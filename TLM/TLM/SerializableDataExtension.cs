@@ -20,15 +20,18 @@ namespace TrafficManager
 
         private static Timer _timer;
 
+        private static bool loaded = false;
+
         public void OnCreated(ISerializableData serializableData)
         {
             uniqueID = 0;
             SerializableData = serializableData;
+            loaded = false;
         }
 
         public void OnReleased()
         {
-
+            loaded = false;
         }
 
         public static void GenerateUniqueID()
@@ -51,7 +54,7 @@ namespace TrafficManager
             }
             else
             {
-                _timer = new Timer(2000);
+                _timer = new System.Timers.Timer(2000);
                 // Hook up the Elapsed event for the timer. 
                 _timer.Elapsed += OnLoadDataTimed;
                 _timer.Enabled = true;
@@ -68,19 +71,15 @@ namespace TrafficManager
             }
 
             var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + uniqueID + ".xml");
+            _timer.Enabled = false;
 
             if (!File.Exists(filepath))
             {
-                _timer.Enabled = false;
-                _timer.Stop();
+                
                 return;
             }
 
             var configuration = Configuration.Deserialize(filepath);
-
-            var laneFlags = configuration.laneFlags.Split(new char[] { '|' }, StringSplitOptions.None);
-
-            var i3 = 0;
 
             for (var i = 0; i < configuration.prioritySegments.Count; i++)
             {
@@ -226,9 +225,6 @@ namespace TrafficManager
                 Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
                     Convert.ToUInt16(split[1]);
             }
-
-            _timer.Enabled = false;
-            _timer.Stop();
         }
 
         public void OnSaveData()
@@ -236,7 +232,7 @@ namespace TrafficManager
 
             FastList<byte> data = new FastList<byte>();
 
-            GenerateUniqueID();
+            GenerateUniqueID(); 
 
             byte[] uniqueIdBytes = BitConverter.GetBytes(uniqueID);
             foreach (byte uniqueIdByte in uniqueIdBytes)
@@ -372,12 +368,9 @@ namespace TrafficManager
 
                 if (TrafficPriority.prioritySegments.ContainsKey(laneSegment))
                 {
-                    configuration.laneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags +
-                                               ",";
+                    configuration.laneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags + ",";
                 }
             }
-
-            configuration.laneFlags = configuration.laneFlags.TrimEnd(',');
 
             Configuration.Serialize(filepath, configuration);
         }
