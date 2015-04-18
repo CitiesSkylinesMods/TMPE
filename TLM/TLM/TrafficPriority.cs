@@ -115,7 +115,7 @@ namespace TrafficManager
         public static bool incomingVehicles(ushort targetCar, ushort nodeID)
         {
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-            uint frame = currentFrameIndex >> 5;
+            uint frame = currentFrameIndex >> 4;
             var node = TrafficLightTool.GetNetNode(nodeID);
 
             var fromPrioritySegment = getPrioritySegment(nodeID, vehicleList[targetCar].fromSegment);
@@ -138,7 +138,7 @@ namespace TrafficManager
                         // select outdated cars
                         foreach (var car in prioritySegment.cars)
                         {
-                            var frameReduce = vehicleList[car].lastSpeed < 70 ? 3u : 2u;
+                            var frameReduce = vehicleList[car].lastSpeed < 70 ? 4u : 2u;
 
                             if (vehicleList[car].lastFrame < frame - frameReduce)
                             {

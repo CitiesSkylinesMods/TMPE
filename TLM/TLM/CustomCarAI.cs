@@ -179,7 +179,7 @@ namespace TrafficManager
                         TrafficPriority.isPrioritySegment(num2, prevPos.m_segment))
                     {
                         uint currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                        uint frame = currentFrameIndex2 >> 5;
+                        uint frame = currentFrameIndex2 >> 4;
 
                         var prioritySegment = TrafficPriority.getPrioritySegment(num2, prevPos.m_segment);
                         if (TrafficPriority.vehicleList[vehicleID].toNode != num2 ||
@@ -336,7 +336,7 @@ namespace TrafficManager
                             TrafficPriority.isPrioritySegment(num2, prevPos.m_segment))
                         {
                             uint currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                            uint frame = currentFrameIndex2 >> 5;
+                            uint frame = currentFrameIndex2 >> 4;
 
                             var prioritySegment = TrafficPriority.getPrioritySegment(num2, prevPos.m_segment);
 
