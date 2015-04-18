@@ -1,0 +1,718 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
+using ColossalFramework;
+using ColossalFramework.Math;
+using ColossalFramework.UI;
+using UnityEngine;
+
+namespace TrafficManager
+{
+    public class TrafficLightTool : DefaultTool
+    {
+        public enum ToolMode
+        {
+            None,
+            SwitchTrafficLight,
+            AddPrioritySigns,
+            ManualSwitch,
+            TimedLightsSelectNode
+        }
+
+        private ToolMode _toolMode;
+
+        private bool _mouseDown = false;
+        private bool _mouseClicked = false;
+
+        private ushort _hoveredNetNodeIdx;
+        private ushort _selectedNetNodeIdx;
+
+        public static List<ushort> SelectedNodeIndexes = new List<ushort>();
+
+        private int _hoveredSegmentButton = 0;
+
+        private Texture2D signStop = new Texture2D(200, 200);
+        private Texture2D signYield = new Texture2D(200, 200);
+        private Texture2D signPriority = new Texture2D(200, 200);
+
+        protected override void Awake()
+        {
+            Debug.Log(Application.dataPath);
+
+            signStop.LoadImage(File.ReadAllBytes(Path.Combine(Application.dataPath, "sign_stop.png")));
+            signYield.LoadImage(File.ReadAllBytes(Path.Combine(Application.dataPath, "sign_yield.png")));
+            signPriority.LoadImage(File.ReadAllBytes(Path.Combine(Application.dataPath, "sign_priority.png")));
+
+            base.Awake();
+        }
+
+        // Expose protected property
+        public new CursorInfo ToolCursor
+        {
+            get { return base.ToolCursor; }
+            set { base.ToolCursor = value; }
+        }
+
+        public ushort SelectedNode 
+        {
+            get { return _selectedNetNodeIdx; }
+            set { }
+        }
+
+        public int HoveredSegmentButton
+        {
+            get { return _hoveredSegmentButton; }
+            set { _hoveredSegmentButton = value; }
+        }
+
+        public void setToolMode(ToolMode mode)
+        {
+            _toolMode = mode;
+
+            if (mode == ToolMode.ManualSwitch)
+            {
+                _selectedNetNodeIdx = 0;
+            }
+
+            if (mode != ToolMode.TimedLightsSelectNode)
+            {
+                SelectedNodeIndexes.Clear();
+            }
+        }
+
+        // Overridden to disable base class behavior
+        protected override void OnEnable()
+        {
+        }
+
+        // Overridden to disable base class behavior
+        protected override void OnDisable()
+        {
+        }
+
+        public override void RenderGeometry(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_hoveredNetNodeIdx != 0)
+            {
+                m_toolController.RenderCollidingNotifications(cameraInfo, 0, 0);
+            }
+        }
+
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_toolMode == ToolMode.SwitchTrafficLight)
+            {
+                if (m_toolController.IsInsideUI || !Cursor.visible)
+                {
+                    return;
+                }
+
+                _renderOverlaySwitch(cameraInfo);
+            }
+            else if (_toolMode == ToolMode.AddPrioritySigns)
+            {
+                _renderOverlayPriority(cameraInfo);
+            }
+            else if (_toolMode == ToolMode.ManualSwitch)
+            {
+                _renderOverlayManual(cameraInfo);
+            }
+            else if (_toolMode == ToolMode.TimedLightsSelectNode)
+            {
+                _renderOverlayTimedSelectNodes(cameraInfo);
+            }
+            else
+            {
+                base.RenderOverlay(cameraInfo);
+            }
+        }
+
+        public void _renderOverlaySwitch(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_hoveredNetNodeIdx != 0)
+            {
+                Bezier3 bezier;
+
+                var node = GetNetNode(_hoveredNetNodeIdx);
+                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) node.m_segment0];
+
+                bezier.a = node.m_position;
+                bezier.d = node.m_position;
+
+                var color = GetToolColor(_mouseDown, false);
+
+                NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection,
+                    false, false, out bezier.b, out bezier.c);
+                _renderOverlayDraw(cameraInfo, bezier, color);
+            }
+        }
+
+        public void _renderOverlayPriority(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_selectedNetNodeIdx != 0)
+            {
+                var node = GetNetNode(_selectedNetNodeIdx);
+
+                var colorGreen = new Color(0.1f, 1f, 0.1f, 0.25f);
+                var colorRed = new Color(1f, 0.1f, 0.1f, 0.25f);
+                var colorYellow = new Color(1f, 1f, 0.1f, 0.25f);
+                var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
+
+                var segmentId = 0;
+
+                for (var i = 0; i < 8; i++)
+                {
+                    segmentId = node.GetSegment(i);
+
+                    if (segmentId != 0)
+                    {
+                        var color2 = colorGray;
+
+                        var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) segmentId];
+
+                        var position = node.m_position;
+
+                        if (segment.m_startNode == _selectedNetNodeIdx)
+                        {
+                            position.x += segment.m_startDirection.x*10f;
+                            position.y += segment.m_startDirection.y*10f;
+                            position.z += segment.m_startDirection.z*10f;
+                        }
+                        else
+                        {
+                            position.x += segment.m_endDirection.x*10f;
+                            position.y += segment.m_endDirection.y*10f;
+                            position.z += segment.m_endDirection.z*10f;
+                        }
+
+                        var isStopSign = TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segmentId);
+
+                        if (!isStopSign)
+                        {
+                            float width = _hoveredSegmentButton == segmentId ? 11.25f : 10f;
+
+                            _renderOverlayDraw(cameraInfo, color2, position, width, segmentId != _hoveredSegmentButton);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (_hoveredNetNodeIdx != 0)
+                {
+                    Bezier3 bezier;
+
+                    var node = GetNetNode(_hoveredNetNodeIdx);
+                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) node.m_segment0];
+
+                    if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
+                    {
+                        bezier.a = node.m_position;
+                        bezier.d = node.m_position;
+
+                        var color = GetToolColor(false, false);
+
+                        NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                            segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+                        _renderOverlayDraw(cameraInfo, bezier, color);
+                    }
+                }
+            }
+        }
+
+        public void _renderOverlayManual(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_selectedNetNodeIdx != 0)
+            {
+                var node = GetNetNode(_selectedNetNodeIdx);
+
+                var colorGreen = new Color(0.1f, 1f, 0.1f, 0.25f);
+                var colorYellow = new Color(1f, 1f, 0.1f, 0.25f);
+                var colorRed = new Color(1f, 0.1f, 0.1f, 0.25f);
+                var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
+
+                var segmentId = 0;
+
+                var color2 = colorGray;
+
+                var nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
+
+                for (var i = 0; i < 8; i++)
+                {
+                    segmentId = node.GetSegment(i);
+
+                    if (segmentId != 0)
+                    {
+                        var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) segmentId];
+
+                        var position = node.m_position;
+
+                        if (segment.m_startNode == _selectedNetNodeIdx)
+                        {
+                            position.x += segment.m_startDirection.x*10f;
+                            position.y += segment.m_startDirection.y*10f;
+                            position.z += segment.m_startDirection.z*10f;
+                        }
+                        else
+                        {
+                            position.x += segment.m_endDirection.x*10f;
+                            position.y += segment.m_endDirection.y*10f;
+                            position.z += segment.m_endDirection.z*10f;
+                        }
+
+                        if (nodeSimulation != null)
+                        {
+                            if (TrafficLightsManual.IsSegmentLight(_selectedNetNodeIdx, segmentId))
+                            {
+                                var segmentDict = TrafficLightsManual.GetSegmentLight(_selectedNetNodeIdx,
+                                    segmentId);
+
+                                if (segmentDict == RoadBaseAI.TrafficLightState.Green)
+                                {
+                                    color2 = colorGreen;
+                                }
+                                else if (segmentDict == RoadBaseAI.TrafficLightState.Red)
+                                {
+                                    color2 = colorRed;
+                                }
+                                else
+                                {
+                                    color2 = colorYellow;
+                                }
+                            }
+                        }
+
+                        float width = _hoveredSegmentButton == segmentId ? 11.25f : 10f;
+
+                        _renderOverlayDraw(cameraInfo, color2, position, width, segmentId != _hoveredSegmentButton);
+                    }
+                }
+            }
+            else
+            {
+                if (_hoveredNetNodeIdx != 0)
+                {
+                    Bezier3 bezier;
+
+                    var node = GetNetNode(_hoveredNetNodeIdx);
+                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) node.m_segment0];
+
+                    if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                    {
+                        bezier.a = node.m_position;
+                        bezier.d = node.m_position;
+
+                        var color = GetToolColor(false, false);
+
+                        NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                            segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+                        _renderOverlayDraw(cameraInfo, bezier, color);
+                    }
+                }
+            }
+        }
+
+        public void _renderOverlayTimedSelectNodes(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_hoveredNetNodeIdx != 0 && !containsListNode(_hoveredNetNodeIdx) && !m_toolController.IsInsideUI && Cursor.visible)
+            {
+                Bezier3 bezier;
+
+                var node = GetNetNode(_hoveredNetNodeIdx);
+                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int)node.m_segment0];
+
+                if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                {
+                    bezier.a = node.m_position;
+                    bezier.d = node.m_position;
+
+                    var color = GetToolColor(false, false);
+
+                    NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                        segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+                    _renderOverlayDraw(cameraInfo, bezier, color);
+                }
+            }
+
+            if (SelectedNodeIndexes.Count > 0)
+            {
+                for (var i = 0; i < SelectedNodeIndexes.Count; i++)
+                {
+                    var node = GetNetNode(SelectedNodeIndexes[i]);
+                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int)node.m_segment0];
+
+                    Bezier3 bezier;
+
+                    bezier.a = node.m_position;
+                    bezier.d = node.m_position;
+
+                    var color = GetToolColor(true, false);
+
+                    NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                        segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+                    _renderOverlayDraw(cameraInfo, bezier, color);
+                }
+            }
+        }
+
+        public void _renderOverlayDraw(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color)
+        {
+            var width = 8f;
+
+            ToolManager expr_EA_cp_0 = Singleton<ToolManager>.instance;
+            expr_EA_cp_0.m_drawCallData.m_overlayCalls = expr_EA_cp_0.m_drawCallData.m_overlayCalls + 1;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(cameraInfo, color, bezier,
+                width * 2f, width, width, -1f, 1280f, false, false);
+
+            // 8 - small roads; 16 - big roads
+        }
+
+        public void _renderOverlayDraw(RenderManager.CameraInfo cameraInfo, Color color, Vector3 position, float width, bool alpha)
+        {
+            ToolManager expr_EA_cp_0 = Singleton<ToolManager>.instance;
+            expr_EA_cp_0.m_drawCallData.m_overlayCalls = expr_EA_cp_0.m_drawCallData.m_overlayCalls + 1;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(cameraInfo, color, position, width, position.y - 100f, position.y + 100f, false, alpha);
+        }
+
+        public override void SimulationStep()
+        {
+            base.SimulationStep();
+
+            var mouseRayValid = !UIView.IsInsideUI() && Cursor.visible;
+
+            if (mouseRayValid)
+            {
+                var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+                var mouseRayLength = Camera.main.farClipPlane;
+                var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
+
+                var defaultService = new ToolBase.RaycastService(ItemClass.Service.None, ItemClass.SubService.None, ItemClass.Layer.Default);
+                var input = new ToolBase.RaycastInput(mouseRay, mouseRayLength)
+                {
+                    m_rayRight = rayRight,
+                    m_netService = defaultService,
+                    m_ignoreNodeFlags = NetNode.Flags.None
+                };
+                RaycastOutput output;
+                if (!RayCast(input, out output))
+                {
+                    //TODO: Fehlerbehandlung?
+                    _hoveredNetNodeIdx = 0;
+                    return;
+                }
+
+                var node = GetNetNode(output.m_netNode);
+
+                if ((node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
+                    _hoveredNetNodeIdx = output.m_netNode;
+                }
+                else
+                {
+                    _hoveredNetNodeIdx = 0;
+                }
+            }
+
+
+            if (_toolMode == ToolMode.None)
+            {
+                ToolCursor = null;
+            }
+            else if (_toolMode == ToolMode.SwitchTrafficLight)
+            {
+                NetTool netTool = null;
+
+                foreach (var tool in ToolsModifierControl.toolController.Tools)
+                {
+                    NetTool nt = tool as NetTool;
+                    if (nt != null && nt.m_prefab != null)
+                    {
+                        netTool = nt;
+                        break;
+                    }
+                }
+
+                if (netTool != null)
+                {
+                    ToolCursor = netTool.m_upgradeCursor;
+                }
+            }
+        }
+
+        protected override void OnToolUpdate()
+        {
+            _mouseDown = Input.GetMouseButton(0);
+
+            if (_mouseDown)
+            {
+                if (!_mouseClicked)
+                {
+                    _mouseClicked = true;
+
+                    if (m_toolController.IsInsideUI || !Cursor.visible)
+                    {
+                        return;
+                    }
+
+                    if (_hoveredNetNodeIdx != 0)
+                    {
+                        var node = GetNetNode(_hoveredNetNodeIdx);
+
+                        if (_toolMode == ToolMode.SwitchTrafficLight)
+                        {
+                            _switchTrafficLights();
+                        }
+                        else if (_toolMode == ToolMode.AddPrioritySigns)
+                        {
+                            if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
+                            {
+                                _selectedNetNodeIdx = _hoveredNetNodeIdx;
+                            }
+                            else
+                            {
+                                ShowToolInfo(true, "Node should not be a traffic light", node.m_position);
+                            }
+                        }
+                        else if (_toolMode == ToolMode.ManualSwitch)
+                        {
+                            if (_selectedNetNodeIdx == 0)
+                            {
+                                if (!TrafficLightSimulation.IsTimedNode(_hoveredNetNodeIdx))
+                                {
+                                    if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                                    {
+                                        _selectedNetNodeIdx = _hoveredNetNodeIdx;
+                                    }
+                                    else
+                                    {
+                                        ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+                                    }
+                                }
+                                else
+                                {
+                                    ShowToolInfo(true, "Node is part of timed script", node.m_position);
+                                }
+                            }
+                        }
+                        else if (_toolMode == ToolMode.TimedLightsSelectNode)
+                        {
+                            if (!TrafficLightSimulation.IsTimedNode(_hoveredNetNodeIdx))
+                            {
+                                if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                                {
+                                    if (containsListNode(_hoveredNetNodeIdx))
+                                    {
+                                        removeListNode(_hoveredNetNodeIdx);
+                                    }
+                                    else
+                                    {
+                                        addListNode(_hoveredNetNodeIdx);
+                                    }
+                                }
+                                else
+                                {
+                                    ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+                                }
+                            }
+                            else
+                            {
+                                ShowToolInfo(true, "Node is part of timed script", node.m_position);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //hideUI();
+                    }
+                }
+            }
+            else
+            {
+                ShowToolInfo(false, null, Vector3.zero);
+                _mouseClicked = false;
+            }
+        }
+
+        protected override void OnToolGUI()
+        {
+            if (_toolMode == ToolMode.AddPrioritySigns)
+            {
+                if (_selectedNetNodeIdx != 0)
+                {
+                    var node = GetNetNode(_selectedNetNodeIdx);
+
+                    var colorGreen = new Color(0.1f, 1f, 0.1f, 0.25f);
+                    var colorRed = new Color(1f, 0.1f, 0.1f, 0.25f);
+                    var colorYellow = new Color(1f, 1f, 0.1f, 0.25f);
+                    var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
+
+                    var segmentId = 0;
+
+                    for (var i = 0; i < 8; i++)
+                    {
+                        segmentId = node.GetSegment(i);
+
+                        if (segmentId != 0)
+                        {
+                            var color2 = colorGray;
+
+                            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[(int) segmentId];
+
+                            var position = node.m_position;
+
+                            if (segment.m_startNode == _selectedNetNodeIdx)
+                            {
+                                position.x += segment.m_startDirection.x*10f;
+                                position.y += segment.m_startDirection.y*10f;
+                                position.z += segment.m_startDirection.z*10f;
+                            }
+                            else
+                            {
+                                position.x += segment.m_endDirection.x*10f;
+                                position.y += segment.m_endDirection.y*10f;
+                                position.z += segment.m_endDirection.z*10f;
+                            }
+
+                            var isStopSign = TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segmentId);
+
+                            if (isStopSign)
+                            {
+                                var prioritySegment = TrafficPriority.getPrioritySegment(_selectedNetNodeIdx, segmentId);
+
+                                var screenPos = Camera.main.WorldToScreenPoint(position);
+
+                                Vector3 diff = position - Camera.main.transform.position;
+                                float zoom = 1.0f / diff.magnitude * 100f;
+
+                                var size = 90f * zoom;
+
+                                screenPos.y = Screen.height - screenPos.y;
+
+                                var guiColor = GUI.color;
+
+                                if (_hoveredSegmentButton == segmentId)
+                                {
+                                    guiColor.a = 1f;
+                                }
+                                else
+                                {
+                                    guiColor.a = 0.25f;
+                                }
+
+                                GUI.color = guiColor;
+
+                                if (prioritySegment.type == PrioritySegment.PriorityType.Main)
+                                {
+                                    GUI.DrawTexture(new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size), signPriority);
+                                }
+                                else if (prioritySegment.type == PrioritySegment.PriorityType.Yield)
+                                {
+                                    GUI.DrawTexture(new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size), signYield);
+                                }
+                                else if (prioritySegment.type == PrioritySegment.PriorityType.Stop)
+                                {
+                                    GUI.DrawTexture(new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size), signStop);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        protected void _switchTrafficLights()
+        {
+            var node = GetNetNode(_hoveredNetNodeIdx);
+
+            if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+            {
+                if (TrafficLightSimulation.IsTimedNode(_hoveredNetNodeIdx))
+                {
+                    ShowToolInfo(true, "Node is part of timed script", node.m_position);
+                }
+                else
+                {
+                    node.m_flags &= ~NetNode.Flags.TrafficLights;
+                }
+            }
+            else
+            {
+                node.m_flags |= NetNode.Flags.TrafficLights;
+            }
+
+            SetNetNode(_hoveredNetNodeIdx, node);
+        }
+
+        public bool SwitchManual()
+        {
+            if (_selectedNetNodeIdx != 0)
+            {
+                var node = GetNetNode(_selectedNetNodeIdx);
+                var nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
+
+                if (nodeSimulation == null)
+                {
+                    //node.Info.m_netAI = _myGameObject.GetComponent<CustomRoadAI>();
+                    //node.Info.m_netAI.m_info = node.Info;
+                    CustomRoadAI.AddNodeToSimulation(_selectedNetNodeIdx);
+                    nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
+                    nodeSimulation.FlagManualTrafficLights = true;
+
+                    return true;
+                }
+                else
+                {
+                    nodeSimulation.FlagManualTrafficLights = false;
+                    CustomRoadAI.RemoveNodeFromSimulation(_selectedNetNodeIdx);
+                }
+            }
+
+            return false;
+        }
+
+        public void DisableManual()
+        {
+            if (_selectedNetNodeIdx != 0)
+            {
+                var node = GetNetNode(_selectedNetNodeIdx);
+                var nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
+
+                if (nodeSimulation != null)
+                {
+                    nodeSimulation.FlagManualTrafficLights = false;
+                    CustomRoadAI.RemoveNodeFromSimulation(_selectedNetNodeIdx);
+                }
+            }
+        }
+
+        public NetNode GetCurrentNetNode()
+        {
+            return GetNetNode(_hoveredNetNodeIdx);
+        }
+        public static NetNode GetNetNode(ushort index)
+        {
+            return Singleton<NetManager>.instance.m_nodes.m_buffer[index];
+        }
+
+        public static void SetNetNode(ushort index, NetNode node)
+        {
+            Singleton<NetManager>.instance.m_nodes.m_buffer[index] = node;
+        }
+
+        public static void addListNode(ushort node)
+        {
+            SelectedNodeIndexes.Add(node);
+        }
+
+        public static bool containsListNode(ushort node)
+        {
+            return SelectedNodeIndexes.Contains(node);
+        }
+
+        public static void removeListNode(ushort node)
+        {
+            SelectedNodeIndexes.Remove(node);
+        }
+    }
+}

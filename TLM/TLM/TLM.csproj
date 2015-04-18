@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,27 +42,75 @@
       <HintPath>D:\Games\SteamLibrary\SteamApps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Games\SteamLibrary\SteamApps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomCarAI.cs" />
+    <Compile Include="CustomCargoTruckAI.cs" />
+    <Compile Include="CustomHumanAI.cs" />
+    <Compile Include="CustomPathFind.cs" />
+    <Compile Include="CustomPathManager.cs" />
     <Compile Include="CustomRoadAI.cs" />
+    <Compile Include="CustomPassengerCarAI.cs" />
+    <Compile Include="CustomTransportLineAI.cs" />
+    <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="SerializableDataExtension.cs" />
+    <Compile Include="TrafficLightsManual.cs" />
     <Compile Include="TrafficLightSimulation.cs" />
-    <Compile Include="ToolLaneChange.cs" />
-    <Compile Include="ToolTrafficLight.cs" />
-    <Compile Include="UIUtils.cs" />
+    <Compile Include="TrafficLightTool.cs" />
+    <Compile Include="TrafficLightsTimed.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Mod.cs" />
-    <Compile Include="ModUI.cs" />
+    <Compile Include="TrafficPriority.cs" />
+    <Compile Include="TrafficRoadRestrictions.cs" />
+    <Compile Include="UIBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UITimedLights.cs" />
+    <Compile Include="UITrafficManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="sprites.png" />
+    <EmbeddedResource Include="Resources\light_1_1.png" />
+    <EmbeddedResource Include="Resources\light_1_2.png" />
+    <EmbeddedResource Include="Resources\light_1_3.png" />
+    <EmbeddedResource Include="Resources\light_2_1.png" />
+    <EmbeddedResource Include="Resources\light_2_2.png" />
+    <EmbeddedResource Include="Resources\light_2_3.png" />
+    <EmbeddedResource Include="Resources\light_3_1.png" />
+    <EmbeddedResource Include="Resources\light_3_2.png" />
+    <EmbeddedResource Include="Resources\light_3_3.png" />
+    <EmbeddedResource Include="Resources\light_4_1.png" />
+    <EmbeddedResource Include="Resources\light_4_2.png" />
+    <EmbeddedResource Include="Resources\light_4_3.png" />
+    <EmbeddedResource Include="Resources\light_5_1.png" />
+    <EmbeddedResource Include="Resources\light_5_2.png" />
+    <EmbeddedResource Include="Resources\light_5_3.png" />
+    <EmbeddedResource Include="Resources\light_6_1.png" />
+    <EmbeddedResource Include="Resources\light_6_2.png" />
+    <EmbeddedResource Include="Resources\light_6_3.png" />
+    <EmbeddedResource Include="Resources\light_counter.png" />
+    <EmbeddedResource Include="Resources\light_mode.png" />
+    <EmbeddedResource Include="Resources\light_yellow.png" />
+    <EmbeddedResource Include="Resources\pedestrian_light_1.png" />
+    <EmbeddedResource Include="Resources\pedestrian_light_2.png" />
+    <EmbeddedResource Include="Resources\pedestrian_mode_1.png" />
+    <EmbeddedResource Include="Resources\pedestrian_mode_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sign_none.png" />
+    <EmbeddedResource Include="Resources\sign_priority.png" />
+    <EmbeddedResource Include="Resources\sign_stop.png" />
+    <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy TrafficManager.dll "C:\Users\svetnah\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\TrafficManager"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
