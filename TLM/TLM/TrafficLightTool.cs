@@ -90,8 +90,8 @@ namespace TrafficManager
         private GUIStyle counterStyle = new GUIStyle();
 
         private bool uiClickedSegment = false;
-        private Rect _windowRect = new Rect(11, 440, 250, 350);
-        private Rect _windowRect2 = new Rect(11, 440, 250, 150);
+        private Rect _windowRect = new Rect(275, 80, 250, 350);
+        private Rect _windowRect2 = new Rect(275, 80, 300, 150);
 
         public float stepValue = 1f;
 
@@ -99,7 +99,7 @@ namespace TrafficManager
 
         private Texture2D secondPanelTexture;
 
-        private bool timedShowNumbers = false;
+        private static bool timedShowNumbers = false;
 
         protected override void Awake()
         {
@@ -226,7 +226,7 @@ namespace TrafficManager
             set { }
         }
 
-        public void setToolMode(ToolMode mode)
+        public static void setToolMode(ToolMode mode)
         {
             toolMode = mode;
 
@@ -560,7 +560,7 @@ namespace TrafficManager
                 var mouseRayLength = Camera.main.farClipPlane;
                 var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
 
-                var defaultService = new ToolBase.RaycastService(ItemClass.Service.None, ItemClass.SubService.None, ItemClass.Layer.Default);
+                var defaultService = new ToolBase.RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
                 var input = new ToolBase.RaycastInput(mouseRay, mouseRayLength)
                 {
                     m_rayRight = rayRight,
@@ -2479,13 +2479,27 @@ namespace TrafficManager
             {
                 laneList.Sort(delegate(float[] x, float[] y)
                 {
-                    if (Mathf.Abs(y[1]) > Mathf.Abs(x[1]))
+                    if (!TrafficPriority.leftHandDrive)
                     {
-                        return -1;
+                        if (Mathf.Abs(y[1]) > Mathf.Abs(x[1]))
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return 1;
+                        }
                     }
                     else
                     {
-                        return 1;
+                        if (Mathf.Abs(x[1]) > Mathf.Abs(y[1]))
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return 1;
+                        }
                     }
                 });
             }
@@ -3240,6 +3254,10 @@ namespace TrafficManager
                         }
                         timedPanelAdd = false;
                     }
+                    if (GUILayout.Button("X", GUILayout.Width(22)))
+                    {
+                        timedPanelAdd = false;
+                    }
                 }
                 else
                 {
@@ -3277,7 +3295,7 @@ namespace TrafficManager
                 }
                 else
                 {
-                    if (timedEditStep < 0)
+                    if (timedEditStep < 0 && !timedPanelAdd)
                     {
                         if (GUILayout.Button("Start"))
                         {
@@ -3594,7 +3612,7 @@ namespace TrafficManager
             return false;
         }
 
-        public void DisableManual()
+        public static void DisableManual()
         {
             if (_selectedNetNodeIdx != 0)
             {

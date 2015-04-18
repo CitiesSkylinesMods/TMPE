@@ -51,6 +51,7 @@
     <Compile Include="CustomCarAI.cs" />
     <Compile Include="CustomCargoTruckAI.cs" />
     <Compile Include="CustomHumanAI.cs" />
+    <Compile Include="CustomNetNode.cs" />
     <Compile Include="CustomPathFind.cs" />
     <Compile Include="CustomPathManager.cs" />
     <Compile Include="CustomRoadAI.cs" />

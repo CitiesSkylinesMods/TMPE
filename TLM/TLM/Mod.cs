@@ -54,96 +54,105 @@ namespace TrafficManager
 
             if (!LoadingExtension.Instance.detourInited)
             {
-                var srcMethod = typeof(CarAI).GetMethod("CalculateSegmentPosition", 
-                    BindingFlags.NonPublic | BindingFlags.Instance, 
-                    null, 
-                    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(PathUnit.Position), typeof(PathUnit.Position), typeof(uint), typeof(byte), typeof(PathUnit.Position), typeof(uint), typeof(byte), typeof(Vector3).MakeByRefType(), typeof(Vector3).MakeByRefType(), typeof(float).MakeByRefType() }, 
-                    null);
+                LoadingExtension.Instance.revertMethods[0] = RedirectionHelper.RedirectCalls(
+                    typeof (CarAI).GetMethod("CalculateSegmentPosition",
+                        BindingFlags.NonPublic | BindingFlags.Instance,
+                        null,
+                        new Type[]
+                        {
+                            typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+                            typeof (PathUnit.Position), typeof (uint), typeof (byte), typeof (PathUnit.Position),
+                            typeof (uint), typeof (byte), typeof (Vector3).MakeByRefType(),
+                            typeof (Vector3).MakeByRefType(), typeof (float).MakeByRefType()
+                        },
+                        null),
+                    typeof (CustomCarAI).GetMethod("CalculateSegmentPosition"));
 
-                var destMethod = typeof(CustomCarAI).GetMethod("CalculateSegmentPosition");
+                LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(
+                    typeof (RoadBaseAI).GetMethod("SimulationStep",
+                        new Type[] {typeof (ushort), typeof (NetNode).MakeByRefType()}),
+                    typeof (CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
 
-                var srcMethod2 = typeof(RoadBaseAI).GetMethod("SimulationStep", new Type[] { typeof(ushort), typeof(NetNode).MakeByRefType() });
-                var destMethod2 = typeof(CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                var srcMethod3 = typeof(HumanAI).GetMethod("CheckTrafficLights",
+                LoadingExtension.Instance.revertMethods[2] = RedirectionHelper.RedirectCalls(typeof (HumanAI).GetMethod("CheckTrafficLights",
                     BindingFlags.NonPublic | BindingFlags.Instance,
                     null,
-                    new Type[] { typeof(ushort), typeof(ushort) },
-                    null);
+                    new Type[] {typeof (ushort), typeof (ushort)},
+                    null),
+                    typeof (CustomHumanAI).GetMethod("CheckTrafficLights"));
 
-                var destMethod3 = typeof(CustomHumanAI).GetMethod("CheckTrafficLights");
+                LoadingExtension.Instance.revertMethods[3] =
+                    RedirectionHelper.RedirectCalls(
+                        typeof (CarAI).GetMethod("SimulationStep",
+                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                        typeof (CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
 
-                var srcMethod4 = typeof(CarAI).GetMethod("SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-                var destMethod4 = typeof(CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance);
 
-                //ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos
-                var srcMethod5 = typeof(PassengerCarAI).GetMethod("SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-                var destMethod5 = typeof(CustomPassengerCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance);
+                LoadingExtension.Instance.revertMethods[4] =
+                    RedirectionHelper.RedirectCalls(
+                        typeof (PassengerCarAI).GetMethod("SimulationStep",
+                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                        typeof (CustomPassengerCarAI).GetMethod("SimulationStep",
+                            BindingFlags.NonPublic | BindingFlags.Instance));
 
-                var srcMethod6 = typeof(CargoTruckAI).GetMethod("SimulationStep", new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-                var destMethod6 = typeof(CustomCargoTruckAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance);
+                LoadingExtension.Instance.revertMethods[5] =
+                    RedirectionHelper.RedirectCalls(
+                        typeof (CargoTruckAI).GetMethod("SimulationStep",
+                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                        typeof (CustomCargoTruckAI).GetMethod("SimulationStep",
+                            BindingFlags.NonPublic | BindingFlags.Instance));
 
-                var srcMethod7 = typeof(CarAI).GetMethod("CalculateSegmentPosition",
+                LoadingExtension.Instance.revertMethods[6] = RedirectionHelper.RedirectCalls(typeof (CarAI).GetMethod("CalculateSegmentPosition",
                     BindingFlags.NonPublic | BindingFlags.Instance,
                     null,
-                    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(PathUnit.Position), typeof(uint), typeof(byte), typeof(Vector3).MakeByRefType(), typeof(Vector3).MakeByRefType(), typeof(float).MakeByRefType() },
-                    null);
+                    new Type[]
+                    {
+                        typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position), typeof (uint),
+                        typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
+                        typeof (float).MakeByRefType()
+                    },
+                    null),
+                    typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
 
-                var destMethod7 = typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2");
-
-                //var srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
+                //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
                 //    BindingFlags.NonPublic | BindingFlags.Instance,
                 //    null,
                 //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
                 //    null);
 
-                //var destMethod8 = typeof(CustomCarAI).GetMethod("StartPathFind");
+                //destMethod[8 = typeof(CustomCarAI).GetMethod("StartPathFind");
 
-                //var srcMethod9 = typeof (TransportLineAI).GetMethod("StartPathFind");
+                //srcMethod9 = typeof (TransportLineAI).GetMethod("StartPathFind");
 
-                //var destMethod9 = typeof(CustomTransportLineAI).GetMethod("StartPathFind", BindingFlags.NonPublic | BindingFlags.Static);
+                //destMethod[9 = typeof(CustomTransportLineAI).GetMethod("StartPathFind", BindingFlags.NonPublic | BindingFlags.Static);
 
-                //var srcMethod10 = typeof(PassengerCarAI).GetMethod("StartPathFind",
+                //srcMethod10 = typeof(PassengerCarAI).GetMethod("StartPathFind",
                 //    BindingFlags.NonPublic | BindingFlags.Instance,
                 //    null,
                 //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
                 //    null);
 
-                //var destMethod10 = typeof(CustomPassengerCarAI).GetMethod("StartPathFind2");
+                //destMethod[10 = typeof(CustomPassengerCarAI).GetMethod("StartPathFind2");
 
-                //var srcMethod11 = typeof(CargoTruckAI).GetMethod("StartPathFind",
+                //srcMethod11 = typeof(CargoTruckAI).GetMethod("StartPathFind",
                 //    BindingFlags.NonPublic | BindingFlags.Instance,
                 //    null,
                 //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
                 //    null);
 
-                //var destMethod11 = typeof(CustomCargoTruckAI).GetMethod("StartPathFind2");
+                //destMethod[11 = typeof(CustomCargoTruckAI).GetMethod("StartPathFind2");
 
-                if (srcMethod != null & destMethod != null && 
-                    srcMethod2 != null && destMethod2 != null &&
-                    srcMethod3 != null && destMethod3 != null &&
-                    srcMethod4 != null && destMethod4 != null &&
-                    srcMethod5 != null && destMethod5 != null &&
-                    srcMethod6 != null && destMethod6 != null &&
-                    srcMethod7 != null && destMethod7 != null)
-                    //srcMethod8 != null && destMethod8 != null &&
-                    //srcMethod9 != null && destMethod9 != null &&
-                    //srcMethod10 != null && destMethod10 != null &&
-                    //srcMethod11 != null && destMethod11 != null)
-                {
-                    LoadingExtension.Instance.detourInited = true;
-                    RedirectionHelper.RedirectCalls(srcMethod, destMethod);
-                    RedirectionHelper.RedirectCalls(srcMethod2, destMethod2);
-                    RedirectionHelper.RedirectCalls(srcMethod3, destMethod3);
-                    RedirectionHelper.RedirectCalls(srcMethod4, destMethod4);
-                    RedirectionHelper.RedirectCalls(srcMethod5, destMethod5);
-                    RedirectionHelper.RedirectCalls(srcMethod6, destMethod6);
-                    RedirectionHelper.RedirectCalls(srcMethod7, destMethod7);
-                    //RedirectionHelper.RedirectCalls(srcMethod8, destMethod8);
-                    //RedirectionHelper.RedirectCalls(srcMethod9, destMethod9);
-                    //RedirectionHelper.RedirectCalls(srcMethod10, destMethod10);
-                    //RedirectionHelper.RedirectCalls(srcMethod11, destMethod11);
-                }
+                //LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(typeof (NetNode).GetMethod("RefreshJunctionData",
+                //    BindingFlags.NonPublic | BindingFlags.Instance,
+                //    null,
+                //    new Type[]
+                //    {
+                //        typeof (ushort), typeof (int), typeof (ushort), typeof (Vector3), typeof (uint).MakeByRefType(),
+                //        typeof (RenderManager.Instance).MakeByRefType()
+                //    },
+                //    null),
+                //    typeof (CustomNetNode).GetMethod("RefreshJunctionData"));
+
+                LoadingExtension.Instance.detourInited = true;
 
                 if (!LoadingExtension.Instance.nodeSimulationLoaded)
                 {
@@ -162,6 +171,8 @@ namespace TrafficManager
     public sealed class LoadingExtension : LoadingExtensionBase
     {
         public static LoadingExtension Instance = null;
+
+        public RedirectCallsState[] revertMethods = new RedirectCallsState[7];
 
         public TrafficManagerMode ToolMode = TrafficManagerMode.None;
 
@@ -236,12 +247,21 @@ namespace TrafficManager
             // TODO: revert detours
             base.OnLevelUnloading();
 
+            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("CalculateSegmentPosition"), revertMethods[0]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[1]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomHumanAI).GetMethod("CheckTrafficLights"), revertMethods[2]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[3]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomPassengerCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[4]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomCargoTruckAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[5]);
+            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2"), revertMethods[6]);
+            TrafficPriority.prioritySegments.Clear();
+            CustomRoadAI.nodeDictionary.Clear();
+            TrafficLightsManual.ManualSegments.Clear();
+            TrafficLightsTimed.timedScripts.Clear();
         }
 
         private void OnNewGame()
         {
-            Debug.Log("Cxz");
-            SerializableDataExtension.GenerateUniqueID();
         }
         private void OnLoaded()
         {

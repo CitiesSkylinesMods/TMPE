@@ -12,6 +12,8 @@ namespace TrafficManager
         public ushort node_1 = 0;
         public ushort node_2 = 0;
 
+        public int segment = 0;
+
         public PrioritySegment instance_1;
         public PrioritySegment instance_2;
     }
@@ -49,6 +51,7 @@ namespace TrafficManager
             else
             {
                 prioritySegments.Add(segmentID, new TrafficSegment());
+                prioritySegments[segmentID].segment = segmentID;
                 prioritySegments[segmentID].node_1 = nodeID;
                 prioritySegments[segmentID].instance_1 = new PrioritySegment(nodeID, segmentID, type);
             }

@@ -18,8 +18,11 @@ namespace TrafficManager
 
         public static ISerializableData SerializableData;
 
+        private static Timer _timer;
+
         public void OnCreated(ISerializableData serializableData)
         {
+            uniqueID = 0;
             SerializableData = serializableData;
         }
 
@@ -48,195 +51,192 @@ namespace TrafficManager
             }
             else
             {
-                for (var i = 0; i < data.Length - 3; i++)
+                _timer = new Timer(2000);
+                // Hook up the Elapsed event for the timer. 
+                _timer.Elapsed += OnLoadDataTimed;
+                _timer.Enabled = true;
+            }
+        }
+
+        private static void OnLoadDataTimed(System.Object source, ElapsedEventArgs e)
+        {
+            byte[] data = SerializableData.LoadData(dataID);
+
+            for (var i = 0; i < data.Length - 3; i++)
+            {
+                uniqueID = BitConverter.ToUInt32(data, i);
+            }
+
+            var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + uniqueID + ".xml");
+
+            if (!File.Exists(filepath))
+            {
+                _timer.Enabled = false;
+                _timer.Stop();
+                return;
+            }
+
+            var configuration = Configuration.Deserialize(filepath);
+
+            var laneFlags = configuration.laneFlags.Split(new char[] { '|' }, StringSplitOptions.None);
+
+            var i3 = 0;
+
+            for (var i = 0; i < configuration.prioritySegments.Count; i++)
+            {
+                if (
+                    !TrafficPriority.isPrioritySegment((ushort)configuration.prioritySegments[i][0],
+                        configuration.prioritySegments[i][1]))
                 {
-                    uniqueID = BitConverter.ToUInt32(data, i);
+                    TrafficPriority.addPrioritySegment((ushort)configuration.prioritySegments[i][0],
+                        configuration.prioritySegments[i][1],
+                        (PrioritySegment.PriorityType)configuration.prioritySegments[i][2]);
+                }
+            }
+
+            for (var i = 0; i < configuration.nodeDictionary.Count; i++)
+            {
+                if (CustomRoadAI.GetNodeSimulation((ushort)configuration.nodeDictionary[i][0]) == null)
+                {
+                    CustomRoadAI.AddNodeToSimulation((ushort)configuration.nodeDictionary[i][0]);
+                    var nodeDict = CustomRoadAI.GetNodeSimulation((ushort)configuration.nodeDictionary[i][0]);
+
+                    nodeDict._manualTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][1]);
+                    nodeDict._timedTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][2]);
+                    nodeDict.TimedTrafficLightsActive = Convert.ToBoolean(configuration.nodeDictionary[i][3]);
+                }
+            }
+
+            for (var i = 0; i < configuration.manualSegments.Count; i++)
+            {
+                var segmentData = configuration.manualSegments[i];
+
+                if (!TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], segmentData[1]))
+                {
+                    TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], segmentData[1],
+                        RoadBaseAI.TrafficLightState.Green);
+                    var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], segmentData[1]);
+                    segment.currentMode = (ManualSegmentLight.Mode)segmentData[2];
+                    segment.lightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
+                    segment.lightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
+                    segment.lightRight = (RoadBaseAI.TrafficLightState)segmentData[5];
+                    segment.lightPedestrian = (RoadBaseAI.TrafficLightState)segmentData[6];
+                    segment.lastChange = (uint)segmentData[7];
+                    segment.lastChangeFrame = (uint)segmentData[8];
+                    segment.pedestrianEnabled = Convert.ToBoolean(segmentData[9]);
+                }
+            }
+
+            var timedStepCount = 0;
+            var timedStepSegmentCount = 0;
+
+            for (var i = 0; i < configuration.timedNodes.Count; i++)
+            {
+                var nodeid = (ushort)configuration.timedNodes[i][0];
+
+                var nodeGroup = new List<ushort>();
+                for (var j = 0; j < configuration.timedNodeGroups[i].Length; j++)
+                {
+                    nodeGroup.Add(configuration.timedNodeGroups[i][j]);
                 }
 
-                var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + uniqueID + ".xml");
-
-                if (!File.Exists(filepath))
+                if (!TrafficLightsTimed.IsTimedLight(nodeid))
                 {
-                    GenerateUniqueID();
-                    return;
-                }
+                    TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
+                    var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
 
-                var configuration = Configuration.Deserialize(filepath);
+                    timedNode.currentStep = configuration.timedNodes[i][1];
 
-                for (var i = 0; i < configuration.prioritySegments.Count; i++)
-                {
-                    if (
-                        !TrafficPriority.isPrioritySegment((ushort) configuration.prioritySegments[i][0],
-                            configuration.prioritySegments[i][1]))
+                    for (var j = 0; j < configuration.timedNodes[i][2]; j++)
                     {
-                        TrafficPriority.addPrioritySegment((ushort) configuration.prioritySegments[i][0],
-                            configuration.prioritySegments[i][1],
-                            (PrioritySegment.PriorityType) configuration.prioritySegments[i][2]);
-                    }
-                }
+                        var cfgstep = configuration.timedNodeSteps[timedStepCount];
 
-                for (var i = 0; i < configuration.nodeDictionary.Count; i++)
-                {
-                    if (CustomRoadAI.GetNodeSimulation((ushort) configuration.nodeDictionary[i][0]) == null)
-                    {
-                        CustomRoadAI.AddNodeToSimulation((ushort) configuration.nodeDictionary[i][0]);
-                        var nodeDict = CustomRoadAI.GetNodeSimulation((ushort) configuration.nodeDictionary[i][0]);
+                        timedNode.addStep(cfgstep[0]);
 
-                        nodeDict._manualTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][1]);
-                        nodeDict._timedTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][2]);
-                        nodeDict.TimedTrafficLightsActive = Convert.ToBoolean(configuration.nodeDictionary[i][3]);
-                    }
-                }
+                        var step = timedNode.steps[j];
 
-                for (var i = 0; i < configuration.manualSegments.Count; i++)
-                {
-                    var segmentData = configuration.manualSegments[i];
-
-                    if (!TrafficLightsManual.IsSegmentLight((ushort) segmentData[0], segmentData[1]))
-                    {
-                        TrafficLightsManual.AddSegmentLight((ushort) segmentData[0], segmentData[1],
-                            RoadBaseAI.TrafficLightState.Green);
-                        var segment = TrafficLightsManual.GetSegmentLight((ushort) segmentData[0], segmentData[1]);
-                        segment.currentMode = (ManualSegmentLight.Mode) segmentData[2];
-                        segment.lightLeft = (RoadBaseAI.TrafficLightState) segmentData[3];
-                        segment.lightMain = (RoadBaseAI.TrafficLightState) segmentData[4];
-                        segment.lightRight = (RoadBaseAI.TrafficLightState) segmentData[5];
-                        segment.lightPedestrian = (RoadBaseAI.TrafficLightState) segmentData[6];
-                        segment.lastChange = (uint) segmentData[7];
-                        segment.lastChangeFrame = (uint) segmentData[8];
-                        segment.pedestrianEnabled = Convert.ToBoolean(segmentData[9]);
-                    }
-                }
-
-                var timedStepCount = 0;
-                var timedStepSegmentCount = 0;
-
-                for (var i = 0; i < configuration.timedNodes.Count; i++)
-                {
-                    var nodeid = (ushort)configuration.timedNodes[i][0];
-
-                    var nodeGroup = new List<ushort>();
-                    for (var j = 0; j < configuration.timedNodeGroups[i].Length; j++)
-                    {
-                        nodeGroup.Add(configuration.timedNodeGroups[i][j]);
-                    }
-
-                    if (!TrafficLightsTimed.IsTimedLight(nodeid))
-                    {
-                        TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
-                        var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
-
-                        timedNode.currentStep = configuration.timedNodes[i][1];
-
-                        for (var j = 0; j < configuration.timedNodes[i][2]; j++)
+                        for (var k = 0; k < cfgstep[1]; k++)
                         {
-                            var cfgstep = configuration.timedNodeSteps[timedStepCount];
+                            step.lightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][0];
+                            step.lightMain[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][1];
+                            step.lightRight[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][2];
+                            step.lightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][3];
 
-                            timedNode.addStep(cfgstep[0]);
-
-                            var step = timedNode.steps[j];
-
-                            for (var k = 0; k < cfgstep[1]; k++)
-                            {
-                                step.lightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][0];
-                                step.lightMain[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][1];
-                                step.lightRight[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][2];
-                                step.lightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][3];
-
-                                timedStepSegmentCount++;
-                            }
-
-                            timedStepCount++;
+                            timedStepSegmentCount++;
                         }
 
-                        if (timedNode.isStarted())
-                        {
-                            timedNode.start();
-                        }
-                    }
-                }
-
-                var j1 = 0;
-                for (var i1 = 0; i1 < 32768; i1++)
-                {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i1].Info.m_class.m_service ==
-                        ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags != 0)
-                    {
-                        var trafficLight = configuration.nodeTrafficLights[j1];
-
-                        if (trafficLight == '1')
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags |= NetNode.Flags.TrafficLights;
-                        }
-                        else
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags &= ~NetNode.Flags.TrafficLights;
-                        }
-
-                        j1++;
-                    }
-                }
-
-                var j2 = 0;
-                for (var i2 = 0; i2 < 32768; i2++)
-                {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i2].Info.m_class.m_service ==
-                        ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags != 0)
-                    {
-                        var crossWalk = configuration.nodeCrosswalk[j2];
-
-                        if (crossWalk == '1')
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags |= NetNode.Flags.Junction;
-                        }
-                        else
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags &= ~NetNode.Flags.Junction;
-                        }
-
-                        j2++;
-                    }
-                }
-
-                var laneFlags = configuration.laneFlags.Split(new char[] {'|'}, StringSplitOptions.None);
-
-                var i3 = 0;
-                foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
-                {
-                    uint num2;
-                    NetInfo info;
-
-                    if (prioritySegment.node_1 != 0)
-                    {
-                        num2 = Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid].m_lanes;
-                        info =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid].Info;
-                    }
-                    else
-                    {
-                        num2 = Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid].m_lanes;
-                        info =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid].Info;
+                        timedStepCount++;
                     }
 
-                    int num3 = 0;
-
-                    while (num3 < info.m_lanes.Length && num2 != 0u)
+                    if (timedNode.isStarted())
                     {
-                        Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_flags = Convert.ToUInt16(laneFlags[i3]);
-
-                        num2 = Singleton<NetManager>.instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-                        num3++;
-                        i3++;
+                        timedNode.start();
                     }
                 }
             }
+
+            var j1 = 0;
+            for (var i1 = 0; i1 < 32768; i1++)
+            {
+                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i1].Info.m_class.m_service ==
+                    ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags != 0)
+                {
+                    var trafficLight = configuration.nodeTrafficLights[j1];
+
+                    if (trafficLight == '1')
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags |= NetNode.Flags.TrafficLights;
+                    }
+                    else
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags &= ~NetNode.Flags.TrafficLights;
+                    }
+
+                    j1++;
+                }
+            }
+
+            var j2 = 0;
+            for (var i2 = 0; i2 < 32768; i2++)
+            {
+                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i2].Info.m_class.m_service ==
+                    ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags != 0)
+                {
+                    var crossWalk = configuration.nodeCrosswalk[j2];
+
+                    if (crossWalk == '1')
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags |= NetNode.Flags.Junction;
+                    }
+                    else
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags &= ~NetNode.Flags.Junction;
+                    }
+
+                    j2++;
+                }
+            }
+
+            var lanes = configuration.laneFlags.Split(',');
+
+            for (var i = 0; i < lanes.Length; i++)
+            {
+                var split = lanes[i].Split(':');
+
+                Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
+                    Convert.ToUInt16(split[1]);
+            }
+
+            _timer.Enabled = false;
+            _timer.Stop();
         }
 
         public void OnSaveData()
         {
 
             FastList<byte> data = new FastList<byte>();
+
+            GenerateUniqueID();
 
             byte[] uniqueIdBytes = BitConverter.GetBytes(uniqueID);
             foreach (byte uniqueIdByte in uniqueIdBytes)
@@ -366,46 +366,18 @@ namespace TrafficManager
                 }
             }
 
-            if (TrafficPriority.prioritySegments.Count > 0)
+            for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++)
             {
-                foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
+                var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
+
+                if (TrafficPriority.prioritySegments.ContainsKey(laneSegment))
                 {
-                    uint num2;
-                    NetInfo info;
-
-                    if (prioritySegment.node_1 != 0)
-                    {
-                        num2 =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid]
-                                .m_lanes;
-                        info =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid]
-                                .Info;
-                    }
-                    else
-                    {
-                        num2 =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid]
-                                .m_lanes;
-                        info =
-                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid]
-                                .Info;
-                    }
-
-                    int num3 = 0;
-
-                    while (num3 < info.m_lanes.Length && num2 != 0u)
-                    {
-                        configuration.laneFlags +=
-                            Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_flags + "|";
-
-                        num2 = Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_nextLane;
-                        num3++;
-                    }
+                    configuration.laneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags +
+                                               ",";
                 }
-
-                configuration.laneFlags = configuration.laneFlags.TrimEnd('|');
             }
+
+            configuration.laneFlags = configuration.laneFlags.TrimEnd(',');
 
             Configuration.Serialize(filepath, configuration);
         }

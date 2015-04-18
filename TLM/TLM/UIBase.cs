@@ -44,7 +44,7 @@ namespace TrafficManager
             button.playAudioEvents = true;
 
             // Place the button.
-            button.transformPosition = new Vector3(-1.53f, 0.96f);
+            button.relativePosition = new Vector3(180f, 20f);
 
             // Respond to button click.
             button.eventClick += ButtonClick;
@@ -90,7 +90,7 @@ namespace TrafficManager
             }
 
             UITrafficManager.uistate = UITrafficManager.UIState.None;
-            TrafficLightTool.toolMode = TrafficLightTool.ToolMode.None;
+            TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
             LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
 
             _uiShown = false;
