@@ -106,7 +106,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy TrafficManager.dll "C:\Users\svetnah\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\TrafficManager"</PostBuildEvent>
+    <PostBuildEvent>copy TrafficManager.dll "D:\Games\SteamLibrary\SteamApps\workshop\content\255710\427585724"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

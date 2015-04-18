@@ -24,11 +24,13 @@ namespace TrafficManager
 
         private static UIState _uistate = UIState.None;
 
+        private static bool inited = false;
+
         public static UIState uistate
         {
             set
             {
-                if (value == UIState.None)
+                if (value == UIState.None && inited)
                 {
                     buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
                     buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
@@ -60,6 +62,8 @@ namespace TrafficManager
 
         public override void Start()
         {
+            inited = true;
+
             trafficLightTool = LoadingExtension.Instance.TrafficLightTool;
 
             this.backgroundSprite = "GenericPanel";

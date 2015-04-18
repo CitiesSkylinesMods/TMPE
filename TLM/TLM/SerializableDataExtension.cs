@@ -28,7 +28,7 @@ namespace TrafficManager
 
         }
 
-        public void GenerateUniqueID()
+        public static void GenerateUniqueID()
         {
             uniqueID = (uint)UnityEngine.Random.Range(1000000f, 2000000f);
 
@@ -347,49 +347,65 @@ namespace TrafficManager
                         }
                     }
                 }
+            }
 
+            for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++)
+            {
                 var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
 
-                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service ==
-                    ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags != 0)
+                if (nodeFlags != 0)
                 {
-                    configuration.nodeTrafficLights +=
-                        Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
-                    configuration.nodeCrosswalk +=
-                        Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
+                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service ==
+                        ItemClass.Service.Road)
+                    {
+                        configuration.nodeTrafficLights +=
+                            Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
+                        configuration.nodeCrosswalk +=
+                            Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
+                    }
                 }
             }
 
-            foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
+            if (TrafficPriority.prioritySegments.Count > 0)
             {
-                uint num2;
-                NetInfo info;
+                foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
+                {
+                    uint num2;
+                    NetInfo info;
 
-                if (prioritySegment.node_1 != 0)
-                {
-                    num2 = Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid].m_lanes;
-                    info =
-                        Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid].Info;
-                } else
-                {
-                    num2 = Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid].m_lanes;
-                    info =
-                        Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid].Info;
+                    if (prioritySegment.node_1 != 0)
+                    {
+                        num2 =
+                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid]
+                                .m_lanes;
+                        info =
+                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_1.segmentid]
+                                .Info;
+                    }
+                    else
+                    {
+                        num2 =
+                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid]
+                                .m_lanes;
+                        info =
+                            Singleton<NetManager>.instance.m_segments.m_buffer[prioritySegment.instance_2.segmentid]
+                                .Info;
+                    }
+
+                    int num3 = 0;
+
+                    while (num3 < info.m_lanes.Length && num2 != 0u)
+                    {
+                        configuration.laneFlags +=
+                            Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_flags + "|";
+
+                        num2 = Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_nextLane;
+                        num3++;
+                    }
                 }
 
-                int num3 = 0;
-
-                while (num3 < info.m_lanes.Length && num2 != 0u)
-                {
-                    configuration.laneFlags +=
-                        Singleton<NetManager>.instance.m_lanes.m_buffer[(int) ((UIntPtr) num2)].m_flags + "|";
-
-                    num2 = Singleton<NetManager>.instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-                    num3++;
-                }
+                configuration.laneFlags = configuration.laneFlags.TrimEnd('|');
             }
-
-            configuration.laneFlags = configuration.laneFlags.TrimEnd('|');
 
             Configuration.Serialize(filepath, configuration);
         }

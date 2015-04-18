@@ -763,15 +763,32 @@ namespace TrafficManager
                             {
                                 var lanePos = Mathf.Abs(info.m_lanes[item.m_position.m_lane].m_position);
 
-                                var closest = 100f;
-                                for (var i = 0; i < lanes; i++)
+                                if (!TrafficPriority.leftHandDrive)
                                 {
-                                    var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
-
-                                    if (Math.Abs(newLanePos - lanePos) < closest )
+                                    var closest = 100f;
+                                    for (var i = 0; i < lanes; i++)
                                     {
-                                        closest = Mathf.Abs(newLanePos - lanePos);
-                                        newLane = i;
+                                        var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
+
+                                        if (Math.Abs(newLanePos - lanePos) < closest)
+                                        {
+                                            closest = Mathf.Abs(newLanePos - lanePos);
+                                            newLane = i;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var closest = -1000f;
+                                    for (var i = 0; i < lanes; i++)
+                                    {
+                                        var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
+
+                                        if (Math.Abs(newLanePos - lanePos) > closest)
+                                        {
+                                            closest = Mathf.Abs(newLanePos - lanePos);
+                                            newLane = i;
+                                        }
                                     }
                                 }
 

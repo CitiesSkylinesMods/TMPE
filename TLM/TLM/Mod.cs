@@ -218,6 +218,8 @@ namespace TrafficManager
             switch (mode)
             {
                 case LoadMode.NewGame:
+                    OnNewGame();
+                    break;
                 case LoadMode.LoadGame:
                     OnLoaded();
                     break;
@@ -236,6 +238,11 @@ namespace TrafficManager
 
         }
 
+        private void OnNewGame()
+        {
+            Debug.Log("Cxz");
+            SerializableDataExtension.GenerateUniqueID();
+        }
         private void OnLoaded()
         {
         }
