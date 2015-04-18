@@ -1,14 +1,22 @@
-# Skylines-Traffic-Manager
-A WIP mod for Cities: Skylines to add additional control for traffic light junctions
+# Skylines-Traffic-Manager 0.6b
+A WIP mod for Cities: Skylines to add additional road traffic control
 
-# !!!ATTENTION!!!
-This mod adds new components to the game which means that maps saved with this mod CANNOT be opened without it!
-You don't need to start a new game to use this mod but you should backup your save file beforehand since this is a very early work in progress.
+# Current features
 
-# Objective
-The goal of this mod is to add the functionality for manual changing of traffic lights and scripted timing
+- Add priority signs
+- Change lanes
+- Add/Remove crosswalks
+- Manually control traffic lights
+- Timed traffic lights
+- Clear traffic
+- No despawn
 
-# Current State
+# Known issues
 
+- UI problems using ESC key and some other mildly frustrating issues
+- Crosswalks become permanent upon save/load game
+- Older saves of the same city will not work correctly
 
 # Roadmap
+
+- Road restrictions (speed limit, bus/service/car/cargo lanes)
