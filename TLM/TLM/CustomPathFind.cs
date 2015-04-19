@@ -763,8 +763,7 @@ namespace TrafficManager
                             {
                                 var lanePos = Mathf.Abs(info.m_lanes[item.m_position.m_lane].m_position);
 
-                                if (!TrafficPriority.leftHandDrive)
-                                {
+
                                     var closest = 100f;
                                     for (var i = 0; i < lanes; i++)
                                     {
@@ -776,21 +775,7 @@ namespace TrafficManager
                                             newLane = i;
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    var closest = -1000f;
-                                    for (var i = 0; i < lanes; i++)
-                                    {
-                                        var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
 
-                                        if (Math.Abs(newLanePos - lanePos) > closest)
-                                        {
-                                            closest = Mathf.Abs(newLanePos - lanePos);
-                                            newLane = i;
-                                        }
-                                    }
-                                }
 
                                 //TODO: remove priority node on delete(check what happens on upgrade)
 

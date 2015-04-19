@@ -2522,26 +2522,54 @@ namespace TrafficManager
             {
                 laneList.Sort(delegate(float[] x, float[] y)
                 {
-                    if (dir3 == NetInfo.Direction.Forward)
+                    if (!TrafficPriority.leftHandDrive)
                     {
-                        if (y[1] + maxValue > x[1] + maxValue)
+                        if (dir3 == NetInfo.Direction.Forward)
                         {
-                            return -1;
+                            if (y[1] + maxValue > x[1] + maxValue)
+                            {
+                                return -1;
+                            }
+                            else
+                            {
+                                return 1;
+                            }
                         }
                         else
                         {
-                            return 1;
+                            if (x[1] + maxValue > y[1] + maxValue)
+                            {
+                                return -1;
+                            }
+                            else
+                            {
+                                return 1;
+                            }
                         }
                     }
                     else
                     {
-                        if (x[1] + maxValue > y[1] + maxValue)
+                        if (dir3 == NetInfo.Direction.Forward)
                         {
-                            return -1;
+                            if (x[1] + maxValue > y[1] + maxValue)
+                            {
+                                return -1;
+                            }
+                            else
+                            {
+                                return 1;
+                            }
                         }
                         else
                         {
-                            return 1;
+                            if (y[1] + maxValue > x[1] + maxValue)
+                            {
+                                return -1;
+                            }
+                            else
+                            {
+                                return 1;
+                            }
                         }
                     }
                 });

@@ -250,6 +250,7 @@ namespace TrafficManager
             }
 
             UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
+            TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
         }
 
         public override void OnLevelUnloading()

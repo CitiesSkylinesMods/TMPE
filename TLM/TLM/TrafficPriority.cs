@@ -20,7 +20,7 @@ namespace TrafficManager
 
     class TrafficPriority
     {
-        public static bool leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
+        public static bool leftHandDrive;
 
         public enum SegmentDirection
         {
