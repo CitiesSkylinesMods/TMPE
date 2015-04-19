@@ -113,6 +113,14 @@ namespace TrafficManager
                     null),
                     typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
 
+                //public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
+                LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
+                    BindingFlags.NonPublic | BindingFlags.Instance,
+                    null,
+                    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
+                    null),
+                    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
+
                 //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
                 //    BindingFlags.NonPublic | BindingFlags.Instance,
                 //    null,
@@ -152,6 +160,8 @@ namespace TrafficManager
                 //    null),
                 //    typeof (CustomNetNode).GetMethod("RefreshJunctionData"));
 
+                //
+
                 LoadingExtension.Instance.detourInited = true;
 
                 if (!LoadingExtension.Instance.nodeSimulationLoaded)
@@ -172,7 +182,7 @@ namespace TrafficManager
     {
         public static LoadingExtension Instance = null;
 
-        public RedirectCallsState[] revertMethods = new RedirectCallsState[7];
+        public RedirectCallsState[] revertMethods = new RedirectCallsState[8];
 
         public TrafficManagerMode ToolMode = TrafficManagerMode.None;
 

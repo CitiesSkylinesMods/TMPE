@@ -90,8 +90,8 @@ namespace TrafficManager
         private GUIStyle counterStyle = new GUIStyle();
 
         private bool uiClickedSegment = false;
-        private Rect _windowRect = new Rect(275, 80, 250, 350);
-        private Rect _windowRect2 = new Rect(275, 80, 300, 150);
+        private Rect _windowRect;
+        private Rect _windowRect2;
 
         public float stepValue = 1f;
 
@@ -101,8 +101,23 @@ namespace TrafficManager
 
         private static bool timedShowNumbers = false;
 
+        Rect ResizeGUI(Rect _rect)
+        {
+            float FilScreenWidth = _rect.width / 800;
+            float rectWidth = FilScreenWidth * Screen.width;
+            float FilScreenHeight = _rect.height / 600;
+            float rectHeight = FilScreenHeight * Screen.height;
+            float rectX = (_rect.x / 800) * Screen.width;
+            float rectY = (_rect.y / 600) * Screen.height;
+
+            return new Rect(rectX, rectY, rectWidth, rectHeight);
+        }
+
         protected override void Awake()
         {
+            _windowRect = ResizeGUI(new Rect(120, 45, 140, 145));
+            _windowRect2 = ResizeGUI(new Rect(120, 45, 140, 75));
+
             // simple
             light_simple_1 = LoadDllResource("light_1_1.png", 103, 243);
             light_simple_2 = LoadDllResource("light_1_2.png", 103, 243);
@@ -2423,7 +2438,7 @@ namespace TrafficManager
                 style.border.right = 2;
                 style.border.left = 2;
 
-                Rect _windowRect3 = new Rect(275, 80, numLanes * 118, 60);
+                Rect _windowRect3 = ResizeGUI(new Rect(120, 45, numLanes * 63, 50));
 
                 GUILayout.Window(2, _windowRect3, _guiLaneChangeWindow, "", style);
 

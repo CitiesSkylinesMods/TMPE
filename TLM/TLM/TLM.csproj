@@ -42,6 +42,9 @@
       <HintPath>D:\Games\SteamLibrary\SteamApps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <HintPath>D:\Games\SteamLibrary\SteamApps\common\Cities_Skylines\Cities_Data\Managed\System.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Games\SteamLibrary\SteamApps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
@@ -51,7 +54,7 @@
     <Compile Include="CustomCarAI.cs" />
     <Compile Include="CustomCargoTruckAI.cs" />
     <Compile Include="CustomHumanAI.cs" />
-    <Compile Include="CustomNetNode.cs" />
+    <Compile Include="CustomNetTool.cs" />
     <Compile Include="CustomPathFind.cs" />
     <Compile Include="CustomPathManager.cs" />
     <Compile Include="CustomRoadAI.cs" />

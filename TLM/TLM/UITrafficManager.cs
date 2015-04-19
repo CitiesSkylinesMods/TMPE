@@ -199,7 +199,12 @@ namespace TrafficManager
             {
                 for (var i = 0; i < vehicleList.Count; i++)
                 {
-                    Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleList[i]);
+                    var vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleList[i]];
+
+                    if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car)
+                    {
+                        Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleList[i]);
+                    }
                 }
             }
         }

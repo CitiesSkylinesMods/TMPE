@@ -32,7 +32,10 @@ namespace TrafficManager
 
                         if (segment != 0)
                         {
-                            TrafficLightsManual.ClearSegment(NodeId, segment);
+                            if (TrafficLightsManual.IsSegmentLight(NodeId, segment))
+                            {
+                                TrafficLightsManual.ClearSegment(NodeId, segment);
+                            }
                         }
                     }
                 }
@@ -81,6 +84,7 @@ namespace TrafficManager
 
                 if (value == false)
                 {
+                    TimedTrafficLightsActive = false;
                     TrafficLightsTimed.RemoveTimedLight(NodeId);
 
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
@@ -91,7 +95,10 @@ namespace TrafficManager
 
                         if (segment != 0)
                         {
-                            TrafficLightsManual.ClearSegment(NodeId, segment);
+                            if (TrafficLightsManual.IsSegmentLight(NodeId, segment))
+                            {
+                                TrafficLightsManual.ClearSegment(NodeId, segment);
+                            }
                         }
                     }
                 }
