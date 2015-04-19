@@ -78,7 +78,7 @@ namespace TrafficManager
 
             buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
             buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
-            buttonManualControl = _createButton("Manual Control", new Vector3(35f, 110f), clickManualControl);
+            buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
             buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
             buttonLaneChange = _createButton("Change lanes", new Vector3(35f, 190f), clickChangeLanes);
             //buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
@@ -90,7 +90,7 @@ namespace TrafficManager
         private UIButton _createButton(string text, Vector3 pos, MouseEventHandler eventClick)
         {
             var button = this.AddUIComponent<UIButton>();
-            button.width = 180;
+            button.width = 190;
             button.height = 30;
             button.normalBgSprite = "ButtonMenu";
             button.disabledBgSprite = "ButtonMenuDisabled";
