@@ -1,8 +1,9 @@
-# Skylines-Traffic-Manager 0.6b
+# Skylines-Traffic-Manager 0.8b
 A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Current features
 
+- Add/Remove traffic lights
 - Add priority signs
 - Change lanes
 - Add/Remove crosswalks
