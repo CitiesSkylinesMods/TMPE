@@ -29,20 +29,42 @@ namespace TrafficManager
 
                 List<ushort> clearedNodes = new List<ushort>();
 
-                foreach (var nodeID in nodeDictionary.Keys)
+                foreach(var nodeID in nodeDictionary.Keys)
                 {
-                    var node = GetNodeSimulation(nodeID);
+                    var data = TrafficLightTool.GetNetNode(nodeID);
 
-                    if (node.FlagManualTrafficLights || (node.FlagTimedTrafficLights && node.TimedTrafficLightsActive))
+                    for (var i = 0; i < 8; i++)
                     {
-                        var data = TrafficLightTool.GetNetNode(nodeID);
+                        var sgmid = data.GetSegment(i);
 
-                        node.SimulationStep(ref data, ref clearedNodes);
-                        TrafficLightTool.SetNetNode(nodeID, data);
-
-                        if (clearedNodes.Count > 0)
+                        if (sgmid != 0)
                         {
-                            break;
+                            if (!TrafficLightsManual.IsSegmentLight(nodeID, sgmid))
+                            {
+                                if (nodeDictionary[nodeID].FlagManualTrafficLights)
+                                {
+                                    var timedNode = TrafficLightsTimed.GetTimedLight(nodeID);
+
+                                    for (var j = 0; j < timedNode.nodeGroup.Count; j++)
+                                    {
+                                        var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[j]);
+
+                                        nodeSim.TimedTrafficLightsActive = false;
+
+                                        clearedNodes.Add(timedNode.nodeGroup[j]);
+                                        TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[j]);
+                                    }
+                                }
+                                else
+                                {
+                                    if (nodeDictionary[nodeID].FlagTimedTrafficLights && !TrafficLightsTimed.IsTimedLight(nodeID)) 
+                                    {
+                                        nodeDictionary[nodeID].TimedTrafficLightsActive = false;
+
+                                        clearedNodes.Add(nodeID);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -52,6 +74,24 @@ namespace TrafficManager
                     for (var i = 0; i < clearedNodes.Count; i++)
                     {
                         CustomRoadAI.RemoveNodeFromSimulation(clearedNodes[i]);
+                    }
+                }
+
+                foreach (var nodeID in nodeDictionary.Keys)
+                {
+                    var node = GetNodeSimulation(nodeID);
+                    
+                    if (node.FlagManualTrafficLights || (node.FlagTimedTrafficLights && node.TimedTrafficLightsActive))
+                    {
+                        var data = TrafficLightTool.GetNetNode(nodeID);
+
+                        node.SimulationStep(ref data);
+                        TrafficLightTool.SetNetNode(nodeID, data);
+
+                        if (clearedNodes.Count > 0)
+                        {
+                            break;
+                        }
                     }
                 }
             }

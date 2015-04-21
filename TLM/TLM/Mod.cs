@@ -163,12 +163,12 @@ namespace TrafficManager
                 //
 
                 LoadingExtension.Instance.detourInited = true;
+            }
 
-                if (!LoadingExtension.Instance.nodeSimulationLoaded)
-                {
-                    LoadingExtension.Instance.nodeSimulationLoaded = true;
-                    ToolsModifierControl.toolController.gameObject.AddComponent<CustomRoadAI>();
-                }
+            if (!LoadingExtension.Instance.nodeSimulationLoaded)
+            {
+                LoadingExtension.Instance.nodeSimulationLoaded = true;
+                ToolsModifierControl.toolController.gameObject.AddComponent<CustomRoadAI>();
             }
 
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -272,6 +272,8 @@ namespace TrafficManager
             CustomRoadAI.nodeDictionary.Clear();
             TrafficLightsManual.ManualSegments.Clear();
             TrafficLightsTimed.timedScripts.Clear();
+
+            LoadingExtension.Instance.nodeSimulationLoaded = false;
         }
 
         private void OnNewGame()
@@ -321,65 +323,6 @@ namespace TrafficManager
                 TrafficLightTool.Destroy(TrafficLightTool);
                 TrafficLightTool = null;
             }
-        }
-
-        public enum FindOptions
-        {
-            None = 0,
-            NameContains = 1 << 0
-        }
-
-        UIView uiRoot = null;
-
-        void FindUIRoot()
-        {
-            uiRoot = null;
-
-            foreach (UIView view in UIView.FindObjectsOfType<UIView>())
-            {
-                if (view.transform.parent == null && view.name == "UIView")
-                {
-                    uiRoot = view;
-                    break;
-                }
-            }
-        }
-
-        public T FindComponent<T>(string name, UIComponent parent = null, FindOptions options = FindOptions.None) where T : UIComponent
-        {
-            if (uiRoot == null)
-            {
-                FindUIRoot();
-                if (uiRoot == null)
-                {
-                    return null;
-                }
-            }
-
-            foreach (T component in UIComponent.FindObjectsOfType<T>())
-            {
-                bool nameMatches;
-                if ((options & FindOptions.NameContains) != 0) nameMatches = component.name.Contains(name);
-                else nameMatches = component.name == name;
-
-                if (!nameMatches) continue;
-
-                Transform parentTransform;
-                if (parent != null) parentTransform = parent.transform;
-                else parentTransform = uiRoot.transform;
-
-                Transform t = component.transform.parent;
-                while (t != null && t != parentTransform)
-                {
-                    t = t.parent;
-                }
-
-                if (t == null) continue;
-
-                return component;
-            }
-
-            return null;
         }
     }
 }

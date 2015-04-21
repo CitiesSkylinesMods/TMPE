@@ -26,7 +26,7 @@ namespace TrafficManager
                 {
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 
@@ -46,7 +46,7 @@ namespace TrafficManager
                     var instance = Singleton<NetManager>.instance;
                     var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 
@@ -89,7 +89,7 @@ namespace TrafficManager
 
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 
@@ -111,7 +111,7 @@ namespace TrafficManager
                     var instance = Singleton<NetManager>.instance;
                     var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 
@@ -145,7 +145,7 @@ namespace TrafficManager
             this.NodeId = nodeID;
         }
 
-        public void SimulationStep(ref NetNode data, ref List<ushort> clearedNodes )
+        public void SimulationStep(ref NetNode data)
         {
             NetManager instance = Singleton<NetManager>.instance;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -166,22 +166,6 @@ namespace TrafficManager
                         var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
                         segmentLight.lastChange = (currentFrameIndex >> 6) - segmentLight.lastChangeFrame;
-                    }
-                    else
-                    {
-                        var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
-
-                        for (var i = 0; i < timedNode.nodeGroup.Count; i++)
-                        {
-                            var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[i]);
-
-                            nodeSim.TimedTrafficLightsActive = false;
-
-                            clearedNodes.Add(timedNode.nodeGroup[i]);
-                            TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[i]);
-                        }
-
-                        break;
                     }
                 }
             }

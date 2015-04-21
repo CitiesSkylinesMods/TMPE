@@ -24,7 +24,7 @@ namespace TrafficManager
 
         public void OnCreated(ISerializableData serializableData)
         {
-            uniqueID = 0;
+            uniqueID = 0u;
             SerializableData = serializableData;
             loaded = false;
         }
@@ -64,6 +64,8 @@ namespace TrafficManager
         private static void OnLoadDataTimed(System.Object source, ElapsedEventArgs e)
         {
             byte[] data = SerializableData.LoadData(dataID);
+
+            uniqueID = 0u;
 
             for (var i = 0; i < data.Length - 3; i++)
             {

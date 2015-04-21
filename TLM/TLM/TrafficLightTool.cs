@@ -673,7 +673,7 @@ namespace TrafficManager
                                         nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
                                         nodeSimulation.FlagManualTrafficLights = true;
 
-                                        for (int s = 0; s < node2.CountSegments(); s++)
+                                        for (int s = 0; s < 8; s++)
                                         {
                                             var segment = node2.GetSegment(s);
 
@@ -3168,7 +3168,7 @@ namespace TrafficManager
                         nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNodeIndexes[i]);
                         nodeSimulation.FlagTimedTrafficLights = true;
 
-                        for (int s = 0; s < node2.CountSegments(); s++)
+                        for (int s = 0; s < 8; s++)
                         {
                             var segment = node2.GetSegment(s);
 
@@ -3594,7 +3594,7 @@ namespace TrafficManager
                 var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNodeIndexes[i]);
                 nodeSimulation.FlagTimedTrafficLights = true;
 
-                for (int s = 0; s < node.CountSegments(); s++)
+                for (int s = 0; s < 8; s++)
                 {
                     var segment = node.GetSegment(s);
 
@@ -3621,7 +3621,7 @@ namespace TrafficManager
                     nodeSimulation = CustomRoadAI.GetNodeSimulation(_selectedNetNodeIdx);
                     nodeSimulation.FlagManualTrafficLights = true;
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 
@@ -3638,7 +3638,7 @@ namespace TrafficManager
                     nodeSimulation.FlagManualTrafficLights = false;
                     CustomRoadAI.RemoveNodeFromSimulation(_selectedNetNodeIdx);
 
-                    for (int s = 0; s < node.CountSegments(); s++)
+                    for (int s = 0; s < 8; s++)
                     {
                         var segment = node.GetSegment(s);
 

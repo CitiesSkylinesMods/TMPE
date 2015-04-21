@@ -25,7 +25,7 @@ namespace TrafficManager
 
             var node = TrafficLightTool.GetNetNode(nodeID);
 
-            for (int s = 0; s < node.CountSegments(); s++)
+            for (int s = 0; s < 8; s++)
             {
                 var segment = node.GetSegment(s);
 

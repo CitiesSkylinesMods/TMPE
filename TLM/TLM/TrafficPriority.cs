@@ -125,7 +125,7 @@ namespace TrafficManager
             var numCars = 0;
 
             // get all cars
-            for (int s = 0; s < node.CountSegments(); s++)
+            for (int s = 0; s < 8; s++)
             {
                 var segment = node.GetSegment(s);
 
@@ -871,7 +871,7 @@ namespace TrafficManager
         {
             var node = TrafficLightTool.GetNetNode(nodeID);
 
-            for (int s = 0; s < node.CountSegments(); s++)
+            for (int s = 0; s < 8; s++)
             {
                 var segment = node.GetSegment(s);
 
@@ -895,7 +895,7 @@ namespace TrafficManager
         {
             var node = TrafficLightTool.GetNetNode(nodeID);
 
-            for (int s = 0; s < node.CountSegments(); s++)
+            for (int s = 0; s < 8; s++)
             {
                 var segment = node.GetSegment(s);
 
@@ -924,7 +924,7 @@ namespace TrafficManager
                 var hasLeftSegment = false;
                 var hasRightSegment = false;
 
-                for (int s = 0; s < node.CountSegments(); s++)
+                for (int s = 0; s < 8; s++)
                 {
                     var segment = node.GetSegment(s);
 
