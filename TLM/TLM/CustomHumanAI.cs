@@ -46,7 +46,7 @@ namespace TrafficManager
             }
             else
             {
-                if (TrafficLightsManual.GetSegmentLight(node, segment).GetLightPedestrian() ==
+                if (TrafficLightsManual.IsSegmentLight(node, segment) && TrafficLightsManual.GetSegmentLight(node, segment).GetLightPedestrian() ==
                     RoadBaseAI.TrafficLightState.Red)
                 {
                     return false;

@@ -27,6 +27,8 @@ namespace TrafficManager
             {
                 lastFrame = currentFrameIndex;
 
+                List<ushort> clearedNodes = new List<ushort>();
+
                 foreach (var nodeID in nodeDictionary.Keys)
                 {
                     var node = GetNodeSimulation(nodeID);
@@ -34,11 +36,30 @@ namespace TrafficManager
                     if (node.FlagManualTrafficLights || (node.FlagTimedTrafficLights && node.TimedTrafficLightsActive))
                     {
                         var data = TrafficLightTool.GetNetNode(nodeID);
-                        node.SimulationStep(ref data);
+
+                        node.SimulationStep(ref data, ref clearedNodes);
                         TrafficLightTool.SetNetNode(nodeID, data);
+
+                        if (clearedNodes.Count > 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (clearedNodes.Count > 0)
+                {
+                    for (var i = 0; i < clearedNodes.Count; i++)
+                    {
+                        CustomRoadAI.RemoveNodeFromSimulation(clearedNodes[i]);
                     }
                 }
             }
+        }
+
+        private void _runUpdate()
+        {
+            
         }
 
         private void SimulationStep(ushort nodeID, ref NetNode data)

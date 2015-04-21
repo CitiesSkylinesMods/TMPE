@@ -1057,7 +1057,7 @@ namespace TrafficManager
             }
 
             return false;
-        }
+        }   
 
         public static SegmentDirection GetSegmentDirection(int segment, ushort nodeid)
         {

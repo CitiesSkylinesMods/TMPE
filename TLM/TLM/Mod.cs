@@ -203,21 +203,6 @@ namespace TrafficManager
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
-
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-
-            FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
-            PathManager stockPathManager = PathManager.instance;
-            customPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-            customPathManager.UpdateWithPathManagerValues(stockPathManager);
-            pathManagerInstance.SetValue(null, customPathManager);
-            FastList<ISimulationManager> managers = typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as FastList<ISimulationManager>;
-            managers.Remove(stockPathManager);
-            managers.Add(customPathManager);
-            GameObject.Destroy(stockPathManager, 10f);
         }
 
         public override void OnReleased()
@@ -249,8 +234,26 @@ namespace TrafficManager
                     break;
             }
 
-            UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
-            TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
+            if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame)
+            {
+                if (Instance == null)
+                {
+                    Instance = this;
+                }
+
+                FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
+                PathManager stockPathManager = PathManager.instance;
+                customPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+                customPathManager.UpdateWithPathManagerValues(stockPathManager);
+                pathManagerInstance.SetValue(null, customPathManager);
+                FastList<ISimulationManager> managers = typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as FastList<ISimulationManager>;
+                managers.Remove(stockPathManager);
+                managers.Add(customPathManager);
+                GameObject.Destroy(stockPathManager, 10f);
+
+                UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
+                TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
+            }
         }
 
         public override void OnLevelUnloading()

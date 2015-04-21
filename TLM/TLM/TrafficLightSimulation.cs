@@ -145,7 +145,7 @@ namespace TrafficManager
             this.NodeId = nodeID;
         }
 
-        public void SimulationStep(ref NetNode data)
+        public void SimulationStep(ref NetNode data, ref List<ushort> clearedNodes )
         {
             NetManager instance = Singleton<NetManager>.instance;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -166,6 +166,22 @@ namespace TrafficManager
                         var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
                         segmentLight.lastChange = (currentFrameIndex >> 6) - segmentLight.lastChangeFrame;
+                    }
+                    else
+                    {
+                        var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
+
+                        for (var i = 0; i < timedNode.nodeGroup.Count; i++)
+                        {
+                            var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[i]);
+
+                            nodeSim.TimedTrafficLightsActive = false;
+
+                            clearedNodes.Add(timedNode.nodeGroup[i]);
+                            TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[i]);
+                        }
+
+                        break;
                     }
                 }
             }

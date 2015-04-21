@@ -13,7 +13,7 @@ namespace TrafficManager
 {
     public class SerializableDataExtension : ISerializableDataExtension
     {
-        public static string dataID = "TrafficManager";
+        public static string dataID = "TrafficManager_v0.9";
         public static UInt32 uniqueID;
 
         public static ISerializableData SerializableData;
@@ -167,7 +167,7 @@ namespace TrafficManager
                         timedStepCount++;
                     }
 
-                    if (timedNode.isStarted())
+                    if (Convert.ToBoolean(configuration.timedNodes[i][3]))
                     {
                         timedNode.start();
                     }
@@ -312,7 +312,7 @@ namespace TrafficManager
                 {
                     var timedNode = TrafficLightsTimed.GetTimedLight((ushort) i);
 
-                    configuration.timedNodes.Add(new int[3] { timedNode.nodeID, timedNode.currentStep, timedNode.NumSteps()});
+                    configuration.timedNodes.Add(new int[4] { timedNode.nodeID, timedNode.currentStep, timedNode.NumSteps(), Convert.ToInt32(timedNode.isStarted())});
 
                     var nodeGroup = new ushort[timedNode.nodeGroup.Count];
 

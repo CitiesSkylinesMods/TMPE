@@ -136,6 +136,8 @@ namespace TrafficManager
         {
             this.nodeID = nodeID;
             this.nodeGroup = new List<ushort>(nodeGroup);
+
+            CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = false;
         }
 
         public void addStep(int num)
