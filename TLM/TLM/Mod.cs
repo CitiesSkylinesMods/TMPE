@@ -44,7 +44,7 @@ namespace TrafficManager
 
             if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None && ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool)
             {
-                LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
+                LoadingExtension.Instance.UI.Close();
             }
 
             if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool && LoadingExtension.Instance.UI.isVisible())
@@ -114,12 +114,12 @@ namespace TrafficManager
                     typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
 
                 //public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
-                LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
-                    BindingFlags.NonPublic | BindingFlags.Instance,
-                    null,
-                    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
-                    null),
-                    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
+                //LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
+                //    BindingFlags.NonPublic | BindingFlags.Instance,
+                //    null,
+                //    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
+                //    null),
+                //    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
 
                 //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
                 //    BindingFlags.NonPublic | BindingFlags.Instance,
@@ -290,17 +290,11 @@ namespace TrafficManager
 
             if (mode != TrafficManagerMode.None)
             {
-                if (ToolsModifierControl.toolController.CurrentTool != TrafficLightTool)
-                {
-                    _originalTool = ToolsModifierControl.toolController.CurrentTool;
-                }
-
                 DestroyTool();
                 EnableTool();
             }
             else
             {
-                ToolsModifierControl.toolController.CurrentTool = _originalTool;
                 DestroyTool();
             }
         }
@@ -314,15 +308,78 @@ namespace TrafficManager
             }
 
             ToolsModifierControl.toolController.CurrentTool = TrafficLightTool;
+            ToolsModifierControl.SetTool<TrafficLightTool>();
         }
 
         private void DestroyTool()
         {
             if (TrafficLightTool != null)
             {
+                ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
+                ToolsModifierControl.SetTool<DefaultTool>();
+
                 TrafficLightTool.Destroy(TrafficLightTool);
                 TrafficLightTool = null;
             }
+        }
+
+        public enum FindOptions
+        {
+            None = 0,
+            NameContains = 1 << 0
+        }
+
+        UIView uiRoot = null;
+
+        void FindUIRoot()
+        {
+            uiRoot = null;
+
+            foreach (UIView view in UIView.FindObjectsOfType<UIView>())
+            {
+                if (view.transform.parent == null && view.name == "UIView")
+                {
+                    uiRoot = view;
+                    break;
+                }
+            }
+        }
+
+        public T FindComponent<T>(string name, UIComponent parent = null, FindOptions options = FindOptions.None) where T : UIComponent
+        {
+            if (uiRoot == null)
+            {
+                FindUIRoot();
+                if (uiRoot == null)
+                {
+                    return null;
+                }
+            }
+
+            foreach (T component in UIComponent.FindObjectsOfType<T>())
+            {
+                bool nameMatches;
+                if ((options & FindOptions.NameContains) != 0) nameMatches = component.name.Contains(name);
+                else nameMatches = component.name == name;
+
+                if (!nameMatches) continue;
+
+                Transform parentTransform;
+                if (parent != null) parentTransform = parent.transform;
+                else parentTransform = uiRoot.transform;
+
+                Transform t = component.transform.parent;
+                while (t != null && t != parentTransform)
+                {
+                    t = t.parent;
+                }
+
+                if (t == null) continue;
+
+                return component;
+            }
+
+            return null;
         }
     }
 }

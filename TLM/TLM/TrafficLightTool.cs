@@ -103,20 +103,16 @@ namespace TrafficManager
 
         Rect ResizeGUI(Rect _rect)
         {
-            float FilScreenWidth = _rect.width / 800;
-            float rectWidth = FilScreenWidth * Screen.width;
-            float FilScreenHeight = _rect.height / 600;
-            float rectHeight = FilScreenHeight * Screen.height;
             float rectX = (_rect.x / 800) * Screen.width;
             float rectY = (_rect.y / 600) * Screen.height;
 
-            return new Rect(rectX, rectY, rectWidth, rectHeight);
+            return new Rect(rectX, rectY, _rect.width, _rect.height);
         }
 
         protected override void Awake()
         {
-            _windowRect = ResizeGUI(new Rect(120, 45, 140, 145));
-            _windowRect2 = ResizeGUI(new Rect(120, 45, 140, 75));
+            _windowRect = ResizeGUI(new Rect(120, 45, 300, 350));
+            _windowRect2 = ResizeGUI(new Rect(120, 45, 300, 150));
 
             // simple
             light_simple_1 = LoadDllResource("light_1_1.png", 103, 243);
@@ -1530,7 +1526,7 @@ namespace TrafficManager
 
         protected void _guiTimedTrafficLights()
         {
-            GUILayout.Window(0, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
+            GUILayout.Window(253, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
 
             if (_windowRect.Contains(Event.current.mousePosition))
             {
@@ -2440,9 +2436,9 @@ namespace TrafficManager
                 style.border.right = 2;
                 style.border.left = 2;
 
-                Rect _windowRect3 = ResizeGUI(new Rect(120, 45, numLanes * 63, 50));
+                Rect _windowRect3 = ResizeGUI(new Rect(120, 45, numLanes * 118, 60));
 
-                GUILayout.Window(2, _windowRect3, _guiLaneChangeWindow, "", style);
+                GUILayout.Window(250, _windowRect3, _guiLaneChangeWindow, "", style);
 
                 if (_windowRect3.Contains(Event.current.mousePosition))
                 {
@@ -2668,7 +2664,7 @@ namespace TrafficManager
 
             if (TrafficLightsManual.segmentIsOneWay(_selectedSegmentIdx))
             {
-                GUILayout.Window(2, _windowRect3, _guiLaneRestrictionsOneWayWindow, "", style);
+                GUILayout.Window(251, _windowRect3, _guiLaneRestrictionsOneWayWindow, "", style);
             }
 
             if (_windowRect3.Contains(Event.current.mousePosition))
@@ -3133,7 +3129,7 @@ namespace TrafficManager
 
         protected void _guiTimedTrafficLightsNode()
         {
-            GUILayout.Window(1, _windowRect2, _guiTimedTrafficLightsNodeWindow, "Select nodes");
+            GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, "Select nodes");
 
             if (_windowRect2.Contains(Event.current.mousePosition))
             {

@@ -711,7 +711,7 @@ namespace TrafficManager
 
                         var m_lanes = info2.m_lanes;
 
-                        if ((segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None)
+                        if (TrafficPriority.leftHandDrive)
                         {
                             m_lanes.Reverse();
                         }

@@ -142,69 +142,69 @@ namespace TrafficManager
                 }
                 if (CustomNetTool.FieldUpgrading)
                 {
-                    var priorityList = new Dictionary<ushort, int>();
+                    //var priorityList = new Dictionary<ushort, int>();
 
-                    if (CustomRoadAI.GetNodeSimulation(startPoint.m_node) != null)
-                    {
-                        var nodeDict = CustomRoadAI.GetNodeSimulation(startPoint.m_node);
+                    //if (CustomRoadAI.GetNodeSimulation(startPoint.m_node) != null)
+                    //{
+                    //    var nodeDict = CustomRoadAI.GetNodeSimulation(startPoint.m_node);
 
-                        if (nodeDict.FlagManualTrafficLights)
-                        {
-                            nodeDict.FlagManualTrafficLights = false;
-                        }
-                        if (nodeDict.FlagTimedTrafficLights)
-                        {
-                            nodeDict.FlagTimedTrafficLights = false;
-                        }
+                    //    if (nodeDict.FlagManualTrafficLights)
+                    //    {
+                    //        nodeDict.FlagManualTrafficLights = false;
+                    //    }
+                    //    if (nodeDict.FlagTimedTrafficLights)
+                    //    {
+                    //        nodeDict.FlagTimedTrafficLights = false;
+                    //    }
 
-                        CustomRoadAI.RemoveNodeFromSimulation(startPoint.m_node);
-                    }
+                    //    CustomRoadAI.RemoveNodeFromSimulation(startPoint.m_node);
+                    //}
 
-                    foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
-                    {
-                        if (prioritySegment.node_1 == startPoint.m_node && !priorityList.ContainsKey(startPoint.m_node))
-                        {
-                            priorityList.Add(startPoint.m_node, prioritySegment.segment);
-                        }
-                        if (prioritySegment.node_2 == startPoint.m_node && !priorityList.ContainsKey(startPoint.m_node))
-                        {
-                            priorityList.Add(startPoint.m_node, prioritySegment.segment);
-                        }
-                    }
+                    //foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
+                    //{
+                    //    if (prioritySegment.node_1 == startPoint.m_node && !priorityList.ContainsKey(startPoint.m_node))
+                    //    {
+                    //        priorityList.Add(startPoint.m_node, prioritySegment.segment);
+                    //    }
+                    //    if (prioritySegment.node_2 == startPoint.m_node && !priorityList.ContainsKey(startPoint.m_node))
+                    //    {
+                    //        priorityList.Add(startPoint.m_node, prioritySegment.segment);
+                    //    }
+                    //}
 
-                    if (CustomRoadAI.GetNodeSimulation(endPoint.m_node) != null)
-                    {
+                    //if (CustomRoadAI.GetNodeSimulation(endPoint.m_node) != null)
+                    //{
 
-                        var nodeDict = CustomRoadAI.GetNodeSimulation(endPoint.m_node);
+                    //    var nodeDict = CustomRoadAI.GetNodeSimulation(endPoint.m_node);
 
-                        if (nodeDict.FlagManualTrafficLights)
-                        {
-                            nodeDict.FlagManualTrafficLights = false;
-                        }
-                        if (nodeDict.FlagTimedTrafficLights)
-                        {
-                            nodeDict.FlagTimedTrafficLights = false;
-                        }
+                    //    if (nodeDict.FlagManualTrafficLights)
+                    //    {
+                    //        nodeDict.FlagManualTrafficLights = false;
+                    //    }
+                    //    if (nodeDict.FlagTimedTrafficLights)
+                    //    {
+                    //        nodeDict.FlagTimedTrafficLights = false;
+                    //    }
 
-                        CustomRoadAI.RemoveNodeFromSimulation(endPoint.m_node);
-                    }
+                    //    CustomRoadAI.RemoveNodeFromSimulation(endPoint.m_node);
+                    //}
 
-                    foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
-                    {
-                        if (prioritySegment.node_1 == endPoint.m_node && !priorityList.ContainsKey(endPoint.m_node))
-                        {
-                            priorityList.Add(endPoint.m_node, prioritySegment.segment);
-                        }
-                        if (prioritySegment.node_2 == endPoint.m_node && !priorityList.ContainsKey(endPoint.m_node))
-                        {
-                            priorityList.Add(endPoint.m_node, prioritySegment.segment);
-                        }
-                    }
+                    //foreach (var prioritySegment in TrafficPriority.prioritySegments.Values)
+                    //{
+                    //    if (prioritySegment.node_1 == endPoint.m_node && !priorityList.ContainsKey(endPoint.m_node))
+                    //    {
+                    //        priorityList.Add(endPoint.m_node, prioritySegment.segment);
+                    //    }
+                    //    if (prioritySegment.node_2 == endPoint.m_node && !priorityList.ContainsKey(endPoint.m_node))
+                    //    {
+                    //        priorityList.Add(endPoint.m_node, prioritySegment.segment);
+                    //    }
+                    //}
 
-                    foreach (var pr in priorityList)
-                    {
-                        TrafficPriority.removePrioritySegment(pr.Key, pr.Value);
-                    }
+                    //foreach (var pr in priorityList)
+                    //{
+                    //    TrafficPriority.removePrioritySegment(pr.Key, pr.Value);
+                    //}
 
                     info.m_netAI.UpgradeSucceeded();
                 }
