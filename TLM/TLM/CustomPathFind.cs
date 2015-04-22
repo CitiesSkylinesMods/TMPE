@@ -716,8 +716,18 @@ namespace TrafficManager
                             m_lanes.Reverse();
                         }
 
+                        var laneArrows = 0;
+
                         while (infoLanes < m_lanes.Length && segmentLanes != 0u)
                         {
+                            if (((NetLane.Flags) instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Left) ==
+                                NetLane.Flags.Left || ((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Right) ==
+                                        NetLane.Flags.Right || ((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Forward) ==
+                                        NetLane.Flags.Forward)
+                            {
+                                laneArrows++;
+                            }
+
                             if (m_lanes[infoLanes].m_laneType == NetInfo.LaneType.Vehicle && m_lanes[infoLanes].m_direction == dir3)
                             {
                                 if (TrafficPriority.isLeftSegment(num16, item.m_position.m_segment, nodeID, true) >= 0)
@@ -756,47 +766,78 @@ namespace TrafficManager
                             infoLanes++;
                         }
 
-                        var newLaneNum = 0;
-                        var newLaneId = 0u;
-                        var newLane = -1;
-
-                        if (lanes > 0)
+                        if (laneArrows > 0)
                         {
-                            if (lanes == 1)
-                            {
-                                newLaneNum = laneNums[0];
-                                newLaneId = laneIds[0];
-                            }
-                            else
-                            {
-                                var lanePos = Mathf.Abs(info.m_lanes[item.m_position.m_lane].m_position);
-                                var closest = 100f;
-                                for (var i = 0; i < lanes; i++)
-                                {
-                                    var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
+                            var newLaneNum = 0;
+                            var newLaneId = 0u;
+                            var newLane = -1;
 
-                                    if (Math.Abs(newLanePos - lanePos) < closest)
-                                    {
-                                        closest = Mathf.Abs(newLanePos - lanePos);
-                                        newLane = i;
-                                    }
-                                }
-
-                                if (newLane == -1)
+                            if (lanes > 0)
+                            {
+                                if (lanes == 1)
                                 {
                                     newLaneNum = laneNums[0];
                                     newLaneId = laneIds[0];
                                 }
                                 else
                                 {
-                                    newLaneNum = laneNums[newLane];
-                                    newLaneId = laneIds[newLane];
-                                }
-                            }
+                                    var laneFound = false;
 
-                            this.ProcessItem2(item, nodeID, num16, ref instance.m_segments.m_buffer[(int) num16],
-                                ref num,
-                                connectOffset, true, false, newLaneId, newLaneNum);
+                                    if (info2.m_lanes.Length == info.m_lanes.Length)
+                                    {
+
+                                        for (var i = 0; i < laneNums.Length; i++)
+                                        {
+                                            if (laneNums[i] == item.m_position.m_lane)
+                                            {
+                                                newLaneNum = laneNums[i];
+                                                newLaneId = laneIds[i];
+                                                laneFound = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (!laneFound)
+                                    {
+                                        var lanePos = Mathf.Abs(info.m_lanes[item.m_position.m_lane].m_position);
+                                        var closest = 100f;
+                                        for (var i = 0; i < lanes; i++)
+                                        {
+                                            var newLanePos = Mathf.Abs(info2.m_lanes[laneNums[i]].m_position);
+
+                                            if (Math.Abs(newLanePos - lanePos) < closest)
+                                            {
+                                                closest = Mathf.Abs(newLanePos - lanePos);
+                                                newLane = i;
+                                            }
+                                        }
+
+                                        if (newLane == -1)
+                                        {
+                                            newLaneNum = laneNums[0];
+                                            newLaneId = laneIds[0];
+                                        }
+                                        else
+                                        {
+                                            newLaneNum = laneNums[newLane];
+                                            newLaneId = laneIds[newLane];
+                                        }
+                                    }
+                                }
+
+                                this.ProcessItem2(item, nodeID, num16, ref instance.m_segments.m_buffer[(int) num16],
+                                    ref num,
+                                    connectOffset, true, false, newLaneId, newLaneNum);
+                            }
+                        }
+                        else
+                        {
+                            if (this.ProcessItem4(item, nodeID, num16, ref instance.m_segments.m_buffer[(int)num16], ref num,
+                                connectOffset, true, false))
+                            {
+                                flag3 = true;
+                            }
                         }
                     } 
                     //else if (TrafficRoadRestrictions.isSegment(num16))

@@ -111,7 +111,7 @@ namespace TrafficManager
 
         protected override void Awake()
         {
-            _windowRect = ResizeGUI(new Rect(120, 45, 300, 350));
+            _windowRect = ResizeGUI(new Rect(120, 45, 450, 350));
             _windowRect2 = ResizeGUI(new Rect(120, 45, 300, 150));
 
             // simple
@@ -487,11 +487,19 @@ namespace TrafficManager
 
         public void _renderOverlayLaneChange(RenderManager.CameraInfo cameraInfo)
         {
+
             if (_hoveredSegmentIdx != 0 && _hoveredNetNodeIdx != 0 && (_hoveredSegmentIdx != _selectedSegmentIdx || _hoveredNetNodeIdx != _selectedNetNodeIdx))
             {
-                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+                var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags;
 
-                NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(false, false), GetToolColor(false, false));
+                if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
+
+                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+
+                    NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(false, false),
+                        GetToolColor(false, false));
+                }
             }
 
             if (_selectedSegmentIdx != 0)
@@ -597,7 +605,7 @@ namespace TrafficManager
             {
                 ToolCursor = null;
             }
-            else if (toolMode == ToolMode.SwitchTrafficLight)
+            else
             {
                 NetTool netTool = null;
 
@@ -611,7 +619,7 @@ namespace TrafficManager
                     }
                 }
 
-                if (netTool != null)
+                if (netTool != null && mouseRayValid)
                 {
                     ToolCursor = netTool.m_upgradeCursor;
                 }
@@ -737,8 +745,13 @@ namespace TrafficManager
                         {
                             if (_hoveredNetNodeIdx != 0 && _hoveredSegmentIdx != 0)
                             {
-                                _selectedSegmentIdx = _hoveredSegmentIdx;
-                                _selectedNetNodeIdx = _hoveredNetNodeIdx;
+                                var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags;
+
+                                if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                                {
+                                    _selectedSegmentIdx = _hoveredSegmentIdx;
+                                    _selectedNetNodeIdx = _hoveredNetNodeIdx;
+                                }
                             }
                         }
                     }
@@ -3208,7 +3221,19 @@ namespace TrafficManager
                     {
                         if (i == timedNodeMain.currentStep)
                         {
-                            GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).currentStep(), layout_green);
+                            GUILayout.BeginVertical();
+                            GUILayout.Space(5);
+                            GUILayout.Label("State[" + (i + 1) + "]: " + timedNodeMain.GetStep(i).currentStep(), layout_green);
+                            GUILayout.Space(5);
+                            GUILayout.EndVertical();
+                            if (GUILayout.Button("Skip", GUILayout.Width(45)))
+                            {
+                                for (var j = 0; j < SelectedNodeIndexes.Count; j++)
+                                {
+                                    var timedNode2 = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[j]);
+                                    timedNode2.skipStep();
+                                }
+                            }
                         }
                         else
                         {
@@ -3221,6 +3246,42 @@ namespace TrafficManager
 
                         if (timedEditStep < 0)
                         {
+                            GUILayout.BeginHorizontal(GUILayout.Width(100));
+
+                            if (i > 0)
+                            {
+                                if (GUILayout.Button("up", GUILayout.Width(45)))
+                                {
+                                    for (var j = 0; j < SelectedNodeIndexes.Count; j++)
+                                    {
+                                        var timedNode2 = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[j]);
+                                        timedNode2.moveStep(i, i - 1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                GUILayout.Space(50);
+                            }
+
+                            if (i < timedNodeMain.NumSteps() - 1)
+                            {
+                                if (GUILayout.Button("down", GUILayout.Width(45)))
+                                {
+                                    for (var j = 0; j < SelectedNodeIndexes.Count; j++)
+                                    {
+                                        var timedNode2 = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[j]);
+                                        timedNode2.moveStep(i, i + 1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                GUILayout.Space(50);
+                            }
+
+                            GUILayout.EndHorizontal();
+
                             if (GUILayout.Button("View", GUILayout.Width(45)))
                             {
                                 timedPanelAdd = false;
@@ -3244,6 +3305,8 @@ namespace TrafficManager
                                     timedNode2.GetStep(i).setLights();
                                 }
                             }
+
+                            GUILayout.Space(20);
 
                             if (GUILayout.Button("Delete", GUILayout.Width(60)))
                             {

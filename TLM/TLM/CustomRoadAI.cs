@@ -41,7 +41,7 @@ namespace TrafficManager
                         {
                             if (!TrafficLightsManual.IsSegmentLight(nodeID, sgmid))
                             {
-                                if (nodeDictionary[nodeID].FlagManualTrafficLights)
+                                if (nodeDictionary[nodeID].FlagTimedTrafficLights)
                                 {
                                     var timedNode = TrafficLightsTimed.GetTimedLight(nodeID);
 
@@ -53,15 +53,6 @@ namespace TrafficManager
 
                                         clearedNodes.Add(timedNode.nodeGroup[j]);
                                         TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[j]);
-                                    }
-                                }
-                                else
-                                {
-                                    if (nodeDictionary[nodeID].FlagTimedTrafficLights && !TrafficLightsTimed.IsTimedLight(nodeID)) 
-                                    {
-                                        nodeDictionary[nodeID].TimedTrafficLightsActive = false;
-
-                                        clearedNodes.Add(nodeID);
                                     }
                                 }
                             }

@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ColossalFramework;
 using UnityEngine;
 
 namespace TrafficManager
 {
-    public class TimedTrafficSteps
+    public class TimedTrafficSteps : ICloneable
     {
         public ushort nodeID;
         public int numSteps;
@@ -120,6 +121,11 @@ namespace TrafficManager
 
             return false;
         }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
     public class TrafficLightsTimed
     {
@@ -156,6 +162,14 @@ namespace TrafficManager
             CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = true;
         }
 
+        public void moveStep(int oldPos , int newPos )
+        {
+            TimedTrafficSteps oldStep = steps[oldPos];
+
+            steps.RemoveAt(oldPos);
+            steps.Insert(newPos, oldStep);
+        }
+
         public void stop()
         {
             CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = false;
@@ -185,6 +199,16 @@ namespace TrafficManager
                 steps[currentStep].setFrame(frame);
                 steps[currentStep].setLights();
             }
+        }
+
+        public void skipStep()
+        {
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+
+            currentStep = currentStep + 1 >= steps.Count ? 0 : currentStep + 1;
+
+            steps[currentStep].setFrame(currentFrameIndex >> 6);
+            steps[currentStep].setLights();
         }
 
         public long checkNextChange(int segmentID, int lightType)
