@@ -33,30 +33,37 @@ namespace TrafficManager
                 {
                     var data = TrafficLightTool.GetNetNode(nodeID);
 
-                    for (var i = 0; i < 8; i++)
+                    try
                     {
-                        var sgmid = data.GetSegment(i);
-
-                        if (sgmid != 0)
+                        for (var i = 0; i < 8; i++)
                         {
-                            if (!TrafficLightsManual.IsSegmentLight(nodeID, sgmid))
+                            var sgmid = data.GetSegment(i);
+
+                            if (sgmid != 0)
                             {
-                                if (nodeDictionary[nodeID].FlagTimedTrafficLights)
+                                if (!TrafficLightsManual.IsSegmentLight(nodeID, sgmid))
                                 {
-                                    var timedNode = TrafficLightsTimed.GetTimedLight(nodeID);
-
-                                    for (var j = 0; j < timedNode.nodeGroup.Count; j++)
+                                    if (nodeDictionary[nodeID].FlagTimedTrafficLights)
                                     {
-                                        var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[j]);
+                                        var timedNode = TrafficLightsTimed.GetTimedLight(nodeID);
 
-                                        nodeSim.TimedTrafficLightsActive = false;
+                                        for (var j = 0; j < timedNode.nodeGroup.Count; j++)
+                                        {
+                                            var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[j]);
 
-                                        clearedNodes.Add(timedNode.nodeGroup[j]);
-                                        TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[j]);
+                                            nodeSim.TimedTrafficLightsActive = false;
+
+                                            clearedNodes.Add(timedNode.nodeGroup[j]);
+                                            TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[j]);
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        //Log.Warning("Error on Update: \n" + e.Message + "\n\nStacktrace:\n\n" + e.StackTrace);
                     }
                 }
 
