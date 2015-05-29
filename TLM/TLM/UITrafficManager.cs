@@ -36,11 +36,16 @@ namespace TrafficManager
                     buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
                     buttonManualControl.focusedBgSprite = "ButtonMenu";
                     buttonTimedMain.focusedBgSprite = "ButtonMenu";
-                    buttonLaneChange.focusedBgSprite = "ButtonMenu";
+
+                    
                     //buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
                     buttonCrosswalk.focusedBgSprite = "ButtonMenu";
                     buttonClearTraffic.focusedBgSprite = "ButtonMenu";
-                    buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
+                    if (!LoadingExtension.PathfinderIncompatibility)
+                    {
+                        buttonLaneChange.focusedBgSprite = "ButtonMenu";
+                        buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
+                    }
                 }
 
                 _uistate = value;
@@ -69,22 +74,35 @@ namespace TrafficManager
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(75, 75, 135, 255);
             this.width = 250;
-            this.height = 350;
+            this.height = !LoadingExtension.PathfinderIncompatibility ? 350 : 270;
             this.relativePosition = new Vector3(10.48f, 80f);
 
             UILabel title = this.AddUIComponent<UILabel>();
             title.text = "Traffic Manager";
             title.relativePosition = new Vector3(65.0f, 5.0f);
 
-            buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
-            buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
-            buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
-            buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
-            buttonLaneChange = _createButton("Change lanes", new Vector3(35f, 190f), clickChangeLanes);
-            //buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
-            buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 230f), clickCrosswalk);
-            buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 270f), clickClearTraffic);
-            buttonToggleDespawn = _createButton(LoadingExtension.Instance.despawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, 310f), clickToggleDespawn);
+            if (!LoadingExtension.PathfinderIncompatibility)
+            {
+                buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
+                buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
+                buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
+                buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
+                buttonLaneChange = _createButton("Change lanes", new Vector3(35f, 190f), clickChangeLanes);
+                //buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
+                buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 230f), clickCrosswalk);
+                buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 270f), clickClearTraffic);
+                buttonToggleDespawn = _createButton(LoadingExtension.Instance.despawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, 310f), clickToggleDespawn);
+
+            }
+            else
+            {
+                buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
+                buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
+                buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
+                buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
+                buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 190f), clickCrosswalk);
+                buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 230f), clickClearTraffic);
+            }
         }
 
         private UIButton _createButton(string text, Vector3 pos, MouseEventHandler eventClick)
@@ -213,9 +231,12 @@ namespace TrafficManager
         {
             LoadingExtension.Instance.despawnEnabled = !LoadingExtension.Instance.despawnEnabled;
 
-            buttonToggleDespawn.text = LoadingExtension.Instance.despawnEnabled
-                ? "Disable despawning"
-                : "Enable despawning";
+            if (!LoadingExtension.PathfinderIncompatibility)
+            {
+                buttonToggleDespawn.text = LoadingExtension.Instance.despawnEnabled
+                    ? "Disable despawning"
+                    : "Enable despawning";
+            }
         }
 
         private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam)
@@ -224,7 +245,10 @@ namespace TrafficManager
             {
                 _uistate = UIState.LaneChange;
 
-                buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
+                if (!LoadingExtension.PathfinderIncompatibility)
+                {
+                    buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
+                }
 
                 TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.LaneChange);
             }
@@ -232,7 +256,10 @@ namespace TrafficManager
             {
                 _uistate = UIState.None;
 
-                buttonLaneChange.focusedBgSprite = "ButtonMenu";
+                if (!LoadingExtension.PathfinderIncompatibility)
+                {
+                    buttonLaneChange.focusedBgSprite = "ButtonMenu";
+                }
 
                 TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
             }

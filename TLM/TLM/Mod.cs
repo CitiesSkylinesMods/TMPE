@@ -14,13 +14,13 @@ namespace TrafficManager
         TrafficLight = 1
     }
 
-    public class Mod : IUserMod
+    public class TrafficManagerMod : IUserMod
     {
-
         public string Name
         {
             get
             {
+
                 return "Traffic Manager";
             }
         }
@@ -80,87 +80,89 @@ namespace TrafficManager
                     null),
                     typeof (CustomHumanAI).GetMethod("CheckTrafficLights"));
 
-                LoadingExtension.Instance.revertMethods[3] =
+                if (!LoadingExtension.PathfinderIncompatibility) {
+                    LoadingExtension.Instance.revertMethods[3] =
                     RedirectionHelper.RedirectCalls(
-                        typeof (CarAI).GetMethod("SimulationStep",
-                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                        typeof (CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
+                        typeof(CarAI).GetMethod("SimulationStep",
+                            new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
+                        typeof(CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
 
 
-                LoadingExtension.Instance.revertMethods[4] =
-                    RedirectionHelper.RedirectCalls(
-                        typeof (PassengerCarAI).GetMethod("SimulationStep",
-                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                        typeof (CustomPassengerCarAI).GetMethod("SimulationStep",
-                            BindingFlags.NonPublic | BindingFlags.Instance));
+                    LoadingExtension.Instance.revertMethods[4] =
+                        RedirectionHelper.RedirectCalls(
+                            typeof(PassengerCarAI).GetMethod("SimulationStep",
+                                new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
+                            typeof(CustomPassengerCarAI).GetMethod("SimulationStep",
+                                BindingFlags.NonPublic | BindingFlags.Instance));
 
-                LoadingExtension.Instance.revertMethods[5] =
-                    RedirectionHelper.RedirectCalls(
-                        typeof (CargoTruckAI).GetMethod("SimulationStep",
-                            new Type[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                        typeof (CustomCargoTruckAI).GetMethod("SimulationStep",
-                            BindingFlags.NonPublic | BindingFlags.Instance));
+                    LoadingExtension.Instance.revertMethods[5] =
+                        RedirectionHelper.RedirectCalls(
+                            typeof(CargoTruckAI).GetMethod("SimulationStep",
+                                new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
+                            typeof(CustomCargoTruckAI).GetMethod("SimulationStep",
+                                BindingFlags.NonPublic | BindingFlags.Instance));
 
-                LoadingExtension.Instance.revertMethods[6] = RedirectionHelper.RedirectCalls(typeof (CarAI).GetMethod("CalculateSegmentPosition",
-                    BindingFlags.NonPublic | BindingFlags.Instance,
-                    null,
-                    new Type[]
+                    LoadingExtension.Instance.revertMethods[6] = RedirectionHelper.RedirectCalls(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+                        BindingFlags.NonPublic | BindingFlags.Instance,
+                        null,
+                        new Type[]
                     {
                         typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position), typeof (uint),
                         typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
                         typeof (float).MakeByRefType()
                     },
-                    null),
-                    typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
+                        null),
+                        typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2"));
 
-                //public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
-                //LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
-                //    BindingFlags.NonPublic | BindingFlags.Instance,
-                //    null,
-                //    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
-                //    null),
-                //    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
+                    //public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
+                    //LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
+                    //    BindingFlags.NonPublic | BindingFlags.Instance,
+                    //    null,
+                    //    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
+                    //    null),
+                    //    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
 
-                //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
-                //    BindingFlags.NonPublic | BindingFlags.Instance,
-                //    null,
-                //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                //    null);
+                    //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
+                    //    BindingFlags.NonPublic | BindingFlags.Instance,
+                    //    null,
+                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
+                    //    null);
 
-                //destMethod[8 = typeof(CustomCarAI).GetMethod("StartPathFind");
+                    //destMethod[8 = typeof(CustomCarAI).GetMethod("StartPathFind");
 
-                //srcMethod9 = typeof (TransportLineAI).GetMethod("StartPathFind");
+                    //srcMethod9 = typeof (TransportLineAI).GetMethod("StartPathFind");
 
-                //destMethod[9 = typeof(CustomTransportLineAI).GetMethod("StartPathFind", BindingFlags.NonPublic | BindingFlags.Static);
+                    //destMethod[9 = typeof(CustomTransportLineAI).GetMethod("StartPathFind", BindingFlags.NonPublic | BindingFlags.Static);
 
-                //srcMethod10 = typeof(PassengerCarAI).GetMethod("StartPathFind",
-                //    BindingFlags.NonPublic | BindingFlags.Instance,
-                //    null,
-                //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                //    null);
+                    //srcMethod10 = typeof(PassengerCarAI).GetMethod("StartPathFind",
+                    //    BindingFlags.NonPublic | BindingFlags.Instance,
+                    //    null,
+                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
+                    //    null);
 
-                //destMethod[10 = typeof(CustomPassengerCarAI).GetMethod("StartPathFind2");
+                    //destMethod[10 = typeof(CustomPassengerCarAI).GetMethod("StartPathFind2");
 
-                //srcMethod11 = typeof(CargoTruckAI).GetMethod("StartPathFind",
-                //    BindingFlags.NonPublic | BindingFlags.Instance,
-                //    null,
-                //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                //    null);
+                    //srcMethod11 = typeof(CargoTruckAI).GetMethod("StartPathFind",
+                    //    BindingFlags.NonPublic | BindingFlags.Instance,
+                    //    null,
+                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
+                    //    null);
 
-                //destMethod[11 = typeof(CustomCargoTruckAI).GetMethod("StartPathFind2");
+                    //destMethod[11 = typeof(CustomCargoTruckAI).GetMethod("StartPathFind2");
 
-                //LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(typeof (NetNode).GetMethod("RefreshJunctionData",
-                //    BindingFlags.NonPublic | BindingFlags.Instance,
-                //    null,
-                //    new Type[]
-                //    {
-                //        typeof (ushort), typeof (int), typeof (ushort), typeof (Vector3), typeof (uint).MakeByRefType(),
-                //        typeof (RenderManager.Instance).MakeByRefType()
-                //    },
-                //    null),
-                //    typeof (CustomNetNode).GetMethod("RefreshJunctionData"));
+                    //LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(typeof (NetNode).GetMethod("RefreshJunctionData",
+                    //    BindingFlags.NonPublic | BindingFlags.Instance,
+                    //    null,
+                    //    new Type[]
+                    //    {
+                    //        typeof (ushort), typeof (int), typeof (ushort), typeof (Vector3), typeof (uint).MakeByRefType(),
+                    //        typeof (RenderManager.Instance).MakeByRefType()
+                    //    },
+                    //    null),
+                    //    typeof (CustomNetNode).GetMethod("RefreshJunctionData"));
 
-                //
+                    //
+                }
 
                 LoadingExtension.Instance.detourInited = true;
             }
@@ -181,6 +183,8 @@ namespace TrafficManager
     public sealed class LoadingExtension : LoadingExtensionBase
     {
         public static LoadingExtension Instance = null;
+
+        public static bool PathfinderIncompatibility = false;
 
         public RedirectCallsState[] revertMethods = new RedirectCallsState[8];
 
@@ -238,18 +242,27 @@ namespace TrafficManager
             {
                 if (Instance == null)
                 {
+                    if (Singleton<PathManager>.instance.GetType() != typeof(PathManager))
+                    {
+                        LoadingExtension.PathfinderIncompatibility = true;
+                    }
+
+
                     Instance = this;
                 }
 
-                FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
-                PathManager stockPathManager = PathManager.instance;
-                customPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-                customPathManager.UpdateWithPathManagerValues(stockPathManager);
-                pathManagerInstance.SetValue(null, customPathManager);
-                FastList<ISimulationManager> managers = typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as FastList<ISimulationManager>;
-                managers.Remove(stockPathManager);
-                managers.Add(customPathManager);
-                GameObject.Destroy(stockPathManager, 10f);
+                if (!LoadingExtension.PathfinderIncompatibility)
+                {
+                    FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
+                    PathManager stockPathManager = PathManager.instance;
+                    customPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+                    customPathManager.UpdateWithPathManagerValues(stockPathManager);
+                    pathManagerInstance.SetValue(null, customPathManager);
+                    FastList<ISimulationManager> managers = typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as FastList<ISimulationManager>;
+                    managers.Remove(stockPathManager);
+                    managers.Add(customPathManager);
+                    GameObject.Destroy(stockPathManager, 10f);
+                }
 
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
                 TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
