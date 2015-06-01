@@ -730,7 +730,7 @@ namespace TrafficManager
 
                             if (m_lanes[infoLanes].m_laneType == NetInfo.LaneType.Vehicle && m_lanes[infoLanes].m_direction == dir3)
                             {
-                                if (TrafficPriority.isLeftSegment(num16, item.m_position.m_segment, nodeID, true) >= 0)
+                                if (TrafficPriority.isLeftSegment(num16, item.m_position.m_segment, nodeID))
                                 {
                                     if (((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Left) ==
                                         NetLane.Flags.Left)
@@ -740,7 +740,7 @@ namespace TrafficManager
                                         lanes++;
                                     }
                                 }
-                                else if (TrafficPriority.isRightSegment(num16, item.m_position.m_segment, nodeID, true) >= 0)
+                                else if (TrafficPriority.isRightSegment(num16, item.m_position.m_segment, nodeID))
                                 {
                                     if (((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Right) ==
                                         NetLane.Flags.Right)
