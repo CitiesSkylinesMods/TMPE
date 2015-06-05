@@ -273,12 +273,12 @@ namespace TrafficManager
                         {
                             var stopCar = false;
 
-                            if (TrafficPriority.isLeftSegment(prevPos.m_segment, position.m_segment, num2, true) >= 0)
+                            if (TrafficPriority.isLeftSegment(prevPos.m_segment, position.m_segment, num2))
                             {
                                 vehicleLightState =
                                     TrafficLightsManual.GetSegmentLight(num4, prevPos.m_segment).GetLightLeft();
                             }
-                            else if (TrafficPriority.isRightSegment(prevPos.m_segment, position.m_segment, num2, true) >= 0)
+                            else if (TrafficPriority.isRightSegment(prevPos.m_segment, position.m_segment, num2))
                             {
                                 vehicleLightState =
                                     TrafficLightsManual.GetSegmentLight(num4, prevPos.m_segment).GetLightRight();

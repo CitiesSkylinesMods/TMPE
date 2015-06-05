@@ -1099,9 +1099,9 @@ namespace TrafficManager
 
                         if (!TrafficLightsManual.segmentIsIncomingOneWay(segmentId, _selectedNetNodeIdx))
                         {
-                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, _selectedNetNodeIdx, false) && TrafficPriority.hasLeftLane(_selectedNetNodeIdx, segmentId);
-                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, _selectedNetNodeIdx, false) && TrafficPriority.hasForwardLane(_selectedNetNodeIdx, segmentId);
-                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, _selectedNetNodeIdx, false) && TrafficPriority.hasRightLane(_selectedNetNodeIdx, segmentId);
+                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasLeftLane(_selectedNetNodeIdx, segmentId);
+                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasForwardLane(_selectedNetNodeIdx, segmentId);
+                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasRightLane(_selectedNetNodeIdx, segmentId);
 
                             if (segmentDict.currentMode == ManualSegmentLight.Mode.Simple)
                             {
@@ -1749,9 +1749,9 @@ namespace TrafficManager
 
                         if (!TrafficLightsManual.segmentIsIncomingOneWay(segmentId, SelectedNodeIndexes[i2]))
                         {
-                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNodeIndexes[i2], false) && TrafficPriority.hasLeftLane(SelectedNodeIndexes[i2], segmentId);
-                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNodeIndexes[i2], false) && TrafficPriority.hasForwardLane(SelectedNodeIndexes[i2], segmentId);
-                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNodeIndexes[i2], false) && TrafficPriority.hasRightLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasLeftLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasForwardLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasRightLane(SelectedNodeIndexes[i2], segmentId);
 
                             if (segmentDict.currentMode == ManualSegmentLight.Mode.Simple)
                             {
