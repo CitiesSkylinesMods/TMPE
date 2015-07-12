@@ -515,11 +515,13 @@ namespace TrafficManager
             PathUnit.Position startPosB;
             float num;
             float num2;
-            PathUnit.Position endPosA;
-            PathUnit.Position endPosB;
-            float num3;
+            PathUnit.Position endPosA = new PathUnit.Position();
+            PathUnit.Position endPosB = new PathUnit.Position();
+            float num3 = 0;
             float num4;
-            if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, 32f, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, 32f, out endPosA, out endPosB, out num3, out num4))
+            bool requireConnect = false;
+            float maxDistance = 32f;
+            if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, requireConnect, maxDistance, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, requireConnect, 32f, out endPosA, out endPosB, out num3, out num4))
             {
                 if (!startBothWays || num < 10f)
                 {

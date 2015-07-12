@@ -113,55 +113,6 @@ namespace TrafficManager
                     },
                         null),
                         typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2"));
-
-                    //public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
-                    //LoadingExtension.Instance.revertMethods[7] = RedirectionHelper.RedirectCalls(typeof(NetTool).GetMethod("CreateNodeImpl",
-                    //    BindingFlags.NonPublic | BindingFlags.Instance,
-                    //    null,
-                    //    new Type[] { typeof(NetInfo), typeof(bool), typeof(bool), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint), typeof(NetTool.ControlPoint) },
-                    //    null),
-                    //    typeof(CustomNetTool).GetMethod("CreateNodeImpl"));
-
-                    //srcMethod8 = typeof(CarAI).GetMethod("StartPathFind",
-                    //    BindingFlags.NonPublic | BindingFlags.Instance,
-                    //    null,
-                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                    //    null);
-
-                    //destMethod[8 = typeof(CustomCarAI).GetMethod("StartPathFind");
-
-                    //srcMethod9 = typeof (TransportLineAI).GetMethod("StartPathFind");
-
-                    //destMethod[9 = typeof(CustomTransportLineAI).GetMethod("StartPathFind", BindingFlags.NonPublic | BindingFlags.Static);
-
-                    //srcMethod10 = typeof(PassengerCarAI).GetMethod("StartPathFind",
-                    //    BindingFlags.NonPublic | BindingFlags.Instance,
-                    //    null,
-                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                    //    null);
-
-                    //destMethod[10 = typeof(CustomPassengerCarAI).GetMethod("StartPathFind2");
-
-                    //srcMethod11 = typeof(CargoTruckAI).GetMethod("StartPathFind",
-                    //    BindingFlags.NonPublic | BindingFlags.Instance,
-                    //    null,
-                    //    new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(bool), typeof(bool) },
-                    //    null);
-
-                    //destMethod[11 = typeof(CustomCargoTruckAI).GetMethod("StartPathFind2");
-
-                    //LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(typeof (NetNode).GetMethod("RefreshJunctionData",
-                    //    BindingFlags.NonPublic | BindingFlags.Instance,
-                    //    null,
-                    //    new Type[]
-                    //    {
-                    //        typeof (ushort), typeof (int), typeof (ushort), typeof (Vector3), typeof (uint).MakeByRefType(),
-                    //        typeof (RenderManager.Instance).MakeByRefType()
-                    //    },
-                    //    null),
-                    //    typeof (CustomNetNode).GetMethod("RefreshJunctionData"));
-
-                    //
                 }
 
                 LoadingExtension.Instance.detourInited = true;
@@ -273,14 +224,7 @@ namespace TrafficManager
         {
             // TODO: revert detours
             base.OnLevelUnloading();
-
-            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("CalculateSegmentPosition"), revertMethods[0]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[1]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomHumanAI).GetMethod("CheckTrafficLights"), revertMethods[2]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[3]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomPassengerCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[4]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomCargoTruckAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance), revertMethods[5]);
-            //RedirectionHelper.RevertRedirect(typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2"), revertMethods[6]);
+            
             TrafficPriority.prioritySegments.Clear();
             CustomRoadAI.nodeDictionary.Clear();
             TrafficLightsManual.ManualSegments.Clear();
