@@ -265,9 +265,9 @@ namespace TrafficManager
                     }
                 }
 
-                if (CustomRoadAI.nodeDictionary.ContainsKey((ushort) i))
+                if (CustomRoadAI.NodeDictionary.ContainsKey((ushort) i))
                 {
-                    var nodeDict = CustomRoadAI.nodeDictionary[(ushort)i];
+                    var nodeDict = CustomRoadAI.NodeDictionary[(ushort)i];
 
                     configuration.nodeDictionary.Add(new int[4] {nodeDict.NodeId, Convert.ToInt32(nodeDict._manualTrafficLights), Convert.ToInt32(nodeDict._timedTrafficLights), Convert.ToInt32(nodeDict.TimedTrafficLightsActive)});
                 }

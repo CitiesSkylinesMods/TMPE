@@ -220,7 +220,7 @@ namespace TrafficManager
             try
             {
                 TrafficPriority.prioritySegments.Clear();
-                CustomRoadAI.nodeDictionary.Clear();
+                CustomRoadAI.NodeDictionary.Clear();
                 TrafficLightsManual.ManualSegments.Clear();
                 TrafficLightsTimed.timedScripts.Clear();
 

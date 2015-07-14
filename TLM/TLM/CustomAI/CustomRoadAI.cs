@@ -8,9 +8,9 @@ namespace TrafficManager.CustomAI
 {
     class CustomRoadAI : RoadBaseAI
     {
-        public static Dictionary<ushort, TrafficLightSimulation> nodeDictionary = new Dictionary<ushort, TrafficLightSimulation>();
+        public static Dictionary<ushort, TrafficLightSimulation> NodeDictionary = new Dictionary<ushort, TrafficLightSimulation>();
 
-        private uint lastFrame = 0;
+        private uint _lastFrame = 0;
 
         public void Awake()
         {
@@ -19,17 +19,17 @@ namespace TrafficManager.CustomAI
 
         public void Update()
         {
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
 
-            if (lastFrame < currentFrameIndex)
+            if (_lastFrame < currentFrameIndex)
             {
-                lastFrame = currentFrameIndex;
+                _lastFrame = currentFrameIndex;
 
-                List<ushort> clearedNodes = new List<ushort>();
+                var clearedNodes = new List<ushort>();
 
-                foreach(var nodeID in nodeDictionary.Keys)
+                foreach(var nodeId in NodeDictionary.Keys)
                 {
-                    var data = TrafficLightTool.GetNetNode(nodeID);
+                    var data = TrafficLightTool.GetNetNode(nodeId);
 
                     try
                     {
@@ -39,27 +39,27 @@ namespace TrafficManager.CustomAI
 
                             if (sgmid != 0)
                             {
-                                if (!TrafficLightsManual.IsSegmentLight(nodeID, sgmid))
+                                if (!TrafficLightsManual.IsSegmentLight(nodeId, sgmid))
                                 {
-                                    if (nodeDictionary[nodeID].FlagTimedTrafficLights)
+                                    if (NodeDictionary[nodeId].FlagTimedTrafficLights)
                                     {
-                                        var timedNode = TrafficLightsTimed.GetTimedLight(nodeID);
+                                        var timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
 
-                                        for (var j = 0; j < timedNode.nodeGroup.Count; j++)
+                                        foreach (var timedNodeItem in timedNode.nodeGroup)
                                         {
-                                            var nodeSim = CustomRoadAI.GetNodeSimulation(timedNode.nodeGroup[j]);
+                                            var nodeSim = GetNodeSimulation(timedNodeItem);
 
                                             nodeSim.TimedTrafficLightsActive = false;
 
-                                            clearedNodes.Add(timedNode.nodeGroup[j]);
-                                            TrafficLightsTimed.RemoveTimedLight(timedNode.nodeGroup[j]);
+                                            clearedNodes.Add(timedNodeItem);
+                                            TrafficLightsTimed.RemoveTimedLight(timedNodeItem);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         //Log.Warning("Error on Update: \n" + e.Message + "\n\nStacktrace:\n\n" + e.StackTrace);
                     }
@@ -67,22 +67,22 @@ namespace TrafficManager.CustomAI
 
                 if (clearedNodes.Count > 0)
                 {
-                    for (var i = 0; i < clearedNodes.Count; i++)
+                    foreach (var clearedNode in clearedNodes)
                     {
-                        CustomRoadAI.RemoveNodeFromSimulation(clearedNodes[i]);
+                        RemoveNodeFromSimulation(clearedNode);
                     }
                 }
 
-                foreach (var nodeID in nodeDictionary.Keys)
+                foreach (var nodeId in NodeDictionary.Keys)
                 {
-                    var node = GetNodeSimulation(nodeID);
+                    var node = GetNodeSimulation(nodeId);
                     
                     if (node.FlagManualTrafficLights || (node.FlagTimedTrafficLights && node.TimedTrafficLightsActive))
                     {
-                        var data = TrafficLightTool.GetNetNode(nodeID);
+                        var data = TrafficLightTool.GetNetNode(nodeId);
 
                         node.SimulationStep(ref data);
-                        TrafficLightTool.SetNetNode(nodeID, data);
+                        TrafficLightTool.SetNetNode(nodeId, data);
 
                         if (clearedNodes.Count > 0)
                         {
@@ -93,52 +93,47 @@ namespace TrafficManager.CustomAI
             }
         }
 
-        private void _runUpdate()
+        public override void SimulationStep(ushort nodeId, ref NetNode data)
         {
-            
-        }
-
-        private void SimulationStep(ushort nodeID, ref NetNode data)
-        {
-            var node = GetNodeSimulation(nodeID);
+            var node = GetNodeSimulation(nodeId);
 
             if (node == null || (node.FlagTimedTrafficLights && !node.TimedTrafficLightsActive))
             {
-                OriginalSimulationStep(nodeID, ref data);
+                OriginalSimulationStep(nodeId, ref data);
             }
         }
 
-        public void OriginalSimulationStep(ushort nodeID, ref NetNode data)
+        public void OriginalSimulationStep(ushort nodeId, ref NetNode data)
         {
-            NetManager instance = Singleton<NetManager>.instance;
+            var instance = Singleton<NetManager>.instance;
             if ((data.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
             {
-                uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                int num = (int)(data.m_maxWaitTime & 3);
-                int num2 = data.m_maxWaitTime >> 2 & 7;
-                int num3 = data.m_maxWaitTime >> 5;
-                int num4 = -1;
-                int num5 = -1;
-                int num6 = -1;
-                int num7 = -1;
-                int num8 = -1;
-                int num9 = -1;
-                int num10 = 0;
-                int num11 = 0;
-                int num12 = 0;
-                int num13 = 0;
-                int num14 = 0;
-                for (int i = 0; i < 8; i++)
+                var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+                var num = data.m_maxWaitTime & 3;
+                var num2 = data.m_maxWaitTime >> 2 & 7;
+                var num3 = data.m_maxWaitTime >> 5;
+                var num4 = -1;
+                var num5 = -1;
+                var num6 = -1;
+                var num7 = -1;
+                var num8 = -1;
+                var num9 = -1;
+                var num10 = 0;
+                var num11 = 0;
+                var num12 = 0;
+                var num13 = 0;
+                var num14 = 0;
+                for (var i = 0; i < 8; i++)
                 {
-                    ushort segment = data.GetSegment(i);
+                    var segment = data.GetSegment(i);
                     if (segment != 0)
                     {
-                        int num15 = 0;
-                        int num16 = 0;
-                        instance.m_segments.m_buffer[(int)segment].CountLanes(segment, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Car, ref num15, ref num16);
-                        bool flag = instance.m_segments.m_buffer[(int)segment].m_startNode == nodeID;
-                        bool flag2 = (!flag) ? (num15 != 0) : (num16 != 0);
-                        bool flag3 = (!flag) ? (num16 != 0) : (num15 != 0);
+                        var num15 = 0;
+                        var num16 = 0;
+                        instance.m_segments.m_buffer[segment].CountLanes(segment, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Car, ref num15, ref num16);
+                        var flag = instance.m_segments.m_buffer[segment].m_startNode == nodeId;
+                        var flag2 = (!flag) ? (num15 != 0) : (num16 != 0);
+                        var flag3 = (!flag) ? (num16 != 0) : (num15 != 0);
                         if (flag2)
                         {
                             num10 |= 1 << i;
@@ -148,12 +143,12 @@ namespace TrafficManager.CustomAI
                             num11 |= 1 << i;
                             num13++;
                         }
-                        RoadBaseAI.TrafficLightState trafficLightState;
-                        RoadBaseAI.TrafficLightState trafficLightState2;
+                        TrafficLightState trafficLightState;
+                        TrafficLightState trafficLightState2;
                         bool flag4;
                         bool flag5;
-                        RoadBaseAI.GetTrafficLightState(nodeID, ref instance.m_segments.m_buffer[(int)segment], currentFrameIndex - 256u, out trafficLightState, out trafficLightState2, out flag4, out flag5);
-                        if ((trafficLightState2 & RoadBaseAI.TrafficLightState.Red) != RoadBaseAI.TrafficLightState.Green && flag5)
+                        GetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segment], currentFrameIndex - 256u, out trafficLightState, out trafficLightState2, out flag4, out flag5);
+                        if ((trafficLightState2 & TrafficLightState.Red) != TrafficLightState.Green && flag5)
                         {
                             if (num7 == -1)
                             {
@@ -167,7 +162,7 @@ namespace TrafficManager.CustomAI
                         num14++;
                         if (flag2 || flag4)
                         {
-                            if ((trafficLightState & RoadBaseAI.TrafficLightState.Red) == RoadBaseAI.TrafficLightState.Green)
+                            if ((trafficLightState & TrafficLightState.Red) == TrafficLightState.Green)
                             {
                                 num5 = i;
                                 if (flag4)
@@ -216,15 +211,15 @@ namespace TrafficManager.CustomAI
                 {
                     num5 = -1;
                 }
-                Vector3 vector = Vector3.zero;
+                var vector = Vector3.zero;
                 if (num9 != -1)
                 {
                     ushort segment2 = data.GetSegment(num9);
-                    vector = instance.m_segments.m_buffer[(int)segment2].GetDirection(nodeID);
+                    vector = instance.m_segments.m_buffer[segment2].GetDirection(nodeId);
                     if (num5 != -1)
                     {
                         segment2 = data.GetSegment(num5);
-                        Vector3 direction = instance.m_segments.m_buffer[(int)segment2].GetDirection(nodeID);
+                        var direction = instance.m_segments.m_buffer[segment2].GetDirection(nodeId);
                         if (direction.x * vector.x + direction.z * vector.z < -0.5f)
                         {
                             num5 = -1;
@@ -239,7 +234,7 @@ namespace TrafficManager.CustomAI
                                 segment2 = data.GetSegment(j);
                                 if (segment2 != 0)
                                 {
-                                    Vector3 direction2 = instance.m_segments.m_buffer[(int)segment2].GetDirection(nodeID);
+                                    var direction2 = instance.m_segments.m_buffer[segment2].GetDirection(nodeId);
                                     if (direction2.x * vector.x + direction2.z * vector.z >= -0.5f)
                                     {
                                         num5 = j;
@@ -250,23 +245,23 @@ namespace TrafficManager.CustomAI
                         }
                     }
                 }
-                int num17 = -1;
-                Vector3 vector2 = Vector3.zero;
-                Vector3 vector3 = Vector3.zero;
+                var num17 = -1;
+                var vector2 = Vector3.zero;
+                var vector3 = Vector3.zero;
                 if (num5 != -1)
                 {
-                    ushort segment3 = data.GetSegment(num5);
-                    vector2 = instance.m_segments.m_buffer[(int)segment3].GetDirection(nodeID);
+                    var segment3 = data.GetSegment(num5);
+                    vector2 = instance.m_segments.m_buffer[segment3].GetDirection(nodeId);
                     if ((num10 & num11 & 1 << num5) != 0)
                     {
-                        for (int k = 0; k < 8; k++)
+                        for (var k = 0; k < 8; k++)
                         {
                             if (k != num5 && k != num9 && (num10 & num11 & 1 << k) != 0)
                             {
                                 segment3 = data.GetSegment(k);
                                 if (segment3 != 0)
                                 {
-                                    vector3 = instance.m_segments.m_buffer[(int)segment3].GetDirection(nodeID);
+                                    vector3 = instance.m_segments.m_buffer[segment3].GetDirection(nodeId);
                                     if (num9 == -1 || vector3.x * vector.x + vector3.z * vector.z >= -0.5f)
                                     {
                                         if (num13 == 2)
@@ -290,65 +285,65 @@ namespace TrafficManager.CustomAI
                     ushort segment4 = data.GetSegment(l);
                     if (segment4 != 0)
                     {
-                        RoadBaseAI.TrafficLightState trafficLightState3;
-                        RoadBaseAI.TrafficLightState trafficLightState4;
-                        RoadBaseAI.GetTrafficLightState(nodeID, ref instance.m_segments.m_buffer[(int)segment4], currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4);
-                        trafficLightState3 &= ~RoadBaseAI.TrafficLightState.RedToGreen;
-                        trafficLightState4 &= ~RoadBaseAI.TrafficLightState.RedToGreen;
+                        TrafficLightState trafficLightState3;
+                        TrafficLightState trafficLightState4;
+                        GetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segment4], currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4);
+                        trafficLightState3 &= ~TrafficLightState.RedToGreen;
+                        trafficLightState4 &= ~TrafficLightState.RedToGreen;
                         if (num5 == l || num17 == l)
                         {
-                            if ((trafficLightState3 & RoadBaseAI.TrafficLightState.Red) != RoadBaseAI.TrafficLightState.Green)
+                            if ((trafficLightState3 & TrafficLightState.Red) != TrafficLightState.Green)
                             {
-                                trafficLightState3 = RoadBaseAI.TrafficLightState.RedToGreen;
+                                trafficLightState3 = TrafficLightState.RedToGreen;
                                 num = 0;
                                 if (++num2 >= num12)
                                 {
                                     num2 = 0;
                                 }
                             }
-                            if ((trafficLightState4 & RoadBaseAI.TrafficLightState.Red) == RoadBaseAI.TrafficLightState.Green)
+                            if ((trafficLightState4 & TrafficLightState.Red) == TrafficLightState.Green)
                             {
-                                trafficLightState4 = RoadBaseAI.TrafficLightState.GreenToRed;
+                                trafficLightState4 = TrafficLightState.GreenToRed;
                             }
                         }
                         else
                         {
-                            if ((trafficLightState3 & RoadBaseAI.TrafficLightState.Red) == RoadBaseAI.TrafficLightState.Green)
+                            if ((trafficLightState3 & TrafficLightState.Red) == TrafficLightState.Green)
                             {
-                                trafficLightState3 = RoadBaseAI.TrafficLightState.GreenToRed;
+                                trafficLightState3 = TrafficLightState.GreenToRed;
                             }
-                            Vector3 direction3 = instance.m_segments.m_buffer[(int)segment4].GetDirection(nodeID);
+                            var direction3 = instance.m_segments.m_buffer[segment4].GetDirection(nodeId);
                             if ((num11 & 1 << l) != 0 && num9 != l && ((num5 != -1 && direction3.x * vector2.x + direction3.z * vector2.z < -0.5f) || (num17 != -1 && direction3.x * vector3.x + direction3.z * vector3.z < -0.5f)))
                             {
-                                if ((trafficLightState4 & RoadBaseAI.TrafficLightState.Red) == RoadBaseAI.TrafficLightState.Green)
+                                if ((trafficLightState4 & TrafficLightState.Red) == TrafficLightState.Green)
                                 {
-                                    trafficLightState4 = RoadBaseAI.TrafficLightState.GreenToRed;
+                                    trafficLightState4 = TrafficLightState.GreenToRed;
                                 }
                             }
-                            else if ((trafficLightState4 & RoadBaseAI.TrafficLightState.Red) != RoadBaseAI.TrafficLightState.Green)
+                            else if ((trafficLightState4 & TrafficLightState.Red) != TrafficLightState.Green)
                             {
-                                trafficLightState4 = RoadBaseAI.TrafficLightState.RedToGreen;
+                                trafficLightState4 = TrafficLightState.RedToGreen;
                                 if (++num3 >= num14)
                                 {
                                     num3 = 0;
                                 }
                             }
                         }
-                        RoadBaseAI.SetTrafficLightState(nodeID, ref instance.m_segments.m_buffer[(int)segment4], currentFrameIndex, trafficLightState3, trafficLightState4, false, false);
+                        SetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segment4], currentFrameIndex, trafficLightState3, trafficLightState4, false, false);
                     }
                 }
                 data.m_maxWaitTime = (byte)(num3 << 5 | num2 << 2 | num);
             }
             int num18 = 0;
-            if (this.m_noiseAccumulation != 0)
+            if (m_noiseAccumulation != 0)
             {
-                int num19 = 0;
-                for (int m = 0; m < 8; m++)
+                var num19 = 0;
+                for (var m = 0; m < 8; m++)
                 {
-                    ushort segment5 = data.GetSegment(m);
+                    var segment5 = data.GetSegment(m);
                     if (segment5 != 0)
                     {
-                        num18 += (int)instance.m_segments.m_buffer[(int)segment5].m_trafficDensity;
+                        num18 += instance.m_segments.m_buffer[segment5].m_trafficDensity;
                         num19++;
                     }
                 }
@@ -358,36 +353,36 @@ namespace TrafficManager.CustomAI
                 }
             }
             int num20 = 100 - (num18 - 100) * (num18 - 100) / 100;
-            int num21 = this.m_noiseAccumulation * num20 / 100;
+            int num21 = m_noiseAccumulation * num20 / 100;
             if (num21 != 0)
             {
-                Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.NoisePollution, num21, data.m_position, this.m_noiseRadius);
+                Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.NoisePollution, num21, data.m_position, m_noiseRadius);
             }
             if ((data.m_problems & Notification.Problem.RoadNotConnected) != Notification.Problem.None && (data.m_flags & NetNode.Flags.Original) != NetNode.Flags.None)
             {
-                GuideController properties = Singleton<GuideManager>.instance.m_properties;
+                var properties = Singleton<GuideManager>.instance.m_properties;
                 if (properties != null)
                 {
-                    instance.m_outsideNodeNotConnected.Activate(properties.m_outsideNotConnected, nodeID, Notification.Problem.RoadNotConnected);
+                    instance.m_outsideNodeNotConnected.Activate(properties.m_outsideNotConnected, nodeId, Notification.Problem.RoadNotConnected);
                 }
             }
         }
 
-        public static void AddNodeToSimulation(ushort nodeID)
+        public static void AddNodeToSimulation(ushort nodeId)
         {
-            nodeDictionary.Add(nodeID, new TrafficLightSimulation(nodeID));
+            NodeDictionary.Add(nodeId, new TrafficLightSimulation(nodeId));
         }
 
-        public static void RemoveNodeFromSimulation(ushort nodeID)
+        public static void RemoveNodeFromSimulation(ushort nodeId)
         {
-            nodeDictionary.Remove(nodeID);
+            NodeDictionary.Remove(nodeId);
         }
 
-        public static TrafficLightSimulation GetNodeSimulation(ushort nodeID)
+        public static TrafficLightSimulation GetNodeSimulation(ushort nodeId)
         {
-            if (nodeDictionary.ContainsKey(nodeID))
+            if (NodeDictionary.ContainsKey(nodeId))
             {
-                return nodeDictionary[nodeID];
+                return NodeDictionary[nodeId];
             }
 
             return null;

@@ -4,7 +4,7 @@ using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
 
-namespace TrafficManager.CustomAI
+namespace TrafficManager
 {
     public class CustomPathManager : PathManager
     {
