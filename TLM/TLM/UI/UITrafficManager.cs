@@ -1,11 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using ColossalFramework;
 using ColossalFramework.UI;
+using TrafficManager.Traffic;
+using TrafficManager.TrafficLight;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.UI
 {
     public class UITrafficManager : UIPanel
     {

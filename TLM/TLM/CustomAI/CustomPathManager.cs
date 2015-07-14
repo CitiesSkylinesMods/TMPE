@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
-using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.CustomAI
 {
     public class CustomPathManager : PathManager
     {

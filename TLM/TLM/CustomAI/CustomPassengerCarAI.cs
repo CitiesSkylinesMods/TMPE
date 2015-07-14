@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 using ColossalFramework;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.CustomAI
 {
     class CustomPassengerCarAI : CarAI
     {

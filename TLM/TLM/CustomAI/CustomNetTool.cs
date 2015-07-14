@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
@@ -6,7 +6,7 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.CustomAI
 {
     class CustomNetTool : NetTool
     {

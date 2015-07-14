@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
 using ColossalFramework;
-using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.TrafficLight
 {
     public class TrafficLightSimulation
     {

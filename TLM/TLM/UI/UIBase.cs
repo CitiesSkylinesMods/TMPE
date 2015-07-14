@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;  
-using ColossalFramework;
 using ColossalFramework.UI;
-using ICities;
+using TrafficManager.TrafficLight;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.UI
 {
     public class UIBase : UICustomControl
     {

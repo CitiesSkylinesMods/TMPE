@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ColossalFramework.UI;
+﻿using ColossalFramework.UI;
+using TrafficManager.TrafficLight;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.UI
 {
     class UITimedLights : UIPanel
     {

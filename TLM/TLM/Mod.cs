@@ -2,6 +2,10 @@
 using System.Reflection;
 using ColossalFramework;
 using ICities;
+using TrafficManager.CustomAI;
+using TrafficManager.Traffic;
+using TrafficManager.TrafficLight;
+using TrafficManager.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

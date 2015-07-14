@@ -1,12 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 using ColossalFramework;
-using ColossalFramework.Math;
+using TrafficManager.TrafficLight;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.CustomAI
 {
     class CustomRoadAI : RoadBaseAI
     {

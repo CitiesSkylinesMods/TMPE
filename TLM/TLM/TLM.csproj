@@ -51,29 +51,38 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomCarAI.cs" />
-    <Compile Include="CustomCargoTruckAI.cs" />
-    <Compile Include="CustomHumanAI.cs" />
-    <Compile Include="CustomNetTool.cs" />
-    <Compile Include="CustomPathFind.cs" />
-    <Compile Include="CustomPathManager.cs" />
-    <Compile Include="CustomRoadAI.cs" />
-    <Compile Include="CustomPassengerCarAI.cs" />
-    <Compile Include="CustomTransportLineAI.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="CustomAI\CustomCarAI.cs" />
+    <Compile Include="CustomAI\CustomCargoTruckAI.cs" />
+    <Compile Include="CustomAI\CustomHumanAI.cs" />
+    <Compile Include="CustomAI\CustomNetTool.cs" />
+    <Compile Include="CustomAI\CustomPassengerCarAI.cs" />
+    <Compile Include="CustomAI\CustomPathFind.cs" />
+    <Compile Include="CustomAI\CustomPathManager.cs" />
+    <Compile Include="CustomAI\CustomRoadAI.cs" />
+    <Compile Include="CustomAI\CustomTransportLineAI.cs" />
+    <Compile Include="LaneRestrictions.cs" />
+    <Compile Include="PriorityCar.cs" />
+    <Compile Include="PrioritySegment.cs" />
     <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="SegmentRestrictions.cs" />
     <Compile Include="SerializableDataExtension.cs" />
-    <Compile Include="TrafficLightsManual.cs" />
-    <Compile Include="TrafficLightSimulation.cs" />
-    <Compile Include="TrafficLightTool.cs" />
-    <Compile Include="TrafficLightsTimed.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Mod.cs" />
-    <Compile Include="TrafficPriority.cs" />
-    <Compile Include="TrafficRoadRestrictions.cs" />
-    <Compile Include="UIBase.cs" />
+    <Compile Include="TrafficLight\ManualSegment.cs" />
+    <Compile Include="TrafficLight\ManualSegmentLight.cs" />
+    <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\TrafficLightsManual.cs" />
+    <Compile Include="TrafficLight\TrafficLightsTimed.cs" />
+    <Compile Include="TrafficLight\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UITimedLights.cs" />
-    <Compile Include="UITrafficManager.cs" />
+    <Compile Include="Traffic\TimedTrafficSteps.cs" />
+    <Compile Include="Traffic\TrafficPriority.cs" />
+    <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
+    <Compile Include="Traffic\TrafficSegment.cs" />
+    <Compile Include="UI\UIBase.cs" />
+    <Compile Include="UI\UITimedLights.cs" />
+    <Compile Include="UI\UITrafficManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\light_1_1.png" />
@@ -110,7 +119,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy TrafficManager.dll "D:\Games\SteamLibrary\SteamApps\workshop\content\255710\427585724"</PostBuildEvent>
+    <PostBuildEvent>copy TrafficManager.dll "D:\SteamGames\steamapps\workshop\content\255710\427585724"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

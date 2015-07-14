@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ColossalFramework;
+using TrafficManager.TrafficLight;
 
-namespace TrafficManager
+namespace TrafficManager.CustomAI
 {
     class CustomHumanAI
     {

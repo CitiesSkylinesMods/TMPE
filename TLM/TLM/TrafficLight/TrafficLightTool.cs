@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
-using System.Net.Mime;
 using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.Math;
 using ColossalFramework.UI;
+using TrafficManager.CustomAI;
+using TrafficManager.Traffic;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.TrafficLight
 {
     public class TrafficLightTool : DefaultTool
     {
