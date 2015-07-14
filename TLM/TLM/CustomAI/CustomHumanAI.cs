@@ -9,18 +9,19 @@ namespace TrafficManager.CustomAI
         {
             var nodeSimulation = CustomRoadAI.GetNodeSimulation(node);
 
-            NetManager instance = Singleton<NetManager>.instance;
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-            uint num = (uint)(((int)node << 8) / 32768);
-            uint num2 = currentFrameIndex - num & 255u;
-            RoadBaseAI.TrafficLightState vehicleLightState;
-            RoadBaseAI.TrafficLightState pedestrianLightState;
-            bool vehicles;
-            bool flag;
+            var instance = Singleton<NetManager>.instance;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            
+            var num = (uint)((node << 8) / 32768);
+            var num2 = currentFrameIndex - num & 255u;
 
             if (nodeSimulation == null || (nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive))
             {
-                RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[(int) segment],
+                RoadBaseAI.TrafficLightState vehicleLightState;
+                RoadBaseAI.TrafficLightState pedestrianLightState;
+                bool vehicles;
+                bool flag;
+                RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[segment],
                     currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out flag);
                 switch (pedestrianLightState)
                 {
@@ -34,9 +35,8 @@ namespace TrafficManager.CustomAI
                     case RoadBaseAI.TrafficLightState.GreenToRed:
                         if (!flag && num2 >= 196u)
                         {
-                            flag = true;
-                            RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[(int) segment],
-                                currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, flag);
+                            RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[segment],
+                                currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, pedestrians: true);
                         }
                         return false;
                 }
