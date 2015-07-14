@@ -10,7 +10,7 @@ namespace TrafficManager.CustomAI
     {
         public static Dictionary<ushort, TrafficLightSimulation> NodeDictionary = new Dictionary<ushort, TrafficLightSimulation>();
 
-        private uint _lastFrame = 0;
+        private uint _lastFrame;
 
         public void Awake()
         {
