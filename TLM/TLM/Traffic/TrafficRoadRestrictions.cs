@@ -4,54 +4,46 @@ namespace TrafficManager.Traffic
 {
     class TrafficRoadRestrictions
     {
-        public enum VehicleType
+        public static Dictionary<int, SegmentRestrictions> Segments = new Dictionary<int, SegmentRestrictions>();
+
+        public static void AddSegment(int segmentid, List<int> segmentGroup)
         {
-            Car,
-            Service,
-            Transport,
-            Cargo
+            Segments.Add(segmentid, new SegmentRestrictions(segmentid, segmentGroup));
         }
 
-        public static Dictionary<int, SegmentRestrictions> segments = new Dictionary<int, SegmentRestrictions>();
-
-        public static void addSegment(int segmentid, List<int> segmentGroup)
+        public static void RemoveSegment(int segmentid)
         {
-            segments.Add(segmentid, new SegmentRestrictions(segmentid, segmentGroup));
+            Segments.Remove(segmentid);
         }
 
-        public static void removeSegment(int segmentid)
+        public static SegmentRestrictions GetSegment(int segmentid)
         {
-            segments.Remove(segmentid);
+            return Segments[segmentid];
         }
 
-        public static SegmentRestrictions getSegment(int segmentid)
+        public static bool IsSegment(int segmentid)
         {
-            return segments[segmentid];
+            return Segments.ContainsKey(segmentid);
         }
 
-        public static bool isSegment(int segmentid)
-        {
-            return segments.ContainsKey(segmentid);
-        }
-
-        public static VehicleType vehicleType(byte simulationFlags)
+        public static VehicleType VehicleType(byte simulationFlags)
         {
             if ((simulationFlags & 140) == 140)
-                return VehicleType.Transport;
+                return Traffic.VehicleType.Transport;
             if ((simulationFlags & 138) == 138)
-                return VehicleType.Service;
+                return Traffic.VehicleType.Service;
             if ((simulationFlags & 136) == 136)
-                return VehicleType.Cargo;
+                return Traffic.VehicleType.Cargo;
             if ((simulationFlags & 134) == 134)
-                return VehicleType.Service;
+                return Traffic.VehicleType.Service;
             if ((simulationFlags & 132) == 132)
-                return VehicleType.Service;
+                return Traffic.VehicleType.Service;
             if ((simulationFlags & 130) == 130)
-                return VehicleType.Service;
+                return Traffic.VehicleType.Service;
             if ((simulationFlags & 128) == 128)
-                return VehicleType.Car;
+                return Traffic.VehicleType.Car;
             
-            return VehicleType.Car;
+            return Traffic.VehicleType.Car;
         }
     }
 }

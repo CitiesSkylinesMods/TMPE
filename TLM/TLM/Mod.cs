@@ -207,7 +207,7 @@ namespace TrafficManager
                 }
 
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
-                TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
+                TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
                                                 SimulationMetaData.MetaBool.True;
             }
         }
@@ -219,7 +219,7 @@ namespace TrafficManager
 
             try
             {
-                TrafficPriority.prioritySegments.Clear();
+                TrafficPriority.PrioritySegments.Clear();
                 CustomRoadAI.NodeDictionary.Clear();
                 TrafficLightsManual.ManualSegments.Clear();
                 TrafficLightsTimed.timedScripts.Clear();

@@ -64,9 +64,9 @@ namespace TrafficManager.TrafficLight
 
         public void ChangeMode()
         {
-            var hasLeftSegment = TrafficPriority.HasLeftSegment(this.segment, this.node) && TrafficPriority.hasLeftLane(this.node, this.segment);
-            var hasForwardSegment = TrafficPriority.HasForwardSegment(this.segment, this.node) && TrafficPriority.hasForwardLane(this.node, this.segment);
-            var hasRightSegment = TrafficPriority.HasRightSegment(this.segment, this.node) && TrafficPriority.hasRightLane(this.node, this.segment);
+            var hasLeftSegment = TrafficPriority.HasLeftSegment(this.segment, this.node) && TrafficPriority.HasLeftLane(this.node, this.segment);
+            var hasForwardSegment = TrafficPriority.HasForwardSegment(this.segment, this.node) && TrafficPriority.HasForwardLane(this.node, this.segment);
+            var hasRightSegment = TrafficPriority.HasRightSegment(this.segment, this.node) && TrafficPriority.HasRightLane(this.node, this.segment);
 
             if (currentMode == ManualSegmentLight.Mode.Simple)
             {

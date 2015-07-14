@@ -7,113 +7,113 @@ namespace TrafficManager.Traffic
 {
     public class TimedTrafficSteps : ICloneable
     {
-        public ushort nodeID;
-        public int numSteps;
-        public uint frame;
+        public ushort NodeId;
+        public int NumSteps;
+        public uint Frame;
 
-        public List<int> segments = new List<int>();
+        public List<int> Segments = new List<int>();
 
-        public List<RoadBaseAI.TrafficLightState> lightMain = new List<RoadBaseAI.TrafficLightState>();
-        public List<RoadBaseAI.TrafficLightState> lightLeft = new List<RoadBaseAI.TrafficLightState>();
-        public List<RoadBaseAI.TrafficLightState> lightRight = new List<RoadBaseAI.TrafficLightState>();
-        public List<RoadBaseAI.TrafficLightState> lightPedestrian = new List<RoadBaseAI.TrafficLightState>(); 
+        public List<RoadBaseAI.TrafficLightState> LightMain = new List<RoadBaseAI.TrafficLightState>();
+        public List<RoadBaseAI.TrafficLightState> LightLeft = new List<RoadBaseAI.TrafficLightState>();
+        public List<RoadBaseAI.TrafficLightState> LightRight = new List<RoadBaseAI.TrafficLightState>();
+        public List<RoadBaseAI.TrafficLightState> LightPedestrian = new List<RoadBaseAI.TrafficLightState>(); 
 
-        public TimedTrafficSteps(int num, ushort nodeID)
+        public TimedTrafficSteps(int num, ushort nodeId)
         {
-            this.nodeID = nodeID;
-            this.numSteps = num;
+            NodeId = nodeId;
+            NumSteps = num;
 
-            var node = TrafficLightTool.GetNetNode(nodeID);
+            var node = TrafficLightTool.GetNetNode(nodeId);
 
-            for (int s = 0; s < 8; s++)
+            for (var s = 0; s < 8; s++)
             {
                 var segment = node.GetSegment(s);
 
                 if (segment != 0)
                 {
-                    var segmentLight = TrafficLightsManual.GetSegmentLight(nodeID, segment);
+                    var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segment);
 
-                    segments.Add(segment);
-                    lightMain.Add(segmentLight.GetLightMain());
-                    lightLeft.Add(segmentLight.GetLightLeft());
-                    lightRight.Add(segmentLight.GetLightRight());
-                    lightPedestrian.Add(segmentLight.GetLightPedestrian());
+                    Segments.Add(segment);
+                    LightMain.Add(segmentLight.GetLightMain());
+                    LightLeft.Add(segmentLight.GetLightLeft());
+                    LightRight.Add(segmentLight.GetLightRight());
+                    LightPedestrian.Add(segmentLight.GetLightPedestrian());
                 }
             }
         }
 
-        public RoadBaseAI.TrafficLightState getLight(int segment, int lightType)
+        public RoadBaseAI.TrafficLightState GetLight(int segment, int lightType)
         {
-            for (var i = 0; i < segments.Count; i++)
+            for (var i = 0; i < Segments.Count; i++)
             {
-                if (segments[i] == segment)
+                if (Segments[i] == segment)
                 {
                     if (lightType == 0)
-                        return lightMain[i];
-                    else if (lightType == 1)
-                        return lightLeft[i];
-                    else if (lightType == 2)
-                        return lightRight[i];
-                    else if (lightType == 3)
-                        return lightPedestrian[i];
+                        return LightMain[i];
+                    if (lightType == 1)
+                        return LightLeft[i];
+                    if (lightType == 2)
+                        return LightRight[i];
+                    if (lightType == 3)
+                        return LightPedestrian[i];
                 }
             }
 
             return RoadBaseAI.TrafficLightState.Green;
         }
 
-        public void setFrame(uint frame)
+        public void SetFrame(uint frame)
         {
-            this.frame = frame;
+            Frame = frame;
         }
 
-        public void setLights()
+        public void SetLights()
         {
-            for (int s = 0; s < segments.Count; s++)
+            for (var s = 0; s < Segments.Count; s++)
             {
-                var segment = segments[s];
+                var segment = Segments[s];
 
                 if (segment != 0)
                 {
-                    var segmentLight = TrafficLightsManual.GetSegmentLight(nodeID, segment);
+                    var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
-                    segmentLight.lightMain = lightMain[s];
-                    segmentLight.lightLeft = lightLeft[s];
-                    segmentLight.lightRight = lightRight[s];
-                    segmentLight.lightPedestrian = lightPedestrian[s];
+                    segmentLight.lightMain = LightMain[s];
+                    segmentLight.lightLeft = LightLeft[s];
+                    segmentLight.lightRight = LightRight[s];
+                    segmentLight.lightPedestrian = LightPedestrian[s];
                     segmentLight.UpdateVisuals();
                 }
             }
         }
 
-        public void updateLights()
+        public void UpdateLights()
         {
-            for (int s = 0; s < segments.Count; s++)
+            for (var s = 0; s < Segments.Count; s++)
             {
-                var segment = segments[s];
+                var segment = Segments[s];
 
                 if (segment != 0)
                 {
-                    var segmentLight = TrafficLightsManual.GetSegmentLight(nodeID, segment);
+                    var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
-                    lightMain[s] = segmentLight.lightMain;
-                    lightLeft[s] = segmentLight.lightLeft;
-                    lightRight[s] = segmentLight.lightRight;
-                    lightPedestrian[s] = segmentLight.lightPedestrian;
+                    LightMain[s] = segmentLight.lightMain;
+                    LightLeft[s] = segmentLight.lightLeft;
+                    LightRight[s] = segmentLight.lightRight;
+                    LightPedestrian[s] = segmentLight.lightPedestrian;
                 }
             }
         }
 
-        public long currentStep()
+        public long CurrentStep()
         {
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            return this.frame + this.numSteps - (currentFrameIndex >> 6);
+            return Frame + NumSteps - (currentFrameIndex >> 6);
         }
 
-        public bool stepDone(uint frame)
+        public bool StepDone(uint frame)
         {
-            if (this.frame + this.numSteps <= frame)
+            if (Frame + NumSteps <= frame)
             {
                 return true;
             }
@@ -123,7 +123,7 @@ namespace TrafficManager.Traffic
 
         public object Clone()
         {
-            return this.MemberwiseClone();
+            return MemberwiseClone();
         }
     }
 }

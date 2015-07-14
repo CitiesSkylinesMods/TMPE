@@ -81,7 +81,7 @@ namespace TrafficManager
                 if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian) {
                     for (var i = 0; i < cars.Count; i++)
                     {
-                        if (TrafficPriority.vehicleList[cars[i]].fromLaneID == num2)
+                        if (TrafficPriority.VehicleList[cars[i]].fromLaneID == num2)
                         {
                             carsOnLanes[num3]++;
                         }

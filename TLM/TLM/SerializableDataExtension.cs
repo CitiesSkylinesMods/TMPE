@@ -88,10 +88,10 @@ namespace TrafficManager
             for (var i = 0; i < configuration.prioritySegments.Count; i++)
             {
                 if (
-                    !TrafficPriority.isPrioritySegment((ushort)configuration.prioritySegments[i][0],
+                    !TrafficPriority.IsPrioritySegment((ushort)configuration.prioritySegments[i][0],
                         configuration.prioritySegments[i][1]))
                 {
-                    TrafficPriority.addPrioritySegment((ushort)configuration.prioritySegments[i][0],
+                    TrafficPriority.AddPrioritySegment((ushort)configuration.prioritySegments[i][0],
                         configuration.prioritySegments[i][1],
                         (PrioritySegment.PriorityType)configuration.prioritySegments[i][2]);
                 }
@@ -160,10 +160,10 @@ namespace TrafficManager
 
                         for (var k = 0; k < cfgstep[1]; k++)
                         {
-                            step.lightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][0];
-                            step.lightMain[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][1];
-                            step.lightRight[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][2];
-                            step.lightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][3];
+                            step.LightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][0];
+                            step.LightMain[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][1];
+                            step.LightRight[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][2];
+                            step.LightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.timedNodeStepSegments[timedStepSegmentCount][3];
 
                             timedStepSegmentCount++;
                         }
@@ -253,15 +253,15 @@ namespace TrafficManager
 
             for (var i = 0; i < 32768; i++)
             {
-                if (TrafficPriority.prioritySegments.ContainsKey(i))
+                if (TrafficPriority.PrioritySegments.ContainsKey(i))
                 {
-                    if (TrafficPriority.prioritySegments[i].node_1 != 0)
+                    if (TrafficPriority.PrioritySegments[i].Node1 != 0)
                     {
-                        configuration.prioritySegments.Add(new int[3] { TrafficPriority.prioritySegments[i].node_1, i, (int)TrafficPriority.prioritySegments[i].instance_1.type });
+                        configuration.prioritySegments.Add(new int[3] { TrafficPriority.PrioritySegments[i].Node1, i, (int)TrafficPriority.PrioritySegments[i].Instance1.type });
                     } 
-                    if (TrafficPriority.prioritySegments[i].node_2 != 0)
+                    if (TrafficPriority.PrioritySegments[i].Node2 != 0)
                     {
-                        configuration.prioritySegments.Add(new int[3] { TrafficPriority.prioritySegments[i].node_2, i, (int)TrafficPriority.prioritySegments[i].instance_2.type });
+                        configuration.prioritySegments.Add(new int[3] { TrafficPriority.PrioritySegments[i].Node2, i, (int)TrafficPriority.PrioritySegments[i].Instance2.type });
                     }
                 }
 
@@ -331,18 +331,18 @@ namespace TrafficManager
                     {
                         configuration.timedNodeSteps.Add(new int[2]
                         {
-                            timedNode.steps[j].numSteps,
-                            timedNode.steps[j].segments.Count
+                            timedNode.steps[j].NumSteps,
+                            timedNode.steps[j].Segments.Count
                         });
 
-                        for (var k = 0; k < timedNode.steps[j].segments.Count; k++)
+                        for (var k = 0; k < timedNode.steps[j].Segments.Count; k++)
                         {
                             configuration.timedNodeStepSegments.Add(new int[4]
                             {
-                                (int)timedNode.steps[j].lightLeft[k],
-                                (int)timedNode.steps[j].lightMain[k],
-                                (int)timedNode.steps[j].lightRight[k],
-                                (int)timedNode.steps[j].lightPedestrian[k],
+                                (int)timedNode.steps[j].LightLeft[k],
+                                (int)timedNode.steps[j].LightMain[k],
+                                (int)timedNode.steps[j].LightRight[k],
+                                (int)timedNode.steps[j].LightPedestrian[k],
                             });
                         }
                     }
@@ -370,7 +370,7 @@ namespace TrafficManager
             {
                 var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
 
-                if (TrafficPriority.prioritySegments.ContainsKey(laneSegment))
+                if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment))
                 {
                     configuration.laneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags + ",";
                 }

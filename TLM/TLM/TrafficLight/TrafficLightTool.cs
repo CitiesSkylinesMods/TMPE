@@ -685,9 +685,9 @@ namespace TrafficManager.TrafficLight
                                         {
                                             var segment = node2.GetSegment(s);
 
-                                            if (segment != 0 && !TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segment))
+                                            if (segment != 0 && !TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segment))
                                             {
-                                                TrafficPriority.addPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
+                                                TrafficPriority.AddPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
                                             }
                                         }
                                     }
@@ -829,7 +829,7 @@ namespace TrafficManager.TrafficLight
                             var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
                             var info = segment.Info;
 
-                            if (TrafficRoadRestrictions.isSegment(_hoveredSegmentIdx))
+                            if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx))
                             {
                                 if (SelectedSegmentIndexes.Count > 0)
                                 {
@@ -839,7 +839,7 @@ namespace TrafficManager.TrafficLight
                                 }
                                 else
                                 {
-                                    var restSegment = TrafficRoadRestrictions.getSegment(_hoveredSegmentIdx);
+                                    var restSegment = TrafficRoadRestrictions.GetSegment(_hoveredSegmentIdx);
 
                                     SelectedSegmentIndexes = new List<int>(restSegment.segmentGroup);
                                 }
@@ -1099,9 +1099,9 @@ namespace TrafficManager.TrafficLight
 
                         if (!TrafficLightsManual.segmentIsIncomingOneWay(segmentId, _selectedNetNodeIdx))
                         {
-                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasLeftLane(_selectedNetNodeIdx, segmentId);
-                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasForwardLane(_selectedNetNodeIdx, segmentId);
-                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.hasRightLane(_selectedNetNodeIdx, segmentId);
+                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.HasLeftLane(_selectedNetNodeIdx, segmentId);
+                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.HasForwardLane(_selectedNetNodeIdx, segmentId);
+                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, _selectedNetNodeIdx) && TrafficPriority.HasRightLane(_selectedNetNodeIdx, segmentId);
 
                             if (segmentDict.currentMode == ManualSegmentLight.Mode.Simple)
                             {
@@ -1749,9 +1749,9 @@ namespace TrafficManager.TrafficLight
 
                         if (!TrafficLightsManual.segmentIsIncomingOneWay(segmentId, SelectedNodeIndexes[i2]))
                         {
-                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasLeftLane(SelectedNodeIndexes[i2], segmentId);
-                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasForwardLane(SelectedNodeIndexes[i2], segmentId);
-                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.hasRightLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.HasLeftLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.HasForwardLane(SelectedNodeIndexes[i2], segmentId);
+                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNodeIndexes[i2]) && TrafficPriority.HasRightLane(SelectedNodeIndexes[i2], segmentId);
 
                             if (segmentDict.currentMode == ManualSegmentLight.Mode.Simple)
                             {
@@ -2416,7 +2416,7 @@ namespace TrafficManager.TrafficLight
                 if (segment.m_startNode == TrafficLightTool.SelectedNode)
                     dir = NetInfo.Direction.Backward;
                 var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-                var dir3 = TrafficPriority.leftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+                var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
                 var numLanes = 0;
 
@@ -2481,7 +2481,7 @@ namespace TrafficManager.TrafficLight
             if (segment.m_startNode == TrafficLightTool.SelectedNode)
                 dir = NetInfo.Direction.Backward;
             var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-            var dir3 = TrafficPriority.leftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+            var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
             var numLanes = 0;
 
@@ -2505,7 +2505,7 @@ namespace TrafficManager.TrafficLight
             {
                 laneList.Sort(delegate(float[] x, float[] y)
                 {
-                    if (!TrafficPriority.leftHandDrive)
+                    if (!TrafficPriority.LeftHandDrive)
                     {
                         if (Mathf.Abs(y[1]) > Mathf.Abs(x[1]))
                         {
@@ -2533,7 +2533,7 @@ namespace TrafficManager.TrafficLight
             {
                 laneList.Sort(delegate(float[] x, float[] y)
                 {
-                    if (!TrafficPriority.leftHandDrive)
+                    if (!TrafficPriority.LeftHandDrive)
                     {
                         if (dir3 == NetInfo.Direction.Forward)
                         {
@@ -2671,7 +2671,7 @@ namespace TrafficManager.TrafficLight
             style.border.right = 2;
             style.border.left = 2;
 
-            var width = !TrafficRoadRestrictions.isSegment(SelectedSegmentIndexes[0]) ? 120 : numLanes*120;
+            var width = !TrafficRoadRestrictions.IsSegment(SelectedSegmentIndexes[0]) ? 120 : numLanes*120;
 
             Rect _windowRect3 = new Rect(275, 80, width, 185);
 
@@ -2694,13 +2694,13 @@ namespace TrafficManager.TrafficLight
 
         protected void _guiLaneRestrictionsOneWayWindow(int num)
         {
-            if (!TrafficRoadRestrictions.isSegment(SelectedSegmentIndexes[0]))
+            if (!TrafficRoadRestrictions.IsSegment(SelectedSegmentIndexes[0]))
             {
                 if (GUILayout.Button("Create group"))
                 {
                     for (var i = 0; i < SelectedSegmentIndexes.Count; i++)
                     {
-                        TrafficRoadRestrictions.addSegment(SelectedSegmentIndexes[i], SelectedSegmentIndexes);
+                        TrafficRoadRestrictions.AddSegment(SelectedSegmentIndexes[i], SelectedSegmentIndexes);
 
                         NetManager instance0 = Singleton<NetManager>.instance;
 
@@ -2711,7 +2711,7 @@ namespace TrafficManager.TrafficLight
                         uint num20 = segment0.m_lanes;
                         int num30 = 0;
 
-                        var restSegment = TrafficRoadRestrictions.getSegment(SelectedSegmentIndexes[i]);
+                        var restSegment = TrafficRoadRestrictions.GetSegment(SelectedSegmentIndexes[i]);
 
                         List<float[]> laneList0 = new List<float[]>();
                         var maxValue0 = 0f;
@@ -2770,7 +2770,7 @@ namespace TrafficManager.TrafficLight
             {
                 for (var i = 0; i < SelectedSegmentIndexes.Count; i++)
                 {
-                    TrafficRoadRestrictions.removeSegment(SelectedSegmentIndexes[i]);
+                    TrafficRoadRestrictions.RemoveSegment(SelectedSegmentIndexes[i]);
                 }
 
                 SelectedSegmentIndexes.Clear();
@@ -2871,7 +2871,7 @@ namespace TrafficManager.TrafficLight
 
                 if (info2.m_lanes[(int) laneList[i][2]].m_laneType == NetInfo.LaneType.Vehicle)
                 {
-                    var resSegment = TrafficRoadRestrictions.getSegment(SelectedSegmentIndexes[0]);
+                    var resSegment = TrafficRoadRestrictions.GetSegment(SelectedSegmentIndexes[0]);
                     var resSpeed = resSegment.speedLimits[(int) laneList[i][2]];
 
                     if (setSpeed == (int)laneList[i][2])
@@ -2884,7 +2884,7 @@ namespace TrafficManager.TrafficLight
                         {
                             for (var j = 0; j < SelectedSegmentIndexes.Count; j++)
                             {
-                                var restrictionSegment = TrafficRoadRestrictions.getSegment(SelectedSegmentIndexes[j]);
+                                var restrictionSegment = TrafficRoadRestrictions.GetSegment(SelectedSegmentIndexes[j]);
 
                                 restrictionSegment.speedLimits[(int) laneList[i][2]] =
                                     sliderValues[(int) laneList[i][2]]/
@@ -2936,9 +2936,9 @@ namespace TrafficManager.TrafficLight
 
         public void laneFlag(uint laneID, NetLane.Flags flag)
         {
-            if (!TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, _selectedSegmentIdx))
+            if (!TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, _selectedSegmentIdx))
             {
-                TrafficPriority.addPrioritySegment(_selectedNetNodeIdx, _selectedSegmentIdx,
+                TrafficPriority.AddPrioritySegment(_selectedNetNodeIdx, _selectedSegmentIdx,
                     PrioritySegment.PriorityType.None);
             }
 
@@ -3185,9 +3185,9 @@ namespace TrafficManager.TrafficLight
                         {
                             var segment = node2.GetSegment(s);
 
-                            if (segment != 0 && !TrafficPriority.isPrioritySegment(SelectedNodeIndexes[i], segment))
+                            if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNodeIndexes[i], segment))
                             {
-                                TrafficPriority.addPrioritySegment(SelectedNodeIndexes[i], segment,
+                                TrafficPriority.AddPrioritySegment(SelectedNodeIndexes[i], segment,
                                     PrioritySegment.PriorityType.None);
                             }
                         }
@@ -3223,7 +3223,7 @@ namespace TrafficManager.TrafficLight
                         {
                             GUILayout.BeginVertical();
                             GUILayout.Space(5);
-                            GUILayout.Label("State[" + (i + 1) + "]: " + timedNodeMain.GetStep(i).currentStep(), layout_green);
+                            GUILayout.Label("State[" + (i + 1) + "]: " + timedNodeMain.GetStep(i).CurrentStep(), layout_green);
                             GUILayout.Space(5);
                             GUILayout.EndVertical();
                             if (GUILayout.Button("Skip", GUILayout.Width(45)))
@@ -3237,12 +3237,12 @@ namespace TrafficManager.TrafficLight
                         }
                         else
                         {
-                            GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).numSteps, layout);
+                            GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).NumSteps, layout);
                         }
                     }
                     else
                     {
-                        GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).numSteps);
+                        GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).NumSteps);
 
                         if (timedEditStep < 0)
                         {
@@ -3289,7 +3289,7 @@ namespace TrafficManager.TrafficLight
                                 for (var j = 0; j < SelectedNodeIndexes.Count; j++)
                                 {
                                     var timedNode2 = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[j]);
-                                    timedNode2.GetStep(i).setLights();
+                                    timedNode2.GetStep(i).SetLights();
                                 }
                             }
 
@@ -3297,12 +3297,12 @@ namespace TrafficManager.TrafficLight
                             {
                                 timedPanelAdd = false;
                                 timedEditStep = i;
-                                stepValue = timedNodeMain.GetStep(i).numSteps;
+                                stepValue = timedNodeMain.GetStep(i).NumSteps;
 
                                 for (var j = 0; j < SelectedNodeIndexes.Count; j++)
                                 {
                                     var timedNode2 = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[j]);
-                                    timedNode2.GetStep(i).setLights();
+                                    timedNode2.GetStep(i).SetLights();
                                 }
                             }
 
@@ -3330,8 +3330,8 @@ namespace TrafficManager.TrafficLight
                         for (var s = 0; s < SelectedNodeIndexes.Count; s++)
                         {
                             var timeNode = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[s]);
-                            timeNode.GetStep(timedEditStep).numSteps = (int)stepValue;
-                            timeNode.GetStep(timedEditStep).updateLights();
+                            timeNode.GetStep(timedEditStep).NumSteps = (int)stepValue;
+                            timeNode.GetStep(timedEditStep).UpdateLights();
                         }
 
                         timedEditStep = -1;
@@ -3485,11 +3485,11 @@ namespace TrafficManager.TrafficLight
 
                         Rect myRect = new Rect(screenPos.x - size/2, screenPos.y - size/2, size, size);
 
-                        var isPrioritySegment = TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segmentId);
+                        var isPrioritySegment = TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segmentId);
 
                         if (isPrioritySegment)
                         {
-                            var prioritySegment = TrafficPriority.getPrioritySegment(_selectedNetNodeIdx, segmentId);
+                            var prioritySegment = TrafficPriority.GetPrioritySegment(_selectedNetNodeIdx, segmentId);
 
                             if (prioritySegment.type == PrioritySegment.PriorityType.Main)
                             {
@@ -3563,9 +3563,9 @@ namespace TrafficManager.TrafficLight
                                         {
                                             var segmentId2 = node.GetSegment(s);
 
-                                            if (segmentId2 != 0 && TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segmentId2))
+                                            if (segmentId2 != 0 && TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segmentId2))
                                             {
-                                                var prioritySegment2 = TrafficPriority.getPrioritySegment(_selectedNetNodeIdx, segmentId2);
+                                                var prioritySegment2 = TrafficPriority.GetPrioritySegment(_selectedNetNodeIdx, segmentId2);
 
                                                 if (prioritySegment2.type == PrioritySegment.PriorityType.Main)
                                                 {
@@ -3599,9 +3599,9 @@ namespace TrafficManager.TrafficLight
                                     {
                                         var segmentId2 = node.GetSegment(s);
 
-                                        if (segmentId2 != 0 && TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segmentId2))
+                                        if (segmentId2 != 0 && TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segmentId2))
                                         {
-                                            var prioritySegment2 = TrafficPriority.getPrioritySegment(_selectedNetNodeIdx, segmentId2);
+                                            var prioritySegment2 = TrafficPriority.GetPrioritySegment(_selectedNetNodeIdx, segmentId2);
 
                                             if (prioritySegment2.type == PrioritySegment.PriorityType.Main)
                                             {
@@ -3610,7 +3610,7 @@ namespace TrafficManager.TrafficLight
                                         }
                                     }
 
-                                    TrafficPriority.addPrioritySegment(_selectedNetNodeIdx, segmentId, numMainRoads >= 2 ? PrioritySegment.PriorityType.Yield : PrioritySegment.PriorityType.Main);
+                                    TrafficPriority.AddPrioritySegment(_selectedNetNodeIdx, segmentId, numMainRoads >= 2 ? PrioritySegment.PriorityType.Yield : PrioritySegment.PriorityType.Main);
                                 }
                             }
                         }
@@ -3661,9 +3661,9 @@ namespace TrafficManager.TrafficLight
                 {
                     var segment = node.GetSegment(s);
 
-                    if (segment != 0 && !TrafficPriority.isPrioritySegment(SelectedNodeIndexes[i], segment))
+                    if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNodeIndexes[i], segment))
                     {
-                        TrafficPriority.addPrioritySegment(SelectedNodeIndexes[i], segment, PrioritySegment.PriorityType.None);
+                        TrafficPriority.AddPrioritySegment(SelectedNodeIndexes[i], segment, PrioritySegment.PriorityType.None);
                     }
                 }
             }
@@ -3688,9 +3688,9 @@ namespace TrafficManager.TrafficLight
                     {
                         var segment = node.GetSegment(s);
 
-                        if (segment != 0 && !TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segment))
+                        if (segment != 0 && !TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segment))
                         {
-                            TrafficPriority.addPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
+                            TrafficPriority.AddPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
                         }
                     }
 
@@ -3705,9 +3705,9 @@ namespace TrafficManager.TrafficLight
                     {
                         var segment = node.GetSegment(s);
 
-                        if (segment != 0 && !TrafficPriority.isPrioritySegment(_selectedNetNodeIdx, segment))
+                        if (segment != 0 && !TrafficPriority.IsPrioritySegment(_selectedNetNodeIdx, segment))
                         {
-                            TrafficPriority.addPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
+                            TrafficPriority.AddPrioritySegment(_selectedNetNodeIdx, segment, PrioritySegment.PriorityType.None);
                         }
                     }
                 }

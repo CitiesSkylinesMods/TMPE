@@ -93,7 +93,7 @@ namespace TrafficManager
         private bool _ignoreBlocked;
         private bool _stablePath;
 /*
-        private TrafficRoadRestrictions.VehicleType _vehicleType;
+        private TrafficRoadRestrictions.VehicleTypes _vehicleType;
 */
         private Randomizer _pathRandomizer;
         private uint _pathFindIndex;
@@ -690,7 +690,7 @@ namespace TrafficManager
                         break;
                     }
 
-                    if (TrafficPriority.isPrioritySegment(nodeId, num16) && data.m_position00.m_segment != num16)
+                    if (TrafficPriority.IsPrioritySegment(nodeId, num16) && data.m_position00.m_segment != num16)
                     {
                         var segment = instance.m_segments.m_buffer[num16];
 
@@ -708,11 +708,11 @@ namespace TrafficManager
                         if (segment.m_startNode == nodeId)
                             dir = NetInfo.Direction.Backward;
                         var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-                        var dir3 = TrafficPriority.leftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+                        var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
                         var lanes1 = info2.m_lanes;
 
-                        if (TrafficPriority.leftHandDrive)
+                        if (TrafficPriority.LeftHandDrive)
                         {
                             lanes1 = lanes1.Reverse().ToArray();
                         }
@@ -731,7 +731,7 @@ namespace TrafficManager
 
                             if (lanes1[infoLanes].m_laneType == NetInfo.LaneType.Vehicle && lanes1[infoLanes].m_direction == dir3)
                             {
-                                if (TrafficPriority.isLeftSegment(num16, item.Position.m_segment, nodeId))
+                                if (TrafficPriority.IsLeftSegment(num16, item.Position.m_segment, nodeId))
                                 {
                                     if (((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Left) ==
                                         NetLane.Flags.Left)
@@ -741,7 +741,7 @@ namespace TrafficManager
                                         lanes++;
                                     }
                                 }
-                                else if (TrafficPriority.isRightSegment(num16, item.Position.m_segment, nodeId))
+                                else if (TrafficPriority.IsRightSegment(num16, item.Position.m_segment, nodeId))
                                 {
                                     if (((NetLane.Flags)instance.m_lanes.m_buffer[segmentLanes].m_flags & NetLane.Flags.Right) ==
                                         NetLane.Flags.Right)
@@ -868,7 +868,7 @@ namespace TrafficManager
                     //            }
                     //        }
 
-                    //        if (this._vehicleType == TrafficRoadRestrictions.VehicleType.Car)
+                    //        if (this._vehicleType == TrafficRoadRestrictions.VehicleTypes.Car)
                     //        {
                     //            if (restSegment.lanes[i].enableCars)
                     //            {
@@ -886,7 +886,7 @@ namespace TrafficManager
                     //                }
                     //            }
                     //        }
-                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleType.Service)
+                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleTypes.Service)
                     //        {
                     //            if (restSegment.lanes[i].enableService)
                     //            {
@@ -904,7 +904,7 @@ namespace TrafficManager
                     //                }
                     //            }
                     //        }
-                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleType.Cargo)
+                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleTypes.Cargo)
                     //        {
                     //            if (restSegment.lanes[i].enableCargo)
                     //            {
@@ -922,7 +922,7 @@ namespace TrafficManager
                     //                }
                     //            }
                     //        }
-                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleType.Transport)
+                    //        else if (this._vehicleType == TrafficRoadRestrictions.VehicleTypes.Transport)
                     //        {
                     //            if (restSegment.lanes[i].enableTransport)
                     //            {
@@ -1032,9 +1032,9 @@ namespace TrafficManager
                 laneType = lane.m_laneType;
                 vehicleType = lane.m_vehicleType;
 
-                if (TrafficRoadRestrictions.isSegment(item.Position.m_segment))
+                if (TrafficRoadRestrictions.IsSegment(item.Position.m_segment))
                 {
-                    var restrictionSegment = TrafficRoadRestrictions.getSegment(item.Position.m_segment);
+                    var restrictionSegment = TrafficRoadRestrictions.GetSegment(item.Position.m_segment);
 
                     if (restrictionSegment.speedLimits[item.Position.m_lane] > 0.1f)
                     {
@@ -1080,9 +1080,9 @@ namespace TrafficManager
 
             NetInfo.Lane lane2 = info.m_lanes[num12];
 
-            if (TrafficRoadRestrictions.isSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment))
+            if (TrafficRoadRestrictions.IsSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment))
             {
-                var restrictionSegment = TrafficRoadRestrictions.getSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment);
+                var restrictionSegment = TrafficRoadRestrictions.GetSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment);
 
                 if (restrictionSegment.speedLimits[item.Position.m_lane] > 0.1f)
                 {

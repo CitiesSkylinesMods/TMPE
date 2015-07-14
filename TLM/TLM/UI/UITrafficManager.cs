@@ -209,7 +209,7 @@ namespace TrafficManager.UI
         {
             List<ushort> vehicleList = new List<ushort>();
 
-            foreach (var vehicleID in TrafficPriority.vehicleList.Keys)
+            foreach (var vehicleID in TrafficPriority.VehicleList.Keys)
             {
                 vehicleList.Add(vehicleID);
             }

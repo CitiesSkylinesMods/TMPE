@@ -34,8 +34,8 @@ namespace TrafficManager.TrafficLight
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             currentStep = 0;
-            steps[0].setLights();
-            steps[0].setFrame(currentFrameIndex >> 6);
+            steps[0].SetLights();
+            steps[0].SetFrame(currentFrameIndex >> 6);
 
             CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = true;
         }
@@ -70,12 +70,12 @@ namespace TrafficManager.TrafficLight
 
         public void checkStep(uint frame)
         {
-            if (steps[currentStep].stepDone(frame))
+            if (steps[currentStep].StepDone(frame))
             {
                 currentStep = currentStep + 1 >= steps.Count ? 0 : currentStep + 1;
 
-                steps[currentStep].setFrame(frame);
-                steps[currentStep].setLights();
+                steps[currentStep].SetFrame(frame);
+                steps[currentStep].SetLights();
             }
         }
 
@@ -85,15 +85,15 @@ namespace TrafficManager.TrafficLight
 
             currentStep = currentStep + 1 >= steps.Count ? 0 : currentStep + 1;
 
-            steps[currentStep].setFrame(currentFrameIndex >> 6);
-            steps[currentStep].setLights();
+            steps[currentStep].SetFrame(currentFrameIndex >> 6);
+            steps[currentStep].SetLights();
         }
 
         public long checkNextChange(int segmentID, int lightType)
         {
             var startStep = currentStep;
             var stepNum = currentStep + 1;
-            var numFrames = steps[currentStep].currentStep();
+            var numFrames = steps[currentStep].CurrentStep();
 
             RoadBaseAI.TrafficLightState currentState;
 
@@ -120,7 +120,7 @@ namespace TrafficManager.TrafficLight
                     break;
                 }
 
-                var light = steps[stepNum].getLight(segmentID, lightType);
+                var light = steps[stepNum].GetLight(segmentID, lightType);
 
                 if (light != currentState)
                 {
@@ -128,7 +128,7 @@ namespace TrafficManager.TrafficLight
                 }
                 else
                 {
-                    numFrames += steps[stepNum].numSteps;
+                    numFrames += steps[stepNum].NumSteps;
                 }
 
                 stepNum++;
