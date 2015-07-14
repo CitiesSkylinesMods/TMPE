@@ -6,39 +6,39 @@ namespace TrafficManager.CustomAI
 {
     class CustomPassengerCarAI : CarAI
     {
-        protected void SimulationStep(ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos)
+        public override void SimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
             else
             {
-                base.SimulationStep(vehicleID, ref data, physicsLodRefPos);
+                base.SimulationStep(vehicleId, ref data, physicsLodRefPos);
             }
         }
 
-        public bool StartPathFind2(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
+        public bool StartPathFind2(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
         {
-            VehicleInfo info = this.m_info;
-            ushort driverInstance = CustomPassengerCarAI.GetDriverInstance2(vehicleID, ref vehicleData);
+            var info = m_info;
+            var driverInstance = GetDriverInstance2(vehicleId, ref vehicleData);
             if (driverInstance == 0)
             {
                 return false;
             }
-            CitizenManager instance = Singleton<CitizenManager>.instance;
-            CitizenInfo info2 = instance.m_instances.m_buffer[(int)driverInstance].Info;
-            NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.Pedestrian;
-            VehicleInfo.VehicleType vehicleType = this.m_info.m_vehicleType;
-            bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != Vehicle.Flags.None;
+            var instance = Singleton<CitizenManager>.instance;
+            var info2 = instance.m_instances.m_buffer[driverInstance].Info;
+            var laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.Pedestrian;
+            var vehicleType = m_info.m_vehicleType;
+            var allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != Vehicle.Flags.None;
             PathUnit.Position startPosA;
             PathUnit.Position startPosB;
             float num;
             float num2;
-            PathUnit.Position endPosA = new PathUnit.Position();
-            bool requireConnect = false;
-            float maxDistance = 32f;
-            if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, requireConnect, maxDistance, out startPosA, out startPosB, out num, out num2) && info2.m_citizenAI.FindPathPosition(driverInstance, ref instance.m_instances.m_buffer[(int)driverInstance], endPos, laneTypes, vehicleType, false, out endPosA))
+            PathUnit.Position endPosA;
+            const bool requireConnect = false;
+            const float maxDistance = 32f;
+            if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, requireConnect, maxDistance, out startPosA, out startPosB, out num, out num2) && info2.m_citizenAI.FindPathPosition(driverInstance, ref instance.m_instances.m_buffer[driverInstance], endPos, laneTypes, vehicleType, false, out endPosA))
             {
                 if (!startBothWays || num < 10f)
                 {
@@ -61,7 +61,7 @@ namespace TrafficManager.CustomAI
             return false;
         }
 
-        public static ushort GetDriverInstance2(ushort vehicleID, ref Vehicle data)
+        public static ushort GetDriverInstance2(ushort vehicleId, ref Vehicle data)
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
             uint num = data.m_citizenUnits;
