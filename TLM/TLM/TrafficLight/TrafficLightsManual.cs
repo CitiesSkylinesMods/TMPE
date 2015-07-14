@@ -11,18 +11,18 @@ namespace TrafficManager.TrafficLight
         public static Dictionary<int, ManualSegment> ManualSegments =
             new Dictionary<int, ManualSegment>();
 
-        public static bool segmentIsIncomingOneWay(int segmentid, ushort nodeID)
+        public static bool SegmentIsIncomingOneWay(int segmentid, ushort nodeId)
         {
-            NetManager instance = Singleton<NetManager>.instance;
+            var instance = Singleton<NetManager>.instance;
 
             var segment = instance.m_segments.m_buffer[segmentid];
             var info = segment.Info;
 
-            uint num2 = segment.m_lanes;
-            int num3 = 0;
+            var num2 = segment.m_lanes;
+            var num3 = 0;
 
-            NetInfo.Direction dir = NetInfo.Direction.Forward;
-            if (segment.m_startNode == nodeID)
+            var dir = NetInfo.Direction.Forward;
+            if (segment.m_startNode == nodeId)
                 dir = NetInfo.Direction.Backward;
             var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
             var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
@@ -44,17 +44,16 @@ namespace TrafficManager.TrafficLight
             return isOneWay;
         }
 
-        public static bool segmentIsOneWay(int segmentid)
+        public static bool SegmentIsOneWay(int segmentid)
         {
-            NetManager instance = Singleton<NetManager>.instance;
+            var instance = Singleton<NetManager>.instance;
 
             var segment = instance.m_segments.m_buffer[segmentid];
             var info = segment.Info;
 
-            uint num2 = segment.m_lanes;
-            int num3 = 0;
+            var num2 = segment.m_lanes;
+            var num3 = 0;
 
-            var isOneWay = true;
             var hasForward = false;
             var hasBackward = false;
 
@@ -74,58 +73,57 @@ namespace TrafficManager.TrafficLight
 
                 if (hasForward && hasBackward)
                 {
-                    isOneWay = false;
-                    return isOneWay;
+                    return false;
                 }
 
                 num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
                 num3++;
             }
 
-            return isOneWay;
+            return true;
         }
 
-        public static void AddSegmentLight(ushort nodeID, int segmentID, RoadBaseAI.TrafficLightState light)
+        public static void AddSegmentLight(ushort nodeId, int segmentId, RoadBaseAI.TrafficLightState light)
         {
-            if (ManualSegments.ContainsKey(segmentID))
+            if (ManualSegments.ContainsKey(segmentId))
             {
-                ManualSegments[segmentID].node_2 = nodeID;
-                ManualSegments[segmentID].instance_2 = new ManualSegmentLight(nodeID, segmentID, light);
+                ManualSegments[segmentId].Node2 = nodeId;
+                ManualSegments[segmentId].Instance2 = new ManualSegmentLight(nodeId, segmentId, light);
             }
             else
             {
-                ManualSegments.Add(segmentID, new ManualSegment());
-                ManualSegments[segmentID].node_1 = nodeID;
-                ManualSegments[segmentID].instance_1 = new ManualSegmentLight(nodeID, segmentID, light);
+                ManualSegments.Add(segmentId, new ManualSegment());
+                ManualSegments[segmentId].Node1 = nodeId;
+                ManualSegments[segmentId].Instance1 = new ManualSegmentLight(nodeId, segmentId, light);
             }
         }
 
-        public static void RemoveSegmentLight(ushort nodeID, int segmentID)
+        public static void RemoveSegmentLight(ushort nodeId, int segmentId)
         {
-            if (ManualSegments[segmentID].node_1 == nodeID)
+            if (ManualSegments[segmentId].Node1 == nodeId)
             {
-                ManualSegments[segmentID].node_1 = 0;
-                ManualSegments[segmentID].instance_1 = null;
+                ManualSegments[segmentId].Node1 = 0;
+                ManualSegments[segmentId].Instance1 = null;
             }
             else
             {
-                ManualSegments[segmentID].node_2 = 0;
-                ManualSegments[segmentID].instance_2 = null;
+                ManualSegments[segmentId].Node2 = 0;
+                ManualSegments[segmentId].Instance2 = null;
             }
 
-            if (ManualSegments[segmentID].node_1 == 0 && ManualSegments[segmentID].node_2 == 0)
+            if (ManualSegments[segmentId].Node1 == 0 && ManualSegments[segmentId].Node2 == 0)
             {
-                ManualSegments.Remove(segmentID);
+                ManualSegments.Remove(segmentId);
             }
         }
 
-        public static bool IsSegmentLight(ushort nodeID, int segmentID)
+        public static bool IsSegmentLight(ushort nodeId, int segmentId)
         {
-            if (ManualSegments.ContainsKey(segmentID))
+            if (ManualSegments.ContainsKey(segmentId))
             {
-                var manualSegment = ManualSegments[segmentID];
+                var manualSegment = ManualSegments[segmentId];
 
-                if (manualSegment.node_1 == nodeID || manualSegment.node_2 == nodeID)
+                if (manualSegment.Node1 == nodeId || manualSegment.Node2 == nodeId)
                 {
                     return true;
                 }
@@ -134,44 +132,44 @@ namespace TrafficManager.TrafficLight
             return false;
         }
 
-        public static ManualSegmentLight GetSegmentLight(ushort nodeID, int segmentID)
+        public static ManualSegmentLight GetSegmentLight(ushort nodeId, int segmentId)
         {
-            if (ManualSegments.ContainsKey(segmentID))
+            if (ManualSegments.ContainsKey(segmentId))
             {
-                var manualSegment = ManualSegments[segmentID];
+                var manualSegment = ManualSegments[segmentId];
 
-                if (manualSegment.node_1 == nodeID)
+                if (manualSegment.Node1 == nodeId)
                 {
-                    return manualSegment.instance_1;
+                    return manualSegment.Instance1;
                 }
-                if (manualSegment.node_2 == nodeID)
+                if (manualSegment.Node2 == nodeId)
                 {
-                    return manualSegment.instance_2;
+                    return manualSegment.Instance2;
                 }
             }
 
             return null;
         }
 
-        public static void ClearSegment(ushort nodeID, int segmentID)
+        public static void ClearSegment(ushort nodeId, int segmentId)
         {
-            var manualSegment = ManualSegments[segmentID];
+            var manualSegment = ManualSegments[segmentId];
 
-            if (manualSegment.node_1 == nodeID)
+            if (manualSegment.Node1 == nodeId)
             {
-                manualSegment.node_1 = 0;
-                manualSegment.instance_1 = null;
+                manualSegment.Node1 = 0;
+                manualSegment.Instance1 = null;
             }
 
-            if (manualSegment.node_2 == nodeID)
+            if (manualSegment.Node2 == nodeId)
             {
-                manualSegment.node_2 = 0;
-                manualSegment.instance_2 = null;
+                manualSegment.Node2 = 0;
+                manualSegment.Instance2 = null;
             }
 
-            if (manualSegment.node_1 == 0 && manualSegment.node_2 == 0)
+            if (manualSegment.Node1 == 0 && manualSegment.Node2 == 0)
             {
-                ManualSegments.Remove(segmentID);
+                ManualSegments.Remove(segmentId);
             }
         }
     }

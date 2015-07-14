@@ -13,30 +13,30 @@ namespace TrafficManager.TrafficLight
             All = 4
         }
 
-        public ushort node;
-        public int segment;
+        public ushort Node;
+        public int Segment;
 
-        public Mode currentMode = Mode.Simple;
+        public Mode CurrentMode = Mode.Simple;
 
-        public RoadBaseAI.TrafficLightState lightLeft;
-        public RoadBaseAI.TrafficLightState lightMain;
-        public RoadBaseAI.TrafficLightState lightRight;
-        public RoadBaseAI.TrafficLightState lightPedestrian;
+        public RoadBaseAI.TrafficLightState LightLeft;
+        public RoadBaseAI.TrafficLightState LightMain;
+        public RoadBaseAI.TrafficLightState LightRight;
+        public RoadBaseAI.TrafficLightState LightPedestrian;
 
-        public uint lastChange;
-        public uint lastChangeFrame;
+        public uint LastChange;
+        public uint LastChangeFrame;
 
-        public bool pedestrianEnabled = false;
+        public bool PedestrianEnabled;
 
         public ManualSegmentLight(ushort node, int segment, RoadBaseAI.TrafficLightState mainLight)
         {
-            this.node = node;
-            this.segment = segment;
+            Node = node;
+            Segment = segment;
 
-            lightMain = mainLight;
-            lightLeft = mainLight;
-            lightRight = mainLight;
-            lightPedestrian = mainLight == RoadBaseAI.TrafficLightState.Green
+            LightMain = mainLight;
+            LightLeft = mainLight;
+            LightRight = mainLight;
+            LightPedestrian = mainLight == RoadBaseAI.TrafficLightState.Green
                 ? RoadBaseAI.TrafficLightState.Red
                 : RoadBaseAI.TrafficLightState.Green;
 
@@ -45,111 +45,111 @@ namespace TrafficManager.TrafficLight
 
         public RoadBaseAI.TrafficLightState GetLightMain()
         {
-            return lightMain;
+            return LightMain;
         }
 
         public RoadBaseAI.TrafficLightState GetLightLeft()
         {
-            return lightLeft;
+            return LightLeft;
         }
 
         public RoadBaseAI.TrafficLightState GetLightRight()
         {
-            return lightRight;
+            return LightRight;
         }
         public RoadBaseAI.TrafficLightState GetLightPedestrian()
         {
-            return lightPedestrian;
+            return LightPedestrian;
         }
 
         public void ChangeMode()
         {
-            var hasLeftSegment = TrafficPriority.HasLeftSegment(this.segment, this.node) && TrafficPriority.HasLeftLane(this.node, this.segment);
-            var hasForwardSegment = TrafficPriority.HasForwardSegment(this.segment, this.node) && TrafficPriority.HasForwardLane(this.node, this.segment);
-            var hasRightSegment = TrafficPriority.HasRightSegment(this.segment, this.node) && TrafficPriority.HasRightLane(this.node, this.segment);
+            var hasLeftSegment = TrafficPriority.HasLeftSegment(Segment, Node) && TrafficPriority.HasLeftLane(Node, Segment);
+            var hasForwardSegment = TrafficPriority.HasForwardSegment(Segment, Node) && TrafficPriority.HasForwardLane(Node, Segment);
+            var hasRightSegment = TrafficPriority.HasRightSegment(Segment, Node) && TrafficPriority.HasRightLane(Node, Segment);
 
-            if (currentMode == ManualSegmentLight.Mode.Simple)
+            if (CurrentMode == Mode.Simple)
             {
                 if (!hasLeftSegment)
                 {
-                    currentMode = ManualSegmentLight.Mode.RightForwardL;
+                    CurrentMode = Mode.RightForwardL;
                 }
                 else
                 {
-                    currentMode = ManualSegmentLight.Mode.LeftForwardR;
+                    CurrentMode = Mode.LeftForwardR;
                 }
             }
-            else if (currentMode == ManualSegmentLight.Mode.LeftForwardR)
+            else if (CurrentMode == Mode.LeftForwardR)
             {
                 if (!hasForwardSegment || !hasRightSegment)
                 {
-                    currentMode = ManualSegmentLight.Mode.Simple;
+                    CurrentMode = Mode.Simple;
                 }
                 else
                 {
-                    currentMode = ManualSegmentLight.Mode.RightForwardL;
+                    CurrentMode = Mode.RightForwardL;
                 }
             }
-            else if (currentMode == ManualSegmentLight.Mode.RightForwardL)
+            else if (CurrentMode == Mode.RightForwardL)
             {
                 if (!hasLeftSegment)
                 {
-                    currentMode = ManualSegmentLight.Mode.Simple;
+                    CurrentMode = Mode.Simple;
                 }
                 else
                 {
-                    currentMode = ManualSegmentLight.Mode.All;
+                    CurrentMode = Mode.All;
                 }
             }
             else
             {
-                currentMode = ManualSegmentLight.Mode.Simple;
+                CurrentMode = Mode.Simple;
             }
 
-            if (currentMode == Mode.Simple)
+            if (CurrentMode == Mode.Simple)
             {
-                lightLeft = lightMain;
-                lightRight = lightMain;
-                lightPedestrian = _checkPedestrianLight();
+                LightLeft = LightMain;
+                LightRight = LightMain;
+                LightPedestrian = _checkPedestrianLight();
             }
         }
 
         public void ManualPedestrian()
         {
-            pedestrianEnabled = !pedestrianEnabled;
+            PedestrianEnabled = !PedestrianEnabled;
         }
 
         public void ChangeLightMain()
         {
-            var invertedLight = lightMain == RoadBaseAI.TrafficLightState.Green
+            var invertedLight = LightMain == RoadBaseAI.TrafficLightState.Green
                 ? RoadBaseAI.TrafficLightState.Red
                 : RoadBaseAI.TrafficLightState.Green;
 
-            if (currentMode == Mode.Simple)
+            if (CurrentMode == Mode.Simple)
             {
-                lightLeft = invertedLight;
-                lightRight = invertedLight;
-                lightPedestrian = !pedestrianEnabled ? lightMain : lightPedestrian;
-                lightMain = invertedLight;
+                LightLeft = invertedLight;
+                LightRight = invertedLight;
+                LightPedestrian = !PedestrianEnabled ? LightMain : LightPedestrian;
+                LightMain = invertedLight;
             }
-            else if (currentMode == Mode.LeftForwardR)
+            else if (CurrentMode == Mode.LeftForwardR)
             {
-                lightRight = invertedLight;
-                lightMain = invertedLight;
+                LightRight = invertedLight;
+                LightMain = invertedLight;
             }
-            else if (currentMode == Mode.RightForwardL)
+            else if (CurrentMode == Mode.RightForwardL)
             {
-                lightLeft = invertedLight;
-                lightMain = invertedLight;
+                LightLeft = invertedLight;
+                LightMain = invertedLight;
             }
             else
             {
-                lightMain = invertedLight;
+                LightMain = invertedLight;
             }
 
-            if (!pedestrianEnabled)
+            if (!PedestrianEnabled)
             {
-                lightPedestrian = _checkPedestrianLight();
+                LightPedestrian = _checkPedestrianLight();
             }
 
             UpdateVisuals();
@@ -157,15 +157,15 @@ namespace TrafficManager.TrafficLight
 
         public void ChangeLightLeft()
         {
-            var invertedLight = lightLeft == RoadBaseAI.TrafficLightState.Green
+            var invertedLight = LightLeft == RoadBaseAI.TrafficLightState.Green
                 ? RoadBaseAI.TrafficLightState.Red
                 : RoadBaseAI.TrafficLightState.Green;
 
-            lightLeft = invertedLight;
+            LightLeft = invertedLight;
 
-            if (!pedestrianEnabled)
+            if (!PedestrianEnabled)
             {
-                lightPedestrian = _checkPedestrianLight();
+                LightPedestrian = _checkPedestrianLight();
             }
 
             UpdateVisuals();
@@ -173,15 +173,15 @@ namespace TrafficManager.TrafficLight
 
         public void ChangeLightRight()
         {
-            var invertedLight = lightRight == RoadBaseAI.TrafficLightState.Green
+            var invertedLight = LightRight == RoadBaseAI.TrafficLightState.Green
                 ? RoadBaseAI.TrafficLightState.Red
                 : RoadBaseAI.TrafficLightState.Green;
 
-            lightRight = invertedLight;
+            LightRight = invertedLight;
 
-            if (!pedestrianEnabled)
+            if (!PedestrianEnabled)
             {
-                lightPedestrian = _checkPedestrianLight();
+                LightPedestrian = _checkPedestrianLight();
             }
 
             UpdateVisuals();
@@ -189,13 +189,13 @@ namespace TrafficManager.TrafficLight
 
         public void ChangeLightPedestrian()
         {
-            if (pedestrianEnabled)
+            if (PedestrianEnabled)
             {
-                var invertedLight = lightPedestrian == RoadBaseAI.TrafficLightState.Green
+                var invertedLight = LightPedestrian == RoadBaseAI.TrafficLightState.Green
                     ? RoadBaseAI.TrafficLightState.Red
                     : RoadBaseAI.TrafficLightState.Green;
 
-                lightPedestrian = invertedLight;
+                LightPedestrian = invertedLight;
                 UpdateVisuals();
             }
         }
@@ -205,17 +205,17 @@ namespace TrafficManager.TrafficLight
             NetManager instance = Singleton<NetManager>.instance;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            lastChange = 0u;
-            lastChangeFrame = currentFrameIndex >> 6;
+            LastChange = 0u;
+            LastChangeFrame = currentFrameIndex >> 6;
 
             RoadBaseAI.TrafficLightState trafficLightState3;
             RoadBaseAI.TrafficLightState trafficLightState4;
             bool vehicles;
             bool pedestrians;
-            RoadBaseAI.GetTrafficLightState(this.node, ref instance.m_segments.m_buffer[(int)this.segment],
+            RoadBaseAI.GetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment],
                 currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles, out pedestrians);
 
-            if (lightMain == RoadBaseAI.TrafficLightState.Red && lightLeft == RoadBaseAI.TrafficLightState.Red && lightRight == RoadBaseAI.TrafficLightState.Red)
+            if (LightMain == RoadBaseAI.TrafficLightState.Red && LightLeft == RoadBaseAI.TrafficLightState.Red && LightRight == RoadBaseAI.TrafficLightState.Red)
             {
                 trafficLightState3 = RoadBaseAI.TrafficLightState.Red;
             }
@@ -224,23 +224,20 @@ namespace TrafficManager.TrafficLight
                 trafficLightState3 = RoadBaseAI.TrafficLightState.Green;
             }
 
-            trafficLightState4 = lightPedestrian;
+            trafficLightState4 = LightPedestrian;
 
-            RoadBaseAI.SetTrafficLightState(this.node, ref instance.m_segments.m_buffer[(int)this.segment], currentFrameIndex,
+            RoadBaseAI.SetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment], currentFrameIndex,
                 trafficLightState3, trafficLightState4, vehicles, pedestrians);
         }
 
         private RoadBaseAI.TrafficLightState _checkPedestrianLight()
         {
-            if (lightLeft == RoadBaseAI.TrafficLightState.Red && lightMain == RoadBaseAI.TrafficLightState.Red &&
-                lightRight == RoadBaseAI.TrafficLightState.Red)
+            if (LightLeft == RoadBaseAI.TrafficLightState.Red && LightMain == RoadBaseAI.TrafficLightState.Red &&
+                LightRight == RoadBaseAI.TrafficLightState.Red)
             {
                 return RoadBaseAI.TrafficLightState.Green;
             }
-            else
-            {
-                return RoadBaseAI.TrafficLightState.Red;
-            }
+            return RoadBaseAI.TrafficLightState.Red;
         }
     }
 }

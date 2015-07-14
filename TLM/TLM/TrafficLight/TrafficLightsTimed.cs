@@ -7,104 +7,104 @@ namespace TrafficManager.TrafficLight
 {
     public class TrafficLightsTimed
     {
-        public ushort nodeID;
+        public ushort NodeId;
 
-        public static Dictionary<ushort, TrafficLightsTimed> timedScripts = new Dictionary<ushort, TrafficLightsTimed>(); 
+        public static Dictionary<ushort, TrafficLightsTimed> TimedScripts = new Dictionary<ushort, TrafficLightsTimed>(); 
 
-        public List<TimedTrafficSteps> steps = new List<TimedTrafficSteps>();
-        public int currentStep = 0;
+        public List<TimedTrafficSteps> Steps = new List<TimedTrafficSteps>();
+        public int CurrentStep;
 
-        public List<ushort> nodeGroup; 
+        public List<ushort> NodeGroup; 
 
-        public TrafficLightsTimed(ushort nodeID, List<ushort> nodeGroup)
+        public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup)
         {
-            this.nodeID = nodeID;
-            this.nodeGroup = new List<ushort>(nodeGroup);
+            NodeId = nodeId;
+            NodeGroup = new List<ushort>(nodeGroup);
 
-            CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = false;
+            CustomRoadAI.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
         }
 
-        public void addStep(int num)
+        public void AddStep(int num)
         {
-            steps.Add(new TimedTrafficSteps(num, nodeID));
+            Steps.Add(new TimedTrafficSteps(num, NodeId));
         }
 
-        public void start()
+        public void Start()
         {
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            currentStep = 0;
-            steps[0].SetLights();
-            steps[0].SetFrame(currentFrameIndex >> 6);
+            CurrentStep = 0;
+            Steps[0].SetLights();
+            Steps[0].SetFrame(currentFrameIndex >> 6);
 
-            CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = true;
+            CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive = true;
         }
 
-        public void moveStep(int oldPos , int newPos )
+        public void MoveStep(int oldPos , int newPos )
         {
-            TimedTrafficSteps oldStep = steps[oldPos];
+            var oldStep = Steps[oldPos];
 
-            steps.RemoveAt(oldPos);
-            steps.Insert(newPos, oldStep);
+            Steps.RemoveAt(oldPos);
+            Steps.Insert(newPos, oldStep);
         }
 
-        public void stop()
+        public void Stop()
         {
-            CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive = false;
+            CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive = false;
         }
 
-        public bool isStarted()
+        public bool IsStarted()
         {
-            return CustomRoadAI.GetNodeSimulation(nodeID).TimedTrafficLightsActive;
+            return CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive;
         }
 
         public int NumSteps()
         {
-            return steps.Count;
+            return Steps.Count;
         }
 
-        public TimedTrafficSteps GetStep(int stepID)
+        public TimedTrafficSteps GetStep(int stepId)
         {
-            return steps[stepID];
+            return Steps[stepId];
         }
 
-        public void checkStep(uint frame)
+        public void CheckStep(uint frame)
         {
-            if (steps[currentStep].StepDone(frame))
+            if (Steps[CurrentStep].StepDone(frame))
             {
-                currentStep = currentStep + 1 >= steps.Count ? 0 : currentStep + 1;
+                CurrentStep = CurrentStep + 1 >= Steps.Count ? 0 : CurrentStep + 1;
 
-                steps[currentStep].SetFrame(frame);
-                steps[currentStep].SetLights();
+                Steps[CurrentStep].SetFrame(frame);
+                Steps[CurrentStep].SetLights();
             }
         }
 
-        public void skipStep()
+        public void SkipStep()
         {
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            currentStep = currentStep + 1 >= steps.Count ? 0 : currentStep + 1;
+            CurrentStep = CurrentStep + 1 >= Steps.Count ? 0 : CurrentStep + 1;
 
-            steps[currentStep].SetFrame(currentFrameIndex >> 6);
-            steps[currentStep].SetLights();
+            Steps[CurrentStep].SetFrame(currentFrameIndex >> 6);
+            Steps[CurrentStep].SetLights();
         }
 
-        public long checkNextChange(int segmentID, int lightType)
+        public long CheckNextChange(int segmentId, int lightType)
         {
-            var startStep = currentStep;
-            var stepNum = currentStep + 1;
-            var numFrames = steps[currentStep].CurrentStep();
+            var startStep = CurrentStep;
+            var stepNum = CurrentStep + 1;
+            var numFrames = Steps[CurrentStep].CurrentStep();
 
             RoadBaseAI.TrafficLightState currentState;
 
             if (lightType == 0)
-                currentState = TrafficLightsManual.GetSegmentLight(this.nodeID, segmentID).GetLightMain();
+                currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightMain();
             else if (lightType == 1)
-                currentState = TrafficLightsManual.GetSegmentLight(this.nodeID, segmentID).GetLightLeft();
+                currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightLeft();
             else if (lightType == 2)
-                currentState = TrafficLightsManual.GetSegmentLight(this.nodeID, segmentID).GetLightRight();
+                currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightRight();
             else
-                currentState = TrafficLightsManual.GetSegmentLight(this.nodeID, segmentID).GetLightPedestrian();
+                currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightPedestrian();
 
 
             while (true)
@@ -120,7 +120,7 @@ namespace TrafficManager.TrafficLight
                     break;
                 }
 
-                var light = steps[stepNum].GetLight(segmentID, lightType);
+                var light = Steps[stepNum].GetLight(segmentId, lightType);
 
                 if (light != currentState)
                 {
@@ -128,7 +128,7 @@ namespace TrafficManager.TrafficLight
                 }
                 else
                 {
-                    numFrames += steps[stepNum].NumSteps;
+                    numFrames += Steps[stepNum].NumSteps;
                 }
 
                 stepNum++;
@@ -137,34 +137,34 @@ namespace TrafficManager.TrafficLight
             return numFrames;
         }
 
-        public void resetSteps()
+        public void ResetSteps()
         {
-            steps.Clear();
+            Steps.Clear();
         }
 
         public void RemoveStep(int id)
         {
-            steps.RemoveAt(id);
+            Steps.RemoveAt(id);
         }
 
         public static void AddTimedLight(ushort nodeid, List<ushort> nodeGroup)
         {
-            timedScripts.Add(nodeid, new TrafficLightsTimed(nodeid, nodeGroup));
+            TimedScripts.Add(nodeid, new TrafficLightsTimed(nodeid, nodeGroup));
         }
 
         public static void RemoveTimedLight(ushort nodeid)
         {
-            timedScripts.Remove(nodeid);
+            TimedScripts.Remove(nodeid);
         }
 
         public static bool IsTimedLight(ushort nodeid)
         {
-            return timedScripts.ContainsKey(nodeid);
+            return TimedScripts.ContainsKey(nodeid);
         }
 
         public static TrafficLightsTimed GetTimedLight(ushort nodeid)
         {
-            return timedScripts[nodeid];
+            return TimedScripts[nodeid];
         }
     }
 }

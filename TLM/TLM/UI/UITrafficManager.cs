@@ -133,7 +133,7 @@ namespace TrafficManager.UI
 
                 buttonSwitchTraffic.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.SwitchTrafficLight);
+                TrafficLightTool.SetToolMode(ToolMode.SwitchTrafficLight);
             }
             else
             {
@@ -141,7 +141,7 @@ namespace TrafficManager.UI
 
                 buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -153,7 +153,7 @@ namespace TrafficManager.UI
 
                 buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.AddPrioritySigns);
+                TrafficLightTool.SetToolMode(ToolMode.AddPrioritySigns);
             }
             else
             {
@@ -161,7 +161,7 @@ namespace TrafficManager.UI
 
                 buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -173,7 +173,7 @@ namespace TrafficManager.UI
 
                 buttonManualControl.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.ManualSwitch);
+                TrafficLightTool.SetToolMode(ToolMode.ManualSwitch);
             }
             else
             {
@@ -181,7 +181,7 @@ namespace TrafficManager.UI
 
                 buttonManualControl.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -193,7 +193,7 @@ namespace TrafficManager.UI
 
                 buttonTimedMain.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.TimedLightsSelectNode);
+                TrafficLightTool.SetToolMode(ToolMode.TimedLightsSelectNode);
             }
             else
             {
@@ -201,7 +201,7 @@ namespace TrafficManager.UI
 
                 buttonTimedMain.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -251,7 +251,7 @@ namespace TrafficManager.UI
                     buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
                 }
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.LaneChange);
+                TrafficLightTool.SetToolMode(ToolMode.LaneChange);
             }
             else
             {
@@ -262,7 +262,7 @@ namespace TrafficManager.UI
                     buttonLaneChange.focusedBgSprite = "ButtonMenu";
                 }
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -274,7 +274,7 @@ namespace TrafficManager.UI
 
                 buttonLaneRestrictions.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.LaneRestrictions);
+                TrafficLightTool.SetToolMode(ToolMode.LaneRestrictions);
             }
             else
             {
@@ -282,7 +282,7 @@ namespace TrafficManager.UI
 
                 buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 
@@ -294,7 +294,7 @@ namespace TrafficManager.UI
 
                 buttonCrosswalk.focusedBgSprite = "ButtonMenuFocused";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.Crosswalk);
+                TrafficLightTool.SetToolMode(ToolMode.Crosswalk);
             }
             else
             {
@@ -302,7 +302,7 @@ namespace TrafficManager.UI
 
                 buttonCrosswalk.focusedBgSprite = "ButtonMenu";
 
-                TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+                TrafficLightTool.SetToolMode(ToolMode.None);
             }
         }
 

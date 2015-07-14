@@ -45,7 +45,7 @@ namespace TrafficManager.CustomAI
                                     {
                                         var timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
 
-                                        foreach (var timedNodeItem in timedNode.nodeGroup)
+                                        foreach (var timedNodeItem in timedNode.NodeGroup)
                                         {
                                             var nodeSim = GetNodeSimulation(timedNodeItem);
 

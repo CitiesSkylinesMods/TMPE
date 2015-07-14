@@ -86,7 +86,7 @@ namespace TrafficManager.UI
             }
 
             UITrafficManager.uistate = UITrafficManager.UIState.None;
-            TrafficLightTool.setToolMode(TrafficLightTool.ToolMode.None);
+            TrafficLightTool.SetToolMode(ToolMode.None);
             LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
 
             _uiShown = false;

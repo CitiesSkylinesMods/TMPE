@@ -222,7 +222,7 @@ namespace TrafficManager
                 TrafficPriority.PrioritySegments.Clear();
                 CustomRoadAI.NodeDictionary.Clear();
                 TrafficLightsManual.ManualSegments.Clear();
-                TrafficLightsTimed.timedScripts.Clear();
+                TrafficLightsTimed.TimedScripts.Clear();
 
                 Instance.NodeSimulationLoaded = false;
             }

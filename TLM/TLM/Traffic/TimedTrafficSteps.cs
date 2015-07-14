@@ -77,10 +77,10 @@ namespace TrafficManager.Traffic
                 {
                     var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
-                    segmentLight.lightMain = LightMain[s];
-                    segmentLight.lightLeft = LightLeft[s];
-                    segmentLight.lightRight = LightRight[s];
-                    segmentLight.lightPedestrian = LightPedestrian[s];
+                    segmentLight.LightMain = LightMain[s];
+                    segmentLight.LightLeft = LightLeft[s];
+                    segmentLight.LightRight = LightRight[s];
+                    segmentLight.LightPedestrian = LightPedestrian[s];
                     segmentLight.UpdateVisuals();
                 }
             }
@@ -96,10 +96,10 @@ namespace TrafficManager.Traffic
                 {
                     var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
-                    LightMain[s] = segmentLight.lightMain;
-                    LightLeft[s] = segmentLight.lightLeft;
-                    LightRight[s] = segmentLight.lightRight;
-                    LightPedestrian[s] = segmentLight.lightPedestrian;
+                    LightMain[s] = segmentLight.LightMain;
+                    LightLeft[s] = segmentLight.LightLeft;
+                    LightRight[s] = segmentLight.LightRight;
+                    LightPedestrian[s] = segmentLight.LightPedestrian;
                 }
             }
         }

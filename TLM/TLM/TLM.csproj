@@ -71,6 +71,7 @@
     <Compile Include="Mod.cs" />
     <Compile Include="TrafficLight\ManualSegment.cs" />
     <Compile Include="TrafficLight\ManualSegmentLight.cs" />
+    <Compile Include="TrafficLight\ToolMode.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="TrafficLight\TrafficLightsManual.cs" />
     <Compile Include="TrafficLight\TrafficLightsTimed.cs" />

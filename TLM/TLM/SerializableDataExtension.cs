@@ -104,8 +104,8 @@ namespace TrafficManager
                     CustomRoadAI.AddNodeToSimulation((ushort)configuration.nodeDictionary[i][0]);
                     var nodeDict = CustomRoadAI.GetNodeSimulation((ushort)configuration.nodeDictionary[i][0]);
 
-                    nodeDict._manualTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][1]);
-                    nodeDict._timedTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][2]);
+                    nodeDict.ManualTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][1]);
+                    nodeDict.TimedTrafficLights = Convert.ToBoolean(configuration.nodeDictionary[i][2]);
                     nodeDict.TimedTrafficLightsActive = Convert.ToBoolean(configuration.nodeDictionary[i][3]);
                 }
             }
@@ -119,14 +119,14 @@ namespace TrafficManager
                     TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], segmentData[1],
                         RoadBaseAI.TrafficLightState.Green);
                     var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], segmentData[1]);
-                    segment.currentMode = (ManualSegmentLight.Mode)segmentData[2];
-                    segment.lightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
-                    segment.lightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
-                    segment.lightRight = (RoadBaseAI.TrafficLightState)segmentData[5];
-                    segment.lightPedestrian = (RoadBaseAI.TrafficLightState)segmentData[6];
-                    segment.lastChange = (uint)segmentData[7];
-                    segment.lastChangeFrame = (uint)segmentData[8];
-                    segment.pedestrianEnabled = Convert.ToBoolean(segmentData[9]);
+                    segment.CurrentMode = (ManualSegmentLight.Mode)segmentData[2];
+                    segment.LightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
+                    segment.LightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
+                    segment.LightRight = (RoadBaseAI.TrafficLightState)segmentData[5];
+                    segment.LightPedestrian = (RoadBaseAI.TrafficLightState)segmentData[6];
+                    segment.LastChange = (uint)segmentData[7];
+                    segment.LastChangeFrame = (uint)segmentData[8];
+                    segment.PedestrianEnabled = Convert.ToBoolean(segmentData[9]);
                 }
             }
 
@@ -148,15 +148,15 @@ namespace TrafficManager
                     TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
                     var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
 
-                    timedNode.currentStep = configuration.timedNodes[i][1];
+                    timedNode.CurrentStep = configuration.timedNodes[i][1];
 
                     for (var j = 0; j < configuration.timedNodes[i][2]; j++)
                     {
                         var cfgstep = configuration.timedNodeSteps[timedStepCount];
 
-                        timedNode.addStep(cfgstep[0]);
+                        timedNode.AddStep(cfgstep[0]);
 
-                        var step = timedNode.steps[j];
+                        var step = timedNode.Steps[j];
 
                         for (var k = 0; k < cfgstep[1]; k++)
                         {
@@ -173,7 +173,7 @@ namespace TrafficManager
 
                     if (Convert.ToBoolean(configuration.timedNodes[i][3]))
                     {
-                        timedNode.start();
+                        timedNode.Start();
                     }
                 }
             }
@@ -269,60 +269,60 @@ namespace TrafficManager
                 {
                     var nodeDict = CustomRoadAI.NodeDictionary[(ushort)i];
 
-                    configuration.nodeDictionary.Add(new int[4] {nodeDict.NodeId, Convert.ToInt32(nodeDict._manualTrafficLights), Convert.ToInt32(nodeDict._timedTrafficLights), Convert.ToInt32(nodeDict.TimedTrafficLightsActive)});
+                    configuration.nodeDictionary.Add(new int[4] {nodeDict.NodeId, Convert.ToInt32(nodeDict.ManualTrafficLights), Convert.ToInt32(nodeDict.TimedTrafficLights), Convert.ToInt32(nodeDict.TimedTrafficLightsActive)});
                 }
 
                 if (TrafficLightsManual.ManualSegments.ContainsKey(i))
                 {
-                    if (TrafficLightsManual.ManualSegments[i].node_1 != 0)
+                    if (TrafficLightsManual.ManualSegments[i].Node1 != 0)
                     {
-                        var manualSegment = TrafficLightsManual.ManualSegments[i].instance_1;
+                        var manualSegment = TrafficLightsManual.ManualSegments[i].Instance1;
 
                         configuration.manualSegments.Add(new int[10]
                         {
-                            (int)manualSegment.node,
-                            manualSegment.segment,
-                            (int)manualSegment.currentMode,
-                            (int)manualSegment.lightLeft,
-                            (int)manualSegment.lightMain,
-                            (int)manualSegment.lightRight,
-                            (int)manualSegment.lightPedestrian,
-                            (int)manualSegment.lastChange,
-                            (int)manualSegment.lastChangeFrame,
-                            Convert.ToInt32(manualSegment.pedestrianEnabled)
+                            (int)manualSegment.Node,
+                            manualSegment.Segment,
+                            (int)manualSegment.CurrentMode,
+                            (int)manualSegment.LightLeft,
+                            (int)manualSegment.LightMain,
+                            (int)manualSegment.LightRight,
+                            (int)manualSegment.LightPedestrian,
+                            (int)manualSegment.LastChange,
+                            (int)manualSegment.LastChangeFrame,
+                            Convert.ToInt32(manualSegment.PedestrianEnabled)
                         });
                     }
-                    if (TrafficLightsManual.ManualSegments[i].node_2 != 0)
+                    if (TrafficLightsManual.ManualSegments[i].Node2 != 0)
                     {
-                        var manualSegment = TrafficLightsManual.ManualSegments[i].instance_2;
+                        var manualSegment = TrafficLightsManual.ManualSegments[i].Instance2;
 
                         configuration.manualSegments.Add(new int[10]
                         {
-                            (int)manualSegment.node,
-                            manualSegment.segment,
-                            (int)manualSegment.currentMode,
-                            (int)manualSegment.lightLeft,
-                            (int)manualSegment.lightMain,
-                            (int)manualSegment.lightRight,
-                            (int)manualSegment.lightPedestrian,
-                            (int)manualSegment.lastChange,
-                            (int)manualSegment.lastChangeFrame,
-                            Convert.ToInt32(manualSegment.pedestrianEnabled)
+                            (int)manualSegment.Node,
+                            manualSegment.Segment,
+                            (int)manualSegment.CurrentMode,
+                            (int)manualSegment.LightLeft,
+                            (int)manualSegment.LightMain,
+                            (int)manualSegment.LightRight,
+                            (int)manualSegment.LightPedestrian,
+                            (int)manualSegment.LastChange,
+                            (int)manualSegment.LastChangeFrame,
+                            Convert.ToInt32(manualSegment.PedestrianEnabled)
                         });
                     }
                 }
 
-                if (TrafficLightsTimed.timedScripts.ContainsKey((ushort)i))
+                if (TrafficLightsTimed.TimedScripts.ContainsKey((ushort)i))
                 {
                     var timedNode = TrafficLightsTimed.GetTimedLight((ushort) i);
 
-                    configuration.timedNodes.Add(new int[4] { timedNode.nodeID, timedNode.currentStep, timedNode.NumSteps(), Convert.ToInt32(timedNode.isStarted())});
+                    configuration.timedNodes.Add(new int[4] { timedNode.NodeId, timedNode.CurrentStep, timedNode.NumSteps(), Convert.ToInt32(timedNode.IsStarted())});
 
-                    var nodeGroup = new ushort[timedNode.nodeGroup.Count];
+                    var nodeGroup = new ushort[timedNode.NodeGroup.Count];
 
-                    for (var j = 0; j < timedNode.nodeGroup.Count; j++)
+                    for (var j = 0; j < timedNode.NodeGroup.Count; j++)
                     {
-                        nodeGroup[j] = timedNode.nodeGroup[j];
+                        nodeGroup[j] = timedNode.NodeGroup[j];
                     }
 
                     configuration.timedNodeGroups.Add(nodeGroup);
@@ -331,18 +331,18 @@ namespace TrafficManager
                     {
                         configuration.timedNodeSteps.Add(new int[2]
                         {
-                            timedNode.steps[j].NumSteps,
-                            timedNode.steps[j].Segments.Count
+                            timedNode.Steps[j].NumSteps,
+                            timedNode.Steps[j].Segments.Count
                         });
 
-                        for (var k = 0; k < timedNode.steps[j].Segments.Count; k++)
+                        for (var k = 0; k < timedNode.Steps[j].Segments.Count; k++)
                         {
                             configuration.timedNodeStepSegments.Add(new int[4]
                             {
-                                (int)timedNode.steps[j].LightLeft[k],
-                                (int)timedNode.steps[j].LightMain[k],
-                                (int)timedNode.steps[j].LightRight[k],
-                                (int)timedNode.steps[j].LightPedestrian[k],
+                                (int)timedNode.Steps[j].LightLeft[k],
+                                (int)timedNode.Steps[j].LightMain[k],
+                                (int)timedNode.Steps[j].LightRight[k],
+                                (int)timedNode.Steps[j].LightPedestrian[k],
                             });
                         }
                     }

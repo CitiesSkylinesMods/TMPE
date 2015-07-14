@@ -6,18 +6,18 @@ namespace TrafficManager.TrafficLight
     {
         public ushort NodeId;
 
-        public bool _manualTrafficLights = false;
+        public bool ManualTrafficLights;
 
-        public bool _timedTrafficLights = false;
+        public bool TimedTrafficLights;
 
-        public bool TimedTrafficLightsActive = false;
+        public bool TimedTrafficLightsActive;
 
         public bool FlagManualTrafficLights
         {
-            get { return _manualTrafficLights; }
+            get { return ManualTrafficLights; }
             set
             {
-                _manualTrafficLights = value;
+                ManualTrafficLights = value;
 
                 if (value == false)
                 {
@@ -54,7 +54,7 @@ namespace TrafficManager.TrafficLight
                             bool vehicles;
                             bool pedestrians;
 
-                            RoadBaseAI.GetTrafficLightState(NodeId, ref instance.m_segments.m_buffer[(int) segment],
+                            RoadBaseAI.GetTrafficLightState(NodeId, ref instance.m_segments.m_buffer[segment],
                                 currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles,
                                 out pedestrians);
 
@@ -74,10 +74,10 @@ namespace TrafficManager.TrafficLight
 
         public bool FlagTimedTrafficLights
         {
-            get { return _timedTrafficLights; }
+            get { return TimedTrafficLights; }
             set
             {
-                _timedTrafficLights = value;
+                TimedTrafficLights = value;
 
                 if (value == false)
                 {
@@ -119,7 +119,7 @@ namespace TrafficManager.TrafficLight
                             bool vehicles;
                             bool pedestrians;
 
-                            RoadBaseAI.GetTrafficLightState(NodeId, ref instance.m_segments.m_buffer[(int)segment],
+                            RoadBaseAI.GetTrafficLightState(NodeId, ref instance.m_segments.m_buffer[segment],
                                 currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles,
                                 out pedestrians);
 
@@ -137,32 +137,31 @@ namespace TrafficManager.TrafficLight
             }
         }
 
-        public TrafficLightSimulation(ushort nodeID)
+        public TrafficLightSimulation(ushort nodeId)
         {
-            this.NodeId = nodeID;
+            NodeId = nodeId;
         }
 
         public void SimulationStep(ref NetNode data)
         {
-            NetManager instance = Singleton<NetManager>.instance;
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             if (TrafficLightsTimed.IsTimedLight(NodeId) && TimedTrafficLightsActive)
             {
                 var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
-                timedNode.checkStep(currentFrameIndex >> 6);
+                timedNode.CheckStep(currentFrameIndex >> 6);
             }
 
-            for (int l = 0; l < 8; l++)
+            for (var l = 0; l < 8; l++)
             {
-                ushort segment = data.GetSegment(l);
+                var segment = data.GetSegment(l);
                 if (segment != 0)
                 {
                     if (TrafficLightsManual.IsSegmentLight(NodeId, segment))
                     {
                         var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
 
-                        segmentLight.lastChange = (currentFrameIndex >> 6) - segmentLight.lastChangeFrame;
+                        segmentLight.LastChange = (currentFrameIndex >> 6) - segmentLight.LastChangeFrame;
                     }
                 }
             }
