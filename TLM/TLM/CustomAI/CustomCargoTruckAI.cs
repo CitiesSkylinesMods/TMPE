@@ -6,37 +6,37 @@ namespace TrafficManager.CustomAI
 {
     class CustomCargoTruckAI : CarAI
     {
-        protected void SimulationStep(ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos)
+        public override void SimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
             else
             {
                 if ((data.m_flags & Vehicle.Flags.WaitingTarget) != Vehicle.Flags.None && (data.m_waitCounter += 1) > 20)
                 {
-                    RemoveOffers(vehicleID, ref data);
+                    RemoveOffers(vehicleId, ref data);
                     data.m_flags &= ~Vehicle.Flags.WaitingTarget;
                     data.m_flags |= Vehicle.Flags.GoingBack;
                     data.m_waitCounter = 0;
-                    if (!this.StartPathFind(vehicleID, ref data))
+                    if (!StartPathFind(vehicleId, ref data))
                     {
-                        data.Unspawn(vehicleID);
+                        data.Unspawn(vehicleId);
                     }
                 }
-                BaseSimulationStep(vehicleID, ref data, physicsLodRefPos);
+                BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
             }
         }
 
         // TODO: inherit CarAI
 
-        private void RemoveOffers(ushort vehicleID, ref Vehicle data)
+        private static void RemoveOffers(ushort vehicleId, ref Vehicle data)
         {
             if ((data.m_flags & Vehicle.Flags.WaitingTarget) != Vehicle.Flags.None)
             {
-                TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
-                offer.Vehicle = vehicleID;
+                var offer = default(TransferManager.TransferOffer);
+                offer.Vehicle = vehicleId;
                 if ((data.m_flags & Vehicle.Flags.TransferToSource) != Vehicle.Flags.None)
                 {
                     Singleton<TransferManager>.instance.RemoveIncomingOffer((TransferManager.TransferReason)data.m_transferType, offer);
@@ -48,7 +48,7 @@ namespace TrafficManager.CustomAI
             }
         }
 
-        protected void BaseSimulationStep(ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos)
+        protected void BaseSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None)
             {
@@ -59,21 +59,21 @@ namespace TrafficManager.CustomAI
                     data.m_pathPositionIndex = 255;
                     data.m_flags &= ~Vehicle.Flags.WaitingPath;
                     data.m_flags &= ~Vehicle.Flags.Arriving;
-                    this.PathfindSuccess(vehicleID, ref data);
-                    this.TrySpawn(vehicleID, ref data);
+                    PathfindSuccess(vehicleId, ref data);
+                    TrySpawn(vehicleId, ref data);
                 }
                 else if ((pathFindFlags & 8) != 0)
                 {
                     data.m_flags &= ~Vehicle.Flags.WaitingPath;
                     Singleton<PathManager>.instance.ReleasePath(data.m_path);
                     data.m_path = 0u;
-                    this.PathfindFailure(vehicleID, ref data);
+                    PathfindFailure(vehicleId, ref data);
                     return;
                 }
             }
             else if ((data.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None)
             {
-                this.TrySpawn(vehicleID, ref data);
+                TrySpawn(vehicleId, ref data);
             }
             Vector3 lastFramePosition = data.GetLastFramePosition();
             int lodPhysics;
@@ -91,7 +91,7 @@ namespace TrafficManager.CustomAI
             {
                 lodPhysics = 0;
             }
-            this.SimulationStep(vehicleID, ref data, vehicleID, ref data, lodPhysics);
+            SimulationStep(vehicleId, ref data, vehicleId, ref data, lodPhysics);
             if (data.m_leadingVehicle == 0 && data.m_trailingVehicle != 0)
             {
                 VehicleManager instance2 = Singleton<VehicleManager>.instance;
@@ -99,9 +99,9 @@ namespace TrafficManager.CustomAI
                 int num2 = 0;
                 while (num != 0)
                 {
-                    ushort trailingVehicle = instance2.m_vehicles.m_buffer[(int)num].m_trailingVehicle;
-                    VehicleInfo info = instance2.m_vehicles.m_buffer[(int)num].Info;
-                    info.m_vehicleAI.SimulationStep(num, ref instance2.m_vehicles.m_buffer[(int)num], vehicleID,
+                    ushort trailingVehicle = instance2.m_vehicles.m_buffer[num].m_trailingVehicle;
+                    VehicleInfo info = instance2.m_vehicles.m_buffer[num].Info;
+                    info.m_vehicleAI.SimulationStep(num, ref instance2.m_vehicles.m_buffer[num], vehicleId,
                         ref data, lodPhysics);
                     num = trailingVehicle;
                     if (++num2 > 16384)
@@ -112,23 +112,23 @@ namespace TrafficManager.CustomAI
                     }
                 }
             }
-            int num3 = (this.m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
+            int num3 = (m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
             if ((data.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) ==
                 Vehicle.Flags.None && data.m_cargoParent == 0)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
-            else if ((int)data.m_blockCounter >= num3 && LoadingExtension.Instance.DespawnEnabled)
+            else if (data.m_blockCounter >= num3 && LoadingExtension.Instance.DespawnEnabled)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
         }
 
-        public bool StartPathFind2(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
+        public bool StartPathFind2(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
         {
             if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource | Vehicle.Flags.GoingBack)) != Vehicle.Flags.None)
             {
-                return base.StartPathFind(vehicleID, ref vehicleData, startPos, endPos, startBothWays, endBothWays);
+                return StartPathFind(vehicleId, ref vehicleData, startPos, endPos, startBothWays, endBothWays);
             }
             bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != Vehicle.Flags.None;
             PathUnit.Position startPosA;
@@ -149,7 +149,9 @@ namespace TrafficManager.CustomAI
                     startPosA = position;
                     startPosB = position2;
                     num = num3;
+/*
                     num2 = num4;
+*/
                 }
                 flag = true;
             }
@@ -157,7 +159,7 @@ namespace TrafficManager.CustomAI
             PathUnit.Position endPosB;
             float num5;
             float num6;
-            bool flag2 = PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Car, !allowUnderground, requireConnect, maxDistance, out endPosA, out endPosB, out num5, out num6); ;
+            bool flag2 = PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Car, !allowUnderground, requireConnect, maxDistance, out endPosA, out endPosB, out num5, out num6);
             PathUnit.Position position3;
             PathUnit.Position position4;
             float num7;
@@ -169,7 +171,9 @@ namespace TrafficManager.CustomAI
                     endPosA = position3;
                     endPosB = position4;
                     num5 = num7;
+/*
                     num6 = num8;
+*/
                 }
                 flag2 = true;
             }
@@ -187,7 +191,7 @@ namespace TrafficManager.CustomAI
                 NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
                 VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
                 uint path;
-                if (instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false, ItemClass.Service.Industrial))
+                if (instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, IsHeavyVehicle(), IgnoreBlocked(vehicleId, ref vehicleData), false, false, ItemClass.Service.Industrial))
                 {
                     if (vehicleData.m_path != 0u)
                     {
