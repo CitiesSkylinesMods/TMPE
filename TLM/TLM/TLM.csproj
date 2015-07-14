@@ -83,6 +83,7 @@
     <Compile Include="Traffic\TrafficSegment.cs" />
     <Compile Include="Traffic\VehicleType.cs" />
     <Compile Include="UI\UIBase.cs" />
+    <Compile Include="UI\UIState.cs" />
     <Compile Include="UI\UITimedLights.cs" />
     <Compile Include="UI\UITrafficManager.cs" />
   </ItemGroup>

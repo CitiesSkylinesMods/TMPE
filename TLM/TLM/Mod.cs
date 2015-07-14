@@ -42,7 +42,7 @@ namespace TrafficManager
             }
 
             if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool &&
-                LoadingExtension.Instance.UI.isVisible())
+                LoadingExtension.Instance.UI.IsVisible())
             {
                 LoadingExtension.Instance.UI.Close();
             }
@@ -158,7 +158,7 @@ namespace TrafficManager
             if (ToolMode != TrafficManagerMode.None)
             {
                 ToolMode = TrafficManagerMode.None;
-                UITrafficManager.uistate = UITrafficManager.UIState.None;
+                UITrafficManager.UIState = UIState.None;
                 DestroyTool();
             }
         }

@@ -6,7 +6,7 @@ namespace TrafficManager.UI
 {
     public class UIBase : UICustomControl
     {
-        private bool _uiShown = false;
+        private bool _uiShown;
 
         public UIBase()
         {
@@ -46,7 +46,7 @@ namespace TrafficManager.UI
             button.eventClick += ButtonClick;
         }
 
-        private void ButtonClick(UIComponent component, UIMouseEventParameter eventParam)
+        private void ButtonClick(UIComponent uiComponent, UIMouseEventParameter eventParam)
         {
             if (!_uiShown)
             {
@@ -58,7 +58,7 @@ namespace TrafficManager.UI
             }
         }
 
-        public bool isVisible()
+        public bool IsVisible()
         {
             return _uiShown;
         }
@@ -82,10 +82,10 @@ namespace TrafficManager.UI
 
             if (trafficManager != null)
             {
-                UIView.Destroy(trafficManager);
+                Destroy(trafficManager);
             }
 
-            UITrafficManager.uistate = UITrafficManager.UIState.None;
+            UITrafficManager.UIState = UIState.None;
             TrafficLightTool.SetToolMode(ToolMode.None);
             LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
 
