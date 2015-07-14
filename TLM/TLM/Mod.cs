@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using ColossalFramework;
-using ColossalFramework.Math;
-using ColossalFramework.UI;
 using ICities;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace TrafficManager
 {
@@ -16,19 +15,9 @@ namespace TrafficManager
 
     public class TrafficManagerMod : IUserMod
     {
-        public string Name
-        {
-            get
-            {
+        public string Name => "Traffic Manager";
 
-                return "Traffic Manager";
-            }
-        }
-
-        public string Description
-        {
-            get { return "Manage traffic junctions"; }
-        }
+        public string Description => "Manage traffic junctions";
     }
 
     public sealed class ThreadingExtension : ThreadingExtensionBase
@@ -42,23 +31,25 @@ namespace TrafficManager
                 return;
             }
 
-            if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None && ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool)
+            if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None &&
+                ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool)
             {
                 LoadingExtension.Instance.UI.Close();
             }
 
-            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool && LoadingExtension.Instance.UI.isVisible())
+            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool &&
+                LoadingExtension.Instance.UI.isVisible())
             {
                 LoadingExtension.Instance.UI.Close();
             }
 
-            if (!LoadingExtension.Instance.detourInited)
+            if (!LoadingExtension.Instance.DetourInited)
             {
-                LoadingExtension.Instance.revertMethods[0] = RedirectionHelper.RedirectCalls(
+                LoadingExtension.Instance.RevertMethods[0] = RedirectionHelper.RedirectCalls(
                     typeof (CarAI).GetMethod("CalculateSegmentPosition",
                         BindingFlags.NonPublic | BindingFlags.Instance,
                         null,
-                        new Type[]
+                        new[]
                         {
                             typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
                             typeof (PathUnit.Position), typeof (uint), typeof (byte), typeof (PathUnit.Position),
@@ -68,59 +59,64 @@ namespace TrafficManager
                         null),
                     typeof (CustomCarAI).GetMethod("CalculateSegmentPosition"));
 
-                LoadingExtension.Instance.revertMethods[1] = RedirectionHelper.RedirectCalls(
+                LoadingExtension.Instance.RevertMethods[1] = RedirectionHelper.RedirectCalls(
                     typeof (RoadBaseAI).GetMethod("SimulationStep",
-                        new Type[] {typeof (ushort), typeof (NetNode).MakeByRefType()}),
+                        new[] {typeof (ushort), typeof (NetNode).MakeByRefType()}),
                     typeof (CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
 
-                LoadingExtension.Instance.revertMethods[2] = RedirectionHelper.RedirectCalls(typeof (HumanAI).GetMethod("CheckTrafficLights",
-                    BindingFlags.NonPublic | BindingFlags.Instance,
-                    null,
-                    new Type[] {typeof (ushort), typeof (ushort)},
-                    null),
-                    typeof (CustomHumanAI).GetMethod("CheckTrafficLights"));
-
-                if (!LoadingExtension.PathfinderIncompatibility) {
-                    LoadingExtension.Instance.revertMethods[3] =
-                    RedirectionHelper.RedirectCalls(
-                        typeof(CarAI).GetMethod("SimulationStep",
-                            new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
-                        typeof(CustomCarAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
-
-
-                    LoadingExtension.Instance.revertMethods[4] =
-                        RedirectionHelper.RedirectCalls(
-                            typeof(PassengerCarAI).GetMethod("SimulationStep",
-                                new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
-                            typeof(CustomPassengerCarAI).GetMethod("SimulationStep",
-                                BindingFlags.NonPublic | BindingFlags.Instance));
-
-                    LoadingExtension.Instance.revertMethods[5] =
-                        RedirectionHelper.RedirectCalls(
-                            typeof(CargoTruckAI).GetMethod("SimulationStep",
-                                new Type[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
-                            typeof(CustomCargoTruckAI).GetMethod("SimulationStep",
-                                BindingFlags.NonPublic | BindingFlags.Instance));
-
-                    LoadingExtension.Instance.revertMethods[6] = RedirectionHelper.RedirectCalls(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+                LoadingExtension.Instance.RevertMethods[2] =
+                    RedirectionHelper.RedirectCalls(typeof (HumanAI).GetMethod("CheckTrafficLights",
                         BindingFlags.NonPublic | BindingFlags.Instance,
                         null,
-                        new Type[]
-                    {
-                        typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position), typeof (uint),
-                        typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
-                        typeof (float).MakeByRefType()
-                    },
+                        new[] {typeof (ushort), typeof (ushort)},
                         null),
-                        typeof(CustomCarAI).GetMethod("CalculateSegmentPosition2"));
+                        typeof (CustomHumanAI).GetMethod("CheckTrafficLights"));
+
+                if (!LoadingExtension.PathfinderIncompatibility)
+                {
+                    LoadingExtension.Instance.RevertMethods[3] =
+                        RedirectionHelper.RedirectCalls(
+                            typeof (CarAI).GetMethod("SimulationStep",
+                                new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                            typeof (CustomCarAI).GetMethod("SimulationStep",
+                                BindingFlags.NonPublic | BindingFlags.Instance));
+
+
+                    LoadingExtension.Instance.RevertMethods[4] =
+                        RedirectionHelper.RedirectCalls(
+                            typeof (PassengerCarAI).GetMethod("SimulationStep",
+                                new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                            typeof (CustomPassengerCarAI).GetMethod("SimulationStep",
+                                BindingFlags.NonPublic | BindingFlags.Instance));
+
+                    LoadingExtension.Instance.RevertMethods[5] =
+                        RedirectionHelper.RedirectCalls(
+                            typeof (CargoTruckAI).GetMethod("SimulationStep",
+                                new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
+                            typeof (CustomCargoTruckAI).GetMethod("SimulationStep",
+                                BindingFlags.NonPublic | BindingFlags.Instance));
+
+                    LoadingExtension.Instance.RevertMethods[6] =
+                        RedirectionHelper.RedirectCalls(typeof (CarAI).GetMethod("CalculateSegmentPosition",
+                            BindingFlags.NonPublic | BindingFlags.Instance,
+                            null,
+                            new[]
+                            {
+                                typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+                                typeof (uint),
+                                typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
+                                typeof (float).MakeByRefType()
+                            },
+                            null),
+                            typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
                 }
 
-                LoadingExtension.Instance.detourInited = true;
+                LoadingExtension.Instance.DetourInited = true;
             }
 
-            if (!LoadingExtension.Instance.nodeSimulationLoaded)
+            if (!LoadingExtension.Instance.NodeSimulationLoaded)
             {
-                LoadingExtension.Instance.nodeSimulationLoaded = true;
+                LoadingExtension.Instance.NodeSimulationLoaded = true;
                 ToolsModifierControl.toolController.gameObject.AddComponent<CustomRoadAI>();
             }
 
@@ -133,31 +129,22 @@ namespace TrafficManager
 
     public sealed class LoadingExtension : LoadingExtensionBase
     {
-        public static LoadingExtension Instance = null;
+        public static LoadingExtension Instance;
+        public static bool PathfinderIncompatibility;
+        public CustomPathManager CustomPathManager { get; set; }
+        public bool DespawnEnabled { get; set; }
+        public bool DetourInited { get; set; }
+        public bool NodeSimulationLoaded { get; set; }
+        public RedirectCallsState[] RevertMethods { get; set; }
+        public TrafficManagerMode ToolMode { get; set; }
+        public TrafficLightTool TrafficLightTool { get; set; }
+        public UIBase UI { get; set; }
 
-        public static bool PathfinderIncompatibility = false;
-
-        public RedirectCallsState[] revertMethods = new RedirectCallsState[8];
-
-        public TrafficManagerMode ToolMode = TrafficManagerMode.None;
-
-        public TrafficLightTool TrafficLightTool = null;
-
-        public UIBase UI;
-
-        private ToolBase _originalTool = null;
-
-        public bool detourInited = false;
-
-        public bool nodeSimulationLoaded = false;
-
-        public CustomPathManager customPathManager;
-
-        public bool despawnEnabled = true;
-
-        public override void OnCreated(ILoading loading)
+        public LoadingExtension()
         {
-            base.OnCreated(loading);
+            ToolMode = TrafficManagerMode.None;
+            RevertMethods = new RedirectCallsState[8];
+            DespawnEnabled = true;
         }
 
         public override void OnReleased()
@@ -184,39 +171,40 @@ namespace TrafficManager
                 case LoadMode.LoadGame:
                     OnLoaded();
                     break;
-                default:
-                    
-                    break;
             }
 
             if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame)
             {
                 if (Instance == null)
                 {
-                    if (Singleton<PathManager>.instance.GetType() != typeof(PathManager))
+                    if (Singleton<PathManager>.instance.GetType() != typeof (PathManager))
                     {
-                        LoadingExtension.PathfinderIncompatibility = true;
+                        PathfinderIncompatibility = true;
                     }
 
 
                     Instance = this;
                 }
 
-                if (!LoadingExtension.PathfinderIncompatibility)
+                if (!PathfinderIncompatibility)
                 {
-                    FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
-                    PathManager stockPathManager = PathManager.instance;
-                    customPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-                    customPathManager.UpdateWithPathManagerValues(stockPathManager);
-                    pathManagerInstance.SetValue(null, customPathManager);
-                    FastList<ISimulationManager> managers = typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as FastList<ISimulationManager>;
-                    managers.Remove(stockPathManager);
-                    managers.Add(customPathManager);
-                    GameObject.Destroy(stockPathManager, 10f);
+                    var pathManagerInstance = typeof (Singleton<PathManager>).GetField("sInstance",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+                    var stockPathManager = PathManager.instance;
+                    CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+                    CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+                    pathManagerInstance?.SetValue(null, CustomPathManager);
+                    var simManager =
+                        typeof (SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
+                            .GetValue(null) as FastList<ISimulationManager>;
+                    simManager?.Remove(stockPathManager);
+                    simManager?.Add(CustomPathManager);
+                    Object.Destroy(stockPathManager, 10f);
                 }
 
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
-                TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
+                TrafficPriority.leftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
+                                                SimulationMetaData.MetaBool.True;
             }
         }
 
@@ -224,18 +212,26 @@ namespace TrafficManager
         {
             // TODO: revert detours
             base.OnLevelUnloading();
-            
-            TrafficPriority.prioritySegments.Clear();
-            CustomRoadAI.nodeDictionary.Clear();
-            TrafficLightsManual.ManualSegments.Clear();
-            TrafficLightsTimed.timedScripts.Clear();
 
-            LoadingExtension.Instance.nodeSimulationLoaded = false;
+            try
+            {
+                TrafficPriority.prioritySegments.Clear();
+                CustomRoadAI.nodeDictionary.Clear();
+                TrafficLightsManual.ManualSegments.Clear();
+                TrafficLightsTimed.timedScripts.Clear();
+
+                Instance.NodeSimulationLoaded = false;
+            }
+            catch (Exception)
+            {
+                // ignored - prevents collision with other mods
+            }
         }
 
         private void OnNewGame()
         {
         }
+
         private void OnLoaded()
         {
         }
@@ -263,7 +259,7 @@ namespace TrafficManager
             if (TrafficLightTool == null)
             {
                 TrafficLightTool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficLightTool>() ??
-                    ToolsModifierControl.toolController.gameObject.AddComponent<TrafficLightTool>();
+                                   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficLightTool>();
             }
 
             ToolsModifierControl.toolController.CurrentTool = TrafficLightTool;
@@ -277,7 +273,7 @@ namespace TrafficManager
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
 
-                TrafficLightTool.Destroy(TrafficLightTool);
+                Object.Destroy(TrafficLightTool);
                 TrafficLightTool = null;
             }
         }

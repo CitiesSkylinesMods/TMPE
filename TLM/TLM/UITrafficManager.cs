@@ -91,7 +91,7 @@ namespace TrafficManager
                 //buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
                 buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 230f), clickCrosswalk);
                 buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 270f), clickClearTraffic);
-                buttonToggleDespawn = _createButton(LoadingExtension.Instance.despawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, 310f), clickToggleDespawn);
+                buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, 310f), clickToggleDespawn);
 
             }
             else
@@ -229,11 +229,11 @@ namespace TrafficManager
 
         private void clickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam)
         {
-            LoadingExtension.Instance.despawnEnabled = !LoadingExtension.Instance.despawnEnabled;
+            LoadingExtension.Instance.DespawnEnabled = !LoadingExtension.Instance.DespawnEnabled;
 
             if (!LoadingExtension.PathfinderIncompatibility)
             {
-                buttonToggleDespawn.text = LoadingExtension.Instance.despawnEnabled
+                buttonToggleDespawn.text = LoadingExtension.Instance.DespawnEnabled
                     ? "Disable despawning"
                     : "Enable despawning";
             }

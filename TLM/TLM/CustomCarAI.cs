@@ -79,7 +79,7 @@ namespace TrafficManager
             {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
             }
-            else if ((int)data.m_blockCounter >= num3 && LoadingExtension.Instance.despawnEnabled)
+            else if ((int)data.m_blockCounter >= num3 && LoadingExtension.Instance.DespawnEnabled)
             {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
             }

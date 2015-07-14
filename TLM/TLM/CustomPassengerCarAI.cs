@@ -10,7 +10,7 @@ namespace TrafficManager
     {
         protected void SimulationStep(ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos)
         {
-            if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.despawnEnabled)
+            if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
             {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleID);
             }
