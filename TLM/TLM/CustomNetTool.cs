@@ -6,128 +6,146 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
 
-namespace TrafficManager.CustomAI
+namespace TrafficManager
 {
     class CustomNetTool : NetTool
     {
-         //m_elevation
-         //m_controlPoints
-         //m_controlPointCount
-         //m_upgrading
-         //m_bulldozerTool
+        private static FieldInfo _fieldControlPoints;
+        private static FieldInfo _fieldControlPointCount;
+        private static FieldInfo _fieldElevation;
+        private static FieldInfo _fieldUpgrading;
+        private static FieldInfo _fieldBulldozerTool;
+        private static FieldInfo _fieldUpgradedSegments;
 
-        public static FieldInfo fieldControlPoints;
-        public static FieldInfo fieldControlPointCount;
-        public static FieldInfo fieldElevation;
-        public static FieldInfo fieldUpgrading;
-        public static FieldInfo fieldBulldozerTool;
-        public static FieldInfo fieldUpgradedSegments;
-
-        public static FieldInfo getField(string field)
+        public static FieldInfo GetField(string field)
         {
-            Type stockNetTool = typeof(NetTool);
-            BindingFlags fieldFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var stockNetTool = typeof(NetTool);
+            const BindingFlags fieldFlags = BindingFlags.NonPublic | BindingFlags.Instance;
 
             return stockNetTool.GetField(field, fieldFlags);
         }
 
-        public static NetTool.ControlPoint[] FieldControlPoints
+        public static ControlPoint[] FieldControlPoints
         {
-            get { return (NetTool.ControlPoint[])getField("m_controlPoints").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
-            set { fieldControlPoints = getField("m_controlPoints"); getField("m_controlPoints").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return (ControlPoint[])GetField("m_controlPoints").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
+            set
+            {
+                _fieldControlPoints = GetField("m_controlPoints");
+                GetField("m_controlPoints").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
         public static int FieldControlPointCount
         {
-            get { return (int)getField("m_controlPointCount").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
-            set { fieldControlPointCount = getField("m_controlPointCount"); getField("m_controlPointCount").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return (int)GetField("m_controlPointCount").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
+            set
+            {
+                _fieldControlPointCount = GetField("m_controlPointCount");
+                GetField("m_controlPointCount").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
         public static int FieldElevation
         {
-            get { return (int)getField("m_elevation").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
-            set { fieldElevation = getField("m_elevation"); getField("m_elevation").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return (int)GetField("m_elevation").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
+            set
+            {
+                _fieldElevation = GetField("m_elevation");
+                GetField("m_elevation").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
         public static bool FieldUpgrading
         {
-            get { return Convert.ToBoolean(getField("m_upgrading").GetValue(ToolsModifierControl.GetTool<NetTool>())); }
-            set { fieldUpgrading = getField("m_upgrading"); getField("m_upgrading").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return Convert.ToBoolean(GetField("m_upgrading").GetValue(ToolsModifierControl.GetTool<NetTool>())); }
+            set
+            {
+                _fieldUpgrading = GetField("m_upgrading");
+                GetField("m_upgrading").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
         public static BulldozeTool FieldBulldozerTool
         {
-            get { return (BulldozeTool)getField("m_bulldozerTool").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
-            set { fieldBulldozerTool = getField("m_bulldozerTool"); getField("m_bulldozerTool").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return (BulldozeTool)GetField("m_bulldozerTool").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
+            set
+            {
+                _fieldBulldozerTool = GetField("m_bulldozerTool");
+                GetField("m_bulldozerTool").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
         public static HashSet<ushort> FieldUpgradedSegments
         {
-            get { return (HashSet<ushort>)getField("m_upgradedSegments").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
-            set { fieldUpgradedSegments = getField("m_upgradedSegments"); getField("m_upgradedSegments").SetValue(ToolsModifierControl.GetTool<NetTool>(), value); }
+            get { return (HashSet<ushort>)GetField("m_upgradedSegments").GetValue(ToolsModifierControl.GetTool<NetTool>()); }
+            set
+            {
+                _fieldUpgradedSegments = GetField("m_upgradedSegments");
+                GetField("m_upgradedSegments").SetValue(ToolsModifierControl.GetTool<NetTool>(), value);
+            }
         }
 
-        public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, NetTool.ControlPoint startPoint, NetTool.ControlPoint middlePoint, NetTool.ControlPoint endPoint)
+        public bool CreateNodeImpl(NetInfo info, bool needMoney, bool switchDirection, ControlPoint startPoint, ControlPoint middlePoint, ControlPoint endPoint)
         {
-            bool flag = endPoint.m_node != 0 || endPoint.m_segment != 0;
+            var flag = endPoint.m_node != 0 || endPoint.m_segment != 0;
             ushort num;
             ushort num2;
             int num3;
             int num4;
-            if (NetTool.CreateNode(info, startPoint, middlePoint, endPoint, NetTool.m_nodePositionsSimulation, 1000, true, false, true, needMoney, false, switchDirection, 0, out num, out num2, out num3, out num4) == ToolBase.ToolErrors.None)
+            if (CreateNode(info, startPoint, middlePoint, endPoint, m_nodePositionsSimulation, 1000, true, false, true, needMoney, false, switchDirection, 0, out num, out num2, out num3, out num4) == ToolErrors.None)
             {
-                NetTool.CreateNode(info, startPoint, middlePoint, endPoint, NetTool.m_nodePositionsSimulation, 1000, false, false, true, needMoney, false, switchDirection, 0, out num, out num2, out num3, out num4);
-                NetManager instance = Singleton<NetManager>.instance;
+                CreateNode(info, startPoint, middlePoint, endPoint, m_nodePositionsSimulation, 1000, false, false, true, needMoney, false, switchDirection, 0, out num, out num2, out num3, out num4);
+                var instance = Singleton<NetManager>.instance;
                 endPoint.m_segment = 0;
                 endPoint.m_node = num;
                 if (num2 != 0)
                 {
-                    if (CustomNetTool.FieldUpgrading)
+                    if (FieldUpgrading)
                     {
-                        while (!Monitor.TryEnter(CustomNetTool.FieldUpgradedSegments, SimulationManager.SYNCHRONIZE_TIMEOUT))
+                        while (!Monitor.TryEnter(FieldUpgradedSegments, SimulationManager.SYNCHRONIZE_TIMEOUT))
                         {
                         }
                         try
                         {
-                            CustomNetTool.FieldUpgradedSegments.Add(num2);
+                            FieldUpgradedSegments.Add(num2);
                         }
                         finally
                         {
-                            Monitor.Exit(CustomNetTool.FieldUpgradedSegments);
+                            Monitor.Exit(FieldUpgradedSegments);
                         }
                     }
-                    if (instance.m_segments.m_buffer[(int)num2].m_startNode == num)
+                    if (instance.m_segments.m_buffer[num2].m_startNode == num)
                     {
-                        endPoint.m_direction = -instance.m_segments.m_buffer[(int)num2].m_startDirection;
+                        endPoint.m_direction = -instance.m_segments.m_buffer[num2].m_startDirection;
                     }
-                    else if (instance.m_segments.m_buffer[(int)num2].m_endNode == num)
+                    else if (instance.m_segments.m_buffer[num2].m_endNode == num)
                     {
-                        endPoint.m_direction = -instance.m_segments.m_buffer[(int)num2].m_endDirection;
+                        endPoint.m_direction = -instance.m_segments.m_buffer[num2].m_endDirection;
                     }
                 }
-                CustomNetTool.FieldControlPoints[0] = endPoint;
-                CustomNetTool.FieldElevation = Mathf.Max(0, Mathf.RoundToInt(endPoint.m_elevation / 12f));
-                if (num != 0 && (instance.m_nodes.m_buffer[(int)num].m_flags & NetNode.Flags.Outside) != NetNode.Flags.None)
+                FieldControlPoints[0] = endPoint;
+                FieldElevation = Mathf.Max(0, Mathf.RoundToInt(endPoint.m_elevation / 12f));
+                if (num != 0 && (instance.m_nodes.m_buffer[num].m_flags & NetNode.Flags.Outside) != NetNode.Flags.None)
                 {
-                    CustomNetTool.FieldControlPointCount = 0;
+                    FieldControlPointCount = 0;
                 }
-                else if (this.m_mode == NetTool.Mode.Freeform && CustomNetTool.FieldControlPointCount == 2)
+                else if (m_mode == Mode.Freeform && FieldControlPointCount == 2)
                 {
                     middlePoint.m_position = endPoint.m_position * 2f - middlePoint.m_position;
                     middlePoint.m_elevation = endPoint.m_elevation * 2f - middlePoint.m_elevation;
                     middlePoint.m_direction = endPoint.m_direction;
                     middlePoint.m_node = 0;
                     middlePoint.m_segment = 0;
-                    CustomNetTool.FieldControlPoints[1] = middlePoint;
-                    CustomNetTool.FieldControlPointCount = 2;
+                    FieldControlPoints[1] = middlePoint;
+                    FieldControlPointCount = 2;
                 }
                 else
                 {
-                    CustomNetTool.FieldControlPointCount = 1;
+                    FieldControlPointCount = 1;
                 }
                 if (info.m_class.m_service > ItemClass.Service.Office)
                 {
-                    int num5 = info.m_class.m_service - ItemClass.Service.Office - 1;
+                    var num5 = info.m_class.m_service - ItemClass.Service.Office - 1;
                     Singleton<GuideManager>.instance.m_serviceNotUsed[num5].Disable();
                     Singleton<GuideManager>.instance.m_serviceNeeded[num5].Deactivate();
                 }
@@ -140,7 +158,7 @@ namespace TrafficManager.CustomAI
                 {
                     Singleton<NetManager>.instance.m_onewayRoadPlacement.Disable();
                 }
-                if (CustomNetTool.FieldUpgrading)
+                if (FieldUpgrading)
                 {
                     //var priorityList = new Dictionary<ushort, int>();
 
@@ -210,18 +228,18 @@ namespace TrafficManager.CustomAI
                 }
                 else if (flag && num != 0)
                 {
-                    info.m_netAI.ConnectionSucceeded(num, ref Singleton<NetManager>.instance.m_nodes.m_buffer[(int)num]);
+                    info.m_netAI.ConnectionSucceeded(num, ref Singleton<NetManager>.instance.m_nodes.m_buffer[num]);
                 }
                 Singleton<GuideManager>.instance.m_notEnoughMoney.Deactivate();
-                if (Singleton<GuideManager>.instance.m_properties != null && !CustomNetTool.FieldUpgrading && num2 != 0 && CustomNetTool.FieldBulldozerTool != null && CustomNetTool.FieldBulldozerTool.m_lastNetInfo != null && CustomNetTool.FieldBulldozerTool.m_lastNetInfo.m_netAI.CanUpgradeTo(info))
+                if (Singleton<GuideManager>.instance.m_properties != null && !FieldUpgrading && num2 != 0 && FieldBulldozerTool != null && FieldBulldozerTool.m_lastNetInfo != null && FieldBulldozerTool.m_lastNetInfo.m_netAI.CanUpgradeTo(info))
                 {
-                    ushort startNode = instance.m_segments.m_buffer[(int)num2].m_startNode;
-                    ushort endNode = instance.m_segments.m_buffer[(int)num2].m_endNode;
-                    Vector3 position = instance.m_nodes.m_buffer[(int)startNode].m_position;
-                    Vector3 position2 = instance.m_nodes.m_buffer[(int)endNode].m_position;
-                    Vector3 startDirection = instance.m_segments.m_buffer[(int)num2].m_startDirection;
-                    Vector3 endDirection = instance.m_segments.m_buffer[(int)num2].m_endDirection;
-                    if (Vector3.SqrMagnitude(CustomNetTool.FieldBulldozerTool.m_lastStartPos - position) < 1f && Vector3.SqrMagnitude(CustomNetTool.FieldBulldozerTool.m_lastEndPos - position2) < 1f && Vector2.Dot(VectorUtils.XZ(CustomNetTool.FieldBulldozerTool.m_lastStartDir), VectorUtils.XZ(startDirection)) > 0.99f && Vector2.Dot(VectorUtils.XZ(CustomNetTool.FieldBulldozerTool.m_lastEndDir), VectorUtils.XZ(endDirection)) > 0.99f)
+                    var startNode = instance.m_segments.m_buffer[num2].m_startNode;
+                    var endNode = instance.m_segments.m_buffer[num2].m_endNode;
+                    var position = instance.m_nodes.m_buffer[startNode].m_position;
+                    var position2 = instance.m_nodes.m_buffer[endNode].m_position;
+                    var startDirection = instance.m_segments.m_buffer[num2].m_startDirection;
+                    var endDirection = instance.m_segments.m_buffer[num2].m_endDirection;
+                    if (Vector3.SqrMagnitude(FieldBulldozerTool.m_lastStartPos - position) < 1f && Vector3.SqrMagnitude(FieldBulldozerTool.m_lastEndPos - position2) < 1f && Vector2.Dot(VectorUtils.XZ(FieldBulldozerTool.m_lastStartDir), VectorUtils.XZ(startDirection)) > 0.99f && Vector2.Dot(VectorUtils.XZ(FieldBulldozerTool.m_lastEndDir), VectorUtils.XZ(endDirection)) > 0.99f)
                     {
                         Singleton<NetManager>.instance.m_manualUpgrade.Activate(Singleton<GuideManager>.instance.m_properties.m_manualUpgrade, info.m_class.m_service);
                     }

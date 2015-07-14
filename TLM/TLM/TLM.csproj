@@ -55,12 +55,12 @@
     <Compile Include="CustomAI\CustomCarAI.cs" />
     <Compile Include="CustomAI\CustomCargoTruckAI.cs" />
     <Compile Include="CustomAI\CustomHumanAI.cs" />
-    <Compile Include="CustomAI\CustomNetTool.cs" />
     <Compile Include="CustomAI\CustomPassengerCarAI.cs" />
     <Compile Include="CustomAI\CustomPathFind.cs" />
     <Compile Include="CustomAI\CustomPathManager.cs" />
     <Compile Include="CustomAI\CustomRoadAI.cs" />
     <Compile Include="CustomAI\CustomTransportLineAI.cs" />
+    <Compile Include="CustomNetTool.cs" />
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="PriorityCar.cs" />
     <Compile Include="PrioritySegment.cs" />
