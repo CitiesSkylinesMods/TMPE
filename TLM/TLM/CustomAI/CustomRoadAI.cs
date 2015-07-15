@@ -76,7 +76,7 @@ namespace TrafficManager.CustomAI
                 foreach (var nodeId in NodeDictionary.Keys)
                 {
                     var node = GetNodeSimulation(nodeId);
-                    
+
                     if (node.FlagManualTrafficLights || (node.FlagTimedTrafficLights && node.TimedTrafficLightsActive))
                     {
                         var data = TrafficLightTool.GetNetNode(nodeId);

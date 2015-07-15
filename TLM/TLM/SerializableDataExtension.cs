@@ -22,7 +22,7 @@ namespace TrafficManager
         public static ISerializableData SerializableData;
 
         private static Timer _timer;
-        
+
         public void OnCreated(ISerializableData serializableData)
         {
             UniqueId = 0u;
@@ -54,7 +54,7 @@ namespace TrafficManager
             else
             {
                 _timer = new Timer(2000);
-                // Hook up the Elapsed event for the timer. 
+                // Hook up the Elapsed event for the timer.
                 _timer.Elapsed += OnLoadDataTimed;
                 _timer.Enabled = true;
             }
@@ -76,7 +76,7 @@ namespace TrafficManager
 
             if (!File.Exists(filepath))
             {
-                
+
                 return;
             }
 
@@ -219,7 +219,7 @@ namespace TrafficManager
 
             FastList<byte> data = new FastList<byte>();
 
-            GenerateUniqueId(); 
+            GenerateUniqueId();
 
             byte[] uniqueIdBytes = BitConverter.GetBytes(UniqueId);
             foreach (byte uniqueIdByte in uniqueIdBytes)
@@ -241,7 +241,7 @@ namespace TrafficManager
                     if (TrafficPriority.PrioritySegments[i].Node1 != 0)
                     {
                         configuration.PrioritySegments.Add(new[] { TrafficPriority.PrioritySegments[i].Node1, i, (int)TrafficPriority.PrioritySegments[i].Instance1.Type });
-                    } 
+                    }
                     if (TrafficPriority.PrioritySegments[i].Node2 != 0)
                     {
                         configuration.PrioritySegments.Add(new[] { TrafficPriority.PrioritySegments[i].Node2, i, (int)TrafficPriority.PrioritySegments[i].Instance2.Type });

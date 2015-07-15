@@ -11,7 +11,7 @@ namespace TrafficManager
 
         public List<LaneRestrictions> Lanes = new List<LaneRestrictions>();
 
-        public List<int> SegmentGroup; 
+        public List<int> SegmentGroup;
 
         public SegmentRestrictions(int segmentid, List<int> segmentGroup )
         {

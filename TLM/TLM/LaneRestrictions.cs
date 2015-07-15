@@ -5,7 +5,7 @@ namespace TrafficManager
         public uint LaneId;
         public int LaneNum;
         public NetInfo.Direction Direction;
-        
+
         public bool EnableCars = true;
         public bool EnableService = true;
         public bool EnableTransport = true;

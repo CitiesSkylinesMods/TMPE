@@ -11,7 +11,7 @@ namespace TrafficManager.CustomAI
 
             var instance = Singleton<NetManager>.instance;
             var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-            
+
             var num = (uint)((node << 8) / 32768);
             var num2 = currentFrameIndex - num & 255u;
 

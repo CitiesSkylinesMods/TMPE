@@ -9,12 +9,12 @@ namespace TrafficManager.TrafficLight
     {
         public ushort NodeId;
 
-        public static Dictionary<ushort, TrafficLightsTimed> TimedScripts = new Dictionary<ushort, TrafficLightsTimed>(); 
+        public static Dictionary<ushort, TrafficLightsTimed> TimedScripts = new Dictionary<ushort, TrafficLightsTimed>();
 
         public List<TimedTrafficSteps> Steps = new List<TimedTrafficSteps>();
         public int CurrentStep;
 
-        public List<ushort> NodeGroup; 
+        public List<ushort> NodeGroup;
 
         public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup)
         {

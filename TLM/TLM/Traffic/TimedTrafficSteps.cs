@@ -16,7 +16,7 @@ namespace TrafficManager.Traffic
         public List<RoadBaseAI.TrafficLightState> LightMain = new List<RoadBaseAI.TrafficLightState>();
         public List<RoadBaseAI.TrafficLightState> LightLeft = new List<RoadBaseAI.TrafficLightState>();
         public List<RoadBaseAI.TrafficLightState> LightRight = new List<RoadBaseAI.TrafficLightState>();
-        public List<RoadBaseAI.TrafficLightState> LightPedestrian = new List<RoadBaseAI.TrafficLightState>(); 
+        public List<RoadBaseAI.TrafficLightState> LightPedestrian = new List<RoadBaseAI.TrafficLightState>();
 
         public TimedTrafficSteps(int num, ushort nodeId)
         {
