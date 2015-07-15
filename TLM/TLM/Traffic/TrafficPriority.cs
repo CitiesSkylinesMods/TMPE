@@ -701,7 +701,7 @@ namespace TrafficManager.Traffic
             }
 
             return false;
-        }   
+        }
 
         public static Vector3 GetSegmentDir(int segment, ushort nodeid)
         {

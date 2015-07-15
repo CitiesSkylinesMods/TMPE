@@ -65,7 +65,7 @@ namespace TrafficManager
                     OnLoaded();
                     break;
             }
-            
+
             if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame)
             {
                 if (Instance == null)
@@ -75,7 +75,7 @@ namespace TrafficManager
                     {
                         PathfinderIncompatibility = true;
                     }
-                    
+
                     Instance = this;
                 }
 

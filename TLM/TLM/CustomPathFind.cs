@@ -24,7 +24,7 @@ namespace TrafficManager
 
         public CustomPathFind()
         {
-            
+
         }
 
         //Expose the private fields
@@ -41,7 +41,7 @@ namespace TrafficManager
             get { return _fieldpathUnits.GetValue(this) as Array32<PathUnit>; }
             set { _fieldpathUnits.SetValue(this, value); }
         }
-        
+
         private uint QueueFirst
         {
             get { return (uint)_fieldQueueFirst.GetValue(this); }
@@ -954,7 +954,7 @@ namespace TrafficManager
                     //            ref num,
                     //            connectOffset, true, false, preferedLaneId, preferedLaneNum);
                     //    }
-                    //} 
+                    //}
                     else
                     {
                         if (ProcessItem4(item, nodeId, num16, ref instance.m_segments.m_buffer[num16], ref num,

@@ -24,7 +24,7 @@ namespace TrafficManager.TrafficLight
         private int _hoveredSegmentIdx;
 
         public static List<ushort> SelectedNodeIndexes = new List<ushort>();
-        public static List<int> SelectedSegmentIndexes = new List<int>(); 
+        public static List<int> SelectedSegmentIndexes = new List<int>();
 
         private readonly int[] _hoveredButton = new int[2];
         private ushort _hoveredNode;
@@ -141,7 +141,7 @@ namespace TrafficManager.TrafficLight
             _signYield = LoadDllResource("sign_yield.png", 200, 200);
             _signPriority = LoadDllResource("sign_priority.png", 200, 200);
             _signNone = LoadDllResource("sign_none.png", 200, 200);
-            
+
             _secondPanelTexture = MakeTex(1200, 560, new Color(0.5f, 0.5f, 0.5f, 1f));
 
             base.Awake();
@@ -282,7 +282,7 @@ namespace TrafficManager.TrafficLight
             }
             else if (ToolMode == ToolMode.TimedLightsShowLights)
             {
-                
+
             }
             else if (ToolMode == ToolMode.LaneChange)
             {
@@ -663,7 +663,7 @@ namespace TrafficManager.TrafficLight
                                 {
                                     if (SelectedNodeIndexes.Count == 0)
                                     {
-                                        
+
                                     }
                                     ShowToolInfo(true, "Node is part of timed script", node.m_position);
                                 }
@@ -944,7 +944,7 @@ namespace TrafficManager.TrafficLight
                         // SWITCH MODE BUTTON
                         var modeWidth = 41f*zoom;
                         var modeHeight = 38f*zoom;
-                                    
+
 
                         guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == -1 ? 0.92f : 0.45f;
 
@@ -2364,7 +2364,7 @@ namespace TrafficManager.TrafficLight
             if (SelectedNode != 0 && SelectedSegment != 0)
             {
                 var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
-                
+
                 var info = segment.Info;
                 uint num2 = segment.m_lanes;
                 int num3 = 0;
@@ -2514,7 +2514,7 @@ namespace TrafficManager.TrafficLight
             }
 
             GUILayout.BeginHorizontal();
-            
+
             for (var i = 0; i < laneList.Count; i++)
             {
                 var flags = (NetLane.Flags) Singleton<NetManager>.instance.m_lanes.m_buffer[(int)laneList[i][0]].m_flags;
@@ -2770,7 +2770,7 @@ namespace TrafficManager.TrafficLight
                     {
                         return -1;
                     }
-                        
+
                     return 1;
                 });
             }
@@ -2823,7 +2823,7 @@ namespace TrafficManager.TrafficLight
                             _setSpeed = (int) laneList[i][2];
                         }
                     }
-                    
+
                     //if (GUILayout.Button(lane.enableCars ? "Disable cars" : "Enable cars", lane.enableCars ? style1 : style2))
                     //{
                     //    lane.toggleCars();

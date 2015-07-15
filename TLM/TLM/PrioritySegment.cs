@@ -24,9 +24,9 @@ namespace TrafficManager
 
         public int NumCars;
 
-        public List<ushort> Cars = new List<ushort>(); 
+        public List<ushort> Cars = new List<ushort>();
 
-        public int[] CarsOnLanes = new int[24]; 
+        public int[] CarsOnLanes = new int[24];
 
         public PrioritySegment(ushort nodeid, int segmentid, PriorityType type)
         {

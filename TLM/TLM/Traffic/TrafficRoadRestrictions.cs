@@ -42,7 +42,7 @@ namespace TrafficManager.Traffic
                 return Traffic.VehicleType.Service;
             if ((simulationFlags & 128) == 128)
                 return Traffic.VehicleType.Car;
-            
+
             return Traffic.VehicleType.Car;
         }
     }
