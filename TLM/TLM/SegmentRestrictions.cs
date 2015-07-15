@@ -1,44 +1,37 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TrafficManager
 {
     class SegmentRestrictions
     {
-        private int segmentID;
+        private int _segmentId;
 
-        public float[] speedLimits = new float[16] {0f, 0f, 0f, 0f, 0f, 0f,0f,0f,0f,0f,0f,0f,0f,0f,0f,0f};
+        public float[] SpeedLimits = new float[16] {0f, 0f, 0f, 0f, 0f, 0f,0f,0f,0f,0f,0f,0f,0f,0f,0f,0f};
 
-        public List<LaneRestrictions> lanes = new List<LaneRestrictions>();
+        public List<LaneRestrictions> Lanes = new List<LaneRestrictions>();
 
-        public List<int> segmentGroup; 
+        public List<int> SegmentGroup; 
 
         public SegmentRestrictions(int segmentid, List<int> segmentGroup )
         {
-            this.segmentID = segmentid;
-            this.segmentGroup = new List<int>(segmentGroup);
+            this._segmentId = segmentid;
+            this.SegmentGroup = new List<int>(segmentGroup);
         }
 
-        public void addLane(uint lane, int lanenum, NetInfo.Direction dir)
+        public void AddLane(uint lane, int lanenum, NetInfo.Direction dir)
         {
-            lanes.Add(new LaneRestrictions(lane, lanenum, dir));
+            Lanes.Add(new LaneRestrictions(lane, lanenum, dir));
         }
 
-        public LaneRestrictions getLane(int lane)
+        public LaneRestrictions GetLane(int lane)
         {
-            return lanes[lane];
+            return Lanes[lane];
         }
 
-        public LaneRestrictions getLaneByNum(int laneNum)
+        public LaneRestrictions GetLaneByNum(int laneNum)
         {
-            for (var i = 0; i < lanes.Count; i++)
-            {
-                if (lanes[i].laneNum == laneNum)
-                {
-                    return lanes[i];
-                }
-            }
-
-            return null;
+            return Lanes.FirstOrDefault(laneRestriction => laneRestriction.LaneNum == laneNum);
         }
     }
 }

@@ -802,7 +802,7 @@ namespace TrafficManager.TrafficLight
                                 {
                                     var restSegment = TrafficRoadRestrictions.GetSegment(_hoveredSegmentIdx);
 
-                                    SelectedSegmentIndexes = new List<int>(restSegment.segmentGroup);
+                                    SelectedSegmentIndexes = new List<int>(restSegment.SegmentGroup);
                                 }
                             }
                             else
@@ -2688,7 +2688,7 @@ namespace TrafficManager.TrafficLight
 
                         foreach (float[] lane in laneList0)
                         {
-                            restSegment.addLane((uint)lane[0], (int)lane[2], info0.m_lanes[(int)lane[2]].m_finalDirection);
+                            restSegment.AddLane((uint)lane[0], (int)lane[2], info0.m_lanes[(int)lane[2]].m_finalDirection);
                         }
                     }
                 }
@@ -2795,7 +2795,7 @@ namespace TrafficManager.TrafficLight
                 if (info2.m_lanes[(int) laneList[i][2]].m_laneType == NetInfo.LaneType.Vehicle)
                 {
                     var resSegment = TrafficRoadRestrictions.GetSegment(SelectedSegmentIndexes[0]);
-                    var resSpeed = resSegment.speedLimits[(int) laneList[i][2]];
+                    var resSpeed = resSegment.SpeedLimits[(int) laneList[i][2]];
 
                     if (_setSpeed == (int)laneList[i][2])
                     {
@@ -2807,7 +2807,7 @@ namespace TrafficManager.TrafficLight
                         {
                             foreach (var restrictionSegment in SelectedSegmentIndexes.Select(TrafficRoadRestrictions.GetSegment))
                             {
-                                restrictionSegment.speedLimits[(int) laneList[i][2]] =
+                                restrictionSegment.SpeedLimits[(int) laneList[i][2]] =
                                     SliderValues[(int) laneList[i][2]]/
                                     50f;
                             }
@@ -3385,7 +3385,7 @@ namespace TrafficManager.TrafficLight
                         {
                             var prioritySegment = TrafficPriority.GetPrioritySegment(SelectedNode, segmentId);
 
-                            if (prioritySegment.type == PrioritySegment.PriorityType.Main)
+                            if (prioritySegment.Type == PrioritySegment.PriorityType.Main)
                             {
                                 GUI.DrawTexture(myRect, _signPriority);
 
@@ -3398,11 +3398,11 @@ namespace TrafficManager.TrafficLight
                                     if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
                                     {
                                         _uiClickedSegment = true;
-                                        prioritySegment.type = PrioritySegment.PriorityType.Yield;
+                                        prioritySegment.Type = PrioritySegment.PriorityType.Yield;
                                     }
                                 }
                             }
-                            else if (prioritySegment.type == PrioritySegment.PriorityType.Yield)
+                            else if (prioritySegment.Type == PrioritySegment.PriorityType.Yield)
                             {
                                 GUI.DrawTexture(myRect, _signYield);
 
@@ -3415,11 +3415,11 @@ namespace TrafficManager.TrafficLight
                                     if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
                                     {
                                         _uiClickedSegment = true;
-                                        prioritySegment.type = PrioritySegment.PriorityType.Stop;
+                                        prioritySegment.Type = PrioritySegment.PriorityType.Stop;
                                     }
                                 }
                             }
-                            else if (prioritySegment.type == PrioritySegment.PriorityType.Stop)
+                            else if (prioritySegment.Type == PrioritySegment.PriorityType.Stop)
                             {
                                 GUI.DrawTexture(myRect, _signStop);
 
@@ -3433,7 +3433,7 @@ namespace TrafficManager.TrafficLight
                                     {
                                         _uiClickedSegment = true;
 
-                                        prioritySegment.type = PrioritySegment.PriorityType.None;
+                                        prioritySegment.Type = PrioritySegment.PriorityType.None;
                                     }
                                 }
                             }
@@ -3461,14 +3461,14 @@ namespace TrafficManager.TrafficLight
                                             {
                                                 var prioritySegment2 = TrafficPriority.GetPrioritySegment(SelectedNode, segmentId2);
 
-                                                if (prioritySegment2.type == PrioritySegment.PriorityType.Main)
+                                                if (prioritySegment2.Type == PrioritySegment.PriorityType.Main)
                                                 {
                                                     numMainRoads++;
                                                 }
                                             }
                                         }
 
-                                        prioritySegment.type = numMainRoads >= 2 ? PrioritySegment.PriorityType.Yield : PrioritySegment.PriorityType.Main;
+                                        prioritySegment.Type = numMainRoads >= 2 ? PrioritySegment.PriorityType.Yield : PrioritySegment.PriorityType.Main;
                                     }
                                 }
                             }
@@ -3497,7 +3497,7 @@ namespace TrafficManager.TrafficLight
                                         {
                                             var prioritySegment2 = TrafficPriority.GetPrioritySegment(SelectedNode, segmentId2);
 
-                                            if (prioritySegment2.type == PrioritySegment.PriorityType.Main)
+                                            if (prioritySegment2.Type == PrioritySegment.PriorityType.Main)
                                             {
                                                 numMainRoads++;
                                             }

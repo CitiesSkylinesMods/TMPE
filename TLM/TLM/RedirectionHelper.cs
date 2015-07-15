@@ -27,8 +27,8 @@ namespace TrafficManager
 {
     public struct RedirectCallsState
     {
-        public byte a, b, c, d, e;
-        public ulong f;
+        public byte A, B, C, D, E;
+        public ulong F;
     }
 
     /// <summary>
@@ -70,12 +70,12 @@ namespace TrafficManager
             unsafe
             {
                 byte* sitePtr = (byte*)site.ToPointer();
-                state.a = *sitePtr;
-                state.b = *(sitePtr + 1);
-                state.c = *(sitePtr + 10);
-                state.d = *(sitePtr + 11);
-                state.e = *(sitePtr + 12);
-                state.f = *((ulong*)(sitePtr + 2));
+                state.A = *sitePtr;
+                state.B = *(sitePtr + 1);
+                state.C = *(sitePtr + 10);
+                state.D = *(sitePtr + 11);
+                state.E = *(sitePtr + 12);
+                state.F = *((ulong*)(sitePtr + 2));
 
                 *sitePtr = 0x49; // mov r11, target
                 *(sitePtr + 1) = 0xBB;
@@ -93,12 +93,12 @@ namespace TrafficManager
             unsafe
             {
                 byte* sitePtr = (byte*)site.ToPointer();
-                *sitePtr = state.a; // mov r11, target
-                *(sitePtr + 1) = state.b;
-                *((ulong*)(sitePtr + 2)) = state.f;
-                *(sitePtr + 10) = state.c; // jmp r11
-                *(sitePtr + 11) = state.d;
-                *(sitePtr + 12) = state.e;
+                *sitePtr = state.A; // mov r11, target
+                *(sitePtr + 1) = state.B;
+                *((ulong*)(sitePtr + 2)) = state.F;
+                *(sitePtr + 10) = state.C; // jmp r11
+                *(sitePtr + 11) = state.D;
+                *(sitePtr + 12) = state.E;
             }
         }
 

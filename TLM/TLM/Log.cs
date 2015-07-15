@@ -1,29 +1,31 @@
-﻿namespace TrafficManager
+﻿using System;
+
+namespace TrafficManager
 {
 
     public static class Log
     {
-        const string prefix = "TrafficLightManager: ";
+        const string Prefix = "TrafficLightManager: ";
 
         public static void Message(object s)
         {
-            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, prefix + s.ToString());
+            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
         }
 
         public static void Error(object s)
         {
-            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, prefix + s.ToString());
+            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
         }
 
         public static void Warning(object s)
         {
-            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, prefix + s.ToString());
+            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
         }
 
 
         internal static void Warning(InstanceType instanceType)
         {
-            throw new System.NotImplementedException();
+            DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + String.Empty.ToString());
         }
     }
 

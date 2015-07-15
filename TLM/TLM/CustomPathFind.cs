@@ -22,6 +22,11 @@ namespace TrafficManager
             public NetInfo.LaneType LanesUsed;
         }
 
+        public CustomPathFind()
+        {
+            
+        }
+
         //Expose the private fields
         FieldInfo _fieldpathUnits;
         FieldInfo _fieldQueueFirst;
@@ -36,7 +41,7 @@ namespace TrafficManager
             get { return _fieldpathUnits.GetValue(this) as Array32<PathUnit>; }
             set { _fieldpathUnits.SetValue(this, value); }
         }
-
+        
         private uint QueueFirst
         {
             get { return (uint)_fieldQueueFirst.GetValue(this); }
@@ -130,7 +135,8 @@ namespace TrafficManager
             CustomPathFindThread.Start();
             if (!CustomPathFindThread.IsAlive)
             {
-                CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find thread failed to start!");
+                //CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find thread failed to start!");
+                Debug.LogError("Path find thread failed to start!", this);
             }
 
         }
@@ -1036,9 +1042,9 @@ namespace TrafficManager
                 {
                     var restrictionSegment = TrafficRoadRestrictions.GetSegment(item.Position.m_segment);
 
-                    if (restrictionSegment.speedLimits[item.Position.m_lane] > 0.1f)
+                    if (restrictionSegment.SpeedLimits[item.Position.m_lane] > 0.1f)
                     {
-                        num5 = restrictionSegment.speedLimits[item.Position.m_lane];
+                        num5 = restrictionSegment.SpeedLimits[item.Position.m_lane];
                     }
                     else
                     {
@@ -1084,7 +1090,7 @@ namespace TrafficManager
             {
                 var restrictionSegment = TrafficRoadRestrictions.GetSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment);
 
-                if (restrictionSegment.speedLimits[item.Position.m_lane] > 0.1f)
+                if (restrictionSegment.SpeedLimits[item.Position.m_lane] > 0.1f)
                 {
                 }
             }
@@ -1661,7 +1667,7 @@ namespace TrafficManager
                 {
                     Debug.Log("path thread error: " + ex.Message);
                     UIView.ForwardException(ex);
-                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find error: " + ex.Message + "\n" + ex.StackTrace);
+                    Debug.LogError("Path find error: " + ex.Message + "\n" + ex.StackTrace, this);
                     var expr_1A0Cp0 = PathUnits.m_buffer;
                     var expr_1A0Cp1 = (UIntPtr)Calculating;
                     expr_1A0Cp0[(int)expr_1A0Cp1].m_pathFindFlags = (byte)(expr_1A0Cp0[(int)expr_1A0Cp1].m_pathFindFlags | 8);

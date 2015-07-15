@@ -112,7 +112,7 @@ namespace TrafficManager.Traffic
                         var prioritySegment = GetPrioritySegment(nodeId, segment);
 
                         // select outdated cars
-                        removeCarList.AddRange(from car in prioritySegment.cars let frameReduce = VehicleList[car].lastSpeed < 70 ? 4u : 2u where VehicleList[car].lastFrame < frame - frameReduce select car);
+                        removeCarList.AddRange(from car in prioritySegment.Cars let frameReduce = VehicleList[car].lastSpeed < 70 ? 4u : 2u where VehicleList[car].lastFrame < frame - frameReduce select car);
 
                         // remove outdated cars
                         foreach (var rcar in removeCarList)
@@ -125,13 +125,13 @@ namespace TrafficManager.Traffic
 
                         if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
                         {
-                            if (fromPrioritySegment.type == PrioritySegment.PriorityType.Main)
+                            if (fromPrioritySegment.Type == PrioritySegment.PriorityType.Main)
                             {
-                                if (prioritySegment.type == PrioritySegment.PriorityType.Main)
+                                if (prioritySegment.Type == PrioritySegment.PriorityType.Main)
                                 {
-                                    numCars += prioritySegment.numCars;
+                                    numCars += prioritySegment.NumCars;
 
-                                    foreach (var car in prioritySegment.cars)
+                                    foreach (var car in prioritySegment.Cars)
                                     {
                                         if (VehicleList[car].lastSpeed > 0.1f)
                                         {
@@ -148,11 +148,11 @@ namespace TrafficManager.Traffic
                             }
                             else
                             {
-                                numCars += prioritySegment.numCars;
+                                numCars += prioritySegment.NumCars;
 
-                                foreach (var car in prioritySegment.cars)
+                                foreach (var car in prioritySegment.Cars)
                                 {
-                                    if (prioritySegment.type == PrioritySegment.PriorityType.Main)
+                                    if (prioritySegment.Type == PrioritySegment.PriorityType.Main)
                                     {
                                         if (!VehicleList[car].stopped)
                                         {
@@ -189,9 +189,9 @@ namespace TrafficManager.Traffic
 
                                 if (segmentLight.GetLightMain() == RoadBaseAI.TrafficLightState.Green)
                                 {
-                                    numCars += prioritySegment.numCars;
+                                    numCars += prioritySegment.NumCars;
 
-                                    foreach (var car in prioritySegment.cars)
+                                    foreach (var car in prioritySegment.Cars)
                                     {
                                         if (VehicleList[car].lastSpeed > 1f)
                                         {

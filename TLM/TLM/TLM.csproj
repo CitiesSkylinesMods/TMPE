@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TrafficManager</RootNamespace>
     <AssemblyName>TrafficManager</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -62,13 +62,14 @@
     <Compile Include="CustomPathFind.cs" />
     <Compile Include="CustomPathManager.cs" />
     <Compile Include="LaneRestrictions.cs" />
+    <Compile Include="LoadingExtension.cs" />
     <Compile Include="PriorityCar.cs" />
     <Compile Include="PrioritySegment.cs" />
     <Compile Include="RedirectionHelper.cs" />
     <Compile Include="SegmentRestrictions.cs" />
     <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="Mod.cs" />
+    <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\ManualSegment.cs" />
     <Compile Include="TrafficLight\ManualSegmentLight.cs" />
     <Compile Include="TrafficLight\ToolMode.cs" />
@@ -77,6 +78,8 @@
     <Compile Include="TrafficLight\TrafficLightsTimed.cs" />
     <Compile Include="TrafficLight\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="Traffic\TimedTrafficSteps.cs" />
     <Compile Include="Traffic\TrafficPriority.cs" />
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />

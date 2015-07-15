@@ -6,39 +6,30 @@ namespace TrafficManager
 {
     public class Configuration
     {
-        public string nodeTrafficLights;
-        public string nodeCrosswalk;
-        public string laneFlags;
+        public string NodeTrafficLights;
+        public string NodeCrosswalk;
+        public string LaneFlags;
 
-        public List<int[]> prioritySegments = new List<int[]>();
-        public List<int[]> nodeDictionary = new List<int[]>(); 
-        public List<int[]> manualSegments = new List<int[]>(); 
+        public List<int[]> PrioritySegments = new List<int[]>();
+        public List<int[]> NodeDictionary = new List<int[]>(); 
+        public List<int[]> ManualSegments = new List<int[]>(); 
 
-        public List<int[]> timedNodes = new List<int[]>();
-        public List<ushort[]> timedNodeGroups = new List<ushort[]>();
-        public List<int[]> timedNodeSteps = new List<int[]>();
-        public List<int[]> timedNodeStepSegments = new List<int[]>(); 
-
-        public void OnPreSerialize()
-        {
-        }
-
-        public void OnPostDeserialize()
-        {
-        }
-
-        public static void Serialize(string filename, Configuration config)
+        public List<int[]> TimedNodes = new List<int[]>();
+        public List<ushort[]> TimedNodeGroups = new List<ushort[]>();
+        public List<int[]> TimedNodeSteps = new List<int[]>();
+        public List<int[]> TimedNodeStepSegments = new List<int[]>(); 
+        
+        public static void SaveConfigurationToFile(string filename, Configuration config)
         {
             var serializer = new XmlSerializer(typeof(Configuration));
 
             using (var writer = new StreamWriter(filename))
             {
-                config.OnPreSerialize();
                 serializer.Serialize(writer, config);
             }
         }
 
-        public static Configuration Deserialize(string filename)
+        public static Configuration LoadConfigurationFromFile(string filename)
         {
             var serializer = new XmlSerializer(typeof(Configuration));
 
@@ -47,11 +38,13 @@ namespace TrafficManager
                 using (var reader = new StreamReader(filename))
                 {
                     var config = (Configuration)serializer.Deserialize(reader);
-                    config.OnPostDeserialize();
                     return config;
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             return null;
         }
