@@ -10,27 +10,115 @@ namespace TrafficManager.CustomAI
 {
     class CustomCarAI : CarAI
     {
-        public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
+        private const int MaxTrailingVehicles = 16384;
+        private const float FarLod = 1210000f;
+        private const float CloseLod = 250000f;
+
+        public void TmSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos)
         {
-            if ((data.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None)
+            try
             {
-                if (!CanFindPath(vehicleId, ref data))
-                    return;
+                FindPathIfNeeded(vehicleId, ref vehicleData);
             }
-            else if ((data.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None)
+            catch (InvalidOperationException)
             {
-                TrySpawn(vehicleId, ref data);
+                return;
             }
 
-            var lastFramePosition = data.GetLastFramePosition();
+            SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
+
+            SimulateVehicleChain(vehicleId, ref vehicleData, physicsLodRefPos);
+
+            DespawnVehicles(vehicleId, vehicleData);
+        }
+
+        private void SimulateVehicleChain(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos)
+        {
+            var lastFramePosition = vehicleData.GetLastFramePosition();
+
+            var lodPhysics = CalculateLod(physicsLodRefPos, lastFramePosition);
+
+            SimulationStep(vehicleId, ref vehicleData, vehicleId, ref vehicleData, lodPhysics);
+
+            // if there are vehicles behind this, simulate them
+            if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0)
+            {
+                SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics);
+            }
+        }
+
+        private void DespawnVehicles(ushort vehicleId, Vehicle vehicleData)
+        {
+            DespawnInvalidVehicles(vehicleId, vehicleData);
+
+            DespawnVehicleIfOverBlockMax(vehicleId, vehicleData);
+        }
+
+        private void DespawnInvalidVehicles(ushort vehicleId, Vehicle vehicleData)
+        {
+            if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) ==
+                Vehicle.Flags.None && vehicleData.m_cargoParent == 0)
+            {
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+            }
+        }
+
+        private void DespawnVehicleIfOverBlockMax(ushort vehicleId, Vehicle vehicleData)
+        {
+            var maxBlockingVehicles = CalculateMaxBlockingVehicleCount();
+            if (vehicleData.m_blockCounter >= maxBlockingVehicles && LoadingExtension.Instance.DespawnEnabled)
+            {
+                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+            }
+        }
+
+        private int CalculateMaxBlockingVehicleCount()
+        {
+            return (m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
+        }
+
+        private void SimulateTrailingVehicles(ushort vehicleId, ref Vehicle vehicleData, int lodPhysics)
+        {
+            var vehicleManager = Singleton<VehicleManager>.instance;
+            var trailingVehicleId = vehicleData.m_trailingVehicle;
+            var numberOfIterations = 0;
+            SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager, numberOfIterations);
+        }
+
+        private void SimulateTrailingVehicles(ushort vehicleId, ref Vehicle vehicleData, int lodPhysics,
+            ushort leadingVehicleId, VehicleManager vehicleManager, int numberOfIterations)
+        {
+            if (leadingVehicleId == 0)
+            {
+                return;
+            }
+
+            var trailingVehicleId = vehicleManager.m_vehicles.m_buffer[leadingVehicleId].m_trailingVehicle;
+            var trailingVehicleInfo = vehicleManager.m_vehicles.m_buffer[trailingVehicleId].Info;
+
+            trailingVehicleInfo.m_vehicleAI.SimulationStep(trailingVehicleId,
+                ref vehicleManager.m_vehicles.m_buffer[trailingVehicleId], vehicleId,
+                ref vehicleData, lodPhysics);
+
+            if (++numberOfIterations > MaxTrailingVehicles)
+            {
+                CODebugBase<LogChannel>.Error(LogChannel.Core,
+                    "Invalid list detected!\n" + Environment.StackTrace);
+                return;
+            }
+            SimulateTrailingVehicles(trailingVehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager, numberOfIterations);
+        }
+        
+        private static int CalculateLod(Vector3 physicsLodRefPos, Vector3 lastFramePosition)
+        {
             int lodPhysics;
-            if (Vector3.SqrMagnitude(physicsLodRefPos - lastFramePosition) >= 1210000f)
+            if (Vector3.SqrMagnitude(physicsLodRefPos - lastFramePosition) >= FarLod)
             {
                 lodPhysics = 2;
             }
             else if (
                 Vector3.SqrMagnitude(Singleton<SimulationManager>.instance.m_simulationView.m_position -
-                                     lastFramePosition) >= 250000f)
+                                     lastFramePosition) >= CloseLod)
             {
                 lodPhysics = 1;
             }
@@ -38,37 +126,23 @@ namespace TrafficManager.CustomAI
             {
                 lodPhysics = 0;
             }
-            SimulationStep(vehicleId, ref data, vehicleId, ref data, lodPhysics);
-            if (data.m_leadingVehicle == 0 && data.m_trailingVehicle != 0)
-            {
-                var instance2 = Singleton<VehicleManager>.instance;
-                var num = data.m_trailingVehicle;
-                var num2 = 0;
-                while (num != 0)
-                {
-                    var trailingVehicle = instance2.m_vehicles.m_buffer[num].m_trailingVehicle;
-                    var info = instance2.m_vehicles.m_buffer[num].Info;
-                    info.m_vehicleAI.SimulationStep(num, ref instance2.m_vehicles.m_buffer[num], vehicleId,
-                        ref data, lodPhysics);
-                    num = trailingVehicle;
+            return lodPhysics;
+        }
 
-                    if (++num2 > 16384)
-                    {
-                        CODebugBase<LogChannel>.Error(LogChannel.Core,
-                            "Invalid list detected!\n" + Environment.StackTrace);
-                        break;
-                    }
-                }
-            }
-            var num3 = (m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
-            if ((data.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) ==
-                Vehicle.Flags.None && data.m_cargoParent == 0)
+        private void SpawnVehicleIfWaiting(ushort vehicleId, ref Vehicle vehicleData)
+        {
+            if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+                TrySpawn(vehicleId, ref vehicleData);
             }
-            else if (data.m_blockCounter >= num3 && LoadingExtension.Instance.DespawnEnabled)
+        }
+
+        private void FindPathIfNeeded(ushort vehicleId, ref Vehicle vehicleData)
+        {
+            if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None)
             {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+                if (!CanFindPath(vehicleId, ref vehicleData))
+                    throw new InvalidOperationException("Path Not Available for Vehicle");
             }
         }
 
