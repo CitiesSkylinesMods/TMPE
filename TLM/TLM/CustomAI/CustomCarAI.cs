@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace TrafficManager.CustomAI
 {
-    class CustomCarAI : CarAI
+    internal class CustomCarAI : CarAI
     {
         private const int MaxTrailingVehicles = 16384;
         private const float FarLod = 1210000f;
@@ -43,7 +43,11 @@ namespace TrafficManager.CustomAI
             // if there are vehicles behind this, simulate them
             if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0)
             {
-                SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics);
+                var vehicleManager = Singleton<VehicleManager>.instance;
+                var trailingVehicleId = vehicleData.m_trailingVehicle;
+                var numberOfIterations = 0;
+                SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager,
+                    numberOfIterations);
             }
         }
 
@@ -76,15 +80,7 @@ namespace TrafficManager.CustomAI
         {
             return (m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
         }
-
-        private void SimulateTrailingVehicles(ushort vehicleId, ref Vehicle vehicleData, int lodPhysics)
-        {
-            var vehicleManager = Singleton<VehicleManager>.instance;
-            var trailingVehicleId = vehicleData.m_trailingVehicle;
-            var numberOfIterations = 0;
-            SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager, numberOfIterations);
-        }
-
+        
         private void SimulateTrailingVehicles(ushort vehicleId, ref Vehicle vehicleData, int lodPhysics,
             ushort leadingVehicleId, VehicleManager vehicleManager, int numberOfIterations)
         {
@@ -106,9 +102,10 @@ namespace TrafficManager.CustomAI
                     "Invalid list detected!\n" + Environment.StackTrace);
                 return;
             }
-            SimulateTrailingVehicles(trailingVehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager, numberOfIterations);
+            SimulateTrailingVehicles(trailingVehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager,
+                numberOfIterations);
         }
-        
+
         private static int CalculateLod(Vector3 physicsLodRefPos, Vector3 lastFramePosition)
         {
             int lodPhysics;
@@ -116,9 +113,8 @@ namespace TrafficManager.CustomAI
             {
                 lodPhysics = 2;
             }
-            else if (
-                Vector3.SqrMagnitude(Singleton<SimulationManager>.instance.m_simulationView.m_position -
-                                     lastFramePosition) >= CloseLod)
+            else if (Vector3.SqrMagnitude(Singleton<SimulationManager>.
+                instance.m_simulationView.m_position - lastFramePosition) >= CloseLod)
             {
                 lodPhysics = 1;
             }
@@ -173,12 +169,15 @@ namespace TrafficManager.CustomAI
             PathUnit.Position position, uint laneId, byte offset, PathUnit.Position prevPos, uint prevLaneId,
             byte prevOffset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
         {
-            NetManager instance = Singleton<NetManager>.instance;
-            instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
-            Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
-            Vector3 position2 = lastFrameData.m_position;
-            Vector3 b = instance.m_lanes.m_buffer[(int)((UIntPtr)prevLaneId)].CalculatePosition(prevOffset * 0.003921569f);
-            float num = 0.5f * lastFrameData.m_velocity.sqrMagnitude / m_info.m_braking + m_info.m_generatedInfo.m_size.z * 0.5f;
+            var netManager = Singleton<NetManager>.instance;
+            netManager.m_lanes.m_buffer[(int)((UIntPtr) laneId)]
+                .CalculatePositionAndDirection(offset*0.003921569f, out pos, out dir);
+
+            var lastFrameData = vehicleData.GetLastFrameData();
+            var vehiclePositionLastFrame = lastFrameData.m_position;
+            var b = netManager.m_lanes.m_buffer[(int) ((UIntPtr) prevLaneId)]
+                .CalculatePosition(prevOffset*0.003921569f);
+            var num = 0.5f*lastFrameData.m_velocity.sqrMagnitude/m_info.m_braking + m_info.m_generatedInfo.m_size.z*0.5f;
 
             if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car)
             {
@@ -188,7 +187,7 @@ namespace TrafficManager.CustomAI
                 }
             }
 
-            if (Vector3.Distance(position2, b) >= num - 1f)
+            if (Vector3.Distance(vehiclePositionLastFrame, b) >= num - 1f)
             {
                 Segment3 segment;
                 segment.a = pos;
@@ -197,56 +196,56 @@ namespace TrafficManager.CustomAI
                 if (offset < position.m_offset)
                 {
                     segment.b = pos + dir.normalized*m_info.m_generatedInfo.m_size.z;
-                    num2 = instance.m_segments.m_buffer[position.m_segment].m_startNode;
-                    num3 = instance.m_segments.m_buffer[position.m_segment].m_endNode;
+                    num2 = netManager.m_segments.m_buffer[position.m_segment].m_startNode;
+                    num3 = netManager.m_segments.m_buffer[position.m_segment].m_endNode;
                 }
                 else
                 {
                     segment.b = pos - dir.normalized*m_info.m_generatedInfo.m_size.z;
-                    num2 = instance.m_segments.m_buffer[position.m_segment].m_endNode;
-                    num3 = instance.m_segments.m_buffer[position.m_segment].m_startNode;
+                    num2 = netManager.m_segments.m_buffer[position.m_segment].m_endNode;
+                    num3 = netManager.m_segments.m_buffer[position.m_segment].m_startNode;
                 }
                 ushort num4;
                 if (prevOffset == 0)
                 {
-                    num4 = instance.m_segments.m_buffer[prevPos.m_segment].m_startNode;
+                    num4 = netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode;
                 }
                 else
                 {
-                    num4 = instance.m_segments.m_buffer[prevPos.m_segment].m_endNode;
+                    num4 = netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
                 }
 
                 if (num2 == num4)
                 {
-                    uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                    uint num5 = (uint)((num4 << 8) / 32768);
-                    uint num6 = currentFrameIndex - num5 & 255u;
+                    var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+                    var num5 = (uint) ((num4 << 8)/32768);
+                    var num6 = currentFrameIndex - num5 & 255u;
 
-                    NetNode.Flags flags = instance.m_nodes.m_buffer[num2].m_flags;
-                    NetLane.Flags flags2 =
-                        (NetLane.Flags) instance.m_lanes.m_buffer[(int) ((UIntPtr) prevLaneId)].m_flags;
-                    bool flag = (flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
-                    bool flag2 = (flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
-                    bool flag3 = (flags2 & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
+                    var flags = netManager.m_nodes.m_buffer[num2].m_flags;
+                    var flags2 =
+                        (NetLane.Flags) netManager.m_lanes.m_buffer[(int) ((UIntPtr) prevLaneId)].m_flags;
+                    var flag = (flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+                    var flag2 = (flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
+                    var flag3 = (flags2 & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
                     if ((flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) ==
-                        NetNode.Flags.Junction && instance.m_nodes.m_buffer[num2].CountSegments() != 2)
+                        NetNode.Flags.Junction && netManager.m_nodes.m_buffer[num2].CountSegments() != 2)
                     {
-                        float len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
-                        if (!instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].CheckSpace(len))
+                        var len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
+                        if (!netManager.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].CheckSpace(len))
                         {
-                            bool flag4 = false;
+                            var flag4 = false;
                             if (nextPosition.m_segment != 0 &&
-                                instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_length < 30f)
+                                netManager.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_length < 30f)
                             {
-                                NetNode.Flags flags3 = instance.m_nodes.m_buffer[num3].m_flags;
+                                var flags3 = netManager.m_nodes.m_buffer[num3].m_flags;
                                 if ((flags3 &
                                      (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) !=
-                                    NetNode.Flags.Junction || instance.m_nodes.m_buffer[num3].CountSegments() == 2)
+                                    NetNode.Flags.Junction || netManager.m_nodes.m_buffer[num3].CountSegments() == 2)
                                 {
-                                    uint laneId2 = PathManager.GetLaneID(nextPosition);
+                                    var laneId2 = PathManager.GetLaneID(nextPosition);
                                     if (laneId2 != 0u)
                                     {
-                                        flag4 = instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId2)].CheckSpace(len);
+                                        flag4 = netManager.m_lanes.m_buffer[(int) ((UIntPtr) laneId2)].CheckSpace(len);
                                     }
                                 }
                             }
@@ -262,8 +261,8 @@ namespace TrafficManager.CustomAI
                         TrafficPriority.VehicleList.ContainsKey(vehicleId) &&
                         TrafficPriority.IsPrioritySegment(num2, prevPos.m_segment))
                     {
-                        uint currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-                        uint frame = currentFrameIndex2 >> 4;
+                        var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+                        var frame = currentFrameIndex2 >> 4;
 
                         var prioritySegment = TrafficPriority.GetPrioritySegment(num2, prevPos.m_segment);
                         if (TrafficPriority.VehicleList[vehicleId].toNode != num2 ||
@@ -292,7 +291,7 @@ namespace TrafficManager.CustomAI
                             TrafficPriority.VehicleList[vehicleId].toLaneID = PathManager.GetLaneID(position);
                             TrafficPriority.VehicleList[vehicleId].fromLaneID = PathManager.GetLaneID(prevPos);
                             TrafficPriority.VehicleList[vehicleId].fromLaneFlags =
-                                instance.m_lanes.m_buffer[PathManager.GetLaneID(prevPos)].m_flags;
+                                netManager.m_lanes.m_buffer[PathManager.GetLaneID(prevPos)].m_flags;
                             TrafficPriority.VehicleList[vehicleId].yieldSpeedReduce = Random.Range(13f,
                                 18f);
 
@@ -308,23 +307,24 @@ namespace TrafficManager.CustomAI
                     {
                         var nodeSimulation = CustomRoadAI.GetNodeSimulation(num4);
 
-                        NetInfo info = instance.m_nodes.m_buffer[num2].Info;
+                        var info = netManager.m_nodes.m_buffer[num2].Info;
                         RoadBaseAI.TrafficLightState vehicleLightState;
 
-                        if (nodeSimulation == null || (nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive))
+                        if (nodeSimulation == null ||
+                            (nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive))
                         {
                             RoadBaseAI.TrafficLightState pedestrianLightState;
                             bool flag5;
                             bool pedestrians;
                             RoadBaseAI.GetTrafficLightState(num4,
-                                ref instance.m_segments.m_buffer[prevPos.m_segment],
+                                ref netManager.m_segments.m_buffer[prevPos.m_segment],
                                 currentFrameIndex - num5, out vehicleLightState, out pedestrianLightState, out flag5,
                                 out pedestrians);
                             if (!flag5 && num6 >= 196u)
                             {
                                 flag5 = true;
                                 RoadBaseAI.SetTrafficLightState(num4,
-                                    ref instance.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - num5,
+                                    ref netManager.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - num5,
                                     vehicleLightState, pedestrianLightState, flag5, pedestrians);
                             }
 
@@ -514,13 +514,13 @@ namespace TrafficManager.CustomAI
                                     }
                                     TrafficPriority.VehicleList[vehicleId].stopped = false;
 
-                                    NetInfo info3 = instance.m_segments.m_buffer[position.m_segment].Info;
+                                    var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
                                     if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane)
                                     {
                                         maxSpeed =
                                             CalculateTargetSpeed(vehicleId, ref vehicleData,
                                                 info3.m_lanes[position.m_lane].m_speedLimit,
-                                                instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_curve)*0.8f;
+                                                netManager.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_curve)*0.8f;
                                     }
                                     else
                                     {
@@ -539,7 +539,7 @@ namespace TrafficManager.CustomAI
                 }
             }
 
-            NetInfo info2 = instance.m_segments.m_buffer[position.m_segment].Info;
+            var info2 = netManager.m_segments.m_buffer[position.m_segment].Info;
             if (info2.m_lanes != null && info2.m_lanes.Length > position.m_lane)
             {
                 var laneSpeedLimit = info2.m_lanes[position.m_lane].m_speedLimit;
@@ -554,17 +554,21 @@ namespace TrafficManager.CustomAI
                     }
                 }
 
-                maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_curve);
+                maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,
+                    netManager.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_curve);
             }
             else
             {
                 maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
             }
         }
-        public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, uint laneId, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
+
+        public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData,
+            PathUnit.Position position, uint laneId, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
         {
             var instance = Singleton<NetManager>.instance;
-            instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
+            instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].CalculatePositionAndDirection(offset*0.003921569f,
+                out pos, out dir);
             var info = instance.m_segments.m_buffer[position.m_segment].Info;
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane)
             {
@@ -580,7 +584,8 @@ namespace TrafficManager.CustomAI
                     }
                 }
 
-                maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_curve);
+                maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,
+                    instance.m_lanes.m_buffer[(int) ((UIntPtr) laneId)].m_curve);
             }
             else
             {
@@ -588,10 +593,12 @@ namespace TrafficManager.CustomAI
             }
         }
 
-        protected override bool StartPathFind(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
+        protected override bool StartPathFind(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos,
+            Vector3 endPos, bool startBothWays, bool endBothWays)
         {
-            VehicleInfo info = m_info;
-            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != Vehicle.Flags.None;
+            var info = m_info;
+            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) !=
+                                   Vehicle.Flags.None;
             PathUnit.Position startPosA;
             PathUnit.Position startPosB;
             float num;
@@ -602,7 +609,12 @@ namespace TrafficManager.CustomAI
             float num4;
             const bool requireConnect = false;
             const float maxDistance = 32f;
-            if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, requireConnect, maxDistance, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, requireConnect, 32f, out endPosA, out endPosB, out num3, out num4))
+            if (
+                PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle,
+                    info.m_vehicleType, allowUnderground, requireConnect, maxDistance, out startPosA, out startPosB,
+                    out num, out num2) &&
+                PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle,
+                    info.m_vehicleType, false, requireConnect, 32f, out endPosA, out endPosB, out num3, out num4))
             {
                 if (!startBothWays || num < 10f)
                 {
@@ -614,7 +626,11 @@ namespace TrafficManager.CustomAI
                 }
                 uint path;
 
-                if (Singleton<CustomPathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, IsHeavyVehicle(), IgnoreBlocked(vehicleId, ref vehicleData), false, false, vehicleData.Info.m_class.m_service))
+                if (Singleton<CustomPathManager>.instance.CreatePath(out path,
+                    ref Singleton<SimulationManager>.instance.m_randomizer,
+                    Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB,
+                    default(PathUnit.Position), NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, IsHeavyVehicle(),
+                    IgnoreBlocked(vehicleId, ref vehicleData), false, false, vehicleData.Info.m_class.m_service))
                 {
                     if (vehicleData.m_path != 0u)
                     {
