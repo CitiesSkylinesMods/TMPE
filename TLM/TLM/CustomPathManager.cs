@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
+using UnityEngine;
+
 // ReSharper disable InconsistentNaming
 
 namespace TrafficManager
@@ -17,15 +19,22 @@ namespace TrafficManager
         //On waking up, replace the stock pathfinders with the custom one
         protected new virtual void Awake()
         {
-            PathFind[] stockPathFinds = GetComponents<PathFind>();
-            int l = stockPathFinds.Length;
-            _replacementPathFinds = new CustomPathFind[l];
-            for (int i = 0; i < l; i++)
+            Debug.Log("Waking up CustomPathManager.");
+            var stockPathFinds = GetComponents<PathFind>();
+            var numOfStockPathFinds = stockPathFinds.Length;
+
+            Debug.Log("Creating " + numOfStockPathFinds + " custom PathFind objects.");
+            _replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
+            for (var i = 0; i < numOfStockPathFinds; i++)
             {
                 _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
                 Destroy(stockPathFinds[i]);
             }
+
+            Debug.Log("Setting _replacementPathFinds");
             var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            Debug.Log("Setting m_pathfinds to custom collection");
             fieldInfo?.SetValue(this, _replacementPathFinds);
         }
 

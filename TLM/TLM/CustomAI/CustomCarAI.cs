@@ -10,7 +10,7 @@ namespace TrafficManager.CustomAI
 {
     class CustomCarAI : CarAI
     {
-        public override void SimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
+        public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None)
             {
@@ -95,7 +95,7 @@ namespace TrafficManager.CustomAI
             return true;
         }
 
-        protected override void CalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition,
+        public void TmCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition,
             PathUnit.Position position, uint laneId, byte offset, PathUnit.Position prevPos, uint prevLaneId,
             byte prevOffset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
         {
@@ -487,7 +487,7 @@ namespace TrafficManager.CustomAI
                 maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
             }
         }
-        public void CalculateSegmentPosition2(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, uint laneId, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
+        public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, uint laneId, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed)
         {
             var instance = Singleton<NetManager>.instance;
             instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);

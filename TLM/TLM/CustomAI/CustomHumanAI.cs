@@ -5,7 +5,7 @@ namespace TrafficManager.CustomAI
 {
     class CustomHumanAI
     {
-        public bool CheckTrafficLights(ushort node, ushort segment)
+        public bool CustomCheckTrafficLights(ushort node, ushort segment)
         {
             var nodeSimulation = CustomRoadAI.GetNodeSimulation(node);
 

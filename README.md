@@ -2,8 +2,7 @@
 A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Changelog
-- Updated codebase to support Cities Skylines 1.1.1 patch. Version number of Mod will now track CS build number to keep it easy.
-- Major codebase refactoring and cleanup. Still a long ways to go, but this should make enhancements, and bug fixing easier.
+- Fixed PathManager problems caused from the first refactor pass
 
 # Current features
 
@@ -24,5 +23,4 @@ A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Roadmap
 
-- Road restrictions (speed limit, bus/service/car/cargo lanes)
 - Better UI

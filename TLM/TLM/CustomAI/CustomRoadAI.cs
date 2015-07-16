@@ -93,7 +93,7 @@ namespace TrafficManager.CustomAI
             }
         }
 
-        public override void SimulationStep(ushort nodeId, ref NetNode data)
+        public void CustomSimulationStep(ushort nodeId, ref NetNode data)
         {
             var node = GetNodeSimulation(nodeId);
 

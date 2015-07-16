@@ -6,7 +6,7 @@ namespace TrafficManager.CustomAI
 {
     class CustomCargoTruckAI : CarAI
     {
-        public override void SimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
+        public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
             {

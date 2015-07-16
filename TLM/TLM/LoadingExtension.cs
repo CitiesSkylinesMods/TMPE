@@ -14,7 +14,7 @@ namespace TrafficManager
     public class LoadingExtension : LoadingExtensionBase
     {
         public static LoadingExtension Instance;
-        public static bool PathfinderIncompatibility;
+        public static bool IsPathManagerCompatibile = true;
         public CustomPathManager CustomPathManager { get; set; }
         public bool DespawnEnabled { get; set; }
         public bool DetourInited { get; set; }
@@ -36,6 +36,12 @@ namespace TrafficManager
 
             Debug.Log("Setting Despawn to False");
             DespawnEnabled = true;
+
+            Debug.Log("Init DetourInited");
+            DetourInited = false;
+
+            Debug.Log("Init Custom PathManager");
+            CustomPathManager = new CustomPathManager();
         }
 
         public override void OnReleased()
@@ -73,26 +79,36 @@ namespace TrafficManager
                     Debug.Log("Instance is NULL. Set Instance to this.");
                     if (Singleton<PathManager>.instance.GetType() != typeof (PathManager))
                     {
-                        PathfinderIncompatibility = true;
+                        Debug.Log("Traffic++ Detected. Disable Pathfinder");
+                        IsPathManagerCompatibile = false;
                     }
-
+                    
                     Instance = this;
                 }
 
-                if (!PathfinderIncompatibility)
+                if (IsPathManagerCompatibile)
                 {
                     Debug.Log("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     var pathManagerInstance = typeof (Singleton<PathManager>).GetField("sInstance",
                         BindingFlags.Static | BindingFlags.NonPublic);
+
                     var stockPathManager = PathManager.instance;
                     CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
                     CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+
                     pathManagerInstance?.SetValue(null, CustomPathManager);
+
+                    Debug.Log("Getting Current SimulationManager");
                     var simManager =
                         typeof (SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
                             .GetValue(null) as FastList<ISimulationManager>;
+
+                    Debug.Log("Removing Stock PathManager");
                     simManager?.Remove(stockPathManager);
+
+                    Debug.Log("Adding Custom PathManager");
                     simManager?.Add(CustomPathManager);
+
                     Object.Destroy(stockPathManager, 10f);
                 }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using ICities;
 using TrafficManager.CustomAI;
@@ -36,7 +37,7 @@ namespace TrafficManager
             Debug.Log("If !DetourInited");
             if (!LoadingExtension.Instance.DetourInited)
             {
-                Debug.Log("Redirecting Car AI Calls");
+                Debug.Log("Redirecting Car AI Calculate Segment Calls");
                 LoadingExtension.Instance.RevertMethods[0] = RedirectionHelper.RedirectCalls(
                     typeof (CarAI).GetMethod("CalculateSegmentPosition",
                         BindingFlags.NonPublic | BindingFlags.Instance,
@@ -49,13 +50,13 @@ namespace TrafficManager
                             typeof (Vector3).MakeByRefType(), typeof (float).MakeByRefType()
                         },
                         null),
-                    typeof (CustomCarAI).GetMethod("CalculateSegmentPosition"));
+                    typeof (CustomCarAI).GetMethod("TmCalculateSegmentPosition"));
 
                 Debug.Log("Redirecting SimulationStep");
                 LoadingExtension.Instance.RevertMethods[1] = RedirectionHelper.RedirectCalls(
                     typeof (RoadBaseAI).GetMethod("SimulationStep",
                         new[] {typeof (ushort), typeof (NetNode).MakeByRefType()}),
-                    typeof (CustomRoadAI).GetMethod("SimulationStep", BindingFlags.NonPublic | BindingFlags.Instance));
+                    typeof (CustomRoadAI).GetMethod("CustomSimulationStep"));
 
                 Debug.Log("Redirecting Human AI Calls");
                 LoadingExtension.Instance.RevertMethods[2] =
@@ -64,32 +65,37 @@ namespace TrafficManager
                         null,
                         new[] {typeof (ushort), typeof (ushort)},
                         null),
-                        typeof (CustomHumanAI).GetMethod("CheckTrafficLights"));
+                        typeof (CustomHumanAI).GetMethod("CustomCheckTrafficLights"));
 
-                if (!LoadingExtension.PathfinderIncompatibility)
+                if (!LoadingExtension.IsPathManagerCompatibile)
                 {
+                    Debug.Log("Traffic++ Not detected. Loading Pathfinder.");
+                    Debug.Log("Redirecting CarAI Simulation Step Calls");
                     LoadingExtension.Instance.RevertMethods[3] =
                         RedirectionHelper.RedirectCalls(
                             typeof (CarAI).GetMethod("SimulationStep",
-                                new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                            typeof (CustomCarAI).GetMethod("SimulationStep",
-                                BindingFlags.NonPublic | BindingFlags.Instance));
+                                new[] {
+                                    typeof (ushort),
+                                    typeof (Vehicle).MakeByRefType(),
+                                    typeof (Vector3)
+                                }),
+                            typeof (CustomCarAI).GetMethod("CustomSimulationStep"));
 
-
+                    Debug.Log("Redirecting PassengerCarAI Simulation Step Calls");
                     LoadingExtension.Instance.RevertMethods[4] =
                         RedirectionHelper.RedirectCalls(
                             typeof (PassengerCarAI).GetMethod("SimulationStep",
                                 new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                            typeof (CustomPassengerCarAI).GetMethod("SimulationStep",
-                                BindingFlags.NonPublic | BindingFlags.Instance));
+                            typeof (CustomPassengerCarAI).GetMethod("CustomSimulationStep"));
 
+                    Debug.Log("Redirecting CargoTruckAI Simulation Step Calls");
                     LoadingExtension.Instance.RevertMethods[5] =
                         RedirectionHelper.RedirectCalls(
                             typeof (CargoTruckAI).GetMethod("SimulationStep",
                                 new[] {typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (Vector3)}),
-                            typeof (CustomCargoTruckAI).GetMethod("SimulationStep",
-                                BindingFlags.NonPublic | BindingFlags.Instance));
+                            typeof (CustomCargoTruckAI).GetMethod("CustomSimulationStep"));
 
+                    Debug.Log("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
                     LoadingExtension.Instance.RevertMethods[6] =
                         RedirectionHelper.RedirectCalls(typeof (CarAI).GetMethod("CalculateSegmentPosition",
                             BindingFlags.NonPublic | BindingFlags.Instance,
@@ -102,7 +108,7 @@ namespace TrafficManager
                                 typeof (float).MakeByRefType()
                             },
                             null),
-                            typeof (CustomCarAI).GetMethod("CalculateSegmentPosition2"));
+                            typeof (CustomCarAI).GetMethod("TmCalculateSegmentPositionPathFinder"));
                 }
 
                 LoadingExtension.Instance.DetourInited = true;

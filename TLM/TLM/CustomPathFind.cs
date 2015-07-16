@@ -112,13 +112,13 @@ namespace TrafficManager
             const BindingFlags fieldFlags = BindingFlags.NonPublic | BindingFlags.Instance;
 
 
-            _fieldpathUnits = stockPathFindType.GetField("_pathUnits", fieldFlags);
-            _fieldQueueFirst = stockPathFindType.GetField("QueueFirst", fieldFlags);
-            _fieldQueueLast = stockPathFindType.GetField("QueueLast", fieldFlags);
-            _fieldQueueLock = stockPathFindType.GetField("QueueLock", fieldFlags);
-            _fieldTerminated = stockPathFindType.GetField("Terminated", fieldFlags);
-            _fieldCalculating = stockPathFindType.GetField("Calculating", fieldFlags);
-            _fieldPathFindThread = stockPathFindType.GetField("PathFindThread", fieldFlags);
+            _fieldpathUnits = stockPathFindType.GetField("m_pathUnits", fieldFlags);
+            _fieldQueueFirst = stockPathFindType.GetField("m_queueFirst", fieldFlags);
+            _fieldQueueLast = stockPathFindType.GetField("m_queueLast", fieldFlags);
+            _fieldQueueLock = stockPathFindType.GetField("m_queueLock", fieldFlags);
+            _fieldTerminated = stockPathFindType.GetField("m_terminated", fieldFlags);
+            _fieldCalculating = stockPathFindType.GetField("m_calculating", fieldFlags);
+            _fieldPathFindThread = stockPathFindType.GetField("m_pathFindThread", fieldFlags);
 
             _buffer = new BufferItem[65536];
             _bufferLock = PathManager.instance.m_bufferLock;
