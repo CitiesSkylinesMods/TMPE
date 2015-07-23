@@ -15,8 +15,8 @@ namespace TrafficManager
 
         public SegmentRestrictions(int segmentid, List<int> segmentGroup )
         {
-            this._segmentId = segmentid;
-            this.SegmentGroup = new List<int>(segmentGroup);
+            _segmentId = segmentid;
+            SegmentGroup = new List<int>(segmentGroup);
         }
 
         public void AddLane(uint lane, int lanenum, NetInfo.Direction dir)

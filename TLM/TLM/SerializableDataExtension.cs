@@ -60,7 +60,7 @@ namespace TrafficManager
             }
         }
 
-        private static void OnLoadDataTimed(Object source, ElapsedEventArgs e)
+        private static void OnLoadDataTimed(object source, ElapsedEventArgs e)
         {
             byte[] data = SerializableData.LoadData(DataId);
 

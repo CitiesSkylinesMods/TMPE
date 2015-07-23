@@ -67,7 +67,7 @@ namespace TrafficManager
                         null),
                         typeof (CustomHumanAI).GetMethod("CustomCheckTrafficLights"));
 
-                if (!LoadingExtension.IsPathManagerCompatibile)
+                if (LoadingExtension.IsPathManagerCompatibile)
                 {
                     Debug.Log("Traffic++ Not detected. Loading Pathfinder.");
                     Debug.Log("Redirecting CarAI Simulation Step Calls");

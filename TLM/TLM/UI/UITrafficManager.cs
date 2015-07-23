@@ -29,7 +29,7 @@ namespace TrafficManager.UI
                     //buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
                     _buttonCrosswalk.focusedBgSprite = "ButtonMenu";
                     _buttonClearTraffic.focusedBgSprite = "ButtonMenu";
-                    if (!LoadingExtension.IsPathManagerCompatibile)
+                    if (LoadingExtension.IsPathManagerCompatibile)
                     {
                         _buttonLaneChange.focusedBgSprite = "ButtonMenu";
                         _buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
@@ -62,14 +62,14 @@ namespace TrafficManager.UI
             backgroundSprite = "GenericPanel";
             color = new Color32(75, 75, 135, 255);
             width = 250;
-            height = !LoadingExtension.IsPathManagerCompatibile ? 350 : 270;
+            height = LoadingExtension.IsPathManagerCompatibile ? 350 : 270;
             relativePosition = new Vector3(10.48f, 80f);
 
             UILabel title = AddUIComponent<UILabel>();
             title.text = "Traffic Manager";
             title.relativePosition = new Vector3(65.0f, 5.0f);
 
-            if (!LoadingExtension.IsPathManagerCompatibile)
+            if (LoadingExtension.IsPathManagerCompatibile)
             {
                 _buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
                 _buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
@@ -213,7 +213,7 @@ namespace TrafficManager.UI
         {
             LoadingExtension.Instance.DespawnEnabled = !LoadingExtension.Instance.DespawnEnabled;
 
-            if (!LoadingExtension.IsPathManagerCompatibile)
+            if (LoadingExtension.IsPathManagerCompatibile)
             {
                 _buttonToggleDespawn.text = LoadingExtension.Instance.DespawnEnabled
                     ? "Disable despawning"
@@ -227,7 +227,7 @@ namespace TrafficManager.UI
             {
                 _uiState = UIState.LaneChange;
 
-                if (!LoadingExtension.IsPathManagerCompatibile)
+                if (LoadingExtension.IsPathManagerCompatibile)
                 {
                     _buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
                 }
@@ -238,7 +238,7 @@ namespace TrafficManager.UI
             {
                 _uiState = UIState.None;
 
-                if (!LoadingExtension.IsPathManagerCompatibile)
+                if (LoadingExtension.IsPathManagerCompatibile)
                 {
                     _buttonLaneChange.focusedBgSprite = "ButtonMenu";
                 }

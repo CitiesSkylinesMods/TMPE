@@ -6,6 +6,7 @@ using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.Math;
 using ColossalFramework.UI;
+using JetBrains.Annotations;
 using TrafficManager.CustomAI;
 using TrafficManager.Traffic;
 using UnityEngine;
@@ -79,9 +80,9 @@ namespace TrafficManager.TrafficLight
         private Rect _windowRect;
         private Rect _windowRect2;
 
-        public float StepValue = 1f;
+        private float _stepValue = 1f;
 
-        public float[] SliderValues = new float[16] {1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f};
+        private readonly float[] _sliderValues = {1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f,1f};
 
         private Texture2D _secondPanelTexture;
 
@@ -147,13 +148,13 @@ namespace TrafficManager.TrafficLight
             base.Awake();
         }
 
-        public static Texture2D LoadDllResource(string resourceName, int width, int height)
+        private static Texture2D LoadDllResource(string resourceName, int width, int height)
         {
             var myAssembly = Assembly.GetExecutingAssembly();
             var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
 
             var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
-
+            
             texture.LoadImage(ReadToEnd(myStream));
 
             return texture;
@@ -161,41 +162,40 @@ namespace TrafficManager.TrafficLight
 
         static byte[] ReadToEnd(Stream stream)
         {
-            long originalPosition = stream.Position;
+            var originalPosition = stream.Position;
             stream.Position = 0;
 
             try
             {
-                byte[] readBuffer = new byte[4096];
+                var readBuffer = new byte[4096];
 
-                int totalBytesRead = 0;
+                var totalBytesRead = 0;
                 int bytesRead;
 
                 while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
                 {
                     totalBytesRead += bytesRead;
 
-                    if (totalBytesRead == readBuffer.Length)
-                    {
-                        int nextByte = stream.ReadByte();
-                        if (nextByte != -1)
-                        {
-                            byte[] temp = new byte[readBuffer.Length*2];
-                            Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
-                            Buffer.SetByte(temp, totalBytesRead, (byte) nextByte);
-                            readBuffer = temp;
-                            totalBytesRead++;
+                    if (totalBytesRead != readBuffer.Length)
+                        continue;
 
-                        }
-                    }
+                    var nextByte = stream.ReadByte();
+                    if (nextByte == -1)
+                        continue;
+
+                    var temp = new byte[readBuffer.Length*2];
+                    Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
+                    Buffer.SetByte(temp, totalBytesRead, (byte) nextByte);
+                    readBuffer = temp;
+                    totalBytesRead++;
                 }
 
-                byte[] buffer = readBuffer;
-                if (readBuffer.Length != totalBytesRead)
-                {
-                    buffer = new byte[totalBytesRead];
-                    Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
-                }
+                var buffer = readBuffer;
+                if (readBuffer.Length == totalBytesRead)
+                    return buffer;
+
+                buffer = new byte[totalBytesRead];
+                Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
                 return buffer;
             }
             finally
@@ -205,6 +205,7 @@ namespace TrafficManager.TrafficLight
         }
 
         // Expose protected property
+        // ReSharper disable once MemberCanBePrivate.Global
         public new CursorInfo ToolCursor
         {
             get { return base.ToolCursor; }
@@ -259,161 +260,136 @@ namespace TrafficManager.TrafficLight
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            if (ToolMode == ToolMode.SwitchTrafficLight)
+            switch (ToolMode)
             {
-                if (m_toolController.IsInsideUI || !Cursor.visible)
-                {
-                    return;
-                }
+                case ToolMode.SwitchTrafficLight:
+                    if (m_toolController.IsInsideUI || !Cursor.visible)
+                    {
+                        return;
+                    }
 
-                _renderOverlaySwitch(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.AddPrioritySigns)
-            {
-                _renderOverlayPriority(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.ManualSwitch)
-            {
-                _renderOverlayManual(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.TimedLightsSelectNode)
-            {
-                _renderOverlayTimedSelectNodes(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.TimedLightsShowLights)
-            {
+                    _renderOverlaySwitch(cameraInfo, _mouseDown);
+                    break;
+                case ToolMode.AddPrioritySigns:
+                    _renderOverlaySwitch(cameraInfo, false);
+                    break;
+                case ToolMode.ManualSwitch:
+                    _renderOverlayManual(cameraInfo);
+                    break;
+                case ToolMode.TimedLightsSelectNode:
+                    _renderOverlayTimedSelectNodes(cameraInfo);
+                    break;
+                case ToolMode.TimedLightsShowLights:
 
-            }
-            else if (ToolMode == ToolMode.LaneChange)
-            {
-                _renderOverlayLaneChange(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.LaneRestrictions)
-            {
-                _renderOverlayLaneRestrictions(cameraInfo);
-            }
-            else if (ToolMode == ToolMode.Crosswalk)
-            {
-                _renderOverlayCrosswalk(cameraInfo);
-            }
-            else
-            {
-                base.RenderOverlay(cameraInfo);
+                    break;
+                case ToolMode.LaneChange:
+                    _renderOverlayLaneChange(cameraInfo);
+                    break;
+                case ToolMode.LaneRestrictions:
+                    _renderOverlayLaneRestrictions(cameraInfo);
+                    break;
+                case ToolMode.Crosswalk:
+                    _renderOverlayCrosswalk(cameraInfo);
+                    break;
+                default:
+                    base.RenderOverlay(cameraInfo);
+                    break;
             }
         }
 
-        public void _renderOverlaySwitch(RenderManager.CameraInfo cameraInfo)
+        public void _renderOverlaySwitch(RenderManager.CameraInfo cameraInfo, bool warning = false)
         {
-            if (_hoveredNetNodeIdx != 0)
-            {
-                var node = GetNetNode(_hoveredNetNodeIdx);
+            if (_hoveredNetNodeIdx == 0) return;
 
-                if ((node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                {
-                    Bezier3 bezier;
+            var node = GetNetNode(_hoveredNetNodeIdx);
 
-                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
+            if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
 
-                    bezier.a = node.m_position;
-                    bezier.d = node.m_position;
+            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
-                    var color = GetToolColor(_mouseDown, false);
+            Bezier3 bezier;
+            bezier.a = node.m_position;
+            bezier.d = node.m_position;
 
-                    NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-                        segment.m_endDirection,
-                        false, false, out bezier.b, out bezier.c);
-                    _renderOverlayDraw(cameraInfo, bezier, color);
-                }
-            }
-        }
+            var color = GetToolColor(warning, false);
 
-        public void _renderOverlayPriority(RenderManager.CameraInfo cameraInfo)
-        {
-            if (_hoveredNetNodeIdx != 0 && _hoveredNetNodeIdx != SelectedNode)
-            {
-                var node = GetNetNode(_hoveredNetNodeIdx);
-                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
+            NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                segment.m_endDirection,
+                false, false, out bezier.b, out bezier.c);
 
-                if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
-                {
-                    Bezier3 bezier;
-                    bezier.a = node.m_position;
-                    bezier.d = node.m_position;
-
-                    var color = GetToolColor(false, false);
-
-                    NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-                        segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-                    _renderOverlayDraw(cameraInfo, bezier, color);
-                }
-            }
+            _renderOverlayDraw(cameraInfo, bezier, color);
         }
 
         public void _renderOverlayManual(RenderManager.CameraInfo cameraInfo)
         {
             if (SelectedNode != 0)
             {
-                var node = GetNetNode(SelectedNode);
-
-                var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
-
-                var color2 = colorGray;
-
-                var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNode);
-
-                for (var i = 0; i < 8; i++)
-                {
-                    int segmentId = node.GetSegment(i);
-
-                    if (segmentId != 0)
-                    {
-                        var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-
-                        var position = node.m_position;
-
-                        if (segment.m_startNode == SelectedNode)
-                        {
-                            position.x += segment.m_startDirection.x*10f;
-                            position.y += segment.m_startDirection.y*10f;
-                            position.z += segment.m_startDirection.z*10f;
-                        }
-                        else
-                        {
-                            position.x += segment.m_endDirection.x*10f;
-                            position.y += segment.m_endDirection.y*10f;
-                            position.z += segment.m_endDirection.z*10f;
-                        }
-
-                        if (nodeSimulation == null || !TrafficLightsManual.IsSegmentLight(SelectedNode, segmentId))
-                        {
-                            var width = _hoveredButton[0] == segmentId ? 11.25f : 10f;
-
-                            _renderOverlayDraw(cameraInfo, color2, position, width, segmentId != _hoveredButton[0]);
-                        }
-                    }
-                }
+                RenderNodeOverlays(cameraInfo);
             }
             else
             {
-                if (_hoveredNetNodeIdx != 0)
-                {
-                    var node = GetNetNode(_hoveredNetNodeIdx);
-                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
-
-                    if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
-                    {
-                        Bezier3 bezier;
-                        bezier.a = node.m_position;
-                        bezier.d = node.m_position;
-
-                        var color = GetToolColor(false, false);
-
-                        NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-                            segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-                        _renderOverlayDraw(cameraInfo, bezier, color);
-                    }
-                }
+                RenderSelectionOverlay(cameraInfo);
             }
+        }
+
+        private void RenderSelectionOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            if (_hoveredNetNodeIdx == 0) return;
+            var node = GetNetNode(_hoveredNetNodeIdx);
+            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
+
+            if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) return;
+            Bezier3 bezier;
+            bezier.a = node.m_position;
+            bezier.d = node.m_position;
+
+            var color = GetToolColor(false, false);
+
+            NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+            _renderOverlayDraw(cameraInfo, bezier, color);
+        }
+
+        private void RenderNodeOverlays(RenderManager.CameraInfo cameraInfo)
+        {
+            var node = GetNetNode(SelectedNode);
+            
+            var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNode);
+
+            for (var i = 0; i < 8; i++)
+            {
+                var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
+                int segmentId = node.GetSegment(i);
+
+                if (segmentId == 0 ||
+                    (nodeSimulation != null && TrafficLightsManual.IsSegmentLight(SelectedNode, segmentId)))
+                    continue;
+                
+                var position = CalculateNodePositionForSegment(node, segmentId);
+
+                var width = _hoveredButton[0] == segmentId ? 11.25f : 10f;
+                _renderOverlayDraw(cameraInfo, colorGray, position, width, segmentId != _hoveredButton[0]);
+            }
+        }
+
+        private static Vector3 CalculateNodePositionForSegment(NetNode node, int segmentId)
+        {
+            var position = node.m_position;
+
+            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (segment.m_startNode == SelectedNode)
+            {
+                position.x += segment.m_startDirection.x*10f;
+                position.y += segment.m_startDirection.y*10f;
+                position.z += segment.m_startDirection.z*10f;
+            }
+            else
+            {
+                position.x += segment.m_endDirection.x*10f;
+                position.y += segment.m_endDirection.y*10f;
+                position.z += segment.m_endDirection.z*10f;
+            }
+            return position;
         }
 
         public void _renderOverlayTimedSelectNodes(RenderManager.CameraInfo cameraInfo)
@@ -437,24 +413,23 @@ namespace TrafficManager.TrafficLight
                 }
             }
 
-            if (SelectedNodeIndexes.Count > 0)
+            if (SelectedNodeIndexes.Count <= 0) return;
+
+            foreach (var index in SelectedNodeIndexes)
             {
-                foreach (var index in SelectedNodeIndexes)
-                {
-                    var node = GetNetNode(index);
-                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
+                var node = GetNetNode(index);
+                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
-                    Bezier3 bezier;
+                Bezier3 bezier;
 
-                    bezier.a = node.m_position;
-                    bezier.d = node.m_position;
+                bezier.a = node.m_position;
+                bezier.d = node.m_position;
 
-                    var color = GetToolColor(true, false);
+                var color = GetToolColor(true, false);
 
-                    NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-                        segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-                    _renderOverlayDraw(cameraInfo, bezier, color);
-                }
+                NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
+                    segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+                _renderOverlayDraw(cameraInfo, bezier, color);
             }
         }
 
@@ -468,19 +443,18 @@ namespace TrafficManager.TrafficLight
                 if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
 
-                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+                    var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
 
-                    NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(false, false),
+                    NetTool.RenderOverlay(cameraInfo, ref hoveredSegment, GetToolColor(false, false),
                         GetToolColor(false, false));
                 }
             }
 
-            if (SelectedSegment != 0)
-            {
-                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
+            if (SelectedSegment == 0) return;
 
-                NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(true, false), GetToolColor(true, false));
-            }
+            var selectedSegment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
+
+            NetTool.RenderOverlay(cameraInfo, ref selectedSegment, GetToolColor(true, false), GetToolColor(true, false));
         }
 
         public void _renderOverlayLaneRestrictions(RenderManager.CameraInfo cameraInfo)
@@ -497,13 +471,12 @@ namespace TrafficManager.TrafficLight
                 }
             }
 
-            if (_hoveredSegmentIdx != 0)
-            {
-                var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+            if (_hoveredSegmentIdx == 0) return;
 
-                    NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(false, false),
-                        GetToolColor(false, false));
-            }
+            var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+
+            NetTool.RenderOverlay(cameraInfo, ref hoveredSegment, GetToolColor(false, false),
+                GetToolColor(false, false));
         }
 
         public void _renderOverlayCrosswalk(RenderManager.CameraInfo cameraInfo)
@@ -596,255 +569,281 @@ namespace TrafficManager.TrafficLight
 
             if (_mouseDown)
             {
-                if (!_mouseClicked)
+                if (_mouseClicked) return;
+
+                _mouseClicked = true;
+
+                if (m_toolController.IsInsideUI || !Cursor.visible || _cursorInSecondaryPanel)
                 {
-                    _mouseClicked = true;
+                    return;
+                }
+                if (_hoveredSegmentIdx == 0) return;
 
-                    if (m_toolController.IsInsideUI || !Cursor.visible || _cursorInSecondaryPanel)
-                    {
-                        return;
-                    }
+                var node = GetNetNode(_hoveredNetNodeIdx);
 
-                    if (_hoveredNetNodeIdx != 0)
-                    {
-                        var node = GetNetNode(_hoveredNetNodeIdx);
-
-                        if (ToolMode == ToolMode.SwitchTrafficLight)
-                        {
-                            if ((node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                            {
-                                _switchTrafficLights();
-                            }
-                        }
-                        else if (ToolMode == ToolMode.AddPrioritySigns)
-                        {
-                            if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
-                            {
-                                _uiClickedSegment = true;
-                                SelectedNode = _hoveredNetNodeIdx;
-                            }
-                            else
-                            {
-                                ShowToolInfo(true, "Node should not be a traffic light", node.m_position);
-                            }
-                        }
-                        else if (ToolMode == ToolMode.ManualSwitch)
-                        {
-                            if (SelectedNode == 0)
-                            {
-                                if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx))
-                                {
-                                    if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
-                                    {
-                                        SelectedNode = _hoveredNetNodeIdx;
-
-                                        var node2 = GetNetNode(SelectedNode);
-
-                                        CustomRoadAI.AddNodeToSimulation(SelectedNode);
-                                        var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNode);
-                                        nodeSimulation.FlagManualTrafficLights = true;
-
-                                        for (var s = 0; s < 8; s++)
-                                        {
-                                            var segment = node2.GetSegment(s);
-
-                                            if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNode, segment))
-                                            {
-                                                TrafficPriority.AddPrioritySegment(SelectedNode, segment, PrioritySegment.PriorityType.None);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        ShowToolInfo(true, "Node is not a traffic light", node.m_position);
-                                    }
-                                }
-                                else
-                                {
-                                    if (SelectedNodeIndexes.Count == 0)
-                                    {
-
-                                    }
-                                    ShowToolInfo(true, "Node is part of timed script", node.m_position);
-                                }
-                            }
-                        }
-                        else if (ToolMode == ToolMode.TimedLightsSelectNode)
-                        {
-                            if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx))
-                            {
-                                if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
-                                {
-                                    if (ContainsListNode(_hoveredNetNodeIdx))
-                                    {
-                                        RemoveListNode(_hoveredNetNodeIdx);
-                                    }
-                                    else
-                                    {
-                                        AddListNode(_hoveredNetNodeIdx);
-                                    }
-                                }
-                                else
-                                {
-                                    ShowToolInfo(true, "Node is not a traffic light", node.m_position);
-                                }
-                            }
-                            else
-                            {
-                                if (SelectedNodeIndexes.Count == 0)
-                                {
-                                    var timedLight = TrafficLightsTimed.GetTimedLight(_hoveredNetNodeIdx);
-
-                                    SelectedNodeIndexes = new List<ushort>(timedLight.NodeGroup);
-                                    SetToolMode(ToolMode.TimedLightsShowLights);
-                                }
-                                else
-                                {
-                                    ShowToolInfo(true, "Node is part of timed script", node.m_position);
-                                }
-                            }
-                        }
-                        else if (ToolMode == ToolMode.LaneChange)
-                        {
-                            if (_hoveredNetNodeIdx != 0 && _hoveredSegmentIdx != 0)
-                            {
-                                var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags;
-
-                                if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                                {
-                                    SelectedSegment = _hoveredSegmentIdx;
-                                    SelectedNode = _hoveredNetNodeIdx;
-                                }
-                            }
-                        }
-                    }
-                    if (_hoveredSegmentIdx != 0)
-                    {
-                        if (ToolMode == ToolMode.Crosswalk)
-                        {
-                            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
-
-                            var startNode = GetNetNode(segment.m_startNode);
-                            var endNode = GetNetNode(segment.m_endNode);
-
-                            var result = false;
-
-                            if (!result && ValidCrosswalkNode(segment.m_startNode, startNode))
-                            {
-                                if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
-                                {
-                                    startNode.m_flags |= NetNode.Flags.Junction;
-                                    result = true;
-                                }
-                            }
-                            if (!result && (ValidCrosswalkNode(segment.m_startNode, startNode) || ValidCrosswalkNode(segment.m_endNode, endNode)) && (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
-                            {
-                                if (ValidCrosswalkNode(segment.m_startNode, startNode) && (startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                                {
-                                    startNode.m_flags &= ~NetNode.Flags.Junction;
-                                    result = true;
-                                }
-                                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-                                    (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
-                                {
-                                    endNode.m_flags |= NetNode.Flags.Junction;
-                                    result = true;
-                                }
-                            }
-                            if (!result &&
-                                (ValidCrosswalkNode(segment.m_startNode, startNode) ||
-                                 ValidCrosswalkNode(segment.m_endNode, endNode)))
-                            {
-                                if (ValidCrosswalkNode(segment.m_startNode, startNode) && (startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
-                                {
-                                    startNode.m_flags |= NetNode.Flags.Junction;
-                                    result = true;
-                                }
-                                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-                                    (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
-                                {
-                                    endNode.m_flags |= NetNode.Flags.Junction;
-                                    result = true;
-                                }
-                            }
-                            if (!result &&
-                                (ValidCrosswalkNode(segment.m_startNode, startNode) ||
-                                 ValidCrosswalkNode(segment.m_endNode, endNode)))
-                            {
-                                if (ValidCrosswalkNode(segment.m_startNode, startNode) && (startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                                {
-                                    startNode.m_flags &= ~NetNode.Flags.Junction;
-                                }
-                                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-                                    (endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
-                                {
-                                    endNode.m_flags &= ~NetNode.Flags.Junction;
-                                }
-                            }
-
-                            SetNetNode(segment.m_startNode, startNode);
-                            SetNetNode(segment.m_endNode, endNode);
-                        }
-                        else if (ToolMode == ToolMode.LaneRestrictions)
-                        {
-                            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
-                            var info = segment.Info;
-
-                            if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx))
-                            {
-                                if (SelectedSegmentIndexes.Count > 0)
-                                {
-                                    ShowToolInfo(true, "Road is already in a group!",
-                                        Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
-                                            .m_position);
-                                }
-                                else
-                                {
-                                    var restSegment = TrafficRoadRestrictions.GetSegment(_hoveredSegmentIdx);
-
-                                    SelectedSegmentIndexes = new List<int>(restSegment.SegmentGroup);
-                                }
-                            }
-                            else
-                            {
-                                if (ContainsListSegment(_hoveredSegmentIdx))
-                                {
-                                    RemoveListSegment(_hoveredSegmentIdx);
-                                }
-                                else
-                                {
-                                    if (SelectedSegmentIndexes.Count > 0)
-                                    {
-                                        var segment2 =
-                                            Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentIndexes[0]
-                                                ];
-                                        var info2 = segment2.Info;
-
-                                        if (info.m_lanes.Length != info2.m_lanes.Length)
-                                        {
-                                            ShowToolInfo(true, "All selected roads must be of the same type!",
-                                                Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
-                                                    .m_position);
-                                        }
-                                        else
-                                        {
-                                            AddListSegment(_hoveredSegmentIdx);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        AddListSegment(_hoveredSegmentIdx);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                switch (ToolMode)
+                {
+                    case ToolMode.SwitchTrafficLight:
+                        SwitchTrafficLightToolMode(node);
+                        break;
+                    case ToolMode.AddPrioritySigns:
+                        AddPrioritySignsToolMode(node);
+                        break;
+                    case ToolMode.ManualSwitch:
+                        ManualSwitchToolMode(node);
+                        break;
+                    case ToolMode.TimedLightsSelectNode:
+                        TimedLightSelectNodeToolMode(node);
+                        break;
+                    case ToolMode.LaneChange:
+                        LaneChangeToolMode();
+                        break;
+                    case ToolMode.Crosswalk:
+                        CrosswalkToolMode();
+                        break;
+                    case ToolMode.LaneRestrictions:
+                        LaneRestrictionsToolMode();
+                        break;
                 }
             }
             else
             {
                 ShowToolInfo(false, null, Vector3.zero);
                 _mouseClicked = false;
+            }
+        }
+
+        private void LaneChangeToolMode()
+        {
+            if (_hoveredNetNodeIdx == 0 || _hoveredSegmentIdx == 0) return;
+
+            var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags;
+
+            if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
+
+            SelectedSegment = _hoveredSegmentIdx;
+            SelectedNode = _hoveredNetNodeIdx;
+        }
+
+        private void TimedLightSelectNodeToolMode(NetNode node)
+        {
+            if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx))
+            {
+                if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                {
+                    if (ContainsListNode(_hoveredNetNodeIdx))
+                    {
+                        RemoveListNode(_hoveredNetNodeIdx);
+                    }
+                    else
+                    {
+                        AddListNode(_hoveredNetNodeIdx);
+                    }
+                }
+                else
+                {
+                    ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+                }
+            }
+            else
+            {
+                if (SelectedNodeIndexes.Count == 0)
+                {
+                    var timedLight = TrafficLightsTimed.GetTimedLight(_hoveredNetNodeIdx);
+
+                    SelectedNodeIndexes = new List<ushort>(timedLight.NodeGroup);
+                    SetToolMode(ToolMode.TimedLightsShowLights);
+                }
+                else
+                {
+                    ShowToolInfo(true, "Node is part of timed script", node.m_position);
+                }
+            }
+        }
+
+        private void ManualSwitchToolMode(NetNode node)
+        {
+            if (SelectedNode != 0) return;
+
+            if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx))
+            {
+                if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None)
+                {
+                    SelectedNode = _hoveredNetNodeIdx;
+
+                    var node2 = GetNetNode(SelectedNode);
+
+                    CustomRoadAI.AddNodeToSimulation(SelectedNode);
+                    var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNode);
+                    nodeSimulation.FlagManualTrafficLights = true;
+
+                    for (var s = 0; s < 8; s++)
+                    {
+                        var segment = node2.GetSegment(s);
+
+                        if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNode, segment))
+                        {
+                            TrafficPriority.AddPrioritySegment(SelectedNode, segment, PrioritySegment.PriorityType.None);
+                        }
+                    }
+                }
+                else
+                {
+                    ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+                }
+            }
+            else
+            {
+                if (SelectedNodeIndexes.Count == 0)
+                {
+                }
+                ShowToolInfo(true, "Node is part of timed script", node.m_position);
+            }
+        }
+
+        private void AddPrioritySignsToolMode(NetNode node)
+        {
+            if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None)
+            {
+                _uiClickedSegment = true;
+                SelectedNode = _hoveredNetNodeIdx;
+            }
+            else
+            {
+                ShowToolInfo(true, "Node should not be a traffic light", node.m_position);
+            }
+        }
+
+        private void SwitchTrafficLightToolMode(NetNode node)
+        {
+            if ((node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+            {
+                _switchTrafficLights();
+            }
+        }
+
+        private void CrosswalkToolMode()
+        {
+            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+
+            var startNode = GetNetNode(segment.m_startNode);
+            var endNode = GetNetNode(segment.m_endNode);
+
+            var result = false;
+
+            if (!result && ValidCrosswalkNode(segment.m_startNode, startNode))
+            {
+                if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+                {
+                    startNode.m_flags |= NetNode.Flags.Junction;
+                    result = true;
+                }
+            }
+            if (!result &&
+                (ValidCrosswalkNode(segment.m_startNode, startNode) || ValidCrosswalkNode(segment.m_endNode, endNode)) &&
+                (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+            {
+                if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
+                    (startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
+                    startNode.m_flags &= ~NetNode.Flags.Junction;
+                    result = true;
+                }
+                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
+                    (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+                {
+                    endNode.m_flags |= NetNode.Flags.Junction;
+                    result = true;
+                }
+            }
+            if (!result &&
+                (ValidCrosswalkNode(segment.m_startNode, startNode) ||
+                 ValidCrosswalkNode(segment.m_endNode, endNode)))
+            {
+                if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
+                    (startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+                {
+                    startNode.m_flags |= NetNode.Flags.Junction;
+                    result = true;
+                }
+                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
+                    (endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+                {
+                    endNode.m_flags |= NetNode.Flags.Junction;
+                    result = true;
+                }
+            }
+            if (!result &&
+                (ValidCrosswalkNode(segment.m_startNode, startNode) ||
+                 ValidCrosswalkNode(segment.m_endNode, endNode)))
+            {
+                if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
+                    (startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
+                    startNode.m_flags &= ~NetNode.Flags.Junction;
+                }
+                if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
+                    (endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
+                    endNode.m_flags &= ~NetNode.Flags.Junction;
+                }
+            }
+
+            SetNetNode(segment.m_startNode, startNode);
+            SetNetNode(segment.m_endNode, endNode);
+        }
+
+        private void LaneRestrictionsToolMode()
+        {
+            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+            var info = segment.Info;
+
+            if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx))
+            {
+                if (SelectedSegmentIndexes.Count > 0)
+                {
+                    ShowToolInfo(true, "Road is already in a group!",
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
+                            .m_position);
+                }
+                else
+                {
+                    var restSegment = TrafficRoadRestrictions.GetSegment(_hoveredSegmentIdx);
+
+                    SelectedSegmentIndexes = new List<int>(restSegment.SegmentGroup);
+                }
+            }
+            else
+            {
+                if (ContainsListSegment(_hoveredSegmentIdx))
+                {
+                    RemoveListSegment(_hoveredSegmentIdx);
+                }
+                else
+                {
+                    if (SelectedSegmentIndexes.Count > 0)
+                    {
+                        var segment2 =
+                            Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentIndexes[0]
+                                ];
+                        var info2 = segment2.Info;
+
+                        if (info.m_lanes.Length != info2.m_lanes.Length)
+                        {
+                            ShowToolInfo(true, "All selected roads must be of the same type!",
+                                Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
+                                    .m_position);
+                        }
+                        else
+                        {
+                            AddListSegment(_hoveredSegmentIdx);
+                        }
+                    }
+                    else
+                    {
+                        AddListSegment(_hoveredSegmentIdx);
+                    }
+                }
             }
         }
 
@@ -906,474 +905,579 @@ namespace TrafficManager.TrafficLight
                 {
                     int segmentId = node.GetSegment(i);
 
-                    if (segmentId != 0 && nodeSimulation != null && TrafficLightsManual.IsSegmentLight(SelectedNode, segmentId))
+                    if (segmentId == 0 || nodeSimulation == null ||
+                        !TrafficLightsManual.IsSegmentLight(SelectedNode, segmentId)) continue;
+
+                    var segmentDict = TrafficLightsManual.GetSegmentLight(SelectedNode, segmentId);
+
+                    var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+
+                    var position = CalculateNodePositionForSegment(node, segment);
+                    
+                    var screenPos = Camera.main.WorldToScreenPoint(position);
+                    screenPos.y = Screen.height - screenPos.y;
+
+                    var diff = position - Camera.main.transform.position;
+                    var zoom = 1.0f/diff.magnitude*100f;
+
+                    // original / 2.5
+                    var lightWidth = 41f*zoom;
+                    var lightHeight = 97f*zoom;
+
+                    // SWITCH MODE BUTTON
+                    var modeWidth = 41f*zoom;
+                    var modeHeight = 38f*zoom;
+
+                    SetAlpha(segmentId, -1);
+
+                    var myRect1 = new Rect(screenPos.x - modeWidth / 2, screenPos.y - modeHeight / 2 + modeHeight - 7f*zoom, modeWidth, modeHeight);
+
+                    GUI.DrawTexture(myRect1, _lightMode);
+
+                    hoveredSegment = GetHoveredSegment(myRect1, segmentId, hoveredSegment, segmentDict);
+
+                    // COUNTER
+                    hoveredSegment = RenderCounter(segmentId, screenPos, modeWidth, modeHeight, zoom, segmentDict, hoveredSegment);
+
+                    // SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
+                    hoveredSegment = RenderManualPedestrianLightSwitch(zoom, segmentId, screenPos, lightWidth, segmentDict, hoveredSegment);
+
+                    // SWITCH PEDESTRIAN LIGHT
+                    var pedestrianWidth = 36f * zoom;
+                    var pedestrianHeight = 61f * zoom;
+
+                    var guiColor = GUI.color;
+                    guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && segmentDict.PedestrianEnabled ? 0.92f : 0.45f;
+                    GUI.color = guiColor;
+
+                    var myRect3 = new Rect(screenPos.x - pedestrianWidth / 2 - lightWidth + 5f*zoom, screenPos.y - pedestrianHeight / 2 + 22f*zoom, pedestrianWidth, pedestrianHeight);
+
+                    switch (segmentDict.LightPedestrian)
                     {
-                        var segmentDict = TrafficLightsManual.GetSegmentLight(SelectedNode, segmentId);
-
-                        var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-
-                        var position = node.m_position;
-
-                        var offset = 25f;
-
-                        if (segment.m_startNode == SelectedNode)
-                        {
-                            position.x += segment.m_startDirection.x * offset;
-                            position.y += segment.m_startDirection.y * offset;
-                            position.z += segment.m_startDirection.z * offset;
-                        }
-                        else
-                        {
-                            position.x += segment.m_endDirection.x * offset;
-                            position.y += segment.m_endDirection.y * offset;
-                            position.z += segment.m_endDirection.z * offset;
-                        }
-
-                        var guiColor = GUI.color;
-
-                        var screenPos = Camera.main.WorldToScreenPoint(position);
-                        screenPos.y = Screen.height - screenPos.y;
-
-                        Vector3 diff = position - Camera.main.transform.position;
-                        float zoom = 1.0f/diff.magnitude*100f;
-
-                        // original / 2.5
-                        var lightWidth = 41f*zoom;
-                        var lightHeight = 97f*zoom;
-
-                        // SWITCH MODE BUTTON
-                        var modeWidth = 41f*zoom;
-                        var modeHeight = 38f*zoom;
-
-
-                        guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == -1 ? 0.92f : 0.45f;
-
-                        GUI.color = guiColor;
-
-                        Rect myRect1 = new Rect(screenPos.x - modeWidth / 2, screenPos.y - modeHeight / 2 + modeHeight - 7f*zoom, modeWidth, modeHeight);
-
-                        GUI.DrawTexture(myRect1, _lightMode);
-
-                        if (myRect1.Contains(Event.current.mousePosition))
-                        {
-                            _hoveredButton[0] = segmentId;
-                            _hoveredButton[1] = -1;
-                            hoveredSegment = true;
-
-                            if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                            {
-                                _uiClickedSegment = true;
-                                segmentDict.ChangeMode();
-                            }
-                        }
-
-                        // COUNTER
-                        guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 0 ? 0.92f : 0.45f;
-
-                        Rect myRectCounter = new Rect(screenPos.x - modeWidth / 2, screenPos.y - modeHeight / 2 - 6f*zoom, modeWidth, modeHeight);
-
-                        GUI.DrawTexture(myRectCounter, _lightCounter);
-
-                        float counterSize = 20f * zoom;
-
-                        var counter = segmentDict.LastChange;
-
-                        Rect myRectCounterNum = new Rect(screenPos.x - counterSize + 15f * zoom + (counter >= 10 ? -5*zoom : 0f), screenPos.y - counterSize + 11f * zoom, counterSize, counterSize);
-
-                        _counterStyle.fontSize = (int)(18f*zoom);
-                        _counterStyle.normal.textColor = new Color(1f, 1f, 1f);
-
-                        GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
-
-                        if (myRectCounter.Contains(Event.current.mousePosition))
-                        {
-                            _hoveredButton[0] = segmentId;
-                            _hoveredButton[1] = 0;
-                            hoveredSegment = true;
-                        }
-
-                        // SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
-                        var manualPedestrianWidth = 36f*zoom;
-                        var manualPedestrianHeight = 35f*zoom;
-
-                        guiColor.a = _hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) ? 0.92f : 0.45f;
-
-                        GUI.color = guiColor;
-
-                        var myRect2 = new Rect(screenPos.x - manualPedestrianWidth / 2 - lightWidth + 5f*zoom, screenPos.y - manualPedestrianHeight / 2 - 9f*zoom, manualPedestrianWidth, manualPedestrianHeight);
-
-                        if (segmentDict.PedestrianEnabled)
-                            GUI.DrawTexture(myRect2, _pedestrianMode2);
-                        else
-                            GUI.DrawTexture(myRect2, _pedestrianMode1);
-
-                        if (myRect2.Contains(Event.current.mousePosition))
-                        {
-                            _hoveredButton[0] = segmentId;
-                            _hoveredButton[1] = 1;
-                            hoveredSegment = true;
-
-                            if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                            {
-                                _uiClickedSegment = true;
-                                segmentDict.ManualPedestrian();
-                            }
-                        }
-
-                        // SWITCH PEDESTRIAN LIGHT
-                        var pedestrianWidth = 36f * zoom;
-                        var pedestrianHeight = 61f * zoom;
-
-                        guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && segmentDict.PedestrianEnabled ? 0.92f : 0.45f;
-
-                        GUI.color = guiColor;
-
-                        var myRect3 = new Rect(screenPos.x - pedestrianWidth / 2 - lightWidth + 5f*zoom, screenPos.y - pedestrianHeight / 2 + 22f*zoom, pedestrianWidth, pedestrianHeight);
-
-                        if (segmentDict.LightPedestrian == RoadBaseAI.TrafficLightState.Green)
+                        case RoadBaseAI.TrafficLightState.Green:
                             GUI.DrawTexture(myRect3, _pedestrianLight2);
-                        else if (segmentDict.LightPedestrian == RoadBaseAI.TrafficLightState.Red)
+                            break;
+                        case RoadBaseAI.TrafficLightState.Red:
                             GUI.DrawTexture(myRect3, _pedestrianLight1);
+                            break;
+                    }
 
-                        if (myRect3.Contains(Event.current.mousePosition))
-                        {
-                            _hoveredButton[0] = segmentId;
-                            _hoveredButton[1] = 2;
-                            hoveredSegment = true;
+                    hoveredSegment = IsPedestrianLightHovered(myRect3, segmentId, hoveredSegment, segmentDict);
 
-                            if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                            {
-                                _uiClickedSegment = true;
+                    if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, SelectedNode)) continue;
 
-                                if (!segmentDict.PedestrianEnabled)
-                                {
-                                    segmentDict.ManualPedestrian();
-                                }
-                                else
-                                {
-                                    segmentDict.ChangeLightPedestrian();
-                                }
-                            }
-                        }
+                    var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode) && TrafficPriority.HasLeftLane(SelectedNode, segmentId);
+                    var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNode) && TrafficPriority.HasForwardLane(SelectedNode, segmentId);
+                    var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode) && TrafficPriority.HasRightLane(SelectedNode, segmentId);
 
-                        if (!TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, SelectedNode))
-                        {
-                            var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode) && TrafficPriority.HasLeftLane(SelectedNode, segmentId);
-                            var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNode) && TrafficPriority.HasForwardLane(SelectedNode, segmentId);
-                            var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode) && TrafficPriority.HasRightLane(SelectedNode, segmentId);
+                    switch (segmentDict.CurrentMode)
+                    {
+                        case ManualSegmentLight.Mode.Simple:
+                            hoveredSegment = SimpleManualSegmentLightMode(segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment);
+                            break;
+                        case ManualSegmentLight.Mode.LeftForwardR:
+                            hoveredSegment = LeftForwardRManualSegmentLightMode(hasLeftSegment, segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment, hasForwardSegment, hasRightSegment);
+                            break;
+                        case ManualSegmentLight.Mode.RightForwardL:
+                            hoveredSegment = RightForwardLSegmentLightMode(segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, hasForwardSegment, hasLeftSegment, segmentDict, hasRightSegment, hoveredSegment);
+                            break;
+                        default:
+                            // left arrow light
+                            if (hasLeftSegment)
+                                hoveredSegment = LeftArrowLightMode(segmentId, lightWidth, hasRightSegment, hasForwardSegment, screenPos, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment);
 
-                            if (segmentDict.CurrentMode == ManualSegmentLight.Mode.Simple)
-                            {
-                                // no arrow light
-                                guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 ? 0.92f : 0.45f;
+                            // forward arrow light
+                            if (hasForwardSegment)
+                                hoveredSegment = ForwardArrowLightMode(segmentId, lightWidth, hasRightSegment, screenPos, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment);
 
-                                GUI.color = guiColor;
-
-                                var myRect4 =
-                                    new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
-                                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                    GUI.DrawTexture(myRect4, _lightSimple3);
-                                else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                    GUI.DrawTexture(myRect4, _lightSimple1);
-
-                                if (myRect4.Contains(Event.current.mousePosition))
-                                {
-                                    _hoveredButton[0] = segmentId;
-                                    _hoveredButton[1] = 3;
-                                    hoveredSegment = true;
-
-                                    if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                    {
-                                        _uiClickedSegment = true;
-                                        segmentDict.ChangeLightMain();
-                                    }
-                                }
-                            }
-                            else if (segmentDict.CurrentMode == ManualSegmentLight.Mode.LeftForwardR)
-                            {
-                                if (hasLeftSegment)
-                                {
-                                    // left arrow light
-                                    guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 ? 0.92f : 0.45f;
-
-                                    GUI.color = guiColor;
-
-                                    Rect myRect4 =
-                                        new Rect(screenPos.x - lightWidth/2 - lightWidth*2 - pedestrianWidth + 5f*zoom,
-                                            screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                    if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect4, _lightLeft3);
-                                    else if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect4, _lightLeft1);
-
-                                    if (myRect4.Contains(Event.current.mousePosition))
-                                    {
-                                        _hoveredButton[0] = segmentId;
-                                        _hoveredButton[1] = 3;
-                                        hoveredSegment = true;
-
-                                        if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                        {
-                                            _uiClickedSegment = true;
-                                            segmentDict.ChangeLightLeft();
-                                        }
-                                    }
-                                }
-
-                                // forward-right arrow light
-                                guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.45f;
-
-                                GUI.color = guiColor;
-
-                                Rect myRect5 =
-                                    new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
-                                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                if (hasForwardSegment && hasRightSegment)
-                                {
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect5, _lightForwardRight3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect5, _lightForwardRight1);
-                                }
-                                else if (!hasRightSegment)
-                                {
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect5, _lightForward3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect5, _lightForward1);
-                                }
-                                else
-                                {
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect5, _lightRight3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect5, _lightRight1);
-                                }
-
-                                if (myRect5.Contains(Event.current.mousePosition))
-                                {
-                                    _hoveredButton[0] = segmentId;
-                                    _hoveredButton[1] = 4;
-                                    hoveredSegment = true;
-
-                                    if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                    {
-                                        _uiClickedSegment = true;
-                                        segmentDict.ChangeLightMain();
-                                    }
-                                }
-                            }
-                            else if (segmentDict.CurrentMode == ManualSegmentLight.Mode.RightForwardL)
-                            {
-                                // forward-left light
-                                guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 ? 0.92f : 0.45f;
-
-                                GUI.color = guiColor;
-
-                                Rect myRect4 = new Rect(screenPos.x - lightWidth/2 - lightWidth*2 - pedestrianWidth + 5f*zoom,
-                                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                if (hasForwardSegment && hasLeftSegment)
-                                {
-                                    if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect4, _lightForwardLeft3);
-                                    else if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect4, _lightForwardLeft1);
-                                }
-                                else if (!hasLeftSegment)
-                                {
-                                    if (!hasRightSegment)
-                                    {
-                                        myRect4 = new Rect(screenPos.x - lightWidth / 2 - lightWidth - pedestrianWidth + 5f * zoom,
-                                        screenPos.y - lightHeight / 2, lightWidth, lightHeight);
-                                    }
-
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect4, _lightForward3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect4, _lightForward1);
-                                }
-                                else
-                                {
-                                    if (!hasRightSegment)
-                                    {
-                                        myRect4 = new Rect(screenPos.x - lightWidth / 2 - lightWidth - pedestrianWidth + 5f * zoom,
-                                        screenPos.y - lightHeight / 2, lightWidth, lightHeight);
-                                    }
-
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect4, _lightLeft3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect4, _lightLeft1);
-                                }
-
-
-                                if (myRect4.Contains(Event.current.mousePosition))
-                                {
-                                    _hoveredButton[0] = segmentId;
-                                    _hoveredButton[1] = 3;
-                                    hoveredSegment = true;
-
-                                    if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                    {
-                                        _uiClickedSegment = true;
-                                        segmentDict.ChangeLightMain();
-                                    }
-                                }
-
-                                // right arrow light
-                                if (hasRightSegment)
-                                guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.45f;
-
-                                GUI.color = guiColor;
-
-                                Rect myRect5 =
-                                    new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
-                                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                if (segmentDict.LightRight == RoadBaseAI.TrafficLightState.Green)
-                                    GUI.DrawTexture(myRect5, _lightRight3);
-                                else if (segmentDict.LightRight == RoadBaseAI.TrafficLightState.Red)
-                                    GUI.DrawTexture(myRect5, _lightRight1);
-
-
-                                if (myRect5.Contains(Event.current.mousePosition))
-                                {
-                                    _hoveredButton[0] = segmentId;
-                                    _hoveredButton[1] = 4;
-                                    hoveredSegment = true;
-
-                                    if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                    {
-                                        _uiClickedSegment = true;
-                                        segmentDict.ChangeLightRight();
-                                    }
-                                }
-                            }
-                            else // all
-                            {
-                                // left arrow light
-                                if (hasLeftSegment)
-                                {
-                                    guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 ? 0.92f : 0.45f;
-
-                                    GUI.color = guiColor;
-
-                                    var offsetLight = lightWidth;
-
-                                    if (hasRightSegment)
-                                        offsetLight += lightWidth;
-
-                                    if (hasForwardSegment)
-                                        offsetLight += lightWidth;
-
-                                    Rect myRect4 =
-                                        new Rect(screenPos.x - lightWidth / 2 - offsetLight - pedestrianWidth + 5f * zoom,
-                                            screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                    if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect4, _lightLeft3);
-                                    else if (segmentDict.LightLeft == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect4, _lightLeft1);
-
-                                    if (myRect4.Contains(Event.current.mousePosition))
-                                    {
-                                        _hoveredButton[0] = segmentId;
-                                        _hoveredButton[1] = 3;
-                                        hoveredSegment = true;
-
-                                        if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                        {
-                                            _uiClickedSegment = true;
-                                            segmentDict.ChangeLightLeft();
-
-                                            if (!hasForwardSegment)
-                                            {
-                                                segmentDict.ChangeLightMain();
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // forward arrow light
-                                if (hasForwardSegment)
-                                {
-                                    guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.45f;
-
-                                    GUI.color = guiColor;
-
-                                    var offsetLight = lightWidth;
-
-                                    if (hasRightSegment)
-                                        offsetLight += lightWidth;
-
-                                    Rect myRect6 =
-                                        new Rect(screenPos.x - lightWidth/2 - offsetLight - pedestrianWidth + 5f*zoom,
-                                            screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                    if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect6, _lightForward3);
-                                    else if (segmentDict.LightMain == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect6, _lightForward1);
-
-                                    if (myRect6.Contains(Event.current.mousePosition))
-                                    {
-                                        _hoveredButton[0] = segmentId;
-                                        _hoveredButton[1] = 4;
-                                        hoveredSegment = true;
-
-                                        if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                        {
-                                            _uiClickedSegment = true;
-                                            segmentDict.ChangeLightMain();
-                                        }
-                                    }
-                                }
-
-                                // right arrow light
-                                if (hasRightSegment)
-                                {
-                                    guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 5 ? 0.92f : 0.45f;
-
-                                    GUI.color = guiColor;
-
-                                    Rect myRect5 =
-                                        new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
-                                            screenPos.y - lightHeight/2, lightWidth, lightHeight);
-
-                                    if (segmentDict.LightRight == RoadBaseAI.TrafficLightState.Green)
-                                        GUI.DrawTexture(myRect5, _lightRight3);
-                                    else if (segmentDict.LightRight == RoadBaseAI.TrafficLightState.Red)
-                                        GUI.DrawTexture(myRect5, _lightRight1);
-
-                                    if (myRect5.Contains(Event.current.mousePosition))
-                                    {
-                                        _hoveredButton[0] = segmentId;
-                                        _hoveredButton[1] = 5;
-                                        hoveredSegment = true;
-
-                                        if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
-                                        {
-                                            _uiClickedSegment = true;
-                                            segmentDict.ChangeLightRight();
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                            // right arrow light
+                            if (hasRightSegment)
+                                hoveredSegment = RightArrowLightMode(segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment);
+                            break;
                     }
                 }
             }
 
-            if (!hoveredSegment)
+            if (hoveredSegment) return;
+            _hoveredButton[0] = 0;
+            _hoveredButton[1] = 0;
+        }
+
+        private bool RightArrowLightMode(int segmentId, Vector3 screenPos, float lightWidth,
+            float pedestrianWidth, float zoom, float lightHeight, ManualSegmentLight segmentDict, bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 5);
+
+            var myRect5 =
+                new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            switch (segmentDict.LightRight)
             {
-                _hoveredButton[0] = 0;
-                _hoveredButton[1] = 0;
+                case RoadBaseAI.TrafficLightState.Green:
+                    GUI.DrawTexture(myRect5, _lightRight3);
+                    break;
+                case RoadBaseAI.TrafficLightState.Red:
+                    GUI.DrawTexture(myRect5, _lightRight1);
+                    break;
             }
+
+            if (!myRect5.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 5;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightRight();
+            return true;
+        }
+
+        private void SetAlpha(int segmentId, int buttonId)
+        {
+            var guiColor = GUI.color;
+
+            guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId ? 0.92f : 0.45f;
+
+            GUI.color = guiColor;
+        }
+
+        private bool ForwardArrowLightMode(int segmentId, float lightWidth, bool hasRightSegment,
+            Vector3 screenPos, float pedestrianWidth, float zoom, float lightHeight, ManualSegmentLight segmentDict,
+            bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 4);
+
+            var offsetLight = lightWidth;
+
+            if (hasRightSegment)
+                offsetLight += lightWidth;
+
+            var myRect6 =
+                new Rect(screenPos.x - lightWidth/2 - offsetLight - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            switch (segmentDict.LightMain)
+            {
+                case RoadBaseAI.TrafficLightState.Green:
+                    GUI.DrawTexture(myRect6, _lightForward3);
+                    break;
+                case RoadBaseAI.TrafficLightState.Red:
+                    GUI.DrawTexture(myRect6, _lightForward1);
+                    break;
+            }
+
+            if (!myRect6.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 4;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightMain();
+            return true;
+        }
+
+        private bool LeftArrowLightMode(int segmentId, float lightWidth, bool hasRightSegment,
+            bool hasForwardSegment, Vector3 screenPos, float pedestrianWidth, float zoom, float lightHeight,
+            ManualSegmentLight segmentDict, bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 3);
+
+            var offsetLight = lightWidth;
+
+            if (hasRightSegment)
+                offsetLight += lightWidth;
+
+            if (hasForwardSegment)
+                offsetLight += lightWidth;
+
+            var myRect4 =
+                new Rect(screenPos.x - lightWidth/2 - offsetLight - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            switch (segmentDict.LightLeft)
+            {
+                case RoadBaseAI.TrafficLightState.Green:
+                    GUI.DrawTexture(myRect4, _lightLeft3);
+                    break;
+                case RoadBaseAI.TrafficLightState.Red:
+                    GUI.DrawTexture(myRect4, _lightLeft1);
+                    break;
+            }
+
+            if (!myRect4.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 3;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightLeft();
+
+            if (!hasForwardSegment)
+            {
+                segmentDict.ChangeLightMain();
+            }
+            return true;
+        }
+
+        private bool RightForwardLSegmentLightMode(int segmentId, Vector3 screenPos, float lightWidth, float pedestrianWidth,
+            float zoom, float lightHeight, bool hasForwardSegment, bool hasLeftSegment, ManualSegmentLight segmentDict,
+            bool hasRightSegment, bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 3);
+
+            var myRect4 = new Rect(screenPos.x - lightWidth/2 - lightWidth*2 - pedestrianWidth + 5f*zoom,
+                screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            if (hasForwardSegment && hasLeftSegment)
+            {
+                switch (segmentDict.LightLeft)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect4, _lightForwardLeft3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect4, _lightForwardLeft1);
+                        break;
+                }
+            }
+            else if (!hasLeftSegment)
+            {
+                if (!hasRightSegment)
+                {
+                    myRect4 = new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
+                }
+
+                switch (segmentDict.LightMain)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect4, _lightForward3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect4, _lightForward1);
+                        break;
+                }
+            }
+            else
+            {
+                if (!hasRightSegment)
+                {
+                    myRect4 = new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
+                }
+
+                switch (segmentDict.LightMain)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect4, _lightLeft3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect4, _lightLeft1);
+                        break;
+                }
+            }
+
+
+            if (myRect4.Contains(Event.current.mousePosition))
+            {
+                _hoveredButton[0] = segmentId;
+                _hoveredButton[1] = 3;
+                hoveredSegment = true;
+
+                if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
+                {
+                    _uiClickedSegment = true;
+                    segmentDict.ChangeLightMain();
+                }
+            }
+
+            var guiColor = GUI.color;
+            // right arrow light
+            if (hasRightSegment)
+                guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.45f;
+
+            GUI.color = guiColor;
+
+            var myRect5 =
+                new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            switch (segmentDict.LightRight)
+            {
+                case RoadBaseAI.TrafficLightState.Green:
+                    GUI.DrawTexture(myRect5, _lightRight3);
+                    break;
+                case RoadBaseAI.TrafficLightState.Red:
+                    GUI.DrawTexture(myRect5, _lightRight1);
+                    break;
+            }
+
+
+            if (!myRect5.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 4;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightRight();
+            return true;
+        }
+
+        private bool LeftForwardRManualSegmentLightMode(bool hasLeftSegment, int segmentId, Vector3 screenPos, float lightWidth,
+            float pedestrianWidth, float zoom, float lightHeight, ManualSegmentLight segmentDict, bool hoveredSegment,
+            bool hasForwardSegment, bool hasRightSegment)
+        {
+            if (hasLeftSegment)
+            {
+                // left arrow light
+                SetAlpha(segmentId, 3);
+
+                var myRect4 =
+                    new Rect(screenPos.x - lightWidth/2 - lightWidth*2 - pedestrianWidth + 5f*zoom,
+                        screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+                switch (segmentDict.LightLeft)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect4, _lightLeft3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect4, _lightLeft1);
+                        break;
+                }
+
+                if (myRect4.Contains(Event.current.mousePosition))
+                {
+                    _hoveredButton[0] = segmentId;
+                    _hoveredButton[1] = 3;
+                    hoveredSegment = true;
+
+                    if (Input.GetMouseButtonDown(0) && !_uiClickedSegment)
+                    {
+                        _uiClickedSegment = true;
+                        segmentDict.ChangeLightLeft();
+                    }
+                }
+            }
+
+            // forward-right arrow light
+            SetAlpha(segmentId, 4);
+
+            var myRect5 =
+                new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            if (hasForwardSegment && hasRightSegment)
+            {
+                switch (segmentDict.LightMain)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect5, _lightForwardRight3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect5, _lightForwardRight1);
+                        break;
+                }
+            }
+            else if (!hasRightSegment)
+            {
+                switch (segmentDict.LightMain)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect5, _lightForward3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect5, _lightForward1);
+                        break;
+                }
+            }
+            else
+            {
+                switch (segmentDict.LightMain)
+                {
+                    case RoadBaseAI.TrafficLightState.Green:
+                        GUI.DrawTexture(myRect5, _lightRight3);
+                        break;
+                    case RoadBaseAI.TrafficLightState.Red:
+                        GUI.DrawTexture(myRect5, _lightRight1);
+                        break;
+                }
+            }
+
+            if (!myRect5.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 4;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightMain();
+            return true;
+        }
+
+        private bool SimpleManualSegmentLightMode(int segmentId, Vector3 screenPos, float lightWidth, float pedestrianWidth,
+            float zoom, float lightHeight, ManualSegmentLight segmentDict, bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 3);
+
+            var myRect4 =
+                new Rect(screenPos.x - lightWidth/2 - lightWidth - pedestrianWidth + 5f*zoom,
+                    screenPos.y - lightHeight/2, lightWidth, lightHeight);
+
+            switch (segmentDict.LightMain)
+            {
+                case RoadBaseAI.TrafficLightState.Green:
+                    GUI.DrawTexture(myRect4, _lightSimple3);
+                    break;
+                case RoadBaseAI.TrafficLightState.Red:
+                    GUI.DrawTexture(myRect4, _lightSimple1);
+                    break;
+            }
+
+            if (!myRect4.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 3;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+
+            _uiClickedSegment = true;
+            segmentDict.ChangeLightMain();
+            return true;
+        }
+
+        private bool IsPedestrianLightHovered(Rect myRect3, int segmentId, bool hoveredSegment, ManualSegmentLight segmentDict)
+        {
+            if (!myRect3.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 2;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+            _uiClickedSegment = true;
+
+            if (!segmentDict.PedestrianEnabled)
+            {
+                segmentDict.ManualPedestrian();
+            }
+            else
+            {
+                segmentDict.ChangeLightPedestrian();
+            }
+            return true;
+        }
+
+        private bool RenderManualPedestrianLightSwitch(float zoom, int segmentId, Vector3 screenPos, float lightWidth,
+            ManualSegmentLight segmentDict, bool hoveredSegment)
+        {
+            var guiColor = GUI.color;
+            var manualPedestrianWidth = 36f*zoom;
+            var manualPedestrianHeight = 35f*zoom;
+
+            guiColor.a = _hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) ? 0.92f : 0.45f;
+
+            GUI.color = guiColor;
+
+            var myRect2 = new Rect(screenPos.x - manualPedestrianWidth/2 - lightWidth + 5f*zoom,
+                screenPos.y - manualPedestrianHeight/2 - 9f*zoom, manualPedestrianWidth, manualPedestrianHeight);
+
+            GUI.DrawTexture(myRect2, segmentDict.PedestrianEnabled ? _pedestrianMode2 : _pedestrianMode1);
+
+            if (!myRect2.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 1;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+
+            _uiClickedSegment = true;
+            segmentDict.ManualPedestrian();
+            return true;
+        }
+
+        private bool RenderCounter(int segmentId, Vector3 screenPos, float modeWidth, float modeHeight, float zoom,
+            ManualSegmentLight segmentDict, bool hoveredSegment)
+        {
+            SetAlpha(segmentId, 0);
+
+            var myRectCounter = new Rect(screenPos.x - modeWidth/2, screenPos.y - modeHeight/2 - 6f*zoom, modeWidth, modeHeight);
+
+            GUI.DrawTexture(myRectCounter, _lightCounter);
+
+            var counterSize = 20f*zoom;
+
+            var counter = segmentDict.LastChange;
+
+            var myRectCounterNum = new Rect(screenPos.x - counterSize + 15f*zoom + (counter >= 10 ? -5*zoom : 0f),
+                screenPos.y - counterSize + 11f*zoom, counterSize, counterSize);
+
+            _counterStyle.fontSize = (int) (18f*zoom);
+            _counterStyle.normal.textColor = new Color(1f, 1f, 1f);
+
+            GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
+
+            if (!myRectCounter.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = 0;
+            return true;
+        }
+
+        private bool GetHoveredSegment(Rect myRect1, int segmentId, bool hoveredSegment, ManualSegmentLight segmentDict)
+        {
+            if (!myRect1.Contains(Event.current.mousePosition))
+                return hoveredSegment;
+
+            Debug.Log("mouse in myRect1");
+            _hoveredButton[0] = segmentId;
+            _hoveredButton[1] = -1;
+
+            if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+                return true;
+            _uiClickedSegment = true;
+            segmentDict.ChangeMode();
+            return true;
+        }
+
+        private static Vector3 CalculateNodePositionForSegment(NetNode node, NetSegment segment)
+        {
+            var position = node.m_position;
+
+            const float offset = 25f;
+
+            if (segment.m_startNode == SelectedNode)
+            {
+                position.x += segment.m_startDirection.x*offset;
+                position.y += segment.m_startDirection.y*offset;
+                position.z += segment.m_startDirection.z*offset;
+            }
+            else
+            {
+                position.x += segment.m_endDirection.x*offset;
+                position.y += segment.m_endDirection.y*offset;
+                position.z += segment.m_endDirection.z*offset;
+            }
+            return position;
         }
 
         protected void _guiManualTrafficLightsCrosswalk(NetNode node)
@@ -1500,14 +1604,7 @@ namespace TrafficManager.TrafficLight
         {
             GUILayout.Window(253, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
 
-            if (_windowRect.Contains(Event.current.mousePosition))
-            {
-                _cursorInSecondaryPanel = true;
-            }
-            else
-            {
-                _cursorInSecondaryPanel = false;
-            }
+            IsCursorInSecondaryPanel();
 
             var hoveredSegment = false;
 
@@ -2359,6 +2456,18 @@ namespace TrafficManager.TrafficLight
             }
         }
 
+        private void IsCursorInSecondaryPanel()
+        {
+            if (_windowRect.Contains(Event.current.mousePosition))
+            {
+                _cursorInSecondaryPanel = true;
+            }
+            else
+            {
+                _cursorInSecondaryPanel = false;
+            }
+        }
+
         protected void _guiLaneChange()
         {
             if (SelectedNode != 0 && SelectedSegment != 0)
@@ -2799,16 +2908,16 @@ namespace TrafficManager.TrafficLight
 
                     if (_setSpeed == (int)laneList[i][2])
                     {
-                        SliderValues[(int) laneList[i][2]] =
-                            GUILayout.HorizontalSlider(SliderValues[(int) laneList[i][2]],
+                        _sliderValues[(int) laneList[i][2]] =
+                            GUILayout.HorizontalSlider(_sliderValues[(int) laneList[i][2]],
                                 20f, 150f, GUILayout.Height(20));
 
-                        if (GUILayout.Button("Set Speed " + (int)SliderValues[(int) laneList[i][2]]))
+                        if (GUILayout.Button("Set Speed " + (int)_sliderValues[(int) laneList[i][2]]))
                         {
                             foreach (var restrictionSegment in SelectedSegmentIndexes.Select(TrafficRoadRestrictions.GetSegment))
                             {
                                 restrictionSegment.SpeedLimits[(int) laneList[i][2]] =
-                                    SliderValues[(int) laneList[i][2]]/
+                                    _sliderValues[(int) laneList[i][2]]/
                                     50f;
                             }
 
@@ -2819,7 +2928,7 @@ namespace TrafficManager.TrafficLight
                     {
                         if (GUILayout.Button("Max speed " + (int)(resSpeed > 0.1f ? resSpeed*50f : info2.m_lanes[(int) laneList[i][2]].m_speedLimit*50f)))
                         {
-                            SliderValues[(int) laneList[i][2]] = info2.m_lanes[(int) laneList[i][2]].m_speedLimit*50f;
+                            _sliderValues[(int) laneList[i][2]] = info2.m_lanes[(int) laneList[i][2]].m_speedLimit*50f;
                             _setSpeed = (int) laneList[i][2];
                         }
                     }
@@ -3199,7 +3308,7 @@ namespace TrafficManager.TrafficLight
                             {
                                 _timedPanelAdd = false;
                                 _timedEditStep = i;
-                                StepValue = timedNodeMain.GetStep(i).NumSteps;
+                                _stepValue = timedNodeMain.GetStep(i).NumSteps;
 
                                 foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight))
                                 {
@@ -3223,13 +3332,13 @@ namespace TrafficManager.TrafficLight
                 }
                 else
                 {
-                    GUILayout.Label("Time: " + (int)StepValue, GUILayout.Width(60));
-                    StepValue = GUILayout.HorizontalSlider(StepValue, 1f, 120f, GUILayout.Height(20));
+                    GUILayout.Label("Time: " + (int)_stepValue, GUILayout.Width(60));
+                    _stepValue = GUILayout.HorizontalSlider(_stepValue, 1f, 120f, GUILayout.Height(20));
                     if (GUILayout.Button("Save", GUILayout.Width(45)))
                     {
                         foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight))
                         {
-                            timeNode.GetStep(_timedEditStep).NumSteps = (int)StepValue;
+                            timeNode.GetStep(_timedEditStep).NumSteps = (int)_stepValue;
                             timeNode.GetStep(_timedEditStep).UpdateLights();
                         }
 
@@ -3246,13 +3355,13 @@ namespace TrafficManager.TrafficLight
             {
                 if (_timedPanelAdd)
                 {
-                    GUILayout.Label("Time: " + (int) StepValue, GUILayout.Width(60));
-                    StepValue = GUILayout.HorizontalSlider(StepValue, 1f, 120f, GUILayout.Height(20));
+                    GUILayout.Label("Time: " + (int) _stepValue, GUILayout.Width(60));
+                    _stepValue = GUILayout.HorizontalSlider(_stepValue, 1f, 120f, GUILayout.Height(20));
                     if (GUILayout.Button("Add", GUILayout.Width(45)))
                     {
                         foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight))
                         {
-                            timedNode.AddStep((int) StepValue);
+                            timedNode.AddStep((int) _stepValue);
                         }
                         _timedPanelAdd = false;
                     }
@@ -3519,7 +3628,7 @@ namespace TrafficManager.TrafficLight
             }
         }
 
-        protected void _switchTrafficLights()
+        private void _switchTrafficLights()
         {
             var node = GetNetNode(_hoveredNetNodeIdx);
 
