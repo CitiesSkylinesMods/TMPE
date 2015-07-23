@@ -12,29 +12,29 @@ namespace TrafficManager
         {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 
-            Debug.Log("Checking for NULL LoadingExtension Instance");
+            //Debug.Log("Checking for NULL LoadingExtension Instance");
             if (LoadingExtension.Instance == null)
             {
                 return;
             }
 
-            Debug.Log("Getting ToolMode");
+            //Debug.Log("Getting ToolMode");
             if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None &&
                 ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool)
             {
-                Debug.Log("Closing UI");
+                //Debug.Log("Closing UI");
                 LoadingExtension.Instance.UI.Close();
             }
 
-            Debug.Log("Checking if TrafficLightTool is Visible");
+            //Debug.Log("Checking if TrafficLightTool is Visible");
             if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool &&
                 LoadingExtension.Instance.UI.IsVisible())
             {
-                Debug.Log("Closing UI");
+                //Debug.Log("Closing UI");
                 LoadingExtension.Instance.UI.Close();
             }
 
-            Debug.Log("If !DetourInited");
+            //Debug.Log("If !DetourInited");
             if (!LoadingExtension.Instance.DetourInited)
             {
                 Debug.Log("Redirecting Car AI Calculate Segment Calls");

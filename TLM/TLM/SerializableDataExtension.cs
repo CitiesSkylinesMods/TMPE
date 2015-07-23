@@ -33,7 +33,7 @@ namespace TrafficManager
         {
         }
 
-        public static void GenerateUniqueId()
+        private static void GenerateUniqueId()
         {
             UniqueId = (uint)Random.Range(1000000f, 2000000f);
 
@@ -216,22 +216,24 @@ namespace TrafficManager
 
         public void OnSaveData()
         {
-
-            FastList<byte> data = new FastList<byte>();
+            Debug.Log("Saving Mod Data.");
+            var data = new FastList<byte>();
 
             GenerateUniqueId();
 
-            byte[] uniqueIdBytes = BitConverter.GetBytes(UniqueId);
-            foreach (byte uniqueIdByte in uniqueIdBytes)
+            Debug.Log("UniqueID: " + UniqueId);
+            var uniqueIdBytes = BitConverter.GetBytes(UniqueId);
+
+            foreach (var uniqueIdByte in uniqueIdBytes)
             {
                 data.Add(uniqueIdByte);
             }
 
-            byte[] dataToSave = data.ToArray();
+            var dataToSave = data.ToArray();
             SerializableData.SaveData(DataId, dataToSave);
 
             var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + UniqueId + ".xml");
-
+            Debug.Log("Save Location: " + filepath);
             var configuration = new Configuration();
 
             for (var i = 0; i < 32768; i++)
