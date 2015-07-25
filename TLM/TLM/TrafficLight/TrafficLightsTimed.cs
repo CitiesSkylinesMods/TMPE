@@ -70,13 +70,12 @@ namespace TrafficManager.TrafficLight
 
         public void CheckStep(uint frame)
         {
-            if (Steps[CurrentStep].StepDone(frame))
-            {
-                CurrentStep = CurrentStep + 1 >= Steps.Count ? 0 : CurrentStep + 1;
+            if (!Steps[CurrentStep].StepDone(frame)) return;
 
-                Steps[CurrentStep].SetFrame(frame);
-                Steps[CurrentStep].SetLights();
-            }
+            CurrentStep = CurrentStep + 1 >= Steps.Count ? 0 : CurrentStep + 1;
+
+            Steps[CurrentStep].SetFrame(frame);
+            Steps[CurrentStep].SetLights();
         }
 
         public void SkipStep()

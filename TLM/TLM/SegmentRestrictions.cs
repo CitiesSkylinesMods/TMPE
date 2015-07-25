@@ -5,33 +5,33 @@ namespace TrafficManager
 {
     class SegmentRestrictions
     {
-        private int _segmentId;
+        public int SegmentId { get; }
 
-        public float[] SpeedLimits = new float[16] {0f, 0f, 0f, 0f, 0f, 0f,0f,0f,0f,0f,0f,0f,0f,0f,0f,0f};
+        public readonly float[] SpeedLimits = {0f, 0f, 0f, 0f, 0f, 0f,0f,0f,0f,0f,0f,0f,0f,0f,0f,0f};
 
-        public List<LaneRestrictions> Lanes = new List<LaneRestrictions>();
+        private readonly List<LaneRestrictions> _lanes = new List<LaneRestrictions>();
 
-        public List<int> SegmentGroup;
+        public readonly List<int> SegmentGroup;
 
-        public SegmentRestrictions(int segmentid, List<int> segmentGroup )
+        public SegmentRestrictions(int segmentid, IEnumerable<int> segmentGroup )
         {
-            _segmentId = segmentid;
+            SegmentId = segmentid;
             SegmentGroup = new List<int>(segmentGroup);
         }
 
         public void AddLane(uint lane, int lanenum, NetInfo.Direction dir)
         {
-            Lanes.Add(new LaneRestrictions(lane, lanenum, dir));
+            _lanes.Add(new LaneRestrictions(lane, lanenum, dir));
         }
 
         public LaneRestrictions GetLane(int lane)
         {
-            return Lanes[lane];
+            return _lanes[lane];
         }
 
         public LaneRestrictions GetLaneByNum(int laneNum)
         {
-            return Lanes.FirstOrDefault(laneRestriction => laneRestriction.LaneNum == laneNum);
+            return _lanes.FirstOrDefault(laneRestriction => laneRestriction.LaneNum == laneNum);
         }
     }
 }

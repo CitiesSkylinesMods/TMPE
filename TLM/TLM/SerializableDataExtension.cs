@@ -45,7 +45,8 @@ namespace TrafficManager
 
         public void OnLoadData()
         {
-            byte[] data = SerializableData.LoadData(DataId);
+            Debug.Log("Loading Mod Data.");
+            var data = SerializableData.LoadData(DataId);
 
             if (data == null)
             {
@@ -62,7 +63,7 @@ namespace TrafficManager
 
         private static void OnLoadDataTimed(object source, ElapsedEventArgs e)
         {
-            byte[] data = SerializableData.LoadData(DataId);
+            var data = SerializableData.LoadData(DataId);
 
             UniqueId = 0u;
 
@@ -71,12 +72,13 @@ namespace TrafficManager
                 UniqueId = BitConverter.ToUInt32(data, i);
             }
 
+            Debug.Log("Loading TrafficManagerSave");
             var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + UniqueId + ".xml");
             _timer.Enabled = false;
 
             if (!File.Exists(filepath))
             {
-
+                Debug.LogWarning("Save Data doesn't exist. Expected: " + filepath);
                 return;
             }
 
@@ -128,81 +130,75 @@ namespace TrafficManager
                     nodeGroup.Add(configuration.TimedNodeGroups[i][j]);
                 }
 
-                if (!TrafficLightsTimed.IsTimedLight(nodeid))
+                if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
+                TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
+                var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
+
+                timedNode.CurrentStep = configuration.TimedNodes[i][1];
+
+                for (var j = 0; j < configuration.TimedNodes[i][2]; j++)
                 {
-                    TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
-                    var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
+                    var cfgstep = configuration.TimedNodeSteps[timedStepCount];
 
-                    timedNode.CurrentStep = configuration.TimedNodes[i][1];
+                    timedNode.AddStep(cfgstep[0]);
 
-                    for (var j = 0; j < configuration.TimedNodes[i][2]; j++)
+                    var step = timedNode.Steps[j];
+
+                    for (var k = 0; k < cfgstep[1]; k++)
                     {
-                        var cfgstep = configuration.TimedNodeSteps[timedStepCount];
+                        step.LightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
+                        step.LightMain[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
+                        step.LightRight[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
+                        step.LightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
 
-                        timedNode.AddStep(cfgstep[0]);
-
-                        var step = timedNode.Steps[j];
-
-                        for (var k = 0; k < cfgstep[1]; k++)
-                        {
-                            step.LightLeft[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-                            step.LightMain[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-                            step.LightRight[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-                            step.LightPedestrian[k] = (RoadBaseAI.TrafficLightState)configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
-
-                            timedStepSegmentCount++;
-                        }
-
-                        timedStepCount++;
+                        timedStepSegmentCount++;
                     }
 
-                    if (Convert.ToBoolean(configuration.TimedNodes[i][3]))
-                    {
-                        timedNode.Start();
-                    }
+                    timedStepCount++;
+                }
+
+                if (Convert.ToBoolean(configuration.TimedNodes[i][3]))
+                {
+                    timedNode.Start();
                 }
             }
 
             var j1 = 0;
             for (var i1 = 0; i1 < 32768; i1++)
             {
-                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i1].Info.m_class.m_service ==
-                    ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags != 0)
+                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i1].Info.m_class.m_service != ItemClass.Service.Road ||
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags == 0) continue;
+                var trafficLight = configuration.NodeTrafficLights[j1];
+
+                if (trafficLight == '1')
                 {
-                    var trafficLight = configuration.NodeTrafficLights[j1];
-
-                    if (trafficLight == '1')
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags |= NetNode.Flags.TrafficLights;
-                    }
-                    else
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags &= ~NetNode.Flags.TrafficLights;
-                    }
-
-                    j1++;
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags |= NetNode.Flags.TrafficLights;
                 }
+                else
+                {
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags &= ~NetNode.Flags.TrafficLights;
+                }
+
+                j1++;
             }
 
             var j2 = 0;
             for (var i2 = 0; i2 < 32768; i2++)
             {
-                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i2].Info.m_class.m_service ==
-                    ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags != 0)
+                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i2].Info.m_class.m_service != ItemClass.Service.Road ||
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags == 0) continue;
+                var crossWalk = configuration.NodeCrosswalk[j2];
+
+                if (crossWalk == '1')
                 {
-                    var crossWalk = configuration.NodeCrosswalk[j2];
-
-                    if (crossWalk == '1')
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags |= NetNode.Flags.Junction;
-                    }
-                    else
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags &= ~NetNode.Flags.Junction;
-                    }
-
-                    j2++;
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags |= NetNode.Flags.Junction;
                 }
+                else
+                {
+                    Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags &= ~NetNode.Flags.Junction;
+                }
+
+                j2++;
             }
 
             var lanes = configuration.LaneFlags.Split(',');
@@ -297,39 +293,38 @@ namespace TrafficManager
                     }
                 }
 
-                if (TrafficLightsTimed.TimedScripts.ContainsKey((ushort)i))
+                if (!TrafficLightsTimed.TimedScripts.ContainsKey((ushort) i)) continue;
+
+                var timedNode = TrafficLightsTimed.GetTimedLight((ushort) i);
+
+                configuration.TimedNodes.Add(new[] { timedNode.NodeId, timedNode.CurrentStep, timedNode.NumSteps(), Convert.ToInt32(timedNode.IsStarted())});
+
+                var nodeGroup = new ushort[timedNode.NodeGroup.Count];
+
+                for (var j = 0; j < timedNode.NodeGroup.Count; j++)
                 {
-                    var timedNode = TrafficLightsTimed.GetTimedLight((ushort) i);
+                    nodeGroup[j] = timedNode.NodeGroup[j];
+                }
 
-                    configuration.TimedNodes.Add(new[] { timedNode.NodeId, timedNode.CurrentStep, timedNode.NumSteps(), Convert.ToInt32(timedNode.IsStarted())});
+                configuration.TimedNodeGroups.Add(nodeGroup);
 
-                    var nodeGroup = new ushort[timedNode.NodeGroup.Count];
-
-                    for (var j = 0; j < timedNode.NodeGroup.Count; j++)
+                for (var j = 0; j < timedNode.NumSteps(); j++)
+                {
+                    configuration.TimedNodeSteps.Add(new[]
                     {
-                        nodeGroup[j] = timedNode.NodeGroup[j];
-                    }
+                        timedNode.Steps[j].NumSteps,
+                        timedNode.Steps[j].Segments.Count
+                    });
 
-                    configuration.TimedNodeGroups.Add(nodeGroup);
-
-                    for (var j = 0; j < timedNode.NumSteps(); j++)
+                    for (var k = 0; k < timedNode.Steps[j].Segments.Count; k++)
                     {
-                        configuration.TimedNodeSteps.Add(new[]
+                        configuration.TimedNodeStepSegments.Add(new[]
                         {
-                            timedNode.Steps[j].NumSteps,
-                            timedNode.Steps[j].Segments.Count
+                            (int)timedNode.Steps[j].LightLeft[k],
+                            (int)timedNode.Steps[j].LightMain[k],
+                            (int)timedNode.Steps[j].LightRight[k],
+                            (int)timedNode.Steps[j].LightPedestrian[k],
                         });
-
-                        for (var k = 0; k < timedNode.Steps[j].Segments.Count; k++)
-                        {
-                            configuration.TimedNodeStepSegments.Add(new[]
-                            {
-                                (int)timedNode.Steps[j].LightLeft[k],
-                                (int)timedNode.Steps[j].LightMain[k],
-                                (int)timedNode.Steps[j].LightRight[k],
-                                (int)timedNode.Steps[j].LightPedestrian[k],
-                            });
-                        }
                     }
                 }
             }
@@ -338,17 +333,13 @@ namespace TrafficManager
             {
                 var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
 
-                if (nodeFlags != 0)
-                {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service ==
-                        ItemClass.Service.Road)
-                    {
-                        configuration.NodeTrafficLights +=
-                            Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
-                        configuration.NodeCrosswalk +=
-                            Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
-                    }
-                }
+                if (nodeFlags == 0) continue;
+                if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road)
+                    continue;
+                configuration.NodeTrafficLights +=
+                    Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
+                configuration.NodeCrosswalk +=
+                    Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
             }
 
             for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++)

@@ -41,6 +41,10 @@
     <Reference Include="ICities">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.0.1\lib\net35\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <HintPath>..\..\..\..\..\..\steamapps\common\Cities_Skylines\Cities_Data\Managed\System.Core.dll</HintPath>
@@ -67,6 +71,7 @@
     <Compile Include="PrioritySegment.cs" />
     <Compile Include="RedirectionHelper.cs" />
     <Compile Include="SegmentRestrictions.cs" />
+    <Compile Include="SelfDestruct.cs" />
     <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ThreadingExtension.cs" />
@@ -78,6 +83,7 @@
     <Compile Include="TrafficLight\TrafficLightsTimed.cs" />
     <Compile Include="TrafficLight\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrafficLight\TrafficLightToolTextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="Traffic\TimedTrafficSteps.cs" />
@@ -123,9 +129,21 @@
     <EmbeddedResource Include="Resources\sign_stop.png" />
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy TrafficManager.dll "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
+    <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
+del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
+xcopy /y "$(TargetPath)" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
+xcopy /y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

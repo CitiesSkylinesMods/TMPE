@@ -73,16 +73,15 @@ namespace TrafficManager.Traffic
             {
                 var segment = Segments[s];
 
-                if (segment != 0)
-                {
-                    var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
+                if (segment == 0) continue;
 
-                    segmentLight.LightMain = LightMain[s];
-                    segmentLight.LightLeft = LightLeft[s];
-                    segmentLight.LightRight = LightRight[s];
-                    segmentLight.LightPedestrian = LightPedestrian[s];
-                    segmentLight.UpdateVisuals();
-                }
+                var segmentLight = TrafficLightsManual.GetSegmentLight(NodeId, segment);
+
+                segmentLight.LightMain = LightMain[s];
+                segmentLight.LightLeft = LightLeft[s];
+                segmentLight.LightRight = LightRight[s];
+                segmentLight.LightPedestrian = LightPedestrian[s];
+                segmentLight.UpdateVisuals();
             }
         }
 

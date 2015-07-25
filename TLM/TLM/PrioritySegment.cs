@@ -67,7 +67,7 @@ namespace TrafficManager
 
         private void _numCarsOnLane()
         {
-            NetManager instance = Singleton<NetManager>.instance;
+            var instance = Singleton<NetManager>.instance;
 
             var segment = instance.m_segments.m_buffer[Segmentid];
             var info = segment.Info;
@@ -79,7 +79,8 @@ namespace TrafficManager
 
             while (num3 < info.m_lanes.Length && num2[0] != 0u)
             {
-                if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian) {
+                if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian)
+                {
                     foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].fromLaneID == num2[0]))
                     {
                         CarsOnLanes[num3]++;

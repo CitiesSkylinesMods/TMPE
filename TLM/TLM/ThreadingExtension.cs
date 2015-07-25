@@ -79,7 +79,7 @@ namespace TrafficManager
                                     typeof (Vehicle).MakeByRefType(),
                                     typeof (Vector3)
                                 }),
-                            typeof (CustomCarAI).GetMethod("TmSimulationStep"));
+                            typeof (CustomCarAI).GetMethod("TrafficManagerSimulationStep"));
 
                     Debug.Log("Redirecting PassengerCarAI Simulation Step Calls");
                     LoadingExtension.Instance.RevertMethods[4] =

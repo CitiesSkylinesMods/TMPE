@@ -134,6 +134,7 @@ namespace TrafficManager.UI
 
         private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam)
         {
+            Debug.Log("Priority Sign Clicked.");
             if (_uiState != UIState.AddStopSign)
             {
                 _uiState = UIState.AddStopSign;
@@ -332,50 +333,48 @@ namespace TrafficManager.UI
 
         private void _laneChangePanel()
         {
-            if (TrafficLightTool.SelectedSegment != 0)
+            if (TrafficLightTool.SelectedSegment == 0) return;
+            var instance = Singleton<NetManager>.instance;
+
+            var segment = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment];
+
+            var info = segment.Info;
+
+            var num2 = segment.m_lanes;
+            var num3 = 0;
+
+            var dir = NetInfo.Direction.Forward;
+            if (segment.m_startNode == TrafficLightTool.SelectedNode)
+                dir = NetInfo.Direction.Backward;
+            var dir3 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+
+            while (num3 < info.m_lanes.Length && num2 != 0u)
             {
-                var instance = Singleton<NetManager>.instance;
-
-                var segment = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment];
-
-                var info = segment.Info;
-
-                var num2 = segment.m_lanes;
-                var num3 = 0;
-
-                var dir = NetInfo.Direction.Forward;
-                if (segment.m_startNode == TrafficLightTool.SelectedNode)
-                    dir = NetInfo.Direction.Backward;
-                var dir3 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-
-                while (num3 < info.m_lanes.Length && num2 != 0u)
+                if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3)
                 {
-                    if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3)
-                    {
-                        //segmentLights[num3].Show();
-                        //segmentLights[num3].relativePosition = new Vector3(35f, (float)(xPos + (offsetIdx * 40f)));
-                        //segmentLights[num3].text = ((NetLane.Flags)instance.m_lanes.m_buffer[num2].m_flags & ~NetLane.Flags.Created).ToString();
+                    //segmentLights[num3].Show();
+                    //segmentLights[num3].relativePosition = new Vector3(35f, (float)(xPos + (offsetIdx * 40f)));
+                    //segmentLights[num3].text = ((NetLane.Flags)instance.m_lanes.m_buffer[num2].m_flags & ~NetLane.Flags.Created).ToString();
 
-                        //if (segmentLights[num3].containsMouse)
-                        //{
-                        //    if (Input.GetMouseButton(0) && !segmentMouseDown)
-                        //    {
-                        //        switchLane(num2);
-                        //        segmentMouseDown = true;
+                    //if (segmentLights[num3].containsMouse)
+                    //{
+                    //    if (Input.GetMouseButton(0) && !segmentMouseDown)
+                    //    {
+                    //        switchLane(num2);
+                    //        segmentMouseDown = true;
 
-                        //        if (
-                        //            !TrafficPriority.isPrioritySegment(TrafficLightTool.SelectedNode,
-                        //                TrafficLightTool.SelectedSegment))
-                        //        {
-                        //            TrafficPriority.addPrioritySegment(TrafficLightTool.SelectedNode, TrafficLightTool.SelectedSegment, PrioritySegment.PriorityType.None);
-                        //        }
-                        //    }
-                        //}
-                    }
-
-                    num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-                    num3++;
+                    //        if (
+                    //            !TrafficPriority.isPrioritySegment(TrafficLightTool.SelectedNode,
+                    //                TrafficLightTool.SelectedSegment))
+                    //        {
+                    //            TrafficPriority.addPrioritySegment(TrafficLightTool.SelectedNode, TrafficLightTool.SelectedSegment, PrioritySegment.PriorityType.None);
+                    //        }
+                    //    }
+                    //}
                 }
+
+                num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
+                num3++;
             }
         }
 

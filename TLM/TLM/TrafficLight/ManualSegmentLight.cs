@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using TrafficManager.Traffic;
+using UnityEngine;
 
 namespace TrafficManager.TrafficLight
 {
@@ -202,32 +203,36 @@ namespace TrafficManager.TrafficLight
 
         public void UpdateVisuals()
         {
-            NetManager instance = Singleton<NetManager>.instance;
-            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            var instance = Singleton<NetManager>.instance;
+            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             LastChange = 0u;
             LastChangeFrame = currentFrameIndex >> 6;
 
-            RoadBaseAI.TrafficLightState trafficLightState3;
-            RoadBaseAI.TrafficLightState trafficLightState4;
+            RoadBaseAI.TrafficLightState vehicleLightState;
+            RoadBaseAI.TrafficLightState pedestrianLightState;
             bool vehicles;
             bool pedestrians;
             RoadBaseAI.GetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment],
-                currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles, out pedestrians);
+                currentFrameIndex - 256u, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
-            if (LightMain == RoadBaseAI.TrafficLightState.Red && LightLeft == RoadBaseAI.TrafficLightState.Red && LightRight == RoadBaseAI.TrafficLightState.Red)
+            if (LightMain == RoadBaseAI.TrafficLightState.Red && 
+                LightLeft == RoadBaseAI.TrafficLightState.Red && 
+                LightRight == RoadBaseAI.TrafficLightState.Red)
             {
-                trafficLightState3 = RoadBaseAI.TrafficLightState.Red;
+                Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to red.");
+                vehicleLightState = RoadBaseAI.TrafficLightState.Red;
             }
             else
             {
-                trafficLightState3 = RoadBaseAI.TrafficLightState.Green;
+                Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to green.");
+                vehicleLightState = RoadBaseAI.TrafficLightState.Green;
             }
 
-            trafficLightState4 = LightPedestrian;
+            pedestrianLightState = LightPedestrian;
 
             RoadBaseAI.SetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment], currentFrameIndex,
-                trafficLightState3, trafficLightState4, vehicles, pedestrians);
+                vehicleLightState, pedestrianLightState, vehicles, pedestrians);
         }
 
         private RoadBaseAI.TrafficLightState _checkPedestrianLight()

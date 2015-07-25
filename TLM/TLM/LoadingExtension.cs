@@ -26,7 +26,13 @@ namespace TrafficManager
 
         public LoadingExtension()
         {
-            Debug.Log("LoadingExtension constructor entry.");
+        }
+
+        public override void OnCreated(ILoading loading)
+        {
+            SelfDestruct.DestructOldInstances(this);
+
+            base.OnCreated(loading);
 
             Debug.Log("Setting ToolMode");
             ToolMode = TrafficManagerMode.None;
