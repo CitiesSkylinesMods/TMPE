@@ -2,43 +2,34 @@ namespace TrafficManager
 {
     class PriorityCar
     {
-        public enum CarState
+        public CarState CarState = CarState.None;
+
+        public int WaitTime = 0;
+
+        public ushort ToNode;
+        public int FromSegment;
+        public int ToSegment;
+        public uint ToLaneId;
+        public uint FromLaneId;
+        public ushort FromLaneFlags;
+        public float LastSpeed;
+        public float ReduceSpeedByValueToYield;
+        public bool Stopped = false;
+
+        public uint LastFrame;
+
+        public void ResetCar()
         {
-            None,
-            Enter,
-            Transit,
-            Stop,
-            Leave
-        }
+            ToNode = 0;
+            FromSegment = 0;
+            ToSegment = 0;
+            ToLaneId = 0;
+            FromLaneId = 0;
+            FromLaneFlags = 0;
+            Stopped = false;
 
-        public CarState carState = CarState.None;
-
-        public int waitTime = 0;
-
-        public ushort toNode;
-        public int fromSegment;
-        public int toSegment;
-        public uint toLaneID;
-        public uint fromLaneID;
-        public ushort fromLaneFlags;
-        public float lastSpeed;
-        public float yieldSpeedReduce;
-        public bool stopped = false;
-
-        public uint lastFrame;
-
-        public void resetCar()
-        {
-            toNode = 0;
-            fromSegment = 0;
-            toSegment = 0;
-            toLaneID = 0;
-            fromLaneID = 0;
-            fromLaneFlags = 0;
-            stopped = false;
-
-            waitTime = 0;
-            carState = CarState.None;
+            WaitTime = 0;
+            CarState = CarState.None;
         }
     }
 }

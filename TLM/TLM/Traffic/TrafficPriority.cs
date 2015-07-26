@@ -90,7 +90,7 @@ namespace TrafficManager.Traffic
             var frame = currentFrameIndex >> 4;
             var node = TrafficLightTool.GetNetNode(nodeId);
 
-            var fromPrioritySegment = GetPrioritySegment(nodeId, VehicleList[targetCar].fromSegment);
+            var fromPrioritySegment = GetPrioritySegment(nodeId, VehicleList[targetCar].FromSegment);
 
             var removeCarList = new List<ushort>();
 
@@ -101,18 +101,18 @@ namespace TrafficManager.Traffic
             {
                 var segment = node.GetSegment(s);
 
-                if (segment == 0 || segment == VehicleList[targetCar].fromSegment) continue;
+                if (segment == 0 || segment == VehicleList[targetCar].FromSegment) continue;
                 if (!IsPrioritySegment(nodeId, segment)) continue;
 
                 var prioritySegment = GetPrioritySegment(nodeId, segment);
 
                 // select outdated cars
-                removeCarList.AddRange(from car in prioritySegment.Cars let frameReduce = VehicleList[car].lastSpeed < 70 ? 4u : 2u where VehicleList[car].lastFrame < frame - frameReduce select car);
+                removeCarList.AddRange(from car in prioritySegment.Cars let frameReduce = VehicleList[car].LastSpeed < 70 ? 4u : 2u where VehicleList[car].LastFrame < frame - frameReduce select car);
 
                 // remove outdated cars
                 foreach (var rcar in removeCarList)
                 {
-                    VehicleList[rcar].resetCar();
+                    VehicleList[rcar].ResetCar();
                     prioritySegment.RemoveCar(rcar);
                 }
 
@@ -128,7 +128,7 @@ namespace TrafficManager.Traffic
 
                         foreach (var car in prioritySegment.Cars)
                         {
-                            if (VehicleList[car].lastSpeed > 0.1f)
+                            if (VehicleList[car].LastSpeed > 0.1f)
                             {
                                 numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
                                     ? numCars - 1
@@ -148,7 +148,7 @@ namespace TrafficManager.Traffic
                         {
                             if (prioritySegment.Type == PrioritySegment.PriorityType.Main)
                             {
-                                if (!VehicleList[car].stopped)
+                                if (!VehicleList[car].Stopped)
                                 {
                                     numCars = CheckPriorityRoadIncomingCar(targetCar, car, nodeId)
                                         ? numCars - 1
@@ -161,7 +161,7 @@ namespace TrafficManager.Traffic
                             }
                             else
                             {
-                                if (VehicleList[car].lastSpeed > 0.1f)
+                                if (VehicleList[car].LastSpeed > 0.1f)
                                 {
                                     numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
                                         ? numCars - 1
@@ -187,7 +187,7 @@ namespace TrafficManager.Traffic
 
                     foreach (var car in prioritySegment.Cars)
                     {
-                        if (VehicleList[car].lastSpeed > 1f)
+                        if (VehicleList[car].LastSpeed > 1f)
                         {
                             numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
                                 ? numCars - 1
@@ -216,40 +216,40 @@ namespace TrafficManager.Traffic
             var targetCar = VehicleList[targetCarId];
             var incomingCar = VehicleList[incomingCarId];
 
-            if (IsRightSegment(targetCar.fromSegment, incomingCar.fromSegment, nodeId))
+            if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
             {
-                if (IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                 {
-                    if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId))
+                    if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId))
                     {
                         return true;
                     }
                 }
-                else if (targetCar.toSegment == incomingCar.toSegment && targetCar.toLaneID != incomingCar.toLaneID)
+                else if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId)
                 {
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                 }
             }
-            else if (IsLeftSegment(targetCar.fromSegment, incomingCar.fromSegment, nodeId))
+            else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
                 // incoming is on the left
             {
                 return true;
             }
             else // incoming is in front or elsewhere
             {
-                if (!IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (!IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car not going left
                 {
                     return true;
                 }
-                if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId))
+                if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId))
                 {
-                    if (targetCar.toLaneID != incomingCar.toLaneID)
+                    if (targetCar.ToLaneId != incomingCar.ToLaneId)
                     {
-                        return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                        return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                     }
                 }
-                else if (IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId) && IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // both left turns
+                else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
                 {
                     return true;
                 }
@@ -264,37 +264,37 @@ namespace TrafficManager.Traffic
             var targetCar = VehicleList[targetCarId];
             var incomingCar = VehicleList[incomingCarId];
 
-            if (IsRightSegment(targetCar.fromSegment, incomingCar.fromSegment, nodeId))
+            if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
             {
-                if (IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                 {
                     return true;
                 }
-                if (targetCar.toSegment == incomingCar.toSegment && targetCar.toLaneID != incomingCar.toLaneID)
+                if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId)
                 {
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                 }
             }
-            else if (IsLeftSegment(targetCar.fromSegment, incomingCar.fromSegment, nodeId))
+            else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
                 // incoming is on the left
             {
                 return true;
             }
             else // incoming is in front or elsewhere
             {
-                if (!IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (!IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car not going left
                 {
                     return true;
                 }
-                if (IsRightSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId))
+                if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId))
                 {
-                    if (targetCar.toLaneID != incomingCar.toLaneID)
+                    if (targetCar.ToLaneId != incomingCar.ToLaneId)
                     {
-                        return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                        return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                     }
                 }
-                else if (IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId) && IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // both left turns
+                else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
                 {
                     return true;
                 }
@@ -319,41 +319,41 @@ namespace TrafficManager.Traffic
             var targetCar = VehicleList[targetCarId];
             var incomingCar = VehicleList[incomingCarId];
 
-            if (incomingCar.toSegment == targetCar.toSegment)
+            if (incomingCar.ToSegment == targetCar.ToSegment)
             {
-                if (incomingCar.toLaneID == targetCar.toLaneID) return false;
+                if (incomingCar.ToLaneId == targetCar.ToLaneId) return false;
 
-                if (IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car goes right
                 {
                     // go if incoming car is in the left lane
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                 }
-                if (IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car goes left
                 {
                     // go if incoming car is in the right lane
-                    return LaneOrderCorrect(targetCar.toSegment, incomingCar.toLaneID, targetCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, incomingCar.ToLaneId, targetCar.ToLaneId);
                 }
-                if (IsRightSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car goes right
+                if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car goes right
                 {
                     // go if incoming car is in the left lane
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, targetCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, targetCar.ToLaneId);
                 }
-                if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car goes left
+                if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car goes left
                 {
                     // go if incoming car is in the right lane
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID,
-                        incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId,
+                        incomingCar.ToLaneId);
                 }
             }
-            else if (incomingCar.toSegment == targetCar.fromSegment)
+            else if (incomingCar.ToSegment == targetCar.FromSegment)
             {
-                if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId))
+                if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId))
                 {
                     return true;
                 }
-                if (targetCar.toSegment == incomingCar.fromSegment)
+                if (targetCar.ToSegment == incomingCar.FromSegment)
                 {
                     return true;
                 }
@@ -361,11 +361,11 @@ namespace TrafficManager.Traffic
             else // if no segment match
             {
                 // target car turning right
-                if (IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                 {
                     return true;
                 }
-                if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car turning right
+                if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car turning right
                 {
                     return true;
                 }
@@ -380,41 +380,41 @@ namespace TrafficManager.Traffic
             var targetCar = VehicleList[targetCarId];
             var incomingCar = VehicleList[incomingCarId];
 
-            if (incomingCar.toSegment == targetCar.toSegment)
+            if (incomingCar.ToSegment == targetCar.ToSegment)
             {
-                if (incomingCar.toLaneID == targetCar.toLaneID) return false;
+                if (incomingCar.ToLaneId == targetCar.ToLaneId) return false;
 
-                if (IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car goes right
                 {
                     // go if incoming car is in the left lane
-                    return LaneOrderCorrect(targetCar.toSegment, incomingCar.toLaneID, targetCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, incomingCar.ToLaneId, targetCar.ToLaneId);
                 }
-                if (IsLeftSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                     // target car goes left
                 {
                     // go if incoming car is in the right lane
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                 }
-                if (IsRightSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car goes right
+                if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car goes right
                 {
                     // go if incoming car is in the left lane
-                    return LaneOrderCorrect(targetCar.toSegment, targetCar.toLaneID, incomingCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
                 }
-                if (IsLeftSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car goes left
+                if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car goes left
                 {
                     // go if incoming car is in the right lane
-                    return LaneOrderCorrect(targetCar.toSegment, incomingCar.toLaneID,
-                        targetCar.toLaneID);
+                    return LaneOrderCorrect(targetCar.ToSegment, incomingCar.ToLaneId,
+                        targetCar.ToLaneId);
                 }
             }
-            else if (incomingCar.toSegment == targetCar.fromSegment)
+            else if (incomingCar.ToSegment == targetCar.FromSegment)
             {
-                if (IsRightSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId))
+                if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId))
                 {
                     return true;
                 }
-                if (targetCar.toSegment == incomingCar.fromSegment)
+                if (targetCar.ToSegment == incomingCar.FromSegment)
                 {
                     return true;
                 }
@@ -422,11 +422,11 @@ namespace TrafficManager.Traffic
             else // if no segment match
             {
                 // target car turning right
-                if (IsRightSegment(targetCar.fromSegment, targetCar.toSegment, nodeId))
+                if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
                 {
                     return true;
                 }
-                if (IsRightSegment(incomingCar.fromSegment, incomingCar.toSegment, nodeId)) // incoming car turning right
+                if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // incoming car turning right
                 {
                     return true;
                 }

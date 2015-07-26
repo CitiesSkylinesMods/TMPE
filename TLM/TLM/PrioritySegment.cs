@@ -81,7 +81,7 @@ namespace TrafficManager
             {
                 if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian)
                 {
-                    foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].fromLaneID == num2[0]))
+                    foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].FromLaneId == num2[0]))
                     {
                         CarsOnLanes[num3]++;
                     }

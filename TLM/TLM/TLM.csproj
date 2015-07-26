@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CarState.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="CustomAI\CustomCarAI.cs" />
     <Compile Include="CustomAI\CustomCargoTruckAI.cs" />
