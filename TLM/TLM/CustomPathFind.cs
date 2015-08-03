@@ -136,7 +136,7 @@ namespace TrafficManager
             if (!CustomPathFindThread.IsAlive)
             {
                 //CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find thread failed to start!");
-                Debug.LogError("Path find thread failed to start!", this);
+                Log.Error("Path find thread failed to start!");
             }
 
         }
@@ -1665,9 +1665,9 @@ namespace TrafficManager
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log("path thread error: " + ex.Message);
+                    Log.Error("path thread error: " + ex.Message);
                     UIView.ForwardException(ex);
-                    Debug.LogError("Path find error: " + ex.Message + "\n" + ex.StackTrace, this);
+                    Log.Error("Path find error: " + ex.Message + "\n" + ex.StackTrace);
                     var expr_1A0Cp0 = PathUnits.m_buffer;
                     var expr_1A0Cp1 = (UIntPtr)Calculating;
                     expr_1A0Cp0[(int)expr_1A0Cp1].m_pathFindFlags = (byte)(expr_1A0Cp0[(int)expr_1A0Cp1].m_pathFindFlags | 8);

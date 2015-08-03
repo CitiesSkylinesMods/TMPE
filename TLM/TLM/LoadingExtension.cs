@@ -34,19 +34,19 @@ namespace TrafficManager
 
             base.OnCreated(loading);
 
-            Debug.Log("Setting ToolMode");
+            Log.Message("Setting ToolMode");
             ToolMode = TrafficManagerMode.None;
 
-            Debug.Log("Init RevertMethods");
+            Log.Message("Init RevertMethods");
             RevertMethods = new RedirectCallsState[8];
 
-            Debug.Log("Setting Despawn to False");
+            Log.Message("Setting Despawn to False");
             DespawnEnabled = true;
 
-            Debug.Log("Init DetourInited");
+            Log.Message("Init DetourInited");
             DetourInited = false;
 
-            Debug.Log("Init Custom PathManager");
+            Log.Message("Init Custom PathManager");
             CustomPathManager = new CustomPathManager();
         }
 
@@ -64,9 +64,9 @@ namespace TrafficManager
 
         public override void OnLevelLoaded(LoadMode mode)
         {
-            Debug.Log("OnLevelLoaded calling base method");
+            Log.Message("OnLevelLoaded calling base method");
             base.OnLevelLoaded(mode);
-            Debug.Log("OnLevelLoaded Returned from base, calling custom code.");
+            Log.Message("OnLevelLoaded Returned from base, calling custom code.");
 
             switch (mode)
             {
@@ -82,10 +82,10 @@ namespace TrafficManager
             {
                 if (Instance == null)
                 {
-                    Debug.Log("Instance is NULL. Set Instance to this.");
+                    Log.Message("Instance is NULL. Set Instance to this.");
                     if (Singleton<PathManager>.instance.GetType() != typeof (PathManager))
                     {
-                        Debug.Log("Traffic++ Detected. Disable Pathfinder");
+                        Log.Message("Traffic++ Detected. Disable Pathfinder");
                         IsPathManagerCompatibile = false;
                     }
                     
@@ -94,31 +94,42 @@ namespace TrafficManager
 
                 if (IsPathManagerCompatibile)
                 {
-                    Debug.Log("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+                    Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     var pathManagerInstance = typeof (Singleton<PathManager>).GetField("sInstance",
                         BindingFlags.Static | BindingFlags.NonPublic);
 
                     var stockPathManager = PathManager.instance;
+                    Log.Message($"Got stock PathManager instance {stockPathManager.GetName()}");
+
                     CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+                    Log.Message("Added CustomPathManager to gameObject List");
+
+                    if (CustomPathManager == null)
+                    {
+                        Log.Error("CustomPathManager null. Error creating it.");
+                        return;
+                    }
+
                     CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+                    Log.Message("UpdateWithPathManagerValues success");
 
                     pathManagerInstance?.SetValue(null, CustomPathManager);
 
-                    Debug.Log("Getting Current SimulationManager");
+                    Log.Message("Getting Current SimulationManager");
                     var simManager =
                         typeof (SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
                             .GetValue(null) as FastList<ISimulationManager>;
 
-                    Debug.Log("Removing Stock PathManager");
+                    Log.Message("Removing Stock PathManager");
                     simManager?.Remove(stockPathManager);
 
-                    Debug.Log("Adding Custom PathManager");
+                    Log.Message("Adding Custom PathManager");
                     simManager?.Add(CustomPathManager);
 
                     Object.Destroy(stockPathManager, 10f);
                 }
 
-                Debug.Log("Adding Controls to UI.");
+                Log.Message("Adding Controls to UI.");
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
                 TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
                                                 SimulationMetaData.MetaBool.True;
@@ -129,6 +140,111 @@ namespace TrafficManager
         {
             // TODO: revert detours
             base.OnLevelUnloading();
+
+            //if (Instance == null)
+            //{
+            //    Log.Message("Instance is NULL. Set Instance to this.");
+            //    if (Singleton<PathManager>.instance.GetType() != typeof(PathManager))
+            //    {
+            //        Log.Message("Traffic++ Detected. Disable Pathfinder");
+            //        IsPathManagerCompatibile = false;
+            //    }
+
+            //    Instance = this;
+            //}
+            //try
+            //{
+            //    RedirectionHelper.RevertRedirect(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+            //            BindingFlags.NonPublic | BindingFlags.Instance,
+            //            null,
+            //            new[]
+            //            {
+            //                typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+            //                typeof (PathUnit.Position), typeof (uint), typeof (byte), typeof (PathUnit.Position),
+            //                typeof (uint), typeof (byte), typeof (Vector3).MakeByRefType(),
+            //                typeof (Vector3).MakeByRefType(), typeof (float).MakeByRefType()
+            //            },
+            //            null), LoadingExtension.Instance.RevertMethods[0]);
+
+            //    RedirectionHelper.RevertRedirect(typeof (RoadBaseAI).GetMethod("SimulationStep",
+            //        new[] {typeof (ushort), typeof (NetNode).MakeByRefType()}),
+            //        LoadingExtension.Instance.RevertMethods[1]);
+
+            //    Log.Message("Redirecting Human AI Calls");
+            //    RedirectionHelper.RevertRedirect(typeof(HumanAI).GetMethod("CheckTrafficLights",
+            //            BindingFlags.NonPublic | BindingFlags.Instance,
+            //            null,
+            //            new[] { typeof(ushort), typeof(ushort) },
+            //            null),
+            //            LoadingExtension.Instance.RevertMethods[2]);
+
+            //    if (IsPathManagerCompatibile)
+            //    {
+            //        RedirectionHelper.RevertRedirect(
+            //                typeof(CarAI).GetMethod("SimulationStep",
+            //                    new[] {
+            //                        typeof (ushort),
+            //                        typeof (Vehicle).MakeByRefType(),
+            //                        typeof (Vector3)
+            //                    }),
+            //                Instance.RevertMethods[3]);
+
+            //        Log.Message("Redirecting PassengerCarAI Simulation Step Calls");
+            //        RedirectionHelper.RevertRedirect(
+            //                typeof(PassengerCarAI).GetMethod("SimulationStep",
+            //                    new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
+            //                Instance.RevertMethods[4]);
+
+            //        Log.Message("Redirecting CargoTruckAI Simulation Step Calls");
+            //        RedirectionHelper.RevertRedirect(
+            //                typeof(CargoTruckAI).GetMethod("SimulationStep",
+            //                    new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
+            //                Instance.RevertMethods[5]);
+
+            //        Log.Message("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
+            //        RedirectionHelper.RevertRedirect(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+            //                BindingFlags.NonPublic | BindingFlags.Instance,
+            //                null,
+            //                new[]
+            //                {
+            //                    typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+            //                    typeof (uint),
+            //                    typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
+            //                    typeof (float).MakeByRefType()
+            //                },
+            //                null),
+            //                Instance.RevertMethods[6]);
+
+            //        LoadingExtension.Instance.DetourInited = false;
+            //        Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+            //        var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance",
+            //            BindingFlags.Static | BindingFlags.NonPublic);
+
+            //        var stockPathManager = PathManager.instance;
+            //        CustomPathManager = stockPathManager.gameObject.GetComponent<CustomPathManager>();
+            //        //CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+
+            //        pathManagerInstance?.SetValue(null, CustomPathManager);
+
+            //        Log.Message("Getting Current SimulationManager");
+            //        var simManager =
+            //            typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
+            //                .GetValue(null) as FastList<ISimulationManager>;
+
+            //        Log.Message("Removing Stock PathManager");
+            //        simManager?.Remove(CustomPathManager);
+
+            //        Log.Message("Adding Custom PathManager");
+            //        simManager?.Add(stockPathManager);
+            //    }
+
+            //}
+            //catch (Exception e)
+            //{
+            //    Log.Error("Error unloading. " + e.Message);
+                
+            //}
+            
 
             try
             {
@@ -141,19 +257,19 @@ namespace TrafficManager
             }
             catch (Exception e)
             {
-                Debug.LogError("Exception unloading mod. " + e.Message);
+                Log.Error("Exception unloading mod. " + e.Message);
                 // ignored - prevents collision with other mods
             }
         }
 
         protected virtual void OnNewGame()
         {
-            Debug.Log("New Game Started");
+            Log.Message("New Game Started");
         }
 
         protected virtual void OnLoaded()
         {
-            Debug.Log("Loaded save game.");
+            Log.Message("Loaded save game.");
         }
 
         public void SetToolMode(TrafficManagerMode mode)

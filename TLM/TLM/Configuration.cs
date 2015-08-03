@@ -1,14 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Xml.Serialization;
 
 namespace TrafficManager
 {
+    [Serializable]
     public class Configuration
     {
-        public string NodeTrafficLights;
-        public string NodeCrosswalk;
-        public string LaneFlags;
+        public string NodeTrafficLights = "";
+        public string NodeCrosswalk = "";
+        public string LaneFlags = "";
 
         public List<int[]> PrioritySegments = new List<int[]>();
         public List<int[]> NodeDictionary = new List<int[]>();
@@ -19,6 +22,7 @@ namespace TrafficManager
         public List<int[]> TimedNodeSteps = new List<int[]>();
         public List<int[]> TimedNodeStepSegments = new List<int[]>();
 
+        [Obsolete("This should be replaced with memory stream write/read to save direct to the user's save file.")]
         public static void SaveConfigurationToFile(string filename, Configuration config)
         {
             var serializer = new XmlSerializer(typeof(Configuration));
@@ -29,6 +33,7 @@ namespace TrafficManager
             }
         }
 
+        [Obsolete("This should be replaced with memory stream write/read to save direct to the user's save file.")]
         public static Configuration LoadConfigurationFromFile(string filename)
         {
             var serializer = new XmlSerializer(typeof(Configuration));

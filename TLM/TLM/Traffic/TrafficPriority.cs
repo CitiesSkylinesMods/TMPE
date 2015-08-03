@@ -20,7 +20,7 @@ namespace TrafficManager.Traffic
             if (PrioritySegments.ContainsKey(segmentId))
             {
                 var prioritySegment = PrioritySegments[segmentId];
-
+                
                 prioritySegment.Node2 = nodeId;
                 prioritySegment.Instance2 = new PrioritySegment(nodeId, segmentId, type);
             }
@@ -527,7 +527,7 @@ namespace TrafficManager.Traffic
                     {
                         if (debug)
                         {
-                            Debug.Log("LEFT: " + segment + " " + GetSegmentDir(segment, nodeId));
+                            Log.Message("LEFT: " + segment + " " + GetSegmentDir(segment, nodeId));
                         }
                         return true;
                     }
@@ -550,7 +550,7 @@ namespace TrafficManager.Traffic
 
                 if (debug)
                 {
-                    Debug.Log("RIGHT: " + segment + " " + GetSegmentDir(segment, nodeId));
+                    Log.Message("RIGHT: " + segment + " " + GetSegmentDir(segment, nodeId));
                 }
                 return true;
             }
@@ -571,7 +571,7 @@ namespace TrafficManager.Traffic
 
                 if (debug)
                 {
-                    Debug.Log("FORWARD: " + segment + " " + GetSegmentDir(segment, nodeId));
+                    Log.Message("FORWARD: " + segment + " " + GetSegmentDir(segment, nodeId));
                 }
                 return true;
             }

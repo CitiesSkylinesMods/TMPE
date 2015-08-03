@@ -19,11 +19,11 @@ namespace TrafficManager
         //On waking up, replace the stock pathfinders with the custom one
         protected new virtual void Awake()
         {
-            //Debug.Log("Waking up CustomPathManager.");
+            Log.Message("Waking up CustomPathManager.");
             var stockPathFinds = GetComponents<PathFind>();
             var numOfStockPathFinds = stockPathFinds.Length;
 
-            //Debug.Log("Creating " + numOfStockPathFinds + " custom PathFind objects.");
+            Log.Message("Creating " + numOfStockPathFinds + " custom PathFind objects.");
             _replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
             for (var i = 0; i < numOfStockPathFinds; i++)
             {
@@ -31,10 +31,10 @@ namespace TrafficManager
                 Destroy(stockPathFinds[i]);
             }
 
-            //Debug.Log("Setting _replacementPathFinds");
+            Log.Message("Setting _replacementPathFinds");
             var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            //Debug.Log("Setting m_pathfinds to custom collection");
+            Log.Message("Setting m_pathfinds to custom collection");
             fieldInfo?.SetValue(this, _replacementPathFinds);
         }
 

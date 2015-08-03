@@ -134,7 +134,7 @@ namespace TrafficManager.UI
 
         private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam)
         {
-            Debug.Log("Priority Sign Clicked.");
+            Log.Message("Priority Sign Clicked.");
             if (_uiState != UIState.AddStopSign)
             {
                 _uiState = UIState.AddStopSign;

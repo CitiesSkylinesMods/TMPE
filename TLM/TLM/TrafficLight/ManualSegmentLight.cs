@@ -220,12 +220,12 @@ namespace TrafficManager.TrafficLight
                 LightLeft == RoadBaseAI.TrafficLightState.Red && 
                 LightRight == RoadBaseAI.TrafficLightState.Red)
             {
-                Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to red.");
+                //Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to red.");
                 vehicleLightState = RoadBaseAI.TrafficLightState.Red;
             }
             else
             {
-                Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to green.");
+                //Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to green.");
                 vehicleLightState = RoadBaseAI.TrafficLightState.Green;
             }
 

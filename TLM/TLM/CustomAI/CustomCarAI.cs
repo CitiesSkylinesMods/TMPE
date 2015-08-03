@@ -39,9 +39,10 @@ namespace TrafficManager.CustomAI
             var lodPhysics = CalculateLod(physicsLodRefPos, lastFramePosition);
 
             SimulationStep(vehicleId, ref vehicleData, vehicleId, ref vehicleData, lodPhysics);
+            
+            if (vehicleData.m_leadingVehicle != 0 || vehicleData.m_trailingVehicle == 0)
+                return;
 
-            // if there are vehicles behind this, simulate them
-            if (vehicleData.m_leadingVehicle != 0 || vehicleData.m_trailingVehicle == 0) return;
             var vehicleManager = Singleton<VehicleManager>.instance;
             var trailingVehicleId = vehicleData.m_trailingVehicle;
             SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager,
@@ -424,7 +425,7 @@ namespace TrafficManager.CustomAI
                                 switch (prioritySegment.Type)
                                 {
                                     case PrioritySegment.PriorityType.Stop:
-                                        if (TrafficPriority.VehicleList[vehicleId].WaitTime < 25)
+                                        if (TrafficPriority.VehicleList[vehicleId].WaitTime < 75)
                                         {
                                             TrafficPriority.VehicleList[vehicleId].CarState = CarState.Stop;
 
@@ -444,7 +445,7 @@ namespace TrafficManager.CustomAI
                                                         return;
                                                     }
                                                     TrafficPriority.VehicleList[vehicleId].CarState =
-                                                        CarState.Transit;
+                                                        CarState.Leave;
                                                 }
                                                 else
                                                 {
@@ -482,6 +483,9 @@ namespace TrafficManager.CustomAI
                                             }
                                             else
                                             {
+                                                maxSpeed = vehicleData.GetLastFrameData().m_velocity.sqrMagnitude -
+                                                           TrafficPriority.VehicleList[vehicleId]
+                                                               .ReduceSpeedByValueToYield;
                                                 return;
                                             }
                                         }
