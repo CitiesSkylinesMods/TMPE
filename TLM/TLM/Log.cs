@@ -11,22 +11,43 @@ namespace TrafficManager
 
         public static void Message(object s)
         {
-            if(InGameDebug)
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
+            try
+            {
+                if (InGameDebug)
+                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
+            }
+            catch (Exception)
+            {
+                // cross thread issue?
+            }
             Debug.Log(Prefix + s.ToString());
         }
 
         public static void Error(object s)
         {
-            if (InGameDebug)
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
+            try
+            {
+                if (InGameDebug)
+                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
+            }
+            catch (Exception)
+            {
+                // cross thread issue?
+            }
             Debug.LogError(Prefix + s.ToString());
         }
 
         public static void Warning(object s)
         {
-            if (InGameDebug)
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
+            try
+            {
+                if (InGameDebug)
+                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
+            }
+            catch (Exception)
+            {
+                // cross thread issue?
+            }
             Debug.LogWarning(Prefix + s.ToString());
         }
 

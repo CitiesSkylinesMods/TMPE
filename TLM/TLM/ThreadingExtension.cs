@@ -112,11 +112,8 @@ namespace TrafficManager
                 }
 
                 LoadingExtension.Instance.DetourInited = true;
-
-                if (SerializableDataExtension.ConfigLoaded)
-                    SerializableDataExtension.LoadDataState();
             }
-
+            
             if (!LoadingExtension.Instance.NodeSimulationLoaded)
             {
                 LoadingExtension.Instance.NodeSimulationLoaded = true;

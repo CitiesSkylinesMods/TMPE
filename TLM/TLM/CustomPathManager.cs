@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
+using JetBrains.Annotations;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -17,7 +18,8 @@ namespace TrafficManager
         public static CustomPathFind PathFindInstance;
 
         //On waking up, replace the stock pathfinders with the custom one
-        protected new virtual void Awake()
+        [UsedImplicitly]
+        public new virtual void Awake()
         {
             Log.Message("Waking up CustomPathManager.");
             var stockPathFinds = GetComponents<PathFind>();

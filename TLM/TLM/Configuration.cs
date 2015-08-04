@@ -42,13 +42,14 @@ namespace TrafficManager
             {
                 using (var reader = new StreamReader(filename))
                 {
+                    Log.Message("Deserializing Configuration Object");
                     var config = (Configuration)serializer.Deserialize(reader);
                     return config;
                 }
             }
-            catch
+            catch (Exception e)
             {
-                // ignored
+                Log.Error($"Error deserializing Configuration Object {e.Message}");
             }
 
             return null;

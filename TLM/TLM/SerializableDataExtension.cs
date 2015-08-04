@@ -25,6 +25,7 @@ namespace TrafficManager
         public static ISerializableData SerializableData;
         private static Configuration _configuration;
         public static bool ConfigLoaded = false;
+        public static bool StateLoaded = false;
 
         public override void OnCreated(ISerializableData serializableData)
         {
@@ -109,10 +110,22 @@ namespace TrafficManager
                 _configuration = (Configuration) binaryFormatter.Deserialize(memoryStream);
             }
             ConfigLoaded = true;
+
+            Log.Message("Setting timer to load data.");
+            var timer = new Timer(5000);
+            timer.Elapsed += (sender, args) =>
+            {
+                if (!ConfigLoaded || StateLoaded) return;
+                Log.Message("Loading State Data from Save.");
+                LoadDataState();
+                StateLoaded = true;
+            };
+            timer.Start();
         }
 
         public static void LoadDataState()
         {
+            Log.Message("Loading State from Config");
             foreach (
                 var segment in
                     _configuration.PrioritySegments.Where(segment => !TrafficPriority.IsPrioritySegment((ushort) segment[0],
@@ -128,6 +141,7 @@ namespace TrafficManager
                 var node in _configuration.NodeDictionary.Where(node => CustomRoadAI.GetNodeSimulation((ushort) node[0]) == null)
                 )
             {
+                Log.Message($"Adding Node do Simulation {node[0]}");
                 try
                 {
                     CustomRoadAI.AddNodeToSimulation((ushort)node[0]);
@@ -149,6 +163,7 @@ namespace TrafficManager
                     _configuration.ManualSegments.Where(
                         segmentData => !TrafficLightsManual.IsSegmentLight((ushort) segmentData[0], segmentData[1])))
             {
+                Log.Message($"Adding Light to Segment {segmentData[0]}");
                 try
                 {
                     TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], segmentData[1],
@@ -175,6 +190,7 @@ namespace TrafficManager
 
             for (var i = 0; i < _configuration.TimedNodes.Count; i++)
             {
+                Log.Message($"Adding Timed Node {i}");
                 try
                 {
                     var nodeid = (ushort)_configuration.TimedNodes[i][0];
@@ -228,60 +244,45 @@ namespace TrafficManager
                 }
             }
 
-            var j1 = 0;
-            for (var i1 = 0; i1 < 32768; i1++)
+            Log.Message($"Config Nodes: {_configuration.NodeTrafficLights.Length}\nLevel Nodes: {Singleton<NetManager>.instance.m_nodes.m_buffer.Length}");
+            for (var i = 0; i < _configuration.NodeTrafficLights.Length; i++)
             {
+                //Log.Message($"Adding NodeTrafficLights iteration: {i1}");
                 try
                 {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i1].Info.m_class.m_service != ItemClass.Service.Road ||
-                    Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags == 0)
+                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road ||
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
                         continue;
-                    var trafficLight = _configuration.NodeTrafficLights[j1];
+
+                    var trafficLight = _configuration.NodeTrafficLights[i];
 
                     if (trafficLight == '1')
                     {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags |= NetNode.Flags.TrafficLights;
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.TrafficLights;
                     }
                     else
                     {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i1].m_flags &= ~NetNode.Flags.TrafficLights;
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.TrafficLights;
+                    }
+
+                    var crossWalk = _configuration.NodeCrosswalk[i];
+
+                    if (crossWalk == '1')
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
+                    }
+                    else
+                    {
+                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
                     }
                 }
                 catch (Exception e)
                 {
                     // ignore as it's probably bad save data.
-                    Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
+                    //Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
                 }
-                j1++;
             }
-
-            var j2 = 0;
-            for (var i2 = 0; i2 < 32768; i2++)
-            {
-                try
-                {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i2].Info.m_class.m_service != ItemClass.Service.Road ||
-                    Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags == 0)
-                        continue;
-                    var crossWalk = _configuration.NodeCrosswalk[j2];
-
-                    if (crossWalk == '1')
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags |= NetNode.Flags.Junction;
-                    }
-                    else
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i2].m_flags &= ~NetNode.Flags.Junction;
-                    }
-                }
-                catch (Exception e)
-                {
-                    // bad save data. ignore
-                    Log.Warning("Error loading data from the NodeCrosswalk: " + e.Message);
-                }
-                j2++;
-            }
-
+            
             Log.Message($"LaneFlags: {_configuration.LaneFlags}");
             var lanes = _configuration.LaneFlags.Split(',');
 
