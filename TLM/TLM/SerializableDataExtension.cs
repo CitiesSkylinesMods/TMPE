@@ -111,8 +111,11 @@ namespace TrafficManager
             }
             ConfigLoaded = true;
 
+            //LoadDataState();
+            //StateLoaded = true;
+
             Log.Message("Setting timer to load data.");
-            var timer = new Timer(5000);
+            var timer = new Timer(1500);
             timer.Elapsed += (sender, args) =>
             {
                 if (!ConfigLoaded || StateLoaded) return;
@@ -279,10 +282,14 @@ namespace TrafficManager
                 catch (Exception e)
                 {
                     // ignore as it's probably bad save data.
-                    //Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
+                    Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
                 }
             }
-            
+
+            // For Traffic++ compatibility
+            if (!LoadingExtension.IsPathManagerCompatibile)
+                return;
+
             Log.Message($"LaneFlags: {_configuration.LaneFlags}");
             var lanes = _configuration.LaneFlags.Split(',');
 
@@ -290,9 +297,26 @@ namespace TrafficManager
                 return;
             foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1))
             {
-                Log.Message($"Split Data: {split[0]} , {split[1]}");
-                Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
-                    Convert.ToUInt16(split[1]);
+                try
+                {
+                    Log.Message($"Split Data: {split[0]} , {split[1]}");
+                    var laneIndex = Convert.ToInt32(split[0]);
+
+                    //make sure we don't cause any overflows because of bad save data.
+                    if (Singleton<NetManager>.instance.m_lanes.m_buffer.Length <= laneIndex)
+                        continue;
+
+                    if (Convert.ToInt32(split[1]) > ushort.MaxValue)
+                        continue;
+
+                    Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
+                        Convert.ToUInt16(split[1]);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(
+                        $"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
+                }
             }
         }
 
@@ -414,14 +438,23 @@ namespace TrafficManager
                     Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
             }
 
-            for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++)
+            // Traffic++ compatibility
+            if (LoadingExtension.IsPathManagerCompatibile)
             {
-                var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-
-                if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment))
+                for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++)
                 {
-                    configuration.LaneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags + ",";
+                    var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
+
+                    if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment))
+                    {
+                        configuration.LaneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags +
+                                                   ",";
+                    }
                 }
+            }
+            else
+            {
+                configuration.LaneFlags = "";
             }
 
             var binaryFormatter = new BinaryFormatter();

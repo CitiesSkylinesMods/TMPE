@@ -48,7 +48,7 @@ namespace TrafficManager.CustomAI
             }
         }
 
-        protected void BaseSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
+        private void BaseSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
             if ((data.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None)
             {

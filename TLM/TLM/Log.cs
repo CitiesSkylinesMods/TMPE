@@ -11,6 +11,7 @@ namespace TrafficManager
 
         public static void Message(object s)
         {
+#if DEBUG
             try
             {
                 if (InGameDebug)
@@ -21,10 +22,12 @@ namespace TrafficManager
                 // cross thread issue?
             }
             Debug.Log(Prefix + s.ToString());
+#endif
         }
 
         public static void Error(object s)
         {
+#if DEBUG
             try
             {
                 if (InGameDebug)
@@ -35,10 +38,12 @@ namespace TrafficManager
                 // cross thread issue?
             }
             Debug.LogError(Prefix + s.ToString());
+#endif
         }
 
         public static void Warning(object s)
         {
+#if DEBUG
             try
             {
                 if (InGameDebug)
@@ -49,14 +54,17 @@ namespace TrafficManager
                 // cross thread issue?
             }
             Debug.LogWarning(Prefix + s.ToString());
+#endif
         }
 
 
         internal static void Warning(InstanceType instanceType)
         {
+#if DEBUG
             if (InGameDebug)
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix);
             Debug.LogWarning(Prefix);
+#endif
         }
     }
 
