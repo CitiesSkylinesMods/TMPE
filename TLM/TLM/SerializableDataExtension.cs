@@ -111,19 +111,19 @@ namespace TrafficManager
             }
             ConfigLoaded = true;
 
-            //LoadDataState();
-            //StateLoaded = true;
+            LoadDataState();
+            StateLoaded = true;
 
-            Log.Message("Setting timer to load data.");
-            var timer = new Timer(1500);
-            timer.Elapsed += (sender, args) =>
-            {
-                if (!ConfigLoaded || StateLoaded) return;
-                Log.Message("Loading State Data from Save.");
-                LoadDataState();
-                StateLoaded = true;
-            };
-            timer.Start();
+            //Log.Message("Setting timer to load data.");
+            //var timer = new Timer(1500);
+            //timer.Elapsed += (sender, args) =>
+            //{
+            //    if (!ConfigLoaded || StateLoaded) return;
+            //    Log.Message("Loading State Data from Save.");
+            //    LoadDataState();
+            //    StateLoaded = true;
+            //};
+            //timer.Start();
         }
 
         public static void LoadDataState()
@@ -248,7 +248,9 @@ namespace TrafficManager
             }
 
             Log.Message($"Config Nodes: {_configuration.NodeTrafficLights.Length}\nLevel Nodes: {Singleton<NetManager>.instance.m_nodes.m_buffer.Length}");
-            for (var i = 0; i < _configuration.NodeTrafficLights.Length; i++)
+            var saveDataIndex = 0;
+            var nodeCount = Singleton<NetManager>.instance.m_nodes.m_buffer.Length;
+            for (var i = 0; i < nodeCount; i++)
             {
                 //Log.Message($"Adding NodeTrafficLights iteration: {i1}");
                 try
@@ -257,27 +259,37 @@ namespace TrafficManager
                         Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
                         continue;
 
-                    var trafficLight = _configuration.NodeTrafficLights[i];
+                    // prevent overflow
+                    if (_configuration.NodeTrafficLights.Length > saveDataIndex)
+                    {
 
-                    if (trafficLight == '1')
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.TrafficLights;
-                    }
-                    else
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.TrafficLights;
+                        var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
+                        if (trafficLight == '1')
+                        {
+                            //Log.Message($"Adding Traffic Light at Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
+                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.TrafficLights;
+                        }
+                        else
+                        {
+                            //Log.Message($"Removing Traffic Light from Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
+                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.TrafficLights;
+                        }
                     }
 
-                    var crossWalk = _configuration.NodeCrosswalk[i];
+                    if (_configuration.NodeCrosswalk.Length > saveDataIndex)
+                    {
+                        var crossWalk = _configuration.NodeCrosswalk[saveDataIndex];
 
-                    if (crossWalk == '1')
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
+                        if (crossWalk == '1')
+                        {
+                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
+                        }
+                        else
+                        {
+                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
+                        }
                     }
-                    else
-                    {
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
-                    }
+                    ++saveDataIndex;
                 }
                 catch (Exception e)
                 {
@@ -436,26 +448,21 @@ namespace TrafficManager
                     Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
                 configuration.NodeCrosswalk +=
                     Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
+
+                if (!LoadingExtension.IsPathManagerCompatibile)
+                    continue;
+
+                var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
+
+                if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment))
+                {
+                    configuration.LaneFlags += $"{i}:{Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags},";
+                }
             }
 
             // Traffic++ compatibility
-            if (LoadingExtension.IsPathManagerCompatibile)
-            {
-                for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++)
-                {
-                    var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-
-                    if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment))
-                    {
-                        configuration.LaneFlags += i + ":" + Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags +
-                                                   ",";
-                    }
-                }
-            }
-            else
-            {
+            if (!LoadingExtension.IsPathManagerCompatibile)
                 configuration.LaneFlags = "";
-            }
 
             var binaryFormatter = new BinaryFormatter();
             var memoryStream = new MemoryStream();
