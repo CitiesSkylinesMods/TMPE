@@ -51,6 +51,7 @@
     <Reference Include="System.Core">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
@@ -77,6 +78,7 @@
     <Compile Include="SelfDestruct.cs" />
     <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="SimpleJson.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\ManualSegment.cs" />
     <Compile Include="TrafficLight\ManualSegmentLight.cs" />

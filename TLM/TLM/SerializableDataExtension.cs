@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Timers;
+using System.Threading;
 using ColossalFramework;
+using ColossalFramework.HTTP;
 using ICities;
 using NLog;
 using TrafficManager.CustomAI;
@@ -13,6 +14,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using Object = System.Object;
 using Random = UnityEngine.Random;
+using Timer = System.Timers.Timer;
 
 namespace TrafficManager
 {
@@ -51,10 +53,23 @@ namespace TrafficManager
         public override void OnLoadData()
         {
             Log.Message("Loading Mod Data");
-            var data = SerializableData.LoadData(LegacyDataId) ?? SerializableData.LoadData(DataId);
-
+            var keys = SerializableData.EnumerateData().Where(k => k.StartsWith("TrafficManager"));
+            byte[] data = null;
+            foreach (var key in keys)
+            {
+                Log.Message($"Checking for save data at key: {key}");
+                data = SerializableData.LoadData(key);
+                if (data != null && data.Length > 0)
+                {
+                    Log.Message($"Save Data Found. Deserializing.");
+                    break;
+                }
+            }
             if (data == null)
+            {
+                Log.Warning($"No Save Data Found. Possibly a new game?");
                 return;
+            }
             DeserializeData(data);
         }
 
@@ -67,13 +82,13 @@ namespace TrafficManager
                 UniqueId = BitConverter.ToUInt32(data, i);
             }
 
-            Log.Message($"Loading TrafficManagerSave from file trafficManagerSave_{UniqueId}.xml");
+            Log.Message($"Looking for legacy TrafficManagerSave file trafficManagerSave_{UniqueId}.xml");
             var filepath = Path.Combine(Application.dataPath, "trafficManagerSave_" + UniqueId + ".xml");
 
             if (File.Exists(filepath))
                 return filepath;
 
-            Log.Warning("Save Data doesn't exist. Expected: " + filepath);
+            Log.Warning("Legacy Save Data doesn't exist. Expected: " + filepath);
             throw new FileNotFoundException("Legacy data not present.");
         }
         
@@ -98,32 +113,45 @@ namespace TrafficManager
             {
                 if (data.Length == 0)
                 {
-                    Log.Error("Save game data is empty! Attempting reload.");
+                    Log.Warning("Legacy data was empty. Checking for new Save data.");
                     data = SerializableData.LoadData(DataId);
                 }
-                Log.Message("Loading Data from New Load Routine! Hooray.");
-                var memoryStream = new MemoryStream();
-                memoryStream.Write(data, 0, data.Length);
-                memoryStream.Position = 0;
 
-                var binaryFormatter = new BinaryFormatter();
-                _configuration = (Configuration) binaryFormatter.Deserialize(memoryStream);
+                try
+                {
+                    if (data.Length != 0)
+                    {
+                        Log.Message("Loading Data from New Load Routine!");
+                        var memoryStream = new MemoryStream();
+                        memoryStream.Write(data, 0, data.Length);
+                        memoryStream.Position = 0;
+
+                        var binaryFormatter = new BinaryFormatter();
+                        _configuration = (Configuration)binaryFormatter.Deserialize(memoryStream);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Error deserializing data: {e.Message}");
+                }
             }
             ConfigLoaded = true;
 
-            LoadDataState();
-            StateLoaded = true;
+            //LoadDataState();
+            //StateLoaded = true;
 
-            //Log.Message("Setting timer to load data.");
-            //var timer = new Timer(1500);
-            //timer.Elapsed += (sender, args) =>
-            //{
-            //    if (!ConfigLoaded || StateLoaded) return;
-            //    Log.Message("Loading State Data from Save.");
-            //    LoadDataState();
-            //    StateLoaded = true;
-            //};
-            //timer.Start();
+            Log.Message("Setting timer to load data.");
+            var timer = new Timer(1500);
+            timer.Elapsed += (sender, args) =>
+            {
+                if (!ConfigLoaded || StateLoaded) return;
+                Log.Message("Loading State Data from Save.");
+                var t = new Thread(LoadDataState);
+                t.Start();
+                //LoadDataState();
+                StateLoaded = true;
+            };
+            timer.Start();
         }
 
         public static void LoadDataState()
@@ -486,5 +514,6 @@ namespace TrafficManager
                 memoryStream.Close();
             }
         }
+        
     }
 }
