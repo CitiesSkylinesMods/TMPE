@@ -61,9 +61,16 @@ namespace TrafficManager
         internal static void Warning(InstanceType instanceType)
         {
 #if DEBUG
-            if (InGameDebug)
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix);
-            //Debug.LogWarning(Prefix);
+            try
+            {
+                if (InGameDebug)
+                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix);
+                //Debug.LogWarning(Prefix);
+            }
+            catch (Exception)
+            {
+                // cross thread issue?
+            }
 #endif
         }
     }

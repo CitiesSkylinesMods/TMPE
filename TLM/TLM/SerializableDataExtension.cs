@@ -67,7 +67,7 @@ namespace TrafficManager
             }
             if (data == null)
             {
-                Log.Warning($"No Save Data Found. Possibly a new game?");
+                Log.Message($"No Save Data Found. Possibly a new game?");
                 return;
             }
             DeserializeData(data);
@@ -88,7 +88,7 @@ namespace TrafficManager
             if (File.Exists(filepath))
                 return filepath;
 
-            Log.Warning("Legacy Save Data doesn't exist. Expected: " + filepath);
+            Log.Message("Legacy Save Data doesn't exist. Expected: " + filepath);
             throw new FileNotFoundException("Legacy data not present.");
         }
         
@@ -106,14 +106,14 @@ namespace TrafficManager
             
             if (legacyFilepath != null)
             {
-                Log.Warning("Converting Legacy Config Data.");
+                Log.Message("Converting Legacy Config Data.");
                 _configuration = Configuration.LoadConfigurationFromFile(legacyFilepath);
             }
             else
             {
                 if (data.Length == 0)
                 {
-                    Log.Warning("Legacy data was empty. Checking for new Save data.");
+                    Log.Message("Legacy data was empty. Checking for new Save data.");
                     data = SerializableData.LoadData(DataId);
                 }
 
@@ -137,46 +137,55 @@ namespace TrafficManager
             }
             ConfigLoaded = true;
 
-            //LoadDataState();
-            //StateLoaded = true;
+            LoadDataState();
+            StateLoaded = true;
 
-            Log.Message("Setting timer to load data.");
-            var timer = new Timer(1500);
-            timer.Elapsed += (sender, args) =>
-            {
-                if (!ConfigLoaded || StateLoaded) return;
-                Log.Message("Loading State Data from Save.");
-                var t = new Thread(LoadDataState);
-                t.Start();
-                //LoadDataState();
-                StateLoaded = true;
-            };
-            timer.Start();
+            //Log.Message("Setting timer to load data.");
+            //var timer = new Timer(1500);
+            //timer.Elapsed += (sender, args) =>
+            //{
+            //    if (!ConfigLoaded || StateLoaded) return;
+            //    Log.Message("Loading State Data from Save.");
+            //    var t = new Thread(LoadDataState);
+            //    t.Start();
+            //    //LoadDataState();
+            //    StateLoaded = true;
+            //};
+            //timer.Start();
         }
 
         public static void LoadDataState()
         {
             Log.Message("Loading State from Config");
-            foreach (
-                var segment in
-                    _configuration.PrioritySegments.Where(segment => !TrafficPriority.IsPrioritySegment((ushort) segment[0],
-                        segment[1])))
+            if (_configuration == null)
             {
-                Log.Message($"Adding Priority Segment of type: {segment[2].ToString()}");
-                TrafficPriority.AddPrioritySegment((ushort) segment[0],
-                    segment[1],
-                    (PrioritySegment.PriorityType) segment[2]);
+                Log.Message("Configuration Null. Couldn't load save data?");
+                return;
             }
 
-            foreach (
-                var node in _configuration.NodeDictionary.Where(node => CustomRoadAI.GetNodeSimulation((ushort) node[0]) == null)
-                )
+            foreach (var segment in _configuration.PrioritySegments)
             {
+                if(segment.Length < 3)
+                    continue;
+                if (TrafficPriority.IsPrioritySegment((ushort) segment[0], segment[1]))
+                    continue;
+
+                Log.Message($"Adding Priority Segment of type: {segment[2].ToString()}");
+                TrafficPriority.AddPrioritySegment((ushort) segment[0], segment[1], (PrioritySegment.PriorityType) segment[2]);
+            }
+
+            foreach (var node in _configuration.NodeDictionary)
+            {
+                if (node.Length < 4)
+                    continue;
+                if (CustomRoadAI.GetNodeSimulation((ushort) node[0]) != null)
+                    continue;
+
                 Log.Message($"Adding Node do Simulation {node[0]}");
                 try
                 {
-                    CustomRoadAI.AddNodeToSimulation((ushort)node[0]);
-                    var nodeDict = CustomRoadAI.GetNodeSimulation((ushort)node[0]);
+                    CustomRoadAI.AddNodeToSimulation((ushort) node[0]);
+                    var nodeDict = CustomRoadAI.GetNodeSimulation((ushort) node[0]);
 
                     nodeDict.ManualTrafficLights = Convert.ToBoolean(node[1]);
                     nodeDict.TimedTrafficLights = Convert.ToBoolean(node[2]);
@@ -189,24 +198,24 @@ namespace TrafficManager
                 }
             }
 
-            foreach (
-                var segmentData in
-                    _configuration.ManualSegments.Where(
-                        segmentData => !TrafficLightsManual.IsSegmentLight((ushort) segmentData[0], segmentData[1])))
+            foreach (var segmentData in _configuration.ManualSegments)
             {
+                if (segmentData.Length < 10)
+                    continue;
+                if (TrafficLightsManual.IsSegmentLight((ushort) segmentData[0], segmentData[1]))
+                    continue;
                 Log.Message($"Adding Light to Segment {segmentData[0]}");
                 try
                 {
-                    TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], segmentData[1],
-                    RoadBaseAI.TrafficLightState.Green);
-                    var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], segmentData[1]);
-                    segment.CurrentMode = (ManualSegmentLight.Mode)segmentData[2];
-                    segment.LightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
-                    segment.LightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
-                    segment.LightRight = (RoadBaseAI.TrafficLightState)segmentData[5];
-                    segment.LightPedestrian = (RoadBaseAI.TrafficLightState)segmentData[6];
-                    segment.LastChange = (uint)segmentData[7];
-                    segment.LastChangeFrame = (uint)segmentData[8];
+                    TrafficLightsManual.AddSegmentLight((ushort) segmentData[0], segmentData[1], RoadBaseAI.TrafficLightState.Green);
+                    var segment = TrafficLightsManual.GetSegmentLight((ushort) segmentData[0], segmentData[1]);
+                    segment.CurrentMode = (ManualSegmentLight.Mode) segmentData[2];
+                    segment.LightLeft = (RoadBaseAI.TrafficLightState) segmentData[3];
+                    segment.LightMain = (RoadBaseAI.TrafficLightState) segmentData[4];
+                    segment.LightRight = (RoadBaseAI.TrafficLightState) segmentData[5];
+                    segment.LightPedestrian = (RoadBaseAI.TrafficLightState) segmentData[6];
+                    segment.LastChange = (uint) segmentData[7];
+                    segment.LastChangeFrame = (uint) segmentData[8];
                     segment.PedestrianEnabled = Convert.ToBoolean(segmentData[9]);
                 }
                 catch (Exception e)
@@ -219,110 +228,123 @@ namespace TrafficManager
             var timedStepCount = 0;
             var timedStepSegmentCount = 0;
 
-            for (var i = 0; i < _configuration.TimedNodes.Count; i++)
+            if (_configuration.TimedNodes.Count > 0)
             {
-                Log.Message($"Adding Timed Node {i}");
-                try
+                for (var i = 0; i < _configuration.TimedNodes.Count; i++)
                 {
-                    var nodeid = (ushort)_configuration.TimedNodes[i][0];
-
-                    var nodeGroup = new List<ushort>();
-                    for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++)
+                    Log.Message($"Adding Timed Node {i}");
+                    try
                     {
-                        nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
-                    }
+                        var nodeid = (ushort) _configuration.TimedNodes[i][0];
 
-                    if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
-                    TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
-                    var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
-
-                    timedNode.CurrentStep = _configuration.TimedNodes[i][1];
-
-                    for (var j = 0; j < _configuration.TimedNodes[i][2]; j++)
-                    {
-                        var cfgstep = _configuration.TimedNodeSteps[timedStepCount];
-
-                        timedNode.AddStep(cfgstep[0]);
-
-                        var step = timedNode.Steps[j];
-
-                        for (var k = 0; k < cfgstep[1]; k++)
+                        var nodeGroup = new List<ushort>();
+                        for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++)
                         {
-                            step.LightLeft[k] =
-                                (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-                            step.LightMain[k] =
-                                (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-                            step.LightRight[k] =
-                                (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-                            step.LightPedestrian[k] =
-                                (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
-
-                            timedStepSegmentCount++;
+                            nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
                         }
 
-                        timedStepCount++;
-                    }
+                        if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
+                        TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
+                        var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
 
-                    if (Convert.ToBoolean(_configuration.TimedNodes[i][3]))
-                    {
-                        timedNode.Start();
+                        timedNode.CurrentStep = _configuration.TimedNodes[i][1];
+
+                        for (var j = 0; j < _configuration.TimedNodes[i][2]; j++)
+                        {
+                            var cfgstep = _configuration.TimedNodeSteps[timedStepCount];
+
+                            timedNode.AddStep(cfgstep[0]);
+
+                            var step = timedNode.Steps[j];
+
+                            for (var k = 0; k < cfgstep[1]; k++)
+                            {
+                                step.LightLeft[k] =
+                                    (RoadBaseAI.TrafficLightState)
+                                        _configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
+                                step.LightMain[k] =
+                                    (RoadBaseAI.TrafficLightState)
+                                        _configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
+                                step.LightRight[k] =
+                                    (RoadBaseAI.TrafficLightState)
+                                        _configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
+                                step.LightPedestrian[k] =
+                                    (RoadBaseAI.TrafficLightState)
+                                        _configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
+
+                                timedStepSegmentCount++;
+                            }
+
+                            timedStepCount++;
+                        }
+
+                        if (Convert.ToBoolean(_configuration.TimedNodes[i][3]))
+                        {
+                            timedNode.Start();
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    // ignore, as it's probably corrupt save data. it'll be culled on next save
-                    Log.Warning("Error loading data from the TimedNodes: " + e.Message);
+                    catch (Exception e)
+                    {
+                        // ignore, as it's probably corrupt save data. it'll be culled on next save
+                        Log.Warning("Error loading data from the TimedNodes: " + e.Message);
+                    }
                 }
             }
 
             Log.Message($"Config Nodes: {_configuration.NodeTrafficLights.Length}\nLevel Nodes: {Singleton<NetManager>.instance.m_nodes.m_buffer.Length}");
             var saveDataIndex = 0;
             var nodeCount = Singleton<NetManager>.instance.m_nodes.m_buffer.Length;
-            for (var i = 0; i < nodeCount; i++)
+            if (nodeCount > 0)
             {
-                //Log.Message($"Adding NodeTrafficLights iteration: {i1}");
-                try
+                for (var i = 0; i < nodeCount; i++)
                 {
-                    if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road ||
-                        Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
-                        continue;
-
-                    // prevent overflow
-                    if (_configuration.NodeTrafficLights.Length > saveDataIndex)
+                    //Log.Message($"Adding NodeTrafficLights iteration: {i1}");
+                    try
                     {
+                        if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service !=
+                            ItemClass.Service.Road ||
+                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
+                            continue;
 
-                        var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
-                        if (trafficLight == '1')
+                        // prevent overflow
+                        if (_configuration.NodeTrafficLights.Length > saveDataIndex)
                         {
-                            //Log.Message($"Adding Traffic Light at Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.TrafficLights;
+
+                            var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
+                            if (trafficLight == '1')
+                            {
+                                //Log.Message($"Adding Traffic Light at Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
+                                Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |=
+                                    NetNode.Flags.TrafficLights;
+                            }
+                            else
+                            {
+                                //Log.Message($"Removing Traffic Light from Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
+                                Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &=
+                                    ~NetNode.Flags.TrafficLights;
+                            }
                         }
-                        else
+
+                        if (_configuration.NodeCrosswalk.Length > saveDataIndex)
                         {
-                            //Log.Message($"Removing Traffic Light from Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.TrafficLights;
+                            var crossWalk = _configuration.NodeCrosswalk[saveDataIndex];
+
+                            if (crossWalk == '1')
+                            {
+                                Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
+                            }
+                            else
+                            {
+                                Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
+                            }
                         }
+                        ++saveDataIndex;
                     }
-
-                    if (_configuration.NodeCrosswalk.Length > saveDataIndex)
+                    catch (Exception e)
                     {
-                        var crossWalk = _configuration.NodeCrosswalk[saveDataIndex];
-
-                        if (crossWalk == '1')
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
-                        }
-                        else
-                        {
-                            Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
-                        }
+                        // ignore as it's probably bad save data.
+                        Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
                     }
-                    ++saveDataIndex;
-                }
-                catch (Exception e)
-                {
-                    // ignore as it's probably bad save data.
-                    Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
                 }
             }
 
@@ -335,8 +357,11 @@ namespace TrafficManager
 
             if (lanes.Length <= 1)
                 return;
-            foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1))
+            foreach (var lane in lanes)
             {
+                var split = lane.Split(':');
+                if (split.Length <= 1)
+                    continue;
                 try
                 {
                     Log.Message($"Split Data: {split[0]} , {split[1]}");
@@ -349,13 +374,11 @@ namespace TrafficManager
                     if (Convert.ToInt32(split[1]) > ushort.MaxValue)
                         continue;
 
-                    Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
-                        Convert.ToUInt16(split[1]);
+                    Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags = Convert.ToUInt16(split[1]);
                 }
                 catch (Exception e)
                 {
-                    Log.Error(
-                        $"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
+                    Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
                 }
             }
         }

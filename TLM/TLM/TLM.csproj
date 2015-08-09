@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -147,8 +147,8 @@
   <PropertyGroup>
     <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
 del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
-xcopy /y "$(TargetPath)" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-xcopy /y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
+xcopy /y "$(TargetDir)$(TargetName).*" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
+xcopy /y "$(TargetDir)$(TargetName).*" "D:\SteamGames\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
