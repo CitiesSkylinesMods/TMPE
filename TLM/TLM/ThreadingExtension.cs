@@ -125,21 +125,6 @@ namespace TrafficManager
             {
                 LoadingExtension.Instance.UI.Close();
             }
-
-            try
-            {
-                if (!LoadingExtension.Instance.DetourInited || !SerializableDataExtension.ConfigLoaded ||
-                SerializableDataExtension.StateLoaded)
-                    return;
-
-                Log.Message($"Nodes available at this point: {Singleton<NetManager>.instance.m_nodes.m_buffer.Length}");
-                //SerializableDataExtension.LoadDataState();
-                //SerializableDataExtension.StateLoaded = true;
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception Loading Save Data: {e.Message}");
-            }
         }
     }
 }

@@ -148,7 +148,7 @@
     <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
 del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
 xcopy /y "$(TargetDir)$(TargetName).*" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-xcopy /y "$(TargetDir)$(TargetName).*" "D:\SteamGames\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
+xcopy /y "$(TargetDir)$(TargetName).*" "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\481786333"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
