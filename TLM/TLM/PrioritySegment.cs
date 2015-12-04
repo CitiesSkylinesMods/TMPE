@@ -70,25 +70,25 @@ namespace TrafficManager
             var instance = Singleton<NetManager>.instance;
 
             var segment = instance.m_segments.m_buffer[Segmentid];
-            var info = segment.Info;
+            var segmentInfo = segment.Info;
 
-            uint[] num2 = {segment.m_lanes};
-            var num3 = 0;
+            uint[] laneId = {segment.m_lanes};
+            var currentLane = 0;
 
             CarsOnLanes = new int[16];
 
-            while (num3 < info.m_lanes.Length && num2[0] != 0u)
+            while (currentLane < segmentInfo.m_lanes.Length && laneId[0] != 0u)
             {
-                if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian)
+                if (segmentInfo.m_lanes[currentLane].m_laneType != NetInfo.LaneType.Pedestrian)
                 {
-                    foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].FromLaneId == num2[0]))
+                    foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].FromLaneId == laneId[0]))
                     {
-                        CarsOnLanes[num3]++;
+                        CarsOnLanes[currentLane]++;
                     }
                 }
 
-                num2[0] = instance.m_lanes.m_buffer[(int)((UIntPtr)num2[0])].m_nextLane;
-                num3++;
+                laneId[0] = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId[0])].m_nextLane;
+                currentLane++;
             }
         }
     }

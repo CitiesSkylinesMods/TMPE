@@ -11,12 +11,12 @@ namespace TrafficManager
 
         public void OnEnabled()
         {
-            Debug.Log("TrafficManagerMod Enabled");
+            Log.Message("TrafficManagerMod Enabled");
         }
 
         public void OnDisabled()
         {
-            Debug.Log("TrafficManagerMod Disabled");
+            Log.Message("TrafficManagerMod Disabled");
         }
     }
 }

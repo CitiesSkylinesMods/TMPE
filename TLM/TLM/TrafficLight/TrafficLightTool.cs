@@ -447,7 +447,6 @@ namespace TrafficManager.TrafficLight
                         SwitchTrafficLightToolMode(node);
                         break;
                     case ToolMode.AddPrioritySigns:
-                        Debug.Log("Add Priority Signs Tool Mode");
                         AddPrioritySignsToolMode(node);
                         break;
                     case ToolMode.ManualSwitch:
@@ -723,7 +722,6 @@ namespace TrafficManager.TrafficLight
             switch (_toolMode)
             {
                 case ToolMode.AddPrioritySigns:
-                    Debug.Log("Priority Sign OnToolGUI");
                     _guiPrioritySigns();
                     break;
                 case ToolMode.ManualSwitch:
@@ -1307,7 +1305,7 @@ namespace TrafficManager.TrafficLight
             if (!myRect1.Contains(Event.current.mousePosition))
                 return hoveredSegment;
 
-            Debug.Log("mouse in myRect1");
+            Log.Message("mouse in myRect1");
             _hoveredButton[0] = segmentId;
             _hoveredButton[1] = -1;
 
@@ -3343,7 +3341,7 @@ namespace TrafficManager.TrafficLight
                             GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
                             if (hoveredSegment && _uiClickedSegment)
                             {
-                                Debug.Log("PrioritySegment.Type = Yield");
+                                Log.Message("PrioritySegment.Type = Yield");
                                 prioritySegment.Type = PrioritySegment.PriorityType.Yield;
                             }
                             break;
@@ -3363,7 +3361,7 @@ namespace TrafficManager.TrafficLight
 
                             if(hoveredSegment && _uiClickedSegment)
                             {
-                                Debug.Log("PrioritySegment.Type = None");
+                                Log.Message("PrioritySegment.Type = None");
                                 prioritySegment.Type = GetNumberOfMainRoads(node) >= 2
                                     ? PrioritySegment.PriorityType.Yield
                                     : PrioritySegment.PriorityType.Main;
