@@ -385,7 +385,7 @@ namespace TrafficManager
             Log.Message("Saving Mod Data.");
             var configuration = new Configuration();
 
-            for (var i = 0; i < 32768; i++)
+            for (var i = 0; i < 36864; i++)
             {
                 if (TrafficPriority.PrioritySegments != null)
                 {

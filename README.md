@@ -1,8 +1,8 @@
-# Skylines-Traffic-Manager 1.1.1
+# Skylines-Traffic-Manager Plus 1.2.0
 A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Changelog
-- Fixed PathManager problems caused from the first refactor pass
+- Updated for 1.2.2-f2 game patch.
 
 # Current features
 
