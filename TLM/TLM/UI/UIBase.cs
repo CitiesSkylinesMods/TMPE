@@ -2,94 +2,86 @@ using ColossalFramework.UI;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 
-namespace TrafficManager.UI
-{
-    public class UIBase : UICustomControl
-    {
-        private bool _uiShown;
+namespace TrafficManager.UI {
+	public class UIBase : UICustomControl {
+		private bool _uiShown;
 
-        public UIBase()
-        {
-            // Get the UIView object. This seems to be the top-level object for most
-            // of the UI.
-            var uiView = UIView.GetAView();
+		public UIBase() {
+			Log.Message("##### Initializing UIBase.");
 
-            // Add a new button to the view.
-            var button = (UIButton)uiView.AddUIComponent(typeof(UIButton));
+			// Get the UIView object. This seems to be the top-level object for most
+			// of the UI.
+			var uiView = UIView.GetAView();
 
-            // Set the text to show on the button.
-            button.text = "Traffic Manager";
+			// Add a new button to the view.
+			var button = (UIButton)uiView.AddUIComponent(typeof(UIButton));
 
-            // Set the button dimensions.
-            button.width = 150;
-            button.height = 30;
+			// Set the text to show on the button.
+			button.text = "TM 1.3";
 
-            // Style the button to look like a menu button.
-            button.normalBgSprite = "ButtonMenu";
-            button.disabledBgSprite = "ButtonMenuDisabled";
-            button.hoveredBgSprite = "ButtonMenuHovered";
-            button.focusedBgSprite = "ButtonMenuFocused";
-            button.pressedBgSprite = "ButtonMenuPressed";
-            button.textColor = new Color32(255, 255, 255, 255);
-            button.disabledTextColor = new Color32(7, 7, 7, 255);
-            button.hoveredTextColor = new Color32(7, 132, 255, 255);
-            button.focusedTextColor = new Color32(255, 255, 255, 255);
-            button.pressedTextColor = new Color32(30, 30, 44, 255);
+			// Set the button dimensions.
+			button.width = 150;
+			button.height = 30;
 
-            // Enable button sounds.
-            button.playAudioEvents = true;
+			// Style the button to look like a menu button.
+			button.normalBgSprite = "ButtonMenu";
+			button.disabledBgSprite = "ButtonMenuDisabled";
+			button.hoveredBgSprite = "ButtonMenuHovered";
+			button.focusedBgSprite = "ButtonMenuFocused";
+			button.pressedBgSprite = "ButtonMenuPressed";
+			button.textColor = new Color32(255, 255, 255, 255);
+			button.disabledTextColor = new Color32(7, 7, 7, 255);
+			button.hoveredTextColor = new Color32(7, 132, 255, 255);
+			button.focusedTextColor = new Color32(255, 255, 255, 255);
+			button.pressedTextColor = new Color32(30, 30, 44, 255);
 
-            // Place the button.
-            button.relativePosition = new Vector3(180f, 20f);
+			// Enable button sounds.
+			button.playAudioEvents = true;
 
-            // Respond to button click.
-            button.eventClick += ButtonClick;
-        }
+			// Place the button.
+			button.relativePosition = new Vector3(180f, 20f);
 
-        private void ButtonClick(UIComponent uiComponent, UIMouseEventParameter eventParam)
-        {
-            if (!_uiShown)
-            {
-                Show();
-            }
-            else
-            {
-                Close();
-            }
-        }
+			// Respond to button click.
+			button.eventClick += ButtonClick;
+		}
 
-        public bool IsVisible()
-        {
-            return _uiShown;
-        }
+		private void ButtonClick(UIComponent uiComponent, UIMouseEventParameter eventParam) {
+			if (!_uiShown) {
+				Show();
+			} else {
+				Close();
+			}
+		}
 
-        public void Show()
-        {
-            var uiView = UIView.GetAView();
+		public bool IsVisible() {
+			return _uiShown;
+		}
 
-            uiView.AddUIComponent(typeof(UITrafficManager));
+		public void Show() {
+			if (LoadingExtension.Instance != null) {
+				var uiView = UIView.GetAView();
+				uiView.AddUIComponent(typeof(UITrafficManager));
+				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.TrafficLight);
+				_uiShown = true;
+			}
+		}
 
-            LoadingExtension.Instance.SetToolMode(TrafficManagerMode.TrafficLight);
+		public void Close() {
+			if (LoadingExtension.Instance != null) {
+				var uiView = UIView.GetAView();
 
-            _uiShown = true;
-        }
+				var trafficManager = uiView.FindUIComponent("UITrafficManager");
 
-        public void Close()
-        {
-            var uiView = UIView.GetAView();
+				if (trafficManager != null) {
+					Destroy(trafficManager);
+				}
 
-            var trafficManager = uiView.FindUIComponent("UITrafficManager");
+				UITrafficManager.UIState = UIState.None;
+				TrafficLightTool.SetToolMode(ToolMode.None);
+				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
 
-            if (trafficManager != null)
-            {
-                Destroy(trafficManager);
-            }
-
-            UITrafficManager.UIState = UIState.None;
-            TrafficLightTool.SetToolMode(ToolMode.None);
-            LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
-
-            _uiShown = false;
-        }
-    }
+				_uiShown = false;
+			}
+		}
+	}
 }

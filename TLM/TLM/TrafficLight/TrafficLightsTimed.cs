@@ -72,7 +72,7 @@ namespace TrafficManager.TrafficLight
         {
             if (!Steps[CurrentStep].StepDone(frame)) return;
 
-            CurrentStep = CurrentStep + 1 >= Steps.Count ? 0 : CurrentStep + 1;
+            CurrentStep = (CurrentStep + 1) % Steps.Count;
 
             Steps[CurrentStep].SetFrame(frame);
             Steps[CurrentStep].SetLights();

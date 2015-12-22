@@ -7,7 +7,7 @@ namespace TrafficManager
     {
         public string Name => "Traffic Manager Plus";
 
-        public string Description => "Traffic Junction Manager [v1.2.0]";
+        public string Description => "Traffic Junction Manager [v1.3]";
 
         public void OnEnabled()
         {

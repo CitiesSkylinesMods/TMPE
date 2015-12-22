@@ -1,9 +1,7 @@
 using ColossalFramework;
 
-namespace TrafficManager.TrafficLight
-{
-    public class TrafficLightSimulation
-    {
+namespace TrafficManager.TrafficLight {
+    public class TrafficLightSimulation {
         public readonly ushort NodeId;
 
         public bool ManualTrafficLights;
@@ -12,37 +10,29 @@ namespace TrafficManager.TrafficLight
 
         public bool TimedTrafficLightsActive;
 
-        public bool FlagManualTrafficLights
-        {
+        public bool FlagManualTrafficLights {
             get { return ManualTrafficLights; }
-            set
-            {
+            set {
                 ManualTrafficLights = value;
 
-                if (value == false)
-                {
+                if (value == false) {
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
 
-                    for (var s = 0; s < 8; s++)
-                    {
+                    for (var s = 0; s < 8; s++) {
                         var segment = node.GetSegment(s);
 
                         if (segment == 0) continue;
-                        if (TrafficLightsManual.IsSegmentLight(NodeId, segment))
-                        {
+                        if (TrafficLightsManual.IsSegmentLight(NodeId, segment)) {
                             TrafficLightsManual.ClearSegment(NodeId, segment);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
 
                     var instance = Singleton<NetManager>.instance;
                     var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-                    for (var s = 0; s < 8; s++)
-                    {
+                    for (var s = 0; s < 8; s++) {
                         var segment = node.GetSegment(s);
 
                         if (segment == 0) continue;
@@ -64,33 +54,26 @@ namespace TrafficManager.TrafficLight
             }
         }
 
-        public bool FlagTimedTrafficLights
-        {
+        public bool FlagTimedTrafficLights {
             get { return TimedTrafficLights; }
-            set
-            {
+            set {
                 TimedTrafficLights = value;
 
-                if (value == false)
-                {
+                if (value == false) {
                     TimedTrafficLightsActive = false;
                     TrafficLightsTimed.RemoveTimedLight(NodeId);
 
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
 
-                    for (int s = 0; s < 8; s++)
-                    {
+                    for (int s = 0; s < 8; s++) {
                         var segment = node.GetSegment(s);
 
                         if (segment == 0) continue;
-                        if (TrafficLightsManual.IsSegmentLight(NodeId, segment))
-                        {
+                        if (TrafficLightsManual.IsSegmentLight(NodeId, segment)) {
                             TrafficLightsManual.ClearSegment(NodeId, segment);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     TrafficLightsTimed.AddTimedLight(NodeId, TrafficLightTool.SelectedNodeIndexes);
 
                     var node = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId];
@@ -98,12 +81,10 @@ namespace TrafficManager.TrafficLight
                     var instance = Singleton<NetManager>.instance;
                     var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-                    for (int s = 0; s < 8; s++)
-                    {
+                    for (int s = 0; s < 8; s++) {
                         var segment = node.GetSegment(s);
 
-                        if (segment != 0)
-                        {
+                        if (segment != 0) {
                             RoadBaseAI.TrafficLightState trafficLightState3;
                             RoadBaseAI.TrafficLightState trafficLightState4;
                             bool vehicles;
@@ -113,12 +94,9 @@ namespace TrafficManager.TrafficLight
                                 currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles,
                                 out pedestrians);
 
-                            if (trafficLightState3 == RoadBaseAI.TrafficLightState.Green)
-                            {
+                            if (trafficLightState3 == RoadBaseAI.TrafficLightState.Green) {
                                 TrafficLightsManual.AddSegmentLight(NodeId, segment, RoadBaseAI.TrafficLightState.Green);
-                            }
-                            else
-                            {
+                            } else {
                                 TrafficLightsManual.AddSegmentLight(NodeId, segment, RoadBaseAI.TrafficLightState.Red);
                             }
                         }
@@ -127,23 +105,20 @@ namespace TrafficManager.TrafficLight
             }
         }
 
-        public TrafficLightSimulation(ushort nodeId)
-        {
+        public TrafficLightSimulation(ushort nodeId) {
             NodeId = nodeId;
         }
 
-        public void SimulationStep(ref NetNode data)
-        {
+        public void SimulationStep(ref NetNode data) {
+            //Log.Warning("step: " + NodeId);
             var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            if (TrafficLightsTimed.IsTimedLight(NodeId) && TimedTrafficLightsActive)
-            {
+            if (TrafficLightsTimed.IsTimedLight(NodeId) && TimedTrafficLightsActive) {
                 var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
                 timedNode.CheckStep(currentFrameIndex >> 6);
             }
 
-            for (var l = 0; l < 8; l++)
-            {
+            for (var l = 0; l < 8; l++) {
                 var segment = data.GetSegment(l);
                 if (segment == 0) continue;
                 if (!TrafficLightsManual.IsSegmentLight(NodeId, segment)) continue;

@@ -1,76 +1,51 @@
 ﻿using System;
 using UnityEngine;
 
-namespace TrafficManager
-{
+namespace TrafficManager {
 
-    public static class Log
-    {
+    public static class Log {
         const string Prefix = "TrafficLightManager: ";
-        private static readonly bool InGameDebug = Environment.OSVersion.Platform != PlatformID.Unix;
+        private static readonly bool InGameDebug = true;// Environment.OSVersion.Platform != PlatformID.Unix;
 
-        public static void Message(object s)
-        {
+        public static void Message(object s) {
 #if DEBUG
-            try
-            {
-                if (InGameDebug)
-                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
-            }
-            catch (Exception)
-            {
+            try {
+                if (InGameDebug) {
+                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
+                    Debug.Log(Prefix + s);
+                }
+            } catch (Exception) {
                 // cross thread issue?
             }
             //Debug.Log(Prefix + s.ToString());
 #endif
         }
 
-        public static void Error(object s)
-        {
+        public static void Error(object s) {
 #if DEBUG
-            try
-            {
-                if (InGameDebug)
-                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
-            }
-            catch (Exception)
-            {
+            try {
+                if (InGameDebug) {
+                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
+                    Debug.LogError(Prefix + s);
+                }
+            } catch (Exception) {
                 // cross thread issue?
             }
             //Debug.LogError(Prefix + s.ToString());
 #endif
         }
 
-        public static void Warning(object s)
-        {
+        public static void Warning(object s) {
 #if DEBUG
-            try
-            {
-                if (InGameDebug)
-                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
-            }
-            catch (Exception)
-            {
+            try {
+                if (InGameDebug) {
+                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
+                    Debug.LogWarning(Prefix + s);
+                }
+            } catch (Exception) {
                 // cross thread issue?
             }
             //Debug.LogWarning(Prefix + s.ToString());
-#endif
-        }
-
-
-        internal static void Warning(InstanceType instanceType)
-        {
-#if DEBUG
-            try
-            {
-                if (InGameDebug)
-                    DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix);
-                //Debug.LogWarning(Prefix);
-            }
-            catch (Exception)
-            {
-                // cross thread issue?
-            }
 #endif
         }
     }
