@@ -24,9 +24,9 @@ namespace TrafficManager.TrafficLight
             CustomRoadAI.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
         }
 
-        public void AddStep(int num)
+        public void AddStep(int timeUnits)
         {
-            Steps.Add(new TimedTrafficSteps(num, NodeId));
+            Steps.Add(new TimedTrafficSteps(timeUnits, NodeId));
         }
 
         public void Start()
@@ -127,7 +127,7 @@ namespace TrafficManager.TrafficLight
                 }
                 else
                 {
-                    numFrames += Steps[stepNum].NumSteps;
+                    numFrames += Steps[stepNum].timeUnits;
                 }
 
                 stepNum++;

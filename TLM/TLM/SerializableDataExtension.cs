@@ -211,27 +211,23 @@ namespace TrafficManager {
 
 						for (var j = 0; j < _configuration.TimedNodes[i][2]; j++) {
 							var cfgstep = _configuration.TimedNodeSteps[timedStepCount];
+							// cfgstep[0]: number of timed steps
+							// cfgstep[1]: number of segments
 
 							timedNode.AddStep(cfgstep[0]);
 
 							var step = timedNode.Steps[j];
+							if (cfgstep[1] <= step.segmentIds.Count)
+								for (var k = 0; k < cfgstep[1]; k++) {
+									var leftLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
+									var mainLightState = (RoadBaseAI.TrafficLightState)	_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
+									var rightLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
+									var pedLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
 
-							for (var k = 0; k < cfgstep[1]; k++) {
-								step.LightLeft[k] =
-									(RoadBaseAI.TrafficLightState)
-										_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-								step.LightMain[k] =
-									(RoadBaseAI.TrafficLightState)
-										_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-								step.LightRight[k] =
-									(RoadBaseAI.TrafficLightState)
-										_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-								step.LightPedestrian[k] =
-									(RoadBaseAI.TrafficLightState)
-										_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
+									ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
 
-								timedStepSegmentCount++;
-							}
+									timedStepSegmentCount++;
+								}
 
 							timedStepCount++;
 						}
@@ -432,17 +428,19 @@ namespace TrafficManager {
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
 					configuration.TimedNodeSteps.Add(new[]
 					{
-						timedNode.Steps[j].NumSteps,
-						timedNode.Steps[j].Segments.Count
+						timedNode.Steps[j].timeUnits,
+						timedNode.Steps[j].segmentIds.Count
 					});
 
-					for (var k = 0; k < timedNode.Steps[j].Segments.Count; k++) {
+					for (var k = 0; k < timedNode.Steps[j].segmentIds.Count; k++) {
+						var segmentId = timedNode.Steps[j].segmentIds[k];
+						var segLight = timedNode.Steps[j].segmentLightStates[segmentId];
 						configuration.TimedNodeStepSegments.Add(new[]
 						{
-							(int) timedNode.Steps[j].LightLeft[k],
-							(int) timedNode.Steps[j].LightMain[k],
-							(int) timedNode.Steps[j].LightRight[k],
-							(int) timedNode.Steps[j].LightPedestrian[k],
+							(int) segLight.LightLeft,
+							(int) segLight.LightMain,
+							(int) segLight.LightRight,
+							(int) segLight.LightPedestrian
 						});
 					}
 				}

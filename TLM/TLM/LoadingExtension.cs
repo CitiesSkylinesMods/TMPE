@@ -18,7 +18,8 @@ namespace TrafficManager {
         public bool DetourInited { get; set; }
         public bool NodeSimulationLoaded { get; set; }
 		public MethodInfo[] OriginalMethods { get; set; }
-		public RedirectCallsState[] CustomMethods { get; set; }
+		public MethodInfo[] CustomMethods { get; set; }
+		public RedirectCallsState[] CustomRedirects { get; set; }
         public TrafficManagerMode ToolMode { get; set; }
         public TrafficLightTool TrafficLightTool { get; set; }
         public UIBase UI { get; set; }
@@ -31,7 +32,7 @@ namespace TrafficManager {
 				Log.Message("Revert detours");
 				for (int i = 0; i < 7; ++i) {
 					if (LoadingExtension.Instance.OriginalMethods[i] != null)
-						RedirectionHelper.RevertRedirect(LoadingExtension.Instance.OriginalMethods[i], LoadingExtension.Instance.CustomMethods[i]);
+						RedirectionHelper.RevertRedirect(LoadingExtension.Instance.OriginalMethods[i], LoadingExtension.Instance.CustomRedirects[i]);
 				}
 				LoadingExtension.Instance.DetourInited = false;
 			}
@@ -53,7 +54,8 @@ namespace TrafficManager {
 								typeof (Vector3).MakeByRefType(), typeof (float).MakeByRefType()
 							},
 							null);
-					LoadingExtension.Instance.CustomMethods[0] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[0], typeof(CustomCarAI).GetMethod("TmCalculateSegmentPosition"));
+					LoadingExtension.Instance.CustomMethods[0] = typeof(CustomCarAI).GetMethod("TmCalculateSegmentPosition");
+					LoadingExtension.Instance.CustomRedirects[0] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[0], LoadingExtension.Instance.CustomMethods[0]);
 				} catch (Exception) {
 					Log.Error("Could not redirect CarAI::CalculateSegmentPosition.");
 				}
@@ -61,7 +63,8 @@ namespace TrafficManager {
 				Log.Message("Redirecting SimulationStep");
 				try {
 					LoadingExtension.Instance.OriginalMethods[1] = typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetNode).MakeByRefType() });
-					LoadingExtension.Instance.CustomMethods[1] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[1], typeof(CustomRoadAI).GetMethod("CustomSimulationStep"));
+					LoadingExtension.Instance.CustomMethods[1] = typeof(CustomRoadAI).GetMethod("CustomSimulationStep");
+					LoadingExtension.Instance.CustomRedirects[1] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[1], LoadingExtension.Instance.CustomMethods[1]);
 				} catch (Exception) {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
 				}
@@ -73,7 +76,8 @@ namespace TrafficManager {
 							null,
 							new[] { typeof(ushort), typeof(ushort) },
 							null);
-					LoadingExtension.Instance.CustomMethods[2] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[2], typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights"));
+					LoadingExtension.Instance.CustomMethods[2] = typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights");
+					LoadingExtension.Instance.CustomRedirects[2] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[2], LoadingExtension.Instance.CustomMethods[2]);
 				} catch (Exception) {
 					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
 				}
@@ -88,7 +92,8 @@ namespace TrafficManager {
 										typeof (Vehicle).MakeByRefType(),
 										typeof (Vector3)
 									});
-						LoadingExtension.Instance.CustomMethods[3] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[3], typeof(CustomCarAI).GetMethod("TrafficManagerSimulationStep"));
+						LoadingExtension.Instance.CustomMethods[3] = typeof(CustomCarAI).GetMethod("TrafficManagerSimulationStep");
+						LoadingExtension.Instance.CustomRedirects[3] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[3], LoadingExtension.Instance.CustomMethods[3]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CarAI::SimulationStep.");
 					}
@@ -97,7 +102,8 @@ namespace TrafficManager {
 					try {
 						LoadingExtension.Instance.OriginalMethods[4] = typeof(PassengerCarAI).GetMethod("SimulationStep",
 								new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-						LoadingExtension.Instance.CustomMethods[4] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[4], typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep"));
+						LoadingExtension.Instance.CustomMethods[4] = typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep");
+						LoadingExtension.Instance.CustomRedirects[4] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[4], LoadingExtension.Instance.CustomMethods[4]);
 					} catch (Exception) {
 						Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
 					}
@@ -106,7 +112,8 @@ namespace TrafficManager {
 					try {
 						LoadingExtension.Instance.OriginalMethods[5] = typeof(CargoTruckAI).GetMethod("SimulationStep",
 									new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-						LoadingExtension.Instance.CustomMethods[5] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[5], typeof(CustomCargoTruckAI).GetMethod("CustomSimulationStep"));
+						LoadingExtension.Instance.CustomMethods[5] = typeof(CustomCargoTruckAI).GetMethod("CustomSimulationStep");
+						LoadingExtension.Instance.CustomRedirects[5] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[5], LoadingExtension.Instance.CustomMethods[5]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CargoTruckAI::SimulationStep.");
 					}
@@ -124,8 +131,9 @@ namespace TrafficManager {
 									typeof (float).MakeByRefType()
 								},
 								null);
-						LoadingExtension.Instance.CustomMethods[6] =
-							RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[6], typeof(CustomCarAI).GetMethod("TmCalculateSegmentPositionPathFinder"));
+						LoadingExtension.Instance.CustomMethods[6] = typeof(CustomCarAI).GetMethod("TmCalculateSegmentPositionPathFinder");
+						LoadingExtension.Instance.CustomRedirects[6] =
+							RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[6], LoadingExtension.Instance.CustomMethods[6]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
 					}
@@ -145,7 +153,8 @@ namespace TrafficManager {
 
             Log.Message("Init RevertMethods");
 			OriginalMethods = new MethodInfo[7];
-			CustomMethods = new RedirectCallsState[7];
+			CustomMethods = new MethodInfo[7];
+			CustomRedirects = new RedirectCallsState[7];
 
             Log.Message("Setting Despawn to False");
             DespawnEnabled = true;
