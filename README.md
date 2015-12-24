@@ -1,4 +1,4 @@
-# Skylines-Traffic-Manager Plus 1.2.0
+# Cities: Skylines - Traffic Manager 1.3.0 Nerd Edition - work in progress! 
 A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Changelog
@@ -23,4 +23,5 @@ A WIP mod for Cities: Skylines to add additional road traffic control
 
 # Roadmap
 
-- Better UI
+- Adaptive Timed Traffic Lights (automatically adjusted based on traffic amount)
+- Timed Traffic Light Templates (ready-to-use directional traffic light patterns)
