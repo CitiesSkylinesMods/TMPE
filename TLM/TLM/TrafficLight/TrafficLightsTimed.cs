@@ -163,6 +163,8 @@ namespace TrafficManager.TrafficLight
 
         public static TrafficLightsTimed GetTimedLight(ushort nodeid)
         {
+			if (!IsTimedLight(nodeid))
+				return null;
             return TimedScripts[nodeid];
         }
     }

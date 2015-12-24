@@ -194,9 +194,9 @@ namespace TrafficManager {
 
 			if (_configuration.TimedNodes.Count > 0) {
 				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
-					Log.Message($"Adding Timed Node {i}");
 					try {
 						var nodeid = (ushort)_configuration.TimedNodes[i][0];
+						Log.Message($"Adding Timed Node {i} at node {nodeid}");
 
 						var nodeGroup = new List<ushort>();
 						for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++) {
@@ -224,7 +224,11 @@ namespace TrafficManager {
 									var rightLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
 									var pedLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
 
-									ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
+									//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
+									step.segmentLightStates[step.segmentIds[k]].LightLeft = leftLightState;
+									step.segmentLightStates[step.segmentIds[k]].LightMain = mainLightState;
+									step.segmentLightStates[step.segmentIds[k]].LightRight = rightLightState;
+									step.segmentLightStates[step.segmentIds[k]].LightPedestrian = pedLightState;
 
 									timedStepSegmentCount++;
 								}

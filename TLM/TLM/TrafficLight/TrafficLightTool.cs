@@ -43,6 +43,8 @@ namespace TrafficManager.TrafficLight {
 
 		private static bool _timedShowNumbers;
 
+		private const float CloseLod = 250f;
+
 		static Rect ResizeGUI(Rect rect) {
 			var rectX = (rect.x / 800) * Screen.width;
 			var rectY = (rect.y / 600) * Screen.height;
@@ -54,9 +56,7 @@ namespace TrafficManager.TrafficLight {
 			_windowRect = ResizeGUI(new Rect(120, 45, 450, 350));
 			_windowRect2 = ResizeGUI(new Rect(120, 45, 300, 150));
 
-
-
-			_secondPanelTexture = MakeTex(1200, 560, new Color(0.5f, 0.5f, 0.5f, 1f));
+			_secondPanelTexture = MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
 
 			base.Awake();
 		}
@@ -444,8 +444,10 @@ namespace TrafficManager.TrafficLight {
 				if (SelectedNodeIndexes.Count == 0) {
 					var timedLight = TrafficLightsTimed.GetTimedLight(_hoveredNetNodeIdx);
 
-					SelectedNodeIndexes = new List<ushort>(timedLight.NodeGroup);
-					SetToolMode(ToolMode.TimedLightsShowLights);
+					if (timedLight != null) {
+						SelectedNodeIndexes = new List<ushort>(timedLight.NodeGroup);
+						SetToolMode(ToolMode.TimedLightsShowLights);
+					}
 				} else {
 					ShowToolInfo(true, "Node is part of timed script", node.m_position);
 				}
@@ -603,6 +605,11 @@ namespace TrafficManager.TrafficLight {
 				_uiClickedSegment = false;
 			}
 
+#if DEBUG
+			_guiSegments();
+			_guiNodes();
+			_guiVehicles();
+#endif
 			switch (_toolMode) {
 				case ToolMode.AddPrioritySigns:
 					_guiPrioritySigns();
@@ -1280,6 +1287,116 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[1] = 0;
 		}
 
+		/// <summary>
+		/// Displays segment ids over segments
+		/// </summary>
+		private void _guiSegments() {
+			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
+			for (int i = 1; i < segments.m_size; ++i) {
+				NetSegment segment = segments.m_buffer[i];
+				if (segment.m_flags == NetSegment.Flags.None) // segment is unused
+					continue;
+
+				Vector3 centerPos = segment.m_bounds.center;
+				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
+				screenPos.y = Screen.height - screenPos.y;
+
+				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+				var diff = centerPos - camPos;
+				if (diff.magnitude > CloseLod)
+					continue; // do not draw if too distant
+
+				var zoom = 1.0f / diff.magnitude * 150f;
+
+				_counterStyle.fontSize = (int)(15f * zoom);
+				_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
+
+				String labelStr = "Segment " + i + "\nStart: " + segment.m_startNode + "\nEnd: " + segment.m_endNode;
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
+
+				GUI.Label(labelRect, labelStr, _counterStyle);
+			}
+		}
+
+		/// <summary>
+		/// Displays node ids over nodes
+		/// </summary>
+		private void _guiNodes() {
+			Array16<NetNode> nodes = Singleton<NetManager>.instance.m_nodes;
+			for (int i = 1; i < nodes.m_size; ++i) {
+				NetNode node = nodes.m_buffer[i];
+				if (node.m_flags == NetNode.Flags.None) // node is unused
+					continue;
+
+				Vector3 pos = node.m_position;
+				var screenPos = Camera.main.WorldToScreenPoint(pos);
+				screenPos.y = Screen.height - screenPos.y;
+
+				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+				var diff = pos - camPos;
+				if (diff.magnitude > CloseLod)
+					continue; // do not draw if too distant
+				
+				var zoom = 1.0f / diff.magnitude * 150f;
+
+				_counterStyle.fontSize = (int)(15f * zoom);
+				_counterStyle.normal.textColor = new Color(0f, 0f, 1f);
+
+				String labelStr = "Node " + i;
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
+
+				GUI.Label(labelRect, labelStr, _counterStyle);
+			}
+		}
+
+		/// <summary>
+		/// Displays vehicle ids over vehicles
+		/// </summary>
+		private void _guiVehicles() {
+			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
+			for (int i = 1; i < vehicles.m_size; ++i) {
+				Vehicle vehicle = vehicles.m_buffer[i];
+				if (vehicle.m_flags == Vehicle.Flags.None) // node is unused
+					continue;
+
+				Vector3 pos = vehicle.m_frame0.m_position;
+				var screenPos = Camera.main.WorldToScreenPoint(pos);
+				screenPos.y = Screen.height - screenPos.y;
+
+				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+				var diff = pos - camPos;
+				if (diff.magnitude > CloseLod)
+					continue; // do not draw if too distant
+
+				var zoom = 1.0f / diff.magnitude * 150f;
+
+				_counterStyle.fontSize = (int)(10f * zoom);
+				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
+				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
+
+				String labelStr = "Veh. " + i + " @ " + vehicle.m_frame0.m_velocity.magnitude + "/" + (TrafficPriority.VehicleList.ContainsKey((ushort)i) ? "" + Math.Sqrt(TrafficPriority.VehicleList[(ushort)i].LastSpeed) : "?");
+				// add current path info
+				/*var currentPathId = vehicle.m_path;
+				if (currentPathId > 0) {
+					var vehiclePathUnit = Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathId];
+					if ((vehiclePathUnit.m_pathFindFlags & PathUnit.FLAG_READY) != 0) {
+						var realTimePosition = vehiclePathUnit.GetPosition(vehicle.m_pathPositionIndex >> 1);
+						labelStr += "\n@ seg " + realTimePosition.m_segment + "\nlane " + realTimePosition.m_lane + "\noff " + realTimePosition.m_offset;
+					}
+				}*/
+
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
+
+				GUI.Box(labelRect, labelStr, _counterStyle);
+
+				//_counterStyle.normal.background = null;
+			}
+		}
+
+
 		private void _guiTimedTrafficLights() {
 			GUILayout.Window(253, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
 
@@ -1287,26 +1404,26 @@ namespace TrafficManager.TrafficLight {
 
 			var hoveredSegment = false;
 
-			foreach (var index in SelectedNodeIndexes) {
-				var node = GetNetNode(index);
+			foreach (var nodeId in SelectedNodeIndexes) {
+				var node = GetNetNode(nodeId);
 
-				var nodeSimulation = CustomRoadAI.GetNodeSimulation(index);
+				var nodeSimulation = CustomRoadAI.GetNodeSimulation(nodeId);
 
 				for (var i = 0; i < 8; i++) {
-					int segmentId = node.GetSegment(i);
+					int srcSegmentId = node.GetSegment(i); // source segment
 
-					if (segmentId == 0 || nodeSimulation == null ||
-						!TrafficLightsManual.IsSegmentLight(index, segmentId)) continue;
+					if (srcSegmentId == 0 || nodeSimulation == null ||
+						!TrafficLightsManual.IsSegmentLight(nodeId, srcSegmentId)) continue;
 
-					var segmentDict = TrafficLightsManual.GetSegmentLight(index, segmentId);
+					var segmentDict = TrafficLightsManual.GetSegmentLight(nodeId, srcSegmentId);
 
-					var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+					var segment = Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId];
 
 					var position = node.m_position;
 
 					var offset = 25f;
 
-					if (segment.m_startNode == index) {
+					if (segment.m_startNode == nodeId) {
 						position.x += segment.m_startDirection.x * offset;
 						position.y += segment.m_startDirection.y * offset;
 						position.z += segment.m_startDirection.z * offset;
@@ -1335,8 +1452,8 @@ namespace TrafficManager.TrafficLight {
 					var modeHeight = 38f * zoom;
 
 					if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-						guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == -1 &&
-									 _hoveredNode == index
+						guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == -1 &&
+									 _hoveredNode == nodeId
 							? 0.92f
 							: 0.45f;
 
@@ -1348,9 +1465,9 @@ namespace TrafficManager.TrafficLight {
 						GUI.DrawTexture(myRect1, TrafficLightToolTextureResources.LightModeTexture2D);
 
 						if (myRect1.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-							_hoveredButton[0] = segmentId;
+							_hoveredButton[0] = srcSegmentId;
 							_hoveredButton[1] = -1;
-							_hoveredNode = index;
+							_hoveredNode = nodeId;
 							hoveredSegment = true;
 
 							if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
@@ -1365,9 +1482,9 @@ namespace TrafficManager.TrafficLight {
 					var manualPedestrianHeight = 35f * zoom;
 
 					if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-						guiColor.a = _hoveredButton[0] == segmentId &&
+						guiColor.a = _hoveredButton[0] == srcSegmentId &&
 									 (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) &&
-									 _hoveredNode == index
+									 _hoveredNode == nodeId
 							? 0.92f
 							: 0.45f;
 
@@ -1380,9 +1497,9 @@ namespace TrafficManager.TrafficLight {
 						GUI.DrawTexture(myRect2, segmentDict.PedestrianEnabled ? TrafficLightToolTextureResources.PedestrianModeManualTexture2D : TrafficLightToolTextureResources.PedestrianModeAutomaticTexture2D);
 
 						if (myRect2.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-							_hoveredButton[0] = segmentId;
+							_hoveredButton[0] = srcSegmentId;
 							_hoveredButton[1] = 1;
-							_hoveredNode = index;
+							_hoveredNode = nodeId;
 							hoveredSegment = true;
 
 							if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
@@ -1396,7 +1513,7 @@ namespace TrafficManager.TrafficLight {
 					var pedestrianWidth = 36f * zoom;
 					var pedestrianHeight = 61f * zoom;
 
-					guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && _hoveredNode == index ? 0.92f : 0.45f;
+					guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 					GUI.color = guiColor;
 
@@ -1412,9 +1529,9 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					if (myRect3.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-						_hoveredButton[0] = segmentId;
+						_hoveredButton[0] = srcSegmentId;
 						_hoveredButton[1] = 2;
-						_hoveredNode = index;
+						_hoveredNode = nodeId;
 						hoveredSegment = true;
 
 						if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1428,13 +1545,38 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 
+					if (timedActive /*&& _timedShowNumbers*/) {
+						var prioSeg = TrafficPriority.GetPrioritySegment(nodeId, srcSegmentId);
+
+						var counterSize = 20f * zoom;
+						var yOffset = counterSize + 77f * zoom - modeHeight * 2;
+						var carNumRect = new Rect(screenPos.x, screenPos.y - yOffset, counterSize, counterSize);
+						var segIdRect = new Rect(screenPos.x, screenPos.y - yOffset - counterSize - 2f, counterSize, counterSize);
+
+						_counterStyle.fontSize = (int)(15f * zoom);
+						_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
+
+						String labelStr = "n/a";
+						if (prioSeg != null) {
+							labelStr = prioSeg.NumCars.ToString() + " incoming";
+							/*for (int k = 0; k < prioSeg.numLanes; ++k) {
+								if (k > 0)
+									labelStr += "/";
+								labelStr += prioSeg.CarsOnLanes[k];
+							}*/
+						}
+						GUI.Label(carNumRect, labelStr, _counterStyle);
+
+						_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
+						GUI.Label(segIdRect, "Segment " + srcSegmentId, _counterStyle);
+					}
+
 					// COUNTER
-					if (timedActive && _timedShowNumbers) {
+					var timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+					if (timedActive && _timedShowNumbers && timedSegment != null) {
 						var counterSize = 20f * zoom;
 
-						var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-						var counter = timedSegment.CheckNextChange(segmentId, 3);
+						var counter = timedSegment.CheckNextChange(srcSegmentId, 3);
 
 						float numOffset;
 
@@ -1454,23 +1596,23 @@ namespace TrafficManager.TrafficLight {
 						GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 						if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-							_hoveredButton[0] = segmentId;
+							_hoveredButton[0] = srcSegmentId;
 							_hoveredButton[1] = 2;
-							_hoveredNode = index;
+							_hoveredNode = nodeId;
 							hoveredSegment = true;
 						}
 					}
 
-					if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, index)) continue;
+					if (TrafficLightsManual.SegmentIsIncomingOneWay(srcSegmentId, nodeId)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, index) && TrafficPriority.HasLeftLane(index, segmentId);
-					var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, index) && TrafficPriority.HasForwardLane(index, segmentId);
-					var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, index) && TrafficPriority.HasRightLane(index, segmentId);
+					var hasLeftSegment = TrafficPriority.HasLeftSegment(srcSegmentId, nodeId) && TrafficPriority.HasLeftLane(nodeId, srcSegmentId);
+					var hasForwardSegment = TrafficPriority.HasForwardSegment(srcSegmentId, nodeId) && TrafficPriority.HasForwardLane(nodeId, srcSegmentId);
+					var hasRightSegment = TrafficPriority.HasRightSegment(srcSegmentId, nodeId) && TrafficPriority.HasRightLane(nodeId, srcSegmentId);
 
 					switch (segmentDict.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple: {
 								// no arrow light
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1484,9 +1626,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.DrawTexture(myRect4, TrafficLightToolTextureResources.RedLightTexture2D);
 
 								if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 3;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1496,12 +1638,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, 0);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, 0);
 
 									float numOffset;
 
@@ -1521,9 +1662,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}
@@ -1534,7 +1675,7 @@ namespace TrafficManager.TrafficLight {
 						case ManualSegmentLight.Mode.LeftForwardR:
 							if (hasLeftSegment) {
 								// left arrow light
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1548,9 +1689,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.DrawTexture(myRect4, TrafficLightToolTextureResources.RedLightLeftTexture2D);
 
 								if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 3;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1560,12 +1701,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, 1);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, 1);
 
 									float numOffset;
 
@@ -1585,16 +1725,16 @@ namespace TrafficManager.TrafficLight {
 									GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}
 							}
 
 							// forward-right arrow light
-							guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 && _hoveredNode == index ? 0.92f : 0.45f;
+							guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 							GUI.color = guiColor;
 
@@ -1620,9 +1760,9 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							if (myRect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-								_hoveredButton[0] = segmentId;
+								_hoveredButton[0] = srcSegmentId;
 								_hoveredButton[1] = 4;
-								_hoveredNode = index;
+								_hoveredNode = nodeId;
 								hoveredSegment = true;
 
 								if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1632,12 +1772,11 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							// COUNTER
-							if (timedActive && _timedShowNumbers) {
+							timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+							if (timedActive && _timedShowNumbers && timedSegment != null) {
 								var counterSize = 20f * zoom;
 
-								var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-								var counter = timedSegment.CheckNextChange(segmentId, 0);
+								var counter = timedSegment.CheckNextChange(srcSegmentId, 0);
 
 								float numOffset;
 
@@ -1657,16 +1796,16 @@ namespace TrafficManager.TrafficLight {
 								GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 								if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 4;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 								}
 							}
 							break;
 						case ManualSegmentLight.Mode.RightForwardL: {
 								// forward-left light
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1706,9 +1845,9 @@ namespace TrafficManager.TrafficLight {
 
 
 								if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 3;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1718,12 +1857,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, lightType);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, lightType);
 
 									float numOffset;
 
@@ -1743,17 +1881,17 @@ namespace TrafficManager.TrafficLight {
 									GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}
 
 								// right arrow light
 								if (hasRightSegment) {
-									guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 &&
-												 _hoveredNode == index
+									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
+												 _hoveredNode == nodeId
 										? 0.92f
 										: 0.45f;
 
@@ -1770,9 +1908,9 @@ namespace TrafficManager.TrafficLight {
 
 
 									if (rect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 4;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive &&
@@ -1783,12 +1921,11 @@ namespace TrafficManager.TrafficLight {
 									}
 
 									// COUNTER
-									if (timedActive && _timedShowNumbers) {
+									timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+									if (timedActive && _timedShowNumbers && timedSegment != null) {
 										var counterSize = 20f * zoom;
 
-										var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-										var counter = timedSegment.CheckNextChange(segmentId, 2);
+										var counter = timedSegment.CheckNextChange(srcSegmentId, 2);
 
 										float numOffset;
 
@@ -1812,9 +1949,9 @@ namespace TrafficManager.TrafficLight {
 
 										if (myRectCounterNum.Contains(Event.current.mousePosition) &&
 											!_cursorInSecondaryPanel) {
-											_hoveredButton[0] = segmentId;
+											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 4;
-											_hoveredNode = index;
+											_hoveredNode = nodeId;
 											hoveredSegment = true;
 										}
 									}
@@ -1824,7 +1961,7 @@ namespace TrafficManager.TrafficLight {
 						default:
 							// left arrow light
 							if (hasLeftSegment) {
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 3 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1846,9 +1983,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.DrawTexture(myRect4, TrafficLightToolTextureResources.RedLightLeftTexture2D);
 
 								if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 3;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1858,12 +1995,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, 1);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, 1);
 
 									float numOffset;
 
@@ -1887,9 +2023,9 @@ namespace TrafficManager.TrafficLight {
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) &&
 										!_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}
@@ -1897,7 +2033,7 @@ namespace TrafficManager.TrafficLight {
 
 							// forward arrow light
 							if (hasForwardSegment) {
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1916,9 +2052,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.DrawTexture(myRect6, TrafficLightToolTextureResources.RedLightStraightTexture2D);
 
 								if (myRect6.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 4;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1928,12 +2064,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, 0);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, 0);
 
 									float numOffset;
 
@@ -1957,9 +2092,9 @@ namespace TrafficManager.TrafficLight {
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) &&
 										!_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 4;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}
@@ -1967,7 +2102,7 @@ namespace TrafficManager.TrafficLight {
 
 							// right arrow light
 							if (hasRightSegment) {
-								guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 5 && _hoveredNode == index ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
 								GUI.color = guiColor;
 
@@ -1981,9 +2116,9 @@ namespace TrafficManager.TrafficLight {
 									GUI.DrawTexture(rect6, TrafficLightToolTextureResources.RedLightRightTexture2D);
 
 								if (rect6.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
-									_hoveredButton[0] = segmentId;
+									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 5;
-									_hoveredNode = index;
+									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
@@ -1993,12 +2128,11 @@ namespace TrafficManager.TrafficLight {
 								}
 
 								// COUNTER
-								if (timedActive && _timedShowNumbers) {
+								timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
+								if (timedActive && _timedShowNumbers && timedSegment != null) {
 									var counterSize = 20f * zoom;
 
-									var timedSegment = TrafficLightsTimed.GetTimedLight(index);
-
-									var counter = timedSegment.CheckNextChange(segmentId, 2);
+									var counter = timedSegment.CheckNextChange(srcSegmentId, 2);
 
 									float numOffset;
 
@@ -2022,9 +2156,9 @@ namespace TrafficManager.TrafficLight {
 
 									if (myRectCounterNum.Contains(Event.current.mousePosition) &&
 										!_cursorInSecondaryPanel) {
-										_hoveredButton[0] = segmentId;
+										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 5;
-										_hoveredNode = index;
+										_hoveredNode = nodeId;
 										hoveredSegment = true;
 									}
 								}

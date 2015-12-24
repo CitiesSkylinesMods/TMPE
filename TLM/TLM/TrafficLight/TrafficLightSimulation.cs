@@ -113,9 +113,10 @@ namespace TrafficManager.TrafficLight {
             //Log.Warning("step: " + NodeId);
             var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            if (TrafficLightsTimed.IsTimedLight(NodeId) && TimedTrafficLightsActive) {
-                var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
-                timedNode.CheckStep(currentFrameIndex >> 6);
+			if (TimedTrafficLightsActive) {
+				var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
+				if (timedNode != null)
+					timedNode.CheckStep(currentFrameIndex >> 6);
             }
 
             for (var l = 0; l < 8; l++) {

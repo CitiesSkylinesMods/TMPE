@@ -27,32 +27,38 @@ namespace TrafficManager
         public List<ushort> Cars = new List<ushort>();
 
         public int[] CarsOnLanes = new int[24];
+		public int numLanes = 0;
 
         public PrioritySegment(ushort nodeid, int segmentid, PriorityType type)
         {
             Nodeid = nodeid;
             Segmentid = segmentid;
             Type = type;
+			_numCarsOnLane();
         }
 
-        public void AddCar(ushort vehicleId)
+        public bool AddCar(ushort vehicleId)
         {
             if (!Cars.Contains(vehicleId))
             {
                 Cars.Add(vehicleId);
-                NumCars++;
+                NumCars = Cars.Count;
                 _numCarsOnLane();
+				return true;
             }
+			return false;
         }
 
-        public void RemoveCar(ushort vehicleId)
+        public bool RemoveCar(ushort vehicleId)
         {
             if (Cars.Contains(vehicleId))
             {
                 Cars.Remove(vehicleId);
-                NumCars--;
-                _numCarsOnLane();
+				NumCars = Cars.Count;
+				_numCarsOnLane();
+				return true;
             }
+			return false;
         }
 
         public bool HasCar(ushort vehicleId)
@@ -77,7 +83,8 @@ namespace TrafficManager
 
             CarsOnLanes = new int[16];
 
-            while (currentLane < segmentInfo.m_lanes.Length && laneId[0] != 0u)
+			numLanes = segmentInfo.m_lanes.Length;
+			while (currentLane < segmentInfo.m_lanes.Length && laneId[0] != 0u)
             {
                 if (segmentInfo.m_lanes[currentLane].m_laneType != NetInfo.LaneType.Pedestrian)
                 {

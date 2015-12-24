@@ -34,14 +34,15 @@ namespace TrafficManager.CustomAI {
                                     if (NodeDictionary[nodeId].FlagTimedTrafficLights) {
                                         var timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
 
-                                        foreach (var timedNodeItem in timedNode.NodeGroup) {
-                                            var nodeSim = GetNodeSimulation(timedNodeItem);
+										if (timedNode != null)
+											foreach (var timedNodeItem in timedNode.NodeGroup) {
+												var nodeSim = GetNodeSimulation(timedNodeItem);
 
-                                            nodeSim.TimedTrafficLightsActive = false;
+												nodeSim.TimedTrafficLightsActive = false;
 
-                                            clearedNodes.Add(timedNodeItem);
-                                            TrafficLightsTimed.RemoveTimedLight(timedNodeItem);
-                                        }
+												clearedNodes.Add(timedNodeItem);
+												TrafficLightsTimed.RemoveTimedLight(timedNodeItem);
+											}
                                     }
                                 }
                             }
