@@ -2975,7 +2975,7 @@ namespace TrafficManager.TrafficLight {
 							_timedPanelAdd = false;
 
 							foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
-#ifdef DEBUG
+#if DEBUG
 								Log.Message("Starting traffic light @ " + timedNode.NodeId);
 								Log.Message("Node group: " + timedNode.NodeGroup.ToString());
 #endif
