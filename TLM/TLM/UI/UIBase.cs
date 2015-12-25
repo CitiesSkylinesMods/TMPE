@@ -17,7 +17,7 @@ namespace TrafficManager.UI {
 			var button = (UIButton)uiView.AddUIComponent(typeof(UIButton));
 
 			// Set the text to show on the button.
-			button.text = "TM 1.3";
+			button.text = "Traffic President";
 
 			// Set the button dimensions.
 			button.width = 150;

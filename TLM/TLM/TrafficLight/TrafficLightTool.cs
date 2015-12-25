@@ -2807,7 +2807,7 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
 							String labelStr = "State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
-							if (timedNodeMain.GetStep(i).MinTimeRemaining() <= 0)
+							if (timedNodeMain.GetStep(i).MinTimeRemaining() <= 0 && !Single.IsNaN(timedNodeMain.GetStep(i).maxWait) && !Single.IsNaN(timedNodeMain.GetStep(i).minFlow))
 								labelStr += " min. avg. flow: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).minFlow) + " max. avg. wait: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).maxWait);
 							GUILayout.Label(labelStr, layoutGreen);
 							GUILayout.Space(5);
