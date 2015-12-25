@@ -5,7 +5,7 @@ namespace TrafficManager
 {
     public class TrafficManagerMod : IUserMod
     {
-        public string Name => "Traffic Manager Plus";
+        public string Name => "Traffic Manager: Traffic President Edition";
 
         public string Description => "Traffic Junction Manager [v1.3]";
 

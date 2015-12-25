@@ -5,7 +5,7 @@ namespace TrafficManager {
 
     public static class Log {
         const string Prefix = "TrafficLightManager: ";
-        private static readonly bool InGameDebug = true;// Environment.OSVersion.Platform != PlatformID.Unix;
+        private static readonly bool InGameDebug = Environment.OSVersion.Platform != PlatformID.Unix;
 
         public static void Message(object s) {
 #if DEBUG
