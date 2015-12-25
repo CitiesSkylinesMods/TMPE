@@ -81,6 +81,8 @@ namespace TrafficManager.Traffic {
 			var node = TrafficLightTool.GetNetNode(nodeId);
 
 			var fromPrioritySegment = GetPrioritySegment(nodeId, VehicleList[targetCar].FromSegment);
+			if (fromPrioritySegment == null)
+				return false;
 
 			var removeCarList = new List<ushort>();
 
@@ -94,6 +96,8 @@ namespace TrafficManager.Traffic {
 				if (!IsPrioritySegment(nodeId, segment)) continue;
 
 				var prioritySegment = GetPrioritySegment(nodeId, segment);
+				if (prioritySegment == null)
+					continue; // should not happen
 
 				// select outdated cars
 				removeCarList.AddRange(from car in prioritySegment.Cars where VehicleList[car].LastFrame < frame - 32u select car);
