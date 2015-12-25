@@ -69,13 +69,17 @@ namespace TrafficManager.CustomAI {
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
 
+#if DEBUG
 			List<String> logBuffer = new List<String>();
 			bool logme = false;
+#endif
 
 			if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
+#if DEBUG
 				if (vehicleId % 5 == 0) {
 					logBuffer.Add("Calculating prio info for vehicleId " + vehicleId);
 				}
+#endif
 
 				// we extract the segment information directly from the vehicle
 				var currentPathId = vehicleData.m_path;
@@ -87,9 +91,11 @@ namespace TrafficManager.CustomAI {
 				List<PathUnit.Position> nextRealTimePositions = new List<PathUnit.Position>(); // car position after passing the next nodes
 				List<ushort> nextRealTimeDestinationNodes = new List<ushort>(); // upcoming node ids
 
+#if DEBUG
 				if (vehicleId % 5 == 0) {
 					logBuffer.Add("* vehicleId " + vehicleId + ". currentPathId: " + currentPathId);
 				}
+#endif
 
 				if (currentPathId > 0) {
 					// vehicle has a path...
@@ -137,15 +143,16 @@ namespace TrafficManager.CustomAI {
 							nextRealTimePositions.Add(nextRealTimePosition);
 							nextRealTimeDestinationNodes.Add(destNodeId);
 						}
-						
+
 						// please don't ask why we use "m_pathPositionIndex >> 1" (which equals to "m_pathPositionIndex / 2") here (Though it would
 						// be interesting to know why they used such an ugly indexing scheme!!). I assume m_pathPositionIndex relates to the car's position
 						// on the segment. If it is even the car might be in the segement's first half and if it is odd, it might be in the segment's
 						// second half.
-
+#if DEBUG
 						if (vehicleId % 5 == 0) {
 							logBuffer.Add("* vehicleId " + vehicleId + ". *INFO* rtPos.seg=" + realTimePosition.Value.m_segment + " nrtPos.seg=" + veryNextRealTimePosition.m_segment);
 						}
+#endif
 					}
 				}
 
@@ -153,9 +160,11 @@ namespace TrafficManager.CustomAI {
 				TrafficPriority.VehicleList[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 4;
 				TrafficPriority.VehicleList[vehicleId].LastSpeed = lastFrameData.m_velocity.sqrMagnitude;
 
+#if DEBUG
 				if (vehicleId % 5 == 0) {
 					logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + TrafficPriority.VehicleList[vehicleId].ToNode + ". FromSegment: " + TrafficPriority.VehicleList[vehicleId].FromSegment + ". FromLaneId: " + TrafficPriority.VehicleList[vehicleId].FromLaneId);
 				}
+#endif
 
 				if (realTimePosition != null) {
 					// we found a valid path unit
@@ -172,24 +181,31 @@ namespace TrafficManager.CustomAI {
 							TrafficPriority.VehicleList[vehicleId].WaitTime = 0;
 							TrafficPriority.VehicleList[vehicleId].Stopped = false;
 							if (oldPrioritySegment.RemoveCar(vehicleId)) {
-								//Log.Message("query: vehicleId: " + vehicleId + ", prevLaneID: " + prevLaneID + ", laneID: " + laneID + ", prevOffset: " + prevOffset + ", offset: " + offset);
+#if DEBUG
 								if (vehicleId % 5 == 0) {
 									logBuffer.Add("### REMOVING vehicle " + vehicleId);
 								}
+#endif
 							} else {
+#if DEBUG
 								if (vehicleId % 5 == 0) {
 									logBuffer.Add("* vehicleId " + vehicleId + " was NOT REMOVED!");
 								}
+#endif
 							}
 						} else {
+#if DEBUG
 							if (vehicleId % 5 == 0) {
 								logBuffer.Add("* vehicleId " + vehicleId + ". oldPrioSeg is null");
 							}
+#endif
 						}
 
+#if DEBUG
 						if (vehicleId % 5 == 0) {
 							logBuffer.Add("* vehicleId " + vehicleId + ". *VEHINFO* ToNode=" + realTimeDestinationNode + " FromSegment=" + realTimePosition.Value.m_segment + " FromLaneId=" + PathManager.GetLaneID(realTimePosition.Value) + " ToSegment=" + veryNextRealTimePosition.m_segment + " ToLaneId=" + (veryNextRealTimePosition.m_segment > 0 ? "" + PathManager.GetLaneID(veryNextRealTimePosition) : "n/a"));
 						}
+#endif
 
 						if (handleWatched)
 							watchedVehicleIds.Remove(vehicleId);
@@ -198,7 +214,9 @@ namespace TrafficManager.CustomAI {
 						// ... and add it to the new priority segment
 						var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNode, realTimePosition.Value.m_segment);
 						if (prioritySegment != null) {
+#if DEBUG
 							logme = true;
+#endif
 							if (handleWatched)
 								watchedVehicleIds.Add(vehicleId);
 
@@ -214,22 +232,28 @@ namespace TrafficManager.CustomAI {
 							TrafficPriority.VehicleList[vehicleId].ReduceSpeedByValueToYield = Random.Range(13f, 18f);
 
 							if (prioritySegment.AddCar(vehicleId)) {
+#if DEBUG
 								if (vehicleId % 5 == 0) {
 									logBuffer.Add("* vehicleId " + vehicleId + " was added!");
 								}
+#endif
 								/*if (vehicleId % 16 == 0) {
 									Log.Message("query: vehicleId: " + vehicleId + ", prevLaneID: " + prevLaneID + ", laneID: " + laneID + ", prevOffset: " + prevOffset + ", offset: " + offset);
 									Log.Warning("*** ADDING vehicle " + vehicleId + " at (prev/cur/next) lane: (" + TrafficPriority.VehicleList[vehicleId].FromLaneId + "/" + TrafficPriority.VehicleList[vehicleId].ToLaneId + "/" + (nextPosition.m_segment > 0 ? "" + PathManager.GetLaneID(nextPosition) : "n/a") + "), (prev/cur/next) offset: (" + prevPos.m_offset + "/" + position.m_offset + "/" + nextPosition.m_offset + "), (prev/cur/next) segment: (" + prevPos.m_segment + "/" + position.m_segment + "/" + nextPosition.m_segment + ") at (src/dest/intrst) node (" + sourceNodeId + "/" + destinationNodeId + "/" + interestingNodeId + "), pathId: " + vehicleData.m_path + ", pathPosIndex: " + vehicleData.m_pathPositionIndex);
 								}*/
 							} else {
+#if DEBUG
 								if (vehicleId % 5 == 0) {
 									logBuffer.Add("* vehicleId " + vehicleId + " was NOT added!");
 								}
+#endif
 							}
 						} else {
+#if DEBUG
 							if (vehicleId % 5 == 0) {
 								logBuffer.Add("* vehicleId " + vehicleId + ". prioSeg is null");
 							}
+#endif
 						}
 
 						// add to watchlist if any upcoming node is a priority node
@@ -243,18 +267,32 @@ namespace TrafficManager.CustomAI {
 							}
 						}
 					} else {
-						// car is on active priority segment
-						if (handleWatched)
-							watchedVehicleIds.Add(vehicleId);
+						var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNode, realTimePosition.Value.m_segment);
+						if (prioritySegment != null) {
+							// vehicle is still on priority segment
+							if (handleWatched)
+								watchedVehicleIds.Add(vehicleId);
+						}
 					}
 				} else {
-					if (vehicleId % 5 == 0) {
-						logBuffer.Add("* vehicleId " + vehicleId + ". no real-time pos");
+					if (TrafficPriority.VehicleList.ContainsKey(vehicleId)) {
+						var oldNode = TrafficPriority.VehicleList[vehicleId].ToNode;
+						var oldSegment = TrafficPriority.VehicleList[vehicleId].FromSegment;
+
+						var oldPrioritySegment = TrafficPriority.GetPrioritySegment(oldNode, oldSegment);
+						if (oldPrioritySegment != null) {
+							oldPrioritySegment.RemoveCar(vehicleId);
+						}
 					}
+
+					if (handleWatched)
+						watchedVehicleIds.Remove(vehicleId);
+					handledVehicle = true;
 				}
 			}
 
-			if (vehicleId == (ushort)12000/*logme || vehicleId % 100 == 0*/) {
+#if DEBUG
+			if (false && vehicleId == (ushort)12000/*logme || vehicleId % 100 == 0*/) {
 				if (logme) {
 					Log.Error("vehicleId: " + vehicleId + " ============================================");
 				} else {
@@ -264,6 +302,7 @@ namespace TrafficManager.CustomAI {
 					Log.Message(logBuf);
 				}
 			}
+#endif
 
 			return handledVehicle;
 		}

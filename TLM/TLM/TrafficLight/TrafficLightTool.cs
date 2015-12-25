@@ -35,7 +35,8 @@ namespace TrafficManager.TrafficLight {
 		private Rect _windowRect;
 		private Rect _windowRect2;
 
-		private float _stepValue = 1f;
+		private int _stepMinValue = 1;
+		private int _stepMaxValue = 1;
 
 		private readonly float[] _sliderValues = { 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f };
 
@@ -608,7 +609,7 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 			_guiSegments();
 			_guiNodes();
-			_guiVehicles();
+			/*_guiVehicles();*/
 #endif
 			switch (_toolMode) {
 				case ToolMode.AddPrioritySigns:
@@ -716,10 +717,10 @@ namespace TrafficManager.TrafficLight {
 						case ManualSegmentLight.Mode.Simple:
 							hoveredSegment = SimpleManualSegmentLightMode(segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment);
 							break;
-						case ManualSegmentLight.Mode.LeftForwardR:
+						case ManualSegmentLight.Mode.SingleRight:
 							hoveredSegment = LeftForwardRManualSegmentLightMode(hasLeftSegment, segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentDict, hoveredSegment, hasForwardSegment, hasRightSegment);
 							break;
-						case ManualSegmentLight.Mode.RightForwardL:
+						case ManualSegmentLight.Mode.SingleLeft:
 							hoveredSegment = RightForwardLSegmentLightMode(segmentId, screenPos, lightWidth, pedestrianWidth, zoom, lightHeight, hasForwardSegment, hasLeftSegment, segmentDict, hasRightSegment, hoveredSegment);
 							break;
 						default:
@@ -1672,7 +1673,7 @@ namespace TrafficManager.TrafficLight {
 								GUI.color = guiColor;
 							}
 							break;
-						case ManualSegmentLight.Mode.LeftForwardR:
+						case ManualSegmentLight.Mode.SingleRight:
 							if (hasLeftSegment) {
 								// left arrow light
 								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
@@ -1803,7 +1804,7 @@ namespace TrafficManager.TrafficLight {
 								}
 							}
 							break;
-						case ManualSegmentLight.Mode.RightForwardL: {
+						case ManualSegmentLight.Mode.SingleLeft: {
 								// forward-left light
 								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
 
@@ -2805,7 +2806,7 @@ namespace TrafficManager.TrafficLight {
 						if (i == timedNodeMain.CurrentStep) {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
-							GUILayout.Label("State[" + (i + 1) + "]: " + timedNodeMain.GetStep(i).CurrentStep(), layoutGreen);
+							GUILayout.Label("State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining() + " avg. flow: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).minFlow) + " avg. wait: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).maxWait), layoutGreen);
 							GUILayout.Space(5);
 							GUILayout.EndVertical();
 							if (GUILayout.Button("Skip", GUILayout.Width(45))) {
@@ -2814,10 +2815,10 @@ namespace TrafficManager.TrafficLight {
 								}
 							}
 						} else {
-							GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).timeUnits, layout);
+							GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime, layout);
 						}
 					} else {
-						GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).timeUnits);
+						GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime);
 
 						if (_timedEditStep < 0) {
 							GUILayout.BeginHorizontal(GUILayout.Width(100));
@@ -2856,7 +2857,8 @@ namespace TrafficManager.TrafficLight {
 							if (GUILayout.Button("Edit", GUILayout.Width(45))) {
 								_timedPanelAdd = false;
 								_timedEditStep = i;
-								_stepValue = timedNodeMain.GetStep(i).timeUnits;
+								_stepMinValue = timedNodeMain.GetStep(i).minTime;
+								_stepMaxValue = timedNodeMain.GetStep(i).maxTime;
 
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 									timedNode2.GetStep(i).SetLights();
@@ -2875,11 +2877,29 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 				} else {
-					GUILayout.Label("Time: " + (int)_stepValue, GUILayout.Width(60));
-					_stepValue = GUILayout.HorizontalSlider(_stepValue, 1f, 120f, GUILayout.Height(20));
+					int oldStepMinValue = _stepMinValue;
+					int oldStepMaxValue = _stepMaxValue;
+
+					// Editing step
+					GUILayout.Label("Min. Time:", GUILayout.Width(65));
+					if (! Int32.TryParse(GUILayout.TextField(_stepMinValue.ToString(), GUILayout.Height(20)), out _stepMinValue))
+						_stepMinValue = oldStepMinValue;
+
+					GUILayout.Label("Max. Time:", GUILayout.Width(65));
+					if (! Int32.TryParse(GUILayout.TextField(_stepMaxValue.ToString(), GUILayout.Height(20)), out _stepMaxValue))
+						_stepMaxValue = oldStepMaxValue;
+					
 					if (GUILayout.Button("Save", GUILayout.Width(45))) {
 						foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
-							timeNode.GetStep(_timedEditStep).timeUnits = (int)_stepValue;
+							if (_stepMinValue < 0)
+								_stepMinValue = 0;
+							if (_stepMaxValue <= 0)
+								_stepMaxValue = 1;
+							if (_stepMaxValue < _stepMinValue)
+								_stepMaxValue = _stepMinValue;
+
+							timeNode.GetStep(_timedEditStep).minTime = (int)_stepMinValue;
+							timeNode.GetStep(_timedEditStep).maxTime = (int)_stepMaxValue;
 							timeNode.GetStep(_timedEditStep).UpdateLights();
 						}
 
@@ -2894,11 +2914,28 @@ namespace TrafficManager.TrafficLight {
 
 			if (_timedEditStep < 0 && !nodeSimulation.TimedTrafficLightsActive) {
 				if (_timedPanelAdd) {
-					GUILayout.Label("Time: " + (int)_stepValue, GUILayout.Width(60));
-					_stepValue = GUILayout.HorizontalSlider(_stepValue, 1f, 120f, GUILayout.Height(20));
+					// new step
+					int oldStepMinValue = _stepMinValue;
+					int oldStepMaxValue = _stepMaxValue;
+
+					GUILayout.Label("Min. Time:", GUILayout.Width(65));
+					if (!Int32.TryParse(GUILayout.TextField(_stepMinValue.ToString(), GUILayout.Height(20)), out _stepMinValue))
+						_stepMinValue = oldStepMinValue;
+
+					GUILayout.Label("Max. Time:", GUILayout.Width(65));
+					if (!Int32.TryParse(GUILayout.TextField(_stepMaxValue.ToString(), GUILayout.Height(20)), out _stepMaxValue))
+						_stepMaxValue = oldStepMaxValue;
+
 					if (GUILayout.Button("Add", GUILayout.Width(45))) {
 						foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
-							timedNode.AddStep((int)_stepValue);
+							if (_stepMinValue < 0)
+								_stepMinValue = 0;
+							if (_stepMaxValue <= 0)
+								_stepMaxValue = 1;
+							if (_stepMaxValue < _stepMinValue)
+								_stepMaxValue = _stepMinValue;
+
+							timedNode.AddStep(_stepMinValue, _stepMaxValue);
 						}
 						_timedPanelAdd = false;
 					}
@@ -2935,6 +2972,10 @@ namespace TrafficManager.TrafficLight {
 							_timedPanelAdd = false;
 
 							foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
+#ifdef DEBUG
+								Log.Message("Starting traffic light @ " + timedNode.NodeId);
+								Log.Message("Node group: " + timedNode.NodeGroup.ToString());
+#endif
 								timedNode.Start();
 							}
 						}

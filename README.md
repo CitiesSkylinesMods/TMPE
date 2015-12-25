@@ -1,7 +1,11 @@
-# Cities: Skylines - Traffic Manager 1.3.0 Nerd Edition - work in progress! 
-A WIP mod for Cities: Skylines to add additional road traffic control
+# Cities: Skylines - Traffic Manager 1.3.0 *Traffic President Edition*
+A work-in-progress (state: 12/25/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.0, 12/25/2015 (Victor-Philipp Negoescu)
+- **Adaptive Timed Traffic Lights** (automatically adjusted based on traffic amount)
+
+1.2.0 (iMarbot)
 - Updated for 1.2.2-f2 game patch.
 
 # Current features
@@ -19,9 +23,8 @@ A WIP mod for Cities: Skylines to add additional road traffic control
 
 - Crosswalks become permanent upon save/load game
 - Crosswalks work on places it shouldn't (like intersections) and the result is missing textures.
-- Other minor issues
 
-# Roadmap
+# Upcoming changes
 
-- Adaptive Timed Traffic Lights (automatically adjusted based on traffic amount)
+- Code optimization & refactoring
 - Timed Traffic Light Templates (ready-to-use directional traffic light patterns)

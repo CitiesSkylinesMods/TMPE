@@ -8,6 +8,12 @@ using UnityEngine;
 
 namespace TrafficManager.Traffic {
 	class TrafficPriority {
+		public enum Direction {
+			Left,
+			Forward,
+			Right
+		}
+
 		public static bool LeftHandDrive;
 
 		public static Dictionary<int, TrafficSegment> PrioritySegments = new Dictionary<int, TrafficSegment>();
@@ -90,7 +96,7 @@ namespace TrafficManager.Traffic {
 				var prioritySegment = GetPrioritySegment(nodeId, segment);
 
 				// select outdated cars
-				removeCarList.AddRange(from car in prioritySegment.Cars where VehicleList[car].LastFrame < frame - 128u select car);
+				removeCarList.AddRange(from car in prioritySegment.Cars where VehicleList[car].LastFrame < frame - 32u select car);
 
 				// remove outdated cars
 				foreach (var rcar in removeCarList) {
@@ -405,6 +411,22 @@ namespace TrafficManager.Traffic {
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// Determines the direction vehicles are turning when changing from segment `fromSegment` to segment `toSegment` at node `nodeId`.
+		/// </summary>
+		/// <param name="fromSegment"></param>
+		/// <param name="toSegment"></param>
+		/// <param name="nodeId"></param>
+		/// <returns></returns>
+		public static Direction GetDirection(int fromSegment, int toSegment, ushort nodeId) {
+			if (IsRightSegment(fromSegment, toSegment, nodeId))
+				return Direction.Right;
+			else if (IsLeftSegment(fromSegment, toSegment, nodeId))
+				return Direction.Left;
+			else
+				return Direction.Forward;
 		}
 
 		public static bool IsRightSegment(int fromSegment, int toSegment, ushort nodeid) {

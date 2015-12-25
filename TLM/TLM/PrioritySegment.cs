@@ -4,99 +4,127 @@ using System.Linq;
 using ColossalFramework;
 using TrafficManager.Traffic;
 
-namespace TrafficManager
-{
-    public class PrioritySegment
-    {
-        public enum PriorityType
-        {
-            None = 0,
-            Main = 1,
-            Stop = 2,
-            Yield = 3
-        }
+/// <summary>
+/// A priority segment describes a directional traffic segment connected to a controlled
+/// node (with traffic lights, priority settings).
+/// </summary>
+namespace TrafficManager {
+	public class PrioritySegment {
+		public enum PriorityType {
+			None = 0,
+			Main = 1,
+			Stop = 2,
+			Yield = 3
+		}
 
-        public ushort Nodeid;
-        public int Segmentid;
+		public ushort Nodeid;
+		public int Segmentid;
 
 
-        public PriorityType Type;
+		public PriorityType Type;
 
-        public int NumCars;
+		public int NumCars;
 
-        public List<ushort> Cars = new List<ushort>();
+		public List<ushort> Cars = new List<ushort>();
 
-        public int[] CarsOnLanes = new int[24];
+		public int[] CarsOnLanes = new int[24];
 		public int numLanes = 0;
 
-        public PrioritySegment(ushort nodeid, int segmentid, PriorityType type)
-        {
-            Nodeid = nodeid;
-            Segmentid = segmentid;
-            Type = type;
-			_numCarsOnLane();
-        }
+		/// <summary>
+		/// For each segment id: number of cars going to this segment
+		/// </summary>
+		public Dictionary<ushort, int> numCarsGoingToSegmentId;
 
-        public bool AddCar(ushort vehicleId)
-        {
-            if (!Cars.Contains(vehicleId))
-            {
-                Cars.Add(vehicleId);
-                NumCars = Cars.Count;
-                _numCarsOnLane();
-				return true;
-            }
-			return false;
-        }
+		public PrioritySegment(ushort nodeid, int segmentid, PriorityType type) {
+			numCarsGoingToSegmentId = new Dictionary<ushort, int>();
+			Nodeid = nodeid;
+			Segmentid = segmentid;
+			Type = type;
+			housekeeping();
+		}
 
-        public bool RemoveCar(ushort vehicleId)
-        {
-            if (Cars.Contains(vehicleId))
-            {
-                Cars.Remove(vehicleId);
+		public bool AddCar(ushort vehicleId) {
+			if (!Cars.Contains(vehicleId)) {
+				Cars.Add(vehicleId);
 				NumCars = Cars.Count;
-				_numCarsOnLane();
+				housekeeping();
 				return true;
-            }
+			}
 			return false;
-        }
+		}
+		
+		public bool RemoveCar(ushort vehicleId) {
+			return RemoveCar(vehicleId, true);
+		}
 
-        public bool HasCar(ushort vehicleId)
-        {
-            return Cars.Contains(vehicleId);
-        }
+		private bool RemoveCar(ushort vehicleId, bool hk) {
+			if (Cars.Contains(vehicleId)) {
+				Cars.Remove(vehicleId);
+				NumCars = Cars.Count;
 
-        public int GetCarsOnLane(int lane)
-        {
-            return CarsOnLanes[lane];
-        }
+				if (hk)
+					housekeeping();
+				return true;
+			}
+			return false;
+		}
 
-        private void _numCarsOnLane()
-        {
-            var instance = Singleton<NetManager>.instance;
+		private void housekeeping() {
+			calcNumCarsGoingToSegment();
+			_numCarsOnLane();
+		}
 
-            var segment = instance.m_segments.m_buffer[Segmentid];
-            var segmentInfo = segment.Info;
+		private void calcNumCarsGoingToSegment() {
+			numCarsGoingToSegmentId.Clear();
+			List<ushort> invalidVehicleIds = new List<ushort>();
+			foreach (var vehicleId in Cars) {
+				if (!TrafficPriority.VehicleList.ContainsKey(vehicleId)) {
+					invalidVehicleIds.Add(vehicleId);
+					continue;
+				}
 
-            uint[] laneId = {segment.m_lanes};
-            var currentLane = 0;
+				PriorityCar vehicle = TrafficPriority.VehicleList[vehicleId];
+				if (!numCarsGoingToSegmentId.ContainsKey(vehicle.ToSegment))
+					numCarsGoingToSegmentId[vehicle.ToSegment] = 1;
+				else
+					numCarsGoingToSegmentId[vehicle.ToSegment]++;
+			}
 
-            CarsOnLanes = new int[16];
+			foreach (var vehicleId in invalidVehicleIds) {
+				RemoveCar(vehicleId, false);
+			}
+		}
+
+		public bool HasCar(ushort vehicleId) {
+			return Cars.Contains(vehicleId);
+		}
+
+		public int GetCarsOnLane(int lane) {
+			return CarsOnLanes[lane];
+		}
+
+		private void _numCarsOnLane() {
+			var instance = Singleton<NetManager>.instance;
+
+			var segment = instance.m_segments.m_buffer[Segmentid];
+			var segmentInfo = segment.Info;
+
+			uint[] laneId = { segment.m_lanes };
+			var currentLane = 0;
+
+			CarsOnLanes = new int[16];
 
 			numLanes = segmentInfo.m_lanes.Length;
-			while (currentLane < segmentInfo.m_lanes.Length && laneId[0] != 0u)
-            {
-                if (segmentInfo.m_lanes[currentLane].m_laneType != NetInfo.LaneType.Pedestrian)
-                {
-                    foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].FromLaneId == laneId[0]))
-                    {
-                        CarsOnLanes[currentLane]++;
-                    }
-                }
+			while (currentLane < segmentInfo.m_lanes.Length && laneId[0] != 0u) {
+				if (segmentInfo.m_lanes[currentLane].m_laneType != NetInfo.LaneType.Pedestrian) {
+					foreach (var car in Cars.Where(car => TrafficPriority.VehicleList[car].FromLaneId == laneId[0])) {
+						CarsOnLanes[currentLane]++;
+					}
+				}
 
-                laneId[0] = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId[0])].m_nextLane;
-                currentLane++;
-            }
-        }
-    }
+				laneId[0] = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId[0])].m_nextLane;
+				currentLane++;
+			}
+		}
+	}
 }

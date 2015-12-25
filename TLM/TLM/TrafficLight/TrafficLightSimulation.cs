@@ -116,7 +116,7 @@ namespace TrafficManager.TrafficLight {
 			if (TimedTrafficLightsActive) {
 				var timedNode = TrafficLightsTimed.GetTimedLight(NodeId);
 				if (timedNode != null)
-					timedNode.CheckStep(currentFrameIndex >> 6);
+					timedNode.CheckCurrentStep();
             }
 
             for (var l = 0; l < 8; l++) {

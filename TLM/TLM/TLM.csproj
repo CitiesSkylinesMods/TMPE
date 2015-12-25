@@ -90,7 +90,7 @@
     <Compile Include="TrafficLight\TrafficLightToolTextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
-    <Compile Include="Traffic\TimedTrafficSteps.cs" />
+    <Compile Include="Traffic\TimedTrafficStep.cs" />
     <Compile Include="Traffic\TrafficPriority.cs" />
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
     <Compile Include="Traffic\TrafficSegment.cs" />

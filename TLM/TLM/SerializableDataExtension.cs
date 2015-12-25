@@ -211,14 +211,33 @@ namespace TrafficManager {
 
 						for (var j = 0; j < _configuration.TimedNodes[i][2]; j++) {
 							var cfgstep = _configuration.TimedNodeSteps[timedStepCount];
-							// cfgstep[0]: number of timed steps
-							// cfgstep[1]: number of segments
+							// old (pre 1.3.0):
+							//   cfgstep[0]: time of step
+							//   cfgstep[1]: number of steps
+							// new (post 1.3.0):
+							//   cfgstep[0]: min. time of step
+							//   cfgstep[1]: max. time of step
+							//   cfgstep[2]: number of steps
 
-							timedNode.AddStep(cfgstep[0]);
+							int minTime = 1;
+							int maxTime = 1;
+							int numSteps = 0;
+
+							if (cfgstep.Length == 2) {
+								minTime = cfgstep[0];
+								maxTime = cfgstep[0];
+								numSteps = cfgstep[1];
+							} else if (cfgstep.Length == 3) {
+								minTime = cfgstep[0];
+								maxTime = cfgstep[1];
+								numSteps = cfgstep[2];
+							}
+
+							timedNode.AddStep(minTime, maxTime);
 
 							var step = timedNode.Steps[j];
-							if (cfgstep[1] <= step.segmentIds.Count)
-								for (var k = 0; k < cfgstep[1]; k++) {
+							if (numSteps <= step.segmentIds.Count)
+								for (var k = 0; k < numSteps; k++) {
 									var leftLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
 									var mainLightState = (RoadBaseAI.TrafficLightState)	_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
 									var rightLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
@@ -432,7 +451,7 @@ namespace TrafficManager {
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
 					configuration.TimedNodeSteps.Add(new[]
 					{
-						timedNode.Steps[j].timeUnits,
+						timedNode.Steps[j].minTime,
 						timedNode.Steps[j].segmentIds.Count
 					});
 
