@@ -11,7 +11,7 @@ A work-in-progress (state: 12/25/2015) mod for **Cities: Skylines** to add addit
 # Current features
 
 - Add/Remove traffic lights
-- Adaptively timed traffic lights
+- Adaptive timed traffic lights
 - Add priority signs
 - Change lanes
 - Add/Remove crosswalks
