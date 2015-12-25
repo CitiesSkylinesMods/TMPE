@@ -169,6 +169,9 @@ namespace TrafficManager.Traffic {
 		public bool StepDone(uint frame) {
 			if (startFrame + maxTime <= frame) {
 				// maximum time reached. switch!
+#if DEBUG
+				Log.Message("step finished @ " + nodeId);
+#endif
 				return true;
 			}
 
@@ -180,7 +183,11 @@ namespace TrafficManager.Traffic {
 
 				if (masterNodeId != null && TrafficLightsTimed.IsTimedLight((ushort)masterNodeId)) {
 					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight((ushort)masterNodeId);
-					return masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone(frame);
+					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone(frame);
+#if DEBUG
+					Log.Message("step finished (1) @ " + nodeId);
+#endif
+					return done;
 				} else {
 					// we are the master node. calculate traffic data
 					foreach (ushort timedNodeId in groupNodeIds) {
@@ -246,7 +253,11 @@ namespace TrafficManager.Traffic {
 						maxWait = Math.Max(curMeanWait, maxWait);
 
 					// if double as many cars are waiting than flowing, we change the step
-					return maxWait > 0 && minFlow * 2f < maxWait;
+					bool done = maxWait > 0 && minFlow < maxWait;
+#if DEBUG
+					Log.Message("step finished (2) @ " + nodeId);
+#endif
+					return done;
 				}
 			}
 			return false;

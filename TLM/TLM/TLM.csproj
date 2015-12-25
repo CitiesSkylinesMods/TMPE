@@ -144,9 +144,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
-xcopy /y "$(TargetDir)$(TargetName).*" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"</PostBuildEvent>
+    <PostBuildEvent>mkdir "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740"
+del /Q "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740\*"
+xcopy /y "$(TargetDir)$(TargetName).*" "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740"
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

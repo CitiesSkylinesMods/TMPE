@@ -38,6 +38,9 @@ namespace TrafficManager.TrafficLight {
 		private int _stepMinValue = 1;
 		private int _stepMaxValue = 1;
 
+		private String _stepMinValueStr = "1";
+		private String _stepMaxValueStr = "1";
+
 		private readonly float[] _sliderValues = { 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f };
 
 		private Texture2D _secondPanelTexture;
@@ -1546,6 +1549,7 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 
+#if DEBUG
 					if (timedActive /*&& _timedShowNumbers*/) {
 						var prioSeg = TrafficPriority.GetPrioritySegment(nodeId, srcSegmentId);
 
@@ -1571,6 +1575,7 @@ namespace TrafficManager.TrafficLight {
 						_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 						GUI.Label(segIdRect, "Segment " + srcSegmentId, _counterStyle);
 					}
+#endif
 
 					// COUNTER
 					var timedSegment = TrafficLightsTimed.GetTimedLight(nodeId);
@@ -2795,6 +2800,11 @@ namespace TrafficManager.TrafficLight {
 			var nodeSimulation = CustomRoadAI.GetNodeSimulation(SelectedNodeIndexes[0]);
 			var timedNodeMain = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[0]);
 
+			if (nodeSimulation == null || timedNodeMain == null) {
+				SetToolMode(ToolMode.TimedLightsSelectNode);
+				return;
+			}
+
 			var layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
 			var layoutGreen = new GUIStyle { normal = { textColor = new Color(0f, 1f, 0f) } };
 
@@ -2862,6 +2872,8 @@ namespace TrafficManager.TrafficLight {
 								_timedEditStep = i;
 								_stepMinValue = timedNodeMain.GetStep(i).minTime;
 								_stepMaxValue = timedNodeMain.GetStep(i).maxTime;
+								_stepMinValueStr = _stepMinValue.ToString();
+								_stepMaxValueStr = _stepMaxValue.ToString();
 
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 									timedNode2.GetStep(i).SetLights();
@@ -2885,11 +2897,13 @@ namespace TrafficManager.TrafficLight {
 
 					// Editing step
 					GUILayout.Label("Min. Time:", GUILayout.Width(65));
-					if (! Int32.TryParse(GUILayout.TextField(_stepMinValue.ToString(), GUILayout.Height(20)), out _stepMinValue))
+					_stepMinValueStr = GUILayout.TextField(_stepMinValueStr, GUILayout.Height(20));
+					if (! Int32.TryParse(_stepMinValueStr, out _stepMinValue))
 						_stepMinValue = oldStepMinValue;
 
 					GUILayout.Label("Max. Time:", GUILayout.Width(65));
-					if (! Int32.TryParse(GUILayout.TextField(_stepMaxValue.ToString(), GUILayout.Height(20)), out _stepMaxValue))
+					_stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
+					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 					
 					if (GUILayout.Button("Save", GUILayout.Width(45))) {
@@ -2922,11 +2936,13 @@ namespace TrafficManager.TrafficLight {
 					int oldStepMaxValue = _stepMaxValue;
 
 					GUILayout.Label("Min. Time:", GUILayout.Width(65));
-					if (!Int32.TryParse(GUILayout.TextField(_stepMinValue.ToString(), GUILayout.Height(20)), out _stepMinValue))
+					_stepMinValueStr = GUILayout.TextField(_stepMinValueStr, GUILayout.Height(20));
+					if (!Int32.TryParse(_stepMinValueStr, out _stepMinValue))
 						_stepMinValue = oldStepMinValue;
 
 					GUILayout.Label("Max. Time:", GUILayout.Width(65));
-					if (!Int32.TryParse(GUILayout.TextField(_stepMaxValue.ToString(), GUILayout.Height(20)), out _stepMaxValue))
+					_stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
+					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 
 					if (GUILayout.Button("Add", GUILayout.Width(45))) {
