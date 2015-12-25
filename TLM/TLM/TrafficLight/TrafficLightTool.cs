@@ -2806,7 +2806,10 @@ namespace TrafficManager.TrafficLight {
 						if (i == timedNodeMain.CurrentStep) {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
-							GUILayout.Label("State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining() + " avg. flow: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).minFlow) + " avg. wait: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).maxWait), layoutGreen);
+							String labelStr = "State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
+							if (timedNodeMain.GetStep(i).MinTimeRemaining() <= 0)
+								labelStr += " min. avg. flow: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).minFlow) + " max. avg. wait: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).maxWait);
+							GUILayout.Label(labelStr, layoutGreen);
 							GUILayout.Space(5);
 							GUILayout.EndVertical();
 							if (GUILayout.Button("Skip", GUILayout.Width(45))) {
