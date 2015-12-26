@@ -31,7 +31,7 @@ namespace TrafficManager.TrafficLight {
 
 		private readonly GUIStyle _counterStyle = new GUIStyle();
 
-		private bool _uiClickedSegment;
+		private bool mouseClickProcessed;
 		private Rect _windowRect;
 		private Rect _windowRect2;
 
@@ -47,7 +47,14 @@ namespace TrafficManager.TrafficLight {
 
 		private static bool _timedShowNumbers;
 
-		private const float CloseLod = 250f;
+		private const float DebugCloseLod = 250f;
+		private const float PriorityCloseLod = 1000f;
+
+		private uint tooltipStartFrame = 0;
+		private String tooltipText = null;
+		private Vector3? tooltipWorldPos = null;
+
+		private uint currentFrame = 0;
 
 		static Rect ResizeGUI(Rect rect) {
 			var rectX = (rect.x / 800) * Screen.width;
@@ -95,6 +102,12 @@ namespace TrafficManager.TrafficLight {
 			if (mode != ToolMode.LaneRestrictions) {
 				_selectedSegmentIndexes.Clear();
 			}
+
+			housekeeping();
+		}
+
+		private static void housekeeping() {
+			TrafficPriority.housekeeping();
 		}
 
 		// Overridden to disable base class behavior
@@ -151,6 +164,10 @@ namespace TrafficManager.TrafficLight {
 			if (_hoveredNetNodeIdx == 0) return;
 
 			var node = GetNetNode(_hoveredNetNodeIdx);
+
+			// no highlight for existing priority node in sign mode
+			if (_toolMode == ToolMode.AddPrioritySigns && TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx))
+				return;
 
 			if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
 
@@ -340,6 +357,19 @@ namespace TrafficManager.TrafficLight {
 		public override void SimulationStep() {
 			base.SimulationStep();
 
+			currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 2;
+
+			if (tooltipText != null) {
+				if (currentFrame <= tooltipStartFrame + 30) {
+					ShowToolInfo(true, tooltipText, (Vector3)tooltipWorldPos);
+				} else {
+					ShowToolInfo(false, null, Vector3.zero);
+					tooltipStartFrame = 0;
+					tooltipText = null;
+					tooltipWorldPos = null;
+				}
+			}			
+
 			var mouseRayValid = !UIView.IsInsideUI() && Cursor.visible && !_cursorInSecondaryPanel;
 
 			if (mouseRayValid) {
@@ -417,7 +447,7 @@ namespace TrafficManager.TrafficLight {
 						break;
 				}
 			} else {
-				ShowToolInfo(false, null, Vector3.zero);
+				//showTooltip(false, null, Vector3.zero);
 				_mouseClicked = false;
 			}
 		}
@@ -442,7 +472,7 @@ namespace TrafficManager.TrafficLight {
 						AddListNode(_hoveredNetNodeIdx);
 					}
 				} else {
-					ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+					showTooltip("Node is not a traffic light", node.m_position);
 				}
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
@@ -453,7 +483,7 @@ namespace TrafficManager.TrafficLight {
 						SetToolMode(ToolMode.TimedLightsShowLights);
 					}
 				} else {
-					ShowToolInfo(true, "Node is part of timed script", node.m_position);
+					showTooltip("Node is part of timed script", node.m_position);
 				}
 			}
 		}
@@ -479,21 +509,21 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 				} else {
-					ShowToolInfo(true, "Node is not a traffic light", node.m_position);
+					showTooltip("Node is not a traffic light", node.m_position);
 				}
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
 				}
-				ShowToolInfo(true, "Node is part of timed script", node.m_position);
+				showTooltip("Node is part of timed script", node.m_position);
 			}
 		}
 
 		private void AddPrioritySignsToolMode(NetNode node) {
 			if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
-				_uiClickedSegment = true;
+				mouseClickProcessed = true;
 				SelectedNode = _hoveredNetNodeIdx;
 			} else {
-				ShowToolInfo(true, "Node should not be a traffic light", node.m_position);
+				showTooltip("Node has a traffic light! Cannot add priority signs.", node.m_position);
 			}
 		}
 
@@ -568,7 +598,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx)) {
 				if (_selectedSegmentIndexes.Count > 0) {
-					ShowToolInfo(true, "Road is already in a group!",
+					showTooltip("Road is already in a group!",
 						Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
 							.m_position);
 				} else {
@@ -587,7 +617,7 @@ namespace TrafficManager.TrafficLight {
 						var info2 = segment2.Info;
 
 						if (info.m_lanes.Length != info2.m_lanes.Length) {
-							ShowToolInfo(true, "All selected roads must be of the same type!",
+							showTooltip("All selected roads must be of the same type!",
 								Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
 									.m_position);
 						} else {
@@ -606,17 +636,16 @@ namespace TrafficManager.TrafficLight {
 
 		protected override void OnToolGUI() {
 			if (!Input.GetMouseButtonDown(0)) {
-				_uiClickedSegment = false;
+				mouseClickProcessed = false;
 			}
 
 #if DEBUG
-			_guiSegments();
+/*			_guiSegments();
 			_guiNodes();
-			_guiVehicles();
+			_guiVehicles();*/
 #endif
 			switch (_toolMode) {
-				case ToolMode.AddPrioritySigns:
-					_guiPrioritySigns();
+				case ToolMode.AddPrioritySigns:_guiPrioritySigns();
 					break;
 				case ToolMode.ManualSwitch:
 					_guiManualTrafficLights();
@@ -771,10 +800,10 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 5;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
 
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightRight();
 			return true;
 		}
@@ -816,10 +845,10 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 4;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
 
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightMain();
 			return true;
 		}
@@ -855,10 +884,10 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 3;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
 
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightLeft();
 
 			if (!hasForwardSegment) {
@@ -920,8 +949,7 @@ namespace TrafficManager.TrafficLight {
 				_hoveredButton[1] = 3;
 				hoveredSegment = true;
 
-				if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-					_uiClickedSegment = true;
+				if (checkClicked()) {
 					segmentDict.ChangeLightMain();
 				}
 			}
@@ -953,9 +981,9 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 4;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightRight();
 			return true;
 		}
@@ -985,8 +1013,7 @@ namespace TrafficManager.TrafficLight {
 					_hoveredButton[1] = 3;
 					hoveredSegment = true;
 
-					if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-						_uiClickedSegment = true;
+					if (checkClicked()) {
 						segmentDict.ChangeLightLeft();
 					}
 				}
@@ -1033,9 +1060,9 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 4;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightMain();
 			return true;
 		}
@@ -1062,10 +1089,10 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 3;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
 
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeLightMain();
 			return true;
 		}
@@ -1077,9 +1104,9 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 2;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 
 			if (!segmentDict.PedestrianEnabled) {
 				segmentDict.ManualPedestrian();
@@ -1110,10 +1137,10 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = 1;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
 
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ManualPedestrian();
 			return true;
 		}
@@ -1153,9 +1180,9 @@ namespace TrafficManager.TrafficLight {
 			_hoveredButton[0] = segmentId;
 			_hoveredButton[1] = -1;
 
-			if (!Input.GetMouseButtonDown(0) || _uiClickedSegment)
+			if (!Input.GetMouseButtonDown(0) || mouseClickProcessed)
 				return true;
-			_uiClickedSegment = true;
+			mouseClickProcessed = true;
 			segmentDict.ChangeMode();
 			return true;
 		}
@@ -1250,9 +1277,7 @@ namespace TrafficManager.TrafficLight {
 				_hoveredButton[1] = 0;
 				hoveredSegment = true;
 
-				if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-					_uiClickedSegment = true;
-				}
+				checkClicked();
 			}
 
 			// no arrow light
@@ -1278,8 +1303,7 @@ namespace TrafficManager.TrafficLight {
 				_hoveredButton[1] = 1;
 				hoveredSegment = true;
 
-				if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-					_uiClickedSegment = true;
+				if (checkClicked()) {
 					segmentDict1.ChangeLightMain();
 					segmentDict2.ChangeLightMain();
 				}
@@ -1307,7 +1331,7 @@ namespace TrafficManager.TrafficLight {
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = centerPos - camPos;
-				if (diff.magnitude > CloseLod)
+				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
 
 				var zoom = 1.0f / diff.magnitude * 150f;
@@ -1339,7 +1363,7 @@ namespace TrafficManager.TrafficLight {
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = pos - camPos;
-				if (diff.magnitude > CloseLod)
+				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
 				
 				var zoom = 1.0f / diff.magnitude * 150f;
@@ -1371,7 +1395,7 @@ namespace TrafficManager.TrafficLight {
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = pos - camPos;
-				if (diff.magnitude > CloseLod)
+				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
 
 				var zoom = 1.0f / diff.magnitude * 150f;
@@ -1380,7 +1404,7 @@ namespace TrafficManager.TrafficLight {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				String labelStr = "Veh. " + i + " @ " + vehicle.m_frame0.m_velocity.magnitude + "/" + (TrafficPriority.VehicleList.ContainsKey((ushort)i) ? "" + Math.Sqrt(TrafficPriority.VehicleList[(ushort)i].LastSpeed) : "?");
+				String labelStr = "Veh. " + i;// + " @ " + vehicle.m_frame0.m_velocity.magnitude + "/" + (TrafficPriority.VehicleList.ContainsKey((ushort)i) ? "" + Math.Sqrt(TrafficPriority.VehicleList[(ushort)i].LastSpeed) : "?");
 				// add current path info
 				/*var currentPathId = vehicle.m_path;
 				if (currentPathId > 0) {
@@ -1474,8 +1498,7 @@ namespace TrafficManager.TrafficLight {
 							_hoveredNode = nodeId;
 							hoveredSegment = true;
 
-							if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-								_uiClickedSegment = true;
+							if (checkClicked()) {
 								segmentDict.ChangeMode();
 							}
 						}
@@ -1506,8 +1529,7 @@ namespace TrafficManager.TrafficLight {
 							_hoveredNode = nodeId;
 							hoveredSegment = true;
 
-							if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-								_uiClickedSegment = true;
+							if (checkClicked()) {
 								segmentDict.ManualPedestrian();
 							}
 						}
@@ -1538,8 +1560,8 @@ namespace TrafficManager.TrafficLight {
 						_hoveredNode = nodeId;
 						hoveredSegment = true;
 
-						if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-							_uiClickedSegment = true;
+						if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+							mouseClickProcessed = true;
 
 							if (!segmentDict.PedestrianEnabled) {
 								segmentDict.ManualPedestrian();
@@ -1637,8 +1659,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightMain();
 									}
 								}
@@ -1700,8 +1722,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightLeft();
 									}
 								}
@@ -1771,8 +1793,8 @@ namespace TrafficManager.TrafficLight {
 								_hoveredNode = nodeId;
 								hoveredSegment = true;
 
-								if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-									_uiClickedSegment = true;
+								if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+									mouseClickProcessed = true;
 									segmentDict.ChangeLightMain();
 								}
 							}
@@ -1856,8 +1878,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightMain();
 									}
 								}
@@ -1919,9 +1941,9 @@ namespace TrafficManager.TrafficLight {
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
-										if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive &&
+										if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive &&
 											(_timedPanelAdd || _timedEditStep >= 0)) {
-											_uiClickedSegment = true;
+											mouseClickProcessed = true;
 											segmentDict.ChangeLightRight();
 										}
 									}
@@ -1994,8 +2016,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightLeft();
 									}
 								}
@@ -2063,8 +2085,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightMain();
 									}
 								}
@@ -2127,8 +2149,8 @@ namespace TrafficManager.TrafficLight {
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
-									if (Input.GetMouseButtonDown(0) && !_uiClickedSegment && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										_uiClickedSegment = true;
+									if (Input.GetMouseButtonDown(0) && !mouseClickProcessed && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
+										mouseClickProcessed = true;
 										segmentDict.ChangeLightRight();
 									}
 								}
@@ -3014,107 +3036,148 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void _guiPrioritySigns() {
-			var hoveredSegment = false;
+			try {
+				bool clicked = checkClicked();
+				var hoveredSegment = false;
+				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
-			if (SelectedNode == 0) {
-				_hoveredButton[0] = 0;
-				_hoveredButton[1] = 0;
-				return;
-			}
-			var node = GetNetNode(SelectedNode);
+				foreach (KeyValuePair<int, TrafficSegment> e in TrafficPriority.PrioritySegments) {
+					var segmentId = e.Key;
+					var trafficSegment = e.Value;
+					List<PrioritySegment> prioritySegments = new List<PrioritySegment>();
+					PrioritySegment tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
+					if (tmpSeg1 != null)
+						prioritySegments.Add(tmpSeg1);
+					PrioritySegment tmpSeg2 = TrafficPriority.GetPrioritySegment(trafficSegment.Node2, segmentId);
+					if (tmpSeg2 != null)
+						prioritySegments.Add(tmpSeg2);
 
-			for (var i = 0; i < 8; i++) {
-				int segmentId = node.GetSegment(i);
+					//Log.Message("init ok");
+					
+					foreach (var prioritySegment in prioritySegments) {
+						var nodeId = prioritySegment.Nodeid;
+						var node = GetNetNode((ushort)nodeId);
+						//Log.Message("_guiPrioritySigns: nodeId=" + nodeId);
 
-				if (segmentId == 0) continue;
+						var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
 
-				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+						var nodePositionVector3 = node.m_position;
+						var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+						var diff = nodePositionVector3 - camPos;
+						if (diff.magnitude > PriorityCloseLod)
+							continue; // do not draw if too distant
+						
+						if (segment.m_startNode == (ushort)nodeId) {
+							nodePositionVector3.x += segment.m_startDirection.x * 10f;
+							nodePositionVector3.y += segment.m_startDirection.y * 10f;
+							nodePositionVector3.z += segment.m_startDirection.z * 10f;
+						} else {
+							nodePositionVector3.x += segment.m_endDirection.x * 10f;
+							nodePositionVector3.y += segment.m_endDirection.y * 10f;
+							nodePositionVector3.z += segment.m_endDirection.z * 10f;
+						}
 
-				var nodePositionVector3 = node.m_position;
+						var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
 
-				if (segment.m_startNode == SelectedNode) {
-					nodePositionVector3.x += segment.m_startDirection.x * 10f;
-					nodePositionVector3.y += segment.m_startDirection.y * 10f;
-					nodePositionVector3.z += segment.m_startDirection.z * 10f;
-				} else {
-					nodePositionVector3.x += segment.m_endDirection.x * 10f;
-					nodePositionVector3.y += segment.m_endDirection.y * 10f;
-					nodePositionVector3.z += segment.m_endDirection.z * 10f;
-				}
+						var zoom = 1.0f / diff.magnitude * 100f;
 
-				var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
+						var size = 110f * zoom;
 
-				var diff = nodePositionVector3 - Camera.main.transform.position;
-				var zoom = 1.0f / diff.magnitude * 100f;
+						nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
 
-				var size = 85f * zoom;
+						var guiColor = GUI.color;
 
-				nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
+						var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
+						hoveredSegment = IsMouseOverSegment(nodeBoundingBox, segmentId);
 
-				var guiColor = GUI.color;
+						if (hoveredSegment) {
+							// mouse hovering over sign
+							guiColor.a = 0.8f;
+						} else {
+							guiColor.a = 0.5f;
+							size = 90f * zoom;
+						}
+						var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
 
-				if (_hoveredButton[0] == segmentId && _hoveredButton[1] == 0) {
-					guiColor.a = 0.8f;
-				} else {
-					guiColor.a = 0.25f;
-				}
+						GUI.color = guiColor;
 
-				GUI.color = guiColor;
+						switch (prioritySegment.Type) {
+							case PrioritySegment.PriorityType.Main:
+								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
+								if (clicked && hoveredSegment) {
+									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (1)");
+									//Log.Message("PrioritySegment.Type = Yield");
+									prioritySegment.Type = PrioritySegment.PriorityType.Yield;
+									clicked = false;
+								}
+								break;
+							case PrioritySegment.PriorityType.Yield:
+								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignYieldTexture2D);
+								if (clicked && hoveredSegment) {
+									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (2)");
+									prioritySegment.Type = PrioritySegment.PriorityType.Stop;
+									clicked = false;
+								}
 
-				var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
+								break;
+							case PrioritySegment.PriorityType.Stop:
+								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignStopTexture2D);
+								if (clicked && hoveredSegment) {
+									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (3)");
+									prioritySegment.Type = PrioritySegment.PriorityType.None;
+									clicked = false;
+								}
+								break;
+							case PrioritySegment.PriorityType.None:
+								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
 
-				var isPrioritySegment = TrafficPriority.IsPrioritySegment(SelectedNode, segmentId);
-				hoveredSegment = IsMouseOverSegment(nodeBoundingBox, segmentId);
-
-				if (isPrioritySegment) {
-					var prioritySegment = TrafficPriority.GetPrioritySegment(SelectedNode, segmentId);
-					switch (prioritySegment.Type) {
-						case PrioritySegment.PriorityType.Main:
-							GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
-							if (hoveredSegment && _uiClickedSegment) {
-								Log.Message("PrioritySegment.Type = Yield");
-								prioritySegment.Type = PrioritySegment.PriorityType.Yield;
-							}
-							break;
-						case PrioritySegment.PriorityType.Yield:
-							GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignYieldTexture2D);
-							if (hoveredSegment && _uiClickedSegment)
-								prioritySegment.Type = PrioritySegment.PriorityType.Stop;
-
-							break;
-						case PrioritySegment.PriorityType.Stop:
-							GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignStopTexture2D);
-							if (hoveredSegment && _uiClickedSegment)
-								prioritySegment.Type = PrioritySegment.PriorityType.None;
-							break;
-						case PrioritySegment.PriorityType.None:
-							GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
-
-							if (hoveredSegment && _uiClickedSegment) {
-								Log.Message("PrioritySegment.Type = None");
-								prioritySegment.Type = GetNumberOfMainRoads(node) >= 2
-									? PrioritySegment.PriorityType.Yield
-									: PrioritySegment.PriorityType.Main;
-							}
-							break;
+								if (clicked && hoveredSegment) {
+									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
+									//Log.Message("PrioritySegment.Type = None");
+									prioritySegment.Type = GetNumberOfMainRoads(node) >= 2
+										? PrioritySegment.PriorityType.Yield
+										: PrioritySegment.PriorityType.Main;
+									clicked = false;
+								}
+								break;
+						}
 					}
-				} else {
-					GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
-
-					if (!hoveredSegment) continue;
-
-					if (!_uiClickedSegment) continue;
-
-					TrafficPriority.AddPrioritySegment(SelectedNode, segmentId,
-						GetNumberOfMainRoads(node) >= 2 ? PrioritySegment.PriorityType.Yield :
-						PrioritySegment.PriorityType.Main);
 				}
+
+				// add a new priority segment node
+				if (_hoveredNetNodeIdx != 0 && clicked) {
+					var node = GetNetNode((ushort)_hoveredNetNodeIdx);
+					if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+						showTooltip("Node has a traffic light! Cannot add priority signs.", node.m_position);
+						return;
+					}
+					
+					Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx);
+
+					for (var i = 0; i < 8; i++) {
+						int segmentId = node.GetSegment(i);
+
+						if (segmentId == 0)
+							continue;
+						TrafficPriority.AddPrioritySegment((ushort)_hoveredNetNodeIdx, segmentId, PrioritySegment.PriorityType.None);
+					}
+				}
+
+
+				/*if (SelectedNode == 0) {
+					_hoveredButton[0] = 0;
+					_hoveredButton[1] = 0;
+					return;
+				}
+			
+
+				if (hoveredSegment) return;
+
+				_hoveredButton[0] = 0;
+				_hoveredButton[1] = 0;*/
+			} catch (Exception e) {
+				Log.Error(e.ToString());
 			}
-
-			if (hoveredSegment) return;
-
-			_hoveredButton[0] = 0;
-			_hoveredButton[1] = 0;
 		}
 
 		private static int GetNumberOfMainRoads(NetNode node) {
@@ -3136,17 +3199,21 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private bool IsMouseOverSegment(Rect nodeBoundingBox, int segmentId) {
-			if (!nodeBoundingBox.Contains(Event.current.mousePosition))
-				return false;
+			return nodeBoundingBox.Contains(Event.current.mousePosition);
+		}
 
-			_hoveredButton[0] = segmentId;
-			_hoveredButton[1] = 0;
-
-			if (Input.GetMouseButtonDown(0) && !_uiClickedSegment) {
-				_uiClickedSegment = true;
+		private bool checkClicked() {
+			if (Input.GetMouseButtonDown(0) && !mouseClickProcessed) {
+				mouseClickProcessed = true;
 				return true;
 			}
 			return false;
+		}
+
+		private void showTooltip(String text, Vector3 position) {
+			tooltipStartFrame = currentFrame;
+			tooltipText = text;
+			tooltipWorldPos = position;
 		}
 
 		private void _switchTrafficLights() {
@@ -3154,7 +3221,7 @@ namespace TrafficManager.TrafficLight {
 
 			if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 				if (TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
-					ShowToolInfo(true, "Node is part of timed script", node.m_position);
+					showTooltip("Node is part of timed script", node.m_position);
 				} else {
 					node.m_flags &= ~NetNode.Flags.TrafficLights;
 				}

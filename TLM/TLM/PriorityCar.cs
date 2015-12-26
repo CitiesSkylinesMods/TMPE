@@ -8,7 +8,9 @@ namespace TrafficManager {
 		public ushort FromSegment;
 		public ushort ToSegment;
 		public uint ToLaneId;
+		public uint ToLaneIndex;
 		public uint FromLaneId;
+		public uint FromLaneIndex;
 		public ushort FromLaneFlags;
 		public float LastSpeed;
 		public float ReduceSpeedByValueToYield;
@@ -21,7 +23,9 @@ namespace TrafficManager {
 			FromSegment = 0;
 			ToSegment = 0;
 			ToLaneId = 0;
+			ToLaneIndex = 0;
 			FromLaneId = 0;
+			FromLaneIndex = 0;
 			FromLaneFlags = 0;
 			Stopped = false;
 

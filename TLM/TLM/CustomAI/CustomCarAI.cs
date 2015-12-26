@@ -290,7 +290,7 @@ namespace TrafficManager.CustomAI {
 					watchedVehicleIds.Remove(vehicleId);
 				handledVehicle = true;
 			}
-
+			
 #if DEBUG
 			if (false && vehicleId == (ushort)12000/*logme || vehicleId % 100 == 0*/) {
 				if (logme) {
@@ -303,7 +303,7 @@ namespace TrafficManager.CustomAI {
 				}
 			}
 #endif
-
+			
 			return handledVehicle;
 		}
 

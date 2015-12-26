@@ -24,7 +24,7 @@ namespace TrafficManager.CustomAI {
 
 				foreach (var nodeId in NodeDictionary.Keys) {
 					var nodeData = TrafficLightTool.GetNetNode(nodeId);
-					if (nodeData.m_flags == NetNode.Flags.None) {
+					if (nodeData.m_flags == NetNode.Flags.None) { // TODO move to housekeeping
 						// node does not exist anymore
 						clearedNodes.Add(nodeId);
 						continue;
