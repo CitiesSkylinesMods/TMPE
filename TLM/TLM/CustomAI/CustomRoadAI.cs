@@ -14,6 +14,7 @@ namespace TrafficManager.CustomAI {
 
 		}
 
+		// why does this method exist? argh...
 		public void Update() {
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
 
@@ -31,9 +32,11 @@ namespace TrafficManager.CustomAI {
 		}
 
 		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
-			var node = TrafficPriority.GetNodeSimulation(nodeId);
+			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
 
-			if (node == null || (node.FlagTimedTrafficLights && !node.TimedTrafficLightsActive)) {
+			if (nodeSim != null && nodeSim.FlagTimedTrafficLights && nodeSim.TimedTrafficLightsActive)
+				nodeSim.SimulationStep();
+			else if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
 				OriginalSimulationStep(nodeId, ref data);
 			}
 		}
