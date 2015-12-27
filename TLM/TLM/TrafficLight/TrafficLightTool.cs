@@ -3289,8 +3289,9 @@ namespace TrafficManager.TrafficLight {
 						if (delete) {
 							Log.Message("_guiPrioritySigns: deleting prio segments @ nodeId=" + _hoveredNetNodeIdx);
 							TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
-						}  else {
+						}  else if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
 							Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
+
 							for (var i = 0; i < 8; i++) {
 								int segmentId = node.GetSegment(i);
 

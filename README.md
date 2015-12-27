@@ -1,4 +1,4 @@
-# Cities: Skylines - Traffic Manager 1.3: *Traffic President Edition*
+# Cities: Skylines - Traffic Manager: *Traffic President Edition*
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
