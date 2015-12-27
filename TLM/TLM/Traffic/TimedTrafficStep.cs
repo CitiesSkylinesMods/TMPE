@@ -48,6 +48,8 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		float maxSegmentLength = 0f;
 
+		private bool invalid = false; // TODO rework
+
 		public TimedTrafficStep(int minTime, int maxTime, ushort nodeId, ushort masterNodeId, List<ushort> groupNodeIds) {
 			this.nodeId = nodeId;
 			this.minTime = minTime;
@@ -80,6 +82,11 @@ namespace TrafficManager.Traffic {
 						segmentLightStates[segmentId] = (ManualSegmentLight)segmentLight.Clone();
 				}
 			}
+		}
+
+		// TODO rework
+		public bool isValid() {
+			return !invalid;
 		}
 
 		/// <summary>
@@ -145,28 +152,34 @@ namespace TrafficManager.Traffic {
 		}
 
 		public void SetLights(bool noTransition) {
-			bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
-			bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
+			try {
+				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
+				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
 
-			TimedTrafficStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
-			TimedTrafficStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
+				TimedTrafficStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
+				TimedTrafficStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
 
-			foreach (KeyValuePair<int, ManualSegmentLight> e in segmentLightStates) {
-				var segmentId = e.Key;
-				var segLightState = e.Value;
-				var prevLightState = previousStep.segmentLightStates[segmentId];
-				var nextLightState = nextStep.segmentLightStates[segmentId];
+			
+				foreach (KeyValuePair<int, ManualSegmentLight> e in segmentLightStates) {
+					var segmentId = e.Key;
+					var segLightState = e.Value;
+					var prevLightState = previousStep.segmentLightStates[segmentId];
+					var nextLightState = nextStep.segmentLightStates[segmentId];
 
-				var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
-				if (segmentLight == null)
-					continue;
+					var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
+					if (segmentLight == null)
+						continue;
 
-				segmentLight.LightMain = calcLightState(prevLightState.LightMain, segLightState.LightMain, nextLightState.LightMain, atStartTransition, atEndTransition);
-				segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
-				segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
-				segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
-				
-				segmentLight.UpdateVisuals();
+					segmentLight.LightMain = calcLightState(prevLightState.LightMain, segLightState.LightMain, nextLightState.LightMain, atStartTransition, atEndTransition);
+					segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
+					segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
+					segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
+
+					segmentLight.UpdateVisuals();
+				}
+			} catch (Exception e) {
+				// TODO rework this
+				invalid = true;
 			}
 		}
 
@@ -234,11 +247,6 @@ namespace TrafficManager.Traffic {
 			}
 
 			if (startFrame + minTime <= getCurrentFrame()) {
-				int numFlows = 0;
-				int numWaits = 0;
-				float curMeanFlow = 0;
-				float curMeanWait = 0;
-
 				if (masterNodeId != null && TrafficLightsTimed.IsTimedLight((ushort)masterNodeId)) {
 					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight((ushort)masterNodeId);
 					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone();
@@ -250,12 +258,19 @@ namespace TrafficManager.Traffic {
 						endTransitionStart = (int)getCurrentFrame();
 					return stepDone;
 				} else {
+					int numFlows = 0;
+					int numWaits = 0;
+					float curMeanFlow = 0;
+					float curMeanWait = 0;
+
 					// we are the master node. calculate traffic data
 					foreach (ushort timedNodeId in groupNodeIds) {
 						if (!TrafficLightsTimed.IsTimedLight(timedNodeId))
 							continue;
 						TrafficLightsTimed slaveTimedNode = TrafficLightsTimed.GetTimedLight(timedNodeId);
 						TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
+
+						List<int> segmentIdsToDelete = new List<int>();
 
 						// minimum time reached. check traffic!
 						foreach (KeyValuePair<int, ManualSegmentLight> e in slaveStep.segmentLightStates) {
@@ -265,6 +280,11 @@ namespace TrafficManager.Traffic {
 
 							// one of the traffic lights at this segment is green: count minimum traffic flowing through
 							PrioritySegment prioSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
+							if (prioSeg == null) {
+								Log.Warning("stepDone(): prioSeg is null");
+								segmentIdsToDelete.Add(fromSegmentId);
+								continue;
+							}
 							foreach (KeyValuePair<ushort, int> f in prioSeg.numCarsGoingToSegmentId) {
 								var toSegmentId = f.Key;
 								var numCars = f.Value;
@@ -295,6 +315,17 @@ namespace TrafficManager.Traffic {
 									curMeanWait += (float)numCars * segmentWeight;
 								}
 							}
+						}
+
+						// delete invalid segments from step
+						foreach (int segmentId in segmentIdsToDelete) {
+							slaveStep.segmentLightStates.Remove(segmentId);
+						}
+
+						if (slaveStep.segmentLightStates.Count <= 0) {
+							// TODO rework
+							invalid = true;
+							return true;
 						}
 					}
 

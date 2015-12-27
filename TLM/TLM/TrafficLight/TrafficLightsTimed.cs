@@ -69,6 +69,10 @@ namespace TrafficManager.TrafficLight {
 			if (!IsStarted())
 				return true;
 
+			if (! Steps[CurrentStep].isValid()) {
+				TrafficPriority.RemoveNodeFromSimulation(NodeId);
+			}
+
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 			Steps[CurrentStep].SetLights();

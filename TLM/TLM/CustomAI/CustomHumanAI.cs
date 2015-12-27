@@ -14,8 +14,9 @@ namespace TrafficManager.CustomAI {
 			var num2 = currentFrameIndex - num & 255u;
 
 			RoadBaseAI.TrafficLightState pedestrianLightState;
+			ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(node, segment);
 
-			if (nodeSimulation == null || (nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
+			if (light == null || nodeSimulation == null || (nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
 				RoadBaseAI.TrafficLightState vehicleLightState;
 				bool vehicles;
 				bool pedestrians;
@@ -23,8 +24,9 @@ namespace TrafficManager.CustomAI {
 				RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 				if (pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed && !pedestrians && num2 >= 196u)
 					RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
-			} else
-				pedestrianLightState = TrafficLightsManual.GetSegmentLight(node, segment).GetLightPedestrian();
+			} else {
+				pedestrianLightState = light.GetLightPedestrian();
+			}
 
 			switch (pedestrianLightState) {
 				case RoadBaseAI.TrafficLightState.RedToGreen:

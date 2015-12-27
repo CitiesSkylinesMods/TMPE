@@ -709,6 +709,9 @@ namespace TrafficManager.TrafficLight {
 					var screenPos = Camera.main.WorldToScreenPoint(position);
 					screenPos.y = Screen.height - screenPos.y;
 
+					if (screenPos.z < 0)
+						continue;
+
 					var diff = position - Camera.main.transform.position;
 					var zoom = 1.0f / diff.magnitude * 100f;
 
@@ -1262,6 +1265,9 @@ namespace TrafficManager.TrafficLight {
 			var screenPos = Camera.main.WorldToScreenPoint(position);
 			screenPos.y = Screen.height - screenPos.y;
 
+			if (screenPos.z < 0)
+				return;
+
 			var diff = position - Camera.main.transform.position;
 			var zoom = 1.0f / diff.magnitude * 100f;
 
@@ -1345,6 +1351,9 @@ namespace TrafficManager.TrafficLight {
 				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
 				screenPos.y = Screen.height - screenPos.y;
 
+				if (screenPos.z < 0)
+					continue;
+
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = centerPos - camPos;
 				if (diff.magnitude > DebugCloseLod)
@@ -1377,6 +1386,9 @@ namespace TrafficManager.TrafficLight {
 				var screenPos = Camera.main.WorldToScreenPoint(pos);
 				screenPos.y = Screen.height - screenPos.y;
 
+				if (screenPos.z < 0)
+					continue;
+
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = pos - camPos;
 				if (diff.magnitude > DebugCloseLod)
@@ -1408,6 +1420,9 @@ namespace TrafficManager.TrafficLight {
 				Vector3 pos = vehicle.m_frame0.m_position;
 				var screenPos = Camera.main.WorldToScreenPoint(pos);
 				screenPos.y = Screen.height - screenPos.y;
+
+				if (screenPos.z < 0)
+					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = pos - camPos;
@@ -1481,6 +1496,9 @@ namespace TrafficManager.TrafficLight {
 
 					var screenPos = Camera.main.WorldToScreenPoint(position);
 					screenPos.y = Screen.height - screenPos.y;
+
+					if (screenPos.z < 0)
+						continue;
 
 					var diff = position - Camera.main.transform.position;
 					var zoom = 1.0f / diff.magnitude * 100f;
@@ -3175,6 +3193,8 @@ namespace TrafficManager.TrafficLight {
 
 						var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
 						nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
+						if (nodeScreenPosition.z < 0)
+							continue;
 						var zoom = 1.0f / diff.magnitude * 100f;
 						var size = 110f * zoom;
 						var guiColor = GUI.color;
@@ -3247,6 +3267,8 @@ namespace TrafficManager.TrafficLight {
 					// draw deletion button
 					var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
 					nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
+					if (nodeScreenPosition.z < 0)
+						continue;
 					var zoom = 1.0f / diff.magnitude * 100f;
 					var size = 100f * zoom;
 					var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);

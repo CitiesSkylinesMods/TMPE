@@ -496,8 +496,9 @@ namespace TrafficManager.CustomAI {
 
 							var destinationInfo = netManager.m_nodes.m_buffer[destinationNodeId].Info;
 							RoadBaseAI.TrafficLightState vehicleLightState;
+							ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment); // TODO rework
 
-							if (nodeSimulation == null ||
+							if (light == null || nodeSimulation == null ||
 								(nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
 								RoadBaseAI.TrafficLightState pedestrianLightState;
 								bool flag5;
@@ -536,14 +537,14 @@ namespace TrafficManager.CustomAI {
 							} else {
 								// traffic light simulation is active
 								var stopCar = false;
-
+								
 								// determine responsible traffic light (left, right or main)
 								if (TrafficPriority.IsLeftSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-									vehicleLightState = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment).GetLightLeft();
+									vehicleLightState = light.GetLightLeft();
 								} else if (TrafficPriority.IsRightSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-									vehicleLightState = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment).GetLightRight();
+									vehicleLightState = light.GetLightRight();
 								} else {
-									vehicleLightState = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment).GetLightMain();
+									vehicleLightState = light.GetLightMain();
 								}
 
 								if (vehicleLightState == RoadBaseAI.TrafficLightState.Green) {

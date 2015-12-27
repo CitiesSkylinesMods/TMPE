@@ -2,6 +2,10 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.3, 12/28/2015 (Victor-Philipp Negoescu)
+- (Temporary) hotfix: Deleting a segment with a timed traffic light does not cause a NullReferenceException
+- If priority signs are located behind the camera they are not rendered anymore
+
 1.3.2, 12/28/2015 (Victor-Philipp Negoescu)
 - Priority signs are persistently visible when Traffic Manager is in "Add priority sign" mode
 - Synchronized traffic light rendering: In-game Traffic lights display the correct color (Thanks to @Fabrice for pointing out this problem)

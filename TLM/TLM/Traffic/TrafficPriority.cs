@@ -811,24 +811,32 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		private static readonly object simLock = new object(); // TODO rework
+
 		public static void AddNodeToSimulation(ushort nodeId) {
-			LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
+			lock(simLock) {
+				LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
+			}
 		}
 
 		public static void RemoveNodeFromSimulation(ushort nodeId) {
-			if (!LightSimByNodeId.ContainsKey(nodeId))
-				return;
-			var nodeSim = LightSimByNodeId[nodeId];
-			nodeSim.Destroy();
-			LightSimByNodeId.Remove(nodeId);
+			lock (simLock) {
+				if (!LightSimByNodeId.ContainsKey(nodeId))
+					return;
+				var nodeSim = LightSimByNodeId[nodeId];
+				LightSimByNodeId.Remove(nodeId);
+				nodeSim.Destroy();
+			}
 		}
 
 		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
-			if (LightSimByNodeId.ContainsKey(nodeId)) {
-				return LightSimByNodeId[nodeId];
-			}
+			lock (simLock) {
+				if (LightSimByNodeId.ContainsKey(nodeId)) {
+					return LightSimByNodeId[nodeId];
+				}
 
-			return null;
+				return null;
+			}
 		}
 	}
 }

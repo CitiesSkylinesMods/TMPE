@@ -25,9 +25,13 @@ namespace TrafficManager.CustomAI {
 					TrafficPriority.housekeeping();
 			}
 
-			foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
-				var nodeSim = e.Value;
-				nodeSim.SimulationStep();
+			try {
+				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
+					var nodeSim = e.Value;
+					nodeSim.SimulationStep();
+				}
+			} catch (Exception e) {
+				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
 			}
 		}
 
