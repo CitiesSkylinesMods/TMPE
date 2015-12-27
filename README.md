@@ -2,6 +2,9 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.4, 12/28/2015 (Victor-Philipp Negoescu)
+- Better traffic jam handling
+
 1.3.3, 12/28/2015 (Victor-Philipp Negoescu)
 - (Temporary) hotfix: Deleting a segment with a timed traffic light does not cause a NullReferenceException
 - If priority signs are located behind the camera they are not rendered anymore

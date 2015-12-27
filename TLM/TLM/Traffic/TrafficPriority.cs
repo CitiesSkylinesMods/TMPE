@@ -177,7 +177,7 @@ namespace TrafficManager.Traffic {
 						numCars += prioritySegment.NumCars;
 
 						foreach (var car in prioritySegment.Cars) {
-							if (VehicleList[car].LastSpeed > 0.1f) {
+							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
 								numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
 									? numCars - 1
 									: numCars;
@@ -198,7 +198,7 @@ namespace TrafficManager.Traffic {
 									numCars--;
 								}
 							} else {
-								if (VehicleList[car].LastSpeed > 0.1f) {
+								if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
 									numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
 										? numCars - 1
 										: numCars;
@@ -218,7 +218,7 @@ namespace TrafficManager.Traffic {
 					numCars += prioritySegment.NumCars;
 
 					foreach (var car in prioritySegment.Cars) {
-						if (VehicleList[car].LastSpeed > 1f) {
+						if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 1f) {
 							numCars = CheckSameRoadIncomingCar(targetCar, car, nodeId)
 								? numCars - 1
 								: numCars;
