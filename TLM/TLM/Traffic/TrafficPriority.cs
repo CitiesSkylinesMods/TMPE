@@ -31,19 +31,23 @@ namespace TrafficManager.Traffic {
 			if (nodeId <= 0 || segmentId <= 0)
 				return;
 
-			//Log.Message("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
+			Log.Message("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
 			if (PrioritySegments.ContainsKey(segmentId)) {
 				var prioritySegment = PrioritySegments[segmentId];
+				prioritySegment.Segment = segmentId;
 
-				if (prioritySegment.Node1 == nodeId) {
-					prioritySegment.Instance1.Segmentid = segmentId;
-					prioritySegment.Instance1.Type = type;
+				Log.Message("Priority segment already exists. Node1=" + prioritySegment.Node1 + " Node2=" + prioritySegment.Node2);
+
+				if (prioritySegment.Node1 == nodeId || prioritySegment.Node1 == 0) {
+					Log.Message("Updating Node1");
+					prioritySegment.Node1 = nodeId;
+					PrioritySegments[segmentId].Instance1 = new PrioritySegment(nodeId, segmentId, type);
 					return;
 				}
 
 				if (prioritySegment.Node2 != 0) {
 					// overwrite Node2
-					//Log.Warning("Refusing to add priority segment for node " + nodeId + ", seg. " + segmentId + ", type " + type);
+					Log.Warning("Overwriting priority segment for node " + nodeId + ", seg. " + segmentId + ", type " + type);
 					prioritySegment.Node2 = nodeId;
 					prioritySegment.Instance2.Nodeid = nodeId;
 					prioritySegment.Instance2.Segmentid = segmentId;
@@ -51,11 +55,13 @@ namespace TrafficManager.Traffic {
 					rebuildPriorityNodes();
 				} else {
 					// add Node2
+					Log.Message("Adding as Node2");
 					prioritySegment.Node2 = nodeId;
 					prioritySegment.Instance2 = new PrioritySegment(nodeId, segmentId, type);
 				}
 			} else {
 				// add Node1
+				Log.Message("Adding as Node1");
 				PrioritySegments.Add(segmentId, new TrafficSegment());
 				PrioritySegments[segmentId].Segment = segmentId;
 				PrioritySegments[segmentId].Node1 = nodeId;
@@ -702,7 +708,7 @@ namespace TrafficManager.Traffic {
 			}
 
 			foreach (var sId in segmentIdsToDelete) {
-				Log.Message("Housekeeping: Deleting segment " + sId);
+				Log.Warning("Housekeeping: Deleting segment " + sId);
 				PrioritySegments.Remove(sId);
 			}
 
@@ -715,6 +721,7 @@ namespace TrafficManager.Traffic {
 					switch (nodeState) {
 						case NodeValidityState.SimWithoutLight:
 							// delete traffic light simulation
+							Log.Warning("Housekeeping: RemoveNodeFromSimulation " + nodeId);
 							RemoveNodeFromSimulation(nodeId);
 							break;
 						default:
@@ -724,7 +731,7 @@ namespace TrafficManager.Traffic {
 			}
 
 			foreach (var nId in nodeIdsToDelete) {
-				Log.Message("Housekeeping: Deleting node " + nId);
+				Log.Warning("Housekeeping: Deleting node " + nId);
 				RemovePrioritySegments(nId);
 			}
 		}

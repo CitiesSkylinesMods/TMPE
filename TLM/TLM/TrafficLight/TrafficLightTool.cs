@@ -111,9 +111,9 @@ namespace TrafficManager.TrafficLight {
 				_selectedSegmentIndexes.Clear();
 			}
 
-			if (mode == ToolMode.None) {
+			/*if (mode == ToolMode.None) {
 				housekeeping();
-			}
+			}*/
 		}
 
 		private static void housekeeping() {
@@ -3286,9 +3286,11 @@ namespace TrafficManager.TrafficLight {
 
 						Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx);
 
-						if (delete)
+						if (delete) {
+							Log.Message("_guiPrioritySigns: deleting prio segments @ nodeId=" + _hoveredNetNodeIdx);
 							TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
-						else {
+						}  else {
+							Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
 							for (var i = 0; i < 8; i++) {
 								int segmentId = node.GetSegment(i);
 

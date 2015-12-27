@@ -32,6 +32,9 @@ namespace TrafficManager.CustomAI {
 		}
 
 		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
+			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
+				TrafficPriority.housekeeping();
+
 			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
 
 			if (nodeSim != null && nodeSim.FlagTimedTrafficLights && nodeSim.TimedTrafficLightsActive)
