@@ -2,7 +2,7 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.3.2 *BETA*, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.2, 12/28/2015 (Victor-Philipp Negoescu)
 - Priority signs are persistently visible when Traffic Manager is in "Add priority sign" mode
 - Synchronized traffic light rendering: In-game Traffic lights display the correct color (Thanks to @Fabrice for pointing out this problem)
 - Traffic lights switch between green, yellow and red. Not only between green and red.
