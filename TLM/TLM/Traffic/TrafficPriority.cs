@@ -16,6 +16,11 @@ namespace TrafficManager.Traffic {
 
 		public static bool LeftHandDrive;
 
+		/// <summary>
+		/// For each node id: traffic light simulation assigned to the node
+		/// </summary>
+		public static Dictionary<ushort, TrafficLightSimulation> LightSimByNodeId = new Dictionary<ushort, TrafficLightSimulation>();
+
 		public static Dictionary<int, TrafficSegment> PrioritySegments = new Dictionary<int, TrafficSegment>();
 
 		public static Dictionary<ushort, PriorityCar> VehicleList = new Dictionary<ushort, PriorityCar>();
@@ -70,7 +75,7 @@ namespace TrafficManager.Traffic {
 					continue;
 
 				if (PrioritySegments.ContainsKey(segmentId)) {
-					Log.Message("Housekeeping: node " + nodeId + " contains prio seg. " + segmentId);
+					//Log.Message("Housekeeping: node " + nodeId + " contains prio seg. " + segmentId);
 					var prioritySegment = PrioritySegments[segmentId];
 					if (prioritySegment.Node1 == nodeId) {
 						prioritySegment.Node1 = 0;
@@ -84,7 +89,7 @@ namespace TrafficManager.Traffic {
 						PrioritySegments.Remove(segmentId);
 					}
 				} else {
-					Log.Message("Housekeeping: node " + nodeId + " contains NO prio seg. " + segmentId);
+					//Log.Message("Housekeeping: node " + nodeId + " contains NO prio seg. " + segmentId);
 				}
 			}
 			priorityNodes.Remove(nodeId);
@@ -358,6 +363,15 @@ namespace TrafficManager.Traffic {
 			}
 
 			return false;
+		}
+
+		internal static void OnLevelUnloading() {
+			PrioritySegments.Clear();
+			LightSimByNodeId.Clear();
+			VehicleList.Clear();
+			priorityNodes.Clear();
+			TrafficLightsManual.ManualSegments.Clear(); // TODO refactor
+			TrafficLightsTimed.TimedScripts.Clear(); // TODO refactor
 		}
 
 		protected static bool _checkPriorityRoadIncomingCarRightHandDrive(ushort targetCarId, ushort incomingCarId,
@@ -657,6 +671,9 @@ namespace TrafficManager.Traffic {
 			return dir;
 		}
 
+		/// <summary>
+		/// rebuilds the implicitly defined set of priority nodes (traffic light nodes & nodes with priority signs)
+		/// </summary>
 		private static void rebuildPriorityNodes() {
 			priorityNodes.Clear();
 
@@ -668,32 +685,40 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
-		internal static void housekeeping() {
+		public static void housekeeping() {
+			// delete invalid segments
+			List<int> segmentIdsToDelete = new List<int>();
+			foreach (KeyValuePair<int, TrafficSegment> e in PrioritySegments) {
+				var segmentId = e.Key;
+				if (segmentId <= 0) {
+					segmentIdsToDelete.Add(segmentId);
+					continue;
+				}
+
+				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+				if (segment.m_flags == NetSegment.Flags.None || (!priorityNodes.Contains(segment.m_startNode) && !priorityNodes.Contains(segment.m_endNode))) {
+					segmentIdsToDelete.Add(segmentId);
+				}
+			}
+
+			foreach (var sId in segmentIdsToDelete) {
+				Log.Message("Housekeeping: Deleting segment " + sId);
+				PrioritySegments.Remove(sId);
+			}
+
+			// delete invalid nodes
 			List<ushort> nodeIdsToDelete = new List<ushort>();
 			foreach (ushort nodeId in priorityNodes) {
-				var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-				var nodeSim = CustomRoadAI.GetNodeSimulation(nodeId);
-				if (nodeSim != null) {
-					// traffic light simulation is active (ok)
-					continue;
-				} else {
-					bool ok = false;
-					for (var s = 0; s < 8; s++) {
-						var segmentId = node.GetSegment(s);
-						if (segmentId <= 0)
-							continue;
-
-						PrioritySegment prioritySegment = GetPrioritySegment(nodeId, segmentId);
-						//if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, nodeId))
-						if (prioritySegment.Type != PrioritySegment.PriorityType.None) {
-							ok = true;
+				NodeValidityState nodeState = NodeValidityState.Valid;
+				if (! isValidPriorityNode(nodeId, out nodeState)) {
+					nodeIdsToDelete.Add(nodeId);
+					switch (nodeState) {
+						case NodeValidityState.SimWithoutLight:
+							// delete traffic light simulation
+							RemoveNodeFromSimulation(nodeId);
 							break;
-						}
-					}
-
-					if (!ok) {
-						// delete element with only empty priority signs
-						nodeIdsToDelete.Add(nodeId);
+						default:
+							break;
 					}
 				}
 			}
@@ -702,6 +727,101 @@ namespace TrafficManager.Traffic {
 				Log.Message("Housekeeping: Deleting node " + nId);
 				RemovePrioritySegments(nId);
 			}
+		}
+
+		private enum NodeValidityState {
+			Valid,
+			/// <summary>
+			/// the node is currently not used (no traffic junction exists for the node id)
+			/// </summary>
+			Unused,
+			/// <summary>
+			/// a traffic light simulation is running for this node but the node does not have a traffic light
+			/// </summary>
+			SimWithoutLight,
+			/// <summary>
+			/// none of the node's possible priority signs is set
+			/// </summary>
+			NoValidSegments,
+			/// <summary>
+			/// Invalid node id given
+			/// </summary>
+			Invalid
+		}
+
+		private static bool isValidPriorityNode(ushort nodeId, out NodeValidityState nodeState) {
+			nodeState = NodeValidityState.Valid;
+
+			if (nodeId <= 0) {
+				nodeState = NodeValidityState.Invalid;
+				return false;
+			}
+
+			var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+			if (node.m_flags == NetNode.Flags.None) {
+				nodeState = NodeValidityState.Unused;
+				return false; // node is unused
+			}
+
+			var nodeSim = GetNodeSimulation(nodeId);
+			if (nodeSim != null) {
+				if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+					// traffic light simulation is active but node does not have a traffic light
+					nodeState = NodeValidityState.SimWithoutLight;
+					return false;
+				} else
+					return true;
+			} else {
+				bool ok = false;
+				for (var s = 0; s < 8; s++) {
+					var segmentId = node.GetSegment(s);
+					if (segmentId <= 0)
+						continue;
+					NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+					if (segment.m_startNode != nodeId && segment.m_endNode != nodeId)
+						continue;
+
+					PrioritySegment prioritySegment = GetPrioritySegment(nodeId, segmentId);
+					if (prioritySegment == null)
+						continue;
+
+					// if node is a traffic light, it must not have priority signs
+					if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+						prioritySegment.Type = PrioritySegment.PriorityType.None;
+					}
+
+					// if a priority sign is set, everything is ok
+					if (prioritySegment.Type != PrioritySegment.PriorityType.None) {
+						ok = true;
+						break;
+					}
+				}
+
+				if (!ok) {
+					nodeState = NodeValidityState.NoValidSegments;
+				}
+				return ok;
+			}
+		}
+
+		public static void AddNodeToSimulation(ushort nodeId) {
+			LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
+		}
+
+		public static void RemoveNodeFromSimulation(ushort nodeId) {
+			if (!LightSimByNodeId.ContainsKey(nodeId))
+				return;
+			var nodeSim = LightSimByNodeId[nodeId];
+			nodeSim.Destroy();
+			LightSimByNodeId.Remove(nodeId);
+		}
+
+		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
+			if (LightSimByNodeId.ContainsKey(nodeId)) {
+				return LightSimByNodeId[nodeId];
+			}
+
+			return null;
 		}
 	}
 }

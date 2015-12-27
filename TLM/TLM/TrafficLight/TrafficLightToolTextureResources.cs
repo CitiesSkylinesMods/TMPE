@@ -36,8 +36,9 @@ namespace TrafficManager.TrafficLight
         public static readonly Texture2D SignYieldTexture2D;
         public static readonly Texture2D SignPriorityTexture2D;
         public static readonly Texture2D SignNoneTexture2D;
+		public static readonly Texture2D SignRemoveTexture2D;
 
-        static TrafficLightToolTextureResources()
+		static TrafficLightToolTextureResources()
         {
             // simple
             RedLightTexture2D = LoadDllResource("light_1_1.png", 103, 243);
@@ -80,7 +81,11 @@ namespace TrafficManager.TrafficLight
             SignYieldTexture2D = LoadDllResource("sign_yield.png", 200, 200);
             SignPriorityTexture2D = LoadDllResource("sign_priority.png", 200, 200);
             SignNoneTexture2D = LoadDllResource("sign_none.png", 200, 200);
-        }
+
+			// delete priority sign
+			SignRemoveTexture2D = LoadDllResource("remove_signs.png", 256, 256);
+
+		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)
         {

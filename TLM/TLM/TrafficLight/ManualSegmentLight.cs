@@ -8,8 +8,8 @@ namespace TrafficManager.TrafficLight {
 	public class ManualSegmentLight : ICloneable {
 		public enum Mode {
 			Simple = 1, // <^>
-			SingleRight = 2, // <^, >
-			SingleLeft = 3, // <, ^>
+			SingleLeft = 2, // <, ^>
+			SingleRight = 3, // <^, >
 			All = 4 // <, ^, >
 		}
 
@@ -109,17 +109,17 @@ namespace TrafficManager.TrafficLight {
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {
-					CurrentMode = Mode.SingleLeft;
-				} else {
 					CurrentMode = Mode.SingleRight;
-				}
-			} else if (CurrentMode == Mode.SingleRight) {
-				if (!hasForwardSegment || !hasRightSegment) {
-					CurrentMode = Mode.Simple;
 				} else {
 					CurrentMode = Mode.SingleLeft;
 				}
 			} else if (CurrentMode == Mode.SingleLeft) {
+				if (!hasForwardSegment || !hasRightSegment) {
+					CurrentMode = Mode.Simple;
+				} else {
+					CurrentMode = Mode.SingleRight;
+				}
+			} else if (CurrentMode == Mode.SingleRight) {
 				if (!hasLeftSegment) {
 					CurrentMode = Mode.Simple;
 				} else {
@@ -150,10 +150,10 @@ namespace TrafficManager.TrafficLight {
 				LightRight = invertedLight;
 				LightPedestrian = !PedestrianEnabled ? LightMain : LightPedestrian;
 				LightMain = invertedLight;
-			} else if (CurrentMode == Mode.SingleRight) {
+			} else if (CurrentMode == Mode.SingleLeft) {
 				LightRight = invertedLight;
 				LightMain = invertedLight;
-			} else if (CurrentMode == Mode.SingleLeft) {
+			} else if (CurrentMode == Mode.SingleRight) {
 				LightLeft = invertedLight;
 				LightMain = invertedLight;
 			} else {
@@ -226,32 +226,43 @@ namespace TrafficManager.TrafficLight {
 
 		public void UpdateVisuals() {
 			var instance = Singleton<NetManager>.instance;
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+
+			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			uint num = (uint)(((int)Node << 8) / 32768);
 
 			LastChange = 0u;
 			LastChangeFrame = currentFrameIndex >> 6;
 
+			RoadBaseAI.TrafficLightState oldVehicleLightState;
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			bool vehicles;
 			bool pedestrians;
 			RoadBaseAI.GetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment],
-				currentFrameIndex - 256u, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+				currentFrameIndex - num, out oldVehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
+			// any green?
+			if (LightMain == RoadBaseAI.TrafficLightState.Green ||
+				LightLeft == RoadBaseAI.TrafficLightState.Green ||
+				LightRight == RoadBaseAI.TrafficLightState.Green) {
+				vehicleLightState = RoadBaseAI.TrafficLightState.Green;
+			} else // all red?
 			if (LightMain == RoadBaseAI.TrafficLightState.Red &&
 				LightLeft == RoadBaseAI.TrafficLightState.Red &&
 				LightRight == RoadBaseAI.TrafficLightState.Red) {
-				//Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to red.");
 				vehicleLightState = RoadBaseAI.TrafficLightState.Red;
-			} else {
-				//Debug.Log("Changing Light with segment Id" + Segment + " and node id " + Node + " to green.");
-				vehicleLightState = RoadBaseAI.TrafficLightState.Green;
-			}
+			} else // any red+yellow?
+			if (LightMain == RoadBaseAI.TrafficLightState.RedToGreen ||
+				LightLeft == RoadBaseAI.TrafficLightState.RedToGreen ||
+				LightRight == RoadBaseAI.TrafficLightState.RedToGreen) {
+				vehicleLightState = RoadBaseAI.TrafficLightState.RedToGreen;
+			} else
+				vehicleLightState = RoadBaseAI.TrafficLightState.GreenToRed;
 
 			pedestrianLightState = LightPedestrian;
 
-			RoadBaseAI.SetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment], currentFrameIndex,
-				vehicleLightState, pedestrianLightState, vehicles, pedestrians);
+			RoadBaseAI.SetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment], currentFrameIndex - num,
+				vehicleLightState, pedestrianLightState, true, true);
 		}
 
 		private RoadBaseAI.TrafficLightState _checkPedestrianLight() {

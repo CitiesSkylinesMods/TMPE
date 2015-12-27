@@ -62,7 +62,7 @@ namespace TrafficManager.UI {
             relativePosition = new Vector3(10.48f, 80f);
 
             UILabel title = AddUIComponent<UILabel>();
-            title.text = "Traffic Manager";
+            title.text = "Version 1.3.2";
             title.relativePosition = new Vector3(65.0f, 5.0f);
 
             if (LoadingExtension.IsPathManagerCompatibile) {

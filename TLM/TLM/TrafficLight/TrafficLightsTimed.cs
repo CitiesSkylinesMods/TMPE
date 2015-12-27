@@ -20,7 +20,7 @@ namespace TrafficManager.TrafficLight {
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
 
-			CustomRoadAI.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
+			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
 		public void AddStep(int minTime, int maxTime) {
@@ -35,13 +35,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Start() {
-			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
 			CurrentStep = 0;
 			Steps[0].SetLights();
-			Steps[0].Start(currentFrameIndex >> 6);
+			Steps[0].Start();
 
-			CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive = true;
+			TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive = true;
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -52,11 +50,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Stop() {
-			CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive = false;
+			TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive = false;
 		}
 
 		public bool IsStarted() {
-			return CustomRoadAI.GetNodeSimulation(NodeId).TimedTrafficLightsActive;
+			return TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive;
 		}
 
 		public int NumSteps() {
@@ -68,23 +66,31 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool CheckCurrentStep() {
+			if (!IsStarted())
+				return true;
+
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			if (!Steps[CurrentStep].StepDone(currentFrameIndex >> 6)) return false;
-
+			Steps[CurrentStep].SetLights();
+			if (!Steps[CurrentStep].StepDone()) {
+				return false;
+			}
+			// step is done
+			if (!Steps[CurrentStep].isEndTransitionDone()) return false;
+			// ending transition (yellow) finished
 			CurrentStep = (CurrentStep + 1) % Steps.Count;
 
-			Steps[CurrentStep].Start(currentFrameIndex >> 6);
+			Steps[CurrentStep].Start();
 			Steps[CurrentStep].SetLights();
 			return true;
 		}
 
 		public void SkipStep() {
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			Steps[CurrentStep].SetStepDone();
 
 			CurrentStep = (CurrentStep + 1) % Steps.Count;
 
-			Steps[CurrentStep].Start(currentFrameIndex >> 6);
+			Steps[CurrentStep].Start();
 			Steps[CurrentStep].SetLights();
 		}
 

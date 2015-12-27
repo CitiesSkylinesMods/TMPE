@@ -253,14 +253,7 @@ namespace TrafficManager {
 			revertDetours();
 
 			try {
-				if (TrafficPriority.PrioritySegments != null)
-					TrafficPriority.PrioritySegments.Clear();
-				if (CustomRoadAI.NodeDictionary != null)
-					CustomRoadAI.NodeDictionary.Clear();
-				if (TrafficLightsManual.ManualSegments != null)
-					TrafficLightsManual.ManualSegments.Clear();
-				if (TrafficLightsTimed.TimedScripts != null)
-					TrafficLightsTimed.TimedScripts.Clear();
+				TrafficPriority.OnLevelUnloading();
 
 				if (Instance != null)
 					Instance.NodeSimulationLoaded = false;

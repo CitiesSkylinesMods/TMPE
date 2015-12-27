@@ -16,6 +16,10 @@ namespace TrafficManager.Traffic {
 		public int maxTime;
 		public uint startFrame;
 
+		private bool stepDone;
+
+		private int endTransitionStart;
+
 		/// <summary>
 		/// minimum mean "number of cars passing through" / "average segment length"
 		/// </summary>
@@ -60,6 +64,9 @@ namespace TrafficManager.Traffic {
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
 
+			endTransitionStart = -1;
+			stepDone = false;
+
 			for (var s = 0; s < 8; s++) {
 				var segmentId = node.GetSegment(s);
 				float segLength = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_averageLength;
@@ -73,6 +80,26 @@ namespace TrafficManager.Traffic {
 						segmentLightStates[segmentId] = (ManualSegmentLight)segmentLight.Clone();
 				}
 			}
+		}
+
+		/// <summary>
+		/// Checks if the green-to-red (=yellow) phase is finished
+		/// </summary>
+		/// <returns></returns>
+		internal bool isEndTransitionDone() {
+			return endTransitionStart > -1 && getCurrentFrame() > endTransitionStart && StepDone();
+		}
+
+		/// <summary>
+		/// Checks if the green-to-red (=yellow) phase is currently active
+		/// </summary>
+		/// <returns></returns>
+		internal bool isInEndTransition() {
+			return endTransitionStart > -1 && getCurrentFrame() <= endTransitionStart && StepDone();
+		}
+
+		internal bool isInStartTransition() {
+			return getCurrentFrame() == startFrame && !StepDone();
 		}
 
 		public RoadBaseAI.TrafficLightState GetLight(int segment, int lightType) {
@@ -96,34 +123,60 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Starts the step.
 		/// </summary>
-		/// <param name="startFrame">current time frame >> 6</param>
-		public void Start(uint startFrame) {
-			this.startFrame = startFrame;
+		public void Start() {
+			stepDone = false;
+			this.startFrame = getCurrentFrame();
+			this.endTransitionStart = -1;
 			foreach (int segmentId in segmentIds) {
 				minFlow = Single.NaN;
 				maxWait = Single.NaN;
 			}
 		}
 
+		private uint getCurrentFrame() {
+			return Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
+		}
+
 		/// <summary>
 		/// Updates "real-world" traffic light states according to the timed scripts
 		/// </summary>
 		public void SetLights() {
+			SetLights(false);
+		}
+
+		public void SetLights(bool noTransition) {
+			bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
+			bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
+
+			TimedTrafficStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
+			TimedTrafficStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
+
 			foreach (KeyValuePair<int, ManualSegmentLight> e in segmentLightStates) {
 				var segmentId = e.Key;
 				var segLightState = e.Value;
-				//if (segment == 0) continue;
+				var prevLightState = previousStep.segmentLightStates[segmentId];
+				var nextLightState = nextStep.segmentLightStates[segmentId];
 
 				var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
 				if (segmentLight == null)
 					continue;
 
-				segmentLight.LightMain = segLightState.LightMain;
-				segmentLight.LightLeft = segLightState.LightLeft;
-				segmentLight.LightRight = segLightState.LightRight;
-				segmentLight.LightPedestrian = segLightState.LightPedestrian;
+				segmentLight.LightMain = calcLightState(prevLightState.LightMain, segLightState.LightMain, nextLightState.LightMain, atStartTransition, atEndTransition);
+				segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
+				segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
+				segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
+				
 				segmentLight.UpdateVisuals();
 			}
+		}
+
+		private RoadBaseAI.TrafficLightState calcLightState(RoadBaseAI.TrafficLightState previousState, RoadBaseAI.TrafficLightState currentState, RoadBaseAI.TrafficLightState nextState, bool atStartTransition, bool atEndTransition) {
+			if (atStartTransition && currentState == RoadBaseAI.TrafficLightState.Green && previousState == RoadBaseAI.TrafficLightState.Red)
+				return RoadBaseAI.TrafficLightState.RedToGreen;
+			else if (atEndTransition && currentState == RoadBaseAI.TrafficLightState.Green && nextState == RoadBaseAI.TrafficLightState.Red)
+				return RoadBaseAI.TrafficLightState.GreenToRed;
+			else
+				return currentState;
 		}
 
 		/// <summary>
@@ -151,9 +204,7 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <returns></returns>
 		public long MinTimeRemaining() {
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
-			return Math.Max(0, startFrame + minTime - (currentFrameIndex >> 6));
+			return Math.Max(0, startFrame + minTime - getCurrentFrame());
 		}
 
 		/// <summary>
@@ -161,21 +212,28 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <returns></returns>
 		public long MaxTimeRemaining() {
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
-			return Math.Max(0, startFrame + maxTime - (currentFrameIndex >> 6));
+			return Math.Max(0, startFrame + maxTime - getCurrentFrame());
 		}
 
-		public bool StepDone(uint frame) {
-			if (startFrame + maxTime <= frame) {
+		public void SetStepDone() {
+			stepDone = true;
+		}
+
+		public bool StepDone() {
+			if (stepDone)
+				return true;
+
+			if (startFrame + maxTime <= getCurrentFrame()) {
 				// maximum time reached. switch!
 #if DEBUG
-				Log.Message("step finished @ " + nodeId);
+				//Log.Message("step finished @ " + nodeId);
 #endif
-				return true;
+				stepDone = true;
+				endTransitionStart = (int)getCurrentFrame();
+				return stepDone;
 			}
 
-			if (startFrame + minTime <= frame) {
+			if (startFrame + minTime <= getCurrentFrame()) {
 				int numFlows = 0;
 				int numWaits = 0;
 				float curMeanFlow = 0;
@@ -183,11 +241,14 @@ namespace TrafficManager.Traffic {
 
 				if (masterNodeId != null && TrafficLightsTimed.IsTimedLight((ushort)masterNodeId)) {
 					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight((ushort)masterNodeId);
-					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone(frame);
+					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone();
 #if DEBUG
-					Log.Message("step finished (1) @ " + nodeId);
+					//Log.Message("step finished (1) @ " + nodeId);
 #endif
-					return done;
+					stepDone = done;
+					if (stepDone)
+						endTransitionStart = (int)getCurrentFrame();
+					return stepDone;
 				} else {
 					// we are the master node. calculate traffic data
 					foreach (ushort timedNodeId in groupNodeIds) {
@@ -255,9 +316,12 @@ namespace TrafficManager.Traffic {
 					// if double as many cars are waiting than flowing, we change the step
 					bool done = maxWait > 0 && minFlow < maxWait;
 #if DEBUG
-					Log.Message("step finished (2) @ " + nodeId);
+					//Log.Message("step finished (2) @ " + nodeId);
 #endif
-					return done;
+					stepDone = done;
+					if (stepDone)
+						endTransitionStart = (int)getCurrentFrame();
+					return stepDone;
 				}
 			}
 			return false;

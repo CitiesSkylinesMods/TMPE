@@ -492,7 +492,7 @@ namespace TrafficManager.CustomAI {
 
 					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
 						if (hasTrafficLight && (!isJoinedJunction || hasCrossing)) {
-							var nodeSimulation = CustomRoadAI.GetNodeSimulation(interestingNodeId);
+							var nodeSimulation = TrafficPriority.GetNodeSimulation(interestingNodeId);
 
 							var destinationInfo = netManager.m_nodes.m_buffer[destinationNodeId].Info;
 							RoadBaseAI.TrafficLightState vehicleLightState;

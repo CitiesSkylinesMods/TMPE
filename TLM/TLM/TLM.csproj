@@ -137,6 +137,7 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\remove_signs.png" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>

@@ -147,13 +147,13 @@ namespace TrafficManager {
 			foreach (var node in _configuration.NodeDictionary) {
 				if (node.Length < 4)
 					continue;
-				if (CustomRoadAI.GetNodeSimulation((ushort)node[0]) != null)
+				if (TrafficPriority.GetNodeSimulation((ushort)node[0]) != null)
 					continue;
 
 				Log.Message($"Adding Node do Simulation {node[0]}");
 				try {
-					CustomRoadAI.AddNodeToSimulation((ushort)node[0]);
-					var nodeDict = CustomRoadAI.GetNodeSimulation((ushort)node[0]);
+					TrafficPriority.AddNodeToSimulation((ushort)node[0]);
+					var nodeDict = TrafficPriority.GetNodeSimulation((ushort)node[0]);
 
 					nodeDict.ManualTrafficLights = Convert.ToBoolean(node[1]);
 					nodeDict.TimedTrafficLights = Convert.ToBoolean(node[2]);
@@ -348,7 +348,7 @@ namespace TrafficManager {
 					AddPrioritySegment(i, configuration);
 				}
 
-				if (CustomRoadAI.NodeDictionary != null) {
+				if (TrafficPriority.LightSimByNodeId != null) {
 					AddNodeToDictionary(i, configuration);
 				}
 
@@ -519,13 +519,13 @@ namespace TrafficManager {
 
 		private static void AddNodeToDictionary(int i, Configuration configuration) {
 			try {
-				if (!CustomRoadAI.NodeDictionary.ContainsKey((ushort)i))
+				if (!TrafficPriority.LightSimByNodeId.ContainsKey((ushort)i))
 					return;
-				var nodeDict = CustomRoadAI.NodeDictionary[(ushort)i];
+				var nodeDict = TrafficPriority.LightSimByNodeId[(ushort)i];
 
 				configuration.NodeDictionary.Add(new[]
 				{
-					nodeDict.NodeId, Convert.ToInt32(nodeDict.ManualTrafficLights),
+					nodeDict.nodeId, Convert.ToInt32(nodeDict.ManualTrafficLights),
 					Convert.ToInt32(nodeDict.TimedTrafficLights),
 					Convert.ToInt32(nodeDict.TimedTrafficLightsActive)
 				});
