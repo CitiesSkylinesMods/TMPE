@@ -2,6 +2,10 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.6, 12/28/2015 (Victor-Philipp Negoescu)
+- Bugfix: wrong flow value taken when comparing flowing vehicles
+- Forced node rendering after modifying a crosswalk
+
 1.3.5, 12/28/2015 (Victor-Philipp Negoescu)
 - Fixed pedestrian traffic Lights (thanks to @Glowstrontium for pointing out this problem)
 - Better fix for: Deleting a segment with a timed traffic light does not cause a NullReferenceException

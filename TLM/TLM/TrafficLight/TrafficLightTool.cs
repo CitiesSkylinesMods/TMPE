@@ -559,11 +559,14 @@ namespace TrafficManager.TrafficLight {
 			var endNode = GetNetNode(segment.m_endNode);
 
 			var result = false;
+			var startNodeChanged = false;
+			var endNodeChanged = false;
 
 			if (!result && ValidCrosswalkNode(segment.m_startNode, startNode)) {
 				if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 					startNode.m_flags |= NetNode.Flags.Junction;
 					result = true;
+					startNodeChanged = true;
 				}
 			}
 			if (!result &&
@@ -573,11 +576,13 @@ namespace TrafficManager.TrafficLight {
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					startNode.m_flags &= ~NetNode.Flags.Junction;
 					result = true;
+					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 					endNode.m_flags |= NetNode.Flags.Junction;
 					result = true;
+					endNodeChanged = true;
 				}
 			}
 			if (!result &&
@@ -587,11 +592,13 @@ namespace TrafficManager.TrafficLight {
 					(startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 					startNode.m_flags |= NetNode.Flags.Junction;
 					result = true;
+					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 					endNode.m_flags |= NetNode.Flags.Junction;
 					result = true;
+					endNodeChanged = true;
 				}
 			}
 			if (!result &&
@@ -600,15 +607,27 @@ namespace TrafficManager.TrafficLight {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					startNode.m_flags &= ~NetNode.Flags.Junction;
+					result = true;
+					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					endNode.m_flags &= ~NetNode.Flags.Junction;
+					result = true;
+					endNodeChanged = true;
 				}
 			}
 
 			SetNetNode(segment.m_startNode, startNode);
 			SetNetNode(segment.m_endNode, endNode);
+
+			// force rendering of nodes
+			if (startNodeChanged) {
+				Singleton<NetManager>.instance.UpdateNodeRenderer(segment.m_startNode, false);
+			}
+			if (endNodeChanged) {
+				Singleton<NetManager>.instance.UpdateNodeRenderer(segment.m_endNode, false);
+			}
 		}
 
 		private void LaneRestrictionsToolMode() {
