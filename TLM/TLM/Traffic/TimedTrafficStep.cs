@@ -78,8 +78,10 @@ namespace TrafficManager.Traffic {
 				if (segmentId != 0) {
 					segmentIds.Add(segmentId);
 					var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
-					if (segmentLight != null)
+					if (segmentLight != null) {
 						segmentLightStates[segmentId] = (ManualSegmentLight)segmentLight.Clone();
+						segmentLightStates[segmentId].makeRedOrGreen();
+					}
 				}
 			}
 		}

@@ -276,5 +276,25 @@ namespace TrafficManager.TrafficLight {
 		public object Clone() {
 			return MemberwiseClone();
 		}
+
+		internal void makeRedOrGreen() {
+			if (LightLeft == RoadBaseAI.TrafficLightState.RedToGreen) {
+				LightLeft = RoadBaseAI.TrafficLightState.Green;
+			} else if (LightLeft == RoadBaseAI.TrafficLightState.GreenToRed) {
+				LightLeft = RoadBaseAI.TrafficLightState.Red;
+			}
+
+			if (LightMain == RoadBaseAI.TrafficLightState.RedToGreen) {
+				LightMain = RoadBaseAI.TrafficLightState.Green;
+			} else if (LightMain == RoadBaseAI.TrafficLightState.GreenToRed) {
+				LightMain = RoadBaseAI.TrafficLightState.Red;
+			}
+
+			if (LightRight == RoadBaseAI.TrafficLightState.RedToGreen) {
+				LightRight = RoadBaseAI.TrafficLightState.Green;
+			} else if (LightRight == RoadBaseAI.TrafficLightState.GreenToRed) {
+				LightRight = RoadBaseAI.TrafficLightState.Red;
+			}
+		}
 	}
 }
