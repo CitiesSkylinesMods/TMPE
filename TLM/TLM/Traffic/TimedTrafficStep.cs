@@ -334,6 +334,9 @@ namespace TrafficManager.Traffic {
 					if (numWaits > 0)
 						curMeanWait /= (float)numWaits;
 
+					float decisionValue = 0.8f; // a value smaller than 1 rewards steady traffic currents
+					minFlow /= decisionValue;
+
 					if (Single.IsNaN(minFlow))
 						minFlow = curMeanFlow;
 					else
@@ -344,7 +347,7 @@ namespace TrafficManager.Traffic {
 					else
 						maxWait = Math.Max(curMeanWait, maxWait);
 
-					// if double as many cars are waiting than flowing, we change the step
+					// if more cars are waiting than flowing, we change the step
 					bool done = maxWait > 0 && minFlow < maxWait;
 #if DEBUG
 					//Log.Message("step finished (2) @ " + nodeId);

@@ -22,8 +22,10 @@ namespace TrafficManager.CustomAI {
 				bool pedestrians;
 
 				RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
-				if (pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed && !pedestrians && num2 >= 196u)
+				if ((pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) && !pedestrians && num2 >= 196u) {
 					RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
+					return true;
+				}
 			} else {
 				pedestrianLightState = light.GetLightPedestrian();
 			}

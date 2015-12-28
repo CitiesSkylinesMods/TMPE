@@ -776,8 +776,26 @@ namespace TrafficManager.Traffic {
 					// traffic light simulation is active but node does not have a traffic light
 					nodeState = NodeValidityState.SimWithoutLight;
 					return false;
-				} else
+				} else {
+					// check if all timed step segments are valid
+					if (nodeSim.FlagTimedTrafficLights && nodeSim.TimedTrafficLightsActive) {
+						TrafficLightsTimed timedLight = TrafficLightsTimed.GetTimedLight(nodeId);
+						if (timedLight == null || timedLight.Steps.Count <= 0) {
+							Log.Warning("Housekeeping: Timed light is null or no steps!");
+							RemoveNodeFromSimulation(nodeId);
+							return false;
+						}
+
+						foreach (var segmentId in timedLight.Steps[0].segmentIds) {
+							if (! IsPrioritySegment(nodeId, segmentId)) {
+								Log.Warning("Housekeeping: Timed light - Priority segment has gone away!");
+								RemoveNodeFromSimulation(nodeId);
+								return false;
+							}
+						}
+					}
 					return true;
+				}
 			} else {
 				bool ok = false;
 				for (var s = 0; s < 8; s++) {
@@ -814,29 +832,29 @@ namespace TrafficManager.Traffic {
 		private static readonly object simLock = new object(); // TODO rework
 
 		public static void AddNodeToSimulation(ushort nodeId) {
-			lock(simLock) {
+			//lock(simLock) {
 				LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
-			}
+			//}
 		}
 
 		public static void RemoveNodeFromSimulation(ushort nodeId) {
-			lock (simLock) {
+			//lock (simLock) {
 				if (!LightSimByNodeId.ContainsKey(nodeId))
 					return;
 				var nodeSim = LightSimByNodeId[nodeId];
 				LightSimByNodeId.Remove(nodeId);
 				nodeSim.Destroy();
-			}
+			//}
 		}
 
 		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
-			lock (simLock) {
+			//lock (simLock) {
 				if (LightSimByNodeId.ContainsKey(nodeId)) {
 					return LightSimByNodeId[nodeId];
 				}
 
 				return null;
-			}
+			//}
 		}
 	}
 }

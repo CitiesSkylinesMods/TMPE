@@ -385,6 +385,9 @@ namespace TrafficManager.TrafficLight {
 			if (mouseRayValid) {
 				var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 				var mouseRayLength = Camera.main.farClipPlane;
+#if DEBUG
+				Debug.DrawRay(mouseRay.origin, mouseRay.direction * mouseRayLength, Color.yellow);
+#endif
 				var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
 
 				var defaultService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);

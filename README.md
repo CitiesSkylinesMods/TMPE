@@ -2,14 +2,19 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.3.4, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.5, 12/28/2015 (Victor-Philipp Negoescu)
+- Fixed pedestrian traffic Lights
+- Better fix for: Deleting a segment with a timed traffic light does not cause a NullReferenceException
+- Adjusted the comparison between flowing (green light) and waiting (red light) traffic
+
+1.3.4, 12/27/2015 (Victor-Philipp Negoescu)
 - Better traffic jam handling
 
-1.3.3, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.3, 12/27/2015 (Victor-Philipp Negoescu)
 - (Temporary) hotfix: Deleting a segment with a timed traffic light does not cause a NullReferenceException
 - If priority signs are located behind the camera they are not rendered anymore
 
-1.3.2, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.2, 12/27/2015 (Victor-Philipp Negoescu)
 - Priority signs are persistently visible when Traffic Manager is in "Add priority sign" mode
 - Synchronized traffic light rendering: In-game Traffic lights display the correct color (Thanks to @Fabrice for pointing out this problem)
 - Traffic lights switch between green, yellow and red. Not only between green and red.

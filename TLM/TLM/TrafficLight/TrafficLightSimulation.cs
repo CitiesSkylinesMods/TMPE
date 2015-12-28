@@ -61,7 +61,10 @@ namespace TrafficManager.TrafficLight {
 
                 if (value == false) {
                     TimedTrafficLightsActive = false;
-                    TrafficLightsTimed.RemoveTimedLight(nodeId);
+					TrafficLightsTimed timedLight = TrafficLightsTimed.GetTimedLight(nodeId);
+					if (timedLight != null)
+						timedLight.Stop();
+					TrafficLightsTimed.RemoveTimedLight(nodeId);
 
 					var node = getNode();
 
