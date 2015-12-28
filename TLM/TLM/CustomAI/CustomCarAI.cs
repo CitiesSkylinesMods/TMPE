@@ -14,6 +14,10 @@ namespace TrafficManager.CustomAI {
 		private const float CloseLod = 250000f;
 		public static HashSet<ushort> watchedVehicleIds = new HashSet<ushort>();
 
+		internal static void OnLevelUnloading() {
+			watchedVehicleIds.Clear();
+		}
+
 		/// <summary>
 		/// Lightweight simulation step method.
 		/// This method is occasionally being called for different cars.

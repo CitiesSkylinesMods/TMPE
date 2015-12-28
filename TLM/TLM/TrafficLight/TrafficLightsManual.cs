@@ -144,5 +144,9 @@ namespace TrafficManager.TrafficLight {
 				ManualSegments.Remove(segmentId);
 			}
 		}
+
+		internal static void OnLevelUnloading() {
+			ManualSegments.Clear();
+		}
 	}
 }

@@ -12,8 +12,9 @@ using Object = UnityEngine.Object;
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
         public static LoadingExtension Instance;
-        public static bool IsPathManagerCompatibile = true;
-        public CustomPathManager CustomPathManager { get; set; }
+        public static bool IsPathManagerCompatible = true;
+		public static bool PathManagerReplaced = false;
+		public CustomPathManager CustomPathManager { get; set; }
         public bool DespawnEnabled { get; set; }
         public bool DetourInited { get; set; }
         public bool NodeSimulationLoaded { get; set; }
@@ -29,7 +30,7 @@ namespace TrafficManager {
 
 		public void revertDetours() {
 			if (LoadingExtension.Instance.DetourInited) {
-				Log.Message("Revert detours");
+				Log.Warning("Revert detours");
 				for (int i = 0; i < 7; ++i) {
 					if (LoadingExtension.Instance.OriginalMethods[i] != null)
 						RedirectionHelper.RevertRedirect(LoadingExtension.Instance.OriginalMethods[i], LoadingExtension.Instance.CustomRedirects[i]);
@@ -39,6 +40,7 @@ namespace TrafficManager {
 		}
 
 		public void initDetours() {
+			Log.Warning("Init detours");
 			if (!LoadingExtension.Instance.DetourInited) {
 				Log.Message("Redirecting Car AI Calculate Segment Calls");
 				try {
@@ -82,7 +84,7 @@ namespace TrafficManager {
 					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
 				}
 
-				if (LoadingExtension.IsPathManagerCompatibile) {
+				if (LoadingExtension.IsPathManagerCompatible) {
 					Log.Message("Traffic++ Not detected. Loading Pathfinder.");
 					Log.Message("Redirecting CarAI Simulation Step Calls");
 					try {
@@ -177,7 +179,7 @@ namespace TrafficManager {
         }
 
         public override void OnLevelLoaded(LoadMode mode) {
-            Log.Message("OnLevelLoaded calling base method");
+            Log.Warning("OnLevelLoaded calling base method");
             base.OnLevelLoaded(mode);
             Log.Message("OnLevelLoaded Returned from base, calling custom code.");
 
@@ -191,20 +193,16 @@ namespace TrafficManager {
             }
 
             if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame) {
-				Log.Message("Instance is NULL. Set Instance to this.");
-				if (Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
-					Log.Message("Traffic++ Detected. Disable Pathfinder");
-					IsPathManagerCompatibile = false;
-				}
-
-				if (Instance != null) {
-					revertDetours();
+				IsPathManagerCompatible = true;
+				if (! PathManagerReplaced && Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
+					Log.Message("Traffic++ Detected. Disable Pathfinder. Pathfinder is " + Singleton<PathManager>.instance.GetType().ToString());
+					IsPathManagerCompatible = false;
 				}
 
                 Instance = this;
 				initDetours();
 
-                if (IsPathManagerCompatibile) {
+                if (IsPathManagerCompatible && ! PathManagerReplaced) {
                     Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance",
                         BindingFlags.Static | BindingFlags.NonPublic);
@@ -237,7 +235,9 @@ namespace TrafficManager {
                     simManager?.Add(CustomPathManager);
 
                     Object.Destroy(stockPathManager, 10f);
-                }
+
+					PathManagerReplaced = true;
+				}
 
                 Log.Message("Adding Controls to UI.");
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
@@ -254,6 +254,9 @@ namespace TrafficManager {
 
 			try {
 				TrafficPriority.OnLevelUnloading();
+				CustomCarAI.OnLevelUnloading();
+				TrafficLightsManual.OnLevelUnloading();
+				TrafficLightsTimed.OnLevelUnloading();
 
 				if (Instance != null)
 					Instance.NodeSimulationLoaded = false;

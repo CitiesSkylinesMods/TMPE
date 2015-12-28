@@ -2738,10 +2738,10 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void LaneFlag(uint laneId, NetLane.Flags flag) {
-			if (!TrafficPriority.IsPrioritySegment(SelectedNode, SelectedSegment)) {
+			/*if (!TrafficPriority.IsPrioritySegment(SelectedNode, SelectedSegment)) {
 				TrafficPriority.AddPrioritySegment(SelectedNode, SelectedSegment,
 					PrioritySegment.PriorityType.None);
-			}
+			}*/
 
 			var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 

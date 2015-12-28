@@ -24,7 +24,7 @@ namespace TrafficManager.UI {
                     //buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
                     _buttonCrosswalk.focusedBgSprite = "ButtonMenu";
                     _buttonClearTraffic.focusedBgSprite = "ButtonMenu";
-                    if (LoadingExtension.IsPathManagerCompatibile) {
+                    if (LoadingExtension.IsPathManagerCompatible) {
                         _buttonLaneChange.focusedBgSprite = "ButtonMenu";
                         _buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
                     }
@@ -58,14 +58,14 @@ namespace TrafficManager.UI {
             backgroundSprite = "GenericPanel";
             color = new Color32(75, 75, 135, 255);
             width = 250;
-            height = LoadingExtension.IsPathManagerCompatibile ? 350 : 270;
+            height = LoadingExtension.IsPathManagerCompatible ? 350 : 270;
             relativePosition = new Vector3(10.48f, 80f);
 
             UILabel title = AddUIComponent<UILabel>();
             title.text = "Version 1.3.7";
             title.relativePosition = new Vector3(65.0f, 5.0f);
 
-            if (LoadingExtension.IsPathManagerCompatibile) {
+            if (LoadingExtension.IsPathManagerCompatible) {
                 _buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
                 _buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
                 _buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
@@ -186,7 +186,7 @@ namespace TrafficManager.UI {
         private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {
             LoadingExtension.Instance.DespawnEnabled = !LoadingExtension.Instance.DespawnEnabled;
 
-            if (LoadingExtension.IsPathManagerCompatibile) {
+            if (LoadingExtension.IsPathManagerCompatible) {
                 _buttonToggleDespawn.text = LoadingExtension.Instance.DespawnEnabled
                     ? "Disable despawning"
                     : "Enable despawning";
@@ -197,7 +197,7 @@ namespace TrafficManager.UI {
             if (_uiState != UIState.LaneChange) {
                 _uiState = UIState.LaneChange;
 
-                if (LoadingExtension.IsPathManagerCompatibile) {
+                if (LoadingExtension.IsPathManagerCompatible) {
                     _buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
                 }
 
@@ -205,7 +205,7 @@ namespace TrafficManager.UI {
             } else {
                 _uiState = UIState.None;
 
-                if (LoadingExtension.IsPathManagerCompatibile) {
+                if (LoadingExtension.IsPathManagerCompatible) {
                     _buttonLaneChange.focusedBgSprite = "ButtonMenu";
                 }
 

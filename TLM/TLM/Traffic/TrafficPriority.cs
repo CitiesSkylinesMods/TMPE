@@ -376,8 +376,6 @@ namespace TrafficManager.Traffic {
 			LightSimByNodeId.Clear();
 			VehicleList.Clear();
 			priorityNodes.Clear();
-			TrafficLightsManual.ManualSegments.Clear(); // TODO refactor
-			TrafficLightsTimed.TimedScripts.Clear(); // TODO refactor
 		}
 
 		protected static bool _checkPriorityRoadIncomingCarRightHandDrive(ushort targetCarId, ushort incomingCarId,
@@ -692,47 +690,51 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static void housekeeping() {
-			// delete invalid segments
-			List<int> segmentIdsToDelete = new List<int>();
-			foreach (KeyValuePair<int, TrafficSegment> e in PrioritySegments) {
-				var segmentId = e.Key;
-				if (segmentId <= 0) {
-					segmentIdsToDelete.Add(segmentId);
-					continue;
-				}
+			try {
+				// delete invalid segments
+				List<int> segmentIdsToDelete = new List<int>();
+				foreach (KeyValuePair<int, TrafficSegment> e in PrioritySegments) {
+					var segmentId = e.Key;
+					if (segmentId <= 0) {
+						segmentIdsToDelete.Add(segmentId);
+						continue;
+					}
 
-				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-				if (segment.m_flags == NetSegment.Flags.None || (!priorityNodes.Contains(segment.m_startNode) && !priorityNodes.Contains(segment.m_endNode))) {
-					segmentIdsToDelete.Add(segmentId);
-				}
-			}
-
-			foreach (var sId in segmentIdsToDelete) {
-				Log.Warning("Housekeeping: Deleting segment " + sId);
-				PrioritySegments.Remove(sId);
-			}
-
-			// delete invalid nodes
-			List<ushort> nodeIdsToDelete = new List<ushort>();
-			foreach (ushort nodeId in priorityNodes) {
-				NodeValidityState nodeState = NodeValidityState.Valid;
-				if (! isValidPriorityNode(nodeId, out nodeState)) {
-					nodeIdsToDelete.Add(nodeId);
-					switch (nodeState) {
-						case NodeValidityState.SimWithoutLight:
-							// delete traffic light simulation
-							Log.Warning("Housekeeping: RemoveNodeFromSimulation " + nodeId);
-							RemoveNodeFromSimulation(nodeId);
-							break;
-						default:
-							break;
+					NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+					if (segment.m_flags == NetSegment.Flags.None || (!priorityNodes.Contains(segment.m_startNode) && !priorityNodes.Contains(segment.m_endNode))) {
+						segmentIdsToDelete.Add(segmentId);
 					}
 				}
-			}
 
-			foreach (var nId in nodeIdsToDelete) {
-				Log.Warning("Housekeeping: Deleting node " + nId);
-				RemovePrioritySegments(nId);
+				foreach (var sId in segmentIdsToDelete) {
+					Log.Warning("Housekeeping: Deleting segment " + sId);
+					PrioritySegments.Remove(sId);
+				}
+
+				// delete invalid nodes
+				List<ushort> nodeIdsToDelete = new List<ushort>();
+				foreach (ushort nodeId in priorityNodes) {
+					NodeValidityState nodeState = NodeValidityState.Valid;
+					if (!isValidPriorityNode(nodeId, out nodeState)) {
+						nodeIdsToDelete.Add(nodeId);
+						switch (nodeState) {
+							case NodeValidityState.SimWithoutLight:
+								// delete traffic light simulation
+								Log.Warning("Housekeeping: RemoveNodeFromSimulation " + nodeId);
+								RemoveNodeFromSimulation(nodeId);
+								break;
+							default:
+								break;
+						}
+					}
+				}
+
+				foreach (var nId in nodeIdsToDelete) {
+					Log.Warning("Housekeeping: Deleting node " + nId);
+					RemovePrioritySegments(nId);
+				}
+			} catch (Exception e) {
+				Log.Warning($"Housekeeping failed: {e.Message}");
 			}
 		}
 

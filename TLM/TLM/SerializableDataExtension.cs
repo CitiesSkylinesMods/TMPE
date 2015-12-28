@@ -42,7 +42,7 @@ namespace TrafficManager {
 		}
 
 		public override void OnLoadData() {
-			Log.Message("Loading Mod Data");
+			Log.Warning("Loading Mod Data");
 			var keys = _serializableData.EnumerateData().Where(k => k.StartsWith("TrafficManager"));
 			byte[] data = null;
 			foreach (var key in keys) {
@@ -310,7 +310,7 @@ namespace TrafficManager {
 			}
 
 			// For Traffic++ compatibility
-			if (!LoadingExtension.IsPathManagerCompatibile)
+			if (!LoadingExtension.IsPathManagerCompatible)
 				return;
 
 			Log.Message($"LaneFlags: {_configuration.LaneFlags}");
@@ -330,6 +330,7 @@ namespace TrafficManager {
 					if (Convert.ToInt32(split[1]) > ushort.MaxValue)
 						continue;
 
+					Log.Message("Setting flags for lane " + Convert.ToInt32(split[0]) + " to " + Convert.ToUInt16(split[1]));
 					Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
 						Convert.ToUInt16(split[1]);
 				} catch (Exception e) {
@@ -340,7 +341,7 @@ namespace TrafficManager {
 		}
 
 		public override void OnSaveData() {
-			Log.Message("Saving Mod Data.");
+			Log.Warning("Saving Mod Data.");
 			var configuration = new Configuration();
 
 			for (var i = 0; i < 36864; i++) {
@@ -365,17 +366,17 @@ namespace TrafficManager {
 				for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
 					if (AddNodeLightsAndCrosswalks(i, configuration))
 						continue;
-
-					if (!LoadingExtension.IsPathManagerCompatibile)
-						continue;
-
-					AddNodeLaneData(i, configuration);
 				}
 			}
 
-			// Traffic++ compatibility
-			if (!LoadingExtension.IsPathManagerCompatibile)
+			if (LoadingExtension.IsPathManagerCompatible && Singleton<NetManager>.instance?.m_lanes?.m_buffer != null) {
+				for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
+					AddLaneData(i, configuration);
+				}
+			} else {
+				// Traffic++ compatibility
 				configuration.LaneFlags = "";
+			}
 
 			var binaryFormatter = new BinaryFormatter();
 			var memoryStream = new MemoryStream();
@@ -395,13 +396,23 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddNodeLaneData(int i, Configuration configuration) {
+		private static void AddLaneData(int i, Configuration configuration) {
 			try {
-				var laneSegment = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
+				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[i];
+				NetLane.Flags flags = (NetLane.Flags)lane.m_flags;
+				if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) // only save lanes with explicit lane arrows
+					return;
+				var laneSegmentId = lane.m_segment;
+				if (laneSegmentId <= 0)
+					return;
+				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[laneSegmentId];
+				if (segment.m_flags == NetSegment.Flags.None)
+					return;
 
-				if (TrafficPriority.PrioritySegments.ContainsKey(laneSegment)) {
+				//if (TrafficPriority.PrioritySegments.ContainsKey(laneSegmentId)) {
+					Log.Message($"Saving lane data for lane {i}, segment {laneSegmentId}");
 					configuration.LaneFlags += $"{i}:{Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags},";
-				}
+				//}
 			} catch (Exception e) {
 				Log.Error($"Error saving NodeLaneData {e.Message}");
 			}

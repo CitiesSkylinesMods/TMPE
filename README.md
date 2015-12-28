@@ -2,8 +2,11 @@
 A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.3.7 **ALPHA**, 12/28/2015 (Victor-Philipp Negoescu)
-- When setting up a new timed traffic light, yellow lights from the real-world state are not taken over
+1.3.7, 12/28/2015 (Victor-Philipp Negoescu)
+- When setting up a new timed traffic light, yellow lights from the real-world state are not taken over.
+- When loading another save game via the escape menu, Traffic Manager does not crash
+- When loading another save game via the escape menu, Traffic++ detection works as intended
+- Lane arrows are saved correctly
 
 1.3.6, 12/28/2015 (Victor-Philipp Negoescu)
 - Bugfix: wrong flow value taken when comparing flowing vehicles

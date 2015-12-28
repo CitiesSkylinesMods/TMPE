@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.CustomAI;
@@ -159,6 +160,10 @@ namespace TrafficManager.TrafficLight {
 			if (!IsTimedLight(nodeid))
 				return null;
 			return TimedScripts[nodeid];
+		}
+
+		internal static void OnLevelUnloading() {
+			TimedScripts.Clear();
 		}
 	}
 }
