@@ -3,7 +3,7 @@ A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add addit
 
 # Changelog
 1.3.5, 12/28/2015 (Victor-Philipp Negoescu)
-- Fixed pedestrian traffic Lights
+- Fixed pedestrian traffic Lights (thanks to @Glowstrontium for pointing out this problem)
 - Better fix for: Deleting a segment with a timed traffic light does not cause a NullReferenceException
 - Adjusted the comparison between flowing (green light) and waiting (red light) traffic
 
