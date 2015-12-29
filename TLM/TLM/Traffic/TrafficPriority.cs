@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ColossalFramework;
 using TrafficManager.TrafficLight;
-using TrafficManager.CustomAI;
+using TrafficManager.Custom.AI;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
@@ -118,6 +118,10 @@ namespace TrafficManager.Traffic {
 
 		public static bool IsPriorityNode(ushort nodeId) {
 			return priorityNodes.Contains(nodeId);
+		}
+
+		public static HashSet<ushort> getPriorityNodes() {
+			return priorityNodes;
 		}
 
 		public static PrioritySegment GetPrioritySegment(ushort nodeId, int segmentId) {

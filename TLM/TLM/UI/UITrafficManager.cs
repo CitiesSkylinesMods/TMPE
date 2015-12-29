@@ -36,27 +36,33 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(10.48f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.3.8";
+			title.text = "Version 1.3.9";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
-				_buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
-				_buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
-				_buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
-				_buttonLaneChange = _createButton("Change lanes", new Vector3(35f, 190f), clickChangeLanes);
-				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
-				_buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 230f), clickCrosswalk);
-				_buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 270f), clickClearTraffic);
-				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, 310f), ClickToggleDespawn);
+			int y = 30;
+			_buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, y), clickSwitchTraffic);
+			y += 40;
+			_buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, y), clickAddPrioritySigns);
+			y += 40;
+			_buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, y), clickManualControl);
+			y += 40;
+			_buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, y), clickTimedAdd);
+			y += 40;
 
-			} else {
-				_buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, 30f), clickSwitchTraffic);
-				_buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, 70f), clickAddPrioritySigns);
-				_buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, 110f), clickManualControl);
-				_buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, 150f), clickTimedAdd);
-				_buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, 190f), clickCrosswalk);
-				_buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, 230f), clickClearTraffic);
+			if (LoadingExtension.IsPathManagerCompatible) {
+				_buttonLaneChange = _createButton("Change lanes", new Vector3(35f, y), clickChangeLanes);
+				y += 40;
+				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
+			}
+
+			_buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, y), clickCrosswalk);
+			y += 40;
+			_buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, y), clickClearTraffic);
+			y += 40;
+
+			if (LoadingExtension.IsPathManagerCompatible) {
+				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, y), ClickToggleDespawn);
+				y += 40;
 			}
 		}
 
@@ -123,15 +129,23 @@ namespace TrafficManager.UI {
 		/// Removes the focused sprite from all menu buttons
 		/// </summary>
 		public static void deactivateButtons() {
-			_buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
-			_buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
-			_buttonManualControl.focusedBgSprite = "ButtonMenu";
-			_buttonTimedMain.focusedBgSprite = "ButtonMenu";
-			_buttonLaneChange.focusedBgSprite = "ButtonMenu";
+			if (_buttonSwitchTraffic != null)
+				_buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
+			if (_buttonPrioritySigns != null)
+				_buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
+			if (_buttonManualControl != null)
+				_buttonManualControl.focusedBgSprite = "ButtonMenu";
+			if (_buttonTimedMain != null)
+				_buttonTimedMain.focusedBgSprite = "ButtonMenu";
+			if (_buttonLaneChange != null)
+				_buttonLaneChange.focusedBgSprite = "ButtonMenu";
 			//_buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
-			_buttonCrosswalk.focusedBgSprite = "ButtonMenu";
-			_buttonClearTraffic.focusedBgSprite = "ButtonMenu";
-			_buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
+			if (_buttonCrosswalk != null)
+				_buttonCrosswalk.focusedBgSprite = "ButtonMenu";
+			if (_buttonClearTraffic != null)
+				_buttonClearTraffic.focusedBgSprite = "ButtonMenu";
+			if (_buttonToggleDespawn != null)
+				_buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
 		}
 
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {

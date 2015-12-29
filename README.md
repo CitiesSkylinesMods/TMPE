@@ -2,6 +2,10 @@
 A work-in-progress (state: 12/29/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.9, 12/29/2015 (Victor-Philipp Negoescu)
+- Introduced information icons for timed traffic lights
+- Mod is now compatible with "Improved AI" (Lane changer is deactivated if "Improved AI" is active)
+
 1.3.8, 12/29/2015 (Victor-Philipp Negoescu)
 - Articulated busses are now simulated correctly (thanks to @nieksen for pointing out this problem)
 - UI improvements

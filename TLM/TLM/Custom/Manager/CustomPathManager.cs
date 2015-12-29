@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using TrafficManager.Custom.Misc;
 using ColossalFramework;
 using ColossalFramework.Math;
 using JetBrains.Annotations;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 
-namespace TrafficManager
+namespace TrafficManager.Custom.Manager
 {
     public class CustomPathManager : PathManager
     {

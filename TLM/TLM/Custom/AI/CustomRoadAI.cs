@@ -5,7 +5,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using UnityEngine;
 
-namespace TrafficManager.CustomAI {
+namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
 
 		private uint _lastFrame;

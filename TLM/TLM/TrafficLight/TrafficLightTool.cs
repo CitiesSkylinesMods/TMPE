@@ -5,7 +5,7 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using ColossalFramework.UI;
 using JetBrains.Annotations;
-using TrafficManager.CustomAI;
+using TrafficManager.Custom.AI;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
@@ -779,7 +779,7 @@ namespace TrafficManager.TrafficLight {
 					var pedestrianHeight = 61f * zoom;
 
 					var guiColor = GUI.color;
-					guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && segmentDict.PedestrianEnabled ? 0.92f : 0.45f;
+					guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && segmentDict.PedestrianEnabled ? 0.92f : 0.6f;
 					GUI.color = guiColor;
 
 					var myRect3 = new Rect(screenPos.x - pedestrianWidth / 2 - lightWidth + 5f * zoom, screenPos.y - pedestrianHeight / 2 + 22f * zoom, pedestrianWidth, pedestrianHeight);
@@ -867,7 +867,7 @@ namespace TrafficManager.TrafficLight {
 		private void SetAlpha(int segmentId, int buttonId) {
 			var guiColor = GUI.color;
 
-			guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId ? 0.92f : 0.45f;
+			guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId ? 0.92f : 0.6f;
 
 			GUI.color = guiColor;
 		}
@@ -1013,7 +1013,7 @@ namespace TrafficManager.TrafficLight {
 			var guiColor = GUI.color;
 			// right arrow light
 			if (hasRightSegment)
-				guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.45f;
+				guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.6f;
 
 			GUI.color = guiColor;
 
@@ -1178,7 +1178,7 @@ namespace TrafficManager.TrafficLight {
 			var manualPedestrianWidth = 36f * zoom;
 			var manualPedestrianHeight = 35f * zoom;
 
-			guiColor.a = _hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) ? 0.92f : 0.45f;
+			guiColor.a = _hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) ? 0.92f : 0.6f;
 
 			GUI.color = guiColor;
 
@@ -1316,7 +1316,7 @@ namespace TrafficManager.TrafficLight {
 			var pedestrianWidth = 36f * zoom;
 			var pedestrianHeight = 61f * zoom;
 
-			guiColor.a = _hoveredButton[0] == segment1 && _hoveredButton[1] == 0 ? 0.92f : 0.45f;
+			guiColor.a = _hoveredButton[0] == segment1 && _hoveredButton[1] == 0 ? 0.92f : 0.6f;
 
 			GUI.color = guiColor;
 
@@ -1340,7 +1340,7 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			// no arrow light
-			guiColor.a = _hoveredButton[0] == segment1 && _hoveredButton[1] == 1 ? 0.92f : 0.45f;
+			guiColor.a = _hoveredButton[0] == segment1 && _hoveredButton[1] == 1 ? 0.92f : 0.6f;
 
 			GUI.color = guiColor;
 
@@ -1559,7 +1559,7 @@ namespace TrafficManager.TrafficLight {
 						guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == -1 &&
 									 _hoveredNode == nodeId
 							? 0.92f
-							: 0.45f;
+							: 0.6f;
 
 						GUI.color = guiColor;
 
@@ -1589,7 +1589,7 @@ namespace TrafficManager.TrafficLight {
 									 (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) &&
 									 _hoveredNode == nodeId
 							? 0.92f
-							: 0.45f;
+							: 0.6f;
 
 						GUI.color = guiColor;
 
@@ -1615,7 +1615,7 @@ namespace TrafficManager.TrafficLight {
 					var pedestrianWidth = 36f * zoom;
 					var pedestrianHeight = 61f * zoom;
 
-					guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+					guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 					GUI.color = guiColor;
 
@@ -1716,7 +1716,7 @@ namespace TrafficManager.TrafficLight {
 					switch (liveSegmentLight.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple: {
 								// no arrow light
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -1776,7 +1776,7 @@ namespace TrafficManager.TrafficLight {
 						case ManualSegmentLight.Mode.SingleLeft:
 							if (hasLeftSegment) {
 								// left arrow light
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -1832,7 +1832,7 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							// forward-right arrow light
-							guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+							guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 							GUI.color = guiColor;
 
@@ -1894,7 +1894,7 @@ namespace TrafficManager.TrafficLight {
 							break;
 						case ManualSegmentLight.Mode.SingleRight: {
 								// forward-left light
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -1973,7 +1973,7 @@ namespace TrafficManager.TrafficLight {
 									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
 												 _hoveredNode == nodeId
 										? 0.92f
-										: 0.45f;
+										: 0.6f;
 
 									GUI.color = guiColor;
 
@@ -2037,7 +2037,7 @@ namespace TrafficManager.TrafficLight {
 						default:
 							// left arrow light
 							if (hasLeftSegment) {
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -2106,7 +2106,7 @@ namespace TrafficManager.TrafficLight {
 
 							// forward arrow light
 							if (hasForwardSegment) {
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -2172,7 +2172,7 @@ namespace TrafficManager.TrafficLight {
 
 							// right arrow light
 							if (hasRightSegment) {
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId ? 0.92f : 0.45f;
+								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 								GUI.color = guiColor;
 
@@ -2929,6 +2929,31 @@ namespace TrafficManager.TrafficLight {
 			_cursorInSecondaryPanel = false;
 
 			GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, "Select nodes");
+
+			foreach (ushort nodeId in TrafficPriority.getPriorityNodes()) {
+				TrafficLightSimulation lightSim = TrafficPriority.GetNodeSimulation(nodeId);
+				if (lightSim != null && lightSim.TimedTrafficLights) {
+					var node = GetNetNode((ushort)nodeId);
+					var nodePositionVector3 = node.m_position;
+					var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+					var diff = nodePositionVector3 - camPos;
+					if (diff.magnitude > PriorityCloseLod)
+						continue; // do not draw if too distant
+
+					var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
+					nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
+					if (nodeScreenPosition.z < 0)
+						continue;
+					var zoom = 1.0f / diff.magnitude * 100f;
+					var size = 180f * zoom;
+					var guiColor = GUI.color;
+					guiColor.a = 0.8f;
+					GUI.color = guiColor;
+					var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
+
+					GUI.DrawTexture(nodeDrawingBox, lightSim.TimedTrafficLightsActive ? TrafficLightToolTextureResources.ClockPlayTexture2D : TrafficLightToolTextureResources.ClockPauseTexture2D);
+				}
+			}
 
 			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
 		}

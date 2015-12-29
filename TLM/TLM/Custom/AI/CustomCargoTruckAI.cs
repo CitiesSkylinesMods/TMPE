@@ -1,8 +1,9 @@
 using System;
 using ColossalFramework;
 using UnityEngine;
+using TrafficManager.Custom.Manager;
 
-namespace TrafficManager.CustomAI
+namespace TrafficManager.Custom.AI
 {
     class CustomCargoTruckAI : CarAI
     {

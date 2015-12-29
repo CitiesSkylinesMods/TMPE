@@ -6,7 +6,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using ColossalFramework;
 using ICities;
-using TrafficManager.CustomAI;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using UnityEngine;

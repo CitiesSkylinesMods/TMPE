@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
-using TrafficManager.CustomAI;
+using TrafficManager.Custom.AI;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.TrafficLight {

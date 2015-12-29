@@ -2,17 +2,22 @@ using System;
 using System.Reflection;
 using ColossalFramework;
 using ICities;
-using TrafficManager.CustomAI;
+using TrafficManager.Custom.AI;
+using TrafficManager.Custom.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using System.Collections.Generic;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
         public static LoadingExtension Instance;
         public static bool IsPathManagerCompatible = true;
+		public static bool IsImprovedAiLoaded = false;
+		public static bool IsTrafficPlusPlusLoaded = false;
 		public static bool PathManagerReplaced = false;
 		public CustomPathManager CustomPathManager { get; set; }
         public bool DespawnEnabled { get; set; }
@@ -192,19 +197,16 @@ namespace TrafficManager {
             }
 
             if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame) {
-				IsPathManagerCompatible = true;
-				if (! PathManagerReplaced && Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
-					Log.Message("Traffic++ Detected. Disable Pathfinder. Pathfinder is " + Singleton<PathManager>.instance.GetType().ToString());
-					IsPathManagerCompatible = false;
-				}
+				determinePathManagerCompatible();
 
                 Instance = this;
 				initDetours();
 
                 if (IsPathManagerCompatible && ! PathManagerReplaced) {
+					Log.Warning("#####################################");
+
                     Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
-                    var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance",
-                        BindingFlags.Static | BindingFlags.NonPublic);
+					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
                     var stockPathManager = PathManager.instance;
                     Log.Message($"Got stock PathManager instance {stockPathManager.GetName()}");
@@ -245,7 +247,44 @@ namespace TrafficManager {
             }
         }
 
-        public override void OnLevelUnloading() {
+		private void determinePathManagerCompatible() {
+			IsPathManagerCompatible = true;
+			IsImprovedAiLoaded = false;
+			if (!PathManagerReplaced) {
+
+				var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
+				List<ILoadingExtension> loadingExtensions = null;
+				if (loadingWrapperLoadingExtensionsField != null) {
+					loadingExtensions = (List<ILoadingExtension>) loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
+				} else {
+					Log.Message("Could not get loading extensions field");
+				}
+
+				if (loadingExtensions != null) {
+					Log.Message("Loaded extensions:");
+					foreach (ILoadingExtension extension in loadingExtensions) {
+						Log.Message($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
+						var namespaceStr = extension.GetType().Namespace.ToString();
+						if ("Improved_AI".Equals(namespaceStr)) {
+							IsImprovedAiLoaded = true;
+							IsPathManagerCompatible = false; // Improved AI found
+						} else if ("CSL_Traffic".Equals(namespaceStr)) {
+							IsTrafficPlusPlusLoaded = true;
+							IsPathManagerCompatible = false; // Improved AI found
+						}
+					}
+				} else {
+					Log.Message("Could not get loading extensions");
+				}
+
+				if (Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
+					Log.Message("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
+					IsPathManagerCompatible = false;
+				}
+			}
+		}
+
+		public override void OnLevelUnloading() {
             base.OnLevelUnloading();
 			if (Instance == null)
 				Instance = this;

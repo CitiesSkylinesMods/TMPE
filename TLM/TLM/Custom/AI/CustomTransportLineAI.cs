@@ -1,6 +1,7 @@
 using ColossalFramework;
+using TrafficManager.Custom.Manager;
 
-namespace TrafficManager.CustomAI
+namespace TrafficManager.Custom.AI
 {
     class CustomTransportLineAI
     {

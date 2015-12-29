@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using ColossalFramework;
 using ICities;
-using TrafficManager.CustomAI;
+using TrafficManager.Custom.AI;
 using UnityEngine;
 
 namespace TrafficManager {

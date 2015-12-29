@@ -8,7 +8,7 @@ using TrafficManager.Traffic;
 /// A priority segment describes a directional traffic segment connected to a controlled
 /// node (with traffic lights, priority settings).
 /// </summary>
-namespace TrafficManager {
+namespace TrafficManager.Traffic {
 	public class PrioritySegment {
 		public enum PriorityType {
 			None = 0,

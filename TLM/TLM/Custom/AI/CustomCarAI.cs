@@ -4,10 +4,11 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
+using TrafficManager.Custom.Manager;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace TrafficManager.CustomAI {
+namespace TrafficManager.Custom.AI {
 	internal class CustomCarAI : CarAI {
 		private const float FarLod = 1210000f;
 		private const float CloseLod = 250000f;

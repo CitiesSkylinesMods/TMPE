@@ -37,6 +37,8 @@ namespace TrafficManager.TrafficLight
         public static readonly Texture2D SignPriorityTexture2D;
         public static readonly Texture2D SignNoneTexture2D;
 		public static readonly Texture2D SignRemoveTexture2D;
+		public static readonly Texture2D ClockPlayTexture2D;
+		public static readonly Texture2D ClockPauseTexture2D;
 
 		static TrafficLightToolTextureResources()
         {
@@ -84,6 +86,9 @@ namespace TrafficManager.TrafficLight
 
 			// delete priority sign
 			SignRemoveTexture2D = LoadDllResource("remove_signs.png", 256, 256);
+			// timer
+			ClockPlayTexture2D = LoadDllResource("clock_play.png", 512, 512);
+			ClockPauseTexture2D = LoadDllResource("clock_pause.png", 512, 512);
 
 		}
 

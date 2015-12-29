@@ -8,7 +8,7 @@ using ColossalFramework.UI;
 using TrafficManager.Traffic;
 using UnityEngine;
 
-namespace TrafficManager
+namespace TrafficManager.Custom.Misc
 {
     public class CustomPathFind : PathFind
     {
@@ -97,10 +97,11 @@ namespace TrafficManager
         private bool _isHeavyVehicle;
         private bool _ignoreBlocked;
         private bool _stablePath;
-/*
-        private TrafficRoadRestrictions.VehicleTypes _vehicleType;
-*/
-        private Randomizer _pathRandomizer;
+		private bool _transportVehicle;
+		/*
+				private TrafficRoadRestrictions.VehicleTypes _vehicleType;
+		*/
+		private Randomizer _pathRandomizer;
         private uint _pathFindIndex;
         private NetInfo.LaneType _laneTypes;
         private VehicleInfo.VehicleType _vehicleTypes;
@@ -238,10 +239,11 @@ namespace TrafficManager
             _isHeavyVehicle = ((PathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags & 16) != 0);
             _ignoreBlocked = ((PathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags & 32) != 0);
             _stablePath = ((PathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags & 64) != 0);
-            //this._vehicleType =
-            //    TrafficRoadRestrictions.vehicleType(this._pathUnits._buffer[(int) ((UIntPtr) unit)].m_simulationFlags);
-
-            var num = PathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount & 15;
+			_transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
+			if ((byte)(this._laneTypes & NetInfo.LaneType.Vehicle) != 0) {
+				this._laneTypes |= NetInfo.LaneType.TransportVehicle;
+			}
+			var num = PathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount & 15;
             var num2 = PathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount >> 4;
             BufferItem startPosA;
             if (data.m_position00.m_segment != 0 && num >= 1)

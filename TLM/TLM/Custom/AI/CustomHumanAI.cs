@@ -2,7 +2,7 @@ using ColossalFramework;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 
-namespace TrafficManager.CustomAI {
+namespace TrafficManager.Custom.AI {
 	class CustomHumanAI {
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
 			var nodeSimulation = TrafficPriority.GetNodeSimulation(node);
