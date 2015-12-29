@@ -269,8 +269,8 @@ namespace TrafficManager {
 							IsImprovedAiLoaded = true;
 							IsPathManagerCompatible = false; // Improved AI found
 						} else if ("CSL_Traffic".Equals(namespaceStr)) {
-							IsTrafficPlusPlusLoaded = true;
-							IsPathManagerCompatible = false; // Improved AI found
+							/*IsTrafficPlusPlusLoaded = true;
+							IsPathManagerCompatible = false;*/ // Improved AI found
 						}
 					}
 				} else {

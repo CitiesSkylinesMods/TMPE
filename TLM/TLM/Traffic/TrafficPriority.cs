@@ -848,15 +848,18 @@ namespace TrafficManager.Traffic {
 			if (!LightSimByNodeId.ContainsKey(nodeId))
 				return;
 			var nodeSim = LightSimByNodeId[nodeId];
-			if (nodeSim.TimedTrafficLights) {
-				TrafficLightsTimed timedLights = TrafficLightsTimed.GetTimedLight(nodeId);
-				if (timedLights != null) {
-					foreach (ushort otherNodeId in timedLights.NodeGroup) {
-						LightSimByNodeId.Remove(otherNodeId);
-					}
+			var isTimedLight = nodeSim.TimedTrafficLights;
+			TrafficLightsTimed timedLights = null;
+			if (isTimedLight)
+				timedLights = TrafficLightsTimed.GetTimedLight(nodeId);
+			nodeSim.Destroy();
+			if (isTimedLight && timedLights != null) {
+				foreach (ushort otherNodeId in timedLights.NodeGroup) {
+					Log.Message($"Removing simulation @ node {otherNodeId} (group)");
+					LightSimByNodeId.Remove(otherNodeId);
 				}
 			}
-			nodeSim.Destroy();
+			LightSimByNodeId.Remove(nodeId);
 			//}
 		}
 
