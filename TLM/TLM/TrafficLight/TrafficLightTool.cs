@@ -7,6 +7,7 @@ using ColossalFramework.UI;
 using JetBrains.Annotations;
 using TrafficManager.CustomAI;
 using TrafficManager.Traffic;
+using TrafficManager.UI;
 using UnityEngine;
 
 namespace TrafficManager.TrafficLight {
@@ -56,9 +57,9 @@ namespace TrafficManager.TrafficLight {
 
 		private uint currentFrame = 0;
 
-		private static readonly string NODE_IS_LIGHT = "Node has a traffic light.\nDelete the traffic light by choosing \"Switch traffic lights\" and clicking on this node.";
-		private static readonly string NODE_IS_TIMED_LIGHT = "Node is part of a timed script.\nSelect \"Timed traffic lights\", click on this node and click on \"Remove\" first.";
-		private static readonly string NODE_IS_NOT_LIGHT = "Node does not have a traffic light.\nAdd a traffic light first by choosing \"Switch traffic lights\" and clicking on this node.";
+		private static readonly string NODE_IS_LIGHT = "Junction has a traffic light.\nDelete the traffic light by choosing \"Switch traffic lights\" and clicking on this node.";
+		private static readonly string NODE_IS_TIMED_LIGHT = "Junction is part of a timed script.\nSelect \"Timed traffic lights\", click on this node and click on \"Remove\" first.";
+		private static readonly string NODE_IS_NOT_LIGHT = "Junction does not have a traffic light.\nAdd a traffic light first by choosing \"Switch traffic lights\" and clicking on this node.";
 
 		static Rect ResizeGUI(Rect rect) {
 			var rectX = (rect.x / 800) * Screen.width;
@@ -95,9 +96,19 @@ namespace TrafficManager.TrafficLight {
 		public static void SetToolMode(ToolMode mode) {
 			_toolMode = mode;
 
+			if (mode == ToolMode.None)
+				UITrafficManager.deactivateButtons();
+
 			if (mode != ToolMode.ManualSwitch) {
 				DisableManual();
 			}
+
+			/*if (mode == ToolMode.SwitchTrafficLight) {
+				Singleton<InfoManager>.instance.SetCurrentMode(InfoManager.InfoMode.Traffic, InfoManager.SubInfoMode.Default);
+				UIView.library.Hide("TrafficInfoViewPanel");
+			} else {
+				Singleton<InfoManager>.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
+			}*/
 
 			SelectedNode = 0;
 			SelectedSegment = 0;
@@ -383,20 +394,18 @@ namespace TrafficManager.TrafficLight {
 			var mouseRayValid = !UIView.IsInsideUI() && Cursor.visible && !_cursorInSecondaryPanel;
 
 			if (mouseRayValid) {
+				// find currently hovered node & segment
 				var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 				var mouseRayLength = Camera.main.farClipPlane;
-#if DEBUG
-				Debug.DrawRay(mouseRay.origin, mouseRay.direction * mouseRayLength, Color.yellow);
-#endif
 				var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
 
-				var defaultService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
-				var input = new RaycastInput(mouseRay, mouseRayLength) {
-					m_rayRight = rayRight,
-					m_netService = defaultService,
-					m_ignoreNodeFlags = NetNode.Flags.None,
-					m_ignoreSegmentFlags = NetSegment.Flags.Untouchable
-				};
+				var input = new RaycastInput(mouseRay, mouseRayLength);
+				input.m_netService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
+				input.m_rayRight = rayRight;
+				input.m_ignoreTerrain = true;
+				input.m_ignoreNodeFlags = NetNode.Flags.None;
+				input.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
+
 				RaycastOutput output;
 				if (!RayCast(input, out output)) {
 					_hoveredSegmentIdx = 0;
@@ -404,11 +413,15 @@ namespace TrafficManager.TrafficLight {
 					return;
 				}
 
+				if (output.m_netNode != _hoveredNetNodeIdx || output.m_netSegment != _hoveredSegmentIdx) {
+					Log.Message($"*** Mouse ray @ node {output.m_netNode}, segment {output.m_netSegment}, toolMode={_toolMode}");
+                }
+
 				_hoveredNetNodeIdx = output.m_netNode;
-
 				_hoveredSegmentIdx = output.m_netSegment;
+			} else {
+				Log.Message($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {_cursorInSecondaryPanel}");
 			}
-
 
 			if (_toolMode == ToolMode.None) {
 				ToolCursor = null;
@@ -682,6 +695,8 @@ namespace TrafficManager.TrafficLight {
 			_guiNodes();
 			//_guiVehicles();
 #endif
+			_cursorInSecondaryPanel = false;
+
 			switch (_toolMode) {
 				case ToolMode.AddPrioritySigns:_guiPrioritySigns();
 					break;
@@ -1479,9 +1494,11 @@ namespace TrafficManager.TrafficLight {
 
 
 		private void _guiTimedTrafficLights() {
+			_cursorInSecondaryPanel = false;
+
 			GUILayout.Window(253, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
 
-			IsCursorInSecondaryPanel();
+			_cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
 
 			var hoveredSegment = false;
 
@@ -2332,11 +2349,9 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		private void IsCursorInSecondaryPanel() {
-			_cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
-		}
-
 		private void _guiLaneChange() {
+			_cursorInSecondaryPanel = false;
+
 			if (SelectedNode == 0 || SelectedSegment == 0) return;
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
 
@@ -2499,6 +2514,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void _guiLaneRestrictions() {
+			_cursorInSecondaryPanel = false;
+
 			if (_selectedSegmentIndexes.Count < 1) {
 				return;
 			}
@@ -2909,6 +2926,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void _guiTimedTrafficLightsNode() {
+			_cursorInSecondaryPanel = false;
+
 			GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, "Select nodes");
 
 			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
@@ -3156,9 +3175,13 @@ namespace TrafficManager.TrafficLight {
 
 			GUILayout.Space(30);
 
-			if (_timedEditStep >= 0) return;
+			if (_timedEditStep >= 0) {
+				return;
+			}
 
-			if (!GUILayout.Button("REMOVE")) return;
+			if (!GUILayout.Button("REMOVE")) {
+				return;
+			}
 
 			DisableTimed();
 			SelectedNodeIndexes.Clear();

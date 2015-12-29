@@ -179,7 +179,7 @@ namespace TrafficManager.Traffic {
 
 					segmentLight.UpdateVisuals();
 				}
-			} catch (Exception e) {
+			} catch (Exception) {
 				// TODO rework this
 				invalid = true;
 			}

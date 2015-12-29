@@ -30,7 +30,7 @@ namespace TrafficManager.CustomAI {
 					var nodeSim = e.Value;
 					nodeSim.SimulationStep();
 				}
-			} catch (Exception e) {
+			} catch (Exception) {
 				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
 			}
 		}

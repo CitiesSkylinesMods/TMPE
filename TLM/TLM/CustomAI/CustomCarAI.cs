@@ -9,34 +9,12 @@ using Random = UnityEngine.Random;
 
 namespace TrafficManager.CustomAI {
 	internal class CustomCarAI : CarAI {
-		private const int MaxTrailingVehicles = 16384;
 		private const float FarLod = 1210000f;
 		private const float CloseLod = 250000f;
 		public static HashSet<ushort> watchedVehicleIds = new HashSet<ushort>();
 
 		internal static void OnLevelUnloading() {
 			watchedVehicleIds.Clear();
-		}
-
-		/// <summary>
-		/// Lightweight simulation step method.
-		/// This method is occasionally being called for different cars.
-		/// </summary>
-		/// <param name="vehicleId"></param>
-		/// <param name="vehicleData"></param>
-		/// <param name="physicsLodRefPos"></param>
-		public void TrafficManagerSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			try {
-				FindPathIfNeeded(vehicleId, ref vehicleData);
-			} catch (InvalidOperationException) {
-				return;
-			}
-
-			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
-
-			SimulateVehicleChain(vehicleId, ref vehicleData, physicsLodRefPos);
-
-			DespawnVehicles(vehicleId, vehicleData);
 		}
 
 		/// <summary>
@@ -311,7 +289,41 @@ namespace TrafficManager.CustomAI {
 			return handledVehicle;
 		}
 
-		private void SimulateVehicleChain(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
+		/// <summary>
+		/// Lightweight simulation step method.
+		/// This method is occasionally being called for different cars.
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <param name="vehicleData"></param>
+		/// <param name="physicsLodRefPos"></param>
+		public void TrafficManagerSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
+			try {
+				FindPathIfNeeded(vehicleId, ref vehicleData);
+			} catch (InvalidOperationException) {
+				return;
+			}
+
+			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
+
+			SimulateVehicleAndTrailers(vehicleId, ref vehicleData, physicsLodRefPos);
+
+			DespawnVehicles(vehicleId, ref vehicleData);
+		}
+
+		private void FindPathIfNeeded(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) == Vehicle.Flags.None) return;
+
+			if (!CanFindPath(vehicleId, ref vehicleData))
+				throw new InvalidOperationException("Path Not Available for Vehicle");
+		}
+
+		private void SpawnVehicleIfWaiting(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None) {
+				TrySpawn(vehicleId, ref vehicleData);
+			}
+		}
+
+		private void SimulateVehicleAndTrailers(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			var lastFramePosition = vehicleData.GetLastFramePosition();
 
 			var lodPhysics = CalculateLod(physicsLodRefPos, lastFramePosition);
@@ -323,54 +335,38 @@ namespace TrafficManager.CustomAI {
 
 			var vehicleManager = Singleton<VehicleManager>.instance;
 			var trailingVehicleId = vehicleData.m_trailingVehicle;
-			SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager,
-				0);
+			SimulateTrailingVehicles(vehicleId, ref vehicleData, lodPhysics, trailingVehicleId, ref vehicleManager, 0);
 		}
 
-		private void DespawnVehicles(ushort vehicleId, Vehicle vehicleData) {
-			DespawnInvalidVehicles(vehicleId, vehicleData);
-
-			DespawnVehicleIfOverBlockMax(vehicleId, vehicleData);
-		}
-
-		private void DespawnInvalidVehicles(ushort vehicleId, Vehicle vehicleData) {
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) ==
-				Vehicle.Flags.None && vehicleData.m_cargoParent == 0) {
+		private void DespawnVehicles(ushort vehicleId, ref Vehicle vehicleData) {
+			int privateServiceIndex = ItemClass.GetPrivateServiceIndex(this.m_info.m_class.m_service);
+			int num3 = (privateServiceIndex == -1) ? 150 : 100;
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) == Vehicle.Flags.None && vehicleData.m_cargoParent == 0) {
+				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+			} else if ((int)vehicleData.m_blockCounter == num3 && LoadingExtension.Instance.DespawnEnabled) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
 
-		private void DespawnVehicleIfOverBlockMax(ushort vehicleId, Vehicle vehicleData) {
-			var maxBlockingVehicles = CalculateMaxBlockingVehicleCount();
-			if (vehicleData.m_blockCounter >= maxBlockingVehicles && LoadingExtension.Instance.DespawnEnabled) {
-				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			}
-		}
-
-		private int CalculateMaxBlockingVehicleCount() {
-			return (m_info.m_class.m_service > ItemClass.Service.Office) ? 150 : 100;
-		}
-
-		private void SimulateTrailingVehicles(ushort vehicleId, ref Vehicle vehicleData, int lodPhysics,
-			ushort leadingVehicleId, VehicleManager vehicleManager, int numberOfIterations) {
-			if (leadingVehicleId == 0) {
+		private void SimulateTrailingVehicles(ushort leaderId, ref Vehicle leaderData, int lodPhysics,
+			ushort trailingVehicleId, ref VehicleManager vehicleManager, int numberOfIterations) {
+			if (trailingVehicleId == 0) {
 				return;
 			}
 
-			var trailingVehicleId = vehicleManager.m_vehicles.m_buffer[leadingVehicleId].m_trailingVehicle;
+			var trailingTrailingVehicleId = vehicleManager.m_vehicles.m_buffer[trailingVehicleId].m_trailingVehicle;
 			var trailingVehicleInfo = vehicleManager.m_vehicles.m_buffer[trailingVehicleId].Info;
 
 			trailingVehicleInfo.m_vehicleAI.SimulationStep(trailingVehicleId,
-				ref vehicleManager.m_vehicles.m_buffer[trailingVehicleId], vehicleId,
-				ref vehicleData, lodPhysics);
+				ref vehicleManager.m_vehicles.m_buffer[trailingVehicleId], leaderId,
+				ref leaderData, lodPhysics);
 
-			if (++numberOfIterations > MaxTrailingVehicles) {
+			if (++numberOfIterations > 16384) {
 				CODebugBase<LogChannel>.Error(LogChannel.Core,
 					"Invalid list detected!\n" + Environment.StackTrace);
 				return;
 			}
-			SimulateTrailingVehicles(trailingVehicleId, ref vehicleData, lodPhysics, trailingVehicleId, vehicleManager,
-				numberOfIterations);
+			SimulateTrailingVehicles(leaderId, ref leaderData, lodPhysics, trailingTrailingVehicleId, ref vehicleManager, numberOfIterations);
 		}
 
 		private static int CalculateLod(Vector3 physicsLodRefPos, Vector3 lastFramePosition) {
@@ -384,19 +380,6 @@ namespace TrafficManager.CustomAI {
 				lodPhysics = 0;
 			}
 			return lodPhysics;
-		}
-
-		private void SpawnVehicleIfWaiting(ushort vehicleId, ref Vehicle vehicleData) {
-			if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None) {
-				TrySpawn(vehicleId, ref vehicleData);
-			}
-		}
-
-		private void FindPathIfNeeded(ushort vehicleId, ref Vehicle vehicleData) {
-			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) == Vehicle.Flags.None) return;
-
-			if (!CanFindPath(vehicleId, ref vehicleData))
-				throw new InvalidOperationException("Path Not Available for Vehicle");
 		}
 
 		private bool CanFindPath(ushort vehicleId, ref Vehicle data) {

@@ -1,9 +1,13 @@
 # Cities: Skylines - Traffic Manager: *Traffic President Edition*
-A work-in-progress (state: 12/28/2015) mod for **Cities: Skylines** to add additional road traffic control
+A work-in-progress (state: 12/29/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.8, 12/29/2015 (Victor-Philipp Negoescu)
+- Articulated busses are now simulated correctly (thanks to @nieksen for pointing out this problem)
+- UI improvements
+
 1.3.7, 12/28/2015 (Victor-Philipp Negoescu)
-- When setting up a new timed traffic light, yellow lights from the real-world state are not taken over.
+- When setting up a new timed traffic light, yellow lights from the real-world state are not taken over
 - When loading another save game via the escape menu, Traffic Manager does not crash
 - When loading another save game via the escape menu, Traffic++ detection works as intended
 - Lane arrows are saved correctly

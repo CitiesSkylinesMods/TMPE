@@ -173,7 +173,6 @@ namespace TrafficManager {
 
             if (ToolMode != TrafficManagerMode.None) {
                 ToolMode = TrafficManagerMode.None;
-                UITrafficManager.UIState = UIState.None;
                 DestroyTool();
             }
         }
