@@ -845,11 +845,18 @@ namespace TrafficManager.Traffic {
 
 		public static void RemoveNodeFromSimulation(ushort nodeId) {
 			//lock (simLock) {
-				if (!LightSimByNodeId.ContainsKey(nodeId))
-					return;
-				var nodeSim = LightSimByNodeId[nodeId];
-				LightSimByNodeId.Remove(nodeId);
-				nodeSim.Destroy();
+			if (!LightSimByNodeId.ContainsKey(nodeId))
+				return;
+			var nodeSim = LightSimByNodeId[nodeId];
+			if (nodeSim.TimedTrafficLights) {
+				TrafficLightsTimed timedLights = TrafficLightsTimed.GetTimedLight(nodeId);
+				if (timedLights != null) {
+					foreach (ushort otherNodeId in timedLights.NodeGroup) {
+						LightSimByNodeId.Remove(otherNodeId);
+					}
+				}
+			}
+			nodeSim.Destroy();
 			//}
 		}
 

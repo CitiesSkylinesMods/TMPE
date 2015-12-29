@@ -152,6 +152,7 @@ namespace TrafficManager.TrafficLight {
 					if (nodeSim == null)
 						continue;
 					nodeSim.TimedTrafficLightsActive = false;
+					nodeSim.TimedTrafficLights = false;
 				}
 			}
 		}
