@@ -16,8 +16,14 @@ namespace TrafficManager.Traffic {
 		public int maxTime;
 		public uint startFrame;
 
+		/// <summary>
+		/// Indicates if the step is done (internal use only)
+		/// </summary>
 		private bool stepDone;
 
+		/// <summary>
+		/// Frame when the GreenToRed phase started
+		/// </summary>
 		private int endTransitionStart;
 
 		/// <summary>
@@ -37,11 +43,11 @@ namespace TrafficManager.Traffic {
 		private List<ushort> groupNodeIds;
 		private TrafficLightsTimed timedNode;
 
-		public Dictionary<int, ManualSegmentLight> segmentLightStates = new Dictionary<int, ManualSegmentLight>();
+		public Dictionary<ushort, ManualSegmentLight> segmentLightStates = new Dictionary<ushort, ManualSegmentLight>();
 		/// <summary>
 		/// list of segment ids connected to the node
 		/// </summary>
-		public List<int> segmentIds = new List<int>();
+		public List<ushort> segmentIds = new List<ushort>();
 
 		/// <summary>
 		/// Maximum segment length
@@ -71,22 +77,38 @@ namespace TrafficManager.Traffic {
 
 			for (var s = 0; s < 8; s++) {
 				var segmentId = node.GetSegment(s);
+				if (segmentId <= 0)
+					continue;
+
+				addSegment(segmentId);
+			}
+			rebuildSegmentIds();
+		}
+
+		internal void rebuildSegmentIds() {
+			var node = TrafficLightTool.GetNetNode(nodeId);
+
+			List<ushort> oldSegmentIds = new List<ushort>(segmentIds);
+			maxSegmentLength = 0;
+			segmentIds.Clear();
+			for (var s = 0; s < 8; s++) {
+				var segmentId = node.GetSegment(s);
+				
+				if (segmentId <= 0)
+					continue;
+
 				float segLength = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_averageLength;
 				if (segLength > maxSegmentLength)
 					maxSegmentLength = segLength;
 
-				if (segmentId != 0) {
-					segmentIds.Add(segmentId);
-					var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
-					if (segmentLight != null) {
-						segmentLightStates[segmentId] = (ManualSegmentLight)segmentLight.Clone();
-						segmentLightStates[segmentId].makeRedOrGreen();
-					}
-				}
+				segmentIds.Add(segmentId);
+				oldSegmentIds.Remove(segmentId);
 			}
+
+			foreach (var segmentId in oldSegmentIds)
+				segmentIds.Add(segmentId);
 		}
 
-		// TODO rework
 		public bool isValid() {
 			return !invalid;
 		}
@@ -111,7 +133,7 @@ namespace TrafficManager.Traffic {
 			return getCurrentFrame() == startFrame && !StepDone();
 		}
 
-		public RoadBaseAI.TrafficLightState GetLight(int segment, int lightType) {
+		public RoadBaseAI.TrafficLightState GetLight(ushort segment, int lightType) {
 			ManualSegmentLight segLight = segmentLightStates[segment];
 			if (segLight != null) {
 				switch (lightType) {
@@ -136,10 +158,8 @@ namespace TrafficManager.Traffic {
 			stepDone = false;
 			this.startFrame = getCurrentFrame();
 			this.endTransitionStart = -1;
-			foreach (int segmentId in segmentIds) {
-				minFlow = Single.NaN;
-				maxWait = Single.NaN;
-			}
+			minFlow = Single.NaN;
+			maxWait = Single.NaN;
 		}
 
 		private uint getCurrentFrame() {
@@ -161,8 +181,7 @@ namespace TrafficManager.Traffic {
 				TimedTrafficStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
 				TimedTrafficStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
 
-			
-				foreach (KeyValuePair<int, ManualSegmentLight> e in segmentLightStates) {
+				foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
 					var segmentId = e.Key;
 					var segLightState = e.Value;
 					var prevLightState = previousStep.segmentLightStates[segmentId];
@@ -179,10 +198,20 @@ namespace TrafficManager.Traffic {
 
 					segmentLight.UpdateVisuals();
 				}
-			} catch (Exception) {
-				// TODO rework this
+			} catch (Exception e) {
+				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.Message}");
 				invalid = true;
 			}
+		}
+
+		/// <summary>
+		/// Adds a new segment to this step. After adding all steps the method `rebuildSegmentIds` must be called.
+		/// </summary>
+		/// <param name="segmentId"></param>
+		internal void addSegment(ushort segmentId) {
+			segmentLightStates.Add(segmentId, (ManualSegmentLight)TrafficLightsManual.GetOrLiveSegmentLight(nodeId, segmentId).Clone());
+			segmentLightStates[segmentId].makeRedOrGreen();
+			segmentIds.Add(segmentId);
 		}
 
 		private RoadBaseAI.TrafficLightState calcLightState(RoadBaseAI.TrafficLightState previousState, RoadBaseAI.TrafficLightState currentState, RoadBaseAI.TrafficLightState nextState, bool atStartTransition, bool atEndTransition) {
@@ -198,7 +227,7 @@ namespace TrafficManager.Traffic {
 		/// Updates timed segment lights according to "real-world" traffic light states
 		/// </summary>
 		public void UpdateLights() {
-			foreach (KeyValuePair<int, ManualSegmentLight> e in segmentLightStates) {
+			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
 				var segmentId = e.Key;
 				var segLightState = e.Value;
 				
@@ -272,10 +301,10 @@ namespace TrafficManager.Traffic {
 						TrafficLightsTimed slaveTimedNode = TrafficLightsTimed.GetTimedLight(timedNodeId);
 						TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
 
-						List<int> segmentIdsToDelete = new List<int>();
+						//List<int> segmentIdsToDelete = new List<int>();
 
 						// minimum time reached. check traffic!
-						foreach (KeyValuePair<int, ManualSegmentLight> e in slaveStep.segmentLightStates) {
+						foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
 							var fromSegmentId = e.Key;
 							var segLightState = e.Value;
 							float segmentWeight = Singleton<NetManager>.instance.m_segments.m_buffer[fromSegmentId].m_averageLength / maxSegmentLength;
@@ -283,9 +312,9 @@ namespace TrafficManager.Traffic {
 							// one of the traffic lights at this segment is green: count minimum traffic flowing through
 							PrioritySegment prioSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
 							if (prioSeg == null) {
-								Log.Warning("stepDone(): prioSeg is null");
-								segmentIdsToDelete.Add(fromSegmentId);
-								continue;
+								//Log.Warning("stepDone(): prioSeg is null");
+								//segmentIdsToDelete.Add(fromSegmentId);
+								continue; // skip invalid segment
 							}
 							foreach (KeyValuePair<ushort, int> f in prioSeg.numCarsGoingToSegmentId) {
 								var toSegmentId = f.Key;
@@ -320,12 +349,11 @@ namespace TrafficManager.Traffic {
 						}
 
 						// delete invalid segments from step
-						foreach (int segmentId in segmentIdsToDelete) {
+						/*foreach (int segmentId in segmentIdsToDelete) {
 							slaveStep.segmentLightStates.Remove(segmentId);
-						}
+						}*/
 
 						if (slaveStep.segmentLightStates.Count <= 0) {
-							// TODO rework
 							invalid = true;
 							return true;
 						}

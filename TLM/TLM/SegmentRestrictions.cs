@@ -5,18 +5,18 @@ namespace TrafficManager
 {
     class SegmentRestrictions
     {
-        public int SegmentId { get; }
+        public ushort SegmentId { get; }
 
         public readonly float[] SpeedLimits = {0f, 0f, 0f, 0f, 0f, 0f,0f,0f,0f,0f,0f,0f,0f,0f,0f,0f};
 
         private readonly List<LaneRestrictions> _lanes = new List<LaneRestrictions>();
 
-        public readonly List<int> SegmentGroup;
+        public readonly List<ushort> SegmentGroup;
 
-        public SegmentRestrictions(int segmentid, IEnumerable<int> segmentGroup )
+        public SegmentRestrictions(ushort segmentid, IEnumerable<ushort> segmentGroup )
         {
             SegmentId = segmentid;
-            SegmentGroup = new List<int>(segmentGroup);
+            SegmentGroup = new List<ushort>(segmentGroup);
         }
 
         public void AddLane(uint lane, int lanenum, NetInfo.Direction dir)

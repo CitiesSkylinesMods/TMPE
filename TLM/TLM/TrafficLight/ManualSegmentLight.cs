@@ -13,8 +13,13 @@ namespace TrafficManager.TrafficLight {
 			All = 4 // <, ^, >
 		}
 
-		public ushort Node;
-		public int Segment;
+		public ushort nodeId;
+		private ushort segmentId;
+
+		public ushort SegmentId {
+			get { return segmentId; }
+			set { segmentId = value; rebuildOutSegments(); }
+		}
 
 		public Mode CurrentMode = Mode.Simple;
 
@@ -41,13 +46,9 @@ namespace TrafficManager.TrafficLight {
 
 		public bool PedestrianEnabled;
 
-		public ManualSegmentLight(ushort nodeId, int segmentId, RoadBaseAI.TrafficLightState mainLight) {
-			Node = nodeId;
-			Segment = segmentId;
-
-			leftOutSegmentIds = new List<int>();
-			forwardOutSegmentIds = new List<int>();
-			rightOutSegmentIds = new List<int>();
+		public ManualSegmentLight(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight) {
+			this.nodeId = nodeId;
+			this.segmentId = segmentId;
 
 			LightMain = mainLight;
 			LightLeft = mainLight;
@@ -56,8 +57,20 @@ namespace TrafficManager.TrafficLight {
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
-			// build outgoing segment lists
+			rebuildOutSegments();
+
+			UpdateVisuals();
+		}
+		
+		/// <summary>
+		/// build outgoing segment lists
+		/// </summary>
+		private void rebuildOutSegments() {
 			var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
+			leftOutSegmentIds = new List<int>();
+			forwardOutSegmentIds = new List<int>();
+			rightOutSegmentIds = new List<int>();
 
 			for (var s = 0; s < 8; s++) {
 				var toSegmentId = node.GetSegment(s);
@@ -70,13 +83,11 @@ namespace TrafficManager.TrafficLight {
 				else
 					forwardOutSegmentIds.Add(toSegmentId);
 			}
-
-			UpdateVisuals();
 		}
 
-		public ManualSegmentLight(ushort nodeId, int segmentId, RoadBaseAI.TrafficLightState mainLight, RoadBaseAI.TrafficLightState leftLight, RoadBaseAI.TrafficLightState rightLight, RoadBaseAI.TrafficLightState pedestrianLight) {
-			Node = nodeId;
-			Segment = segmentId;
+		public ManualSegmentLight(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight, RoadBaseAI.TrafficLightState leftLight, RoadBaseAI.TrafficLightState rightLight, RoadBaseAI.TrafficLightState pedestrianLight) {
+			this.nodeId = nodeId;
+			this.segmentId = segmentId;
 
 			LightMain = mainLight;
 			LightLeft = leftLight;
@@ -103,9 +114,9 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void ChangeMode() {
-			var hasLeftSegment = TrafficPriority.HasLeftSegment(Segment, Node) && TrafficPriority.HasLeftLane(Node, Segment);
-			var hasForwardSegment = TrafficPriority.HasForwardSegment(Segment, Node) && TrafficPriority.HasForwardLane(Node, Segment);
-			var hasRightSegment = TrafficPriority.HasRightSegment(Segment, Node) && TrafficPriority.HasRightLane(Node, Segment);
+			var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, nodeId) && TrafficPriority.HasLeftLane(nodeId, segmentId);
+			var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, nodeId) && TrafficPriority.HasForwardLane(nodeId, segmentId);
+			var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, nodeId) && TrafficPriority.HasRightLane(nodeId, segmentId);
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {
@@ -228,7 +239,7 @@ namespace TrafficManager.TrafficLight {
 			var instance = Singleton<NetManager>.instance;
 
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			uint num = (uint)(((int)Node << 8) / 32768);
+			uint num = (uint)(((int)nodeId << 8) / 32768);
 
 			LastChange = 0u;
 			LastChangeFrame = currentFrameIndex >> 6;
@@ -238,7 +249,7 @@ namespace TrafficManager.TrafficLight {
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			bool vehicles;
 			bool pedestrians;
-			RoadBaseAI.GetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment],
+			RoadBaseAI.GetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segmentId],
 				currentFrameIndex - num, out oldVehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
 			// any green?
@@ -261,7 +272,7 @@ namespace TrafficManager.TrafficLight {
 
 			pedestrianLightState = LightPedestrian;
 
-			RoadBaseAI.SetTrafficLightState(Node, ref instance.m_segments.m_buffer[Segment], currentFrameIndex - num,
+			RoadBaseAI.SetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segmentId], currentFrameIndex - num,
 				vehicleLightState, pedestrianLightState, true, true);
 		}
 

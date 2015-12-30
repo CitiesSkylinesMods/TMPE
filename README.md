@@ -2,6 +2,10 @@
 A work-in-progress (state: 12/29/2015) mod for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.11, 12/30/2015 (Victor-Philipp Negoescu)
+- Road segments next to a timed traffic light may now be deleted/upgraded/added without leading to deletion of the light
+- Priority signs and Timed traffic light state symbols are now visible as soon as the menu is opened
+
 1.3.10, 12/29/2015 (Victor-Philipp Negoescu)
 - Fixed an issue where timed traffic light groups were not deleted after deleting an adjacent segment
 

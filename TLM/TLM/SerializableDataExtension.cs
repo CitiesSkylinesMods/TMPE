@@ -137,10 +137,10 @@ namespace TrafficManager {
 			foreach (var segment in _configuration.PrioritySegments) {
 				if (segment.Length < 3)
 					continue;
-				if (TrafficPriority.IsPrioritySegment((ushort)segment[0], segment[1]))
+				if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1]))
 					continue;
 				Log.Message($"Adding Priority Segment of type: {segment[2].ToString()}");
-				TrafficPriority.AddPrioritySegment((ushort)segment[0], segment[1], (PrioritySegment.PriorityType)segment[2]);
+				TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (PrioritySegment.PriorityType)segment[2]);
 			}
 
 			foreach (var node in _configuration.NodeDictionary) {
@@ -167,13 +167,13 @@ namespace TrafficManager {
 				if (segmentData.Length < 10)
 					continue;
 
-				if (TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], segmentData[1]))
+				if (TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]))
 					continue;
 
 				Log.Message($"Adding Light to Segment {segmentData[0]}");
 				try {
-					TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], segmentData[1], RoadBaseAI.TrafficLightState.Green);
-					var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], segmentData[1]);
+					TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], (ushort)segmentData[1], RoadBaseAI.TrafficLightState.Green);
+					var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]);
 					segment.CurrentMode = (ManualSegmentLight.Mode)segmentData[2];
 					segment.LightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
 					segment.LightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
@@ -235,22 +235,24 @@ namespace TrafficManager {
 							timedNode.AddStep(minTime, maxTime);
 
 							var step = timedNode.Steps[j];
-							if (numSegments <= step.segmentIds.Count)
+							if (numSegments <= step.segmentIds.Count) {
 								for (var k = 0; k < numSegments; k++) {
-									var leftLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-									var mainLightState = (RoadBaseAI.TrafficLightState)	_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-									var rightLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-									var pedLightState = (RoadBaseAI.TrafficLightState) _configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
+									ushort stepSegmentId = (ushort)step.segmentIds[k];
+
+									var leftLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
+									var mainLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
+									var rightLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
+									var pedLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
 
 									//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
-									step.segmentLightStates[step.segmentIds[k]].LightLeft = leftLightState;
-									step.segmentLightStates[step.segmentIds[k]].LightMain = mainLightState;
-									step.segmentLightStates[step.segmentIds[k]].LightRight = rightLightState;
-									step.segmentLightStates[step.segmentIds[k]].LightPedestrian = pedLightState;
+									step.segmentLightStates[stepSegmentId].LightLeft = leftLightState;
+									step.segmentLightStates[stepSegmentId].LightMain = mainLightState;
+									step.segmentLightStates[stepSegmentId].LightRight = rightLightState;
+									step.segmentLightStates[stepSegmentId].LightPedestrian = pedLightState;
 
 									timedStepSegmentCount++;
 								}
-
+							}
 							timedStepCount++;
 						}
 
@@ -343,7 +345,7 @@ namespace TrafficManager {
 			Log.Warning("Saving Mod Data.");
 			var configuration = new Configuration();
 
-			for (var i = 0; i < 36864; i++) {
+			for (ushort i = 0; i < 36864; i++) {
 				if (TrafficPriority.PrioritySegments != null) {
 					AddPrioritySegment(i, configuration);
 				}
@@ -446,7 +448,7 @@ namespace TrafficManager {
 
 				configuration.TimedNodes.Add(new[]
 				{
-					timedNode.NodeId, timedNode.CurrentStep, timedNode.NumSteps(),
+					timedNode.nodeId, timedNode.CurrentStep, timedNode.NumSteps(),
 					Convert.ToInt32(timedNode.IsStarted())
 				});
 
@@ -458,16 +460,25 @@ namespace TrafficManager {
 
 				configuration.TimedNodeGroups.Add(nodeGroup);
 
+				// get segment ids which are still defined but for which real road segments are missing
+				HashSet<ushort> invalidSegmentIds = timedNode.getInvalidSegmentIds();
+
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
+					int validCount = timedNode.Steps[j].segmentIds.Count - invalidSegmentIds.Count;
+
 					configuration.TimedNodeSteps.Add(new[]
 					{
 						timedNode.Steps[j].minTime,
 						timedNode.Steps[j].maxTime,
-						timedNode.Steps[j].segmentIds.Count
+						validCount
 					});
 
 					for (var k = 0; k < timedNode.Steps[j].segmentIds.Count; k++) {
 						var segmentId = timedNode.Steps[j].segmentIds[k];
+
+						if (invalidSegmentIds.Contains(segmentId))
+							continue;
+
 						var segLight = timedNode.Steps[j].segmentLightStates[segmentId];
 						configuration.TimedNodeStepSegments.Add(new[]
 						{
@@ -483,18 +494,18 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddManualTrafficLight(int i, Configuration configuration) {
+		private static void AddManualTrafficLight(ushort segmentId, Configuration configuration) {
 			try {
-				if (!TrafficLightsManual.ManualSegments.ContainsKey(i))
+				if (!TrafficLightsManual.ManualSegments.ContainsKey(segmentId))
 					return;
 
-				if (TrafficLightsManual.ManualSegments[i].Node1 != 0) {
-					var manualSegment = TrafficLightsManual.ManualSegments[i].Instance1;
+				if (TrafficLightsManual.ManualSegments[segmentId].Node1 != 0) {
+					var manualSegment = TrafficLightsManual.ManualSegments[segmentId].Instance1;
 
 					configuration.ManualSegments.Add(new[]
 					{
-						manualSegment.Node,
-						manualSegment.Segment,
+						manualSegment.nodeId,
+						manualSegment.SegmentId,
 						(int) manualSegment.CurrentMode,
 						(int) manualSegment.LightLeft,
 						(int) manualSegment.LightMain,
@@ -505,14 +516,14 @@ namespace TrafficManager {
 						Convert.ToInt32(manualSegment.PedestrianEnabled)
 					});
 				}
-				if (TrafficLightsManual.ManualSegments[i].Node2 == 0)
+				if (TrafficLightsManual.ManualSegments[segmentId].Node2 == 0)
 					return;
-				var manualSegmentLight = TrafficLightsManual.ManualSegments[i].Instance2;
+				var manualSegmentLight = TrafficLightsManual.ManualSegments[segmentId].Instance2;
 
 				configuration.ManualSegments.Add(new[]
 				{
-					manualSegmentLight.Node,
-					manualSegmentLight.Segment,
+					manualSegmentLight.nodeId,
+					manualSegmentLight.SegmentId,
 					(int) manualSegmentLight.CurrentMode,
 					(int) manualSegmentLight.LightLeft,
 					(int) manualSegmentLight.LightMain,
@@ -544,28 +555,28 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddPrioritySegment(int i, Configuration configuration) {
+		private static void AddPrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				if (!TrafficPriority.PrioritySegments.ContainsKey(i))
+				if (!TrafficPriority.PrioritySegments.ContainsKey(segmentId))
 					return;
-				if (TrafficPriority.PrioritySegments[i].Node1 != 0) {
+				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0) {
 					Log.Message(
-						$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[i].Instance1.Type}");
+						$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type}");
 					configuration.PrioritySegments.Add(new[]
 					{
-						TrafficPriority.PrioritySegments[i].Node1, i,
-						(int) TrafficPriority.PrioritySegments[i].Instance1.Type
+						TrafficPriority.PrioritySegments[segmentId].Node1, segmentId,
+						(int) TrafficPriority.PrioritySegments[segmentId].Instance1.Type
 					});
 				}
 
-				if (TrafficPriority.PrioritySegments[i].Node2 == 0)
+				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0)
 					return;
 				Log.Message(
-					$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[i].Instance2.Type}");
+					$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type}");
 				configuration.PrioritySegments.Add(new[]
 				{
-					TrafficPriority.PrioritySegments[i].Node2, i,
-					(int) TrafficPriority.PrioritySegments[i].Instance2.Type
+					TrafficPriority.PrioritySegments[segmentId].Node2, segmentId,
+					(int) TrafficPriority.PrioritySegments[segmentId].Instance2.Type
 				});
 			} catch (Exception e) {
 				Log.Error($"Error adding Priority Segments to Save {e.Message}");

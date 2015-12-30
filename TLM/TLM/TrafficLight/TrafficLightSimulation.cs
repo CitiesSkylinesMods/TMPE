@@ -23,32 +23,18 @@ namespace TrafficManager.TrafficLight {
 
                         if (segment == 0) continue;
                         if (TrafficLightsManual.IsSegmentLight(nodeId, segment)) {
-                            TrafficLightsManual.ClearSegment(nodeId, segment);
+                            TrafficLightsManual.RemoveSegmentLight(nodeId, segment);
                         }
                     }
                 } else {
 					var node = getNode();
 
-					var instance = Singleton<NetManager>.instance;
-                    var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
                     for (var s = 0; s < 8; s++) {
-                        var segment = node.GetSegment(s);
+                        var segmentId = node.GetSegment(s);
 
-                        if (segment == 0) continue;
-                        RoadBaseAI.TrafficLightState vehicleLightState;
-                        RoadBaseAI.TrafficLightState pedestrianLightState;
-                        bool vehicles;
-                        bool pedestrians;
-
-                        RoadBaseAI.GetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segment],
-                            currentFrameIndex - 256u, out vehicleLightState, out pedestrianLightState, out vehicles,
-                            out pedestrians);
-
-                        TrafficLightsManual.AddSegmentLight(nodeId, segment,
-                            vehicleLightState == RoadBaseAI.TrafficLightState.Green
-                                ? RoadBaseAI.TrafficLightState.Green
-                                : RoadBaseAI.TrafficLightState.Red);
+                        if (segmentId == 0)
+							continue;
+						TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
                     }
                 }
             }
@@ -73,7 +59,7 @@ namespace TrafficManager.TrafficLight {
 
                         if (segment == 0) continue;
                         if (TrafficLightsManual.IsSegmentLight(nodeId, segment)) {
-                            TrafficLightsManual.ClearSegment(nodeId, segment);
+                            TrafficLightsManual.RemoveSegmentLight(nodeId, segment);
                         }
                     }
                 } else {
@@ -81,29 +67,13 @@ namespace TrafficManager.TrafficLight {
 
 					var node = getNode();
 
-					var instance = Singleton<NetManager>.instance;
-                    var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
                     for (int s = 0; s < 8; s++) {
-                        var segment = node.GetSegment(s);
+                        var segmentId = node.GetSegment(s);
 
-                        if (segment != 0) {
-                            RoadBaseAI.TrafficLightState trafficLightState3;
-                            RoadBaseAI.TrafficLightState trafficLightState4;
-                            bool vehicles;
-                            bool pedestrians;
-
-                            RoadBaseAI.GetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segment],
-                                currentFrameIndex - 256u, out trafficLightState3, out trafficLightState4, out vehicles,
-                                out pedestrians);
-
-                            if (trafficLightState3 == RoadBaseAI.TrafficLightState.Green) {
-                                TrafficLightsManual.AddSegmentLight(nodeId, segment, RoadBaseAI.TrafficLightState.Green);
-                            } else {
-                                TrafficLightsManual.AddSegmentLight(nodeId, segment, RoadBaseAI.TrafficLightState.Red);
-                            }
-                        }
-                    }
+						if (segmentId == 0)
+							continue;
+						TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
+					}
                 }
             }
         }

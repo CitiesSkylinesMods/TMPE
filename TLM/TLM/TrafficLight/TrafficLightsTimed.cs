@@ -6,9 +6,12 @@ using TrafficManager.Traffic;
 
 namespace TrafficManager.TrafficLight {
 	public class TrafficLightsTimed {
-		public ushort NodeId;
+		public ushort nodeId;
 		private ushort masterNodeId;
 
+		/// <summary>
+		/// Timed traffic light by node id
+		/// </summary>
 		public static Dictionary<ushort, TrafficLightsTimed> TimedScripts = new Dictionary<ushort, TrafficLightsTimed>();
 
 		public List<TimedTrafficStep> Steps = new List<TimedTrafficStep>();
@@ -17,7 +20,7 @@ namespace TrafficManager.TrafficLight {
 		public List<ushort> NodeGroup;
 
 		public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup) {
-			NodeId = nodeId;
+			this.nodeId = nodeId;
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
 
@@ -32,7 +35,7 @@ namespace TrafficManager.TrafficLight {
 			if (maxTime < minTime)
 				maxTime = minTime;
 
-			Steps.Add(new TimedTrafficStep(minTime, maxTime, NodeId, masterNodeId, NodeGroup));
+			Steps.Add(new TimedTrafficStep(minTime, maxTime, nodeId, masterNodeId, NodeGroup));
 		}
 
 		public void Start() {
@@ -40,7 +43,7 @@ namespace TrafficManager.TrafficLight {
 			Steps[0].SetLights();
 			Steps[0].Start();
 
-			TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive = true;
+			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = true;
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -51,11 +54,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Stop() {
-			TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive = false;
+			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
 		public bool IsStarted() {
-			return TrafficPriority.GetNodeSimulation(NodeId).TimedTrafficLightsActive;
+			return TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive;
 		}
 
 		public int NumSteps() {
@@ -71,7 +74,8 @@ namespace TrafficManager.TrafficLight {
 				return true;
 
 			if (! Steps[CurrentStep].isValid()) {
-				TrafficPriority.RemoveNodeFromSimulation(NodeId);
+				TrafficPriority.RemoveNodeFromSimulation(nodeId);
+				return false;
 			}
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -99,7 +103,7 @@ namespace TrafficManager.TrafficLight {
 			Steps[CurrentStep].SetLights();
 		}
 
-		public long CheckNextChange(int segmentId, int lightType) {
+		public long CheckNextChange(ushort segmentId, int lightType) {
 			var curStep = CurrentStep;
 			var nextStep = CurrentStep + 1;
 			var numFrames = Steps[CurrentStep].MaxTimeRemaining();
@@ -107,13 +111,13 @@ namespace TrafficManager.TrafficLight {
 			RoadBaseAI.TrafficLightState currentState;
 
 			if (lightType == 0)
-				currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightMain();
+				currentState = TrafficLightsManual.GetSegmentLight(nodeId, segmentId).GetLightMain();
 			else if (lightType == 1)
-				currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightLeft();
+				currentState = TrafficLightsManual.GetSegmentLight(nodeId, segmentId).GetLightLeft();
 			else if (lightType == 2)
-				currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightRight();
+				currentState = TrafficLightsManual.GetSegmentLight(nodeId, segmentId).GetLightRight();
 			else
-				currentState = TrafficLightsManual.GetSegmentLight(NodeId, segmentId).GetLightPedestrian();
+				currentState = TrafficLightsManual.GetSegmentLight(nodeId, segmentId).GetLightPedestrian();
 
 
 			while (true) {
@@ -164,6 +168,86 @@ namespace TrafficManager.TrafficLight {
 
 		internal static void OnLevelUnloading() {
 			TimedScripts.Clear();
+		}
+
+		internal void handleNewSegments() {
+			if (Steps.Count <= 0)
+				return;
+
+			NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+			
+			for (int s = 0; s < 8; ++s) {
+				ushort segmentId = node.GetSegment(s);
+				if (segmentId <= 0)
+					continue;
+				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+
+				List<ushort> invalidSegmentIds = new List<ushort>();
+				bool isNewSegment = true;
+
+				foreach (KeyValuePair<ushort, ManualSegmentLight> e in Steps[0].segmentLightStates) {
+					var fromSegmentId = e.Key;
+					var segLightState = e.Value;
+
+					if (fromSegmentId == segmentId)
+						isNewSegment = false;
+
+					if (!TrafficPriority.IsPrioritySegment(nodeId, fromSegmentId))
+						invalidSegmentIds.Add(fromSegmentId);
+				}
+
+				if (isNewSegment) {
+					Log.Message($"New segment detected: {segmentId} @ {nodeId}");
+					// segment was created
+					TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
+					TrafficPriority.AddPrioritySegment(nodeId, segmentId, PrioritySegment.PriorityType.None);
+
+					if (invalidSegmentIds.Count > 0) {
+						var oldSegmentId = invalidSegmentIds[0];
+						Log.Message($"Replacing old segment {oldSegmentId} @ {nodeId} with new segment {segmentId}");
+
+						// replace the old segment with the newly created one
+						for (int i = 0; i < Steps.Count; ++i) {
+							ManualSegmentLight segmentLight = Steps[i].segmentLightStates[oldSegmentId];
+							Steps[i].segmentIds.Remove(oldSegmentId);
+							Steps[i].segmentLightStates.Remove(oldSegmentId);
+							segmentLight.SegmentId = segmentId;
+							Steps[i].segmentLightStates.Add(segmentId, segmentLight);
+							Steps[i].segmentIds.Add(segmentId);
+							Steps[i].rebuildSegmentIds();
+						}
+					} else {
+						Log.Message($"Adding new segment {segmentId} to node {nodeId}");
+
+						// create a new manual light
+						for (int i = 0; i < Steps.Count; ++i) {
+							Steps[i].addSegment(segmentId);
+							Steps[i].rebuildSegmentIds();
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Determines the set of segments for which timed steps are defined but no real road segment exist
+		/// </summary>
+		/// <returns></returns>
+		internal HashSet<ushort> getInvalidSegmentIds() {
+			HashSet<ushort> invalidSegmentIds = new HashSet<ushort>();
+
+			if (Steps.Count <= 0)
+				return invalidSegmentIds;
+
+			foreach (KeyValuePair<ushort, ManualSegmentLight> e in Steps[0].segmentLightStates) {
+				var fromSegmentId = e.Key;
+				var segLightState = e.Value;
+
+				if (!TrafficPriority.IsPrioritySegment(nodeId, fromSegmentId))
+					invalidSegmentIds.Add(fromSegmentId);
+			}
+
+			return invalidSegmentIds;
 		}
 	}
 }

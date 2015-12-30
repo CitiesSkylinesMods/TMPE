@@ -21,13 +21,13 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		public static Dictionary<ushort, TrafficLightSimulation> LightSimByNodeId = new Dictionary<ushort, TrafficLightSimulation>();
 
-		public static Dictionary<int, TrafficSegment> PrioritySegments = new Dictionary<int, TrafficSegment>();
+		public static Dictionary<ushort, TrafficSegment> PrioritySegments = new Dictionary<ushort, TrafficSegment>();
 
 		public static Dictionary<ushort, PriorityCar> VehicleList = new Dictionary<ushort, PriorityCar>();
 
 		private static HashSet<ushort> priorityNodes = new HashSet<ushort>();
 
-		public static void AddPrioritySegment(ushort nodeId, int segmentId, PrioritySegment.PriorityType type) {
+		public static void AddPrioritySegment(ushort nodeId, ushort segmentId, PrioritySegment.PriorityType type) {
 			if (nodeId <= 0 || segmentId <= 0)
 				return;
 
@@ -101,7 +101,7 @@ namespace TrafficManager.Traffic {
 			priorityNodes.Remove(nodeId);
 		}
 
-		public static bool IsPrioritySegment(ushort nodeId, int segmentId) {
+		public static bool IsPrioritySegment(ushort nodeId, ushort segmentId) {
 			if (nodeId <= 0 || segmentId <= 0)
 				return false;
 
@@ -124,7 +124,7 @@ namespace TrafficManager.Traffic {
 			return priorityNodes;
 		}
 
-		public static PrioritySegment GetPrioritySegment(ushort nodeId, int segmentId) {
+		public static PrioritySegment GetPrioritySegment(ushort nodeId, ushort segmentId) {
 			if (! IsPrioritySegment(nodeId, segmentId)) return null;
 
 			var prioritySegment = PrioritySegments[segmentId];
@@ -685,7 +685,7 @@ namespace TrafficManager.Traffic {
 		private static void rebuildPriorityNodes() {
 			priorityNodes.Clear();
 
-			foreach (KeyValuePair<int, TrafficSegment> e in PrioritySegments) {
+			foreach (KeyValuePair<ushort, TrafficSegment> e in PrioritySegments) {
 				if (e.Value.Node1 != 0)
 					priorityNodes.Add(e.Value.Node1);
 				if (e.Value.Node2 != 0)
@@ -696,8 +696,8 @@ namespace TrafficManager.Traffic {
 		public static void housekeeping() {
 			try {
 				// delete invalid segments
-				List<int> segmentIdsToDelete = new List<int>();
-				foreach (KeyValuePair<int, TrafficSegment> e in PrioritySegments) {
+				List<ushort> segmentIdsToDelete = new List<ushort>();
+				foreach (KeyValuePair<ushort, TrafficSegment> e in PrioritySegments) {
 					var segmentId = e.Key;
 					if (segmentId <= 0) {
 						segmentIdsToDelete.Add(segmentId);
@@ -713,6 +713,7 @@ namespace TrafficManager.Traffic {
 				foreach (var sId in segmentIdsToDelete) {
 					Log.Warning("Housekeeping: Deleting segment " + sId);
 					PrioritySegments.Remove(sId);
+					TrafficLightsManual.RemoveSegmentLight(sId);
 				}
 
 				// delete invalid nodes
@@ -720,9 +721,15 @@ namespace TrafficManager.Traffic {
 				foreach (ushort nodeId in priorityNodes) {
 					NodeValidityState nodeState = NodeValidityState.Valid;
 					if (!isValidPriorityNode(nodeId, out nodeState)) {
-						nodeIdsToDelete.Add(nodeId);
+						if (nodeState != NodeValidityState.SimWithoutLight)
+							nodeIdsToDelete.Add(nodeId);
+
 						switch (nodeState) {
 							case NodeValidityState.SimWithoutLight:
+								Log.Warning("Housekeeping: Re-adding traffic light at node " + nodeId);
+								Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
+								break;
+							case NodeValidityState.Unused:
 								// delete traffic light simulation
 								Log.Warning("Housekeeping: RemoveNodeFromSimulation " + nodeId);
 								RemoveNodeFromSimulation(nodeId);
@@ -736,6 +743,14 @@ namespace TrafficManager.Traffic {
 				foreach (var nId in nodeIdsToDelete) {
 					Log.Warning("Housekeeping: Deleting node " + nId);
 					RemovePrioritySegments(nId);
+				}
+
+				// add newly created segments to timed traffic lights
+				foreach (KeyValuePair<ushort, TrafficLightsTimed> e in TrafficLightsTimed.TimedScripts) {
+					TrafficLightsTimed timedLights = e.Value;
+					ushort nodeId = e.Key;
+
+					timedLights.handleNewSegments();
 				}
 			} catch (Exception e) {
 				Log.Warning($"Housekeeping failed: {e.Message}");
@@ -792,13 +807,13 @@ namespace TrafficManager.Traffic {
 							return false;
 						}
 
-						foreach (var segmentId in timedLight.Steps[0].segmentIds) {
+						/*foreach (var segmentId in timedLight.Steps[0].segmentIds) {
 							if (! IsPrioritySegment(nodeId, segmentId)) {
 								Log.Warning("Housekeeping: Timed light - Priority segment has gone away!");
 								RemoveNodeFromSimulation(nodeId);
 								return false;
 							}
-						}
+						}*/
 					}
 					return true;
 				}

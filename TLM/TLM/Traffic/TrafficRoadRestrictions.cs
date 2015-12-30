@@ -4,24 +4,24 @@ namespace TrafficManager.Traffic
 {
     class TrafficRoadRestrictions
     {
-        public static Dictionary<int, SegmentRestrictions> Segments = new Dictionary<int, SegmentRestrictions>();
+        public static Dictionary<ushort, SegmentRestrictions> Segments = new Dictionary<ushort, SegmentRestrictions>();
 
-        public static void AddSegment(int segmentid, List<int> segmentGroup)
+        public static void AddSegment(ushort segmentid, List<ushort> segmentGroup)
         {
             Segments.Add(segmentid, new SegmentRestrictions(segmentid, segmentGroup));
         }
 
-        public static void RemoveSegment(int segmentid)
+        public static void RemoveSegment(ushort segmentid)
         {
             Segments.Remove(segmentid);
         }
 
-        public static SegmentRestrictions GetSegment(int segmentid)
+        public static SegmentRestrictions GetSegment(ushort segmentid)
         {
             return Segments[segmentid];
         }
 
-        public static bool IsSegment(int segmentid)
+        public static bool IsSegment(ushort segmentid)
         {
             return Segments.ContainsKey(segmentid);
         }

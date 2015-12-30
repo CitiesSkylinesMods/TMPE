@@ -14,8 +14,9 @@ namespace TrafficManager.Custom.AI {
 
 		}
 
-		// why does this method exist? argh...
+		// this implements the Update method of MonoBehaviour
 		public void Update() {
+			//Log.Warning("CustomRoadAI: Update called");
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
 
 			if (_lastFrame < currentFrameIndex) {
