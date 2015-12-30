@@ -2,6 +2,9 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.12, 12/30/2015 (Victor-Philipp Negoescu)
+- Bugfix: Priority signs are not editable (thanks to @ningcaohan for pointing out this problem)
+
 1.3.11, 12/30/2015 (Victor-Philipp Negoescu)
 - Road segments next to a timed traffic light may now be deleted/upgraded/added without leading to deletion of the light
 - Priority signs and Timed traffic light state symbols are now visible as soon as the menu is opened

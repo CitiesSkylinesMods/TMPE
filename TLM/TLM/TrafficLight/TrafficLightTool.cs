@@ -713,7 +713,7 @@ namespace TrafficManager.TrafficLight {
 
 			switch (_toolMode) {
 				case ToolMode.AddPrioritySigns:
-					_guiPrioritySigns(true);
+					_guiPrioritySigns(false);
 					break;
 				case ToolMode.ManualSwitch:
 					_guiManualTrafficLights();
