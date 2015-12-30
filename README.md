@@ -1,5 +1,5 @@
 # Cities: Skylines - Traffic Manager: *Traffic President Edition*
-A work-in-progress (state: 12/29/2015) mod for **Cities: Skylines** to add additional road traffic control
+A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
 1.3.11, 12/30/2015 (Victor-Philipp Negoescu)
@@ -67,10 +67,16 @@ A work-in-progress (state: 12/29/2015) mod for **Cities: Skylines** to add addit
 - Clear traffic
 - No despawn
 
-# Known issues
+# Todo list
 
-- Crosswalks become permanent upon save/load game
-- Crosswalks work on places it shouldn't (like intersections) and the result is missing textures.
+- I would like to investigate why yellow traffic lights sometimes are not properly rendered.
+- I would like to implement traffic light templates so that you would not need to manually set up individual steps for common junction patterns.
+- Stop signs should be more useful. Drivers should act more realistically/confident when stop/yield signs and traffic jams meet together.
+- Adaptive Timed Traffic Lights: Currently only vehicles on the road segment next to the junction are being measured. I would like to expand the traffic measurement to 2 segments.
+- When switching between control modes, the UI starts to ignore user mouse input. This is annoying. I will hopefully fix that.
+- We could measure if there is traffic backing up after a timed traffic light. If it is the case (that is: cars having a green light do not move) the next timed step could be activated.
+- There are still some issues with crossings and pedestrain crossing lights (missing textures, double crosswalks). Let's see what can be done.
+- For new users it takes some time to understand how the mod works. Having something like a (video) manual would be great. Or just a better UI. 
 
 # Upcoming changes
 
