@@ -2,57 +2,63 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.3.12, 12/30/2015 (Victor-Philipp Negoescu)
+1.3.13, 01/01/2016
+- Bugfix: Lane arrows are not correctly translated into path finding decisions (thanks to @bvoice360 for pointing out this problem)
+- Bugfix: Priority signs are sometimes undeletable (thank to @Blackwolf for pointing out this problem) 
+- Bugfix: Errors occur when other mods without namespace definitions are loaded (thanks to @Arch Angel for pointing out this problem)
+- Connecting a new road segment to a junction that already has priority signs now allows modification of the new priority sign
+
+1.3.12, 12/30/2015
 - Bugfix: Priority signs are not editable (thanks to @ningcaohan for pointing out this problem)
 
-1.3.11, 12/30/2015 (Victor-Philipp Negoescu)
+1.3.11, 12/30/2015
 - Road segments next to a timed traffic light may now be deleted/upgraded/added without leading to deletion of the light
 - Priority signs and Timed traffic light state symbols are now visible as soon as the menu is opened
 
-1.3.10, 12/29/2015 (Victor-Philipp Negoescu)
+1.3.10, 12/29/2015
 - Fixed an issue where timed traffic light groups were not deleted after deleting an adjacent segment
 
-1.3.9, 12/29/2015 (Victor-Philipp Negoescu)
+1.3.9, 12/29/2015
 - Introduced information icons for timed traffic lights
 - Mod is now compatible with "Improved AI" (Lane changer is deactivated if "Improved AI" is active)
 
-1.3.8, 12/29/2015 (Victor-Philipp Negoescu)
+1.3.8, 12/29/2015
 - Articulated busses are now simulated correctly (thanks to @nieksen for pointing out this problem)
 - UI improvements
 
-1.3.7, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.7, 12/28/2015
 - When setting up a new timed traffic light, yellow lights from the real-world state are not taken over
 - When loading another save game via the escape menu, Traffic Manager does not crash
 - When loading another save game via the escape menu, Traffic++ detection works as intended
 - Lane arrows are saved correctly
 
-1.3.6, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.6, 12/28/2015
 - Bugfix: wrong flow value taken when comparing flowing vehicles
 - Forced node rendering after modifying a crosswalk
 
-1.3.5, 12/28/2015 (Victor-Philipp Negoescu)
+1.3.5, 12/28/2015
 - Fixed pedestrian traffic Lights (thanks to @Glowstrontium for pointing out this problem)
 - Better fix for: Deleting a segment with a timed traffic light does not cause a NullReferenceException
 - Adjusted the comparison between flowing (green light) and waiting (red light) traffic
 
-1.3.4, 12/27/2015 (Victor-Philipp Negoescu)
+1.3.4, 12/27/2015
 - Better traffic jam handling
 
-1.3.3, 12/27/2015 (Victor-Philipp Negoescu)
+1.3.3, 12/27/2015
 - (Temporary) hotfix: Deleting a segment with a timed traffic light does not cause a NullReferenceException
 - If priority signs are located behind the camera they are not rendered anymore
 
-1.3.2, 12/27/2015 (Victor-Philipp Negoescu)
+1.3.2, 12/27/2015
 - Priority signs are persistently visible when Traffic Manager is in "Add priority sign" mode
 - Synchronized traffic light rendering: In-game Traffic lights display the correct color (Thanks to @Fabrice for pointing out this problem)
 - Traffic lights switch between green, yellow and red. Not only between green and red.
 - UI tool tips are more explanatory and are shown longer.
 
-1.3.1, 12/26/2015 (Victor-Philipp Negoescu)
+1.3.1, 12/26/2015
 - Minimum time units may be zero now
 - Timed traffic lights of deleted/modified junctions get properly disposed
 
-1.3.0, 12/25/2015 (Victor-Philipp Negoescu)
+1.3.0, 12/25/2015
 - **Adaptive Timed Traffic Lights** (automatically adjusted based on traffic amount)
 
 1.2.0 (iMarbot)

@@ -474,7 +474,6 @@ namespace TrafficManager.Custom.Misc
 
 		// 1
 		private void ProcessItemMain(BufferItem item, ushort nodeID, ref NetNode node, byte connectOffset, bool isMiddle) {
-			bool debug2 = nodeID == 26128u;
 			NetManager instance = Singleton<NetManager>.instance;
 			bool isPedestrianLane = false;
 			bool isBicycleLane = false;
@@ -612,7 +611,6 @@ namespace TrafficManager.Custom.Misc
 					if (nextSegmentId == 0 || nextSegmentId == item.m_position.m_segment) {
 						break;
 					}
-					bool debug = nodeID == 26128u && item.m_position.m_segment == 2013;
 
 					// NON-STOCK CODE START //
 					//if (TrafficPriority.IsPrioritySegment(nodeID, nextSegmentId)) {
@@ -621,17 +619,11 @@ namespace TrafficManager.Custom.Misc
 
 						var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
 						var nextSegmentInfo = nextSegment.Info;
-						//var nextSegmentLanes = nextSegmentInfo.m_lanes;
 
 						NetInfo.Direction prevDir = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 						prevDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevDir : NetInfo.InvertDirection(prevDir);
 						NetInfo.Direction nextDir = nextSegment.m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 						nextDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
-						//var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
-
-						/*if (TrafficPriority.LeftHandDrive) {
-							nextSegmentLanes = nextSegmentLanes.Reverse().ToArray();
-						}*/
 
 						// valid next lanes:
 						int[] laneIndexes = new int[16]; // index of NetNode.Info.m_lanes
@@ -690,17 +682,12 @@ namespace TrafficManager.Custom.Misc
 									NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
 
 									// lane matching
-									//uint index = _pathRandomizer.UInt32(0, (uint)curLaneIndex-1);
 									uint index = (uint)Math.Min(curLaneIndex - 1, lane.m_similarLaneIndex);
 									if (prevDir != nextDir)
 										index = (uint)(curLaneIndex - index - 1);
 									
 									newLaneIndex = laneIndexes[index];
 									newLaneId = laneIds[index];
-
-									if (debug) {
-										Log.Message($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment} ({prevDir}), lane {item.m_position.m_lane}, {lane.m_similarLaneIndex}. There are {curLaneIndex} candidate lanes. We choose lane {index} (index {newLaneIndex}, id {newLaneId}). lhd: {TrafficPriority.LeftHandDrive}, ped: {pedestrianAllowed}");
-                                    }
 								}
 
 								ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId);
@@ -721,9 +708,6 @@ namespace TrafficManager.Custom.Misc
 					nextSegmentId = instance.m_segments.m_buffer[(int)nextSegmentId].GetRightSegment(nodeID);
 				}
 				if (flag4) {
-					if (debug2) {
-						Log.Warning("flag4 is true");
-					}
 					nextSegmentId = item.m_position.m_segment;
 					this.ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[(int)nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, false);
 				}

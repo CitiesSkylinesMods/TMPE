@@ -16,7 +16,6 @@ namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
         public static LoadingExtension Instance;
         public static bool IsPathManagerCompatible = true;
-		public static bool IsImprovedAiLoaded = false;
 		public static bool IsTrafficPlusPlusLoaded = false;
 		public static bool PathManagerReplaced = false;
 		public CustomPathManager CustomPathManager { get; set; }
@@ -249,7 +248,6 @@ namespace TrafficManager {
 
 		private void determinePathManagerCompatible() {
 			IsPathManagerCompatible = true;
-			IsImprovedAiLoaded = false;
 			if (!PathManagerReplaced) {
 
 				var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -263,14 +261,13 @@ namespace TrafficManager {
 				if (loadingExtensions != null) {
 					Log.Message("Loaded extensions:");
 					foreach (ILoadingExtension extension in loadingExtensions) {
+						if (extension.GetType().Namespace == null)
+							continue;
+
 						Log.Message($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
 						var namespaceStr = extension.GetType().Namespace.ToString();
 						if ("Improved_AI".Equals(namespaceStr)) {
-							IsImprovedAiLoaded = true;
 							IsPathManagerCompatible = false; // Improved AI found
-						} else if ("CSL_Traffic".Equals(namespaceStr)) {
-							/*IsTrafficPlusPlusLoaded = true;
-							IsPathManagerCompatible = false;*/ // Improved AI found
 						}
 					}
 				} else {

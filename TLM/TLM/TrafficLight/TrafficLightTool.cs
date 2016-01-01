@@ -3426,17 +3426,11 @@ namespace TrafficManager.TrafficLight {
 				}
 
 				// add a new or delete a priority segment node
-				if (_hoveredNetNodeIdx != 0) {
+				if (_hoveredNetNodeIdx != 0 || hoveredExistingNodeId != 0) {
 					var node = GetNetNode((ushort)_hoveredNetNodeIdx);
 					bool delete = false;
 					if (hoveredExistingNodeId > 0) {
-						if (hoveredExistingNodeId == _hoveredNetNodeIdx) {
-							delete = true;
-						} else {
-							return;
-						}
-					} else {
-						
+						delete = true;
 					}
 
 					if (clicked) {
@@ -3445,23 +3439,14 @@ namespace TrafficManager.TrafficLight {
 							return;
 						}
 
-						Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx);
+						Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx + "/" + hoveredExistingNodeId);
 
 						if (delete) {
-							Log.Message("_guiPrioritySigns: deleting prio segments @ nodeId=" + _hoveredNetNodeIdx);
-							TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
-						}  else if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
+							TrafficPriority.RemovePrioritySegments(hoveredExistingNodeId);
+						} else if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
 							Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
 
-							for (var i = 0; i < 8; i++) {
-								var segmentId = node.GetSegment(i);
-
-								if (segmentId == 0)
-									continue;
-								if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, _hoveredNetNodeIdx)) continue;
-
-								TrafficPriority.AddPrioritySegment((ushort)_hoveredNetNodeIdx, segmentId, PrioritySegment.PriorityType.None);
-							}
+							TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
 						}
 					}
 				}

@@ -818,7 +818,7 @@ namespace TrafficManager.Traffic {
 					return true;
 				}
 			} else {
-				bool ok = false;
+				byte numSegmentsWithSigns = 0;
 				for (var s = 0; s < 8; s++) {
 					var segmentId = node.GetSegment(s);
 					if (segmentId <= 0)
@@ -826,10 +826,10 @@ namespace TrafficManager.Traffic {
 					NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
 					if (segment.m_startNode != nodeId && segment.m_endNode != nodeId)
 						continue;
-
 					PrioritySegment prioritySegment = GetPrioritySegment(nodeId, segmentId);
-					if (prioritySegment == null)
+					if (prioritySegment == null) {
 						continue;
+					}
 
 					// if node is a traffic light, it must not have priority signs
 					if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
@@ -838,12 +838,17 @@ namespace TrafficManager.Traffic {
 
 					// if a priority sign is set, everything is ok
 					if (prioritySegment.Type != PrioritySegment.PriorityType.None) {
-						ok = true;
-						break;
+						++numSegmentsWithSigns;
 					}
 				}
 
-				if (!ok) {
+				if (numSegmentsWithSigns > 0) {
+					// add priority segments for newly created segments
+					numSegmentsWithSigns += AddPriorityNode(nodeId);
+				}
+
+				bool ok = numSegmentsWithSigns > 1;
+				if (! ok) {
 					nodeState = NodeValidityState.NoValidSegments;
 				}
 				return ok;
@@ -852,10 +857,12 @@ namespace TrafficManager.Traffic {
 
 		private static readonly object simLock = new object(); // TODO rework
 
+		/// <summary>
+		/// Adds a traffic light simulation to the node with the given id
+		/// </summary>
+		/// <param name="nodeId"></param>
 		public static void AddNodeToSimulation(ushort nodeId) {
-			//lock(simLock) {
-				LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
-			//}
+			LightSimByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
 		}
 
 		public static void RemoveNodeFromSimulation(ushort nodeId) {
@@ -886,6 +893,33 @@ namespace TrafficManager.Traffic {
 
 				return null;
 			//}
+		}
+
+
+		/// <summary>
+		/// Adds/Sets a node as a priority node
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <returns>number of priority segments added</returns>
+		internal static byte AddPriorityNode(ushort nodeId) {
+			if (nodeId <= 0)
+				return 0;
+
+			byte ret = 0;
+			for (var i = 0; i < 8; i++) {
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
+
+				if (segmentId == 0)
+					continue;
+				if (TrafficPriority.IsPrioritySegment(nodeId, segmentId))
+					continue;
+				if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, nodeId))
+					continue;
+
+				TrafficPriority.AddPrioritySegment(nodeId, segmentId, PrioritySegment.PriorityType.None);
+				++ret;
+			}
+			return ret;
 		}
 	}
 }
