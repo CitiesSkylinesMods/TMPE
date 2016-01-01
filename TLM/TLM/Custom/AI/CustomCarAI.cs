@@ -31,8 +31,10 @@ namespace TrafficManager.Custom.AI {
 		private bool HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool handleWatched) {
 			bool handledVehicle = false;
 			if (handleWatched) {
+#if DEBUG
 				if (Singleton<SimulationManager>.instance.m_currentFrameIndex % 100 == 0)
 					Log.Message($"{watchedVehicleIds.Count} watched vehicles");
+#endif
 
 				var vehManager = Singleton<VehicleManager>.instance;
 				// handle watched vehicles
@@ -68,15 +70,20 @@ namespace TrafficManager.Custom.AI {
 			}
 #endif
 
+			// add vehicle to our vehicle list
+			if (!TrafficPriority.VehicleList.ContainsKey(vehicleId)) {
+				TrafficPriority.VehicleList.Add(vehicleId, new PriorityCar());
+			}
+
 			// we extract the segment information directly from the vehicle
 			var currentPathId = vehicleData.m_path;
+			List<ushort> realTimeDestinationNodes = new List<ushort>(); // upcoming node ids
 			//ushort realTimeSourceNode = 0; // the car is currently moving from this node...
-			ushort realTimeDestinationNode = 0; // ... to this node ...
+			// ushort realTimeDestinationNode = 0; // ... to this node ...
 			//ushort realTimeVeryNextDestinationNode = 0; // ... and then to this node ...
 			PathUnit.Position? realTimePosition = null; // car position at current frame
-			PathUnit.Position veryNextRealTimePosition = default(PathUnit.Position);
+			//PathUnit.Position veryNextRealTimePosition = default(PathUnit.Position);
 			List<PathUnit.Position> nextRealTimePositions = new List<PathUnit.Position>(); // car position after passing the next nodes
-			List<ushort> nextRealTimeDestinationNodes = new List<ushort>(); // upcoming node ids
 
 #if DEBUG
 			if (vehicleId % 5 == 0) {
@@ -92,15 +99,15 @@ namespace TrafficManager.Custom.AI {
 					realTimePosition = vehiclePathUnit.GetPosition(vehicleData.m_pathPositionIndex >> 1);
 					var currentSegment = netManager.m_segments.m_buffer[realTimePosition.Value.m_segment];
 					if (realTimePosition.Value.m_offset == 0) {
-						realTimeDestinationNode = currentSegment.m_startNode;
+						realTimeDestinationNodes.Add(currentSegment.m_startNode);
 						//realTimeSourceNode = currentSegment.m_endNode;
 					} else {
-						realTimeDestinationNode = currentSegment.m_endNode;
+						realTimeDestinationNodes.Add(currentSegment.m_endNode);
 						//realTimeSourceNode = currentSegment.m_startNode;
 					}
 
 					// evaluate upcoming path units
-					bool first = true;
+					byte i = 0;
 					for (byte pathPos = (byte)((vehicleData.m_pathPositionIndex >> 1)+1); pathPos < vehiclePathUnit.m_positionCount; ++pathPos) {
 						PathUnit.Position nextRealTimePosition = default(PathUnit.Position);
 						if (!vehiclePathUnit.GetPosition(pathPos, out nextRealTimePosition)) // if this returns false, there is no next path unit
@@ -116,35 +123,40 @@ namespace TrafficManager.Custom.AI {
 							}
 						}
 
+						nextRealTimePositions.Add(nextRealTimePosition);
+						realTimeDestinationNodes.Add(destNodeId);
+
 						// this is the very next path node, save it separately
-						if (first) {
-							veryNextRealTimePosition = nextRealTimePosition;
+						if (i >= 1)
+							break; 
+						++i;
+
+						
+						/*if (first) {
+							//veryNextRealTimePosition = nextRealTimePosition;
 							//realTimeVeryNextDestinationNode = destNodeId;
 							first = false;
-							if (! handleWatched) {
+							if (!handleWatched) {
 								break;
 								// we only need the first path unit
 							}
-						}
-
-						nextRealTimePositions.Add(nextRealTimePosition);
-						nextRealTimeDestinationNodes.Add(destNodeId);
+						}*/
 					}
 
 					// please don't ask why we use "m_pathPositionIndex >> 1" (which equals to "m_pathPositionIndex / 2") here (Though it would
-					// be interesting to know why they used such an ugly indexing scheme!!). I assume m_pathPositionIndex relates to the car's position
-					// on the segment. If it is even the car might be in the segement's first half and if it is odd, it might be in the segment's
-					// second half.
+					// be interesting to know why they used such an ugly indexing scheme!!). I assume the oddness of m_pathPositionIndex relates
+					// to the car's position on the segment. If it is even the car might be in the segment's first half and if it is odd, it might
+					// be in the segment's second half.
 #if DEBUG
 					if (vehicleId % 5 == 0) {
-						logBuffer.Add("* vehicleId " + vehicleId + ". *INFO* rtPos.seg=" + realTimePosition.Value.m_segment + " nrtPos.seg=" + veryNextRealTimePosition.m_segment);
+						logBuffer.Add("* vehicleId " + vehicleId + ". *INFO* rtPos.seg=" + realTimePosition.Value.m_segment + " nrtPos.seg=" + (nextRealTimePositions.Count > 0 ? ""+nextRealTimePositions[0].m_segment : "n/a"));
 					}
 #endif
 				}
 			}
 
 			// we have seen the car!
-			TrafficPriority.VehicleList[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 4;
+			TrafficPriority.VehicleList[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
 			TrafficPriority.VehicleList[vehicleId].LastSpeed = lastFrameData.m_velocity.sqrMagnitude;
 
 #if DEBUG
@@ -156,12 +168,13 @@ namespace TrafficManager.Custom.AI {
 			if (realTimePosition != null) {
 				// we found a valid path unit
 				var sourceLaneId = PathManager.GetLaneID(realTimePosition.Value);
-				if (TrafficPriority.VehicleList[vehicleId].ToNode != realTimeDestinationNode ||
-					TrafficPriority.VehicleList[vehicleId].FromSegment != realTimePosition.Value.m_segment ||
-					TrafficPriority.VehicleList[vehicleId].FromLaneId != sourceLaneId) {
+				var oldPriorityCar = TrafficPriority.VehicleList[vehicleId];
+				if (oldPriorityCar.ToNode != realTimeDestinationNodes[0] ||
+					oldPriorityCar.FromSegment != realTimePosition.Value.m_segment ||
+					oldPriorityCar.FromLaneId != sourceLaneId) {
 					// vehicle information is not up-to-date. remove the car from the old priority segment (if existing)...
-					var oldNode = TrafficPriority.VehicleList[vehicleId].ToNode;
-					var oldSegment = TrafficPriority.VehicleList[vehicleId].FromSegment;
+					var oldNode = oldPriorityCar.ToNode;
+					var oldSegment = oldPriorityCar.FromSegment;
 
 					var oldPrioritySegment = TrafficPriority.GetPrioritySegment(oldNode, oldSegment);
 					if (oldPrioritySegment != null) {
@@ -189,9 +202,9 @@ namespace TrafficManager.Custom.AI {
 					}
 
 #if DEBUG
-					if (vehicleId % 5 == 0) {
+					/*if (vehicleId % 5 == 0) {
 						logBuffer.Add("* vehicleId " + vehicleId + ". *VEHINFO* ToNode=" + realTimeDestinationNode + " FromSegment=" + realTimePosition.Value.m_segment + " FromLaneId=" + PathManager.GetLaneID(realTimePosition.Value) + " ToSegment=" + veryNextRealTimePosition.m_segment + " ToLaneId=" + (veryNextRealTimePosition.m_segment > 0 ? "" + PathManager.GetLaneID(veryNextRealTimePosition) : "n/a"));
-					}
+					}*/
 #endif
 
 					if (handleWatched)
@@ -199,26 +212,52 @@ namespace TrafficManager.Custom.AI {
 					handledVehicle = true;
 
 					// ... and add it to the new priority segment
-					var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNode, realTimePosition.Value.m_segment);
-					if (prioritySegment != null) {
+					float avgSegmentLength = Singleton<NetManager>.instance.m_segments.m_buffer[realTimePosition.Value.m_segment].m_averageLength;
+					var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[0], realTimePosition.Value.m_segment);
+					PrioritySegment nextPrioritySegment = null;
+					if (nextRealTimePositions.Count >= 2) {
+						// add traffic to next segment if a timed traffic light exists
+						TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(realTimeDestinationNodes[1]);
+						if (nodeSim != null && nodeSim.TimedTrafficLights) {
+							nextPrioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[1], nextRealTimePositions[0].m_segment);
+						}
+					}
+					if (nextPrioritySegment != null && nextRealTimePositions.Count >= 2) {
+						if (handleWatched)
+							watchedVehicleIds.Add(vehicleId);
+
+						TrafficPriority.VehicleList[vehicleId].ToNode = realTimeDestinationNodes[1];
+						TrafficPriority.VehicleList[vehicleId].FromSegment = nextRealTimePositions[0].m_segment;
+						TrafficPriority.VehicleList[vehicleId].FromLaneId = PathManager.GetLaneID(nextRealTimePositions[0]);
+						TrafficPriority.VehicleList[vehicleId].ToSegment = nextRealTimePositions[1].m_segment;
+						if (nextRealTimePositions[1].m_segment > 0)
+							TrafficPriority.VehicleList[vehicleId].ToLaneId = PathManager.GetLaneID(nextRealTimePositions[1]);
+						else
+							TrafficPriority.VehicleList[vehicleId].ToLaneId = 0;
+						TrafficPriority.VehicleList[vehicleId].FromLaneFlags = netManager.m_lanes.m_buffer[TrafficPriority.VehicleList[vehicleId].FromLaneId].m_flags;
+						TrafficPriority.VehicleList[vehicleId].ReduceSpeedByValueToYield = Random.Range(13f, 18f);
+
+						nextPrioritySegment.AddCar(vehicleId, avgSegmentLength);
+					} else if (prioritySegment != null && nextRealTimePositions.Count >= 1) {
 #if DEBUG
 						logme = true;
 #endif
 						if (handleWatched)
 							watchedVehicleIds.Add(vehicleId);
 
-						TrafficPriority.VehicleList[vehicleId].ToNode = realTimeDestinationNode;
+					
+						TrafficPriority.VehicleList[vehicleId].ToNode = realTimeDestinationNodes[0];
 						TrafficPriority.VehicleList[vehicleId].FromSegment = realTimePosition.Value.m_segment;
 						TrafficPriority.VehicleList[vehicleId].FromLaneId = PathManager.GetLaneID(realTimePosition.Value);
-						TrafficPriority.VehicleList[vehicleId].ToSegment = veryNextRealTimePosition.m_segment;
-						if (veryNextRealTimePosition.m_segment > 0)
-							TrafficPriority.VehicleList[vehicleId].ToLaneId = PathManager.GetLaneID(veryNextRealTimePosition);
+						TrafficPriority.VehicleList[vehicleId].ToSegment = nextRealTimePositions[0].m_segment;
+						if (nextRealTimePositions[0].m_segment > 0)
+							TrafficPriority.VehicleList[vehicleId].ToLaneId = PathManager.GetLaneID(nextRealTimePositions[0]);
 						else
 							TrafficPriority.VehicleList[vehicleId].ToLaneId = 0;
 						TrafficPriority.VehicleList[vehicleId].FromLaneFlags = netManager.m_lanes.m_buffer[TrafficPriority.VehicleList[vehicleId].FromLaneId].m_flags;
 						TrafficPriority.VehicleList[vehicleId].ReduceSpeedByValueToYield = Random.Range(13f, 18f);
 
-						if (prioritySegment.AddCar(vehicleId)) {
+						if (prioritySegment.AddCar(vehicleId, avgSegmentLength)) {
 #if DEBUG
 							if (vehicleId % 5 == 0) {
 								logBuffer.Add("* vehicleId " + vehicleId + " was added!");
@@ -247,14 +286,14 @@ namespace TrafficManager.Custom.AI {
 					if (handleWatched) {
 						for (int i = 0; i < nextRealTimePositions.Count; ++i) {
 							if (nextRealTimePositions[i].m_segment > 0) {
-								var nextPrioritySegment = TrafficPriority.GetPrioritySegment(nextRealTimeDestinationNodes[i], nextRealTimePositions[i].m_segment);
-								if (nextPrioritySegment != null)
+								var nextNextPrioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[i+1], nextRealTimePositions[i].m_segment);
+								if (nextNextPrioritySegment != null)
 									watchedVehicleIds.Add(vehicleId);
 							}
 						}
 					}
 				} else {
-					var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNode, realTimePosition.Value.m_segment);
+					var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[0], realTimePosition.Value.m_segment);
 					if (prioritySegment != null) {
 						// vehicle is still on priority segment
 						if (handleWatched)
@@ -308,6 +347,8 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
+
+			HandleVehicle(vehicleId, ref vehicleData, false);
 
 			SimulateVehicleAndTrailers(vehicleId, ref vehicleData, physicsLodRefPos);
 
@@ -415,14 +456,19 @@ namespace TrafficManager.Custom.AI {
 			var lastFrameData = vehicleData.GetLastFrameData();
 			var lastFrameVehiclePos = lastFrameData.m_position;
 
+			var camPos = Camera.main.transform.position;
 			if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
 				// add vehicle to our vehicle list
 				if (!TrafficPriority.VehicleList.ContainsKey(vehicleId)) {
 					TrafficPriority.VehicleList.Add(vehicleId, new PriorityCar());
 				}
-			}
 
-			HandleVehicle(vehicleId, ref vehicleData);
+				if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && 
+					TrafficPriority.VehicleList[vehicleId].LastFrame < Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) {
+					//Log.Message("handle vehicle after threshold");
+					HandleVehicle(vehicleId, ref vehicleData, false);
+				}
+			}
 
 			// I think this is supposed to be the lane position?
 			// [VN, 12/23/2015] It's the 3D car position on the Bezier curve of the lane.
@@ -572,7 +618,7 @@ namespace TrafficManager.Custom.AI {
 									return;
 								}
 							}
-						} else {
+						} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod) {
 							if (TrafficPriority.VehicleList.ContainsKey(vehicleId) &&
 								TrafficPriority.IsPrioritySegment(destinationNodeId, prevPos.m_segment)) {
 								var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -589,7 +635,7 @@ namespace TrafficManager.Custom.AI {
 									bool hasIncomingCars;
 									switch (prioritySegment.Type) {
 										case PrioritySegment.PriorityType.Stop:
-											if (TrafficPriority.VehicleList[vehicleId].WaitTime < 75) {
+											if (TrafficPriority.VehicleList[vehicleId].WaitTime < 30) {
 												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Stop;
 
 												if (lastFrameData.m_velocity.sqrMagnitude < 0.1f ||
@@ -597,7 +643,7 @@ namespace TrafficManager.Custom.AI {
 													TrafficPriority.VehicleList[vehicleId].Stopped = true;
 													TrafficPriority.VehicleList[vehicleId].WaitTime++;
 
-													if (TrafficPriority.VehicleList[vehicleId].WaitTime > 2) {
+													if (TrafficPriority.VehicleList[vehicleId].WaitTime > 1) {
 														hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
 
 														if (hasIncomingCars) {
@@ -619,40 +665,48 @@ namespace TrafficManager.Custom.AI {
 											}
 											break;
 										case PrioritySegment.PriorityType.Yield:
-											if (TrafficPriority.VehicleList[vehicleId].WaitTime < 75) {
+											if (TrafficPriority.VehicleList[vehicleId].WaitTime < 30) {
 												TrafficPriority.VehicleList[vehicleId].WaitTime++;
 												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Stop;
-												maxSpeed = 0f;
-
-												if (lastFrameData.m_velocity.sqrMagnitude <
-													TrafficPriority.VehicleList[vehicleId].ReduceSpeedByValueToYield) {
-													hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
-
-													if (hasIncomingCars) {
-														return;
+												hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
+												if (hasIncomingCars) {
+													if (lastFrameData.m_velocity.sqrMagnitude > 0) {
+														maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude -
+																   TrafficPriority.VehicleList[vehicleId].ReduceSpeedByValueToYield);
+													} else {
+														maxSpeed = 0f;
 													}
-												} else {
-													maxSpeed = lastFrameData.m_velocity.sqrMagnitude -
-															   TrafficPriority.VehicleList[vehicleId]
-																   .ReduceSpeedByValueToYield;
+#if DEBUG
+													if (TrafficPriority.VehicleList[vehicleId].ToNode == 8621)
+														Log.Message($"Vehicle {vehicleId} is yielding at node {destinationNodeId}. Speed: {maxSpeed}, Waiting time: {TrafficPriority.VehicleList[vehicleId].WaitTime}");
+#endif
 													return;
+												} else {
+#if DEBUG
+													if (TrafficPriority.VehicleList[vehicleId].ToNode == 8621)
+														Log.Message($"Vehicle {vehicleId} is NOT yielding at node {destinationNodeId}.");
+#endif
 												}
+												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Leave;
 											} else {
 												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Leave;
 											}
 											break;
 										case PrioritySegment.PriorityType.Main:
-											TrafficPriority.VehicleList[vehicleId].WaitTime++;
-											TrafficPriority.VehicleList[vehicleId].CarState = CarState.Stop;
-											maxSpeed = 0f;
+											if (TrafficPriority.VehicleList[vehicleId].WaitTime < 30) {
+												TrafficPriority.VehicleList[vehicleId].WaitTime++;
+												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Stop;
+												maxSpeed = 0f;
 
-											hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
+												hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
 
-											if (hasIncomingCars) {
-												TrafficPriority.VehicleList[vehicleId].Stopped = true;
-												return;
+												if (hasIncomingCars) {
+													TrafficPriority.VehicleList[vehicleId].Stopped = true;
+													return;
+												}
+												TrafficPriority.VehicleList[vehicleId].CarState = CarState.Leave;
+												TrafficPriority.VehicleList[vehicleId].Stopped = false;
 											}
-											TrafficPriority.VehicleList[vehicleId].Stopped = false;
 
 											var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
 											if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane) {

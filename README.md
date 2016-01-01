@@ -2,6 +2,12 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.14, 01/01/2016
+- Improved performance
+- UI: Non-timed traffic lights are now automatically removed when adding priority signs to a junction
+- Adjusted the adaptive traffic light decision formula (vehicle lengths are considered now)
+- Traffic two road segments in front of a timed traffic light is being measured now  
+
 1.3.13, 01/01/2016
 - Bugfix: Lane arrows are not correctly translated into path finding decisions (thanks to @bvoice360 for pointing out this problem)
 - Bugfix: Priority signs are sometimes undeletable (thank to @Blackwolf for pointing out this problem) 

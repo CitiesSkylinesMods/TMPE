@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.TrafficLight;
+using TrafficManager.Traffic;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.TrafficLight {
 	public class TimedTrafficStep : ICloneable {
 		public ushort nodeId;
 		/// <summary>
@@ -307,7 +308,7 @@ namespace TrafficManager.Traffic {
 						foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
 							var fromSegmentId = e.Key;
 							var segLightState = e.Value;
-							float segmentWeight = Singleton<NetManager>.instance.m_segments.m_buffer[fromSegmentId].m_averageLength / maxSegmentLength;
+							//float segmentWeight = Singleton<NetManager>.instance.m_segments.m_buffer[fromSegmentId].m_averageLength / maxSegmentLength;
 
 							// one of the traffic lights at this segment is green: count minimum traffic flowing through
 							PrioritySegment prioSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
@@ -316,9 +317,9 @@ namespace TrafficManager.Traffic {
 								//segmentIdsToDelete.Add(fromSegmentId);
 								continue; // skip invalid segment
 							}
-							foreach (KeyValuePair<ushort, int> f in prioSeg.numCarsGoingToSegmentId) {
+							foreach (KeyValuePair<ushort, float> f in prioSeg.numCarsGoingToSegmentId) {
 								var toSegmentId = f.Key;
-								var numCars = f.Value;
+								var totalNormCarLength = f.Value;
 
 								TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
 								bool addToFlow = false;
@@ -340,10 +341,10 @@ namespace TrafficManager.Traffic {
 
 								if (addToFlow) {
 									++numFlows;
-									curMeanFlow += (float)numCars * segmentWeight;
+									curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
 								} else {
 									++numWaits;
-									curMeanWait += (float)numCars * segmentWeight;
+									curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
 								}
 							}
 						}
@@ -364,13 +365,13 @@ namespace TrafficManager.Traffic {
 					if (numWaits > 0)
 						curMeanWait /= (float)numWaits;
 
-					float decisionValue = 0.8f; // a value smaller than 1 rewards steady traffic currents
+					float decisionValue = 0.75f; // a value smaller than 1 rewards steady traffic currents
 					curMeanFlow /= decisionValue;
 
 					if (Single.IsNaN(minFlow))
 						minFlow = curMeanFlow;
 					else
-						minFlow = Math.Min(curMeanFlow, minFlow);
+						minFlow = 0.75f * curMeanFlow + 0.25f * minFlow;
 
 					if (Single.IsNaN(maxWait))
 						maxWait = curMeanWait;

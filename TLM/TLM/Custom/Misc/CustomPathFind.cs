@@ -613,7 +613,7 @@ namespace TrafficManager.Custom.Misc
 				NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
 #if DEBUG
 				//bool debug = nodeID == 28311u && item.m_position.m_segment == 33016;
-				bool debug = nodeID == 26128u && item.m_position.m_segment == 4139 && nextSegmentId == 27106;
+				//bool debug = nodeID == 26128u && item.m_position.m_segment == 4139 && nextSegmentId == 27106;
 #endif
 				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
 				int prevRightSimilarLaneIndex;
@@ -635,8 +635,6 @@ namespace TrafficManager.Custom.Misc
 					var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
 					var nextSegmentInfo = nextSegment.Info;
 
-					/*NetInfo.Direction prevDir = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-					NetInfo.Direction prevDir2 = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevDir : NetInfo.InvertDirection(prevDir);*/
 					NetInfo.Direction nextDir = nextSegment.m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 					NetInfo.Direction nextDir2 = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
 
@@ -706,8 +704,6 @@ namespace TrafficManager.Custom.Misc
 								newLaneIndex = laneIndexes[0];
 								newLaneId = laneIds[0];
 							} else {
-								//NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
-
 								// lane matching
 								uint index = (uint)Math.Min(curLaneIndex - 1, prevRightSimilarLaneIndex);
 								index = indexByRightSimilarLaneIndex[index];

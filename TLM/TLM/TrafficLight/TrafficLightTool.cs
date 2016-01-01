@@ -145,6 +145,10 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
+		/// <summary>
+		///	Renders overlays (node selection, segment selection, etc.)
+		/// </summary>
+		/// <param name="cameraInfo"></param>
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
 			switch (_toolMode) {
 				case ToolMode.SwitchTrafficLight:
@@ -177,6 +181,99 @@ namespace TrafficManager.TrafficLight {
 					break;
 				default:
 					base.RenderOverlay(cameraInfo);
+					break;
+			}
+		}
+
+		/// <summary>
+		/// Primarily handles click events on hovered nodes/segments
+		/// </summary>
+		protected override void OnToolUpdate() {
+			_mouseDown = Input.GetMouseButton(0);
+
+			if (_mouseDown) {
+				if (_mouseClicked) return;
+
+				_mouseClicked = true;
+
+				bool elementsHovered = determineHoveredElements();
+
+				if (!elementsHovered) {
+					//Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: " + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
+					return;
+				}
+				if (_hoveredSegmentIdx == 0 && _hoveredNetNodeIdx == 0) {
+					//Log.Message("no hovered segment");
+					return;
+				}
+
+				var node = GetNetNode(_hoveredNetNodeIdx);
+
+				switch (_toolMode) {
+					case ToolMode.SwitchTrafficLight:
+						SwitchTrafficLightToolMode(node);
+						break;
+					case ToolMode.AddPrioritySigns:
+						//AddPrioritySignsToolMode(node);
+						break;
+					case ToolMode.ManualSwitch:
+						ManualSwitchToolMode(node);
+						break;
+					case ToolMode.TimedLightsSelectNode:
+						TimedLightSelectNodeToolMode(node);
+						break;
+					case ToolMode.LaneChange:
+						LaneChangeToolMode();
+						break;
+					case ToolMode.Crosswalk:
+						CrosswalkToolMode();
+						break;
+					case ToolMode.LaneRestrictions:
+						LaneRestrictionsToolMode();
+						break;
+				}
+			} else {
+				//showTooltip(false, null, Vector3.zero);
+				_mouseClicked = false;
+			}
+		}
+
+		protected override void OnToolGUI() {
+			if (!Input.GetMouseButtonDown(0)) {
+				mouseClickProcessed = false;
+			}
+
+#if DEBUG
+			_guiSegments();
+			_guiNodes();
+			_guiVehicles();
+#endif
+
+			showTimedLightIcons();
+			if (_toolMode != ToolMode.AddPrioritySigns) {
+				_guiPrioritySigns(true);
+			}
+
+			_cursorInSecondaryPanel = false;
+
+			switch (_toolMode) {
+				case ToolMode.AddPrioritySigns:
+					_guiPrioritySigns(false);
+					break;
+				case ToolMode.ManualSwitch:
+					_guiManualTrafficLights();
+					break;
+				case ToolMode.TimedLightsSelectNode:
+					_guiTimedTrafficLightsNode();
+					break;
+				case ToolMode.TimedLightsShowLights:
+					_guiTimedTrafficLights();
+					break;
+				case ToolMode.LaneChange:
+					_guiLaneChange();
+					break;
+				case ToolMode.LaneRestrictions:
+					_guiLaneRestrictions();
 					break;
 			}
 		}
@@ -273,7 +370,7 @@ namespace TrafficManager.TrafficLight {
 				var node = GetNetNode(_hoveredNetNodeIdx);
 				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
-				if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+				//if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 					Bezier3 bezier;
 					bezier.a = node.m_position;
 					bezier.d = node.m_position;
@@ -283,7 +380,7 @@ namespace TrafficManager.TrafficLight {
 					NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
 						segment.m_endDirection, false, false, out bezier.b, out bezier.c);
 					_renderOverlayDraw(cameraInfo, bezier, color);
-				}
+				//}
 			}
 
 			if (SelectedNodeIndexes.Count <= 0) return;
@@ -440,56 +537,6 @@ namespace TrafficManager.TrafficLight {
 			return mouseRayValid;
 		}
 
-		protected override void OnToolUpdate() {
-			_mouseDown = Input.GetMouseButton(0);
-
-			if (_mouseDown) {
-				if (_mouseClicked) return;
-
-				_mouseClicked = true;
-
-				bool elementsHovered = determineHoveredElements();
-
-				if (! elementsHovered) {
-					//Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: " + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
-					return;
-				}
-				if (_hoveredSegmentIdx == 0 && _hoveredNetNodeIdx == 0) {
-					//Log.Message("no hovered segment");
-					return;
-				}
-
-				var node = GetNetNode(_hoveredNetNodeIdx);
-
-				switch (_toolMode) {
-					case ToolMode.SwitchTrafficLight:
-						SwitchTrafficLightToolMode(node);
-						break;
-					case ToolMode.AddPrioritySigns:
-						AddPrioritySignsToolMode(node);
-						break;
-					case ToolMode.ManualSwitch:
-						ManualSwitchToolMode(node);
-						break;
-					case ToolMode.TimedLightsSelectNode:
-						TimedLightSelectNodeToolMode(node);
-						break;
-					case ToolMode.LaneChange:
-						LaneChangeToolMode();
-						break;
-					case ToolMode.Crosswalk:
-						CrosswalkToolMode();
-						break;
-					case ToolMode.LaneRestrictions:
-						LaneRestrictionsToolMode();
-						break;
-				}
-			} else {
-				//showTooltip(false, null, Vector3.zero);
-				_mouseClicked = false;
-			}
-		}
-
 		private void LaneChangeToolMode() {
 			if (_hoveredNetNodeIdx == 0 || _hoveredSegmentIdx == 0) return;
 
@@ -503,15 +550,15 @@ namespace TrafficManager.TrafficLight {
 
 		private void TimedLightSelectNodeToolMode(NetNode node) {
 			if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
-				if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+				//if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 					if (ContainsListNode(_hoveredNetNodeIdx)) {
 						RemoveListNode(_hoveredNetNodeIdx);
 					} else {
 						AddListNode(_hoveredNetNodeIdx);
 					}
-				} else {
+				/*} else {
 					showTooltip(NODE_IS_NOT_LIGHT, node.m_position);
-				}
+				}*/
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
 					var timedLight = TrafficLightsTimed.GetTimedLight(_hoveredNetNodeIdx);
@@ -557,7 +604,20 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void AddPrioritySignsToolMode(NetNode node) {
+			bool ok = false;
 			if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+				// no traffic light set
+				ok = true;
+			} else {
+				TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(_hoveredNetNodeIdx);
+				if (nodeSim == null || !nodeSim.TimedTrafficLights)
+					ok = true;
+				else {
+					Log.Warning("Could not add priority signs. " + (nodeSim == null));
+				}
+			}
+
+			if (ok) {
 				mouseClickProcessed = true;
 				SelectedNode = _hoveredNetNodeIdx;
 			} else {
@@ -585,7 +645,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (!result && ValidCrosswalkNode(segment.m_startNode, startNode)) {
 				if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					startNode.m_flags |= NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags |= NetNode.Flags.Junction;
 					result = true;
 					startNodeChanged = true;
 				}
@@ -595,13 +655,13 @@ namespace TrafficManager.TrafficLight {
 				(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					startNode.m_flags &= ~NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags &= ~NetNode.Flags.Junction;
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					endNode.m_flags |= NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags |= NetNode.Flags.Junction;
 					result = true;
 					endNodeChanged = true;
 				}
@@ -611,13 +671,13 @@ namespace TrafficManager.TrafficLight {
 				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					startNode.m_flags |= NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags |= NetNode.Flags.Junction;
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					endNode.m_flags |= NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags |= NetNode.Flags.Junction;
 					result = true;
 					endNodeChanged = true;
 				}
@@ -627,20 +687,17 @@ namespace TrafficManager.TrafficLight {
 				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					startNode.m_flags &= ~NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags &= ~NetNode.Flags.Junction;
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					endNode.m_flags &= ~NetNode.Flags.Junction;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags &= ~NetNode.Flags.Junction;
 					result = true;
 					endNodeChanged = true;
 				}
 			}
-
-			SetNetNode(segment.m_startNode, startNode);
-			SetNetNode(segment.m_endNode, endNode);
 
 			// force rendering of nodes
 			if (startNodeChanged) {
@@ -691,46 +748,6 @@ namespace TrafficManager.TrafficLight {
 
 		private static bool ValidCrosswalkNode(ushort nodeid, NetNode node) {
 			return nodeid != 0 && (node.m_flags & (NetNode.Flags.Transition | NetNode.Flags.TrafficLights)) == NetNode.Flags.None;
-		}
-
-		protected override void OnToolGUI() {
-			if (!Input.GetMouseButtonDown(0)) {
-				mouseClickProcessed = false;
-			}
-
-#if DEBUG
-			_guiSegments();
-			_guiNodes();
-			_guiVehicles();
-#endif
-
-			showTimedLightIcons();
-			if (_toolMode != ToolMode.AddPrioritySigns) {
-				_guiPrioritySigns(true);
-			}
-
-			_cursorInSecondaryPanel = false;
-
-			switch (_toolMode) {
-				case ToolMode.AddPrioritySigns:
-					_guiPrioritySigns(false);
-					break;
-				case ToolMode.ManualSwitch:
-					_guiManualTrafficLights();
-					break;
-				case ToolMode.TimedLightsSelectNode:
-					_guiTimedTrafficLightsNode();
-					break;
-				case ToolMode.TimedLightsShowLights:
-					_guiTimedTrafficLights();
-					break;
-				case ToolMode.LaneChange:
-					_guiLaneChange();
-					break;
-				case ToolMode.LaneRestrictions:
-					_guiLaneRestrictions();
-					break;
-			}
 		}
 
 		private void _guiManualTrafficLights() {
@@ -1464,7 +1481,7 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-				_guiLanes(ref segment, ref segmentInfo);
+				//_guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
@@ -3433,36 +3450,34 @@ namespace TrafficManager.TrafficLight {
 						delete = true;
 					}
 
-					if (clicked) {
-						if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
-							showTooltip(NODE_IS_LIGHT, node.m_position);
-							return;
+					// determine if we may add new priority signs to this node
+					bool ok = false;
+					if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+						// no traffic light set
+						ok = true;
+					} else {
+						TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(_hoveredNetNodeIdx);
+						if (nodeSim == null || !nodeSim.TimedTrafficLights) {
+							ok = true;
 						}
+					}
 
+					if (clicked) {
 						Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx + "/" + hoveredExistingNodeId);
 
 						if (delete) {
 							TrafficPriority.RemovePrioritySegments(hoveredExistingNodeId);
-						} else if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
-							Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
-
-							TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
+						} else if (ok) {
+							if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
+								Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
+								Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags &= ~NetNode.Flags.TrafficLights;
+								TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
+							}
+						} else {
+							showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
 						}
 					}
 				}
-
-
-				/*if (SelectedNode == 0) {
-					_hoveredButton[0] = 0;
-					_hoveredButton[1] = 0;
-					return;
-				}
-			
-
-				if (hoveredSegment) return;
-
-				_hoveredButton[0] = 0;
-				_hoveredButton[1] = 0;*/
 			} catch (Exception e) {
 				Log.Error(e.ToString());
 			}
@@ -3511,14 +3526,11 @@ namespace TrafficManager.TrafficLight {
 				if (TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
 					showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
 				} else {
-					node.m_flags &= ~NetNode.Flags.TrafficLights;
+					Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags &= ~NetNode.Flags.TrafficLights;
 				}
 			} else {
-				node.m_flags |= NetNode.Flags.TrafficLights;
+				Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags |= NetNode.Flags.TrafficLights;
 			}
-
-			Log.Message("setnetnode!");
-			SetNetNode(_hoveredNetNodeIdx, node);
 		}
 
 		public void AddTimedNodes() {
@@ -3606,10 +3618,6 @@ namespace TrafficManager.TrafficLight {
 		}
 		public static NetNode GetNetNode(ushort index) {
 			return Singleton<NetManager>.instance.m_nodes.m_buffer[index];
-		}
-
-		public static void SetNetNode(ushort index, NetNode node) {
-			Singleton<NetManager>.instance.m_nodes.m_buffer[index] = node;
 		}
 
 		private static void AddListNode(ushort node) {
