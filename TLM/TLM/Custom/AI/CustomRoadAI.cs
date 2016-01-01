@@ -14,30 +14,23 @@ namespace TrafficManager.Custom.AI {
 
 		// this implements the Update method of MonoBehaviour
 		public void Update() {
-			//Log.Warning("CustomRoadAI: Update called");
-			/*if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
-				TrafficPriority.housekeeping();
-		}*/
-
-			/*try {
-				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
-					var nodeSim = e.Value;
-					nodeSim.SimulationStep();
-				}
-			} catch (Exception) {
-				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
-			}*/
 		}
 
 		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
 			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
 				TrafficPriority.housekeeping();
 
-			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
+			try {
+				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
+					var otherNodeSim = e.Value;
+					otherNodeSim.SimulationStep();
+				}
+			} catch (Exception) {
+				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
+			}
 
-			if (nodeSim != null && nodeSim.FlagTimedTrafficLights && nodeSim.TimedTrafficLightsActive)
-				nodeSim.SimulationStep();
-			else if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
+			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
+			if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
 				OriginalSimulationStep(nodeId, ref data);
 			}
 		}

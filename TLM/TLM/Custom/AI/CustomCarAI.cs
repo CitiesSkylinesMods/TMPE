@@ -31,6 +31,9 @@ namespace TrafficManager.Custom.AI {
 		private bool HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool handleWatched) {
 			bool handledVehicle = false;
 			if (handleWatched) {
+				if (Singleton<SimulationManager>.instance.m_currentFrameIndex % 100 == 0)
+					Log.Message($"{watchedVehicleIds.Count} watched vehicles");
+
 				var vehManager = Singleton<VehicleManager>.instance;
 				// handle watched vehicles
 				HashSet<ushort> toDelete = new HashSet<ushort>();

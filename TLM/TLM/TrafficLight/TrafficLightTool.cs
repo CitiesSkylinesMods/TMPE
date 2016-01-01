@@ -1542,7 +1542,7 @@ namespace TrafficManager.TrafficLight {
 					}
 				}*/
 
-				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+			Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
 
 				GUI.Box(labelRect, labelStr, _counterStyle);
