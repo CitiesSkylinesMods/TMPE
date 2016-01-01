@@ -434,7 +434,7 @@ namespace TrafficManager.TrafficLight {
 				_hoveredNetNodeIdx = output.m_netNode;
 				_hoveredSegmentIdx = output.m_netSegment;
 			} else {
-				Log.Message($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {_cursorInSecondaryPanel}");
+				//Log.Message($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {_cursorInSecondaryPanel}");
 			}
 
 			return mouseRayValid;
@@ -701,7 +701,7 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 			_guiSegments();
 			_guiNodes();
-			//_guiVehicles();
+			_guiVehicles();
 #endif
 
 			showTimedLightIcons();
@@ -1390,6 +1390,47 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		/// <summary>
+		/// Displays lane ids over lanes
+		/// </summary>
+		private void _guiLanes(ref NetSegment segment, ref NetInfo segmentInfo) {
+			Vector3 centerPos = segment.m_bounds.center;
+			var screenPos = Camera.main.WorldToScreenPoint(centerPos);
+			screenPos.y = Screen.height - screenPos.y - 200;
+
+			if (screenPos.z < 0)
+				return;
+
+			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+			var diff = centerPos - camPos;
+			if (diff.magnitude > DebugCloseLod)
+				return; // do not draw if too distant
+
+			var zoom = 1.0f / diff.magnitude * 150f;
+
+			_counterStyle.fontSize = (int)(11f * zoom);
+			_counterStyle.normal.textColor = new Color(1f, 1f, 0f);
+
+			uint curLaneId = segment.m_lanes;
+			String labelStr = "";
+			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
+				if (curLaneId == 0)
+					break;
+
+				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
+				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
+
+				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "\n";
+
+				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+			}
+			
+			Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+			Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
+
+			GUI.Label(labelRect, labelStr, _counterStyle);
+		}
+
+		/// <summary>
 		/// Displays segment ids over segments
 		/// </summary>
 		private void _guiSegments() {
@@ -1413,14 +1454,17 @@ namespace TrafficManager.TrafficLight {
 
 				var zoom = 1.0f / diff.magnitude * 150f;
 
-				_counterStyle.fontSize = (int)(15f * zoom);
+				_counterStyle.fontSize = (int)(12f * zoom);
 				_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
-				String labelStr = "Segment " + i + "\nStart: " + segment.m_startNode + "\nEnd: " + segment.m_endNode;
+				String labelStr = "Segment " + i + ", flags: " + segment.m_flags.ToString() + "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 
 				GUI.Label(labelRect, labelStr, _counterStyle);
+
+				var segmentInfo = segment.Info;
+				_guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
