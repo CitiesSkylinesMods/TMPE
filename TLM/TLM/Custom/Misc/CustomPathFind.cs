@@ -613,98 +613,95 @@ namespace TrafficManager.Custom.Misc
 					}
 
 					// NON-STOCK CODE START //
-					//if (TrafficPriority.IsPrioritySegment(nodeID, nextSegmentId)) {
-					if (true) {
-						// "nextSegment" is actually the previous segment because path-finding runs from target to start
+					// "nextSegment" is actually the previous segment because path-finding runs from target to start
 
-						var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
-						var nextSegmentInfo = nextSegment.Info;
+					var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
+					var nextSegmentInfo = nextSegment.Info;
 
-						NetInfo.Direction prevDir = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-						prevDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevDir : NetInfo.InvertDirection(prevDir);
-						NetInfo.Direction nextDir = nextSegment.m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-						nextDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
+					NetInfo.Direction prevDir = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+					prevDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevDir : NetInfo.InvertDirection(prevDir);
+					NetInfo.Direction nextDir = nextSegment.m_startNode != nodeID ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+					nextDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
 
-						// valid next lanes:
-						int[] laneIndexes = new int[16]; // index of NetNode.Info.m_lanes
-						uint[] laneIds = new uint[16]; // index of NetManager.m_lanes.m_buffer
+					// valid next lanes:
+					int[] laneIndexes = new int[16]; // index of NetNode.Info.m_lanes
+					uint[] laneIds = new uint[16]; // index of NetManager.m_lanes.m_buffer
 
-						bool laneArrowsDefined = false;
-						var curLaneIndex = 0;
-						uint curLaneId = nextSegment.m_lanes;
-						int i = 0;
-						while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
-							NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
-							if ((byte)(nextLane.m_finalDirection & nextDir) != 0 && nextLane.CheckType(_laneTypes, _vehicleTypes)) {
+					bool laneArrowsDefined = false;
+					var curLaneIndex = 0;
+					uint curLaneId = nextSegment.m_lanes;
+					int i = 0;
+					while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
+						// determine valid lased based on lane arrows
+						NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
+						if ((byte)(nextLane.m_finalDirection & nextDir) != 0 && nextLane.CheckType(_laneTypes, _vehicleTypes)) {
 
-								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) != NetLane.Flags.None) {
-									laneArrowsDefined = true;
-								}
+							if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) != NetLane.Flags.None) {
+								laneArrowsDefined = true;
+							}
 								
-								if (TrafficPriority.IsLeftSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) ==
-										NetLane.Flags.Left) {
-										laneIndexes[curLaneIndex] = i;
-										laneIds[curLaneIndex] = curLaneId;
-										curLaneIndex++;
-									}
-								} else if (TrafficPriority.IsRightSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) ==
-										NetLane.Flags.Right) {
-										laneIndexes[curLaneIndex] = i;
-										laneIds[curLaneIndex] = curLaneId;
-										curLaneIndex++;
-									}
-								} else {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) ==
-										NetLane.Flags.Forward) {
-										laneIndexes[curLaneIndex] = i;
-										laneIds[curLaneIndex] = curLaneId;
-										curLaneIndex++;
-									}
+							if (TrafficPriority.IsLeftSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
+								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) ==
+									NetLane.Flags.Left) {
+									laneIndexes[curLaneIndex] = i;
+									laneIds[curLaneIndex] = curLaneId;
+									curLaneIndex++;
+								}
+							} else if (TrafficPriority.IsRightSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
+								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) ==
+									NetLane.Flags.Right) {
+									laneIndexes[curLaneIndex] = i;
+									laneIds[curLaneIndex] = curLaneId;
+									curLaneIndex++;
+								}
+							} else {
+								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) ==
+									NetLane.Flags.Forward) {
+									laneIndexes[curLaneIndex] = i;
+									laneIds[curLaneIndex] = curLaneId;
+									curLaneIndex++;
 								}
 							}
-
-							curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
-							i++;
 						}
 
-						if (laneArrowsDefined) {
-							var newLaneIndex = 0;
-							var newLaneId = 0u;
-							var newLane = -1;
+						curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
+						i++;
+					}
 
-							if (curLaneIndex > 0) {
-								if (curLaneIndex == 1) {
-									newLaneIndex = laneIndexes[0];
-									newLaneId = laneIds[0];
-								} else {
-									NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
+					if (laneArrowsDefined) {
+						var newLaneIndex = 0;
+						var newLaneId = 0u;
 
-									// lane matching
-									uint index = (uint)Math.Min(curLaneIndex - 1, lane.m_similarLaneIndex);
-									if (prevDir != nextDir)
-										index = (uint)(curLaneIndex - index - 1);
+						if (curLaneIndex > 0) {
+							if (curLaneIndex == 1) {
+								newLaneIndex = laneIndexes[0];
+								newLaneId = laneIds[0];
+							} else {
+								NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
+
+								// lane matching
+								uint index = (uint)Math.Min(curLaneIndex - 1, lane.m_similarLaneIndex);
+								if (prevDir != nextDir)
+									index = (uint)(curLaneIndex - index - 1);
 									
-									newLaneIndex = laneIndexes[index];
-									newLaneId = laneIds[index];
-								}
+								newLaneIndex = laneIndexes[index];
+								newLaneId = laneIds[index];
+							}
 
-								ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId);
-							}
-						} else {
-							if (ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian)) {
-								flag4 = true;
-							}
+							ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId);
 						}
 					} else {
-					// NON-STOCK CODE END //
-						if (this.ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[(int)nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian)) {
+						if (ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian)) {
 							flag4 = true;
 						}
-					// NON-STOCK CODE START //
 					}
 					// NON-STOCK CODE END
+
+					// stock code:
+					/*if (this.ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[(int)nextSegmentId], ref dirSimilarLaneIndex, connectOffset, true, enablePedestrian)) {
+						flag4 = true;
+					}*/
+
 					nextSegmentId = instance.m_segments.m_buffer[(int)nextSegmentId].GetRightSegment(nodeID);
 				}
 				if (flag4) {
