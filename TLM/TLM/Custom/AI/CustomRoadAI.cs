@@ -8,26 +8,32 @@ using UnityEngine;
 namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
 
+		private uint lastUpdateFrame = 0;
+
 		public void Awake() {
 
 		}
 
 		// this implements the Update method of MonoBehaviour
 		public void Update() {
+			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 4;
+
+			if (lastUpdateFrame < currentFrameIndex) {
+				try {
+					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
+						var otherNodeSim = e.Value;
+						otherNodeSim.SimulationStep();
+					}
+				} catch (Exception) {
+					// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
+				}
+			}
+			lastUpdateFrame = currentFrameIndex;
 		}
 
 		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
 			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
 				TrafficPriority.housekeeping();
-
-			try {
-				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
-					var otherNodeSim = e.Value;
-					otherNodeSim.SimulationStep();
-				}
-			} catch (Exception) {
-				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
-			}
 
 			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
 			if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
