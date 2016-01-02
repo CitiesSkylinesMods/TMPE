@@ -59,6 +59,14 @@ namespace TrafficManager {
 				return;
 			}
 			DeserializeData(data);
+
+			// load options
+			byte[] options = _serializableData.LoadData("TMPE_Options");
+			if (options != null) {
+				if (options.Length >= 1) {
+					Options.setSimAccuracy(options[0]);
+				}
+			}
 		}
 
 		private static string LoadLegacyData(byte[] data) {
@@ -390,6 +398,9 @@ namespace TrafficManager {
 
 				Log.Message("Erasing old save data.");
 				_serializableData.SaveData(LegacyDataId, new byte[] { });
+
+				// save options
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

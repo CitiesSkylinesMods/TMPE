@@ -614,6 +614,8 @@ namespace TrafficManager.Custom.Misc
 #if DEBUG
 				//bool debug = nodeID == 28311u && item.m_position.m_segment == 33016;
 				//bool debug = nodeID == 26128u && item.m_position.m_segment == 4139 && nextSegmentId == 27106;
+				bool debug = nodeID == 32265u && item.m_position.m_segment == 32818 && nextSegmentId == 4343;
+				//bool debug = false;
 #endif
 				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
 				int prevRightSimilarLaneIndex;
@@ -644,11 +646,11 @@ namespace TrafficManager.Custom.Misc
 					uint[] indexByRightSimilarLaneIndex = new uint[16];
 
 					bool laneArrowsDefined = false;
-					uint curLaneIndex = 0;
+					uint curLaneI = 0;
 					uint curLaneId = nextSegment.m_lanes;
 					int i = 0;
 					while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
-						// determine valid lased based on lane arrows
+						// determine valid lanes based on lane arrows
 						NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
 
 						if ((byte)(nextLane.m_finalDirection & nextDir2) != 0 && nextLane.CheckType(_laneTypes, _vehicleTypes)) {
@@ -667,26 +669,26 @@ namespace TrafficManager.Custom.Misc
 							if (TrafficPriority.IsLeftSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
 								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) ==
 									NetLane.Flags.Left) {
-									laneIndexes[curLaneIndex] = i;
-									laneIds[curLaneIndex] = curLaneId;
-									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneIndex;
-									curLaneIndex++;
+									laneIndexes[curLaneI] = i;
+									laneIds[curLaneI] = curLaneId;
+									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+									curLaneI++;
 								}
 							} else if (TrafficPriority.IsRightSegment(nextSegmentId, item.m_position.m_segment, nodeID)) {
 								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) ==
 									NetLane.Flags.Right) {
-									laneIndexes[curLaneIndex] = i;
-									laneIds[curLaneIndex] = curLaneId;
-									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneIndex;
-									curLaneIndex++;
+									laneIndexes[curLaneI] = i;
+									laneIds[curLaneI] = curLaneId;
+									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+									curLaneI++;
 								}
 							} else {
 								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) ==
 									NetLane.Flags.Forward) {
-									laneIndexes[curLaneIndex] = i;
-									laneIds[curLaneIndex] = curLaneId;
-									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneIndex;
-									curLaneIndex++;
+									laneIndexes[curLaneI] = i;
+									laneIds[curLaneI] = curLaneId;
+									indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+									curLaneI++;
 								}
 							}
 						}
@@ -699,21 +701,32 @@ namespace TrafficManager.Custom.Misc
 						var newLaneIndex = 0;
 						var newLaneId = 0u;
 
-						if (curLaneIndex > 0) {
-							if (curLaneIndex == 1) {
+						if (curLaneI > 0) {
+							if (curLaneI == 1) {
 								newLaneIndex = laneIndexes[0];
 								newLaneId = laneIds[0];
 							} else {
 								// lane matching
-								uint index = (uint)Math.Min(curLaneIndex - 1, prevRightSimilarLaneIndex);
-								index = indexByRightSimilarLaneIndex[index];
-								
-								newLaneIndex = laneIndexes[index];
-								newLaneId = laneIds[index];
+								int x = prevRightSimilarLaneIndex;
+								int nextLaneI = -1;
+								int nextRightSimilarLaneIndex = -1;
+								for (int j = 0; j < 16; ++j) {
+									if (indexByRightSimilarLaneIndex[j] == 0)
+										continue;
+									nextLaneI = (int)indexByRightSimilarLaneIndex[j] - 1;
+									nextRightSimilarLaneIndex = j;
+									if (x == 0) { // matching lane found
+										break;
+									}
+									--x;
+								}
+
+								newLaneIndex = laneIndexes[nextLaneI];
+								newLaneId = laneIds[nextLaneI];
 
 #if DEBUG
 								if (debug) {
-									Log.Message($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane {item.m_position.m_lane}, {similarLaneIndexFromLeft}. There are {curLaneIndex} candidate lanes. We choose lane {index} (index {newLaneIndex}, id {newLaneId}). lhd: {TrafficPriority.LeftHandDrive}, ped: {pedestrianAllowed}, magical flag4: {blocked}");
+									Log.Message($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right. There are {curLaneI} candidate lanes. We choose lane {nextLaneI} (index {newLaneIndex}, id {newLaneId}, {nextRightSimilarLaneIndex} from right). lhd: {TrafficPriority.LeftHandDrive}, ped: {pedestrianAllowed}, magical flag4: {blocked}");
                                 }
 #endif
 							}

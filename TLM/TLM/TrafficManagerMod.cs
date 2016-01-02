@@ -1,22 +1,22 @@
 using ICities;
 using UnityEngine;
 
-namespace TrafficManager
-{
-    public class TrafficManagerMod : IUserMod
-    {
-        public string Name => "Traffic Manager: Traffic President Edition";
+namespace TrafficManager {
+	public class TrafficManagerMod : IUserMod {
+		public string Name => "Traffic Manager: Traffic President Edition";
 
-        public string Description => "Traffic Junction Manager [v1.3]";
+		public string Description => "Traffic Junction Manager [v1.3]";
 
-        public void OnEnabled()
-        {
-            Log.Message("TrafficManagerMod Enabled");
-        }
+		public void OnEnabled() {
+			Log.Message("TrafficManagerMod Enabled");
+		}
 
-        public void OnDisabled()
-        {
-            Log.Message("TrafficManagerMod Disabled");
-        }
-    }
+		public void OnDisabled() {
+			Log.Message("TrafficManagerMod Disabled");
+		}
+
+		public void OnSettingsUI(UIHelperBase helper) {
+			Options.makeSettings(helper);
+		}
+	}
 }

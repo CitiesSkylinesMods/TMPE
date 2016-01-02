@@ -342,5 +342,5 @@ namespace TrafficManager {
                 TrafficLightTool = null;
             }
         }
-    }
+	}
 }

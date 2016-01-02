@@ -14,6 +14,8 @@ namespace TrafficManager.Traffic {
 			Right
 		}
 
+		private static uint[] loadBalanceMod = new uint[] {0, 127, 511, 1023, 2047};
+
 		public static bool LeftHandDrive;
 
 		/// <summary>
@@ -148,6 +150,8 @@ namespace TrafficManager.Traffic {
 
 			var numCars = 0;
 
+			bool debug = nodeId == 32538;
+
 			// get all cars
 			for (var s = 0; s < 8; s++) {
 				var segment = node.GetSegment(s);
@@ -171,8 +175,12 @@ namespace TrafficManager.Traffic {
 							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
 								if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 									--numCars;
-								else
+								else {
+									if (debug) {
+										Log.Message($"Vehicle {targetCar} on segment {VehicleList[targetCar].FromSegment} has to wait for vehicle {car} on segment {VehicleList[car].FromSegment}");
+									}
 									return true;
+								}
 							} else {
 								numCars--;
 							}
@@ -693,8 +701,7 @@ namespace TrafficManager.Traffic {
 
 		public static void housekeeping() {
 			try {
-				uint loadBalanceMod = 255;
-				uint frameMod = Singleton<SimulationManager>.instance.m_currentFrameIndex & loadBalanceMod; // load balancing: we don't do everything on every frame
+				uint frameMod = Singleton<SimulationManager>.instance.m_currentFrameIndex & loadBalanceMod[Options.simAccuracy]; // load balancing: we don't do everything on every frame
 
 				NetManager netManager = Singleton<NetManager>.instance;
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
@@ -714,7 +721,7 @@ namespace TrafficManager.Traffic {
 						continue;
 					}
 
-					if ((segmentId & loadBalanceMod) == frameMod) {
+					if ((segmentId & loadBalanceMod[Options.simAccuracy]) == frameMod) {
 						//Log.Warning("Housekeeping cars of segment " + segmentId);
 
 						// segment is valid, check for invalid cars

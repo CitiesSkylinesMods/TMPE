@@ -70,6 +70,7 @@
     <Compile Include="Custom\Manager\CustomPathManager.cs" />
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="PriorityCar.cs" />
     <Compile Include="Traffic\PrioritySegment.cs" />
     <Compile Include="RedirectionHelper.cs" />

@@ -24,7 +24,7 @@ namespace TrafficManager.Custom.Manager
         {
             Log.Message("Waking up CustomPathManager.");
             var stockPathFinds = GetComponents<PathFind>();
-            var numOfStockPathFinds = stockPathFinds.Length;
+			var numOfStockPathFinds = stockPathFinds.Length;
 
             Log.Message("Creating " + numOfStockPathFinds + " custom PathFind objects.");
             _replacementPathFinds = new CustomPathFind[numOfStockPathFinds];

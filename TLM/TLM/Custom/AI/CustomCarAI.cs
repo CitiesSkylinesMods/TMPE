@@ -14,6 +14,10 @@ namespace TrafficManager.Custom.AI {
 		private const float CloseLod = 250000f;
 		public static HashSet<ushort> watchedVehicleIds = new HashSet<ushort>();
 
+		private static int[] closeLodUpdateMod = new int[] { 1, 2, 4, 6, 8 };
+		private static int[] farLodUpdateMod = new int[] { 4, 8, 10, 12, 16 };
+		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 16, 20 };
+
 		internal static void OnLevelUnloading() {
 			watchedVehicleIds.Clear();
 		}
@@ -156,7 +160,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// we have seen the car!
-			TrafficPriority.VehicleList[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
+			TrafficPriority.VehicleList[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 			TrafficPriority.VehicleList[vehicleId].LastSpeed = lastFrameData.m_velocity.sqrMagnitude;
 
 #if DEBUG
@@ -463,8 +467,17 @@ namespace TrafficManager.Custom.AI {
 					TrafficPriority.VehicleList.Add(vehicleId, new PriorityCar());
 				}
 
-				if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && 
-					TrafficPriority.VehicleList[vehicleId].LastFrame < Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) {
+				if (
+					(
+						(lastFrameVehiclePos - camPos).sqrMagnitude < CloseLod &&
+						(TrafficPriority.VehicleList[vehicleId].LastFrame >> closeLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> closeLodUpdateMod[Options.simAccuracy]) // very often
+					) ||
+					(
+						(lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && 
+						(TrafficPriority.VehicleList[vehicleId].LastFrame >> farLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> farLodUpdateMod[Options.simAccuracy]) // often
+					) ||
+						(TrafficPriority.VehicleList[vehicleId].LastFrame >> veryFarLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> veryFarLodUpdateMod[Options.simAccuracy]) // less often
+					) {
 					//Log.Message("handle vehicle after threshold");
 					HandleVehicle(vehicleId, ref vehicleData, false);
 				}
@@ -620,7 +633,10 @@ namespace TrafficManager.Custom.AI {
 							}
 						} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod) {
 							if (TrafficPriority.VehicleList.ContainsKey(vehicleId) &&
-								TrafficPriority.IsPrioritySegment(destinationNodeId, prevPos.m_segment)) {
+								TrafficPriority.IsPrioritySegment(destinationNodeId, prevPos.m_segment) &&
+								TrafficPriority.VehicleList[vehicleId].ToNode == destinationNodeId &&
+								TrafficPriority.VehicleList[vehicleId].FromSegment == prevPos.m_segment) {
+
 								var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 								var frame = currentFrameIndex2 >> 4;
 

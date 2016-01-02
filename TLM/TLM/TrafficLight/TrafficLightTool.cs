@@ -1436,7 +1436,7 @@ namespace TrafficManager.TrafficLight {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
 
-				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "\n";
+				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", final dir: " + laneInfo.m_finalDirection + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
