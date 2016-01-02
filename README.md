@@ -4,6 +4,7 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 # Changelog
 1.3.15, 01/02/2016
 - Simulation accuracy (and thus performance) is now controllable through the game options dialog
+- Bugfix: Vehicles on a priority road sometimes stop without an obvious reason
 
 1.3.14, 01/01/2016
 - Improved performance
