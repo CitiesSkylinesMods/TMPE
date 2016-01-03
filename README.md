@@ -2,7 +2,7 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.3.16, 01/02/2016
+1.3.16, 01/03/2016
 - Bugfix: Traffic light settings on roads of the Network Extensions mods are not saved (thanks to @Scarface, @martintech and @Sonic for pointing out this problem)
 - Improved save data management 
 
