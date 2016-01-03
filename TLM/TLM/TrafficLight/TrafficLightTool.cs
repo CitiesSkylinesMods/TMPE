@@ -115,7 +115,7 @@ namespace TrafficManager.TrafficLight {
 			SelectedSegment = 0;
 
 			if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights) {
-				SelectedNodeIndexes.Clear();
+				ClearSelectedNodes();
 				_timedShowNumbers = false;
 			}
 
@@ -158,19 +158,14 @@ namespace TrafficManager.TrafficLight {
 					_renderOverlayManual(cameraInfo);
 					break;
 				case ToolMode.TimedLightsSelectNode:
-					_renderOverlayTimedSelectNodes(cameraInfo);
-					break;
 				case ToolMode.TimedLightsShowLights:
-
+					_renderOverlayTimedSelectNodes(cameraInfo);
 					break;
 				case ToolMode.LaneChange:
 					_renderOverlayLaneChange(cameraInfo);
 					break;
 				case ToolMode.LaneRestrictions:
 					_renderOverlayLaneRestrictions(cameraInfo);
-					break;
-				case ToolMode.Crosswalk:
-					_renderOverlayCrosswalk(cameraInfo);
 					break;
 				default:
 					base.RenderOverlay(cameraInfo);
@@ -213,13 +208,11 @@ namespace TrafficManager.TrafficLight {
 						ManualSwitchToolMode(node);
 						break;
 					case ToolMode.TimedLightsSelectNode:
+					case ToolMode.TimedLightsShowLights:
 						TimedLightSelectNodeToolMode(node);
 						break;
 					case ToolMode.LaneChange:
 						LaneChangeToolMode();
-						break;
-					case ToolMode.Crosswalk:
-						CrosswalkToolMode();
 						break;
 					case ToolMode.LaneRestrictions:
 						LaneRestrictionsToolMode();
@@ -359,7 +352,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void _renderOverlayTimedSelectNodes(RenderManager.CameraInfo cameraInfo) {
-			if (_hoveredNetNodeIdx != 0 && !ContainsListNode(_hoveredNetNodeIdx) && !m_toolController.IsInsideUI && Cursor.visible) {
+			if (_hoveredNetNodeIdx != 0 && !IsNodeSelected(_hoveredNetNodeIdx) && !m_toolController.IsInsideUI && Cursor.visible) {
 				var node = GetNetNode(_hoveredNetNodeIdx);
 				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
@@ -435,19 +428,6 @@ namespace TrafficManager.TrafficLight {
 				GetToolColor(false, false));
 		}
 
-		private void _renderOverlayCrosswalk(RenderManager.CameraInfo cameraInfo) {
-			if (_hoveredSegmentIdx == 0) return;
-
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
-
-			if (ValidCrosswalkNode(segment.m_startNode, GetNetNode(segment.m_startNode)) ||
-				ValidCrosswalkNode(segment.m_endNode, GetNetNode(segment.m_endNode))) {
-
-				NetTool.RenderOverlay(cameraInfo, ref segment, GetToolColor(_mouseDown, false),
-					GetToolColor(_mouseDown, false));
-			}
-		}
-
 		private void _renderOverlayDraw(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color) {
 			const float width = 8f;
 
@@ -499,6 +479,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (mouseRayValid) {
 				// find currently hovered node & segment
+				
 				var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 				var mouseRayLength = Camera.main.farClipPlane;
 				var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
@@ -542,16 +523,20 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void TimedLightSelectNodeToolMode(NetNode node) {
+			if (_hoveredNetNodeIdx <= 0)
+				return;
+
+			if (_toolMode == ToolMode.TimedLightsShowLights) {
+				_toolMode = ToolMode.TimedLightsSelectNode;
+				ClearSelectedNodes();
+			}
+
 			if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
-				//if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
-					if (ContainsListNode(_hoveredNetNodeIdx)) {
-						RemoveListNode(_hoveredNetNodeIdx);
-					} else {
-						AddListNode(_hoveredNetNodeIdx);
-					}
-				/*} else {
-					showTooltip(NODE_IS_NOT_LIGHT, node.m_position);
-				}*/
+				if (IsNodeSelected(_hoveredNetNodeIdx)) {
+					RemoveSelectedNode(_hoveredNetNodeIdx);
+				} else {
+					AddSelectedNode(_hoveredNetNodeIdx);
+				}
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
 					var timedLight = TrafficLightsTimed.GetTimedLight(_hoveredNetNodeIdx);
@@ -626,81 +611,6 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		private void CrosswalkToolMode() {
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
-
-			var startNode = GetNetNode(segment.m_startNode);
-			var endNode = GetNetNode(segment.m_endNode);
-
-			var result = false;
-			var startNodeChanged = false;
-			var endNodeChanged = false;
-
-			if (!result && ValidCrosswalkNode(segment.m_startNode, startNode)) {
-				if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_startNode, true);
-					result = true;
-					startNodeChanged = true;
-				}
-			}
-			if (!result &&
-				(ValidCrosswalkNode(segment.m_startNode, startNode) || ValidCrosswalkNode(segment.m_endNode, endNode)) &&
-				(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
-					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_startNode, false);
-					result = true;
-					startNodeChanged = true;
-				}
-				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_endNode, true);
-					result = true;
-					endNodeChanged = true;
-				}
-			}
-			if (!result &&
-				(ValidCrosswalkNode(segment.m_startNode, startNode) ||
-				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
-				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
-					(startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_startNode, true);
-					result = true;
-					startNodeChanged = true;
-				}
-				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_endNode, true);
-					result = true;
-					endNodeChanged = true;
-				}
-			}
-			if (!result &&
-				(ValidCrosswalkNode(segment.m_startNode, startNode) ||
-				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
-				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
-					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_startNode, false);
-					result = true;
-					startNodeChanged = true;
-				}
-				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
-					(endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Flags.setNodeCrossingFlag(segment.m_endNode, false);
-					result = true;
-					endNodeChanged = true;
-				}
-			}
-
-			// force rendering of nodes
-			if (startNodeChanged) {
-				Singleton<NetManager>.instance.UpdateNodeRenderer(segment.m_startNode, false);
-			}
-			if (endNodeChanged) {
-				Singleton<NetManager>.instance.UpdateNodeRenderer(segment.m_endNode, false);
-			}
-		}
-
 		private void LaneRestrictionsToolMode() {
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
 			var info = segment.Info;
@@ -716,8 +626,8 @@ namespace TrafficManager.TrafficLight {
 					_selectedSegmentIds = new List<ushort>(restSegment.SegmentGroup);
 				}
 			} else {
-				if (ContainsListSegment(_hoveredSegmentIdx)) {
-					RemoveListSegment(_hoveredSegmentIdx);
+				if (IsSegmentSelected(_hoveredSegmentIdx)) {
+					RemoveSelectedSegment(_hoveredSegmentIdx);
 				} else {
 					if (_selectedSegmentIds.Count > 0) {
 						var segment2 =
@@ -730,17 +640,13 @@ namespace TrafficManager.TrafficLight {
 								Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
 									.m_position);
 						} else {
-							AddListSegment(_hoveredSegmentIdx);
+							AddSelectedSegment(_hoveredSegmentIdx);
 						}
 					} else {
-						AddListSegment(_hoveredSegmentIdx);
+						AddSelectedSegment(_hoveredSegmentIdx);
 					}
 				}
 			}
-		}
-
-		private static bool ValidCrosswalkNode(ushort nodeid, NetNode node) {
-			return nodeid != 0 && (node.m_flags & (NetNode.Flags.Transition | NetNode.Flags.TrafficLights)) == NetNode.Flags.None;
 		}
 
 		private void _guiManualTrafficLights() {
@@ -1474,7 +1380,7 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-				_guiLanes(ref segment, ref segmentInfo);
+				//_guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
@@ -3027,7 +2933,10 @@ namespace TrafficManager.TrafficLight {
 
 				GUILayout.Label(txt);
 
-				if (!GUILayout.Button("Next")) return;
+				if (SelectedNodeIndexes.Count > 0 && GUILayout.Button("Deselect all nodes")) {
+					ClearSelectedNodes();
+				}
+				if (!GUILayout.Button("Setup timed traffic light")) return;
 
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 					var node2 = GetNetNode(selectedNodeIndex);
@@ -3223,7 +3132,7 @@ namespace TrafficManager.TrafficLight {
 					}
 				} else {
 					if (_timedEditStep < 0) {
-						if (GUILayout.Button("Add State")) {
+						if (GUILayout.Button("Add step")) {
 							_timedPanelAdd = true;
 						}
 					}
@@ -3268,12 +3177,12 @@ namespace TrafficManager.TrafficLight {
 				return;
 			}
 
-			if (!GUILayout.Button("REMOVE")) {
+			if (!GUILayout.Button("Remove timed traffic light")) {
 				return;
 			}
 
 			DisableTimed();
-			SelectedNodeIndexes.Clear();
+			ClearSelectedNodes();
 			SetToolMode(ToolMode.None);
 		}
 
@@ -3456,7 +3365,8 @@ namespace TrafficManager.TrafficLight {
 						} else if (ok) {
 							if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
 								Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
-								Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false);
+								TrafficLightSimulation.RemoveNodeFromSimulation(_hoveredNetNodeIdx); // TODO refactor!
+								Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false); // TODO refactor!
 								TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
 							}
 						} else {
@@ -3512,7 +3422,8 @@ namespace TrafficManager.TrafficLight {
 				if (TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
 					showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
 				} else {
-					Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false);
+					TrafficLightSimulation.RemoveNodeFromSimulation(_hoveredNetNodeIdx); // TODO refactor!
+					Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false); // TODO refactor!
 				}
 			} else {
 				TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
@@ -3590,13 +3501,8 @@ namespace TrafficManager.TrafficLight {
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				GetNetNode(selectedNodeIndex);
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
-
-				TrafficLightsTimed.RemoveTimedLight(selectedNodeIndex);
-
 				if (nodeSimulation == null) continue;
-
-				nodeSimulation.FlagTimedTrafficLights = false;
-				TrafficLightSimulation.RemoveNodeFromSimulation(selectedNodeIndex);
+				nodeSimulation.Destroy();
 			}
 		}
 
@@ -3607,27 +3513,31 @@ namespace TrafficManager.TrafficLight {
 			return Singleton<NetManager>.instance.m_nodes.m_buffer[index];
 		}
 
-		private static void AddListNode(ushort node) {
+		private static void AddSelectedNode(ushort node) {
 			SelectedNodeIndexes.Add(node);
 		}
 
-		private static bool ContainsListNode(ushort node) {
+		private static bool IsNodeSelected(ushort node) {
 			return SelectedNodeIndexes.Contains(node);
 		}
 
-		private static void RemoveListNode(ushort node) {
+		private static void RemoveSelectedNode(ushort node) {
 			SelectedNodeIndexes.Remove(node);
 		}
 
-		private static void AddListSegment(ushort segment) {
+		private static void ClearSelectedNodes() {
+			SelectedNodeIndexes.Clear();
+		}
+
+		private static void AddSelectedSegment(ushort segment) {
 			_selectedSegmentIds.Add(segment);
 		}
 
-		private static bool ContainsListSegment(ushort segment) {
+		private static bool IsSegmentSelected(ushort segment) {
 			return _selectedSegmentIds.Contains(segment);
 		}
 
-		private static void RemoveListSegment(ushort segment) {
+		private static void RemoveSelectedSegment(ushort segment) {
 			_selectedSegmentIds.Remove(segment);
 		}
 	}

@@ -16,7 +16,6 @@ namespace TrafficManager.UI {
 		private static UIButton _buttonTimedMain;
 		private static UIButton _buttonLaneChange;
 		//private static UIButton _buttonLaneRestrictions;
-		private static UIButton _buttonCrosswalk;
 		private static UIButton _buttonClearTraffic;
 		private static UIButton _buttonToggleDespawn;
 
@@ -32,11 +31,11 @@ namespace TrafficManager.UI {
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
 			width = 250;
-			height = LoadingExtension.IsPathManagerCompatible ? 350 : 270;
+			height = LoadingExtension.IsPathManagerCompatible ? 310 : 230;
 			relativePosition = new Vector3(10.48f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.3.16";
+			title.text = "Version 1.3.18";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -55,8 +54,6 @@ namespace TrafficManager.UI {
 				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
 			}
 
-			_buttonCrosswalk = _createButton("Add/Remove Crosswalk", new Vector3(35f, y), clickCrosswalk);
-			y += 40;
 			_buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, y), clickClearTraffic);
 			y += 40;
 
@@ -140,8 +137,6 @@ namespace TrafficManager.UI {
 			if (_buttonLaneChange != null)
 				_buttonLaneChange.focusedBgSprite = "ButtonMenu";
 			//_buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
-			if (_buttonCrosswalk != null)
-				_buttonCrosswalk.focusedBgSprite = "ButtonMenu";
 			if (_buttonClearTraffic != null)
 				_buttonClearTraffic.focusedBgSprite = "ButtonMenu";
 			if (_buttonToggleDespawn != null)
@@ -202,16 +197,6 @@ namespace TrafficManager.UI {
 			}
 		}*/
 
-		private void clickCrosswalk(UIComponent component, UIMouseEventParameter eventParam) {
-			if (TrafficLightTool.getToolMode() != ToolMode.Crosswalk) {
-				_buttonCrosswalk.focusedBgSprite = "ButtonMenuFocused";
-				TrafficLightTool.SetToolMode(ToolMode.Crosswalk);
-			} else {
-				_buttonCrosswalk.focusedBgSprite = "ButtonMenu";
-				TrafficLightTool.SetToolMode(ToolMode.None);
-			}
-		}
-
 		public override void Update() {
 			switch (TrafficLightTool.getToolMode()) {
 				case ToolMode.None: _basePanel(); break;
@@ -221,7 +206,6 @@ namespace TrafficManager.UI {
 				case ToolMode.TimedLightsSelectNode: _timedControlNodesPanel(); break;
 				case ToolMode.TimedLightsShowLights: _timedControlLightsPanel(); break;
 				case ToolMode.LaneChange: _laneChangePanel(); break;
-				case ToolMode.Crosswalk: _crosswalkPanel(); break;
 			}
 		}
 
@@ -293,9 +277,6 @@ namespace TrafficManager.UI {
 			} catch (Exception e) {
 				Log.Error("Exception in _laneChangePanel: " + e.ToString());
 			}
-		}
-
-		private void _crosswalkPanel() {
 		}
 	}
 }

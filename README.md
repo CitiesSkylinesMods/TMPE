@@ -2,6 +2,15 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.18, 01/03/2016
+- Provided a fix for unconnected junctions caused by other mods
+- Crosswalk feature removed. If you need to add/remove crosswalks please use the "Crossings" mod.
+- UI improvements: You can now switch between activated timed traffic lights without clicking on the menu button again
+
+1.3.17, 01/03/2016
+- Bugfix: Timed traffic lights cannot be added again after removal, toggling traffic lights does not work (thanks to @Fabrice, @ChakyHH, @sensual.heathen for pointing out this problem)
+- Bugfix: After using the "Manual traffic lights" option, toggling lights does not work (thanks to @Timso113 for pointing out this problem)
+
 1.3.16, 01/03/2016
 - Bugfix: Traffic light settings on roads of the Network Extensions mods are not saved (thanks to @Scarface, @martintech and @Sonic for pointing out this problem)
 - Improved save data management 

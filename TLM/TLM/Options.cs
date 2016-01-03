@@ -15,8 +15,8 @@ namespace TrafficManager {
 		public static int simAccuracy = 1;
 		
 		public static void makeSettings(UIHelperBase helper) {
-			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition");
-			simAccuracyDropdown = group.AddDropdown("Simulation accuracy (affects performance)", new string[] { "Very high", "High", "Medium", "Low", "Very Low" }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition (Settings are defined for each savegame separately)");
+			simAccuracyDropdown = group.AddDropdown("Simulation accuracy (affects performance):", new string[] { "Very high", "High", "Medium", "Low", "Very Low" }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {

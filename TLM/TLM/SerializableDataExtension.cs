@@ -288,14 +288,9 @@ namespace TrafficManager {
 
 						// prevent overflow
 						if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
-
 							var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
+							Log.Message("Setting traffic light flag for node " + i + ": " + (trafficLight == '1'));
 							Flags.setNodeTrafficLight((ushort)i, trafficLight == '1');
-						}
-
-						if (_configuration.NodeCrosswalk.Length > saveDataIndex) {
-							var crossWalk = _configuration.NodeCrosswalk[saveDataIndex];
-							Flags.setNodeCrossingFlag((ushort)i, crossWalk == '1');
 						}
 						++saveDataIndex;
 					} catch (Exception e) {
@@ -306,8 +301,8 @@ namespace TrafficManager {
 			}
 
 			// For Traffic++ compatibility
-			if (!LoadingExtension.IsPathManagerCompatible)
-				return;
+			/*if (!LoadingExtension.IsPathManagerCompatible)
+				return;*/
 
 			Log.Message($"LaneFlags: {_configuration.LaneFlags}");
 			var lanes = _configuration.LaneFlags.Split(',');
@@ -396,7 +391,7 @@ namespace TrafficManager {
 
 			if (Singleton<NetManager>.instance?.m_nodes?.m_buffer != null) {
 				for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
-					SaveNodeLightsAndCrosswalks(i, configuration);
+					SaveNodeLights(i, configuration);
 				}
 			}
 
@@ -456,7 +451,7 @@ namespace TrafficManager {
 			}
 		}
 
-		private static bool SaveNodeLightsAndCrosswalks(int i, Configuration configuration) {
+		private static bool SaveNodeLights(int i, Configuration configuration) {
 			try {
 				var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
 
@@ -471,7 +466,6 @@ namespace TrafficManager {
 					Log.Message($"Saving that node {i} does not have a traffic light");
 				}
 				configuration.NodeTrafficLights += Convert.ToInt16(hasTrafficLight);
-				configuration.NodeCrosswalk += Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
 				return false;
 			} catch (Exception e) {
 				Log.Error($"Error Adding Node Lights and Crosswalks {e.Message}");

@@ -244,6 +244,7 @@ namespace TrafficManager {
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
                 TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
                                                 SimulationMetaData.MetaBool.True;
+				TrafficPriority.fixJunctions();
             }
         }
 

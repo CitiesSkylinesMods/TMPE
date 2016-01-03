@@ -15,7 +15,7 @@ namespace TrafficManager.Traffic {
 			Right
 		}
 
-		private static uint[] segmentsCheckLoadBalanceMod = new uint[] {3, 7, 15, 31, 63};
+		private static uint[] segmentsCheckLoadBalanceMod = new uint[] {15, 31, 63, 127, 255};
 		private static uint checkMod = 0;
 
 		public static bool LeftHandDrive;
@@ -751,6 +751,16 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		internal static void fixJunctions() {
+			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
+				NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[i];
+				if (node.m_flags == NetNode.Flags.None)
+					continue;
+				if (node.CountSegments() > 2)
+					Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
+			}
+		}
+
 		public static void housekeeping(ushort nodeId) {
 			try {
 				uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -759,23 +769,20 @@ namespace TrafficManager.Traffic {
 				NetManager netManager = Singleton<NetManager>.instance;
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-				if ((nodeId & checkMod) == checkMod) {
-					Flags.applyNodeTrafficLightFlag(nodeId);
-					Flags.applyNodeCrossingFlag(nodeId);
+				Flags.applyNodeTrafficLightFlag(nodeId);
 
-					// update lane arrows
-					var node = netManager.m_nodes.m_buffer[nodeId];
-					for (var s = 0; s < 8; s++) {
-						var segmentId = node.GetSegment(s);
-						if (segmentId <= 0)
-							continue;
-						NetSegment segment = netManager.m_segments.m_buffer[segmentId];
+				// update lane arrows
+				var node = netManager.m_nodes.m_buffer[nodeId];
+				for (var s = 0; s < 8; s++) {
+					var segmentId = node.GetSegment(s);
+					if (segmentId <= 0)
+						continue;
+					NetSegment segment = netManager.m_segments.m_buffer[segmentId];
 
-						uint laneId = segment.m_lanes;
-						while (laneId != 0) {
-							Flags.applyLaneArrowFlags(laneId);
-							laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
-						}
+					uint laneId = segment.m_lanes;
+					while (laneId != 0) {
+						Flags.applyLaneArrowFlags(laneId);
+						laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
 					}
 				}
 		
@@ -808,44 +815,40 @@ namespace TrafficManager.Traffic {
 						continue;
 					}
 
-					//if ((segmentId & vehicleCheckLoadBalanceMod[Options.simAccuracy]) == vehicleCheckMod) {
-						//Log.Warning("Housekeeping cars of segment " + segmentId);
+					// segment is valid, check for invalid cars
+					if (PrioritySegments[segmentId].Node1 != 0) {
+						List<ushort> vehicleIdsToDelete = new List<ushort>();
 
-						// segment is valid, check for invalid cars
-						if (PrioritySegments[segmentId].Node1 != 0) {
-							List<ushort> vehicleIdsToDelete = new List<ushort>();
-
-							foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance1.Cars) {
-								var vehicleId = e.Key;
-								if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
-									vehicleIdsToDelete.Add(vehicleId);
-								}
-							}
-
-							foreach (var vehicleId in vehicleIdsToDelete) {
-								Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
-								PrioritySegments[segmentId].Instance1.RemoveCar(vehicleId);
-								VehicleList.Remove(vehicleId);
+						foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance1.Cars) {
+							var vehicleId = e.Key;
+							if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
+								vehicleIdsToDelete.Add(vehicleId);
 							}
 						}
 
-						if (PrioritySegments[segmentId].Node2 != 0) {
-							List<ushort> vehicleIdsToDelete = new List<ushort>();
+						foreach (var vehicleId in vehicleIdsToDelete) {
+							Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
+							PrioritySegments[segmentId].Instance1.RemoveCar(vehicleId);
+							VehicleList.Remove(vehicleId);
+						}
+					}
 
-							foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance2.Cars) {
-								var vehicleId = e.Key;
-								if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
-									vehicleIdsToDelete.Add(vehicleId);
-								}
-							}
+					if (PrioritySegments[segmentId].Node2 != 0) {
+						List<ushort> vehicleIdsToDelete = new List<ushort>();
 
-							foreach (var vehicleId in vehicleIdsToDelete) {
-								Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
-								PrioritySegments[segmentId].Instance2.RemoveCar(vehicleId);
-								VehicleList.Remove(vehicleId);
+						foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance2.Cars) {
+							var vehicleId = e.Key;
+							if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
+								vehicleIdsToDelete.Add(vehicleId);
 							}
 						}
-					//}
+
+						foreach (var vehicleId in vehicleIdsToDelete) {
+							Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
+							PrioritySegments[segmentId].Instance2.RemoveCar(vehicleId);
+							VehicleList.Remove(vehicleId);
+						}
+					}
 				}
 
 				foreach (var sId in segmentIdsToDelete) {
@@ -856,9 +859,6 @@ namespace TrafficManager.Traffic {
 
 				// validate nodes & delete invalid nodes
 				foreach (ushort nId in nodeIdsToCheck) {
-					if ((nId & checkMod) != checkMod)
-						continue;
-
 					NodeValidityState nodeState = NodeValidityState.Valid;
 					if (!isValidPriorityNode(nId, out nodeState)) {
 						if (nodeState != NodeValidityState.SimWithoutLight) {

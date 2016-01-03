@@ -25,31 +25,18 @@ namespace TrafficManager.State {
 		private static Dictionary<ushort, bool> nodeTrafficLightFlag = new Dictionary<ushort, bool>();
 
 		/// <summary>
-		/// For each node: Defines if a crossing exists or not. If no entry exists for a given node id, the game's default setting is used
-		/// </summary>
-		private static Dictionary<ushort, bool> nodeCrossingFlag = new Dictionary<ushort, bool>();
-
-		/// <summary>
 		/// For each lane: Defines the lane arrows which are set
 		/// </summary>
 		private static Dictionary<uint, LaneArrows> laneArrowFlags = new Dictionary<uint, LaneArrows>();
 
-		public static void setNodeTrafficLight(ushort nodeId,  bool flag) {
+		public static void setNodeTrafficLight(ushort nodeId, bool flag) {
 			if (nodeId <= 0)
 				return;
 
 			nodeTrafficLightFlag[nodeId] = flag;
 			applyNodeTrafficLightFlag(nodeId);
 		}
-
-		public static void setNodeCrossingFlag(ushort nodeId, bool flag) {
-			if (nodeId <= 0)
-				return;
-
-			nodeCrossingFlag[nodeId] = flag;
-			applyNodeCrossingFlag(nodeId);
-		}
-
+		
 		public static void setLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
@@ -83,7 +70,6 @@ namespace TrafficManager.State {
 		public static void applyAllFlags() {
 			foreach (ushort nodeId in nodeTrafficLightFlag.Keys) {
 				applyNodeTrafficLightFlag(nodeId);
-				applyNodeCrossingFlag(nodeId);
 			}
 
 			foreach (uint laneId in laneArrowFlags.Keys) {
@@ -105,20 +91,6 @@ namespace TrafficManager.State {
 			}
 		}
 
-		public static void applyNodeCrossingFlag(ushort nodeId) {
-			if (nodeId <= 0 || !nodeCrossingFlag.ContainsKey(nodeId))
-				return;
-
-			bool flag = nodeCrossingFlag[nodeId];
-			if (flag) {
-				//Log.Message($"Adding crosswalk @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.Junction;
-			} else {
-				//Log.Message($"Removing crosswalk @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.Junction;
-			}
-		}
-
 		public static void applyLaneArrowFlags(uint laneId) {
 			if (laneId <= 0 || !laneArrowFlags.ContainsKey(laneId))
 				return;
@@ -127,13 +99,12 @@ namespace TrafficManager.State {
 			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 			laneFlags &= ~lfr; // remove all arrows
 			laneFlags |= (uint)flags; // add desired arrows
-			Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
+			//Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
 			Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 		}
 
 		internal static void clearAll() {
 			nodeTrafficLightFlag.Clear();
-			nodeCrossingFlag.Clear();
 			laneArrowFlags.Clear();
 		}
 
