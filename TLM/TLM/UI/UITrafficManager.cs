@@ -36,7 +36,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(10.48f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.3.15";
+			title.text = "Version 1.3.16";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -248,73 +248,50 @@ namespace TrafficManager.UI {
 		}
 
 		private void _laneChangePanel() {
-			if (TrafficLightTool.SelectedSegment == 0) return;
-			var instance = Singleton<NetManager>.instance;
+			try {
+				if (TrafficLightTool.SelectedSegment == 0) return;
+				var instance = Singleton<NetManager>.instance;
 
-			var segment = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment];
+				var segment = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment];
 
-			var info = segment.Info;
+				var info = segment.Info;
 
-			var num2 = segment.m_lanes;
-			var num3 = 0;
+				var num2 = segment.m_lanes;
+				var num3 = 0;
 
-			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == TrafficLightTool.SelectedNode)
-				dir = NetInfo.Direction.Backward;
-			var dir3 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+				var dir = NetInfo.Direction.Forward;
+				if (segment.m_startNode == TrafficLightTool.SelectedNode)
+					dir = NetInfo.Direction.Backward;
+				var dir3 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3) {
-					//segmentLights[num3].Show();
-					//segmentLights[num3].relativePosition = new Vector3(35f, (float)(xPos + (offsetIdx * 40f)));
-					//segmentLights[num3].text = ((NetLane.Flags)instance.m_lanes.m_buffer[num2].m_flags & ~NetLane.Flags.Created).ToString();
+				while (num3 < info.m_lanes.Length && num2 != 0u) {
+					if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3) {
+						//segmentLights[num3].Show();
+						//segmentLights[num3].relativePosition = new Vector3(35f, (float)(xPos + (offsetIdx * 40f)));
+						//segmentLights[num3].text = ((NetLane.Flags)instance.m_lanes.m_buffer[num2].m_flags & ~NetLane.Flags.Created).ToString();
 
-					//if (segmentLights[num3].containsMouse)
-					//{
-					//    if (Input.GetMouseButton(0) && !segmentMouseDown)
-					//    {
-					//        switchLane(num2);
-					//        segmentMouseDown = true;
+						//if (segmentLights[num3].containsMouse)
+						//{
+						//    if (Input.GetMouseButton(0) && !segmentMouseDown)
+						//    {
+						//        switchLane(num2);
+						//        segmentMouseDown = true;
 
-					//        if (
-					//            !TrafficPriority.isPrioritySegment(TrafficLightTool.SelectedNode,
-					//                TrafficLightTool.SelectedSegment))
-					//        {
-					//            TrafficPriority.addPrioritySegment(TrafficLightTool.SelectedNode, TrafficLightTool.SelectedSegment, PrioritySegment.PriorityType.None);
-					//        }
-					//    }
-					//}
+						//        if (
+						//            !TrafficPriority.isPrioritySegment(TrafficLightTool.SelectedNode,
+						//                TrafficLightTool.SelectedSegment))
+						//        {
+						//            TrafficPriority.addPrioritySegment(TrafficLightTool.SelectedNode, TrafficLightTool.SelectedSegment, PrioritySegment.PriorityType.None);
+						//        }
+						//    }
+						//}
+					}
+
+					num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
+					num3++;
 				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-		}
-
-		public void SwitchLane(uint laneId) {
-			var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
-
-			if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.LeftForwardRight) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.LeftForwardRight) | NetLane.Flags.Forward);
-			} else if ((flags & NetLane.Flags.ForwardRight) == NetLane.Flags.ForwardRight) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.ForwardRight) | NetLane.Flags.LeftForwardRight);
-			} else if ((flags & NetLane.Flags.LeftRight) == NetLane.Flags.LeftRight) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.LeftRight) | NetLane.Flags.ForwardRight);
-			} else if ((flags & NetLane.Flags.LeftForward) == NetLane.Flags.LeftForward) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.LeftForward) | NetLane.Flags.LeftRight);
-			} else if ((flags & NetLane.Flags.Right) == NetLane.Flags.Right) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.Right) | NetLane.Flags.LeftForward);
-			} else if ((flags & NetLane.Flags.Left) == NetLane.Flags.Left) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.Left) | NetLane.Flags.Right);
-			} else if ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags =
-					(ushort)((flags & ~NetLane.Flags.Forward) | NetLane.Flags.Left);
+			} catch (Exception e) {
+				Log.Error("Exception in _laneChangePanel: " + e.ToString());
 			}
 		}
 

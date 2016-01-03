@@ -11,6 +11,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Timer = System.Timers.Timer;
+using TrafficManager.State;
 
 namespace TrafficManager {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -147,20 +148,20 @@ namespace TrafficManager {
 					continue;
 				if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1]))
 					continue;
-				Log.Message($"Adding Priority Segment of type: {segment[2].ToString()}");
+				Log.Message($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
 				TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (PrioritySegment.PriorityType)segment[2]);
 			}
 
 			foreach (var node in _configuration.NodeDictionary) {
 				if (node.Length < 4)
 					continue;
-				if (TrafficPriority.GetNodeSimulation((ushort)node[0]) != null)
+				if (TrafficLightSimulation.GetNodeSimulation((ushort)node[0]) != null)
 					continue;
 
-				Log.Message($"Adding Node do Simulation {node[0]}");
+				Log.Message($"Adding node simulation {node[0]}");
 				try {
-					TrafficPriority.AddNodeToSimulation((ushort)node[0]);
-					var nodeDict = TrafficPriority.GetNodeSimulation((ushort)node[0]);
+					TrafficLightSimulation.AddNodeToSimulation((ushort)node[0]);
+					var nodeDict = TrafficLightSimulation.GetNodeSimulation((ushort)node[0]);
 
 					nodeDict.ManualTrafficLights = Convert.ToBoolean(node[1]);
 					nodeDict.TimedTrafficLights = Convert.ToBoolean(node[2]);
@@ -281,8 +282,7 @@ namespace TrafficManager {
 				for (var i = 0; i < nodeCount; i++) {
 					//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
 					try {
-						if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service !=
-							ItemClass.Service.Road ||
+						if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road ||
 							Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
 							continue;
 
@@ -290,25 +290,12 @@ namespace TrafficManager {
 						if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
 
 							var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
-							if (trafficLight == '1') {
-								//Log.Message($"Adding Traffic Light at Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
-								Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |=
-									NetNode.Flags.TrafficLights;
-							} else {
-								//Log.Message($"Removing Traffic Light from Segment: {Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.name}");
-								Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &=
-									~NetNode.Flags.TrafficLights;
-							}
+							Flags.setNodeTrafficLight((ushort)i, trafficLight == '1');
 						}
 
 						if (_configuration.NodeCrosswalk.Length > saveDataIndex) {
 							var crossWalk = _configuration.NodeCrosswalk[saveDataIndex];
-
-							if (crossWalk == '1') {
-								Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
-							} else {
-								Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags &= ~NetNode.Flags.Junction;
-							}
+							Flags.setNodeCrossingFlag((ushort)i, crossWalk == '1');
 						}
 						++saveDataIndex;
 					} catch (Exception e) {
@@ -330,23 +317,59 @@ namespace TrafficManager {
 			foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
 				try {
 					Log.Message($"Split Data: {split[0]} , {split[1]}");
-					var laneIndex = Convert.ToInt32(split[0]);
+					var laneIndex = Convert.ToUInt32(split[0]);
+					uint flags = Convert.ToUInt32(split[1]);
 
 					//make sure we don't cause any overflows because of bad save data.
 					if (Singleton<NetManager>.instance.m_lanes.m_buffer.Length <= laneIndex)
 						continue;
 
-					if (Convert.ToInt32(split[1]) > ushort.MaxValue)
+					if (flags > ushort.MaxValue)
 						continue;
 
-					Log.Message("Setting flags for lane " + Convert.ToInt32(split[0]) + " to " + Convert.ToUInt16(split[1]));
-					Singleton<NetManager>.instance.m_lanes.m_buffer[Convert.ToInt32(split[0])].m_flags =
-						Convert.ToUInt16(split[1]);
+					Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags);
+
+					uint laneArrowFlags = flags & Flags.lfr;
+					uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags & Flags.lfr);
+					Log.Message("Setting flags for lane " + laneIndex + " to " + flags + " (" + ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
+					if ((origFlags | laneArrowFlags) == origFlags) { // only load if setting differs from default
+						Log.Message("Flags for lane " + laneIndex + " are original (" + ((NetLane.Flags)(origFlags)).ToString() + ")");
+					}
+					Flags.setLaneArrowFlags(laneIndex, (Flags.LaneArrows)(laneArrowFlags));
 				} catch (Exception e) {
 					Log.Error(
 						$"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
 				}
 			}
+		}
+
+		private static ushort fixLaneFlags(ushort flags) {
+			ushort ret = 0;
+			if ((flags & (ushort)NetLane.Flags.Created) != 0)
+				ret |= (ushort)NetLane.Flags.Created;
+			if ((flags & (ushort)NetLane.Flags.Deleted) != 0)
+				ret |= (ushort)NetLane.Flags.Deleted;
+			if ((flags & (ushort)NetLane.Flags.Inverted) != 0)
+				ret |= (ushort)NetLane.Flags.Inverted;
+			if ((flags & (ushort)NetLane.Flags.JoinedJunction) != 0)
+				ret |= (ushort)NetLane.Flags.JoinedJunction;
+			if ((flags & (ushort)NetLane.Flags.Forward) != 0)
+				ret |= (ushort)NetLane.Flags.Forward;
+			if ((flags & (ushort)NetLane.Flags.Left) != 0)
+				ret |= (ushort)NetLane.Flags.Left;
+			if ((flags & (ushort)NetLane.Flags.Right) != 0)
+				ret |= (ushort)NetLane.Flags.Right;
+			if ((flags & (ushort)NetLane.Flags.Stop) != 0)
+				ret |= (ushort)NetLane.Flags.Stop;
+			if ((flags & (ushort)NetLane.Flags.StartOneWayLeft) != 0)
+				ret |= (ushort)NetLane.Flags.StartOneWayLeft;
+			if ((flags & (ushort)NetLane.Flags.StartOneWayRight) != 0)
+				ret |= (ushort)NetLane.Flags.StartOneWayRight;
+			if ((flags & (ushort)NetLane.Flags.EndOneWayLeft) != 0)
+				ret |= (ushort)NetLane.Flags.EndOneWayLeft;
+			if ((flags & (ushort)NetLane.Flags.EndOneWayRight) != 0)
+				ret |= (ushort)NetLane.Flags.EndOneWayRight;
+			return ret;
 		}
 
 		public override void OnSaveData() {
@@ -355,32 +378,31 @@ namespace TrafficManager {
 
 			for (ushort i = 0; i < 36864; i++) {
 				if (TrafficPriority.PrioritySegments != null) {
-					AddPrioritySegment(i, configuration);
+					SavePrioritySegment(i, configuration);
 				}
 
-				if (TrafficPriority.LightSimByNodeId != null) {
-					AddNodeToDictionary(i, configuration);
+				if (TrafficLightSimulation.LightSimulationByNodeId != null) {
+					SaveTrafficLightSimulation(i, configuration);
 				}
 
 				if (TrafficLightsManual.ManualSegments != null) {
-					AddManualTrafficLight(i, configuration);
+					SaveManualTrafficLight(i, configuration);
 				}
 
 				if (TrafficLightsTimed.TimedScripts != null) {
-					AddTimedTrafficLight(i, configuration);
+					SaveTimedTrafficLight(i, configuration);
 				}
 			}
 
 			if (Singleton<NetManager>.instance?.m_nodes?.m_buffer != null) {
 				for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
-					if (AddNodeLightsAndCrosswalks(i, configuration))
-						continue;
+					SaveNodeLightsAndCrosswalks(i, configuration);
 				}
 			}
 
 			if (LoadingExtension.IsPathManagerCompatible && Singleton<NetManager>.instance?.m_lanes?.m_buffer != null) {
-				for (var i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
-					AddLaneData(i, configuration);
+				for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
+					SaveLaneData(i, configuration);
 				}
 			} else {
 				// Traffic++ compatibility
@@ -408,12 +430,12 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddLaneData(int i, Configuration configuration) {
+		private static void SaveLaneData(uint i, Configuration configuration) {
 			try {
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[i];
-				NetLane.Flags flags = (NetLane.Flags)lane.m_flags;
-				if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) // only save lanes with explicit lane arrows
-					return;
+				//NetLane.Flags flags = (NetLane.Flags)lane.m_flags;
+				/*if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) // only save lanes with explicit lane arrows
+					return;*/
 				var laneSegmentId = lane.m_segment;
 				if (laneSegmentId <= 0)
 					return;
@@ -422,27 +444,34 @@ namespace TrafficManager {
 					return;
 
 				//if (TrafficPriority.PrioritySegments.ContainsKey(laneSegmentId)) {
-					Log.Message($"Saving lane data for lane {i}, segment {laneSegmentId}");
-					configuration.LaneFlags += $"{i}:{Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags},";
+				Flags.LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);
+				if (laneArrows != null) {
+					uint laneArrowInt = (uint)laneArrows;
+					Log.Message($"Saving lane data for lane {i}, segment {laneSegmentId}, setting to {laneArrows.ToString()} ({laneArrowInt})");
+                    configuration.LaneFlags += $"{i}:{laneArrowInt},";
+				}
 				//}
 			} catch (Exception e) {
 				Log.Error($"Error saving NodeLaneData {e.Message}");
 			}
 		}
 
-		private static bool AddNodeLightsAndCrosswalks(int i, Configuration configuration) {
+		private static bool SaveNodeLightsAndCrosswalks(int i, Configuration configuration) {
 			try {
 				var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
 
 				if (nodeFlags == 0)
 					return true;
-				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service !=
-					ItemClass.Service.Road)
+				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road)
 					return true;
-				configuration.NodeTrafficLights +=
-					Convert.ToInt16((nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None);
-				configuration.NodeCrosswalk +=
-					Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
+				bool hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+				if (hasTrafficLight) {
+					Log.Message($"Saving that node {i} has a traffic light");
+				} else {
+					Log.Message($"Saving that node {i} does not have a traffic light");
+				}
+				configuration.NodeTrafficLights += Convert.ToInt16(hasTrafficLight);
+				configuration.NodeCrosswalk += Convert.ToInt16((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None);
 				return false;
 			} catch (Exception e) {
 				Log.Error($"Error Adding Node Lights and Crosswalks {e.Message}");
@@ -450,7 +479,7 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddTimedTrafficLight(int i, Configuration configuration) {
+		private static void SaveTimedTrafficLight(int i, Configuration configuration) {
 			try {
 				if (!TrafficLightsTimed.TimedScripts.ContainsKey((ushort)i))
 					return;
@@ -505,7 +534,7 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddManualTrafficLight(ushort segmentId, Configuration configuration) {
+		private static void SaveManualTrafficLight(ushort segmentId, Configuration configuration) {
 			try {
 				if (!TrafficLightsManual.ManualSegments.ContainsKey(segmentId))
 					return;
@@ -549,31 +578,36 @@ namespace TrafficManager {
 			}
 		}
 
-		private static void AddNodeToDictionary(int i, Configuration configuration) {
+		private static void SaveTrafficLightSimulation(int i, Configuration configuration) {
 			try {
-				if (!TrafficPriority.LightSimByNodeId.ContainsKey((ushort)i))
+				if (!TrafficLightSimulation.LightSimulationByNodeId.ContainsKey((ushort)i))
 					return;
-				var nodeDict = TrafficPriority.LightSimByNodeId[(ushort)i];
+				var nodeSim = TrafficLightSimulation.LightSimulationByNodeId[(ushort)i];
+
+				/*if (nodeSim == null)
+					return;*/
+
+				Log.Message($"Saving traffic light simulation at node {i}, timed: {nodeSim.TimedTrafficLights}, active: {nodeSim.TimedTrafficLightsActive}");
 
 				configuration.NodeDictionary.Add(new[]
 				{
-					nodeDict.nodeId, Convert.ToInt32(nodeDict.ManualTrafficLights),
-					Convert.ToInt32(nodeDict.TimedTrafficLights),
-					Convert.ToInt32(nodeDict.TimedTrafficLightsActive)
+					nodeSim.nodeId, Convert.ToInt32(nodeSim.ManualTrafficLights),
+					Convert.ToInt32(nodeSim.TimedTrafficLights),
+					Convert.ToInt32(nodeSim.TimedTrafficLightsActive)
 				});
 			} catch (Exception e) {
 				Log.Error($"Error adding Nodes to Dictionary {e.Message}");
 			}
 		}
 
-		private static void AddPrioritySegment(ushort segmentId, Configuration configuration) {
+		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
 				if (!TrafficPriority.PrioritySegments.ContainsKey(segmentId))
 					return;
+
 				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0) {
-					Log.Message(
-						$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type}");
-					configuration.PrioritySegments.Add(new[]
+					Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node1}, seg. {segmentId}");
+                    configuration.PrioritySegments.Add(new[]
 					{
 						TrafficPriority.PrioritySegments[segmentId].Node1, segmentId,
 						(int) TrafficPriority.PrioritySegments[segmentId].Instance1.Type
@@ -582,10 +616,9 @@ namespace TrafficManager {
 
 				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0)
 					return;
-				Log.Message(
-					$"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type}");
-				configuration.PrioritySegments.Add(new[]
-				{
+
+				Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node2}, seg. {segmentId}");
+				configuration.PrioritySegments.Add(new[] {
 					TrafficPriority.PrioritySegments[segmentId].Node2, segmentId,
 					(int) TrafficPriority.PrioritySegments[segmentId].Instance2.Type
 				});

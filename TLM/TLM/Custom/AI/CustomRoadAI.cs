@@ -20,7 +20,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (lastUpdateFrame < currentFrameIndex) {
 				try {
-					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficPriority.LightSimByNodeId) {
+					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
 						var otherNodeSim = e.Value;
 						otherNodeSim.SimulationStep();
 					}
@@ -33,9 +33,9 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
 			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
-				TrafficPriority.housekeeping();
+				TrafficPriority.housekeeping(nodeId);
 
-			var nodeSim = TrafficPriority.GetNodeSimulation(nodeId);
+			var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 			if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
 				OriginalSimulationStep(nodeId, ref data);
 			}

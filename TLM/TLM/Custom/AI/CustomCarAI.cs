@@ -221,7 +221,7 @@ namespace TrafficManager.Custom.AI {
 					PrioritySegment nextPrioritySegment = null;
 					if (nextRealTimePositions.Count >= 2) {
 						// add traffic to next segment if a timed traffic light exists
-						TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(realTimeDestinationNodes[1]);
+						TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(realTimeDestinationNodes[1]);
 						if (nodeSim != null && nodeSim.TimedTrafficLights) {
 							nextPrioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[1], nextRealTimePositions[0].m_segment);
 						}
@@ -542,7 +542,7 @@ namespace TrafficManager.Custom.AI {
 
 					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
 						if (hasTrafficLight && (!isJoinedJunction || hasCrossing)) {
-							var nodeSimulation = TrafficPriority.GetNodeSimulation(interestingNodeId);
+							var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(interestingNodeId);
 
 							var destinationInfo = netManager.m_nodes.m_buffer[destinationNodeId].Info;
 							RoadBaseAI.TrafficLightState vehicleLightState;

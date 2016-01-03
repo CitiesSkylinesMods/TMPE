@@ -24,7 +24,7 @@ namespace TrafficManager.TrafficLight {
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
 
-			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
+			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
 		public void AddStep(int minTime, int maxTime) {
@@ -43,7 +43,7 @@ namespace TrafficManager.TrafficLight {
 			Steps[0].SetLights();
 			Steps[0].Start();
 
-			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = true;
+			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = true;
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -54,11 +54,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Stop() {
-			TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
+			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
 		public bool IsStarted() {
-			return TrafficPriority.GetNodeSimulation(nodeId).TimedTrafficLightsActive;
+			return TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive;
 		}
 
 		public int NumSteps() {
@@ -74,7 +74,7 @@ namespace TrafficManager.TrafficLight {
 				return true;
 
 			if (! Steps[CurrentStep].isValid()) {
-				TrafficPriority.RemoveNodeFromSimulation(nodeId);
+				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId);
 				return false;
 			}
 

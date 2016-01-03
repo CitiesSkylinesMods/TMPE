@@ -11,6 +11,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
 using TrafficManager.Custom.Misc;
+using TrafficManager.State;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -292,6 +293,7 @@ namespace TrafficManager {
 				CustomCarAI.OnLevelUnloading();
 				TrafficLightsManual.OnLevelUnloading();
 				TrafficLightsTimed.OnLevelUnloading();
+				Flags.OnLevelUnloading();
 
 				if (Instance != null)
 					Instance.NodeSimulationLoaded = false;

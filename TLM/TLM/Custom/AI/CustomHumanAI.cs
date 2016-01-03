@@ -5,7 +5,7 @@ using TrafficManager.TrafficLight;
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI {
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
-			var nodeSimulation = TrafficPriority.GetNodeSimulation(node);
+			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(node);
 
 			var instance = Singleton<NetManager>.instance;
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;

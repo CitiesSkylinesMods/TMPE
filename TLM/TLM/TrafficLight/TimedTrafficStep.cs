@@ -365,7 +365,7 @@ namespace TrafficManager.TrafficLight {
 					if (numWaits > 0)
 						curMeanWait /= (float)numWaits;
 
-					float decisionValue = 0.75f; // a value smaller than 1 rewards steady traffic currents
+					float decisionValue = 0.85f; // a value smaller than 1 rewards steady traffic currents
 					curMeanFlow /= decisionValue;
 
 					if (Single.IsNaN(minFlow))

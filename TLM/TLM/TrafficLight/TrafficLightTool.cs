@@ -9,6 +9,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
+using TrafficManager.State;
 
 namespace TrafficManager.TrafficLight {
 	[UsedImplicitly]
@@ -121,14 +122,6 @@ namespace TrafficManager.TrafficLight {
 			if (mode != ToolMode.LaneRestrictions) {
 				_selectedSegmentIds.Clear();
 			}
-
-			/*if (mode == ToolMode.None) {
-				housekeeping();
-			}*/
-		}
-
-		private static void housekeeping() {
-			TrafficPriority.housekeeping();
 		}
 
 		// Overridden to disable base class behavior
@@ -332,7 +325,7 @@ namespace TrafficManager.TrafficLight {
 		private void RenderNodeOverlays(RenderManager.CameraInfo cameraInfo) {
 			var node = GetNetNode(SelectedNode);
 
-			var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 
 			for (var i = 0; i < 8; i++) {
 				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
@@ -582,8 +575,8 @@ namespace TrafficManager.TrafficLight {
 
 					var node2 = GetNetNode(SelectedNode);
 
-					TrafficPriority.AddNodeToSimulation(SelectedNode);
-					var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+					TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
+					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 					nodeSimulation.FlagManualTrafficLights = true;
 
 					for (var s = 0; s < 8; s++) {
@@ -609,7 +602,7 @@ namespace TrafficManager.TrafficLight {
 				// no traffic light set
 				ok = true;
 			} else {
-				TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(_hoveredNetNodeIdx);
+				TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(_hoveredNetNodeIdx);
 				if (nodeSim == null || !nodeSim.TimedTrafficLights)
 					ok = true;
 				else {
@@ -645,7 +638,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (!result && ValidCrosswalkNode(segment.m_startNode, startNode)) {
 				if ((startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags |= NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_startNode, true);
 					result = true;
 					startNodeChanged = true;
 				}
@@ -655,13 +648,13 @@ namespace TrafficManager.TrafficLight {
 				(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags &= ~NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_startNode, false);
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags |= NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_endNode, true);
 					result = true;
 					endNodeChanged = true;
 				}
@@ -671,13 +664,13 @@ namespace TrafficManager.TrafficLight {
 				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags |= NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_startNode, true);
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags |= NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_endNode, true);
 					result = true;
 					endNodeChanged = true;
 				}
@@ -687,13 +680,13 @@ namespace TrafficManager.TrafficLight {
 				 ValidCrosswalkNode(segment.m_endNode, endNode))) {
 				if (ValidCrosswalkNode(segment.m_startNode, startNode) &&
 					(startNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode].m_flags &= ~NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_startNode, false);
 					result = true;
 					startNodeChanged = true;
 				}
 				if (ValidCrosswalkNode(segment.m_endNode, endNode) &&
 					(endNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_endNode].m_flags &= ~NetNode.Flags.Junction;
+					Flags.setNodeCrossingFlag(segment.m_endNode, false);
 					result = true;
 					endNodeChanged = true;
 				}
@@ -756,7 +749,7 @@ namespace TrafficManager.TrafficLight {
 			if (SelectedNode != 0) {
 				var node = GetNetNode(SelectedNode);
 
-				var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 
 				if (node.CountSegments() == 2) {
 					_guiManualTrafficLightsCrosswalk(node);
@@ -1481,7 +1474,7 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-				//_guiLanes(ref segment, ref segmentInfo);
+				_guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
@@ -1581,7 +1574,7 @@ namespace TrafficManager.TrafficLight {
 			foreach (var nodeId in SelectedNodeIndexes) {
 				var node = GetNetNode(nodeId);
 
-				var nodeSimulation = TrafficPriority.GetNodeSimulation(nodeId);
+				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(nodeId);
 
 				for (var i = 0; i < 8; i++) {
 					ushort srcSegmentId = node.GetSegment(i); // source segment
@@ -2505,7 +2498,7 @@ namespace TrafficManager.TrafficLight {
 					maxValue = Mathf.Max(maxValue, info.m_lanes[num3].m_position);
 				}
 
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
+				num2 = instance.m_lanes.m_buffer[num2].m_nextLane;
 				num3++;
 			}
 
@@ -2552,7 +2545,7 @@ namespace TrafficManager.TrafficLight {
 			GUILayout.BeginHorizontal();
 
 			for (var i = 0; i < laneList.Count; i++) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[(int)laneList[i][0]].m_flags;
+				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)laneList[i][0]].m_flags;
 
 				var style1 = new GUIStyle("button");
 				var style2 = new GUIStyle("button") {
@@ -2572,14 +2565,15 @@ namespace TrafficManager.TrafficLight {
 				GUILayout.Label("Lane " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
+				Flags.applyLaneArrowFlags((uint)laneList[i][0]);
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					LaneFlag((uint)laneList[i][0], NetLane.Flags.Left);
+					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Left);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
-					LaneFlag((uint)laneList[i][0], NetLane.Flags.Forward);
+					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Forward);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					LaneFlag((uint)laneList[i][0], NetLane.Flags.Right);
+					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Right);
 				}
 				GUILayout.EndHorizontal();
 				GUILayout.EndVertical();
@@ -2830,19 +2824,8 @@ namespace TrafficManager.TrafficLight {
 			GUILayout.EndHorizontal();
 		}
 
-		private void LaneFlag(uint laneId, NetLane.Flags flag) {
-			/*if (!TrafficPriority.IsPrioritySegment(SelectedNode, SelectedSegment)) {
-				TrafficPriority.AddPrioritySegment(SelectedNode, SelectedSegment,
-					PrioritySegment.PriorityType.None);
-			}*/
-
-			var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
-
-			if ((flags & flag) == flag) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = (ushort)(flags & ~flag);
-			} else {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = (ushort)(flags | flag);
-			}
+		private void toggleLaneFlag(uint laneId, Flags.LaneArrows flags) {
+			Flags.toggleLaneArrowFlags(laneId, flags);
 		}
 
 		private Texture2D MakeTex(int width, int height, Color col) {
@@ -3011,7 +2994,7 @@ namespace TrafficManager.TrafficLight {
 
 		private void showTimedLightIcons() {
 			foreach (ushort nodeId in TrafficPriority.getPriorityNodes()) {
-				TrafficLightSimulation lightSim = TrafficPriority.GetNodeSimulation(nodeId);
+				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 				if (lightSim != null && lightSim.TimedTrafficLights) {
 					var node = GetNetNode((ushort)nodeId);
 					var nodePositionVector3 = node.m_position;
@@ -3048,16 +3031,19 @@ namespace TrafficManager.TrafficLight {
 
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 					var node2 = GetNetNode(selectedNodeIndex);
-					TrafficPriority.AddNodeToSimulation(selectedNodeIndex);
-					var nodeSimulation = TrafficPriority.GetNodeSimulation(selectedNodeIndex);
+					TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
+					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
 					nodeSimulation.FlagTimedTrafficLights = true;
 
 					for (var s = 0; s < 8; s++) {
 						var segment = node2.GetSegment(s);
+						if (segment <= 0)
+							continue;
 
-						if (segment != 0 && !TrafficPriority.IsPrioritySegment(selectedNodeIndex, segment)) {
-							TrafficPriority.AddPrioritySegment(selectedNodeIndex, segment,
-								PrioritySegment.PriorityType.None);
+						if (!TrafficPriority.IsPrioritySegment(selectedNodeIndex, segment)) {
+							TrafficPriority.AddPrioritySegment(selectedNodeIndex, segment, PrioritySegment.PriorityType.None);
+						} else {
+							TrafficPriority.GetPrioritySegment(selectedNodeIndex, segment).Type = PrioritySegment.PriorityType.None;
 						}
 					}
 				}
@@ -3071,7 +3057,7 @@ namespace TrafficManager.TrafficLight {
 		private readonly TrafficLightToolTextureResources _trafficLightToolTextureResources = new TrafficLightToolTextureResources();
 
 		private void _guiTimedControlPanel(int num) {
-			var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNodeIndexes[0]);
+			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNodeIndexes[0]);
 			var timedNodeMain = TrafficLightsTimed.GetTimedLight(SelectedNodeIndexes[0]);
 
 			if (nodeSimulation == null || timedNodeMain == null) {
@@ -3302,14 +3288,14 @@ namespace TrafficManager.TrafficLight {
 					var segmentId = e.Key;
 					var trafficSegment = e.Value;
 					List<PrioritySegment> prioritySegments = new List<PrioritySegment>();
-					if (TrafficPriority.GetNodeSimulation(trafficSegment.Node1) == null) {
+					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node1) == null) {
 						PrioritySegment tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
 						if (tmpSeg1 != null) {
 							prioritySegments.Add(tmpSeg1);
 							nodeIdsWithSigns.Add(trafficSegment.Node1);
 						}
 					}
-					if (TrafficPriority.GetNodeSimulation(trafficSegment.Node2) == null) {
+					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node2) == null) {
 						PrioritySegment tmpSeg2 = TrafficPriority.GetPrioritySegment(trafficSegment.Node2, segmentId);
 						if (tmpSeg2 != null) {
 							prioritySegments.Add(tmpSeg2);
@@ -3456,7 +3442,7 @@ namespace TrafficManager.TrafficLight {
 						// no traffic light set
 						ok = true;
 					} else {
-						TrafficLightSimulation nodeSim = TrafficPriority.GetNodeSimulation(_hoveredNetNodeIdx);
+						TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(_hoveredNetNodeIdx);
 						if (nodeSim == null || !nodeSim.TimedTrafficLights) {
 							ok = true;
 						}
@@ -3470,7 +3456,7 @@ namespace TrafficManager.TrafficLight {
 						} else if (ok) {
 							if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
 								Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
-								Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags &= ~NetNode.Flags.TrafficLights;
+								Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false);
 								TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
 							}
 						} else {
@@ -3526,18 +3512,19 @@ namespace TrafficManager.TrafficLight {
 				if (TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
 					showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
 				} else {
-					Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags &= ~NetNode.Flags.TrafficLights;
+					Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false);
 				}
 			} else {
-				Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags |= NetNode.Flags.TrafficLights;
+				TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
+				Flags.setNodeTrafficLight(_hoveredNetNodeIdx, true);
 			}
 		}
 
 		public void AddTimedNodes() {
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				var node = GetNetNode(selectedNodeIndex);
-				TrafficPriority.AddNodeToSimulation(selectedNodeIndex);
-				var nodeSimulation = TrafficPriority.GetNodeSimulation(selectedNodeIndex);
+				TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
+				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
 				nodeSimulation.FlagTimedTrafficLights = true;
 
 				for (var s = 0; s < 8; s++) {
@@ -3554,13 +3541,13 @@ namespace TrafficManager.TrafficLight {
 			if (SelectedNode == 0) return false;
 
 			var node = GetNetNode(SelectedNode);
-			var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 
 			if (nodeSimulation == null) {
 				//node.Info.m_netAI = _myGameObject.GetComponent<CustomRoadAI>();
 				//node.Info.m_netAI.m_info = node.Info;
-				TrafficPriority.AddNodeToSimulation(SelectedNode);
-				nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+				TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
+				nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 				nodeSimulation.FlagManualTrafficLights = true;
 
 				for (var s = 0; s < 8; s++) {
@@ -3574,7 +3561,7 @@ namespace TrafficManager.TrafficLight {
 				return true;
 			}
 			nodeSimulation.FlagManualTrafficLights = false;
-			TrafficPriority.RemoveNodeFromSimulation(SelectedNode);
+			TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNode);
 
 			for (var s = 0; s < 8; s++) {
 				var segment = node.GetSegment(s);
@@ -3589,12 +3576,12 @@ namespace TrafficManager.TrafficLight {
 
 		private static void DisableManual() {
 			if (SelectedNode == 0) return;
-			var nodeSimulation = TrafficPriority.GetNodeSimulation(SelectedNode);
+			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 
 			if (nodeSimulation == null || !nodeSimulation.FlagManualTrafficLights) return;
 
 			nodeSimulation.FlagManualTrafficLights = false;
-			TrafficPriority.RemoveNodeFromSimulation(SelectedNode);
+			TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNode);
 		}
 
 		private void DisableTimed() {
@@ -3602,14 +3589,14 @@ namespace TrafficManager.TrafficLight {
 
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				GetNetNode(selectedNodeIndex);
-				var nodeSimulation = TrafficPriority.GetNodeSimulation(selectedNodeIndex);
+				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
 
 				TrafficLightsTimed.RemoveTimedLight(selectedNodeIndex);
 
 				if (nodeSimulation == null) continue;
 
 				nodeSimulation.FlagTimedTrafficLights = false;
-				TrafficPriority.RemoveNodeFromSimulation(selectedNodeIndex);
+				TrafficLightSimulation.RemoveNodeFromSimulation(selectedNodeIndex);
 			}
 		}
 

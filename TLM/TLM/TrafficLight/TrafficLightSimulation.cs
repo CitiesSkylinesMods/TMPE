@@ -1,10 +1,16 @@
 using System;
 using ColossalFramework;
 using TrafficManager.Traffic;
+using System.Collections.Generic;
 
 namespace TrafficManager.TrafficLight {
     public class TrafficLightSimulation {
-        public readonly ushort nodeId;
+		/// <summary>
+		/// For each node id: traffic light simulation assigned to the node
+		/// </summary>
+		public static Dictionary<ushort, TrafficLightSimulation> LightSimulationByNodeId = new Dictionary<ushort, TrafficLightSimulation>();
+
+		public readonly ushort nodeId;
 
         public bool ManualTrafficLights;
         public bool TimedTrafficLights;
@@ -117,14 +123,41 @@ namespace TrafficManager.TrafficLight {
 
 			if (timedNode != null) {
 				foreach (var timedNodeId in timedNode.NodeGroup) {
-					var nodeSim = TrafficPriority.GetNodeSimulation(timedNodeId); // `this` is one of `nodeSim`
+					Log.Message($"Removing simulation @ node {timedNodeId}");
+					var nodeSim = TrafficLightSimulation.GetNodeSimulation(timedNodeId); // `this` is one of `nodeSim`
 					TrafficLightsTimed.RemoveTimedLight(timedNodeId);
+					LightSimulationByNodeId.Remove(timedNodeId);
 					if (nodeSim == null)
 						continue;
 					nodeSim.TimedTrafficLightsActive = false;
 					nodeSim.TimedTrafficLights = false;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Adds a traffic light simulation to the node with the given id
+		/// </summary>
+		/// <param name="nodeId"></param>
+		public static void AddNodeToSimulation(ushort nodeId) {
+			LightSimulationByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
+		}
+
+		public static void RemoveNodeFromSimulation(ushort nodeId) {
+			//lock (simLock) {
+			if (!LightSimulationByNodeId.ContainsKey(nodeId))
+				return;
+			TrafficLightSimulation.LightSimulationByNodeId[nodeId].Destroy();
+		}
+
+		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
+			//lock (simLock) {
+			if (LightSimulationByNodeId.ContainsKey(nodeId)) {
+				return LightSimulationByNodeId[nodeId];
+			}
+
+			return null;
+			//}
 		}
 	}
 }
