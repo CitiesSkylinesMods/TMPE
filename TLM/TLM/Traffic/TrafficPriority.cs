@@ -40,7 +40,7 @@ namespace TrafficManager.Traffic {
 				return;
 
 			Log.Message("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
-			if (PrioritySegments.ContainsKey(segmentId)) {
+			if (PrioritySegments.ContainsKey(segmentId)) { // do not replace with IsPrioritySegment!
 				var prioritySegment = PrioritySegments[segmentId];
 				prioritySegment.Segment = segmentId;
 
@@ -88,7 +88,7 @@ namespace TrafficManager.Traffic {
 				if (segmentId <= 0)
 					continue;
 
-				if (PrioritySegments.ContainsKey(segmentId)) {
+				if (IsPrioritySegment(nodeId, segmentId)) {
 					//Log.Message("Housekeeping: node " + nodeId + " contains prio seg. " + segmentId);
 					var prioritySegment = PrioritySegments[segmentId];
 					if (prioritySegment.Node1 == nodeId) {
@@ -102,8 +102,6 @@ namespace TrafficManager.Traffic {
 					if (prioritySegment.Node1 == 0 && prioritySegment.Node2 == 0) {
 						PrioritySegments.Remove(segmentId);
 					}
-				} else {
-					//Log.Message("Housekeeping: node " + nodeId + " contains NO prio seg. " + segmentId);
 				}
 			}
 			priorityNodes.Remove(nodeId);
@@ -120,9 +118,8 @@ namespace TrafficManager.Traffic {
 				if (segmentId <= 0)
 					continue;
 
-				if (PrioritySegments.ContainsKey(segmentId)) {
+				if (IsPrioritySegment(nodeId, segmentId)) {
 					ret.Add(segmentId);
-					//Log.Message("Housekeeping: node " + nodeId + " contains prio seg. " + segmentId);
 				}
 			}
 
@@ -132,8 +129,13 @@ namespace TrafficManager.Traffic {
 		internal static void HandleAllVehicles() {
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			for (ushort i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
-				if (vehicleManager.m_vehicles.m_buffer[i].m_flags != Vehicle.Flags.None)
-					CustomCarAI.HandleVehicle(i, ref vehicleManager.m_vehicles.m_buffer[i]);
+				if (vehicleManager.m_vehicles.m_buffer[i].m_flags != Vehicle.Flags.None) {
+					try {
+						CustomCarAI.HandleVehicle(i, ref vehicleManager.m_vehicles.m_buffer[i]);
+					} catch (Exception e) {
+						Log.Error("TrafficPriority HandleAllVehicles Error: " + e.ToString());
+					}
+				}
 			}
 		}
 
@@ -143,6 +145,12 @@ namespace TrafficManager.Traffic {
 
 			if (PrioritySegments.ContainsKey(segmentId)) {
 				var prioritySegment = PrioritySegments[segmentId];
+
+				NetManager netManager = Singleton<NetManager>.instance;
+				if (netManager.m_segments.m_buffer[segmentId].m_flags == NetSegment.Flags.None) {
+					RemovePrioritySegment(nodeId, segmentId);
+					return false;
+				}
 
 				if (prioritySegment.Node1 == nodeId || prioritySegment.Node2 == nodeId) {
 					return true;
@@ -171,6 +179,25 @@ namespace TrafficManager.Traffic {
 
 			return prioritySegment.Node2 == nodeId ?
 				prioritySegment.Instance2 : null;
+		}
+
+		internal static void RemovePrioritySegment(ushort nodeId, ushort segmentId) {
+			if (!PrioritySegments.ContainsKey(segmentId))
+				return;
+			var prioritySegment = PrioritySegments[segmentId];
+
+			if (prioritySegment.Node1 == nodeId) {
+				prioritySegment.Node1 = 0;
+				prioritySegment.Instance1 = null;
+			}
+			if (prioritySegment.Node2 == nodeId) {
+				prioritySegment.Node2 = 0;
+				prioritySegment.Instance2 = null;
+			}
+
+			if (prioritySegment.Node1 == 0 && prioritySegment.Node2 == 0)
+				PrioritySegments.Remove(segmentId);
+			rebuildPriorityNodes();
 		}
 
 		/// <summary>

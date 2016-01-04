@@ -214,7 +214,11 @@ namespace TrafficManager.Custom.AI {
 
 			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
 
-			HandleVehicle(vehicleId, ref vehicleData);
+			try {
+				HandleVehicle(vehicleId, ref vehicleData);
+			} catch (Exception e) {
+				Log.Error("CarAI TrafficManagerSimulationStep Error: " + e.ToString());
+			}
 
 			SimulateVehicleAndTrailers(vehicleId, ref vehicleData, physicsLodRefPos);
 
@@ -318,6 +322,7 @@ namespace TrafficManager.Custom.AI {
 			var netManager = Singleton<NetManager>.instance;
 			//var vehicleManager = Singleton<VehicleManager>.instance;
 			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
+			bool isRecklessDriver = (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 
 			var lastFrameData = vehicleData.GetLastFrameData();
 			var lastFrameVehiclePos = lastFrameData.m_position;
@@ -341,7 +346,11 @@ namespace TrafficManager.Custom.AI {
 						(TrafficPriority.Vehicles[vehicleId].LastFrame >> veryFarLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> veryFarLodUpdateMod[Options.simAccuracy]) // less often
 					) {
 					//Log.Message("handle vehicle after threshold");
-					HandleVehicle(vehicleId, ref vehicleData);
+					try {
+						HandleVehicle(vehicleId, ref vehicleData);
+					} catch (Exception e) {
+						Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
+					}
 				}
 			}
 
@@ -378,26 +387,29 @@ namespace TrafficManager.Custom.AI {
 					var hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 					var hasCrossing = (nodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 					var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
-					if ((nodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) ==
-						NetNode.Flags.Junction && netManager.m_nodes.m_buffer[destinationNodeId].CountSegments() != 2) {
-						var len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
-						if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(len)) {
-							var sufficientSpace = false;
-							if (nextPosition.m_segment != 0 &&
-								netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_length < 30f) {
-								var flags3 = netManager.m_nodes.m_buffer[sourceNodeId].m_flags;
-								if ((flags3 &
-									 (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) !=
-									NetNode.Flags.Junction || netManager.m_nodes.m_buffer[sourceNodeId].CountSegments() == 2) {
-									var laneId2 = PathManager.GetLaneID(nextPosition);
-									if (laneId2 != 0u) {
-										sufficientSpace = netManager.m_lanes.m_buffer[(int)((UIntPtr)laneId2)].CheckSpace(len);
+					if ((uint)vehicleId % (Options.getRecklessDriverModulo()/2) == 0) {
+						// check if there is enough space
+						if ((nodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) ==
+							NetNode.Flags.Junction && netManager.m_nodes.m_buffer[destinationNodeId].CountSegments() != 2) {
+							var len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
+							if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(len)) {
+								var sufficientSpace = false;
+								if (nextPosition.m_segment != 0 &&
+									netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_length < 30f) {
+									var flags3 = netManager.m_nodes.m_buffer[sourceNodeId].m_flags;
+									if ((flags3 &
+										 (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) !=
+										NetNode.Flags.Junction || netManager.m_nodes.m_buffer[sourceNodeId].CountSegments() == 2) {
+										var laneId2 = PathManager.GetLaneID(nextPosition);
+										if (laneId2 != 0u) {
+											sufficientSpace = netManager.m_lanes.m_buffer[(int)((UIntPtr)laneId2)].CheckSpace(len);
+										}
 									}
 								}
-							}
-							if (!sufficientSpace) {
-								maxSpeed = 0f;
-								return;
+								if (!sufficientSpace) {
+									maxSpeed = 0f;
+									return;
+								}
 							}
 						}
 					}
@@ -450,13 +462,17 @@ namespace TrafficManager.Custom.AI {
 								// traffic light simulation is active
 								var stopCar = false;
 								
-								// determine responsible traffic light (left, right or main)
-								if (TrafficPriority.IsLeftSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-									vehicleLightState = light.GetLightLeft();
-								} else if (TrafficPriority.IsRightSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-									vehicleLightState = light.GetLightRight();
-								} else {
-									vehicleLightState = light.GetLightMain();
+								if (isRecklessDriver)
+									vehicleLightState = RoadBaseAI.TrafficLightState.Green;
+								else {
+									// determine responsible traffic light (left, right or main)
+									if (TrafficPriority.IsLeftSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
+										vehicleLightState = light.GetLightLeft();
+									} else if (TrafficPriority.IsRightSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
+										vehicleLightState = light.GetLightRight();
+									} else {
+										vehicleLightState = light.GetLightMain();
+									}
 								}
 
 								if (vehicleLightState == RoadBaseAI.TrafficLightState.Green) {
@@ -464,8 +480,9 @@ namespace TrafficManager.Custom.AI {
 
 									if (hasIncomingCars) {
 										// green light but other cars are incoming: slow approach
-										maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.01f;
+										maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.3f;
 										//stopCar = true;
+										return;
 									}
 								}
 
@@ -493,12 +510,11 @@ namespace TrafficManager.Custom.AI {
 									return;
 								}
 							}
-						} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod) {
+						} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver) {
 							if (TrafficPriority.Vehicles.ContainsKey(vehicleId) &&
 								TrafficPriority.IsPrioritySegment(destinationNodeId, prevPos.m_segment) &&
 								TrafficPriority.Vehicles[vehicleId].ToNode == destinationNodeId &&
 								TrafficPriority.Vehicles[vehicleId].FromSegment == prevPos.m_segment) {
-
 								var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 								var frame = currentFrameIndex2 >> 4;
 
@@ -624,6 +640,9 @@ namespace TrafficManager.Custom.AI {
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
+
+			if (isRecklessDriver)
+				maxSpeed *= Random.Range(1.2f, 2.5f);
 		}
 
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData,

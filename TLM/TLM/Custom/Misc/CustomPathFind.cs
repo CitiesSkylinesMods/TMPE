@@ -971,7 +971,8 @@ namespace TrafficManager.Custom.Misc
 				laneType2 &= ~NetInfo.LaneType.Pedestrian;
 			}
 			// NON-STOCK CODE START //
-			bool changeLane = !this._stablePath && forceLaneIndex == null && Options.laneChangingRandomization < 4 && _pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1; // lane randomization
+			NetNode sourceNode = (targetNode == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? instance.m_nodes.m_buffer[instance.m_segments.m_buffer[item.m_position.m_segment].m_endNode] : instance.m_nodes.m_buffer[instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode]; // no lane changing directly in front of a junction
+			bool changeLane = !this._stablePath && (sourceNode.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None && forceLaneIndex == null && Options.laneChangingRandomization < 4 && _pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1; // lane randomization
 			int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
 			// NON-STOCK CODE END //
 			while (laneIndex < nextNumLanes && curLaneId != 0u) {

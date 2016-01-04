@@ -205,17 +205,17 @@ namespace TrafficManager.TrafficLight {
 
 					if (invalidSegmentIds.Count > 0) {
 						var oldSegmentId = invalidSegmentIds[0];
+						TrafficPriority.RemovePrioritySegment(nodeId, oldSegmentId);
 						Log.Message($"Replacing old segment {oldSegmentId} @ {nodeId} with new segment {segmentId}");
 
 						// replace the old segment with the newly created one
 						for (int i = 0; i < NumSteps(); ++i) {
 							ManualSegmentLight segmentLight = Steps[i].segmentLightStates[oldSegmentId];
-							Steps[i].segmentIds.Remove(oldSegmentId);
 							Steps[i].segmentLightStates.Remove(oldSegmentId);
 							segmentLight.SegmentId = segmentId;
 							Steps[i].segmentLightStates.Add(segmentId, segmentLight);
-							Steps[i].segmentIds.Add(segmentId);
-							Steps[i].rebuildSegmentIds();
+							Steps[i].calcMaxSegmentLength();
+							TrafficLightsManual.GetSegmentLight(nodeId, segmentId).CurrentMode = segmentLight.CurrentMode;
 						}
 					} else {
 						Log.Message($"Adding new segment {segmentId} to node {nodeId}");
@@ -223,32 +223,11 @@ namespace TrafficManager.TrafficLight {
 						// create a new manual light
 						for (int i = 0; i < NumSteps(); ++i) {
 							Steps[i].addSegment(segmentId);
-							Steps[i].rebuildSegmentIds();
+							Steps[i].calcMaxSegmentLength();
 						}
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Determines the set of segments for which timed steps are defined but no real road segment exist
-		/// </summary>
-		/// <returns></returns>
-		internal HashSet<ushort> getInvalidSegmentIds() {
-			HashSet<ushort> invalidSegmentIds = new HashSet<ushort>();
-
-			if (NumSteps() <= 0)
-				return invalidSegmentIds;
-
-			foreach (KeyValuePair<ushort, ManualSegmentLight> e in Steps[0].segmentLightStates) {
-				var fromSegmentId = e.Key;
-				var segLightState = e.Value;
-
-				if (!TrafficPriority.IsPrioritySegment(nodeId, fromSegmentId))
-					invalidSegmentIds.Add(fromSegmentId);
-			}
-
-			return invalidSegmentIds;
 		}
 	}
 }

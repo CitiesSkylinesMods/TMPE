@@ -60,7 +60,6 @@ namespace TrafficManager.TrafficLight {
 
 		private static readonly string NODE_IS_LIGHT = "Junction has a traffic light.\nDelete the traffic light by choosing \"Switch traffic lights\" and clicking on this node.";
 		private static readonly string NODE_IS_TIMED_LIGHT = "Junction is part of a timed script.\nSelect \"Timed traffic lights\", click on this node and click on \"Remove\" first.";
-		private static readonly string NODE_IS_NOT_LIGHT = "Junction does not have a traffic light.\nAdd a traffic light first by choosing \"Switch traffic lights\" and clicking on this node.";
 
 		private static bool nodeSelectionLocked = false;
 
@@ -295,18 +294,18 @@ namespace TrafficManager.TrafficLight {
 
 		private void _renderOverlayManual(RenderManager.CameraInfo cameraInfo) {
 			if (SelectedNode != 0) {
-				RenderNodeOverlays(cameraInfo);
+				RenderManualNodeOverlays(cameraInfo);
 			} else {
-				RenderSelectionOverlay(cameraInfo);
+				RenderManualSelectionOverlay(cameraInfo);
 			}
 		}
 
-		private void RenderSelectionOverlay(RenderManager.CameraInfo cameraInfo) {
+		private void RenderManualSelectionOverlay(RenderManager.CameraInfo cameraInfo) {
 			if (_hoveredNetNodeIdx == 0) return;
 			var node = GetNetNode(_hoveredNetNodeIdx);
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
-			if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) return;
+			//if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) return;
 			Bezier3 bezier;
 			bezier.a = node.m_position;
 			bezier.d = node.m_position;
@@ -318,7 +317,7 @@ namespace TrafficManager.TrafficLight {
 			_renderOverlayDraw(cameraInfo, bezier, color);
 		}
 
-		private void RenderNodeOverlays(RenderManager.CameraInfo cameraInfo) {
+		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
 			var node = GetNetNode(SelectedNode);
 
 			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
@@ -355,7 +354,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void _renderOverlayTimedSelectNodes(RenderManager.CameraInfo cameraInfo) {
-			if (_hoveredNetNodeIdx != 0 && !IsNodeSelected(_hoveredNetNodeIdx) && !m_toolController.IsInsideUI && Cursor.visible) {
+			if (! nodeSelectionLocked && _hoveredNetNodeIdx != 0 && !IsNodeSelected(_hoveredNetNodeIdx) && !m_toolController.IsInsideUI && Cursor.visible) {
 				var node = GetNetNode(_hoveredNetNodeIdx);
 				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[node.m_segment0];
 
@@ -558,24 +557,24 @@ namespace TrafficManager.TrafficLight {
 			if (SelectedNode != 0) return;
 
 			if (!TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
-				if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
-					SelectedNode = _hoveredNetNodeIdx;
+				if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+					TrafficPriority.RemovePrioritySegments(_hoveredNetNodeIdx);
+					Flags.setNodeTrafficLight(_hoveredNetNodeIdx, true);
+				}
 
-					var node2 = GetNetNode(SelectedNode);
+				SelectedNode = _hoveredNetNodeIdx;
 
-					TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
-					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
-					nodeSimulation.FlagManualTrafficLights = true;
+				var node2 = GetNetNode(SelectedNode);
 
-					for (var s = 0; s < 8; s++) {
-						var segment = node2.GetSegment(s);
+				TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
+				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
+				nodeSimulation.FlagManualTrafficLights = true;
 
-						if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNode, segment)) {
-							TrafficPriority.AddPrioritySegment(SelectedNode, segment, PrioritySegment.PriorityType.None);
-						}
+				for (var s = 0; s < 8; s++) {
+					var segment = node2.GetSegment(s);
+					if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNode, segment)) {
+						TrafficPriority.AddPrioritySegment(SelectedNode, segment, PrioritySegment.PriorityType.None);
 					}
-				} else {
-					showTooltip(NODE_IS_NOT_LIGHT, node.m_position);
 				}
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
@@ -3046,6 +3045,7 @@ namespace TrafficManager.TrafficLight {
 								_stepMaxValue = timedNodeMain.GetStep(i).maxTime;
 								_stepMinValueStr = _stepMinValue.ToString();
 								_stepMaxValueStr = _stepMaxValue.ToString();
+								nodeSelectionLocked = true;
 
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 									timedNode2.GetStep(i).SetLights(true);
@@ -3064,6 +3064,7 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 				} else {
+					nodeSelectionLocked = true;
 					int oldStepMinValue = _stepMinValue;
 					int oldStepMaxValue = _stepMaxValue;
 
@@ -3093,6 +3094,7 @@ namespace TrafficManager.TrafficLight {
 						}
 
 						_timedEditStep = -1;
+						nodeSelectionLocked = false;
 					}
 				}
 
@@ -3103,6 +3105,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (_timedEditStep < 0 && !nodeSimulation.TimedTrafficLightsActive) {
 				if (_timedPanelAdd) {
+					nodeSelectionLocked = true;
 					// new step
 					int oldStepMinValue = _stepMinValue;
 					int oldStepMaxValue = _stepMaxValue;
@@ -3137,6 +3140,7 @@ namespace TrafficManager.TrafficLight {
 					if (_timedEditStep < 0) {
 						if (GUILayout.Button("Add step")) {
 							_timedPanelAdd = true;
+							nodeSelectionLocked = true;
 						}
 					}
 				}
@@ -3161,6 +3165,7 @@ namespace TrafficManager.TrafficLight {
 					if (_timedEditStep < 0 && !_timedPanelAdd) {
 						if (GUILayout.Button("Start")) {
 							_timedPanelAdd = false;
+							nodeSelectionLocked = false;
 
 							foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 #if DEBUG
@@ -3175,7 +3180,6 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			GUILayout.Space(30);
-			nodeSelectionLocked = GUILayout.Toggle(nodeSelectionLocked, "Lock junction selection", new GUILayoutOption[] { });
 
 			if (_timedEditStep >= 0) {
 				return;

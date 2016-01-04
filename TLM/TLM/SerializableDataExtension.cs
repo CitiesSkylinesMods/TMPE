@@ -71,6 +71,10 @@ namespace TrafficManager {
 				if (options.Length >= 2) {
 					Options.setLaneChangingRandomization(options[1]);
 				}
+
+				if (options.Length >= 3) {
+					Options.setRecklessDrivers(options[2]);
+				}
 			}
 		}
 
@@ -205,6 +209,8 @@ namespace TrafficManager {
 			var timedStepCount = 0;
 			var timedStepSegmentCount = 0;
 
+			NetManager netManager = Singleton<NetManager>.instance;
+
 			if (_configuration.TimedNodes.Count > 0) {
 				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
 					try {
@@ -219,6 +225,7 @@ namespace TrafficManager {
 						if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
 						TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
 						var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
+						var node = netManager.m_nodes.m_buffer[nodeid];
 
 						timedNode.CurrentStep = _configuration.TimedNodes[i][1];
 
@@ -247,25 +254,27 @@ namespace TrafficManager {
 							}
 
 							timedNode.AddStep(minTime, maxTime);
-
 							var step = timedNode.Steps[j];
-							if (numSegments <= step.segmentIds.Count) {
-								for (var k = 0; k < numSegments; k++) {
-									ushort stepSegmentId = (ushort)step.segmentIds[k];
 
-									var leftLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-									var mainLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-									var rightLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-									var pedLightState = (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
+							for (var s = 0; s < 8; s++) {
+								var segmentId = node.GetSegment(s);
+								if (segmentId <= 0)
+									continue;
 
-									//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
-									step.segmentLightStates[stepSegmentId].LightLeft = leftLightState;
-									step.segmentLightStates[stepSegmentId].LightMain = mainLightState;
-									step.segmentLightStates[stepSegmentId].LightRight = rightLightState;
-									step.segmentLightStates[stepSegmentId].LightPedestrian = pedLightState;
+								bool tooFewSegments = (timedStepSegmentCount >= _configuration.TimedNodeStepSegments.Count);
+							
+								var leftLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
+								var mainLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
+								var rightLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
+								var pedLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
 
-									timedStepSegmentCount++;
-								}
+								//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
+								step.segmentLightStates[segmentId].LightLeft = leftLightState;
+								step.segmentLightStates[segmentId].LightMain = mainLightState;
+								step.segmentLightStates[segmentId].LightRight = rightLightState;
+								step.segmentLightStates[segmentId].LightPedestrian = pedLightState;
+
+								timedStepSegmentCount++;
 							}
 							timedStepCount++;
 						}
@@ -422,7 +431,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(LegacyDataId, new byte[] { });
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -484,6 +493,7 @@ namespace TrafficManager {
 					return;
 
 				var timedNode = TrafficLightsTimed.GetTimedLight((ushort)i);
+				timedNode.handleNewSegments();
 
 				configuration.TimedNodes.Add(new[]
 				{
@@ -500,10 +510,27 @@ namespace TrafficManager {
 				configuration.TimedNodeGroups.Add(nodeGroup);
 
 				// get segment ids which are still defined but for which real road segments are missing
-				HashSet<ushort> invalidSegmentIds = timedNode.getInvalidSegmentIds();
+				NetManager netManager = Singleton<NetManager>.instance;
 
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
-					int validCount = timedNode.Steps[j].segmentIds.Count - invalidSegmentIds.Count;
+					int validCount = 0;
+					var node = netManager.m_nodes.m_buffer[i];
+					for (var s = 0; s < 8; s++) {
+						var segmentId = node.GetSegment(s);
+						if (segmentId <= 0)
+							continue;
+						
+						var segLight = timedNode.Steps[j].segmentLightStates.ContainsKey(segmentId) ? timedNode.Steps[j].segmentLightStates[segmentId] : null;
+						configuration.TimedNodeStepSegments.Add(new[]
+						{
+							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightLeft),
+							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightMain),
+							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightRight),
+							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightPedestrian)
+						});
+
+						++validCount;
+					}
 
 					configuration.TimedNodeSteps.Add(new[]
 					{
@@ -511,22 +538,6 @@ namespace TrafficManager {
 						timedNode.Steps[j].maxTime,
 						validCount
 					});
-
-					for (var k = 0; k < timedNode.Steps[j].segmentIds.Count; k++) {
-						var segmentId = timedNode.Steps[j].segmentIds[k];
-
-						if (invalidSegmentIds.Contains(segmentId))
-							continue;
-
-						var segLight = timedNode.Steps[j].segmentLightStates[segmentId];
-						configuration.TimedNodeStepSegments.Add(new[]
-						{
-							(int) segLight.LightLeft,
-							(int) segLight.LightMain,
-							(int) segLight.LightRight,
-							(int) segLight.LightPedestrian
-						});
-					}
 				}
 			} catch (Exception e) {
 				Log.Error($"Error adding TimedTrafficLights to save {e.Message}");

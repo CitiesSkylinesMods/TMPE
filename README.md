@@ -2,11 +2,17 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.20, 01/04/2016
+- Bugfix: Timed traffic lights are not saved correctly after upgrading a road nearby
+- UI improvements
+- New feature: Reckless driving 
+
 1.3.19, 01/04/2016
 - Timed traffic lights: Absolute minimum time changed to 1
 - Timed traffic lights: Velocity of vehicles is being measured to detect traffic jams
 - Improved traffic flow measurement
 - Improved path finding: Cims may now choose their lanes more independently
+- Bugfix: Upgrading a road resets the traffic light arrow mode
 
 1.3.18, 01/03/2016
 - Provided a fix for unconnected junctions caused by other mods

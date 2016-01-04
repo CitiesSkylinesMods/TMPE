@@ -45,10 +45,6 @@ namespace TrafficManager.TrafficLight {
 		private TrafficLightsTimed timedNode;
 
 		public Dictionary<ushort, ManualSegmentLight> segmentLightStates = new Dictionary<ushort, ManualSegmentLight>();
-		/// <summary>
-		/// list of segment ids connected to the node
-		/// </summary>
-		public List<ushort> segmentIds = new List<ushort>();
 
 		/// <summary>
 		/// Maximum segment length
@@ -85,15 +81,13 @@ namespace TrafficManager.TrafficLight {
 
 				addSegment(segmentId);
 			}
-			rebuildSegmentIds();
+			calcMaxSegmentLength();
 		}
 
-		internal void rebuildSegmentIds() {
+		internal void calcMaxSegmentLength() {
 			var node = TrafficLightTool.GetNetNode(nodeId);
 
-			List<ushort> oldSegmentIds = new List<ushort>(segmentIds);
 			maxSegmentLength = 0;
-			segmentIds.Clear();
 			for (var s = 0; s < 8; s++) {
 				var segmentId = node.GetSegment(s);
 				
@@ -103,13 +97,7 @@ namespace TrafficManager.TrafficLight {
 				float segLength = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_averageLength;
 				if (segLength > maxSegmentLength)
 					maxSegmentLength = segLength;
-
-				segmentIds.Add(segmentId);
-				oldSegmentIds.Remove(segmentId);
 			}
-
-			foreach (var segmentId in oldSegmentIds)
-				segmentIds.Add(segmentId);
 		}
 
 		public bool isValid() {
@@ -214,7 +202,6 @@ namespace TrafficManager.TrafficLight {
 		internal void addSegment(ushort segmentId) {
 			segmentLightStates.Add(segmentId, (ManualSegmentLight)TrafficLightsManual.GetOrLiveSegmentLight(nodeId, segmentId).Clone());
 			segmentLightStates[segmentId].makeRedOrGreen();
-			segmentIds.Add(segmentId);
 		}
 
 		private RoadBaseAI.TrafficLightState calcLightState(RoadBaseAI.TrafficLightState previousState, RoadBaseAI.TrafficLightState currentState, RoadBaseAI.TrafficLightState nextState, bool atStartTransition, bool atEndTransition) {
