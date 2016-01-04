@@ -12,6 +12,11 @@ namespace TrafficManager.TrafficLight {
 		public static Dictionary<ushort, ManualSegment> ManualSegments = new Dictionary<ushort, ManualSegment>();
 
 		// TODO refactor
+		public static bool SegmentIsIncomingOneWay(ushort segmentid, ushort nodeId) {
+			return (SegmentIsOneWay(segmentid) && !SegmentIsOutgoingOneWay(segmentid, nodeId));
+		}
+
+		// TODO refactor
 		public static bool SegmentIsOutgoingOneWay(ushort segmentid, ushort nodeId) {
 			var instance = Singleton<NetManager>.instance;
 

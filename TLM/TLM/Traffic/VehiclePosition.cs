@@ -1,5 +1,5 @@
-namespace TrafficManager {
-	public class PriorityCar {
+namespace TrafficManager.Traffic {
+	public class VehiclePosition {
 		public CarState CarState = CarState.None;
 
 		public int WaitTime = 0;
@@ -11,8 +11,6 @@ namespace TrafficManager {
 		public uint ToLaneIndex;
 		public uint FromLaneId;
 		public uint FromLaneIndex;
-		public ushort FromLaneFlags;
-		public float LastSpeed;
 		public float ReduceSpeedByValueToYield;
 		public bool Stopped = false;
 
@@ -26,7 +24,6 @@ namespace TrafficManager {
 			ToLaneIndex = 0;
 			FromLaneId = 0;
 			FromLaneIndex = 0;
-			FromLaneFlags = 0;
 			Stopped = false;
 
 			WaitTime = 0;

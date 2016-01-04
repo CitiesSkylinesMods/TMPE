@@ -62,6 +62,8 @@ namespace TrafficManager.TrafficLight {
 		private static readonly string NODE_IS_TIMED_LIGHT = "Junction is part of a timed script.\nSelect \"Timed traffic lights\", click on this node and click on \"Remove\" first.";
 		private static readonly string NODE_IS_NOT_LIGHT = "Junction does not have a traffic light.\nAdd a traffic light first by choosing \"Switch traffic lights\" and clicking on this node.";
 
+		private static bool nodeSelectionLocked = false;
+
 		static Rect ResizeGUI(Rect rect) {
 			var rectX = (rect.x / 800) * Screen.width;
 			var rectY = (rect.y / 600) * Screen.height;
@@ -96,6 +98,7 @@ namespace TrafficManager.TrafficLight {
 
 		public static void SetToolMode(ToolMode mode) {
 			_toolMode = mode;
+			nodeSelectionLocked = false;
 
 			if (mode == ToolMode.None)
 				UITrafficManager.deactivateButtons();
@@ -523,7 +526,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void TimedLightSelectNodeToolMode(NetNode node) {
-			if (_hoveredNetNodeIdx <= 0)
+			if (_hoveredNetNodeIdx <= 0 || nodeSelectionLocked)
 				return;
 
 			if (_toolMode == ToolMode.TimedLightsShowLights) {
@@ -1380,7 +1383,7 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-				//_guiLanes(ref segment, ref segmentInfo);
+				_guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
@@ -1447,7 +1450,7 @@ namespace TrafficManager.TrafficLight {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				String labelStr = "Veh. " + i;// + " @ " + vehicle.m_frame0.m_velocity.magnitude + "/" + (TrafficPriority.VehicleList.ContainsKey((ushort)i) ? "" + Math.Sqrt(TrafficPriority.VehicleList[(ushort)i].LastSpeed) : "?");
+				String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehicle.GetLastFrameVelocity().magnitude);
 				// add current path info
 				/*var currentPathId = vehicle.m_path;
 				if (currentPathId > 0) {
@@ -1636,7 +1639,7 @@ namespace TrafficManager.TrafficLight {
 
 						String labelStr = "n/a";
 						if (prioSeg != null) {
-							labelStr = prioSeg.NumCars.ToString() + " incoming";
+							labelStr = prioSeg.getNumCars().ToString() + " incoming";
 							/*for (int k = 0; k < prioSeg.numLanes; ++k) {
 								if (k > 0)
 									labelStr += "/";
@@ -3077,8 +3080,8 @@ namespace TrafficManager.TrafficLight {
 					
 					if (GUILayout.Button("Save", GUILayout.Width(45))) {
 						foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
-							if (_stepMinValue < 0)
-								_stepMinValue = 0;
+							if (_stepMinValue <= 0)
+								_stepMinValue = 1;
 							if (_stepMaxValue <= 0)
 								_stepMaxValue = 1;
 							if (_stepMaxValue < _stepMinValue)
@@ -3116,8 +3119,8 @@ namespace TrafficManager.TrafficLight {
 
 					if (GUILayout.Button("Add", GUILayout.Width(45))) {
 						foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
-							if (_stepMinValue < 0)
-								_stepMinValue = 0;
+							if (_stepMinValue <= 0)
+								_stepMinValue = 1;
 							if (_stepMaxValue <= 0)
 								_stepMaxValue = 1;
 							if (_stepMaxValue < _stepMinValue)
@@ -3172,6 +3175,7 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			GUILayout.Space(30);
+			nodeSelectionLocked = GUILayout.Toggle(nodeSelectionLocked, "Lock junction selection", new GUILayoutOption[] { });
 
 			if (_timedEditStep >= 0) {
 				return;

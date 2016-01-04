@@ -9,6 +9,7 @@ namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
 
 		private uint lastUpdateFrame = 0;
+		private static byte[] timedLightUpdateShift = new byte[] { 3, 3, 4, 4, 5 };
 
 		public void Awake() {
 
@@ -16,7 +17,7 @@ namespace TrafficManager.Custom.AI {
 
 		// this implements the Update method of MonoBehaviour
 		public void Update() {
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 4;
+			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> timedLightUpdateShift[Options.simAccuracy];
 
 			if (lastUpdateFrame < currentFrameIndex) {
 				try {

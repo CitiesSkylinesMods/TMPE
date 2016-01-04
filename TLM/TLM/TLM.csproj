@@ -71,7 +71,7 @@
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="PriorityCar.cs" />
+    <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\PrioritySegment.cs" />
     <Compile Include="RedirectionHelper.cs" />

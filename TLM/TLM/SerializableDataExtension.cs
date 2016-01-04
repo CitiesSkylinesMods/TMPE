@@ -67,6 +67,10 @@ namespace TrafficManager {
 				if (options.Length >= 1) {
 					Options.setSimAccuracy(options[0]);
 				}
+
+				if (options.Length >= 2) {
+					Options.setLaneChangingRandomization(options[1]);
+				}
 			}
 		}
 
@@ -122,6 +126,7 @@ namespace TrafficManager {
 
 			LoadDataState();
 			StateLoaded = true;
+			TrafficPriority.HandleAllVehicles();
 
 			//Log.Message("Setting timer to load data.");
 			//var timer = new Timer(1500);
@@ -417,7 +422,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(LegacyDataId, new byte[] { });
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

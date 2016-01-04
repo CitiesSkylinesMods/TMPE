@@ -28,7 +28,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Dictionary of relevant vehicles
 		/// </summary>
-		public static Dictionary<ushort, PriorityCar> VehicleList = new Dictionary<ushort, PriorityCar>();
+		public static Dictionary<ushort, VehiclePosition> Vehicles = new Dictionary<ushort, VehiclePosition>();
 
 		/// <summary>
 		/// Nodes that have timed traffic lights or priority signs
@@ -129,6 +129,14 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
+		internal static void HandleAllVehicles() {
+			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+			for (ushort i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
+				if (vehicleManager.m_vehicles.m_buffer[i].m_flags != Vehicle.Flags.None)
+					CustomCarAI.HandleVehicle(i, ref vehicleManager.m_vehicles.m_buffer[i]);
+			}
+		}
+
 		public static bool IsPrioritySegment(ushort nodeId, ushort segmentId) {
 			if (nodeId <= 0 || segmentId <= 0)
 				return false;
@@ -196,19 +204,19 @@ namespace TrafficManager.Traffic {
 			var frame = currentFrameIndex >> 4;
 			var node = TrafficLightTool.GetNetNode(nodeId);
 
-			var fromPrioritySegment = GetPrioritySegment(nodeId, VehicleList[targetCar].FromSegment);
+			var fromPrioritySegment = GetPrioritySegment(nodeId, Vehicles[targetCar].FromSegment);
 			if (fromPrioritySegment == null)
 				return false;
 
 			var numCars = 0;
 
-			bool debug = nodeId == 32538;
+			bool debug = nodeId == 8621;
 
 			// get all cars
 			for (var s = 0; s < 8; s++) {
 				var segment = node.GetSegment(s);
 
-				if (segment == 0 || segment == VehicleList[targetCar].FromSegment) continue;
+				if (segment == 0 || segment == Vehicles[targetCar].FromSegment) continue;
 				if (!IsPrioritySegment(nodeId, segment)) continue;
 
 				var toPrioritySegment = GetPrioritySegment(nodeId, segment);
@@ -220,17 +228,17 @@ namespace TrafficManager.Traffic {
 						if (toPrioritySegment.Type != PrioritySegment.PriorityType.Main) continue;
 						// Main - Main
 
-						numCars += toPrioritySegment.NumCars;
+						numCars += toPrioritySegment.getNumCars();
 
-						foreach (KeyValuePair<ushort, float> e in toPrioritySegment.Cars) {
+						foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 							var car = e.Key;
-							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
+							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 								if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 									--numCars;
 								else {
-									if (debug) {
-										Log.Message($"Vehicle {targetCar} on segment {VehicleList[targetCar].FromSegment} has to wait for vehicle {car} on segment {VehicleList[car].FromSegment}");
-									}
+									/*if (debug) {
+										Log.Message($"Vehicle {targetCar} on segment {Vehicles[targetCar].FromSegment} has to wait for vehicle {car} on segment {Vehicles[car].FromSegment}");
+									}*/
 									return true;
 								}
 							} else {
@@ -239,12 +247,12 @@ namespace TrafficManager.Traffic {
 						}
 					} else {
 						// Main - Yield/Stop
-						numCars += toPrioritySegment.NumCars;
+						numCars += toPrioritySegment.getNumCars();
 
-						foreach (KeyValuePair<ushort, float> e in toPrioritySegment.Cars) {
+						foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 							var car = e.Key;
 							if (toPrioritySegment.Type == PrioritySegment.PriorityType.Main) {
-								if (!VehicleList[car].Stopped && Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
+								if (!Vehicles[car].Stopped && Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 									if (CheckPriorityRoadIncomingCar(targetCar, car, nodeId))
 										--numCars;
 									else
@@ -253,7 +261,7 @@ namespace TrafficManager.Traffic {
 									numCars--;
 								}
 							} else {
-								if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 0.1f) {
+								if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 									if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 										--numCars;
 									else
@@ -272,11 +280,11 @@ namespace TrafficManager.Traffic {
 
 					if (segmentLight.GetLightMain() != RoadBaseAI.TrafficLightState.Green) continue;
 
-					numCars += toPrioritySegment.NumCars;
+					numCars += toPrioritySegment.getNumCars();
 
-					foreach (KeyValuePair<ushort, float> e in toPrioritySegment.Cars) {
+					foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 						var car = e.Key;
-						if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].m_frame0.m_velocity.magnitude > 1f) {
+						if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 							if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 								--numCars;
 							else
@@ -294,6 +302,15 @@ namespace TrafficManager.Traffic {
 			return numCars > 0;
 		}
 
+		internal static void RemoveVehicle(ushort vehicleId) {
+			foreach (KeyValuePair<ushort, TrafficSegment> e in PrioritySegments) {
+				if (e.Value.Instance1 != null)
+					e.Value.Instance1.RemoveCar(vehicleId);
+				if (e.Value.Instance2 != null)
+					e.Value.Instance2.RemoveCar(vehicleId);
+			}
+		}
+
 		public static bool CheckSameRoadIncomingCar(ushort targetCarId, ushort incomingCarId, ushort nodeId) {
 			return LeftHandDrive ? _checkSameRoadIncomingCarLeftHandDrive(targetCarId, incomingCarId, nodeId) :
 				_checkSameRoadIncomingCarRightHandDrive(targetCarId, incomingCarId, nodeId);
@@ -301,72 +318,79 @@ namespace TrafficManager.Traffic {
 
 		protected static bool _checkSameRoadIncomingCarLeftHandDrive(ushort targetCarId, ushort incomingCarId,
 			ushort nodeId) {
-			var targetCar = VehicleList[targetCarId];
-			var incomingCar = VehicleList[incomingCarId];
+			try {
+				var targetCar = Vehicles[targetCarId];
+				var incomingCar = Vehicles[incomingCarId];
 
-			if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId)) {
-				if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId)) {
-					if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
-						return true;
-					}
-				} else if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId) {
-					return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
-				}
-			} else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
-			  // incoming is on the left
-			  {
-				return true;
-			} else // incoming is in front or elsewhere
-			  {
-				if (!IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
-				// target car not going left
-				{
-					return true;
-				}
-				if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
-					if (targetCar.ToLaneId != incomingCar.ToLaneId) {
+				if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId)) {
+					if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId)) {
+						if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
+							return true;
+						}
+					} else if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId) {
 						return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
 					}
-				} else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
+				} else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
+				  // incoming is on the left
 				  {
 					return true;
+				} else // incoming is in front or elsewhere
+				  {
+					if (!IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
+					// target car not going left
+					{
+						return true;
+					}
+					if (IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
+						if (targetCar.ToLaneId != incomingCar.ToLaneId) {
+							return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
+						}
+					} else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
+					  {
+						return true;
+					}
 				}
+			} catch (Exception e) {
+				Log.Error("Error occured: " + e.ToString());
 			}
 
 			return false;
 		}
 
-		protected static bool _checkSameRoadIncomingCarRightHandDrive(ushort targetCarId, ushort incomingCarId,
-			ushort nodeId) {
-			var targetCar = VehicleList[targetCarId];
-			var incomingCar = VehicleList[incomingCarId];
+		protected static bool _checkSameRoadIncomingCarRightHandDrive(ushort targetCarId, ushort incomingCarId, ushort nodeId) {
+			try {
+				var targetCar = Vehicles[targetCarId];
+				var incomingCar = Vehicles[incomingCarId];
 
-			if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId)) {
-				if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId)) {
-					return true;
-				}
-				if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId) {
-					return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
-				}
-			} else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
-			  // incoming is on the left
-			  {
-				return true;
-			} else // incoming is in front or elsewhere
-			  {
-				if (!IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
-				// target car not going left
-				{
-					return true;
-				}
-				if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
-					if (targetCar.ToLaneId != incomingCar.ToLaneId) {
+				if (IsRightSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId)) {
+					if (IsRightSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId)) {
+						return true;
+					}
+					if (targetCar.ToSegment == incomingCar.ToSegment && targetCar.ToLaneId != incomingCar.ToLaneId) {
 						return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
 					}
-				} else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
+				} else if (IsLeftSegment(targetCar.FromSegment, incomingCar.FromSegment, nodeId))
+				  // incoming is on the left
 				  {
 					return true;
+				} else // incoming is in front or elsewhere
+				  {
+					if (!IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId))
+					// target car not going left
+					{
+						return true;
+					}
+					if (IsRightSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) {
+						if (targetCar.ToLaneId != incomingCar.ToLaneId) {
+							return LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
+						}
+					} else if (IsLeftSegment(targetCar.FromSegment, targetCar.ToSegment, nodeId) && IsLeftSegment(incomingCar.FromSegment, incomingCar.ToSegment, nodeId)) // both left turns
+					  {
+						return true;
+					}
 				}
+			} catch (Exception e) {
+				Log.Error("Error occured: " + e.ToString());
 			}
 
 			return false;
@@ -382,8 +406,8 @@ namespace TrafficManager.Traffic {
 
 		protected static bool _checkPriorityRoadIncomingCarLeftHandDrive(ushort targetCarId, ushort incomingCarId,
 			ushort nodeId) {
-			var targetCar = VehicleList[targetCarId];
-			var incomingCar = VehicleList[incomingCarId];
+			var targetCar = Vehicles[targetCarId];
+			var incomingCar = Vehicles[incomingCarId];
 
 			if (incomingCar.ToSegment == targetCar.ToSegment) {
 				if (incomingCar.ToLaneId == targetCar.ToLaneId) return false;
@@ -436,14 +460,14 @@ namespace TrafficManager.Traffic {
 		internal static void OnLevelUnloading() {
 			PrioritySegments.Clear();
 			TrafficLightSimulation.LightSimulationByNodeId.Clear();
-			VehicleList.Clear();
+			Vehicles.Clear();
 			priorityNodes.Clear();
 		}
 
 		protected static bool _checkPriorityRoadIncomingCarRightHandDrive(ushort targetCarId, ushort incomingCarId,
 			ushort nodeId) {
-			var targetCar = VehicleList[targetCarId];
-			var incomingCar = VehicleList[incomingCarId];
+			var targetCar = Vehicles[targetCarId];
+			var incomingCar = Vehicles[incomingCarId];
 
 			if (incomingCar.ToSegment == targetCar.ToSegment) {
 				if (incomingCar.ToLaneId == targetCar.ToLaneId) return false;
@@ -818,8 +842,7 @@ namespace TrafficManager.Traffic {
 					// segment is valid, check for invalid cars
 					if (PrioritySegments[segmentId].Node1 != 0) {
 						List<ushort> vehicleIdsToDelete = new List<ushort>();
-
-						foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance1.Cars) {
+						foreach (KeyValuePair<ushort, VehiclePosition> e in PrioritySegments[segmentId].Instance1.getCars()) {
 							var vehicleId = e.Key;
 							if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
 								vehicleIdsToDelete.Add(vehicleId);
@@ -827,16 +850,16 @@ namespace TrafficManager.Traffic {
 						}
 
 						foreach (var vehicleId in vehicleIdsToDelete) {
-							Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
+							//Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
 							PrioritySegments[segmentId].Instance1.RemoveCar(vehicleId);
-							VehicleList.Remove(vehicleId);
+							Vehicles.Remove(vehicleId);
 						}
 					}
 
 					if (PrioritySegments[segmentId].Node2 != 0) {
 						List<ushort> vehicleIdsToDelete = new List<ushort>();
 
-						foreach (KeyValuePair<ushort, float> e in PrioritySegments[segmentId].Instance2.Cars) {
+						foreach (KeyValuePair<ushort, VehiclePosition> e in PrioritySegments[segmentId].Instance2.getCars()) {
 							var vehicleId = e.Key;
 							if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags == Vehicle.Flags.None) {
 								vehicleIdsToDelete.Add(vehicleId);
@@ -844,9 +867,9 @@ namespace TrafficManager.Traffic {
 						}
 
 						foreach (var vehicleId in vehicleIdsToDelete) {
-							Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
+							//Log.Warning("Housekeeping: Deleting vehicle " + vehicleId);
 							PrioritySegments[segmentId].Instance2.RemoveCar(vehicleId);
-							VehicleList.Remove(vehicleId);
+							Vehicles.Remove(vehicleId);
 						}
 					}
 				}

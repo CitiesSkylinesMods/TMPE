@@ -57,6 +57,8 @@ namespace TrafficManager.TrafficLight {
 
 		private bool invalid = false; // TODO rework
 
+		private static readonly float?[] speedsToLookup = new float?[] {null, 0.1f};
+
 		public TimedTrafficStep(int minTime, int maxTime, ushort nodeId, ushort masterNodeId, List<ushort> groupNodeIds) {
 			this.nodeId = nodeId;
 			this.minTime = minTime;
@@ -308,43 +310,51 @@ namespace TrafficManager.TrafficLight {
 						foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
 							var fromSegmentId = e.Key;
 							var segLightState = e.Value;
-							//float segmentWeight = Singleton<NetManager>.instance.m_segments.m_buffer[fromSegmentId].m_averageLength / maxSegmentLength;
 
 							// one of the traffic lights at this segment is green: count minimum traffic flowing through
-							PrioritySegment prioSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
-							if (prioSeg == null) {
+							PrioritySegment fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
+							if (fromSeg == null) {
 								//Log.Warning("stepDone(): prioSeg is null");
 								//segmentIdsToDelete.Add(fromSegmentId);
 								continue; // skip invalid segment
 							}
-							foreach (KeyValuePair<ushort, float> f in prioSeg.numCarsGoingToSegmentId) {
-								var toSegmentId = f.Key;
-								var totalNormCarLength = f.Value;
 
-								TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
-								bool addToFlow = false;
-								switch (dir) {
-									case TrafficPriority.Direction.Left:
-										if (segLightState.isLeftGreen())
-											addToFlow = true;
-										break;
-									case TrafficPriority.Direction.Right:
-										if (segLightState.isRightGreen())
-											addToFlow = true;
-										break;
-									case TrafficPriority.Direction.Forward:
-									default:
-										if (segLightState.isForwardGreen())
-											addToFlow = true;
-										break;
-								}
+							bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
+							float?[] minSpeeds = startPhase ? new float?[] { null } : speedsToLookup;
+							foreach (float? minSpeed in minSpeeds) {
+								foreach (KeyValuePair<ushort, float> f in fromSeg.getNumCarsGoingToSegment(minSpeed)) {
+									var toSegmentId = f.Key;
+									var totalNormCarLength = f.Value;
 
-								if (addToFlow) {
-									++numFlows;
-									curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
-								} else {
-									++numWaits;
-									curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
+									TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
+									bool addToFlow = false;
+									switch (dir) {
+										case TrafficPriority.Direction.Left:
+											if (segLightState.isLeftGreen())
+												addToFlow = true;
+											break;
+										case TrafficPriority.Direction.Right:
+											if (segLightState.isRightGreen())
+												addToFlow = true;
+											break;
+										case TrafficPriority.Direction.Forward:
+										default:
+											if (segLightState.isForwardGreen())
+												addToFlow = true;
+											break;
+									}
+
+									if (addToFlow) {
+										if (minSpeed != null || startPhase) {
+											++numFlows;
+											curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
+										}
+									} else {
+										if (minSpeed == null) {
+											++numWaits;
+											curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
+										}
+									}
 								}
 							}
 						}
@@ -365,18 +375,18 @@ namespace TrafficManager.TrafficLight {
 					if (numWaits > 0)
 						curMeanWait /= (float)numWaits;
 
-					float decisionValue = 0.85f; // a value smaller than 1 rewards steady traffic currents
-					curMeanFlow /= decisionValue;
+					/*float decisionValue = 0.75f; // a value smaller than 1 rewards steady traffic currents
+					curMeanFlow /= decisionValue;*/
 
 					if (Single.IsNaN(minFlow))
 						minFlow = curMeanFlow;
 					else
-						minFlow = 0.75f * curMeanFlow + 0.25f * minFlow;
+						minFlow = 0.5f * minFlow + 0.5f * curMeanFlow; // some smoothing
 
 					if (Single.IsNaN(maxWait))
-						maxWait = curMeanWait;
+						maxWait = 0;
 					else
-						maxWait = Math.Max(curMeanWait, maxWait);
+						maxWait = 0.5f * maxWait + 0.5f * curMeanWait; // some smoothing
 
 					// if more cars are waiting than flowing, we change the step
 					bool done = maxWait > 0 && minFlow < maxWait;

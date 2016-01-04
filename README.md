@@ -2,6 +2,12 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.19, 01/04/2016
+- Timed traffic lights: Absolute minimum time changed to 1
+- Timed traffic lights: Velocity of vehicles is being measured to detect traffic jams
+- Improved traffic flow measurement
+- Improved path finding: Cims may now choose their lanes more independently
+
 1.3.18, 01/03/2016
 - Provided a fix for unconnected junctions caused by other mods
 - Crosswalk feature removed. If you need to add/remove crosswalks please use the "Crossings" mod.

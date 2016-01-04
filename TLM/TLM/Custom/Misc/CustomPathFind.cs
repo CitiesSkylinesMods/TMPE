@@ -474,6 +474,14 @@ namespace TrafficManager.Custom.Misc
 
 		// 1
 		private void ProcessItemMain(BufferItem item, ushort nodeID, ref NetNode node, byte connectOffset, bool isMiddle) {
+#if DEBUG
+			//bool debug = nodeID == 28311u && item.m_position.m_segment == 33016;
+			//bool debug = nodeID == 26128u && item.m_position.m_segment == 4139 && nextSegmentId == 27106;
+			//bool debug = nodeID == 13630u && item.m_position.m_segment == 35546u;
+			bool debug = false;
+#endif
+
+
 			NetManager instance = Singleton<NetManager>.instance;
 			bool isPedestrianLane = false;
 			bool isBicycleLane = false;
@@ -490,11 +498,17 @@ namespace TrafficManager.Custom.Misc
 				}
 			}
 			if (isMiddle) {
+#if DEBUG
+				if (debug) {
+					Log.Message("Path finding: segment is middle");
+				}
+#endif
+
 				for (int i = 0; i < 8; i++) {
 					ushort segment = node.GetSegment(i);
-					if (segment != 0) {
-						this.ProcessItem(item, nodeID, segment, ref instance.m_segments.m_buffer[(int)segment], ref similarLaneIndexFromLeft, connectOffset, !isPedestrianLane, isPedestrianLane);
-					}
+					if (segment <= 0)
+						continue;
+					this.ProcessItem(item, nodeID, segment, ref instance.m_segments.m_buffer[(int)segment], ref similarLaneIndexFromLeft, connectOffset, !isPedestrianLane, isPedestrianLane);
 				}
 			} else if (isPedestrianLane) {
 				ushort segment2 = item.m_position.m_segment;
@@ -611,12 +625,7 @@ namespace TrafficManager.Custom.Misc
 
 				// NON-STOCK CODE START //
 				NetInfo.Lane lane = info.m_lanes[(int)item.m_position.m_lane];
-#if DEBUG
-				//bool debug = nodeID == 28311u && item.m_position.m_segment == 33016;
-				//bool debug = nodeID == 26128u && item.m_position.m_segment == 4139 && nextSegmentId == 27106;
-				bool debug = nodeID == 32265u && item.m_position.m_segment == 32818 && nextSegmentId == 4343;
-				//bool debug = false;
-#endif
+
 				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
 				int prevRightSimilarLaneIndex;
 				if ((byte)(lane.m_direction & normDirection) != 0) {
@@ -630,6 +639,11 @@ namespace TrafficManager.Custom.Misc
 					if (nextSegmentId == 0 || nextSegmentId == item.m_position.m_segment) {
 						break;
 					}
+
+#if DEBUG
+					if (nextSegmentId == 7386u)
+						debug = false;
+#endif
 
 					// NON-STOCK CODE START //
 					// "nextSegment" is actually the previous segment because path-finding runs from target to start
@@ -733,8 +747,20 @@ namespace TrafficManager.Custom.Misc
 
 							if (ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId))
 								blocked = true;
+						} else {
+#if DEBUG
+							if (debug) {
+								Log.Message($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: No compatible lanes found");
+							}
+#endif
 						}
 					} else {
+#if DEBUG
+						if (debug) {
+							Log.Message($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: No lane arrows defined");
+						}
+#endif
+
 						if (ProcessItem(item, nodeID, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
 							blocked = true;
 						}
@@ -856,20 +882,20 @@ namespace TrafficManager.Custom.Misc
 		private bool ProcessItem(BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment segment, ref int currentTargetIndex, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
 			return ProcessItem(item, targetNode, segmentID, ref segment, ref currentTargetIndex, connectOffset, enableVehicle, enablePedestrian, null, null);
 		}
-		
+
 		// 3
-		private bool ProcessItem(BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment segment, ref int currentTargetIndex, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId) {
+		private bool ProcessItem(BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment nextSegment, ref int currentTargetIndex, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId) {
 			bool result = false;
-			if ((segment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
+			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
 				return result;
 			}
 			NetManager instance = Singleton<NetManager>.instance;
-			NetInfo nextSegmentInfo = segment.Info;
+			NetInfo nextSegmentInfo = nextSegment.Info;
 			NetInfo prevSegmentInfo = instance.m_segments.m_buffer[(int)item.m_position.m_segment].Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
-			uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : segment.m_lanes);
-			NetInfo.Direction direction = (targetNode != segment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-			NetInfo.Direction direction2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? direction : NetInfo.InvertDirection(direction);
+			uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : nextSegment.m_lanes); // NON-STOCK CODE
+			NetInfo.Direction nextDir = (targetNode != nextSegment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+			NetInfo.Direction nextDir2 = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
 			float num3 = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
 			if (num3 < 1f) {
 				Vector3 vector;
@@ -879,10 +905,10 @@ namespace TrafficManager.Custom.Misc
 					vector = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_endDirection;
 				}
 				Vector3 vector2;
-				if ((byte)(direction & NetInfo.Direction.Forward) != 0) {
-					vector2 = segment.m_endDirection;
+				if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
+					vector2 = nextSegment.m_endDirection;
 				} else {
-					vector2 = segment.m_startDirection;
+					vector2 = nextSegment.m_startDirection;
 				}
 				float num4 = vector.x * vector2.x + vector.z * vector2.z;
 				if (num4 >= num3) {
@@ -893,12 +919,23 @@ namespace TrafficManager.Custom.Misc
 			float num6 = 1f;
 			NetInfo.LaneType laneType = NetInfo.LaneType.None;
 			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
+			// NON-STOCK CODE START //
+			int prevRightSimilarLaneIndex = -1;
+			NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
+			// NON-STOCK CODE END //
 			if ((int)item.m_position.m_lane < prevSegmentInfo.m_lanes.Length) {
 				NetInfo.Lane lane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				laneType = lane.m_laneType;
 				vehicleType = lane.m_vehicleType;
 				num5 = lane.m_speedLimit;
 				num6 = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane);
+				// NON-STOCK CODE START //
+				if ((byte)(lane.m_direction & normDirection) != 0) {
+					prevRightSimilarLaneIndex = lane.m_similarLaneIndex;
+				} else {
+					prevRightSimilarLaneIndex = lane.m_similarLaneCount - lane.m_similarLaneIndex - 1;
+				}
+				// NON-STOCK CODE END //
 			}
 			float num7 = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_averageLength;
 			if (!this._stablePath) {
@@ -933,18 +970,37 @@ namespace TrafficManager.Custom.Misc
 			if (!enablePedestrian) {
 				laneType2 &= ~NetInfo.LaneType.Pedestrian;
 			}
+			// NON-STOCK CODE START //
+			bool changeLane = !this._stablePath && forceLaneIndex == null && Options.laneChangingRandomization < 4 && _pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1; // lane randomization
 			int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
+			// NON-STOCK CODE END //
 			while (laneIndex < nextNumLanes && curLaneId != 0u) {
 				// NON-STOCK CODE START //
 				if (forceLaneIndex != null && laneIndex != forceLaneIndex)
 					break;
 				// NON-STOCK CODE END //
 
-				NetInfo.Lane lane2 = nextSegmentInfo.m_lanes[laneIndex];
-				if ((byte)(lane2.m_finalDirection & direction2) != 0) {
-					if (lane2.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane) && (byte)(lane2.m_finalDirection & direction2) != 0) {
+				NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[laneIndex];
+				if ((byte)(nextLane.m_finalDirection & nextDir2) != 0) {
+					if (nextLane.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane) && (byte)(nextLane.m_finalDirection & nextDir2) != 0) {
+						// NON-STOCK CODE START //
+						if (changeLane && nextLane.m_similarLaneCount > 1) {
+							// calculate current similar lane index starting from right lane
+							int nextRightSimilarLaneIndex;
+							if ((byte)(nextLane.m_direction & normDirection) != 0) {
+								nextRightSimilarLaneIndex = nextLane.m_similarLaneIndex;
+							} else {
+								nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
+							}
+
+							if (nextRightSimilarLaneIndex != prevRightSimilarLaneIndex + 1 && nextRightSimilarLaneIndex != prevRightSimilarLaneIndex - 1) {
+								goto IL_8F5;
+							}
+						}
+						// NON-STOCK CODE END //
+
 						Vector3 a;
-						if ((byte)(direction & NetInfo.Direction.Forward) != 0) {
+						if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
 							a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.d;
 						} else {
 							a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.a;
@@ -953,51 +1009,51 @@ namespace TrafficManager.Custom.Misc
 						if (flag) {
 							num13 *= 2f;
 						}
-						float num14 = num13 / ((num5 + lane2.m_speedLimit) * 0.5f * this._maxLength);
+						float num14 = num13 / ((num5 + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 						BufferItem item2;
 						item2.m_position.m_segment = segmentID;
 						item2.m_position.m_lane = (byte)laneIndex;
-						item2.m_position.m_offset = (byte)(((direction & NetInfo.Direction.Forward) == 0) ? 0 : 255);
-						if ((byte)(lane2.m_laneType & laneType) == 0) {
+						item2.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255);
+						if ((byte)(nextLane.m_laneType & laneType) == 0) {
 							item2.m_methodDistance = 0f;
 						} else {
 							item2.m_methodDistance = num9 + num13;
 						}
-						if (lane2.m_laneType != NetInfo.LaneType.Pedestrian || item2.m_methodDistance < 1000f) {
+						if (nextLane.m_laneType != NetInfo.LaneType.Pedestrian || item2.m_methodDistance < 1000f) {
 							item2.m_comparisonValue = num10 + num14;
-							item2.m_direction = direction;
+							item2.m_direction = nextDir;
 							if (curLaneId == this._startLaneA) {
 								if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetA) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetA)) {
 									curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
 									goto IL_90F;
 								}
-								float num15 = this.CalculateLaneSpeed(this._startOffsetA, item2.m_position.m_offset, ref segment, lane2);
+								float num15 = this.CalculateLaneSpeed(this._startOffsetA, item2.m_position.m_offset, ref nextSegment, nextLane);
 								float num16 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
-								item2.m_comparisonValue += num16 * segment.m_averageLength / (num15 * this._maxLength);
+								item2.m_comparisonValue += num16 * nextSegment.m_averageLength / (num15 * this._maxLength);
 							}
 							if (curLaneId == this._startLaneB) {
 								if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetB) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetB)) {
 									curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
 									goto IL_90F;
 								}
-								float num17 = this.CalculateLaneSpeed(this._startOffsetB, item2.m_position.m_offset, ref segment, lane2);
+								float num17 = this.CalculateLaneSpeed(this._startOffsetB, item2.m_position.m_offset, ref nextSegment, nextLane);
 								float num18 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
-								item2.m_comparisonValue += num18 * segment.m_averageLength / (num17 * this._maxLength);
+								item2.m_comparisonValue += num18 * nextSegment.m_averageLength / (num17 * this._maxLength);
 							}
-							if (!this._ignoreBlocked && (segment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && (byte)(lane2.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
+							if (!this._ignoreBlocked && (nextSegment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && (byte)(nextLane.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 								item2.m_comparisonValue += 0.1f;
 								result = true;
 							}
-							item2.m_lanesUsed = (item.m_lanesUsed | lane2.m_laneType);
+							item2.m_lanesUsed = (item.m_lanesUsed | nextLane.m_laneType);
 							item2.m_laneID = curLaneId;
-							if ((byte)(lane2.m_laneType & laneType) != 0 && lane2.m_vehicleType == vehicleType) {
+							if ((byte)(nextLane.m_laneType & laneType) != 0 && nextLane.m_vehicleType == vehicleType) {
 								int firstTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_firstTarget;
 								int lastTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_lastTarget;
 								if (currentTargetIndex < firstTarget || currentTargetIndex >= lastTarget) {
-									item2.m_comparisonValue += Mathf.Max(1f, num13 * 3f - 3f) / ((num5 + lane2.m_speedLimit) * 0.5f * this._maxLength);
+									item2.m_comparisonValue += Mathf.Max(1f, num13 * 3f - 3f) / ((num5 + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 								}
-								if (!this._transportVehicle && lane2.m_laneType == NetInfo.LaneType.TransportVehicle) {
-									item2.m_comparisonValue += 20f / ((num5 + lane2.m_speedLimit) * 0.5f * this._maxLength);
+								if (!this._transportVehicle && nextLane.m_laneType == NetInfo.LaneType.TransportVehicle) {
+									item2.m_comparisonValue += 20f / ((num5 + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 								}
 							}
 							this.AddBufferItem(item2, item.m_position);
@@ -1005,7 +1061,7 @@ namespace TrafficManager.Custom.Misc
 					}
 					goto IL_8F5;
 				}
-				if ((byte)(lane2.m_laneType & laneType) != 0 && lane2.m_vehicleType == vehicleType) {
+				if ((byte)(nextLane.m_laneType & laneType) != 0 && nextLane.m_vehicleType == vehicleType) {
 					num11++;
 					goto IL_8F5;
 				}
@@ -1109,142 +1165,6 @@ namespace TrafficManager.Custom.Misc
 			}
 		}
 #endregion
-
-		private void ProcessItem2(BufferItem item, ushort targetNode, ushort segmentId, ref NetSegment segment, ref int currentTargetIndex, byte connectOffset, bool enableVehicle, bool enablePedestrian, uint laneId, int laneNum) {
-			if ((segment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
-				return;
-			}
-			var instance = Singleton<NetManager>.instance;
-			var info = segment.Info;
-			var info2 = instance.m_segments.m_buffer[item.m_position.m_segment].Info;
-			var num2 = laneId; // xxx
-			var direction = (targetNode != segment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-			var direction2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? direction : NetInfo.InvertDirection(direction);
-			var num3 = 0.01f - Mathf.Min(info.m_maxTurnAngleCos, info2.m_maxTurnAngleCos);
-			if (num3 < 1f) {
-				Vector3 vector;
-				if (targetNode == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) {
-					vector = instance.m_segments.m_buffer[item.m_position.m_segment].m_startDirection;
-				} else {
-					vector = instance.m_segments.m_buffer[item.m_position.m_segment].m_endDirection;
-				}
-				Vector3 vector2;
-				if ((byte)(direction & NetInfo.Direction.Forward) != 0) {
-					vector2 = segment.m_endDirection;
-				} else {
-					vector2 = segment.m_startDirection;
-				}
-				float num4 = vector.x * vector2.x + vector.z * vector2.z;
-				if (num4 >= num3) {
-					return;
-				}
-			}
-			float num5 = 1f;
-			float num6 = 1f;
-			NetInfo.LaneType laneType = NetInfo.LaneType.None;
-			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
-			if (item.m_position.m_lane < info2.m_lanes.Length) {
-				NetInfo.Lane lane = info2.m_lanes[item.m_position.m_lane];
-				laneType = lane.m_laneType;
-				vehicleType = lane.m_vehicleType;
-
-				if (TrafficRoadRestrictions.IsSegment(item.m_position.m_segment)) {
-					var restrictionSegment = TrafficRoadRestrictions.GetSegment(item.m_position.m_segment);
-
-					if (restrictionSegment.SpeedLimits[item.m_position.m_lane] > 0.1f) {
-						num5 = restrictionSegment.SpeedLimits[item.m_position.m_lane];
-					} else {
-						num5 = lane.m_speedLimit;
-					}
-				} else {
-					num5 = lane.m_speedLimit;
-				}
-				num6 = CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[item.m_position.m_segment], lane);
-			}
-			float num7 = instance.m_segments.m_buffer[item.m_position.m_segment].m_averageLength;
-			if (!_stablePath) {
-				Randomizer randomizer = new Randomizer(_pathFindIndex << 16 | item.m_position.m_segment);
-				num7 *= (randomizer.Int32(900, 1000 + instance.m_segments.m_buffer[item.m_position.m_segment].m_trafficDensity * 10) + _pathRandomizer.Int32(20u)) * 0.001f;
-			}
-			if (_isHeavyVehicle && (instance.m_segments.m_buffer[item.m_position.m_segment].m_flags & NetSegment.Flags.HeavyBan) != NetSegment.Flags.None) {
-				num7 *= 10f;
-			}
-			float num8 = Mathf.Abs(connectOffset - item.m_position.m_offset) * 0.003921569f * num7;
-			float num9 = item.m_methodDistance + num8;
-			float num10 = item.m_comparisonValue + num8 / (num6 * _maxLength);
-			Vector3 b = instance.m_lanes.m_buffer[(int)((UIntPtr)item.m_laneID)].CalculatePosition(connectOffset * 0.003921569f);
-			int num11 = laneNum;
-			bool flag = (instance.m_nodes.m_buffer[targetNode].m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
-			NetInfo.LaneType laneType2 = _laneTypes;
-			if (!enableVehicle) {
-				laneType2 &= ~NetInfo.LaneType.Vehicle;
-			}
-			if (!enablePedestrian) {
-				laneType2 &= ~NetInfo.LaneType.Pedestrian;
-			}
-			int num12 = laneNum;
-
-			NetInfo.Lane lane2 = info.m_lanes[num12];
-
-			if (TrafficRoadRestrictions.IsSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment)) {
-				var restrictionSegment = TrafficRoadRestrictions.GetSegment(instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_segment);
-
-				if (restrictionSegment.SpeedLimits[item.m_position.m_lane] > 0.1f) {
-				}
-			}
-
-			if (lane2.CheckType(laneType2, _vehicleTypes) && (segmentId != item.m_position.m_segment || num12 != item.m_position.m_lane) && (byte)(lane2.m_finalDirection & direction2) != 0) {
-				Vector3 a;
-				if ((byte)(direction & NetInfo.Direction.Forward) != 0) {
-					a = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_bezier.d;
-				} else {
-					a = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_bezier.a;
-				}
-				var num13 = Vector3.Distance(a, b);
-				if (flag) {
-					num13 *= 2f;
-				}
-				var num14 = num13 / ((num5 + lane2.m_speedLimit) * 0.5f * _maxLength);
-				BufferItem item2;
-				item2.m_position.m_segment = segmentId;
-				item2.m_position.m_lane = (byte)laneNum;
-				item2.m_position.m_offset = (byte)(((byte)(direction & NetInfo.Direction.Forward) == 0) ? 0 : 255);
-				if (laneType != lane2.m_laneType) {
-					item2.m_methodDistance = 0f;
-				} else {
-					item2.m_methodDistance = num9 + num13;
-				}
-
-				item2.m_comparisonValue = num10 + num14;
-				if (num2 == _startLaneA) {
-					float num15 = CalculateLaneSpeed(_startOffsetA, item2.m_position.m_offset, ref segment, lane2);
-					float num16 = Mathf.Abs(item2.m_position.m_offset - _startOffsetA) * 0.003921569f;
-					item2.m_comparisonValue += num16 * segment.m_averageLength / (num15 * _maxLength);
-				}
-				if (num2 == _startLaneB) {
-					float num17 = CalculateLaneSpeed(_startOffsetB, item2.m_position.m_offset, ref segment, lane2);
-					float num18 = Mathf.Abs(item2.m_position.m_offset - _startOffsetB) * 0.003921569f;
-					item2.m_comparisonValue += num18 * segment.m_averageLength / (num17 * _maxLength);
-				}
-				if (!_ignoreBlocked && (segment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && lane2.m_laneType == NetInfo.LaneType.Vehicle) {
-					item2.m_comparisonValue += 0.1f;
-				}
-				item2.m_direction = direction;
-				item2.m_lanesUsed = (item.m_lanesUsed | lane2.m_laneType);
-				item2.m_laneID = laneId;
-				if (lane2.m_laneType == laneType && lane2.m_vehicleType == vehicleType) {
-					int firstTarget = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_firstTarget;
-					int lastTarget = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_lastTarget;
-					if (currentTargetIndex < firstTarget || currentTargetIndex >= lastTarget) {
-						item2.m_comparisonValue += Mathf.Max(1f, num13 * 3f - 3f) / ((num5 + lane2.m_speedLimit) * 0.5f * _maxLength);
-					}
-				}
-
-				AddBufferItem(item2, item.m_position);
-			}
-
-			currentTargetIndex = num11;
-		}
 
 		protected virtual NetLane.Flags GetLaneFlags(ushort segmentId, ushort nodeId) {
 			NetManager instance = NetManager.instance;

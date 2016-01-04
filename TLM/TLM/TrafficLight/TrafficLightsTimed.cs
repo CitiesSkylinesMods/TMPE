@@ -28,8 +28,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void AddStep(int minTime, int maxTime) {
-			if (minTime < 0)
-				minTime = 0;
+			if (minTime <= 0)
+				minTime = 1;
 			if (maxTime <= 0)
 				maxTime = 1;
 			if (maxTime < minTime)
@@ -87,7 +87,8 @@ namespace TrafficManager.TrafficLight {
 			// step is done
 			if (!Steps[CurrentStep].isEndTransitionDone()) return false;
 			// ending transition (yellow) finished
-			CurrentStep = (CurrentStep + 1) % Steps.Count;
+			var oldCurrentStep = CurrentStep;
+			CurrentStep = (CurrentStep + 1) % NumSteps();
 
 			Steps[CurrentStep].Start();
 			Steps[CurrentStep].SetLights();
@@ -97,7 +98,7 @@ namespace TrafficManager.TrafficLight {
 		public void SkipStep() {
 			Steps[CurrentStep].SetStepDone();
 
-			CurrentStep = (CurrentStep + 1) % Steps.Count;
+			CurrentStep = (CurrentStep + 1) % NumSteps();
 
 			Steps[CurrentStep].Start();
 			Steps[CurrentStep].SetLights();
@@ -105,7 +106,7 @@ namespace TrafficManager.TrafficLight {
 
 		public long CheckNextChange(ushort segmentId, int lightType) {
 			var curStep = CurrentStep;
-			var nextStep = CurrentStep + 1;
+			var nextStep = (CurrentStep + 1) % NumSteps();
 			var numFrames = Steps[CurrentStep].MaxTimeRemaining();
 
 			RoadBaseAI.TrafficLightState currentState;
@@ -171,7 +172,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void handleNewSegments() {
-			if (Steps.Count <= 0)
+			if (NumSteps() <= 0)
 				return;
 
 			NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
@@ -207,7 +208,7 @@ namespace TrafficManager.TrafficLight {
 						Log.Message($"Replacing old segment {oldSegmentId} @ {nodeId} with new segment {segmentId}");
 
 						// replace the old segment with the newly created one
-						for (int i = 0; i < Steps.Count; ++i) {
+						for (int i = 0; i < NumSteps(); ++i) {
 							ManualSegmentLight segmentLight = Steps[i].segmentLightStates[oldSegmentId];
 							Steps[i].segmentIds.Remove(oldSegmentId);
 							Steps[i].segmentLightStates.Remove(oldSegmentId);
@@ -220,7 +221,7 @@ namespace TrafficManager.TrafficLight {
 						Log.Message($"Adding new segment {segmentId} to node {nodeId}");
 
 						// create a new manual light
-						for (int i = 0; i < Steps.Count; ++i) {
+						for (int i = 0; i < NumSteps(); ++i) {
 							Steps[i].addSegment(segmentId);
 							Steps[i].rebuildSegmentIds();
 						}
@@ -236,7 +237,7 @@ namespace TrafficManager.TrafficLight {
 		internal HashSet<ushort> getInvalidSegmentIds() {
 			HashSet<ushort> invalidSegmentIds = new HashSet<ushort>();
 
-			if (Steps.Count <= 0)
+			if (NumSteps() <= 0)
 				return invalidSegmentIds;
 
 			foreach (KeyValuePair<ushort, ManualSegmentLight> e in Steps[0].segmentLightStates) {
