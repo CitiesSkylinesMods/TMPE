@@ -188,8 +188,9 @@ namespace TrafficManager {
 				if (TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]))
 					continue;
 
-				Log.Message($"Adding Light to Segment {segmentData[0]}");
+				Log.Message($"Adding Light to node {segmentData[0]}");
 				try {
+					Flags.setNodeTrafficLight((ushort)segmentData[0], true);
 					TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], (ushort)segmentData[1], RoadBaseAI.TrafficLightState.Green);
 					var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]);
 					segment.CurrentMode = (ManualSegmentLight.Mode)segmentData[2];
@@ -215,6 +216,7 @@ namespace TrafficManager {
 				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
 					try {
 						var nodeid = (ushort)_configuration.TimedNodes[i][0];
+						Flags.setNodeTrafficLight(nodeid, true);
 						Log.Message($"Adding Timed Node {i} at node {nodeid}");
 
 						var nodeGroup = new List<ushort>();
@@ -242,18 +244,22 @@ namespace TrafficManager {
 							int minTime = 1;
 							int maxTime = 1;
 							int numSegments = 0;
+							float waitFlowBalance = 1f;
 
 							if (cfgstep.Length == 2) {
 								minTime = cfgstep[0];
 								maxTime = cfgstep[0];
 								numSegments = cfgstep[1];
-							} else if (cfgstep.Length == 3) {
+							} else if (cfgstep.Length >= 3) {
 								minTime = cfgstep[0];
 								maxTime = cfgstep[1];
 								numSegments = cfgstep[2];
+								if (cfgstep.Length == 4) {
+									waitFlowBalance = (float)cfgstep[3] / 10f;
+								}
 							}
 
-							timedNode.AddStep(minTime, maxTime);
+							timedNode.AddStep(minTime, maxTime, waitFlowBalance);
 							var step = timedNode.Steps[j];
 
 							for (var s = 0; s < 8; s++) {
@@ -469,11 +475,11 @@ namespace TrafficManager {
 			try {
 				var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
 
-				if (nodeFlags == 0)
+				if ((nodeFlags & NetNode.Flags.Created) == NetNode.Flags.None)
 					return true;
 				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road)
 					return true;
-				bool hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+				bool hasTrafficLight = Flags.isNodeTrafficLight((ushort)i);
 				if (hasTrafficLight) {
 					Log.Message($"Saving that node {i} has a traffic light");
 				} else {
@@ -536,7 +542,8 @@ namespace TrafficManager {
 					{
 						timedNode.Steps[j].minTime,
 						timedNode.Steps[j].maxTime,
-						validCount
+						validCount,
+						(int)(timedNode.Steps[j].waitFlowBalance*10)
 					});
 				}
 			} catch (Exception e) {

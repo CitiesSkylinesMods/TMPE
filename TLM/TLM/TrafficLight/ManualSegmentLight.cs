@@ -288,6 +288,26 @@ namespace TrafficManager.TrafficLight {
 			return MemberwiseClone();
 		}
 
+		public void invert() {
+			LightMain = invertLight(LightMain);
+			LightLeft = invertLight(LightLeft);
+			LightRight = invertLight(LightRight);
+			LightPedestrian = invertLight(LightPedestrian);
+		}
+
+		private RoadBaseAI.TrafficLightState invertLight(RoadBaseAI.TrafficLightState light) {
+			switch (light) {
+				case RoadBaseAI.TrafficLightState.Red:
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					return RoadBaseAI.TrafficLightState.Green;
+				case RoadBaseAI.TrafficLightState.Green:
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+				default:
+					return RoadBaseAI.TrafficLightState.Red;
+			}
+			return RoadBaseAI.TrafficLightState.Red;
+		}
+
 		internal void makeRedOrGreen() {
 			if (LightLeft == RoadBaseAI.TrafficLightState.RedToGreen) {
 				LightLeft = RoadBaseAI.TrafficLightState.Green;

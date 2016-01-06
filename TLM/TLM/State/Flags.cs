@@ -33,13 +33,41 @@ namespace TrafficManager.State {
 			if (nodeId <= 0)
 				return;
 
+			Log.Message($"Flags: Set node traffic light: {nodeId}={flag}");
+
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				Log.Warning("Flags: Removing traffic light: not created");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				nodeTrafficLightFlag.Remove(nodeId);
+				return;
+			}
+
 			nodeTrafficLightFlag[nodeId] = flag;
 			applyNodeTrafficLightFlag(nodeId);
 		}
-		
+
+		internal static bool isNodeTrafficLight(ushort nodeId) {
+			if (nodeId <= 0)
+				return false;
+
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+				return false;
+
+			if (!nodeTrafficLightFlag.ContainsKey(nodeId))
+				return false;
+
+			return nodeTrafficLightFlag[nodeId];
+		}
+
 		public static void setLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
+
+			if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0) {
+				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = 0;
+				laneArrowFlags.Remove(laneId);
+				return;
+			}
 
 			laneArrowFlags[laneId] = flags;
 			applyLaneArrowFlags(laneId);
@@ -55,6 +83,12 @@ namespace TrafficManager.State {
 		public static void toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
+
+			if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0) {
+				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = 0;
+				laneArrowFlags.Remove(laneId);
+				return;
+			}
 
 			if (!laneArrowFlags.ContainsKey(laneId)) {
 				// read currently defined arrows

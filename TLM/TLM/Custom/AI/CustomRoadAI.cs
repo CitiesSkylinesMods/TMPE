@@ -37,7 +37,7 @@ namespace TrafficManager.Custom.AI {
 				TrafficPriority.housekeeping(nodeId);
 
 			var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
-			if (nodeSim == null || (nodeSim.FlagTimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
+			if (nodeSim == null || (nodeSim.TimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
 				OriginalSimulationStep(nodeId, ref data);
 			}
 		}

@@ -200,6 +200,20 @@ namespace TrafficManager.Traffic {
 			rebuildPriorityNodes();
 		}
 
+		internal static void ClearTraffic() {
+			var vehicleList = TrafficPriority.Vehicles.Keys.ToList();
+
+			lock (Singleton<VehicleManager>.instance) {
+				foreach (var vehicle in
+					from vehicle in vehicleList
+					let vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicle]
+					where vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car
+					select vehicle) {
+					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicle);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Adds/Sets a node as a priority node
 		/// </summary>
@@ -227,6 +241,9 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static bool HasIncomingVehicles(ushort targetCar, ushort nodeId) {
+			if (!Vehicles.ContainsKey(targetCar))
+				return false;
+
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 			var frame = currentFrameIndex >> 4;
 			var node = TrafficLightTool.GetNetNode(nodeId);
@@ -259,6 +276,11 @@ namespace TrafficManager.Traffic {
 
 						foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 							var car = e.Key;
+							if (!Vehicles.ContainsKey(car)) {
+								--numCars;
+								continue;
+							}
+
 							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 								if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 									--numCars;
@@ -278,6 +300,11 @@ namespace TrafficManager.Traffic {
 
 						foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 							var car = e.Key;
+							if (! Vehicles.ContainsKey(car)) {
+								--numCars;
+								continue;
+							}
+
 							if (toPrioritySegment.Type == PrioritySegment.PriorityType.Main) {
 								if (!Vehicles[car].Stopped && Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 									if (CheckPriorityRoadIncomingCar(targetCar, car, nodeId))
@@ -311,6 +338,11 @@ namespace TrafficManager.Traffic {
 
 					foreach (KeyValuePair<ushort, VehiclePosition> e in toPrioritySegment.getCars()) {
 						var car = e.Key;
+						if (!Vehicles.ContainsKey(car)) {
+							--numCars;
+							continue;
+						}
+
 						if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[car].GetLastFrameVelocity().magnitude > 0.25f) {
 							if (CheckSameRoadIncomingCar(targetCar, car, nodeId))
 								--numCars;
@@ -805,7 +837,7 @@ namespace TrafficManager.Traffic {
 		internal static void fixJunctions() {
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
 				NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[i];
-				if (node.m_flags == NetNode.Flags.None)
+				if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
 				if (node.CountSegments() > 2)
 					Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
@@ -855,14 +887,10 @@ namespace TrafficManager.Traffic {
 					}
 
 					NetSegment segment = netManager.m_segments.m_buffer[segmentId];
-					bool startNodeExists = priorityNodes.Contains(segment.m_startNode);
-					bool endNodeExists = priorityNodes.Contains(segment.m_endNode);
-					if (segment.m_flags == NetSegment.Flags.None || (!startNodeExists && !endNodeExists)) {
+					if (segment.m_flags == NetSegment.Flags.None) {
 						segmentIdsToDelete.Add(segmentId);
-						if (startNodeExists)
-							nodeIdsToCheck.Add(segment.m_startNode);
-						if (endNodeExists)
-							nodeIdsToCheck.Add(segment.m_endNode);
+						nodeIdsToCheck.Add(segment.m_startNode);
+						nodeIdsToCheck.Add(segment.m_endNode);
 						continue;
 					}
 
@@ -924,7 +952,7 @@ namespace TrafficManager.Traffic {
 							case NodeValidityState.Unused:
 								// delete traffic light simulation
 								Log.Warning("Housekeeping: RemoveNodeFromSimulation " + nId);
-								TrafficLightSimulation.RemoveNodeFromSimulation(nId);
+								TrafficLightSimulation.RemoveNodeFromSimulation(nId, false);
 								break;
 							default:
 								break;
@@ -974,7 +1002,7 @@ namespace TrafficManager.Traffic {
 
 			Flags.applyNodeTrafficLightFlag(nodeId);
 			var node = netManager.m_nodes.m_buffer[nodeId];
-			if (node.m_flags == NetNode.Flags.None) {
+			if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				nodeState = NodeValidityState.Unused;
 				Log.Warning($"Housekeeping: Node {nodeId} is unused!");
 				return false; // node is unused
@@ -990,11 +1018,11 @@ namespace TrafficManager.Traffic {
 					return false;
 				} else {
 					// check if all timed step segments are valid
-					if (nodeSim.FlagTimedTrafficLights && nodeSim.TimedTrafficLightsActive) {
+					if (nodeSim.TimedTrafficLights && nodeSim.TimedTrafficLightsActive) {
 						TrafficLightsTimed timedLight = TrafficLightsTimed.GetTimedLight(nodeId);
 						if (timedLight == null || timedLight.Steps.Count <= 0) {
 							Log.Warning("Housekeeping: Timed light is null or no steps for node {nodeId}!");
-							TrafficLightSimulation.RemoveNodeFromSimulation(nodeId);
+							TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
 							return false;
 						}
 

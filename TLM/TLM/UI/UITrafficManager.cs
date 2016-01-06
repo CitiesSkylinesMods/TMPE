@@ -35,7 +35,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(10.48f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.3.20";
+			title.text = "Version 1.3.21";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -146,17 +146,7 @@ namespace TrafficManager.UI {
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficLightTool.SetToolMode(ToolMode.None);
 
-			var vehicleList = TrafficPriority.Vehicles.Keys.ToList();
-
-			lock (Singleton<VehicleManager>.instance) {
-				foreach (var vehicle in
-					from vehicle in vehicleList
-					let vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicle]
-					where vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car
-					select vehicle) {
-					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicle);
-				}
-			}
+			TrafficPriority.ClearTraffic();
 		}
 
 		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {

@@ -7,7 +7,11 @@ using TrafficManager.Traffic;
 namespace TrafficManager.TrafficLight {
 	public class TrafficLightsTimed {
 		public ushort nodeId;
-		private ushort masterNodeId;
+		/// <summary>
+		/// In case the traffic light is set for a group of nodes, the master node decides
+		/// if all member steps are done. If it is `null` then we are the master node.
+		/// </summary>
+		internal ushort masterNodeId;
 
 		/// <summary>
 		/// Timed traffic light by node id
@@ -18,6 +22,7 @@ namespace TrafficManager.TrafficLight {
 		public int CurrentStep;
 
 		public List<ushort> NodeGroup;
+		private bool testMode = false;
 
 		public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup) {
 			this.nodeId = nodeId;
@@ -27,7 +32,7 @@ namespace TrafficManager.TrafficLight {
 			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
-		public void AddStep(int minTime, int maxTime) {
+		public void AddStep(int minTime, int maxTime, float waitFlowBalance) {
 			if (minTime <= 0)
 				minTime = 1;
 			if (maxTime <= 0)
@@ -35,15 +40,62 @@ namespace TrafficManager.TrafficLight {
 			if (maxTime < minTime)
 				maxTime = minTime;
 
-			Steps.Add(new TimedTrafficStep(minTime, maxTime, nodeId, masterNodeId, NodeGroup));
+			Steps.Add(new TimedTrafficStep(minTime, maxTime, waitFlowBalance, nodeId, NodeGroup));
 		}
 
 		public void Start() {
+			if (!housekeeping())
+				return;
+
 			CurrentStep = 0;
 			Steps[0].SetLights();
 			Steps[0].Start();
 
 			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = true;
+		}
+
+		internal void RemoveNodeFromGroup(ushort otherNodeId) {
+			NodeGroup.Remove(otherNodeId);
+			if (NodeGroup.Count <= 0) {
+				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, true);
+				return;
+			}
+			masterNodeId = NodeGroup[0];
+		}
+
+		private bool housekeeping() {
+			bool mayStart = true;
+			List<ushort> nodeIdsToDelete = new List<ushort>();
+
+			int i = 0;
+			foreach (ushort otherNodeId in NodeGroup) {
+				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[otherNodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+					Log.Warning($"Timed housekeeping: Remove node {otherNodeId}");
+                    nodeIdsToDelete.Add(otherNodeId);
+					if (otherNodeId == nodeId) {
+						Log.Warning($"Timed housekeeping: Other is this. mayStart = false");
+						mayStart = false;
+					}
+				}
+				++i;
+			}
+
+			foreach (ushort nodeIdToDelete in nodeIdsToDelete) {
+				NodeGroup.Remove(nodeIdToDelete);
+				var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeIdToDelete);
+				if (nodeSim != null) {
+					nodeSim.Destroy(false);
+				}
+			}
+
+			if (NodeGroup.Count <= 0) {
+				Log.Warning($"Timed housekeeping: No lights left. mayStart = false");
+				mayStart = false;
+				return mayStart;
+			}
+			//Log.Warning($"Timed housekeeping: Setting master node to {NodeGroup[0]}");
+			masterNodeId = NodeGroup[0];
+			return mayStart;
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -69,30 +121,31 @@ namespace TrafficManager.TrafficLight {
 			return Steps[stepId];
 		}
 
-		public bool CheckCurrentStep() {
+		public void SimulationStep() {
 			if (!IsStarted())
-				return true;
+				return;
 
 			if (! Steps[CurrentStep].isValid()) {
-				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId);
-				return false;
+				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
+				return;
 			}
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 			Steps[CurrentStep].SetLights();
 			if (!Steps[CurrentStep].StepDone()) {
-				return false;
+				return;
 			}
 			// step is done
-			if (!Steps[CurrentStep].isEndTransitionDone()) return false;
+			if (!housekeeping())
+				return;
+			if (!Steps[CurrentStep].isEndTransitionDone()) return;
 			// ending transition (yellow) finished
 			var oldCurrentStep = CurrentStep;
 			CurrentStep = (CurrentStep + 1) % NumSteps();
 
 			Steps[CurrentStep].Start();
 			Steps[CurrentStep].SetLights();
-			return true;
 		}
 
 		public void SkipStep() {
@@ -228,6 +281,19 @@ namespace TrafficManager.TrafficLight {
 					}
 				}
 			}
+		}
+
+		internal void SetTestMode(bool testMode) {
+			this.testMode = false;
+			if (!IsStarted())
+				return;
+			this.testMode = testMode;
+		}
+
+		internal bool IsInTestMode() {
+			if (!IsStarted())
+				testMode = false;
+			return testMode;
 		}
 	}
 }

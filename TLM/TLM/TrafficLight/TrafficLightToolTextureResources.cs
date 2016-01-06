@@ -39,6 +39,7 @@ namespace TrafficManager.TrafficLight
 		public static readonly Texture2D SignRemoveTexture2D;
 		public static readonly Texture2D ClockPlayTexture2D;
 		public static readonly Texture2D ClockPauseTexture2D;
+		public static readonly Texture2D ClockTestTexture2D;
 
 		static TrafficLightToolTextureResources()
         {
@@ -89,6 +90,7 @@ namespace TrafficManager.TrafficLight
 			// timer
 			ClockPlayTexture2D = LoadDllResource("clock_play.png", 512, 512);
 			ClockPauseTexture2D = LoadDllResource("clock_pause.png", 512, 512);
+			ClockTestTexture2D = LoadDllResource("clock_test.png", 512, 512);
 
 		}
 

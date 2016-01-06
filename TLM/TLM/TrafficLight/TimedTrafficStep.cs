@@ -36,11 +36,6 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		public float maxWait;
 
-		/// <summary>
-		/// In case the traffic light is set for a group of nodes, the master node decides
-		/// if all member steps are done. If it is `null` then we are the master node.
-		/// </summary>
-		private ushort? masterNodeId;
 		private List<ushort> groupNodeIds;
 		private TrafficLightsTimed timedNode;
 
@@ -55,16 +50,15 @@ namespace TrafficManager.TrafficLight {
 
 		private static readonly float?[] speedsToLookup = new float?[] {null, 0.1f};
 
-		public TimedTrafficStep(int minTime, int maxTime, ushort nodeId, ushort masterNodeId, List<ushort> groupNodeIds) {
+		public float waitFlowBalance = 1f;
+
+		public TimedTrafficStep(int minTime, int maxTime, float waitFlowBalance, ushort nodeId, List<ushort> groupNodeIds) {
 			this.nodeId = nodeId;
 			this.minTime = minTime;
 			this.maxTime = maxTime;
+			this.waitFlowBalance = waitFlowBalance;
 			this.timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
 
-			if (nodeId == masterNodeId)
-				this.masterNodeId = null;
-			else
-				this.masterNodeId = masterNodeId;
 			this.groupNodeIds = groupNodeIds;
 
 			var node = TrafficLightTool.GetNetNode(nodeId);
@@ -164,7 +158,11 @@ namespace TrafficManager.TrafficLight {
 			SetLights(false);
 		}
 
-		public void SetLights(bool noTransition) {
+		internal void SetLights(bool noTransition) {
+			SetLights(noTransition, false);
+		}
+
+		public void SetLights(bool noTransition, bool invert) {
 			try {
 				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
@@ -178,6 +176,8 @@ namespace TrafficManager.TrafficLight {
 					var prevLightState = previousStep.segmentLightStates[segmentId];
 					var nextLightState = nextStep.segmentLightStates[segmentId];
 
+					segLightState.makeRedOrGreen(); // TODO temporary fix
+
 					var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, segmentId);
 					if (segmentLight == null)
 						continue;
@@ -186,6 +186,10 @@ namespace TrafficManager.TrafficLight {
 					segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
 					segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
 					segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
+
+					if (invert) {
+						segmentLight.invert();
+					}
 
 					segmentLight.UpdateVisuals();
 				}
@@ -254,6 +258,10 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool StepDone() {
+			if (timedNode.IsInTestMode()) {
+				calcWaitFlow();
+				return false;
+			}
 			if (stepDone)
 				return true;
 
@@ -268,8 +276,12 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (startFrame + minTime <= getCurrentFrame()) {
-				if (masterNodeId != null && TrafficLightsTimed.IsTimedLight((ushort)masterNodeId)) {
-					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight((ushort)masterNodeId);
+				if (timedNode.masterNodeId != nodeId) {
+					if (! TrafficLightsTimed.IsTimedLight(timedNode.masterNodeId)) {
+						invalid = true;
+						return true;
+					}
+					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight(timedNode.masterNodeId);
 					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone();
 #if DEBUG
 					//Log.Message("step finished (1) @ " + nodeId);
@@ -279,101 +291,9 @@ namespace TrafficManager.TrafficLight {
 						endTransitionStart = (int)getCurrentFrame();
 					return stepDone;
 				} else {
-					int numFlows = 0;
-					int numWaits = 0;
-					float curMeanFlow = 0;
-					float curMeanWait = 0;
-
-					// we are the master node. calculate traffic data
-					foreach (ushort timedNodeId in groupNodeIds) {
-						if (!TrafficLightsTimed.IsTimedLight(timedNodeId))
-							continue;
-						TrafficLightsTimed slaveTimedNode = TrafficLightsTimed.GetTimedLight(timedNodeId);
-						TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
-
-						//List<int> segmentIdsToDelete = new List<int>();
-
-						// minimum time reached. check traffic!
-						foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
-							var fromSegmentId = e.Key;
-							var segLightState = e.Value;
-
-							// one of the traffic lights at this segment is green: count minimum traffic flowing through
-							PrioritySegment fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
-							if (fromSeg == null) {
-								//Log.Warning("stepDone(): prioSeg is null");
-								//segmentIdsToDelete.Add(fromSegmentId);
-								continue; // skip invalid segment
-							}
-
-							bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
-							float?[] minSpeeds = startPhase ? new float?[] { null } : speedsToLookup;
-							foreach (float? minSpeed in minSpeeds) {
-								foreach (KeyValuePair<ushort, float> f in fromSeg.getNumCarsGoingToSegment(minSpeed)) {
-									var toSegmentId = f.Key;
-									var totalNormCarLength = f.Value;
-
-									TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
-									bool addToFlow = false;
-									switch (dir) {
-										case TrafficPriority.Direction.Left:
-											if (segLightState.isLeftGreen())
-												addToFlow = true;
-											break;
-										case TrafficPriority.Direction.Right:
-											if (segLightState.isRightGreen())
-												addToFlow = true;
-											break;
-										case TrafficPriority.Direction.Forward:
-										default:
-											if (segLightState.isForwardGreen())
-												addToFlow = true;
-											break;
-									}
-
-									if (addToFlow) {
-										if (minSpeed != null || startPhase) {
-											++numFlows;
-											curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
-										}
-									} else {
-										if (minSpeed == null) {
-											++numWaits;
-											curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
-										}
-									}
-								}
-							}
-						}
-
-						// delete invalid segments from step
-						/*foreach (int segmentId in segmentIdsToDelete) {
-							slaveStep.segmentLightStates.Remove(segmentId);
-						}*/
-
-						if (slaveStep.segmentLightStates.Count <= 0) {
-							invalid = true;
-							return true;
-						}
-					}
-
-					if (numFlows > 0)
-						curMeanFlow /= (float)numFlows;
-					if (numWaits > 0)
-						curMeanWait /= (float)numWaits;
-
-					/*float decisionValue = 0.75f; // a value smaller than 1 rewards steady traffic currents
-					curMeanFlow /= decisionValue;*/
-
-					if (Single.IsNaN(minFlow))
-						minFlow = curMeanFlow;
-					else
-						minFlow = 0.5f * minFlow + 0.5f * curMeanFlow; // some smoothing
-
-					if (Single.IsNaN(maxWait))
-						maxWait = 0;
-					else
-						maxWait = 0.5f * maxWait + 0.5f * curMeanWait; // some smoothing
+					// we are the master node
+					if (!calcWaitFlow())
+						return true;
 
 					// if more cars are waiting than flowing, we change the step
 					bool done = maxWait > 0 && minFlow < maxWait;
@@ -389,22 +309,102 @@ namespace TrafficManager.TrafficLight {
 			return false;
 		}
 
-		/// <summary>
-		/// Calculates the peak (minimum or maximum) flow for a previously known flow (old number of cars)
-		/// and current flow (current number of cars)
-		/// </summary>
-		/// <param name="oldFlow"></param>
-		/// <param name="currentFlow"></param>
-		/// <param name="minimum"></param>
-		/// <returns></returns>
-		private int calcPeakFlow(int oldFlow, int currentFlow, bool minimum) {
-			if (oldFlow < 0)
-				return currentFlow; // initialization of minimum/maximum
+		private bool calcWaitFlow() {
+			int numFlows = 0;
+			int numWaits = 0;
+			float curMeanFlow = 0;
+			float curMeanWait = 0;
 
-			if (minimum)
-				return Math.Min(oldFlow, currentFlow);
+			// we are the master node. calculate traffic data
+			foreach (ushort timedNodeId in groupNodeIds) {
+				if (!TrafficLightsTimed.IsTimedLight(timedNodeId))
+					continue;
+				TrafficLightsTimed slaveTimedNode = TrafficLightsTimed.GetTimedLight(timedNodeId);
+				TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
+
+				//List<int> segmentIdsToDelete = new List<int>();
+
+				// minimum time reached. check traffic!
+				foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
+					var fromSegmentId = e.Key;
+					var segLightState = e.Value;
+
+					// one of the traffic lights at this segment is green: count minimum traffic flowing through
+					PrioritySegment fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
+					if (fromSeg == null) {
+						//Log.Warning("stepDone(): prioSeg is null");
+						//segmentIdsToDelete.Add(fromSegmentId);
+						continue; // skip invalid segment
+					}
+
+					bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
+					float?[] minSpeeds = startPhase ? new float?[] { null } : speedsToLookup;
+					foreach (float? minSpeed in minSpeeds) {
+						foreach (KeyValuePair<ushort, float> f in fromSeg.getNumCarsGoingToSegment(minSpeed)) {
+							var toSegmentId = f.Key;
+							var totalNormCarLength = f.Value;
+
+							TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
+							bool addToFlow = false;
+							switch (dir) {
+								case TrafficPriority.Direction.Left:
+									if (segLightState.isLeftGreen())
+										addToFlow = true;
+									break;
+								case TrafficPriority.Direction.Right:
+									if (segLightState.isRightGreen())
+										addToFlow = true;
+									break;
+								case TrafficPriority.Direction.Forward:
+								default:
+									if (segLightState.isForwardGreen())
+										addToFlow = true;
+									break;
+							}
+
+							if (addToFlow) {
+								if (minSpeed != null || startPhase) {
+									++numFlows;
+									curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
+								}
+							} else {
+								if (minSpeed == null) {
+									++numWaits;
+									curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
+								}
+							}
+						}
+					}
+				}
+
+				// delete invalid segments from step
+				/*foreach (int segmentId in segmentIdsToDelete) {
+					slaveStep.segmentLightStates.Remove(segmentId);
+				}*/
+
+				if (slaveStep.segmentLightStates.Count <= 0) {
+					invalid = true;
+					return false;
+				}
+			}
+
+			if (numFlows > 0)
+				curMeanFlow /= (float)numFlows;
+			if (numWaits > 0)
+				curMeanWait /= (float)numWaits;
+
+			curMeanFlow /= waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
+
+			if (Single.IsNaN(minFlow))
+				minFlow = curMeanFlow;
 			else
-				return Math.Max(oldFlow, currentFlow);
+				minFlow = 0.5f * minFlow + 0.5f * curMeanFlow; // some smoothing
+
+			if (Single.IsNaN(maxWait))
+				maxWait = 0;
+			else
+				maxWait = 0.5f * maxWait + 0.5f * curMeanWait; // some smoothing
+			return true;
 		}
 
 		public object Clone() {

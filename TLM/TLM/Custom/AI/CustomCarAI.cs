@@ -423,7 +423,7 @@ namespace TrafficManager.Custom.AI {
 							ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment); // TODO rework
 
 							if (light == null || nodeSimulation == null ||
-								(nodeSimulation.FlagTimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
+								(nodeSimulation.TimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
 								RoadBaseAI.TrafficLightState pedestrianLightState;
 								bool flag5;
 								bool pedestrians;
