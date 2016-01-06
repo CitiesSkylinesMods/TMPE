@@ -305,7 +305,6 @@ namespace TrafficManager.TrafficLight {
 				default:
 					return RoadBaseAI.TrafficLightState.Red;
 			}
-			return RoadBaseAI.TrafficLightState.Red;
 		}
 
 		internal void makeRedOrGreen() {

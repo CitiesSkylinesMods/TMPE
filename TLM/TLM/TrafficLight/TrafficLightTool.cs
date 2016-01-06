@@ -3002,11 +3002,19 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
 							String labelStr = "State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
-							if (!Single.IsNaN(timedNodeMain.GetStep(i).maxWait) && !Single.IsNaN(timedNodeMain.GetStep(i).minFlow))
-								labelStr += " avg. flow: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).minFlow) + " avg. wait: " + String.Format("{0:0.##}", timedNodeMain.GetStep(i).maxWait);
+							float flow = Single.NaN;
+							float wait = Single.NaN;
+							if (timedNodeMain.IsInTestMode()) {
+								timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(out wait, out flow);
+							} else {
+								wait = timedNodeMain.GetStep(i).maxWait;
+								flow = timedNodeMain.GetStep(i).minFlow;
+							}
+							if (!Single.IsNaN(flow) && !Single.IsNaN(wait))
+								labelStr += " avg. flow: " + String.Format("{0:0.##}", flow) + " avg. wait: " + String.Format("{0:0.##}", wait);
 							GUIStyle labelLayout = layout;
-							if (timedNodeMain.IsInTestMode() && !Single.IsNaN(timedNodeMain.GetStep(i).maxWait) && !Single.IsNaN(timedNodeMain.GetStep(i).minFlow)) {
-								if (timedNodeMain.GetStep(i).maxWait > 0 && timedNodeMain.GetStep(i).minFlow < timedNodeMain.GetStep(i).maxWait)
+							if (timedNodeMain.IsInTestMode() && !Single.IsNaN(wait) && !Single.IsNaN(flow)) {
+								if (wait > 0 && flow < wait)
 									labelLayout = layoutRed;
 								else
 									labelLayout = layoutGreen;
@@ -3310,8 +3318,44 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void makeFlowPolicySlider() {
-			GUILayout.Label("Traffic sensitivity (" + String.Format("{0:0.#}", _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
-			_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.1f, 2.5f);
+			string formatStr;
+			if (_waitFlowBalance < 0.01f)
+				formatStr = "{0:0.###}";
+			else if (_waitFlowBalance < 0.1f)
+				formatStr = "{0:0.##}";
+			else
+				formatStr = "{0:0.#}";
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Sensitivity (" + String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
+			if (_waitFlowBalance <= 0.01f) {
+				if (_waitFlowBalance >= 0) {
+					if (GUILayout.Button("-.001")) {
+						_waitFlowBalance -= 0.001f;
+					}
+				}
+				if (_waitFlowBalance < 0.01f) {
+					if (GUILayout.Button("+.001")) {
+						_waitFlowBalance += 0.001f;
+					}
+				}
+			} else if (_waitFlowBalance <= 0.1f) {
+				if (GUILayout.Button("-.01")) {
+					_waitFlowBalance -= 0.01f;
+				}
+				if (_waitFlowBalance < 0.1f) {
+					if (GUILayout.Button("+.01")) {
+						_waitFlowBalance += 0.01f;
+					}
+				}
+			}
+			if (_waitFlowBalance < 0)
+				_waitFlowBalance = 0;
+			if (_waitFlowBalance > 5)
+				_waitFlowBalance = 5;
+			GUILayout.EndHorizontal();
+
+			_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 5f);
 			GUILayout.BeginHorizontal();
 			GUIStyle style = new GUIStyle();
 			style.normal.textColor = Color.white;
@@ -3325,7 +3369,9 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private string getWaitFlowBalanceInfo() {
-			if (_waitFlowBalance < 0.5f) {
+			if (_waitFlowBalance < 0.1f) {
+				return "Extreme long green/red phases";
+			} else if (_waitFlowBalance < 0.5f) {
 				return "Very long green/red phases";
 			} else if (_waitFlowBalance < 0.75f) {
 				return "Long green/red phases";
@@ -3333,8 +3379,10 @@ namespace TrafficManager.TrafficLight {
 				return "Moderate green/red phases";
 			} else if (_waitFlowBalance < 1.5f) {
 				return "Short green/red phases";
-			} else {
+			} else if (_waitFlowBalance < 2.5f) {
 				return "Very short green/red phases";
+			} else {
+				return "Extreme short green/red phases";
 			}
 		}
 

@@ -103,7 +103,7 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <returns></returns>
 		internal bool isEndTransitionDone() {
-			return endTransitionStart > -1 && getCurrentFrame() > endTransitionStart && StepDone();
+			return endTransitionStart > -1 && getCurrentFrame() > endTransitionStart && StepDone(false);
 		}
 
 		/// <summary>
@@ -111,11 +111,11 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <returns></returns>
 		internal bool isInEndTransition() {
-			return endTransitionStart > -1 && getCurrentFrame() <= endTransitionStart && StepDone();
+			return endTransitionStart > -1 && getCurrentFrame() <= endTransitionStart && StepDone(false);
 		}
 
 		internal bool isInStartTransition() {
-			return getCurrentFrame() == startFrame && !StepDone();
+			return getCurrentFrame() == startFrame && !StepDone(false);
 		}
 
 		public RoadBaseAI.TrafficLightState GetLight(ushort segment, int lightType) {
@@ -257,9 +257,8 @@ namespace TrafficManager.TrafficLight {
 			stepDone = true;
 		}
 
-		public bool StepDone() {
+		public bool StepDone(bool updateValues) {
 			if (timedNode.IsInTestMode()) {
-				calcWaitFlow();
 				return false;
 			}
 			if (stepDone)
@@ -282,7 +281,7 @@ namespace TrafficManager.TrafficLight {
 						return true;
 					}
 					TrafficLightsTimed masterTimedNode = TrafficLightsTimed.GetTimedLight(timedNode.masterNodeId);
-					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone();
+					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone(updateValues);
 #if DEBUG
 					//Log.Message("step finished (1) @ " + nodeId);
 #endif
@@ -292,15 +291,33 @@ namespace TrafficManager.TrafficLight {
 					return stepDone;
 				} else {
 					// we are the master node
-					if (!calcWaitFlow())
+					float wait, flow;
+					if (!calcWaitFlow(out wait, out flow))
 						return true;
+					float newFlow = minFlow;
+					float newWait = maxWait;
+
+					if (Single.IsNaN(newFlow))
+						newFlow = flow;
+					else
+						newFlow = 0.5f * newFlow + 0.5f * flow; // some smoothing
+
+					if (Single.IsNaN(newWait))
+						newWait = 0;
+					else
+						newWait = 0.5f * newWait + 0.5f * wait; // some smoothing
 
 					// if more cars are waiting than flowing, we change the step
-					bool done = maxWait > 0 && minFlow < maxWait;
+					bool done = newWait > 0 && newFlow < newWait;
+					if (updateValues) {
+						minFlow = newFlow;
+						maxWait = newWait;
+					}
 #if DEBUG
 					//Log.Message("step finished (2) @ " + nodeId);
 #endif
-					stepDone = done;
+					if (updateValues)
+						stepDone = done;
 					if (stepDone)
 						endTransitionStart = (int)getCurrentFrame();
 					return stepDone;
@@ -309,7 +326,7 @@ namespace TrafficManager.TrafficLight {
 			return false;
 		}
 
-		private bool calcWaitFlow() {
+		public bool calcWaitFlow(out float wait, out float flow) {
 			int numFlows = 0;
 			int numWaits = 0;
 			float curMeanFlow = 0;
@@ -384,6 +401,8 @@ namespace TrafficManager.TrafficLight {
 
 				if (slaveStep.segmentLightStates.Count <= 0) {
 					invalid = true;
+					flow = 0f;
+					wait = 0f;
 					return false;
 				}
 			}
@@ -395,15 +414,8 @@ namespace TrafficManager.TrafficLight {
 
 			curMeanFlow /= waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
 
-			if (Single.IsNaN(minFlow))
-				minFlow = curMeanFlow;
-			else
-				minFlow = 0.5f * minFlow + 0.5f * curMeanFlow; // some smoothing
-
-			if (Single.IsNaN(maxWait))
-				maxWait = 0;
-			else
-				maxWait = 0.5f * maxWait + 0.5f * curMeanWait; // some smoothing
+			wait = curMeanWait;
+			flow = curMeanFlow;
 			return true;
 		}
 
