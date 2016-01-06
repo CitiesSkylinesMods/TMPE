@@ -32,6 +32,10 @@ namespace TrafficManager.TrafficLight {
 			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
 
+		public bool isMasterNode() {
+			return masterNodeId == nodeId;
+		}
+
 		public void AddStep(int minTime, int maxTime, float waitFlowBalance) {
 			if (minTime <= 0)
 				minTime = 1;
@@ -122,39 +126,64 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SimulationStep() {
-			if (!IsStarted())
+			if (!isMasterNode() || !IsStarted())
 				return;
-
-			if (! Steps[CurrentStep].isValid()) {
-				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
+			if (!housekeeping())
 				return;
-			}
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			Steps[CurrentStep].SetLights();
-			if (!Steps[CurrentStep].StepDone()) {
+			if (!Steps[CurrentStep].isValid()) {
+				TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
 				return;
 			}
-			// step is done
-			if (!housekeeping())
+			
+			// set lights
+			foreach (ushort slaveNodeId in NodeGroup) {
+				TrafficLightsTimed slaveTimedNode = GetTimedLight(slaveNodeId);
+				if (slaveTimedNode == null) {
+					TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
+					continue;
+				}
+				slaveTimedNode.Steps[CurrentStep].SetLights();
+			}
+			if (!Steps[CurrentStep].StepDone(true))
 				return;
-			if (!Steps[CurrentStep].isEndTransitionDone()) return;
-			// ending transition (yellow) finished
-			var oldCurrentStep = CurrentStep;
-			CurrentStep = (CurrentStep + 1) % NumSteps();
+			// step is done
 
-			Steps[CurrentStep].Start();
-			Steps[CurrentStep].SetLights();
+			if (!Steps[CurrentStep].isEndTransitionDone())
+				return;
+			// ending transition (yellow) finished
+
+			// change step
+			var newCurrentStep = (CurrentStep + 1) % NumSteps();
+			foreach (ushort slaveNodeId in NodeGroup) {
+				TrafficLightsTimed slaveTimedNode = GetTimedLight(slaveNodeId);
+				if (slaveTimedNode == null) {
+					continue;
+				}
+
+				slaveTimedNode.CurrentStep = newCurrentStep;
+				slaveTimedNode.Steps[newCurrentStep].Start();
+				slaveTimedNode.Steps[newCurrentStep].SetLights();
+			}
 		}
 
 		public void SkipStep() {
-			Steps[CurrentStep].SetStepDone();
+			if (!isMasterNode())
+				return;
 
-			CurrentStep = (CurrentStep + 1) % NumSteps();
-
-			Steps[CurrentStep].Start();
-			Steps[CurrentStep].SetLights();
+			var newCurrentStep = (CurrentStep + 1) % NumSteps();
+			foreach (ushort slaveNodeId in NodeGroup) {
+				TrafficLightsTimed slaveTimedNode = GetTimedLight(slaveNodeId);
+				if (slaveTimedNode == null) {
+					continue;
+				}
+				slaveTimedNode.Steps[CurrentStep].SetStepDone();
+				slaveTimedNode.CurrentStep = newCurrentStep;
+				slaveTimedNode.Steps[newCurrentStep].Start();
+				slaveTimedNode.Steps[newCurrentStep].SetLights();
+			}
 		}
 
 		public long CheckNextChange(ushort segmentId, int lightType) {

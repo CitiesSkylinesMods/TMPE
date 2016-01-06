@@ -8,6 +8,7 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 1.3.21, 01/06/2016
 - New feature: Traffic Sensitivity Tuning
 - UI improvements: When adding a new step to a timed traffic light the lights are inverted.
+- Timed traffic light status symbols should now be less annoying 
 - Bugfix: Deletion of junctions that were members of a traffic light group is now handled correctly 
 
 1.3.20, 01/04/2016
