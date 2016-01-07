@@ -25,7 +25,7 @@ namespace TrafficManager.TrafficLight {
 		/// <summary>
 		/// Frame when the GreenToRed phase started
 		/// </summary>
-		private int endTransitionStart;
+		private uint? endTransitionStart;
 
 		/// <summary>
 		/// minimum mean "number of cars passing through" / "average segment length"
@@ -65,7 +65,7 @@ namespace TrafficManager.TrafficLight {
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
 
-			endTransitionStart = -1;
+			endTransitionStart = null;
 			stepDone = false;
 
 			for (var s = 0; s < 8; s++) {
@@ -103,7 +103,7 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <returns></returns>
 		internal bool isEndTransitionDone() {
-			return endTransitionStart > -1 && getCurrentFrame() > endTransitionStart && StepDone(false);
+			return endTransitionStart != null && getCurrentFrame() > endTransitionStart && StepDone(false);
 		}
 
 		/// <summary>
@@ -111,7 +111,7 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <returns></returns>
 		internal bool isInEndTransition() {
-			return endTransitionStart > -1 && getCurrentFrame() <= endTransitionStart && StepDone(false);
+			return endTransitionStart != null && getCurrentFrame() <= endTransitionStart && StepDone(false);
 		}
 
 		internal bool isInStartTransition() {
@@ -142,7 +142,7 @@ namespace TrafficManager.TrafficLight {
 		public void Start() {
 			stepDone = false;
 			this.startFrame = getCurrentFrame();
-			this.endTransitionStart = -1;
+			this.endTransitionStart = null;
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
 		}
@@ -270,7 +270,7 @@ namespace TrafficManager.TrafficLight {
 				//Log.Message("step finished @ " + nodeId);
 #endif
 				stepDone = true;
-				endTransitionStart = (int)getCurrentFrame();
+				endTransitionStart = getCurrentFrame();
 				return stepDone;
 			}
 
@@ -287,7 +287,7 @@ namespace TrafficManager.TrafficLight {
 #endif
 					stepDone = done;
 					if (stepDone)
-						endTransitionStart = (int)getCurrentFrame();
+						endTransitionStart = getCurrentFrame();
 					return stepDone;
 				} else {
 					// we are the master node
@@ -319,7 +319,7 @@ namespace TrafficManager.TrafficLight {
 					if (updateValues)
 						stepDone = done;
 					if (stepDone)
-						endTransitionStart = (int)getCurrentFrame();
+						endTransitionStart = getCurrentFrame();
 					return stepDone;
 				}
 			}
@@ -337,6 +337,11 @@ namespace TrafficManager.TrafficLight {
 				if (!TrafficLightsTimed.IsTimedLight(timedNodeId))
 					continue;
 				TrafficLightsTimed slaveTimedNode = TrafficLightsTimed.GetTimedLight(timedNodeId);
+				if (slaveTimedNode.NumSteps() <= timedNode.CurrentStep) {
+					for (int i = 0; i < slaveTimedNode.NumSteps(); ++i)
+						slaveTimedNode.GetStep(i).invalid = true;
+					continue;
+				}
 				TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
 
 				//List<int> segmentIdsToDelete = new List<int>();

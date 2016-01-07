@@ -86,9 +86,24 @@ namespace TrafficManager.TrafficLight {
 
 			foreach (ushort nodeIdToDelete in nodeIdsToDelete) {
 				NodeGroup.Remove(nodeIdToDelete);
-				var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeIdToDelete);
-				if (nodeSim != null) {
-					nodeSim.Destroy(false);
+				TrafficLightSimulation.RemoveNodeFromSimulation(nodeIdToDelete, false);
+			}
+
+			// check that simulation exists (TODO refactor this whole stuff!!)
+			foreach (ushort timedNodeId in NodeGroup) {
+				if (TrafficLightSimulation.GetNodeSimulation(timedNodeId) == null) {
+					TrafficLightSimulation.AddNodeToSimulation(timedNodeId);
+					TrafficLightSimulation.GetNodeSimulation(timedNodeId).TimedTrafficLights = true;
+
+					// check that live traffic light exists
+					NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNodeId];
+					for (int s = 0; s < 8; s++) {
+						var segmentId = node.GetSegment(s);
+
+						if (segmentId == 0)
+							continue;
+						TrafficLightsManual.AddLiveSegmentLight(timedNodeId, segmentId);
+					}
 				}
 			}
 
