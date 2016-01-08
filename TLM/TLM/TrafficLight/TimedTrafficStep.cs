@@ -157,12 +157,8 @@ namespace TrafficManager.TrafficLight {
 		public void SetLights() {
 			SetLights(false);
 		}
-
-		internal void SetLights(bool noTransition) {
-			SetLights(noTransition, false);
-		}
-
-		public void SetLights(bool noTransition, bool invert) {
+		
+		public void SetLights(bool noTransition) {
 			try {
 				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
@@ -186,10 +182,6 @@ namespace TrafficManager.TrafficLight {
 					segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
 					segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
 					segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
-
-					if (invert) {
-						segmentLight.invert();
-					}
 
 					segmentLight.UpdateVisuals();
 				}
