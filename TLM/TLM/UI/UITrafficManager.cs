@@ -35,7 +35,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(10.48f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.3.21";
+			title.text = "Version 1.3.22";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -49,7 +49,7 @@ namespace TrafficManager.UI {
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton("Change lanes", new Vector3(35f, y), clickChangeLanes);
+				_buttonLaneChange = _createButton("Change lane arrows", new Vector3(35f, y), clickChangeLanes);
 				y += 40;
 				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
 			}
