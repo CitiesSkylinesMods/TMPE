@@ -12,7 +12,6 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {
 	public class CustomPathManager : PathManager {
-		public SegmentGeometry[] segmentGeometries;
 		CustomPathFind[] _replacementPathFinds;
 
 		public static CustomPathFind PathFindInstance;
@@ -21,12 +20,6 @@ namespace TrafficManager.Custom.Manager {
 		[UsedImplicitly]
 		public new virtual void Awake() {
 			Log.Message("Waking up CustomPathManager.");
-			segmentGeometries = new SegmentGeometry[Singleton<NetManager>.instance.m_segments.m_size];
-			Log.Message($"Building {segmentGeometries.Length} segment geometries...");
-            for (ushort i = 0; i < segmentGeometries.Length; ++i) {
-				segmentGeometries[i] = new SegmentGeometry(i);
-			}
-			Log.Message($"Calculated segment geometries.");
 
 			var stockPathFinds = GetComponents<PathFind>();
 			var numOfStockPathFinds = stockPathFinds.Length;

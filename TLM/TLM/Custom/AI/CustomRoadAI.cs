@@ -6,22 +6,40 @@ using TrafficManager.Traffic;
 using UnityEngine;
 using ColossalFramework.Math;
 using TrafficManager.Custom.Manager;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
+		public static uint lastSimulationStep = 0;
+		public static uint lastUpdateFrame = 0;
 
-		private uint lastUpdateFrame = 0;
+		public static SegmentGeometry[] segmentGeometries;
+		public static ushort[] laneTrafficBuffer;
+		public static byte[] laneTrafficDensity;
+		public static bool initDone = false;
+
 		private static byte[] timedLightUpdateShift = new byte[] { 3, 3, 4, 4, 5 };
 
 		public void Awake() {
+			if (!initDone) {
+				segmentGeometries = new SegmentGeometry[Singleton<NetManager>.instance.m_segments.m_size];
+				Log.Message($"Building {segmentGeometries.Length} segment geometries...");
+				for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+					segmentGeometries[i] = new SegmentGeometry(i);
+				}
+				Log.Message($"Calculated segment geometries.");
 
+				laneTrafficBuffer = new ushort[Singleton<NetManager>.instance.m_lanes.m_size];
+				laneTrafficDensity = new byte[Singleton<NetManager>.instance.m_lanes.m_size];
+				initDone = true;
+			}
 		}
 
 		// this implements the Update method of MonoBehaviour
 		public void Update() {
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> timedLightUpdateShift[Options.simAccuracy];
+			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			if (lastUpdateFrame < currentFrameIndex) {
+			if (lastUpdateFrame >> timedLightUpdateShift[Options.simAccuracy] < currentFrameIndex >> timedLightUpdateShift[Options.simAccuracy]) {
 				try {
 					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
 						var otherNodeSim = e.Value;
@@ -45,10 +63,36 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
-			try {
-				Singleton<CustomPathManager>.instance.segmentGeometries[segmentID].recalculate();
-			} catch (Exception e) {
-				Log.Error("Error occured while recalculating segment geometry: " + e.ToString());
+			if (initDone) {
+				try {
+					segmentGeometries[segmentID].recalculate();
+				} catch (Exception e) {
+					Log.Error("Error occured while recalculating segment geometry: " + e.ToString());
+				}
+
+
+				try {
+					// calculate traffic density
+					uint curLaneId = data.m_lanes;
+					int nextNumLanes = data.Info.m_lanes.Length;
+					int laneIndex = 0;
+					while (laneIndex < nextNumLanes && curLaneId != 0u) {
+						float laneLength = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length;
+						int currentDensity = Math.Min(100, Mathf.RoundToInt((float)laneTrafficBuffer[curLaneId] / laneLength * 100f));
+						float diff = currentDensity - laneTrafficDensity[curLaneId];
+						if (diff > 0)
+							laneTrafficDensity[curLaneId] = (byte)Mathf.Clamp(laneTrafficDensity[curLaneId] + 1, 0, 100);
+						else if (diff < 0)
+							laneTrafficDensity[curLaneId] = (byte)Mathf.Clamp(laneTrafficDensity[curLaneId] - 1, 0, 100);
+
+						laneTrafficBuffer[curLaneId] = 0;
+
+						laneIndex++;
+						curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+					}
+				} catch (Exception e) {
+					Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
+				}
 			}
 
 			OriginalSimulationStep(segmentID, ref data);

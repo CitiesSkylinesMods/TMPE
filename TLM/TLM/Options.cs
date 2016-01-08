@@ -26,7 +26,7 @@ namespace TrafficManager {
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition (Settings are defined for each savegame separately)");
 			simAccuracyDropdown = group.AddDropdown("Simulation accuracy (higher accuracy reduces performance):", new string[] { "Very high", "High", "Medium", "Low", "Very Low" }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
-			laneChangingRandomizationDropdown = group.AddDropdown("Vehicles may change lanes (BETA feature):", new string[] { "Very often (25 %)", "Often (12.5 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Use game default" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			laneChangingRandomizationDropdown = group.AddDropdown("Drivers want to change lanes (BETA feature):", new string[] { "Almost everytime (50 %)", "Very often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Use game default" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			recklessDriversDropdown = group.AddDropdown("Reckless driving (BETA feature):", new string[] { "Path Of Evil (10 %)", "Rush Hour (5 %)", "Minor Complaints (2 %)", "The Holy City (0 %)" }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 			nodesOverlayToggle = group.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
@@ -94,9 +94,9 @@ namespace TrafficManager {
 		internal static int getLaneChangingRandomizationTargetValue() {
 			switch (laneChangingRandomization) {
 				case 0:
-					return 4;
+					return 2;
 				case 1:
-					return 8;
+					return 4;
 				case 2:
 					return 10;
 				case 3:

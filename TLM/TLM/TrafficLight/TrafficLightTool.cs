@@ -51,7 +51,7 @@ namespace TrafficManager.TrafficLight {
 
 		private static bool _timedShowNumbers;
 
-		private const float DebugCloseLod = 250f;
+		private const float DebugCloseLod = 350f;
 		private const float PriorityCloseLod = 1000f;
 
 		private uint tooltipStartFrame = 0;
@@ -73,8 +73,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		protected override void Awake() {
-			_windowRect = ResizeGUI(new Rect(120, 45, 450, 350));
-			_windowRect2 = ResizeGUI(new Rect(120, 45, 300, 150));
+			_windowRect = ResizeGUI(new Rect(155, 45, 450, 350));
+			_windowRect2 = ResizeGUI(new Rect(155, 45, 300, 150));
 
 			_secondPanelTexture = MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
 
@@ -1341,7 +1341,7 @@ namespace TrafficManager.TrafficLight {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
 
-				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", final dir: " + laneInfo.m_finalDirection + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "\n";
+				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", final dir: " + laneInfo.m_finalDirection + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", traffic: " + CustomRoadAI.laneTrafficDensity[curLaneId] + "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1379,16 +1379,21 @@ namespace TrafficManager.TrafficLight {
 				_counterStyle.fontSize = (int)(12f * zoom);
 				_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
-				String labelStr = "Segment " + i + ", flags: " + segment.m_flags.ToString() + ", traffic: " + segment.m_trafficDensity + "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;
+				String labelStr = "Segment " + i;
+#if DEBUG
+					labelStr += ", flags: " + segment.m_flags.ToString();
+#endif
+				labelStr += "\nTraffic: " + segment.m_trafficDensity + " %";
+#if DEBUG
+				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;
+#endif
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-#if DEBUG
 				_guiLanes(ref segment, ref segmentInfo);
-#endif
 			}
 		}
 
@@ -2378,7 +2383,7 @@ namespace TrafficManager.TrafficLight {
 				}
 			};
 
-			var windowRect3 = ResizeGUI(new Rect(120, 45, numLanes * 118, 60));
+			var windowRect3 = ResizeGUI(new Rect(155, 45, numLanes * 118, 60));
 
 			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", style);
 

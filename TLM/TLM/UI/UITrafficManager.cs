@@ -32,7 +32,7 @@ namespace TrafficManager.UI {
 			color = new Color32(75, 75, 135, 255);
 			width = 250;
 			height = LoadingExtension.IsPathManagerCompatible ? 310 : 230;
-			relativePosition = new Vector3(10.48f, 80f);
+			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
 			title.text = "Version 1.4.0";

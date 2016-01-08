@@ -18,6 +18,10 @@ namespace TrafficManager.Custom.AI {
 		private static int[] farLodUpdateMod = new int[] { 4, 8, 10, 12, 16 };
 		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 16, 20 };
 
+		public void Awake() {
+			
+		}
+
 		internal static void OnLevelUnloading() {
 			watchedVehicleIds.Clear();
 		}
@@ -125,6 +129,14 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + TrafficPriority.Vehicles[vehicleId].ToNode + ". FromSegment: " + TrafficPriority.Vehicles[vehicleId].FromSegment + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId);
 #endif
+			if (realTimePositions.Count > 0) {
+				// add traffic to lane
+				ushort leaderId = vehicleData.m_leadingVehicle == 0 ? vehicleId : vehicleData.m_leadingVehicle;
+				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
+				int len = 
+				CustomRoadAI.laneTrafficBuffer[laneId] = (byte)Math.Min(65535, CustomRoadAI.laneTrafficBuffer[laneId] + (uint)Mathf.RoundToInt(vehicleData.CalculateTotalLength(leaderId) * 2.5f));
+			}
+
 			if (realTimePositions.Count >= 2) {
 				// we found a valid path unit
 				var sourceLaneId = PathManager.GetLaneID(realTimePositions[0]);
@@ -387,7 +399,7 @@ namespace TrafficManager.Custom.AI {
 					var hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 					var hasCrossing = (nodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 					var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
-					if ((uint)vehicleId % (Options.getRecklessDriverModulo()/2) == 0) {
+					if ((uint)vehicleId % (Options.getRecklessDriverModulo()/2) != 0) {
 						// check if there is enough space
 						if ((nodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) ==
 							NetNode.Flags.Junction && netManager.m_nodes.m_buffer[destinationNodeId].CountSegments() != 2) {
