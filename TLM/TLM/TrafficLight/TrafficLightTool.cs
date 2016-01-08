@@ -233,11 +233,13 @@ namespace TrafficManager.TrafficLight {
 				mouseClickProcessed = false;
 			}
 
+			if (Options.nodesOverlay) {
+				_guiSegments();
+				_guiNodes();
 #if DEBUG
-			_guiSegments();
-			_guiNodes();
-			_guiVehicles();
+				_guiVehicles();
 #endif
+			}
 
 			showTimedLightIcons();
 			if (_toolMode != ToolMode.AddPrioritySigns) {
@@ -1384,7 +1386,9 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-				//_guiLanes(ref segment, ref segmentInfo);
+#if DEBUG
+				_guiLanes(ref segment, ref segmentInfo);
+#endif
 			}
 		}
 

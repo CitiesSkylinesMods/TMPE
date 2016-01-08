@@ -75,6 +75,14 @@ namespace TrafficManager {
 				if (options.Length >= 3) {
 					Options.setRecklessDrivers(options[2]);
 				}
+
+				if (options.Length >= 4) {
+					Options.setRelaxedBusses(options[3] == (byte)1);
+				}
+
+				if (options.Length >= 5) {
+					Options.setNodesOverlay(options[4] == (byte)1);
+				}
 			}
 		}
 
@@ -437,7 +445,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(LegacyDataId, new byte[] { });
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0)});
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

@@ -49,7 +49,7 @@ namespace TrafficManager.UI {
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton("Change lanes", new Vector3(35f, y), clickChangeLanes);
+				_buttonLaneChange = _createButton("Change lane arrows", new Vector3(35f, y), clickChangeLanes);
 				y += 40;
 				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
 			}

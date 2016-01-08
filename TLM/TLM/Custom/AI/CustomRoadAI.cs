@@ -4,6 +4,8 @@ using ColossalFramework;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using UnityEngine;
+using ColossalFramework.Math;
+using TrafficManager.Custom.Manager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
@@ -32,7 +34,7 @@ namespace TrafficManager.Custom.AI {
 			lastUpdateFrame = currentFrameIndex;
 		}
 
-		public void CustomSimulationStep(ushort nodeId, ref NetNode data) {
+		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
 			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns)
 				TrafficPriority.housekeeping(nodeId);
 
@@ -40,6 +42,16 @@ namespace TrafficManager.Custom.AI {
 			if (nodeSim == null || (nodeSim.TimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
 				OriginalSimulationStep(nodeId, ref data);
 			}
+		}
+
+		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
+			try {
+				Singleton<CustomPathManager>.instance.segmentGeometries[segmentID].recalculate();
+			} catch (Exception e) {
+				Log.Error("Error occured while recalculating segment geometry: " + e.ToString());
+			}
+
+			OriginalSimulationStep(segmentID, ref data);
 		}
 
 		public void OriginalSimulationStep(ushort nodeId, ref NetNode data) {
@@ -244,6 +256,121 @@ namespace TrafficManager.Custom.AI {
 				var properties = Singleton<GuideManager>.instance.m_properties;
 				if (properties != null) {
 					instance.m_outsideNodeNotConnected.Activate(properties.m_outsideNotConnected, nodeId, Notification.Problem.RoadNotConnected);
+				}
+			}
+		}
+
+		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) {
+			//base.SimulationStep(segmentID, ref data);
+
+			NetManager instance = Singleton<NetManager>.instance;
+			Vector3 position = instance.m_nodes.m_buffer[(int)data.m_startNode].m_position;
+			Vector3 position2 = instance.m_nodes.m_buffer[(int)data.m_endNode].m_position;
+
+			if ((data.m_flags & NetSegment.Flags.Original) == NetSegment.Flags.None) {
+				int num_a = this.GetMaintenanceCost(position, position2);
+				bool flag = (ulong)(Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15));
+				if (num_a != 0) {
+					if (flag) {
+						num_a = num_a * 16 / 100 - num_a / 100 * 15;
+					} else {
+						num_a /= 100;
+					}
+					Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, num_a, this.m_info.m_class);
+				}
+				if (flag) {
+					float num_b = (float)instance.m_nodes.m_buffer[(int)data.m_startNode].m_elevation;
+					float num_c = (float)instance.m_nodes.m_buffer[(int)data.m_endNode].m_elevation;
+					if (this.IsUnderground()) {
+						num_b = -num_b;
+						num_c = -num_c;
+					}
+					int constructionCost = this.GetConstructionCost(position, position2, num_b, num_c);
+					if (constructionCost != 0) {
+						StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt64>(StatisticType.CityValue);
+						if (statisticBase != null) {
+							statisticBase.Add(constructionCost);
+						}
+					}
+				}
+			}
+
+
+			float num = 0f;
+			uint num2 = data.m_lanes;
+			int num3 = 0;
+			while (num3 < this.m_info.m_lanes.Length && num2 != 0u) {
+				NetInfo.Lane lane = this.m_info.m_lanes[num3];
+				if ((byte)(lane.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && lane.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
+					num += instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_length;
+				}
+				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
+				num3++;
+			}
+			int num4 = 0;
+			if (data.m_trafficBuffer == 65535) {
+				if ((data.m_flags & NetSegment.Flags.Blocked) == NetSegment.Flags.None) {
+					data.m_flags |= NetSegment.Flags.Blocked;
+					data.m_modifiedIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex++;
+				}
+			} else {
+				data.m_flags &= ~NetSegment.Flags.Blocked;
+				int num5 = Mathf.RoundToInt(num) << 4;
+				if (num5 != 0) {
+					num4 = (int)((byte)Mathf.Min((int)(data.m_trafficBuffer * 100) / num5, 100));
+				}
+			}
+			data.m_trafficBuffer = 0;
+			if (num4 > (int)data.m_trafficDensity) {
+				data.m_trafficDensity = (byte)Mathf.Min((int)(data.m_trafficDensity + 5), num4);
+			} else if (num4 < (int)data.m_trafficDensity) {
+				data.m_trafficDensity = (byte)Mathf.Max((int)(data.m_trafficDensity - 5), num4);
+			}
+			/*Vector3 position = instance.m_nodes.m_buffer[(int)data.m_startNode].m_position;
+			Vector3 position2 = instance.m_nodes.m_buffer[(int)data.m_endNode].m_position;*/
+			Vector3 vector = (position + position2) * 0.5f;
+			if (!this.IsUnderground()) {
+				float num6 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector));
+				if (num6 > vector.y + 1f) {
+					data.m_flags |= NetSegment.Flags.Flooded;
+				} else {
+					data.m_flags &= ~NetSegment.Flags.Flooded;
+				}
+			}
+			if (!this.m_highwayRules) {
+				DistrictManager instance2 = Singleton<DistrictManager>.instance;
+				byte district = instance2.GetDistrict(vector);
+				DistrictPolicies.CityPlanning cityPlanningPolicies = instance2.m_districts.m_buffer[(int)district].m_cityPlanningPolicies;
+				if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.HeavyTrafficBan) != DistrictPolicies.CityPlanning.None) {
+					data.m_flags |= NetSegment.Flags.HeavyBan;
+				} else {
+					data.m_flags &= ~NetSegment.Flags.HeavyBan;
+				}
+				if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.BikeBan) != DistrictPolicies.CityPlanning.None) {
+					data.m_flags |= NetSegment.Flags.BikeBan;
+				} else {
+					data.m_flags &= ~NetSegment.Flags.BikeBan;
+				}
+				if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.OldTown) != DistrictPolicies.CityPlanning.None) {
+					data.m_flags |= NetSegment.Flags.CarBan;
+				} else {
+					data.m_flags &= ~NetSegment.Flags.CarBan;
+				}
+			}
+			int num7 = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
+			int num8 = this.m_noiseAccumulation * num7 / 100;
+			if (num8 != 0) {
+				float num9 = Vector3.Distance(position, position2);
+				int num10 = Mathf.FloorToInt(num9 / this.m_noiseRadius);
+				for (int i = 0; i < num10; i++) {
+					Vector3 position3 = Vector3.Lerp(position, position2, (float)(i + 1) / (float)(num10 + 1));
+					Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.NoisePollution, num8, position3, this.m_noiseRadius);
+				}
+			}
+			if (data.m_trafficDensity >= 50 && data.m_averageLength < 25f && (instance.m_nodes.m_buffer[(int)data.m_startNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights && (instance.m_nodes.m_buffer[(int)data.m_endNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights) {
+				GuideController properties = Singleton<GuideManager>.instance.m_properties;
+				if (properties != null) {
+					Singleton<NetManager>.instance.m_shortRoadTraffic.Activate(properties.m_shortRoadTraffic, segmentID);
 				}
 			}
 		}

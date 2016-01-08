@@ -68,6 +68,7 @@
     <Compile Include="CustomNetTool.cs" />
     <Compile Include="Custom\Misc\CustomPathFind.cs" />
     <Compile Include="Custom\Manager\CustomPathManager.cs" />
+    <Compile Include="Custom\SegmentGeometry.cs" />
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Options.cs" />

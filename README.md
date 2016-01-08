@@ -5,6 +5,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 1.4.0,
 - Included an advanced vehicle AI
 
+1.3.22, 01/08/2016
+- Added an option allowing busses to ignore lane arrows
+- Added an option to display nodes and segments
+
 1.3.21, 01/06/2016
 - New feature: Traffic Sensitivity Tuning
 - UI improvements: When adding a new step to a timed traffic light the lights are inverted.
