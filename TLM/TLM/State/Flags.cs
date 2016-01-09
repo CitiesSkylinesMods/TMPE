@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
 	public class Flags {
@@ -29,6 +30,15 @@ namespace TrafficManager.State {
 		/// </summary>
 		private static Dictionary<uint, LaneArrows> laneArrowFlags = new Dictionary<uint, LaneArrows>();
 
+		public static void resetTrafficLights(bool all) {
+			nodeTrafficLightFlag.Clear();
+			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
+				if (! all && TrafficPriority.IsPriorityNode(i))
+					continue;
+				Singleton<NetManager>.instance.UpdateNodeFlags(i);
+			}
+		}
+
 		public static void setNodeTrafficLight(ushort nodeId, bool flag) {
 			if (nodeId <= 0)
 				return;
@@ -46,6 +56,10 @@ namespace TrafficManager.State {
 			applyNodeTrafficLightFlag(nodeId);
 		}
 
+		internal static bool isNodeTrafficLightDefined(ushort nodeId) {
+			return nodeId > 0 && nodeTrafficLightFlag.ContainsKey(nodeId);
+		}
+
 		internal static bool isNodeTrafficLight(ushort nodeId) {
 			if (nodeId <= 0)
 				return false;
@@ -54,7 +68,7 @@ namespace TrafficManager.State {
 				return false;
 
 			if (!nodeTrafficLightFlag.ContainsKey(nodeId))
-				return false;
+				return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 
 			return nodeTrafficLightFlag[nodeId];
 		}

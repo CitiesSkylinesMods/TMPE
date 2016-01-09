@@ -6,6 +6,7 @@ using UnityEngine;
 using ColossalFramework;
 using ColossalFramework.UI;
 using ICities;
+using TrafficManager.State;
 
 namespace TrafficManager {
 
@@ -29,6 +30,8 @@ namespace TrafficManager {
 			recklessDriversDropdown = group.AddDropdown("Reckless driving (BETA feature):", new string[] { "Path Of Evil (10 %)", "Rush Hour (5 %)", "Minor Complaints (2 %)", "The Holy City (0 %)" }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 			nodesOverlayToggle = group.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+			UIHelperBase group2 = helper.AddGroup("Maintenance");
+			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
@@ -54,6 +57,10 @@ namespace TrafficManager {
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
 			Log.Message($"Nodes overlay changed to {newNodesOverlay}");
 			nodesOverlay = newNodesOverlay;
+		}
+
+		private static void onClickForgetToggledLights() {
+			Flags.resetTrafficLights(false);
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {
