@@ -1265,13 +1265,13 @@ namespace TrafficManager.Custom.Misc {
 									nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
 								}
 
-								if (nextRightSimilarLaneIndex != prevRightSimilarLaneIndex) {
-									// vehicles should not change lane in front of junctions with high traffic volumes
-									float trafficCost = 1f + 0.01f * (float)Math.Max(1, 7 - item2.m_numSegmentsToJunction) * (1f + density);
+								//if (nextRightSimilarLaneIndex != prevRightSimilarLaneIndex) {
+									// vehicles should choose lanes with low traffic volume if possible
+									float trafficCost = 1f + 0.1f * (float)Math.Max(1, 7 - item2.m_numSegmentsToJunction) * density; // 1 .. 1.7
 									if (density >= 0.7f)
 										changeLane = false;
 									item2.m_comparisonValue *= trafficCost;
-								}
+								//}
 
 								// highway exit handling
 								if (nextRightSimilarLaneIndex != prevRightSimilarLaneIndex && nextIsHighway) {
@@ -1284,14 +1284,14 @@ namespace TrafficManager.Custom.Misc {
 									if (item2.m_numSegmentsToJunction <= decelerationLaneLength) {
 										// stay on lane before exit
 										changeLane = false;
-										junctionCost += 0.03f * laneDist * laneDist;
+										junctionCost += 0.03f * laneDist * laneDist; // 1 .. 1.75
 									} else if (item2.m_numSegmentsToJunction <= decelerationLaneLength + decelerationLaneEntryLength) {
 										// vehicles may enter deceleration lane here
 										if (laneDist > 1)
-											junctionCost += 0.02f * laneDist * laneDist;
+											junctionCost += 0.02f * laneDist * laneDist; // 1 .. 1.50
 									} else {
 										// stay on lane
-										junctionCost += 0.03f * laneDist * laneDist;
+										junctionCost += 0.03f * laneDist * laneDist; // 1 .. 1.75
 										changeLane = false;
 									}
 									item2.m_comparisonValue *= junctionCost;
@@ -1303,14 +1303,14 @@ namespace TrafficManager.Custom.Misc {
 									// we should change the lane
 									if (diff != 1) {
 										// punish staying on lane or changing more than by one lane
-										item2.m_comparisonValue *= 1.1f + (0.01f * diff);
+										item2.m_comparisonValue *= 1.1f + (0.01f * diff); // 1.1 .. 1.15
 									}
 								} else {
 									// we should stay on lane
 									if (nextRightSimilarLaneIndex != prevRightSimilarLaneIndex) {
 										// punish not staying on lane
 										// on highway: punishment for leaving lane
-										item2.m_comparisonValue *= 1f + 0.01f * (diff + density);
+										item2.m_comparisonValue *= 1f + 0.01f * (diff + density); // 1.1 .. 1.16
 									}
 								}
 
