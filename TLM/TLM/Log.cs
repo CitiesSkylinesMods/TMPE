@@ -22,7 +22,6 @@ namespace TrafficManager {
         }
 
         public static void Error(object s) {
-#if DEBUG
             try {
                 if (InGameDebug) {
                     //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
@@ -32,11 +31,9 @@ namespace TrafficManager {
                 // cross thread issue?
             }
             //Debug.LogError(Prefix + s.ToString());
-#endif
         }
 
         public static void Warning(object s) {
-#if DEBUG
             try {
                 if (InGameDebug) {
                     //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
@@ -46,7 +43,6 @@ namespace TrafficManager {
                 // cross thread issue?
             }
             //Debug.LogWarning(Prefix + s.ToString());
-#endif
         }
     }
 
