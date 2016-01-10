@@ -5,6 +5,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 1.4.0,
 - Included an advanced vehicle AI
 
+1.3.23, 01/09/2016
+- Bugfix: Corrected an issue where toggled traffic lights would not be saved/loaded correctly (thanks to @Jeffrios and @AOD_War_2g for pointing out this problem)
+- Option added to forget all toggled traffic lights
+
 1.3.22, 01/08/2016
 - Added an option allowing busses to ignore lane arrows
 - Added an option to display nodes and segments

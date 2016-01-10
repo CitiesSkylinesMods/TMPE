@@ -3236,7 +3236,7 @@ namespace TrafficManager.TrafficLight {
 										break;
 									}
 
-									timedNode.Steps[timedNode.NumSteps() - 1].SetLights(false, true);
+									timedNode.Steps[timedNode.NumSteps() - 1].SetLights(true);
 								}
 							}
 

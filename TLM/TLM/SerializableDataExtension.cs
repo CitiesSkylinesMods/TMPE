@@ -84,6 +84,9 @@ namespace TrafficManager {
 					Options.setNodesOverlay(options[4] == (byte)1);
 				}
 			}
+
+			// load toggled traffic lights
+			//byte[] trafficLight = _serializableData.LoadData("TMPE_Options");
 		}
 
 		private static string LoadLegacyData(byte[] data) {
@@ -311,9 +314,9 @@ namespace TrafficManager {
 					//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
 					try {
 						if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road ||
-							Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags == 0)
+							(Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 							continue;
-
+						
 						// prevent overflow
 						if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
 							var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
