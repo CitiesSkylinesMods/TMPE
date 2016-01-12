@@ -311,6 +311,9 @@ namespace TrafficManager {
 						if (flags > ushort.MaxValue)
 							continue;
 
+						if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags & (ushort)NetLane.Flags.Created) == 0 || Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_segment == 0)
+							continue;
+
 						Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneIndex].m_flags);
 
 						uint laneArrowFlags = flags & Flags.lfr;
@@ -418,7 +421,9 @@ namespace TrafficManager {
 				if (laneSegmentId <= 0)
 					return;
 				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[laneSegmentId];
-				if (segment.m_flags == NetSegment.Flags.None)
+				if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					return;
+				if ((lane.m_flags & (ushort)NetLane.Flags.Created) == 0 || lane.m_segment == 0)
 					return;
 
 				//if (TrafficPriority.PrioritySegments.ContainsKey(laneSegmentId)) {
