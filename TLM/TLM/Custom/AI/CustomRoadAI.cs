@@ -418,5 +418,9 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 		}
+
+		internal static void AddTraffic(uint laneID, ushort val) {
+			laneTrafficBuffer[laneID] += val;
+		}
 	}
 }

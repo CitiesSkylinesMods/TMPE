@@ -133,8 +133,7 @@ namespace TrafficManager.Custom.AI {
 				// add traffic to lane
 				ushort leaderId = vehicleData.m_leadingVehicle == 0 ? vehicleId : vehicleData.m_leadingVehicle;
 				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
-				int len = 
-				CustomRoadAI.laneTrafficBuffer[laneId] = (byte)Math.Min(65535, CustomRoadAI.laneTrafficBuffer[laneId] + (uint)Mathf.RoundToInt(vehicleData.CalculateTotalLength(leaderId) * 2.5f));
+				//CustomRoadAI.laneTrafficBuffer[laneId] = (byte)Math.Min(65535, CustomRoadAI.laneTrafficBuffer[laneId] + (uint)Mathf.RoundToInt(vehicleData.CalculateTotalLength(leaderId) * 2.5f));
 			}
 
 			if (realTimePositions.Count >= 2) {
