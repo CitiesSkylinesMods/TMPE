@@ -470,10 +470,10 @@ namespace TrafficManager {
 				var laneSegmentId = lane.m_segment;
 				if (laneSegmentId <= 0)
 					return;
+				if ((lane.m_flags & (ushort)NetLane.Flags.Created) == 0 || laneSegmentId == 0)
+					return;
 				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[laneSegmentId];
 				if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
-					return;
-				if ((lane.m_flags & (ushort)NetLane.Flags.Created) == 0 || lane.m_segment == 0)
 					return;
 
 				//if (TrafficPriority.PrioritySegments.ContainsKey(laneSegmentId)) {
@@ -652,7 +652,7 @@ namespace TrafficManager {
 					});
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 && TrafficPriority.PrioritySegments[segmentId].Instance2.Type != PrioritySegment.PriorityType.None)
+				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 || TrafficPriority.PrioritySegments[segmentId].Instance2.Type == PrioritySegment.PriorityType.None)
 					return;
 
 				Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node2}, seg. {segmentId}");
