@@ -1001,7 +1001,7 @@ namespace TrafficManager.Traffic {
 					numSegmentsWithSigns += AddPriorityNode(nodeId);
 				}
 
-				bool ok = numSegmentsWithSigns > 2;
+				bool ok = numSegmentsWithSigns >= 2;
 				if (!ok) {
 					Log.Warning($"Housekeeping: Node {nodeId} does not have valid priority segments!");
 					nodeState = NodeValidityState.NoValidSegments;
