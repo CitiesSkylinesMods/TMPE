@@ -178,6 +178,7 @@ namespace TrafficManager.TrafficLight {
 					if (segmentLight == null)
 						continue;
 
+					segmentLight.CurrentMode = segLightState.CurrentMode;
 					segmentLight.LightMain = calcLightState(prevLightState.LightMain, segLightState.LightMain, nextLightState.LightMain, atStartTransition, atEndTransition);
 					segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
 					segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
@@ -414,6 +415,12 @@ namespace TrafficManager.TrafficLight {
 			wait = curMeanWait;
 			flow = curMeanFlow;
 			return true;
+		}
+
+		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
+			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
+				e.Value.CurrentMode = mode;
+			}
 		}
 
 		public object Clone() {

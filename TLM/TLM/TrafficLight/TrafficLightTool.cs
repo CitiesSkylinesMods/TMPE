@@ -726,6 +726,7 @@ namespace TrafficManager.TrafficLight {
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 							break;
 						case RoadBaseAI.TrafficLightState.Red:
+						default:
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 							break;
 					}
@@ -1264,6 +1265,7 @@ namespace TrafficManager.TrafficLight {
 					GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 					break;
 				case RoadBaseAI.TrafficLightState.Red:
+				default:
 					GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 					break;
 			}
@@ -1494,6 +1496,11 @@ namespace TrafficManager.TrafficLight {
 				var node = GetNetNode(nodeId);
 
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				if (nodeSimulation == null)
+					continue;
+				TrafficLightsTimed timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
+				if (timedNode == null)
+					continue;
 
 				for (var i = 0; i < 8; i++) {
 					ushort srcSegmentId = node.GetSegment(i); // source segment
@@ -1564,6 +1571,7 @@ namespace TrafficManager.TrafficLight {
 
 							if (checkClicked()) {
 								liveSegmentLight.ChangeMode();
+								timedNode.ChangeLightMode(srcSegmentId, liveSegmentLight.CurrentMode);
 							}
 						}
 					}
@@ -1614,6 +1622,7 @@ namespace TrafficManager.TrafficLight {
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 							break;
 						case RoadBaseAI.TrafficLightState.Red:
+						default:
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 							break;
 					}
@@ -2484,7 +2493,9 @@ namespace TrafficManager.TrafficLight {
 				GUILayout.Label("Lane " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				Flags.applyLaneArrowFlags((uint)laneList[i][0]);
+				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
+					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
+				}
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Left);
 				}
@@ -3502,7 +3513,7 @@ namespace TrafficManager.TrafficLight {
 								if (clicked && hoveredSegment) {
 									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
 									//Log.Message("PrioritySegment.Type = None");
-									prioritySegment.Type = GetNumberOfMainRoads(node) >= 2
+									prioritySegment.Type = GetNumberOfMainRoads(nodeId, node) >= 2
 										? PrioritySegment.PriorityType.Yield
 										: PrioritySegment.PriorityType.Main;
 									clicked = false;
@@ -3588,15 +3599,15 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		private static int GetNumberOfMainRoads(NetNode node) {
+		private static int GetNumberOfMainRoads(ushort nodeId, NetNode node) {
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
 				var segmentId2 = node.GetSegment(s);
 
 				if (segmentId2 == 0 ||
-					!TrafficPriority.IsPrioritySegment(SelectedNode, segmentId2))
+					!TrafficPriority.IsPrioritySegment(nodeId, segmentId2))
 					continue;
-				var prioritySegment2 = TrafficPriority.GetPrioritySegment(SelectedNode,
+				var prioritySegment2 = TrafficPriority.GetPrioritySegment(nodeId,
 					segmentId2);
 
 				if (prioritySegment2.Type == PrioritySegment.PriorityType.Main) {

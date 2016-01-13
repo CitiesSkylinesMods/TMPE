@@ -9,7 +9,7 @@ namespace TrafficManager.TrafficLight {
 		public ushort nodeId;
 		/// <summary>
 		/// In case the traffic light is set for a group of nodes, the master node decides
-		/// if all member steps are done. If it is `null` then we are the master node.
+		/// if all member steps are done.
 		/// </summary>
 		internal ushort masterNodeId;
 
@@ -28,6 +28,20 @@ namespace TrafficManager.TrafficLight {
 			this.nodeId = nodeId;
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
+
+			// setup priority segments & live traffic lights
+			foreach (ushort slaveNodeId in nodeGroup) {
+				NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[slaveNodeId];
+
+				for (int s = 0; s < 8; ++s) {
+					ushort segmentId = node.GetSegment(s);
+					if (segmentId <= 0)
+						continue;
+					NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+					TrafficPriority.AddPrioritySegment(slaveNodeId, segmentId, PrioritySegment.PriorityType.None);
+					TrafficLightsManual.AddLiveSegmentLight(slaveNodeId, segmentId);
+				}
+			}
 
 			TrafficLightSimulation.GetNodeSimulation(nodeId).TimedTrafficLightsActive = false;
 		}
@@ -143,8 +157,11 @@ namespace TrafficManager.TrafficLight {
 		public void SimulationStep() {
 			if (!isMasterNode() || !IsStarted())
 				return;
-			if (!housekeeping())
+			if (!housekeeping()) {
+				Log.Warning($"Housekeeping detected that this timed traffic light has become invalid: {nodeId}.");
+				Stop();
 				return;
+			}
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
@@ -338,6 +355,12 @@ namespace TrafficManager.TrafficLight {
 			if (!IsStarted())
 				testMode = false;
 			return testMode;
+		}
+
+		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
+			foreach (TimedTrafficStep step in Steps) {
+				step.ChangeLightMode(segmentId, mode);
+			}
 		}
 	}
 }

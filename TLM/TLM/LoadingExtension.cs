@@ -12,6 +12,7 @@ using Object = UnityEngine.Object;
 using System.Collections.Generic;
 using TrafficManager.Custom.Misc;
 using TrafficManager.State;
+using ColossalFramework.UI;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -47,6 +48,7 @@ namespace TrafficManager {
 		public void initDetours() {
 			Log.Warning("Init detours");
 			if (!LoadingExtension.Instance.DetourInited) {
+				bool detourFailed = false;
 				Log.Message("Redirecting Car AI Calculate Segment Calls");
 				try {
 
@@ -65,6 +67,7 @@ namespace TrafficManager {
 					LoadingExtension.Instance.CustomRedirects[0] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[0], LoadingExtension.Instance.CustomMethods[0]);
 				} catch (Exception) {
 					Log.Error("Could not redirect CarAI::CalculateSegmentPosition.");
+					detourFailed = true;
 				}
 
 				Log.Message("Redirecting SimulationStep");
@@ -74,6 +77,7 @@ namespace TrafficManager {
 					LoadingExtension.Instance.CustomRedirects[1] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[1], LoadingExtension.Instance.CustomMethods[1]);
 				} catch (Exception) {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
+					detourFailed = true;
 				}
 
 				Log.Message("Redirecting SimulationStep");
@@ -96,6 +100,7 @@ namespace TrafficManager {
 					LoadingExtension.Instance.CustomRedirects[3] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[3], LoadingExtension.Instance.CustomMethods[3]);
 				} catch (Exception) {
 					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
+					detourFailed = true;
 				}
 
 				if (LoadingExtension.IsPathManagerCompatible) {
@@ -112,6 +117,7 @@ namespace TrafficManager {
 						LoadingExtension.Instance.CustomRedirects[4] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[4], LoadingExtension.Instance.CustomMethods[4]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CarAI::SimulationStep.");
+						detourFailed = true;
 					}
 
 					Log.Message("Redirecting PassengerCarAI Simulation Step Calls");
@@ -122,6 +128,7 @@ namespace TrafficManager {
 						LoadingExtension.Instance.CustomRedirects[5] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[5], LoadingExtension.Instance.CustomMethods[5]);
 					} catch (Exception) {
 						Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
+						detourFailed = true;
 					}
 
 					Log.Message("Redirecting CargoTruckAI Simulation Step Calls");
@@ -132,6 +139,7 @@ namespace TrafficManager {
 						LoadingExtension.Instance.CustomRedirects[6] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[6], LoadingExtension.Instance.CustomMethods[6]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CargoTruckAI::SimulationStep.");
+						detourFailed = true;
 					}
 
 					Log.Message("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
@@ -152,7 +160,12 @@ namespace TrafficManager {
 							RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[7], LoadingExtension.Instance.CustomMethods[7]);
 					} catch (Exception) {
 						Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
+						detourFailed = true;
 					}
+				} // path manager compatible
+
+				if (detourFailed) {
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
 				}
 
 				LoadingExtension.Instance.DetourInited = true;
@@ -212,41 +225,45 @@ namespace TrafficManager {
 				initDetours();
 
                 if (IsPathManagerCompatible && ! PathManagerReplaced) {
-					Log.Warning("#####################################");
+					try {
+						Log.Warning("#####################################");
 
-                    Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
-					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
+						Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+						var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
-                    var stockPathManager = PathManager.instance;
-                    Log.Message($"Got stock PathManager instance {stockPathManager.GetName()}");
+						var stockPathManager = PathManager.instance;
+						Log.Message($"Got stock PathManager instance {stockPathManager.GetName()}");
 
-                    CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-                    Log.Message("Added CustomPathManager to gameObject List");
+						CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+						Log.Message("Added CustomPathManager to gameObject List");
 
-                    if (CustomPathManager == null) {
-                        Log.Error("CustomPathManager null. Error creating it.");
-                        return;
-                    }
+						if (CustomPathManager == null) {
+							Log.Error("CustomPathManager null. Error creating it.");
+							return;
+						}
 
-                    CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
-                    Log.Message("UpdateWithPathManagerValues success");
+						CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+						Log.Message("UpdateWithPathManagerValues success");
 
-                    pathManagerInstance?.SetValue(null, CustomPathManager);
+						pathManagerInstance?.SetValue(null, CustomPathManager);
 
-                    Log.Message("Getting Current SimulationManager");
-                    var simManager =
-                        typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
-                            .GetValue(null) as FastList<ISimulationManager>;
+						Log.Message("Getting Current SimulationManager");
+						var simManager =
+							typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
+								.GetValue(null) as FastList<ISimulationManager>;
 
-                    Log.Message("Removing Stock PathManager");
-                    simManager?.Remove(stockPathManager);
+						Log.Message("Removing Stock PathManager");
+						simManager?.Remove(stockPathManager);
 
-                    Log.Message("Adding Custom PathManager");
-                    simManager?.Add(CustomPathManager);
+						Log.Message("Adding Custom PathManager");
+						simManager?.Add(CustomPathManager);
 
-                    Object.Destroy(stockPathManager, 10f);
+						Object.Destroy(stockPathManager, 10f);
 
-					PathManagerReplaced = true;
+						PathManagerReplaced = true;
+					} catch (Exception) {
+						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+					}
 				}
 
                 Log.Message("Adding Controls to UI.");

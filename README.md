@@ -2,8 +2,22 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.4.0,
+1.4.0, 01/15/2016
 - Included an advanced vehicle AI
+
+1.3.24, 01/13/2016
+- Improved handling of priority signs
+- Priority signs: After adding two main road signs the next offered sign is a yield sign
+- Priority signs: Vehicles now should notice earlier that they can enter a junction
+- Removed the legacy XML file save system
+- Invalid (not created) lanes are not saved/loaded anymore
+- Added a configuration option that allows vehicles to enter blocked junctions
+- Bugfix: Some priority signs were not saved
+- Bugfix: Priority signs on deleted segments are now deleted too
+- Bugfix: Lane arrows on removed lanes are now removed too
+- Bugfix: Adding a priority sign to a junction having more than one main sign creates a yield sign (thanks to @GordonDry for pointing out this problem)
+- Bugfix: If reckless driving was set to "The Holy City (0 %)", vehicles blocked intersections with traffic light.
+- Bugfix: Traffic light arrow modes were sometimes not correctly saved  
 
 1.3.23, 01/09/2016
 - Bugfix: Corrected an issue where toggled traffic lights would not be saved/loaded correctly (thanks to @Jeffrios and @AOD_War_2g for pointing out this problem)

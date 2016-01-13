@@ -1,6 +1,19 @@
+using ColossalFramework;
+
 namespace TrafficManager.Traffic {
 	public class VehiclePosition {
-		public CarState CarState = CarState.None;
+		private CarState carState;
+
+		public CarState CarState {
+			get { return carState; }
+			set {
+				if (value != carState)
+					LastCarStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+				carState = value;
+			}
+		}
+
+		public uint LastCarStateUpdate = 0;
 
 		public int WaitTime = 0;
 
@@ -15,6 +28,10 @@ namespace TrafficManager.Traffic {
 		public bool Stopped = false;
 
 		public uint LastFrame;
+
+		public VehiclePosition() {
+			ResetCar();
+		}
 
 		public void ResetCar() {
 			ToNode = 0;
