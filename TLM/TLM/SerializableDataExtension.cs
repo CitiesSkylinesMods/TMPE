@@ -367,11 +367,13 @@ namespace TrafficManager {
 			Log.Warning("Saving Mod Data.");
 			var configuration = new Configuration();
 
-			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
-				if (TrafficPriority.PrioritySegments != null) {
+			if (TrafficPriority.PrioritySegments != null) {
+				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
 					SavePrioritySegment(i, configuration);
 				}
+			}
 
+			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
 				if (TrafficLightSimulation.LightSimulationByNodeId != null) {
 					SaveTrafficLightSimulation(i, configuration);
 				}
@@ -588,8 +590,9 @@ namespace TrafficManager {
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				if (!TrafficPriority.PrioritySegments.ContainsKey(segmentId))
+				if (!TrafficPriority.PrioritySegments.ContainsKey(segmentId)) {
 					return;
+				}
 
 				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0) {
 					Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node1}, seg. {segmentId}");
@@ -609,7 +612,7 @@ namespace TrafficManager {
 					(int) TrafficPriority.PrioritySegments[segmentId].Instance2.Type
 				});
 			} catch (Exception e) {
-				Log.Error($"Error adding Priority Segments to Save {e.Message}");
+				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");
 			}
 		}
 	}

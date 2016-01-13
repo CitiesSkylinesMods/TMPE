@@ -1265,6 +1265,7 @@ namespace TrafficManager.TrafficLight {
 					GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 					break;
 				case RoadBaseAI.TrafficLightState.Red:
+				default:
 					GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 					break;
 			}
@@ -1610,6 +1611,7 @@ namespace TrafficManager.TrafficLight {
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 							break;
 						case RoadBaseAI.TrafficLightState.Red:
+						default:
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 							break;
 					}

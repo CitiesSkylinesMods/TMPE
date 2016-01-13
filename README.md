@@ -3,6 +3,8 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 
 # Changelog
 1.3.24, 01/13/2016
+- Improved handling of priority signs
+- Bugfix: Some priority signs were not saved.
 - Removed the legacy XML file save system
 - Invalid (not created) lanes are not saved/loaded anymore
 - Bugfix: Adding a priority sign to a junction having more than one main sign creates a yield sign (thanks to @GordonDry for pointing out this problem)
