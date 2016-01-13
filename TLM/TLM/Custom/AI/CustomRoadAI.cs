@@ -22,11 +22,16 @@ namespace TrafficManager.Custom.AI {
 			if (lastUpdateFrame < currentFrameIndex) {
 				try {
 					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
-						var otherNodeSim = e.Value;
-						otherNodeSim.SimulationStep();
+						try {
+							var otherNodeSim = e.Value;
+							otherNodeSim.SimulationStep();
+						} catch (Exception ex) {
+							Log.Warning($"Error occured while simulating traffic light @ node {e.Key}: {ex.ToString()}");
+						}
 					}
-				} catch (Exception) {
+				} catch (Exception ex) {
 					// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
+					Log.Warning($"Error occured while iterating overs traffic light simulations: {ex.ToString()}");
 				}
 			}
 			lastUpdateFrame = currentFrameIndex;

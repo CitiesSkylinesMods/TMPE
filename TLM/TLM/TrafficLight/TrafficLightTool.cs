@@ -726,6 +726,7 @@ namespace TrafficManager.TrafficLight {
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianGreenLightTexture2D);
 							break;
 						case RoadBaseAI.TrafficLightState.Red:
+						default:
 							GUI.DrawTexture(myRect3, TrafficLightToolTextureResources.PedestrianRedLightTexture2D);
 							break;
 					}
@@ -3497,7 +3498,7 @@ namespace TrafficManager.TrafficLight {
 								if (clicked && hoveredSegment) {
 									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
 									//Log.Message("PrioritySegment.Type = None");
-									prioritySegment.Type = GetNumberOfMainRoads(node) >= 2
+									prioritySegment.Type = GetNumberOfMainRoads(nodeId, node) >= 2
 										? PrioritySegment.PriorityType.Yield
 										: PrioritySegment.PriorityType.Main;
 									clicked = false;
@@ -3583,15 +3584,15 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		private static int GetNumberOfMainRoads(NetNode node) {
+		private static int GetNumberOfMainRoads(ushort nodeId, NetNode node) {
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
 				var segmentId2 = node.GetSegment(s);
 
 				if (segmentId2 == 0 ||
-					!TrafficPriority.IsPrioritySegment(SelectedNode, segmentId2))
+					!TrafficPriority.IsPrioritySegment(nodeId, segmentId2))
 					continue;
-				var prioritySegment2 = TrafficPriority.GetPrioritySegment(SelectedNode,
+				var prioritySegment2 = TrafficPriority.GetPrioritySegment(nodeId,
 					segmentId2);
 
 				if (prioritySegment2.Type == PrioritySegment.PriorityType.Main) {

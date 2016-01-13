@@ -9,7 +9,7 @@ namespace TrafficManager.TrafficLight {
 		public ushort nodeId;
 		/// <summary>
 		/// In case the traffic light is set for a group of nodes, the master node decides
-		/// if all member steps are done. If it is `null` then we are the master node.
+		/// if all member steps are done.
 		/// </summary>
 		internal ushort masterNodeId;
 
@@ -143,8 +143,11 @@ namespace TrafficManager.TrafficLight {
 		public void SimulationStep() {
 			if (!isMasterNode() || !IsStarted())
 				return;
-			if (!housekeeping())
+			if (!housekeeping()) {
+				Log.Warning("Housekeeping detected that this timed traffic light has become invalid.");
+				Stop();
 				return;
+			}
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 

@@ -2,6 +2,11 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.3.24, 01/13/2016
+- Removed the legacy XML file save system
+- Invalid (not created) lanes are not saved/loaded anymore
+- Bugfix: Adding a priority sign to a junction having more than one main sign creates a yield sign (thanks to @GordonDry for pointing out this problem)
+
 1.3.23, 01/09/2016
 - Bugfix: Corrected an issue where toggled traffic lights would not be saved/loaded correctly (thanks to @Jeffrios and @AOD_War_2g for pointing out this problem)
 - Option added to forget all toggled traffic lights
