@@ -37,8 +37,10 @@ namespace TrafficManager.Custom.AI {
 			bool logme = (vehicleId == 16310);
 #endif
 
-			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car)
-				return;
+			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car) {
+				Log.Message($"HandleVehicle does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
+                return;
+			}
 #if DEBUG
 			logBuffer.Add("Calculating prio info for vehicleId " + vehicleId);
 #endif
@@ -340,7 +342,7 @@ namespace TrafficManager.Custom.AI {
 						(TrafficPriority.Vehicles[vehicleId].LastFrame >> closeLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> closeLodUpdateMod[Options.simAccuracy]) // very often
 					) ||
 					(
-						(lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && 
+						(lastFrameVehiclePos - camPos).sqrMagnitude < FarLod &&
 						(TrafficPriority.Vehicles[vehicleId].LastFrame >> farLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> farLodUpdateMod[Options.simAccuracy]) // often
 					) ||
 						(TrafficPriority.Vehicles[vehicleId].LastFrame >> veryFarLodUpdateMod[Options.simAccuracy]) < (Singleton<SimulationManager>.instance.m_currentFrameIndex >> veryFarLodUpdateMod[Options.simAccuracy]) // less often
@@ -352,6 +354,8 @@ namespace TrafficManager.Custom.AI {
 						Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
 					}
 				}
+			} else {
+				Log.Message($"TmCalculateSegmentPosition does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
 			}
 
 			// I think this is supposed to be the lane position?
@@ -387,7 +391,11 @@ namespace TrafficManager.Custom.AI {
 					var hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 					var hasCrossing = (nodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 					var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
-					if ((uint)vehicleId % (Options.getRecklessDriverModulo()/2) == 0) {
+					bool checkSpace = !Options.mayEnterBlockedJunctions;
+					if (checkSpace && (uint)vehicleId % (Options.getRecklessDriverModulo() / 2) == 0) {
+						checkSpace = false;
+					}
+					if (checkSpace) {
 						// check if there is enough space
 						if ((nodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) ==
 							NetNode.Flags.Junction && netManager.m_nodes.m_buffer[destinationNodeId].CountSegments() != 2) {
@@ -615,7 +623,7 @@ namespace TrafficManager.Custom.AI {
 											return;
 									}
 								} else {
-									TrafficPriority.Vehicles[vehicleId].CarState = CarState.Transit;
+									TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
 								}
 							}
 						}

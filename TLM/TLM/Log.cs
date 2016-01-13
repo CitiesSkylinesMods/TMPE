@@ -5,9 +5,9 @@ namespace TrafficManager {
 
     public static class Log {
         const string Prefix = "TrafficLightManager: ";
-        private static readonly bool InGameDebug = Environment.OSVersion.Platform != PlatformID.Unix;
+		private static readonly bool InGameDebug = true; // Environment.OSVersion.Platform != PlatformID.Unix;
 
-        public static void Message(object s) {
+        public static void Message(string s) {
 #if DEBUG
             try {
                 if (InGameDebug) {
@@ -21,25 +21,31 @@ namespace TrafficManager {
 #endif
         }
 
-        public static void Error(object s) {
+        public static void Error(string s) {
             try {
                 if (InGameDebug) {
-                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s.ToString());
-                    Debug.LogError(Prefix + s);
-                }
+#if DEBUG
+					Debug.LogError(Prefix + s);
+#else
+					DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s);
+#endif
+				}
             } catch (Exception) {
                 // cross thread issue?
             }
             //Debug.LogError(Prefix + s.ToString());
         }
 
-        public static void Warning(object s) {
+        public static void Warning(string s) {
             try {
                 if (InGameDebug) {
-                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s.ToString());
-                    Debug.LogWarning(Prefix + s);
-                }
-            } catch (Exception) {
+#if DEBUG
+					Debug.LogWarning(Prefix + s);
+#else
+					DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s);
+#endif
+				}
+			} catch (Exception) {
                 // cross thread issue?
             }
             //Debug.LogWarning(Prefix + s.ToString());

@@ -16,12 +16,14 @@ namespace TrafficManager {
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
+		private static UICheckBox mayEnterBlockedJunctionsToggle = null;
 
 		public static int simAccuracy = 1;
 		public static int laneChangingRandomization = 4;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool nodesOverlay = false;
+		public static bool mayEnterBlockedJunctions = false;
 
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition (Settings are defined for each savegame separately)");
@@ -29,9 +31,10 @@ namespace TrafficManager {
 			laneChangingRandomizationDropdown = group.AddDropdown("Vehicles may change lanes (BETA feature):", new string[] { "Very often (10 %)", "Often (5 %)", "Sometimes (2.5 %)", "Rarely (1 %)", "Only if neccessary" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			recklessDriversDropdown = group.AddDropdown("Reckless driving (BETA feature):", new string[] { "Path Of Evil (10 %)", "Rush Hour (5 %)", "Minor Complaints (2 %)", "The Holy City (0 %)" }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
-			nodesOverlayToggle = group.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+			mayEnterBlockedJunctionsToggle = group.AddCheckbox("Vehicles may enter blocked junctions", mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
 			UIHelperBase group2 = helper.AddGroup("Maintenance");
 			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
+			nodesOverlayToggle = group2.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
@@ -52,6 +55,11 @@ namespace TrafficManager {
 		private static void onRelaxedBussesChanged(bool newRelaxedBusses) {
 			Log.Message($"Relaxed busses changed to {newRelaxedBusses}");
 			relaxedBusses = newRelaxedBusses;
+		}
+
+		private static void onMayEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
+			Log.Message($"MayEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
+			mayEnterBlockedJunctions = newMayEnterBlockedJunctions;
 		}
 
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
@@ -87,6 +95,12 @@ namespace TrafficManager {
 				relaxedBussesToggle.isChecked = newRelaxedBusses;
 		}
 
+		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
+			mayEnterBlockedJunctions = newMayEnterBlockedJunctions;
+			if (mayEnterBlockedJunctionsToggle != null)
+				mayEnterBlockedJunctionsToggle.isChecked = newMayEnterBlockedJunctions;
+		}
+
 		public static void setNodesOverlay(bool newNodesOverlay) {
 			nodesOverlay = newNodesOverlay;
 			if (nodesOverlayToggle != null)
@@ -118,9 +132,9 @@ namespace TrafficManager {
 				case 2:
 					return 50;
 				case 3:
-					return 100000;
+					return 10000;
 			}
-			return 100000;
+			return 10000;
 		}
 	}
 }

@@ -16,14 +16,12 @@ using TrafficManager.State;
 namespace TrafficManager {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
 		private const string DataId = "TrafficManager_v1.0";
-		private static uint _uniqueId;
 
 		private static ISerializableData _serializableData;
 		private static Configuration _configuration;
 		public static bool StateLoaded;
 
 		public override void OnCreated(ISerializableData serializableData) {
-			_uniqueId = 0u;
 			_serializableData = serializableData;
 		}
 
@@ -56,6 +54,10 @@ namespace TrafficManager {
 
 				if (options.Length >= 5) {
 					Options.setNodesOverlay(options[4] == (byte)1);
+				}
+
+				if (options.Length >= 6) {
+					Options.setMayEnterBlockedJunctions(options[5] == (byte)1);
 				}
 			}
 
@@ -97,8 +99,39 @@ namespace TrafficManager {
 				foreach (var segment in _configuration.PrioritySegments) {
 					if (segment.Length < 3)
 						continue;
-					if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1]))
+#if DEBUG
+					bool debug = segment[0] == 13630;
+#endif
+
+					if ((PrioritySegment.PriorityType)segment[2] == PrioritySegment.PriorityType.None) {
+#if DEBUG
+						if (debug)
+							Log.Message($"Loading priority segment: Not adding 'None' priority segment: {segment[1]} @ node {segment[0]}");
+#endif
 						continue;
+					}
+
+					if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
+#if DEBUG
+						if (debug)
+							Log.Message($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
+#endif
+						continue;
+					}
+					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segment[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+#if DEBUG
+						if (debug)
+							Log.Message($"Loading priority segment: node {segment[0]} is invalid");
+#endif
+						continue;
+					}
+					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segment[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+#if DEBUG
+						if (debug)
+							Log.Message($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is invalid");
+#endif
+						continue;
+					}
 #if DEBUG
 					Log.Message($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
 #endif
@@ -115,6 +148,8 @@ namespace TrafficManager {
 					if (node.Length < 4)
 						continue;
 					if (TrafficLightSimulation.GetNodeSimulation((ushort)node[0]) != null)
+						continue;
+					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[node[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 						continue;
 #if DEBUG
 					Log.Message($"Adding node simulation {node[0]}");
@@ -136,16 +171,20 @@ namespace TrafficManager {
 			}
 
 			// Load live traffic lights
-			if (_configuration.ManualSegments != null) {
+			/*if (_configuration.ManualSegments != null) {
 				Log.Message($"Loading {_configuration.ManualSegments.Count()} live traffic lights");
 				foreach (var segmentData in _configuration.ManualSegments) {
 					if (segmentData.Length < 10)
 						continue;
 
+					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segmentData[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+						continue;
+					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentData[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+						continue;
 					if (TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]))
 						continue;
 #if DEBUG
-					Log.Message($"Adding Light to node {segmentData[0]}");
+					Log.Message($"Adding Light to node {segmentData[0]}, segment {segmentData[1]}");
 #endif
 					try {
 						Flags.setNodeTrafficLight((ushort)segmentData[0], true);
@@ -166,7 +205,7 @@ namespace TrafficManager {
 				}
 			} else {
 				Log.Warning("Live traffic lights data structure undefined!");
-			}
+			}*/
 
 			var timedStepCount = 0;
 			var timedStepSegmentCount = 0;
@@ -178,6 +217,8 @@ namespace TrafficManager {
 				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
 					try {
 						var nodeid = (ushort)_configuration.TimedNodes[i][0];
+						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeid].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+							continue;
 						Flags.setNodeTrafficLight(nodeid, true);
 #if DEBUG
 						Log.Message($"Adding Timed Node {i} at node {nodeid}");
@@ -237,12 +278,18 @@ namespace TrafficManager {
 								var mainLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
 								var rightLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
 								var pedLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
+								ManualSegmentLight.Mode? mode = null;
+								if (_configuration.TimedNodeStepSegments[timedStepSegmentCount].Length >= 5) {
+									mode = (ManualSegmentLight.Mode)_configuration.TimedNodeStepSegments[timedStepSegmentCount][4];
+								}
 
 								//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
-								step.segmentLightStates[segmentId].LightLeft = leftLightState;
+									step.segmentLightStates[segmentId].LightLeft = leftLightState;
 								step.segmentLightStates[segmentId].LightMain = mainLightState;
 								step.segmentLightStates[segmentId].LightRight = rightLightState;
 								step.segmentLightStates[segmentId].LightPedestrian = pedLightState;
+								if (mode != null)
+									step.segmentLightStates[segmentId].CurrentMode = (ManualSegmentLight.Mode)mode;
 
 								timedStepSegmentCount++;
 							}
@@ -266,7 +313,8 @@ namespace TrafficManager {
 			for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
 				//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
 				try {
-					if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road ||
+					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road &&
+						Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport) ||
 						(Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 						continue;
 						
@@ -378,9 +426,9 @@ namespace TrafficManager {
 					SaveTrafficLightSimulation(i, configuration);
 				}
 
-				if (TrafficLightsManual.ManualSegments != null) {
+				/*if (TrafficLightsManual.ManualSegments != null) {
 					SaveManualTrafficLight(i, configuration);
-				}
+				}*/
 
 				if (TrafficLightsTimed.TimedScripts != null) {
 					SaveTimedTrafficLight(i, configuration);
@@ -405,7 +453,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0)});
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -447,7 +495,7 @@ namespace TrafficManager {
 
 				if ((nodeFlags & NetNode.Flags.Created) == NetNode.Flags.None)
 					return true;
-				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road)
+				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport)
 					return true;
 
 				bool hasTrafficLight = Flags.isNodeTrafficLight((ushort)i);
@@ -503,7 +551,8 @@ namespace TrafficManager {
 							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightLeft),
 							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightMain),
 							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightRight),
-							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightPedestrian)
+							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightPedestrian),
+							(int) segLight.CurrentMode
 						});
 
 						++validCount;
@@ -594,7 +643,7 @@ namespace TrafficManager {
 					return;
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0) {
+				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0 && TrafficPriority.PrioritySegments[segmentId].Instance1.Type != PrioritySegment.PriorityType.None) {
 					Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node1}, seg. {segmentId}");
                     configuration.PrioritySegments.Add(new[]
 					{
@@ -603,7 +652,7 @@ namespace TrafficManager {
 					});
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0)
+				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 && TrafficPriority.PrioritySegments[segmentId].Instance2.Type != PrioritySegment.PriorityType.None)
 					return;
 
 				Log.Message($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node2}, seg. {segmentId}");

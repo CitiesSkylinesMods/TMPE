@@ -92,8 +92,16 @@ namespace TrafficManager.Traffic {
 			return Vehicles.Count;
 		}
 
+		internal int getNumApproachingVehicles() {
+			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 9 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 9).Count();
+		}
+
 		internal Dictionary<ushort, VehiclePosition> getCars() {
 			return Vehicles;
+		}
+
+		internal Dictionary<ushort, VehiclePosition> getApproachingVehicles() {
+			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 9 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 9).ToDictionary(e => e.Key, e => e.Value);
 		}
 	}
 }

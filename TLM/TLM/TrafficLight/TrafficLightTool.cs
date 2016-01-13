@@ -1491,6 +1491,11 @@ namespace TrafficManager.TrafficLight {
 				var node = GetNetNode(nodeId);
 
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				if (nodeSimulation == null)
+					continue;
+				TrafficLightsTimed timedNode = TrafficLightsTimed.GetTimedLight(nodeId);
+				if (timedNode == null)
+					continue;
 
 				for (var i = 0; i < 8; i++) {
 					ushort srcSegmentId = node.GetSegment(i); // source segment
@@ -1561,6 +1566,7 @@ namespace TrafficManager.TrafficLight {
 
 							if (checkClicked()) {
 								liveSegmentLight.ChangeMode();
+								timedNode.ChangeLightMode(srcSegmentId, liveSegmentLight.CurrentMode);
 							}
 						}
 					}
@@ -2482,7 +2488,9 @@ namespace TrafficManager.TrafficLight {
 				GUILayout.Label("Lane " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				Flags.applyLaneArrowFlags((uint)laneList[i][0]);
+				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
+					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
+				}
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Left);
 				}

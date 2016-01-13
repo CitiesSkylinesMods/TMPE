@@ -417,6 +417,12 @@ namespace TrafficManager.TrafficLight {
 			return true;
 		}
 
+		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
+			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
+				e.Value.CurrentMode = mode;
+			}
+		}
+
 		public object Clone() {
 			return MemberwiseClone();
 		}

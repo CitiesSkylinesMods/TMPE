@@ -4,7 +4,6 @@ namespace TrafficManager
     {
         None,
         Enter,
-        Transit,
         Stop,
         Leave
     }
