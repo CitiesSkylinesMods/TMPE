@@ -132,7 +132,7 @@ namespace TrafficManager.Traffic {
 			for (ushort i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
 				if (vehicleManager.m_vehicles.m_buffer[i].m_flags != Vehicle.Flags.None) {
 					try {
-						CustomCarAI.HandleVehicle(i, ref vehicleManager.m_vehicles.m_buffer[i]);
+						CustomCarAI.HandleVehicle(i, ref vehicleManager.m_vehicles.m_buffer[i], true);
 					} catch (Exception e) {
 						Log.Error("TrafficPriority HandleAllVehicles Error: " + e.ToString());
 					}
@@ -202,17 +202,21 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal static void ClearTraffic() {
-			var vehicleList = TrafficPriority.Vehicles.Keys.ToList();
+			try {
+				var vehicleList = TrafficPriority.Vehicles.Keys.ToList();
 
-			lock (Singleton<VehicleManager>.instance) {
-				foreach (var vehicle in
-					from vehicle in vehicleList
-					let vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicle]
-					where vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car
-					select vehicle) {
-					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicle);
+				lock (Singleton<VehicleManager>.instance) {
+					foreach (var vehicle in
+						from vehicle in vehicleList
+						let vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicle]
+						where vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car
+						select vehicle) {
+						Singleton<VehicleManager>.instance.ReleaseVehicle(vehicle);
+					}
 				}
-			}
+			} catch (Exception ex) {
+				Log.Error($"Error occured when trying to clear traffic: {ex.ToString()}");
+            }
 		}
 
 		/// <summary>
@@ -242,13 +246,17 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static bool HasIncomingVehicles(ushort targetCar, ushort nodeId) {
-			if (!Vehicles.ContainsKey(targetCar))
-				return false;
 #if DEBUG
-			bool debug = false;
+			bool debug = nodeId == 6090;
 #else
 			bool debug = false;
 #endif
+
+			if (!Vehicles.ContainsKey(targetCar)) {
+				Log.Warning($"HasIncomingVehicles: {targetCar} @ {nodeId}, fromSegment: {Vehicles[targetCar].FromSegment}, toSegment: {Vehicles[targetCar].ToSegment}. Car does not exist!");
+				return false;
+			}
+
 
 			if (debug) {
 				Log.Message($"HasIncomingVehicles: {targetCar} @ {nodeId}, fromSegment: {Vehicles[targetCar].FromSegment}, toSegment: {Vehicles[targetCar].ToSegment}");
@@ -425,20 +433,6 @@ namespace TrafficManager.Traffic {
 
 				// We assume the target car is coming from BOTTOM.
 
-				bool sameTargets = false;
-				bool laneOrderCorrect = false;
-				if (targetCar.ToSegment == incomingCar.ToSegment) {
-					// target and incoming are both going to same segment
-					sameTargets = true;
-					if (targetCar.ToLaneIndex == incomingCar.ToLaneIndex)
-						laneOrderCorrect = false;
-					else
-						laneOrderCorrect = LaneOrderCorrect(targetCar.ToSegment, targetCar.ToLaneId, incomingCar.ToLaneId);
-				}
-
-				if (sameTargets && laneOrderCorrect)
-					return true;
-
 				Direction targetToDir = GetDirection(targetCar.FromSegment, targetCar.ToSegment, nodeId);
 				Direction incomingRelDir = GetDirection(targetCar.FromSegment, incomingCar.FromSegment, nodeId);
 				Direction incomingToDir = GetDirection(incomingCar.FromSegment, incomingCar.ToSegment, nodeId);
@@ -450,14 +444,63 @@ namespace TrafficManager.Traffic {
 					incomingToDir = InvertLeftRight(incomingToDir);
 				}
 
+				bool sameTargets = false;
+				bool laneOrderCorrect = false;
+				if (targetCar.ToSegment == incomingCar.ToSegment) {
+					// target and incoming are both going to same segment
+					sameTargets = true;
+					if (targetCar.ToLaneIndex == incomingCar.ToLaneIndex && targetCar.FromSegment != incomingCar.FromSegment)
+						laneOrderCorrect = false;
+					else {
+						switch (targetToDir) {
+							case Direction.Left:
+								laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, targetCar.ToLaneIndex, incomingCar.ToLaneIndex); // stay left
+								break;
+							case Direction.Forward:
+							default:
+								switch (incomingRelDir) {
+									case Direction.Left:
+									case Direction.Forward:
+										laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, incomingCar.ToLaneIndex, targetCar.ToLaneIndex); // stay right
+										break;
+									case Direction.Right:
+										laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, targetCar.ToLaneIndex, incomingCar.ToLaneIndex); // stay left
+										break;
+									case Direction.Turn:
+									default:
+										laneOrderCorrect = true;
+										break;
+								}
+								break;
+							case Direction.Right:
+								laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, incomingCar.ToLaneIndex, targetCar.ToLaneIndex); // stay right
+								break;
+						}
+						laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, targetCar.ToLaneIndex, incomingCar.ToLaneIndex);
+					}
+				}
+
+				if (sameTargets && laneOrderCorrect) {
+					if (debug) {
+						Log.Message($"Lane order between car {targetCarId} and {incomingCarId} is correct!");
+					}
+					return true;
+				}
+
 				bool incomingCrossingStreet = incomingToDir == Direction.Forward || incomingToDir == Direction.Left;
 
 				switch (targetToDir) {
 					case Direction.Right:
 						// target: BOTTOM->RIGHT
+						if (debug) {
+							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going right without conflict!");
+                        }
 						return true;
 					case Direction.Forward:
 					default:
+						if (debug) {
+							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going forward: {incomingRelDir}, {targetIsOnMainRoad}, {incomingCrossingStreet}!");
+						}
 						// target: BOTTOM->TOP
 						switch (incomingRelDir) {
 							case Direction.Right:
@@ -468,6 +511,9 @@ namespace TrafficManager.Traffic {
 								return true;
 						}
 					case Direction.Left:
+						if (debug) {
+							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going left: {incomingRelDir}, {targetIsOnMainRoad}, {incomingIsOnMainRoad}, {incomingCrossingStreet}, {incomingToDir}!");
+						}
 						// target: BOTTOM->LEFT
 						switch (incomingRelDir) {
 							case Direction.Right:
@@ -503,7 +549,27 @@ namespace TrafficManager.Traffic {
 			priorityNodes.Clear();
 		}
 
-		public static bool LaneOrderCorrect(int segmentid, uint leftLane, uint rightLane) {
+		public static bool IsLaneOrderConflictFree(ushort segmentId, uint leftLaneIndex, uint rightLaneIndex) {
+			try {
+				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
+				NetInfo.Lane leftLane = segmentInfo.m_lanes[leftLaneIndex];
+				NetInfo.Lane rightLane = segmentInfo.m_lanes[rightLaneIndex];
+
+				// forward (right-hand traffic system): left < right
+				// backward (right-hand traffic system): left > right
+				if ((byte)(leftLane.m_direction & normDirection) != 0) {
+					return leftLane.m_position < rightLane.m_position; 
+				} else {
+					return rightLane.m_position < leftLane.m_position;
+				}
+			} catch (Exception e) {
+				Log.Error($"IsLaneOrderConflictFree({segmentId}, {leftLaneIndex}, {rightLaneIndex}): Error: {e.ToString()}");
+            }
+			return true;
+		}
+
+		/*public static bool LaneOrderCorrect(int segmentid, uint leftLane, uint rightLane) {
 			if (leftLane == rightLane)
 				return false;
 
@@ -512,36 +578,36 @@ namespace TrafficManager.Traffic {
 			var segment = instance.m_segments.m_buffer[segmentid];
 			var info = segment.Info;
 
-			var num2 = segment.m_lanes;
-			var num3 = 0;
+			var curLaneId = segment.m_lanes;
+			var laneIndex = 0;
 
 			var oneWaySegment = true;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[num3].m_direction == NetInfo.Direction.Backward)) {
+			while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
+				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
+					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Backward)) {
 					oneWaySegment = false;
+					break;
 				}
 
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
+				curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
+				laneIndex++;
 			}
 
-			num3 = 0;
+			laneIndex = 0;
 			var leftLanePosition = 0f;
 			var rightLanePosition = 0f;
 
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				if (num2 == leftLane) {
-					leftLanePosition = info.m_lanes[num3].m_position;
+			while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
+				if (curLaneId == leftLane) {
+					leftLanePosition = info.m_lanes[laneIndex].m_position;
 				}
 
-				if (num2 == rightLane) {
-					rightLanePosition = info.m_lanes[num3].m_position;
+				if (curLaneId == rightLane) {
+					rightLanePosition = info.m_lanes[laneIndex].m_position;
 				}
 
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
+				curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
+				laneIndex++;
 			}
 
 			if (oneWaySegment) {
@@ -555,7 +621,7 @@ namespace TrafficManager.Traffic {
 			}
 
 			return false;
-		}
+		}*/
 
 		/// <summary>
 		/// Determines the direction vehicles are turning when changing from segment `fromSegment` to segment `toSegment` at node `nodeId`.

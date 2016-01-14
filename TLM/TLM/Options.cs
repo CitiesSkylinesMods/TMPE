@@ -18,6 +18,7 @@ namespace TrafficManager {
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
 		private static UICheckBox mayEnterBlockedJunctionsToggle = null;
+		private static UICheckBox advancedAIToggle = null;
 
 		public static int simAccuracy = 1;
 		public static int laneChangingRandomization = 5;
@@ -25,14 +26,17 @@ namespace TrafficManager {
 		public static bool relaxedBusses = false;
 		public static bool nodesOverlay = false;
 		public static bool mayEnterBlockedJunctions = false;
+		public static bool advancedAI = false;
 
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition (Settings are defined for each savegame separately)");
 			simAccuracyDropdown = group.AddDropdown("Simulation accuracy (higher accuracy reduces performance):", new string[] { "Very high", "High", "Medium", "Low", "Very Low" }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
-			laneChangingRandomizationDropdown = group.AddDropdown("Drivers want to change lanes (BETA feature):", new string[] { "Almost everytime (50 %)", "Very often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Use game default" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			recklessDriversDropdown = group.AddDropdown("Reckless driving (BETA feature):", new string[] { "Path Of Evil (10 %)", "Rush Hour (5 %)", "Minor Complaints (2 %)", "The Holy City (0 %)" }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 			mayEnterBlockedJunctionsToggle = group.AddCheckbox("Vehicles may enter blocked junctions", mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
+			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
+			advancedAIToggle = groupAI.AddCheckbox("Enable Advanced Vehicle AI (traffic will be cleared)", advancedAI, onAdvancedAIChanged) as UICheckBox;
+			laneChangingRandomizationDropdown = groupAI.AddDropdown("Drivers want to change lanes (only applied if Advanced AI is enabled):", new string[] { "Very often (50 %)", "Often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Only if necessary" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			UIHelperBase group2 = helper.AddGroup("Maintenance");
 			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
 			nodesOverlayToggle = group2.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
@@ -56,6 +60,12 @@ namespace TrafficManager {
 		private static void onRelaxedBussesChanged(bool newRelaxedBusses) {
 			Log.Message($"Relaxed busses changed to {newRelaxedBusses}");
 			relaxedBusses = newRelaxedBusses;
+		}
+
+		private static void onAdvancedAIChanged(bool newAdvancedAI) {
+			Log.Message($"advancedAI busses changed to {newAdvancedAI}");
+			advancedAI = newAdvancedAI;
+			TrafficPriority.ClearTraffic();
 		}
 
 		private static void onMayEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
@@ -91,13 +101,19 @@ namespace TrafficManager {
 		}
 
 		internal static bool isStockLaneChangerUsed() {
-			return laneChangingRandomization == 5;
+			return !advancedAI;
 		}
 
 		public static void setRelaxedBusses(bool newRelaxedBusses) {
 			relaxedBusses = newRelaxedBusses;
 			if (relaxedBussesToggle != null)
 				relaxedBussesToggle.isChecked = newRelaxedBusses;
+		}
+
+		public static void setAdvancedAI(bool newAdvancedAI) {
+			advancedAI = newAdvancedAI;
+			if (advancedAIToggle != null)
+				advancedAIToggle.isChecked = newAdvancedAI;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
@@ -125,7 +141,7 @@ namespace TrafficManager {
 				case 4:
 					return 40;
 			}
-			return 1000;
+			return 100;
 		}
 
 		internal static int getRecklessDriverModulo() {

@@ -59,6 +59,10 @@ namespace TrafficManager {
 				if (options.Length >= 6) {
 					Options.setMayEnterBlockedJunctions(options[5] == (byte)1);
 				}
+
+				if (options.Length >= 7) {
+					Options.setAdvancedAI(options[6] == (byte)1);
+				}
 			}
 
 			// load toggled traffic lights
@@ -111,13 +115,6 @@ namespace TrafficManager {
 						continue;
 					}
 
-					if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
-#if DEBUG
-						if (debug)
-							Log.Message($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
-#endif
-						continue;
-					}
 					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segment[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 #if DEBUG
 						if (debug)
@@ -130,6 +127,14 @@ namespace TrafficManager {
 						if (debug)
 							Log.Message($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is invalid");
 #endif
+						continue;
+					}
+					if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
+#if DEBUG
+						if (debug)
+							Log.Message($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
+#endif
+						TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (PrioritySegment.PriorityType)segment[2];
 						continue;
 					}
 #if DEBUG
@@ -453,7 +458,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

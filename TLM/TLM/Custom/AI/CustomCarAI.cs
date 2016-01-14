@@ -15,7 +15,7 @@ namespace TrafficManager.Custom.AI {
 		public static HashSet<ushort> watchedVehicleIds = new HashSet<ushort>();
 
 		private static int[] closeLodUpdateMod = new int[] { 0, 1, 2, 4, 6 };
-		private static int[] farLodUpdateMod = new int[] { 4, 8, 10, 12, 16 };
+		private static int[] farLodUpdateMod = new int[] { 2, 4, 6, 8, 10 };
 		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 16, 20 };
 
 		public void Awake() {
@@ -32,7 +32,7 @@ namespace TrafficManager.Custom.AI {
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
-		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic) {
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
 
@@ -129,22 +129,21 @@ namespace TrafficManager.Custom.AI {
 			TrafficPriority.Vehicles[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 #if DEBUG
-			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + TrafficPriority.Vehicles[vehicleId].ToNode + ". FromSegment: " + TrafficPriority.Vehicles[vehicleId].FromSegment + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId);
+			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + TrafficPriority.Vehicles[vehicleId].ToNode + ". FromSegment: " + TrafficPriority.Vehicles[vehicleId].FromSegment/* + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId*/);
 #endif
-			if (realTimePositions.Count > 0) {
+			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
 				// add traffic to lane
-				ushort leaderId = vehicleData.m_leadingVehicle == 0 ? vehicleId : vehicleData.m_leadingVehicle;
 				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
-				//CustomRoadAI.laneTrafficBuffer[laneId] = (byte)Math.Min(65535, CustomRoadAI.laneTrafficBuffer[laneId] + (uint)Mathf.RoundToInt(vehicleData.CalculateTotalLength(leaderId) * 2.5f));
+				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)));
 			}
 
 			if (realTimePositions.Count >= 2) {
 				// we found a valid path unit
-				var sourceLaneId = PathManager.GetLaneID(realTimePositions[0]);
+				var sourceLaneIndex = realTimePositions[0].m_lane;
 				var oldPriorityCar = TrafficPriority.Vehicles[vehicleId];
 				if (oldPriorityCar.ToNode != realTimeDestinationNodes[0] ||
 					oldPriorityCar.FromSegment != realTimePositions[0].m_segment ||
-					oldPriorityCar.FromLaneId != sourceLaneId) {
+					oldPriorityCar.FromLaneIndex != sourceLaneIndex) {
 					// vehicle information is not up-to-date. remove the car from an old priority segment (if existing)...
 					var oldNode = oldPriorityCar.ToNode;
 					var oldSegment = oldPriorityCar.FromSegment;
@@ -161,14 +160,15 @@ namespace TrafficManager.Custom.AI {
 					// save vehicle information for priority rule handling
 					TrafficPriority.Vehicles[vehicleId].ToNode = realTimeDestinationNodes[0];
 					TrafficPriority.Vehicles[vehicleId].FromSegment = realTimePositions[0].m_segment;
-					TrafficPriority.Vehicles[vehicleId].FromLaneId = PathManager.GetLaneID(realTimePositions[0]);
+					//TrafficPriority.Vehicles[vehicleId].FromLaneId = PathManager.GetLaneID(realTimePositions[0]);
 					TrafficPriority.Vehicles[vehicleId].ToSegment = realTimePositions[1].m_segment;
-					if (realTimePositions[1].m_segment > 0)
+					/*if (realTimePositions[1].m_segment > 0)
 						TrafficPriority.Vehicles[vehicleId].ToLaneId = PathManager.GetLaneID(realTimePositions[1]);
 					else
-						TrafficPriority.Vehicles[vehicleId].ToLaneId = 0;
+						TrafficPriority.Vehicles[vehicleId].ToLaneId = 0;*/
 					TrafficPriority.Vehicles[vehicleId].ReduceSpeedByValueToYield = Random.Range(13f, 18f);
 
+					float totalLength = 0f;
 					// add the vehicle to upcoming priority segments that have timed traffic lights
 					for (int i = 0; i < realTimePositions.Count - 1; ++i) {
 						var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[i], realTimePositions[i].m_segment);
@@ -177,19 +177,21 @@ namespace TrafficManager.Custom.AI {
 
 						// add upcoming segments only if there is a timed traffic light
 						TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(realTimeDestinationNodes[i]);
-						if (i > 0 && (nodeSim == null || !nodeSim.TimedTrafficLights || !nodeSim.TimedTrafficLightsActive))
+						if (i > 0 && (nodeSim == null || !nodeSim.TimedTrafficLights || !nodeSim.TimedTrafficLightsActive) && totalLength > 50)
 							continue;
+
+						totalLength += Singleton<NetManager>.instance.m_segments.m_buffer[realTimePositions[i].m_segment].m_averageLength;
 
 						VehiclePosition carPos = new VehiclePosition();
 						carPos.LastFrame = TrafficPriority.Vehicles[vehicleId].LastFrame;
 						carPos.ToNode = realTimeDestinationNodes[i];
 						carPos.FromSegment = realTimePositions[i].m_segment;
-						carPos.FromLaneId = PathManager.GetLaneID(realTimePositions[i]);
+						//carPos.FromLaneId = PathManager.GetLaneID(realTimePositions[i]);
 						carPos.ToSegment = realTimePositions[i+1].m_segment;
-						if (realTimePositions[i+1].m_segment > 0)
+						/*if (realTimePositions[i+1].m_segment > 0)
 							carPos.ToLaneId = PathManager.GetLaneID(realTimePositions[i+1]);
 						else
-							carPos.ToLaneId = 0;
+							carPos.ToLaneId = 0;*/
 						carPos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
 
 						prioritySegment.AddCar(vehicleId, carPos);
@@ -228,7 +230,7 @@ namespace TrafficManager.Custom.AI {
 			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
 
 			try {
-				HandleVehicle(vehicleId, ref vehicleData);
+				HandleVehicle(vehicleId, ref vehicleData, true);
 			} catch (Exception e) {
 				Log.Error("CarAI TrafficManagerSimulationStep Error: " + e.ToString());
 			}
@@ -360,7 +362,7 @@ namespace TrafficManager.Custom.AI {
 					) {
 					//Log.Message("handle vehicle after threshold");
 					try {
-						HandleVehicle(vehicleId, ref vehicleData);
+						HandleVehicle(vehicleId, ref vehicleData, false);
 					} catch (Exception e) {
 						Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
 					}

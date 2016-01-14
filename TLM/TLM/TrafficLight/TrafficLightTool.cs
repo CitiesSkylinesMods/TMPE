@@ -1343,7 +1343,7 @@ namespace TrafficManager.TrafficLight {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
 
-				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", final dir: " + laneInfo.m_finalDirection + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", traffic: " + CustomRoadAI.laneTrafficDensity[curLaneId] + "\n";
+				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", traffic: " + CustomRoadAI.laneTrafficDensity[curLaneId] + "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -3025,7 +3025,11 @@ namespace TrafficManager.TrafficLight {
 							float flow = Single.NaN;
 							float wait = Single.NaN;
 							if (timedNodeMain.IsInTestMode()) {
-								timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(out wait, out flow);
+								try {
+									timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(out wait, out flow);
+								} catch (Exception e) {
+									Log.Warning("calcWaitFlow in UI: This is not thread-safe: " + e.ToString());
+								}
 							} else {
 								wait = timedNodeMain.GetStep(i).maxWait;
 								flow = timedNodeMain.GetStep(i).minFlow;

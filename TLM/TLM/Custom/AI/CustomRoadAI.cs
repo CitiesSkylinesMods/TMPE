@@ -83,12 +83,14 @@ namespace TrafficManager.Custom.AI {
 					int laneIndex = 0;
 					while (laneIndex < nextNumLanes && curLaneId != 0u) {
 						float laneLength = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length;
-						int currentDensity = Math.Min(100, Mathf.RoundToInt((float)laneTrafficBuffer[curLaneId] / laneLength * 100f));
-						float diff = currentDensity - laneTrafficDensity[curLaneId];
+						int buf = Convert.ToInt32(laneTrafficBuffer[curLaneId]);
+						int currentDensity = Math.Min(100, Mathf.RoundToInt((float)(buf >> 2) / laneLength * 100f));
+						int prevDensity = Convert.ToInt32(laneTrafficDensity[curLaneId]);
+						int diff = currentDensity - prevDensity;
 						if (diff > 0)
-							laneTrafficDensity[curLaneId] = (byte)Mathf.Clamp(laneTrafficDensity[curLaneId] + 1, 0, 100);
+							laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity + 5, 0, 100));
 						else if (diff < 0)
-							laneTrafficDensity[curLaneId] = (byte)Mathf.Clamp(laneTrafficDensity[curLaneId] - 1, 0, 100);
+							laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity - 5, 0, 100));
 
 						laneTrafficBuffer[curLaneId] = 0;
 
@@ -425,7 +427,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		internal static void AddTraffic(uint laneID, ushort val) {
-			laneTrafficBuffer[laneID] += val;
+			laneTrafficBuffer[laneID] = (ushort)Math.Min(65535u, (uint)laneTrafficBuffer[laneID] + (uint)val);
 		}
 	}
 }
