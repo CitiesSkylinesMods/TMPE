@@ -52,6 +52,12 @@ namespace TrafficManager.State {
 				return;
 			}
 
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
+				Log.Warning("Flags: Refusing to add traffic light to non-junction");
+				nodeTrafficLightFlag.Remove(nodeId);
+				return;
+			}
+
 			nodeTrafficLightFlag[nodeId] = flag;
 			applyNodeTrafficLightFlag(nodeId);
 		}

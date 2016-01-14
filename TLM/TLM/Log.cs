@@ -5,7 +5,7 @@ namespace TrafficManager {
 
     public static class Log {
         const string Prefix = "TrafficLightManager: ";
-		private static readonly bool InGameDebug = true; // Environment.OSVersion.Platform != PlatformID.Unix;
+		private static readonly bool InGameDebug = Environment.OSVersion.Platform != PlatformID.Unix;
 
         public static void Message(string s) {
 #if DEBUG
@@ -26,8 +26,7 @@ namespace TrafficManager {
                 if (InGameDebug) {
 #if DEBUG
 					Debug.LogError(Prefix + s);
-#else
-					DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s);
+					//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s);
 #endif
 				}
             } catch (Exception) {
@@ -41,8 +40,7 @@ namespace TrafficManager {
                 if (InGameDebug) {
 #if DEBUG
 					Debug.LogWarning(Prefix + s);
-#else
-					DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s);
+					//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s);
 #endif
 				}
 			} catch (Exception) {
