@@ -3,7 +3,9 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 
 # Changelog
 1.4.0, 01/15/2016
-- Included an advanced vehicle AI
+- Introducing Advanced Vehicle AI (disabled by default! Go to "Options" and enable it if you want to use it.)
+- Bugfix: Traffic lights were popping up in the middle of roads
+- Bugfix: Fixed the lane changer for left-hand traffic systems (thanks to @Phishie for pointing out this problem) 
 
 1.3.24, 01/13/2016
 - Improved handling of priority signs

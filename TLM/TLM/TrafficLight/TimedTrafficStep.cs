@@ -419,6 +419,8 @@ namespace TrafficManager.TrafficLight {
 
 		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
 			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
+				if (e.Key != segmentId)
+					continue;
 				e.Value.CurrentMode = mode;
 			}
 		}

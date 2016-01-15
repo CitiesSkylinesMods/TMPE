@@ -63,9 +63,14 @@ namespace TrafficManager {
 		}
 
 		private static void onAdvancedAIChanged(bool newAdvancedAI) {
-			Log.Message($"advancedAI busses changed to {newAdvancedAI}");
-			advancedAI = newAdvancedAI;
-			TrafficPriority.ClearTraffic();
+			if (LoadingExtension.IsPathManagerCompatible) {
+				Log.Message($"advancedAI busses changed to {newAdvancedAI}");
+				advancedAI = newAdvancedAI;
+				TrafficPriority.ClearTraffic();
+			} else if (newAdvancedAI) {
+				setAdvancedAI(false);
+				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Advanced AI cannot be activated", "The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
+			}
 		}
 
 		private static void onMayEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
@@ -111,7 +116,11 @@ namespace TrafficManager {
 		}
 
 		public static void setAdvancedAI(bool newAdvancedAI) {
-			advancedAI = newAdvancedAI;
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				advancedAI = false;
+			} else {
+				advancedAI = newAdvancedAI;
+			}
 			if (advancedAIToggle != null)
 				advancedAIToggle.isChecked = newAdvancedAI;
 		}
