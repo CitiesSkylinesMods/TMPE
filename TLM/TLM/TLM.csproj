@@ -64,6 +64,7 @@
     <Compile Include="Custom\AI\CustomHumanAI.cs" />
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
+    <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="CustomNetTool.cs" />
     <Compile Include="Custom\Misc\CustomPathFind.cs" />

@@ -26,13 +26,17 @@ namespace TrafficManager.Custom.AI {
 			watchedVehicleIds.Clear();
 		}
 
+		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic) {
+			HandleVehicle(vehicleId, ref vehicleData, addTraffic, 2);
+		}
+
 		/// <summary>
 		/// Handles vehicle path information in order to manage special nodes (nodes with priority signs or traffic lights).
 		/// Data like "vehicle X is on segment S0 and is going to segment S1" is collected.
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
-		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic) {
+		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, byte maxPathUnits) {
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
 
@@ -41,7 +45,7 @@ namespace TrafficManager.Custom.AI {
 			bool logme = (vehicleId == 16310);
 #endif
 
-			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car) {
+			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car && vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Train) {
 				Log.Message($"HandleVehicle does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
                 return;
 			}
@@ -108,7 +112,7 @@ namespace TrafficManager.Custom.AI {
 						realTimePositions.Add(nextRealTimePosition);
 						realTimeDestinationNodes.Add(destNodeId);
 
-						if (i >= 1)
+						if (i >= maxPathUnits - 1)
 							break; // we calculate up to 2 upcoming path units at the moment
 
 						++pathPos;

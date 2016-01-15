@@ -103,66 +103,78 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				if (LoadingExtension.IsPathManagerCompatible) {
-					Log.Message("Traffic++ Not detected. Loading Pathfinder.");
-					Log.Message("Redirecting CarAI Simulation Step Calls");
-					try {
-						LoadingExtension.Instance.OriginalMethods[4] = typeof(CarAI).GetMethod("SimulationStep",
-									new[] {
-										typeof (ushort),
-										typeof (Vehicle).MakeByRefType(),
-										typeof (Vector3)
-									});
-						LoadingExtension.Instance.CustomMethods[4] = typeof(CustomCarAI).GetMethod("TrafficManagerSimulationStep");
-						LoadingExtension.Instance.CustomRedirects[4] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[4], LoadingExtension.Instance.CustomMethods[4]);
-					} catch (Exception) {
-						Log.Error("Could not redirect CarAI::SimulationStep.");
-						detourFailed = true;
-					}
+				Log.Message("Redirecting CarAI Simulation Step Calls");
+				try {
+					LoadingExtension.Instance.OriginalMethods[4] = typeof(CarAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3)
+								});
+					LoadingExtension.Instance.CustomMethods[4] = typeof(CustomCarAI).GetMethod("TrafficManagerSimulationStep");
+					LoadingExtension.Instance.CustomRedirects[4] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[4], LoadingExtension.Instance.CustomMethods[4]);
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::SimulationStep.");
+					detourFailed = true;
+				}
 
-					Log.Message("Redirecting PassengerCarAI Simulation Step Calls");
-					try {
-						LoadingExtension.Instance.OriginalMethods[5] = typeof(PassengerCarAI).GetMethod("SimulationStep",
+				Log.Message("Redirecting PassengerCarAI Simulation Step Calls");
+				try {
+					LoadingExtension.Instance.OriginalMethods[5] = typeof(PassengerCarAI).GetMethod("SimulationStep",
+							new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
+					LoadingExtension.Instance.CustomMethods[5] = typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep");
+					LoadingExtension.Instance.CustomRedirects[5] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[5], LoadingExtension.Instance.CustomMethods[5]);
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				Log.Message("Redirecting CargoTruckAI Simulation Step Calls");
+				try {
+					LoadingExtension.Instance.OriginalMethods[6] = typeof(CargoTruckAI).GetMethod("SimulationStep",
 								new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-						LoadingExtension.Instance.CustomMethods[5] = typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep");
-						LoadingExtension.Instance.CustomRedirects[5] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[5], LoadingExtension.Instance.CustomMethods[5]);
-					} catch (Exception) {
-						Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
-						detourFailed = true;
-					}
+					LoadingExtension.Instance.CustomMethods[6] = typeof(CustomCargoTruckAI).GetMethod("CustomSimulationStep");
+					LoadingExtension.Instance.CustomRedirects[6] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[6], LoadingExtension.Instance.CustomMethods[6]);
+				} catch (Exception) {
+					Log.Error("Could not redirect CargoTruckAI::SimulationStep.");
+					detourFailed = true;
+				}
 
-					Log.Message("Redirecting CargoTruckAI Simulation Step Calls");
-					try {
-						LoadingExtension.Instance.OriginalMethods[6] = typeof(CargoTruckAI).GetMethod("SimulationStep",
-									new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
-						LoadingExtension.Instance.CustomMethods[6] = typeof(CustomCargoTruckAI).GetMethod("CustomSimulationStep");
-						LoadingExtension.Instance.CustomRedirects[6] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[6], LoadingExtension.Instance.CustomMethods[6]);
-					} catch (Exception) {
-						Log.Error("Could not redirect CargoTruckAI::SimulationStep.");
-						detourFailed = true;
-					}
+				Log.Message("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
+				try {
+					LoadingExtension.Instance.OriginalMethods[7] = typeof(CarAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
+								typeof (float).MakeByRefType()
+							},
+							null);
+					LoadingExtension.Instance.CustomMethods[7] = typeof(CustomCarAI).GetMethod("TmCalculateSegmentPositionPathFinder");
+					LoadingExtension.Instance.CustomRedirects[7] =
+						RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[7], LoadingExtension.Instance.CustomMethods[7]);
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
+					detourFailed = true;
+				}
 
-					Log.Message("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
-					try {
-						LoadingExtension.Instance.OriginalMethods[7] = typeof(CarAI).GetMethod("CalculateSegmentPosition",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
-									typeof (uint),
-									typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
-									typeof (float).MakeByRefType()
-								},
-								null);
-						LoadingExtension.Instance.CustomMethods[7] = typeof(CustomCarAI).GetMethod("TmCalculateSegmentPositionPathFinder");
-						LoadingExtension.Instance.CustomRedirects[7] =
-							RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[7], LoadingExtension.Instance.CustomMethods[7]);
-					} catch (Exception) {
-						Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
-						detourFailed = true;
-					}
-				} // path manager compatible
+				Log.Message("Redirecting TrainAI Simulation Step Calls");
+				try {
+					LoadingExtension.Instance.OriginalMethods[8] = typeof(TrainAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3)
+								});
+					LoadingExtension.Instance.CustomMethods[8] = typeof(CustomTrainAI).GetMethod("TrafficManagerSimulationStep");
+					LoadingExtension.Instance.CustomRedirects[8] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[8], LoadingExtension.Instance.CustomMethods[8]);
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::SimulationStep.");
+					detourFailed = true;
+				}
 
 				if (detourFailed) {
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
@@ -181,9 +193,9 @@ namespace TrafficManager {
             ToolMode = TrafficManagerMode.None;
 
             Log.Message("Init RevertMethods");
-			OriginalMethods = new MethodInfo[8];
-			CustomMethods = new MethodInfo[8];
-			CustomRedirects = new RedirectCallsState[8];
+			OriginalMethods = new MethodInfo[9];
+			CustomMethods = new MethodInfo[9];
+			CustomRedirects = new RedirectCallsState[9];
 
             Log.Message("Setting Despawn to False");
             DespawnEnabled = true;
