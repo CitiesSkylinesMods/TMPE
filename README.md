@@ -2,6 +2,9 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.1, 01/05/2016
+Bugfix: Path-finding near junctions fixed
+
 1.4.0, 01/15/2016
 - Introducing Advanced Vehicle AI (disabled by default! Go to "Options" and enable it if you want to use it.)
 - Bugfix: Traffic lights were popping up in the middle of roads

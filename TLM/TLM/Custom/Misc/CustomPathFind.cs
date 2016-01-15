@@ -1109,7 +1109,9 @@ namespace TrafficManager.Custom.Misc {
 			float nextDensity = 0f;
 			int prevRightSimilarLaneIndex = -1;
 			NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
-																																	  // NON-STOCK CODE END //
+			int prevLanes = 1;
+			float prevDensity = 0f;
+			// NON-STOCK CODE END //
 			if ((int)item.m_position.m_lane < prevSegmentInfo.m_lanes.Length) {
 				NetInfo.Lane lane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				laneType = lane.m_laneType;
@@ -1117,11 +1119,13 @@ namespace TrafficManager.Custom.Misc {
 				maxSpeed = lane.m_speedLimit;
 				laneSpeed = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane);
 				// NON-STOCK CODE START //
+				prevLanes = lane.m_similarLaneCount;
 				if ((byte)(lane.m_direction & normDirection) != 0) {
 					prevRightSimilarLaneIndex = lane.m_similarLaneIndex;
 				} else {
 					prevRightSimilarLaneIndex = lane.m_similarLaneCount - lane.m_similarLaneIndex - 1;
 				}
+				prevDensity = CustomRoadAI.laneMeanTrafficDensity[item.m_laneID];
 				// NON-STOCK CODE END //
 			}
 			float cost = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_averageLength;
@@ -1164,13 +1168,16 @@ namespace TrafficManager.Custom.Misc {
 			ushort sourceNodeId = (targetNodeId == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? instance.m_segments.m_buffer[item.m_position.m_segment].m_endNode : instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode; // no lane changing directly in front of a junction
 																																																																   //NetNode sourceNode = instance.m_nodes.m_buffer[sourceNodeId];
 			bool prevIsJunction = instance.m_nodes.m_buffer[sourceNodeId].CountSegments() > 2;
-			bool changeLane = /*!prevIsHighway &&*/
+			int laneTargetValue = Options.getLaneChangingRandomizationTargetValue();
+			if (this._isHeavyVehicle)
+				laneTargetValue *= 2;
+			bool changeLane =
 				!prevIsJunction &&
-				!this._stablePath/* && density <= 0.5f*/ &&
+				!this._stablePath &&
 				forceLaneIndex == null &&
 				customLaneChanging &&
-				/*_pathRandomizer.Int32(0, 100) >= segmentDensity &&*/
-				_pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1; // lane randomization
+				prevDensity <= 0.5f &&
+				_pathRandomizer.Int32(1, laneTargetValue) == 1; // lane randomization
 			int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
 			bool nextIsHighway = false;
 			if (nextSegmentInfo.m_netAI is RoadBaseAI)
@@ -1181,11 +1188,7 @@ namespace TrafficManager.Custom.Misc {
 				if (forceLaneIndex != null && laneIndex != forceLaneIndex)
 					break;
 				if (customLaneChanging) {
-					int d = CustomRoadAI.laneTrafficDensity[curLaneId];
-					if (d > 0) {
-						nextDensity = (float)_pathRandomizer.Int32(0, d) * 0.01f; // 0..1 in 100 steps of 0.01
-					} else
-						nextDensity = 0;
+					nextDensity = CustomRoadAI.laneMeanTrafficDensity[curLaneId];
 				}
 				// NON-STOCK CODE END //
 
@@ -1274,50 +1277,65 @@ namespace TrafficManager.Custom.Misc {
 								} else {
 									nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
 								}
+								int maxLaneDiff = Math.Max(prevLanes, nextLane.m_similarLaneCount);
 
 								bool doLaneChange = changeLane;
 
 								// vehicles should choose lanes with low traffic volume if possible, especially before junctions.
 								int laneDist = Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex);
-								if (laneDist > 0 || doLaneChange) {
-									float trafficCost = (float)Math.Max(1, 5 - item2.m_numSegmentsToJunction) * (0.01f*nextDensity); // 0.000 .. 0.05
-									item2.m_comparisonValue += trafficCost;
+								float trafficFactor = (float)Math.Max(1, 5 - (int)item2.m_numSegmentsToJunction);
+								float maxTrafficCost = 4f;
+								float trafficCost = (trafficFactor * nextDensity) / maxTrafficCost;
 
-									/*if (nextDensity >= 0.4f)
-										doLaneChange = false; // avoid lane changes on crowded roads*/
+								if (trafficCost > 1) {
+									Log.Warning($"trafficCost={trafficCost}={trafficFactor},{nextDensity}");
 								}
 
 								// vehicles should generally avoid changing more than one lane.
+								float laneChangeCost = 0f;
 								if (laneDist > 1)
-									item2.m_comparisonValue += 0.001f * laneDist * laneDist; // (*) -- 0.004, 0.009, 0.016, 0.025
+									laneChangeCost = Math.Min(1f, Math.Max(0f, (float)laneDist / (float)maxLaneDiff)); // (*)
 
 								// highway exit handling
+								float junctionCost = 0f;
 								if (laneDist > 0 && nextIsHighway) {
 									// calculate costs for changing lane near highway junctions
-									float junctionCost = 0f;
 									// on highways: vehicles should not switch lanes directly before an exit.
 									int decelerationLaneLength = _pathRandomizer.Int32(1, 4);
-									int decelerationLaneEntryLength = _pathRandomizer.Int32(1, 2);
 									if (item2.m_numSegmentsToJunction <= decelerationLaneLength) {
 										// stay on lane before exit
-										junctionCost += 0.001f * laneDist; // 1 .. 1.0025
+										junctionCost = Math.Min(1f, Math.Max(0f, (float)laneDist / (float)maxLaneDiff));
 										doLaneChange = false;
 									}
-									item2.m_comparisonValue += junctionCost;
 								}
 
-								if (laneDist == 1 && !doLaneChange) {
-									// do not change lane
-									item2.m_comparisonValue += 0.001f; // should be similarily calculated as (*)
-								} else if (laneDist == 0 && doLaneChange) {
-									// change lane
-									item2.m_comparisonValue += 0.001f;
+								if ((laneDist == 1 && !doLaneChange) || (laneDist == 0 && doLaneChange)) {
+									// do not change lane / change lane
+									laneChangeCost = 1f / (float)maxLaneDiff; // should be similarily calculated as (*)
 								}
-								
-								/*if (Options.nodesOverlay && item2.m_position.m_segment % 10 == 0)
-									Log.Message($">> seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}");*/
+
+								float totalCost = 0f;
+								if (laneDist > 0 && nextIsHighway) {
+									float weight;
+									if (this._isHeavyVehicle)
+										weight = (float)_pathRandomizer.Int32(5, 10) * 0.01f;
+									else
+										weight = (float)_pathRandomizer.Int32(10, 20) * 0.01f;
+									totalCost = weight * trafficCost + 0.2f * junctionCost + (0.8f - weight) * laneChangeCost;
+								} else {
+									float weight;
+									if (this._isHeavyVehicle)
+										weight = (float)_pathRandomizer.Int32(10, 20) * 0.01f;
+									else
+										weight = (float)_pathRandomizer.Int32(20, 30) * 0.01f;
+									totalCost = weight * trafficCost + (1f - weight) * laneChangeCost;
+								}
+								item2.m_comparisonValue += 0.1f * totalCost;
+
 								item2.m_comparisonValue = Math.Max(0f, Math.Min(1f, item2.m_comparisonValue));
-							}
+								if (debug)
+									Log.Message($">> seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} ({0.1f * totalCost})={trafficCost} * {junctionCost} * {laneChangeCost}");
+                            }
 							if (forceLaneIndex != null && laneIndex == forceLaneIndex)
 								foundForced = true;
 

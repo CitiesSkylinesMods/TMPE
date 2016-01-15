@@ -35,7 +35,7 @@ namespace TrafficManager {
 			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 			mayEnterBlockedJunctionsToggle = group.AddCheckbox("Vehicles may enter blocked junctions", mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
-			advancedAIToggle = groupAI.AddCheckbox("Enable Advanced Vehicle AI (traffic will be cleared)", advancedAI, onAdvancedAIChanged) as UICheckBox;
+			advancedAIToggle = groupAI.AddCheckbox("Enable Advanced Vehicle AI", advancedAI, onAdvancedAIChanged) as UICheckBox;
 			laneChangingRandomizationDropdown = groupAI.AddDropdown("Drivers want to change lanes (only applied if Advanced AI is enabled):", new string[] { "Very often (50 %)", "Often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Only if necessary" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			UIHelperBase group2 = helper.AddGroup("Maintenance");
 			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
@@ -66,7 +66,6 @@ namespace TrafficManager {
 			if (LoadingExtension.IsPathManagerCompatible) {
 				Log.Message($"advancedAI busses changed to {newAdvancedAI}");
 				advancedAI = newAdvancedAI;
-				TrafficPriority.ClearTraffic();
 			} else if (newAdvancedAI) {
 				setAdvancedAI(false);
 				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Advanced AI cannot be activated", "The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);

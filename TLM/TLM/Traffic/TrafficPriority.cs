@@ -247,7 +247,7 @@ namespace TrafficManager.Traffic {
 
 		public static bool HasIncomingVehicles(ushort targetCar, ushort nodeId) {
 #if DEBUG
-			bool debug = nodeId == 6090;
+			bool debug = false;
 #else
 			bool debug = false;
 #endif

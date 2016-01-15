@@ -1343,7 +1343,7 @@ namespace TrafficManager.TrafficLight {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
 
-				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", traffic: " + CustomRoadAI.laneTrafficDensity[curLaneId] + "\n";
+				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", t: " + CustomRoadAI.laneTrafficDensity[curLaneId] + ", mt: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanTrafficDensity[curLaneId]*100) + " %\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1395,7 +1395,9 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
+#if DEBUG
 				_guiLanes(ref segment, ref segmentInfo);
+#endif
 			}
 		}
 
