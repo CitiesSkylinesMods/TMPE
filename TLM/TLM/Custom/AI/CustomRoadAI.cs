@@ -81,30 +81,32 @@ namespace TrafficManager.Custom.AI {
 				}
 
 
-				try {
-					// calculate traffic density
-					uint curLaneId = data.m_lanes;
-					int nextNumLanes = data.Info.m_lanes.Length;
-					int laneIndex = 0;
-					while (laneIndex < nextNumLanes && curLaneId != 0u) {
-						float laneLength = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length;
-						int buf = Convert.ToInt32(laneTrafficBuffer[curLaneId]);
-						int currentDensity = Math.Min(100, Mathf.RoundToInt((float)(buf >> 1) / laneLength * 100f));
-						int prevDensity = Convert.ToInt32(laneTrafficDensity[curLaneId]);
-						int diff = currentDensity - prevDensity;
-						if (diff > 0)
-							laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity + 5, 0, 100));
-						else if (diff < 0)
-							laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity - 5, 0, 100));
+				if (!Options.isStockLaneChangerUsed()) {
+					try {
+						// calculate traffic density
+						uint curLaneId = data.m_lanes;
+						int nextNumLanes = data.Info.m_lanes.Length;
+						int laneIndex = 0;
+						while (laneIndex < nextNumLanes && curLaneId != 0u) {
+							float laneLength = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length;
+							int buf = Convert.ToInt32(laneTrafficBuffer[curLaneId]);
+							int currentDensity = Math.Min(100, Mathf.RoundToInt((float)(buf >> 1) / laneLength * 100f));
+							int prevDensity = Convert.ToInt32(laneTrafficDensity[curLaneId]);
+							int diff = currentDensity - prevDensity;
+							if (diff > 0)
+								laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity + 5, 0, 100));
+							else if (diff < 0)
+								laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity - 5, 0, 100));
 
-						laneMeanTrafficDensity[curLaneId] = 0.99f * laneMeanTrafficDensity[curLaneId] + 0.01f * (float)laneTrafficDensity[curLaneId] * 0.01f;
-						laneTrafficBuffer[curLaneId] = 0;
+							laneMeanTrafficDensity[curLaneId] = 0.99f * laneMeanTrafficDensity[curLaneId] + 0.01f * (float)laneTrafficDensity[curLaneId] * 0.01f;
+							laneTrafficBuffer[curLaneId] = 0;
 
-						laneIndex++;
-						curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+							laneIndex++;
+							curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+						}
+					} catch (Exception e) {
+						Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
 					}
-				} catch (Exception e) {
-					Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
 				}
 			}
 

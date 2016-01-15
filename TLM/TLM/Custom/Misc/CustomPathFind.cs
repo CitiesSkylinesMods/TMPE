@@ -1197,12 +1197,20 @@ namespace TrafficManager.Custom.Misc {
 					if (nextLane.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane) && (byte)(nextLane.m_finalDirection & nextDir2) != 0) {
 						float distanceOnBezier = 0f;
 						Vector3 a;
-						if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
-							a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.d;
+						// NON-STOCK CODE START //
+						if (customLaneChanging) {
+							a = instance.m_nodes.m_buffer[targetNodeId].m_position;
 						} else {
-							a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.a;
+						// NON-STOCK CODE END //
+							if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
+								a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.d;
+							} else {
+								a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.a;
+							}
+						// NON-STOCK CODE START //
 						}
-						distanceOnBezier = customLaneChanging ? 1f : Vector3.Distance(a, b); // NON-STOCK CODE
+						// NON-STOCK CODE END //
+						distanceOnBezier = Vector3.Distance(a, b);
 						
 						if (transitionNode || (customLaneChanging && prevIsJunction)) { // NON-STOCK CODE
 							// NON-STOCK CODE START
@@ -1215,7 +1223,6 @@ namespace TrafficManager.Custom.Misc {
 						float num14 = distanceOnBezier / ((maxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 						BufferItem item2;
 						// NON-STOCK CODE START //
-						float speedOverLength = 1f / ((maxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 						if (nextIsJunction)
 							item2.m_numSegmentsToJunction = 0;
 						else if (prevIsJunction)
