@@ -129,6 +129,10 @@ namespace TrafficManager.State {
 			ushort segmentId = lane.m_segment;
 			NetSegment segment = netManager.m_segments.m_buffer[segmentId];
 
+			var dir = NetInfo.Direction.Forward;
+			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+			var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+
 			NetInfo segmentInfo = segment.Info;
 			uint curLaneId = segment.m_lanes;
 			int numLanes = segmentInfo.m_lanes.Length;
@@ -136,12 +140,8 @@ namespace TrafficManager.State {
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				if (curLaneId == laneId) {
 					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-					ushort nodeId = 0;
-					if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
-						nodeId = (laneInfo.m_direction == NetInfo.Direction.Forward) ? segment.m_endNode : segment.m_startNode;
-					else
-						nodeId = (laneInfo.m_direction == NetInfo.Direction.Forward) ? segment.m_startNode : segment.m_endNode;
-
+					ushort nodeId = (laneInfo.m_direction == dir3) ? segment.m_endNode : segment.m_startNode;
+					
 					NetNode node = netManager.m_nodes.m_buffer[nodeId];
 					if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 						return false;
