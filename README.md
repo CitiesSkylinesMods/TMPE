@@ -2,13 +2,24 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.4.1, 01/05/2016
+1.4.2, 01/16/2016
+- Several major performance improvements (thanks to @sci302 for pointing out those issues)
+- Improved the way traffic lights are saved/loaded
+- Lane-wise traffic density is only measured if Advanced AI is activated
+- Bugfix: AI did not consider speed limits/road types during path calculation (thanks to @bhanhart, @sa62039 for pointing out this problem)
+- Connecting a city road to a highway road that does not supply enough lanes for merging leads to behavior people do not understand (see manual). Option added to disable highway rules.  
+- Bugfix: Vehicles were stopping in front of green traffic lights
+- Bugfix: Stop/Yield signs were not working properly (thanks to @GordonDry, @Glowstrontium for pointing out this problem)
+- Bugfix: Cargo trucks were ignoring the "Heavy ban" policy, they should do now (thanks to @Scratch for pointing out this problem)
+
+1.4.1, 01/15/2016
 Bugfix: Path-finding near junctions fixed
 
 1.4.0, 01/15/2016
 - Introducing Advanced Vehicle AI (disabled by default! Go to "Options" and enable it if you want to use it.)
 - Bugfix: Traffic lights were popping up in the middle of roads
-- Bugfix: Fixed the lane changer for left-hand traffic systems (thanks to @Phishie for pointing out this problem) 
+- Bugfix: Fixed the lane changer for left-hand traffic systems (thanks to @Phishie for pointing out this problem)
+- Bugfix: Traffic lights on invalid nodes are not saved anymore 
 
 1.3.24, 01/13/2016
 - Improved handling of priority signs

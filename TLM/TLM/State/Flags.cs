@@ -39,22 +39,39 @@ namespace TrafficManager.State {
 			}
 		}
 
+		public static bool mayHaveTrafficLight(ushort nodeId) {
+			if (nodeId <= 0)
+				return false;
+
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				//Log.Message($"Flags: Node {nodeId} may not have a traffic light (not created)");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				return false;
+			}
+
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
+				//Log.Message($"Flags: Node {nodeId} may not have a traffic light (not a junction)");
+				return false;
+			}
+
+			ItemClass connectionClass = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+
+			if (connectionClass == null ||
+				(connectionClass.m_service != ItemClass.Service.Road &&
+				connectionClass.m_service != ItemClass.Service.PublicTransport))
+				return false;
+
+			return true;
+		}
+
 		public static void setNodeTrafficLight(ushort nodeId, bool flag) {
 			if (nodeId <= 0)
 				return;
 
 			Log.Message($"Flags: Set node traffic light: {nodeId}={flag}");
 
-			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
-				Log.Warning("Flags: Removing traffic light: not created");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
-				nodeTrafficLightFlag.Remove(nodeId);
-				return;
-			}
-
-			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-				Log.Warning("Flags: Refusing to add traffic light to non-junction");
-				nodeTrafficLightFlag.Remove(nodeId);
+			if (!mayHaveTrafficLight(nodeId)) {
+				Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
 				return;
 			}
 

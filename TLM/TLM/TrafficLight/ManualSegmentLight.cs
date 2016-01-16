@@ -18,7 +18,7 @@ namespace TrafficManager.TrafficLight {
 
 		public ushort SegmentId {
 			get { return segmentId; }
-			set { segmentId = value; rebuildOutSegments(); }
+			set { segmentId = value; }
 		}
 
 		public Mode CurrentMode = Mode.Simple;
@@ -27,19 +27,6 @@ namespace TrafficManager.TrafficLight {
 		public RoadBaseAI.TrafficLightState LightMain;
 		public RoadBaseAI.TrafficLightState LightRight;
 		public RoadBaseAI.TrafficLightState LightPedestrian;
-
-		/// <summary>
-		/// Left outgoing segment ids. If `LightLeft` is green, traffic may flow to those segments.
-		/// </summary>
-		private List<int> leftOutSegmentIds;
-		/// <summary>
-		/// Left outgoing segment ids. If `LightMain` is green, traffic may flow to those segments.
-		/// </summary>
-		private List<int> forwardOutSegmentIds;
-		/// <summary>
-		/// Left outgoing segment ids. If `LightRight` is green, traffic may flow to those segments.
-		/// </summary>
-		private List<int> rightOutSegmentIds;
 
 		public uint LastChange;
 		public uint LastChangeFrame;
@@ -57,32 +44,7 @@ namespace TrafficManager.TrafficLight {
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
-			rebuildOutSegments();
-
 			UpdateVisuals();
-		}
-		
-		/// <summary>
-		/// build outgoing segment lists
-		/// </summary>
-		private void rebuildOutSegments() {
-			var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-
-			leftOutSegmentIds = new List<int>();
-			forwardOutSegmentIds = new List<int>();
-			rightOutSegmentIds = new List<int>();
-
-			for (var s = 0; s < 8; s++) {
-				var toSegmentId = node.GetSegment(s);
-				if (toSegmentId == 0) continue;
-
-				if (TrafficPriority.IsLeftSegment(segmentId, toSegmentId, nodeId))
-					leftOutSegmentIds.Add(toSegmentId);
-				else if (TrafficPriority.IsRightSegment(segmentId, toSegmentId, nodeId))
-					rightOutSegmentIds.Add(toSegmentId);
-				else
-					forwardOutSegmentIds.Add(toSegmentId);
-			}
 		}
 
 		public ManualSegmentLight(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight, RoadBaseAI.TrafficLightState leftLight, RoadBaseAI.TrafficLightState rightLight, RoadBaseAI.TrafficLightState pedestrianLight) {
@@ -114,9 +76,9 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void ChangeMode() {
-			var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, nodeId) && TrafficPriority.HasLeftLane(nodeId, segmentId);
-			var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, nodeId) && TrafficPriority.HasForwardLane(nodeId, segmentId);
-			var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, nodeId) && TrafficPriority.HasRightLane(nodeId, segmentId);
+			var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, nodeId);
+			var hasForwardSegment = TrafficPriority.HasStraightSegment(segmentId, nodeId);
+			var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, nodeId);
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {

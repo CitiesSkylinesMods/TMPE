@@ -73,6 +73,7 @@
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="Traffic\Direction.cs" />
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
     <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="State\Flags.cs" />

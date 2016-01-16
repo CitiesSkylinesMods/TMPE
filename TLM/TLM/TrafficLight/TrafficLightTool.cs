@@ -51,7 +51,7 @@ namespace TrafficManager.TrafficLight {
 
 		private static bool _timedShowNumbers;
 
-		private const float DebugCloseLod = 350f;
+		private const float DebugCloseLod = 300f;
 		private const float PriorityCloseLod = 1000f;
 
 		private uint tooltipStartFrame = 0;
@@ -735,9 +735,9 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, SelectedNode)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode) && TrafficPriority.HasLeftLane(SelectedNode, segmentId);
-					var hasForwardSegment = TrafficPriority.HasForwardSegment(segmentId, SelectedNode) && TrafficPriority.HasForwardLane(SelectedNode, segmentId);
-					var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode) && TrafficPriority.HasRightLane(SelectedNode, segmentId);
+					var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode);
+					var hasForwardSegment = TrafficPriority.HasStraightSegment(segmentId, SelectedNode);
+					var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode);
 
 					switch (segmentDict.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple:
@@ -1343,7 +1343,11 @@ namespace TrafficManager.TrafficLight {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 				NetLane lane = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId];
 
-				labelStr += "Lane idx " + i + ", id " + curLaneId + ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + ", t: " + CustomRoadAI.laneTrafficDensity[curLaneId] + ", mt: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanTrafficDensity[curLaneId]*100) + " %\n";
+				labelStr += "Lane idx " + i + ", id " + curLaneId;
+#if DEBUG
+				labelStr += ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType;
+#endif
+				labelStr += ", Traffic: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanTrafficDensity[curLaneId]*100) + " % (" + CustomRoadAI.laneTrafficDensity[curLaneId] + ")\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1395,9 +1399,8 @@ namespace TrafficManager.TrafficLight {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				var segmentInfo = segment.Info;
-#if DEBUG
-				_guiLanes(ref segment, ref segmentInfo);
-#endif
+				if (Options.showLanes)
+					 _guiLanes(ref segment, ref segmentInfo);
 			}
 		}
 
@@ -1708,9 +1711,9 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(srcSegmentId, nodeId)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(srcSegmentId, nodeId) && TrafficPriority.HasLeftLane(nodeId, srcSegmentId);
-					var hasForwardSegment = TrafficPriority.HasForwardSegment(srcSegmentId, nodeId) && TrafficPriority.HasForwardLane(nodeId, srcSegmentId);
-					var hasRightSegment = TrafficPriority.HasRightSegment(srcSegmentId, nodeId) && TrafficPriority.HasRightLane(nodeId, srcSegmentId);
+					var hasLeftSegment = TrafficPriority.HasLeftSegment(srcSegmentId, nodeId);
+					var hasForwardSegment = TrafficPriority.HasStraightSegment(srcSegmentId, nodeId);
+					var hasRightSegment = TrafficPriority.HasRightSegment(srcSegmentId, nodeId);
 
 					switch (liveSegmentLight.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple: {
@@ -3419,9 +3422,11 @@ namespace TrafficManager.TrafficLight {
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
 				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
-				foreach (KeyValuePair<ushort, TrafficSegment> e in TrafficPriority.PrioritySegments) {
-					var segmentId = e.Key;
-					var trafficSegment = e.Value;
+				for (ushort segmentId = 0; segmentId < TrafficPriority.PrioritySegments.Length; ++segmentId) {
+					var trafficSegment = TrafficPriority.PrioritySegments[segmentId];
+					if (trafficSegment == null)
+						continue;
+
 					List<PrioritySegment> prioritySegments = new List<PrioritySegment>();
 					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node1) == null) {
 						PrioritySegment tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
@@ -3441,7 +3446,7 @@ namespace TrafficManager.TrafficLight {
 					//Log.Message("init ok");
 					
 					foreach (var prioritySegment in prioritySegments) {
-						var nodeId = prioritySegment.Nodeid;
+						var nodeId = prioritySegment.NodeId;
 						var node = GetNetNode((ushort)nodeId);
 						//Log.Message("_guiPrioritySigns: nodeId=" + nodeId);
 

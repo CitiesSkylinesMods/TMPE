@@ -18,33 +18,59 @@ namespace TrafficManager.Traffic {
 			Yield = 3
 		}
 
-		public ushort Nodeid;
-		public int Segmentid;
+		public ushort NodeId {
+			get; private set;
+		}
+		public ushort SegmentId {
+			get; private set;
+		}
 
 		public PriorityType Type;
 
 		private Dictionary<ushort, VehiclePosition> Vehicles = new Dictionary<ushort, VehiclePosition>();
 
-		public PrioritySegment(ushort nodeid, int segmentid, PriorityType type) {
-			Nodeid = nodeid;
-			Segmentid = segmentid;
+		public PrioritySegment(ushort nodeId, ushort segmentId, PriorityType type) {
+			NodeId = nodeId;
+			SegmentId = segmentId;
 			Type = type;
 		}
 
-		public void AddCar(ushort vehicleId, VehiclePosition carPos) {
+		~PrioritySegment() {
+			RemoveAllCars();
+		}
+
+		public void AddVehicle(ushort vehicleId, VehiclePosition carPos) {
+			if (carPos.ToNode != NodeId || carPos.FromSegment != SegmentId) {
+				Log.Warning($"Refusing to add vehicle {vehicleId} to PrioritySegment {SegmentId} @ {NodeId} (given: {carPos.FromSegment} @ {carPos.ToNode}).");
+                return;
+			}
 			Vehicles[vehicleId] = carPos;
+			TrafficPriority.MarkVehicleInSegment(vehicleId, SegmentId);
 		}
 		
 		public bool RemoveCar(ushort vehicleId) {
-			if (Vehicles.ContainsKey(vehicleId)) {
-				Vehicles.Remove(vehicleId);
-				return true;
+			if (!Vehicles.ContainsKey(vehicleId))
+				return false;
+			Vehicles.Remove(vehicleId);
+			TrafficPriority.UnmarkVehicleInSegment(vehicleId, SegmentId);
+			return true;
+		}
+
+		public void RemoveAllCars() {
+			List<ushort> vehicleIds = new List<ushort>(Vehicles.Keys);
+			foreach (ushort vehicleId in vehicleIds) {
+				RemoveCar(vehicleId);
 			}
-			return false;
 		}
 
 		public bool HasVehicle(ushort vehicleId) {
 			return Vehicles.ContainsKey(vehicleId);
+		}
+
+		internal VehiclePosition GetVehicle(ushort vehicleId) {
+			if (!HasVehicle(vehicleId))
+				return null;
+			return Vehicles[vehicleId];
 		}
 
 		/// <summary>
@@ -55,14 +81,14 @@ namespace TrafficManager.Traffic {
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			NetNode node = netManager.m_nodes.m_buffer[Nodeid];
+			NetNode node = netManager.m_nodes.m_buffer[NodeId];
 			for (var s = 0; s < 8; s++) {
 				var segmentId = node.GetSegment(s);
 
-				if (segmentId == 0 || segmentId == Segmentid)
+				if (segmentId == 0 || segmentId == SegmentId)
 					continue;
 
-				if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, Nodeid))
+				if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, NodeId))
 					continue;
 
 				numCarsGoingToSegmentId[segmentId] = 0;
@@ -93,7 +119,7 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal int getNumApproachingVehicles() {
-			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 9 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 9).Count();
+			return Vehicles.Where(e => (e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) && (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None).Count();
 		}
 
 		internal Dictionary<ushort, VehiclePosition> getCars() {
@@ -101,7 +127,7 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal Dictionary<ushort, VehiclePosition> getApproachingVehicles() {
-			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 9 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 9).ToDictionary(e => e.Key, e => e.Value);
+			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6).ToDictionary(e => e.Key, e => e.Value);
 		}
 	}
 }

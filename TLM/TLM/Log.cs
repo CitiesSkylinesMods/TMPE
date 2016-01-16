@@ -3,51 +3,43 @@ using UnityEngine;
 
 namespace TrafficManager {
 
-    public static class Log {
-        const string Prefix = "TrafficLightManager: ";
-		private static readonly bool InGameDebug = Environment.OSVersion.Platform != PlatformID.Unix;
+	public static class Log {
+		const string Prefix = "TrafficLightManager: ";
 
-        public static void Message(string s) {
+		public static void Message(string s) {
 #if DEBUG
-            try {
-                if (InGameDebug) {
-                    //DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
-                    Debug.Log(Prefix + s);
-                }
-            } catch (Exception) {
-                // cross thread issue?
-            }
-            //Debug.Log(Prefix + s.ToString());
-#endif
-        }
-
-        public static void Error(string s) {
-            try {
-                if (InGameDebug) {
-#if DEBUG
-					Debug.LogError(Prefix + s);
-					//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s);
-#endif
-				}
-            } catch (Exception) {
-                // cross thread issue?
-            }
-            //Debug.LogError(Prefix + s.ToString());
-        }
-
-        public static void Warning(string s) {
-            try {
-                if (InGameDebug) {
-#if DEBUG
-					Debug.LogWarning(Prefix + s);
-					//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s);
-#endif
-				}
+			try {
+				//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, Prefix + s.ToString());
+				Debug.Log(Prefix + s);
 			} catch (Exception) {
-                // cross thread issue?
-            }
-            //Debug.LogWarning(Prefix + s.ToString());
-        }
-    }
+				// cross thread issue?
+			}
+
+#endif
+		}
+
+		public static void Error(string s) {
+#if DEBUG
+			try {
+				Debug.LogError(Prefix + s + ": " + (new System.Diagnostics.StackTrace()).ToString());
+				//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, Prefix + s);
+			} catch (Exception) {
+				// cross thread issue?
+			}
+#endif
+		}
+
+		public static void Warning(string s) {
+#if DEBUG
+			try {
+
+				Debug.LogWarning(Prefix + s + ": " + (new System.Diagnostics.StackTrace()).ToString());
+				//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Warning, Prefix + s);
+			} catch (Exception) {
+				// cross thread issue?
+			}
+#endif
+		}
+	}
 
 }

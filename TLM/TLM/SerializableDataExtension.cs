@@ -61,7 +61,31 @@ namespace TrafficManager {
 				}
 
 				if (options.Length >= 7) {
-					Options.setAdvancedAI(options[6] == (byte)1);
+					if (!LoadingExtension.IsPathManagerCompatible) {
+						Options.setAdvancedAI(false);
+					} else {
+						Options.setAdvancedAI(options[6] == (byte)1);
+					}
+				}
+
+				if (options.Length >= 8) {
+					Options.setHighwayRules(options[7] == (byte)1);
+				}
+
+				if (options.Length >= 9) {
+					Options.setCarCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[8]) * 0.01f, 2));
+				}
+
+				if (options.Length >= 10) {
+					Options.setCarHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[9]) * 0.01f, 2));
+				}
+
+				if (options.Length >= 11) {
+					Options.setTruckCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[10]) * 0.01f, 2));
+				}
+
+				if (options.Length >= 12) {
+					Options.setTruckHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[11]) * 0.01f, 2));
 				}
 			}
 
@@ -313,34 +337,51 @@ namespace TrafficManager {
 				Log.Warning("Timed traffic lights data structure undefined!");
 			}
 
+			var trafficLightDefs = _configuration.NodeTrafficLights.Split(',');
+
 			Log.Message($"Loading junction traffic light data");
-			var saveDataIndex = 0;
-			for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
-				//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
-				try {
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road &&
-						Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport) ||
-						(Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-						continue;
-						
-					// prevent overflow
-					if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
-						var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
+			if (trafficLightDefs.Length <= 1) {
+				// old method
+				Log.Message($"Using old method to load traffic light data");
+
+				var saveDataIndex = 0;
+				for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
+					//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
+					try {
+						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road &&
+							Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport) ||
+							(Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+							continue;
+
+						// prevent overflow
+						if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
+							var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
 #if DEBUG
-						Log.Message("Setting traffic light flag for node " + i + ": " + (trafficLight == '1'));
+							Log.Message("Setting traffic light flag for node " + i + ": " + (trafficLight == '1'));
 #endif
-						Flags.setNodeTrafficLight((ushort)i, trafficLight == '1');
+							Flags.setNodeTrafficLight((ushort)i, trafficLight == '1');
+						}
+						++saveDataIndex;
+					} catch (Exception e) {
+						// ignore as it's probably bad save data.
+						Log.Warning("Error setting the NodeTrafficLights (old): " + e.Message);
 					}
-					++saveDataIndex;
-				} catch (Exception e) {
-					// ignore as it's probably bad save data.
-					Log.Warning("Error setting the NodeTrafficLights: " + e.Message);
+				}
+			} else {
+				// new method
+				foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
+					try {
+						Log.Message($"Traffic light split data: {split[0]} , {split[1]}");
+						var nodeId = Convert.ToUInt16(split[0]);
+						uint flag = Convert.ToUInt16(split[1]);
+
+						Flags.setNodeTrafficLight(nodeId, flag > 0);
+					} catch (Exception e) {
+						// ignore as it's probably bad save data.
+						Log.Warning("Error setting the NodeTrafficLights (new): " + e.Message);
+					}
 				}
 			}
-
-			// For Traffic++ compatibility
-			/*if (!LoadingExtension.IsPathManagerCompatible)
-				return;*/
 
 			if (_configuration.LaneFlags != null) {
 				Log.Message($"Loading lane arrow data");
@@ -458,7 +499,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), Convert.ToByte(Math.Round(Options.carCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.carHighwayTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckHighwayTrafficSensitivity * 100f)) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -496,11 +537,7 @@ namespace TrafficManager {
 
 		private static bool SaveNodeLights(int i, Configuration configuration) {
 			try {
-				var nodeFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags;
-
-				if ((nodeFlags & NetNode.Flags.Created) == NetNode.Flags.None)
-					return true;
-				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road && Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport)
+				if (!Flags.mayHaveTrafficLight((ushort)i))
 					return true;
 
 				bool hasTrafficLight = Flags.isNodeTrafficLight((ushort)i);
@@ -509,7 +546,7 @@ namespace TrafficManager {
 				} else {
 					Log.Message($"Saving that node {i} does not have a traffic light");
 				}
-				configuration.NodeTrafficLights += Convert.ToInt16(hasTrafficLight);
+				configuration.NodeTrafficLights += $"{i}:{Convert.ToUInt16(hasTrafficLight)},";
 				return false;
 			} catch (Exception e) {
 				Log.Error($"Error Adding Node Lights and Crosswalks {e.Message}");
@@ -644,7 +681,7 @@ namespace TrafficManager {
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				if (!TrafficPriority.PrioritySegments.ContainsKey(segmentId)) {
+				if (TrafficPriority.PrioritySegments[segmentId] == null) {
 					return;
 				}
 

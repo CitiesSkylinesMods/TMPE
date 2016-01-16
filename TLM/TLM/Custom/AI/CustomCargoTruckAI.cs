@@ -26,7 +26,14 @@ namespace TrafficManager.Custom.AI
                         data.Unspawn(vehicleId);
                     }
                 }
-                BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
+
+				/*try {
+					CustomCarAI.HandleVehicle(vehicleId, ref data, false);
+				} catch (Exception e) {
+					Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
+				}*/
+
+				BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
             }
         }
 

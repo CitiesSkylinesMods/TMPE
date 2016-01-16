@@ -24,6 +24,13 @@ namespace TrafficManager.Custom.Misc {
 			public uint m_numSegmentsToJunction;
 		}
 
+		private static float[] weightDimByTrafficFactor;
+		static CustomPathFind() {
+			weightDimByTrafficFactor = new float[6];
+			for (int i = 0; i <= 5; ++i)
+				weightDimByTrafficFactor[i] = (float)Math.Pow(1.1f, Convert.ToSingle(i));
+		}
+
 		public CustomPathFind() {
 
 		}
@@ -432,7 +439,7 @@ namespace TrafficManager.Custom.Misc {
 				}
 				uint laneID = PathManager.GetLaneID(position);
 				// NON-STOCK CODE START
-				//CustomRoadAI.AddTraffic(laneID, 1);
+				CustomRoadAI.AddTraffic(laneID, (ushort)(this._isHeavyVehicle ? 10 : 5));
 				// NON-STOCK CODE END
 				position = this._laneTarget[(int)((UIntPtr)laneID)];
 			}
@@ -627,12 +634,12 @@ namespace TrafficManager.Custom.Misc {
 				int rightRemaining = 0;
 				if (instance.m_segments.m_buffer[(int)prevSegment].m_startNode == nextNodeId) {
 					hasStraight = CustomRoadAI.segmentGeometries[prevSegment].startNodeHasStraightSegment;
-					leftRemaining = CustomRoadAI.segmentGeometries[prevSegment].startNodeLeftSegments;
-					rightRemaining = CustomRoadAI.segmentGeometries[prevSegment].startNodeRightSegments;
+					leftRemaining = CustomRoadAI.segmentGeometries[prevSegment].startNodeNumLeftSegments;
+					rightRemaining = CustomRoadAI.segmentGeometries[prevSegment].startNodeNumRightSegments;
 				} else {
 					hasStraight = CustomRoadAI.segmentGeometries[prevSegment].endNodeHasStraightSegment;
-					leftRemaining = CustomRoadAI.segmentGeometries[prevSegment].endNodeLeftSegments;
-					rightRemaining = CustomRoadAI.segmentGeometries[prevSegment].endNodeRightSegments;
+					leftRemaining = CustomRoadAI.segmentGeometries[prevSegment].endNodeNumLeftSegments;
+					rightRemaining = CustomRoadAI.segmentGeometries[prevSegment].endNodeNumRightSegments;
 				}
 				hasLeft = leftRemaining > 0;
 				hasRight = rightRemaining > 0;
@@ -663,197 +670,211 @@ namespace TrafficManager.Custom.Misc {
 					}*/
 
 					// NON-STOCK CODE START //
-					byte incomingLanes = 0;
-					if (Options.relaxedBusses && _transportVehicle) {
+					byte incomingVehicleLanes = 0;
+					if (Options.allRelaxed || (Options.relaxedBusses && _transportVehicle)) {
 						// NON-STOCK CODE END //
 						if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
 							blocked = true;
 						}
 						// NON-STOCK CODE START //
 					}  else if (!enablePedestrian) {
-						// NON-STOCK CODE START //
-						var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
-						var nextSegmentInfo = nextSegment.Info;
-						bool isRight = rightRemaining > 0;
-						bool isStraight = rightRemaining == 0 && hasStraight;
-						bool isLeft = !isRight & !isStraight;
+						try {
+							var nextSegment = instance.m_segments.m_buffer[nextSegmentId];
+							var nextSegmentInfo = nextSegment.Info;
+							bool isRight = rightRemaining > 0;
+							bool isStraight = rightRemaining == 0 && hasStraight;
+							bool isLeft = !isRight & !isStraight;
 
-						if (debug) {
-							Log.Message($"Path finding ({this._pathFindIndex}): Segment {nextSegmentId}: rightRemaining: {rightRemaining}");
-						}
-
-						NetInfo.Direction nextDir = nextSegment.m_startNode != nextNodeId ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
-						NetInfo.Direction nextDir2 = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
-
-						// valid next lanes:
-						int[] laneIndexes = new int[16]; // index of NetNode.Info.m_lanes
-						uint[] laneIds = new uint[16]; // index of NetManager.m_lanes.m_buffer
-						uint[] indexByRightSimilarLaneIndex = new uint[16];
-						uint[] indexByLeftSimilarLaneIndex = new uint[16];
-
-						bool laneArrowsDefined = false;
-						uint curLaneI = 0;
-						uint curLaneId = nextSegment.m_lanes;
-						int i = 0;
-						while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
-							// determine valid lanes based on lane arrows
-							NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
-
-							if ((byte)(nextLane.m_finalDirection & nextDir2) != 0 && nextLane.CheckType(_laneTypes, _vehicleTypes)) {
-								++incomingLanes;
-								if (debug) {
-									Log.Message($"Path finding ({this._pathFindIndex}): Segment {nextSegmentId}, lane {curLaneId}, {i} is compatible.");
-								}
-
-								// calculate current similar lane index starting from right line
-								int nextRightSimilarLaneIndex;
-								int nextLeftSimilarLaneIndex;
-								if ((byte)(nextLane.m_direction & normDirection) != 0) {
-									nextRightSimilarLaneIndex = nextLane.m_similarLaneIndex;
-									nextLeftSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
-								} else {
-									nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
-									nextLeftSimilarLaneIndex = nextLane.m_similarLaneIndex;
-								}
-
-								if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) != NetLane.Flags.None) {
-									laneArrowsDefined = true;
-								}
-
-								if (isRight) {// TrafficPriority.IsLeftSegment(nextSegmentId, item.m_position.m_segment, targetNodeId)) {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) ==
-										NetLane.Flags.Left) {
-										laneIndexes[curLaneI] = i;
-										laneIds[curLaneI] = curLaneId;
-										indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
-										indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
-										curLaneI++;
-									}
-								} else if (isLeft) { // if (TrafficPriority.IsRightSegment(nextSegmentId, item.m_position.m_segment, targetNodeId)) {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) ==
-										NetLane.Flags.Right) {
-										laneIndexes[curLaneI] = i;
-										laneIds[curLaneI] = curLaneId;
-										indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
-										indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
-										curLaneI++;
-									}
-								} else {
-									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) != NetLane.Flags.None || ((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) { // valid if straight segment and no arrows given or forward arrow is set
-										laneIndexes[curLaneI] = i;
-										laneIds[curLaneI] = curLaneId;
-										indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
-										indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
-										curLaneI++;
-									}
-								}
-							}
-
-							curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
-							i++;
-						} // foreach lane
-
-						if (laneArrowsDefined) {
-							var newLaneIndex = 0;
-							var newLaneId = 0u;
-							int nextLaneI = -1;
-							int nextCompatibleLaneCount = Convert.ToInt32(curLaneI);
+							VehicleInfo.VehicleType vehicleType2 = this._vehicleTypes;
+							NetInfo.LaneType drivingEnabledLaneTypes = this._laneTypes;
+							drivingEnabledLaneTypes &= ~NetInfo.LaneType.Pedestrian;
+							drivingEnabledLaneTypes &= ~NetInfo.LaneType.Parking;
 
 							if (debug) {
-								Log.Message($"Path finding ({this._pathFindIndex}): Lane arrows defined.");
+								Log.Message($"Path finding ({this._pathFindIndex}): Segment {nextSegmentId}: rightRemaining: {rightRemaining}");
 							}
 
-							if (curLaneI > 0) {
-								if (prevIsOutgoingOneWay && prevIsHighway && nextIsJunction) {
-									if (isLeft) {
-										// right segment joins with highway: find directly matching lanes from right
-										nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[prevRightSimilarLaneIndex]) - 1;
-									} else if (isRight) {
-										// left segment joins with highway: find directly matching lanes from left
-										nextLaneI = Convert.ToInt32(indexByLeftSimilarLaneIndex[prevLeftSimilarLaneIndex]) - 1;
+							NetInfo.Direction nextDir = nextSegment.m_startNode != nextNodeId ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+							NetInfo.Direction nextDir2 = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
+
+							// valid next lanes:
+							int[] laneIndexes = new int[16]; // index of NetNode.Info.m_lanes
+							uint[] laneIds = new uint[16]; // index of NetManager.m_lanes.m_buffer
+							uint[] indexByRightSimilarLaneIndex = new uint[16];
+							uint[] indexByLeftSimilarLaneIndex = new uint[16];
+
+							bool laneArrowsDefined = false;
+							uint curLaneI = 0;
+							uint curLaneId = nextSegment.m_lanes;
+							int i = 0;
+							while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
+								// determine valid lanes based on lane arrows
+								NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
+
+								if ((byte)(nextLane.m_finalDirection & nextDir2) != 0 && nextLane.CheckType(_laneTypes, _vehicleTypes)) {
+									if (nextLane.CheckType(drivingEnabledLaneTypes, _vehicleTypes))
+										++incomingVehicleLanes;
+									if (debug) {
+										Log.Message($"Path finding ({this._pathFindIndex}): Segment {nextSegmentId}, lane {curLaneId}, {i} is compatible (prevSegment: {prevSegment}). laneTypes: {_laneTypes.ToString()}, vehicleTypes: {_vehicleTypes.ToString()}, incomingLanes={incomingVehicleLanes}");
+									}
+
+									// calculate current similar lane index starting from right line
+									int nextRightSimilarLaneIndex;
+									int nextLeftSimilarLaneIndex;
+									if ((byte)(nextLane.m_direction & normDirection) != 0) {
+										nextRightSimilarLaneIndex = nextLane.m_similarLaneIndex;
+										nextLeftSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
 									} else {
-										// straight segment
-										if (hasLeft && hasRight) {
-#if DEBUG
-											if (debug)
-												Log.Message($"prevLeftSimilarLaneIndex: {prevLeftSimilarLaneIndex}, totalIncomingLanes: {totalIncomingLanes}, node: {nextNodeId}, prev segment: {prevSegment}, next segment: {nextSegmentId}");
-#endif
-											int nextLeftSimilarIndex = prevLeftSimilarLaneIndex - totalIncomingLanes;
-											if (nextLeftSimilarIndex >= 0 && nextLeftSimilarIndex < curLaneI)
-												nextLaneI = Convert.ToInt32(indexByLeftSimilarLaneIndex[nextLeftSimilarIndex]) - 1;
-										} else if (hasLeft) {
-											// sort right
+										nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
+										nextLeftSimilarLaneIndex = nextLane.m_similarLaneIndex;
+									}
+
+									if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) != NetLane.Flags.None) {
+										laneArrowsDefined = true;
+									}
+
+									if (isRight) {// TrafficPriority.IsLeftSegment(nextSegmentId, item.m_position.m_segment, targetNodeId)) {
+										if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) ==
+											NetLane.Flags.Left) {
+											laneIndexes[curLaneI] = i;
+											laneIds[curLaneI] = curLaneId;
+											indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+											indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
+											curLaneI++;
+										}
+									} else if (isLeft) { // if (TrafficPriority.IsRightSegment(nextSegmentId, item.m_position.m_segment, targetNodeId)) {
+										if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) ==
+											NetLane.Flags.Right) {
+											laneIndexes[curLaneI] = i;
+											laneIds[curLaneI] = curLaneId;
+											indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+											indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
+											curLaneI++;
+										}
+									} else {
+										if (((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) != NetLane.Flags.None || ((NetLane.Flags)instance.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) { // valid if straight segment and no arrows given or forward arrow is set
+											laneIndexes[curLaneI] = i;
+											laneIds[curLaneI] = curLaneId;
+											indexByRightSimilarLaneIndex[nextRightSimilarLaneIndex] = curLaneI + 1;
+											indexByLeftSimilarLaneIndex[nextLeftSimilarLaneIndex] = curLaneI + 1;
+											curLaneI++;
+										}
+									}
+								}
+
+								curLaneId = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
+								i++;
+							} // foreach lane
+
+							if (laneArrowsDefined) {
+								var newLaneIndex = 0;
+								var newLaneId = 0u;
+								int nextLaneI = -1;
+								int nextCompatibleLaneCount = Convert.ToInt32(curLaneI);
+
+								if (debug) {
+									Log.Message($"Path finding ({this._pathFindIndex}): Lane arrows defined.");
+								}
+
+								if (curLaneI > 0) {
+									if (Options.highwayRules && prevIsOutgoingOneWay && prevIsHighway && nextIsJunction) {
+										if (isLeft) {
+											// right segment joins with highway: find directly matching lanes from right
+											nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[prevRightSimilarLaneIndex]) - 1;
+										} else if (isRight) {
+											// left segment joins with highway: find directly matching lanes from left
 											nextLaneI = Convert.ToInt32(indexByLeftSimilarLaneIndex[prevLeftSimilarLaneIndex]) - 1;
 										} else {
-											// sort left
-											nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[prevRightSimilarLaneIndex]) - 1;
-										}
-									}
-									if (nextLaneI < 0 || nextLaneI >= nextCompatibleLaneCount)
-										goto nextIter; // no path to this lane
-								} else if (curLaneI == 1) {
-									nextLaneI = 0;
-								} else {
-									// lane matching
-									int prevSimilarLaneCount = lane.m_similarLaneCount;
-
-									int nextRightSimilarLaneIndex = -1;
-									int x = 0;
-									if (nextIsJunction) {
-										// at junctions: try to match distinct lanes (1-to-1, n-to-1)
-										x = prevRightSimilarLaneIndex;
-									} else {
-										HandleLaneMergesAndSplits(prevRightSimilarLaneIndex, nextCompatibleLaneCount, prevSimilarLaneCount, out nextRightSimilarLaneIndex, out x);
-									}
-
-									// find best matching lane
-									for (int j = 0; j < 16; ++j) {
-										if (indexByRightSimilarLaneIndex[j] == 0)
-											continue;
-										nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[j]) - 1;
-										nextRightSimilarLaneIndex = j;
-										if (x == 0) { // matching lane found
-											break;
-										}
-										--x;
-									}
+											// straight segment
+											if (hasLeft && hasRight) {
 #if DEBUG
-									if (debug) {
-										Log.Message($"Path finding ({this._pathFindIndex}): Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right. There are {curLaneI} candidate lanes. We choose lane {nextLaneI} (index {newLaneIndex}, id {newLaneId}, {nextRightSimilarLaneIndex} from right). lhd: {TrafficPriority.LeftHandDrive}, ped: {pedestrianAllowed}, magical flag4: {blocked}");
-									}
+												if (debug)
+													Log.Message($"Pathfind ({this._pathFindIndex}) prevLeftSimilarLaneIndex: {prevLeftSimilarLaneIndex}, totalIncomingLanes: {totalIncomingLanes}, node: {nextNodeId}, prev segment: {prevSegment}, next segment: {nextSegmentId}");
 #endif
-								}
-							} else {
+												int nextLeftSimilarIndex = prevLeftSimilarLaneIndex - totalIncomingLanes;
+												if (nextLeftSimilarIndex >= 0 && nextLeftSimilarIndex < curLaneI)
+													nextLaneI = Convert.ToInt32(indexByLeftSimilarLaneIndex[nextLeftSimilarIndex]) - 1;
+											} else if (hasLeft) {
+												// sort right
+												nextLaneI = Convert.ToInt32(indexByLeftSimilarLaneIndex[prevLeftSimilarLaneIndex]) - 1;
+											} else {
+												// sort left
+												nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[prevRightSimilarLaneIndex]) - 1;
+											}
+										}
+										if (nextLaneI < 0 || nextLaneI >= nextCompatibleLaneCount)
+											goto nextIter; // no path to this lane
+									} else if (curLaneI == 1) {
+										nextLaneI = 0;
+									} else {
+										// lane matching
+										int prevSimilarLaneCount = lane.m_similarLaneCount;
+
+										int nextRightSimilarLaneIndex = -1;
+										int x = 0;
+										if (nextIsJunction) {
+											// at junctions: try to match distinct lanes (1-to-1, n-to-1)
+											x = prevRightSimilarLaneIndex;
+										} else {
+											HandleLaneMergesAndSplits(prevRightSimilarLaneIndex, nextCompatibleLaneCount, prevSimilarLaneCount, out nextRightSimilarLaneIndex, out x);
+										}
+
+										// find best matching lane
+										for (int j = 0; j < 16; ++j) {
+											if (indexByRightSimilarLaneIndex[j] == 0)
+												continue;
+											nextLaneI = Convert.ToInt32(indexByRightSimilarLaneIndex[j]) - 1;
+											nextRightSimilarLaneIndex = j;
+											if (x == 0) { // matching lane found
+												break;
+											}
+											--x;
+										}
+#if DEBUG
+										if (debug) {
+											Log.Message($"Path finding ({this._pathFindIndex}): Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right. There are {curLaneI} candidate lanes. We choose lane {nextLaneI} (index {newLaneIndex}, id {newLaneId}, {nextRightSimilarLaneIndex} from right). lhd: {TrafficPriority.LeftHandDrive}, ped: {pedestrianAllowed}, magical flag4: {blocked}");
+										}
+#endif
+									}
+								} else {
 #if DEBUG
 									if (debug) {
 										Log.Message($"Path finding ({this._pathFindIndex}): Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: No compatible lanes found");
 									}
 #endif
-								goto nextIter;
-							}
+									goto nextIter;
+								}
 
-							// go to matched lane
-							newLaneIndex = laneIndexes[nextLaneI];
-							newLaneId = laneIds[nextLaneI];
+								// go to matched lane
+								newLaneIndex = laneIndexes[nextLaneI];
+								newLaneId = laneIds[nextLaneI];
 
-							if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId, out foundForced))
-								blocked = true;
+								if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian, newLaneIndex, newLaneId, out foundForced))
+									blocked = true;
 
-							if (foundForced) {
+								if (foundForced) {
 #if DEBUG
 									if (debug) {
 										Log.Message($"Path finding ({this._pathFindIndex}): Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: FORCED LANE FOUND!");
 									}
 #endif
-							}
-						} else {
+								}
+							} else {
 #if DEBUG
 								if (debug) {
 									Log.Message($"Path finding ({this._pathFindIndex}): Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: No lane arrows defined");
 								}
 #endif
 
-							if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
+								if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
+									blocked = true;
+								}
+							}
+						} catch (Exception e) {
+							Log.Error($"Error occurred in custom path-finding (main): {e.ToString()}");
+
+							// stock code fallback
+							if (this.ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[(int)nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
 								blocked = true;
 							}
 						}
@@ -867,7 +888,7 @@ namespace TrafficManager.Custom.Misc {
 
 					nextIter:
 					nextSegmentId = instance.m_segments.m_buffer[(int)nextSegmentId].GetRightSegment(nextNodeId);
-					totalIncomingLanes += incomingLanes;
+					totalIncomingLanes += incomingVehicleLanes;
 					--rightRemaining;
 				} // foreach segment
 				if (blocked) {
@@ -1066,6 +1087,7 @@ namespace TrafficManager.Custom.Misc {
 
 		// 3
 		private bool ProcessItem(bool debug, BufferItem item, ushort targetNodeId, ushort segmentID, ref NetSegment nextSegment, ref int laneIndexFromLeft, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId, out bool foundForced) {
+			//debug = targetNodeId == 6900;
 			foundForced = false;
 			bool result = false;
 			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
@@ -1097,8 +1119,8 @@ namespace TrafficManager.Custom.Misc {
 					return result;
 				}
 			}
-			float maxSpeed = 1f;
-			float laneSpeed = 1f;
+			float prevMaxSpeed = 1f;
+			float prevLaneSpeed = 1f;
 			NetInfo.LaneType laneType = NetInfo.LaneType.None;
 			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
 			// NON-STOCK CODE START //
@@ -1106,6 +1128,7 @@ namespace TrafficManager.Custom.Misc {
 			bool prevIsHighway = false;
 			if (prevSegmentInfo.m_netAI is RoadBaseAI)
 				prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules;
+			bool prevIsOutgoingOneWay = TrafficLightsManual.SegmentIsOutgoingOneWay(item.m_position.m_segment, targetNodeId);
 			float nextDensity = 0f;
 			int prevRightSimilarLaneIndex = -1;
 			NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
@@ -1116,8 +1139,8 @@ namespace TrafficManager.Custom.Misc {
 				NetInfo.Lane lane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				laneType = lane.m_laneType;
 				vehicleType = lane.m_vehicleType;
-				maxSpeed = lane.m_speedLimit;
-				laneSpeed = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane);
+				prevMaxSpeed = lane.m_speedLimit;
+				prevLaneSpeed = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane);
 				// NON-STOCK CODE START //
 				prevLanes = lane.m_similarLaneCount;
 				if ((byte)(lane.m_direction & normDirection) != 0) {
@@ -1134,9 +1157,9 @@ namespace TrafficManager.Custom.Misc {
 				cost *= (float)(randomizer.Int32(900, 1000 + (int)(instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
 			}
 			if (this._isHeavyVehicle && (instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_flags & NetSegment.Flags.HeavyBan) != NetSegment.Flags.None) {
-				cost *= 10f;
+				cost *= customLaneChanging ? 15f : 10f; // NON-STOCK CODE
 			} else if (laneType == NetInfo.LaneType.Vehicle && vehicleType == VehicleInfo.VehicleType.Car && (instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_flags & NetSegment.Flags.CarBan) != NetSegment.Flags.None) {
-				cost *= 5f;
+				cost *= customLaneChanging ? 10f : 5f; // NON-STOCK CODE
 			}
 			if (this._transportVehicle && laneType == NetInfo.LaneType.TransportVehicle) {
 				cost *= 0.95f;
@@ -1144,10 +1167,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((byte)(laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 				laneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 			}
-			float num8 = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * cost;
-			float prevMethodDist = item.m_methodDistance + num8;
-			float num10 = item.m_comparisonValue + num8 / (laneSpeed * this._maxLength);
-			Vector3 b = instance.m_lanes.m_buffer[(int)((UIntPtr)item.m_laneID)].CalculatePosition((float)connectOffset * 0.003921569f);
+			float prevOffset = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * cost;
+			float prevMethodDist = item.m_methodDistance + prevOffset;
+			float prevComparisonPlusOffsetOverSpeed = item.m_comparisonValue + prevOffset / (prevLaneSpeed * this._maxLength);
+			Vector3 prevLanePosition = instance.m_lanes.m_buffer[(int)((UIntPtr)item.m_laneID)].CalculatePosition((float)connectOffset * 0.003921569f);
 			int num11 = laneIndexFromLeft;
 			bool transitionNode = (instance.m_nodes.m_buffer[(int)targetNodeId].m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 			NetInfo.LaneType laneType2 = this._laneTypes;
@@ -1163,7 +1186,7 @@ namespace TrafficManager.Custom.Misc {
 			}
 			// NON-STOCK CODE START //
 			//NetNode targetNode = instance.m_nodes.m_buffer[targetNodeId];
-			float segmentDensity = (float)(instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_trafficDensity + nextSegment.m_trafficDensity) / 2f;
+			//float segmentDensity = (float)(instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_trafficDensity + nextSegment.m_trafficDensity) / 2f;
 			bool nextIsJunction = instance.m_nodes.m_buffer[targetNodeId].CountSegments() > 2;
 			ushort sourceNodeId = (targetNodeId == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? instance.m_segments.m_buffer[item.m_position.m_segment].m_endNode : instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode; // no lane changing directly in front of a junction
 																																																																   //NetNode sourceNode = instance.m_nodes.m_buffer[sourceNodeId];
@@ -1176,7 +1199,6 @@ namespace TrafficManager.Custom.Misc {
 				!this._stablePath &&
 				forceLaneIndex == null &&
 				customLaneChanging &&
-				prevDensity <= 0.5f &&
 				_pathRandomizer.Int32(1, laneTargetValue) == 1; // lane randomization
 			int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
 			bool nextIsHighway = false;
@@ -1198,7 +1220,7 @@ namespace TrafficManager.Custom.Misc {
 						float distanceOnBezier = 0f;
 						Vector3 a;
 						// NON-STOCK CODE START //
-						if (customLaneChanging) {
+						if (customLaneChanging && !this._stablePath) {
 							a = instance.m_nodes.m_buffer[targetNodeId].m_position;
 						} else {
 						// NON-STOCK CODE END //
@@ -1210,19 +1232,18 @@ namespace TrafficManager.Custom.Misc {
 						// NON-STOCK CODE START //
 						}
 						// NON-STOCK CODE END //
-						distanceOnBezier = Vector3.Distance(a, b);
+						distanceOnBezier = Vector3.Distance(a, prevLanePosition);
+						/*if (targetNodeId == 5456) {
+							Log.Message("Original distance: " + Vector3.Distance(a1, prevLanePosition) + " New distance: " + Vector3.Distance(a2, prevLanePosition) + " Other: " + Vector3.Distance(a3, prevLanePosition));
+						}*/
 						
 						if (transitionNode || (customLaneChanging && prevIsJunction)) { // NON-STOCK CODE
-							// NON-STOCK CODE START
-							if (customLaneChanging)
-								distanceOnBezier *= 4f;
-							else
-							// NON-STOCK CODE END
-								distanceOnBezier *= 2f;
+							distanceOnBezier *= 2f;
 						}
-						float num14 = distanceOnBezier / ((maxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+						float distanceOverMeanMaxSpeed = distanceOnBezier / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 						BufferItem item2;
 						// NON-STOCK CODE START //
+						bool addCustomCosts = customLaneChanging && curLaneId != this._startLaneA && curLaneId != this._startLaneB && curLaneId != this._endLaneA && curLaneId != this._endLaneB && forceLaneIndex == null && nextLane.m_similarLaneCount > 1;
 						if (nextIsJunction)
 							item2.m_numSegmentsToJunction = 0;
 						else if (prevIsJunction)
@@ -1239,7 +1260,7 @@ namespace TrafficManager.Custom.Misc {
 							item2.m_methodDistance = prevMethodDist + distanceOnBezier;
 						}
 						if (nextLane.m_laneType != NetInfo.LaneType.Pedestrian || item2.m_methodDistance < 1000f) {
-							item2.m_comparisonValue = num10 + num14;
+							item2.m_comparisonValue = prevComparisonPlusOffsetOverSpeed + distanceOverMeanMaxSpeed;
 							item2.m_direction = nextDir;
 							if (curLaneId == this._startLaneA) {
 								if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetA) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetA)) {
@@ -1266,88 +1287,103 @@ namespace TrafficManager.Custom.Misc {
 							item2.m_lanesUsed = (item.m_lanesUsed | nextLane.m_laneType);
 							item2.m_laneID = curLaneId;
 							if ((byte)(nextLane.m_laneType & laneType) != 0 && nextLane.m_vehicleType == vehicleType) {
-								int firstTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_firstTarget;
-								int lastTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_lastTarget;
-								if (laneIndexFromLeft < firstTarget || laneIndexFromLeft >= lastTarget) {
-									item2.m_comparisonValue += Mathf.Max(1f, distanceOnBezier * 3f - 3f) / ((maxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+								// NON-STOCK CODE START //
+								if (!customLaneChanging/* || !addCustomCosts*/) {
+								// NON-STOCK CODE END //
+									int firstTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_firstTarget;
+									int lastTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_lastTarget;
+									if (laneIndexFromLeft < firstTarget || laneIndexFromLeft >= lastTarget) {
+										item2.m_comparisonValue += Mathf.Max(1f, distanceOnBezier * 3f - 3f) / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+									}
+								// NON-STOCK CODE START //
 								}
+								// NON-STOCK CODE END //
+
 								if (!this._transportVehicle && nextLane.m_laneType == NetInfo.LaneType.TransportVehicle) {
-									item2.m_comparisonValue += 20f / ((maxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+									item2.m_comparisonValue += 20f / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
 								}
 							}
 
 							// NON-STOCK CODE START //
-							if (customLaneChanging && forceLaneIndex == null && nextLane.m_similarLaneCount > 1) {
-								int nextRightSimilarLaneIndex;
-								if ((byte)(nextLane.m_direction & normDirection) != 0) {
-									nextRightSimilarLaneIndex = nextLane.m_similarLaneIndex;
-								} else {
-									nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
-								}
-								int maxLaneDiff = Math.Max(prevLanes, nextLane.m_similarLaneCount);
+							try {
+								if (addCustomCosts) {
+									int nextRightSimilarLaneIndex;
+									if ((byte)(nextLane.m_direction & normDirection) != 0) {
+										nextRightSimilarLaneIndex = nextLane.m_similarLaneIndex;
+									} else {
+										nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
+									}
+									int maxLaneDiff = Math.Max(prevLanes, nextLane.m_similarLaneCount);
 
-								bool doLaneChange = changeLane;
+									bool doLaneChange = changeLane;
 
-								// vehicles should choose lanes with low traffic volume if possible, especially before junctions.
-								int laneDist = Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex);
-								float trafficFactor = (float)Math.Max(1, 5 - (int)item2.m_numSegmentsToJunction);
-								float maxTrafficCost = 4f;
-								float trafficCost = (trafficFactor * nextDensity) / maxTrafficCost;
+									// vehicles should choose lanes with low traffic volume if possible, especially before junctions.
+									float trafficCost = 0f;
+									int laneDist = Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex);
+									trafficCost = UnityEngine.Random.Range(0f, (prevDensity - nextDensity + 1f) / 2f);
 
-								if (trafficCost > 1) {
-									Log.Warning($"trafficCost={trafficCost}={trafficFactor},{nextDensity}");
-								}
+									if (trafficCost > 1) {
+										Log.Error($"Traffic cost > 1! {prevDensity} {nextDensity}");
+									}
 
-								// vehicles should generally avoid changing more than one lane.
-								float laneChangeCost = 0f;
-								if (laneDist > 1)
-									laneChangeCost = Math.Min(1f, Math.Max(0f, (float)laneDist / (float)maxLaneDiff)); // (*)
+									// vehicles should generally avoid changing more than one lane.
+									float laneChangeCost = 0f;
+									if (laneDist > 1)
+										laneChangeCost = Math.Min(1f, Math.Max(0f, (float)(laneDist * laneDist) / (float)(maxLaneDiff * maxLaneDiff))); // (*)
 
-								// highway exit handling
-								float junctionCost = 0f;
-								if (laneDist > 0 && nextIsHighway) {
-									// calculate costs for changing lane near highway junctions
-									// on highways: vehicles should not switch lanes directly before an exit.
-									int decelerationLaneLength = _pathRandomizer.Int32(1, 4);
-									if (item2.m_numSegmentsToJunction <= decelerationLaneLength) {
-										// stay on lane before exit
-										junctionCost = Math.Min(1f, Math.Max(0f, (float)laneDist / (float)maxLaneDiff));
-										doLaneChange = false;
+									// highway exit handling
+									float junctionCost = 0f;
+									bool applyHighwayRules = Options.highwayRules && laneDist > 0 && nextIsHighway && prevIsOutgoingOneWay;
+									if (applyHighwayRules) {
+										// calculate costs for changing lane near highway junctions
+										// on highways: vehicles should not switch lanes directly before an exit.
+										int decelerationLaneLength = _pathRandomizer.Int32(1, 4);
+										if (item2.m_numSegmentsToJunction <= decelerationLaneLength) {
+											// stay on lane before exit
+											junctionCost = Math.Min(1f, Math.Max(0f, (float)laneDist / (float)maxLaneDiff));
+											doLaneChange = false;
+										}
+									}
+
+									if ((laneDist == 1 && !doLaneChange) || (laneDist == 0 && doLaneChange)) {
+										// do not change lane / change lane
+										laneChangeCost = 1f / (float)(maxLaneDiff * maxLaneDiff); // should be similarily calculated as (*)
+									}
+
+									float totalCost = 0f;
+									float weight;
+									if (applyHighwayRules) {
+										if (this._isHeavyVehicle)
+											weight = UnityEngine.Random.Range(Math.Max(0f, Options.truckHighwayTrafficSensitivity - 0.1f), Math.Min(1f, Options.truckHighwayTrafficSensitivity + 0.1f));
+										else
+											weight = UnityEngine.Random.Range(Math.Max(0f, Options.carHighwayTrafficSensitivity - 0.1f), Math.Min(1f, Options.carHighwayTrafficSensitivity + 0.1f));
+										totalCost = weight * trafficCost + 0.2f * junctionCost + (0.8f - weight) * laneChangeCost;
+									} else {
+										if (this._isHeavyVehicle)
+											weight = UnityEngine.Random.Range(Math.Max(0f, Options.truckCityTrafficSensitivity - 0.1f), Math.Min(1f, Options.truckCityTrafficSensitivity + 0.1f));
+										else
+											weight = UnityEngine.Random.Range(Math.Max(0f, Options.carCityTrafficSensitivity - 0.1f), Math.Min(1f, Options.carCityTrafficSensitivity + 0.1f));
+										// prevent lane changes before junctions
+										int trafficFactor = Math.Max(1, 5 - (int)item2.m_numSegmentsToJunction);
+										weight /= weightDimByTrafficFactor[trafficFactor];
+										totalCost = weight * trafficCost + (1f - weight) * laneChangeCost;
+									}
+									item2.m_comparisonValue += totalCost * nextSegment.m_averageLength * Options.getPathCostMultiplicator() / (nextLane.m_speedLimit * this._maxLength);
+
+									//item2.m_comparisonValue = Math.Max(0f, Math.Min(1f, item2.m_comparisonValue));
+									item2.m_comparisonValue = Math.Max(0f, item2.m_comparisonValue);
+									if (debug) {
+										Log.Message($">> seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} = traffic={trafficCost}, junction={junctionCost}, lane={laneChangeCost}, weight={weight}");
 									}
 								}
+								if (forceLaneIndex != null && laneIndex == forceLaneIndex)
+									foundForced = true;
 
-								if ((laneDist == 1 && !doLaneChange) || (laneDist == 0 && doLaneChange)) {
-									// do not change lane / change lane
-									laneChangeCost = 1f / (float)maxLaneDiff; // should be similarily calculated as (*)
+								if (debug) {
+									Log.Message($">> Adding item: seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}");
 								}
-
-								float totalCost = 0f;
-								if (laneDist > 0 && nextIsHighway) {
-									float weight;
-									if (this._isHeavyVehicle)
-										weight = (float)_pathRandomizer.Int32(5, 10) * 0.01f;
-									else
-										weight = (float)_pathRandomizer.Int32(10, 20) * 0.01f;
-									totalCost = weight * trafficCost + 0.2f * junctionCost + (0.8f - weight) * laneChangeCost;
-								} else {
-									float weight;
-									if (this._isHeavyVehicle)
-										weight = (float)_pathRandomizer.Int32(10, 20) * 0.01f;
-									else
-										weight = (float)_pathRandomizer.Int32(20, 30) * 0.01f;
-									totalCost = weight * trafficCost + (1f - weight) * laneChangeCost;
-								}
-								item2.m_comparisonValue += 0.1f * totalCost;
-
-								item2.m_comparisonValue = Math.Max(0f, Math.Min(1f, item2.m_comparisonValue));
-								if (debug)
-									Log.Message($">> seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} ({0.1f * totalCost})={trafficCost} * {junctionCost} * {laneChangeCost}");
-                            }
-							if (forceLaneIndex != null && laneIndex == forceLaneIndex)
-								foundForced = true;
-
-							if (debug) {
-								Log.Message($">> Adding item: seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}");
+							} catch (Exception e) {
+								Log.Error($"Error occurred in custom path-finding (sub): {e.ToString()}");
 							}
 							// NON-STOCK CODE END //
 

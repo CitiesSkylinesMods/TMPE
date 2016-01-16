@@ -12,18 +12,17 @@ namespace TrafficManager.Custom.AI {
 	internal class CustomCarAI : CarAI {
 		private const float FarLod = 1210000f;
 		private const float CloseLod = 250000f;
-		public static HashSet<ushort> watchedVehicleIds = new HashSet<ushort>();
 
-		private static int[] closeLodUpdateMod = new int[] { 0, 1, 2, 4, 6 };
-		private static int[] farLodUpdateMod = new int[] { 2, 4, 6, 8, 10 };
-		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 16, 20 };
+		private static int[] closeLodUpdateMod = new int[] { 2, 4, 5, 6, 8 };
+		private static int[] farLodUpdateMod = new int[] { 4, 6, 8, 10, 12 };
+		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 14, 16 };
 
 		public void Awake() {
 			
 		}
 
 		internal static void OnLevelUnloading() {
-			watchedVehicleIds.Clear();
+
 		}
 
 		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic) {
@@ -36,14 +35,19 @@ namespace TrafficManager.Custom.AI {
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
-		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, byte maxPathUnits) {
+		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, byte maxPathUnits, bool debug = false) {
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
-
+			var lastFrameVehiclePos = lastFrameData.m_position;
 #if DEBUG
+			var camPos = Camera.main.transform.position;
+			//debug = (lastFrameVehiclePos - camPos).sqrMagnitude < CloseLod;
+			debug = false;
 			List<String> logBuffer = new List<String>();
-			bool logme = (vehicleId == 16310);
+			bool logme = false;
 #endif
+			if ((vehicleData.m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None)
+				return;
 
 			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car && vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Train) {
 				Log.Message($"HandleVehicle does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
@@ -54,8 +58,10 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			// add vehicle to our vehicle list
-			if (!TrafficPriority.Vehicles.ContainsKey(vehicleId)) {
-				TrafficPriority.Vehicles.Add(vehicleId, new VehiclePosition());
+			VehiclePosition vehiclePos = TrafficPriority.Vehicles[vehicleId];
+			if (vehiclePos == null) {
+				vehiclePos = new VehiclePosition();
+				TrafficPriority.Vehicles[vehicleId] = vehiclePos;
 			}
 
 			// we extract the segment information directly from the vehicle
@@ -64,15 +70,14 @@ namespace TrafficManager.Custom.AI {
 			List<PathUnit.Position> realTimePositions = new List<PathUnit.Position>(); // current and upcoming vehicle positions
 
 #if DEBUG
-			logBuffer.Add("* vehicleId " + vehicleId + ". currentPathId: " + currentPathUnitId);
+			logBuffer.Add("* vehicleId " + vehicleId + ". currentPathId: " + currentPathUnitId + " pathPositionIndex: " + vehicleData.m_pathPositionIndex);
 #endif
 
 			if (currentPathUnitId > 0) {
 				// vehicle has a path...
-				var vehiclePathUnit = Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathUnitId];
-				if ((vehiclePathUnit.m_pathFindFlags & PathUnit.FLAG_READY) != 0) {
+				if ((Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathUnitId].m_pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					// The path(unit) is established and is ready for use: get the vehicle's current position in terms of segment and lane
-					realTimePositions.Add(vehiclePathUnit.GetPosition(vehicleData.m_pathPositionIndex >> 1));
+					realTimePositions.Add(Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathUnitId].GetPosition(vehicleData.m_pathPositionIndex >> 1));
 					var currentSegment = netManager.m_segments.m_buffer[realTimePositions[0].m_segment];
 					if (realTimePositions[0].m_offset == 0) {
 						realTimeDestinationNodes.Add(currentSegment.m_startNode);
@@ -83,21 +88,26 @@ namespace TrafficManager.Custom.AI {
 					// evaluate upcoming path units
 					byte i = 0;
 					uint pathUnitId = currentPathUnitId;
-					byte pathPos = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
-					var pathUnit = vehiclePathUnit;
+					int pathPos = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
 					while (true) {
 						if (pathPos > 11) {
 							// go to next path unit
 							pathPos = 0;
-							pathUnitId = pathUnit.m_nextPathUnit;
+							pathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
+#if DEBUG
+							logBuffer.Add("* vehicleId " + vehicleId + ". Going to next path unit (1). pathUnitId=" + pathUnitId);
+#endif
 							if (pathUnitId <= 0)
 								break;
-							pathUnit = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId];
 						}
 
 						PathUnit.Position nextRealTimePosition = default(PathUnit.Position);
-						if (!pathUnit.GetPosition(pathPos, out nextRealTimePosition)) // if this returns false, there is no next path unit
+						if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPos, out nextRealTimePosition)) { // if this returns false, there is no next path unit
+#if DEBUG
+							logBuffer.Add("* vehicleId " + vehicleId + ". No next path unit! pathPos=" + pathPos + ", pathUnitId=" + pathUnitId);
+#endif
 							break;
+						}
 
 						ushort destNodeId = 0;
 						if (nextRealTimePosition.m_segment > 0) {
@@ -108,6 +118,10 @@ namespace TrafficManager.Custom.AI {
 								destNodeId = nextSegment.m_endNode;
 							}
 						}
+
+#if DEBUG
+						logBuffer.Add("* vehicleId " + vehicleId + ". Next path unit! node " + destNodeId + ", seg. " + nextRealTimePosition.m_segment + ", pathUnitId=" + pathUnitId + ", pathPos: " + pathPos);
+#endif
 
 						realTimePositions.Add(nextRealTimePosition);
 						realTimeDestinationNodes.Add(destNodeId);
@@ -130,10 +144,10 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// we have seen the car!
-			TrafficPriority.Vehicles[vehicleId].LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			vehiclePos.LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 #if DEBUG
-			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + TrafficPriority.Vehicles[vehicleId].ToNode + ". FromSegment: " + TrafficPriority.Vehicles[vehicleId].FromSegment/* + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId*/);
+			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + vehiclePos.ToNode + ". FromSegment: " + vehiclePos.FromSegment/* + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId*/);
 #endif
 			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
 				// add traffic to lane
@@ -141,38 +155,34 @@ namespace TrafficManager.Custom.AI {
 				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)));
 			}
 
+#if DEBUG
+			logBuffer.Add("* vehicleId " + vehicleId + ". Real time positions: " + realTimePositions.Count + ", Destination nodes: " + realTimeDestinationNodes.Count);
+#endif
 			if (realTimePositions.Count >= 2) {
 				// we found a valid path unit
 				var sourceLaneIndex = realTimePositions[0].m_lane;
-				var oldPriorityCar = TrafficPriority.Vehicles[vehicleId];
-				if (oldPriorityCar.ToNode != realTimeDestinationNodes[0] ||
-					oldPriorityCar.FromSegment != realTimePositions[0].m_segment ||
-					oldPriorityCar.FromLaneIndex != sourceLaneIndex) {
-					// vehicle information is not up-to-date. remove the car from an old priority segment (if existing)...
-					var oldNode = oldPriorityCar.ToNode;
-					var oldSegment = oldPriorityCar.FromSegment;
 
-					var oldPrioritySegment = TrafficPriority.GetPrioritySegment(oldNode, oldSegment);
-					if (oldPrioritySegment != null) {
-						TrafficPriority.Vehicles[vehicleId].WaitTime = 0;
-						TrafficPriority.Vehicles[vehicleId].Stopped = false;
-					}
-
-					// remove vehicle from all priority segments
-					TrafficPriority.RemoveVehicle(vehicleId);
+				if (vehiclePos.ToNode != realTimeDestinationNodes[0] ||
+					vehiclePos.FromSegment != realTimePositions[0].m_segment ||
+					vehiclePos.FromLaneIndex != sourceLaneIndex) {
+					// vehicle information is not up-to-date. remove the car from old priority segments (if existing)...
+					TrafficPriority.RemoveVehicleFromSegments(vehicleId);
 
 					// save vehicle information for priority rule handling
-					TrafficPriority.Vehicles[vehicleId].ToNode = realTimeDestinationNodes[0];
-					TrafficPriority.Vehicles[vehicleId].FromSegment = realTimePositions[0].m_segment;
-					//TrafficPriority.Vehicles[vehicleId].FromLaneId = PathManager.GetLaneID(realTimePositions[0]);
-					TrafficPriority.Vehicles[vehicleId].ToSegment = realTimePositions[1].m_segment;
-					/*if (realTimePositions[1].m_segment > 0)
-						TrafficPriority.Vehicles[vehicleId].ToLaneId = PathManager.GetLaneID(realTimePositions[1]);
-					else
-						TrafficPriority.Vehicles[vehicleId].ToLaneId = 0;*/
-					TrafficPriority.Vehicles[vehicleId].ReduceSpeedByValueToYield = Random.Range(13f, 18f);
+					vehiclePos.CarState = CarState.None;
+					vehiclePos.WaitTime = 0;
+					vehiclePos.Stopped = false;
+					vehiclePos.ToNode = realTimeDestinationNodes[0];
+					vehiclePos.FromSegment = realTimePositions[0].m_segment;
+					vehiclePos.FromLaneIndex = realTimePositions[0].m_lane;
+					vehiclePos.ToSegment = realTimePositions[1].m_segment;
+					vehiclePos.ToLaneIndex = realTimePositions[1].m_lane;
+					vehiclePos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
 
-					float totalLength = 0f;
+#if DEBUG
+					logBuffer.Add($"* vehicleId {vehicleId}. Setting current position to: from {vehiclePos.FromSegment} (lane {vehiclePos.FromLaneIndex}), going over {vehiclePos.ToNode}, to {vehiclePos.ToSegment} (lane {vehiclePos.ToLaneIndex})");
+#endif
+
 					// add the vehicle to upcoming priority segments that have timed traffic lights
 					for (int i = 0; i < realTimePositions.Count - 1; ++i) {
 						var prioritySegment = TrafficPriority.GetPrioritySegment(realTimeDestinationNodes[i], realTimePositions[i].m_segment);
@@ -181,38 +191,43 @@ namespace TrafficManager.Custom.AI {
 
 						// add upcoming segments only if there is a timed traffic light
 						TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(realTimeDestinationNodes[i]);
-						if (i > 0 && (nodeSim == null || !nodeSim.TimedTrafficLights || !nodeSim.TimedTrafficLightsActive) && totalLength > 50)
+						if (i > 0 && (nodeSim == null || !nodeSim.TimedTrafficLights || !nodeSim.TimedTrafficLightsActive))
 							continue;
 
-						totalLength += Singleton<NetManager>.instance.m_segments.m_buffer[realTimePositions[i].m_segment].m_averageLength;
+						VehiclePosition upcomingVehiclePos = new VehiclePosition();
+						upcomingVehiclePos.CarState = CarState.None;
+						upcomingVehiclePos.LastFrame = vehiclePos.LastFrame;
+						upcomingVehiclePos.ToNode = realTimeDestinationNodes[i];
+						upcomingVehiclePos.FromSegment = realTimePositions[i].m_segment;
+						upcomingVehiclePos.FromLaneIndex = realTimePositions[i].m_lane;
+						upcomingVehiclePos.ToSegment = realTimePositions[i + 1].m_segment;
+						upcomingVehiclePos.ToLaneIndex = realTimePositions[i + 1].m_lane;
+						upcomingVehiclePos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
+#if DEBUG
+						logBuffer.Add($"* vehicleId {vehicleId}. Adding future position: from {upcomingVehiclePos.FromSegment}  (lane {upcomingVehiclePos.FromLaneIndex}), going over {upcomingVehiclePos.ToNode}, to {upcomingVehiclePos.ToSegment} (lane {upcomingVehiclePos.ToLaneIndex})");
+#endif
 
-						VehiclePosition carPos = new VehiclePosition();
-						carPos.LastFrame = TrafficPriority.Vehicles[vehicleId].LastFrame;
-						carPos.ToNode = realTimeDestinationNodes[i];
-						carPos.FromSegment = realTimePositions[i].m_segment;
-						//carPos.FromLaneId = PathManager.GetLaneID(realTimePositions[i]);
-						carPos.ToSegment = realTimePositions[i+1].m_segment;
-						/*if (realTimePositions[i+1].m_segment > 0)
-							carPos.ToLaneId = PathManager.GetLaneID(realTimePositions[i+1]);
-						else
-							carPos.ToLaneId = 0;*/
-						carPos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
-
-						prioritySegment.AddCar(vehicleId, carPos);
+						prioritySegment.AddVehicle(vehicleId, upcomingVehiclePos);
 					}
+				} else {
+#if DEBUG
+					logBuffer.Add($"* vehicleId {vehicleId}. Nothing has changed. from {vehiclePos.FromSegment} (lane {vehiclePos.FromLaneIndex}), going over {vehiclePos.ToNode}, to {vehiclePos.ToSegment} (lane {vehiclePos.ToLaneIndex})");
+					logme = false;
+#endif
 				}
+			} else {
+#if DEBUG
+				logBuffer.Add($"* vehicleId {vehicleId}. Insufficient path unit positions.");
+#endif
 			}
 			
 #if DEBUG
-			if (false && logme && vehicleId % 5 == 0) {
-				if (logme) {
-					Log.Error("vehicleId: " + vehicleId + " ============================================");
-				} else {
-					Log.Warning("vehicleId: " + vehicleId + " ============================================");
-				}
+			if (logme) {
+				Log.Message("vehicleId: " + vehicleId + " ============================================");
 				foreach (String logBuf in logBuffer) {
 					Log.Message(logBuf);
 				}
+				Log.Message("vehicleId: " + vehicleId + " ============================================");
 			}
 #endif
 		}
@@ -234,7 +249,7 @@ namespace TrafficManager.Custom.AI {
 			SpawnVehicleIfWaiting(vehicleId, ref vehicleData);
 
 			try {
-				HandleVehicle(vehicleId, ref vehicleData, true);
+				HandleVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], true);
 			} catch (Exception e) {
 				Log.Error("CarAI TrafficManagerSimulationStep Error: " + e.ToString());
 			}
@@ -317,8 +332,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		private bool CanFindPath(ushort vehicleId, ref Vehicle data) {
-			var pathManager = Singleton<PathManager>.instance;
-			var pathFindFlags = pathManager.m_pathUnits.m_buffer[(int)((UIntPtr)data.m_path)].m_pathFindFlags;
+			var pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)data.m_path)].m_pathFindFlags;
 			if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 				data.m_pathPositionIndex = 255;
 				data.m_flags &= ~Vehicle.Flags.WaitingPath;
@@ -349,10 +363,11 @@ namespace TrafficManager.Custom.AI {
 			var camPos = Camera.main.transform.position;
 			if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
 				// add vehicle to our vehicle list
-				if (!TrafficPriority.Vehicles.ContainsKey(vehicleId)) {
-					TrafficPriority.Vehicles.Add(vehicleId, new VehiclePosition());
+				VehiclePosition vehiclePos = TrafficPriority.Vehicles[vehicleId];
+				if (vehiclePos == null) {
+					vehiclePos = new VehiclePosition();
+					TrafficPriority.Vehicles[vehicleId] = vehiclePos;
 				}
-
 				if (
 					(
 						(lastFrameVehiclePos - camPos).sqrMagnitude < CloseLod &&
@@ -390,17 +405,16 @@ namespace TrafficManager.Custom.AI {
 				destinationNodeId = netManager.m_segments.m_buffer[position.m_segment].m_endNode;
 				sourceNodeId = netManager.m_segments.m_buffer[position.m_segment].m_startNode;
 			}
-			var interestingNodeId = prevOffset == 0 ? netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode :
-				netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
+			var previousDestinationNode = prevOffset == 0 ? netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode : netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
 			
 			// this seems to be like the required braking force in order to stop the vehicle within its half length.
 			var crazyValue = 0.5f * lastFrameData.m_velocity.sqrMagnitude / m_info.m_braking + m_info.m_generatedInfo.m_size.z * 0.5f;
 
 			// Essentially, this is true if the car has enough time and space to brake (e.g. for a red traffic light)
-			if (destinationNodeId == interestingNodeId) {
+			if (destinationNodeId == previousDestinationNode) {
 				if (Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f) {
 					var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-					var num5 = (uint)((interestingNodeId << 8) / 32768);
+					var num5 = (uint)((previousDestinationNode << 8) / 32768);
 					var num6 = currentFrameIndex - num5 & 255u;
 
 					var nodeFlags = netManager.m_nodes.m_buffer[destinationNodeId].m_flags;
@@ -439,211 +453,257 @@ namespace TrafficManager.Custom.AI {
 						}
 					}
 
-					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
-						if (hasTrafficLight && (!isJoinedJunction || hasCrossing)) {
-							var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(interestingNodeId);
 
-							var destinationInfo = netManager.m_nodes.m_buffer[destinationNodeId].Info;
-							RoadBaseAI.TrafficLightState vehicleLightState;
-							ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(interestingNodeId, prevPos.m_segment); // TODO rework
+					try {
+						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
+							if (hasTrafficLight && (!isJoinedJunction || hasCrossing)) {
+								var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(previousDestinationNode);
 
-							if (light == null || nodeSimulation == null ||
-								(nodeSimulation.TimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
-								RoadBaseAI.TrafficLightState pedestrianLightState;
-								bool flag5;
-								bool pedestrians;
-								RoadBaseAI.GetTrafficLightState(interestingNodeId,
-									ref netManager.m_segments.m_buffer[prevPos.m_segment],
-									currentFrameIndex - num5, out vehicleLightState, out pedestrianLightState, out flag5,
-									out pedestrians);
-								if (!flag5 && num6 >= 196u) {
-									flag5 = true;
-									RoadBaseAI.SetTrafficLightState(interestingNodeId,
-										ref netManager.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - num5,
-										vehicleLightState, pedestrianLightState, flag5, pedestrians);
-								}
+								var destinationInfo = netManager.m_nodes.m_buffer[destinationNodeId].Info;
+								RoadBaseAI.TrafficLightState vehicleLightState;
+								ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(previousDestinationNode, prevPos.m_segment); // TODO rework
 
-								if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None ||
-									destinationInfo.m_class.m_service != ItemClass.Service.Road) {
-									switch (vehicleLightState) {
-										case RoadBaseAI.TrafficLightState.RedToGreen:
-											if (num6 < 60u) {
-												maxSpeed = 0f;
-												return;
-											}
-											break;
-										case RoadBaseAI.TrafficLightState.Red:
-											maxSpeed = 0f;
-											return;
-										case RoadBaseAI.TrafficLightState.GreenToRed:
-											if (num6 >= 30u) {
-												maxSpeed = 0f;
-												return;
-											}
-											break;
+								if (light == null || nodeSimulation == null ||
+									(nodeSimulation.TimedTrafficLights && !nodeSimulation.TimedTrafficLightsActive)) {
+									RoadBaseAI.TrafficLightState pedestrianLightState;
+									bool flag5;
+									bool pedestrians;
+									RoadBaseAI.GetTrafficLightState(previousDestinationNode,
+										ref netManager.m_segments.m_buffer[prevPos.m_segment],
+										currentFrameIndex - num5, out vehicleLightState, out pedestrianLightState, out flag5,
+										out pedestrians);
+									if (!flag5 && num6 >= 196u) {
+										flag5 = true;
+										RoadBaseAI.SetTrafficLightState(previousDestinationNode,
+											ref netManager.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - num5,
+											vehicleLightState, pedestrianLightState, flag5, pedestrians);
 									}
-								}
-							} else {
-								// traffic light simulation is active
-								var stopCar = false;
-								
-								if (isRecklessDriver)
-									vehicleLightState = RoadBaseAI.TrafficLightState.Green;
-								else {
-									// determine responsible traffic light (left, right or main)
-									if (TrafficPriority.IsLeftSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-										vehicleLightState = light.GetLightLeft();
-									} else if (TrafficPriority.IsRightSegment(prevPos.m_segment, position.m_segment, destinationNodeId)) {
-										vehicleLightState = light.GetLightRight();
-									} else {
-										vehicleLightState = light.GetLightMain();
-									}
-								}
 
-								if (vehicleLightState == RoadBaseAI.TrafficLightState.Green) {
-									var hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
-
-									if (hasIncomingCars) {
-										// green light but other cars are incoming: slow approach
-										maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.3f;
-										//stopCar = true;
-										return;
-									}
-								}
-
-								if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None ||
-									destinationInfo.m_class.m_service != ItemClass.Service.Road) {
-									switch (vehicleLightState) {
-										case RoadBaseAI.TrafficLightState.RedToGreen:
-											if (num6 < 60u) {
-												stopCar = true;
-											}
-											break;
-										case RoadBaseAI.TrafficLightState.Red:
-											stopCar = true;
-											break;
-										case RoadBaseAI.TrafficLightState.GreenToRed:
-											if (num6 >= 30u) {
-												stopCar = true;
-											}
-											break;
-									}
-								}
-
-								if (stopCar) {
-									maxSpeed = 0f;
-									return;
-								}
-							}
-						} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver) {
-							if (TrafficPriority.Vehicles.ContainsKey(vehicleId) &&
-								TrafficPriority.IsPrioritySegment(destinationNodeId, prevPos.m_segment) &&
-								TrafficPriority.Vehicles[vehicleId].ToNode == destinationNodeId &&
-								TrafficPriority.Vehicles[vehicleId].FromSegment == prevPos.m_segment) {
-								var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-								var frame = currentFrameIndex2 >> 4;
-
-								var prioritySegment = TrafficPriority.GetPrioritySegment(destinationNodeId, prevPos.m_segment);
-
-								if (TrafficPriority.Vehicles[vehicleId].CarState == CarState.None) {
-									TrafficPriority.Vehicles[vehicleId].CarState = CarState.Enter;
-								}
-
-								if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None &&
-									TrafficPriority.Vehicles[vehicleId].CarState != CarState.Leave) {
-									bool hasIncomingCars;
-									switch (prioritySegment.Type) {
-										case PrioritySegment.PriorityType.Stop:
-											if (TrafficPriority.Vehicles[vehicleId].WaitTime < 30) {
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Stop;
-
-												if (lastFrameData.m_velocity.magnitude < 0.5f ||
-													TrafficPriority.Vehicles[vehicleId].Stopped) {
-													TrafficPriority.Vehicles[vehicleId].Stopped = true;
-													TrafficPriority.Vehicles[vehicleId].WaitTime++;
-
-													if (TrafficPriority.Vehicles[vehicleId].WaitTime > 1) {
-														hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
-
-														if (hasIncomingCars) {
-															maxSpeed = 0f;
-															return;
-														}
-														TrafficPriority.Vehicles[vehicleId].CarState =
-															CarState.Leave;
-													} else {
-														maxSpeed = 0f;
-														return;
-													}
-												} else {
+									if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None ||
+										destinationInfo.m_class.m_service != ItemClass.Service.Road) {
+										switch (vehicleLightState) {
+											case RoadBaseAI.TrafficLightState.RedToGreen:
+												if (num6 < 60u) {
 													maxSpeed = 0f;
 													return;
 												}
-											} else {
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
-											}
-											break;
-										case PrioritySegment.PriorityType.Yield:
-											if (TrafficPriority.Vehicles[vehicleId].WaitTime < 30) {
-												TrafficPriority.Vehicles[vehicleId].WaitTime++;
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Stop;
-												hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
-												if (hasIncomingCars) {
-													if (lastFrameData.m_velocity.magnitude > 0) {
-														maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude -
-																   TrafficPriority.Vehicles[vehicleId].ReduceSpeedByValueToYield);
-													} else {
-														maxSpeed = 0f;
-													}
-#if DEBUG
-													/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
-														Log.Message($"Vehicle {vehicleId} is yielding at node {destinationNodeId}. Speed: {maxSpeed}, Waiting time: {TrafficPriority.Vehicles[vehicleId].WaitTime}");*/
-#endif
-													return;
-												} else {
-#if DEBUG
-													/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
-														Log.Message($"Vehicle {vehicleId} is NOT yielding at node {destinationNodeId}.");*/
-#endif
-												}
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
-											} else {
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
-											}
-											break;
-										case PrioritySegment.PriorityType.Main:
-											if (TrafficPriority.Vehicles[vehicleId].WaitTime < 30) {
-												TrafficPriority.Vehicles[vehicleId].WaitTime++;
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Stop;
+												break;
+											case RoadBaseAI.TrafficLightState.Red:
 												maxSpeed = 0f;
-
-												hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
-
-												if (hasIncomingCars) {
-													TrafficPriority.Vehicles[vehicleId].Stopped = true;
+												return;
+											case RoadBaseAI.TrafficLightState.GreenToRed:
+												if (num6 >= 30u) {
+													maxSpeed = 0f;
 													return;
 												}
-												TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
-												TrafficPriority.Vehicles[vehicleId].Stopped = false;
-											}
-
-											var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
-											if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane) {
-												maxSpeed =
-													CalculateTargetSpeed(vehicleId, ref vehicleData,
-														info3.m_lanes[position.m_lane].m_speedLimit,
-														netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
-											} else {
-												maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) *
-														   0.8f;
-											}
-											return;
+												break;
+										}
 									}
 								} else {
-									TrafficPriority.Vehicles[vehicleId].CarState = CarState.Leave;
+									// traffic light simulation is active
+									var stopCar = false;
+
+									if (isRecklessDriver)
+										vehicleLightState = RoadBaseAI.TrafficLightState.Green;
+									else {
+										// determine responsible traffic light (left, right or main)
+										if (CustomRoadAI.segmentGeometries[prevPos.m_segment].IsLeftSegment(position.m_segment, destinationNodeId)) {
+											vehicleLightState = light.GetLightLeft();
+										} else if (CustomRoadAI.segmentGeometries[prevPos.m_segment].IsRightSegment(position.m_segment, destinationNodeId)) {
+											vehicleLightState = light.GetLightRight();
+										} else {
+											vehicleLightState = light.GetLightMain();
+										}
+									}
+
+									if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None ||
+										destinationInfo.m_class.m_service != ItemClass.Service.Road) {
+										switch (vehicleLightState) {
+											case RoadBaseAI.TrafficLightState.RedToGreen:
+												if (num6 < 60u) {
+													stopCar = true;
+												}
+												break;
+											case RoadBaseAI.TrafficLightState.Red:
+												stopCar = true;
+												break;
+											case RoadBaseAI.TrafficLightState.GreenToRed:
+												if (num6 >= 30u) {
+													stopCar = true;
+												}
+												break;
+										}
+									}
+
+									if (stopCar) {
+										maxSpeed = 0f;
+										return;
+									}
+								}
+							} else if ((lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver) {
+#if DEBUG
+								//bool debug = destinationNodeId == 10864;
+								bool debug = false;
+#endif
+								//bool debug = false;
+#if DEBUG
+								if (debug)
+									Log.Message($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {destinationNodeId} which is not a traffic light.");
+#endif
+
+								var prioritySegment = TrafficPriority.GetPrioritySegment(destinationNodeId, prevPos.m_segment);
+								if (prioritySegment != null) {
+#if DEBUG
+									if (debug)
+										Log.Message($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {destinationNodeId} which is not a traffic light and is a priority segment.");
+#endif
+                                    VehiclePosition segTargetPos = prioritySegment.GetVehicle(vehicleId);
+									if (segTargetPos != null) {
+#if DEBUG
+										if (debug)
+											Log.Message($"Vehicle {vehicleId}: segment target position found");
+#endif
+										VehiclePosition globalTargetPos = TrafficPriority.Vehicles[vehicleId];
+										if (globalTargetPos != null) {
+#if DEBUG
+											if (debug)
+												Log.Message($"Vehicle {vehicleId}: global target position found. carState = {globalTargetPos.CarState.ToString()}");
+#endif
+											var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+											var frame = currentFrameIndex2 >> 4;
+
+											if (globalTargetPos.CarState == CarState.None) {
+												globalTargetPos.CarState = CarState.Enter;
+											}
+
+											if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None && globalTargetPos.CarState != CarState.Leave) {
+												bool hasIncomingCars;
+												switch (prioritySegment.Type) {
+													case PrioritySegment.PriorityType.Stop:
+#if DEBUG
+														if (debug)
+															Log.Message($"Vehicle {vehicleId}: STOP sign. waittime={globalTargetPos.WaitTime}, vel={lastFrameData.m_velocity.magnitude}");
+#endif
+														if (globalTargetPos.WaitTime < 30) {
+															globalTargetPos.CarState = CarState.Stop;
+
+															if (lastFrameData.m_velocity.magnitude < 0.5f ||
+																globalTargetPos.Stopped) {
+																globalTargetPos.Stopped = true;
+																globalTargetPos.WaitTime++;
+
+																if (globalTargetPos.WaitTime > 1) {
+																	hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
+#if DEBUG
+																	if (debug)
+																		Log.Message($"hasIncomingCars: {hasIncomingCars}");
+#endif
+
+																	if (hasIncomingCars) {
+																		maxSpeed = 0f;
+																		return;
+																	}
+																	globalTargetPos.CarState = CarState.Leave;
+																} else {
+																	maxSpeed = 0f;
+																	return;
+																}
+															} else {
+																maxSpeed = 0f;
+																return;
+															}
+														} else {
+															globalTargetPos.CarState = CarState.Leave;
+														}
+														break;
+													case PrioritySegment.PriorityType.Yield:
+#if DEBUG
+														if (debug)
+															Log.Message($"Vehicle {vehicleId}: YIELD sign. waittime={globalTargetPos.WaitTime}");
+#endif
+														if (globalTargetPos.WaitTime < 30) {
+															globalTargetPos.WaitTime++;
+															globalTargetPos.CarState = CarState.Stop;
+															hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
+#if DEBUG
+															if (debug)
+																Log.Message($"hasIncomingCars: {hasIncomingCars}");
+#endif
+															if (hasIncomingCars) {
+																if (lastFrameData.m_velocity.magnitude > 0) {
+																	maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude - globalTargetPos.ReduceSpeedByValueToYield);
+																} else {
+																	maxSpeed = 0f;
+																}
+#if DEBUG
+																/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
+																	Log.Message($"Vehicle {vehicleId} is yielding at node {destinationNodeId}. Speed: {maxSpeed}, Waiting time: {TrafficPriority.Vehicles[vehicleId].WaitTime}");*/
+#endif
+																return;
+															} else {
+#if DEBUG
+																/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
+																	Log.Message($"Vehicle {vehicleId} is NOT yielding at node {destinationNodeId}.");*/
+#endif
+															}
+															globalTargetPos.CarState = CarState.Leave;
+														} else {
+															globalTargetPos.CarState = CarState.Leave;
+														}
+														break;
+													case PrioritySegment.PriorityType.Main:
+#if DEBUG
+														if (debug)
+															Log.Message($"Vehicle {vehicleId}: MAIN sign. waittime={globalTargetPos.WaitTime}");
+#endif
+														if (globalTargetPos.WaitTime < 30) {
+															globalTargetPos.WaitTime++;
+															globalTargetPos.CarState = CarState.Stop;
+															maxSpeed = 0f;
+
+															hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
+#if DEBUG
+															if (debug)
+																Log.Message($"hasIncomingCars: {hasIncomingCars}");
+#endif
+
+															if (hasIncomingCars) {
+																globalTargetPos.Stopped = true;
+																return;
+															}
+															globalTargetPos.CarState = CarState.Leave;
+															globalTargetPos.Stopped = false;
+														}
+
+														var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
+														if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane) {
+															maxSpeed =
+																CalculateTargetSpeed(vehicleId, ref vehicleData, info3.m_lanes[position.m_lane].m_speedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
+														} else {
+															maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.8f;
+														}
+														return;
+												}
+											} else {
+												globalTargetPos.CarState = CarState.Leave;
+											}
+										} else {
+#if DEBUG
+											if (debug)
+												Log.Warning($"globalTargetPos is null! {vehicleId} @ seg. {prevPos.m_segment} @ node {destinationNodeId}");
+#endif
+										}
+									} else {
+#if DEBUG
+										if (debug)
+											Log.Warning($"targetPos is null! {vehicleId} @ seg. {prevPos.m_segment} @ node {destinationNodeId}");
+#endif
+									}
 								}
 							}
 						}
+					} catch (Exception e) {
+						Log.Error($"Error occured in TmCalculateSegmentPosition: {e.ToString()}");
 					}
 				}
 			}

@@ -19,7 +19,7 @@ namespace TrafficManager {
         public static LoadingExtension Instance;
         public static bool IsPathManagerCompatible = true;
 		public static bool IsTrafficPlusPlusLoaded = false;
-		public static bool PathManagerReplaced = false;
+		public static bool IsPathManagerReplaced = false;
 		public CustomPathManager CustomPathManager { get; set; }
         public bool DespawnEnabled { get; set; }
         public bool DetourInited { get; set; }
@@ -236,7 +236,7 @@ namespace TrafficManager {
                 Instance = this;
 				initDetours();
 
-                if (IsPathManagerCompatible && ! PathManagerReplaced) {
+                if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 					try {
 						Log.Warning("#####################################");
 
@@ -272,9 +272,10 @@ namespace TrafficManager {
 
 						Object.Destroy(stockPathManager, 10f);
 
-						PathManagerReplaced = true;
+						IsPathManagerReplaced = true;
 					} catch (Exception) {
 						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+						IsPathManagerCompatible = false;
 					}
 				}
 
@@ -282,13 +283,14 @@ namespace TrafficManager {
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
                 TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
                                                 SimulationMetaData.MetaBool.True;
-				TrafficPriority.fixJunctions();
-            }
+				TrafficPriority.OnLevelLoading();
+				CustomRoadAI.OnLevelLoading();
+			}
         }
 
 		private void determinePathManagerCompatible() {
 			IsPathManagerCompatible = true;
-			if (!PathManagerReplaced) {
+			if (!IsPathManagerReplaced) {
 
 				var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
 				List<ILoadingExtension> loadingExtensions = null;
@@ -319,6 +321,10 @@ namespace TrafficManager {
 					IsPathManagerCompatible = false;
 				}
 			}
+
+			if (!IsPathManagerCompatible) {
+				Options.setAdvancedAI(false);
+			}
 		}
 
 		public override void OnLevelUnloading() {
@@ -330,6 +336,7 @@ namespace TrafficManager {
 			try {
 				TrafficPriority.OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
+				CustomRoadAI.OnLevelUnloading();
 				TrafficLightsManual.OnLevelUnloading();
 				TrafficLightsTimed.OnLevelUnloading();
 				Flags.OnLevelUnloading();

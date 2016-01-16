@@ -36,6 +36,8 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		public float maxWait;
 
+		public uint lastFlowWaitCalc = 0;
+
 		private List<ushort> groupNodeIds;
 		private TrafficLightsTimed timedNode;
 
@@ -145,6 +147,7 @@ namespace TrafficManager.TrafficLight {
 			this.endTransitionStart = null;
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
+			lastFlowWaitCalc = 0;
 		}
 
 		private uint getCurrentFrame() {
@@ -285,8 +288,17 @@ namespace TrafficManager.TrafficLight {
 				} else {
 					// we are the master node
 					float wait, flow;
-					if (!calcWaitFlow(out wait, out flow))
-						return true;
+					uint curFrame = getCurrentFrame();
+					if (lastFlowWaitCalc < curFrame) {
+                        if (!calcWaitFlow(out wait, out flow))
+							return true;
+						else {
+							lastFlowWaitCalc = curFrame;
+						}
+					} else {
+						flow = minFlow;
+						wait = maxWait;
+					}
 					float newFlow = minFlow;
 					float newWait = maxWait;
 
@@ -359,18 +371,18 @@ namespace TrafficManager.TrafficLight {
 							var toSegmentId = f.Key;
 							var totalNormCarLength = f.Value;
 
-							TrafficPriority.Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
+							Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
 							bool addToFlow = false;
 							switch (dir) {
-								case TrafficPriority.Direction.Left:
+								case Direction.Left:
 									if (segLightState.isLeftGreen())
 										addToFlow = true;
 									break;
-								case TrafficPriority.Direction.Right:
+								case Direction.Right:
 									if (segLightState.isRightGreen())
 										addToFlow = true;
 									break;
-								case TrafficPriority.Direction.Forward:
+								case Direction.Forward:
 								default:
 									if (segLightState.isForwardGreen())
 										addToFlow = true;
@@ -418,11 +430,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
-			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
-				if (e.Key != segmentId)
-					continue;
-				e.Value.CurrentMode = mode;
-			}
+			segmentLightStates[segmentId].CurrentMode = mode;
 		}
 
 		public object Clone() {
