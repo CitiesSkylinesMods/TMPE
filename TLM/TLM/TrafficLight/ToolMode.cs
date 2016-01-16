@@ -9,6 +9,7 @@ namespace TrafficManager.TrafficLight
         TimedLightsSelectNode,
         TimedLightsShowLights,
         LaneChange,
-        LaneRestrictions
-    }
+        LaneRestrictions,
+		SpeedLimits
+	}
 }
