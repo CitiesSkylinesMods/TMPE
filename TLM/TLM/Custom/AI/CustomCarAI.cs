@@ -177,7 +177,7 @@ namespace TrafficManager.Custom.AI {
 					vehiclePos.FromLaneIndex = realTimePositions[0].m_lane;
 					vehiclePos.ToSegment = realTimePositions[1].m_segment;
 					vehiclePos.ToLaneIndex = realTimePositions[1].m_lane;
-					vehiclePos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
+					vehiclePos.ReduceSpeedByValueToYield = Random.Range(16f, 28f);
 
 #if DEBUG
 					logBuffer.Add($"* vehicleId {vehicleId}. Setting current position to: from {vehiclePos.FromSegment} (lane {vehiclePos.FromLaneIndex}), going over {vehiclePos.ToNode}, to {vehiclePos.ToSegment} (lane {vehiclePos.ToLaneIndex})");
@@ -202,7 +202,7 @@ namespace TrafficManager.Custom.AI {
 						upcomingVehiclePos.FromLaneIndex = realTimePositions[i].m_lane;
 						upcomingVehiclePos.ToSegment = realTimePositions[i + 1].m_segment;
 						upcomingVehiclePos.ToLaneIndex = realTimePositions[i + 1].m_lane;
-						upcomingVehiclePos.ReduceSpeedByValueToYield = Random.Range(13f, 18f);
+						upcomingVehiclePos.ReduceSpeedByValueToYield = Random.Range(16f, 28f);
 #if DEBUG
 						logBuffer.Add($"* vehicleId {vehicleId}. Adding future position: from {upcomingVehiclePos.FromSegment}  (lane {upcomingVehiclePos.FromLaneIndex}), going over {upcomingVehiclePos.ToNode}, to {upcomingVehiclePos.ToSegment} (lane {upcomingVehiclePos.ToLaneIndex})");
 #endif
@@ -584,7 +584,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log.Message($"Vehicle {vehicleId}: STOP sign. waittime={globalTargetPos.WaitTime}, vel={lastFrameData.m_velocity.magnitude}");
 #endif
-														if (globalTargetPos.WaitTime < 30) {
+														if (globalTargetPos.WaitTime < 40) {
 															globalTargetPos.CarState = CarState.Stop;
 
 															if (lastFrameData.m_velocity.magnitude < 0.5f ||
@@ -592,7 +592,8 @@ namespace TrafficManager.Custom.AI {
 																globalTargetPos.Stopped = true;
 																globalTargetPos.WaitTime++;
 
-																if (globalTargetPos.WaitTime > 1) {
+																float minStopWaitTime = Random.Range(0f, 3f);
+																if (globalTargetPos.WaitTime >= minStopWaitTime) {
 																	hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
 #if DEBUG
 																	if (debug)
@@ -600,12 +601,15 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 																	if (hasIncomingCars) {
-																		maxSpeed = 0f;
+																		maxSpeed = Random.Range(0f, 0.1f);
 																		return;
 																	}
 																	globalTargetPos.CarState = CarState.Leave;
 																} else {
-																	maxSpeed = 0f;
+																	if (globalTargetPos.WaitTime < 10)
+																		maxSpeed = Random.Range(0f, 0.1f);
+																	else
+																		maxSpeed = 0;
 																	return;
 																}
 															} else {
@@ -621,7 +625,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log.Message($"Vehicle {vehicleId}: YIELD sign. waittime={globalTargetPos.WaitTime}");
 #endif
-														if (globalTargetPos.WaitTime < 30) {
+														if (globalTargetPos.WaitTime < 40) {
 															globalTargetPos.WaitTime++;
 															globalTargetPos.CarState = CarState.Stop;
 															hasIncomingCars = TrafficPriority.HasIncomingVehicles(vehicleId, destinationNodeId);
@@ -633,7 +637,10 @@ namespace TrafficManager.Custom.AI {
 																if (lastFrameData.m_velocity.magnitude > 0) {
 																	maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude - globalTargetPos.ReduceSpeedByValueToYield);
 																} else {
-																	maxSpeed = 0f;
+																	if (globalTargetPos.WaitTime < 10)
+																		maxSpeed = Random.Range(0f, 0.1f);
+																	else
+																		maxSpeed = 0;
 																}
 #if DEBUG
 																/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
@@ -645,6 +652,9 @@ namespace TrafficManager.Custom.AI {
 																/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
 																	Log.Message($"Vehicle {vehicleId} is NOT yielding at node {destinationNodeId}.");*/
 #endif
+																if (lastFrameData.m_velocity.magnitude > 0) {
+																	maxSpeed = Math.Max(1f, lastFrameData.m_velocity.magnitude - globalTargetPos.ReduceSpeedByValueToYield * 0.5f);
+																}
 															}
 															globalTargetPos.CarState = CarState.Leave;
 														} else {
@@ -656,7 +666,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log.Message($"Vehicle {vehicleId}: MAIN sign. waittime={globalTargetPos.WaitTime}");
 #endif
-														if (globalTargetPos.WaitTime < 30) {
+														if (globalTargetPos.WaitTime < 40) {
 															globalTargetPos.WaitTime++;
 															globalTargetPos.CarState = CarState.Stop;
 															maxSpeed = 0f;

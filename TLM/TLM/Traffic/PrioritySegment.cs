@@ -119,7 +119,10 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal int getNumApproachingVehicles() {
-			return Vehicles.Where(e => (e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) && (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None).Count();
+			return Vehicles.Where(e =>
+				(e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) &&
+				(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None &&
+				Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].GetLastFrameVelocity().magnitude > TrafficPriority.maxStopVelocity).Count();
 		}
 
 		internal Dictionary<ushort, VehiclePosition> getCars() {
@@ -127,7 +130,10 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal Dictionary<ushort, VehiclePosition> getApproachingVehicles() {
-			return Vehicles.Where(e => e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6).ToDictionary(e => e.Key, e => e.Value);
+			return Vehicles.Where(e => 
+				(e.Value.CarState != CarState.Leave || e.Value.LastCarStateUpdate >> 6 >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6) &&
+				(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None &&
+				Singleton<VehicleManager>.instance.m_vehicles.m_buffer[e.Key].GetLastFrameVelocity().magnitude > TrafficPriority.maxStopVelocity).ToDictionary(e => e.Key, e => e.Value);
 		}
 	}
 }
