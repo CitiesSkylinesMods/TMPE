@@ -13,6 +13,7 @@ namespace TrafficManager.Traffic {
 		private static uint checkMod = 0;
 
 		public static bool LeftHandDrive;
+		public static float maxStopVelocity = 0.5f;
 
 		/// <summary>
 		/// Dictionary of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id
@@ -305,8 +306,8 @@ namespace TrafficManager.Traffic {
 		public static bool HasIncomingVehicles(ushort targetVehicleId, ushort nodeId) {
 			try {
 #if DEBUG
-				//bool debug = nodeId == 8621;
-				bool debug = false;
+				bool debug = nodeId == 30634;
+				//bool debug = false;
 #else
 				bool debug = false;
 #endif
@@ -397,7 +398,7 @@ namespace TrafficManager.Traffic {
 									continue;
 								}*/
 
-								if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > 0.25f) {
+								if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > maxStopVelocity) {
 									if (HasVehiclePriority(debug, targetVehicleId, true, incomingCar, true, nodeId)) {
 										--numCars;
 #if DEBUG
@@ -441,7 +442,7 @@ namespace TrafficManager.Traffic {
 								}
 
 								if (incomingFromPrioritySegment.Type == PrioritySegment.PriorityType.Main) {
-									if (!otherVehiclePos.Stopped && Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > 0.25f) {
+									if (!otherVehiclePos.Stopped && Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > maxStopVelocity) {
 										if (HasVehiclePriority(debug, targetVehicleId, false, incomingCar, true, nodeId)) {
 #if DEBUG
 											if (debug)
@@ -463,7 +464,7 @@ namespace TrafficManager.Traffic {
 										numCars--;
 									}
 								} else {
-									if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > 0.25f) {
+									if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > 0.5f) {
 										if (HasVehiclePriority(debug, targetVehicleId, false, incomingCar, false, nodeId)) {
 #if DEBUG
 											if (debug)
@@ -521,7 +522,7 @@ namespace TrafficManager.Traffic {
 								continue;
 							}*/
 
-							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > 0.25f) {
+							if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCar].GetLastFrameVelocity().magnitude > maxStopVelocity) {
 								if (HasVehiclePriority(debug, targetVehicleId, true, incomingCar, true, nodeId)) {
 #if DEBUG
 									if (debug)
@@ -580,8 +581,7 @@ namespace TrafficManager.Traffic {
 		protected static bool HasVehiclePriority(bool debug, ushort targetCarId, bool targetIsOnMainRoad, ushort incomingCarId, bool incomingIsOnMainRoad, ushort nodeId) {
 			try {
 #if DEBUG
-				//debug = nodeId == 8621;
-				debug = false;
+				debug = nodeId == 30634;
 				if (debug) {
 					Log.Message($"HasVehiclePriority: Checking if {targetCarId} (main road = {targetIsOnMainRoad}) has priority over {incomingCarId} (main road = {incomingIsOnMainRoad}).");
                 }
@@ -594,8 +594,65 @@ namespace TrafficManager.Traffic {
 					return true;
 				}
 
+				// check if incoming car has stopped
+				float incomingVel = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].GetLastFrameVelocity().magnitude;
+				if (incomingVel <= maxStopVelocity) {
+					Log.Message($"HasVehiclePriority: incoming car {incomingCarId} is too slow");
+					return true;
+				}
+
 				var targetCar = Vehicles[targetCarId];
 				var incomingCar = Vehicles[incomingCarId];
+
+				// check incoming car position
+				uint pathUnitId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_path;
+				if (pathUnitId != 0) {
+					int pathUnitIndex = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_pathPositionIndex >> 1;
+					PathUnit.Position curPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathUnitIndex);
+					if (curPos.m_segment != incomingCar.FromSegment) {
+#if DEBUG
+						if (debug) {
+							Log.Message($"We have old data from incoming car {incomingCarId}. It is currently on segment {curPos.m_segment}.");
+						}
+#endif
+						RemoveVehicleFromSegments(incomingCarId);
+						Vehicles[incomingCarId] = null;
+						return true;
+					}
+				} else {
+#if DEBUG
+					if (debug) {
+						Log.Message($"We have old data from incoming car {incomingCarId}. It does not have a valid path.");
+					}
+#endif
+					RemoveVehicleFromSegments(incomingCarId);
+					Vehicles[incomingCarId] = null;
+					return true;
+				}
+
+				// check distance and velocity
+				float dist = Vector3.Distance(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].GetLastFramePosition(), Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].GetLastFramePosition());
+				if (dist >= 100) {
+#if DEBUG
+					if (debug) {
+						Log.Message($"Incoming car {incomingCarId} is too far away.");
+					}
+#endif
+					return true;
+				}
+
+#if DEBUG
+				if (debug) {
+					Log.Message($"HasVehiclePriority: Distance between target car {targetCarId} and incoming car {incomingCarId}: {dist}. Incoming speed: {incomingVel}. Speed * 20 time units = {incomingVel*20}");
+				}
+#endif
+				// check incoming car position
+				if (incomingVel * 20f < dist) {
+#if DEBUG
+					Log.Message($"HasVehiclePriority: Target car {targetCarId} can make it against {incomingCarId}! Ha!");
+#endif
+					return true;
+				}
 
 				if (targetCar == null || incomingCar == null) {
 					Log.Warning($"HasVehiclePriority: incoming car {incomingCarId} or targetCar {targetCarId} is null.");
@@ -697,7 +754,8 @@ namespace TrafficManager.Traffic {
 							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going right without conflict!");
                         }
 #endif
-						if (!targetIsOnMainRoad && incomingIsOnMainRoad && !laneOrderCorrect) {
+
+						if (!targetIsOnMainRoad && incomingIsOnMainRoad && sameTargets && !laneOrderCorrect) {
 #if DEBUG
 							if (debug) {
 								Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is on low-priority road turning right. the other vehicle is on a priority road.");
