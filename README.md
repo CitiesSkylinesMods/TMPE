@@ -13,7 +13,7 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 - Bugfix: Cargo trucks were ignoring the "Heavy ban" policy, they should do now (thanks to @Scratch for pointing out this problem)
 
 1.4.1, 01/15/2016
-Bugfix: Path-finding near junctions fixed
+- Bugfix: Path-finding near junctions fixed
 
 1.4.0, 01/15/2016
 - Introducing Advanced Vehicle AI (disabled by default! Go to "Options" and enable it if you want to use it.)
