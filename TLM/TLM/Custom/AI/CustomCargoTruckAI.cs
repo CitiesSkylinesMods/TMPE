@@ -199,7 +199,7 @@ namespace TrafficManager.Custom.AI
                 NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
                 VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
                 uint path;
-                if (instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, IsHeavyVehicle(), IgnoreBlocked(vehicleId, ref vehicleData), false, false, ItemClass.Service.Industrial))
+                if (instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, IsHeavyVehicle(), IgnoreBlocked(vehicleId, ref vehicleData), false, false))
                 {
                     if (vehicleData.m_path != 0u)
                     {

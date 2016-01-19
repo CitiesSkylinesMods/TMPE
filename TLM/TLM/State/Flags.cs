@@ -9,6 +9,7 @@ namespace TrafficManager.State {
 	public class Flags {
 		[Flags]
 		public enum LaneArrows { // compatible with NetLane.Flags
+			None = 0,
 			Forward = 16,
 			Left = 32,
 			Right = 64,
@@ -29,6 +30,11 @@ namespace TrafficManager.State {
 		/// For each lane: Defines the lane arrows which are set
 		/// </summary>
 		private static Dictionary<uint, LaneArrows> laneArrowFlags = new Dictionary<uint, LaneArrows>();
+
+		/// <summary>
+		/// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
+		/// </summary>
+		private static Dictionary<uint, LaneArrows> highwayLaneArrowFlags = new Dictionary<uint, LaneArrows>();
 
 		public static void resetTrafficLights(bool all) {
 			nodeTrafficLightFlag.Clear();
@@ -105,7 +111,23 @@ namespace TrafficManager.State {
 				return;
 			}
 
+			if (highwayLaneArrowFlags.ContainsKey(laneId))
+				return; // disallow custom lane arrows in highway rule mode
+
 			laneArrowFlags[laneId] = flags;
+			applyLaneArrowFlags(laneId);
+		}
+
+		public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags) {
+			if (laneId <= 0)
+				return;
+
+			if (!mayHaveLaneArrows(laneId)) {
+				removeLaneArrowFlags(laneId);
+				return;
+			}
+
+			highwayLaneArrowFlags[laneId] = flags;
 			applyLaneArrowFlags(laneId);
 		}
 
@@ -116,6 +138,18 @@ namespace TrafficManager.State {
 			return laneArrowFlags[laneId];
 		}
 
+		public static LaneArrows? getHighwayLaneArrowFlags(uint laneId) {
+			LaneArrows laneArrows;
+			if (!highwayLaneArrowFlags.TryGetValue(laneId, out laneArrows))
+				return null;
+			else
+				return laneArrows;
+		}
+
+		public static void removeHighwayLaneArrowFlags(uint laneId) {
+			highwayLaneArrowFlags.Remove(laneId);
+		}
+
 		public static void toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
@@ -124,6 +158,9 @@ namespace TrafficManager.State {
 				removeLaneArrowFlags(laneId);
 				return;
 			}
+
+			if (highwayLaneArrowFlags.ContainsKey(laneId))
+				return; // disallow custom lane arrows in highway rule mode
 
 			if (!laneArrowFlags.ContainsKey(laneId)) {
 				// read currently defined arrows
@@ -136,33 +173,51 @@ namespace TrafficManager.State {
 			applyLaneArrowFlags(laneId);
 		}
 
+		/*private static bool isLaneInHighwayMode(uint laneId) {
+			if (Options.highwayRules) {
+				NetManager netManager = Singleton<NetManager>.instance;
+				bool isHighway = false;
+				NetInfo segInfo = netManager.m_segments.m_buffer[netManager.m_lanes.m_buffer[laneId].m_segment].Info;
+				if (segInfo.m_netAI is RoadBaseAI)
+					isHighway = ((RoadBaseAI)segInfo.m_netAI).m_highwayRules;
+
+				if (isHighway)
+					return true; // lane changer for highways in highway rule mode deactivated
+			}
+			return false;
+		}*/
+
 		private static bool mayHaveLaneArrows(uint laneId) {
 			if (!isLaneValid(laneId))
 				return false;
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			NetLane lane = netManager.m_lanes.m_buffer[laneId];
-			ushort segmentId = lane.m_segment;
-			NetSegment segment = netManager.m_segments.m_buffer[segmentId];
+			ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
 
 			var dir = NetInfo.Direction.Forward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 			var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
-			NetInfo segmentInfo = segment.Info;
-			uint curLaneId = segment.m_lanes;
+			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
 			int numLanes = segmentInfo.m_lanes.Length;
 			int laneIndex = 0;
+			int wIter = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
+				++wIter;
+				if (wIter >= 20) {
+					Log.Error("Too many iterations in Flags.mayHaveLaneArrows!");
+					break;
+				}
+
 				if (curLaneId == laneId) {
 					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-					ushort nodeId = (laneInfo.m_direction == dir3) ? segment.m_endNode : segment.m_startNode;
+					ushort nodeId = (laneInfo.m_direction == dir3) ? netManager.m_segments.m_buffer[segmentId].m_endNode : netManager.m_segments.m_buffer[segmentId].m_startNode;
 					
-					NetNode node = netManager.m_nodes.m_buffer[nodeId];
-					if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+					if ((netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 						return false;
-					return (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+					return (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 				}
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				++laneIndex;
@@ -176,11 +231,10 @@ namespace TrafficManager.State {
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			NetLane lane = netManager.m_lanes.m_buffer[laneId];
-			if ((lane.m_flags & (ushort)NetLane.Flags.Created) == 0)
+			if ((netManager.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0)
 				return false;
 
-			ushort segmentId = lane.m_segment;
+			ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
 			if (segmentId <= 0)
 				return false;
 			NetSegment segment = netManager.m_segments.m_buffer[segmentId];
@@ -242,6 +296,12 @@ namespace TrafficManager.State {
 			if (!mayHaveLaneArrows(laneId))
 				return false;
 
+			/*if (isLaneInHighwayMode(laneId)) {
+				flags = LaneArrows.None;*/
+				if (highwayLaneArrowFlags.ContainsKey(laneId))
+					flags = highwayLaneArrowFlags[laneId];
+			// }
+
 			laneFlags &= ~lfr; // remove all arrows
 			laneFlags |= (uint)flags; // add desired arrows
 			//Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
@@ -253,6 +313,10 @@ namespace TrafficManager.State {
 			if (laneId <= 0)
 				return;
 
+			//if (isLaneInHighwayMode(laneId))
+			if (highwayLaneArrowFlags.ContainsKey(laneId))
+				return; // modification of arrows in highway rule mode is forbidden
+
 			laneArrowFlags.Remove(laneId);
 			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
@@ -263,9 +327,14 @@ namespace TrafficManager.State {
 			}
 		}
 
+		public static void clearHighwayLaneArrows() {
+			highwayLaneArrowFlags.Clear();
+		}
+
 		internal static void clearAll() {
 			nodeTrafficLightFlag.Clear();
 			laneArrowFlags.Clear();
+			highwayLaneArrowFlags.Clear();
 		}
 
 		internal static void OnLevelUnloading() {

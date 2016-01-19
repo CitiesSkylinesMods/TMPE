@@ -48,7 +48,7 @@ namespace TrafficManager.Custom.AI
                 PathUnit.Position endPosB = default(PathUnit.Position);
                 SimulationManager instance2 = Singleton<SimulationManager>.instance;
                 uint path;
-                if (Singleton<CustomPathManager>.instance.CreatePath(out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f, false, false, false, false, ItemClass.Service.None))
+                if (Singleton<CustomPathManager>.instance.CreatePath(out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f, false, false, false, false))
                 {
                     if (vehicleData.m_path != 0u)
                     {

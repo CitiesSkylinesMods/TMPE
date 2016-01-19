@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.Traffic;
 using UnityEngine;
+using TrafficManager.Custom.AI;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager.TrafficLight {
 	public class ManualSegmentLight : ICloneable {
@@ -76,9 +78,10 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void ChangeMode() {
-			var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, nodeId);
-			var hasForwardSegment = TrafficPriority.HasStraightSegment(segmentId, nodeId);
-			var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, nodeId);
+			SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId, nodeId);
+			var hasLeftSegment = geometry.HasLeftSegment(nodeId);
+			var hasForwardSegment = geometry.HasStraightSegment(nodeId);
+			var hasRightSegment = geometry.HasRightSegment(nodeId);
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {

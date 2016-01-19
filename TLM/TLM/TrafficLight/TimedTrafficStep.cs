@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
+using TrafficManager.Custom.AI;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager.TrafficLight {
 	public class TimedTrafficStep : ICloneable {
@@ -49,8 +51,6 @@ namespace TrafficManager.TrafficLight {
 		float maxSegmentLength = 0f;
 
 		private bool invalid = false; // TODO rework
-
-		private static readonly float?[] speedsToLookup = new float?[] {null, 0.1f};
 
 		public float waitFlowBalance = 1f;
 
@@ -331,6 +331,12 @@ namespace TrafficManager.TrafficLight {
 			return false;
 		}
 
+		/// <summary>
+		/// Calculates the current metrics for flowing and waiting vehicles
+		/// </summary>
+		/// <param name="wait"></param>
+		/// <param name="flow"></param>
+		/// <returns>true if the values could be calculated, false otherwise</returns>
 		public bool calcWaitFlow(out float wait, out float flow) {
 			int numFlows = 0;
 			int numWaits = 0;
@@ -365,15 +371,40 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
-					float?[] minSpeeds = startPhase ? new float?[] { null } : speedsToLookup;
-					foreach (float? minSpeed in minSpeeds) {
-						foreach (KeyValuePair<ushort, float> f in fromSeg.getNumCarsGoingToSegment(minSpeed)) {
+					Dictionary<ushort, float>[] carsToSegmentMetrics = new Dictionary<ushort, float>[startPhase ? 1 : 2];
+					try {
+						carsToSegmentMetrics[0] = fromSeg.getNumCarsGoingToSegment(null);
+					} catch (Exception ex) {
+						Log.Warning("calcWaitFlow: " + ex.ToString());
+					}
+					if (!startPhase) {
+						try {
+							carsToSegmentMetrics[1] = fromSeg.getNumCarsGoingToSegment(0.1f);
+						} catch (Exception ex) {
+							Log.Warning("calcWaitFlow: " + ex.ToString());
+						}
+					}
+
+					// build directions from toSegment to fromSegment
+					Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
+					foreach (KeyValuePair<ushort, float> f in carsToSegmentMetrics[0]) {
+						var toSegmentId = f.Key;
+						SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId, slaveStep.nodeId);
+						Direction dir = geometry.GetDirection(toSegmentId, timedNodeId);
+						directions[toSegmentId] = dir;
+					}
+
+					// calculate waiting/flowing traffic
+					for (int i = 0; i < carsToSegmentMetrics.Length; ++i) {
+						if (carsToSegmentMetrics[i] == null)
+							continue;
+
+						foreach (KeyValuePair<ushort, float> f in carsToSegmentMetrics[i]) {
 							var toSegmentId = f.Key;
 							var totalNormCarLength = f.Value;
 
-							Direction dir = TrafficPriority.GetDirection(fromSegmentId, toSegmentId, timedNodeId);
 							bool addToFlow = false;
-							switch (dir) {
+							switch (directions[toSegmentId]) {
 								case Direction.Left:
 									if (segLightState.isLeftGreen())
 										addToFlow = true;
@@ -390,15 +421,13 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							if (addToFlow) {
-								if (minSpeed != null || startPhase) {
+								if (i > 0 || startPhase) {
 									++numFlows;
 									curMeanFlow += (float)totalNormCarLength/* * segmentWeight*/;
 								}
-							} else {
-								if (minSpeed == null) {
-									++numWaits;
-									curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
-								}
+							} else if (i == 0) {
+								++numWaits;
+								curMeanWait += (float)totalNormCarLength/* * segmentWeight*/;
 							}
 						}
 					}

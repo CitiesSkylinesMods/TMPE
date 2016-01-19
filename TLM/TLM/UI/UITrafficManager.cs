@@ -18,6 +18,12 @@ namespace TrafficManager.UI {
 		//private static UIButton _buttonLaneRestrictions;
 		private static UIButton _buttonClearTraffic;
 		private static UIButton _buttonToggleDespawn;
+		private static UITextField _goToField = null;
+#if DEBUG
+		private static UIButton _goToSegmentButton = null;
+		private static UIButton _goToNodeButton = null;
+		private static UIButton _goToVehicleButton = null;
+#endif
 
 		public static TrafficLightTool TrafficLightTool;
 
@@ -32,10 +38,13 @@ namespace TrafficManager.UI {
 			color = new Color32(75, 75, 135, 255);
 			width = 250;
 			height = LoadingExtension.IsPathManagerCompatible ? 310 : 230;
+#if DEBUG
+			height += 160;		
+#endif
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.4.2";
+			title.text = "Version 1.4.3";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -61,6 +70,42 @@ namespace TrafficManager.UI {
 				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, y), ClickToggleDespawn);
 				y += 40;
 			}
+
+#if DEBUG
+			_goToField = CreateTextField("", 35, y);
+			y += 40;
+			_goToSegmentButton = _createButton("Goto segment", new Vector3(35f, y), clickGoToSegment);
+			y += 40;
+			_goToNodeButton = _createButton("Goto node", new Vector3(35f, y), clickGoToNode);
+			y += 40;
+			_goToVehicleButton = _createButton("Goto vehicle", new Vector3(35f, y), clickGoToVehicle);
+			y += 40;
+#endif
+		}
+
+		private UITextField CreateTextField(string str, int x, int y) {
+			UITextField textfield = AddUIComponent<UITextField>();
+			textfield.relativePosition = new Vector3(x, y);
+			textfield.horizontalAlignment = UIHorizontalAlignment.Left;
+			textfield.text = str;
+			textfield.textScale = 0.8f;
+			textfield.color = Color.black;
+			textfield.cursorBlinkTime = 0.45f;
+			textfield.cursorWidth = 1;
+			textfield.selectionBackgroundColor = new Color(233, 201, 148, 255);
+			textfield.selectionSprite = "EmptySprite";
+			textfield.verticalAlignment = UIVerticalAlignment.Middle;
+			textfield.padding = new RectOffset(5, 0, 5, 0);
+			textfield.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
+			textfield.normalBgSprite = "TextFieldPanel";
+			textfield.hoveredBgSprite = "TextFieldPanelHovered";
+			textfield.focusedBgSprite = "TextFieldPanel";
+			textfield.size = new Vector3(190, 30);
+			textfield.isInteractive = true;
+			textfield.enabled = true;
+			textfield.readOnly = false;
+			textfield.builtinKeyNavigation = true;
+			return textfield;
 		}
 
 		private UIButton _createButton(string text, Vector3 pos, MouseEventHandler eventClick) {
@@ -79,6 +124,29 @@ namespace TrafficManager.UI {
 			button.eventClick += eventClick;
 
 			return button;
+		}
+
+		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort segmentId = Convert.ToUInt16(_goToField.text);
+			NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+			if ((segment.m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
+				CameraCtrl.GoToSegment(segmentId, new Vector3(segment.m_bounds.center.x, Camera.main.transform.position.y, segment.m_bounds.center.z));
+			}
+		}
+		private void clickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort nodeId = Convert.ToUInt16(_goToField.text);
+			NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+			if ((node.m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
+				CameraCtrl.GoToNode(nodeId, new Vector3(node.m_position.x, Camera.main.transform.position.y, node.m_position.z));
+			}
+		}
+
+		private void clickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort vehicleId = Convert.ToUInt16(_goToField.text);
+			Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+			if ((vehicle.m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None) {
+				CameraCtrl.GoToVehicle(vehicleId, new Vector3(vehicle.GetLastFramePosition().x, Camera.main.transform.position.y, vehicle.GetLastFramePosition().z));
+			}
 		}
 
 		private void clickSwitchTraffic(UIComponent component, UIMouseEventParameter eventParam) {

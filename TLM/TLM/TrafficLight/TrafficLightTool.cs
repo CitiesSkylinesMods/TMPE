@@ -10,6 +10,7 @@ using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
 using TrafficManager.State;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager.TrafficLight {
 	[UsedImplicitly]
@@ -735,9 +736,11 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, SelectedNode)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode);
-					var hasForwardSegment = TrafficPriority.HasStraightSegment(segmentId, SelectedNode);
-					var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode);
+
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId, SelectedNode);
+					var hasLeftSegment = geometry.HasLeftSegment(SelectedNode);
+					var hasForwardSegment = geometry.HasStraightSegment(SelectedNode);
+					var hasRightSegment = geometry.HasRightSegment(SelectedNode);
 
 					switch (segmentDict.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple:
@@ -1334,6 +1337,7 @@ namespace TrafficManager.TrafficLight {
 			_counterStyle.fontSize = (int)(11f * zoom);
 			_counterStyle.normal.textColor = new Color(1f, 1f, 0f);
 
+
 			uint curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
@@ -1367,6 +1371,7 @@ namespace TrafficManager.TrafficLight {
 				NetSegment segment = segments.m_buffer[i];
 				if (segment.m_flags == NetSegment.Flags.None) // segment is unused
 					continue;
+				var segmentInfo = segment.Info;
 
 				Vector3 centerPos = segment.m_bounds.center;
 				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
@@ -1390,15 +1395,36 @@ namespace TrafficManager.TrafficLight {
 					labelStr += ", flags: " + segment.m_flags.ToString();
 #endif
 				labelStr += "\nTraffic: " + segment.m_trafficDensity + " %";
+
+				float meanTrafficDensity = 0f;
+
+				int lIndex = 0;
+				uint laneId = segment.m_lanes;
+				int validLanes = 0;
+				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
+					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
+					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
+						meanTrafficDensity += CustomRoadAI.laneMeanTrafficDensity[laneId];
+						++validLanes;
+					}
+					lIndex++;
+					laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
+				}
+
+				if (validLanes > 0)
+					meanTrafficDensity /= Convert.ToSingle(validLanes);
+
+				labelStr += " (lane avg. " + String.Format("{0:0.##}", meanTrafficDensity*100) + " %)";
+
 #if DEBUG
 				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;
 #endif
+
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
-				var segmentInfo = segment.Info;
 				if (Options.showLanes)
 					 _guiLanes(ref segment, ref segmentInfo);
 			}
@@ -1711,9 +1737,10 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(srcSegmentId, nodeId)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(srcSegmentId, nodeId);
-					var hasForwardSegment = TrafficPriority.HasStraightSegment(srcSegmentId, nodeId);
-					var hasRightSegment = TrafficPriority.HasRightSegment(srcSegmentId, nodeId);
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(srcSegmentId, nodeId);
+					var hasLeftSegment = geometry.HasLeftSegment(nodeId);
+					var hasForwardSegment = geometry.HasStraightSegment(nodeId);
+					var hasRightSegment = geometry.HasRightSegment(nodeId);
 
 					switch (liveSegmentLight.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple: {

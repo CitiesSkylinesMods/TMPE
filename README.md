@@ -2,6 +2,16 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.3, 01/20/2016
+- Several performance improvements
+- Improved calculation of segment geometries
+- Improved load balancing
+- Police cars, ambulances, fire trucks and hearses are now also controlled by the AI
+- Bugfix: Vehicles did not always take the shortest path
+- Bugfix: Vehicles disappeared after deleting/upgrading a road segment
+- Bugfix: Fixed an error in path-finding cost calculation
+- Bugfix: Outgoing roads were treated as ingoing roads when highway rules were activated
+
 1.4.2, 01/16/2016
 - Several major performance improvements (thanks to @sci302 for pointing out those issues)
 - Improved the way traffic lights are saved/loaded

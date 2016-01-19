@@ -40,9 +40,9 @@ namespace TrafficManager {
 					Options.setSimAccuracy(options[0]);
 				}
 
-				if (options.Length >= 2) {
+				/*if (options.Length >= 2) {
 					Options.setLaneChangingRandomization(options[1]);
-				}
+				}*/
 
 				if (options.Length >= 3) {
 					Options.setRecklessDrivers(options[2]);
@@ -72,7 +72,7 @@ namespace TrafficManager {
 					Options.setHighwayRules(options[7] == (byte)1);
 				}
 
-				if (options.Length >= 9) {
+				/*if (options.Length >= 9) {
 					Options.setCarCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[8]) * 0.01f, 2));
 				}
 
@@ -86,7 +86,7 @@ namespace TrafficManager {
 
 				if (options.Length >= 12) {
 					Options.setTruckHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[11]) * 0.01f, 2));
-				}
+				}*/
 			}
 
 			// load toggled traffic lights
@@ -112,6 +112,8 @@ namespace TrafficManager {
 			
 			LoadDataState();
 			TrafficPriority.HandleAllVehicles();
+			Flags.clearHighwayLaneArrows();
+			Flags.applyAllFlags();
 		}
 
 		private static void LoadDataState() {
@@ -499,7 +501,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), Convert.ToByte(Math.Round(Options.carCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.carHighwayTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckHighwayTrafficSensitivity * 100f)) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

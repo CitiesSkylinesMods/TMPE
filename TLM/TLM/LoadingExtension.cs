@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using TrafficManager.Custom.Misc;
 using TrafficManager.State;
 using ColossalFramework.UI;
+using ColossalFramework.Math;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -189,21 +190,12 @@ namespace TrafficManager {
 
             base.OnCreated(loading);
 
-            Log.Message("Setting ToolMode");
             ToolMode = TrafficManagerMode.None;
-
-            Log.Message("Init RevertMethods");
 			OriginalMethods = new MethodInfo[9];
 			CustomMethods = new MethodInfo[9];
 			CustomRedirects = new RedirectCallsState[9];
-
-            Log.Message("Setting Despawn to False");
             DespawnEnabled = true;
-
-            Log.Message("Init DetourInited");
             DetourInited = false;
-
-            Log.Message("Init Custom PathManager");
             CustomPathManager = new CustomPathManager();
         }
 
@@ -216,7 +208,29 @@ namespace TrafficManager {
             }
         }
 
-        public override void OnLevelLoaded(LoadMode mode) {
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
+			if (Instance == null)
+				Instance = this;
+			revertDetours();
+
+			try {
+				TrafficPriority.OnLevelUnloading();
+				CustomCarAI.OnLevelUnloading();
+				CustomRoadAI.OnLevelUnloading();
+				TrafficLightsManual.OnLevelUnloading();
+				TrafficLightsTimed.OnLevelUnloading();
+				Flags.OnLevelUnloading();
+
+				if (Instance != null)
+					Instance.NodeSimulationLoaded = false;
+			} catch (Exception e) {
+				Log.Error("Exception unloading mod. " + e.Message);
+				// ignored - prevents collision with other mods
+			}
+		}
+
+		public override void OnLevelLoaded(LoadMode mode) {
             Log.Warning("OnLevelLoaded calling base method");
             base.OnLevelLoaded(mode);
             Log.Message("OnLevelLoaded Returned from base, calling custom code.");
@@ -231,15 +245,18 @@ namespace TrafficManager {
             }
 
             if (mode == LoadMode.NewGame || mode == LoadMode.LoadGame) {
-				determinePathManagerCompatible();
+				Instance = this;
 
-                Instance = this;
+				determinePathManagerCompatible();
+				TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
+											   SimulationMetaData.MetaBool.True;
+				TrafficPriority.OnLevelLoading();
+				CustomRoadAI.OnLevelLoading();
+
 				initDetours();
 
                 if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 					try {
-						Log.Warning("#####################################");
-
 						Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
 						var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -279,12 +296,8 @@ namespace TrafficManager {
 					}
 				}
 
-                Log.Message("Adding Controls to UI.");
+				Log.Message("Adding Controls to UI.");
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
-                TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
-                                                SimulationMetaData.MetaBool.True;
-				TrafficPriority.OnLevelLoading();
-				CustomRoadAI.OnLevelLoading();
 			}
         }
 
@@ -326,28 +339,6 @@ namespace TrafficManager {
 				Options.setAdvancedAI(false);
 			}
 		}
-
-		public override void OnLevelUnloading() {
-            base.OnLevelUnloading();
-			if (Instance == null)
-				Instance = this;
-			revertDetours();
-
-			try {
-				TrafficPriority.OnLevelUnloading();
-				CustomCarAI.OnLevelUnloading();
-				CustomRoadAI.OnLevelUnloading();
-				TrafficLightsManual.OnLevelUnloading();
-				TrafficLightsTimed.OnLevelUnloading();
-				Flags.OnLevelUnloading();
-
-				if (Instance != null)
-					Instance.NodeSimulationLoaded = false;
-            } catch (Exception e) {
-                Log.Error("Exception unloading mod. " + e.Message);
-                // ignored - prevents collision with other mods
-            }
-        }
 
         protected virtual void OnNewGame() {
             Log.Message("New Game Started");
