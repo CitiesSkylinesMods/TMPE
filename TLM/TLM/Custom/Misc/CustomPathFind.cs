@@ -1,6 +1,6 @@
 #define DEBUGPFx
 #define DEBUGLOCKSx
-#define DEBUGCOSTS
+#define DEBUGCOSTSx
 
 using System;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace TrafficManager.Custom.Misc {
 			public uint m_numSegmentsToJunction;
 		}
 
-		public readonly static int SYNC_TIMEOUT = 0;
+		public readonly static int SYNC_TIMEOUT = 50;
 
 		//Expose the private fields
 		FieldInfo _fieldpathUnits;
@@ -337,11 +337,13 @@ namespace TrafficManager.Custom.Misc {
 				this._buffer[++this._bufferMaxPos] = bufferItemEndB;
 			}
 			bool canFindPath = false;
+#if DEBUG
 			uint wIter = 0;
+#endif
 			//Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: STARTING MAIN LOOP! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");
 			while (this._bufferMinPos <= this._bufferMaxPos) {
-				if (m_queuedPathFindCount > 1000)
-					Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: MAIN LOOP RUNNING! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");
+				/*if (m_queuedPathFindCount > 1000)
+					Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: MAIN LOOP RUNNING! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");*/
 				int num4 = this._bufferMin[this._bufferMinPos];
 				int num5 = this._bufferMax[this._bufferMinPos];
 				if (num4 > num5) {
@@ -410,14 +412,16 @@ namespace TrafficManager.Custom.Misc {
 						}
 					}
 				}
+#if DEBUG
 				++wIter;
 				if (wIter > 1000000) {
 					Log.Error("Too many iterations in PathFindImpl.");
 					break;
 				}
+#endif
 			}
-			if (m_queuedPathFindCount > 1000)
-				Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: MAIN LOOP FINISHED! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");
+			/*if (m_queuedPathFindCount > 1000)
+				Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: MAIN LOOP FINISHED! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");*/
 			if (!canFindPath) {
 				PathUnit[] expr_909_cp_0 = this._pathUnits.m_buffer;
 				UIntPtr expr_909_cp_1 = (UIntPtr)unit;
@@ -509,7 +513,7 @@ namespace TrafficManager.Custom.Misc {
 			UIntPtr expr_D99_cp_1 = (UIntPtr)unit;
 			expr_D99_cp_0[(int)expr_D99_cp_1].m_pathFindFlags = (byte)(expr_D99_cp_0[(int)expr_D99_cp_1].m_pathFindFlags | 8);
 		}
-		#endregion
+#endregion
 
 		// be aware:
 		//   (1) path-finding works from target to start. the "next" segment is always the previous and the "previous" segment is always the next segment on the path!
@@ -825,13 +829,17 @@ namespace TrafficManager.Custom.Misc {
 								uint curLaneI = 0;
 								uint curLaneId = nextSegment.m_lanes;
 								int i = 0;
+#if DEBUG
 								uint wIter = 0;
+#endif
 								while (i < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
+#if DEBUG
 									++wIter;
 									if (wIter >= 20) {
 										Log.Error("Too many iterations in ProcessItemMain!");
 										break;
 									}
+#endif
 
 									// determine valid lanes based on lane arrows
 									NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[i];
@@ -1296,13 +1304,17 @@ namespace TrafficManager.Custom.Misc {
 			float num7 = item.m_comparisonValue + num5 / (num4 * this._maxLength);
 			Vector3 b = instance.m_lanes.m_buffer[(int)((UIntPtr)item.m_laneID)].CalculatePosition((float)connectOffset * 0.003921569f);
 			int laneIndex = 0;
+#if DEBUG
 			int wIter = 0;
+#endif
 			while (laneIndex < nextNumLanes && curLaneId != 0u) {
+#if DEBUG
 				++wIter;
 				if (wIter >= 20) {
 					Log.Error("Too many iterations in ProcessItem2!");
 					break;
 				}
+#endif
 
 				if (lane == curLaneId) {
 					NetInfo.Lane lane3 = nextSegmentInfo.m_lanes[laneIndex];
@@ -1568,11 +1580,11 @@ namespace TrafficManager.Custom.Misc {
 				if (prevSegmentInfo.m_netAI is RoadBaseAI)
 					prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules;
 				bool prevIsOutgoingOneWay = TrafficLightsManual.SegmentIsOutgoingOneWay(item.m_position.m_segment, targetNodeId);
-				float nextDensity = 0f;
+				float nextSpeed = 0f;
 				int prevRightSimilarLaneIndex = -1;
 				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
 				int prevNumLanes = 1;
-				float prevDensity = 0f;
+				float prevSpeed = 0f;
 				// NON-STOCK CODE END //
 				if ((int)item.m_position.m_lane < prevSegmentInfo.m_lanes.Length) {
 					NetInfo.Lane lane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
@@ -1587,7 +1599,7 @@ namespace TrafficManager.Custom.Misc {
 					} else {
 						prevRightSimilarLaneIndex = lane.m_similarLaneCount - lane.m_similarLaneIndex - 1;
 					}
-					prevDensity = CustomRoadAI.laneMeanTrafficDensity[item.m_laneID];
+					prevSpeed = CustomRoadAI.laneMeanSpeeds[item.m_laneID];
 					// NON-STOCK CODE END //
 				}
 				bool customLaneChanging = vehicleType == VehicleInfo.VehicleType.Car && !Options.isStockLaneChangerUsed() && !this._transportVehicle && !this._stablePath; // NON-STOCK CODE
@@ -1616,14 +1628,18 @@ namespace TrafficManager.Custom.Misc {
 					int lIndex = 0;
 					uint laneId = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_lanes;
 					int validLanes = 0;
+#if DEBUG
 					uint wIter1 = 0;
+#endif
 					while (lIndex < prevSegmentInfo.m_lanes.Length && laneId != 0u) {
 						//Log.Message($"PF {this._pathFindIndex} -- CustomPathfind (1): Iter #{lIndex}, laneId={laneId}, prevSegment={item.m_position.m_segment}, targetNodeId={targetNodeId}");
+#if DEBUG
 						++wIter1;
 						if (wIter1 >= 20) {
 							Log.Error("Too many iterations in ProcessItemSub (1)!");
 							break;
 						}
+#endif
 
 						NetInfo.Lane prevLane = prevSegmentInfo.m_lanes[lIndex];
 						meanPrevLanePosition += instance.m_lanes.m_buffer[laneId].CalculatePosition((float)connectOffset * 0.003921569f);
@@ -1669,42 +1685,21 @@ namespace TrafficManager.Custom.Misc {
 				bool nextIsHighway = false;
 				if (nextSegmentInfo.m_netAI is RoadBaseAI)
 					nextIsHighway = ((RoadBaseAI)nextSegmentInfo.m_netAI).m_highwayRules;
-				float meanTrafficDensity = 0f;
-				if (customLaneChanging) {
-					int lIndex = 0;
-					uint laneId = nextSegment.m_lanes;
-					int validLanes = 0;
-					uint wIter2 = 0;
-					while (lIndex < nextNumLanes && laneId != 0u) {
-						++wIter2;
-						if (wIter2 >= 20) {
-							Log.Error("Too many iterations in ProcessItemSub (2)!");
-							break;
-						}
-						//Log.Message($"PF {this._pathFindIndex} -- CustomPathfind (2): Iter #{lIndex}, laneId={laneId}, prevSegment={item.m_position.m_segment}, targetNodeId={targetNodeId}");
-
-						NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[lIndex];
-						if (nextLane.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || lIndex != (int)item.m_position.m_lane) && (byte)(nextLane.m_finalDirection & nextDir2) != 0) {
-							meanTrafficDensity += CustomRoadAI.laneMeanTrafficDensity[laneId];
-							++validLanes;
-						}
-						lIndex++;
-						laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
-					}
-
-					if (validLanes > 0)
-						meanTrafficDensity /= Convert.ToSingle(validLanes);
-				}
 				int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
 				uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : nextSegment.m_lanes); // NON-STOCK CODE
-																								  // NON-STOCK CODE END //
+
+				// NON-STOCK CODE END //
+#if DEBUG
 				uint wIter3 = 0;
+#endif
 				while (laneIndex < nextNumLanes && curLaneId != 0u) {
+#if DEBUG
 					++wIter3;
 					if (wIter3 >= 20) {
 						Log.Error("Too many iterations in ProcessItemSub (3)!");
 						break;
 					}
+#endif
 
 					//Log.Message($"PF {this._pathFindIndex} -- CustomPathfind (3): Iter #{laneIndex}, curLaneId={curLaneId}, prevSegment={item.m_position.m_segment}, targetNodeId={targetNodeId}");
 
@@ -1712,37 +1707,32 @@ namespace TrafficManager.Custom.Misc {
 					if (forceLaneIndex != null && laneIndex != forceLaneIndex)
 						break;
 					if (customLaneChanging) {
-						nextDensity = CustomRoadAI.laneMeanTrafficDensity[curLaneId];
+						nextSpeed = CustomRoadAI.laneMeanSpeeds[curLaneId];
 					}
 					// NON-STOCK CODE END //
 
 					NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[laneIndex];
+					float nextMaxSpeed = nextLane.m_speedLimit; // NON-STOCK CODE
 					if ((byte)(nextLane.m_finalDirection & nextDir2) != 0) {
 						if (nextLane.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane) && (byte)(nextLane.m_finalDirection & nextDir2) != 0) {
 							float distanceOnBezier = 0f;
 							bool addCustomCosts = customLaneChanging && forceLaneIndex == null && curLaneId != this._startLaneA && curLaneId != this._startLaneB && curLaneId != this._endLaneA && curLaneId != this._endLaneB && (byte)(nextLane.m_laneType & laneType) != 0 && nextLane.m_vehicleType == vehicleType;
 							
-							Vector3 a, a1, a2;
-							Vector3 b, b1, b2;
-
-							if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
-								a1 = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.d;
-							} else {
-								a1 = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.a;
-							}
-							a2 = instance.m_nodes.m_buffer[targetNodeId].m_position;
-
-							b2 = meanPrevLanePosition;
-							b1 = prevLanePosition;
+							Vector3 a;
+							Vector3 b;
 
 							// NON-STOCK CODE START //
 							if (customLaneChanging) {
-								a = a2;
-								b = b2;
+								a = instance.m_nodes.m_buffer[targetNodeId].m_position;
+								b = meanPrevLanePosition;
 							} else {
 								// NON-STOCK CODE END //
-								a = a1;
-								b = b1;
+								if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
+									a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.d;
+								} else {
+									a = instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_bezier.a;
+								}
+								b = prevLanePosition;
 								// NON-STOCK CODE START //
 							}
 							// NON-STOCK CODE END //
@@ -1832,6 +1822,7 @@ namespace TrafficManager.Custom.Misc {
 								}
 
 								// NON-STOCK CODE START //
+								bool addItem = true;
 								try {
 									if (addCustomCosts) {
 										int nextRightSimilarLaneIndex;
@@ -1841,156 +1832,74 @@ namespace TrafficManager.Custom.Misc {
 											nextRightSimilarLaneIndex = nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1;
 										}
 
-#if DEBUGCOSTS
-										bool costDebug = segmentID == 27082 || segmentID == 13245;
-										List<String> logBuf = null;
-										if (costDebug)
-											logBuf = new List<String>();
-#endif
-
-										// vehicles should choose lanes with low traffic volume, but should neither change lanes too frequently nor change to distant lanes.
-										float maxLaneDist = Convert.ToSingle(Math.Max(prevNumLanes-1, nextLane.m_similarLaneCount-1));
 										float laneDist = Convert.ToSingle(Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex));
-										float prevDens = Convert.ToSingle(Convert.ToInt32(prevDensity * 20f)) / 20f; // prev. lane density, discretized in 20 steps
-										float nextDens = Convert.ToSingle(Convert.ToInt32(nextDensity * 20f)) / 20f; // prev. lane density, discretized in 20 steps
-																													 //trafficCost = Convert.ToSingle(Convert.ToInt32(nextDensity*10f)) / 10f * (laneDist+1f); //, multiplication with (lane difference + 1)
+										if (laneDist <= 1) {
 
 #if DEBUGCOSTS
-										if (costDebug) {
-											logBuf.Add($"Path from {segmentID} (lane {nextRightSimilarLaneIndex} from right, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevRightSimilarLaneIndex} from right, idx {item.m_position.m_lane}.");
-											logBuf.Add($"maxLaneDist = {maxLaneDist}, laneDist = {laneDist}, prevDens = {prevDens}, nextDens = {nextDens}");
-                                        }
+											bool costDebug = segmentID == 27082 || segmentID == 13245;
+											List<String> logBuf = null;
+											if (costDebug)
+												logBuf = new List<String>();
 #endif
+											float meanSpeed;
 
-										float density = 0;
-										if (nextDens > prevDens) {
-											// high density -> low density
-											density = nextDens;
+											if (laneDist > 1) {
+												meanSpeed = 0.001f;
+											} else {
+												// vehicles should choose lanes with low traffic volume, but should neither change lanes too frequently nor change to distant lanes.
+												float maxLaneDist = Convert.ToSingle(Math.Max(prevNumLanes - 1, nextLane.m_similarLaneCount - 1));
+												float prevDens = prevSpeed < 0 ? prevMaxSpeed : Math.Min(1f, prevSpeed / prevMaxSpeed); // prev. lane density, discretized in 20 steps
+												float nextDens = nextSpeed < 0 ? nextMaxSpeed : Math.Min(1f, nextSpeed / nextMaxSpeed); // prev. lane density, discretized in 20 steps
+												meanSpeed = (prevDens + nextDens) * 0.5f;
+												meanSpeed /= (laneDist * laneDist + 1f);
+
+												if (meanSpeed < 0.01f)
+													meanSpeed = 0.01f;
+											}
+
+											distanceOverMeanMaxSpeed = distanceOnBezier / (meanSpeed * this._maxLength);
+
 #if DEBUGCOSTS
 											if (costDebug) {
-												logBuf.Add("nextDens is higher than prevDens. Taking nextDens for density metric.");
+												logBuf.Add($"Path from {segmentID} (lane {nextRightSimilarLaneIndex} from right, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevRightSimilarLaneIndex} from right, idx {item.m_position.m_lane}.");
+												logBuf.Add($"prevDens = {prevDens}, nextDens = {nextDens}, distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed}, meanDens = {meanDens}");
 											}
 #endif
+
+											item2.m_comparisonValue += distanceOverMeanMaxSpeed;
+#if DEBUGCOSTS
+											if (costDebug) {
+												logBuf.Add($"Total cost = {distanceOverMeanMaxSpeed}, comparison value = {item2.m_comparisonValue}");
+											}
+#endif
+#if DEBUGCOSTS
+											if (costDebug) {
+												foreach (String toLog in logBuf) {
+													Log.Message($"Pathfinder ({this._pathFindIndex}): " + toLog);
+												}
+											}
+#endif
+
+											if (item2.m_comparisonValue < 0f) {
+#if DEBUG
+												Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value < 0! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
+#endif
+												item2.m_comparisonValue = 0f;
+											} else if (item2.m_comparisonValue > 1f) {
+#if DEBUG
+												Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value > 1! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
+#endif
+												item2.m_comparisonValue = 1f;
+												addItem = false;
+											}
+											if (debug) {
+												//Log.Message($">> PF {this._pathFindIndex} -- seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} = traffic={trafficCost}, junction={junctionCost}, lane={laneChangeCost}");
+											}
 										} else {
-											// low density -> high density
-											density = prevDens;
-#if DEBUGCOSTS
-											if (costDebug) {
-												logBuf.Add("prevDens is higher than nextDens. Taking prevDens for density metric.");
-											}
-#endif
-										}
-
-										float trafficCost = 0f; // normalized mean traffic density of the adjacent segments, multiplied with (lane difference + 1)
-										if (laneDist > 1) {
-											// prevent big lane changes
-											trafficCost = 1;
-#if DEBUGCOSTS
-											if (costDebug) {
-												logBuf.Add("laneDist > 1, trafficCost = 1");
-											}
-#endif
-										} else if (meanTrafficDensity < 0.4f) {
-											// on low-density segments: add randomness
-											trafficCost = UnityEngine.Random.Range(0f, density);
-#if DEBUGCOSTS
-											if (costDebug) {
-												logBuf.Add($"Low density! laneDist <= 1, meanTrafficDensity={meanTrafficDensity}, trafficCost = {trafficCost}");
-											}
-#endif
-										} else if (meanTrafficDensity < 0.65f) {
-											// on medium-density segments: choose lane based on density, but prefer to stay on lane
-											bool changeLane = UnityEngine.Random.Range(0f, 1f) < Options.getLaneChangingProbability();
-											if (laneDist == 0)
-												trafficCost = changeLane ? density : 0f;
-											else if (laneDist == 1)
-												trafficCost = changeLane ? 0f : density;
-#if DEBUGCOSTS
-											if(costDebug) {
-												logBuf.Add($"Medium density! laneDist <= 1, meanTrafficDensity={meanTrafficDensity}, trafficCost = {trafficCost}, changeLane = {changeLane}");
-											}
-#endif
-										} else if (laneDist > 0) {
-											// on high-density segments: do not change lanes
-											trafficCost = 1f;
-#if DEBUGCOSTS
-											if (costDebug) {
-												logBuf.Add("High density! trafficCost = 1");
-											}
-#endif
-										}
-
-										trafficCost = ((0.8f * trafficCost + 0.2f) * (laneDist * laneDist + 1f)) / (maxLaneDist * maxLaneDist + 1f);
-#if DEBUGCOSTS
-										if (costDebug) {
-											logBuf.Add($"Traffic cost = {trafficCost}");
-										}
-#endif
-
-										//trafficCost /= Convert.ToSingle(COMath.Clamp(item2.m_numSegmentsToJunction, 1, 3)); // higher penalty for changing to high-density lanes before junctions
-
-										if (trafficCost < 0) {
-											Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Traffic cost < 0! {prevDensity} {nextDensity} {laneDist} {maxLaneDist}");
-											trafficCost = 0f;
-										}
-										if (trafficCost > 1) {
-											Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Traffic cost > 1! {prevDensity} {nextDensity} {laneDist} {maxLaneDist}");
-											trafficCost = 1f;
-										}
-
-										// highway exit handling
-										float junctionCost = 0f;
-										bool applyHighwayRules = Options.highwayRules && laneDist > 0 && nextIsHighway && prevIsOutgoingOneWay && !nextIsRealJunction;
-										/*if (applyHighwayRules && !Options.disableSomething) {
-											// calculate costs for changing lane near highway junctions
-											// on highways: vehicles should not switch lanes directly before an exit.
-											int decelerationLaneLength = _pathRandomizer.Int32(1, 4);
-											if (item2.m_numSegmentsToJunction <= decelerationLaneLength) {
-												// stay on lane before exit
-												junctionCost = Math.Min(1f, Math.Max(0f, laneDist / maxLaneDist));
-												//doLaneChange = false;
-											}
-										}*/
-
-										/*if ((laneDist == 1 && !doLaneChange) || (laneDist == 0 && doLaneChange)) {
-											// do not change lane / change lane
-											laneChangeCost = 1f / (float)(maxLaneDiff * maxLaneDiff); // should be similarily calculated as (*)
-										}*/
-
-										float totalCost = trafficCost;
-										if (totalCost < 0) {
-											Log.Error($"Total cost < 0! prevDensity={prevDensity} nextDensity={nextDensity} traffic={trafficCost}, junction={junctionCost}, applyHighwayRules={applyHighwayRules} heavy={this._isHeavyVehicle}");
-											totalCost = 0f;
-										} else if (totalCost > 1) {
-											Log.Error($"Total cost > 1! prevDensity={prevDensity} nextDensity={nextDensity} traffic={trafficCost}, junction={junctionCost}, applyHighwayRules={applyHighwayRules} heavy={this._isHeavyVehicle}");
-											totalCost = 1f;
-                                        }
-										totalCost = distanceOverMeanMaxSpeed * (totalCost + 1f);
-										item2.m_comparisonValue += totalCost;
-#if DEBUGCOSTS
-										if (costDebug) {
-											logBuf.Add($"Total cost = {totalCost}, comparison value = {item2.m_comparisonValue}");
-										}
-#endif
-#if DEBUGCOSTS
-										if (costDebug) {
-											foreach (String toLog in logBuf) {
-												Log.Message($"Pathfinder ({this._pathFindIndex}): " + toLog);
-											}
-										}
-#endif
-
-										if (item2.m_comparisonValue < 0f) {
-											Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value < 0! prevDensity={prevDensity} nextDensity={nextDensity} traffic={trafficCost}, junction={junctionCost}, applyHighwayRules={applyHighwayRules} heavy={this._isHeavyVehicle} prev. compVal={item.m_comparisonValue}, compVal={item2.m_comparisonValue}, prev. meth.={item.m_methodDistance}, meth.={item2.m_methodDistance}");
-											item2.m_comparisonValue = 0f;
-										} else if (item2.m_comparisonValue > 1f) {
-											Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value > 1! prevDensity={prevDensity} nextDensity={nextDensity} traffic={trafficCost}, junction={junctionCost}, applyHighwayRules={applyHighwayRules} heavy={this._isHeavyVehicle} prev. compVal={item.m_comparisonValue}, compVal={item2.m_comparisonValue}, prev. meth.={item.m_methodDistance}, meth.={item2.m_methodDistance}");
-											item2.m_comparisonValue = 1f;
-										}
-										if (debug) {
-											//Log.Message($">> PF {this._pathFindIndex} -- seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} = traffic={trafficCost}, junction={junctionCost}, lane={laneChangeCost}");
+											addItem = false;
 										}
 									}
+
 									if (forceLaneIndex != null && laneIndex == forceLaneIndex) {
 										foundForced = true;
 									}
@@ -2004,7 +1913,8 @@ namespace TrafficManager.Custom.Misc {
 								}
 								// NON-STOCK CODE END //
 
-								this.AddBufferItem(item2, item.m_position);
+								if (addItem)
+									this.AddBufferItem(item2, item.m_position);
 							}
 						}
 						goto IL_8F5;

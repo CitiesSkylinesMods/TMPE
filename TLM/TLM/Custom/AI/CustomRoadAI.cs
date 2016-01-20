@@ -18,8 +18,8 @@ namespace TrafficManager.Custom.AI {
 		private static SegmentGeometry[] segmentGeometries;
 		public static bool[] laneHasSeenVehicles;
 		public static ushort[] currentLaneTrafficBuffer;
-		public static byte[] laneTrafficDensity;
-		public static float[] laneMeanTrafficDensity;
+		public static int[] currentLaneSpeeds;
+		public static float[] laneMeanSpeeds;
 		public static bool initDone = false;
 
 		public void Awake() {
@@ -89,20 +89,16 @@ namespace TrafficManager.Custom.AI {
 						int nextNumLanes = data.Info.m_lanes.Length;
 						int laneIndex = 0;
 						while (laneIndex < nextNumLanes && curLaneId != 0u) {
-							float laneLength = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length;
 							int buf = Convert.ToInt32(currentLaneTrafficBuffer[curLaneId]);
-							int currentDensity = Math.Min(100, Mathf.RoundToInt((float)buf / laneLength * 100f));
-							int prevDensity = Convert.ToInt32(laneTrafficDensity[curLaneId]);
-							int diff = currentDensity - prevDensity;
-							if (diff > 0)
-								laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity + 5, 0, 100));
-							else if (diff < 0)
-								laneTrafficDensity[curLaneId] = Convert.ToByte(Mathf.Clamp(prevDensity - 5, 0, 100));
-
-							if (laneHasSeenVehicles[curLaneId])
-								laneMeanTrafficDensity[curLaneId] = 0.9f * laneMeanTrafficDensity[curLaneId] + 0.1f * Convert.ToSingle(laneTrafficDensity[curLaneId]) * 0.01f;
-							//laneMeanTrafficDensity[curLaneId] = Convert.ToSingle(laneTrafficDensity[curLaneId]) * 0.01f;
+							float currentSpeeds = Convert.ToSingle(currentLaneSpeeds[curLaneId]);
+							if (buf > 0) {
+								float meanSpeed = currentSpeeds / Convert.ToSingle(buf);
+								laneMeanSpeeds[curLaneId] = meanSpeed;
+							} else {
+								laneMeanSpeeds[curLaneId] = -1;
+							}
 							currentLaneTrafficBuffer[curLaneId] = 0;
+							currentLaneSpeeds[curLaneId] = 0;
 
 							laneIndex++;
 							curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -450,25 +446,26 @@ namespace TrafficManager.Custom.AI {
 			Log.Message($"Calculated segment geometries.");
 
 			currentLaneTrafficBuffer = new ushort[Singleton<NetManager>.instance.m_lanes.m_size];
-			laneTrafficDensity = new byte[Singleton<NetManager>.instance.m_lanes.m_size];
-			laneMeanTrafficDensity = new float[Singleton<NetManager>.instance.m_lanes.m_size];
+			currentLaneSpeeds = new int[Singleton<NetManager>.instance.m_lanes.m_size];
+			laneMeanSpeeds = new float[Singleton<NetManager>.instance.m_lanes.m_size];
 			laneHasSeenVehicles = new bool[Singleton<NetManager>.instance.m_lanes.m_size];
 			resetTrafficStats();
 			initDone = true;
 		}
 
 		internal static void resetTrafficStats() {
-			for (uint i = 0; i < laneMeanTrafficDensity.Length; ++i) {
-				laneMeanTrafficDensity[i] = 0.5f;
+			for (uint i = 0; i < laneMeanSpeeds.Length; ++i) {
+				laneMeanSpeeds[i] = 5f;
 				laneHasSeenVehicles[i] = false;
 				currentLaneTrafficBuffer[i] = 0;
 			}
 		}
 
-		internal static void AddTraffic(uint laneID, ushort val, bool realTraffic) {
+		internal static void AddTraffic(uint laneID, ushort speed, bool realTraffic) {
 			if (!initDone)
 				return;
-			currentLaneTrafficBuffer[laneID] = (ushort)Math.Min(65535u, (uint)currentLaneTrafficBuffer[laneID] + (uint)val);
+			currentLaneTrafficBuffer[laneID] = (ushort)Math.Min(65535u, (uint)currentLaneTrafficBuffer[laneID] + 1u);
+			currentLaneSpeeds[laneID] += speed;
 			if (realTraffic)
 				laneHasSeenVehicles[laneID] = true;
 		}

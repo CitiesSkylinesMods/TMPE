@@ -1351,7 +1351,7 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 				labelStr += ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType;
 #endif
-				labelStr += ", Traffic: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanTrafficDensity[curLaneId]*100) + " % (" + CustomRoadAI.laneTrafficDensity[curLaneId] + ")\n";
+				labelStr += ", Avg. speed: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanSpeeds[curLaneId]) + "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1396,7 +1396,7 @@ namespace TrafficManager.TrafficLight {
 #endif
 				labelStr += "\nTraffic: " + segment.m_trafficDensity + " %";
 
-				float meanTrafficDensity = 0f;
+				float meanLaneSpeed = 0f;
 
 				int lIndex = 0;
 				uint laneId = segment.m_lanes;
@@ -1404,7 +1404,7 @@ namespace TrafficManager.TrafficLight {
 				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
 					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
 					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
-						meanTrafficDensity += CustomRoadAI.laneMeanTrafficDensity[laneId];
+						meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
 						++validLanes;
 					}
 					lIndex++;
@@ -1412,9 +1412,9 @@ namespace TrafficManager.TrafficLight {
 				}
 
 				if (validLanes > 0)
-					meanTrafficDensity /= Convert.ToSingle(validLanes);
+					meanLaneSpeed /= Convert.ToSingle(validLanes);
 
-				labelStr += " (lane avg. " + String.Format("{0:0.##}", meanTrafficDensity*100) + " %)";
+				labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + ")";
 
 #if DEBUG
 				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;

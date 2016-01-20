@@ -149,7 +149,7 @@ namespace TrafficManager.Custom.AI {
 			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
 				// add traffic to lane
 				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
-				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), realTraffic);
+				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
 			}
 
 #if DEBUG
