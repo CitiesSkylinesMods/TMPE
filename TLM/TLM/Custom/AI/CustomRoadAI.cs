@@ -14,7 +14,6 @@ namespace TrafficManager.Custom.AI {
 		private static ushort[] nodeHousekeepingMask = { 3, 7, 15, 31, 63 };
 		private static ushort[] segmentHousekeepingMask = { 15, 31, 63, 127, 255 };
 
-		private uint lastUpdateFrame = 0;
 		private static SegmentGeometry[] segmentGeometries;
 		public static bool[] laneHasSeenVehicles;
 		public static ushort[] currentLaneTrafficBuffer;
@@ -27,28 +26,7 @@ namespace TrafficManager.Custom.AI {
 
 		// this implements the Update method of MonoBehaviour
 		public void Update() {
-			uint currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			uint curFrame = (currentFrame >> 2);
-
-			if ((lastUpdateFrame >> 2) < curFrame) {
-				try {
-					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
-						if ((e.Key & 7) != (curFrame & 7)) // 111
-							continue;
-
-						try {
-							var otherNodeSim = e.Value;
-							otherNodeSim.SimulationStep();
-						} catch (Exception ex) {
-							Log.Warning($"Error occured while simulating traffic light @ node {e.Key}: {ex.ToString()}");
-						}
-					}
-				} catch (Exception ex) {
-					// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
-					Log.Warning($"Error occured while iterating overs traffic light simulations: {ex.ToString()}");
-				}
-				lastUpdateFrame = currentFrame;
-			}
+			
 		}
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
@@ -61,6 +39,8 @@ namespace TrafficManager.Custom.AI {
 						Log.Error($"Error occured while housekeeping node {nodeId}: " + e.ToString());
 					}
 				}
+
+				TrafficPriority.TrafficLightSimulationStep();
 
 				var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 				if (nodeSim == null || (nodeSim.TimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {

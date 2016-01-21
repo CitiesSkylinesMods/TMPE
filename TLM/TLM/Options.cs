@@ -52,7 +52,7 @@ namespace TrafficManager {
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = groupAI.AddCheckbox("Enable Advanced Vehicle AI", advancedAI, onAdvancedAIChanged) as UICheckBox;
 			highwayRulesToggle = groupAI.AddCheckbox("Enable highway specific lane merging/splitting rules (BETA)", highwayRules, onHighwayRulesChanged) as UICheckBox;
-			laneChangingRandomizationDropdown = groupAI.AddDropdown("Drivers want to leave high-density lanes:", new string[] { "Very often (50 %)", "Often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Almost never (1 %)" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			//laneChangingRandomizationDropdown = groupAI.AddDropdown("Drivers want to leave high-density lanes:", new string[] { "Very often (50 %)", "Often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Almost never (1 %)" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			UIHelperBase group2 = helper.AddGroup("Maintenance");
 			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
 			nodesOverlayToggle = group2.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;

@@ -24,6 +24,8 @@ namespace TrafficManager.TrafficLight {
 		public List<ushort> NodeGroup;
 		private bool testMode = false;
 
+		private uint lastSimulationStep = 0;
+
 		public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup) {
 			this.nodeId = nodeId;
 			NodeGroup = new List<ushort>(nodeGroup);
@@ -155,6 +157,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SimulationStep() {
+			uint currentFrame = TimedTrafficStep.getCurrentFrame();
+			if (lastSimulationStep >= currentFrame)
+				return;
+			lastSimulationStep = currentFrame;
+
 			if (!isMasterNode() || !IsStarted())
 				return;
 			if (!housekeeping()) {

@@ -150,7 +150,7 @@ namespace TrafficManager.TrafficLight {
 			lastFlowWaitCalc = 0;
 		}
 
-		private uint getCurrentFrame() {
+		internal static uint getCurrentFrame() {
 			return Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
 		}
 

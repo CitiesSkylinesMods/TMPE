@@ -35,6 +35,8 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		private static HashSet<ushort> priorityNodes = new HashSet<ushort>();
 
+		private static uint lastTrafficLightUpdateFrame = 0;
+
 		static TrafficPriority() {
 			PrioritySegments = new TrafficSegment[Singleton<NetManager>.instance.m_segments.m_size];
 			Vehicles = new VehiclePosition[Singleton<VehicleManager>.instance.m_vehicles.m_size];
@@ -784,6 +786,30 @@ namespace TrafficManager.Traffic {
 			else if (dir == Direction.Right)
 				dir = Direction.Left;
 			return dir;
+		}
+
+		public static void TrafficLightSimulationStep() {
+			uint currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			uint curFrame = (currentFrame >> 2);
+
+			if (lastTrafficLightUpdateFrame < curFrame) {
+				try {
+					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
+						if ((e.Key & 7) != (curFrame & 7)) // 111
+							continue;
+						try {
+							var otherNodeSim = e.Value;
+							otherNodeSim.SimulationStep();
+						} catch (Exception ex) {
+							Log.Warning($"Error occured while simulating traffic light @ node {e.Key}: {ex.ToString()}");
+						}
+					}
+				} catch (Exception ex) {
+					// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
+					Log.Warning($"Error occured while iterating overs traffic light simulations: {ex.ToString()}");
+				}
+				lastTrafficLightUpdateFrame = curFrame;
+			}
 		}
 
 		internal static void OnLevelLoading() {
