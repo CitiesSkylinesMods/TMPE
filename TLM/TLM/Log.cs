@@ -18,28 +18,32 @@ namespace TrafficManager {
 		}
 
 		public static void Error(string s) {
-			try {
 #if DEBUG
+			try {
+
 				Debug.LogError(Prefix + s + " @ " + (new System.Diagnostics.StackTrace()).ToString());
-#else
-				DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, "(Error) " + Prefix + s + " @ " + (new System.Diagnostics.StackTrace()).ToString());
-#endif
+
+			//DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, "(Error) " + Prefix + s + " @ " + (new System.Diagnostics.StackTrace()).ToString());
+
 			} catch (Exception) {
 				// cross thread issue?
 			}
+#endif
 		}
 
 		public static void Warning(string s) {
-			try {
 #if DEBUG
+			try {
+
 				Debug.LogWarning(Prefix + s + ": " + (new System.Diagnostics.StackTrace()).ToString());
-#else
-				DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, "(Warning) " + Prefix + s + " @ " + (new System.Diagnostics.StackTrace()).ToString());
-#endif
+
+			DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Message, "(Warning) " + Prefix + s + " @ " + (new System.Diagnostics.StackTrace()).ToString());
+
 			} catch (Exception) {
 				// cross thread issue?
 			}
-			}
+#endif
+		}
 	}
 
 }
