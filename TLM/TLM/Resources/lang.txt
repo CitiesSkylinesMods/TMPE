@@ -1,0 +1,77 @@
+Switch_traffic_lights Switch traffic lights
+Add_priority_signs Add priority signs
+Manual_traffic_lights Manual traffic lights
+Timed_traffic_lights Timed traffic lights
+Change_lane_arrows Change lane arrows
+Clear_Traffic Clear Traffic
+Disable_despawning Disable despawning
+Enable_despawning Enable despawning
+NODE_IS_LIGHT Junction has a traffic light.\nDelete the traffic light by choosing "Switch traffic lights" and clicking on this node.
+NODE_IS_TIMED_LIGHT Junction is part of a timed script.\nSelect "Timed traffic lights", click on this node and click on "Remove" first.
+Select_nodes_windowTitle Select nodes
+Select_nodes Select nodes
+Node Node
+Deselect_all_nodes Deselect all nodes
+Setup_timed_traffic_light Setup timed traffic light
+State State
+Skip Skip
+up up
+down down
+View View
+Edit Edit
+Delete Delete
+Timed_traffic_lights_manager Timed traffic lights manager
+Add_step Add step
+Remove_timed_traffic_light Remove timed traffic light
+Min._Time: Min. Time:
+Max._Time: Max. Time:
+Save Save
+Add Add
+Sensitivity Sensitivity
+Very_Low Very Low
+Low Low
+Medium Medium
+High High
+Very_high Very high
+Extreme_long_green/red_phases Extreme long green/red phases
+Very_long_green/red_phases Very long green/red phases
+Long_green/red_phases Long green/red phases
+Moderate_green/red_phases Moderate green/red phases
+Short_green/red_phases Short green/red phases
+Very_short_green/red_phases Very short green/red phases
+Extreme_short_green/red_phases Extreme short green/red phases
+Hide_counters Hide counters
+Show_counters Show counters
+Start Start
+Stop Stop
+Enable_test_mode_(stay_in_current_step) Enable test mode (stay in current step)
+avg._flow avg. flow
+avg._wait avg. wait
+min/max min/max
+Lane Lane
+Set_Speed Set Speed {0}
+Max_speed Max speed
+Segment Segment
+incoming incoming
+Enable_Advanced_Vehicle_AI Enable Advanced Vehicle AI
+Vehicles_may_enter_blocked_junctions Vehicles may enter blocked junctions
+All_vehicles_may_ignore_lane_arrows All vehicles may ignore lane arrows
+Busses_may_ignore_lane_arrows Busses may ignore lane arrows
+Reckless_driving Reckless driving (BETA feature)
+TMPE_Title Traffic Manager: President Edition (Settings are defined for each savegame separately)
+Simulation_accuracy Simulation accuracy (higher accuracy reduces performance)
+Enable_highway_specific_lane_merging/splitting_rules Enable highway specific lane merging/splitting rules
+Maintenance Maintenance
+Show_nodes_and_segments Show nodes and segments
+Show_lanes Show lanes
+Path_Of_Evil_(10_%) Path Of Evil (10 %)
+Rush_Hour_(5_%) Rush Hour (5 %)
+Minor_Complaints_(2_%) Minor Complaints (2 %)
+Holy_City_(0_%) Holy City (0 %)
+Forget_toggled_traffic_lights Forget toggled traffic lights
+Road_is_already_in_a_group! Road is already in a group!
+All_selected_roads_must_be_of_the_same_type! All selected roads must be of the same type!
+Create_group Create group
+Delete_group Delete group
+Add_zoning Add zoning
+Remove_zoning Remove zoning

@@ -44,30 +44,30 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.4.3";
+			title.text = "Version 1.4.4";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
-			_buttonSwitchTraffic = _createButton("Switch traffic lights", new Vector3(35f, y), clickSwitchTraffic);
+			_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), new Vector3(35f, y), clickSwitchTraffic);
 			y += 40;
-			_buttonPrioritySigns = _createButton("Add priority signs", new Vector3(35f, y), clickAddPrioritySigns);
+			_buttonPrioritySigns = _createButton(Translation.GetString("Add_priority_signs"), new Vector3(35f, y), clickAddPrioritySigns);
 			y += 40;
-			_buttonManualControl = _createButton("Manual traffic lights", new Vector3(35f, y), clickManualControl);
+			_buttonManualControl = _createButton(Translation.GetString("Manual_traffic_lights"), new Vector3(35f, y), clickManualControl);
 			y += 40;
-			_buttonTimedMain = _createButton("Timed traffic lights", new Vector3(35f, y), clickTimedAdd);
+			_buttonTimedMain = _createButton(Translation.GetString("Timed_traffic_lights"), new Vector3(35f, y), clickTimedAdd);
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton("Change lane arrows", new Vector3(35f, y), clickChangeLanes);
+				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), new Vector3(35f, y), clickChangeLanes);
 				y += 40;
 				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
 			}
 
-			_buttonClearTraffic = _createButton("Clear Traffic", new Vector3(35f, y), clickClearTraffic);
+			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), new Vector3(35f, y), clickClearTraffic);
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? "Disable despawning" : "Enable despawning", new Vector3(35f, y), ClickToggleDespawn);
+				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), new Vector3(35f, y), ClickToggleDespawn);
 				y += 40;
 			}
 
@@ -224,8 +224,8 @@ namespace TrafficManager.UI {
 
 			if (LoadingExtension.IsPathManagerCompatible) {
 				_buttonToggleDespawn.text = LoadingExtension.Instance.DespawnEnabled
-					? "Disable despawning"
-					: "Enable despawning";
+					? Translation.GetString("Disable_despawning")
+					: Translation.GetString("Enable_despawning");
 			}
 		}
 

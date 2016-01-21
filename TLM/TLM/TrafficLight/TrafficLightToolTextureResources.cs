@@ -73,8 +73,8 @@ namespace TrafficManager.TrafficLight
             PedestrianRedLightTexture2D = LoadDllResource("pedestrian_light_1.png", 73, 123);
             PedestrianGreenLightTexture2D = LoadDllResource("pedestrian_light_2.png", 73, 123);
             // light mode
-            LightModeTexture2D = LoadDllResource("light_mode.png", 103, 95);
-            LightCounterTexture2D = LoadDllResource("light_counter.png", 103, 95);
+            LightModeTexture2D = LoadDllResource(Translation.GetTranslatedFileName("light_mode.png"), 103, 95);
+            LightCounterTexture2D = LoadDllResource(Translation.GetTranslatedFileName("light_counter.png"), 103, 95);
             // pedestrian mode
             PedestrianModeAutomaticTexture2D = LoadDllResource("pedestrian_mode_1.png", 73, 70);
             PedestrianModeManualTexture2D = LoadDllResource("pedestrian_mode_2.png", 73, 73);

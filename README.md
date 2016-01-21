@@ -2,6 +2,9 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.4, 01/21/2016
+- Added localization support
+
 1.4.3, 01/20/2016
 - Several performance improvements
 - Improved calculation of segment geometries

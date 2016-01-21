@@ -1,0 +1,77 @@
+Switch_traffic_lights 信号の付け外し
+Add_priority_signs 優先関係標識の追加
+Manual_traffic_lights 信号の手動切替
+Timed_traffic_lights 時間設定された信号
+Change_lane_arrows 車線矢印の変更
+Clear_Traffic 移動中車両の除去
+Disable_despawning スタック除去無効化
+Enable_despawning スタック除去有効化
+NODE_IS_LIGHT この交差点には信号があります。\n信号を削除するには「信号の付け外し」を選んでこの交差点をクリックしてください。
+NODE_IS_TIMED_LIGHT この交差点には時間設定された信号があります。\nまず「時間設定された信号」を選んでこの交差点をクリックして「削除」をクリックしてください。
+Select_nodes_windowTitle 交差点の選択
+Select_nodes 交差点を選択してください
+Node 交差点
+Deselect_all_nodes 全交差点の選択を解除
+Setup_timed_traffic_light 信号のセットアップ
+State 状態
+Skip 次へ
+up 上へ
+down 下へ
+View 表示
+Edit 編集
+Delete 削除
+Timed_traffic_lights_manager 信号の管理
+Add_step 状態の追加
+Remove_timed_traffic_light 信号の削除
+Min._Time: 最短時間:
+Max._Time: 最長時間:
+Save 保存
+Add 追加
+Sensitivity 感度
+Very_Low とても低い
+Low 低い
+Medium 中くらい
+High 高い
+Very_high とても高い
+Extreme_long_green/red_phases 混雑してきてもほとんど切り替えない
+Very_long_green/red_phases 混雑してきてもあまり切り替えない
+Long_green/red_phases 混雑具合によってそこそこに切り替える
+Moderate_green/red_phases 混雑具合によって適度に切り替える
+Short_green/red_phases 混雑具合によって細かく切り替える
+Very_short_green/red_phases 混雑具合によってとても細かく切り替える
+Extreme_short_green/red_phases 混雑具合によって非常に細かく切り替える
+Hide_counters カウンターの非表示
+Show_counters カウンターの表示
+Start 開始
+Stop 停止
+Enable_test_mode_(stay_in_current_step) テストモード有効 (現在の状態に留まる)
+avg._flow 平均流量
+avg._wait 平均待ち
+min/max 最短/最長
+Lane 車線
+Set_Speed 速度{0}に設定
+Max_speed 最大速度
+Segment 道路
+incoming 台流入
+Enable_Advanced_Vehicle_AI Advanced Vehicle AIを有効にする
+Vehicles_may_enter_blocked_junctions 交差点内での停車を許可
+All_vehicles_may_ignore_lane_arrows 全車両に対して車線矢印の無視を許可
+Busses_may_ignore_lane_arrows バスに対して車線矢印の無視を許可
+Reckless_driving 無謀運転 (ベータ機能/いくらかの市民が交通ルールを無視します)
+TMPE_Title Traffic Manager: President Edition (設定は各セーブデータ毎に保存されます)
+Simulation_accuracy シミュレーションの正確さ (高いとパフォーマンスが低下します)
+Enable_highway_specific_lane_merging/splitting_rules 高速道路特有の車線合流/分離ルールを適用する
+Maintenance メンテナンス
+Show_nodes_and_segments 交差点と道路の表示
+Show_lanes 車線の表示
+Path_Of_Evil_(10_%) 悪路 (10 %)
+Rush_Hour_(5_%) ラッシュアワー (5 %)
+Minor_Complaints_(2_%) ほとんど不満なし (2 %)
+Holy_City_(0_%) 天国 (0 %)
+Forget_toggled_traffic_lights 付け外しした信号を元に戻す
+Road_is_already_in_a_group! この道路は既にグループ内にあります！
+All_selected_roads_must_be_of_the_same_type! 選択する道路は全て同じタイプである必要があります！
+Create_group グループの作成
+Delete_group グループの削除
+Add_zoning 区間の追加
+Remove_zoning 区間の削除

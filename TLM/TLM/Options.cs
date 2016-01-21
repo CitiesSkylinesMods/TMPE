@@ -36,30 +36,29 @@ namespace TrafficManager {
 		public static bool mayEnterBlockedJunctions = false;
 		public static bool advancedAI = false;
 		public static bool highwayRules = false;
-		public static bool showLanes = true;
+		public static bool showLanes = false;
 		public static float pathCostMultiplicator = 1f;
 		public static bool disableSomething = false; // debug switch
 
 		public static void makeSettings(UIHelperBase helper) {
-			UIHelperBase group = helper.AddGroup("Traffic Manager: President Edition (Settings are defined for each savegame separately)");
-			simAccuracyDropdown = group.AddDropdown("Simulation accuracy (higher accuracy reduces performance):", new string[] { "Very high", "High", "Medium", "Low", "Very Low" }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
-			recklessDriversDropdown = group.AddDropdown("Reckless driving (BETA feature):", new string[] { "Path Of Evil (10 %)", "Rush Hour (5 %)", "Minor Complaints (2 %)", "Holy City (0 %)" }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			relaxedBussesToggle = group.AddCheckbox("Busses may ignore lane arrows", relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
+			UIHelperBase group = helper.AddGroup(Translation.GetString("TMPE_Title"));
+			simAccuracyDropdown = group.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+			recklessDriversDropdown = group.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
+			relaxedBussesToggle = group.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 #if DEBUG
-			allRelaxedToggle = group.AddCheckbox("All vehicles may ignore lane arrows", allRelaxed, onAllRelaxedChanged) as UICheckBox;
+			allRelaxedToggle = group.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
-			mayEnterBlockedJunctionsToggle = group.AddCheckbox("Vehicles may enter blocked junctions", mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
+			mayEnterBlockedJunctionsToggle = group.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
-			advancedAIToggle = groupAI.AddCheckbox("Enable Advanced Vehicle AI", advancedAI, onAdvancedAIChanged) as UICheckBox;
-			highwayRulesToggle = groupAI.AddCheckbox("Enable highway specific lane merging/splitting rules (BETA)", highwayRules, onHighwayRulesChanged) as UICheckBox;
-			//laneChangingRandomizationDropdown = groupAI.AddDropdown("Drivers want to leave high-density lanes:", new string[] { "Very often (50 %)", "Often (25 %)", "Sometimes (10 %)", "Rarely (5 %)", "Very rarely (2.5 %)", "Almost never (1 %)" }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
-			UIHelperBase group2 = helper.AddGroup("Maintenance");
-			group2.AddButton("Forget toggled traffic lights", onClickForgetToggledLights);
-			nodesOverlayToggle = group2.AddCheckbox("Show nodes and segments", nodesOverlay, onNodesOverlayChanged) as UICheckBox;
-			showLanesToggle = group2.AddCheckbox("Show lanes", showLanes, onShowLanesChanged) as UICheckBox;
+			advancedAIToggle = groupAI.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
+			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+//			laneChangingRandomizationDropdown = groupAI.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			UIHelperBase group2 = helper.AddGroup(Translation.GetString("Maintenance"));
+			group2.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights);
+			nodesOverlayToggle = group2.AddCheckbox(Translation.GetString("Show_nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+            showLanesToggle = group2.AddCheckbox(Translation.GetString("Show_lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 #if DEBUG
 			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
-			disableSomethingToggle = group2.AddCheckbox("Disable something", false, onDisableSomethingChanged) as UICheckBox;
 #endif
 		}
 
