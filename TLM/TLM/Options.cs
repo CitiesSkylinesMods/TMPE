@@ -48,7 +48,7 @@ namespace TrafficManager {
 #if DEBUG
 			allRelaxedToggle = group.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
-			mayEnterBlockedJunctionsToggle = group.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
+			//mayEnterBlockedJunctionsToggle = group.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = groupAI.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;

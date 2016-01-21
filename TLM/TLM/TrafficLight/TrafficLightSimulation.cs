@@ -49,7 +49,7 @@ namespace TrafficManager.TrafficLight {
 
 		public void setupTimedTrafficLight() {
 			TimedTrafficLights = true;
-			TrafficLightsTimed.AddTimedLight(nodeId, TrafficLightTool.SelectedNodeIndexes);
+			TrafficLightsTimed.AddTimedLight(nodeId, TrafficLightTool.SelectedNodeIndexes, false);
 
 			var node = getNode();
 

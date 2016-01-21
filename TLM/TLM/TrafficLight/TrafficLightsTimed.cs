@@ -18,6 +18,11 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		public static Dictionary<ushort, TrafficLightsTimed> TimedScripts = new Dictionary<ushort, TrafficLightsTimed>();
 
+		/// <summary>
+		/// Specifies if vehicles may enter the junction even if it is blocked by other vehicles
+		/// </summary>
+		public bool vehiclesMayEnterBlockedJunctions = false;
+
 		public List<TimedTrafficStep> Steps = new List<TimedTrafficStep>();
 		public int CurrentStep;
 
@@ -26,10 +31,11 @@ namespace TrafficManager.TrafficLight {
 
 		private uint lastSimulationStep = 0;
 
-		public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup) {
+		public TrafficLightsTimed(ushort nodeId, IEnumerable<ushort> nodeGroup, bool vehiclesMayEnterBlockedJunctions) {
 			this.nodeId = nodeId;
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
+			this.vehiclesMayEnterBlockedJunctions = vehiclesMayEnterBlockedJunctions;
 
 			// setup priority segments & live traffic lights
 			foreach (ushort slaveNodeId in nodeGroup) {
@@ -270,8 +276,8 @@ namespace TrafficManager.TrafficLight {
 			Steps.RemoveAt(id);
 		}
 
-		public static void AddTimedLight(ushort nodeid, List<ushort> nodeGroup) {
-			TimedScripts.Add(nodeid, new TrafficLightsTimed(nodeid, nodeGroup));
+		public static void AddTimedLight(ushort nodeid, List<ushort> nodeGroup, bool vehiclesMayEnterBlockedJunctions) {
+			TimedScripts.Add(nodeid, new TrafficLightsTimed(nodeid, nodeGroup, vehiclesMayEnterBlockedJunctions));
 		}
 
 		public static void RemoveTimedLight(ushort nodeid) {

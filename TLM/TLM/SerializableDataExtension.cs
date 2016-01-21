@@ -255,13 +255,18 @@ namespace TrafficManager {
 						Log.Message($"Adding Timed Node {i} at node {nodeid}");
 #endif
 
+						bool vehiclesMayEnterBlockedJunctions = false;
+						if (_configuration.TimedNodes[i].Length >= 5) {
+							vehiclesMayEnterBlockedJunctions = _configuration.TimedNodes[i][4] == 1;
+						}
+
 						var nodeGroup = new List<ushort>();
 						for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++) {
 							nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
 						}
 
 						if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
-						TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
+						TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup, vehiclesMayEnterBlockedJunctions);
 						var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
 						var node = netManager.m_nodes.m_buffer[nodeid];
 
@@ -291,7 +296,10 @@ namespace TrafficManager {
 								maxTime = cfgstep[1];
 								numSegments = cfgstep[2];
 								if (cfgstep.Length == 4) {
-									waitFlowBalance = (float)cfgstep[3] / 10f;
+									waitFlowBalance = Convert.ToSingle(cfgstep[3]) / 10f;
+								}
+								if (cfgstep.Length == 5) {
+									waitFlowBalance = Convert.ToSingle(cfgstep[4]) / 1000f;
 								}
 							}
 
@@ -564,10 +572,12 @@ namespace TrafficManager {
 				var timedNode = TrafficLightsTimed.GetTimedLight((ushort)i);
 				timedNode.handleNewSegments();
 
-				configuration.TimedNodes.Add(new[]
-				{
-					timedNode.nodeId, timedNode.CurrentStep, timedNode.NumSteps(),
-					Convert.ToInt32(timedNode.IsStarted())
+				configuration.TimedNodes.Add(new[] {
+					timedNode.nodeId,
+					timedNode.CurrentStep,
+					timedNode.NumSteps(),
+					Convert.ToInt32(timedNode.IsStarted()),
+					Convert.ToInt32(timedNode.vehiclesMayEnterBlockedJunctions)
 				});
 
 				var nodeGroup = new ushort[timedNode.NodeGroup.Count];
@@ -607,7 +617,8 @@ namespace TrafficManager {
 						timedNode.Steps[j].minTime,
 						timedNode.Steps[j].maxTime,
 						validCount,
-						(int)(timedNode.Steps[j].waitFlowBalance*10)
+						0,
+						Convert.ToInt32(timedNode.Steps[j].waitFlowBalance*1000f)
 					});
 				}
 			} catch (Exception e) {

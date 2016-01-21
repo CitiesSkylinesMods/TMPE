@@ -3325,6 +3325,7 @@ namespace TrafficManager.TrafficLight {
 						timedNode.GetStep(curStep).waitFlowBalance = _waitFlowBalance;
 					}
 
+					var mayEnterIfBlocked = GUILayout.Toggle(timedNodeMain.vehiclesMayEnterBlockedJunctions, Translation.GetString("Vehicles_may_enter_blocked_junctions"), new GUILayoutOption[] { });
 					var testMode = GUILayout.Toggle(timedNodeMain.IsInTestMode(), Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
 					foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 						if (timedNode == null) {
@@ -3333,6 +3334,7 @@ namespace TrafficManager.TrafficLight {
 						}
 
 						timedNode.SetTestMode(testMode);
+						timedNode.vehiclesMayEnterBlockedJunctions = mayEnterIfBlocked;
 					}
 				} else {
 					if (_timedEditStep < 0 && !_timedPanelAdd) {

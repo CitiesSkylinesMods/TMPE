@@ -2,6 +2,10 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.5
+- The option "Vehicles may enter blocked junctions" may now be defined for each junction separately
+- Bugfix: Small values for timed light sensititivity were not saved correctly
+
 1.4.4, 01/21/2016
 - Added localization support
 
