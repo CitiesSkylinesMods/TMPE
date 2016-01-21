@@ -1,0 +1,77 @@
+Switch_traffic_lights Ampeln setzen
+Add_priority_signs Vorfahrtsschilder
+Manual_traffic_lights Manuelle Ampeln
+Timed_traffic_lights Zeitgesteuerte Ampeln
+Change_lane_arrows Richtungspfeile
+Clear_Traffic Verkehr löschen
+Disable_despawning Despawn ausschalten
+Enable_despawning Despawn einschalten
+NODE_IS_LIGHT Die Kreuzung hat eine Ampel.\nLösche zunächst die Ampel, indem du auf "Ampeln setzen" und dann auf die Kreuzung klickst.
+NODE_IS_TIMED_LIGHT Die Kreuzung wird von einer Zeitsteuerung kontrolliert.\nWähle "Zeitgesteuerte Ampeln" aus, klicke auf die Kreuzung und klicke auf "Entfernen".
+Select_nodes_windowTitle Auswahl der Kreuzungen
+Select_nodes Wähle eine oder mehrere Kreuzungen aus
+Node Knotenpunkt
+Deselect_all_nodes Auswahl löschen
+Setup_timed_traffic_light Zeitgesteuerte Ampel einrichten
+State Schritt
+Skip Weiter
+up hoch
+down runter
+View Anzeigen
+Edit Ändern
+Delete Löschen
+Timed_traffic_lights_manager Verwaltung zeitgesteuerter Ampeln
+Add_step Schritt hinzufügen
+Remove_timed_traffic_light Ampel entfernen
+Min._Time: Min. Zeit:
+Max._Time: Max. Zeit:
+Save Speichern
+Add Hinzufügen
+Sensitivity Empfindlichkeit
+Very_Low Sehr niedrig
+Low Niedrig
+Medium Mittel
+High Hoch
+Very_high Sehr hoch
+Extreme_long_green/red_phases Extrem lange Grün-/Rotphasen
+Very_long_green/red_phases Sehr lange Grün-/Rotphasen
+Long_green/red_phases Lange Grün-/Rotphasen
+Moderate_green/red_phases Moderate Grün-/Rotphasen
+Short_green/red_phases Kurze Grün-/Rotphasen
+Very_short_green/red_phases Sehr kurze Grün-/Rotphasen
+Extreme_short_green/red_phases Extrem kurze Grün-/Rotphasen
+Hide_counters Zähler verstecken
+Show_counters Zähler anzeigen
+Start Start
+Stop Stopp
+Enable_test_mode_(stay_in_current_step) Testmodus aktivieren (im aktuellen Schritt bleiben)
+avg._flow fahrend
+avg._wait wartend
+min/max min/max
+Lane Fahrspur
+Set_Speed Geschwindigkeit setzen {0}
+Max_speed Max. Geschwindigkeit
+Segment Segment
+incoming eingehend
+Enable_Advanced_Vehicle_AI Verbesserte Fahrzeug-KI aktivieren
+Vehicles_may_enter_blocked_junctions Fahrzeuge dürfen in blockierte Kreuzungen einfahren
+All_vehicles_may_ignore_lane_arrows Alle Fahrzeuge dürfen Richtungspfeile ignorieren
+Busses_may_ignore_lane_arrows Busse dürfen Richtungspfeile ignorieren
+Reckless_driving Rücksichtsloses Fahren
+TMPE_Title Traffic Manager: President Edition (Einstellungen werden pro Spielstand gespeichert)
+Simulation_accuracy Genauigkeit der Simulation (höhere Genauigkeit reduziert Performance)
+Enable_highway_specific_lane_merging/splitting_rules Aktiviere spezielle Verkehrsregeln auf der Autobahn
+Maintenance Wartung
+Show_nodes_and_segments Zeige Knoten und Segmente
+Show_lanes Zeige Fahrspuren
+Path_Of_Evil_(10_%) Pfad des Bösen (10 %)
+Rush_Hour_(5_%) Feierabendverkehr (5 %)
+Minor_Complaints_(2_%) Einige Beschwerden (2 %)
+Holy_City_(0_%) Heilige Stadt (0 %)
+Forget_toggled_traffic_lights Gesetzte/Entfernte Ampeln vergessen
+Road_is_already_in_a_group! Straße ist bereits in einer Gruppe!
+All_selected_roads_must_be_of_the_same_type! Alle ausgewählten Straßen müssen vom gleichen Typ sein!
+Create_group Gruppe erstellen
+Delete_group Gruppe löschen
+Add_zoning Zonen aktivieren
+Remove_zoning Zonen löschen

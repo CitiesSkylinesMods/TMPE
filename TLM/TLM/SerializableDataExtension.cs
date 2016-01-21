@@ -40,9 +40,9 @@ namespace TrafficManager {
 					Options.setSimAccuracy(options[0]);
 				}
 
-				if (options.Length >= 2) {
+				/*if (options.Length >= 2) {
 					Options.setLaneChangingRandomization(options[1]);
-				}
+				}*/
 
 				if (options.Length >= 3) {
 					Options.setRecklessDrivers(options[2]);
@@ -72,7 +72,7 @@ namespace TrafficManager {
 					Options.setHighwayRules(options[7] == (byte)1);
 				}
 
-				if (options.Length >= 9) {
+				/*if (options.Length >= 9) {
 					Options.setCarCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[8]) * 0.01f, 2));
 				}
 
@@ -86,7 +86,7 @@ namespace TrafficManager {
 
 				if (options.Length >= 12) {
 					Options.setTruckHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[11]) * 0.01f, 2));
-				}
+				}*/
 			}
 
 			// load toggled traffic lights
@@ -112,6 +112,8 @@ namespace TrafficManager {
 			
 			LoadDataState();
 			TrafficPriority.HandleAllVehicles();
+			Flags.clearHighwayLaneArrows();
+			Flags.applyAllFlags();
 		}
 
 		private static void LoadDataState() {
@@ -253,13 +255,18 @@ namespace TrafficManager {
 						Log.Message($"Adding Timed Node {i} at node {nodeid}");
 #endif
 
+						bool vehiclesMayEnterBlockedJunctions = false;
+						if (_configuration.TimedNodes[i].Length >= 5) {
+							vehiclesMayEnterBlockedJunctions = _configuration.TimedNodes[i][4] == 1;
+						}
+
 						var nodeGroup = new List<ushort>();
 						for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++) {
 							nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
 						}
 
 						if (TrafficLightsTimed.IsTimedLight(nodeid)) continue;
-						TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup);
+						TrafficLightsTimed.AddTimedLight(nodeid, nodeGroup, vehiclesMayEnterBlockedJunctions);
 						var timedNode = TrafficLightsTimed.GetTimedLight(nodeid);
 						var node = netManager.m_nodes.m_buffer[nodeid];
 
@@ -289,7 +296,10 @@ namespace TrafficManager {
 								maxTime = cfgstep[1];
 								numSegments = cfgstep[2];
 								if (cfgstep.Length == 4) {
-									waitFlowBalance = (float)cfgstep[3] / 10f;
+									waitFlowBalance = Convert.ToSingle(cfgstep[3]) / 10f;
+								}
+								if (cfgstep.Length == 5) {
+									waitFlowBalance = Convert.ToSingle(cfgstep[4]) / 1000f;
 								}
 							}
 
@@ -499,7 +509,7 @@ namespace TrafficManager {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), Convert.ToByte(Math.Round(Options.carCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.carHighwayTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckCityTrafficSensitivity * 100f)), Convert.ToByte(Math.Round(Options.truckHighwayTrafficSensitivity * 100f)) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -562,10 +572,12 @@ namespace TrafficManager {
 				var timedNode = TrafficLightsTimed.GetTimedLight((ushort)i);
 				timedNode.handleNewSegments();
 
-				configuration.TimedNodes.Add(new[]
-				{
-					timedNode.nodeId, timedNode.CurrentStep, timedNode.NumSteps(),
-					Convert.ToInt32(timedNode.IsStarted())
+				configuration.TimedNodes.Add(new[] {
+					timedNode.nodeId,
+					timedNode.CurrentStep,
+					timedNode.NumSteps(),
+					Convert.ToInt32(timedNode.IsStarted()),
+					Convert.ToInt32(timedNode.vehiclesMayEnterBlockedJunctions)
 				});
 
 				var nodeGroup = new ushort[timedNode.NodeGroup.Count];
@@ -605,7 +617,8 @@ namespace TrafficManager {
 						timedNode.Steps[j].minTime,
 						timedNode.Steps[j].maxTime,
 						validCount,
-						(int)(timedNode.Steps[j].waitFlowBalance*10)
+						0,
+						Convert.ToInt32(timedNode.Steps[j].waitFlowBalance*1000f)
 					});
 				}
 			} catch (Exception e) {

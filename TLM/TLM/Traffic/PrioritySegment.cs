@@ -68,9 +68,9 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal VehiclePosition GetVehicle(ushort vehicleId) {
-			if (!HasVehicle(vehicleId))
-				return null;
-			return Vehicles[vehicleId];
+			VehiclePosition ret = null;
+			Vehicles.TryGetValue(vehicleId, out ret);
+			return ret;
 		}
 
 		/// <summary>

@@ -26,6 +26,7 @@ namespace TrafficManager.Traffic {
 		public uint FromLaneIndex;
 		public float ReduceSpeedByValueToYield;
 		public bool Stopped = false;
+		public bool Valid = false;
 
 		public uint LastFrame;
 
@@ -34,6 +35,7 @@ namespace TrafficManager.Traffic {
 		}
 
 		public void ResetCar() {
+			Valid = false;
 			ToNode = 0;
 			FromSegment = 0;
 			ToSegment = 0;

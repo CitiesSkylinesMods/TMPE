@@ -25,7 +25,7 @@ namespace TrafficManager.Custom.AI {
 
 			/// NON-STOCK CODE START ///
 			try {
-				CustomCarAI.HandleVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], false, 5);
+				CustomCarAI.HandleVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], false, false, 5);
 			} catch (Exception e) {
 				Log.Error("TrainAI TrafficManagerSimulationStep Error: " + e.ToString());
 			}

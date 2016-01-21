@@ -5,7 +5,7 @@ namespace TrafficManager.Custom.AI
 {
     class CustomTransportLineAI
     {
-        protected static bool StartPathFind(ushort segmentId, ref NetSegment data, ItemClass.Service netService, VehicleInfo.VehicleType vehicleType, bool skipQueue)
+        /*protected static bool StartPathFind(ushort segmentId, ref NetSegment data, ItemClass.Service netService, VehicleInfo.VehicleType vehicleType, bool skipQueue)
         {
             if (data.m_path != 0u)
             {
@@ -122,6 +122,6 @@ namespace TrafficManager.Custom.AI
             }
             pos = default(PathUnit.Position);
             return false;
-        }
+        }*/
     }
 }

@@ -10,6 +10,7 @@ using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
 using TrafficManager.State;
+using TrafficManager.Custom.Misc;
 
 namespace TrafficManager.TrafficLight {
 	[UsedImplicitly]
@@ -60,8 +61,8 @@ namespace TrafficManager.TrafficLight {
 
 		private uint currentFrame = 0;
 
-		private static readonly string NODE_IS_LIGHT = "Junction has a traffic light.\nDelete the traffic light by choosing \"Switch traffic lights\" and clicking on this node.";
-		private static readonly string NODE_IS_TIMED_LIGHT = "Junction is part of a timed script.\nSelect \"Timed traffic lights\", click on this node and click on \"Remove\" first.";
+		private static readonly string NODE_IS_LIGHT = Translation.GetString("NODE_IS_LIGHT");
+		private static readonly string NODE_IS_TIMED_LIGHT = Translation.GetString("NODE_IS_TIMED_LIGHT");
 
 		private static bool nodeSelectionLocked = false;
 
@@ -656,7 +657,7 @@ namespace TrafficManager.TrafficLight {
 
 			if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx)) {
 				if (_selectedSegmentIds.Count > 0) {
-					showTooltip("Road is already in a group!",
+					showTooltip(Translation.GetString("Road_is_already_in_a_group!"),
 						Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
 							.m_position);
 				} else {
@@ -675,7 +676,7 @@ namespace TrafficManager.TrafficLight {
 						var info2 = segment2.Info;
 
 						if (info.m_lanes.Length != info2.m_lanes.Length) {
-							showTooltip("All selected roads must be of the same type!",
+							showTooltip(Translation.GetString("All_selected_roads_must_be_of_the_same_type!"),
 								Singleton<NetManager>.instance.m_nodes.m_buffer[segment.m_startNode]
 									.m_position);
 						} else {
@@ -768,9 +769,11 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, SelectedNode)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(segmentId, SelectedNode);
-					var hasForwardSegment = TrafficPriority.HasStraightSegment(segmentId, SelectedNode);
-					var hasRightSegment = TrafficPriority.HasRightSegment(segmentId, SelectedNode);
+
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId, SelectedNode);
+					var hasLeftSegment = geometry.HasLeftSegment(SelectedNode);
+					var hasForwardSegment = geometry.HasStraightSegment(SelectedNode);
+					var hasRightSegment = geometry.HasRightSegment(SelectedNode);
 
 					switch (segmentDict.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple:
@@ -1367,6 +1370,7 @@ namespace TrafficManager.TrafficLight {
 			_counterStyle.fontSize = (int)(11f * zoom);
 			_counterStyle.normal.textColor = new Color(1f, 1f, 0f);
 
+
 			uint curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
@@ -1380,7 +1384,7 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 				labelStr += ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType;
 #endif
-				labelStr += ", Traffic: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanTrafficDensity[curLaneId]*100) + " % (" + CustomRoadAI.laneTrafficDensity[curLaneId] + ")\n";
+				labelStr += ", Avg. speed: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanSpeeds[curLaneId]) + "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1400,6 +1404,7 @@ namespace TrafficManager.TrafficLight {
 				NetSegment segment = segments.m_buffer[i];
 				if (segment.m_flags == NetSegment.Flags.None) // segment is unused
 					continue;
+				var segmentInfo = segment.Info;
 
 				Vector3 centerPos = segment.m_bounds.center;
 				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
@@ -1423,15 +1428,36 @@ namespace TrafficManager.TrafficLight {
 					labelStr += ", flags: " + segment.m_flags.ToString();
 #endif
 				labelStr += "\nTraffic: " + segment.m_trafficDensity + " %";
+
+				float meanLaneSpeed = 0f;
+
+				int lIndex = 0;
+				uint laneId = segment.m_lanes;
+				int validLanes = 0;
+				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
+					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
+					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
+						meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
+						++validLanes;
+					}
+					lIndex++;
+					laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
+				}
+
+				if (validLanes > 0)
+					meanLaneSpeed /= Convert.ToSingle(validLanes);
+
+				labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + ")";
+
 #if DEBUG
 				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;
 #endif
+
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
-				var segmentInfo = segment.Info;
 				if (Options.showLanes)
 					 _guiLanes(ref segment, ref segmentInfo);
 			}
@@ -1524,7 +1550,7 @@ namespace TrafficManager.TrafficLight {
 		private void _guiTimedTrafficLights() {
 			_cursorInSecondaryPanel = false;
 
-			GUILayout.Window(253, _windowRect, _guiTimedControlPanel, "Timed traffic lights manager");
+			GUILayout.Window(253, _windowRect, _guiTimedControlPanel, Translation.GetString("Timed_traffic_lights_manager"));
 
 			_cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
 
@@ -1696,7 +1722,7 @@ namespace TrafficManager.TrafficLight {
 
 						String labelStr = "n/a";
 						if (prioSeg != null) {
-							labelStr = prioSeg.getNumCars().ToString() + " incoming";
+							labelStr = prioSeg.getNumCars().ToString() + " " + Translation.GetString("incoming");
 							/*for (int k = 0; k < prioSeg.numLanes; ++k) {
 								if (k > 0)
 									labelStr += "/";
@@ -1706,7 +1732,7 @@ namespace TrafficManager.TrafficLight {
 						GUI.Label(carNumRect, labelStr, _counterStyle);
 
 						_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
-						GUI.Label(segIdRect, "Segment " + srcSegmentId, _counterStyle);
+						GUI.Label(segIdRect, Translation.GetString("Segment") + " " + srcSegmentId, _counterStyle);
 					}
 #endif
 
@@ -1744,9 +1770,10 @@ namespace TrafficManager.TrafficLight {
 
 					if (TrafficLightsManual.SegmentIsOutgoingOneWay(srcSegmentId, nodeId)) continue;
 
-					var hasLeftSegment = TrafficPriority.HasLeftSegment(srcSegmentId, nodeId);
-					var hasForwardSegment = TrafficPriority.HasStraightSegment(srcSegmentId, nodeId);
-					var hasRightSegment = TrafficPriority.HasRightSegment(srcSegmentId, nodeId);
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(srcSegmentId, nodeId);
+					var hasLeftSegment = geometry.HasLeftSegment(nodeId);
+					var hasForwardSegment = geometry.HasStraightSegment(nodeId);
+					var hasRightSegment = geometry.HasRightSegment(nodeId);
 
 					switch (liveSegmentLight.CurrentMode) {
 						case ManualSegmentLight.Mode.Simple: {
@@ -2528,7 +2555,7 @@ namespace TrafficManager.TrafficLight {
 				};
 
 				GUILayout.BeginVertical(laneStyle);
-				GUILayout.Label("Lane " + (i + 1), laneTitleStyle);
+				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
 				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
@@ -2739,7 +2766,7 @@ namespace TrafficManager.TrafficLight {
 
 		private void _guiLaneRestrictionsOneWayWindow(int num) {
 			if (!TrafficRoadRestrictions.IsSegment(_selectedSegmentIds[0])) {
-				if (!GUILayout.Button("Create group")) return;
+				if (!GUILayout.Button(Translation.GetString("Create_group"))) return;
 
 				foreach (var segmentId in _selectedSegmentIds) {
 					TrafficRoadRestrictions.AddSegment(segmentId, _selectedSegmentIds);
@@ -2794,7 +2821,7 @@ namespace TrafficManager.TrafficLight {
 				return;
 			}
 
-			if (GUILayout.Button("Delete group")) {
+			if (GUILayout.Button(Translation.GetString("Delete_group"))) {
 				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
 					TrafficRoadRestrictions.RemoveSegment(selectedSegmentIndex);
 				}
@@ -2803,7 +2830,7 @@ namespace TrafficManager.TrafficLight {
 				return;
 			}
 
-			if (GUILayout.Button("Add zoning", GUILayout.Width(140))) {
+			if (GUILayout.Button(Translation.GetString("Add_zoning"), GUILayout.Width(140))) {
 				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
 					var segment = Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex];
 					var info = segment.Info;
@@ -2812,7 +2839,7 @@ namespace TrafficManager.TrafficLight {
 				}
 			}
 
-			if (GUILayout.Button("Remove zoning", GUILayout.Width(140))) {
+			if (GUILayout.Button(Translation.GetString("Remove_zoning"), GUILayout.Width(140))) {
 				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
 					var segment = Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex];
 
@@ -2873,7 +2900,7 @@ namespace TrafficManager.TrafficLight {
 			GUILayout.BeginHorizontal();
 			for (var i = 0; i < laneList.Count; i++) {
 				GUILayout.BeginVertical();
-				GUILayout.Label("Lane " + (i + 1));
+				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1));
 
 				if (info2.m_lanes[(int)laneList[i][2]].m_laneType == NetInfo.LaneType.Vehicle) {
 					var resSegment = TrafficRoadRestrictions.GetSegment(_selectedSegmentIds[0]);
@@ -2884,7 +2911,7 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.HorizontalSlider(_sliderValues[(int)laneList[i][2]],
 								20f, 150f, GUILayout.Height(20));
 
-						if (GUILayout.Button("Set Speed " + (int)_sliderValues[(int)laneList[i][2]])) {
+						if (GUILayout.Button(String.Format(Translation.GetString("Set_Speed"), ((int)_sliderValues[(int)laneList[i][2]]).ToString()))) {
 							foreach (var restrictionSegment in _selectedSegmentIds.Select(TrafficRoadRestrictions.GetSegment)) {
 								restrictionSegment.SpeedLimits[(int)laneList[i][2]] =
 									_sliderValues[(int)laneList[i][2]] /
@@ -2894,7 +2921,7 @@ namespace TrafficManager.TrafficLight {
 							_setSpeed = -1;
 						}
 					} else {
-						if (GUILayout.Button("Max speed " + (int)(resSpeed > 0.1f ? resSpeed * 50f : info2.m_lanes[(int)laneList[i][2]].m_speedLimit * 50f))) {
+						if (GUILayout.Button(Translation.GetString("Max_speed") + " " + (int)(resSpeed > 0.1f ? resSpeed * 50f : info2.m_lanes[(int)laneList[i][2]].m_speedLimit * 50f))) {
 							_sliderValues[(int)laneList[i][2]] = info2.m_lanes[(int)laneList[i][2]].m_speedLimit * 50f;
 							_setSpeed = (int)laneList[i][2];
 						}
@@ -3086,7 +3113,7 @@ namespace TrafficManager.TrafficLight {
 		private void _guiTimedTrafficLightsNode() {
 			_cursorInSecondaryPanel = false;
 
-			GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, "Select nodes");
+			GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, Translation.GetString("Select_nodes_windowTitle"));
 
 			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
 		}
@@ -3129,16 +3156,16 @@ namespace TrafficManager.TrafficLight {
 
 		private void _guiTimedTrafficLightsNodeWindow(int num) {
 			if (SelectedNodeIndexes.Count < 1) {
-				GUILayout.Label("Select nodes");
+				GUILayout.Label(Translation.GetString("Select_nodes"));
 			} else {
-				var txt = SelectedNodeIndexes.Aggregate("", (current, t) => current + ("Node " + t + "\n"));
+				var txt = SelectedNodeIndexes.Aggregate("", (current, t) => current + (Translation.GetString("Node") + " " + t + "\n"));
 
 				GUILayout.Label(txt);
 
-				if (SelectedNodeIndexes.Count > 0 && GUILayout.Button("Deselect all nodes")) {
+				if (SelectedNodeIndexes.Count > 0 && GUILayout.Button(Translation.GetString("Deselect_all_nodes"))) {
 					ClearSelectedNodes();
 				}
-				if (!GUILayout.Button("Setup timed traffic light")) return;
+				if (!GUILayout.Button(Translation.GetString("Setup_timed_traffic_light"))) return;
 
 				_waitFlowBalance = 1f;
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
@@ -3190,7 +3217,7 @@ namespace TrafficManager.TrafficLight {
 						if (i == timedNodeMain.CurrentStep) {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
-							String labelStr = "State " + (i + 1) + ": (min/max)" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
+							String labelStr = Translation.GetString("State") + " " + (i + 1) + ": (" + Translation.GetString("min/max") + ")" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
 							float flow = Single.NaN;
 							float wait = Single.NaN;
 							if (timedNodeMain.IsInTestMode()) {
@@ -3204,7 +3231,7 @@ namespace TrafficManager.TrafficLight {
 								flow = timedNodeMain.GetStep(i).minFlow;
 							}
 							if (!Single.IsNaN(flow) && !Single.IsNaN(wait))
-								labelStr += " avg. flow: " + String.Format("{0:0.##}", flow) + " avg. wait: " + String.Format("{0:0.##}", wait);
+								labelStr += " " + Translation.GetString("avg._flow") + ": " + String.Format("{0:0.##}", flow) + " " + Translation.GetString("avg._wait") + ": " + String.Format("{0:0.##}", wait);
 							GUIStyle labelLayout = layout;
 							if (timedNodeMain.IsInTestMode() && !Single.IsNaN(wait) && !Single.IsNaN(flow)) {
 								if (wait > 0 && flow < wait)
@@ -3217,7 +3244,7 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.Label(labelStr, labelLayout);
 							GUILayout.Space(5);
 							GUILayout.EndVertical();
-							if (GUILayout.Button("Skip", GUILayout.Width(45))) {
+							if (GUILayout.Button(Translation.GetString("Skip"), GUILayout.Width(70))) {
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 									if (timedNode2 == null) {
 										TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3227,16 +3254,16 @@ namespace TrafficManager.TrafficLight {
 								}
 							}
 						} else {
-							GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime, layout);
+							GUILayout.Label(Translation.GetString("State") + " " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime, layout);
 						}
 					} else {
-						GUILayout.Label("State " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime);
+						GUILayout.Label(Translation.GetString("State") + " " + (i + 1) + ": " + timedNodeMain.GetStep(i).minTime + " - " + timedNodeMain.GetStep(i).maxTime);
 
 						if (_timedEditStep < 0) {
 							GUILayout.BeginHorizontal(GUILayout.Width(100));
 
 							if (i > 0) {
-								if (GUILayout.Button("up", GUILayout.Width(45))) {
+								if (GUILayout.Button(Translation.GetString("up"), GUILayout.Width(45))) {
 									foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 										var timedNode2 = TrafficLightsTimed.GetTimedLight(selectedNodeIndex);
 										if (timedNode2 == null) {
@@ -3251,7 +3278,7 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							if (i < timedNodeMain.NumSteps() - 1) {
-								if (GUILayout.Button("down", GUILayout.Width(45))) {
+								if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(45))) {
 									foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 										if (timedNode2 == null) {
 											TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3266,7 +3293,7 @@ namespace TrafficManager.TrafficLight {
 
 							GUILayout.EndHorizontal();
 
-							if (GUILayout.Button("View", GUILayout.Width(45))) {
+							if (GUILayout.Button(Translation.GetString("View"), GUILayout.Width(65))) {
 								_timedPanelAdd = false;
 
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
@@ -3278,7 +3305,7 @@ namespace TrafficManager.TrafficLight {
 								}
 							}
 
-							if (GUILayout.Button("Edit", GUILayout.Width(45))) {
+							if (GUILayout.Button(Translation.GetString("Edit"), GUILayout.Width(65))) {
 								_timedPanelAdd = false;
 								_timedEditStep = i;
 								_stepMinValue = timedNodeMain.GetStep(i).minTime;
@@ -3297,9 +3324,7 @@ namespace TrafficManager.TrafficLight {
 								}
 							}
 
-							GUILayout.Space(20);
-
-							if (GUILayout.Button("Delete", GUILayout.Width(60))) {
+							if (GUILayout.Button(Translation.GetString("Delete"), GUILayout.Width(70))) {
 								_timedPanelAdd = false;
 
 								foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
@@ -3318,17 +3343,17 @@ namespace TrafficManager.TrafficLight {
 					int oldStepMaxValue = _stepMaxValue;
 
 					// Editing step
-					GUILayout.Label("Min. Time:", GUILayout.Width(75));
+					GUILayout.Label(Translation.GetString("Min._Time:"), GUILayout.Width(75));
 					_stepMinValueStr = GUILayout.TextField(_stepMinValueStr, GUILayout.Height(20));
 					if (! Int32.TryParse(_stepMinValueStr, out _stepMinValue))
 						_stepMinValue = oldStepMinValue;
 
-					GUILayout.Label("Max. Time:", GUILayout.Width(75));
+					GUILayout.Label(Translation.GetString("Max._Time:"), GUILayout.Width(75));
 					_stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
 					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 					
-					if (GUILayout.Button("Save", GUILayout.Width(45))) {
+					if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(45))) {
 						foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 							if (timeNode == null) {
 								TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3371,17 +3396,17 @@ namespace TrafficManager.TrafficLight {
 					int oldStepMinValue = _stepMinValue;
 					int oldStepMaxValue = _stepMaxValue;
 
-					GUILayout.Label("Min. Time:", GUILayout.Width(65));
+					GUILayout.Label(Translation.GetString("Min._Time:"), GUILayout.Width(65));
 					_stepMinValueStr = GUILayout.TextField(_stepMinValueStr, GUILayout.Height(20));
 					if (!Int32.TryParse(_stepMinValueStr, out _stepMinValue))
 						_stepMinValue = oldStepMinValue;
 
-					GUILayout.Label("Max. Time:", GUILayout.Width(65));
+					GUILayout.Label(Translation.GetString("Max._Time:"), GUILayout.Width(65));
 					_stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
 					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 
-					if (GUILayout.Button("Add", GUILayout.Width(45))) {
+					if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(45))) {
 						foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 							if (timedNode == null) {
 								TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3411,7 +3436,7 @@ namespace TrafficManager.TrafficLight {
 
 				} else {
 					if (_timedEditStep < 0) {
-						if (GUILayout.Button("Add step")) {
+						if (GUILayout.Button(Translation.GetString("Add_step"))) {
 							if (timedNodeMain.NumSteps() > 0) {
 								// invert light state from last step
 								foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
@@ -3437,11 +3462,11 @@ namespace TrafficManager.TrafficLight {
 
 			if (timedNodeMain.NumSteps() > 1 && _timedEditStep < 0) {
 				if (nodeSimulation.TimedTrafficLightsActive) {
-					if (GUILayout.Button(_timedShowNumbers ? "Hide counters" : "Show counters")) {
+					if (GUILayout.Button(_timedShowNumbers ? Translation.GetString("Hide_counters") : Translation.GetString("Show_counters"))) {
 						_timedShowNumbers = !_timedShowNumbers;
 					}
 
-					if (GUILayout.Button("Stop")) {
+					if (GUILayout.Button(Translation.GetString("Stop"))) {
 						foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 							if (timedNode == null) {
 								TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3464,7 +3489,8 @@ namespace TrafficManager.TrafficLight {
 						timedNode.GetStep(curStep).waitFlowBalance = _waitFlowBalance;
 					}
 
-					var testMode = GUILayout.Toggle(timedNodeMain.IsInTestMode(), "Enable test mode (stay in current step)", new GUILayoutOption[] { });
+					var mayEnterIfBlocked = GUILayout.Toggle(timedNodeMain.vehiclesMayEnterBlockedJunctions, Translation.GetString("Vehicles_may_enter_blocked_junctions"), new GUILayoutOption[] { });
+					var testMode = GUILayout.Toggle(timedNodeMain.IsInTestMode(), Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
 					foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 						if (timedNode == null) {
 							TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3472,10 +3498,11 @@ namespace TrafficManager.TrafficLight {
 						}
 
 						timedNode.SetTestMode(testMode);
+						timedNode.vehiclesMayEnterBlockedJunctions = mayEnterIfBlocked;
 					}
 				} else {
 					if (_timedEditStep < 0 && !_timedPanelAdd) {
-						if (GUILayout.Button("Start")) {
+						if (GUILayout.Button(Translation.GetString("Start"))) {
 							_timedPanelAdd = false;
 							nodeSelectionLocked = false;
 
@@ -3501,7 +3528,7 @@ namespace TrafficManager.TrafficLight {
 
 			GUILayout.Space(30);
 
-			if (!GUILayout.Button("Remove timed traffic light")) {
+			if (!GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
 				return;
 			}
 
@@ -3520,7 +3547,7 @@ namespace TrafficManager.TrafficLight {
 				formatStr = "{0:0.#}";
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Sensitivity (" + String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
+			GUILayout.Label(Translation.GetString("Sensitivity") + " (" + String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
 			if (_waitFlowBalance <= 0.01f) {
 				if (_waitFlowBalance >= 0) {
 					if (GUILayout.Button("-.001")) {
@@ -3553,9 +3580,9 @@ namespace TrafficManager.TrafficLight {
 			GUIStyle style = new GUIStyle();
 			style.normal.textColor = Color.white;
 			style.alignment = TextAnchor.LowerLeft;
-			GUILayout.Label("Low", style, new GUILayoutOption[] { GUILayout.Height(10) });
+			GUILayout.Label(Translation.GetString("Low"), style, new GUILayoutOption[] { GUILayout.Height(10) });
 			style.alignment = TextAnchor.LowerRight;
-			GUILayout.Label("High", style, new GUILayoutOption[] { GUILayout.Height(10) });
+			GUILayout.Label(Translation.GetString("High"), style, new GUILayoutOption[] { GUILayout.Height(10) });
 			GUILayout.EndHorizontal();
 
 			GUILayout.Space(5);
@@ -3563,19 +3590,19 @@ namespace TrafficManager.TrafficLight {
 
 		private string getWaitFlowBalanceInfo() {
 			if (_waitFlowBalance < 0.1f) {
-				return "Extreme long green/red phases";
+				return Translation.GetString("Extreme_long_green/red_phases");
 			} else if (_waitFlowBalance < 0.5f) {
-				return "Very long green/red phases";
+				return Translation.GetString("Very_long_green/red_phases");
 			} else if (_waitFlowBalance < 0.75f) {
-				return "Long green/red phases";
+				return Translation.GetString("Long_green/red_phases");
 			} else if (_waitFlowBalance < 1.25f) {
-				return "Moderate green/red phases";
+				return Translation.GetString("Moderate_green/red_phases");
 			} else if (_waitFlowBalance < 1.5f) {
-				return "Short green/red phases";
+				return Translation.GetString("Short_green/red_phases");
 			} else if (_waitFlowBalance < 2.5f) {
-				return "Very short green/red phases";
+				return Translation.GetString("Very_short_green/red_phases");
 			} else {
-				return "Extreme short green/red phases";
+				return Translation.GetString("Extreme_short_green/red_phases");
 			}
 		}
 
