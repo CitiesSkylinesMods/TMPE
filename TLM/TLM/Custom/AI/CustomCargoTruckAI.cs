@@ -27,11 +27,13 @@ namespace TrafficManager.Custom.AI
                     }
                 }
 
-				/*try {
-					CustomCarAI.HandleVehicle(vehicleId, ref data, true, true);
-				} catch (Exception e) {
-					Log.Error("CargoTruckAI CustomSimulationStep Error: " + e.ToString());
-				}*/
+				if (Options.simAccuracy <= 1) {
+					try {
+						CustomCarAI.HandleVehicle(vehicleId, ref data, true, true);
+					} catch (Exception e) {
+						Log.Error("CargoTruckAI CustomSimulationStep Error: " + e.ToString());
+					}
+				}
 
 				BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
             }

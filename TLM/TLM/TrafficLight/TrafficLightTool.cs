@@ -1401,11 +1401,13 @@ namespace TrafficManager.TrafficLight {
 				int lIndex = 0;
 				uint laneId = segment.m_lanes;
 				int validLanes = 0;
+				float meanMaxSpeed = 0;
 				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
 					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
 					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
 						if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
 							meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
+							meanMaxSpeed += lane.m_speedLimit;
 							++validLanes;
 						}
 					}
@@ -1413,10 +1415,12 @@ namespace TrafficManager.TrafficLight {
 					laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
 				}
 
-				if (validLanes > 0)
+				if (validLanes > 0) {
 					meanLaneSpeed /= Convert.ToSingle(validLanes);
+					meanMaxSpeed /= Convert.ToSingle(validLanes);
+				}
 
-				labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + ")";
+				labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + ", max.: " + String.Format("{0:0.##}", meanMaxSpeed) + ")";
 
 #if DEBUG
 				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;

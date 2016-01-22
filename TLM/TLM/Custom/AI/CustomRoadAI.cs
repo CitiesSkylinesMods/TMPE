@@ -31,8 +31,7 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
 			try {
-				uint currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8; // first 8 bits may not be used!
-				if ((currentFrame & nodeHousekeepingMask[Options.simAccuracy]) == 0 && TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns) {
+				if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns) {
 					try {
 						TrafficPriority.nodeHousekeeping(nodeId);
 					} catch (Exception e) {
@@ -53,13 +52,10 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
 			if (initDone) {
-				uint currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8; // first 8 bits may not be used!
-				if ((currentFrame & segmentHousekeepingMask[Options.simAccuracy]) == 0) {
-					try {
-						TrafficPriority.segmentHousekeeping(segmentID);
-					} catch (Exception e) {
-						Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
-					}
+				try {
+					TrafficPriority.segmentHousekeeping(segmentID);
+				} catch (Exception e) {
+					Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
 				}
 
 				if (!Options.isStockLaneChangerUsed()) {
@@ -71,12 +67,14 @@ namespace TrafficManager.Custom.AI {
 						while (laneIndex < nextNumLanes && curLaneId != 0u) {
 							int buf = Convert.ToInt32(currentLaneTrafficBuffer[curLaneId]);
 							float currentSpeeds = Convert.ToSingle(currentLaneSpeeds[curLaneId]);
+							float currentMeanSpeed;
 							if (buf > 0) {
-								float meanSpeed = currentSpeeds / Convert.ToSingle(buf);
-								laneMeanSpeeds[curLaneId] = meanSpeed;
+								currentMeanSpeed = currentSpeeds / Convert.ToSingle(buf);
 							} else {
-								laneMeanSpeeds[curLaneId] = -1;
+								currentMeanSpeed = data.Info.m_lanes[laneIndex].m_speedLimit * 8f;
 							}
+							laneMeanSpeeds[curLaneId] = 0.95f * laneMeanSpeeds[curLaneId] + 0.05f * currentMeanSpeed;
+
 							currentLaneTrafficBuffer[curLaneId] = 0;
 							currentLaneSpeeds[curLaneId] = 0;
 
@@ -435,7 +433,7 @@ namespace TrafficManager.Custom.AI {
 
 		internal static void resetTrafficStats() {
 			for (uint i = 0; i < laneMeanSpeeds.Length; ++i) {
-				laneMeanSpeeds[i] = 5f;
+				laneMeanSpeeds[i] = 16f;
 				laneHasSeenVehicles[i] = false;
 				currentLaneTrafficBuffer[i] = 0;
 			}

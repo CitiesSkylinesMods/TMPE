@@ -18,6 +18,8 @@ namespace TrafficManager.Custom.AI {
 		private static int[] farLodUpdateMod = new int[] { 4, 6, 8, 10, 12 };
 		private static int[] veryFarLodUpdateMod = new int[] { 8, 10, 12, 14, 16 };
 
+		public static readonly int MaxPriorityWaitTime = 80;
+
 		public void Awake() {
 			
 		}
@@ -366,17 +368,19 @@ namespace TrafficManager.Custom.AI {
 			var camPos = Camera.main.transform.position;
 			bool simulatePrioritySigns = (lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver;
 
-			if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
-				VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
-				if (vehiclePos.Valid && simulatePrioritySigns) {
-					try {
-						HandleVehicle(vehicleId, ref vehicleData, true, true);
-					} catch (Exception e) {
-						Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
+			if (Options.simAccuracy <= 0) {
+				if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
+					VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
+					if (vehiclePos.Valid && simulatePrioritySigns) {
+						try {
+							HandleVehicle(vehicleId, ref vehicleData, true, true);
+						} catch (Exception e) {
+							Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
+						}
 					}
+				} else {
+					Log._Debug($"TmCalculateSegmentPosition does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
 				}
-			} else {
-				Log._Debug($"TmCalculateSegmentPosition does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
 			}
 
 			// I think this is supposed to be the lane position?
@@ -533,7 +537,7 @@ namespace TrafficManager.Custom.AI {
 										}
 									}
 
-									if (vehicleLightState == RoadBaseAI.TrafficLightState.Green) {
+									if (vehicleLightState == RoadBaseAI.TrafficLightState.Green && !Options.mayEnterBlockedJunctions) {
 										var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 
 										if (hasIncomingCars) {
@@ -591,7 +595,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={globalTargetPos.WaitTime}, vel={lastFrameData.m_velocity.magnitude}");
 #endif
-														if (globalTargetPos.WaitTime < 40) {
+														if (globalTargetPos.WaitTime < MaxPriorityWaitTime) {
 															globalTargetPos.CarState = CarState.Stop;
 
 															if (lastFrameData.m_velocity.magnitude < 0.5f ||
@@ -629,7 +633,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={globalTargetPos.WaitTime}");
 #endif
-														if (globalTargetPos.WaitTime < 40) {
+														if (globalTargetPos.WaitTime < MaxPriorityWaitTime) {
 															globalTargetPos.WaitTime++;
 															globalTargetPos.CarState = CarState.Stop;
 															hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
@@ -641,10 +645,7 @@ namespace TrafficManager.Custom.AI {
 																if (lastFrameData.m_velocity.magnitude > 0) {
 																	maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude - globalTargetPos.ReduceSpeedByValueToYield);
 																} else {
-																	if (globalTargetPos.WaitTime < 10)
-																		maxSpeed = 0f;
-																	else
-																		maxSpeed = 0;
+																	maxSpeed = 0;
 																}
 #if DEBUG
 																/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
@@ -670,7 +671,7 @@ namespace TrafficManager.Custom.AI {
 														if (debug)
 															Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={globalTargetPos.WaitTime}");
 #endif
-														if (globalTargetPos.WaitTime < 40) {
+														if (globalTargetPos.WaitTime < MaxPriorityWaitTime) {
 															globalTargetPos.WaitTime++;
 															globalTargetPos.CarState = CarState.Stop;
 															maxSpeed = 0f;

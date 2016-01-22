@@ -2,6 +2,10 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.6, 01/22/2016
+- Running average lane speeds are measured now
+- Minor fixes
+
 1.4.5, 01/22/2016
 - The option "Vehicles may enter blocked junctions" may now be defined for each junction separately
 - Bugfix: A deadlock in the path-finding is fixed

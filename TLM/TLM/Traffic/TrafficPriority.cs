@@ -551,7 +551,7 @@ namespace TrafficManager.Traffic {
 		protected static bool HasVehiclePriority(bool debug, ushort targetCarId, bool targetIsOnMainRoad, ushort incomingCarId, bool incomingIsOnMainRoad, ushort nodeId) {
 			try {
 #if DEBUG
-				debug = false;
+				debug = nodeId == 16015;
 				//debug = nodeId == 13531;
 				if (debug) {
 					Log._Debug($"HasVehiclePriority: Checking if {targetCarId} (main road = {targetIsOnMainRoad}) has priority over {incomingCarId} (main road = {incomingIsOnMainRoad}).");
@@ -591,7 +591,14 @@ namespace TrafficManager.Traffic {
 #endif
 						RemoveVehicleFromSegments(targetCarId);
 						Vehicles[targetCarId].Valid = false;
-						return true;
+
+						if (Options.simAccuracy <= 1) {
+							CustomCarAI.HandleVehicle(targetCarId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId], false, false, 1);
+							if (!Vehicles[targetCarId].Valid)
+								return true;
+						} else {
+							return true;
+						}
 					}
 				} else {
 #if DEBUG
@@ -617,7 +624,12 @@ namespace TrafficManager.Traffic {
 #endif
 						RemoveVehicleFromSegments(incomingCarId);
 						Vehicles[incomingCarId].Valid = false;
-						return true;
+
+						if (Options.simAccuracy <= 1) {
+							CustomCarAI.HandleVehicle(incomingCarId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId], false, false, 1);
+							if (!Vehicles[incomingCarId].Valid)
+								return true;
+						}
 					}
 				} else {
 #if DEBUG
