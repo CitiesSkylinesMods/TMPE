@@ -44,7 +44,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.4.4";
+			title.text = "Version 1.4.5";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -160,7 +160,7 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam) {
-			Log.Message("Priority Sign Clicked.");
+			Log._Debug("Priority Sign Clicked.");
 			if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns) {
 				_buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
 				TrafficLightTool.SetToolMode(ToolMode.AddPrioritySigns);

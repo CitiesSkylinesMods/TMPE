@@ -129,14 +129,14 @@ namespace TrafficManager.TrafficLight {
 					var nodeSim = TrafficLightSimulation.GetNodeSimulation(timedNodeId); // `this` is one of `nodeSim`
 					if (nodeSim == null) {
 						if (otherTimedNode != null) {
-							Log.Message($"Removing loose timed light @ node {timedNodeId}");
+							Log._Debug($"Removing loose timed light @ node {timedNodeId}");
 							TrafficLightsTimed.RemoveTimedLight(timedNodeId);
 						}
 						continue;
 					}
 
 					if (otherTimedNode == null || destroyGroup || timedNodeId == nodeId) {
-						Log.Message($"Removing simulation @ node {timedNodeId}");
+						Log._Debug($"Removing simulation @ node {timedNodeId}");
 						nodeSim.destroyTimedTrafficLight();
 						LightSimulationByNodeId.Remove(timedNodeId);
 					} else {

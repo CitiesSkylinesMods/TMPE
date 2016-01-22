@@ -4,6 +4,7 @@ using System.Linq;
 using ColossalFramework;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
+using TrafficManager.Custom.AI;
 
 /// <summary>
 /// A priority segment describes a directional traffic segment connected to a controlled
@@ -88,7 +89,7 @@ namespace TrafficManager.Traffic {
 				if (segmentId == 0 || segmentId == SegmentId)
 					continue;
 
-				if (TrafficLightsManual.SegmentIsIncomingOneWay(segmentId, NodeId))
+				if (CustomRoadAI.GetSegmentGeometry(segmentId).IsIncomingOneWay(NodeId))
 					continue;
 
 				numCarsGoingToSegmentId[segmentId] = 0;

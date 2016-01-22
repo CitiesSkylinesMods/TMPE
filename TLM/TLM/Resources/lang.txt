@@ -61,7 +61,14 @@ Reckless_driving Reckless driving (BETA feature)
 TMPE_Title Traffic Manager: President Edition (Settings are defined for each savegame separately)
 Simulation_accuracy Simulation accuracy (higher accuracy reduces performance)
 Enable_highway_specific_lane_merging/splitting_rules Enable highway specific lane merging/splitting rules
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Drivers like to change their lane (only applied if Advanced AI is enabled)
 Maintenance Maintenance
+Very_often_(50_%) Very often (50 %)
+Often_(25_%) Often (25 %)
+Sometimes_(10_%) Sometimes (10 %)
+Rarely_(5_%) Rarely (5 %)
+Very_rarely_(2.5_%) Very rarely (2.5 %)
+Only_if_necessary Only if necessary
 Show_nodes_and_segments Show nodes and segments
 Show_lanes Show lanes
 Path_Of_Evil_(10_%) Path Of Evil (10 %)

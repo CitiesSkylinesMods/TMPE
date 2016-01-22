@@ -734,10 +734,10 @@ namespace TrafficManager.TrafficLight {
 
 					hoveredSegment = IsPedestrianLightHovered(myRect3, segmentId, hoveredSegment, segmentDict);
 
-					if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, SelectedNode)) continue;
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId);
 
+					if (geometry.IsOutgoingOneWay(SelectedNode)) continue;
 
-					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId, SelectedNode);
 					var hasLeftSegment = geometry.HasLeftSegment(SelectedNode);
 					var hasForwardSegment = geometry.HasStraightSegment(SelectedNode);
 					var hasRightSegment = geometry.HasRightSegment(SelectedNode);
@@ -1404,8 +1404,10 @@ namespace TrafficManager.TrafficLight {
 				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
 					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
 					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
-						meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
-						++validLanes;
+						if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
+							meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
+							++validLanes;
+						}
 					}
 					lIndex++;
 					laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
@@ -1735,9 +1737,9 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 
-					if (TrafficLightsManual.SegmentIsOutgoingOneWay(srcSegmentId, nodeId)) continue;
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(srcSegmentId);
+					if (geometry.IsOutgoingOneWay(nodeId)) continue;
 
-					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(srcSegmentId, nodeId);
 					var hasLeftSegment = geometry.HasLeftSegment(nodeId);
 					var hasForwardSegment = geometry.HasStraightSegment(nodeId);
 					var hasRightSegment = geometry.HasRightSegment(nodeId);
@@ -2462,7 +2464,7 @@ namespace TrafficManager.TrafficLight {
 				num3++;
 			}
 
-			if (!TrafficLightsManual.SegmentIsOneWay(SelectedSegment)) {
+			if (!CustomRoadAI.GetSegmentGeometry(SelectedSegment).IsOneWay()) {
 				laneList.Sort(delegate (float[] x, float[] y) {
 					if (!TrafficPriority.LeftHandDrive) {
 						if (Mathf.Abs(y[1]) > Mathf.Abs(x[1])) {
@@ -2591,7 +2593,7 @@ namespace TrafficManager.TrafficLight {
 
 			var windowRect3 = new Rect(275, 80, width, 185);
 
-			if (TrafficLightsManual.SegmentIsOneWay(SelectedSegment)) {
+			if (CustomRoadAI.GetSegmentGeometry(SelectedSegment).IsOneWay()) {
 				GUILayout.Window(251, windowRect3, _guiLaneRestrictionsOneWayWindow, "", style);
 			}
 
@@ -2633,7 +2635,7 @@ namespace TrafficManager.TrafficLight {
 						num30++;
 					}
 
-					if (!TrafficLightsManual.SegmentIsOneWay(segmentId)) {
+					if (!CustomRoadAI.GetSegmentGeometry(segmentId).IsOneWay()) {
 						laneList0.Sort(delegate (float[] x, float[] y) {
 							if (Mathf.Abs(y[1]) > Mathf.Abs(x[1])) {
 								return -1;
@@ -2716,7 +2718,7 @@ namespace TrafficManager.TrafficLight {
 				num3++;
 			}
 
-			if (!TrafficLightsManual.SegmentIsOneWay(_selectedSegmentIds[0])) {
+			if (!CustomRoadAI.GetSegmentGeometry(_selectedSegmentIds[0]).IsOneWay()) {
 				laneList.Sort(delegate (float[] x, float[] y) {
 					if (Mathf.Abs(y[1]) > Mathf.Abs(x[1])) {
 						return -1;
@@ -3348,8 +3350,8 @@ namespace TrafficManager.TrafficLight {
 									break;
 								}
 #if DEBUG
-								Log.Message("Starting traffic light @ " + timedNode.nodeId);
-								Log.Message("Node group: " + timedNode.NodeGroup.ToString());
+								Log._Debug("Starting traffic light @ " + timedNode.nodeId);
+								Log._Debug("Node group: " + timedNode.NodeGroup.ToString());
 #endif
 								timedNode.Start();
 							}
@@ -3520,7 +3522,7 @@ namespace TrafficManager.TrafficLight {
 							case PrioritySegment.PriorityType.Main:
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
 								if (clicked && hoveredSegment) {
-									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (1)");
+									Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (1)");
 									//Log.Message("PrioritySegment.Type = Yield");
 									prioritySegment.Type = PrioritySegment.PriorityType.Yield;
 									clicked = false;
@@ -3529,7 +3531,7 @@ namespace TrafficManager.TrafficLight {
 							case PrioritySegment.PriorityType.Yield:
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignYieldTexture2D);
 								if (clicked && hoveredSegment) {
-									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (2)");
+									Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (2)");
 									prioritySegment.Type = PrioritySegment.PriorityType.Stop;
 									clicked = false;
 								}
@@ -3538,7 +3540,7 @@ namespace TrafficManager.TrafficLight {
 							case PrioritySegment.PriorityType.Stop:
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignStopTexture2D);
 								if (clicked && hoveredSegment) {
-									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (3)");
+									Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (3)");
 									prioritySegment.Type = PrioritySegment.PriorityType.None;
 									clicked = false;
 								}
@@ -3549,7 +3551,7 @@ namespace TrafficManager.TrafficLight {
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
 
 								if (clicked && hoveredSegment) {
-									Log.Message("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
+									Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
 									//Log.Message("PrioritySegment.Type = None");
 									prioritySegment.Type = GetNumberOfMainRoads(nodeId, node) >= 2
 										? PrioritySegment.PriorityType.Yield
@@ -3616,13 +3618,13 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					if (clicked) {
-						Log.Message("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx + "/" + hoveredExistingNodeId);
+						Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + _hoveredNetNodeIdx + "/" + hoveredExistingNodeId);
 
 						if (delete) {
 							TrafficPriority.RemovePrioritySegments(hoveredExistingNodeId);
 						} else if (ok) {
 							if (!TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx)) {
-								Log.Message("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
+								Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + _hoveredNetNodeIdx);
 								TrafficLightSimulation.RemoveNodeFromSimulation(_hoveredNetNodeIdx, false); // TODO refactor!
 								Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false); // TODO refactor!
 								TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);

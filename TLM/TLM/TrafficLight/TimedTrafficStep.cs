@@ -389,7 +389,7 @@ namespace TrafficManager.TrafficLight {
 					Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
 					foreach (KeyValuePair<ushort, float> f in carsToSegmentMetrics[0]) {
 						var toSegmentId = f.Key;
-						SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId, slaveStep.nodeId);
+						SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId);
 						Direction dir = geometry.GetDirection(toSegmentId, timedNodeId);
 						directions[toSegmentId] = dir;
 					}

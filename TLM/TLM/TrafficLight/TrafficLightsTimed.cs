@@ -325,7 +325,7 @@ namespace TrafficManager.TrafficLight {
 				}
 
 				if (isNewSegment) {
-					Log.Message($"New segment detected: {segmentId} @ {nodeId}");
+					Log._Debug($"New segment detected: {segmentId} @ {nodeId}");
 					// segment was created
 					TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
 					TrafficPriority.AddPrioritySegment(nodeId, segmentId, PrioritySegment.PriorityType.None);
@@ -333,7 +333,7 @@ namespace TrafficManager.TrafficLight {
 					if (invalidSegmentIds.Count > 0) {
 						var oldSegmentId = invalidSegmentIds[0];
 						TrafficPriority.RemovePrioritySegment(nodeId, oldSegmentId);
-						Log.Message($"Replacing old segment {oldSegmentId} @ {nodeId} with new segment {segmentId}");
+						Log._Debug($"Replacing old segment {oldSegmentId} @ {nodeId} with new segment {segmentId}");
 
 						// replace the old segment with the newly created one
 						for (int i = 0; i < NumSteps(); ++i) {
@@ -345,7 +345,7 @@ namespace TrafficManager.TrafficLight {
 							TrafficLightsManual.GetSegmentLight(nodeId, segmentId).CurrentMode = segmentLight.CurrentMode;
 						}
 					} else {
-						Log.Message($"Adding new segment {segmentId} to node {nodeId}");
+						Log._Debug($"Adding new segment {segmentId} to node {nodeId}");
 
 						// create a new manual light
 						for (int i = 0; i < NumSteps(); ++i) {

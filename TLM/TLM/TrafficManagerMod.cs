@@ -8,11 +8,11 @@ namespace TrafficManager {
 		public string Description => "Traffic Junction Manager [v1.4]";
 
 		public void OnEnabled() {
-			Log.Message("TrafficManagerMod Enabled");
+			Log._Debug("TrafficManagerMod Enabled");
 		}
 
 		public void OnDisabled() {
-			Log.Message("TrafficManagerMod Disabled");
+			Log._Debug("TrafficManagerMod Disabled");
 		}
 
 		public void OnSettingsUI(UIHelperBase helper) {

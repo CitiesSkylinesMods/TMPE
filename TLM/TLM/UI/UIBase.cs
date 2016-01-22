@@ -8,7 +8,7 @@ namespace TrafficManager.UI {
 		private bool _uiShown;
 
 		public UIBase() {
-			Log.Message("##### Initializing UIBase.");
+			Log._Debug("##### Initializing UIBase.");
 
 			// Get the UIView object. This seems to be the top-level object for most
 			// of the UI.

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
@@ -35,6 +36,9 @@ namespace TrafficManager.State {
 		/// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
 		/// </summary>
 		private static Dictionary<uint, LaneArrows> highwayLaneArrowFlags = new Dictionary<uint, LaneArrows>();
+
+		private static object laneArrowLock = new object();
+		private static object nodeLightLock = new object();
 
 		public static void resetTrafficLights(bool all) {
 			nodeTrafficLightFlag.Clear();
@@ -71,22 +75,34 @@ namespace TrafficManager.State {
 		}
 
 		public static void setNodeTrafficLight(ushort nodeId, bool flag) {
-			if (nodeId <= 0)
-				return;
+			try {
+				Monitor.Enter(nodeLightLock);
 
-			Log.Message($"Flags: Set node traffic light: {nodeId}={flag}");
+				if (nodeId <= 0)
+					return;
 
-			if (!mayHaveTrafficLight(nodeId)) {
-				Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
-				return;
+				Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
+
+				if (!mayHaveTrafficLight(nodeId)) {
+					Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
+					return;
+				}
+
+				nodeTrafficLightFlag[nodeId] = flag;
+				applyNodeTrafficLightFlag(nodeId);
+			} finally {
+				Monitor.Exit(nodeLightLock);
 			}
-
-			nodeTrafficLightFlag[nodeId] = flag;
-			applyNodeTrafficLightFlag(nodeId);
 		}
 
 		internal static bool isNodeTrafficLightDefined(ushort nodeId) {
-			return nodeId > 0 && nodeTrafficLightFlag.ContainsKey(nodeId);
+			try {
+				Monitor.Enter(nodeLightLock);
+
+				return nodeId > 0 && nodeTrafficLightFlag.ContainsKey(nodeId);
+			} finally {
+				Monitor.Exit(nodeLightLock);
+			}
 		}
 
 		internal static bool isNodeTrafficLight(ushort nodeId) {
@@ -96,96 +112,124 @@ namespace TrafficManager.State {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 				return false;
 
-			if (!nodeTrafficLightFlag.ContainsKey(nodeId))
-				return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+			try {
+				Monitor.Enter(nodeLightLock);
 
-			return nodeTrafficLightFlag[nodeId];
+				if (!nodeTrafficLightFlag.ContainsKey(nodeId))
+					return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+
+				return nodeTrafficLightFlag[nodeId];
+			} finally {
+				Monitor.Exit(nodeLightLock);
+			}
 		}
 
 		public static void setLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
 
-			if (!mayHaveLaneArrows(laneId)) {
-				removeLaneArrowFlags(laneId);
-				return;
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				if (!mayHaveLaneArrows(laneId)) {
+					removeLaneArrowFlags(laneId);
+					return;
+				}
+
+				if (highwayLaneArrowFlags.ContainsKey(laneId))
+					return; // disallow custom lane arrows in highway rule mode
+
+				laneArrowFlags[laneId] = flags;
+				applyLaneArrowFlags(laneId);
+			} finally {
+				Monitor.Exit(laneArrowLock);
 			}
-
-			if (highwayLaneArrowFlags.ContainsKey(laneId))
-				return; // disallow custom lane arrows in highway rule mode
-
-			laneArrowFlags[laneId] = flags;
-			applyLaneArrowFlags(laneId);
 		}
 
 		public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags) {
 			if (laneId <= 0)
 				return;
 
-			if (!mayHaveLaneArrows(laneId)) {
-				removeLaneArrowFlags(laneId);
-				return;
-			}
+			try {
+				Monitor.Enter(laneArrowLock);
 
-			highwayLaneArrowFlags[laneId] = flags;
-			applyLaneArrowFlags(laneId);
+				if (!mayHaveLaneArrows(laneId)) {
+					removeLaneArrowFlags(laneId);
+					return;
+				}
+
+				highwayLaneArrowFlags[laneId] = flags;
+				applyLaneArrowFlags(laneId);
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		public static LaneArrows? getLaneArrowFlags(uint laneId) {
-			if (laneId <= 0 || ! laneArrowFlags.ContainsKey(laneId))
-				return null;
+			try {
+				Monitor.Enter(laneArrowLock);
 
-			return laneArrowFlags[laneId];
+				if (laneId <= 0 || ! laneArrowFlags.ContainsKey(laneId))
+					return null;
+
+				return laneArrowFlags[laneId];
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		public static LaneArrows? getHighwayLaneArrowFlags(uint laneId) {
-			LaneArrows laneArrows;
-			if (!highwayLaneArrowFlags.TryGetValue(laneId, out laneArrows))
-				return null;
-			else
-				return laneArrows;
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				LaneArrows laneArrows;
+				if (!highwayLaneArrowFlags.TryGetValue(laneId, out laneArrows))
+					return null;
+				else
+					return laneArrows;
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		public static void removeHighwayLaneArrowFlags(uint laneId) {
-			highwayLaneArrowFlags.Remove(laneId);
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				highwayLaneArrowFlags.Remove(laneId);
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		public static void toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
-			if (laneId <= 0)
-				return;
+			try {
+				Monitor.Enter(laneArrowLock);
 
-			if (!mayHaveLaneArrows(laneId)) {
-				removeLaneArrowFlags(laneId);
-				return;
+				if (laneId <= 0)
+					return;
+
+				if (!mayHaveLaneArrows(laneId)) {
+					removeLaneArrowFlags(laneId);
+					return;
+				}
+
+				if (highwayLaneArrowFlags.ContainsKey(laneId))
+					return; // disallow custom lane arrows in highway rule mode
+
+				if (!laneArrowFlags.ContainsKey(laneId)) {
+					// read currently defined arrows
+					uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+					laneFlags &= lfr; // filter arrows
+					laneArrowFlags[laneId] = (LaneArrows)laneFlags;
+				}
+
+				laneArrowFlags[laneId] ^= flags;
+				applyLaneArrowFlags(laneId);
+			} finally {
+				Monitor.Exit(laneArrowLock);
 			}
-
-			if (highwayLaneArrowFlags.ContainsKey(laneId))
-				return; // disallow custom lane arrows in highway rule mode
-
-			if (!laneArrowFlags.ContainsKey(laneId)) {
-				// read currently defined arrows
-				uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
-				laneFlags &= lfr; // filter arrows
-				laneArrowFlags[laneId] = (LaneArrows)laneFlags;
-			}
-
-			laneArrowFlags[laneId] ^= flags;
-			applyLaneArrowFlags(laneId);
 		}
-
-		/*private static bool isLaneInHighwayMode(uint laneId) {
-			if (Options.highwayRules) {
-				NetManager netManager = Singleton<NetManager>.instance;
-				bool isHighway = false;
-				NetInfo segInfo = netManager.m_segments.m_buffer[netManager.m_lanes.m_buffer[laneId].m_segment].Info;
-				if (segInfo.m_netAI is RoadBaseAI)
-					isHighway = ((RoadBaseAI)segInfo.m_netAI).m_highwayRules;
-
-				if (isHighway)
-					return true; // lane changer for highways in highway rule mode deactivated
-			}
-			return false;
-		}*/
 
 		private static bool mayHaveLaneArrows(uint laneId) {
 			if (!isLaneValid(laneId))
@@ -273,68 +317,105 @@ namespace TrafficManager.State {
 		}
 
 		public static void applyNodeTrafficLightFlag(ushort nodeId) {
-			if (nodeId <= 0 || !nodeTrafficLightFlag.ContainsKey(nodeId))
-				return;
+			try {
+				Monitor.Enter(nodeLightLock);
 
-			bool flag = nodeTrafficLightFlag[nodeId];
-			if (flag) {
-				//Log.Message($"Adding traffic light @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
-			} else {
-				//Log.Message($"Removing traffic light @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+				if (nodeId <= 0 || !nodeTrafficLightFlag.ContainsKey(nodeId))
+					return;
+
+				bool flag = nodeTrafficLightFlag[nodeId];
+				if (flag) {
+					//Log.Message($"Adding traffic light @ node {nodeId}");
+					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
+				} else {
+					//Log.Message($"Removing traffic light @ node {nodeId}");
+					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+				}
+			} finally {
+				Monitor.Exit(nodeLightLock);
 			}
 		}
 
 		public static bool applyLaneArrowFlags(uint laneId) {
-			if (laneId <= 0 || !laneArrowFlags.ContainsKey(laneId))
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				if (laneId <= 0 || !laneArrowFlags.ContainsKey(laneId))
+					return true;
+
+				LaneArrows flags = laneArrowFlags[laneId];
+				uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+
+				if (!mayHaveLaneArrows(laneId))
+					return false;
+
+				/*if (isLaneInHighwayMode(laneId)) {
+					flags = LaneArrows.None;*/
+					if (highwayLaneArrowFlags.ContainsKey(laneId))
+						flags = highwayLaneArrowFlags[laneId];
+				// }
+
+				laneFlags &= ~lfr; // remove all arrows
+				laneFlags |= (uint)flags; // add desired arrows
+				//Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
+				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 				return true;
-
-			LaneArrows flags = laneArrowFlags[laneId];
-			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
-
-			if (!mayHaveLaneArrows(laneId))
-				return false;
-
-			/*if (isLaneInHighwayMode(laneId)) {
-				flags = LaneArrows.None;*/
-				if (highwayLaneArrowFlags.ContainsKey(laneId))
-					flags = highwayLaneArrowFlags[laneId];
-			// }
-
-			laneFlags &= ~lfr; // remove all arrows
-			laneFlags |= (uint)flags; // add desired arrows
-			//Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
-			Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
-			return true;
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		public static void removeLaneArrowFlags(uint laneId) {
 			if (laneId <= 0)
 				return;
 
-			//if (isLaneInHighwayMode(laneId))
-			if (highwayLaneArrowFlags.ContainsKey(laneId))
-				return; // modification of arrows in highway rule mode is forbidden
+			try {
+				Monitor.Enter(laneArrowLock);
 
-			laneArrowFlags.Remove(laneId);
-			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+				//if (isLaneInHighwayMode(laneId))
+				if (highwayLaneArrowFlags.ContainsKey(laneId))
+					return; // modification of arrows in highway rule mode is forbidden
 
-			if (((NetLane.Flags)laneFlags & NetLane.Flags.Created) == NetLane.Flags.None) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = 0;
-			} else {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &= (ushort)~lfr;
+				laneArrowFlags.Remove(laneId);
+				uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+
+				if (((NetLane.Flags)laneFlags & NetLane.Flags.Created) == NetLane.Flags.None) {
+					Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = 0;
+				} else {
+					Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &= (ushort)~lfr;
+				}
+			} finally {
+				Monitor.Exit(laneArrowLock);
 			}
 		}
 
 		public static void clearHighwayLaneArrows() {
-			highwayLaneArrowFlags.Clear();
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				highwayLaneArrowFlags.Clear();
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		internal static void clearAll() {
-			nodeTrafficLightFlag.Clear();
-			laneArrowFlags.Clear();
-			highwayLaneArrowFlags.Clear();
+			try {
+				Monitor.Enter(nodeLightLock);
+
+				nodeTrafficLightFlag.Clear();
+			} finally {
+				Monitor.Exit(nodeLightLock);
+			}
+
+			try {
+				Monitor.Enter(laneArrowLock);
+
+				laneArrowFlags.Clear();
+				highwayLaneArrowFlags.Clear();
+			} finally {
+				Monitor.Exit(laneArrowLock);
+			}
 		}
 
 		internal static void OnLevelUnloading() {

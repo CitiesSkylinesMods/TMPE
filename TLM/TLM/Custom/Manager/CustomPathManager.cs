@@ -12,30 +12,14 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {
 	public class CustomPathManager : PathManager {
-		CustomPathFind[] _replacementPathFinds;
+		internal CustomPathFind[] _replacementPathFinds;
 
-		public static CustomPathFind PathFindInstance;
+		public static CustomPathManager _instance;
 
 		//On waking up, replace the stock pathfinders with the custom one
 		[UsedImplicitly]
 		public new virtual void Awake() {
-			Log.Message("Waking up CustomPathManager.");
-
-			var stockPathFinds = GetComponents<PathFind>();
-			var numOfStockPathFinds = stockPathFinds.Length;
-
-			Log.Message("Creating " + numOfStockPathFinds + " custom PathFind objects.");
-			_replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
-			for (var i = 0; i < numOfStockPathFinds; i++) {
-				_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
-				Destroy(stockPathFinds[i]);
-			}
-
-			Log.Message("Setting _replacementPathFinds");
-			var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
-
-			Log.Message("Setting m_pathfinds to custom collection");
-			fieldInfo?.SetValue(this, _replacementPathFinds);
+			_instance = this;
 		}
 
 		public void UpdateWithPathManagerValues(PathManager stockPathManager) {
@@ -49,6 +33,35 @@ namespace TrafficManager.Custom.Manager {
 			m_renderPathGizmo = stockPathManager.m_renderPathGizmo;
 			m_pathUnits = stockPathManager.m_pathUnits;
 			m_bufferLock = stockPathManager.m_bufferLock;
+
+			Log._Debug("Waking up CustomPathManager.");
+
+			var stockPathFinds = GetComponents<PathFind>();
+			var numOfStockPathFinds = stockPathFinds.Length;
+
+			Log._Debug("Creating " + numOfStockPathFinds + " custom PathFind objects.");
+			_replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
+			try {
+				while (!Monitor.TryEnter(this.m_bufferLock)) { }
+
+				for (var i = 0; i < numOfStockPathFinds; i++) {
+					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
+					if (i == 0)
+						_replacementPathFinds[i].IsMasterPathFind = true;
+				}
+
+				Log._Debug("Setting _replacementPathFinds");
+				var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
+
+				Log._Debug("Setting m_pathfinds to custom collection");
+				fieldInfo?.SetValue(this, _replacementPathFinds);
+
+				for (var i = 0; i < numOfStockPathFinds; i++) {
+					Destroy(stockPathFinds[i]);
+				}
+			} finally {
+				Monitor.Exit(this.m_bufferLock);
+			}
 		}
 	}
 }

@@ -52,55 +52,56 @@ namespace TrafficManager {
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = groupAI.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
-//			laneChangingRandomizationDropdown = groupAI.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			laneChangingRandomizationDropdown = groupAI.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			UIHelperBase group2 = helper.AddGroup(Translation.GetString("Maintenance"));
 			group2.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights);
 			nodesOverlayToggle = group2.AddCheckbox(Translation.GetString("Show_nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
             showLanesToggle = group2.AddCheckbox(Translation.GetString("Show_lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 #if DEBUG
+			disableSomethingToggle = group2.AddCheckbox("Disable something", disableSomething, onDisableSomethingChanged) as UICheckBox;
 			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
 #endif
 		}
 
 		private static void onDisableSomethingChanged(bool newDisableSomething) {
-			Log.Message($"disableSomething changed to {newDisableSomething}");
+			Log._Debug($"disableSomething changed to {newDisableSomething}");
 			disableSomething = newDisableSomething;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
-			Log.Message($"Simulation accuracy changed to {newAccuracy}");
+			Log._Debug($"Simulation accuracy changed to {newAccuracy}");
 			simAccuracy = newAccuracy;
 		}
 
 		private static void onLaneChangingRandomizationChanged(int newLaneChangingRandomization) {
-			Log.Message($"Lane changing frequency changed to {newLaneChangingRandomization}");
+			Log._Debug($"Lane changing frequency changed to {newLaneChangingRandomization}");
 			laneChangingRandomization = newLaneChangingRandomization;
 		}
 
 		private static void onRecklessDriversChanged(int newRecklessDrivers) {
-			Log.Message($"Reckless driver amount changed to {newRecklessDrivers}");
+			Log._Debug($"Reckless driver amount changed to {newRecklessDrivers}");
 			recklessDrivers = newRecklessDrivers;
 		}
 
 		private static void onRelaxedBussesChanged(bool newRelaxedBusses) {
-			Log.Message($"Relaxed busses changed to {newRelaxedBusses}");
+			Log._Debug($"Relaxed busses changed to {newRelaxedBusses}");
 			relaxedBusses = newRelaxedBusses;
 		}
 
 		private static void onAllRelaxedChanged(bool newAllRelaxed) {
-			Log.Message($"All relaxed changed to {newAllRelaxed}");
+			Log._Debug($"All relaxed changed to {newAllRelaxed}");
 			allRelaxed = newAllRelaxed;
 		}
 
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
-			Log.Message($"Highway rules changed to {newHighwayRules}");
+			Log._Debug($"Highway rules changed to {newHighwayRules}");
 			highwayRules = newHighwayRules;
 			Flags.applyAllFlags();
 		}
 
 		private static void onAdvancedAIChanged(bool newAdvancedAI) {
 			if (LoadingExtension.IsPathManagerCompatible) {
-				Log.Message($"advancedAI busses changed to {newAdvancedAI}");
+				Log._Debug($"advancedAI busses changed to {newAdvancedAI}");
 				advancedAI = newAdvancedAI;
 			} else if (newAdvancedAI) {
 				setAdvancedAI(false);
@@ -109,17 +110,17 @@ namespace TrafficManager {
 		}
 
 		private static void onMayEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
-			Log.Message($"MayEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
+			Log._Debug($"MayEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
 			mayEnterBlockedJunctions = newMayEnterBlockedJunctions;
 		}
 
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
-			Log.Message($"Nodes overlay changed to {newNodesOverlay}");
+			Log._Debug($"Nodes overlay changed to {newNodesOverlay}");
 			nodesOverlay = newNodesOverlay;
 		}
 
 		private static void onShowLanesChanged(bool newShowLanes) {
-			Log.Message($"Show lanes changed to {newShowLanes}");
+			Log._Debug($"Show lanes changed to {newShowLanes}");
 			showLanes = newShowLanes;
 		}
 
@@ -212,19 +213,25 @@ namespace TrafficManager {
 		}
 
 		internal static int getLaneChangingRandomizationTargetValue() {
+			int ret = 100;
 			switch (laneChangingRandomization) {
 				case 0:
-					return 2;
+					ret = 2;
+					break;
 				case 1:
-					return 4;
+					ret = 4;
+					break;
 				case 2:
-					return 10;
+					ret = 10;
+					break;
 				case 3:
-					return 20;
+					ret = 20;
+					break;
 				case 4:
-					return 50;
+					ret = 50;
+					break;
 			}
-			return 100;
+			return ret * 4;
 		}
 
 		internal static float getLaneChangingProbability() {

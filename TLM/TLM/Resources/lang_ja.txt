@@ -61,7 +61,14 @@ Reckless_driving 無謀運転 (ベータ機能/いくらかの市民が交通ル
 TMPE_Title Traffic Manager: President Edition (設定は各セーブデータ毎に保存されます)
 Simulation_accuracy シミュレーションの正確さ (高いとパフォーマンスが低下します)
 Enable_highway_specific_lane_merging/splitting_rules 高速道路特有の車線合流/分離ルールを適用する
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 車線変更の頻度 (Advanced AI有効時のみ適用されます)
 Maintenance メンテナンス
+Very_often_(50_%) 非常に頻繁 (50 %)
+Often_(25_%) 頻繁 (25 %)
+Sometimes_(10_%) 時々 (10 %)
+Rarely_(5_%) まれ (5 %)
+Very_rarely_(2.5_%) 非常にまれ (2.5 %)
+Only_if_necessary 必要時のみ
 Show_nodes_and_segments 交差点と道路の表示
 Show_lanes 車線の表示
 Path_Of_Evil_(10_%) 悪路 (10 %)

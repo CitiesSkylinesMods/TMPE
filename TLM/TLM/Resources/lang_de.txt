@@ -61,7 +61,14 @@ Reckless_driving Rücksichtsloses Fahren
 TMPE_Title Traffic Manager: President Edition (Einstellungen werden pro Spielstand gespeichert)
 Simulation_accuracy Genauigkeit der Simulation (höhere Genauigkeit reduziert Performance)
 Enable_highway_specific_lane_merging/splitting_rules Aktiviere spezielle Verkehrsregeln auf der Autobahn
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Autofahrer wechseln ihre Spur (wird nur angewendet wenn die AI eingeschaltet ist)
 Maintenance Wartung
+Very_often_(50_%) Sehr häufig (50 %)
+Often_(25_%) Häufig (25 %)
+Sometimes_(10_%) Manchmal (10 %)
+Rarely_(5_%) Selten (5 %)
+Very_rarely_(2.5_%) Sehr selten (2.5 %)
+Only_if_necessary Nur falls nötig
 Show_nodes_and_segments Zeige Knoten und Segmente
 Show_lanes Zeige Fahrspuren
 Path_Of_Evil_(10_%) Pfad des Bösen (10 %)

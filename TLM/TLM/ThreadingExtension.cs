@@ -18,14 +18,14 @@ namespace TrafficManager {
            // Log.Message("Getting ToolMode");
             if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None &&
                 ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool) {
-                Log.Message("Closing UI");
+                Log._Debug("Closing UI");
                 LoadingExtension.Instance.UI.Close();
             }
 
             //Debug.Log("Checking if TrafficLightTool is Visible");
             //Log.Message("ToolController: " + ToolsModifierControl.toolController);
             if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool && (LoadingExtension.Instance.UI != null && LoadingExtension.Instance.UI.IsVisible())) {
-                Log.Message("Closing UI");
+                Log._Debug("Closing UI");
                 LoadingExtension.Instance.UI.Close();
             }
 			

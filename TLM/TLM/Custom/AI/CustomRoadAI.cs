@@ -419,11 +419,11 @@ namespace TrafficManager.Custom.AI {
 
 		internal static void OnLevelLoading() {
 			segmentGeometries = new SegmentGeometry[Singleton<NetManager>.instance.m_segments.m_size];
-			Log.Message($"Building {segmentGeometries.Length} segment geometries...");
+			Log._Debug($"Building {segmentGeometries.Length} segment geometries...");
 			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i] = new SegmentGeometry(i);
 			}
-			Log.Message($"Calculated segment geometries.");
+			Log._Debug($"Calculated segment geometries.");
 
 			currentLaneTrafficBuffer = new ushort[Singleton<NetManager>.instance.m_lanes.m_size];
 			currentLaneSpeeds = new int[Singleton<NetManager>.instance.m_lanes.m_size];
@@ -448,6 +448,10 @@ namespace TrafficManager.Custom.AI {
 			currentLaneSpeeds[laneID] += speed;
 			if (realTraffic)
 				laneHasSeenVehicles[laneID] = true;
+		}
+
+		internal static SegmentGeometry GetSegmentGeometry(ushort segmentId) {
+			return segmentGeometries[segmentId];
 		}
 
 		internal static SegmentGeometry GetSegmentGeometry(ushort segmentId, ushort nodeId) {

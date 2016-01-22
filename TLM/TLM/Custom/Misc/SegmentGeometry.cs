@@ -1,9 +1,12 @@
-﻿using ColossalFramework;
+﻿#define DEBUGLOCKSx
+
+using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
@@ -11,10 +14,6 @@ using TrafficManager.TrafficLight;
 namespace TrafficManager.Custom.Misc {
 	public class SegmentGeometry {
 		private ushort segmentId;
-
-		private static int[] recalcInterval = { 5000, 7500, 10000, 12500, 15000 };
-
-		public int updateCounter = 0;
 
 		private HashSet<ushort> startNodeSegments = new HashSet<ushort>();
 		private HashSet<ushort> endNodeSegments = new HashSet<ushort>();
@@ -33,63 +32,65 @@ namespace TrafficManager.Custom.Misc {
 		private HashSet<ushort> endNodeStraightSegments = new HashSet<ushort>();
 		private HashSet<ushort> endNodeIncomingStraightSegments = new HashSet<ushort>();
 
+		private bool oneWay = false;
+		private bool outgoingOneWayAtStartNode = false;
+		private bool outgoingOneWayAtEndNode = false;
 
 		public HashSet<ushort> StartNodeLeftSegments {
-			get { ++updateCounter; return startNodeLeftSegments; }
+			get { return startNodeLeftSegments; }
 			private set { startNodeLeftSegments = value; }
 		}
 		public HashSet<ushort> StartNodeIncomingLeftSegments {
-			get { ++updateCounter; return startNodeIncomingLeftSegments; }
+			get { return startNodeIncomingLeftSegments; }
 			private set { startNodeIncomingLeftSegments = value; }
 		}
 		public HashSet<ushort> StartNodeRightSegments {
-			get { ++updateCounter; return startNodeRightSegments; }
+			get { return startNodeRightSegments; }
 			private set { startNodeRightSegments = value; }
 		}
 		public HashSet<ushort> StartNodeIncomingRightSegments {
-			get { ++updateCounter; return startNodeIncomingRightSegments; }
+			get { return startNodeIncomingRightSegments; }
 			private set { startNodeIncomingRightSegments = value; }
 		}
 		public HashSet<ushort> StartNodeStraightSegments {
-			get { ++updateCounter; return startNodeStraightSegments; }
+			get { return startNodeStraightSegments; }
 			private set { startNodeStraightSegments = value; }
 		}
 		public HashSet<ushort> StartNodeIncomingStraightSegments {
-			get { ++updateCounter; return startNodeIncomingStraightSegments; }
+			get { return startNodeIncomingStraightSegments; }
 			private set { startNodeIncomingStraightSegments = value; }
 		}
 
 		public HashSet<ushort> EndNodeLeftSegments {
-			get { ++updateCounter; return endNodeLeftSegments; }
+			get { return endNodeLeftSegments; }
 			private set { endNodeLeftSegments = value; }
 		}
 		public HashSet<ushort> EndNodeIncomingLeftSegments {
-			get { ++updateCounter; return endNodeIncomingLeftSegments; }
+			get { return endNodeIncomingLeftSegments; }
 			private set { endNodeIncomingLeftSegments = value; }
 		}
 		public HashSet<ushort> EndNodeRightSegments {
-			get { ++updateCounter; return endNodeRightSegments; }
+			get { return endNodeRightSegments; }
 			private set { endNodeRightSegments = value; }
 		}
 		public HashSet<ushort> EndNodeIncomingRightSegments {
-			get { ++updateCounter; return endNodeIncomingRightSegments; }
+			get { return endNodeIncomingRightSegments; }
 			private set { endNodeIncomingRightSegments = value; }
 		}
 		public HashSet<ushort> EndNodeStraightSegments {
-			get { ++updateCounter; return endNodeStraightSegments; }
+			get { return endNodeStraightSegments; }
 			private set { endNodeStraightSegments = value; }
 		}
 		public HashSet<ushort> EndNodeIncomingStraightSegments {
-			get { ++updateCounter; return endNodeIncomingStraightSegments; }
+			get { return endNodeIncomingStraightSegments; }
 			private set { endNodeIncomingStraightSegments = value; }
 		}
 
 		//private static ushort debugSegId = 22980;
 
 		public SegmentGeometry(ushort segmentId) {
-			updateCounter = segmentId % recalcInterval[Options.simAccuracy];
 			this.segmentId = segmentId;
-			Recalculate(false);
+			Recalculate(true, true);
 		}
 
 		public ushort startNodeId() {
@@ -100,43 +101,78 @@ namespace TrafficManager.Custom.Misc {
 			return Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
 		}
 
-		private object recalcLock = new object();
+		public readonly object Lock = new object();
 		private bool recalculating = false;
+		private uint lastRecalculation = 0;
 
-		public void Recalculate(bool output = true) {
+		public void Recalculate(bool output = true, bool force = false) {
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 				return;
-			if (recalculating)
+			uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
+			if (!force && (recalculating || lastRecalculation >= frame))
 				return;
-			else {
-#if DEBUG
+			
+#if DEBUGLOCKS
 				uint lockIter = 0;
 #endif
-				try {
-					while (!Monitor.TryEnter(recalcLock, CustomPathFind.SYNC_TIMEOUT)) {
+			try {
 #if DEBUG
-						++lockIter;
-						if (lockIter % 100 == 0)
-							Log.Message("SegmentGeometry.Recalculate lockIter: " + lockIter);
+				if (output)
+					Log.Info($"Trying to get a lock for Recalculating geometries of segment {segmentId}...");
 #endif
-					}
-
-					if (recalculating)
+				while (!Monitor.TryEnter(Lock, CustomPathFind.SYNC_TIMEOUT)) {
+#if DEBUGLOCKS
+					++lockIter;
+					if (lockIter % 100 == 0)
+						Log._Debug("SegmentGeometry.Recalculate lockIter: " + lockIter);
+#endif
+					if (!force && (recalculating || lastRecalculation >= frame))
 						return;
-					recalculating = true;
-
-					if (output)
-						Log.Warning($"Recalculating geometries of segment {segmentId} STARTED");
-
-					recalculate(ref startNodeSegments, ref startNodeRightSegments, ref startNodeIncomingRightSegments, ref startNodeLeftSegments, ref startNodeIncomingLeftSegments, ref startNodeStraightSegments, ref startNodeIncomingStraightSegments, startNodeId());
-					recalculate(ref endNodeSegments, ref endNodeRightSegments, ref endNodeIncomingRightSegments, ref endNodeLeftSegments, ref endNodeIncomingLeftSegments, ref endNodeStraightSegments, ref endNodeIncomingStraightSegments, endNodeId());
-
-					if (output)
-						Log.Warning($"Recalculating geometries of segment {segmentId} FINISHED");
-				} finally {
-					recalculating = false;
-					Monitor.Exit(recalcLock);
 				}
+
+				if (!force && (recalculating || lastRecalculation >= frame))
+					return;
+				recalculating = true;
+
+#if DEBUG
+				if (output)
+					Log.Info($"Recalculating geometries of segment {segmentId} STARTED");
+#endif
+
+				oneWay = calculateIsOneWay(segmentId);
+
+				recalculate(ref outgoingOneWayAtStartNode, ref startNodeSegments, ref startNodeRightSegments, ref startNodeIncomingRightSegments, ref startNodeLeftSegments, ref startNodeIncomingLeftSegments, ref startNodeStraightSegments, ref startNodeIncomingStraightSegments, startNodeId());
+				recalculate(ref outgoingOneWayAtEndNode, ref endNodeSegments, ref endNodeRightSegments, ref endNodeIncomingRightSegments, ref endNodeLeftSegments, ref endNodeIncomingLeftSegments, ref endNodeStraightSegments, ref endNodeIncomingStraightSegments, endNodeId());
+
+#if DEBUG
+				if (output) {
+					Log.Info($"Recalculating geometries of segment {segmentId} FINISHED");
+					Log._Debug($"seg. {segmentId}. outgoingOneWayAtStartNode={outgoingOneWayAtStartNode}");
+					Log._Debug($"seg. {segmentId}. oneWay={oneWay}");
+					Log._Debug($"seg. {segmentId}. startNodeSegments={ string.Join(", ", startNodeSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeRightSegments={ string.Join(", ", startNodeRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeIncomingRightSegments={ string.Join(", ", startNodeIncomingRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeLeftSegments={ string.Join(", ", startNodeLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeIncomingLeftSegments={ string.Join(", ", startNodeIncomingLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeStraightSegments={ string.Join(", ", startNodeStraightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeIncomingStraightSegments={ string.Join(", ", startNodeIncomingStraightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeSegments={ string.Join(", ", endNodeSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeRightSegments={ string.Join(", ", endNodeRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeIncomingRightSegments={ string.Join(", ", endNodeIncomingRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeLeftSegments={ string.Join(", ", endNodeLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeIncomingLeftSegments={ string.Join(", ", endNodeIncomingLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeStraightSegments={ string.Join(", ", endNodeStraightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeIncomingStraightSegments={ string.Join(", ", endNodeIncomingStraightSegments.Select(x => x.ToString()).ToArray())}");
+				}
+#endif
+			} finally {
+				lastRecalculation = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
+				recalculating = false;
+#if DEBUG
+				if (output)
+					Log.Info($"Lock released after recalculating geometries of segment {segmentId}");
+#endif
+				Monitor.Exit(Lock);
 			}
 
 			/*if (segmentId == 35053) {
@@ -145,7 +181,7 @@ namespace TrafficManager.Custom.Misc {
 			}*/
 		}
 
-		private void recalculate(ref HashSet<ushort> nodeSegments, ref HashSet<ushort> right, ref HashSet<ushort> incomingRight, ref HashSet<ushort> left, ref HashSet<ushort> incomingLeft, ref HashSet<ushort> straight, ref HashSet<ushort> incomingStraight, ushort nodeId) {
+		private void recalculate(ref bool outgoingOneWay, ref HashSet<ushort> nodeSegments, ref HashSet<ushort> right, ref HashSet<ushort> incomingRight, ref HashSet<ushort> left, ref HashSet<ushort> incomingLeft, ref HashSet<ushort> straight, ref HashSet<ushort> incomingStraight, ushort nodeId) {
 			nodeSegments.Clear();
 			right.Clear();
 			incomingRight.Clear();
@@ -172,13 +208,17 @@ namespace TrafficManager.Custom.Misc {
 				// reset highway lane arrows
 				int i = 0;
 				uint curLaneId = netManager.m_segments.m_buffer[otherSegmentId].m_lanes;
+#if DEBUGLOCKS
 				uint wIter = 0;
+#endif
 				while (i < netManager.m_segments.m_buffer[otherSegmentId].Info.m_lanes.Length && curLaneId != 0u) {
+#if DEBUGLOCKS
 					++wIter;
 					if (wIter >= 20) {
 						Log.Error("Too many iterations in SegmentGeometry.recalculate!");
 						break;
 					}
+#endif
 
 					Flags.removeHighwayLaneArrowFlags(curLaneId);
 					curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -186,17 +226,20 @@ namespace TrafficManager.Custom.Misc {
 				} // foreach lane
 
 				// determine geometry
+
+				outgoingOneWay = calculateIsOutgoingOneWay(segmentId, nodeId);
+
 				if (TrafficPriority.IsRightSegment(segmentId, otherSegmentId, nodeId)) {
 					right.Add(otherSegmentId);
-					if (!TrafficLightsManual.SegmentIsOutgoingOneWay(otherSegmentId, nodeId))
+					if (!calculateIsOutgoingOneWay(otherSegmentId, nodeId))
 						incomingRight.Add(otherSegmentId);
 				} else if (TrafficPriority.IsLeftSegment(segmentId, otherSegmentId, nodeId)) {
 					left.Add(otherSegmentId);
-					if (!TrafficLightsManual.SegmentIsOutgoingOneWay(otherSegmentId, nodeId))
+					if (!calculateIsOutgoingOneWay(otherSegmentId, nodeId))
 						incomingLeft.Add(otherSegmentId);
 				} else {
 					straight.Add(otherSegmentId);
-					if (!TrafficLightsManual.SegmentIsOutgoingOneWay(otherSegmentId, nodeId))
+					if (!calculateIsOutgoingOneWay(otherSegmentId, nodeId))
 						incomingStraight.Add(otherSegmentId);
 				}
 
@@ -204,7 +247,7 @@ namespace TrafficManager.Custom.Misc {
 			}
 		}
 
-		public bool VerifySegments(ushort otherSegmentId) {
+		internal bool VerifyConnectedSegment(ushort otherSegmentId) {
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
 				return false;
 			}
@@ -212,7 +255,8 @@ namespace TrafficManager.Custom.Misc {
 				return false;
 
 			if (!startNodeSegments.Contains(otherSegmentId) && !endNodeSegments.Contains(otherSegmentId)) {
-				Recalculate();
+				Log.Warning($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
+                Recalculate();
 				return true;
 			}
 			return false;
@@ -223,22 +267,22 @@ namespace TrafficManager.Custom.Misc {
 				return;
 			}
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Recalculate();
-				return;
-			}
-
 			int expectedCount = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments(NetSegment.Flags.Created, segmentId);
-			if (CountOtherSegments(nodeId) != expectedCount)
+			var storedCount = CountOtherSegments(nodeId);
+			if (storedCount != expectedCount) {
+				Log.Warning($"The number of other segments (expected {expectedCount}) at node {nodeId} does not equals the stored count ({storedCount})");
 				Recalculate();
+			}
 		}
 
 		private int CountOtherSegments(ushort nodeId) {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeSegments.Count;
@@ -254,8 +298,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeRightSegments.Count;
@@ -271,8 +317,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeLeftSegments.Count;
@@ -288,8 +336,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeStraightSegments.Count;
@@ -305,8 +355,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingRightSegments.Count;
@@ -322,8 +374,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingLeftSegments.Count;
@@ -339,8 +393,10 @@ namespace TrafficManager.Custom.Misc {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
+			}
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingStraightSegments.Count;
@@ -386,10 +442,11 @@ namespace TrafficManager.Custom.Misc {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			else
-				VerifySegments(toSegmentId);
+			} else
+				VerifyConnectedSegment(toSegmentId);
 
 			if (startNodeId() == nodeId)
 				return startNodeLeftSegments.Contains(toSegmentId);
@@ -412,10 +469,11 @@ namespace TrafficManager.Custom.Misc {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			else
-				VerifySegments(toSegmentId);
+			} else
+				VerifyConnectedSegment(toSegmentId);
 
 			if (startNodeId() == nodeId)
 				return startNodeRightSegments.Contains(toSegmentId);
@@ -438,10 +496,11 @@ namespace TrafficManager.Custom.Misc {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			else
-				VerifySegments(toSegmentId);
+			} else
+				VerifyConnectedSegment(toSegmentId);
 
 			if (startNodeId() == nodeId)
 				return startNodeStraightSegments.Contains(toSegmentId);
@@ -452,6 +511,89 @@ namespace TrafficManager.Custom.Misc {
 					Log.Warning($"IsStraightSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
 				return false;
 			}
+		}
+
+		public bool IsOneWay() {
+			return oneWay;
+		}
+
+		public bool IsOutgoingOneWay(ushort nodeId) {
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				return false;
+			}
+
+			if (startNodeId() == nodeId)
+				return outgoingOneWayAtStartNode;
+			else if (endNodeId() == nodeId)
+				return outgoingOneWayAtEndNode;
+			else {
+				Log.Warning($"IsOutgoingOneWay: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				return false;
+			}
+		}
+
+		public bool IsIncomingOneWay(ushort nodeId) {
+			return (IsOneWay() && !IsOutgoingOneWay(nodeId));
+		}
+
+		private bool calculateIsOutgoingOneWay(ushort segmentId, ushort nodeId) {
+			var instance = Singleton<NetManager>.instance;
+
+			var segment = instance.m_segments.m_buffer[segmentId];
+			var info = segment.Info;
+
+			var dir = NetInfo.Direction.Forward;
+			if (segment.m_startNode == nodeId)
+				dir = NetInfo.Direction.Backward;
+			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+			var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+
+			var laneId = segment.m_lanes;
+			var laneIndex = 0;
+			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
+				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
+					(info.m_lanes[laneIndex].m_direction == dir3)) {
+					return false;
+				}
+
+				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
+				laneIndex++;
+			}
+
+			return true;
+		}
+
+		private bool calculateIsOneWay(ushort segmentId) {
+			var instance = Singleton<NetManager>.instance;
+
+			var segment = instance.m_segments.m_buffer[segmentId];
+			var info = segment.Info;
+
+			var hasForward = false;
+			var hasBackward = false;
+
+			var laneId = segment.m_lanes;
+			var laneIndex = 0;
+			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
+				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
+					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Forward)) {
+					hasForward = true;
+				}
+
+				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
+					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Backward)) {
+					hasBackward = true;
+				}
+
+				if (hasForward && hasBackward) {
+					return false;
+				}
+
+				laneId = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_nextLane;
+				laneIndex++;
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -468,10 +610,11 @@ namespace TrafficManager.Custom.Misc {
 				return Direction.Forward;
 			}
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId)
+			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			else
-				VerifySegments(toSegmentId);
+			} else
+				VerifyConnectedSegment(toSegmentId);
 
 			if (toSegmentId == segmentId)
 				return Direction.Turn;

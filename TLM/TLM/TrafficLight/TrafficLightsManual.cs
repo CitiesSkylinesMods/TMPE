@@ -9,78 +9,7 @@ namespace TrafficManager.TrafficLight {
 		/// <summary>
 		/// Manual light by segment id
 		/// </summary>
-		public static Dictionary<ushort, ManualSegment> ManualSegments = new Dictionary<ushort, ManualSegment>();
-
-		// TODO refactor
-		public static bool SegmentIsIncomingOneWay(ushort segmentid, ushort nodeId) {
-			return (SegmentIsOneWay(segmentid) && !SegmentIsOutgoingOneWay(segmentid, nodeId));
-		}
-
-		// TODO refactor
-		public static bool SegmentIsOutgoingOneWay(ushort segmentid, ushort nodeId) {
-			var instance = Singleton<NetManager>.instance;
-
-			var segment = instance.m_segments.m_buffer[segmentid];
-			var info = segment.Info;
-
-			var num2 = segment.m_lanes;
-			var num3 = 0;
-
-			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
-
-			var isOneWay = true;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[num3].m_direction == dir3)) {
-					isOneWay = false;
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			return isOneWay;
-		}
-
-		// TODO refactor
-		public static bool SegmentIsOneWay(ushort segmentid) {
-			var instance = Singleton<NetManager>.instance;
-
-			var segment = instance.m_segments.m_buffer[segmentid];
-			var info = segment.Info;
-
-			var num2 = segment.m_lanes;
-			var num3 = 0;
-
-			var hasForward = false;
-			var hasBackward = false;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[num3].m_direction == NetInfo.Direction.Forward)) {
-					hasForward = true;
-				}
-
-				if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[num3].m_direction == NetInfo.Direction.Backward)) {
-					hasBackward = true;
-				}
-
-				if (hasForward && hasBackward) {
-					return false;
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			return true;
-		}
+		public static Dictionary<ushort, ManualSegment> ManualSegments = new Dictionary<ushort, ManualSegment>();		
 
 		internal static void AddLiveSegmentLight(ushort nodeId, ushort segmentId) {
 			if (IsSegmentLight(nodeId, segmentId))

@@ -42,7 +42,7 @@ namespace TrafficManager
             {
                 using (var reader = new StreamReader(filename))
                 {
-                    Log.Message("Deserializing Configuration Object");
+                    Log._Debug("Deserializing Configuration Object");
                     var config = (Configuration)serializer.Deserialize(reader);
                     return config;
                 }

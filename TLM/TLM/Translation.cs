@@ -50,10 +50,11 @@ namespace TrafficManager {
 			}
 
 			if (Assembly.GetExecutingAssembly().GetManifestResourceNames().Contains(RESOURCES_PREFIX + translatedFilename)) {
-				Log.Message($"Translated file {translatedFilename} found");
+				Log._Debug($"Translated file {translatedFilename} found");
                 return translatedFilename;
 			} else {
-				Log.Warning($"Translated file {translatedFilename} not found!");
+				if (language != null && !"en".Equals(language))
+					Log.Warning($"Translated file {translatedFilename} not found!");
 				return filename;
 			}
 		}
@@ -62,7 +63,7 @@ namespace TrafficManager {
 			if (translations == null || loadedLanguage == null || ! loadedLanguage.Equals(LocaleManager.instance.language)) {
 				try {
 					string filename = RESOURCES_PREFIX + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME);
-					Log.Message($"Loading translations from file '{filename}'. Language={LocaleManager.instance.language}");
+					Log._Debug($"Loading translations from file '{filename}'. Language={LocaleManager.instance.language}");
 					string[] lines;
 					using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream(filename)) {
 						using (StreamReader sr = new StreamReader(st)) {

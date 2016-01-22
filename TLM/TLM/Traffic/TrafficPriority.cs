@@ -7,6 +7,7 @@ using TrafficManager.Custom.AI;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.Custom.Misc;
+using System.Threading;
 
 namespace TrafficManager.Traffic {
 	class TrafficPriority {
@@ -57,16 +58,16 @@ namespace TrafficManager.Traffic {
 			if (nodeId <= 0 || segmentId <= 0)
 				return;
 
-			Log.Message("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
+			Log.Info("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
 
 			var prioritySegment = PrioritySegments[segmentId];
 			if (prioritySegment != null) { // do not replace with IsPrioritySegment!
 				prioritySegment.Segment = segmentId;
 
-				Log.Message("Priority segment already exists. Node1=" + prioritySegment.Node1 + " Node2=" + prioritySegment.Node2);
+				Log._Debug("Priority segment already exists. Node1=" + prioritySegment.Node1 + " Node2=" + prioritySegment.Node2);
 
 				if (prioritySegment.Node1 == nodeId || prioritySegment.Node1 == 0) {
-					Log.Message("Updating Node1");
+					Log._Debug("Updating Node1");
 					prioritySegment.Node1 = nodeId;
 					PrioritySegments[segmentId].Instance1 = new PrioritySegment(nodeId, segmentId, type);
 					return;
@@ -80,13 +81,13 @@ namespace TrafficManager.Traffic {
 					rebuildPriorityNodes();
 				} else {
 					// add Node2
-					Log.Message("Adding as Node2");
+					Log._Debug("Adding as Node2");
 					prioritySegment.Node2 = nodeId;
 					prioritySegment.Instance2 = new PrioritySegment(nodeId, segmentId, type);
 				}
 			} else {
 				// add Node1
-				Log.Message("Adding as Node1");
+				Log._Debug("Adding as Node1");
 				prioritySegment = new TrafficSegment();
 				prioritySegment.Segment = segmentId;
 				prioritySegment.Node1 = nodeId;
@@ -233,18 +234,21 @@ namespace TrafficManager.Traffic {
 
 		internal static void ClearTraffic() {
 			try {
-				//lock (Singleton<VehicleManager>.instance) {
-					for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
-						if (
-							(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None &&
-							Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].Info.m_vehicleType == VehicleInfo.VehicleType.Car)
-							Singleton<VehicleManager>.instance.ReleaseVehicle(i);
-					}
-				//}
+				Monitor.Enter(Singleton<VehicleManager>.instance);
+
+				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
+					if (
+						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None &&
+						Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].Info.m_vehicleType == VehicleInfo.VehicleType.Car)
+						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
+				}
+
 				CustomRoadAI.resetTrafficStats();
 			} catch (Exception ex) {
 				Log.Error($"Error occured when trying to clear traffic: {ex.ToString()}");
-            }
+			} finally {
+				Monitor.Exit(Singleton<VehicleManager>.instance);
+			}
 		}
 
 		/// <summary>
@@ -264,7 +268,7 @@ namespace TrafficManager.Traffic {
 					continue;
 				if (TrafficPriority.IsPrioritySegment(nodeId, segmentId))
 					continue;
-				if (TrafficLightsManual.SegmentIsOutgoingOneWay(segmentId, nodeId))
+				if (CustomRoadAI.GetSegmentGeometry(segmentId).IsOutgoingOneWay(nodeId))
 					continue;
 
 				TrafficPriority.AddPrioritySegment(nodeId, segmentId, PrioritySegment.PriorityType.None);
@@ -273,7 +277,7 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		public static bool HasIncomingVehicles(ushort targetVehicleId, ushort nodeId) {
+		public static bool HasIncomingVehiclesWithHigherPriority(ushort targetVehicleId, ushort nodeId) {
 			try {
 #if DEBUG
 				//bool debug = nodeId == 30634;
@@ -284,12 +288,12 @@ namespace TrafficManager.Traffic {
 
 				VehiclePosition targetVehiclePos = GetVehiclePosition(targetVehicleId);
 				if (!targetVehiclePos.Valid) {
-					Log.Warning($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Car does not exist!");
+					Log._Debug($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Car does not exist!");
 					return false;
 				}
 
 				if (targetVehiclePos.ToNode != nodeId) {
-					Log.Warning($"HasIncomingVehicles: The vehicle {targetVehicleId} is not driving on a segment adjacent to node {nodeId}.");
+					Log._Debug($"HasIncomingVehicles: The vehicle {targetVehicleId} is not driving on a segment adjacent to node {nodeId}.");
 					return false;
 				}/* else if (targetVehiclePos.FromSegment == 22980u && nodeId == 13630u) {
 					Log.Error("vehicleId " + targetVehicleId + ". ToNode: " + targetVehiclePos.ToNode + ". FromSegment: " + targetVehiclePos.FromSegment + ". ToSegment: " + targetVehiclePos.ToSegment);
@@ -297,7 +301,7 @@ namespace TrafficManager.Traffic {
 
 #if DEBUG
 				if (debug) {
-					Log.Message($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}");
+					Log._Debug($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}");
 				}
 #endif
 
@@ -305,13 +309,13 @@ namespace TrafficManager.Traffic {
 				if (targetFromPrioritySegment == null) {
 #if DEBUG
 					if (debug) {
-						Log.Message($"source priority segment not found.");
+						Log._Debug($"source priority segment not found.");
 					}
 #endif
 					return false;
 				}
 
-				Direction targetToDir = CustomRoadAI.GetSegmentGeometry(targetVehiclePos.FromSegment, nodeId).GetDirection(targetVehiclePos.ToSegment, nodeId);
+				Direction targetToDir = CustomRoadAI.GetSegmentGeometry(targetVehiclePos.FromSegment).GetDirection(targetVehiclePos.ToSegment, nodeId);
 
 				var numCars = 0;
 
@@ -323,7 +327,7 @@ namespace TrafficManager.Traffic {
 					if (!IsPrioritySegment(nodeId, incomingSegmentId)) {
 #if DEBUG
 						if (debug) {
-							Log.Message($"Segment {incomingSegmentId} @ {nodeId} is not a priority segment (1).");
+							Log._Debug($"Segment {incomingSegmentId} @ {nodeId} is not a priority segment (1).");
 						}
 #endif
 						continue;
@@ -333,7 +337,7 @@ namespace TrafficManager.Traffic {
 					if (incomingFromPrioritySegment == null) {
 #if DEBUG
 						if (debug) {
-							Log.Message($"Segment {incomingSegmentId} @ {nodeId} is not a priority segment (2).");
+							Log._Debug($"Segment {incomingSegmentId} @ {nodeId} is not a priority segment (2).");
 						}
 #endif
 						continue; // should not happen
@@ -343,7 +347,7 @@ namespace TrafficManager.Traffic {
 						if (targetFromPrioritySegment.Type == PrioritySegment.PriorityType.Main) {
 #if DEBUG
 							if (debug)
-								Log.Message($"HasIncomingVehicles: Target {targetVehicleId} is on a main road @ {nodeId}.");
+								Log._Debug($"HasIncomingVehicles: Target {targetVehicleId} is on a main road @ {nodeId}.");
 #endif
 							// target is on a main segment
 							if (incomingFromPrioritySegment.Type != PrioritySegment.PriorityType.Main) {
@@ -354,7 +358,7 @@ namespace TrafficManager.Traffic {
 							numCars += incomingFromPrioritySegment.getNumApproachingVehicles();
 #if DEBUG
 							if (debug)
-								Log.Message($"HasIncomingVehicles: Target {targetVehicleId} has {numCars} possibly conflicting vehicles coming from segment {incomingSegmentId} @ {nodeId}.");
+								Log._Debug($"HasIncomingVehicles: Target {targetVehicleId} has {numCars} possibly conflicting vehicles coming from segment {incomingSegmentId} @ {nodeId}.");
 #endif
 
 							foreach (KeyValuePair<ushort, VehiclePosition> e in incomingFromPrioritySegment.getApproachingVehicles()) {
@@ -369,7 +373,7 @@ namespace TrafficManager.Traffic {
 										--numCars;
 #if DEBUG
 										if (debug)
-											Log.Message($"HasIncomingVehicles: Incoming {incomingCar} is not conflicting.");
+											Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} is not conflicting.");
 #endif
 									}  else {
 										/*if (debug) {
@@ -377,7 +381,7 @@ namespace TrafficManager.Traffic {
 										}*/
 #if DEBUG
 										if (debug)
-											Log.Message($"HasIncomingVehicles: Incoming {incomingCar} IS conflicting.");
+											Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} IS conflicting.");
 #endif
 										return true;
 									}
@@ -389,14 +393,14 @@ namespace TrafficManager.Traffic {
 							// target car is on a low-priority segment
 #if DEBUG
 							if (debug)
-								Log.Message($"HasIncomingVehicles: Target {targetVehicleId} is on a low priority road @ {nodeId}.");
+								Log._Debug($"HasIncomingVehicles: Target {targetVehicleId} is on a low priority road @ {nodeId}.");
 #endif
 
 							// Main - Yield/Stop
 							numCars += incomingFromPrioritySegment.getNumApproachingVehicles();
 #if DEBUG
 							if (debug)
-								Log.Message($"HasIncomingVehicles: Target {targetVehicleId} has {numCars} possibly conflicting vehicles coming from segment {incomingSegmentId} @ {nodeId}.");
+								Log._Debug($"HasIncomingVehicles: Target {targetVehicleId} has {numCars} possibly conflicting vehicles coming from segment {incomingSegmentId} @ {nodeId}.");
 #endif
 
 							foreach (KeyValuePair<ushort, VehiclePosition> e in incomingFromPrioritySegment.getApproachingVehicles()) {
@@ -412,20 +416,20 @@ namespace TrafficManager.Traffic {
 										if (HasVehiclePriority(debug, targetVehicleId, false, incomingCar, true, nodeId)) {
 #if DEBUG
 											if (debug)
-												Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (main) is not conflicting.");
+												Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (main) is not conflicting.");
 #endif
 											--numCars;
 										} else {
 #if DEBUG
 											if (debug)
-												Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (main) IS conflicting.");
+												Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (main) IS conflicting.");
 #endif
 											return true;
 										}
 									} else {
 #if DEBUG
 										if (debug)
-											Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (main) is not conflicting due to low speed.");
+											Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (main) is not conflicting due to low speed.");
 #endif
 										numCars--;
 									}
@@ -434,20 +438,20 @@ namespace TrafficManager.Traffic {
 										if (HasVehiclePriority(debug, targetVehicleId, false, incomingCar, false, nodeId)) {
 #if DEBUG
 											if (debug)
-												Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (low) is not conflicting.");
+												Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (low) is not conflicting.");
 #endif
 											--numCars;
 										} else {
 #if DEBUG
 											if (debug)
-												Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (low) IS conflicting.");
+												Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (low) IS conflicting.");
 #endif
 											return true;
 										}
 									} else {
 #if DEBUG
 										if (debug)
-											Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (low) is not conflicting due to low speed.");
+											Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (low) is not conflicting due to low speed.");
 #endif
 										numCars--;
 									}
@@ -457,14 +461,14 @@ namespace TrafficManager.Traffic {
 					} else {
 #if DEBUG
 						if (debug)
-							Log.Message($"Node {nodeId} is a traffic light.");
+							Log._Debug($"Node {nodeId} is a traffic light.");
 #endif
 
 						// Traffic lights
 						if (!TrafficLightsManual.IsSegmentLight(nodeId, incomingSegmentId)) {
 #if DEBUG
 							if (debug) {
-								Log.Message($"Segment {incomingSegmentId} @ {nodeId} does not have live traffic lights.");
+								Log._Debug($"Segment {incomingSegmentId} @ {nodeId} does not have live traffic lights.");
 							}
 #endif
 							continue;
@@ -476,7 +480,7 @@ namespace TrafficManager.Traffic {
 							continue;
 #if DEBUG
 						if (debug)
-							Log.Message($"Segment {incomingSegmentId} @ {nodeId} is a GREEN traffic light.");
+							Log._Debug($"Segment {incomingSegmentId} @ {nodeId} is a GREEN traffic light.");
 #endif
 
 						numCars += incomingFromPrioritySegment.getNumApproachingVehicles();
@@ -492,20 +496,20 @@ namespace TrafficManager.Traffic {
 								if (HasVehiclePriority(debug, targetVehicleId, true, incomingCar, true, nodeId)) {
 #if DEBUG
 									if (debug)
-										Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (light) is not conflicting.");
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (light) is not conflicting.");
 #endif
 									--numCars;
 								} else {
 #if DEBUG
 									if (debug)
-										Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (light) IS conflicting.");
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (light) IS conflicting.");
 #endif
 									return true;
 								}
 							} else {
 #if DEBUG
 								if (debug)
-									Log.Message($"HasIncomingVehicles: Incoming {incomingCar} (light) is not conflicting due to low speed.");
+									Log._Debug($"HasIncomingVehicles: Incoming {incomingCar} (light) is not conflicting due to low speed.");
 #endif
 								numCars--;
 							}
@@ -548,8 +552,9 @@ namespace TrafficManager.Traffic {
 			try {
 #if DEBUG
 				debug = false;
+				//debug = nodeId == 13531;
 				if (debug) {
-					Log.Message($"HasVehiclePriority: Checking if {targetCarId} (main road = {targetIsOnMainRoad}) has priority over {incomingCarId} (main road = {incomingIsOnMainRoad}).");
+					Log._Debug($"HasVehiclePriority: Checking if {targetCarId} (main road = {targetIsOnMainRoad}) has priority over {incomingCarId} (main road = {incomingIsOnMainRoad}).");
                 }
 #endif
 
@@ -563,7 +568,7 @@ namespace TrafficManager.Traffic {
 				// check if incoming car has stopped
 				float incomingVel = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].GetLastFrameVelocity().magnitude;
 				if (incomingVel <= maxStopVelocity) {
-					Log.Message($"HasVehiclePriority: incoming car {incomingCarId} is too slow");
+					Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} is too slow");
 					return true;
 				}
 
@@ -573,15 +578,41 @@ namespace TrafficManager.Traffic {
 				if (!targetCar.Valid || !incomingCar.Valid)
 					return true;
 
+				// check target car position
+				uint pathUnitId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].m_path;
+				if (pathUnitId != 0) {
+					int pathUnitIndex = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].m_pathPositionIndex >> 1;
+					PathUnit.Position curPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathUnitIndex);
+					if (curPos.m_segment != targetCar.FromSegment) {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"We have old data from target car {targetCarId}. It is currently on segment {curPos.m_segment}.");
+						}
+#endif
+						RemoveVehicleFromSegments(targetCarId);
+						Vehicles[targetCarId].Valid = false;
+						return true;
+					}
+				} else {
+#if DEBUG
+					if (debug) {
+						Log._Debug($"We have old data from target car {targetCarId}. It does not have a valid path.");
+					}
+#endif
+					RemoveVehicleFromSegments(targetCarId);
+					Vehicles[targetCarId].Valid = false;
+					return true;
+				}
+
 				// check incoming car position
-				uint pathUnitId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_path;
+				pathUnitId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_path;
 				if (pathUnitId != 0) {
 					int pathUnitIndex = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_pathPositionIndex >> 1;
 					PathUnit.Position curPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathUnitIndex);
 					if (curPos.m_segment != incomingCar.FromSegment) {
 #if DEBUG
 						if (debug) {
-							Log.Message($"We have old data from incoming car {incomingCarId}. It is currently on segment {curPos.m_segment}.");
+							Log._Debug($"We have old data from incoming car {incomingCarId}. It is currently on segment {curPos.m_segment}.");
 						}
 #endif
 						RemoveVehicleFromSegments(incomingCarId);
@@ -591,7 +622,7 @@ namespace TrafficManager.Traffic {
 				} else {
 #if DEBUG
 					if (debug) {
-						Log.Message($"We have old data from incoming car {incomingCarId}. It does not have a valid path.");
+						Log._Debug($"We have old data from incoming car {incomingCarId}. It does not have a valid path.");
 					}
 #endif
 					RemoveVehicleFromSegments(incomingCarId);
@@ -601,10 +632,10 @@ namespace TrafficManager.Traffic {
 
 				// check distance and velocity
 				float dist = Vector3.Distance(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].GetLastFramePosition(), Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].GetLastFramePosition());
-				if (dist >= 100) {
+				if (dist > 500) {
 #if DEBUG
 					if (debug) {
-						Log.Message($"Incoming car {incomingCarId} is too far away.");
+						Log._Debug($"Incoming car {incomingCarId} is too far away.");
 					}
 #endif
 					return true;
@@ -612,25 +643,25 @@ namespace TrafficManager.Traffic {
 
 #if DEBUG
 				if (debug) {
-					Log.Message($"HasVehiclePriority: Distance between target car {targetCarId} and incoming car {incomingCarId}: {dist}. Incoming speed: {incomingVel}. Speed * 20 time units = {incomingVel*20}");
+					Log._Debug($"HasVehiclePriority: Distance between target car {targetCarId} and incoming car {incomingCarId}: {dist}. Incoming speed: {incomingVel}. Speed * 20 time units = {incomingVel*20}");
 				}
 #endif
 				// check incoming car position
-				if (incomingVel * 20f < dist) {
+				/*if (incomingVel * 20f < dist) {
 #if DEBUG
 					if (debug) {
 						Log.Message($"HasVehiclePriority: Target car {targetCarId} can make it against {incomingCarId}! Ha!");
 					}
 #endif
 					return true;
-				}
+				}*/
 
 				if (targetCar == null || incomingCar == null) {
-					Log.Warning($"HasVehiclePriority: incoming car {incomingCarId} or targetCar {targetCarId} is null.");
+					Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} or targetCar {targetCarId} is null.");
 					return true;
 				}
 				if (incomingCar.ToNode != targetCar.ToNode) {
-					Log.Warning($"HasVehiclePriority: incoming car {incomingCarId} goes to node {incomingCar.ToNode} where target car {targetCarId} goes to {targetCar.ToNode}. Ignoring.");
+					Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} goes to node {incomingCar.ToNode} where target car {targetCarId} goes to {targetCar.ToNode}. Ignoring.");
                     return true;
 				}
 
@@ -644,14 +675,14 @@ namespace TrafficManager.Traffic {
 
 				// We assume the target car is coming from BOTTOM.
 
-				SegmentGeometry targetGeometry = CustomRoadAI.GetSegmentGeometry(targetCar.FromSegment, nodeId);
-				SegmentGeometry incomingGeometry = CustomRoadAI.GetSegmentGeometry(incomingCar.FromSegment, nodeId);
+				SegmentGeometry targetGeometry = CustomRoadAI.GetSegmentGeometry(targetCar.FromSegment);
+				SegmentGeometry incomingGeometry = CustomRoadAI.GetSegmentGeometry(incomingCar.FromSegment);
 				Direction targetToDir = targetGeometry.GetDirection(targetCar.ToSegment, nodeId);
 				Direction incomingRelDir = targetGeometry.GetDirection(incomingCar.FromSegment, nodeId);
 				Direction incomingToDir = incomingGeometry.GetDirection(incomingCar.ToSegment, nodeId);
 #if DEBUG
 				if (debug) {
-					Log.Message($"HasVehiclePriority: targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
+					Log._Debug($"HasVehiclePriority: targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
                 }
 #endif
 
@@ -662,7 +693,7 @@ namespace TrafficManager.Traffic {
 					incomingToDir = InvertLeftRight(incomingToDir);
 #if DEBUG
 					if (debug) {
-						Log.Message($"HasVehiclePriority: LHD! targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
+						Log._Debug($"HasVehiclePriority: LHD! targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
 					}
 #endif
 				}
@@ -702,7 +733,7 @@ namespace TrafficManager.Traffic {
 						laneOrderCorrect = IsLaneOrderConflictFree(targetCar.ToSegment, targetCar.ToLaneIndex, incomingCar.ToLaneIndex);
 #if DEBUG
 						if (debug) {
-							Log.Message($"HasVehiclePriority: target {targetCarId} (going to lane {targetCar.ToLaneIndex}) and incoming {incomingCarId} (going to lane {incomingCar.ToLaneIndex}) are going to the same segment. Lane order correct? {laneOrderCorrect}");
+							Log._Debug($"HasVehiclePriority: target {targetCarId} (going to lane {targetCar.ToLaneIndex}) and incoming {incomingCarId} (going to lane {incomingCar.ToLaneIndex}) are going to the same segment. Lane order correct? {laneOrderCorrect}");
 						}
 #endif
 					}
@@ -711,7 +742,7 @@ namespace TrafficManager.Traffic {
 				if (sameTargets && laneOrderCorrect) {
 #if DEBUG
 					if (debug) {
-						Log.Message($"Lane order between car {targetCarId} and {incomingCarId} is correct.");
+						Log._Debug($"Lane order between car {targetCarId} and {incomingCarId} is correct.");
 					}
 #endif
 					return true;
@@ -724,14 +755,14 @@ namespace TrafficManager.Traffic {
 						// target: BOTTOM->RIGHT
 #if DEBUG
 						if (debug) {
-							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going right without conflict!");
+							Log._Debug($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going right without conflict!");
                         }
 #endif
 
 						if (!targetIsOnMainRoad && incomingIsOnMainRoad && sameTargets && !laneOrderCorrect) {
 #if DEBUG
 							if (debug) {
-								Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is on low-priority road turning right. the other vehicle is on a priority road.");
+								Log._Debug($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is on low-priority road turning right. the other vehicle is on a priority road.");
 							}
 #endif
 							return false; // vehicle must wait for incoming vehicle on priority road
@@ -742,7 +773,7 @@ namespace TrafficManager.Traffic {
 					default:
 #if DEBUG
 						if (debug) {
-							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going forward: {incomingRelDir}, {targetIsOnMainRoad}, {incomingCrossingStreet}!");
+							Log._Debug($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going forward: {incomingRelDir}, {targetIsOnMainRoad}, {incomingCrossingStreet}!");
 						}
 #endif
 						// target: BOTTOM->TOP
@@ -757,7 +788,7 @@ namespace TrafficManager.Traffic {
 					case Direction.Left:
 #if DEBUG
 						if (debug) {
-							Log.Message($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going left: {incomingRelDir}, {targetIsOnMainRoad}, {incomingIsOnMainRoad}, {incomingCrossingStreet}, {incomingToDir}!");
+							Log._Debug($"Car {targetCarId} (vs. {incomingCar.FromSegment}->{incomingCar.ToSegment}) is going left: {incomingRelDir}, {targetIsOnMainRoad}, {incomingIsOnMainRoad}, {incomingCrossingStreet}, {incomingToDir}!");
 						}
 #endif
 						// target: BOTTOM->LEFT

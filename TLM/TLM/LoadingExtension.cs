@@ -37,7 +37,7 @@ namespace TrafficManager {
 
 		public void revertDetours() {
 			if (LoadingExtension.Instance.DetourInited) {
-				Log.Warning("Revert detours");
+				Log.Info("Revert detours");
 				for (int i = 0; i < 8; ++i) {
 					if (LoadingExtension.Instance.OriginalMethods[i] != null)
 						RedirectionHelper.RevertRedirect(LoadingExtension.Instance.OriginalMethods[i], LoadingExtension.Instance.CustomRedirects[i]);
@@ -47,10 +47,10 @@ namespace TrafficManager {
 		}
 
 		public void initDetours() {
-			Log.Warning("Init detours");
+			Log.Info("Init detours");
 			if (!LoadingExtension.Instance.DetourInited) {
 				bool detourFailed = false;
-				Log.Message("Redirecting Car AI Calculate Segment Calls");
+				Log._Debug("Redirecting Car AI Calculate Segment Calls");
 				try {
 
 					LoadingExtension.Instance.OriginalMethods[0] = typeof(CarAI).GetMethod("CalculateSegmentPosition",
@@ -71,7 +71,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting SimulationStep");
+				Log._Debug("Redirecting SimulationStep");
 				try {
 					LoadingExtension.Instance.OriginalMethods[1] = typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetNode).MakeByRefType() });
 					LoadingExtension.Instance.CustomMethods[1] = typeof(CustomRoadAI).GetMethod("CustomNodeSimulationStep");
@@ -81,7 +81,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting SimulationStep");
+				Log._Debug("Redirecting SimulationStep");
 				try {
 					LoadingExtension.Instance.OriginalMethods[2] = typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() });
 					LoadingExtension.Instance.CustomMethods[2] = typeof(CustomRoadAI).GetMethod("CustomSegmentSimulationStep");
@@ -90,7 +90,7 @@ namespace TrafficManager {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
 				}
 
-				Log.Message("Redirecting Human AI Calls");
+				Log._Debug("Redirecting Human AI Calls");
 				try {
 					LoadingExtension.Instance.OriginalMethods[3] = typeof(HumanAI).GetMethod("CheckTrafficLights",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -104,7 +104,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting CarAI Simulation Step Calls");
+				Log._Debug("Redirecting CarAI Simulation Step Calls");
 				try {
 					LoadingExtension.Instance.OriginalMethods[4] = typeof(CarAI).GetMethod("SimulationStep",
 								new[] {
@@ -119,7 +119,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting PassengerCarAI Simulation Step Calls");
+				Log._Debug("Redirecting PassengerCarAI Simulation Step Calls");
 				try {
 					LoadingExtension.Instance.OriginalMethods[5] = typeof(PassengerCarAI).GetMethod("SimulationStep",
 							new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
@@ -130,7 +130,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting CargoTruckAI Simulation Step Calls");
+				Log._Debug("Redirecting CargoTruckAI Simulation Step Calls");
 				try {
 					LoadingExtension.Instance.OriginalMethods[6] = typeof(CargoTruckAI).GetMethod("SimulationStep",
 								new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) });
@@ -141,7 +141,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
+				Log._Debug("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
 				try {
 					LoadingExtension.Instance.OriginalMethods[7] = typeof(CarAI).GetMethod("CalculateSegmentPosition",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -162,7 +162,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Message("Redirecting TrainAI Simulation Step Calls");
+				Log._Debug("Redirecting TrainAI Simulation Step Calls");
 				try {
 					LoadingExtension.Instance.OriginalMethods[8] = typeof(TrainAI).GetMethod("SimulationStep",
 								new[] {
@@ -232,9 +232,9 @@ namespace TrafficManager {
 		}
 
 		public override void OnLevelLoaded(LoadMode mode) {
-            Log.Warning("OnLevelLoaded calling base method");
+            Log._Debug("OnLevelLoaded calling base method");
             base.OnLevelLoaded(mode);
-            Log.Message("OnLevelLoaded Returned from base, calling custom code.");
+            Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
 
             switch (mode) {
                 case LoadMode.NewGame:
@@ -258,14 +258,14 @@ namespace TrafficManager {
 
                 if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 					try {
-						Log.Message("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+						Log._Debug("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
 						var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
 						var stockPathManager = PathManager.instance;
-						Log.Message($"Got stock PathManager instance {stockPathManager.GetName()}");
+						Log._Debug($"Got stock PathManager instance {stockPathManager.GetName()}");
 
 						CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-						Log.Message("Added CustomPathManager to gameObject List");
+						Log._Debug("Added CustomPathManager to gameObject List");
 
 						if (CustomPathManager == null) {
 							Log.Error("CustomPathManager null. Error creating it.");
@@ -273,19 +273,19 @@ namespace TrafficManager {
 						}
 
 						CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
-						Log.Message("UpdateWithPathManagerValues success");
+						Log._Debug("UpdateWithPathManagerValues success");
 
 						pathManagerInstance?.SetValue(null, CustomPathManager);
 
-						Log.Message("Getting Current SimulationManager");
+						Log._Debug("Getting Current SimulationManager");
 						var simManager =
 							typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
 								.GetValue(null) as FastList<ISimulationManager>;
 
-						Log.Message("Removing Stock PathManager");
+						Log._Debug("Removing Stock PathManager");
 						simManager?.Remove(stockPathManager);
 
-						Log.Message("Adding Custom PathManager");
+						Log._Debug("Adding Custom PathManager");
 						simManager?.Add(CustomPathManager);
 
 						Object.Destroy(stockPathManager, 10f);
@@ -297,7 +297,7 @@ namespace TrafficManager {
 					}
 				}
 
-				Log.Message("Adding Controls to UI.");
+				Log._Debug("Adding Controls to UI.");
                 UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
 			}
         }
@@ -311,27 +311,27 @@ namespace TrafficManager {
 				if (loadingWrapperLoadingExtensionsField != null) {
 					loadingExtensions = (List<ILoadingExtension>) loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
 				} else {
-					Log.Message("Could not get loading extensions field");
+					Log._Debug("Could not get loading extensions field");
 				}
 
 				if (loadingExtensions != null) {
-					Log.Message("Loaded extensions:");
+					Log._Debug("Loaded extensions:");
 					foreach (ILoadingExtension extension in loadingExtensions) {
 						if (extension.GetType().Namespace == null)
 							continue;
 
-						Log.Message($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
+						Log._Debug($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
 						var namespaceStr = extension.GetType().Namespace.ToString();
 						if ("Improved_AI".Equals(namespaceStr)) {
 							IsPathManagerCompatible = false; // Improved AI found
 						}
 					}
 				} else {
-					Log.Message("Could not get loading extensions");
+					Log._Debug("Could not get loading extensions");
 				}
 
 				if (Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
-					Log.Message("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
+					Log._Debug("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
 					IsPathManagerCompatible = false;
 				}
 			}
@@ -342,11 +342,11 @@ namespace TrafficManager {
 		}
 
         protected virtual void OnNewGame() {
-            Log.Message("New Game Started");
+            Log._Debug("New Game Started");
         }
 
         protected virtual void OnLoaded() {
-            Log.Message("Loaded save game.");
+            Log._Debug("Loaded save game.");
         }
 
         public void SetToolMode(TrafficManagerMode mode) {
