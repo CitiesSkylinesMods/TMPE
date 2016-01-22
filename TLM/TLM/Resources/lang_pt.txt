@@ -1,0 +1,84 @@
+Switch_traffic_lights Interruptor de Semáforos
+Add_priority_signs Placas de preferência 
+Manual_traffic_lights Semáforo manual
+Timed_traffic_lights Semáforos cronometrados 
+Change_lane_arrows Alterar setas de pista
+Clear_Traffic Limpar tráfego
+Disable_despawning Desativar despawning
+Enable_despawning Ativar despawning
+NODE_IS_LIGHT O cruzamento tem um semáforo.\nExclua o semáforo, escolhendo "Interruptor de Semáforos" e clicando em seu cruzamento.
+NODE_IS_TIMED_LIGHT Esta junção é parte de um script cronometrado.\nPrimeiro selecione "Semáforos cronometrados", selecione este cruzamento e clique em remover. 
+Select_nodes_windowTitle Selecione um cruzamento
+Select_nodes Selecione cruzamento(s)
+Node Cruzamento
+Deselect_all_nodes Cancelar a seleção de todos os cruzamentos
+Setup_timed_traffic_light Criar semáforo cronometrado
+State Estado
+Skip Pular
+up cima
+down baixo
+View Ver
+Edit Editar
+Delete Apagar
+Timed_traffic_lights_manager Gerenciador de semáforos cronometrados
+Add_step Adicionar Passo
+Remove_timed_traffic_light Remover semáforo cronometrado
+Min._Time: Tempo Min.:
+Max._Time: Tempo Max.:
+Save Salvar
+Add Adicionar
+Sensitivity Sensibilidade
+Very_Low Muito Baixa
+Low Baixa
+Medium Média
+High Alta
+Very_high Muito Alta
+Extreme_long_green/red_phases Fases verde/vermelho extremamente longa
+Very_long_green/red_phases Fases verde/vermelho muito longa
+Long_green/red_phases Fases verde/vermelho longa
+Moderate_green/red_phases Fases verde/vermelho moderada
+Short_green/red_phases Fases verde/vermelho curta
+Very_short_green/red_phases Fases verde/vermelho muito curta
+Extreme_short_green/red_phases Fases verde/vermelho extremamente curta
+Hide_counters Ocultar contadores
+Show_counters Mostrar contadores
+Start Iniciar
+Stop Parar
+Enable_test_mode_(stay_in_current_step) Ativar modo de teste (Mantém no passo atual)
+avg._flow fluxo médio
+avg._wait Espera média
+min/max min/max
+Lane Pista
+Set_Speed Setar velocidade {0}
+Max_speed Velocidade Máxima 
+Segment Segmento
+incoming entrando
+Enable_Advanced_Vehicle_AI Ativar IA avançada de veículo 
+Vehicles_may_enter_blocked_junctions Veículos podem entrar em cruzamentos bloqueados
+All_vehicles_may_ignore_lane_arrows Todos os veículos podem ignorar setas da pista
+Busses_may_ignore_lane_arrows ônibus podem ignorar setas da pista
+Reckless_driving Direção imprudente (recurso BETA)
+TMPE_Title Traffic Manager: President Edition\n(As configurações são definidas para cada jogo salvo separadamente)
+Simulation_accuracy A precisão da simulação (maior precisão reduz o desempenho)
+Enable_highway_specific_lane_merging/splitting_rules Habilitar regras de divisão e mesclagem de rodovia
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Motoristas gostam de mudar sua faixa:\n(só é aplicado se IA avançada de veiculo estiver habilitado)
+Maintenance Manunteção
+Very_often_(50_%) Muitas vezes (50 %)
+Often_(25_%) Frequentemente (25 %)
+Sometimes_(10_%) Às vezes (10 %)
+Rarely_(5_%) Raramente (5 %)
+Very_rarely_(2.5_%) Muito raramente (2,5 %)
+Only_if_necessary Apenas se necessário
+Show_nodes_and_segments Mostrar cruzamentos e segmentos
+Show_lanes Mostrar faixas
+Path_Of_Evil_(10_%) Caminho do mal (10 %)
+Rush_Hour_(5_%) Hora do Rush (5 %)
+Minor_Complaints_(2_%) Reclamações de menor importância (2 %) 
+Holy_City_(0_%) Cidade Santa (0 %)
+Forget_toggled_traffic_lights Esquecer os semáforos alternados 
+Road_is_already_in_a_group! Pista já esta em um grupo!
+All_selected_roads_must_be_of_the_same_type! Todas as pistas selecionadas devem ser do mesmo tipo!
+Create_group Criar grupo
+Delete_group Apagar grupo
+Add_zoning Adicionar zoneamento
+Remove_zoning Remover zoneamento

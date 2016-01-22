@@ -9,14 +9,15 @@ namespace TrafficManager.Custom.AI
     {
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
-            if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
-            {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-            }
-            else
-            {
-                base.SimulationStep(vehicleId, ref data, physicsLodRefPos);
-            }
+			try {
+				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled) {
+					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+				} else {
+					base.SimulationStep(vehicleId, ref data, physicsLodRefPos);
+				}
+			} catch (Exception ex) {
+				Log.Error("Error in CustomPassengerCarAI.SimulationStep: " + ex.ToString());
+			}
         }
 
         public bool StartPathFind2(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)

@@ -415,12 +415,12 @@ namespace TrafficManager.Custom.AI {
 					var hasTrafficLight = (nodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 					var hasCrossing = (nodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 					var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
-					bool checkSpace = true;
+					bool checkSpace = !Options.mayEnterBlockedJunctions;
 					TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(destinationNodeId);
 					if (nodeSim != null && nodeSim.TimedTrafficLights && nodeSim.TimedTrafficLightsActive) {
 						TrafficLightsTimed timedNode = TrafficLightsTimed.GetTimedLight(destinationNodeId);
-						if (timedNode != null) {
-							checkSpace = !timedNode.vehiclesMayEnterBlockedJunctions;
+						if (timedNode != null && timedNode.vehiclesMayEnterBlockedJunctions) {
+							checkSpace = false;
 						}
 					}
 					if (checkSpace && (uint)vehicleId % (Options.getRecklessDriverModulo() / 2) == 0) {

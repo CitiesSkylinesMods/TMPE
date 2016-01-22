@@ -86,8 +86,11 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
-
-			OriginalSimulationStep(segmentID, ref data);
+			try {
+				OriginalSimulationStep(segmentID, ref data);
+			} catch (Exception ex) {
+				Log.Error("Error in CustomRoadAI.SimulationStep: " + ex.ToString());
+			}
 		}
 
 		public void OriginalSimulationStep(ushort nodeId, ref NetNode data) {

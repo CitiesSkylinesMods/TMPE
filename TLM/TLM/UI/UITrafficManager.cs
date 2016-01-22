@@ -44,7 +44,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.4.6";
+			title.text = "Version 1.4.7";
 			title.relativePosition = new Vector3(65.0f, 5.0f);
 
 			int y = 30;
@@ -110,6 +110,7 @@ namespace TrafficManager.UI {
 
 		private UIButton _createButton(string text, Vector3 pos, MouseEventHandler eventClick) {
 			var button = AddUIComponent<UIButton>();
+			button.textScale = 0.8f;
 			button.width = 190;
 			button.height = 30;
 			button.normalBgSprite = "ButtonMenu";

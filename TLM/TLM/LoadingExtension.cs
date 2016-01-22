@@ -71,7 +71,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting SimulationStep");
+				Log._Debug("Redirecting RoadBaseAI.SimulationStep for nodes");
 				try {
 					LoadingExtension.Instance.OriginalMethods[1] = typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetNode).MakeByRefType() });
 					LoadingExtension.Instance.CustomMethods[1] = typeof(CustomRoadAI).GetMethod("CustomNodeSimulationStep");
@@ -81,7 +81,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting SimulationStep");
+				Log._Debug("Redirecting RoadBaseAI.SimulationStep for segments");
 				try {
 					LoadingExtension.Instance.OriginalMethods[2] = typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() });
 					LoadingExtension.Instance.CustomMethods[2] = typeof(CustomRoadAI).GetMethod("CustomSegmentSimulationStep");

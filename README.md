@@ -2,6 +2,12 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.7, 01/22/2016
+- Reduced mean size of files can become quite big (thanks to @GordonDry for reporting this problem)
+- Bugfix: Freight ships/trains were not coming in (thanks to @Mas71 and @clus for reporting this problem)
+- Bugfix: The toggle "Vehicles may enter blocked junctions" did not work properly (thanks for @exxonic for reporting this problem)
+- Bugfix: If a timed traffic light is being edited the segment geometry information is not updated (thanks to @GordonDry for reporting this problem)
+
 1.4.6, 01/22/2016
 - Running average lane speeds are measured now
 - Minor fixes

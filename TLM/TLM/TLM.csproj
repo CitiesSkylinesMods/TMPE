@@ -65,7 +65,6 @@
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
-    <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="CustomNetTool.cs" />
     <Compile Include="Custom\Misc\CustomPathFind.cs" />
     <Compile Include="Custom\Manager\CustomPathManager.cs" />
@@ -140,6 +139,7 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_pt.txt" />
     <EmbeddedResource Include="Resources\lang.txt" />
     <EmbeddedResource Include="Resources\lang_de.txt" />
     <EmbeddedResource Include="Resources\lang_ja.txt" />

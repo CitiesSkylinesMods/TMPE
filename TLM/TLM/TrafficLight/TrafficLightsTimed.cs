@@ -299,13 +299,20 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void handleNewSegments() {
-			if (NumSteps() <= 0)
-				return;
+			if (NumSteps() <= 0) {
+				// no steps defined, just create live traffic lights
+				for (int s = 0; s < 8; ++s) {
+					ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+					if (segmentId <= 0)
+						continue;
+					TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
+				}
 
-			NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+				return;
+			}
 			
 			for (int s = 0; s < 8; ++s) {
-				ushort segmentId = node.GetSegment(s);
+				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
 				if (segmentId <= 0)
 					continue;
 				NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];

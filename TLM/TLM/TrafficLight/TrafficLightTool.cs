@@ -124,6 +124,13 @@ namespace TrafficManager.TrafficLight {
 				_timedShowNumbers = false;
 			}
 
+			if (mode == ToolMode.TimedLightsShowLights) {
+				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
+					CustomRoadAI.GetSegmentGeometry(selectedNodeIndex).Recalculate(true, true);
+					TrafficPriority.nodeHousekeeping(selectedNodeIndex);
+				}
+			}
+
 			if (mode != ToolMode.LaneRestrictions) {
 				_selectedSegmentIds.Clear();
 			}
@@ -3195,7 +3202,7 @@ namespace TrafficManager.TrafficLight {
 					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 					
-					if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(45))) {
+					if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
 						foreach (var timeNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 							if (timeNode == null) {
 								TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3248,7 +3255,7 @@ namespace TrafficManager.TrafficLight {
 					if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 						_stepMaxValue = oldStepMaxValue;
 
-					if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(45))) {
+					if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
 						foreach (var timedNode in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 							if (timedNode == null) {
 								TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);

@@ -13,6 +13,7 @@ namespace TrafficManager.Custom.AI {
 			var num = (uint)((node << 8) / 32768);
 			var num2 = currentFrameIndex - num & 255u;
 
+			// NON-STOCK CODE START //
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			ManualSegmentLight light = TrafficLightsManual.GetSegmentLight(node, segment);
 
@@ -29,6 +30,7 @@ namespace TrafficManager.Custom.AI {
 			} else {
 				pedestrianLightState = light.GetLightPedestrian();
 			}
+			// NON-STOCK CODE END //
 
 			switch (pedestrianLightState) {
 				case RoadBaseAI.TrafficLightState.RedToGreen:

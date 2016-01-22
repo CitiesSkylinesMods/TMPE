@@ -330,7 +330,7 @@ namespace TrafficManager.Custom.Misc {
 				return false;
 
 			if (!startNodeSegments.Contains(otherSegmentId) && !endNodeSegments.Contains(otherSegmentId)) {
-				Log.Warning($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
+				Log._Debug($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
                 Recalculate();
 				return true;
 			}
@@ -345,7 +345,7 @@ namespace TrafficManager.Custom.Misc {
 			int expectedCount = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments(NetSegment.Flags.Created, segmentId);
 			var storedCount = CountOtherSegments(nodeId);
 			if (storedCount != expectedCount) {
-				Log.Warning($"The number of other segments (expected {expectedCount}) at node {nodeId} does not equals the stored count ({storedCount})");
+				Log._Debug($"The number of other segments (expected {expectedCount}) at node {nodeId} does not equals the stored count ({storedCount})");
 				Recalculate();
 			}
 		}
@@ -373,7 +373,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -382,7 +382,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeSegments.Count;
 			else {
-				Log.Warning($"CountOtherSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountOtherSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -392,7 +392,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -401,7 +401,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeRightSegments.Count;
 			else {
-				Log.Warning($"CountRightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountRightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -411,7 +411,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -420,7 +420,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeLeftSegments.Count;
 			else {
-				Log.Warning($"CountLeftSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountLeftSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -430,7 +430,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -439,7 +439,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeStraightSegments.Count;
 			else {
-				Log.Warning($"CountStraightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountStraightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -449,7 +449,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -458,7 +458,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeIncomingRightSegments.Count;
 			else {
-				Log.Warning($"CountIncomingRightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountIncomingRightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -468,7 +468,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -477,7 +477,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeIncomingLeftSegments.Count;
 			else {
-				Log.Warning($"CountIncomingLeftSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountIncomingLeftSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -487,7 +487,7 @@ namespace TrafficManager.Custom.Misc {
 				return 0;
 			}
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			}
 
@@ -496,7 +496,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return endNodeIncomingStraightSegments.Count;
 			else {
-				Log.Warning($"CountIncomingStraightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"CountIncomingStraightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return 0;
 			}
 		}
@@ -536,7 +536,7 @@ namespace TrafficManager.Custom.Misc {
 				return false;
 
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
 				VerifyConnectedSegment(toSegmentId);
@@ -547,7 +547,7 @@ namespace TrafficManager.Custom.Misc {
 				return endNodeLeftSegments.Contains(toSegmentId);
 			else {
 				//if (segmentId == debugSegId)
-					Log.Warning($"IsLeftSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
+					Log.Info($"IsLeftSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
 				return false;
 			}
 		}
@@ -563,7 +563,7 @@ namespace TrafficManager.Custom.Misc {
 				return false;
 
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
 				VerifyConnectedSegment(toSegmentId);
@@ -574,7 +574,7 @@ namespace TrafficManager.Custom.Misc {
 				return endNodeRightSegments.Contains(toSegmentId);
 			else {
 				//if (segmentId == debugSegId)
-					Log.Warning($"IsRightSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
+					Log.Info($"IsRightSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
 				return false;
 			}
 		}
@@ -590,7 +590,7 @@ namespace TrafficManager.Custom.Misc {
 				return false;
 
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
 				VerifyConnectedSegment(toSegmentId);
@@ -601,7 +601,7 @@ namespace TrafficManager.Custom.Misc {
 				return endNodeStraightSegments.Contains(toSegmentId);
 			else {
 				//if (segmentId == debugSegId)
-					Log.Warning($"IsStraightSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
+					Log.Info($"IsStraightSegment: Node {nodeId} (segment {toSegmentId}) is neither start nor end node of segment {segmentId}.");
 				return false;
 			}
 		}
@@ -620,7 +620,7 @@ namespace TrafficManager.Custom.Misc {
 			else if (endNodeId() == nodeId)
 				return outgoingOneWayAtEndNode;
 			else {
-				Log.Warning($"IsOutgoingOneWay: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				Log.Info($"IsOutgoingOneWay: Node {nodeId} is neither start nor end node of segment {segmentId}.");
 				return false;
 			}
 		}
@@ -704,7 +704,7 @@ namespace TrafficManager.Custom.Misc {
 			}
 
 			if (startNodeId() != nodeId && endNodeId() != nodeId) {
-				Log.Warning($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
 				VerifyConnectedSegment(toSegmentId);

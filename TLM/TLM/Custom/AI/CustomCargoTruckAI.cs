@@ -9,34 +9,33 @@ namespace TrafficManager.Custom.AI
     {
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
-            if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled)
-            {
-                Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-            }
-            else
-            {
-                if ((data.m_flags & Vehicle.Flags.WaitingTarget) != Vehicle.Flags.None && (data.m_waitCounter += 1) > 20)
-                {
-                    RemoveOffers(vehicleId, ref data);
-                    data.m_flags &= ~Vehicle.Flags.WaitingTarget;
-                    data.m_flags |= Vehicle.Flags.GoingBack;
-                    data.m_waitCounter = 0;
-                    if (!StartPathFind(vehicleId, ref data))
-                    {
-                        data.Unspawn(vehicleId);
-                    }
-                }
-
-				if (Options.simAccuracy <= 1) {
-					try {
-						CustomCarAI.HandleVehicle(vehicleId, ref data, true, true);
-					} catch (Exception e) {
-						Log.Error("CargoTruckAI CustomSimulationStep Error: " + e.ToString());
+			try {
+				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled) {
+					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+				} else {
+					if ((data.m_flags & Vehicle.Flags.WaitingTarget) != Vehicle.Flags.None && (data.m_waitCounter += 1) > 20) {
+						RemoveOffers(vehicleId, ref data);
+						data.m_flags &= ~Vehicle.Flags.WaitingTarget;
+						data.m_flags |= Vehicle.Flags.GoingBack;
+						data.m_waitCounter = 0;
+						if (!StartPathFind(vehicleId, ref data)) {
+							data.Unspawn(vehicleId);
+						}
 					}
-				}
 
-				BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
-            }
+					if (Options.simAccuracy <= 1) {
+						try {
+							CustomCarAI.HandleVehicle(vehicleId, ref data, true, true);
+						} catch (Exception e) {
+							Log.Error("CargoTruckAI CustomSimulationStep Error: " + e.ToString());
+						}
+					}
+
+					BaseSimulationStep(vehicleId, ref data, physicsLodRefPos);
+				}
+			} catch (Exception ex) {
+				Log.Error("Error in CargoTruckAI.SimulationStep: " + ex.ToString());
+			}
         }
 
         // TODO: inherit CarAI

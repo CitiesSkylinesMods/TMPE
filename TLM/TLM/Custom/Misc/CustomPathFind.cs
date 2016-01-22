@@ -512,7 +512,7 @@ namespace TrafficManager.Custom.Misc {
 		private void ProcessItemMain(uint unitId, BufferItem item, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
 			mCurrentState = 0;
 #if DEBUGPF
-			bool debug = nextNodeId == 1425;
+			bool debug = Options.disableSomething;
 #endif
 #if DEBUG
 			if (m_queuedPathFindCount > 100 && Options.disableSomething)
@@ -826,6 +826,21 @@ namespace TrafficManager.Custom.Misc {
 						couldFindCustomPath = true; // not of interest
 					} else if (!enablePedestrian) {
 						mCurrentState = 26;
+
+						if ((_vehicleTypes & ~VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+							// handle non-car paths
+
+#if DEBUGPF
+							if (debug)
+								logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: Handling everything that is not a car: {this._vehicleTypes}");
+#endif
+
+							_vehicleTypes &= ~VehicleInfo.VehicleType.Car;
+							if (ProcessItemSub(false, debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromLeft, connectOffset, true, enablePedestrian)) {
+								blocked = true;
+							}
+							_vehicleTypes |= VehicleInfo.VehicleType.Car;
+						}
 #if DEBUGPF
 						if (debug)
 							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevRightSimilarLaneIndex} from right: !enablePedestrian");
@@ -1552,7 +1567,7 @@ namespace TrafficManager.Custom.Misc {
 				} else {
 					prevRightSimilarLaneIndex = lane.m_similarLaneCount - lane.m_similarLaneIndex - 1;
 				}
-				//prevSpeed = CustomRoadAI.laneMeanSpeeds[item.m_laneID];
+				prevSpeed = CustomRoadAI.laneMeanSpeeds[item.m_laneID];
 				// NON-STOCK CODE END //
 			}
 			sCurrentState = 4;
@@ -1798,10 +1813,10 @@ namespace TrafficManager.Custom.Misc {
 
 								// vehicles should choose lanes with low traffic volume, but should neither change lanes too frequently nor change to too distant lanes.
 								float maxLaneDist = Convert.ToSingle(Math.Max(prevNumLanes - 1, nextLane.m_similarLaneCount - 1));
-								//float prevDens = prevSpeed < 0 ? prevMaxSpeed : Math.Min(1f, (prevSpeed / 4f) / prevMaxSpeed); // prev. lane mean speed (highway has speed limit 2, vehicles driving with max speed go with 16 (who knows why they decided not to use the same metric), 16/8 = 2, so we divide by 4 and then by max. speed, since we want to normalize by max. speed. Makes sense!
+								float prevDens = prevSpeed < 0 ? prevMaxSpeed : Math.Min(1f, (prevSpeed / 4f) / prevMaxSpeed); // prev. lane mean speed (highway has speed limit 2, vehicles driving with max speed go with 16 (who knows why they decided not to use the same metric), 16/8 = 2, so we divide by 4 and then by max. speed, since we want to normalize by max. speed. Makes sense!
 								float nextDens = nextSpeed < 0 ? nextMaxSpeed : Math.Min(1f, (nextSpeed / 4f) / nextMaxSpeed); // next lane mean speed
 																																	   //meanSpeed = (prevDens + nextDens) * 0.5f;
-								meanSpeed = nextDens;
+								meanSpeed = (nextDens + prevDens) * 0.5f;
 								if (_pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1 && meanSpeed >= 0.75f * nextMaxSpeed) {
 									meanSpeed = UnityEngine.Random.Range(0f, meanSpeed);
 								}
