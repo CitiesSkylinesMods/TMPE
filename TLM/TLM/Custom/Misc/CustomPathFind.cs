@@ -273,7 +273,7 @@ namespace TrafficManager.Custom.Misc {
 			while (this._bufferMinPos <= this._bufferMaxPos) {
 				pfCurrentState = 1;
 #if DEBUG
-				if (m_queuedPathFindCount > 100 && Options.disableSomething)
+				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: MAIN LOOP RUNNING! bufferMinPos: {this._bufferMinPos}, bufferMaxPos: {this._bufferMaxPos}, startA: {bufferItemStartA.m_position.m_segment}, startB: {bufferItemStartB.m_position.m_segment}, endA: {bufferItemEndA.m_position.m_segment}, endB: {bufferItemEndB.m_position.m_segment}");
 #endif
 				int num4 = this._bufferMin[this._bufferMinPos];
@@ -512,10 +512,10 @@ namespace TrafficManager.Custom.Misc {
 		private void ProcessItemMain(uint unitId, BufferItem item, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
 			mCurrentState = 0;
 #if DEBUGPF
-			bool debug = Options.disableSomething;
+			bool debug = Options.disableSomething && nextNodeId == 28088;
 #endif
 #if DEBUG
-			if (m_queuedPathFindCount > 100 && Options.disableSomething)
+			if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: processItemMain RUNNING! item: {item.m_position.m_segment}, {item.m_position.m_lane} nextNodeId: {nextNodeId}");
 #endif
 			//Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} Path finder: " + this._pathFindIndex + " vehicle types: " + this._vehicleTypes);
@@ -709,12 +709,12 @@ namespace TrafficManager.Custom.Misc {
 				mCurrentState = 17;
 				// geometries are validated here
 #if DEBUG
-				if (m_queuedPathFindCount > 100 && Options.disableSomething)
+				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Getting segment geometry of {prevSegmentId} @ {nextNodeId} START");
 #endif
 				SegmentGeometry geometry = IsMasterPathFind ? CustomRoadAI.GetSegmentGeometry(prevSegmentId, nextNodeId) : CustomRoadAI.GetSegmentGeometry(prevSegmentId);
 #if DEBUG
-				if (m_queuedPathFindCount > 100 && Options.disableSomething)
+				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Getting segment geometry of {prevSegmentId} @ {nextNodeId} END");
 #endif
 				mCurrentState = 18;
@@ -725,7 +725,7 @@ namespace TrafficManager.Custom.Misc {
 
 					mCurrentState = 19;
 #if DEBUG
-					if (m_queuedPathFindCount > 100 && Options.disableSomething)
+					if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Verifying segment geometry of {prevSegmentId} @ {nextNodeId} START");
 #endif
 					for (int k = 0; k < 8; k++) {
@@ -740,7 +740,7 @@ namespace TrafficManager.Custom.Misc {
 					mCurrentState = 20;
 				}
 #if DEBUG
-				if (m_queuedPathFindCount > 100 && Options.disableSomething)
+				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Verifying segment geometry of {prevSegmentId} @ {nextNodeId} END");
 #endif
 
@@ -866,10 +866,10 @@ namespace TrafficManager.Custom.Misc {
 						if (!isIncomingLeft && !isIncomingRight && !isIncomingStraight) {
 #if DEBUGPF
 							if (debug)
-								logBuf.Add($"(PFWARN) Segment {nextSegmentId} is neither left, right or straight segment @ {nextNodeId}, going to segment {prevSegmentId}");
+								logBuf.Add($"(PFWARN) Segment {nextSegmentId} is neither incoming left, right or straight segment @ {nextNodeId}, going to segment {prevSegmentId}");
 #endif
-							// recalculate geometry
-							geometry.Recalculate(true, false);
+							// recalculate geometry if segment is unknown
+							geometry.VerifyConnectedSegment(nextSegmentId);
 
 							if (!applyHighwayRulesAtSegment) {
 								couldFindCustomPath = true; // not of interest
@@ -1161,25 +1161,28 @@ namespace TrafficManager.Custom.Misc {
 							nextLaneIndex = laneIndexes[nextLaneI];
 							nextLaneId = laneIds[nextLaneI];
 							mCurrentState = 45;
-							if (/*this._pathFindIndex == 0 && */applyHighwayRulesAtSegment && IsMasterPathFind) {
+							if (IsMasterPathFind && applyHighwayRulesAtSegment && !Options.disableSomething3) {
 								// udpate highway mode arrows
 #if DEBUG
-								if (m_queuedPathFindCount > 100 && Options.disableSomething)
-									Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows: START");
+								if (m_queuedPathFindCount > 100 && Options.disableSomething1)
+									Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows @ lane {nextLaneId}: START");
 #endif
-								Flags.LaneArrows? highwayArrows = Flags.getHighwayLaneArrowFlags(nextLaneId);
-								if (highwayArrows == null)
-									highwayArrows = Flags.LaneArrows.None;
+								Flags.LaneArrows? prevHighwayArrows = Flags.getHighwayLaneArrowFlags(nextLaneId);
+								Flags.LaneArrows newHighwayArrows = Flags.LaneArrows.None;
+								if (prevHighwayArrows != null)
+									newHighwayArrows = (Flags.LaneArrows)prevHighwayArrows;
 								if (isIncomingRight)
-									highwayArrows |= Flags.LaneArrows.Left;
+									newHighwayArrows |= Flags.LaneArrows.Left;
 								if (isIncomingLeft)
-									highwayArrows |= Flags.LaneArrows.Right;
+									newHighwayArrows |= Flags.LaneArrows.Right;
 								if (isIncomingStraight)
-									highwayArrows |= Flags.LaneArrows.Forward;
-								Flags.setHighwayLaneArrowFlags(nextLaneId, (Flags.LaneArrows)highwayArrows);
+									newHighwayArrows |= Flags.LaneArrows.Forward;
+
+								if (newHighwayArrows != prevHighwayArrows && newHighwayArrows != Flags.LaneArrows.None)
+									Flags.setHighwayLaneArrowFlags(nextLaneId, newHighwayArrows);
 #if DEBUG
-								if (m_queuedPathFindCount > 100 && Options.disableSomething)
-									Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows: END");
+								if (m_queuedPathFindCount > 100 && Options.disableSomething1)
+									Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows @ lane {nextLaneId} to {newHighwayArrows.ToString()}: END");
 #endif
 							}
 							mCurrentState = 46;
@@ -1502,7 +1505,7 @@ namespace TrafficManager.Custom.Misc {
 		private bool ProcessItemSub(bool allowCustomLaneChanging, bool debug, BufferItem item, ushort targetNodeId, ushort segmentID, ref NetSegment nextSegment, ref int laneIndexFromLeft, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId, out bool foundForced) {
 			sCurrentState = 0;
 #if DEBUG
-			if (m_queuedPathFindCount > 100 && Options.disableSomething)
+			if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: ProcessItemSub item {item.m_position.m_segment} {item.m_position.m_lane}, targetNodeId {targetNodeId}");
 #endif
 
@@ -1922,7 +1925,7 @@ namespace TrafficManager.Custom.Misc {
 
 							if (addItem) {
 #if DEBUG
-								if (Options.disableSomething)
+								if (Options.disableSomething1)
 									Log._Debug($">> PF {this._pathFindIndex} -- Adding item: seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset} -> seg {item.m_position.m_segment}, lane {item.m_position.m_lane} (idx {item.m_laneID}), off {item.m_position.m_offset}, cost {item2.m_comparisonValue}, previous cost {item.m_comparisonValue}, methodDist {item2.m_methodDistance}");
 #endif
 								sCurrentState = 29;
@@ -2077,7 +2080,7 @@ namespace TrafficManager.Custom.Misc {
 		private void AddBufferItem(BufferItem item, PathUnit.Position target) {
 			bCurrentState = 0;
 #if DEBUG
-			if (m_queuedPathFindCount > 100 && Options.disableSomething)
+			if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: AddBufferItem item {item.m_position.m_segment} {item.m_position.m_lane}");
 #endif
 
@@ -2181,20 +2184,20 @@ namespace TrafficManager.Custom.Misc {
 					while (QueueFirst == 0u && !Terminated) {
 						tCurrentState = 4;
 #if DEBUG
-						if (m_queuedPathFindCount > 100 && Options.disableSomething)
+						if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 							Log._Debug($"Pathfind Thread #{Thread.CurrentThread.ManagedThreadId} waiting now for queue lock {QueueLock.GetHashCode()}!");
 #endif
 						if (!Monitor.Wait(QueueLock, SYNC_TIMEOUT)) {
 							tCurrentState = 5;
 #if DEBUG
-							if (m_queuedPathFindCount > 100 && Options.disableSomething)
+							if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 								Log.Warning($"Pathfind Thread #{Thread.CurrentThread.ManagedThreadId} *WAIT TIMEOUT* waiting for queue lock {QueueLock.GetHashCode()}!");
 #endif
 						}
 					}
 					tCurrentState = 6;
 #if DEBUG
-					if (m_queuedPathFindCount > 100 && Options.disableSomething)
+					if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 						Log._Debug($"Pathfind Thread #{Thread.CurrentThread.ManagedThreadId} is continuing now!");
 #endif
 					if (Terminated) {
@@ -2209,7 +2212,7 @@ namespace TrafficManager.Custom.Misc {
 						m_queuedPathFindCount--;
 					}
 #if DEBUG
-					if (m_queuedPathFindCount > 100 && Options.disableSomething)
+					if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PathFindThread: Starting pathfinder. Remaining queued pathfinders: {m_queuedPathFindCount}");
 #endif
 					_pathUnits.m_buffer[(int)((UIntPtr)Calculating)].m_nextPathUnit = 0u;
@@ -2223,7 +2226,7 @@ namespace TrafficManager.Custom.Misc {
 				try {
 					m_pathfindProfiler.BeginStep();
 #if DEBUG
-					if (m_queuedPathFindCount > 100 && Options.disableSomething)
+					if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Calling PathFindImplementation now. Calculating={Calculating}");
 #endif
 					tCurrentState = 8;
@@ -2238,7 +2241,7 @@ namespace TrafficManager.Custom.Misc {
 				} finally {
 					m_pathfindProfiler.EndStep();
 #if DEBUG
-					if (m_queuedPathFindCount > 100 && Options.disableSomething)
+					if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} last step duration: {m_pathfindProfiler.m_lastStepDuration} average step duration: {m_pathfindProfiler.m_averageStepDuration} peak step duration: {m_pathfindProfiler.m_peakStepDuration}");
 #endif
 				}

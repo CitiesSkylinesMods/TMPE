@@ -8,6 +8,7 @@ using ColossalFramework.UI;
 using ICities;
 using TrafficManager.Traffic;
 using TrafficManager.State;
+using TrafficManager.UI;
 
 namespace TrafficManager {
 
@@ -23,7 +24,9 @@ namespace TrafficManager {
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox showLanesToggle = null;
 #if DEBUG
-		private static UICheckBox disableSomethingToggle = null;
+		private static UICheckBox disableSomething3Toggle = null;
+		private static UICheckBox disableSomething2Toggle = null;
+		private static UICheckBox disableSomething1Toggle = null;
 #endif
 		private static UITextField pathCostMultiplicatorField = null;
 
@@ -38,7 +41,9 @@ namespace TrafficManager {
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
 		public static float pathCostMultiplicator = 2f;
-		public static bool disableSomething = false; // debug switch
+		public static bool disableSomething1 = false; // debug switch
+		public static bool disableSomething2 = false; // debug switch
+		public static bool disableSomething3 = false; // debug switch
 
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -58,14 +63,26 @@ namespace TrafficManager {
 			nodesOverlayToggle = group2.AddCheckbox(Translation.GetString("Show_nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
             showLanesToggle = group2.AddCheckbox(Translation.GetString("Show_lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 #if DEBUG
-			disableSomethingToggle = group2.AddCheckbox("Disable something", disableSomething, onDisableSomethingChanged) as UICheckBox;
+			disableSomething1Toggle = group2.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
+			disableSomething2Toggle = group2.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
+			disableSomething3Toggle = group2.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
 			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
 #endif
 		}
 
-		private static void onDisableSomethingChanged(bool newDisableSomething) {
-			Log._Debug($"disableSomething changed to {newDisableSomething}");
-			disableSomething = newDisableSomething;
+		private static void onDisableSomething1Changed(bool newDisableSomething) {
+			Log._Debug($"disableSomething1 changed to {newDisableSomething}");
+			disableSomething1 = newDisableSomething;
+		}
+
+		private static void onDisableSomething2Changed(bool newDisableSomething) {
+			Log._Debug($"disableSomething2 changed to {newDisableSomething}");
+			disableSomething2 = newDisableSomething;
+		}
+
+		private static void onDisableSomething3Changed(bool newDisableSomething) {
+			Log._Debug($"disableSomething3 changed to {newDisableSomething}");
+			disableSomething3 = newDisableSomething;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {

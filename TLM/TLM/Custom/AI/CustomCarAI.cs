@@ -38,7 +38,12 @@ namespace TrafficManager.Custom.AI {
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
-		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic, byte maxPathUnits, bool debug = false) {
+		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic, byte maxUpcomingPathPositions, bool debug = false) {
+			if (Options.disableSomething2)
+				return;
+			if (maxUpcomingPathPositions <= 0)
+				maxUpcomingPathPositions = 1; // we need at least one upcoming path position
+
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
 			var lastFrameVehiclePos = lastFrameData.m_position;
@@ -84,52 +89,54 @@ namespace TrafficManager.Custom.AI {
 						realTimeDestinationNodes.Add(currentSegment.m_endNode);
 					}
 
-					// evaluate upcoming path units
-					byte i = 0;
-					uint pathUnitId = currentPathUnitId;
-					int pathPos = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
-					while (true) {
-						if (pathPos > 11) {
-							// go to next path unit
-							pathPos = 0;
-							pathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
+					if (maxUpcomingPathPositions > 0) {
+						// evaluate upcoming path units
+						byte i = 0;
+						uint pathUnitId = currentPathUnitId;
+						int pathPos = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
+						while (true) {
+							if (pathPos > 11) {
+								// go to next path unit
+								pathPos = 0;
+								pathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
 #if DEBUG
-							logBuffer.Add("* vehicleId " + vehicleId + ". Going to next path unit (1). pathUnitId=" + pathUnitId);
+								logBuffer.Add("* vehicleId " + vehicleId + ". Going to next path unit (1). pathUnitId=" + pathUnitId);
 #endif
-							if (pathUnitId <= 0)
-								break;
-						}
-
-						PathUnit.Position nextRealTimePosition = default(PathUnit.Position);
-						if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPos, out nextRealTimePosition)) { // if this returns false, there is no next path unit
-#if DEBUG
-							logBuffer.Add("* vehicleId " + vehicleId + ". No next path unit! pathPos=" + pathPos + ", pathUnitId=" + pathUnitId);
-#endif
-							break;
-						}
-
-						ushort destNodeId = 0;
-						if (nextRealTimePosition.m_segment > 0) {
-							var nextSegment = netManager.m_segments.m_buffer[nextRealTimePosition.m_segment];
-							if (nextRealTimePosition.m_offset == 0) {
-								destNodeId = nextSegment.m_startNode;
-							} else {
-								destNodeId = nextSegment.m_endNode;
+								if (pathUnitId <= 0)
+									break;
 							}
-						}
+
+							PathUnit.Position nextRealTimePosition = default(PathUnit.Position);
+							if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPos, out nextRealTimePosition)) { // if this returns false, there is no next path unit
+#if DEBUG
+								logBuffer.Add("* vehicleId " + vehicleId + ". No next path unit! pathPos=" + pathPos + ", pathUnitId=" + pathUnitId);
+#endif
+								break;
+							}
+
+							ushort destNodeId = 0;
+							if (nextRealTimePosition.m_segment > 0) {
+								var nextSegment = netManager.m_segments.m_buffer[nextRealTimePosition.m_segment];
+								if (nextRealTimePosition.m_offset == 0) {
+									destNodeId = nextSegment.m_startNode;
+								} else {
+									destNodeId = nextSegment.m_endNode;
+								}
+							}
 
 #if DEBUG
-						logBuffer.Add("* vehicleId " + vehicleId + ". Next path unit! node " + destNodeId + ", seg. " + nextRealTimePosition.m_segment + ", pathUnitId=" + pathUnitId + ", pathPos: " + pathPos);
+							logBuffer.Add("* vehicleId " + vehicleId + ". Next path unit! node " + destNodeId + ", seg. " + nextRealTimePosition.m_segment + ", pathUnitId=" + pathUnitId + ", pathPos: " + pathPos);
 #endif
 
-						realTimePositions.Add(nextRealTimePosition);
-						realTimeDestinationNodes.Add(destNodeId);
+							realTimePositions.Add(nextRealTimePosition);
+							realTimeDestinationNodes.Add(destNodeId);
 
-						if (i >= maxPathUnits - 1)
-							break; // we calculate up to 2 upcoming path units at the moment
+							if (i >= maxUpcomingPathPositions - 1)
+								break; // we calculate up to 2 upcoming path units at the moment
 
-						++pathPos;
-						++i;
+							++pathPos;
+							++i;
+						}
 					}
 
 					// please don't ask why we use "m_pathPositionIndex >> 1" (which equals to "m_pathPositionIndex / 2") here (Though it would

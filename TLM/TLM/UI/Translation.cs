@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace TrafficManager {
+namespace TrafficManager.UI {
 	public class Translation {
 		const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 		private static readonly string DEFAULT_TRANSLATION_FILENAME = "lang.txt";

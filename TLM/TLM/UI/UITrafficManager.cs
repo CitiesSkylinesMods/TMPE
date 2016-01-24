@@ -45,40 +45,40 @@ namespace TrafficManager.UI {
 
 			UILabel title = AddUIComponent<UILabel>();
 			title.text = "Version 1.4.7";
-			title.relativePosition = new Vector3(65.0f, 5.0f);
+			title.relativePosition = new Vector3(70.0f, 5.0f);
 
 			int y = 30;
-			_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), new Vector3(35f, y), clickSwitchTraffic);
+			_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), new Vector3(15f, y), clickSwitchTraffic);
 			y += 40;
-			_buttonPrioritySigns = _createButton(Translation.GetString("Add_priority_signs"), new Vector3(35f, y), clickAddPrioritySigns);
+			_buttonPrioritySigns = _createButton(Translation.GetString("Add_priority_signs"), new Vector3(15f, y), clickAddPrioritySigns);
 			y += 40;
-			_buttonManualControl = _createButton(Translation.GetString("Manual_traffic_lights"), new Vector3(35f, y), clickManualControl);
+			_buttonManualControl = _createButton(Translation.GetString("Manual_traffic_lights"), new Vector3(15f, y), clickManualControl);
 			y += 40;
-			_buttonTimedMain = _createButton(Translation.GetString("Timed_traffic_lights"), new Vector3(35f, y), clickTimedAdd);
+			_buttonTimedMain = _createButton(Translation.GetString("Timed_traffic_lights"), new Vector3(15f, y), clickTimedAdd);
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), new Vector3(35f, y), clickChangeLanes);
+				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), new Vector3(15f, y), clickChangeLanes);
 				y += 40;
-				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(35f, 230f), clickLaneRestrictions);
+				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(15f, 230f), clickLaneRestrictions);
 			}
 
-			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), new Vector3(35f, y), clickClearTraffic);
+			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), new Vector3(15f, y), clickClearTraffic);
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), new Vector3(35f, y), ClickToggleDespawn);
+				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), new Vector3(15f, y), ClickToggleDespawn);
 				y += 40;
 			}
 
 #if DEBUG
 			_goToField = CreateTextField("", 35, y);
 			y += 40;
-			_goToSegmentButton = _createButton("Goto segment", new Vector3(35f, y), clickGoToSegment);
+			_goToSegmentButton = _createButton("Goto segment", new Vector3(15f, y), clickGoToSegment);
 			y += 40;
-			_goToNodeButton = _createButton("Goto node", new Vector3(35f, y), clickGoToNode);
+			_goToNodeButton = _createButton("Goto node", new Vector3(15f, y), clickGoToNode);
 			y += 40;
-			_goToVehicleButton = _createButton("Goto vehicle", new Vector3(35f, y), clickGoToVehicle);
+			_goToVehicleButton = _createButton("Goto vehicle", new Vector3(15f, y), clickGoToVehicle);
 			y += 40;
 #endif
 		}
@@ -111,7 +111,7 @@ namespace TrafficManager.UI {
 		private UIButton _createButton(string text, Vector3 pos, MouseEventHandler eventClick) {
 			var button = AddUIComponent<UIButton>();
 			button.textScale = 0.8f;
-			button.width = 190;
+			button.width = 220;
 			button.height = 30;
 			button.normalBgSprite = "ButtonMenu";
 			button.disabledBgSprite = "ButtonMenuDisabled";

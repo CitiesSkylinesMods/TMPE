@@ -79,6 +79,7 @@ namespace TrafficManager.TrafficLight {
 
 		public void ChangeMode() {
 			SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId);
+			geometry.Recalculate(true, true);
 			var hasLeftSegment = geometry.HasLeftSegment(nodeId);
 			var hasForwardSegment = geometry.HasStraightSegment(nodeId);
 			var hasRightSegment = geometry.HasRightSegment(nodeId);

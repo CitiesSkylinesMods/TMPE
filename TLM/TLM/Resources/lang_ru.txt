@@ -1,0 +1,84 @@
+Switch_traffic_lights Убрать/Вернуть светофор
+Add_priority_signs Знаки приоритета
+Manual_traffic_lights Ручной светофор
+Timed_traffic_lights Временной светофор
+Change_lane_arrows Изменить стрелки полос
+Clear_Traffic Очистить трафик
+Disable_despawning Выключить исчезновение машин
+Enable_despawning Включить исчезновение машин
+NODE_IS_LIGHT На перекрёстке работает светофор.\nДля удаления его выберите "Убрать/Вернуть светофор" и нажмите на этот узел.
+NODE_IS_TIMED_LIGHT Перекрёсток содержит скрипт временного светофора.\nВыберите "Временный светофор", нажмите на этот узел и выберите "Удалить".
+Select_nodes_windowTitle Выбор узлов
+Select_nodes Выберите узлы
+Node Узел
+Deselect_all_nodes Не отмечать узлы
+Setup_timed_traffic_light Настройка времени светофора
+State Статус
+Skip Пропустить
+up вверх
+down вниз
+View Смотреть
+Edit Править
+Delete Удалить
+Timed_traffic_lights_manager Управление временным светофором
+Add_step Добавить шаг
+Remove_timed_traffic_light Удалить временной светофор
+Min._Time: Мин. время:
+Max._Time: Макс. время:
+Save Сохранить
+Add Добавить
+Sensitivity Чувствительность
+Very_Low Очень медленно
+Low Замедленно
+Medium Средне
+High Высоко
+Very_high Очень высоко
+Extreme_long_green/red_phases Слишком долгие фазы зеленый/красный
+Very_long_green/red_phases Очень долгие фазы зеленый/красный
+Long_green/red_phases Долгие фазы зеленый/красный
+Moderate_green/red_phases Умеренные фазы зеленый/красный
+Short_green/red_phases Короткие фазы зеленый/красный
+Very_short_green/red_phases Очень короткие фазы зеленый/красный
+Extreme_short_green/red_phases Слишком короткие фазы зеленый/красный
+Hide_counters Скрыть счётчики
+Show_counters Показать счётчики
+Start Начать
+Stop Остановить
+Enable_test_mode_(stay_in_current_step) Включить тест режим (остаться в текущем шагу)
+avg._flow средний поток
+avg._wait среднее ожидание
+min/max мин/макс
+Lane Полоса
+Set_Speed Установка скорости {0}
+Max_speed Макс. скорость
+Segment Сегмент
+incoming входящее
+Enable_Advanced_Vehicle_AI Включить продвинутый AI
+Vehicles_may_enter_blocked_junctions Транспорт проезжает блокированные перекрестки
+All_vehicles_may_ignore_lane_arrows Весь транспорт игнорирует стрелки полос
+Busses_may_ignore_lane_arrows Автобусы игнорируют стрелки полос
+Reckless_driving Опасное вождение (БЕТА статус)
+TMPE_Title Трафик Менеджер: Президент Редакция (Настройки влияют отдельно для каждого сохранения)
+Simulation_accuracy Точность моделирования (высокое значение снижает производительность)
+Enable_highway_specific_lane_merging/splitting_rules Включить особые правила шоссе слияние/пересечение полос
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Водителям нравится менять полосы (только при продвинутом AI):
+Maintenance Обслуживание
+Very_often_(50_%) Очень часто (50 %)
+Often_(25_%) Часто (25 %)
+Sometimes_(10_%) Иногда (10 %)
+Rarely_(5_%) Редко (5 %)
+Very_rarely_(2.5_%) Очень редко (2.5 %)
+Only_if_necessary Только при необходимости
+Show_nodes_and_segments Показать узлы и сегменты
+Show_lanes Показать полосы
+Path_Of_Evil_(10_%) Дорога Зла (10 %)
+Rush_Hour_(5_%) Час Пик (5 %)
+Minor_Complaints_(2_%) Чуть-чуть Жалоб (2%)
+Holy_City_(0_%) Святой Город (0 %)
+Forget_toggled_traffic_lights Забыть убрать/добавить светофоры
+Road_is_already_in_a_group! Дорога уже находится в группе!
+All_selected_roads_must_be_of_the_same_type! Все выбранные дороги должны быть одинакового типа!
+Create_group Создать группу
+Delete_group Удалить группу
+Add_zoning Добавить зонирование
+Remove_zoning Удалить зонирование

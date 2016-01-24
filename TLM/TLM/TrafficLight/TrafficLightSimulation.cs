@@ -3,6 +3,7 @@ using ColossalFramework;
 using TrafficManager.Traffic;
 using System.Collections.Generic;
 using TrafficManager.State;
+using TrafficManager.Custom.AI;
 
 namespace TrafficManager.TrafficLight {
     public class TrafficLightSimulation {
@@ -29,7 +30,7 @@ namespace TrafficManager.TrafficLight {
                         var segment = node.GetSegment(s);
 
                         if (segment == 0) continue;
-                        if (TrafficLightsManual.IsSegmentLight(nodeId, segment)) {
+						if (TrafficLightsManual.IsSegmentLight(nodeId, segment)) {
                             TrafficLightsManual.RemoveSegmentLight(nodeId, segment);
                         }
                     }
@@ -41,6 +42,7 @@ namespace TrafficManager.TrafficLight {
 
                         if (segmentId == 0)
 							continue;
+						CustomRoadAI.GetSegmentGeometry(segmentId).Recalculate(true, true);
 						TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
                     }
                 }
@@ -58,6 +60,7 @@ namespace TrafficManager.TrafficLight {
 
 				if (segmentId == 0)
 					continue;
+				CustomRoadAI.GetSegmentGeometry(segmentId).Recalculate(true, true);
 				TrafficLightsManual.AddLiveSegmentLight(nodeId, segmentId);
 			}
 		}

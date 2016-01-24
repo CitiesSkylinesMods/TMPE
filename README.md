@@ -2,7 +2,13 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.4.8
+- Added translation to Russion (thanks to @FireGames for working on this!)
+- Bugfix: In highway rule mode, lane arrows sometimes flickered 
+- Bugfix: Some traffic light arrows were sometimes not selectable 
+ 
 1.4.7, 01/22/2016
+- Added translation to Portuguese (thanks to @igordeeoliveira for working on this!) 
 - Reduced mean size of files can become quite big (thanks to @GordonDry for reporting this problem)
 - Bugfix: Freight ships/trains were not coming in (thanks to @Mas71 and @clus for reporting this problem)
 - Bugfix: The toggle "Vehicles may enter blocked junctions" did not work properly (thanks for @exxonic for reporting this problem)

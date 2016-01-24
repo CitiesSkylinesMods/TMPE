@@ -202,20 +202,20 @@ namespace TrafficManager.State {
 			}
 		}
 
-		public static void toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
+		public static bool toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
 			try {
 				Monitor.Enter(laneArrowLock);
 
 				if (laneId <= 0)
-					return;
+					return false;
 
 				if (!mayHaveLaneArrows(laneId)) {
 					removeLaneArrowFlags(laneId);
-					return;
+					return false;
 				}
 
 				if (highwayLaneArrowFlags.ContainsKey(laneId))
-					return; // disallow custom lane arrows in highway rule mode
+					return false; // disallow custom lane arrows in highway rule mode
 
 				if (!laneArrowFlags.ContainsKey(laneId)) {
 					// read currently defined arrows
@@ -226,6 +226,7 @@ namespace TrafficManager.State {
 
 				laneArrowFlags[laneId] ^= flags;
 				applyLaneArrowFlags(laneId);
+				return true;
 			} finally {
 				Monitor.Exit(laneArrowLock);
 			}
@@ -340,24 +341,23 @@ namespace TrafficManager.State {
 			try {
 				Monitor.Enter(laneArrowLock);
 
-				if (laneId <= 0 || !laneArrowFlags.ContainsKey(laneId))
+				if (laneId <= 0)
 					return true;
 
-				LaneArrows flags = laneArrowFlags[laneId];
 				uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
 				if (!mayHaveLaneArrows(laneId))
 					return false;
 
-				/*if (isLaneInHighwayMode(laneId)) {
-					flags = LaneArrows.None;*/
-					if (highwayLaneArrowFlags.ContainsKey(laneId))
-						flags = highwayLaneArrowFlags[laneId];
-				// }
-
-				laneFlags &= ~lfr; // remove all arrows
-				laneFlags |= (uint)flags; // add desired arrows
-				//Log.Message($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
+				if (highwayLaneArrowFlags.ContainsKey(laneId)) {
+					laneFlags &= ~lfr; // remove all arrows
+					laneFlags |= (uint)highwayLaneArrowFlags[laneId]; // add highway arrows
+				} else if (laneArrowFlags.ContainsKey(laneId)) {
+					LaneArrows flags = laneArrowFlags[laneId];
+					laneFlags &= ~lfr; // remove all arrows
+					laneFlags |= (uint)flags; // add desired arrows
+				}
+				Log._Debug($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
 				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 				return true;
 			} finally {
@@ -387,6 +387,20 @@ namespace TrafficManager.State {
 			} finally {
 				Monitor.Exit(laneArrowLock);
 			}
+		}
+
+		internal static void removeHighwayLaneArrowFlagsAtSegment(ushort segmentId) {
+			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+				return;
+
+			int i = 0;
+			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+
+			while (i < Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes.Length && curLaneId != 0u) {
+				Flags.removeHighwayLaneArrowFlags(curLaneId);
+				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+				++i;
+			} // foreach lane
 		}
 
 		public static void clearHighwayLaneArrows() {

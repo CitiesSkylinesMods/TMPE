@@ -68,10 +68,10 @@
     <Compile Include="CustomNetTool.cs" />
     <Compile Include="Custom\Misc\CustomPathFind.cs" />
     <Compile Include="Custom\Manager\CustomPathManager.cs" />
-    <Compile Include="Custom\Misc\SegmentGeometry.cs" />
+    <Compile Include="Traffic\SegmentGeometry.cs" />
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
-    <Compile Include="Translation.cs" />
+    <Compile Include="UI\Translation.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Traffic\Direction.cs" />
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
@@ -83,7 +83,6 @@
     <Compile Include="SelfDestruct.cs" />
     <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="SimpleJson.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\ManualSegment.cs" />
     <Compile Include="TrafficLight\ManualSegmentLight.cs" />
@@ -91,9 +90,9 @@
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="TrafficLight\TrafficLightsManual.cs" />
     <Compile Include="TrafficLight\TrafficLightsTimed.cs" />
-    <Compile Include="TrafficLight\TrafficLightTool.cs" />
+    <Compile Include="UI\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrafficLight\TrafficLightToolTextureResources.cs" />
+    <Compile Include="UI\TrafficLightToolTextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\TimedTrafficStep.cs" />
@@ -139,6 +138,7 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_ru.txt" />
     <EmbeddedResource Include="Resources\lang_pt.txt" />
     <EmbeddedResource Include="Resources\lang.txt" />
     <EmbeddedResource Include="Resources\lang_de.txt" />

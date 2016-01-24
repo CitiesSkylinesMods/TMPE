@@ -61,9 +61,6 @@ namespace TrafficManager.TrafficLight {
 
 		private uint currentFrame = 0;
 
-		private static readonly string NODE_IS_LIGHT = Translation.GetString("NODE_IS_LIGHT");
-		private static readonly string NODE_IS_TIMED_LIGHT = Translation.GetString("NODE_IS_TIMED_LIGHT");
-
 		private static bool nodeSelectionLocked = false;
 
 		static Rect ResizeGUI(Rect rect) {
@@ -74,7 +71,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		protected override void Awake() {
-			_windowRect = ResizeGUI(new Rect(155, 45, 450, 350));
+			_windowRect = ResizeGUI(new Rect(155, 45, 480, 350));
 			_windowRect2 = ResizeGUI(new Rect(155, 45, 300, 150));
 
 			_secondPanelTexture = MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
@@ -126,7 +123,6 @@ namespace TrafficManager.TrafficLight {
 
 			if (mode == ToolMode.TimedLightsShowLights) {
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
-					CustomRoadAI.GetSegmentGeometry(selectedNodeIndex).Recalculate(true, true);
 					TrafficPriority.nodeHousekeeping(selectedNodeIndex);
 				}
 			}
@@ -560,7 +556,7 @@ namespace TrafficManager.TrafficLight {
 						SetToolMode(ToolMode.TimedLightsShowLights);
 					}
 				} else {
-					showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
+					showTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
 				}
 			}
 		}
@@ -591,7 +587,7 @@ namespace TrafficManager.TrafficLight {
 			} else {
 				if (SelectedNodeIndexes.Count == 0) {
 				}
-				showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
+				showTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
 			}
 		}
 
@@ -613,7 +609,7 @@ namespace TrafficManager.TrafficLight {
 				mouseClickProcessed = true;
 				SelectedNode = _hoveredNetNodeIdx;
 			} else {
-				showTooltip(NODE_IS_LIGHT, node.m_position);
+				showTooltip(Translation.GetString("NODE_IS_LIGHT"), node.m_position);
 			}
 		}
 
@@ -1414,7 +1410,7 @@ namespace TrafficManager.TrafficLight {
 					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
 						if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
 							meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
-							meanMaxSpeed += lane.m_speedLimit;
+							meanMaxSpeed += lane.m_speedLimit * 8f;
 							++validLanes;
 						}
 					}
@@ -2542,13 +2538,16 @@ namespace TrafficManager.TrafficLight {
 					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
 				}
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Left);
+					if (!toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Left) && SelectedNode > 0)
+						showTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].m_position);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
-					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Forward);
+					if (!toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Forward) && SelectedNode > 0)
+						showTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].m_position);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Right);
+					if (!toggleLaneFlag((uint)laneList[i][0], Flags.LaneArrows.Right) && SelectedNode > 0)
+						showTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].m_position);
 				}
 				GUILayout.EndHorizontal();
 				GUILayout.EndVertical();
@@ -2799,8 +2798,8 @@ namespace TrafficManager.TrafficLight {
 			GUILayout.EndHorizontal();
 		}
 
-		private void toggleLaneFlag(uint laneId, Flags.LaneArrows flags) {
-			Flags.toggleLaneArrowFlags(laneId, flags);
+		private bool toggleLaneFlag(uint laneId, Flags.LaneArrows flags) {
+			return Flags.toggleLaneArrowFlags(laneId, flags);
 		}
 
 		private Texture2D MakeTex(int width, int height, Color col) {
@@ -3093,7 +3092,7 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.Label(labelStr, labelLayout);
 							GUILayout.Space(5);
 							GUILayout.EndVertical();
-							if (GUILayout.Button(Translation.GetString("Skip"), GUILayout.Width(70))) {
+							if (GUILayout.Button(Translation.GetString("Skip"), GUILayout.Width(80))) {
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 									if (timedNode2 == null) {
 										TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3112,7 +3111,7 @@ namespace TrafficManager.TrafficLight {
 							GUILayout.BeginHorizontal(GUILayout.Width(100));
 
 							if (i > 0) {
-								if (GUILayout.Button(Translation.GetString("up"), GUILayout.Width(45))) {
+								if (GUILayout.Button(Translation.GetString("up"), GUILayout.Width(48))) {
 									foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 										var timedNode2 = TrafficLightsTimed.GetTimedLight(selectedNodeIndex);
 										if (timedNode2 == null) {
@@ -3127,7 +3126,7 @@ namespace TrafficManager.TrafficLight {
 							}
 
 							if (i < timedNodeMain.NumSteps() - 1) {
-								if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(45))) {
+								if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(48))) {
 									foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
 										if (timedNode2 == null) {
 											TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeIndexes.First(), true);
@@ -3142,7 +3141,7 @@ namespace TrafficManager.TrafficLight {
 
 							GUILayout.EndHorizontal();
 
-							if (GUILayout.Button(Translation.GetString("View"), GUILayout.Width(65))) {
+							if (GUILayout.Button(Translation.GetString("View"), GUILayout.Width(70))) {
 								_timedPanelAdd = false;
 
 								foreach (var timedNode2 in SelectedNodeIndexes.Select(TrafficLightsTimed.GetTimedLight)) {
@@ -3641,7 +3640,7 @@ namespace TrafficManager.TrafficLight {
 								TrafficPriority.AddPriorityNode(_hoveredNetNodeIdx);
 							}
 						} else {
-							showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
+							showTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
 						}
 					}
 				}
@@ -3691,7 +3690,7 @@ namespace TrafficManager.TrafficLight {
 
 			if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 				if (TrafficLightsTimed.IsTimedLight(_hoveredNetNodeIdx)) {
-					showTooltip(NODE_IS_TIMED_LIGHT, node.m_position);
+					showTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
 				} else {
 					TrafficLightSimulation.RemoveNodeFromSimulation(_hoveredNetNodeIdx, true); // TODO refactor!
 					Flags.setNodeTrafficLight(_hoveredNetNodeIdx, false); // TODO refactor!

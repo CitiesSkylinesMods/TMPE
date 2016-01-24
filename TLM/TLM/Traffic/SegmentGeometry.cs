@@ -155,7 +155,7 @@ namespace TrafficManager.Custom.Misc {
 			try {
 #if DEBUG
 				if (output)
-					Log.Info($"Trying to get a lock for Recalculating geometries of segment {segmentId}...");
+					Log.Warning($"Trying to get a lock for Recalculating geometries of segment {segmentId}...");
 #endif
 				Monitor.Enter(Lock);
 #if DEBUGLOCKS
@@ -242,6 +242,9 @@ namespace TrafficManager.Custom.Misc {
 					endNodeIncomingLeftSegmentsArray[i] = 0;
 					endNodeIncomingStraightSegmentsArray[i] = 0;
 				}
+
+				// reset highway lane arrows
+				Flags.removeHighwayLaneArrowFlagsAtSegment(segmentId);
 			} finally {
 				Monitor.Exit(Lock);
 			}
@@ -271,28 +274,7 @@ namespace TrafficManager.Custom.Misc {
 				if (otherConnectionClass.m_service != connectionClass.m_service)
 					continue;*/
 
-				// reset highway lane arrows
-				int i = 0;
-				uint curLaneId = netManager.m_segments.m_buffer[otherSegmentId].m_lanes;
-#if DEBUGLOCKS
-				uint wIter = 0;
-#endif
-				while (i < netManager.m_segments.m_buffer[otherSegmentId].Info.m_lanes.Length && curLaneId != 0u) {
-#if DEBUGLOCKS
-					++wIter;
-					if (wIter >= 20) {
-						Log.Error("Too many iterations in SegmentGeometry.recalculate!");
-						break;
-					}
-#endif
-
-					Flags.removeHighwayLaneArrowFlags(curLaneId);
-					curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-					++i;
-				} // foreach lane
-
 				// determine geometry
-
 				outgoingOneWay = calculateIsOutgoingOneWay(segmentId, nodeId);
 
 				if (TrafficPriority.IsRightSegment(segmentId, otherSegmentId, nodeId)) {
@@ -318,6 +300,9 @@ namespace TrafficManager.Custom.Misc {
 					}
 				}
 
+				// reset highway lane arrows
+				Flags.removeHighwayLaneArrowFlagsAtSegment(otherSegmentId);
+
 				nodeSegments.Add(otherSegmentId);
 			}
 		}
@@ -329,7 +314,17 @@ namespace TrafficManager.Custom.Misc {
 			if (otherSegmentId == segmentId)
 				return false;
 
-			if (!startNodeSegments.Contains(otherSegmentId) && !endNodeSegments.Contains(otherSegmentId)) {
+			bool segmentIsConnectedToStartNode = false;
+			bool segmentIsConnectedToEndNode = false;
+			try {
+				Monitor.Enter(Lock);
+				segmentIsConnectedToStartNode = startNodeSegments.Contains(otherSegmentId);
+				segmentIsConnectedToEndNode = endNodeSegments.Contains(otherSegmentId);
+			} finally {
+				Monitor.Exit(Lock);
+			}
+
+			if (!segmentIsConnectedToStartNode && !segmentIsConnectedToEndNode) {
 				Log._Debug($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
                 Recalculate();
 				return true;
