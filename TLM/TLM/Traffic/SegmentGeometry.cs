@@ -124,7 +124,7 @@ namespace TrafficManager.Custom.Misc {
 
 		public SegmentGeometry(ushort segmentId) {
 			this.segmentId = segmentId;
-			Recalculate(true, true);
+			Recalculate(false, true);
 		}
 
 		public ushort startNodeId() {

@@ -558,6 +558,13 @@ namespace TrafficManager.Traffic {
                 }
 #endif
 
+				// delete invalid target car
+				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None) {
+					RemoveVehicleFromSegments(targetCarId);
+					Vehicles[targetCarId].Valid = false;
+					return true;
+				}
+
 				// delete invalid incoming car
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None) {
 					RemoveVehicleFromSegments(incomingCarId);

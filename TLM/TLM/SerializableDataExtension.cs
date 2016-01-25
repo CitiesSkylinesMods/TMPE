@@ -111,9 +111,9 @@ namespace TrafficManager {
 			}
 			
 			LoadDataState();
-			TrafficPriority.HandleAllVehicles();
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
+			TrafficPriority.HandleAllVehicles();
 		}
 
 		private static void LoadDataState() {

@@ -25,7 +25,7 @@ namespace TrafficManager.Custom.AI
 
 					if (Options.simAccuracy <= 1) {
 						try {
-							CustomCarAI.HandleVehicle(vehicleId, ref data, true, true);
+							CustomCarAI.HandleVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], true, true);
 						} catch (Exception e) {
 							Log.Error("CargoTruckAI CustomSimulationStep Error: " + e.ToString());
 						}

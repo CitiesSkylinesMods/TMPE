@@ -138,6 +138,7 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_pl.txt" />
     <EmbeddedResource Include="Resources\lang_ru.txt" />
     <EmbeddedResource Include="Resources\lang_pt.txt" />
     <EmbeddedResource Include="Resources\lang.txt" />

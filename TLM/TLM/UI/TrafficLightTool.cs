@@ -233,44 +233,48 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		protected override void OnToolGUI() {
-			if (!Input.GetMouseButtonDown(0)) {
-				mouseClickProcessed = false;
-			}
+			try {
+				if (!Input.GetMouseButtonDown(0)) {
+					mouseClickProcessed = false;
+				}
 
-			if (Options.nodesOverlay) {
-				_guiSegments();
-				_guiNodes();
+				if (Options.nodesOverlay) {
+					_guiSegments();
+					_guiNodes();
 #if DEBUG
-				_guiVehicles();
+					_guiVehicles();
 #endif
-			}
+				}
 
-			showTimedLightIcons();
-			if (_toolMode != ToolMode.AddPrioritySigns) {
-				_guiPrioritySigns(true);
-			}
+				showTimedLightIcons();
+				if (_toolMode != ToolMode.AddPrioritySigns) {
+					_guiPrioritySigns(true);
+				}
 
-			_cursorInSecondaryPanel = false;
+				_cursorInSecondaryPanel = false;
 
-			switch (_toolMode) {
-				case ToolMode.AddPrioritySigns:
-					_guiPrioritySigns(false);
-					break;
-				case ToolMode.ManualSwitch:
-					_guiManualTrafficLights();
-					break;
-				case ToolMode.TimedLightsSelectNode:
-					_guiTimedTrafficLightsNode();
-					break;
-				case ToolMode.TimedLightsShowLights:
-					_guiTimedTrafficLights();
-					break;
-				case ToolMode.LaneChange:
-					_guiLaneChange();
-					break;
-				case ToolMode.LaneRestrictions:
-					_guiLaneRestrictions();
-					break;
+				switch (_toolMode) {
+					case ToolMode.AddPrioritySigns:
+						_guiPrioritySigns(false);
+						break;
+					case ToolMode.ManualSwitch:
+						_guiManualTrafficLights();
+						break;
+					case ToolMode.TimedLightsSelectNode:
+						_guiTimedTrafficLightsNode();
+						break;
+					case ToolMode.TimedLightsShowLights:
+						_guiTimedTrafficLights();
+						break;
+					case ToolMode.LaneChange:
+						_guiLaneChange();
+						break;
+					case ToolMode.LaneRestrictions:
+						_guiLaneRestrictions();
+						break;
+				}
+			} catch (Exception e) {
+				Log.Error("GUI Error: " + e.ToString());
 			}
 		}
 
@@ -1354,7 +1358,11 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 				labelStr += ", flags: " + ((NetLane.Flags)lane.m_flags).ToString() + ", dir: " + laneInfo.m_direction + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType;
 #endif
-				labelStr += ", Avg. speed: " + String.Format("{0:0.##}", CustomRoadAI.laneMeanSpeeds[curLaneId]) + "\n";
+				if (CustomRoadAI.InStartupPhase)
+					labelStr += ", in start-up phase";
+				else
+					labelStr += ", avg. speed: " + CustomRoadAI.laneMeanSpeeds[curLaneId] + " %";
+				labelStr += ", avg. density: " + CustomRoadAI.laneMeanDensities[curLaneId] + " %\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -1400,17 +1408,17 @@ namespace TrafficManager.TrafficLight {
 				labelStr += "\nTraffic: " + segment.m_trafficDensity + " %";
 
 				float meanLaneSpeed = 0f;
+				float meanLaneDensity = 0f;
 
 				int lIndex = 0;
 				uint laneId = segment.m_lanes;
 				int validLanes = 0;
-				float meanMaxSpeed = 0;
 				while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
 					NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
 					if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
 						if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
-							meanLaneSpeed += CustomRoadAI.laneMeanSpeeds[laneId];
-							meanMaxSpeed += lane.m_speedLimit * 8f;
+							meanLaneSpeed += (float)CustomRoadAI.laneMeanSpeeds[laneId];
+							meanLaneDensity += (float)CustomRoadAI.laneMeanDensities[laneId];
 							++validLanes;
 						}
 					}
@@ -1420,10 +1428,14 @@ namespace TrafficManager.TrafficLight {
 
 				if (validLanes > 0) {
 					meanLaneSpeed /= Convert.ToSingle(validLanes);
-					meanMaxSpeed /= Convert.ToSingle(validLanes);
+					meanLaneDensity /= Convert.ToSingle(validLanes);
 				}
 
-				labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + ", max.: " + String.Format("{0:0.##}", meanMaxSpeed) + ")";
+				if (CustomRoadAI.InStartupPhase)
+					labelStr += " (in start-up phase,";
+				else
+					labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + " %,";
+				labelStr += " avg. density: " + String.Format("{0:0.##}", meanLaneDensity) + " %)";
 
 #if DEBUG
 				labelStr += "\nstart: " + segment.m_startNode + ", end: " + segment.m_endNode;

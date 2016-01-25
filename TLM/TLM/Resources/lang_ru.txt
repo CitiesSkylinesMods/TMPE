@@ -73,7 +73,7 @@ Show_nodes_and_segments Показать узлы и сегменты
 Show_lanes Показать полосы
 Path_Of_Evil_(10_%) Дорога Зла (10 %)
 Rush_Hour_(5_%) Час Пик (5 %)
-Minor_Complaints_(2_%) Чуть-чуть Жалоб (2%)
+Minor_Complaints_(2_%) Чуть-чуть Жалоб (2 %)
 Holy_City_(0_%) Святой Город (0 %)
 Forget_toggled_traffic_lights Забыть убрать/добавить светофоры
 Road_is_already_in_a_group! Дорога уже находится в группе!

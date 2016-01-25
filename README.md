@@ -2,8 +2,14 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.4.8
-- Added translation to Russion (thanks to @FireGames for working on this!)
+1.4.8, 01/25/2016
+- AI: Parameters have been tuned
+- AI: Added traffic density measurements
+- Performance improvements
+- Added translation to Polish (thanks to @Krzychu1245 for working on this!)
+- Added translation to Russian (thanks to @FireGames for working on this!)
+- Bugfix: After removing a timed or manual light the traffic light was deleted (thanks to @Mas71 for pointing out this problem)
+- Bugfix: Segment geometries were not always calculated
 - Bugfix: In highway rule mode, lane arrows sometimes flickered 
 - Bugfix: Some traffic light arrows were sometimes not selectable 
  

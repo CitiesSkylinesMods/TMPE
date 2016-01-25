@@ -39,8 +39,6 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
 		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic, byte maxUpcomingPathPositions, bool debug = false) {
-			if (Options.disableSomething2)
-				return;
 			if (maxUpcomingPathPositions <= 0)
 				maxUpcomingPathPositions = 1; // we need at least one upcoming path position
 
@@ -158,7 +156,7 @@ namespace TrafficManager.Custom.AI {
 			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
 				// add traffic to lane
 				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
-				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
+				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
 			}
 
 #if DEBUG
@@ -380,13 +378,13 @@ namespace TrafficManager.Custom.AI {
 					VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
 					if (vehiclePos.Valid && simulatePrioritySigns) {
 						try {
-							HandleVehicle(vehicleId, ref vehicleData, true, true);
+							HandleVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], false, false);
 						} catch (Exception e) {
 							Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
 						}
 					}
 				} else {
-					Log._Debug($"TmCalculateSegmentPosition does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
+					//Log._Debug($"TmCalculateSegmentPosition does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
 				}
 			}
 
@@ -507,6 +505,8 @@ namespace TrafficManager.Custom.AI {
 										}
 									}
 								} else {
+									//if (debug)
+										Log._Debug($"CarAI: Handling vehicle {vehicleId} @ {destinationNodeId} (timed traffic light) going from seg. {prevPos.m_segment} to {position.m_segment}, {nextPosition.m_segment}");
 									// traffic light simulation is active
 									var stopCar = false;
 
@@ -545,7 +545,7 @@ namespace TrafficManager.Custom.AI {
 									}
 
 									if (vehicleLightState == RoadBaseAI.TrafficLightState.Green && !Options.mayEnterBlockedJunctions) {
-										var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
+										var hasIncomingCars = Options.disableSomething3 ? false : TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 
 										if (hasIncomingCars) {
 											// green light but other cars are incoming and they have priority: stop
@@ -566,7 +566,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 								//bool debug = false;
 #if DEBUG
-								if (debug)
+								//if (debug)
 									Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {destinationNodeId} which is not a traffic light.");
 #endif
 
@@ -612,7 +612,7 @@ namespace TrafficManager.Custom.AI {
 
 																float minStopWaitTime = Random.Range(0f, 3f);
 																if (globalTargetPos.WaitTime >= minStopWaitTime) {
-																	hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
+																	hasIncomingCars = Options.disableSomething3 ? false : TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 #if DEBUG
 																	if (debug)
 																		Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -643,7 +643,7 @@ namespace TrafficManager.Custom.AI {
 														if (globalTargetPos.WaitTime < MaxPriorityWaitTime) {
 															globalTargetPos.WaitTime++;
 															globalTargetPos.CarState = CarState.Stop;
-															hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
+															hasIncomingCars = Options.disableSomething3 ? false : TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 #if DEBUG
 															if (debug)
 																Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -683,7 +683,7 @@ namespace TrafficManager.Custom.AI {
 															globalTargetPos.CarState = CarState.Stop;
 															maxSpeed = 0f;
 
-															hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
+															hasIncomingCars = Options.disableSomething3 ? false : TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 #if DEBUG
 															if (debug)
 																Log._Debug($"hasIncomingCars: {hasIncomingCars}");

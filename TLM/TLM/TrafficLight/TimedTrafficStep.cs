@@ -305,12 +305,12 @@ namespace TrafficManager.TrafficLight {
 					if (Single.IsNaN(newFlow))
 						newFlow = flow;
 					else
-						newFlow = 0.5f * newFlow + 0.5f * flow; // some smoothing
+						newFlow = 0.25f * newFlow + 0.75f * flow; // some smoothing
 
 					if (Single.IsNaN(newWait))
 						newWait = 0;
 					else
-						newWait = 0.5f * newWait + 0.5f * wait; // some smoothing
+						newWait = 0.25f * newWait + 0.75f * wait; // some smoothing
 
 					// if more cars are waiting than flowing, we change the step
 					bool done = newWait > 0 && newFlow < newWait;

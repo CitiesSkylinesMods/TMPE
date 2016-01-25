@@ -27,8 +27,9 @@ namespace TrafficManager {
 		private static UICheckBox disableSomething3Toggle = null;
 		private static UICheckBox disableSomething2Toggle = null;
 		private static UICheckBox disableSomething1Toggle = null;
-#endif
 		private static UITextField pathCostMultiplicatorField = null;
+		private static UITextField someValueField = null;
+#endif
 
 		public static int simAccuracy = 1;
 		public static int laneChangingRandomization = 2;
@@ -40,10 +41,11 @@ namespace TrafficManager {
 		public static bool advancedAI = false;
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
-		public static float pathCostMultiplicator = 2f;
+		public static float pathCostMultiplicator = 2f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
+		public static float someValue = 2f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -56,7 +58,7 @@ namespace TrafficManager {
 			mayEnterBlockedJunctionsToggle = group.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), mayEnterBlockedJunctions, onMayEnterBlockedJunctionsChanged) as UICheckBox;
 			UIHelperBase groupAI = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = groupAI.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
-			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules")+" (BETA feature)", highwayRules, onHighwayRulesChanged) as UICheckBox;
 			laneChangingRandomizationDropdown = groupAI.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			UIHelperBase group2 = helper.AddGroup(Translation.GetString("Maintenance"));
 			group2.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights);
@@ -67,6 +69,7 @@ namespace TrafficManager {
 			disableSomething2Toggle = group2.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
 			disableSomething3Toggle = group2.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
 			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
+			someValueField = group2.AddTextfield("Some value", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
 #endif
 		}
 
@@ -113,6 +116,7 @@ namespace TrafficManager {
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
 			Log._Debug($"Highway rules changed to {newHighwayRules}");
 			highwayRules = newHighwayRules;
+			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
 		}
 
@@ -151,6 +155,16 @@ namespace TrafficManager {
 			}
 		}
 
+		private static void onSomeValueChanged(string newSomeValueStr) {
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
 		private static void onClickForgetToggledLights() {
 			Flags.resetTrafficLights(false);
 		}
@@ -173,11 +187,13 @@ namespace TrafficManager {
 				recklessDriversDropdown.selectedIndex = newRecklessDrivers;
 		}
 
+#if DEBUG
 		public static void setPathCostMultiplicator(float newPathCostMultiplicator) {
 			pathCostMultiplicator = newPathCostMultiplicator;
 			if (pathCostMultiplicatorField != null)
 				pathCostMultiplicatorField.text = newPathCostMultiplicator.ToString();
 		}
+#endif
 
 		internal static bool isStockLaneChangerUsed() {
 			return !advancedAI;
@@ -248,7 +264,7 @@ namespace TrafficManager {
 					ret = 50;
 					break;
 			}
-			return ret * 4;
+			return ret;
 		}
 
 		internal static float getLaneChangingProbability() {

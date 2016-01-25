@@ -148,7 +148,7 @@ namespace TrafficManager.TrafficLight {
 				}
 			}
 
-			Flags.setNodeTrafficLight(nodeId, false);
+			//Flags.setNodeTrafficLight(nodeId, false);
 			FlagManualTrafficLights = false;
 			LightSimulationByNodeId.Remove(nodeId);
 		}

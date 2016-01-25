@@ -101,6 +101,8 @@ namespace TrafficManager.Traffic {
 
 				if (vehicleId <= 0 || carPos.ToSegment <= 0)
 					continue;
+				if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None)
+					continue;
 				float speed = vehicleManager.m_vehicles.m_buffer[vehicleId].GetLastFrameVelocity().magnitude;
 				if (minSpeed != null && speed < minSpeed)
 					continue;

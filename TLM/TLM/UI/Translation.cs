@@ -87,6 +87,21 @@ namespace TrafficManager.UI {
 			}
 		}
 
+		internal static int getMenuWidth() {
+			switch (LocaleManager.instance.language) {
+				case null:
+				case "en":
+				case "de":
+				default:
+					return 210;
+				case "ru":
+				case "pl":
+					return 250;
+				case "pr":
+					return 230;
+			}
+		}
+
 		internal static void OnLevelUnloading() {
 			translations = null;
 		}
