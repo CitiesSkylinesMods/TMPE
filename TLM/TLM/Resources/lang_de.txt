@@ -82,3 +82,4 @@ Create_group Gruppe erstellen
 Delete_group Gruppe löschen
 Add_zoning Zonen aktivieren
 Remove_zoning Zonen löschen
+Lane_Arrow_Changer_Disabled Das Ändern der Richtungspfeile ist für diese Spur deaktviert, weil du die speziellen Regeln für Autobahnen aktiviert hast.
