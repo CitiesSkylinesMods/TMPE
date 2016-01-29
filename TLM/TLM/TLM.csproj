@@ -78,6 +78,8 @@
     <Compile Include="UI\Translation.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Traffic\Direction.cs" />
+    <Compile Include="Traffic\SpeedLimit.cs" />
+    <Compile Include="Traffic\SpeedLimitManager.cs" />
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
     <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="State\Flags.cs" />
@@ -154,6 +156,19 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\0.png" />
+    <EmbeddedResource Include="Resources\10.png" />
+    <EmbeddedResource Include="Resources\100.png" />
+    <EmbeddedResource Include="Resources\120.png" />
+    <EmbeddedResource Include="Resources\130.png" />
+    <EmbeddedResource Include="Resources\20.png" />
+    <EmbeddedResource Include="Resources\30.png" />
+    <EmbeddedResource Include="Resources\40.png" />
+    <EmbeddedResource Include="Resources\50.png" />
+    <EmbeddedResource Include="Resources\60.png" />
+    <EmbeddedResource Include="Resources\70.png" />
+    <EmbeddedResource Include="Resources\80.png" />
+    <EmbeddedResource Include="Resources\90.png" />
     <EmbeddedResource Include="Resources\clock_pause.png" />
     <EmbeddedResource Include="Resources\clock_test.png" />
     <EmbeddedResource Include="Resources\clock_play.png" />

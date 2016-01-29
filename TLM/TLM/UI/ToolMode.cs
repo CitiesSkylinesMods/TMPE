@@ -11,6 +11,7 @@ namespace TrafficManager.UI
         LaneChange,
         LaneRestrictions,
 		TimedLightsAddNode,
-		TimedLightsRemoveNode
+		TimedLightsRemoveNode,
+		SpeedLimits
 	}
 }

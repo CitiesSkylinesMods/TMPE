@@ -176,10 +176,27 @@ namespace TrafficManager.TrafficLight {
 				case ToolMode.LaneRestrictions:
 					_renderOverlayLaneRestrictions(cameraInfo);
 					break;
+				case ToolMode.SpeedLimits:
+					_renderOverlaySpeedLimits(cameraInfo);
+					break;
 				default:
 					base.RenderOverlay(cameraInfo);
 					break;
 			}
+		}
+
+		private void _renderOverlaySpeedLimits(RenderManager.CameraInfo cameraInfo) {
+			if (_hoveredSegmentIdx != 0 && _hoveredSegmentIdx != SelectedSegment) {
+				var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx];
+
+				NetTool.RenderOverlay(cameraInfo, ref hoveredSegment, GetToolColor(false, false), GetToolColor(false, false));
+			}
+
+			if (SelectedSegment == 0) return;
+
+			var selectedSegment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
+
+			NetTool.RenderOverlay(cameraInfo, ref selectedSegment, GetToolColor(true, false), GetToolColor(true, false));
 		}
 
 		/// <summary>
@@ -229,6 +246,9 @@ namespace TrafficManager.TrafficLight {
 					case ToolMode.LaneChange:
 						LaneChangeToolMode();
 						break;
+					case ToolMode.SpeedLimits:
+						SpeedLimitsToolMode();
+						break;
 					case ToolMode.LaneRestrictions:
 						LaneRestrictionsToolMode();
 						break;
@@ -277,6 +297,9 @@ namespace TrafficManager.TrafficLight {
 						break;
 					case ToolMode.LaneChange:
 						_guiLaneChange();
+						break;
+					case ToolMode.SpeedLimits:
+						_guiSpeedLimits();
 						break;
 					case ToolMode.LaneRestrictions:
 						_guiLaneRestrictions();
@@ -543,6 +566,16 @@ namespace TrafficManager.TrafficLight {
 
 			SelectedSegment = _hoveredSegmentIdx;
 			SelectedNode = _hoveredNetNodeIdx;
+		}
+
+		private void SpeedLimitsToolMode() {
+			if (_hoveredSegmentIdx == 0) return;
+
+			var netFlags = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx].m_flags;
+
+			if ((netFlags & NetSegment.Flags.Created) == NetSegment.Flags.None) return;
+
+			SelectedSegment = _hoveredSegmentIdx;
 		}
 
 		private void TimedLightSelectNodeToolMode(NetNode node) {
@@ -2591,6 +2624,137 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			GUILayout.EndHorizontal();
+		}
+
+		private void _guiSpeedLimits() {
+			_cursorInSecondaryPanel = false;
+
+			if (SelectedSegment == 0) return;
+
+			var style = new GUIStyle {
+				normal = { background = _secondPanelTexture },
+				alignment = TextAnchor.MiddleCenter,
+				border =
+				{
+					bottom = 2,
+					top = 2,
+					right = 2,
+					left = 2
+				}
+			};
+
+			var windowRect = ResizeGUI(new Rect(155, 45, speedLimitsPerPage * 200 + 100, 210));
+			GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, "", style);
+			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
+		}
+
+		private int speedLimitPage = 0;
+		private int speedLimitsPerPage = 4;
+		private int curSpeedLimitIndex = 0;
+
+		private void _guiSpeedLimitsWindow(int num) {
+			int speedLimitPages = SpeedLimitManager.AvailableSpeedLimits.Count % speedLimitsPerPage == 0 ? SpeedLimitManager.AvailableSpeedLimits.Count / speedLimitsPerPage : SpeedLimitManager.AvailableSpeedLimits.Count / speedLimitsPerPage + 1;
+			GUILayout.BeginHorizontal();
+			
+			GUILayout.BeginVertical();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("< Previous")) {
+				speedLimitPage = (speedLimitPage + speedLimitPages - 1) % speedLimitPages;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndVertical();
+
+			Color oldColor = GUI.color;
+			for (int i = speedLimitPage * speedLimitPage; i < Math.Min(SpeedLimitManager.AvailableSpeedLimits.Count, speedLimitPage * speedLimitPage + speedLimitsPerPage); ++i) {
+				if (curSpeedLimitIndex == i)
+					GUI.color = Color.yellow;
+				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.AvailableSpeedLimits[i]], GUILayout.Width(200), GUILayout.Height(200))) {
+					curSpeedLimitIndex = i;
+				}
+				GUI.color = oldColor;
+			}
+
+			GUILayout.BeginVertical();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("Next >")) {
+				speedLimitPage = (speedLimitPage + 1) % speedLimitPages;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndVertical();
+
+			GUILayout.EndHorizontal();
+
+			// draw speedlimits over mean middle points of lane beziers
+			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment];
+			uint curLaneId = segment.m_lanes;
+			Dictionary<NetInfo.Direction, int> forwardNumCentersByDir = new Dictionary<NetInfo.Direction, int>();
+			Dictionary<NetInfo.Direction, int> backwardNumCentersByDir = new Dictionary<NetInfo.Direction, int>(); ;
+			Dictionary<NetInfo.Direction, Vector3> forwardCenterByDir = new Dictionary<NetInfo.Direction, Vector3>();
+			Dictionary<NetInfo.Direction, Vector3> backwardCenterByDir = new Dictionary<NetInfo.Direction, Vector3>(); ;
+			int laneIndex = 0;
+			while (laneIndex < segment.Info.m_lanes.Length && curLaneId != 0u) {
+				if ((segment.Info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.PublicTransport)) == NetInfo.LaneType.None)
+					continue;
+
+				NetInfo.Direction dir = segment.Info.m_lanes[laneIndex].m_direction;
+				Vector3 bezierCenter = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_bezier.Position(0.5f);
+				if ((dir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
+					if (!forwardCenterByDir.ContainsKey(dir)) {
+						forwardCenterByDir[dir] = bezierCenter;
+						forwardNumCentersByDir[dir] = 1;
+					} else {
+						forwardCenterByDir[dir] += bezierCenter;
+						forwardNumCentersByDir[dir]++;
+					}
+				} else {
+					if (!backwardCenterByDir.ContainsKey(dir)) {
+						backwardCenterByDir[dir] = bezierCenter;
+						backwardNumCentersByDir[dir] = 1;
+					} else {
+						backwardCenterByDir[dir] += bezierCenter;
+						backwardNumCentersByDir[dir]++;
+					}
+				}
+
+				foreach (KeyValuePair<NetInfo.Direction, int> e in forwardNumCentersByDir) {
+					forwardCenterByDir[e.Key] /= (float)e.Value;
+
+					drawSpeedLimitHandle(forwardCenterByDir[e.Key]);
+				}
+
+				foreach (KeyValuePair<NetInfo.Direction, int> e in backwardNumCentersByDir) {
+					backwardCenterByDir[e.Key] /= (float)e.Value;
+
+					drawSpeedLimitHandle(backwardCenterByDir[e.Key]);
+				}
+
+				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+				laneIndex++;
+			}
+		}
+
+		private void drawSpeedLimitHandle(Vector3 position) {
+			var screenPos = Camera.main.WorldToScreenPoint(position);
+			screenPos.y = Screen.height - screenPos.y;
+			if (screenPos.z < 0)
+				return;
+			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+			var diff = position - camPos;
+			var zoom = 1.0f / diff.magnitude * 100f;
+			var size = 110f * zoom;
+			var guiColor = GUI.color;
+			var boundingBox = new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size);
+			bool hoveredSegment = /*!viewOnly &&*/ IsMouseOver(boundingBox);
+
+			if (hoveredSegment) {
+				// mouse hovering over sign
+				guiColor.a = 0.8f;
+			} else {
+				guiColor.a = 0.5f;
+				size = 90f * zoom;
+			}
+			var drawingBox = new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size);
+			GUI.DrawTexture(drawingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
 		}
 
 		private void _guiLaneRestrictions() {
