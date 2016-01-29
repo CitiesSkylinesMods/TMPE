@@ -27,6 +27,7 @@ namespace TrafficManager.Traffic {
 		public float ReduceSpeedByValueToYield;
 		public bool Stopped = false;
 		public bool Valid = false;
+		public bool OnEmergency;
 
 		public uint LastFrame;
 
@@ -47,6 +48,7 @@ namespace TrafficManager.Traffic {
 
 			WaitTime = 0;
 			CarState = CarState.None;
+			OnEmergency = false;
 		}
 	}
 }

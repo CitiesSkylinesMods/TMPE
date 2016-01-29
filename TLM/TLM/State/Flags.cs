@@ -132,7 +132,7 @@ namespace TrafficManager.State {
 				Monitor.Enter(laneArrowLock);
 
 				if (!mayHaveLaneArrows(laneId)) {
-					removeLaneArrowFlags(laneId);
+                    removeLaneArrowFlags(laneId);
 					return;
 				}
 
@@ -242,7 +242,7 @@ namespace TrafficManager.State {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
@@ -282,9 +282,8 @@ namespace TrafficManager.State {
 			ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
 			if (segmentId <= 0)
 				return false;
-			NetSegment segment = netManager.m_segments.m_buffer[segmentId];
 
-			if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+			if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 				return false;
 
 			return true;
@@ -324,13 +323,18 @@ namespace TrafficManager.State {
 				if (nodeId <= 0 || !nodeTrafficLightFlag.ContainsKey(nodeId))
 					return;
 
+				bool mayHaveLight = mayHaveTrafficLight(nodeId);
 				bool flag = nodeTrafficLightFlag[nodeId];
-				if (flag) {
+				if (flag && mayHaveLight) {
 					//Log.Message($"Adding traffic light @ node {nodeId}");
 					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
 				} else {
 					//Log.Message($"Removing traffic light @ node {nodeId}");
 					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+					if (!mayHaveLight) {
+						Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
+						nodeTrafficLightFlag.Remove(nodeId);
+					}
 				}
 			} finally {
 				Monitor.Exit(nodeLightLock);

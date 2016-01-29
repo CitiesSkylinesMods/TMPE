@@ -35,13 +35,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ColossalManaged">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <HintPath>..\References\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+      <HintPath>..\References\ICities.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.4.2.2\lib\net35\NLog.dll</HintPath>
@@ -53,7 +56,8 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\References\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -66,8 +70,8 @@
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="CustomNetTool.cs" />
-    <Compile Include="Custom\Misc\CustomPathFind.cs" />
-    <Compile Include="Custom\Manager\CustomPathManager.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Traffic\SegmentGeometry.cs" />
     <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
@@ -86,10 +90,10 @@
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\ManualSegment.cs" />
     <Compile Include="TrafficLight\ManualSegmentLight.cs" />
-    <Compile Include="TrafficLight\ToolMode.cs" />
+    <Compile Include="UI\ToolMode.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
-    <Compile Include="TrafficLight\TrafficLightsManual.cs" />
-    <Compile Include="TrafficLight\TrafficLightsTimed.cs" />
+    <Compile Include="TrafficLight\ManualTrafficLights.cs" />
+    <Compile Include="TrafficLight\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\TrafficLightToolTextureResources.cs" />
@@ -138,6 +142,7 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_fr.txt" />
     <EmbeddedResource Include="Resources\lang_pl.txt" />
     <EmbeddedResource Include="Resources\lang_ru.txt" />
     <EmbeddedResource Include="Resources\lang_pt.txt" />

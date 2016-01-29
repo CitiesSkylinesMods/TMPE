@@ -3,17 +3,16 @@ using System.Reflection;
 using ColossalFramework;
 using ICities;
 using TrafficManager.Custom.AI;
-using TrafficManager.Custom.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
-using TrafficManager.Custom.Misc;
 using TrafficManager.State;
 using ColossalFramework.UI;
 using ColossalFramework.Math;
+using TrafficManager.Custom.PathFinding;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -218,8 +217,8 @@ namespace TrafficManager {
 				TrafficPriority.OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
 				CustomRoadAI.OnLevelUnloading();
-				TrafficLightsManual.OnLevelUnloading();
-				TrafficLightsTimed.OnLevelUnloading();
+				ManualTrafficLights.OnLevelUnloading();
+				TrafficLightSimulation.OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
 
@@ -249,8 +248,6 @@ namespace TrafficManager {
 				Instance = this;
 
 				determinePathManagerCompatible();
-				TrafficPriority.LeftHandDrive = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic ==
-											   SimulationMetaData.MetaBool.True;
 				TrafficPriority.OnLevelLoading();
 				CustomRoadAI.OnLevelLoading();
 

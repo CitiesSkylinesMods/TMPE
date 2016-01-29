@@ -44,7 +44,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.4.8";
+			title.text = "Version 1.4.9";
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;
@@ -130,16 +130,14 @@ namespace TrafficManager.UI {
 
 		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort segmentId = Convert.ToUInt16(_goToField.text);
-			NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-			if ((segment.m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
-				CameraCtrl.GoToSegment(segmentId, new Vector3(segment.m_bounds.center.x, Camera.main.transform.position.y, segment.m_bounds.center.z));
+			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
+				CameraCtrl.GoToSegment(segmentId, new Vector3(Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.x, Camera.main.transform.position.y, Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.z));
 			}
 		}
 		private void clickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort nodeId = Convert.ToUInt16(_goToField.text);
-			NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-			if ((node.m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
-				CameraCtrl.GoToNode(nodeId, new Vector3(node.m_position.x, Camera.main.transform.position.y, node.m_position.z));
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
+				CameraCtrl.GoToNode(nodeId, new Vector3(Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position.x, Camera.main.transform.position.y, Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position.z));
 			}
 		}
 

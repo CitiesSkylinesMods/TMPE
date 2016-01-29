@@ -1,0 +1,89 @@
+Switch_traffic_lights (Dés)activer les feux tricolores
+Add_priority_signs Ajouter des Signes de priorité
+Manual_traffic_lights Feux tricolores manuels
+Timed_traffic_lights Feux tricolores chronométrés
+Change_lane_arrows Changer les directions de voies
+Clear_Traffic Nettoyer le Trafic
+Disable_despawning Désactiver la disparition
+Enable_despawning Activer la disparition
+NODE_IS_LIGHT Cette intersection a des feux rouges.\nSupprimez-les en sélectionnant "(Dés)activer les feux tricolores" et en cliquant sur l'intersection.
+NODE_IS_TIMED_LIGHT Cette intersection a des feux chronométrés.\nSélectionnez "Feux tricolores chronométrés", cliquer sur l'intersection, puis sur "Retirer" d'abord.
+Select_nodes_windowTitle Sélection des intersections
+Select_nodes Sélection des intersections
+Node Intersection
+Deselect_all_nodes Désélectionner toutes les intersections
+Setup_timed_traffic_light Créer un chronométrage des Feux
+State Etat
+Skip Passer
+up haut
+down bas
+View Voir
+Edit Modifier
+Delete Suppr.
+Timed_traffic_lights_manager Gestionnaire de Feux tricolores chronométrés
+Add_step Ajouter un état
+Remove_timed_traffic_light Retirer le chronométrage
+Min._Time: Temps Min:
+Max._Time: Temps Max:
+Save Sauvegarder
+Add Ajouter
+Sensitivity Sensibilité
+Very_Low Très Basse
+Low Basse
+Medium Moyenne
+High Haute
+Very_high Très haute
+Extreme_long_green/red_phases Phases rouge/vert extrêmement longues
+Very_long_green/red_phases Phases rouge/vert très longues
+Long_green/red_phases Phases rouge/vert longues
+Moderate_green/red_phases Phases rouge/vert moyennement longues
+Short_green/red_phases Phases rouge/vert courtes
+Very_short_green/red_phases Phases rouge/vert très courtes
+Extreme_short_green/red_phases Phases rouge/vert extrêmement courtes
+Hide_counters Masquer les compteurs
+Show_counters Afficher les compteurs
+Start Démarrer
+Stop Stop
+Enable_test_mode_(stay_in_current_step) Activer le mode Test (rester dans l'état actuel)
+avg._flow flux moy.
+avg._wait attente moy.
+min/max min/max
+Lane Voie
+Set_Speed Régler la vitesse {0}
+Max_speed Vitesse max.
+Segment Segment
+incoming bientôt
+Enable_Advanced_Vehicle_AI Activer l'IA avancée des véhicules
+Vehicles_may_enter_blocked_junctions Véhicules peuvent entrer dans les intersections bloquées
+All_vehicles_may_ignore_lane_arrows Tous les véhicules peuvent ignorer les directions des voies
+Busses_may_ignore_lane_arrows Les bus peuvent ignorer les directions des voies
+Reckless_driving Conduite téméraire (fonctionnalité Bêta)
+TMPE_Title Traffic Manager: Edition Président (Paramètres définis pour chaque sauvegarde séparément)
+Simulation_accuracy Précision de la simulation (une plus haute précision réduit les performances)
+Enable_highway_specific_lane_merging/splitting_rules Activer les règles spécifiques de divergence/convergence sur les autoroutes
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Les conducteurs veulent changer de voies: (seulement si l'IA avancée est activée)
+Maintenance Maintenance
+Very_often_(50_%) Très souvent (50 %)
+Often_(25_%) Souvent (25 %)
+Sometimes_(10_%) Parfois (10 %)
+Rarely_(5_%) Rarement (5 %)
+Very_rarely_(2.5_%) Très rarement (2.5 %)
+Only_if_necessary Seulement si nécessaire
+Show_nodes_and_segments Afficher les nœuds et segments
+Show_lanes Afficher les voies
+Path_Of_Evil_(10_%) Chemin du Mal (10 %)
+Rush_Hour_(5_%) Heures de Pointe (5 %)
+Minor_Complaints_(2_%) Plaintes mineures (2 %)
+Holy_City_(0_%) Ville Sainte (0 %)
+Forget_toggled_traffic_lights Oublier les feux tricolores retirés
+Road_is_already_in_a_group! Cette route est déjà dans un groupe !
+All_selected_roads_must_be_of_the_same_type! Toutes les routes sélectionnées doivent être de même type!
+Create_group Créer un groupe
+Delete_group Supprimer un groupe
+Add_zoning Ajouter le zonage
+Remove_zoning Retirer le zonage
+Lane_Arrow_Changer_Disabled Le modificateur de directions pour cette voie est désactivé car vous avez activer le système de règles pour autoroutes.
+Add_junction_to_timed_light Ajouter une intersection à ce feu tricolore
+Remove_junction_from_timed_light Retirer une intersection de ce feu tricolore
+Select_junction Sélectionnez une intersection
+Cancel Annuler

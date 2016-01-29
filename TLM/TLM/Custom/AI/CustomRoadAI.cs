@@ -5,9 +5,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using UnityEngine;
 using ColossalFramework.Math;
-using TrafficManager.Custom.Manager;
-using TrafficManager.Custom.Misc;
 using System.Threading;
+using TrafficManager.UI;
 
 namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
@@ -52,7 +51,7 @@ namespace TrafficManager.Custom.AI {
 				TrafficPriority.TrafficLightSimulationStep();
 
 				var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
-				if (nodeSim == null || (nodeSim.TimedTrafficLights && !nodeSim.TimedTrafficLightsActive)) {
+				if (nodeSim == null || !nodeSim.IsTimedLightActive()) {
 					OriginalSimulationStep(nodeId, ref data);
 				}
 			} catch (Exception e) {
@@ -84,14 +83,17 @@ namespace TrafficManager.Custom.AI {
 							// we use integer division here because it's faster
 							if (buf > 0) {
 								uint currentSpeeds = currentLaneSpeeds[curLaneId];
-								uint currentDensities = currentLaneDensities[curLaneId] << 3;
+								uint currentDensities = currentLaneDensities[curLaneId] << 4;
 
 								if (!InStartupPhase) {
 									currentMeanSpeed = (byte)Math.Min(100u, ((currentSpeeds * 100u) / buf) / ((uint)(Math.Max(data.Info.m_lanes[laneIndex].m_speedLimit * 8f, 1f)))); // 0 .. 100, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 								}
-								currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Convert.ToUInt32(Math.Max(Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length, 0.1f)))); // 0 .. 100
+								currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Convert.ToUInt32(Math.Max(Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_length, 1f)))); // 0 .. 100
 							} else {
 								currentMeanDensity = 0;
+								if (!InStartupPhase) {
+									currentMeanSpeed = 100;
+								}
 							}
 
 							if (segmentID == 22980) {
@@ -104,9 +106,9 @@ namespace TrafficManager.Custom.AI {
 								laneMeanSpeeds[curLaneId] = (byte)Math.Max((int)laneMeanSpeeds[curLaneId] - 5, 0);
 
 							if (currentMeanDensity >= laneMeanDensities[curLaneId])
-								laneMeanDensities[curLaneId] = (byte)Math.Min((int)laneMeanDensities[curLaneId] + 5, currentMeanDensity);
+								laneMeanDensities[curLaneId] = (byte)Math.Min((int)laneMeanDensities[curLaneId] + 2, currentMeanDensity);
 							else
-								laneMeanDensities[curLaneId] = (byte)Math.Max((int)laneMeanDensities[curLaneId] - 5, 0);
+								laneMeanDensities[curLaneId] = (byte)Math.Max((int)laneMeanDensities[curLaneId] - 1, 0);
 
 							currentLaneTrafficBuffer[curLaneId] = 0;
 							currentLaneSpeeds[curLaneId] = 0;

@@ -83,3 +83,7 @@ Delete_group Delete group
 Add_zoning Add zoning
 Remove_zoning Remove zoning
 Lane_Arrow_Changer_Disabled The lane arrow changer for this lane is disabled because you activated the highway rule system.
+Add_junction_to_timed_light Add a junction to this traffic light
+Remove_junction_from_timed_light Remove a junction from this traffic light
+Select_junction Select a junction
+Cancel Cancel

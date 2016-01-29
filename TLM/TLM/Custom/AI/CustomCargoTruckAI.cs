@@ -1,7 +1,6 @@
 using System;
 using ColossalFramework;
 using UnityEngine;
-using TrafficManager.Custom.Manager;
 
 namespace TrafficManager.Custom.AI
 {

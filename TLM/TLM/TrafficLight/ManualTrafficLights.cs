@@ -4,7 +4,7 @@ using ColossalFramework;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.TrafficLight {
-	class TrafficLightsManual {
+	class ManualTrafficLights {
 
 		/// <summary>
 		/// Manual light by segment id

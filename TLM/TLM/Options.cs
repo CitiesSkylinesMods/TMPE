@@ -45,7 +45,7 @@ namespace TrafficManager {
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
-		public static float someValue = 2f; // debug value
+		public static float someValue = 3f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			UIHelperBase group = helper.AddGroup(Translation.GetString("TMPE_Title"));

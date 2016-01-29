@@ -1,4 +1,4 @@
-namespace TrafficManager.TrafficLight
+namespace TrafficManager.UI
 {
     public enum ToolMode
     {
@@ -9,6 +9,8 @@ namespace TrafficManager.TrafficLight
         TimedLightsSelectNode,
         TimedLightsShowLights,
         LaneChange,
-        LaneRestrictions
-    }
+        LaneRestrictions,
+		TimedLightsAddNode,
+		TimedLightsRemoveNode
+	}
 }

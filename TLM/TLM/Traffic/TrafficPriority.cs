@@ -6,14 +6,12 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Custom.AI;
 using UnityEngine;
 using TrafficManager.State;
-using TrafficManager.Custom.Misc;
 using System.Threading;
 
 namespace TrafficManager.Traffic {
 	class TrafficPriority {
 		private static uint[] segmentsCheckLoadBalanceMod = new uint[] { 127, 255, 511, 1023, 2047 };
 
-		public static bool LeftHandDrive;
 		public static float maxStopVelocity = 0.5f;
 
 		/// <summary>
@@ -178,7 +176,7 @@ namespace TrafficManager.Traffic {
 				NetManager netManager = Singleton<NetManager>.instance;
 				if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
 					RemovePrioritySegment(nodeId, segmentId);
-					TrafficLightsManual.RemoveSegmentLight(segmentId);
+					ManualTrafficLights.RemoveSegmentLight(segmentId);
 					return false;
 				}
 
@@ -465,7 +463,7 @@ namespace TrafficManager.Traffic {
 #endif
 
 						// Traffic lights
-						if (!TrafficLightsManual.IsSegmentLight(nodeId, incomingSegmentId)) {
+						if (!ManualTrafficLights.IsSegmentLight(nodeId, incomingSegmentId)) {
 #if DEBUG
 							if (debug) {
 								Log._Debug($"Segment {incomingSegmentId} @ {nodeId} does not have live traffic lights.");
@@ -474,7 +472,7 @@ namespace TrafficManager.Traffic {
 							continue;
 						}
 
-						var segmentLight = TrafficLightsManual.GetSegmentLight(nodeId, incomingSegmentId);
+						var segmentLight = ManualTrafficLights.GetSegmentLight(nodeId, incomingSegmentId);
 
 						if (segmentLight.GetLightMain() != RoadBaseAI.TrafficLightState.Green)
 							continue;
@@ -660,6 +658,10 @@ namespace TrafficManager.Traffic {
 					return true;
 				}
 
+				// check if target is on main road and incoming is on low-priority road
+				if (targetIsOnMainRoad && !incomingIsOnMainRoad)
+					return true;
+
 #if DEBUG
 				if (debug) {
 					Log._Debug($"HasVehiclePriority: Distance between target car {targetCarId} and incoming car {incomingCarId}: {dist}. Incoming speed: {incomingVel}. Speed * 20 time units = {incomingVel*20}");
@@ -680,7 +682,7 @@ namespace TrafficManager.Traffic {
 					return true;
 				}
 				if (incomingCar.ToNode != targetCar.ToNode) {
-					Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} goes to node {incomingCar.ToNode} where target car {targetCarId} goes to {targetCar.ToNode}. Ignoring.");
+					//Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} goes to node {incomingCar.ToNode} where target car {targetCarId} goes to {targetCar.ToNode}. Ignoring.");
                     return true;
 				}
 
@@ -705,7 +707,7 @@ namespace TrafficManager.Traffic {
                 }
 #endif
 
-				if (LeftHandDrive) {
+				if (IsLeftHandDrive()) {
 					// mirror situation for left-hand traffic systems
 					targetToDir = InvertLeftRight(targetToDir);
 					incomingRelDir = InvertLeftRight(incomingRelDir);
@@ -798,6 +800,7 @@ namespace TrafficManager.Traffic {
 						// target: BOTTOM->TOP
 						switch (incomingRelDir) {
 							case Direction.Right:
+								return !incomingIsOnMainRoad && !incomingCrossingStreet;
 							case Direction.Left:
 								return targetIsOnMainRoad || !incomingCrossingStreet;
 							case Direction.Forward:
@@ -884,7 +887,7 @@ namespace TrafficManager.Traffic {
 		public static bool IsLaneOrderConflictFree(ushort segmentId, uint leftLaneIndex, uint rightLaneIndex) {
 			try {
 				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-				NetInfo.Direction normDirection = TrafficPriority.LeftHandDrive ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
+				NetInfo.Direction normDirection = IsLeftHandDrive() ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
 				NetInfo.Lane leftLane = segmentInfo.m_lanes[leftLaneIndex];
 				NetInfo.Lane rightLane = segmentInfo.m_lanes[rightLaneIndex];
 
@@ -1090,12 +1093,19 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		/// <summary>
+		/// Determines if the map uses a left-hand traffic system
+		/// </summary>
+		/// <returns></returns>
+		public static bool IsLeftHandDrive() {
+			return Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
+		}
+
 		internal static void fixJunctions() {
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
-				NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[i];
-				if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
-				if (node.CountSegments() > 2)
+				if (Singleton<NetManager>.instance.m_nodes.m_buffer[i].CountSegments() > 2)
 					Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags |= NetNode.Flags.Junction;
 			}
 		}
@@ -1155,9 +1165,8 @@ namespace TrafficManager.Traffic {
 					var segmentId = node.GetSegment(s);
 					if (segmentId <= 0)
 						continue;
-					NetSegment segment = netManager.m_segments.m_buffer[segmentId];
 
-					uint laneId = segment.m_lanes;
+					uint laneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
 					while (laneId != 0) {
 						if (!Flags.applyLaneArrowFlags(laneId)) {
 							Flags.removeLaneArrowFlags(laneId);
@@ -1193,11 +1202,11 @@ namespace TrafficManager.Traffic {
 				}
 
 				// add newly created segments to timed traffic lights
-				if (TrafficLightsTimed.TimedScripts.ContainsKey(nodeId)) {
-					TrafficLightsTimed.TimedScripts[nodeId].handleNewSegments();
-				}
+				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				if (lightSim != null)
+					lightSim.handleNewSegments();
 			} catch (Exception e) {
-				Log.Warning($"Housekeeping failed: {e.Message}");
+				Log.Warning($"Housekeeping failed: {e.ToString()}");
 			}
 		}
 
@@ -1260,8 +1269,8 @@ namespace TrafficManager.Traffic {
 					return false;
 				} else {
 					// check if all timed step segments are valid
-					if (nodeSim.TimedTrafficLights && nodeSim.TimedTrafficLightsActive) {
-						TrafficLightsTimed timedLight = TrafficLightsTimed.GetTimedLight(nodeId);
+					if (nodeSim.IsTimedLightActive()) {
+						TimedTrafficLights timedLight = nodeSim.TimedLight;
 						if (timedLight == null || timedLight.Steps.Count <= 0) {
 							Log.Warning("Housekeeping: Timed light is null or no steps for node {nodeId}!");
 							TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, false);
@@ -1284,8 +1293,7 @@ namespace TrafficManager.Traffic {
 					var segmentId = node.GetSegment(s);
 					if (segmentId <= 0)
 						continue;
-					NetSegment segment = netManager.m_segments.m_buffer[segmentId];
-					if (segment.m_startNode != nodeId && segment.m_endNode != nodeId)
+					if (netManager.m_segments.m_buffer[segmentId].m_startNode != nodeId && netManager.m_segments.m_buffer[segmentId].m_endNode != nodeId)
 						continue;
 
 					PrioritySegment prioritySegment = GetPrioritySegment(nodeId, segmentId);
