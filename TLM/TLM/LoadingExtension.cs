@@ -249,7 +249,7 @@ namespace TrafficManager {
 
 				determinePathManagerCompatible();
 				TrafficPriority.OnLevelLoading();
-				CustomRoadAI.OnLevelLoading();
+				//SpeedLimitManager.GetDefaultSpeedLimits();
 
 				initDetours();
 

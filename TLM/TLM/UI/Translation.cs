@@ -98,6 +98,7 @@ namespace TrafficManager.UI {
 				case "pl":
 					return 250;
 				case "pr":
+				case "fr":
 					return 230;
 			}
 		}

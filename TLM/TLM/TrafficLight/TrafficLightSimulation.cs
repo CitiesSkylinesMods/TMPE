@@ -30,11 +30,11 @@ namespace TrafficManager.TrafficLight {
 
 				if (value == false) {
 					for (var s = 0; s < 8; s++) {
-						var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+						var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
 
-						if (segment == 0) continue;
-						if (TrafficLight.ManualTrafficLights.IsSegmentLight(nodeId, segment)) {
-							TrafficLight.ManualTrafficLights.RemoveSegmentLight(nodeId, segment);
+						if (segmentId == 0) continue;
+						if (TrafficLight.ManualTrafficLights.IsSegmentLight(nodeId, segmentId)) {
+							TrafficLight.ManualTrafficLights.RemoveSegmentLight(nodeId, segmentId);
 						}
 					}
 				} else {

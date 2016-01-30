@@ -2,9 +2,11 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.4.10
+1.5.0
+- New feature: Speed restrictions (as requested by @Gfurst)
 - AI: Parameters tuned
 - Code improvements
+- Lane arrow changer window is now positioned near the edited junction (as requested by @GordonDry)
 - Bugfix: Flowing/Waiting vehicles count corrected
 
 1.4.9, 01/27/2016

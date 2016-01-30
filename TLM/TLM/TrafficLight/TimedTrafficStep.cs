@@ -60,7 +60,6 @@ namespace TrafficManager.TrafficLight {
 
 			this.groupNodeIds = groupNodeIds;
 
-			var node = TrafficLightTool.GetNetNode(timedNode.NodeId);
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
 
@@ -68,7 +67,7 @@ namespace TrafficManager.TrafficLight {
 			stepDone = false;
 
 			for (var s = 0; s < 8; s++) {
-				var segmentId = node.GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNode.NodeId].GetSegment(s);
 				if (segmentId <= 0)
 					continue;
 
@@ -78,11 +77,9 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void calcMaxSegmentLength() {
-			var node = TrafficLightTool.GetNetNode(timedNode.NodeId);
-
 			maxSegmentLength = 0;
 			for (var s = 0; s < 8; s++) {
-				var segmentId = node.GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNode.NodeId].GetSegment(s);
 				
 				if (segmentId <= 0)
 					continue;

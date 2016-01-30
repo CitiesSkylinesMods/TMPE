@@ -51,7 +51,7 @@ namespace TrafficManager {
 					UnityEngine.Debug.Log(Prefix + s);
 #endif
 				Monitor.Enter(logLock);
-				LogToFile(s, LogLevel.Debug);
+				LogToFile(s, LogLevel.Info);
 			} catch (Exception) {
 
 			} finally {

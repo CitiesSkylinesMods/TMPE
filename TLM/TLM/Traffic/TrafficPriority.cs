@@ -107,9 +107,8 @@ namespace TrafficManager.Traffic {
 			if (nodeId <= 0)
 				return;
 
-			var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
 			for (var s = 0; s < 8; s++) {
-				var segmentId = node.GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
 				if (segmentId <= 0)
 					continue;
 
@@ -139,9 +138,8 @@ namespace TrafficManager.Traffic {
 			if (nodeId <= 0)
 				return ret;
 
-			var node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
 			for (var s = 0; s < 8; s++) {
-				var segmentId = node.GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
 				if (segmentId <= 0)
 					continue;
 
@@ -286,12 +284,12 @@ namespace TrafficManager.Traffic {
 
 				VehiclePosition targetVehiclePos = GetVehiclePosition(targetVehicleId);
 				if (!targetVehiclePos.Valid) {
-					Log._Debug($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Car does not exist!");
+					Log._Debug($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Target position is invalid!");
 					return false;
 				}
 
 				if (targetVehiclePos.ToNode != nodeId) {
-					Log._Debug($"HasIncomingVehicles: The vehicle {targetVehicleId} is not driving on a segment adjacent to node {nodeId}.");
+					//Log._Debug($"HasIncomingVehicles: The vehicle {targetVehicleId} is not driving on a segment adjacent to node {nodeId}.");
 					return false;
 				}/* else if (targetVehiclePos.FromSegment == 22980u && nodeId == 13630u) {
 					Log.Error("vehicleId " + targetVehicleId + ". ToNode: " + targetVehiclePos.ToNode + ". FromSegment: " + targetVehiclePos.FromSegment + ". ToSegment: " + targetVehiclePos.ToSegment);
@@ -540,9 +538,9 @@ namespace TrafficManager.Traffic {
 				}
 
 				if (trafficSeg.Instance1 != null)
-					trafficSeg.Instance1.RemoveCar(vehicleId); // modifies markedVehicles
+					trafficSeg.Instance1.RemoveVehicle(vehicleId); // modifies markedVehicles
 				if (trafficSeg.Instance2 != null)
-					trafficSeg.Instance2.RemoveCar(vehicleId); // modifies markedVehicles
+					trafficSeg.Instance2.RemoveVehicle(vehicleId); // modifies markedVehicles
 			}
 		}
 
@@ -594,8 +592,8 @@ namespace TrafficManager.Traffic {
 							Log._Debug($"We have old data from target car {targetCarId}. It is currently on segment {curPos.m_segment}.");
 						}
 #endif
-						RemoveVehicleFromSegments(targetCarId);
-						Vehicles[targetCarId].Valid = false;
+						/*RemoveVehicleFromSegments(targetCarId);
+						Vehicles[targetCarId].Valid = false;*/
 
 						if (Options.simAccuracy <= 1) {
 							CustomCarAI.HandleVehicle(targetCarId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId], false, false, 1);
@@ -611,8 +609,6 @@ namespace TrafficManager.Traffic {
 						Log._Debug($"We have old data from target car {targetCarId}. It does not have a valid path.");
 					}
 #endif
-					RemoveVehicleFromSegments(targetCarId);
-					Vehicles[targetCarId].Valid = false;
 					return true;
 				}
 
@@ -627,8 +623,8 @@ namespace TrafficManager.Traffic {
 							Log._Debug($"We have old data from incoming car {incomingCarId}. It is currently on segment {curPos.m_segment}.");
 						}
 #endif
-						RemoveVehicleFromSegments(incomingCarId);
-						Vehicles[incomingCarId].Valid = false;
+						/*RemoveVehicleFromSegments(incomingCarId);
+						Vehicles[incomingCarId].Valid = false;*/
 
 						if (Options.simAccuracy <= 1) {
 							CustomCarAI.HandleVehicle(incomingCarId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId], false, false, 1);
@@ -642,8 +638,6 @@ namespace TrafficManager.Traffic {
 						Log._Debug($"We have old data from incoming car {incomingCarId}. It does not have a valid path.");
 					}
 #endif
-					RemoveVehicleFromSegments(incomingCarId);
-					Vehicles[incomingCarId].Valid = false;
 					return true;
 				}
 
@@ -677,10 +671,6 @@ namespace TrafficManager.Traffic {
 					return true;
 				}*/
 
-				if (targetCar == null || incomingCar == null) {
-					Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} or targetCar {targetCarId} is null.");
-					return true;
-				}
 				if (incomingCar.ToNode != targetCar.ToNode) {
 					//Log._Debug($"HasVehiclePriority: incoming car {incomingCarId} goes to node {incomingCar.ToNode} where target car {targetCarId} goes to {targetCar.ToNode}. Ignoring.");
                     return true;
@@ -884,7 +874,7 @@ namespace TrafficManager.Traffic {
 				markedVehicles[i].Clear();
 		}
 
-		public static bool IsLaneOrderConflictFree(ushort segmentId, uint leftLaneIndex, uint rightLaneIndex) {
+		public static bool IsLaneOrderConflictFree(ushort segmentId, uint leftLaneIndex, uint rightLaneIndex) { // TODO I think this is incorrect. See TrafficLightTool._guiLaneChangeWindow
 			try {
 				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 				NetInfo.Direction normDirection = IsLeftHandDrive() ? NetInfo.Direction.Forward : NetInfo.Direction.Backward; // direction to normalize indices to
@@ -978,92 +968,6 @@ namespace TrafficManager.Traffic {
 			return Vector3.Cross(fromDir, toDir).y >= 0.5;
 		}
 
-		// not very important:
-		/*
-		public static bool HasLeftLane(ushort nodeId, int segmentId) {
-			var instance = Singleton<NetManager>.instance;
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
-
-			var info = segment.Info;
-
-			var num2 = segment.m_lanes;
-			var num3 = 0;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[num2].m_flags;
-
-				if (info.m_lanes[num3].m_direction == dir3 && (flags & NetLane.Flags.Left) != NetLane.Flags.None) {
-					return true;
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			return false;
-		}
-
-		public static bool HasForwardLane(ushort nodeId, int segmentId) {
-			var instance = Singleton<NetManager>.instance;
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
-
-			var info = segment.Info;
-
-			var num2 = segment.m_lanes;
-			var num3 = 0;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[num2].m_flags;
-
-				if (info.m_lanes[num3].m_direction == dir3 && (flags & NetLane.Flags.Left) != NetLane.Flags.Forward) {
-					return true;
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			return false;
-		}
-
-		public static bool HasRightLane(ushort nodeId, int segmentId) {
-			var instance = Singleton<NetManager>.instance;
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
-
-			var info = segment.Info;
-
-			var num2 = segment.m_lanes;
-			var num3 = 0;
-
-			while (num3 < info.m_lanes.Length && num2 != 0u) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[num2].m_flags;
-
-				if (info.m_lanes[num3].m_direction == dir3 && (flags & NetLane.Flags.Left) != NetLane.Flags.Right) {
-					return true;
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			return false;
-		}*/
-
 		public static Vector3 GetSegmentDir(int segment, ushort nodeid) {
 			var instance = Singleton<NetManager>.instance;
 
@@ -1110,14 +1014,27 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		private static List<ushort> vehicleIdsToDelete = new List<ushort>();
+
 		public static void segmentHousekeeping(ushort segmentId) {
-			if (PrioritySegments[segmentId] == null)
+			NetManager netManager = Singleton<NetManager>.instance;
+
+			// update lane arrows
+			uint laneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+			while (laneId != 0) {
+				if (!Flags.applyLaneArrowFlags(laneId)) {
+					Flags.removeLaneArrowFlags(laneId);
+				}
+				laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
+			}
+
+			/*if (PrioritySegments[segmentId] == null)
 				return;
 			var prioritySegment = PrioritySegments[segmentId];
 
 			// segment is valid, check for invalid cars
+			vehicleIdsToDelete.Clear();
 			if (prioritySegment.Node1 != 0) {
-				List<ushort> vehicleIdsToDelete = new List<ushort>();
 				foreach (KeyValuePair<ushort, VehiclePosition> e in prioritySegment.Instance1.getCars()) {
 					var vehicleId = e.Key;
 					if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None) {
@@ -1132,9 +1049,8 @@ namespace TrafficManager.Traffic {
 				}
 			}
 
+			vehicleIdsToDelete.Clear();
 			if (prioritySegment.Node2 != 0) {
-				List<ushort> vehicleIdsToDelete = new List<ushort>();
-
 				foreach (KeyValuePair<ushort, VehiclePosition> e in prioritySegment.Instance2.getCars()) {
 					var vehicleId = e.Key;
 					if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == Vehicle.Flags.None) {
@@ -1147,7 +1063,7 @@ namespace TrafficManager.Traffic {
 					prioritySegment.Instance2.RemoveCar(vehicleId);
 					Vehicles[vehicleId].Valid = false;
 				}
-			}
+			}*/
 		}
 
 		public static void nodeHousekeeping(ushort nodeId) {
@@ -1158,22 +1074,6 @@ namespace TrafficManager.Traffic {
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
 				Flags.applyNodeTrafficLightFlag(nodeId);
-
-				// update lane arrows
-				var node = netManager.m_nodes.m_buffer[nodeId];
-				for (var s = 0; s < 8; s++) {
-					var segmentId = node.GetSegment(s);
-					if (segmentId <= 0)
-						continue;
-
-					uint laneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
-					while (laneId != 0) {
-						if (!Flags.applyLaneArrowFlags(laneId)) {
-							Flags.removeLaneArrowFlags(laneId);
-						}
-						laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
-					}
-				}
 
 				if (IsPriorityNode(nodeId)) {
 					NodeValidityState nodeState = NodeValidityState.Valid;
@@ -1245,15 +1145,13 @@ namespace TrafficManager.Traffic {
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			Flags.applyNodeTrafficLightFlag(nodeId);
-			var node = netManager.m_nodes.m_buffer[nodeId];
-			if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+			if ((netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				nodeState = NodeValidityState.Unused;
 				Log.Warning($"Housekeeping: Node {nodeId} is unused!");
 				return false; // node is unused
 			}
 
-			bool hasTrafficLight = (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+			bool hasTrafficLight = (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 			var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 			if (nodeSim != null) {
 				if (! Flags.mayHaveTrafficLight(nodeId)) {
@@ -1290,7 +1188,7 @@ namespace TrafficManager.Traffic {
 			} else {
 				byte numSegmentsWithSigns = 0;
 				for (var s = 0; s < 8; s++) {
-					var segmentId = node.GetSegment(s);
+					var segmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(s);
 					if (segmentId <= 0)
 						continue;
 					if (netManager.m_segments.m_buffer[segmentId].m_startNode != nodeId && netManager.m_segments.m_buffer[segmentId].m_endNode != nodeId)

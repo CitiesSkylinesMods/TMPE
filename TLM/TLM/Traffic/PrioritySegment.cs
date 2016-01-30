@@ -49,9 +49,7 @@ namespace TrafficManager.Traffic {
 			TrafficPriority.MarkVehicleInSegment(vehicleId, SegmentId);
 		}
 		
-		public bool RemoveCar(ushort vehicleId) {
-			if (!Vehicles.ContainsKey(vehicleId))
-				return false;
+		public bool RemoveVehicle(ushort vehicleId) {
 			Vehicles.Remove(vehicleId);
 			TrafficPriority.UnmarkVehicleInSegment(vehicleId, SegmentId);
 			return true;
@@ -60,7 +58,7 @@ namespace TrafficManager.Traffic {
 		public void RemoveAllCars() {
 			List<ushort> vehicleIds = new List<ushort>(Vehicles.Keys);
 			foreach (ushort vehicleId in vehicleIds) {
-				RemoveCar(vehicleId);
+				RemoveVehicle(vehicleId);
 			}
 		}
 

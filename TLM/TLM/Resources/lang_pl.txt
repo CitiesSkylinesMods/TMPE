@@ -83,3 +83,8 @@ Delete_group Skasuj grupę
 Add_zoning Aktywuj Strefy
 Remove_zoning Skasuj Strefy
 Lane_Arrow_Changer_Disabled Zmiana strzałek pasów została wyłączona dla tego pasa ponieważ aktywowałeś/łaś Zmienione zasady łączenia pasów dla Autostrad
+Add_junction_to_timed_light Dodaj skrzyżowanie do tego węzła sygnalizacji
+Remove_junction_from_timed_light Wyklucz skrzyżowanie z tego węzła sygnalizacji
+Select_junction Wybierz skrzyżowanie 
+Cancel Anuluj 
+Speed_limits Ograniczenia prędkości

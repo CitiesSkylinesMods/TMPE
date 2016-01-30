@@ -10,7 +10,7 @@ using TrafficManager.Traffic;
 using TrafficManager.State;
 using TrafficManager.UI;
 
-namespace TrafficManager {
+namespace TrafficManager.State {
 
 	public class Options : MonoBehaviour {
 		private static UIDropDown simAccuracyDropdown = null;
@@ -28,6 +28,7 @@ namespace TrafficManager {
 		private static UICheckBox disableSomething2Toggle = null;
 		private static UICheckBox disableSomething1Toggle = null;
 		private static UITextField pathCostMultiplicatorField = null;
+		private static UITextField pathCostMultiplicator2Field = null;
 		private static UITextField someValueField = null;
 #endif
 
@@ -41,7 +42,8 @@ namespace TrafficManager {
 		public static bool advancedAI = false;
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
-		public static float pathCostMultiplicator = 2f; // debug value
+		public static float pathCostMultiplicator = 4f; // debug value
+		public static float pathCostMultiplicator2 = 50f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
@@ -68,7 +70,8 @@ namespace TrafficManager {
 			disableSomething1Toggle = group2.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
 			disableSomething2Toggle = group2.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
 			disableSomething3Toggle = group2.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
-			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
+			pathCostMultiplicatorField = group2.AddTextfield("Pathcost multiplicator (mult)", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
+			pathCostMultiplicator2Field = group2.AddTextfield("Pathcost multiplicator (div)", String.Format("{0:0.##}", pathCostMultiplicator2), onPathCostMultiplicator2Changed) as UITextField;
 			someValueField = group2.AddTextfield("Some value", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
 #endif
 		}
@@ -152,6 +155,16 @@ namespace TrafficManager {
 			} catch (Exception e) {
 				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
                 //UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onPathCostMultiplicator2Changed(string newPathCostMultiplicatorStr) {
+			try {
+				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
+				pathCostMultiplicator2 = newPathCostMultiplicator;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
 			}
 		}
 
@@ -295,10 +308,6 @@ namespace TrafficManager {
 					return 10000;
 			}
 			return 10000;
-		}
-
-		internal static float getPathCostMultiplicator() {
-			return pathCostMultiplicator;
 		}
 	}
 }

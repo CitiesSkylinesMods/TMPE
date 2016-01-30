@@ -38,7 +38,7 @@ namespace TrafficManager.UI {
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
 			width = Translation.getMenuWidth();
-			height = LoadingExtension.IsPathManagerCompatible ? 350 : 270;
+			height = LoadingExtension.IsPathManagerCompatible ? 350 : 230;
 #if DEBUG
 			height += 160;		
 #endif
@@ -62,10 +62,10 @@ namespace TrafficManager.UI {
 				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
 				y += 40;
 				//buttonLaneRestrictions = _createButton("Road Restrictions", new Vector3(15f, 230f), clickLaneRestrictions);
-			}
 
-			_buttonSpeedLimits = _createButton("Speed limits", y, clickSpeedLimits);
-			y += 40;
+				_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
+				y += 40;
+			}
 			
 			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), y, clickClearTraffic);
 			y += 40;
@@ -310,17 +310,15 @@ namespace TrafficManager.UI {
 				if (TrafficLightTool.SelectedSegment == 0) return;
 				var instance = Singleton<NetManager>.instance;
 
-				var segment = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment];
+				var info = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].Info;
 
-				var info = segment.Info;
-
-				var num2 = segment.m_lanes;
+				var num2 = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_lanes;
 				var num3 = 0;
 
 				var dir = NetInfo.Direction.Forward;
-				if (segment.m_startNode == TrafficLightTool.SelectedNode)
+				if (instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_startNode == TrafficLightTool.SelectedNode)
 					dir = NetInfo.Direction.Backward;
-				var dir3 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+				var dir3 = ((instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 
 				while (num3 < info.m_lanes.Length && num2 != 0u) {
 					if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3) {

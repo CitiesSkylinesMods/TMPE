@@ -87,3 +87,4 @@ Add_junction_to_timed_light Add a junction to this traffic light
 Remove_junction_from_timed_light Remove a junction from this traffic light
 Select_junction Select a junction
 Cancel Cancel
+Speed_limits Speed limits

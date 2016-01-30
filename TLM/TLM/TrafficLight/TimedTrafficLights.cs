@@ -43,6 +43,7 @@ namespace TrafficManager.TrafficLight {
 					ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[slaveNodeId].GetSegment(s);
 					if (segmentId <= 0)
 						continue;
+					CustomRoadAI.GetSegmentGeometry(segmentId).Recalculate(true, true);
 					TrafficPriority.AddPrioritySegment(slaveNodeId, segmentId, PrioritySegment.PriorityType.None);
 					ManualTrafficLights.AddLiveSegmentLight(slaveNodeId, segmentId);
 				}

@@ -27,7 +27,7 @@ namespace TrafficManager.Custom.PathFinding {
 			public NetInfo.LaneType m_lanesUsed;
 		}
 
-		public readonly static int SYNC_TIMEOUT = 5;
+		public readonly static int SYNC_TIMEOUT = 10;
 
 		//Expose the private fields
 		FieldInfo _fieldpathUnits;
@@ -149,14 +149,7 @@ namespace TrafficManager.Custom.PathFinding {
 			uint lockIter = 0;
 #endif
 			try {
-				while (!Monitor.TryEnter(QueueLock, SYNC_TIMEOUT)) {
-#if DEBUGLOCKS
-					++lockIter;
-					if (lockIter % 100 == 0)
-						Log._Debug("CustomPathFind.OnDestroy lockIter: " + lockIter);
-#endif
-				}
-
+				Monitor.Enter(QueueLock);
 				Terminated = true;
 				Monitor.PulseAll(QueueLock);
 			} catch (Exception e) {
@@ -443,19 +436,9 @@ namespace TrafficManager.Custom.PathFinding {
 				if (currentItemPositionCount == 12) {
 					// the current path unit is full, we need a new one
 					//pfCurrentState = 8;
-#if DEBUGLOCKS
-					uint lockIter = 0;
-#endif
 					uint createdPathUnitId;
 					try {
-						while (!Monitor.TryEnter(this._bufferLock, SYNC_TIMEOUT)) {
-							//pfCurrentState = 9;
-#if DEBUGLOCKS
-							++lockIter;
-							if (lockIter % 100 == 0)
-								Log._Debug("CustomPathFind.PathFindImplementation lockIter: " + lockIter);
-#endif
-						}
+						Monitor.Enter(this._bufferLock);
 						//pfCurrentState = 10;
 						if (!this._pathUnits.CreateItem(out createdPathUnitId, ref this._pathRandomizer)) {
 							// we failed to create a new path unit, thus the path-finding also failed
@@ -487,7 +470,7 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 				uint laneID = PathManager.GetLaneID(currentPosition);
 				// NON-STOCK CODE START
-				CustomRoadAI.AddTraffic(laneID, (ushort)(this._isHeavyVehicle ? 3 : 1), (ushort)Singleton<NetManager>.instance.m_segments.m_buffer[currentPosition.m_segment].Info.m_lanes[currentPosition.m_lane].m_speedLimit, false);
+				CustomRoadAI.AddTraffic(laneID, (ushort)(this._isHeavyVehicle ? 3 : 1), (ushort)SpeedLimitManager.GetLockFreeGameSpeedLimit(currentPosition.m_segment, currentPosition.m_lane, laneID, ref Singleton<NetManager>.instance.m_segments.m_buffer[currentPosition.m_segment].Info.m_lanes[currentPosition.m_lane]), false);
 				// NON-STOCK CODE END
 				currentPosition = this._laneTarget[(int)((UIntPtr)laneID)];
 			}
@@ -713,7 +696,7 @@ namespace TrafficManager.Custom.PathFinding {
 				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Getting segment geometry of {prevSegmentId} @ {nextNodeId} START");
 #endif
-				SegmentGeometry geometry = IsMasterPathFind ? CustomRoadAI.GetSegmentGeometry(prevSegmentId, nextNodeId) : CustomRoadAI.GetSegmentGeometry(prevSegmentId);
+				SegmentGeometry geometry = IsMasterPathFind && !Options.disableSomething2 ? CustomRoadAI.GetSegmentGeometry(prevSegmentId, nextNodeId) : CustomRoadAI.GetSegmentGeometry(prevSegmentId);
 #if DEBUGPF
 				if (m_queuedPathFindCount > 100 && Options.disableSomething1)
 					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Getting segment geometry of {prevSegmentId} @ {nextNodeId} END");
@@ -737,7 +720,7 @@ namespace TrafficManager.Custom.PathFinding {
 						if (!((RoadBaseAI)instance.m_segments.m_buffer[nextSegId].Info.m_netAI).m_highwayRules)
 							nextAreOnlyHighways = false;
 
-					if (IsMasterPathFind) {
+					if (IsMasterPathFind && !Options.disableSomething2) {
 						geometry.VerifyConnectedSegment(nextSegId);
 					}
 				}
@@ -1399,31 +1382,29 @@ namespace TrafficManager.Custom.PathFinding {
 			NetInfo prevSegmentInfo = instance.m_segments.m_buffer[(int)item.m_position.m_segment].Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
 			uint curLaneId = nextSegment.m_lanes;
-			float num3 = 1f;
+			float prevMaxSpeed = 1f;
 			float num4 = 1f;
 			NetInfo.LaneType laneType = NetInfo.LaneType.None;
 			// NON-STOCK CODE START //
-			NetNode targetNode = instance.m_nodes.m_buffer[targetNodeId];
-			bool nextIsJunction = targetNode.CountSegments() > 2;
+			bool nextIsJunction = instance.m_nodes.m_buffer[targetNodeId].CountSegments() > 2;
 			ushort sourceNodeId = (targetNodeId == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? instance.m_segments.m_buffer[item.m_position.m_segment].m_endNode : instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode; // no lane changing directly in front of a junction
-			NetNode sourceNode = instance.m_nodes.m_buffer[sourceNodeId];
-			bool prevIsJunction = sourceNode.CountSegments() > 2;
+			bool prevIsJunction = instance.m_nodes.m_buffer[sourceNodeId].CountSegments() > 2;
 			// NON-STOCK CODE END //
 			if ((int)item.m_position.m_lane < prevSegmentInfo.m_lanes.Length) {
 				NetInfo.Lane lane2 = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
-				num3 = lane2.m_speedLimit;
+				prevMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(item.m_position.m_segment, item.m_position.m_lane, item.m_laneID, ref lane2); // NON-STOCK CODE
 				laneType = lane2.m_laneType;
 				if ((byte)(laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 					laneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 				}
-				num4 = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane2);
+				num4 = this.CalculateLaneSpeed(prevMaxSpeed, connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane2); // NON-STOCK CODE
 			}
 			float averageLength = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_averageLength;
 			float num5 = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * averageLength;
 			float num6 = item.m_methodDistance + num5;
 			float num7 = item.m_comparisonValue + num5 / (num4 * this._maxLength);
 			Vector3 b = instance.m_lanes.m_buffer[(int)((UIntPtr)item.m_laneID)].CalculatePosition((float)connectOffset * 0.003921569f);
-			int laneIndex = 0;
+			uint laneIndex = 0;
 #if DEBUG
 			int wIter = 0;
 #endif
@@ -1450,8 +1431,9 @@ namespace TrafficManager.Custom.PathFinding {
 						} else {
 							item2.m_methodDistance = num6 + num9;
 						}
+						float nextMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, laneIndex, curLaneId, ref lane3); // NON-STOCK CODE
 						if (lane3.m_laneType != NetInfo.LaneType.Pedestrian || item2.m_methodDistance < 1000f) {
-							item2.m_comparisonValue = num7 + num9 / ((num3 + lane3.m_speedLimit) * 0.5f * this._maxLength);
+							item2.m_comparisonValue = num7 + num9 / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength); // NON-STOCK CODE
 							if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
 								item2.m_direction = NetInfo.InvertDirection(lane3.m_finalDirection);
 							} else {
@@ -1461,7 +1443,7 @@ namespace TrafficManager.Custom.PathFinding {
 								if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetA) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetA)) {
 									return;
 								}
-								float num10 = this.CalculateLaneSpeed(this._startOffsetA, item2.m_position.m_offset, ref nextSegment, lane3);
+								float num10 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, item2.m_position.m_offset, ref nextSegment, lane3); // NON-STOCK CODE
 								float num11 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
 								item2.m_comparisonValue += num11 * nextSegment.m_averageLength / (num10 * this._maxLength);
 							}
@@ -1469,7 +1451,7 @@ namespace TrafficManager.Custom.PathFinding {
 								if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetB) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetB)) {
 									return;
 								}
-								float num12 = this.CalculateLaneSpeed(this._startOffsetB, item2.m_position.m_offset, ref nextSegment, lane3);
+								float num12 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, item2.m_position.m_offset, ref nextSegment, lane3); // NON-STOCK CODE
 								float num13 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
 								item2.m_comparisonValue += num13 * nextSegment.m_averageLength / (num12 * this._maxLength);
 							}
@@ -1553,8 +1535,8 @@ namespace TrafficManager.Custom.PathFinding {
 				NetInfo.Lane lane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				laneType = lane.m_laneType;
 				vehicleType = lane.m_vehicleType;
-				prevMaxSpeed = lane.m_speedLimit;
-				prevLaneSpeed = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane);
+				prevMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(item.m_position.m_segment, item.m_position.m_lane, item.m_laneID, ref lane); // NON-STOCK CODE
+				prevLaneSpeed = this.CalculateLaneSpeed(prevMaxSpeed, connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane); // NON-STOCK CODE
 				// NON-STOCK CODE START //
 				prevNumLanes = lane.m_similarLaneCount;
 				if ((byte)(lane.m_direction & normDirection) != 0) {
@@ -1647,23 +1629,43 @@ namespace TrafficManager.Custom.PathFinding {
 			bool nextIsHighway = false;
 			if (nextSegmentInfo.m_netAI is RoadBaseAI)
 				nextIsHighway = ((RoadBaseAI)nextSegmentInfo.m_netAI).m_highwayRules;
-			int laneIndex = (int)(forceLaneIndex != null ? forceLaneIndex : 0);
-			uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : nextSegment.m_lanes); // NON-STOCK CODE
+			bool wantToChangeLane = false;
+			if (customLaneChanging)
+				wantToChangeLane = _pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1;
 
+			float nextDensityVar = 0f;
+			if (customLaneChanging) {
+				// measure speed variance
+				uint lIndex = 0;
+				uint currentLaneId = nextSegment.m_lanes;
+				float v1 = 0f;
+				float v2 = 0f;
+				uint nextCompatibleLanes = 0;
+				while (lIndex < nextNumLanes && currentLaneId != 0u) {
+					NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[lIndex];
+					if (nextLane.CheckType(laneType2, vehicleType2) && (segmentID != item.m_position.m_segment || lIndex != (int)item.m_position.m_lane) && (byte)(nextLane.m_finalDirection & nextDir2) != 0) {
+						float density = CustomRoadAI.laneMeanDensities[currentLaneId];
+						density = (float)Math.Max(0.01f, Math.Round(density * 0.01f * 3f) / 3f); // 0.01, 0.33, 0.67, 1
+						
+						float x = (density - 0.5f); // for numerical stability
+						v1 += x * x;
+						v2 += x;
+						++nextCompatibleLanes;
+					}
+
+					lIndex++;
+					currentLaneId = instance.m_lanes.m_buffer[currentLaneId].m_nextLane;
+				}
+				if (nextCompatibleLanes > 1)
+					nextDensityVar = (1f / ((float)nextCompatibleLanes - 1f)) * (v1 - (1f / (float)nextCompatibleLanes) * v2 * v2);
+			}
 			// NON-STOCK CODE END //
-#if DEBUG
-			uint wIter3 = 0;
-#endif
-			//sCurrentState = 10;
+
+			uint laneIndex = forceLaneIndex != null ? (uint)forceLaneIndex : 0u;
+			uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : nextSegment.m_lanes); // NON-STOCK CODE
+																							  //sCurrentState = 10;
 			while (laneIndex < nextNumLanes && curLaneId != 0u) {
 				//sCurrentState = 11;
-#if DEBUG
-				++wIter3;
-				if (wIter3 >= 20) {
-					Log.Error("Too many iterations in ProcessItemSub (3)!");
-					break;
-				}
-#endif
 
 				//Log.Message($"PF {this._pathFindIndex} -- CustomPathfind (3): Iter #{laneIndex}, curLaneId={curLaneId}, prevSegment={item.m_position.m_segment}, targetNodeId={targetNodeId}");
 
@@ -1672,11 +1674,9 @@ namespace TrafficManager.Custom.PathFinding {
 					break;
 				// NON-STOCK CODE END //
 				NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[laneIndex];
-				float nextMaxSpeed = 0f;
+				float nextMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, ref nextLane); // NON-STOCK CODE
 				// NON-STOCK CODE START //
 				if (customLaneChanging) {
-					nextMaxSpeed = nextLane.m_speedLimit; // NON-STOCK CODE
-
 					nextSpeed = CustomRoadAI.laneMeanSpeeds[curLaneId];
 					nextSpeed = (float)Math.Max(0.1f, Math.Round(nextSpeed * 0.01f * 3f) / 3f); // 0.1, 0.33, 0.67, 1
 					nextDensity = CustomRoadAI.laneMeanDensities[curLaneId];
@@ -1730,7 +1730,7 @@ namespace TrafficManager.Custom.PathFinding {
 							distanceOnBezier *= 1.1f;
 						}*/
 						//sCurrentState = 16;
-						float distanceOverMeanMaxSpeed = distanceOnBezier / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+						float distanceOverMeanMaxSpeed = distanceOnBezier / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
 						BufferItem item2;
 						item2.m_position.m_segment = segmentID;
 						item2.m_position.m_lane = (byte)laneIndex;
@@ -1754,7 +1754,7 @@ namespace TrafficManager.Custom.PathFinding {
 									//sCurrentState = 18;
 									goto IL_90F;
 								}
-								float num15 = this.CalculateLaneSpeed(this._startOffsetA, item2.m_position.m_offset, ref nextSegment, nextLane);
+								float num15 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, item2.m_position.m_offset, ref nextSegment, nextLane); // NON-STOCK CODE
 								float num16 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
 								item2.m_comparisonValue += num16 * nextSegment.m_averageLength / (num15 * this._maxLength);
 							}
@@ -1764,7 +1764,7 @@ namespace TrafficManager.Custom.PathFinding {
 									//sCurrentState = 19;
 									goto IL_90F;
 								}
-								float num17 = this.CalculateLaneSpeed(this._startOffsetB, item2.m_position.m_offset, ref nextSegment, nextLane);
+								float num17 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, item2.m_position.m_offset, ref nextSegment, nextLane); // NON-STOCK CODE
 								float num18 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
 								item2.m_comparisonValue += num18 * nextSegment.m_averageLength / (num17 * this._maxLength);
 							}
@@ -1782,14 +1782,14 @@ namespace TrafficManager.Custom.PathFinding {
 									int firstTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_firstTarget;
 									int lastTarget = (int)instance.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_lastTarget;
 									if (laneIndexFromLeft < firstTarget || laneIndexFromLeft >= lastTarget) {
-										item2.m_comparisonValue += Mathf.Max(1f, distanceOnBezier * 3f - 3f) / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+										item2.m_comparisonValue += Mathf.Max(1f, distanceOnBezier * 3f - 3f) / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
 									}
 									// NON-STOCK CODE START //
 								}
 								// NON-STOCK CODE END //
 
 								if (!this._transportVehicle && nextLane.m_laneType == NetInfo.LaneType.TransportVehicle) {
-									item2.m_comparisonValue += 20f / ((prevMaxSpeed + nextLane.m_speedLimit) * 0.5f * this._maxLength);
+									item2.m_comparisonValue += 20f / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
 								}
 							}
 							//sCurrentState = 21;
@@ -1808,54 +1808,37 @@ namespace TrafficManager.Custom.PathFinding {
 
 								//sCurrentState = 23;
 #if DEBUGCOSTS
-								bool costDebug = targetNodeId == 11330 && Options.disableSomething1;
+								bool costDebug = targetNodeId == 1425 && Options.disableSomething1;
 								List<String> logBuf = null;
 								if (costDebug)
 									logBuf = new List<String>();
 #endif
-								bool wantToChangeLane = _pathRandomizer.Int32(1, Options.getLaneChangingRandomizationTargetValue()) == 1;
 
 								// vehicles should choose lanes with low traffic volume, but should neither change lanes too frequently nor change to too distant lanes.
 
 								// calculate speed metric
-								float meanSpeed = (nextSpeed + prevSpeed) * 0.5f;
-								float meanMaxSpeed = (nextMaxSpeed + prevMaxSpeed) * 0.5f;
-								float divMetric = meanSpeed * meanMaxSpeed;
-								
-								/*int rnd = _pathRandomizer.Int32(0, 2);
-								if (rnd == 0) {
-									divMetric = meanMaxSpeed / 3f;
-								} else if (rnd == 1) {
-									divMetric = meanMaxSpeed * 2f / 3f;
-								} else {
-									if (Options.disableSomething1)
-										Log._Debug("OK");
-									divMetric = meanMaxSpeed;
-								}*/
+								float divMetric = nextSpeed * nextMaxSpeed; // 0 .. nextMaxSpeed
 
 								// calculate density metric
-								float multMetric = 1f;
-								if (meanSpeed < 0.5f) {
-									multMetric = 1f + Options.getPathCostMultiplicator() * prevDensity; // 1 .. 1+pathCostMultiplicator
-								}
+								float multMetric = Options.pathCostMultiplicator * (1f + Options.pathCostMultiplicator2 * nextDensityVar) * Math.Max(prevDensity, nextDensity); // 0 .. pathCostMultiplicator
 
 								// calculate metric
-								float metric = Math.Max(0.01f, multMetric) / Math.Max(0.5f, divMetric);
+								float metric = Math.Max(0.01f, multMetric) / Math.Max(0.001f, divMetric);
+								float metricBeforeLanes = metric;
 
 								// multiply with lane distance
 								float laneDist = Convert.ToSingle(Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex));
 								float laneMetric = 1f;
-								if (!wantToChangeLane) {
+								if (!wantToChangeLane || laneDist > 1) {
 									laneMetric = (float)Math.Pow(Options.someValue, laneDist);
-								} else {
-									laneMetric = (laneDist + 1f);
+
+									metric *= laneMetric;
 								}
-								metric *= laneMetric;
 
 #if DEBUGCOSTS
 								if (costDebug) {
-									logBuf.Add($"Path from {segmentID} (lane {nextRightSimilarLaneIndex} from right, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevRightSimilarLaneIndex} from right, idx {item.m_position.m_lane}: meanMaxSpeed={meanMaxSpeed} meanSpeed={meanSpeed} divMetric={divMetric} prevDensity={prevDensity} multMetric={multMetric} laneDist={laneDist} laneMetric={laneMetric} metric={metric}");
-								}
+									logBuf.Add($"Path from {segmentID} (lane {nextRightSimilarLaneIndex} from right, idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevRightSimilarLaneIndex} from right, idx {item.m_position.m_lane}): nextMaxSpeed={nextMaxSpeed} prevMaxSpeed={prevMaxSpeed} nextMaxSpeed={nextMaxSpeed} divMetric={divMetric} nextDensity={nextDensity} multMetric={multMetric} laneDist={laneDist} laneMetric={laneMetric} metric={metric} metricBeforeLanes={metricBeforeLanes} nextDensityVar={nextDensityVar}//{Options.pathCostMultiplicator2*nextDensityVar}");
+                                }
 #endif
 
 								//sCurrentState = 24;
@@ -1875,7 +1858,7 @@ namespace TrafficManager.Custom.PathFinding {
 									distanceOverMeanMaxSpeed = 0f;
 								} else if (Single.IsNaN(distanceOverMeanMaxSpeed) || Single.IsInfinity(distanceOverMeanMaxSpeed)) {
 #if DEBUGCOSTS
-									Log._Debug($"Pathfinding: comparisonValue is >1, NaN or Infinity: {item2.m_comparisonValue}");
+									Log._Debug($"Pathfinder ({this._pathFindIndex}): distanceOverMeanMaxSpeed is NaN or Infinity: {distanceOverMeanMaxSpeed} // nextMaxSpeed={nextMaxSpeed} prevMaxSpeed={prevMaxSpeed} nextMaxSpeed={nextMaxSpeed} divMetric={divMetric} nextDensity={nextDensity} multMetric={multMetric} laneDist={laneDist} laneMetric={laneMetric} metric={metric} metricBeforeLanes={metricBeforeLanes} nextSpeedVar={nextDensityVar}");
 #endif
 #if DEBUGPF
 									//Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: distanceOverMeanMaxSpeed is NaN! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
@@ -1887,8 +1870,9 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGCOSTS
 								if (costDebug) {
 									logBuf.Add($"Path from {segmentID} (lane {nextRightSimilarLaneIndex} from right, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevRightSimilarLaneIndex} from right, idx {item.m_position.m_lane}.");
-									logBuf.Add($"distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed} oldDistanceOverMaxSpeed = {oldDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, prevSpeed={prevSpeed}, nextSpeed={nextSpeed}");
-								}
+									//logBuf.Add($"distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed} oldDistanceOverMaxSpeed = {oldDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, prevSpeed={prevSpeed}, nextSpeed={nextSpeed}");
+									logBuf.Add($"distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed} oldDistanceOverMaxSpeed = {oldDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, nextSpeed={nextSpeed} nextSpeedVar={nextDensityVar} nextDensity={nextDensity} prevDensity={prevDensity}");
+                                }
 #endif
 
 								item2.m_comparisonValue += distanceOverMeanMaxSpeed;
@@ -1908,12 +1892,12 @@ namespace TrafficManager.Custom.PathFinding {
 								//sCurrentState = 26;
 								if (item2.m_comparisonValue < 0f) {
 #if DEBUG
-									Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value < 0! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
+									Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value < 0! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}");
 #endif
 									item2.m_comparisonValue = 0f;
 								} else if (item2.m_comparisonValue > 1f || Single.IsNaN(item2.m_comparisonValue) || Single.IsInfinity(item2.m_comparisonValue)) {
 #if DEBUGCOSTS
-									Log._Debug($"Pathfinding: comparisonValue is >1, NaN or Infinity: {item2.m_comparisonValue}");
+									Log._Debug($"Pathfinder ({this._pathFindIndex}): comparisonValue is >1, NaN or Infinity: {item2.m_comparisonValue}");
 #endif
 #if DEBUG
 									//Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value > 1, NaN or infinity! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
@@ -2012,28 +1996,26 @@ namespace TrafficManager.Custom.PathFinding {
 				num2 = Vector3.Distance(a2, b2);
 				offset = (byte)(((direction & NetInfo.Direction.Forward) == 0) ? 0 : 255);
 			}
-			float num3 = 1f;
+			float prevMaxSpeed = 1f;
 			float num4 = 1f;
 			NetInfo.LaneType laneType = NetInfo.LaneType.None;
 			if ((int)item.m_position.m_lane < info2.m_lanes.Length) {
 				NetInfo.Lane lane2 = info2.m_lanes[(int)item.m_position.m_lane];
-				num3 = lane2.m_speedLimit;
+				prevMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(item.m_position.m_segment, item.m_position.m_lane, item.m_laneID, ref lane2); // NON-STOCK CODE
 				laneType = lane2.m_laneType;
 				if ((byte)(laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 					laneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 				}
-				num4 = this.CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane2);
+				num4 = this.CalculateLaneSpeed(prevMaxSpeed, connectOffset, item.m_position.m_offset, ref instance.m_segments.m_buffer[(int)item.m_position.m_segment], lane2); // NON-STOCK CODE
 			}
 			float averageLength = instance.m_segments.m_buffer[(int)item.m_position.m_segment].m_averageLength;
 			float num5 = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * averageLength;
 			float num6 = item.m_methodDistance + num5;
 			float num7 = item.m_comparisonValue + num5 / (num4 * this._maxLength);
 			// NON-STOCK CODE START //
-			NetNode targetNode = instance.m_nodes.m_buffer[targetNodeId];
-			bool nextIsJunction = targetNode.CountSegments() > 2;
+			bool nextIsJunction = instance.m_nodes.m_buffer[targetNodeId].CountSegments() > 2;
 			ushort sourceNodeId = (targetNodeId == instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? instance.m_segments.m_buffer[item.m_position.m_segment].m_endNode : instance.m_segments.m_buffer[item.m_position.m_segment].m_startNode; // no lane changing directly in front of a junction
-			NetNode sourceNode = instance.m_nodes.m_buffer[sourceNodeId];
-			bool prevIsJunction = sourceNode.CountSegments() > 2;
+			bool prevIsJunction = instance.m_nodes.m_buffer[sourceNodeId].CountSegments() > 2;
 			// NON-STOCK CODE END //
 			if (laneIndex < num) {
 				NetInfo.Lane lane3 = info.m_lanes[laneIndex];
@@ -2049,8 +2031,9 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 					item2.m_methodDistance = num6 + num2;
 				}
+				float nextMaxSpeed = SpeedLimitManager.GetLockFreeGameSpeedLimit(segmentID, (uint)laneIndex, lane, ref lane3); // NON-STOCK CODE
 				if (lane3.m_laneType != NetInfo.LaneType.Pedestrian || item2.m_methodDistance < 1000f) {
-					item2.m_comparisonValue = num7 + num2 / ((num3 + lane3.m_speedLimit) * 0.25f * this._maxLength);
+					item2.m_comparisonValue = num7 + num2 / ((prevMaxSpeed + nextMaxSpeed) * 0.25f * this._maxLength); // NON-STOCK CODE
 					if ((segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
 						item2.m_direction = NetInfo.InvertDirection(lane3.m_finalDirection);
 					} else {
@@ -2060,7 +2043,7 @@ namespace TrafficManager.Custom.PathFinding {
 						if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetA) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetA)) {
 							return;
 						}
-						float num8 = this.CalculateLaneSpeed(this._startOffsetA, item2.m_position.m_offset, ref segment, lane3);
+						float num8 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, item2.m_position.m_offset, ref segment, lane3); // NON-STOCK CODE
 						float num9 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
 						item2.m_comparisonValue += num9 * segment.m_averageLength / (num8 * this._maxLength);
 					}
@@ -2068,7 +2051,7 @@ namespace TrafficManager.Custom.PathFinding {
 						if (((byte)(item2.m_direction & NetInfo.Direction.Forward) == 0 || item2.m_position.m_offset < this._startOffsetB) && ((byte)(item2.m_direction & NetInfo.Direction.Backward) == 0 || item2.m_position.m_offset > this._startOffsetB)) {
 							return;
 						}
-						float num10 = this.CalculateLaneSpeed(this._startOffsetB, item2.m_position.m_offset, ref segment, lane3);
+						float num10 = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, item2.m_position.m_offset, ref segment, lane3); // NON-STOCK CODE
 						float num11 = (float)Mathf.Abs((int)(item2.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
 						item2.m_comparisonValue += num11 * segment.m_averageLength / (num10 * this._maxLength);
 					}
@@ -2080,18 +2063,18 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 #endregion
 
-		private float CalculateLaneSpeed(byte startOffset, byte endOffset, ref NetSegment segment, NetInfo.Lane laneInfo) {
+		private float CalculateLaneSpeed(float speedLimit, byte startOffset, byte endOffset, ref NetSegment segment, NetInfo.Lane laneInfo) {
 			NetInfo.Direction direction = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? laneInfo.m_finalDirection : NetInfo.InvertDirection(laneInfo.m_finalDirection);
 			if ((byte)(direction & NetInfo.Direction.Avoid) == 0) {
-				return laneInfo.m_speedLimit;
+				return speedLimit;
 			}
 			if (endOffset > startOffset && direction == NetInfo.Direction.AvoidForward) {
-				return laneInfo.m_speedLimit * 0.1f;
+				return speedLimit * 0.1f;
 			}
 			if (endOffset < startOffset && direction == NetInfo.Direction.AvoidBackward) {
-				return laneInfo.m_speedLimit * 0.1f;
+				return speedLimit * 0.1f;
 			}
-			return laneInfo.m_speedLimit * 0.2f;
+			return speedLimit * 0.2f;
 		}
 
 		private void AddBufferItem(BufferItem item, PathUnit.Position target) {
@@ -2183,19 +2166,9 @@ namespace TrafficManager.Custom.PathFinding {
 			//tCurrentState = 0;
 			while (true) {
 				//Log.Message($"Pathfind Thread #{Thread.CurrentThread.ManagedThreadId} iteration!");
-#if DEBUGLOCKS
-				uint lockIter = 0;
-#endif
 				try {
 					//tCurrentState = 1;
-					while (!Monitor.TryEnter(QueueLock, SYNC_TIMEOUT)) {
-						//tCurrentState = 2;
-#if DEBUGLOCKS
-						++lockIter;
-						if (lockIter % 100 == 0)
-							Log._Debug("CustomPathFind.PathFindThread (1) lockIter: " + lockIter);
-#endif
-					}
+					Monitor.Enter(QueueLock);
 					//tCurrentState = 3;
 
 					while (QueueFirst == 0u && !Terminated) {
@@ -2268,14 +2241,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 				try {
-					while (!Monitor.TryEnter(QueueLock, SYNC_TIMEOUT)) {
-						//tCurrentState = 11;
-#if DEBUGLOCKS
-						++lockIter;
-						if (lockIter % 100 == 0)
-							Log._Debug("CustomPathFind.PathFindThread (2) lockIter: " + lockIter);
-#endif
-					}
+					Monitor.Enter(QueueLock);
 					//tCurrentState = 12;
 					_pathUnits.m_buffer[(int)((UIntPtr)Calculating)].m_pathFindFlags = (byte)(_pathUnits.m_buffer[(int)((UIntPtr)Calculating)].m_pathFindFlags & -3);
 					Singleton<PathManager>.instance.ReleasePath(Calculating);

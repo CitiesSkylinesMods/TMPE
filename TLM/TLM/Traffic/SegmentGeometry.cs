@@ -366,7 +366,7 @@ namespace TrafficManager.Traffic {
 			}
 
 			if (!segmentIsConnectedToStartNode && !segmentIsConnectedToEndNode) {
-				Log._Debug($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
+				Log.Warning($"Neither the segments of start node {startNodeId()} nor of end node {endNodeId()} of segment {segmentId} contain the segment {otherSegmentId}");
                 Recalculate();
 				return true;
 			}
@@ -395,7 +395,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected segments at the given node</returns>
@@ -403,10 +403,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeSegments.Count;
@@ -421,7 +421,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of right segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected right segments at the given node</returns>
@@ -429,10 +429,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeRightSegments.Count;
@@ -447,7 +447,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of left segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected left segments at the given node</returns>
@@ -455,10 +455,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeLeftSegments.Count;
@@ -473,7 +473,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of straight segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected straight segments at the given node</returns>
@@ -481,10 +481,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeStraightSegments.Count;
@@ -499,7 +499,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of incoming right segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected incoming right segments at the given node</returns>
@@ -507,10 +507,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingRightSegments.Count;
@@ -524,7 +524,8 @@ namespace TrafficManager.Traffic {
 
 		/// <summary>
 		/// Determines the number of incoming left segments connected to the managed segment at the given node.
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// 
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected incoming left segments at the given node</returns>
@@ -532,10 +533,10 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingLeftSegments.Count;
@@ -550,7 +551,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines the number of incoming straight segments connected to the managed segment at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node at which other segments shall be counted</param>
 		/// <returns>number of connected incoming straight segments at the given node</returns>
@@ -558,10 +559,11 @@ namespace TrafficManager.Traffic {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 				return 0;
 			}
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
-			}
+			}*/
 
 			if (startNodeId() == nodeId)
 				return startNodeIncomingStraightSegments.Count;
@@ -586,6 +588,7 @@ namespace TrafficManager.Traffic {
 
 		/// <summary>
 		/// Determines if the managed segment is connected to right segments at the given node.
+		/// 
 		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node the other segments have to be connected to</param>
@@ -607,6 +610,7 @@ namespace TrafficManager.Traffic {
 
 		/// <summary>
 		/// Determines if the managed segment is connected to incoming left segments at the given node.
+		/// 
 		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="nodeId">The node the other segments have to be connected to</param>
@@ -640,8 +644,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a left segment at the given node relatively to the managed segment.
 		/// 
-		/// This method should only be called if there is a good case to believe that the other segment may be connected to the managed segment.
-		/// Else, a possibly unnecessary geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="toSegmentId">other segment that ought to be left, relatively to the managed segment</param>
 		/// <param name="nodeId">node which both the managed and the other segment ought to be connected to</param>
@@ -656,11 +659,11 @@ namespace TrafficManager.Traffic {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
-				VerifyConnectedSegment(toSegmentId);
+				VerifyConnectedSegment(toSegmentId);*/
 
 			if (startNodeId() == nodeId)
 				return startNodeLeftSegments.Contains(toSegmentId);
@@ -676,8 +679,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a right segment at the given node relatively to the managed segment.
 		/// 
-		/// This method should only be called if there is a good case to believe that the other segment may be connected to the managed segment.
-		/// Else, a possibly unnecessary geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="toSegmentId">other segment that ought to be right, relatively to the managed segment</param>
 		/// <param name="nodeId">node which both the managed and the other segment ought to be connected to</param>
@@ -692,11 +694,11 @@ namespace TrafficManager.Traffic {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
-				VerifyConnectedSegment(toSegmentId);
+				VerifyConnectedSegment(toSegmentId);*/
 
 			if (startNodeId() == nodeId)
 				return startNodeRightSegments.Contains(toSegmentId);
@@ -712,8 +714,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a straight segment at the given node relatively to the managed segment.
 		/// 
-		/// This method should only be called if there is a good case to believe that the other segment may be connected to the managed segment.
-		/// Else, a possibly unnecessary geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="toSegmentId">other segment that ought to be straight, relatively to the managed segment</param>
 		/// <param name="nodeId">node which both the managed and the other segment ought to be connected to</param>
@@ -728,11 +729,11 @@ namespace TrafficManager.Traffic {
 			if (toSegmentId == segmentId)
 				return false;
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
-				VerifyConnectedSegment(toSegmentId);
+				VerifyConnectedSegment(toSegmentId);*/
 
 			if (startNodeId() == nodeId)
 				return startNodeStraightSegments.Contains(toSegmentId);
@@ -758,7 +759,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines if, according to the stored geometry data, the managed segment is an outgoing one-way road at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is an outgoing one-way road at the given node, false otherwise</returns>
 		public bool IsOutgoingOneWay(ushort nodeId) {
@@ -779,7 +780,7 @@ namespace TrafficManager.Traffic {
 		/// <summary>
 		/// Determines if, according to the stored geometry data, the managed segment is an incoming one-way road at the given node.
 		/// 
-		/// If the given node is neither stored as start node nor stored as end node of the managed segment, a geometry recalculation is performed.
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is an incoming one-way road at the given node, false otherwise</returns>
 		public bool IsIncomingOneWay(ushort nodeId) {
@@ -787,7 +788,9 @@ namespace TrafficManager.Traffic {
 		}
 
 		/// <summary>
-		/// Determines the relative direction of the other segment relatively to the managed segment at the given node.
+		/// Determines the relative direction of the other segment relatively to the managed segment at the given node, according to the stored geometry information.
+		/// 
+		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <param name="otherSegmentId">other segment</param>
 		/// <returns>relative direction of the other segment relatively to the managed segment at the given node</returns>
@@ -799,11 +802,11 @@ namespace TrafficManager.Traffic {
 				return Direction.Forward;
 			}
 
-			if (startNodeId() != nodeId && endNodeId() != nodeId) {
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
 				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
 				Recalculate();
 			} else
-				VerifyConnectedSegment(otherSegmentId);
+				VerifyConnectedSegment(otherSegmentId);*/
 
 			if (otherSegmentId == segmentId)
 				return Direction.Turn;
@@ -811,8 +814,12 @@ namespace TrafficManager.Traffic {
 				return Direction.Right;
 			else if (IsLeftSegment(otherSegmentId, nodeId))
 				return Direction.Left;
-			else
+			else {
+				if (startNodeId() != nodeId && endNodeId() != nodeId) {
+					Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				}
 				return Direction.Forward;
+			}
 		}
 
 		/// <summary>
@@ -824,16 +831,15 @@ namespace TrafficManager.Traffic {
 		private static bool calculateIsOutgoingOneWay(ushort segmentId, ushort nodeId) {
 			var instance = Singleton<NetManager>.instance;
 
-			var segment = instance.m_segments.m_buffer[segmentId];
-			var info = segment.Info;
+			var info = instance.m_segments.m_buffer[segmentId].Info;
 
 			var dir = NetInfo.Direction.Forward;
-			if (segment.m_startNode == nodeId)
+			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
 				dir = NetInfo.Direction.Backward;
-			var dir2 = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
-			var laneId = segment.m_lanes;
+			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
@@ -855,13 +861,12 @@ namespace TrafficManager.Traffic {
 		private bool calculateIsOneWay() {
 			var instance = Singleton<NetManager>.instance;
 
-			var segment = instance.m_segments.m_buffer[segmentId];
-			var info = segment.Info;
+			var info = instance.m_segments.m_buffer[segmentId].Info;
 
 			var hasForward = false;
 			var hasBackward = false;
 
-			var laneId = segment.m_lanes;
+			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&

@@ -200,8 +200,8 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		RoadBaseAI.TrafficLightState lastVehicleLightState = RoadBaseAI.TrafficLightState.Red;
-		RoadBaseAI.TrafficLightState lastPedestrianLightState = RoadBaseAI.TrafficLightState.Red;
+		/*RoadBaseAI.TrafficLightState lastVehicleLightState = RoadBaseAI.TrafficLightState.Red;
+		RoadBaseAI.TrafficLightState lastPedestrianLightState = RoadBaseAI.TrafficLightState.Red;*/
 
 		public void UpdateVisuals() {
 			var instance = Singleton<NetManager>.instance;
@@ -257,19 +257,16 @@ namespace TrafficManager.TrafficLight {
 			pedestrianLightState = LightPedestrian;
 
 			uint now = ((currentFrameIndex - num) >> 8) & 1;
-			if (segmentId == 8071) {
-				Log._Debug($"Setting traffic light of seg. {segmentId} to {vehicleLightState.ToString()}");
-            }
 			RoadBaseAI.SetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
 			RoadBaseAI.SetTrafficLightState(nodeId, ref instance.m_segments.m_buffer[segmentId], (1u-now) << 8, vehicleLightState, pedestrianLightState, false, false);
 
-			if (vehicleLightState != lastVehicleLightState || pedestrianLightState != lastPedestrianLightState) {
+			/*if (vehicleLightState != lastVehicleLightState || pedestrianLightState != lastPedestrianLightState) {
 				// force rendering
 				Singleton<NetManager>.instance.UpdateSegmentRenderer(segmentId, true);
 			}
 
 			lastVehicleLightState = vehicleLightState;
-			lastPedestrianLightState = pedestrianLightState;
+			lastPedestrianLightState = pedestrianLightState;*/
 		}
 
 		private RoadBaseAI.TrafficLightState _checkPedestrianLight() {

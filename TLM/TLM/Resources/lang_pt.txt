@@ -82,3 +82,8 @@ Create_group Criar grupo
 Delete_group Apagar grupo
 Add_zoning Adicionar zoneamento
 Remove_zoning Remover zoneamento
+Add_junction_to_timed_light Adicionar cruzamento ao semáforo
+Remove_junction_from_timed_light Remover cruzamento do semáforo
+Select_junction Selecionar cruzamento
+Cancel Cancelar
+Speed_limits Limite de Velocidade

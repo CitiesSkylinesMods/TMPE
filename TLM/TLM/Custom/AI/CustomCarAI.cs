@@ -1,3 +1,5 @@
+#define DEBUGVx
+
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
@@ -7,6 +9,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.State;
 
 namespace TrafficManager.Custom.AI {
 	internal class CustomCarAI : CarAI {
@@ -44,7 +47,7 @@ namespace TrafficManager.Custom.AI {
 			var netManager = Singleton<NetManager>.instance;
 			var lastFrameData = vehicleData.GetLastFrameData();
 			var lastFrameVehiclePos = lastFrameData.m_position;
-#if DEBUG
+#if DEBUGV
 			var camPos = Camera.main.transform.position;
 			//debug = (lastFrameVehiclePos - camPos).sqrMagnitude < CloseLod;
 			debug = false;
@@ -58,7 +61,7 @@ namespace TrafficManager.Custom.AI {
 				//Log._Debug($"HandleVehicle does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
                 return;
 			}
-#if DEBUG
+#if DEBUGV
 			logBuffer.Add("Calculating prio info for vehicleId " + vehicleId);
 #endif
 
@@ -70,7 +73,7 @@ namespace TrafficManager.Custom.AI {
 			List<ushort> realTimeDestinationNodes = new List<ushort>(); // current and upcoming node ids
 			List<PathUnit.Position> realTimePositions = new List<PathUnit.Position>(); // current and upcoming vehicle positions
 
-#if DEBUG
+#if DEBUGV
 			logBuffer.Add("* vehicleId " + vehicleId + ". currentPathId: " + currentPathUnitId + " pathPositionIndex: " + vehicleData.m_pathPositionIndex);
 #endif
 
@@ -79,11 +82,10 @@ namespace TrafficManager.Custom.AI {
 				if ((Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathUnitId].m_pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					// The path(unit) is established and is ready for use: get the vehicle's current position in terms of segment and lane
 					realTimePositions.Add(Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathUnitId].GetPosition(vehicleData.m_pathPositionIndex >> 1));
-					var currentSegment = netManager.m_segments.m_buffer[realTimePositions[0].m_segment];
 					if (realTimePositions[0].m_offset == 0) {
-						realTimeDestinationNodes.Add(currentSegment.m_startNode);
+						realTimeDestinationNodes.Add(netManager.m_segments.m_buffer[realTimePositions[0].m_segment].m_startNode);
 					} else {
-						realTimeDestinationNodes.Add(currentSegment.m_endNode);
+						realTimeDestinationNodes.Add(netManager.m_segments.m_buffer[realTimePositions[0].m_segment].m_endNode);
 					}
 
 					if (maxUpcomingPathPositions > 0) {
@@ -96,7 +98,7 @@ namespace TrafficManager.Custom.AI {
 								// go to next path unit
 								pathPos = 0;
 								pathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
-#if DEBUG
+#if DEBUGV
 								logBuffer.Add("* vehicleId " + vehicleId + ". Going to next path unit (1). pathUnitId=" + pathUnitId);
 #endif
 								if (pathUnitId <= 0)
@@ -105,7 +107,7 @@ namespace TrafficManager.Custom.AI {
 
 							PathUnit.Position nextRealTimePosition = default(PathUnit.Position);
 							if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPos, out nextRealTimePosition)) { // if this returns false, there is no next path unit
-#if DEBUG
+#if DEBUGV
 								logBuffer.Add("* vehicleId " + vehicleId + ". No next path unit! pathPos=" + pathPos + ", pathUnitId=" + pathUnitId);
 #endif
 								break;
@@ -113,15 +115,14 @@ namespace TrafficManager.Custom.AI {
 
 							ushort destNodeId = 0;
 							if (nextRealTimePosition.m_segment > 0) {
-								var nextSegment = netManager.m_segments.m_buffer[nextRealTimePosition.m_segment];
 								if (nextRealTimePosition.m_offset == 0) {
-									destNodeId = nextSegment.m_startNode;
+									destNodeId = netManager.m_segments.m_buffer[nextRealTimePosition.m_segment].m_startNode;
 								} else {
-									destNodeId = nextSegment.m_endNode;
+									destNodeId = netManager.m_segments.m_buffer[nextRealTimePosition.m_segment].m_endNode;
 								}
 							}
 
-#if DEBUG
+#if DEBUGV
 							logBuffer.Add("* vehicleId " + vehicleId + ". Next path unit! node " + destNodeId + ", seg. " + nextRealTimePosition.m_segment + ", pathUnitId=" + pathUnitId + ", pathPos: " + pathPos);
 #endif
 
@@ -140,7 +141,7 @@ namespace TrafficManager.Custom.AI {
 					// be interesting to know why they used such an ugly indexing scheme!!). I assume the oddness of m_pathPositionIndex relates
 					// to the car's position on the segment. If it is even the car might be in the segment's first half and if it is odd, it might
 					// be in the segment's second half.
-#if DEBUG
+#if DEBUGV
 					logBuffer.Add("* vehicleId " + vehicleId + ". *INFO* rtPos.seg=" + realTimePositions[0].m_segment + " nrtPos.seg=" + (realTimePositions.Count > 1 ? ""+realTimePositions[1].m_segment : "n/a"));
 #endif
 				}
@@ -149,7 +150,7 @@ namespace TrafficManager.Custom.AI {
 			// we have seen the car!
 			vehiclePos.LastFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-#if DEBUG
+#if DEBUGV
 			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + vehiclePos.ToNode + ". FromSegment: " + vehiclePos.FromSegment/* + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId*/);
 #endif
 			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
@@ -158,7 +159,7 @@ namespace TrafficManager.Custom.AI {
 				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
 			}
 
-#if DEBUG
+#if DEBUGV
 			logBuffer.Add("* vehicleId " + vehicleId + ". Real time positions: " + realTimePositions.Count + ", Destination nodes: " + realTimeDestinationNodes.Count);
 #endif
 			if (realTimePositions.Count >= 2) {
@@ -186,7 +187,7 @@ namespace TrafficManager.Custom.AI {
 					vehiclePos.ReduceSpeedByValueToYield = Random.Range(16f, 28f);
 					vehiclePos.OnEmergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None;
 
-#if DEBUG
+#if DEBUGV
 					logBuffer.Add($"* vehicleId {vehicleId}. Setting current position to: from {vehiclePos.FromSegment} (lane {vehiclePos.FromLaneIndex}), going over {vehiclePos.ToNode}, to {vehiclePos.ToSegment} (lane {vehiclePos.ToLaneIndex})");
 #endif
 
@@ -213,7 +214,7 @@ namespace TrafficManager.Custom.AI {
 							upcomingVehiclePos.ToLaneIndex = realTimePositions[i + 1].m_lane;
 							upcomingVehiclePos.ReduceSpeedByValueToYield = Random.Range(16f, 28f);
 							upcomingVehiclePos.OnEmergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None;
-#if DEBUG
+#if DEBUGV
 							logBuffer.Add($"* vehicleId {vehicleId}. Adding future position: from {upcomingVehiclePos.FromSegment}  (lane {upcomingVehiclePos.FromLaneIndex}), going over {upcomingVehiclePos.ToNode}, to {upcomingVehiclePos.ToSegment} (lane {upcomingVehiclePos.ToLaneIndex})");
 #endif
 
@@ -221,18 +222,18 @@ namespace TrafficManager.Custom.AI {
 						}
 					//}
 				} else {
-#if DEBUG
+#if DEBUGV
 					logBuffer.Add($"* vehicleId {vehicleId}. Nothing has changed. from {vehiclePos.FromSegment} (lane {vehiclePos.FromLaneIndex}), going over {vehiclePos.ToNode}, to {vehiclePos.ToSegment} (lane {vehiclePos.ToLaneIndex})");
 					logme = false;
 #endif
 				}
 			} else {
-#if DEBUG
+#if DEBUGV
 				logBuffer.Add($"* vehicleId {vehicleId}. Insufficient path unit positions.");
 #endif
 			}
 			
-#if DEBUG
+#if DEBUGV
 			if (logme) {
 				Log._Debug("vehicleId: " + vehicleId + " ============================================");
 				foreach (String logBuf in logBuffer) {
@@ -697,8 +698,8 @@ namespace TrafficManager.Custom.AI {
 
 															var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
 															if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane) {
-																maxSpeed =
-																	CalculateTargetSpeed(vehicleId, ref vehicleData, info3.m_lanes[position.m_lane].m_speedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
+																//maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, info3.m_lanes[position.m_lane].m_speedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
+																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, ref info3.m_lanes[position.m_lane]), netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
 															} else {
 																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.8f;
 															}
@@ -731,24 +732,23 @@ namespace TrafficManager.Custom.AI {
 
 			var info2 = netManager.m_segments.m_buffer[position.m_segment].Info;
 			if (info2.m_lanes != null && info2.m_lanes.Length > position.m_lane) {
-				var laneSpeedLimit = info2.m_lanes[position.m_lane].m_speedLimit;
+				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, ref info2.m_lanes[position.m_lane]); // info2.m_lanes[position.m_lane].m_speedLimit;
 
-				if (TrafficRoadRestrictions.IsSegment(position.m_segment)) {
+				/*if (TrafficRoadRestrictions.IsSegment(position.m_segment)) {
 					var restrictionSegment = TrafficRoadRestrictions.GetSegment(position.m_segment);
 
 					if (restrictionSegment.SpeedLimits[position.m_lane] > 0.1f) {
 						laneSpeedLimit = restrictionSegment.SpeedLimits[position.m_lane];
 					}
-				}
+				}*/
 
-				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,
-					netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
+				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,	netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
 
 			if (isRecklessDriver)
-				maxSpeed *= Random.Range(1.2f, 2.5f);
+				maxSpeed *= Random.Range(1.5f, 3f);
 		}
 
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData,
@@ -758,15 +758,15 @@ namespace TrafficManager.Custom.AI {
 				out pos, out dir);
 			var info = instance.m_segments.m_buffer[position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-				var laneSpeedLimit = info.m_lanes[position.m_lane].m_speedLimit;
+				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneId, ref info.m_lanes[position.m_lane]); //info.m_lanes[position.m_lane].m_speedLimit;
 
-				if (TrafficRoadRestrictions.IsSegment(position.m_segment)) {
+				/*if (TrafficRoadRestrictions.IsSegment(position.m_segment)) {
 					var restrictionSegment = TrafficRoadRestrictions.GetSegment(position.m_segment);
 
 					if (restrictionSegment.SpeedLimits[position.m_lane] > 0.1f) {
 						laneSpeedLimit = restrictionSegment.SpeedLimits[position.m_lane];
 					}
-				}
+				}*/
 
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,
 					instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_curve);

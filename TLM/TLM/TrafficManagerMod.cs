@@ -1,11 +1,12 @@
 using ICities;
+using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 		public string Name => "Traffic Manager: President Edition";
 
-		public string Description => "Traffic Junction Manager [v1.4]";
+		public string Description => "Traffic Manager";
 
 		public void OnEnabled() {
 			Log._Debug("TrafficManagerMod Enabled");

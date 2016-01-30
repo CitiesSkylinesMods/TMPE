@@ -1,18 +1,18 @@
 Switch_traffic_lights 信号の付け外し
 Add_priority_signs 優先関係標識の追加
 Manual_traffic_lights 信号の手動切替
-Timed_traffic_lights 時間設定された信号
+Timed_traffic_lights 時間設定付き信号
 Change_lane_arrows 車線矢印の変更
 Clear_Traffic 移動中車両の除去
 Disable_despawning スタック除去無効化
 Enable_despawning スタック除去有効化
 NODE_IS_LIGHT この交差点には信号があります。\n信号を削除するには「信号の付け外し」を選んでこの交差点をクリックしてください。
-NODE_IS_TIMED_LIGHT この交差点には時間設定された信号があります。\nまず「時間設定された信号」を選んでこの交差点をクリックして「削除」をクリックしてください。
+NODE_IS_TIMED_LIGHT この交差点には時間設定付き信号があります。\nまず「時間設定付き信号」を選んでこの交差点をクリックして「削除」をクリックしてください。
 Select_nodes_windowTitle 交差点の選択
 Select_nodes 交差点を選択してください
 Node 交差点
 Deselect_all_nodes 全交差点の選択を解除
-Setup_timed_traffic_light 信号のセットアップ
+Setup_timed_traffic_light 時間設定付き信号の設定
 State 状態
 Skip 次へ
 up 上へ
@@ -20,9 +20,9 @@ down 下へ
 View 表示
 Edit 編集
 Delete 削除
-Timed_traffic_lights_manager 信号の管理
+Timed_traffic_lights_manager 時間設定付き信号の管理
 Add_step 状態の追加
-Remove_timed_traffic_light 信号の削除
+Remove_timed_traffic_light 時間設定付き信号の削除
 Min._Time: 最短時間:
 Max._Time: 最長時間:
 Save 保存
@@ -82,3 +82,9 @@ Create_group グループの作成
 Delete_group グループの削除
 Add_zoning 区間の追加
 Remove_zoning 区間の削除
+Lane_Arrow_Changer_Disabled 高速道路ルールシステムを適用しているため、この車線の矢印は変更できません
+Add_junction_to_timed_light 
+Remove_junction_from_timed_light 
+Select_junction  
+Cancel  
+Speed_limits 速度制限
