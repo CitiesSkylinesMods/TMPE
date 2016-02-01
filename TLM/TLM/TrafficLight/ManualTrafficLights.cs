@@ -57,7 +57,7 @@ namespace TrafficManager.TrafficLight {
 			if (ManualSegments[segmentId].Node1 == nodeId) {
 				ManualSegments[segmentId].Node1 = 0;
 				ManualSegments[segmentId].Instance1 = null;
-			} else {
+			} else if (ManualSegments[segmentId].Node2 == nodeId) {
 				ManualSegments[segmentId].Node2 = 0;
 				ManualSegments[segmentId].Instance2 = null;
 			}

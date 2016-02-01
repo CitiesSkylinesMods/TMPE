@@ -837,8 +837,10 @@ namespace TrafficManager.Traffic {
 
 			if (lastTrafficLightUpdateFrame < curFrame) {
 				try {
+					uint i = 0;
 					foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulation.LightSimulationByNodeId) {
-						if ((e.Key & 7) != (curFrame & 7)) // 111
+						++i;
+						if ((i & 7u) != (curFrame & 7u)) // 111
 							continue;
 						try {
 							var otherNodeSim = e.Value;
@@ -849,7 +851,7 @@ namespace TrafficManager.Traffic {
 					}
 				} catch (Exception ex) {
 					// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
-					Log.Warning($"Error occured while iterating overs traffic light simulations: {ex.ToString()}");
+					Log.Warning($"Error occured while iterating over traffic light simulations: {ex.ToString()}");
 				}
 				lastTrafficLightUpdateFrame = curFrame;
 			}

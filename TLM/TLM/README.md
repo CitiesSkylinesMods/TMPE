@@ -2,7 +2,19 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
-1.5.0
+1.5.2, 02/01/2016
+- Traffic lights may now be added to/removed from underground junctions
+- Traffic lights may now be setup at *some* points of railway tracks (there seems to be a game-internal bug that prevents selecting arbitrary railway nodes)
+- Display of priority signs, speed limits and timed traffic lights may now be toggled via the options dialog
+- Bugfix: Reckless driving does not apply for trains (thanks to @GordonDry for pointing out this problem)
+- Bugfix: Manual traffic lights were not working (thanks to @Mas71 for pointing out this problem)
+- Bugfix: Pedestrians were ignoring timed traffic lights (thanks to @Hannes8910 for pointing out this problem)
+- Bugfix: Sometimes speed limits were not saved (thanks to @cca_mikeman for pointing out this problem) 
+
+1.5.1, 01/31/2016
+- Trains are now following speed limits
+
+1.5.0, 01/30/2016
 - New feature: Speed restrictions (as requested by @Gfurst)
 - AI: Parameters tuned
 - Code improvements

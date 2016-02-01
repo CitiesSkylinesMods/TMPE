@@ -58,7 +58,7 @@ Vehicles_may_enter_blocked_junctions Véhicules peuvent entrer dans les intersec
 All_vehicles_may_ignore_lane_arrows Tous les véhicules peuvent ignorer les directions des voies
 Busses_may_ignore_lane_arrows Les bus peuvent ignorer les directions des voies
 Reckless_driving Conduite téméraire (fonctionnalité Bêta)
-TMPE_Title Traffic Manager: Edition Président (Paramètres définis pour chaque sauvegarde séparément)
+TMPE_Title Traffic Manager: Edition Président\n(Paramètres définis pour chaque sauvegarde séparément)
 Simulation_accuracy Précision de la simulation (une plus haute précision réduit les performances)
 Enable_highway_specific_lane_merging/splitting_rules Activer les règles spécifiques de divergence/convergence sur les autoroutes
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Les conducteurs veulent changer de voies: (seulement si l'IA avancée est activée)
@@ -69,8 +69,8 @@ Sometimes_(10_%) Parfois (10 %)
 Rarely_(5_%) Rarement (5 %)
 Very_rarely_(2.5_%) Très rarement (2.5 %)
 Only_if_necessary Seulement si nécessaire
-Show_nodes_and_segments Afficher les nœuds et segments
-Show_lanes Afficher les voies
+Nodes_and_segments Nœuds et segments
+Lanes Voies
 Path_Of_Evil_(10_%) Chemin du Mal (10 %)
 Rush_Hour_(5_%) Heures de Pointe (5 %)
 Minor_Complaints_(2_%) Plaintes mineures (2 %)
@@ -88,3 +88,5 @@ Remove_junction_from_timed_light Retirer une intersection de ce feu tricolore
 Select_junction Sélectionnez une intersection
 Cancel Annuler
 Speed_limits Limitations de vitesse
+Persistently_visible_overlays Annonces en superposition visibles de façon permanente
+Priority_signs Signes de priorité 

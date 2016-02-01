@@ -69,8 +69,8 @@ Sometimes_(10_%) 時々 (10 %)
 Rarely_(5_%) まれ (5 %)
 Very_rarely_(2.5_%) 非常にまれ (2.5 %)
 Only_if_necessary 必要時のみ
-Show_nodes_and_segments 交差点と道路の表示
-Show_lanes 車線の表示
+Nodes_and_segments 交差点と道路の表示
+Lanes 車線
 Path_Of_Evil_(10_%) 悪路 (10 %)
 Rush_Hour_(5_%) ラッシュアワー (5 %)
 Minor_Complaints_(2_%) ほとんど不満なし (2 %)
@@ -83,8 +83,9 @@ Delete_group グループの削除
 Add_zoning 区間の追加
 Remove_zoning 区間の削除
 Lane_Arrow_Changer_Disabled 高速道路ルールシステムを適用しているため、この車線の矢印は変更できません
-Add_junction_to_timed_light 
-Remove_junction_from_timed_light 
-Select_junction  
-Cancel  
+Add_junction_to_timed_light この信号に交差点を追加
+Remove_junction_from_timed_light この信号から交差点を削除 
+Select_junction 交差点を選択してください 
+Cancel キャンセル 
 Speed_limits 速度制限
+Priority_signs Priority signs

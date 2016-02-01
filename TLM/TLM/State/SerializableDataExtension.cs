@@ -75,6 +75,18 @@ namespace TrafficManager.State {
 					Options.setHighwayRules(options[7] == (byte)1);
 				}
 
+				if (options.Length >= 9) {
+					Options.setPrioritySignsOverlay(options[8] == (byte)1);
+				}
+
+				if (options.Length >= 10) {
+					Options.setTimedLightsOverlay(options[9] == (byte)1);
+				}
+
+				if (options.Length >= 11) {
+					Options.setSpeedLimitsOverlay(options[10] == (byte)1);
+				}
+
 				/*if (options.Length >= 9) {
 					Options.setCarCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[8]) * 0.01f, 2));
 				}
@@ -268,7 +280,7 @@ namespace TrafficManager.State {
 						}
 
 						TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(nodeid);
-						sim.setupTimedTrafficLight(nodeGroup, vehiclesMayEnterBlockedJunctions);
+						sim.SetupTimedTrafficLight(nodeGroup, vehiclesMayEnterBlockedJunctions);
 						var timedNode = sim.TimedLight;
 
 						timedNode.CurrentStep = _configuration.TimedNodes[i][1];
@@ -403,37 +415,37 @@ namespace TrafficManager.State {
 #endif
 				var lanes = _configuration.LaneFlags.Split(',');
 
-				if (lanes.Length <= 1)
-					return;
-				foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
-					try {
-						Log.Info($"Split Data: {split[0]} , {split[1]}");
-						var laneId = Convert.ToUInt32(split[0]);
-						uint flags = Convert.ToUInt32(split[1]);
+				if (lanes.Length > 1) {
+					foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
+						try {
+							Log.Info($"Split Data: {split[0]} , {split[1]}");
+							var laneId = Convert.ToUInt32(split[0]);
+							uint flags = Convert.ToUInt32(split[1]);
 
-						//make sure we don't cause any overflows because of bad save data.
-						if (Singleton<NetManager>.instance.m_lanes.m_buffer.Length <= laneId)
-							continue;
+							//make sure we don't cause any overflows because of bad save data.
+							if (Singleton<NetManager>.instance.m_lanes.m_buffer.Length <= laneId)
+								continue;
 
-						if (flags > ushort.MaxValue)
-							continue;
+							if (flags > ushort.MaxValue)
+								continue;
 
-						if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment == 0)
-							continue;
+							if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment == 0)
+								continue;
 
-						Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
+							Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
 
-						uint laneArrowFlags = flags & Flags.lfr;
-						uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & Flags.lfr);
+							uint laneArrowFlags = flags & Flags.lfr;
+							uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & Flags.lfr);
 #if DEBUG
-						Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
-						if ((origFlags | laneArrowFlags) == origFlags) { // only load if setting differs from default
-							Log._Debug("Flags for lane " + laneId + " are original (" + ((NetLane.Flags)(origFlags)).ToString() + ")");
-						}
+							Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
+							if ((origFlags | laneArrowFlags) == origFlags) { // only load if setting differs from default
+								Log._Debug("Flags for lane " + laneId + " are original (" + ((NetLane.Flags)(origFlags)).ToString() + ")");
+							}
 #endif
-						Flags.setLaneArrowFlags(laneId, (Flags.LaneArrows)(laneArrowFlags));
-					} catch (Exception e) {
-						Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
+							Flags.setLaneArrowFlags(laneId, (Flags.LaneArrows)(laneArrowFlags));
+						} catch (Exception e) {
+							Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
+						}
 					}
 				}
 			} else {
@@ -442,8 +454,11 @@ namespace TrafficManager.State {
 
 			// load speed limits
 			if (_configuration.LaneSpeedLimits != null) {
-				foreach (Configuration.LaneSpeedLimit laneSpeedLimit in _configuration.LaneSpeedLimits)
-					Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+				Log.Info($"Loading lane speed limit data. {_configuration.LaneSpeedLimits.Count} elements");
+				foreach (Configuration.LaneSpeedLimit laneSpeedLimit in _configuration.LaneSpeedLimits) {
+					Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+                    Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+				}
 			} else {
 				Log.Warning("Lane speed limit structure undefined!");
 			}
@@ -525,7 +540,7 @@ namespace TrafficManager.State {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), (byte)(Options.prioritySignsOverlay ? 1 : 0), (byte)(Options.timedLightsOverlay ? 1 : 0), (byte)(Options.speedLimitsOverlay ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -559,22 +574,25 @@ namespace TrafficManager.State {
 			}
 		}
 
-		private static bool SaveNodeLights(int i, Configuration configuration) {
+		private static void SaveNodeLights(int i, Configuration configuration) {
 			try {
 				if (!Flags.mayHaveTrafficLight((ushort)i))
-					return true;
+					return;
 
-				bool hasTrafficLight = Flags.isNodeTrafficLight((ushort)i);
-				if (hasTrafficLight) {
+				bool? hasTrafficLight = Flags.isNodeTrafficLight((ushort)i);
+				if (hasTrafficLight == null)
+					return;
+
+				if ((bool)hasTrafficLight) {
 					Log.Info($"Saving that node {i} has a traffic light");
 				} else {
 					Log.Info($"Saving that node {i} does not have a traffic light");
 				}
-				configuration.NodeTrafficLights += $"{i}:{Convert.ToUInt16(hasTrafficLight)},";
-				return false;
+				configuration.NodeTrafficLights += $"{i}:{Convert.ToUInt16((bool)hasTrafficLight)},";
+				return;
 			} catch (Exception e) {
 				Log.Error($"Error Adding Node Lights and Crosswalks {e.Message}");
-				return true;
+				return;
 			}
 		}
 

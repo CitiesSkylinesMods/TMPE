@@ -69,8 +69,8 @@ Sometimes_(10_%) Sometimes (10 %)
 Rarely_(5_%) Rarely (5 %)
 Very_rarely_(2.5_%) Very rarely (2.5 %)
 Only_if_necessary Only if necessary
-Show_nodes_and_segments Show nodes and segments
-Show_lanes Show lanes
+Nodes_and_segments Nodes and segments
+Lanes Lanes
 Path_Of_Evil_(10_%) Path Of Evil (10 %)
 Rush_Hour_(5_%) Rush Hour (5 %)
 Minor_Complaints_(2_%) Minor Complaints (2 %)
@@ -88,3 +88,5 @@ Remove_junction_from_timed_light Remove a junction from this traffic light
 Select_junction Select a junction
 Cancel Cancel
 Speed_limits Speed limits
+Persistently_visible_overlays Persistently visible overlays
+Priority_signs Priority signs

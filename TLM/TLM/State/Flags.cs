@@ -53,16 +53,6 @@ namespace TrafficManager.State {
 			return initDone;
 		}
 
-		public static void OnBeforeLoadData() {
-			if (initDone)
-				return;
-
-			laneSpeedLimitArray = new ushort?[Singleton<NetManager>.instance.m_segments.m_size][];
-			laneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
-			highwayLaneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
-			initDone = true;
-		}
-
 		public static void resetTrafficLights(bool all) {
 			nodeTrafficLightFlag.Clear();
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
@@ -82,12 +72,13 @@ namespace TrafficManager.State {
 				return false;
 			}
 
-			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
-				//Log.Message($"Flags: Node {nodeId} may not have a traffic light (not a junction)");
+			ItemClass connectionClass = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
+				connectionClass.m_service != ItemClass.Service.PublicTransport
+				) {
+				Log._Debug($"Flags: Node {nodeId} may not have a traffic light");
 				return false;
 			}
-
-			ItemClass connectionClass = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
 
 			if (connectionClass == null ||
 				(connectionClass.m_service != ItemClass.Service.Road &&
@@ -128,7 +119,7 @@ namespace TrafficManager.State {
 			}
 		}
 
-		internal static bool isNodeTrafficLight(ushort nodeId) {
+		internal static bool? isNodeTrafficLight(ushort nodeId) {
 			if (nodeId <= 0)
 				return false;
 
@@ -139,7 +130,7 @@ namespace TrafficManager.State {
 				Monitor.Enter(nodeLightLock);
 
 				if (!nodeTrafficLightFlag.ContainsKey(nodeId))
-					return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+					return null;
 
 				return nodeTrafficLightFlag[nodeId];
 			} finally {
@@ -451,25 +442,37 @@ namespace TrafficManager.State {
 			}
 		}
 
-		internal static void clearAll() {
+		internal static void OnLevelUnloading() {
+			initDone = false;
+
 			try {
 				Monitor.Enter(nodeLightLock);
-
 				nodeTrafficLightFlag.Clear();
 			} finally {
 				Monitor.Exit(nodeLightLock);
 			}
 
-			for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_size; ++i) {
-				laneArrowFlags[i] = null;
-				highwayLaneArrowFlags[i] = null;
+
+			try {
+				Monitor.Enter(laneSpeedLimitLock);
+				laneSpeedLimitArray = null;
+				laneSpeedLimit.Clear();
+			} finally {
+				Monitor.Exit(laneSpeedLimitLock);
 			}
+
+			laneArrowFlags = null;
+			highwayLaneArrowFlags = null;
 		}
 
-		internal static void OnLevelUnloading() {
-			initDone = false;
-			laneSpeedLimitArray = null;
-			clearAll();
+		public static void OnBeforeLoadData() {
+			if (initDone)
+				return;
+
+			laneSpeedLimitArray = new ushort?[Singleton<NetManager>.instance.m_segments.m_size][];
+			laneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
+			highwayLaneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
+			initDone = true;
 		}
 	}
 }

@@ -92,7 +92,7 @@ namespace TrafficManager.UI {
 		public static ushort SelectedNode { get; private set; }
 
 		public static ushort SelectedSegment { get; private set; }
-
+		
 		public static ToolMode getToolMode() {
 			return _toolMode;
 		}
@@ -304,7 +304,7 @@ namespace TrafficManager.UI {
 			if (_toolMode == ToolMode.AddPrioritySigns && TrafficPriority.IsPriorityNode(_hoveredNetNodeIdx))
 				return;
 
-			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
+			if (!Flags.mayHaveTrafficLight(_hoveredNetNodeIdx)) return;
 
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[_hoveredNetNodeIdx].m_segment0];
 
@@ -495,32 +495,49 @@ namespace TrafficManager.UI {
 			var mouseRayValid = !UIView.IsInsideUI() && Cursor.visible && !_cursorInSecondaryPanel;
 
 			if (mouseRayValid) {
+				ushort oldHoveredSegmentId = _hoveredSegmentIdx;
+				ushort oldHoveredNodeId = _hoveredNetNodeIdx;
+
+				_hoveredSegmentIdx = 0;
+				_hoveredNetNodeIdx = 0;
+
 				// find currently hovered node & segment
-				
-				var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+				/*var mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 				var mouseRayLength = Camera.main.farClipPlane;
-				var rayRight = Camera.main.transform.TransformDirection(Vector3.right);
+				var rayRight = Camera.main.transform.TransformDirection(Vector3.right);*/
 
-				var input = new RaycastInput(mouseRay, mouseRayLength);
-				input.m_netService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
-				input.m_rayRight = rayRight;
-				input.m_ignoreTerrain = true;
-				input.m_ignoreNodeFlags = NetNode.Flags.None;
-				input.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
+				var nodeInput = new RaycastInput(this.m_mouseRay, this.m_mouseRayLength);
+				//input.m_netService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
+				//input.m_rayRight = rayRight;
+				nodeInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels | ItemClass.Layer.PublicTransport;
+				nodeInput.m_ignoreTerrain = true;
+				nodeInput.m_ignoreNodeFlags = NetNode.Flags.None;
+				//nodeInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
-				RaycastOutput output;
-				if (!RayCast(input, out output)) {
-					_hoveredSegmentIdx = 0;
-					_hoveredNetNodeIdx = 0;
-					return false;
+				RaycastOutput nodeOutput;
+				if (RayCast(nodeInput, out nodeOutput)) {
+					_hoveredNetNodeIdx = nodeOutput.m_netNode;
 				}
 
-				/*if (output.m_netNode != _hoveredNetNodeIdx || output.m_netSegment != _hoveredSegmentIdx) {
-					Log.Message($"*** Mouse ray @ node {output.m_netNode}, segment {output.m_netSegment}, toolMode={_toolMode}");
-                }*/
+				var segmentInput = new RaycastInput(this.m_mouseRay, this.m_mouseRayLength);
+				//input.m_netService = new RaycastService(ItemClass.Service.Road, ItemClass.SubService.None, ItemClass.Layer.Default);
+				//input.m_rayRight = rayRight;
+				segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels | ItemClass.Layer.PublicTransport;
+				segmentInput.m_ignoreTerrain = true;
+				//nodeInput.m_ignoreNodeFlags = NetNode.Flags.None;
+				segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
-				_hoveredNetNodeIdx = output.m_netNode;
-				_hoveredSegmentIdx = output.m_netSegment;
+				RaycastOutput segmentOutput;
+				if (RayCast(segmentInput, out segmentOutput)) {
+					_hoveredSegmentIdx = segmentOutput.m_netSegment;
+				}
+
+				if (oldHoveredNodeId != _hoveredNetNodeIdx || oldHoveredSegmentId != _hoveredSegmentIdx) {
+					Log._Debug($"*** Mouse ray @ node {_hoveredNetNodeIdx}, segment {_hoveredSegmentIdx}, toolMode={_toolMode}");
+                }
+
+				return (_hoveredNetNodeIdx != 0 || _hoveredSegmentIdx != 0);
 			} else {
 				//Log.Message($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {_cursorInSecondaryPanel}");
 			}
@@ -601,7 +618,7 @@ namespace TrafficManager.UI {
 				var nodeGroup = new List<ushort>();
 				nodeGroup.Add(_hoveredNetNodeIdx);
 				timedSim = TrafficLightSimulation.AddNodeToSimulation(_hoveredNetNodeIdx);
-				timedSim.setupTimedTrafficLight(nodeGroup);
+				timedSim.SetupTimedTrafficLight(nodeGroup);
 				timedLight = timedSim.TimedLight;
 				timedLight.vehiclesMayEnterBlockedJunctions = mayEnterBlocked;
 			} else {
@@ -644,7 +661,7 @@ namespace TrafficManager.UI {
 				SelectedNode = _hoveredNetNodeIdx;
 
 				sim = TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
-				sim.FlagManualTrafficLights = true;
+				sim.SetupManualTrafficLight();
 
 				for (var s = 0; s < 8; s++) {
 					var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].GetSegment(s);
@@ -2683,9 +2700,12 @@ namespace TrafficManager.UI {
 		}
 
 		private void drawSpeedLimitHandles(ushort segmentId, bool viewOnly) {
-			if (!LoadingExtension.IsPathManagerCompatible) {
+			/*if (!LoadingExtension.IsPathManagerCompatible) {
 				return;
-			}
+			}*/
+
+			if (viewOnly && !Options.speedLimitsOverlay)
+				return;
 
 			// draw speedlimits over mean middle points of lane beziers
 				if (!segmentCenterByDir.ContainsKey(segmentId)) {
@@ -3142,6 +3162,9 @@ namespace TrafficManager.UI {
 		}
 
 		private void showTimedLightIcons() {
+			if (!Options.timedLightsOverlay && _toolMode != ToolMode.TimedLightsAddNode && _toolMode != ToolMode.TimedLightsRemoveNode && _toolMode != ToolMode.TimedLightsSelectNode && _toolMode != ToolMode.TimedLightsShowLights)
+				return;
+
 			foreach (ushort nodeId in TrafficPriority.getPriorityNodes()) {
 				if (SelectedNodeIndexes.Contains(nodeId))
 					continue;
@@ -3193,7 +3216,7 @@ namespace TrafficManager.UI {
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 					TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
 					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
-					nodeSimulation.setupTimedTrafficLight(TrafficLightTool.SelectedNodeIndexes);
+					nodeSimulation.SetupTimedTrafficLight(TrafficLightTool.SelectedNodeIndexes);
 
 					for (var s = 0; s < 8; s++) {
 						var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[selectedNodeIndex].GetSegment(s);
@@ -3594,6 +3617,9 @@ namespace TrafficManager.UI {
 
 		private void _guiPrioritySigns(bool viewOnly) {
 			try {
+				if (viewOnly && !Options.prioritySignsOverlay)
+					return;
+
 				bool clicked = !viewOnly ? checkClicked() : false;
 				var hoveredSegment = false;
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
@@ -3837,7 +3863,7 @@ namespace TrafficManager.UI {
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
-				nodeSimulation.setupTimedTrafficLight(TrafficLightTool.SelectedNodeIndexes);
+				nodeSimulation.SetupTimedTrafficLight(TrafficLightTool.SelectedNodeIndexes);
 
 				for (var s = 0; s < 8; s++) {
 					var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[selectedNodeIndex].GetSegment(s);
@@ -3857,9 +3883,8 @@ namespace TrafficManager.UI {
 			if (nodeSimulation == null) {
 				//node.Info.m_netAI = _myGameObject.GetComponent<CustomRoadAI>();
 				//node.Info.m_netAI.m_info = node.Info;
-				TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
-				nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
-				nodeSimulation.FlagManualTrafficLights = true;
+				nodeSimulation = TrafficLightSimulation.AddNodeToSimulation(SelectedNode);
+				nodeSimulation.SetupManualTrafficLight();
 
 				for (var s = 0; s < 8; s++) {
 					var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].GetSegment(s);
@@ -3871,7 +3896,7 @@ namespace TrafficManager.UI {
 
 				return true;
 			}
-			nodeSimulation.FlagManualTrafficLights = false;
+			nodeSimulation.DestroyManualTrafficLight();
 			TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNode, true);
 
 			for (var s = 0; s < 8; s++) {
@@ -3889,9 +3914,9 @@ namespace TrafficManager.UI {
 			if (SelectedNode == 0) return;
 			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
 
-			if (nodeSimulation == null || !nodeSimulation.FlagManualTrafficLights) return;
+			if (nodeSimulation == null || !nodeSimulation.IsManualLight()) return;
 
-			nodeSimulation.FlagManualTrafficLights = false;
+			nodeSimulation.DestroyManualTrafficLight();
 			TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNode, true);
 		}
 

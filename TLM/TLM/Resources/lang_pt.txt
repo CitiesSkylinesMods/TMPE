@@ -69,8 +69,8 @@ Sometimes_(10_%) Às vezes (10 %)
 Rarely_(5_%) Raramente (5 %)
 Very_rarely_(2.5_%) Muito raramente (2,5 %)
 Only_if_necessary Apenas se necessário
-Show_nodes_and_segments Mostrar cruzamentos e segmentos
-Show_lanes Mostrar faixas
+Nodes_and_segments Cruzamentos e segmentos
+Lanes Faixas
 Path_Of_Evil_(10_%) Caminho do mal (10 %)
 Rush_Hour_(5_%) Hora do Rush (5 %)
 Minor_Complaints_(2_%) Reclamações de menor importância (2 %) 
@@ -87,3 +87,5 @@ Remove_junction_from_timed_light Remover cruzamento do semáforo
 Select_junction Selecionar cruzamento
 Cancel Cancelar
 Speed_limits Limite de Velocidade
+Persistently_visible_overlays Persistently visible overlays
+Priority_signs Placas de preferência

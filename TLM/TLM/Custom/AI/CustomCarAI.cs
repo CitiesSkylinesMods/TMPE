@@ -367,7 +367,7 @@ namespace TrafficManager.Custom.AI {
 			var netManager = Singleton<NetManager>.instance;
 			//var vehicleManager = Singleton<VehicleManager>.instance;
 			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
-			bool isRecklessDriver = (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
+			bool isRecklessDriver = IsRecklessDriver(vehicleId, ref vehicleData);
 
 			var lastFrameData = vehicleData.GetLastFrameData();
 			var lastFrameVehiclePos = lastFrameData.m_position;
@@ -430,7 +430,7 @@ namespace TrafficManager.Custom.AI {
 							checkSpace = false;
 						}
 					}
-					if (checkSpace && (uint)vehicleId % (Options.getRecklessDriverModulo() / 2) == 0) {
+					if (checkSpace && isRecklessDriver) {
 						checkSpace = false;
 					}
 					if (checkSpace) {
@@ -471,7 +471,7 @@ namespace TrafficManager.Custom.AI {
 									RoadBaseAI.TrafficLightState vehicleLightState;
 									ManualSegmentLight light = ManualTrafficLights.GetSegmentLight(previousDestinationNode, prevPos.m_segment); // TODO rework
 
-									if (light == null || nodeSimulation == null || !nodeSimulation.IsTimedLightActive()) {
+									if (light == null || nodeSimulation == null || !nodeSimulation.IsSimulationActive()) {
 										/*if (destinationNodeId == 20164) {
 											Log.Warning($"No sim @ node {destinationNodeId}");
                                         }*/
@@ -734,6 +734,12 @@ namespace TrafficManager.Custom.AI {
 			if (info2.m_lanes != null && info2.m_lanes.Length > position.m_lane) {
 				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, ref info2.m_lanes[position.m_lane]); // info2.m_lanes[position.m_lane].m_speedLimit;
 
+#if DEBUG
+				if (position.m_segment == 275) {
+					Log._Debug($"Applying lane speed limit of {laneSpeedLimit} to lane {laneID} @ seg. {position.m_segment}");
+                }
+#endif
+
 				/*if (TrafficRoadRestrictions.IsSegment(position.m_segment)) {
 					var restrictionSegment = TrafficRoadRestrictions.GetSegment(position.m_segment);
 
@@ -749,6 +755,10 @@ namespace TrafficManager.Custom.AI {
 
 			if (isRecklessDriver)
 				maxSpeed *= Random.Range(1.5f, 3f);
+		}
+
+		internal static bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
+			return ((vehicleData.Info.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleId, ref Vehicle vehicleData,
@@ -768,8 +778,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				}*/
 
-				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,
-					instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_curve);
+				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit,	instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_curve);
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}

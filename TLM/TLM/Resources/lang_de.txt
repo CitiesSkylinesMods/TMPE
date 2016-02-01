@@ -69,8 +69,8 @@ Sometimes_(10_%) Manchmal (10 %)
 Rarely_(5_%) Selten (5 %)
 Very_rarely_(2.5_%) Sehr selten (2.5 %)
 Only_if_necessary Nur falls nötig
-Show_nodes_and_segments Zeige Knoten und Segmente
-Show_lanes Zeige Fahrspuren
+Nodes_and_segments Knoten und Segmente
+Lanes Fahrspuren
 Path_Of_Evil_(10_%) Pfad des Bösen (10 %)
 Rush_Hour_(5_%) Feierabendverkehr (5 %)
 Minor_Complaints_(2_%) Einige Beschwerden (2 %)
@@ -87,4 +87,6 @@ Add_junction_to_timed_light Kreuzung zur Ampel hinzufügen
 Remove_junction_from_timed_light Kreuzung von der Ampel entfernen
 Select_junction Wähle eine Kreuzung aus
 Cancel Abbrechen
-Speed_limits Geschwindigkeitsbeschränkungen
+Speed_limits Geschwindigkeitsbeschr.
+Persistently_visible_overlays Dauerhaft sichtbare Overlays
+Priority_signs Vorfahrtsschilder

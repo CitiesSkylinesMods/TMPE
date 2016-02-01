@@ -18,6 +18,9 @@ namespace TrafficManager.State {
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
+		private static UICheckBox prioritySignsOverlayToggle = null;
+		private static UICheckBox timedLightsOverlayToggle = null;
+		private static UICheckBox speedLimitsOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
 		private static UICheckBox mayEnterBlockedJunctionsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
@@ -37,6 +40,9 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
+		public static bool prioritySignsOverlay = true;
+		public static bool timedLightsOverlay = true;
+		public static bool speedLimitsOverlay = true;
 		public static bool nodesOverlay = false;
 		public static bool mayEnterBlockedJunctions = false;
 		public static bool advancedAI = false;
@@ -62,10 +68,14 @@ namespace TrafficManager.State {
 			advancedAIToggle = groupAI.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 			highwayRulesToggle = groupAI.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules")+" (BETA feature)", highwayRules, onHighwayRulesChanged) as UICheckBox;
 			laneChangingRandomizationDropdown = groupAI.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			UIHelperBase groupOverlay = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
+			prioritySignsOverlayToggle = groupOverlay.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
+			timedLightsOverlayToggle = groupOverlay.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
+			speedLimitsOverlayToggle = groupOverlay.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
+			nodesOverlayToggle = groupOverlay.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+			showLanesToggle = groupOverlay.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 			UIHelperBase group2 = helper.AddGroup(Translation.GetString("Maintenance"));
 			group2.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights);
-			nodesOverlayToggle = group2.AddCheckbox(Translation.GetString("Show_nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
-            showLanesToggle = group2.AddCheckbox(Translation.GetString("Show_lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 #if DEBUG
 			disableSomething1Toggle = group2.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
 			disableSomething2Toggle = group2.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
@@ -74,6 +84,21 @@ namespace TrafficManager.State {
 			pathCostMultiplicator2Field = group2.AddTextfield("Pathcost multiplicator (div)", String.Format("{0:0.##}", pathCostMultiplicator2), onPathCostMultiplicator2Changed) as UITextField;
 			someValueField = group2.AddTextfield("Some value", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
 #endif
+		}
+
+		private static void onPrioritySignsOverlayChanged(bool newPrioritySignsOverlay) {
+			Log._Debug($"prioritySignsOverlay changed to {newPrioritySignsOverlay}");
+			prioritySignsOverlay = newPrioritySignsOverlay;
+		}
+
+		private static void onTimedLightsOverlayChanged(bool newTimedLightsOverlay) {
+			Log._Debug($"timedLightsOverlay changed to {newTimedLightsOverlay}");
+			timedLightsOverlay = newTimedLightsOverlay;
+		}
+
+		private static void onSpeedLimitsOverlayChanged(bool newSpeedLimitsOverlay) {
+			Log._Debug($"speedLimitsOverlay changed to {newSpeedLimitsOverlay}");
+			speedLimitsOverlay = newSpeedLimitsOverlay;
 		}
 
 		private static void onDisableSomething1Changed(bool newDisableSomething) {
@@ -250,6 +275,24 @@ namespace TrafficManager.State {
 			mayEnterBlockedJunctions = newMayEnterBlockedJunctions;
 			if (mayEnterBlockedJunctionsToggle != null)
 				mayEnterBlockedJunctionsToggle.isChecked = newMayEnterBlockedJunctions;
+		}
+
+		public static void setPrioritySignsOverlay(bool newPrioritySignsOverlay) {
+			prioritySignsOverlay = newPrioritySignsOverlay;
+			if (prioritySignsOverlayToggle != null)
+				prioritySignsOverlayToggle.isChecked = newPrioritySignsOverlay;
+		}
+
+		public static void setTimedLightsOverlay(bool newTimedLightsOverlay) {
+			timedLightsOverlay = newTimedLightsOverlay;
+			if (timedLightsOverlayToggle != null)
+				timedLightsOverlayToggle.isChecked = newTimedLightsOverlay;
+		}
+
+		public static void setSpeedLimitsOverlay(bool newSpeedLimitsOverlay) {
+			speedLimitsOverlay = newSpeedLimitsOverlay;
+			if (speedLimitsOverlayToggle != null)
+				speedLimitsOverlayToggle.isChecked = newSpeedLimitsOverlay;
 		}
 
 		public static void setNodesOverlay(bool newNodesOverlay) {

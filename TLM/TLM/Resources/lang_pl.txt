@@ -58,7 +58,7 @@ Vehicles_may_enter_blocked_junctions Pojazdy mogą wjeżdżać na zablokowane sk
 All_vehicles_may_ignore_lane_arrows Wszystkie pojazdy mogą ignorować strzałki pasów
 Busses_may_ignore_lane_arrows Autobusy mogą ignorować strzałki pasów
 Reckless_driving Lekkomyślna jazda (funkcja w wer. BETA)
-TMPE_Title Menedżer ruchu: Edycja Prezydencka (ustawienia są definiowane oddzielnie dla każdego zapisu)
+TMPE_Title Menedżer ruchu: Edycja Prezydencka\n(ustawienia są definiowane oddzielnie dla każdego zapisu)
 Simulation_accuracy Dokładność symulacji (większa dokładność zmiejsza wydajność gry)
 Enable_highway_specific_lane_merging/splitting_rules Aktywuj Zmienione zasady podziału/łączenia pasów dla autostrad
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Chęć kierowców do zmiany pasa (tylko gdy Zaawansowana SI jest włączona) 
@@ -69,8 +69,8 @@ Sometimes_(10_%) Czasami (10 %)
 Rarely_(5_%) Rzadko (5 %)
 Very_rarely_(2.5_%) Bardzo Rzadko (2.5 %) 
 Only_if_necessary Tylko jeśli konieczna
-Show_nodes_and_segments Pokaż węzły i segmenty
-Show_lanes Pokaż pasy
+Nodes_and_segments Pokaż węzły i segmenty
+Lanes Pasy
 Path_Of_Evil_(10_%) Diabelska Ścieżka (10 %)
 Rush_Hour_(5_%) Godziny Szczytu (5 %)
 Minor_Complaints_(2_%) Drobne Skargi (2 %)
@@ -88,3 +88,5 @@ Remove_junction_from_timed_light Wyklucz skrzyżowanie z tego węzła sygnalizac
 Select_junction Wybierz skrzyżowanie 
 Cancel Anuluj 
 Speed_limits Ograniczenia prędkości
+Persistently_visible_overlays Persistently visible overlays
+Priority_signs Znaki pierwszeństwa

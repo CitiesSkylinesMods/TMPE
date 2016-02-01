@@ -400,6 +400,9 @@ namespace TrafficManager.TrafficLight {
 						}
 					}
 
+					if (carsToSegmentMetrics[0] == null)
+						continue;
+
 					// build directions from toSegment to fromSegment
 					Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
 					foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[0]) {

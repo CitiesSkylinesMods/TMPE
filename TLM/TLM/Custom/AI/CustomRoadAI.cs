@@ -52,7 +52,7 @@ namespace TrafficManager.Custom.AI {
 				TrafficPriority.TrafficLightSimulationStep();
 
 				var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
-				if (nodeSim == null || !nodeSim.IsTimedLightActive()) {
+				if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 					OriginalSimulationStep(nodeId, ref data);
 				}
 			} catch (Exception e) {

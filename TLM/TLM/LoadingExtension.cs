@@ -176,6 +176,48 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log._Debug("Redirecting Train AI Calculate Segment Calls");
+				try {
+
+					LoadingExtension.Instance.OriginalMethods[9] = typeof(TrainAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+								typeof (PathUnit.Position), typeof (uint), typeof (byte), typeof (PathUnit.Position),
+								typeof (uint), typeof (byte), typeof (Vector3).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(), typeof (float).MakeByRefType()
+							},
+							null);
+					LoadingExtension.Instance.CustomMethods[9] = typeof(CustomTrainAI).GetMethod("TmCalculateSegmentPosition");
+					LoadingExtension.Instance.CustomRedirects[9] = RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[9], LoadingExtension.Instance.CustomMethods[9]);
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::CalculateSegmentPosition (1)");
+					detourFailed = true;
+				}
+
+				Log._Debug("Redirection TrainAI Calculate Segment Position calls for non-Traffic++");
+				try {
+					LoadingExtension.Instance.OriginalMethods[10] = typeof(TrainAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort), typeof (Vehicle).MakeByRefType(), typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (byte), typeof (Vector3).MakeByRefType(), typeof (Vector3).MakeByRefType(),
+								typeof (float).MakeByRefType()
+							},
+							null);
+					LoadingExtension.Instance.CustomMethods[10] = typeof(CustomTrainAI).GetMethod("TmCalculateSegmentPositionPathFinder");
+					LoadingExtension.Instance.CustomRedirects[10] =
+						RedirectionHelper.RedirectCalls(LoadingExtension.Instance.OriginalMethods[10], LoadingExtension.Instance.CustomMethods[10]);
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::CalculateSegmentPosition (2)");
+					detourFailed = true;
+				}
+
 				if (detourFailed) {
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
 				}
@@ -190,9 +232,9 @@ namespace TrafficManager {
             base.OnCreated(loading);
 
             ToolMode = TrafficManagerMode.None;
-			OriginalMethods = new MethodInfo[9];
-			CustomMethods = new MethodInfo[9];
-			CustomRedirects = new RedirectCallsState[9];
+			OriginalMethods = new MethodInfo[11];
+			CustomMethods = new MethodInfo[11];
+			CustomRedirects = new RedirectCallsState[11];
             DespawnEnabled = true;
             DetourInited = false;
             CustomPathManager = new CustomPathManager();
@@ -208,6 +250,7 @@ namespace TrafficManager {
         }
 
 		public override void OnLevelUnloading() {
+			Log.Info("OnLevelUnloading");
 			base.OnLevelUnloading();
 			if (Instance == null)
 				Instance = this;

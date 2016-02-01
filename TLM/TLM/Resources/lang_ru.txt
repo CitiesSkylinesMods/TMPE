@@ -69,8 +69,8 @@ Sometimes_(10_%) Иногда (10 %)
 Rarely_(5_%) Редко (5 %)
 Very_rarely_(2.5_%) Очень редко (2.5 %)
 Only_if_necessary Только при необходимости
-Show_nodes_and_segments Показать узлы и сегменты
-Show_lanes Показать полосы
+Nodes_and_segments Показать узлы и сегменты
+Lanes полосы
 Path_Of_Evil_(10_%) Дорога Зла (10 %)
 Rush_Hour_(5_%) Час Пик (5 %)
 Minor_Complaints_(2_%) Чуть-чуть Жалоб (2 %)
@@ -88,3 +88,5 @@ Remove_junction_from_timed_light Не соединять с данным све�
 Select_junction Выбрать перекресток
 Cancel Отмена
 Speed_limits Ограничение скорости
+Persistently_visible_overlays Persistently visible overlays
+Priority_signs Знаки приоритета
