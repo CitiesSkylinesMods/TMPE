@@ -2,6 +2,36 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.5.2, 02/01/2016
+- Traffic lights may now be added to/removed from underground junctions
+- Traffic lights may now be setup at *some* points of railway tracks (there seems to be a game-internal bug that prevents selecting arbitrary railway nodes)
+- Display of priority signs, speed limits and timed traffic lights may now be toggled via the options dialog
+- Bugfix: Reckless driving does not apply for trains (thanks to @GordonDry for pointing out this problem)
+- Bugfix: Manual traffic lights were not working (thanks to @Mas71 for pointing out this problem)
+- Bugfix: Pedestrians were ignoring timed traffic lights (thanks to @Hannes8910 for pointing out this problem)
+- Bugfix: Sometimes speed limits were not saved (thanks to @cca_mikeman for pointing out this problem) 
+
+1.5.1, 01/31/2016
+- Trains are now following speed limits
+
+1.5.0, 01/30/2016
+- New feature: Speed restrictions (as requested by @Gfurst)
+- AI: Parameters tuned
+- Code improvements
+- Lane arrow changer window is now positioned near the edited junction (as requested by @GordonDry)
+- Bugfix: Flowing/Waiting vehicles count corrected
+
+1.4.9, 01/27/2016
+- Junctions may now be added to/removed from timed traffic lights after they are created
+- When viewing/moving a timed step, the displayed/moved step is now highlighted (thanks to Joe for this idea)
+- Performance improvements
+- Bugfix (AI): Fixed a division by zero error (thanks to @GordonDry for pointing out this problem)
+- Bugfix (AI): Near highway exits vehicles tended to use the outermost lane (thanks to @Zake for pointing out this problem)
+- Bugfix: Some lane arrows disappeared on maps using left-hand traffic systems (thanks to @Mas71 for pointing out this problem)
+- Bugfix: In lane arrow edit mode, the order of arrows was sometimes incorrect (thanks to @Glowstrontium for pointing out this problem)
+- Bugfix: Lane merging in left-hand traffic systems fixed
+- Bugfix: Turning priority roads fixed (thanks to @GordonDry for pointing out this problem)
+
 1.4.8, 01/25/2016
 - AI: Parameters have been tuned
 - AI: Added traffic density measurements
