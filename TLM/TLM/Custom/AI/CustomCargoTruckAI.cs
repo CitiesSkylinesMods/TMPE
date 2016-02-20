@@ -218,7 +218,7 @@ namespace TrafficManager.Custom.AI
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				ExtVehicleType? extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+				ExtVehicleType? extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleID, ref vehicleData);
 				bool res = false;
 				if (extVehicleType == null)
 					res = Singleton<PathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, heavyVehicle, ignoreBlocked, false, false);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using UnityEngine;
@@ -20,6 +21,9 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
 		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic, byte maxUpcomingPathPositions, bool debug = false) {
+			if (Options.disableSomething3)
+				return;
+
 			if (maxUpcomingPathPositions <= 0)
 				maxUpcomingPathPositions = 1; // we need at least one upcoming path position
 
@@ -40,8 +44,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Car &&
 				vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Train &&
-				vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Tram &&
-				vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
+				vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Tram) {
 				//Log._Debug($"HandleVehicle does not handle vehicles of type {vehicleData.Info.m_vehicleType}");
 				return;
 			}
@@ -49,7 +52,7 @@ namespace TrafficManager.Custom.AI {
 			logBuffer.Add("Calculating prio info for vehicleId " + vehicleId);
 #endif
 
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleId, ref vehicleData);
 			if (vehicleType == null) {
 				Log.Warning($"Could not determine vehicle type of vehicle {vehicleId}!");
 			}
@@ -262,7 +265,15 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		internal static ExtVehicleType? DetermineVehicleTypeFromVehicle(ref Vehicle vehicleData) {
+		internal static ExtVehicleType? DetermineVehicleTypeFromVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None)
+				return ExtVehicleType.Emergency;
+			else {
+				VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
+				if (vehiclePos != null && vehiclePos.Valid && vehiclePos.VehicleType != ExtVehicleType.Emergency)
+					return vehiclePos.VehicleType;
+			}
+
 			VehicleAI ai = vehicleData.Info.m_vehicleAI;
 			return DetermineVehicleTypeFromAIType(ai, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None);
 		}
@@ -293,7 +304,7 @@ namespace TrafficManager.Custom.AI {
 				return ExtVehicleType.Tram;
 			if (ai is CarTrailerAI)
 				return ExtVehicleType.None;
-			Log.Warning($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
+			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
 			return null;
 		}
 	}

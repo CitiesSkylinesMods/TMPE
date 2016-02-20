@@ -133,7 +133,7 @@ namespace TrafficManager.Custom.AI {
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
 			/// NON-STOCK CODE START ///
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleID, ref vehicleData);
 			//Log._Debug($"CustomTrainAI.CustomStartPathFind. vehicleID={vehicleID}. type={this.GetType().ToString()} vehicleType={vehicleType}");
 			/// NON-STOCK CODE END ///
 

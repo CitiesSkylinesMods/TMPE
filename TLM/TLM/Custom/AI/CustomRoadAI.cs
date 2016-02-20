@@ -187,7 +187,7 @@ namespace TrafficManager.Custom.AI {
 			}*/
 
 			// get vehicle type
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleId, ref vehicleData);
 			//Log._Debug($"GetCustomTrafficLightState: Vehicle {vehicleId} is a {vehicleType}");
 			if (vehicleType == null) {
 				Log.Warning($"GetTrafficLightState: Could not determine vehicle type of vehicle {vehicleId}!");

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.State;
 using TrafficManager.Traffic;
 using UnityEngine;
 
@@ -45,8 +46,11 @@ namespace TrafficManager.Custom.AI {
 				PathUnit.Position position2 = default(PathUnit.Position);
 				uint path;
 				ExtVehicleType? extVehicleType = null;
-				if (vehicleInfo != null)
-					extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromAIType(vehicleInfo.m_vehicleAI, false);
+				if (vehicleInfo != null) {
+					if (! Options.disableSomething2)
+						Log._Debug($"CustomCitizenAI: vehicleId={vehicleInfo.m_instanceID.Vehicle}");
+                    extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleInfo.m_instanceID.Vehicle, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleInfo.m_instanceID.Vehicle]);
+				}
 				bool res = false;
 				if (extVehicleType == null)
 					res = Singleton<CustomPathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);

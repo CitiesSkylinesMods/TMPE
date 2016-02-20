@@ -1802,13 +1802,13 @@ namespace TrafficManager.Custom.PathFinding {
 						}*/
 
 						// add costs for crossing a junction
-						if (Options.disableSomething3 && !isMiddle && nextSegmentId == item.m_position.m_segment) {
+						/*if (Options.disableSomething3 && !isMiddle && nextSegmentId == item.m_position.m_segment) {
 							distanceOnBezier += Options.someValue3;
-						}
+						}*/
 
-						if (Options.disableSomething2 && !Options.isStockLaneChangerUsed() && nextIsRealJunction) {
+						/*if (Options.disableSomething2 && !Options.isStockLaneChangerUsed() && nextIsRealJunction) {
 							distanceOnBezier += Options.someValue4;
-						}
+						}*/
 
 						//sCurrentState = 16;
 						float distanceOverMeanMaxSpeed = distanceOnBezier / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
@@ -1934,7 +1934,7 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 
 								// multiply with lane distance
-								float laneDist = Options.disableSomething4 && !isMiddle && nextSegmentId == item.m_position.m_segment ? Options.someValue2 : Convert.ToSingle(Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex));
+								float laneDist = /*Options.disableSomething4 && */!isMiddle && nextSegmentId == item.m_position.m_segment ? Options.someValue2 : Convert.ToSingle(Math.Abs(nextRightSimilarLaneIndex - prevRightSimilarLaneIndex));
 								float laneMetric = 1f;
 								if (!wantToChangeLane || laneDist > 1) {
 									laneMetric = (float)Math.Pow(Options.someValue, laneDist);

@@ -400,6 +400,9 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getUTurnAllowed(ushort segmentId, bool startNode) {
+			if (!IsInitDone())
+				return false;
+
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -424,6 +427,9 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getStraightLaneChangingAllowed(ushort segmentId, bool startNode) {
+			if (!IsInitDone())
+				return false;
+
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -447,6 +453,9 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getEnterWhenBlockedAllowed(ushort segmentId, bool startNode) {
+			if (!IsInitDone())
+				return false;
+
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];

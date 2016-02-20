@@ -1025,6 +1025,9 @@ namespace TrafficManager.Traffic {
 		private static List<ushort> vehicleIdsToDelete = new List<ushort>();
 
 		public static void segmentHousekeeping(ushort segmentId) {
+			if (Options.disableSomething4)
+				return;
+
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			// update lane arrows
@@ -1075,6 +1078,9 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static void nodeHousekeeping(ushort nodeId) {
+			if (Options.disableSomething4)
+				return;
+
 			try {
 				uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 

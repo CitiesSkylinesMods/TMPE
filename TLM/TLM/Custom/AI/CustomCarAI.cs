@@ -506,7 +506,7 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleId, ref vehicleData);
 			float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
 			if (isRecklessDriver)
 				maxSpeed *= 1.5f + vehicleRand * 1.5f; // woohooo, 1.5 .. 3
@@ -540,7 +540,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(ref vehicleData);
+			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleID, ref vehicleData);
 			/*if (vehicleType == null) {
 				Log._Debug($"CustomCarAI.CustomStartPathFind: Could not determine ExtVehicleType from class type. typeof this={this.GetType().ToString()}");
 			} else {
