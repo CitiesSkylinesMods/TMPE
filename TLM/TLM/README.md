@@ -2,6 +2,27 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.0, 02/18/2016
+- New feature: Separate traffic lights for different vehicle types
+- New feature: Vehicle restrictions
+- Snowfall compatibility
+- Better handling of vehicle bans
+- Improved the method for calculating lane traffic densities
+- Ambulances, fire trucks and police cars on duty are now ignoring lane arrows
+- Timed traffic lights may now be setup at arbitrary nodes on railway tracks
+- Reckless drivers now do not enter railroad crossings if the barrier is down
+- Option dialog is disabled if accessed through the main menu
+- Performance optimizations
+- Advanced Vehicle AI: Improved lane spreading
+- The option "Vehicles may enter blocked junctions" may now be defined for each junction separately
+- Vehicles going straight may now change lanes at junctions
+- Vehicles may now perform u-turns at junctions that have an appropriate lane arrow configuration
+- Road conditions (snow, maintenance state) may now have a higher impact on vehicle speed (see "Options" menu)
+- Emergency vehicles on duty now always aim for the the fastest route
+- Bugfix: Path-finding costs for crossing a junction fixed
+- Bugfix: Vehicle detection at timed traffic lights did not work as expected
+- Bugfix: Not all valid traffic light arrow modes were reachable
+
 1.5.2, 02/01/2016
 - Traffic lights may now be added to/removed from underground junctions
 - Traffic lights may now be setup at *some* points of railway tracks (there seems to be a game-internal bug that prevents selecting arbitrary railway nodes)

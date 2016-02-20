@@ -6,12 +6,13 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using JetBrains.Annotations;
 using UnityEngine;
+using TrafficManager.Traffic;
 
 // ReSharper disable InconsistentNaming
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathManager : PathManager {
-		internal CustomPathFind[] _replacementPathFinds;
+		internal static CustomPathFind[] _replacementPathFinds;
 
 		public static CustomPathManager _instance;
 
@@ -61,6 +62,73 @@ namespace TrafficManager.Custom.PathFinding {
 			} finally {
 				Monitor.Exit(this.m_bufferLock);
 			}
+		}
+
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPos, PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+			PathUnit.Position position = default(PathUnit.Position);
+			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPos, position, endPos, position, position, laneTypes, vehicleTypes, maxLength, false, false, false, false);
+		}
+
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), laneTypes, vehicleTypes, maxLength, false, false, false, false);
+		}
+
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
+			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), laneTypes, vehicleTypes, maxLength, isHeavyVehicle, ignoreBlocked, stablePath, skipQueue);
+		}
+
+
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
+			uint num;
+			try {
+				Monitor.Enter(this.m_bufferLock);
+				if (!this.m_pathUnits.CreateItem(out num, ref randomizer)) {
+					unit = 0u;
+					bool result = false;
+					return result;
+				}
+				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
+			} finally {
+				Monitor.Exit(this.m_bufferLock);
+			}
+			unit = num;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 1;
+			if (isHeavyVehicle) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
+			}
+			if (ignoreBlocked) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 32;
+			}
+			if (stablePath) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 64;
+			}
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_pathFindFlags = 0;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_buildIndex = buildIndex;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position00 = startPosA;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position01 = endPosA;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position02 = startPosB;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position03 = endPosB;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position11 = vehiclePosition;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit = 0u;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_laneTypes = (byte)laneTypes;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_vehicleTypes = (byte)vehicleTypes;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_length = maxLength;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount = 20;
+			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_referenceCount = 1;
+			int num2 = 10000000;
+			CustomPathFind pathFind = null;
+			for (int i = 0; i < _replacementPathFinds.Length; i++) {
+				CustomPathFind pathFindCandidate = _replacementPathFinds[i];
+				if (pathFindCandidate.IsAvailable && pathFindCandidate.m_queuedPathFindCount < num2) {
+					num2 = pathFindCandidate.m_queuedPathFindCount;
+					pathFind = pathFindCandidate;
+				}
+			}
+			if (pathFind != null && pathFind.CalculatePath(vehicleType, unit, skipQueue)) {
+				return true;
+			}
+			this.ReleasePath(unit);
+			return false;
 		}
 	}
 }

@@ -64,11 +64,15 @@ namespace TrafficManager.State {
 				}
 
 				if (options.Length >= 7) {
+#if !TAM
 					if (!LoadingExtension.IsPathManagerCompatible) {
 						Options.setAdvancedAI(false);
 					} else {
+#endif
 						Options.setAdvancedAI(options[6] == (byte)1);
+#if !TAM
 					}
+#endif
 				}
 
 				if (options.Length >= 8) {
@@ -87,21 +91,21 @@ namespace TrafficManager.State {
 					Options.setSpeedLimitsOverlay(options[10] == (byte)1);
 				}
 
-				/*if (options.Length >= 9) {
-					Options.setCarCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[8]) * 0.01f, 2));
-				}
-
-				if (options.Length >= 10) {
-					Options.setCarHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[9]) * 0.01f, 2));
-				}
-
-				if (options.Length >= 11) {
-					Options.setTruckCityTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[10]) * 0.01f, 2));
-				}
-
 				if (options.Length >= 12) {
-					Options.setTruckHighwayTrafficSensitivity((float)Math.Round(Convert.ToSingle(options[11]) * 0.01f, 2));
-				}*/
+					Options.setVehicleRestrictionsOverlay(options[11] == (byte)1);
+				}
+
+				if (options.Length >= 13) {
+					Options.setStrongerRoadConditionEffects(options[12] == (byte)1);
+				}
+
+				if (options.Length >= 14) {
+					Options.allowUTurns = options[13] == (byte)1;
+				}
+
+				if (options.Length >= 15) {
+					Options.allowLaneChangesWhileGoingStraight = options[14] == (byte)1;
+				}
 			}
 
 			// load toggled traffic lights
@@ -148,7 +152,7 @@ namespace TrafficManager.State {
 					bool debug = segment[0] == 13630;
 #endif
 
-					if ((PrioritySegment.PriorityType)segment[2] == PrioritySegment.PriorityType.None) {
+					if ((SegmentEnd.PriorityType)segment[2] == SegmentEnd.PriorityType.None) {
 #if DEBUG
 						if (debug)
 							Log._Debug($"Loading priority segment: Not adding 'None' priority segment: {segment[1]} @ node {segment[0]}");
@@ -175,13 +179,13 @@ namespace TrafficManager.State {
 						if (debug)
 							Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
 #endif
-						TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (PrioritySegment.PriorityType)segment[2];
+						TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
 						continue;
 					}
 #if DEBUG
 					Log._Debug($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
 #endif
-					TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (PrioritySegment.PriorityType)segment[2]);
+					TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
 				}
 			} else {
 				Log.Warning("Priority segments data structure undefined!");
@@ -258,8 +262,55 @@ namespace TrafficManager.State {
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			if (_configuration.TimedNodes != null && _configuration.TimedNodeGroups != null) {
-				Log.Info($"Loading {_configuration.TimedNodes.Count()} timed traffic lights");
+			if (_configuration.TimedLights != null) {
+				Log.Info($"Loading {_configuration.TimedLights.Count()} timed traffic lights (new method)");
+
+				foreach (Configuration.TimedTrafficLights cnfTimedLights in _configuration.TimedLights) {
+					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[cnfTimedLights.nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+						continue;
+					Flags.setNodeTrafficLight(cnfTimedLights.nodeId, true);
+
+					Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
+
+					TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(cnfTimedLights.nodeId);
+					sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
+					var timedNode = sim.TimedLight;
+
+					int j = 0;
+					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
+						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
+
+						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
+							CustomSegmentLights lights = null;
+							if (!step.segmentLights.TryGetValue(e.Key, out lights))
+								continue;
+							Configuration.CustomSegmentLights cnfLights = e.Value;
+
+							Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+
+							lights.ManualPedestrianMode = cnfLights.manualPedestrianMode;
+							lights.PedestrianLightState = cnfLights.pedestrianLightState;
+
+							foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
+								CustomSegmentLight light = null;
+								if (!lights.CustomLights.TryGetValue(e2.Key, out light))
+									continue;
+								Configuration.CustomSegmentLight cnfLight = e2.Value;
+
+								light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
+								light.LightLeft = cnfLight.leftLight;
+								light.LightMain = cnfLight.mainLight;
+								light.LightRight = cnfLight.rightLight;
+							}
+						}
+						++j;
+					}
+
+					if (cnfTimedLights.started)
+						timedNode.Start();
+				}
+			} else if (_configuration.TimedNodes != null && _configuration.TimedNodeGroups != null) {
+				Log.Info($"Loading {_configuration.TimedNodes.Count()} timed traffic lights (old method)");
 				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
 					try {
 						var nodeid = (ushort)_configuration.TimedNodes[i][0];
@@ -269,18 +320,13 @@ namespace TrafficManager.State {
 
 						Log._Debug($"Adding Timed Node {i} at node {nodeid}");
 
-						bool vehiclesMayEnterBlockedJunctions = false;
-						if (_configuration.TimedNodes[i].Length >= 5) {
-							vehiclesMayEnterBlockedJunctions = _configuration.TimedNodes[i][4] == 1;
-						}
-
 						var nodeGroup = new List<ushort>();
 						for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++) {
 							nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
 						}
 
 						TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(nodeid);
-						sim.SetupTimedTrafficLight(nodeGroup, vehiclesMayEnterBlockedJunctions);
+						sim.SetupTimedTrafficLight(nodeGroup);
 						var timedNode = sim.TimedLight;
 
 						timedNode.CurrentStep = _configuration.TimedNodes[i][1];
@@ -332,18 +378,22 @@ namespace TrafficManager.State {
 								var mainLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
 								var rightLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
 								var pedLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
-								ManualSegmentLight.Mode? mode = null;
+								CustomSegmentLight.Mode? mode = null;
 								if (_configuration.TimedNodeStepSegments[timedStepSegmentCount].Length >= 5) {
-									mode = (ManualSegmentLight.Mode)_configuration.TimedNodeStepSegments[timedStepSegmentCount][4];
+									mode = (CustomSegmentLight.Mode)_configuration.TimedNodeStepSegments[timedStepSegmentCount][4];
 								}
 
-								//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
-									step.segmentLightStates[segmentId].LightLeft = leftLightState;
-								step.segmentLightStates[segmentId].LightMain = mainLightState;
-								step.segmentLightStates[segmentId].LightRight = rightLightState;
-								step.segmentLightStates[segmentId].LightPedestrian = pedLightState;
-								if (mode != null)
-									step.segmentLightStates[segmentId].CurrentMode = (ManualSegmentLight.Mode)mode;
+								foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in step.segmentLights[segmentId].CustomLights) {
+									//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
+									e.Value.LightLeft = leftLightState;
+									e.Value.LightMain = mainLightState;
+									e.Value.LightRight = rightLightState;
+									if (mode != null)
+										e.Value.CurrentMode = (CustomSegmentLight.Mode)mode;
+								}
+
+								if (step.segmentLights[segmentId].PedestrianLightState != null)
+									step.segmentLights[segmentId].PedestrianLightState = pedLightState;
 
 								timedStepSegmentCount++;
 							}
@@ -462,6 +512,30 @@ namespace TrafficManager.State {
 			} else {
 				Log.Warning("Lane speed limit structure undefined!");
 			}
+
+			// load vehicle restrictions
+			if (_configuration.LaneAllowedVehicleTypes != null) {
+				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
+				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
+					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}");
+					Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, laneVehicleTypes.vehicleTypes);
+				}
+			} else {
+				Log.Warning("Lane speed limit structure undefined!");
+			}
+
+			// Load segment-at-node flags
+			if (_configuration.SegmentNodeConfs != null) {
+				Log.Info($"Loading segment-at-node data. {_configuration.SegmentNodeConfs.Count} elements");
+				foreach (Configuration.SegmentNodeConf segNodeConf in _configuration.SegmentNodeConfs) {
+					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segNodeConf.segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+						continue;
+					Flags.setSegmentNodeFlags(segNodeConf.segmentId, true, segNodeConf.startNodeFlags);
+					Flags.setSegmentNodeFlags(segNodeConf.segmentId, false, segNodeConf.endNodeFlags);
+				}
+			} else {
+				Log.Warning("Segment-at-node structure undefined!");
+			}
 		}
 
 		private static ushort fixLaneFlags(ushort flags) {
@@ -500,6 +574,7 @@ namespace TrafficManager.State {
 			if (TrafficPriority.PrioritySegments != null) {
 				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
 					SavePrioritySegment(i, configuration);
+					SaveSegmentNodeFlags(i, configuration);
 				}
 			}
 
@@ -515,19 +590,28 @@ namespace TrafficManager.State {
 				TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(i);
 				if (sim != null && sim.IsTimedLight()) {
 					SaveTimedTrafficLight(i, configuration);
+					// TODO save new traffic lights
 				}
 
 				SaveNodeLights(i, configuration);
 			}
 
+#if !TAM
 			if (LoadingExtension.IsPathManagerCompatible) {
+#endif
 				for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
 					SaveLaneData(i, configuration);
 				}
+#if !TAM
 			}
+#endif
 
 			foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
 				SaveLaneSpeedLimit(new Configuration.LaneSpeedLimit(e.Key, e.Value), configuration);
+			}
+
+			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
+				SaveLaneAllowedVehicleTypes(new Configuration.LaneVehicleTypes(e.Key, e.Value), configuration);
 			}
 
 			var binaryFormatter = new BinaryFormatter();
@@ -540,7 +624,7 @@ namespace TrafficManager.State {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.mayEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), (byte)(Options.prioritySignsOverlay ? 1 : 0), (byte)(Options.timedLightsOverlay ? 1 : 0), (byte)(Options.speedLimitsOverlay ? 1 : 0) });
+				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.allowEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), (byte)(Options.prioritySignsOverlay ? 1 : 0), (byte)(Options.timedLightsOverlay ? 1 : 0), (byte)(Options.speedLimitsOverlay ? 1 : 0), (byte)(Options.vehicleRestrictionsOverlay ? 1 : 0), (byte)(Options.strongerRoadConditionEffects ? 1 : 0), (byte)(Options.allowUTurns ? 1 : 0), (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0) });
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {
@@ -605,129 +689,63 @@ namespace TrafficManager.State {
 				var timedNode = sim.TimedLight;
 				timedNode.handleNewSegments();
 
-				configuration.TimedNodes.Add(new[] {
-					timedNode.NodeId,
-					timedNode.CurrentStep,
-					timedNode.NumSteps(),
-					Convert.ToInt32(timedNode.IsStarted()),
-					Convert.ToInt32(timedNode.vehiclesMayEnterBlockedJunctions)
-				});
+				Configuration.TimedTrafficLights cnfTimedLights = new Configuration.TimedTrafficLights();
+				configuration.TimedLights.Add(cnfTimedLights);
 
-				var nodeGroup = new ushort[timedNode.NodeGroup.Count];
-
-				for (var j = 0; j < timedNode.NodeGroup.Count; j++) {
-					nodeGroup[j] = timedNode.NodeGroup[j];
-				}
-
-				configuration.TimedNodeGroups.Add(nodeGroup);
-
-				// get segment ids which are still defined but for which real road segments are missing
-				NetManager netManager = Singleton<NetManager>.instance;
+				cnfTimedLights.nodeId = timedNode.NodeId;
+				cnfTimedLights.nodeGroup = timedNode.NodeGroup;
+				cnfTimedLights.started = timedNode.IsStarted();
+				cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
-					int validCount = 0;
-					var node = netManager.m_nodes.m_buffer[i];
-					for (var s = 0; s < 8; s++) {
-						var segmentId = node.GetSegment(s);
-						if (segmentId <= 0)
-							continue;
-						
-						var segLight = timedNode.Steps[j].segmentLightStates.ContainsKey(segmentId) ? timedNode.Steps[j].segmentLightStates[segmentId] : null;
-						configuration.TimedNodeStepSegments.Add(new[]
-						{
-							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightLeft),
-							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightMain),
-							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightRight),
-							(int) (segLight == null ? RoadBaseAI.TrafficLightState.Red : segLight.LightPedestrian),
-							(int) segLight.CurrentMode
-						});
+					TimedTrafficLightsStep timedStep = timedNode.Steps[j];
+					Configuration.TimedTrafficLightsStep cnfTimedStep = new Configuration.TimedTrafficLightsStep();
+					cnfTimedLights.timedSteps.Add(cnfTimedStep);
 
-						++validCount;
+					cnfTimedStep.minTime = timedStep.minTime;
+					cnfTimedStep.maxTime = timedStep.maxTime;
+					cnfTimedStep.waitFlowBalance = timedStep.waitFlowBalance;
+					cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
+					foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.segmentLights) {
+						CustomSegmentLights segLights = e.Value;
+						Configuration.CustomSegmentLights cnfSegLights = new Configuration.CustomSegmentLights();
+						cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
+
+						cnfSegLights.nodeId = segLights.NodeId;
+						cnfSegLights.segmentId = segLights.SegmentId;
+						cnfSegLights.customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>();
+						cnfSegLights.pedestrianLightState = segLights.PedestrianLightState;
+						cnfSegLights.manualPedestrianMode = segLights.ManualPedestrianMode;
+
+						Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
+
+						foreach (KeyValuePair<Traffic.ExtVehicleType, CustomSegmentLight> e2 in segLights.CustomLights) {
+							CustomSegmentLight segLight = e2.Value;
+							Configuration.CustomSegmentLight cnfSegLight = new Configuration.CustomSegmentLight();
+							cnfSegLights.customLights.Add(e2.Key, cnfSegLight);
+
+							cnfSegLight.nodeId = segLight.NodeId;
+							cnfSegLight.segmentId = segLight.SegmentId;
+							cnfSegLight.currentMode = (int)segLight.CurrentMode;
+							cnfSegLight.leftLight = segLight.LightLeft;
+							cnfSegLight.mainLight = segLight.LightMain;
+							cnfSegLight.rightLight = segLight.LightRight;
+						}
 					}
-
-					configuration.TimedNodeSteps.Add(new[]
-					{
-						timedNode.Steps[j].minTime,
-						timedNode.Steps[j].maxTime,
-						validCount,
-						0,
-						Convert.ToInt32(timedNode.Steps[j].waitFlowBalance*1000f)
-					});
 				}
 			} catch (Exception e) {
 				Log.Error($"Error adding TimedTrafficLights to save {e.Message}");
 			}
 		}
 
-		private static void SaveManualTrafficLight(ushort segmentId, Configuration configuration) {
-			try {
-				if (!ManualTrafficLights.ManualSegments.ContainsKey(segmentId))
-					return;
-
-				if (ManualTrafficLights.ManualSegments[segmentId].Node1 != 0) {
-					var manualSegment = ManualTrafficLights.ManualSegments[segmentId].Instance1;
-
-					configuration.ManualSegments.Add(new[]
-					{
-						manualSegment.nodeId,
-						manualSegment.SegmentId,
-						(int) manualSegment.CurrentMode,
-						(int) manualSegment.LightLeft,
-						(int) manualSegment.LightMain,
-						(int) manualSegment.LightRight,
-						(int) manualSegment.LightPedestrian,
-						(int) manualSegment.LastChange,
-						(int) manualSegment.LastChangeFrame,
-						Convert.ToInt32(manualSegment.PedestrianEnabled)
-					});
-				}
-				if (ManualTrafficLights.ManualSegments[segmentId].Node2 == 0)
-					return;
-				var manualSegmentLight = ManualTrafficLights.ManualSegments[segmentId].Instance2;
-
-				configuration.ManualSegments.Add(new[]
-				{
-					manualSegmentLight.nodeId,
-					manualSegmentLight.SegmentId,
-					(int) manualSegmentLight.CurrentMode,
-					(int) manualSegmentLight.LightLeft,
-					(int) manualSegmentLight.LightMain,
-					(int) manualSegmentLight.LightRight,
-					(int) manualSegmentLight.LightPedestrian,
-					(int) manualSegmentLight.LastChange,
-					(int) manualSegmentLight.LastChangeFrame,
-					Convert.ToInt32(manualSegmentLight.PedestrianEnabled)
-				});
-			} catch (Exception e) {
-				Log.Error($"Error saving ManualTraffic Lights {e.Message}");
-			}
-		}
-
-		/*private static void SaveTrafficLightSimulation(int i, Configuration configuration) {
-			try {
-				if (!TrafficLightSimulation.LightSimulationByNodeId.ContainsKey((ushort)i))
-					return;
-				var nodeSim = TrafficLightSimulation.LightSimulationByNodeId[(ushort)i];
-
-				//if (nodeSim == null)
-				//	return;
-
-				Log.Info($"Saving traffic light simulation at node {i}, timed: {nodeSim.TimedTrafficLights}, active: {nodeSim.TimedTrafficLightsActive}");
-
-				configuration.NodeDictionary.Add(new[]
-				{
-					nodeSim.nodeId, Convert.ToInt32(nodeSim.ManualTrafficLights),
-					Convert.ToInt32(nodeSim.TimedTrafficLights),
-					Convert.ToInt32(nodeSim.TimedTrafficLightsActive)
-				});
-			} catch (Exception e) {
-				Log.Error($"Error adding Nodes to Dictionary {e.Message}");
-			}
-		}*/
-
 		private static void SaveLaneSpeedLimit(Configuration.LaneSpeedLimit laneSpeedLimit, Configuration configuration) {
 			Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: {laneSpeedLimit.speedLimit}");
 			configuration.LaneSpeedLimits.Add(laneSpeedLimit);
+		}
+
+		private void SaveLaneAllowedVehicleTypes(Configuration.LaneVehicleTypes laneVehicleTypes, Configuration configuration) {
+			Log._Debug($"Saving vehicle restrictions of lane {laneVehicleTypes.laneId}: {laneVehicleTypes.vehicleTypes}");
+			configuration.LaneAllowedVehicleTypes.Add(laneVehicleTypes);
 		}
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
@@ -736,7 +754,7 @@ namespace TrafficManager.State {
 					return;
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0 && TrafficPriority.PrioritySegments[segmentId].Instance1.Type != PrioritySegment.PriorityType.None) {
+				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0 && TrafficPriority.PrioritySegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
 					Log.Info($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node1}, seg. {segmentId}");
                     configuration.PrioritySegments.Add(new[]
 					{
@@ -745,7 +763,7 @@ namespace TrafficManager.State {
 					});
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 || TrafficPriority.PrioritySegments[segmentId].Instance2.Type == PrioritySegment.PriorityType.None)
+				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 || TrafficPriority.PrioritySegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
 					return;
 
 				Log.Info($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node2}, seg. {segmentId}");
@@ -753,6 +771,29 @@ namespace TrafficManager.State {
 					TrafficPriority.PrioritySegments[segmentId].Node2, segmentId,
 					(int) TrafficPriority.PrioritySegments[segmentId].Instance2.Type
 				});
+			} catch (Exception e) {
+				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");
+			}
+		}
+
+		private static void SaveSegmentNodeFlags(ushort segmentId, Configuration configuration) {
+			try {
+				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					return;
+
+				Configuration.SegmentNodeFlags startNodeFlags = Flags.getSegmentNodeFlags(segmentId, true);
+				Configuration.SegmentNodeFlags endNodeFlags = Flags.getSegmentNodeFlags(segmentId, false);
+
+				if (startNodeFlags == null && endNodeFlags == null)
+					return;
+
+				Configuration.SegmentNodeConf conf = new Configuration.SegmentNodeConf(segmentId);
+
+				conf.startNodeFlags = startNodeFlags;
+				conf.endNodeFlags = endNodeFlags;
+
+				Log.Info($"Saving segment-at-node flags for seg. {segmentId}");
+				configuration.SegmentNodeConfs.Add(conf);
 			} catch (Exception e) {
 				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");
 			}

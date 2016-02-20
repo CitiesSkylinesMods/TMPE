@@ -1,6 +1,6 @@
 namespace TrafficManager
 {
-    public enum CarState
+    public enum VehicleJunctionTransitState
     {
         None,
         Enter,

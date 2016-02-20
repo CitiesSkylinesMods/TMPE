@@ -6,7 +6,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Custom.AI;
 
 namespace TrafficManager.TrafficLight {
-	public class TimedTrafficStep : ICloneable {
+	public class TimedTrafficLightsStep : ICloneable {
 		/// <summary>
 		/// The number of time units this traffic light remains in the current state at least
 		/// </summary>
@@ -41,7 +41,7 @@ namespace TrafficManager.TrafficLight {
 		private List<ushort> groupNodeIds;
 		private TimedTrafficLights timedNode;
 
-		public Dictionary<ushort, ManualSegmentLight> segmentLightStates = new Dictionary<ushort, ManualSegmentLight>();
+		public Dictionary<ushort, CustomSegmentLights> segmentLights = new Dictionary<ushort, CustomSegmentLights>();
 
 		/// <summary>
 		/// Maximum segment length
@@ -52,7 +52,7 @@ namespace TrafficManager.TrafficLight {
 
 		public float waitFlowBalance = 1f;
 
-		public TimedTrafficStep(TimedTrafficLights timedNode, int minTime, int maxTime, float waitFlowBalance, List<ushort> groupNodeIds, bool makeRed=false) {
+		public TimedTrafficLightsStep(TimedTrafficLights timedNode, int minTime, int maxTime, float waitFlowBalance, List<ushort> groupNodeIds, bool makeRed=false) {
 			this.minTime = minTime;
 			this.maxTime = maxTime;
 			this.waitFlowBalance = waitFlowBalance;
@@ -114,8 +114,8 @@ namespace TrafficManager.TrafficLight {
 			return getCurrentFrame() == startFrame && !StepDone(false);
 		}
 
-		public RoadBaseAI.TrafficLightState GetLight(ushort segment, int lightType) {
-			ManualSegmentLight segLight = segmentLightStates[segment];
+		public RoadBaseAI.TrafficLightState GetLight(ushort segmentId, ExtVehicleType vehicleType, int lightType) {
+			CustomSegmentLight segLight = segmentLights[segmentId].GetCustomLight(vehicleType);
 			if (segLight != null) {
 				switch (lightType) {
 					case 0:
@@ -125,7 +125,8 @@ namespace TrafficManager.TrafficLight {
 					case 2:
 						return segLight.LightRight;
 					case 3:
-						return segLight.LightPedestrian;
+						RoadBaseAI.TrafficLightState? pedState = segmentLights[segmentId].PedestrianLightState;
+						return pedState == null ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)pedState;
 				}
 			}
 
@@ -160,32 +161,52 @@ namespace TrafficManager.TrafficLight {
 				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
 
-				TimedTrafficStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
-				TimedTrafficStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
+				TimedTrafficLightsStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
+				TimedTrafficLightsStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
 
-				foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
+				foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
 					var segmentId = e.Key;
-					var segLightState = e.Value;
-					var prevLightState = previousStep.segmentLightStates[segmentId];
-					var nextLightState = nextStep.segmentLightStates[segmentId];
+					var curStepSegmentLights = e.Value;
+					var prevStepSegmentLights = previousStep.segmentLights[segmentId];
+					var nextStepSegmentLights = nextStep.segmentLights[segmentId];
 
-					segLightState.makeRedOrGreen(); // TODO temporary fix
+					//segLightState.makeRedOrGreen(); // TODO temporary fix
 
-					var segmentLight = ManualTrafficLights.GetSegmentLight(timedNode.NodeId, segmentId);
-					if (segmentLight == null)
+					var liveSegmentLights = CustomTrafficLights.GetSegmentLights(timedNode.NodeId, segmentId);
+					if (liveSegmentLights == null)
 						continue;
 
-					segmentLight.CurrentMode = segLightState.CurrentMode;
-					segmentLight.LightMain = calcLightState(prevLightState.LightMain, segLightState.LightMain, nextLightState.LightMain, atStartTransition, atEndTransition);
-					segmentLight.LightLeft = calcLightState(prevLightState.LightLeft, segLightState.LightLeft, nextLightState.LightLeft, atStartTransition, atEndTransition);
-					segmentLight.LightRight = calcLightState(prevLightState.LightRight, segLightState.LightRight, nextLightState.LightRight, atStartTransition, atEndTransition);
-					segmentLight.LightPedestrian = calcLightState(prevLightState.LightPedestrian, segLightState.LightPedestrian, nextLightState.LightPedestrian, atStartTransition, atEndTransition);
+					if (curStepSegmentLights.PedestrianLightState != null && prevStepSegmentLights.PedestrianLightState != null && nextStepSegmentLights.PedestrianLightState != null) {
+						RoadBaseAI.TrafficLightState pedLightState = calcLightState((RoadBaseAI.TrafficLightState)prevStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)curStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)nextStepSegmentLights.PedestrianLightState, atStartTransition, atEndTransition);
+						Log._Debug($"TimedStep.SetLights: Setting pedestrian light state @ seg. {segmentId} to {pedLightState} {curStepSegmentLights.ManualPedestrianMode}");
+                        liveSegmentLights.ManualPedestrianMode = curStepSegmentLights.ManualPedestrianMode;
+						liveSegmentLights.PedestrianLightState = pedLightState;
+						//Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId}: Ped.: {liveSegmentLights.PedestrianLightState.ToString()}");
+					}
+
+					foreach (ExtVehicleType vehicleType in curStepSegmentLights.VehicleTypes) {
+						CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
+						if (liveSegmentLight == null) {
+							Log.Warning($"Timed step @ seg. {segmentId}, node {timedNode.NodeId} has a traffic light for {vehicleType} but the live segment does not have one.");
+							continue;
+						}
+						CustomSegmentLight curStepSegmentLight = curStepSegmentLights.GetCustomLight(vehicleType);
+						CustomSegmentLight prevStepSegmentLight = prevStepSegmentLights.GetCustomLight(vehicleType);
+						CustomSegmentLight nextStepSegmentLight = nextStepSegmentLights.GetCustomLight(vehicleType);
+
+						liveSegmentLight.CurrentMode = curStepSegmentLight.CurrentMode;
+						liveSegmentLight.LightMain = calcLightState(prevStepSegmentLight.LightMain, curStepSegmentLight.LightMain, nextStepSegmentLight.LightMain, atStartTransition, atEndTransition);
+						liveSegmentLight.LightLeft = calcLightState(prevStepSegmentLight.LightLeft, curStepSegmentLight.LightLeft, nextStepSegmentLight.LightLeft, atStartTransition, atEndTransition);
+						liveSegmentLight.LightRight = calcLightState(prevStepSegmentLight.LightRight, curStepSegmentLight.LightRight, nextStepSegmentLight.LightRight, atStartTransition, atEndTransition);
+
+						//Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId} for vehicle type {vehicleType}: L: {liveSegmentLight.LightLeft.ToString()} F: {liveSegmentLight.LightMain.ToString()} R: {liveSegmentLight.LightRight.ToString()}");
+					}
 
 					/*if (timedNode.NodeId == 20164) {
 						Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId}: {segmentLight.LightLeft.ToString()} {segmentLight.LightMain.ToString()} {segmentLight.LightRight.ToString()} {segmentLight.LightPedestrian.ToString()}");
                     }*/
 
-					segmentLight.UpdateVisuals();
+					liveSegmentLights.UpdateVisuals();
 				}
 			} catch (Exception e) {
 				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.Message}");
@@ -198,11 +219,11 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <param name="segmentId"></param>
 		internal void addSegment(ushort segmentId, bool makeRed) {
-			segmentLightStates.Add(segmentId, (ManualSegmentLight)ManualTrafficLights.GetOrLiveSegmentLight(timedNode.NodeId, segmentId).Clone());
+			segmentLights.Add(segmentId, (CustomSegmentLights)CustomTrafficLights.GetOrLiveSegmentLights(timedNode.NodeId, segmentId).Clone());
 			if (makeRed)
-				segmentLightStates[segmentId].makeRed();
+				segmentLights[segmentId].MakeRed();
 			else
-				segmentLightStates[segmentId].makeRedOrGreen();
+				segmentLights[segmentId].MakeRedOrGreen();
 		}
 
 		private RoadBaseAI.TrafficLightState calcLightState(RoadBaseAI.TrafficLightState previousState, RoadBaseAI.TrafficLightState currentState, RoadBaseAI.TrafficLightState nextState, bool atStartTransition, bool atEndTransition) {
@@ -218,19 +239,16 @@ namespace TrafficManager.TrafficLight {
 		/// Updates timed segment lights according to "real-world" traffic light states
 		/// </summary>
 		public void UpdateLights() {
-			foreach (KeyValuePair<ushort, ManualSegmentLight> e in segmentLightStates) {
+			foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
 				var segmentId = e.Key;
-				var segLightState = e.Value;
+				var segLights = e.Value;
 				
 				//if (segment == 0) continue;
-				var segmentLight = ManualTrafficLights.GetSegmentLight(timedNode.NodeId, segmentId);
-				if (segmentLight == null)
+				var liveSegLights = CustomTrafficLights.GetSegmentLights(timedNode.NodeId, segmentId);
+				if (liveSegLights == null)
 					continue;
 
-				segLightState.LightMain = segmentLight.LightMain;
-				segLightState.LightLeft = segmentLight.LightLeft;
-				segLightState.LightRight = segmentLight.LightRight;
-				segLightState.LightPedestrian = segmentLight.LightPedestrian;
+				segLights.SetLights(liveSegLights);
 			}
 		}
 
@@ -368,17 +386,17 @@ namespace TrafficManager.TrafficLight {
 						slaveTimedNode.GetStep(i).invalid = true;
 					continue;
 				}
-				TimedTrafficStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
+				TimedTrafficLightsStep slaveStep = slaveTimedNode.Steps[timedNode.CurrentStep];
 
 				//List<int> segmentIdsToDelete = new List<int>();
 
 				// minimum time reached. check traffic!
-				foreach (KeyValuePair<ushort, ManualSegmentLight> e in slaveStep.segmentLightStates) {
+				foreach (KeyValuePair<ushort, CustomSegmentLights> e in slaveStep.segmentLights) {
 					var fromSegmentId = e.Key;
-					var segLightState = e.Value;
+					var segLights = e.Value;
 
 					// one of the traffic lights at this segment is green: count minimum traffic flowing through
-					PrioritySegment fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
+					SegmentEnd fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
 					if (fromSeg == null) {
 						//Log.Warning("stepDone(): prioSeg is null");
 						//segmentIdsToDelete.Add(fromSegmentId);
@@ -386,66 +404,78 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
-					Dictionary<ushort, uint>[] carsToSegmentMetrics = new Dictionary<ushort, uint>[startPhase ? 1 : 2];
-					try {
-						carsToSegmentMetrics[0] = fromSeg.getNumCarsGoingToSegment(null, debug);
-					} catch (Exception ex) {
-						Log.Warning("calcWaitFlow: " + ex.ToString());
-					}
-					if (!startPhase) {
+					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
+
+					foreach (ExtVehicleType vehicleType in segLights.VehicleTypes) {
+						if (vehicleType != ExtVehicleType.None && (validVehicleTypes & vehicleType) == ExtVehicleType.None)
+							continue;
+						CustomSegmentLight segLight = segLights.GetCustomLight(vehicleType);
+						if (segLight == null) {
+							Log.Warning($"Timed traffic light step: Failed to get custom light for vehicleType {vehicleType} @ seg. {fromSegmentId}, node {timedNode.NodeId}!");
+							continue;
+						}
+
+						Dictionary<ushort, uint>[] carsToSegmentMetrics = new Dictionary<ushort, uint>[startPhase ? 1 : 2];
 						try {
-							carsToSegmentMetrics[1] = fromSeg.getNumCarsGoingToSegment(0.1f, debug);
+							carsToSegmentMetrics[0] = fromSeg.GetVehicleMetricGoingToSegment(null, vehicleType, segLights.SeparateVehicleTypes, debug);
 						} catch (Exception ex) {
 							Log.Warning("calcWaitFlow: " + ex.ToString());
 						}
-					}
+						if (!startPhase) {
+							try {
+								carsToSegmentMetrics[1] = fromSeg.GetVehicleMetricGoingToSegment(0.1f, vehicleType, segLights.SeparateVehicleTypes, debug);
+							} catch (Exception ex) {
+								Log.Warning("calcWaitFlow: " + ex.ToString());
+							}
+						}
 
-					if (carsToSegmentMetrics[0] == null)
-						continue;
-
-					// build directions from toSegment to fromSegment
-					Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
-					foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[0]) {
-						var toSegmentId = f.Key;
-						SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId);
-						Direction dir = geometry.GetDirection(toSegmentId, timedNodeId);
-						directions[toSegmentId] = dir;
-					}
-
-					// calculate waiting/flowing traffic
-					for (int i = 0; i < carsToSegmentMetrics.Length; ++i) {
-						if (carsToSegmentMetrics[i] == null)
+						if (carsToSegmentMetrics[0] == null)
 							continue;
 
-						foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[i]) {
-							ushort toSegmentId = f.Key;
-							uint totalNormCarLength = f.Value;
+						// build directions from toSegment to fromSegment
+						Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
+						foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[0]) {
+							var toSegmentId = f.Key;
+							SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId);
+							Direction dir = geometry.GetDirection(toSegmentId, timedNodeId);
+							directions[toSegmentId] = dir;
+						}
 
-							bool addToFlow = false;
-							switch (directions[toSegmentId]) {
-								case Direction.Left:
-									if (segLightState.isLeftGreen())
-										addToFlow = true;
-									break;
-								case Direction.Right:
-									if (segLightState.isRightGreen())
-										addToFlow = true;
-									break;
-								case Direction.Forward:
-								default:
-									if (segLightState.isForwardGreen())
-										addToFlow = true;
-									break;
-							}
+						// calculate waiting/flowing traffic
+						for (int i = 0; i < carsToSegmentMetrics.Length; ++i) {
+							if (carsToSegmentMetrics[i] == null)
+								continue;
 
-							if (addToFlow) {
-								if (i > 0 || startPhase) {
-									++numFlows;
-									curMeanFlow += totalNormCarLength;
+							foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[i]) {
+								ushort toSegmentId = f.Key;
+								uint totalNormCarLength = f.Value;
+
+								bool addToFlow = false;
+								switch (directions[toSegmentId]) {
+									case Direction.Left:
+										if (segLight.isLeftGreen())
+											addToFlow = true;
+										break;
+									case Direction.Right:
+										if (segLight.isRightGreen())
+											addToFlow = true;
+										break;
+									case Direction.Forward:
+									default:
+										if (segLight.isForwardGreen())
+											addToFlow = true;
+										break;
 								}
-							} else if (i == 0) {
-								++numWaits;
-								curMeanWait += totalNormCarLength;
+
+								if (addToFlow) {
+									if (i > 0 || startPhase) {
+										++numFlows;
+										curMeanFlow += totalNormCarLength;
+									}
+								} else if (i == 0) {
+									++numWaits;
+									curMeanWait += totalNormCarLength;
+								}
 							}
 						}
 					}
@@ -456,7 +486,7 @@ namespace TrafficManager.TrafficLight {
 					slaveStep.segmentLightStates.Remove(segmentId);
 				}*/
 
-				if (slaveStep.segmentLightStates.Count <= 0) {
+				if (slaveStep.segmentLights.Count <= 0) {
 					invalid = true;
 					flow = 0f;
 					wait = 0f;
@@ -477,8 +507,10 @@ namespace TrafficManager.TrafficLight {
 			return true;
 		}
 
-		internal void ChangeLightMode(ushort segmentId, ManualSegmentLight.Mode mode) {
-			segmentLightStates[segmentId].CurrentMode = mode;
+		internal void ChangeLightMode(ushort segmentId, ExtVehicleType vehicleType, CustomSegmentLight.Mode mode) {
+			CustomSegmentLight light = segmentLights[segmentId].GetCustomLight(vehicleType);
+			if (light != null)
+				light.CurrentMode = mode;
 		}
 
 		public object Clone() {

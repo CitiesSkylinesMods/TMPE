@@ -11,7 +11,7 @@ namespace TrafficManager.Traffic
 
         public int Segment = 0;
 
-        public PrioritySegment Instance1;
-        public PrioritySegment Instance2;
+        public SegmentEnd Instance1;
+        public SegmentEnd Instance2;
     }
 }

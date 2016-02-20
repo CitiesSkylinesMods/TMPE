@@ -3,7 +3,7 @@ using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Custom.AI {
-	class CustomHumanAI {
+	class CustomHumanAI : CitizenAI {
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
 			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(node);
 
@@ -15,9 +15,9 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START //
 			RoadBaseAI.TrafficLightState pedestrianLightState;
-			ManualSegmentLight light = ManualTrafficLights.GetSegmentLight(node, segment);
+			CustomSegmentLights lights = CustomTrafficLights.GetSegmentLights(node, segment);
 
-			if (light == null || nodeSimulation == null || !nodeSimulation.IsSimulationActive()) {
+			if (lights == null || nodeSimulation == null || !nodeSimulation.IsSimulationActive()) {
 				RoadBaseAI.TrafficLightState vehicleLightState;
 				bool vehicles;
 				bool pedestrians;
@@ -28,7 +28,12 @@ namespace TrafficManager.Custom.AI {
 					return true;
 				}
 			} else {
-				pedestrianLightState = light.GetLightPedestrian();
+				if (lights.PedestrianLightState == null) {
+					Log.Warning($"A pedestrian wants to cross node {node} at segment {segment} but there is no pedestrian traffic light!");
+					pedestrianLightState = RoadBaseAI.TrafficLightState.Red;
+				} else {
+					pedestrianLightState = (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
+				}
 			}
 			// NON-STOCK CODE END //
 

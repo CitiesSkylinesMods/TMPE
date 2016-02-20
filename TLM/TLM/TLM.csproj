@@ -61,7 +61,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CarState.cs" />
+    <Compile Include="Custom\AI\CustomBusAI.cs" />
+    <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
+    <Compile Include="Custom\AI\CustomCitizenAI.cs" />
+    <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
+    <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
+    <Compile Include="Custom\AI\CustomTaxiAI.cs" />
+    <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
+    <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
+    <Compile Include="Custom\AI\CustomVehicleAI.cs" />
+    <Compile Include="TrafficLight\CustomSegmentLights.cs" />
+    <Compile Include="Traffic\ExtVehicleType.cs" />
+    <Compile Include="Traffic\VehicleRestrictionsManager.cs" />
+    <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
     <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
@@ -82,25 +94,25 @@
     <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
     <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="State\Flags.cs" />
-    <Compile Include="Traffic\PrioritySegment.cs" />
-    <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="SegmentRestrictions.cs" />
     <Compile Include="SelfDestruct.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ThreadingExtension.cs" />
-    <Compile Include="TrafficLight\ManualSegment.cs" />
-    <Compile Include="TrafficLight\ManualSegmentLight.cs" />
+    <Compile Include="TrafficLight\CustomSegment.cs" />
+    <Compile Include="TrafficLight\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
-    <Compile Include="TrafficLight\ManualTrafficLights.cs" />
+    <Compile Include="TrafficLight\CustomTrafficLights.cs" />
     <Compile Include="TrafficLight\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficLightTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\TrafficLightToolTextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
-    <Compile Include="TrafficLight\TimedTrafficStep.cs" />
+    <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
     <Compile Include="Traffic\TrafficPriority.cs" />
     <Compile Include="Traffic\TrafficSegment.cs" />
     <Compile Include="Traffic\VehicleType.cs" />
@@ -143,6 +155,32 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\bicycle_infosign.png" />
+    <EmbeddedResource Include="Resources\bus_infosign.png" />
+    <EmbeddedResource Include="Resources\cargotrain_infosign.png" />
+    <EmbeddedResource Include="Resources\cargotruck_infosign.png" />
+    <EmbeddedResource Include="Resources\passengercar_infosign.png" />
+    <EmbeddedResource Include="Resources\passengertrain_infosign.png" />
+    <EmbeddedResource Include="Resources\emergency_infosign.png" />
+    <EmbeddedResource Include="Resources\service_infosign.png" />
+    <EmbeddedResource Include="Resources\taxi_infosign.png" />
+    <EmbeddedResource Include="Resources\tram_infosign.png" />
+    <EmbeddedResource Include="Resources\bus_allowed.png" />
+    <EmbeddedResource Include="Resources\bus_forbidden.png" />
+    <EmbeddedResource Include="Resources\cargotrain_allowed.png" />
+    <EmbeddedResource Include="Resources\cargotrain_forbidden.png" />
+    <EmbeddedResource Include="Resources\cargotruck_allowed.png" />
+    <EmbeddedResource Include="Resources\cargotruck_forbidden.png" />
+    <EmbeddedResource Include="Resources\emergency_allowed.png" />
+    <EmbeddedResource Include="Resources\emergency_forbidden.png" />
+    <EmbeddedResource Include="Resources\passengercar_allowed.png" />
+    <EmbeddedResource Include="Resources\passengercar_forbidden.png" />
+    <EmbeddedResource Include="Resources\passengertrain_allowed.png" />
+    <EmbeddedResource Include="Resources\passengertrain_forbidden.png" />
+    <EmbeddedResource Include="Resources\service_allowed.png" />
+    <EmbeddedResource Include="Resources\service_forbidden.png" />
+    <EmbeddedResource Include="Resources\taxi_allowed.png" />
+    <EmbeddedResource Include="Resources\taxi_forbidden.png" />
     <EmbeddedResource Include="Resources\light_counter_pl.png" />
     <EmbeddedResource Include="Resources\light_mode_pl.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_2_pl.png" />
@@ -183,9 +221,9 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740"
-del /Q "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)$(TargetName).*" "D:\Spiele\SteamLibrary\steamapps\workshop\content\255710\583429740"
+    <PostBuildEvent>mkdir "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
+xcopy /y "$(TargetDir)$(TargetName).*" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

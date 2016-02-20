@@ -4,6 +4,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 
 namespace TrafficManager.UI {
+#if !TAM
 	public class UIBase : UICustomControl {
 		private bool _uiShown;
 
@@ -89,4 +90,5 @@ namespace TrafficManager.UI {
 			}
 		}
 	}
+#endif
 }

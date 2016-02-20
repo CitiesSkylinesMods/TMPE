@@ -9,9 +9,9 @@ namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
-
-            //Debug.Log("Checking for NULL LoadingExtension Instance");
-            if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null) {
+#if !TAM
+			//Debug.Log("Checking for NULL LoadingExtension Instance");
+			if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null) {
                 return;
             }
 
@@ -37,6 +37,7 @@ namespace TrafficManager {
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 LoadingExtension.Instance.UI.Close();
             }
+#endif
         }
     }
 }

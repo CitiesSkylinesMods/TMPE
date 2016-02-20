@@ -30,7 +30,7 @@ namespace TrafficManager.Traffic {
 		/// The id of the managed segment
 		/// </summary>
 		private ushort segmentId;
-
+		
 		/// <summary>
 		/// Connected segments at start node
 		/// </summary>
@@ -43,17 +43,27 @@ namespace TrafficManager.Traffic {
 
 		private HashSet<ushort> startNodeLeftSegments = new HashSet<ushort>();
 		private HashSet<ushort> startNodeIncomingLeftSegments = new HashSet<ushort>();
+		private HashSet<ushort> startNodeOutgoingLeftSegments = new HashSet<ushort>();
+
 		private HashSet<ushort> startNodeRightSegments = new HashSet<ushort>();
 		private HashSet<ushort> startNodeIncomingRightSegments = new HashSet<ushort>();
+		private HashSet<ushort> startNodeOutgoingRightSegments = new HashSet<ushort>();
+
 		private HashSet<ushort> startNodeStraightSegments = new HashSet<ushort>();
 		private HashSet<ushort> startNodeIncomingStraightSegments = new HashSet<ushort>();
+		private HashSet<ushort> startNodeOutgoingStraightSegments = new HashSet<ushort>();
 
 		private HashSet<ushort> endNodeLeftSegments = new HashSet<ushort>();
 		private HashSet<ushort> endNodeIncomingLeftSegments = new HashSet<ushort>();
+		private HashSet<ushort> endNodeOutgoingLeftSegments = new HashSet<ushort>();
+
 		private HashSet<ushort> endNodeRightSegments = new HashSet<ushort>();
 		private HashSet<ushort> endNodeIncomingRightSegments = new HashSet<ushort>();
+		private HashSet<ushort> endNodeOutgoingRightSegments = new HashSet<ushort>();
+
 		private HashSet<ushort> endNodeStraightSegments = new HashSet<ushort>();
 		private HashSet<ushort> endNodeIncomingStraightSegments = new HashSet<ushort>();
+		private HashSet<ushort> endNodeOutgoingStraightSegments = new HashSet<ushort>();
 
 		private ushort[] startNodeIncomingLeftSegmentsArray = new ushort[7];
 		private ushort[] startNodeIncomingRightSegmentsArray = new ushort[7];
@@ -285,7 +295,7 @@ namespace TrafficManager.Traffic {
 			try {
 #if DEBUG
 				if (output)
-					Log.Warning($"Trying to get a lock for Recalculating geometries of segment {segmentId}...");
+					Log._Debug($"Trying to get a lock for Recalculating geometries of segment {segmentId}...");
 #endif
 				Monitor.Enter(Lock);
 #if DEBUGLOCKS
@@ -303,9 +313,9 @@ namespace TrafficManager.Traffic {
 #endif
 
 				cleanup();
-				oneWay = calculateIsOneWay();
-				recalculate(ref outgoingOneWayAtStartNode, ref startNodeSegments, ref startNodeRightSegments, ref startNodeIncomingRightSegments, ref startNodeIncomingRightSegmentsArray, ref startNodeLeftSegments, ref startNodeIncomingLeftSegments, ref startNodeIncomingLeftSegmentsArray, ref startNodeStraightSegments, ref startNodeIncomingStraightSegments, ref startNodeIncomingStraightSegmentsArray, startNodeId());
-				recalculate(ref outgoingOneWayAtEndNode, ref endNodeSegments, ref endNodeRightSegments, ref endNodeIncomingRightSegments, ref endNodeIncomingRightSegmentsArray, ref endNodeLeftSegments, ref endNodeIncomingLeftSegments, ref endNodeIncomingLeftSegmentsArray, ref endNodeStraightSegments, ref endNodeIncomingStraightSegments, ref endNodeIncomingStraightSegmentsArray, endNodeId());
+				oneWay = calculateIsOneWay(segmentId);
+				recalculate(ref outgoingOneWayAtStartNode, ref startNodeSegments, ref startNodeRightSegments, ref startNodeIncomingRightSegments, ref startNodeOutgoingRightSegments, ref startNodeIncomingRightSegmentsArray, ref startNodeLeftSegments, ref startNodeIncomingLeftSegments, ref startNodeOutgoingLeftSegments, ref startNodeIncomingLeftSegmentsArray, ref startNodeStraightSegments, ref startNodeIncomingStraightSegments, ref startNodeOutgoingStraightSegments, ref startNodeIncomingStraightSegmentsArray, startNodeId());
+				recalculate(ref outgoingOneWayAtEndNode, ref endNodeSegments, ref endNodeRightSegments, ref endNodeIncomingRightSegments, ref endNodeOutgoingRightSegments, ref endNodeIncomingRightSegmentsArray, ref endNodeLeftSegments, ref endNodeIncomingLeftSegments, ref endNodeOutgoingLeftSegments, ref endNodeIncomingLeftSegmentsArray, ref endNodeStraightSegments, ref endNodeIncomingStraightSegments, ref endNodeOutgoingStraightSegments, ref endNodeIncomingStraightSegmentsArray, endNodeId());
 
 #if DEBUG
 				if (output) {
@@ -315,17 +325,28 @@ namespace TrafficManager.Traffic {
 					Log._Debug($"seg. {segmentId}. startNodeSegments={ string.Join(", ", startNodeSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. startNodeRightSegments={ string.Join(", ", startNodeRightSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. startNodeIncomingRightSegments={ string.Join(", ", startNodeIncomingRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeOutgoingRightSegments={ string.Join(", ", startNodeOutgoingRightSegments.Select(x => x.ToString()).ToArray())}");
+
 					Log._Debug($"seg. {segmentId}. startNodeLeftSegments={ string.Join(", ", startNodeLeftSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. startNodeIncomingLeftSegments={ string.Join(", ", startNodeIncomingLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeOutgoingLeftSegments={ string.Join(", ", startNodeOutgoingLeftSegments.Select(x => x.ToString()).ToArray())}");
+
 					Log._Debug($"seg. {segmentId}. startNodeStraightSegments={ string.Join(", ", startNodeStraightSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. startNodeIncomingStraightSegments={ string.Join(", ", startNodeIncomingStraightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. startNodeOutgoingStraightSegments={ string.Join(", ", startNodeOutgoingStraightSegments.Select(x => x.ToString()).ToArray())}");
+
 					Log._Debug($"seg. {segmentId}. endNodeSegments={ string.Join(", ", endNodeSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. endNodeRightSegments={ string.Join(", ", endNodeRightSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. endNodeIncomingRightSegments={ string.Join(", ", endNodeIncomingRightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeOutgoingRightSegments={ string.Join(", ", endNodeOutgoingRightSegments.Select(x => x.ToString()).ToArray())}");
+
 					Log._Debug($"seg. {segmentId}. endNodeLeftSegments={ string.Join(", ", endNodeLeftSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. endNodeIncomingLeftSegments={ string.Join(", ", endNodeIncomingLeftSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeOutgoingLeftSegments={ string.Join(", ", endNodeOutgoingLeftSegments.Select(x => x.ToString()).ToArray())}");
+
 					Log._Debug($"seg. {segmentId}. endNodeStraightSegments={ string.Join(", ", endNodeStraightSegments.Select(x => x.ToString()).ToArray())}");
 					Log._Debug($"seg. {segmentId}. endNodeIncomingStraightSegments={ string.Join(", ", endNodeIncomingStraightSegments.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"seg. {segmentId}. endNodeOutgoingStraightSegments={ string.Join(", ", endNodeOutgoingStraightSegments.Select(x => x.ToString()).ToArray())}");
 				}
 #endif
 			} finally {
@@ -333,7 +354,7 @@ namespace TrafficManager.Traffic {
 				recalculating = false;
 #if DEBUG
 				if (output)
-					Log.Info($"Lock released after recalculating geometries of segment {segmentId}");
+					Log._Debug($"Lock released after recalculating geometries of segment {segmentId}");
 #endif
 				Monitor.Exit(Lock);
 			}
@@ -576,6 +597,85 @@ namespace TrafficManager.Traffic {
 		}
 
 		/// <summary>
+		/// Determines the number of outgoing right segments connected to the managed segment at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node at which other segments shall be counted</param>
+		/// <returns>number of connected outgoing right segments at the given node</returns>
+		public int CountOutgoingRightSegments(ushort nodeId) {
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				return 0;
+			}
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Recalculate();
+			}*/
+
+			if (startNodeId() == nodeId)
+				return startNodeOutgoingRightSegments.Count;
+			else if (endNodeId() == nodeId)
+				return endNodeOutgoingRightSegments.Count;
+			else {
+				Log.Info($"CountOutgoingRightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// Determines the number of outgoing left segments connected to the managed segment at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node at which other segments shall be counted</param>
+		/// <returns>number of connected outgoing left segments at the given node</returns>
+		public int CountOutgoingLeftSegments(ushort nodeId) {
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				return 0;
+			}
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Recalculate();
+			}*/
+
+			if (startNodeId() == nodeId)
+				return startNodeOutgoingLeftSegments.Count;
+			else if (endNodeId() == nodeId)
+				return endNodeOutgoingLeftSegments.Count;
+			else {
+				Log.Info($"CountOutgoingLeftSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// Determines the number of outgoing straight segments connected to the managed segment at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node at which other segments shall be counted</param>
+		/// <returns>number of connected outgoing straight segments at the given node</returns>
+		public int CountOutgoingStraightSegments(ushort nodeId) {
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+				return 0;
+			}
+
+			/*if (startNodeId() != nodeId && endNodeId() != nodeId) {
+				Log.Info($"Node {nodeId} is neither start ({startNodeId()}) nor end node ({endNodeId()}) of segment {segmentId}!");
+				Recalculate();
+			}*/
+
+			if (startNodeId() == nodeId)
+				return startNodeOutgoingStraightSegments.Count;
+			else if (endNodeId() == nodeId)
+				return endNodeOutgoingStraightSegments.Count;
+			else {
+				Log.Info($"CountOutgoingStraightSegments: Node {nodeId} is neither start nor end node of segment {segmentId}.");
+				return 0;
+			}
+		}
+
+		/// <summary>
 		/// Determines if the managed segment is connected to left segments at the given node.
 		/// 
 		/// A segment geometry verification is not performed.
@@ -639,6 +739,39 @@ namespace TrafficManager.Traffic {
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to incoming straight segments at the given node, else false.</returns>
 		public bool HasIncomingStraightSegment(ushort nodeId) {
 			return CountIncomingStraightSegments(nodeId) > 0;
+		}
+
+		/// <summary>
+		/// Determines if the managed segment is connected to outgoing left segments at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node the other segments have to be connected to</param>
+		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing left segments at the given node, else false.</returns>
+		public bool HasOutgoingLeftSegment(ushort nodeId) {
+			return CountOutgoingLeftSegments(nodeId) > 0;
+		}
+
+		/// <summary>
+		/// Determines if the managed segment is connected to outgoing right segments at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node the other segments have to be connected to</param>
+		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing right segments at the given node, else false.</returns>
+		public bool HasOutgoingRightSegment(ushort nodeId) {
+			return CountOutgoingRightSegments(nodeId) > 0;
+		}
+
+		/// <summary>
+		/// Determines if the managed segment is connected to outgoing straight segments at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="nodeId">The node the other segments have to be connected to</param>
+		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing straight segments at the given node, else false.</returns>
+		public bool HasOutgoingStraightSegment(ushort nodeId) {
+			return CountOutgoingStraightSegments(nodeId) > 0;
 		}
 
 		/// <summary>
@@ -823,6 +956,50 @@ namespace TrafficManager.Traffic {
 		}
 
 		/// <summary>
+		/// Determines if highway merging/splitting rules are activated at the managed segment for the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="startNode"></param>
+		/// <returns></returns>
+		public bool AreHighwayRulesEnabled(bool startNode) {
+			if (!Options.highwayRules)
+				return false;
+			if (!IsIncomingOneWay(startNode ? startNodeId() : endNodeId()))
+				return false;
+			if (!(Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_netAI is RoadBaseAI))
+				return false;
+			if (!((RoadBaseAI)Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_netAI).m_highwayRules)
+				return false;
+
+			HashSet<ushort> otherSegmentIds = null;
+			try {
+				Monitor.Enter(Lock);
+				otherSegmentIds = new HashSet<ushort>(startNode ? startNodeSegments : endNodeSegments);
+			} finally {
+				Monitor.Exit(Lock);
+			}
+
+			if (otherSegmentIds.Count <= 1)
+				return false;
+
+			bool nextAreOnlyOneWayHighways = true;
+			foreach (ushort otherSegmentId in otherSegmentIds) {
+				if (Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info.m_netAI is RoadBaseAI) {
+					if (!CustomRoadAI.GetSegmentGeometry(otherSegmentId).IsOneWay() || !((RoadBaseAI)Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info.m_netAI).m_highwayRules) {
+						nextAreOnlyOneWayHighways = false;
+						break;
+					}
+				} else {
+					nextAreOnlyOneWayHighways = false;
+					break;
+				}
+			}
+
+			return nextAreOnlyOneWayHighways;
+		}
+
+		/// <summary>
 		/// Calculates if the given segment is an outgoing one-way road at the given node.
 		/// </summary>
 		/// <param name="segmentId">segment to check</param>
@@ -855,10 +1032,10 @@ namespace TrafficManager.Traffic {
 		}
 
 		/// <summary>
-		/// Calculates if the managed segment is a one-way road.
+		/// Calculates if the given segment is a one-way road.
 		/// </summary>
 		/// <returns>true, if the managed segment is a one-way road, false otherwise</returns>
-		private bool calculateIsOneWay() {
+		private static bool calculateIsOneWay(ushort segmentId) {
 			var instance = Singleton<NetManager>.instance;
 
 			var info = instance.m_segments.m_buffer[segmentId].Info;
@@ -936,18 +1113,21 @@ namespace TrafficManager.Traffic {
 		/// <param name="nodeSegments"></param>
 		/// <param name="right"></param>
 		/// <param name="incomingRight"></param>
+		/// <param name="outgoingRight"></param>
 		/// <param name="incomingRightArray"></param>
 		/// <param name="left"></param>
 		/// <param name="incomingLeft"></param>
+		/// <param name="outgoingLeft"></param>
 		/// <param name="incomingLeftArray"></param>
 		/// <param name="straight"></param>
 		/// <param name="incomingStraight"></param>
+		/// <param name="outgoingStraight"></param>
 		/// <param name="incomingStraightArray"></param>
 		/// <param name="nodeId">node at which the geometry recalculation shall be performed at</param>
 		private void recalculate(ref bool outgoingOneWay, ref HashSet<ushort> nodeSegments,
-			ref HashSet<ushort> right, ref HashSet<ushort> incomingRight, ref ushort[] incomingRightArray,
-			ref HashSet<ushort> left, ref HashSet<ushort> incomingLeft, ref ushort[] incomingLeftArray,
-			ref HashSet<ushort> straight, ref HashSet<ushort> incomingStraight, ref ushort[] incomingStraightArray,
+			ref HashSet<ushort> right, ref HashSet<ushort> incomingRight, ref HashSet<ushort> outgoingRight, ref ushort[] incomingRightArray,
+			ref HashSet<ushort> left, ref HashSet<ushort> incomingLeft, ref HashSet<ushort> outgoingLeft, ref ushort[] incomingLeftArray,
+			ref HashSet<ushort> straight, ref HashSet<ushort> incomingStraight, ref HashSet<ushort> outgoingStraight, ref ushort[] incomingStraightArray,
 			ushort nodeId) {
 
 			if (nodeId == 0)
@@ -977,6 +1157,10 @@ namespace TrafficManager.Traffic {
 						incomingRight.Add(otherSegmentId);
 						if (incomingRightIndex < 7)
 							incomingRightArray[incomingRightIndex++] = otherSegmentId;
+						if (!calculateIsOneWay(otherSegmentId))
+							outgoingRight.Add(otherSegmentId);
+					} else {
+						outgoingRight.Add(otherSegmentId);
 					}
 				} else if (TrafficPriority.IsLeftSegment(segmentId, otherSegmentId, nodeId)) {
 					left.Add(otherSegmentId);
@@ -984,6 +1168,10 @@ namespace TrafficManager.Traffic {
 						incomingLeft.Add(otherSegmentId);
 						if (incomingLeftIndex < 7)
 							incomingLeftArray[incomingLeftIndex++] = otherSegmentId;
+						if (!calculateIsOneWay(otherSegmentId))
+							outgoingLeft.Add(otherSegmentId);
+					} else {
+						outgoingLeft.Add(otherSegmentId);
 					}
 				} else {
 					straight.Add(otherSegmentId);
@@ -991,6 +1179,10 @@ namespace TrafficManager.Traffic {
 						incomingStraight.Add(otherSegmentId);
 						if (incomingStraightIndex < 7)
 							incomingStraightArray[incomingStraightIndex++] = otherSegmentId;
+						if (!calculateIsOneWay(otherSegmentId))
+							outgoingStraight.Add(otherSegmentId);
+					} else {
+						outgoingStraight.Add(otherSegmentId);
 					}
 				}
 

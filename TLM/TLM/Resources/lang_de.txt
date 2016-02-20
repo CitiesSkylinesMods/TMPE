@@ -67,7 +67,7 @@ Very_often_(50_%) Sehr häufig (50 %)
 Often_(25_%) Häufig (25 %)
 Sometimes_(10_%) Manchmal (10 %)
 Rarely_(5_%) Selten (5 %)
-Very_rarely_(2.5_%) Sehr selten (2.5 %)
+Very_rarely_(2.5_%) Sehr selten (2,5 %)
 Only_if_necessary Nur falls nötig
 Nodes_and_segments Knoten und Segmente
 Lanes Fahrspuren
@@ -90,3 +90,13 @@ Cancel Abbrechen
 Speed_limits Geschwindigkeitsbeschr.
 Persistently_visible_overlays Dauerhaft sichtbare Overlays
 Priority_signs Vorfahrtsschilder
+Vehicles_may_do_u-turns_at_junctions Fahrzeuge dürfen an Kreuzungen wenden
+Vehicles_going_straight_may_change_lanes_at_junctions Fahrzeuge dürfen die Spur wechseln, wenn sie an Kreuzungen geradeaus fahren
+Allow_u-turns Wenden erlauben
+Allow_lane_changing_for_vehicles_going_straight Spurwechsel für Fahrzeuge erlauben, die geradeaus fahren
+Allow_vehicles_to_enter_a_blocked_junction Erlaube Fahrzeuge, in eine blockierte Kreuzung einzufahren
+Road_condition_has_a_bigger_impact_on_vehicle_speed Der Straßenzustand hat einen größeren Einfluss auf die Fahrzeuggeschwindigkeit
+Vehicle_restrictions Fahrzeugbeschränkungen
+Copy Kopieren
+Paste Einfügen
+Invert Invertieren

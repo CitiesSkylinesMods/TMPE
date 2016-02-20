@@ -25,7 +25,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// For each node: Defines if a traffic light exists or not. If no entry exists for a given node id, the game's default setting is used
 		/// </summary>
-		private static Dictionary<ushort, bool> nodeTrafficLightFlag = new Dictionary<ushort, bool>();
+		private static bool?[] nodeTrafficLightFlag = null;
 
 		/// <summary>
 		/// For each lane: Defines the lane arrows which are set
@@ -37,15 +37,27 @@ namespace TrafficManager.State {
 		/// </summary>
 		private static Dictionary<uint, ushort> laneSpeedLimit = new Dictionary<uint, ushort>();
 
+		internal static ushort?[][] laneSpeedLimitArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
+
 		/// <summary>
 		/// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
 		/// </summary>
 		private static LaneArrows?[] highwayLaneArrowFlags = null;
 
-		public static ushort?[][] laneSpeedLimitArray; // for faster, lock-free access (used by CustomCarAI), 1st index: segment id, 2nd index: lane index
+		/// <summary>
+		/// For each lane: Defines the allowed vehicle types
+		/// </summary>
+		private static Dictionary<uint, ExtVehicleType> laneAllowedVehicleTypes = new Dictionary<uint, ExtVehicleType>();
+
+		internal static ExtVehicleType?[][] laneAllowedVehicleTypesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
+
+		/// <summary>
+		/// For each segment and node: Defines additional flags for segments at a node
+		/// </summary>
+		private static Configuration.SegmentNodeFlags[][] segmentNodeFlags = null;
 
 		private static object laneSpeedLimitLock = new object();
-		private static object nodeLightLock = new object();
+		private static object laneAllowedVehicleTypesLock = new object();
 
 		private static bool initDone = false;
 
@@ -54,8 +66,8 @@ namespace TrafficManager.State {
 		}
 
 		public static void resetTrafficLights(bool all) {
-			nodeTrafficLightFlag.Clear();
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
+				nodeTrafficLightFlag[i] = null;
 				if (! all && TrafficPriority.IsPriorityNode(i))
 					continue;
 				Singleton<NetManager>.instance.UpdateNodeFlags(i);
@@ -89,34 +101,18 @@ namespace TrafficManager.State {
 		}
 
 		public static void setNodeTrafficLight(ushort nodeId, bool flag) {
-			try {
-				Monitor.Enter(nodeLightLock);
+			if (nodeId <= 0)
+				return;
 
-				if (nodeId <= 0)
-					return;
+			Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
 
-				Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
-
-				if (!mayHaveTrafficLight(nodeId)) {
-					Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
-					return;
-				}
-
-				nodeTrafficLightFlag[nodeId] = flag;
-				applyNodeTrafficLightFlag(nodeId);
-			} finally {
-				Monitor.Exit(nodeLightLock);
+			if (!mayHaveTrafficLight(nodeId)) {
+				Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
+				return;
 			}
-		}
 
-		internal static bool isNodeTrafficLightDefined(ushort nodeId) {
-			try {
-				Monitor.Enter(nodeLightLock);
-
-				return nodeId > 0 && nodeTrafficLightFlag.ContainsKey(nodeId);
-			} finally {
-				Monitor.Exit(nodeLightLock);
-			}
+			nodeTrafficLightFlag[nodeId] = flag;
+			applyNodeTrafficLightFlag(nodeId);
 		}
 
 		internal static bool? isNodeTrafficLight(ushort nodeId) {
@@ -126,16 +122,7 @@ namespace TrafficManager.State {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 				return false;
 
-			try {
-				Monitor.Enter(nodeLightLock);
-
-				if (!nodeTrafficLightFlag.ContainsKey(nodeId))
-					return null;
-
-				return nodeTrafficLightFlag[nodeId];
-			} finally {
-				Monitor.Exit(nodeLightLock);
-			}
+			return nodeTrafficLightFlag[nodeId];
 		}
 
 		public static void setLaneSpeedLimit(uint laneId, ushort speedLimit) {
@@ -217,6 +204,66 @@ namespace TrafficManager.State {
 				laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
 			} finally {
 				Monitor.Exit(laneSpeedLimitLock);
+			}
+		}
+
+		public static void setLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
+			if (laneId <= 0)
+				return;
+			if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None)
+				return;
+
+			ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+			if (segmentId <= 0)
+				return;
+			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+				return;
+
+			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+			uint laneIndex = 0;
+			while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+				if (curLaneId == laneId) {
+					setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, vehicleTypes);
+					return;
+				}
+				laneIndex++;
+				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+			}
+		}
+
+		public static void setLaneAllowedVehicleTypes(ushort segmentId, uint laneIndex, uint laneId, ExtVehicleType vehicleTypes) {
+			if (segmentId <= 0 || laneIndex < 0 || laneId <= 0)
+				return;
+			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+				return;
+			}
+			if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None)
+				return;
+			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+			if (laneIndex >= segmentInfo.m_lanes.Length) {
+				return;
+			}
+
+			try {
+				Monitor.Enter(laneAllowedVehicleTypesLock);
+				Log._Debug($"Flags.setLaneAllowedVehicleTypes: setting allowed vehicles of lane index {laneIndex} @ seg. {segmentId} to {vehicleTypes.ToString()}");
+
+				laneAllowedVehicleTypes[laneId] = vehicleTypes;
+
+				// save allowed vehicle types into the fast-access array.
+				// (1) ensure that the array is defined and large enough
+				if (laneAllowedVehicleTypesArray[segmentId] == null) {
+					laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
+				} else if (laneAllowedVehicleTypesArray[segmentId].Length < segmentInfo.m_lanes.Length) {
+					var oldArray = laneAllowedVehicleTypesArray[segmentId];
+					laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
+					Array.Copy(oldArray, laneAllowedVehicleTypesArray[segmentId], oldArray.Length);
+				}
+				// (2) insert the custom speed limit
+				laneAllowedVehicleTypesArray[segmentId][laneIndex] = vehicleTypes;
+			} finally {
+				Monitor.Exit(laneAllowedVehicleTypesLock);
 			}
 		}
 
@@ -331,6 +378,19 @@ namespace TrafficManager.State {
 			return ret;
 		}
 
+		internal static Dictionary<uint, ExtVehicleType> getAllLaneAllowedVehicleTypes() {
+			Dictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
+			try {
+				Monitor.Enter(laneAllowedVehicleTypesLock);
+
+				ret = new Dictionary<uint, ExtVehicleType>(laneAllowedVehicleTypes);
+
+			} finally {
+				Monitor.Exit(laneAllowedVehicleTypesLock);
+			}
+			return ret;
+		}
+
 		public static LaneArrows? getLaneArrowFlags(uint laneId) {
 			return laneArrowFlags[laneId];
 		}
@@ -339,13 +399,96 @@ namespace TrafficManager.State {
 			return highwayLaneArrowFlags[laneId];
 		}
 
+		public static bool getUTurnAllowed(ushort segmentId, bool startNode) {
+			int index = startNode ? 0 : 1;
+
+			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
+			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].uturnAllowed == null)
+				return Options.allowUTurns;
+			return (bool)nodeFlags[index].uturnAllowed;
+		}
+
+		public static void setUTurnAllowed(ushort segmentId, bool startNode, bool value) {
+			bool? valueToSet = value;
+			if (value == Options.allowUTurns)
+				valueToSet = null;
+
+			int index = startNode ? 0 : 1;
+			if (segmentNodeFlags[segmentId][index] == null) {
+				if (valueToSet == null)
+					return;
+
+				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
+			}
+			segmentNodeFlags[segmentId][index].uturnAllowed = valueToSet;
+		}
+
+		public static bool getStraightLaneChangingAllowed(ushort segmentId, bool startNode) {
+			int index = startNode ? 0 : 1;
+
+			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
+			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].straightLaneChangingAllowed == null)
+				return Options.allowLaneChangesWhileGoingStraight;
+			return (bool)nodeFlags[index].straightLaneChangingAllowed;
+		}
+
+		public static void setStraightLaneChangingAllowed(ushort segmentId, bool startNode, bool value) {
+			bool? valueToSet = value;
+			if (value == Options.allowLaneChangesWhileGoingStraight)
+				valueToSet = null;
+
+			int index = startNode ? 0 : 1;
+			if (segmentNodeFlags[segmentId][index] == null) {
+				if (valueToSet == null)
+					return;
+				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
+			}
+			segmentNodeFlags[segmentId][index].straightLaneChangingAllowed = valueToSet;
+		}
+
+		public static bool getEnterWhenBlockedAllowed(ushort segmentId, bool startNode) {
+			int index = startNode ? 0 : 1;
+
+			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
+			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].enterWhenBlockedAllowed == null)
+				return Options.allowEnterBlockedJunctions;
+			return (bool)nodeFlags[index].enterWhenBlockedAllowed;
+		}
+
+		public static void setEnterWhenBlockedAllowed(ushort segmentId, bool startNode, bool value) {
+			bool? valueToSet = value;
+			if (value == Options.allowEnterBlockedJunctions)
+				valueToSet = null;
+
+			int index = startNode ? 0 : 1;
+			if (segmentNodeFlags[segmentId][index] == null) {
+				if (valueToSet == null)
+					return;
+				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
+			}
+			segmentNodeFlags[segmentId][index].enterWhenBlockedAllowed = valueToSet;
+		}
+
+		internal static void setSegmentNodeFlags(ushort segmentId, bool startNode, Configuration.SegmentNodeFlags flags) {
+			if (flags == null)
+				return;
+
+			int index = startNode ? 0 : 1;
+			segmentNodeFlags[segmentId][index] = flags;
+		}
+
+		internal static Configuration.SegmentNodeFlags getSegmentNodeFlags(ushort segmentId, bool startNode) {
+			int index = startNode ? 0 : 1;
+			return segmentNodeFlags[segmentId][index];
+		}
+
 		public static void removeHighwayLaneArrowFlags(uint laneId) {
 			highwayLaneArrowFlags[laneId] = null;
 		}
 
 		public static void applyAllFlags() {
-			foreach (ushort nodeId in nodeTrafficLightFlag.Keys) {
-				applyNodeTrafficLightFlag(nodeId);
+			for (ushort i = 0; i < nodeTrafficLightFlag.Length; ++i) {
+				applyNodeTrafficLightFlag(i);
 			}
 
 			for (uint i = 0; i < laneArrowFlags.Length; ++i) {
@@ -355,27 +498,21 @@ namespace TrafficManager.State {
 		}
 
 		public static void applyNodeTrafficLightFlag(ushort nodeId) {
-			try {
-				Monitor.Enter(nodeLightLock);
+			bool? flag = nodeTrafficLightFlag[nodeId];
+			if (nodeId <= 0 || flag == null)
+				return;
 
-				if (nodeId <= 0 || !nodeTrafficLightFlag.ContainsKey(nodeId))
-					return;
-
-				bool mayHaveLight = mayHaveTrafficLight(nodeId);
-				bool flag = nodeTrafficLightFlag[nodeId];
-				if (flag && mayHaveLight) {
-					//Log.Message($"Adding traffic light @ node {nodeId}");
-					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
-				} else {
-					//Log.Message($"Removing traffic light @ node {nodeId}");
-					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
-					if (!mayHaveLight) {
-						Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
-						nodeTrafficLightFlag.Remove(nodeId);
-					}
+			bool mayHaveLight = mayHaveTrafficLight(nodeId);
+			if ((bool)flag && mayHaveLight) {
+				//Log.Message($"Adding traffic light @ node {nodeId}");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
+			} else {
+				//Log.Message($"Removing traffic light @ node {nodeId}");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+				if (!mayHaveLight) {
+					Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
+					nodeTrafficLightFlag[nodeId] = null;
 				}
-			} finally {
-				Monitor.Exit(nodeLightLock);
 			}
 		}
 
@@ -445,13 +582,7 @@ namespace TrafficManager.State {
 		internal static void OnLevelUnloading() {
 			initDone = false;
 
-			try {
-				Monitor.Enter(nodeLightLock);
-				nodeTrafficLightFlag.Clear();
-			} finally {
-				Monitor.Exit(nodeLightLock);
-			}
-
+			nodeTrafficLightFlag = null;
 
 			try {
 				Monitor.Enter(laneSpeedLimitLock);
@@ -461,8 +592,17 @@ namespace TrafficManager.State {
 				Monitor.Exit(laneSpeedLimitLock);
 			}
 
+			try {
+				Monitor.Enter(laneAllowedVehicleTypesLock);
+				laneAllowedVehicleTypesArray = null;
+				laneAllowedVehicleTypes.Clear();
+			} finally {
+				Monitor.Exit(laneAllowedVehicleTypesLock);
+			}
+
 			laneArrowFlags = null;
 			highwayLaneArrowFlags = null;
+			segmentNodeFlags = null;
 		}
 
 		public static void OnBeforeLoadData() {
@@ -471,7 +611,13 @@ namespace TrafficManager.State {
 
 			laneSpeedLimitArray = new ushort?[Singleton<NetManager>.instance.m_segments.m_size][];
 			laneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
+			laneAllowedVehicleTypesArray = new ExtVehicleType?[Singleton<NetManager>.instance.m_segments.m_size][];
 			highwayLaneArrowFlags = new LaneArrows?[Singleton<NetManager>.instance.m_lanes.m_size];
+			nodeTrafficLightFlag = new bool?[Singleton<NetManager>.instance.m_nodes.m_size];
+			segmentNodeFlags = new Configuration.SegmentNodeFlags[Singleton<NetManager>.instance.m_segments.m_size][];
+			for (int i = 0; i < segmentNodeFlags.Length; ++i) {
+				segmentNodeFlags[i] = new Configuration.SegmentNodeFlags[2];
+			}
 			initDone = true;
 		}
 	}

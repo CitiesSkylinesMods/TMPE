@@ -90,3 +90,13 @@ Cancel Отмена
 Speed_limits Ограничение скорости
 Persistently_visible_overlays Persistently visible overlays
 Priority_signs Знаки приоритета
+Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
+Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
+Allow_u-turns Allow u-turns
+Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
+Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
+Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
+Vehicle_restrictions Vehicle restrictions
+Copy Copy
+Paste Paste
+Invert Invert

@@ -23,7 +23,7 @@ THE SOFTWARE.
 using System;
 using System.Reflection;
 
-namespace TrafficManager
+namespace TrafficManager.Util
 {
     public struct RedirectCallsState
     {

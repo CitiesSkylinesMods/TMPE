@@ -89,3 +89,13 @@ Select_junction 交差点を選択してください
 Cancel キャンセル 
 Speed_limits 速度制限
 Priority_signs Priority signs
+Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
+Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
+Allow_u-turns Allow u-turns
+Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
+Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
+Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
+Vehicle_restrictions Vehicle restrictions
+Copy Copy
+Paste Paste
+Invert Invert
