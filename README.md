@@ -2,6 +2,56 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.5, 02/24/2016
+- Added despawning setting to options dialog
+- Improved detection of Traffic++ V2
+
+1.6.4, 02/23/2016
+- Minor performance improvements
+- Bugfix: Path-finding calculated erroneous traffic density values 
+- Bugfix: Cims left the bus just to hop on a bus of the same line again (thanks to @kamzik911 for pointing out this problem)
+- Bugfix: Despawn control did not work (thanks to @xXHistoricalxDemoXx for pointing out this problem)
+- Bugfix: State of new settings was not displayed corretly (thanks to @Lord_Assaultーさま for pointing out this problem)
+- Bugfix: Default settings for vehicle restrictions on bus lanes corrected
+- Bugfix: Pedestrian lights at railway junctions fixed (they are still invisible but are derived from the car traffic light state automatically)
+
+1.6.3, 02/22/2016
+- Bugfix: Using the "Old Town" policy led to vehicles not spawning.
+- Bugfix: Planes, cargo trains and ship were sometimes not arriving
+- Bugfix: Trams are not doing u-turns anymore
+
+1.6.2, 02/20/2016
+- Trams are now obeying speed limits (thanks to @Clausewitz for pointing out the issue)
+- Bugfix: Clear traffic sometimes throwed an error
+- Bugfix: Vehicle restrctions did not work as expected (thanks to @[Delta ²k5] for pointing out this problem) 
+- Bugfix: Transition of automatic pedestrian lights fixed
+
+1.6.1, 02/20/2016
+- Improved performance
+- Bugfix: Fixed UI issues
+- Modifying mod options through the main menu now gives an annoying warning message instead of a blank page.
+
+1.6.0, 02/18/2016
+- New feature: Separate traffic lights for different vehicle types
+- New feature: Vehicle restrictions
+- Snowfall compatibility
+- Better handling of vehicle bans
+- Improved the method for calculating lane traffic densities
+- Ambulances, fire trucks and police cars on duty are now ignoring lane arrows
+- Timed traffic lights may now be setup at arbitrary nodes on railway tracks
+- Reckless drivers now do not enter railroad crossings if the barrier is down
+- Option dialog is disabled if accessed through the main menu
+- Performance optimizations
+- Advanced Vehicle AI: Improved lane spreading
+- The option "Vehicles may enter blocked junctions" may now be defined for each junction separately
+- Vehicles going straight may now change lanes at junctions
+- Vehicles may now perform u-turns at junctions that have an appropriate lane arrow configuration
+- Road conditions (snow, maintenance state) may now have a higher impact on vehicle speed (see "Options" menu)
+- Emergency vehicles on duty now always aim for the the fastest route
+- Bugfix: Path-finding costs for crossing a junction fixed
+- Bugfix: Vehicle detection at timed traffic lights did not work as expected
+- Bugfix: Not all valid traffic light arrow modes were reachable
+
 1.5.2, 02/01/2016
 - Traffic lights may now be added to/removed from underground junctions
 - Traffic lights may now be setup at *some* points of railway tracks (there seems to be a game-internal bug that prevents selecting arbitrary railway nodes)

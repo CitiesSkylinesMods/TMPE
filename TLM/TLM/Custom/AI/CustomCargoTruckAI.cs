@@ -12,7 +12,7 @@ namespace TrafficManager.Custom.AI
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
 			try {
-				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled) {
+				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && Options.enableDespawning) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} else {
 					if ((data.m_flags & Vehicle.Flags.WaitingTarget) != Vehicle.Flags.None && (data.m_waitCounter += 1) > 20) {
@@ -129,7 +129,7 @@ namespace TrafficManager.Custom.AI
             {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
-            else if (data.m_blockCounter >= num3 && LoadingExtension.Instance.DespawnEnabled)
+            else if (data.m_blockCounter >= num3 && Options.enableDespawning)
             {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             }
@@ -187,7 +187,7 @@ namespace TrafficManager.Custom.AI
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (instance.CreatePath((vehicleTypes & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None ? ExtVehicleType.CargoVehicle : ExtVehicleType.CargoTruck, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (instance.CreatePath(ExtVehicleType.CargoVehicle, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 					if (vehicleData.m_path != 0u) {
 						instance.ReleasePath(vehicleData.m_path);
 					}

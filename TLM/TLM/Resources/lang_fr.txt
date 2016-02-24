@@ -58,16 +58,17 @@ Vehicles_may_enter_blocked_junctions Les véhicules peuvent entrer dans les inte
 All_vehicles_may_ignore_lane_arrows Tous les véhicules peuvent ignorer les directions des voies
 Busses_may_ignore_lane_arrows Les bus peuvent ignorer les directions des voies
 Reckless_driving Conduite téméraire (fonctionnalité Bêta)
-TMPE_Title Traffic Manager: Edition Président\n(Paramètres définis pour chaque sauvegarde séparément)
+TMPE_Title Traffic Manager: Edition Président
+Settings_are_defined_for_each_savegame_separately Paramètres définis pour chaque sauvegarde séparément
 Simulation_accuracy Précision de la simulation (une plus haute précision réduit les performances)
 Enable_highway_specific_lane_merging/splitting_rules Activer les règles spécifiques de divergence/convergence sur les autoroutes
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Les conducteurs veulent changer de voies: (seulement si l'IA avancée est activée)
 Maintenance Maintenance
-Very_often_(50_%) Très souvent (50 %)
-Often_(25_%) Souvent (25 %)
-Sometimes_(10_%) Parfois (10 %)
-Rarely_(5_%) Rarement (5 %)
-Very_rarely_(2.5_%) Très rarement (2.5 %)
+Very_often Très souvent
+Often Souvent
+Sometimes Parfois
+Rarely Rarement
+Very_rarely Très rarement
 Only_if_necessary Seulement si nécessaire
 Nodes_and_segments Nœuds et segments
 Lanes Voies
@@ -100,3 +101,15 @@ Vehicle_restrictions Vehicle restrictions
 Copy Copy
 Paste Paste
 Invert Invert
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
+Allow_all_vehicles Allow all vehicles
+Ban_all_vehicles Ban all vehicles
+Set_all_traffic_lights_to_red Set all traffic lights to red
+Rotate_left Rotate left
+Rotate_right Rotate right
+Name Name
+Apply Apply
+Select_a_timed_traffic_light_program Select a timed traffic light program
+The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
+Advanced_AI_cannot_be_activated Advanced AI cannot be activated
+The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).

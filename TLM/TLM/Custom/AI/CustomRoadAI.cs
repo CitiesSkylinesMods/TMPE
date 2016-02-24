@@ -18,10 +18,9 @@ namespace TrafficManager.Custom.AI {
 		public static ushort[] currentLaneTrafficBuffer;
 		public static uint[] currentLaneSpeeds;
 		public static uint[] currentLaneDensities;
-		public static uint[] maxLaneDensities;
 
 		public static byte[] laneMeanSpeeds;
-		public static byte[] laneMeanDensities;
+		//public static byte[] laneMeanDensities;
 
 		public static bool initDone = false;
 		public static uint simStartFrame = 0;
@@ -77,19 +76,13 @@ namespace TrafficManager.Custom.AI {
 						uint curLaneId = data.m_lanes;
 						int nextNumLanes = data.Info.m_lanes.Length;
 						uint laneIndex = 0;
+						bool firstWithTraffic = true;
+						bool resetDensity = false;
 						while (laneIndex < nextNumLanes && curLaneId != 0u) {
 							uint buf = currentLaneTrafficBuffer[curLaneId];
-							uint maxDens = Math.Min(1000u, maxLaneDensities[curLaneId]);
 							uint currentDensities = currentLaneDensities[curLaneId];
 
-							byte currentMeanDensity = 0;
-							if (currentDensities > maxDens) {
-								maxLaneDensities[curLaneId] = currentDensities;
-							} else {
-								maxLaneDensities[curLaneId] = (uint)Math.Max(0, (int)maxDens - ((int)maxDens / 25));
-							}
-
-							currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Math.Max(1u, maxDens))); // 0 .. 100
+							//currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Math.Max(1u, maxDens))); // 0 .. 100
 
 							byte currentMeanSpeed = 25;
 							// we use integer division here because it's faster
@@ -114,15 +107,19 @@ namespace TrafficManager.Custom.AI {
 							else
 								laneMeanSpeeds[curLaneId] = (byte)Math.Max((int)laneMeanSpeeds[curLaneId] - 5, 0);
 
-							laneMeanDensities[curLaneId] = currentMeanDensity;
-							/*if (currentMeanDensity >= laneMeanDensities[curLaneId])
-								laneMeanDensities[curLaneId] = (byte)Math.Min((int)laneMeanDensities[curLaneId] + 25, currentMeanDensity);
-							else
-								laneMeanDensities[curLaneId] = (byte)Math.Max((int)laneMeanDensities[curLaneId] - 25, 0);*/
+							//laneMeanDensities[curLaneId] = currentMeanDensity;
 
 							currentLaneTrafficBuffer[curLaneId] = 0;
 							currentLaneSpeeds[curLaneId] = 0;
-							currentLaneDensities[curLaneId] = 0;
+
+							if (currentLaneDensities[curLaneId] > 0 && firstWithTraffic) {
+								resetDensity = (currentLaneDensities[curLaneId] > 1000000);
+								firstWithTraffic = false;
+							}
+
+							if (resetDensity) {
+								currentLaneDensities[curLaneId] /= 2u;
+							}
 
 							laneIndex++;
 							curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -188,6 +185,8 @@ namespace TrafficManager.Custom.AI {
 
 			// get vehicle type
 			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleId, ref vehicleData);
+			if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram && vehicleType != ExtVehicleType.Tram)
+				Log.Warning($"vehicleType={vehicleType} ({(int)vehicleType}) for Tram");
 			//Log._Debug($"GetCustomTrafficLightState: Vehicle {vehicleId} is a {vehicleType}");
 			if (vehicleType == null) {
 				Log.Warning($"GetTrafficLightState: Could not determine vehicle type of vehicle {vehicleId}!");
@@ -696,9 +695,8 @@ namespace TrafficManager.Custom.AI {
 				currentLaneTrafficBuffer = new ushort[Singleton<NetManager>.instance.m_lanes.m_size];
 				currentLaneSpeeds = new uint[Singleton<NetManager>.instance.m_lanes.m_size];
 				currentLaneDensities = new uint[Singleton<NetManager>.instance.m_lanes.m_size];
-				maxLaneDensities = new uint[Singleton<NetManager>.instance.m_lanes.m_size];
 				laneMeanSpeeds = new byte[Singleton<NetManager>.instance.m_lanes.m_size];
-				laneMeanDensities = new byte[Singleton<NetManager>.instance.m_lanes.m_size];
+				//laneMeanDensities = new byte[Singleton<NetManager>.instance.m_lanes.m_size];
 				resetTrafficStats();
 				initDone = true;
 			}
@@ -707,7 +705,7 @@ namespace TrafficManager.Custom.AI {
 		internal static void resetTrafficStats() {
 			for (uint i = 0; i < laneMeanSpeeds.Length; ++i) {
 				laneMeanSpeeds[i] = 25;
-				laneMeanDensities[i] = 50;
+				//laneMeanDensities[i] = 50;
 				currentLaneTrafficBuffer[i] = 0;
 			}
 			simStartFrame = 0;

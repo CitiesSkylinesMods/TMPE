@@ -5,6 +5,7 @@ using ColossalFramework.UI;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.State;
 
 namespace TrafficManager.UI {
 #if !TAM
@@ -39,14 +40,14 @@ namespace TrafficManager.UI {
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
 			width = Translation.getMenuWidth();
-			height = LoadingExtension.IsPathManagerCompatible ? 390 : 270;
+			height = LoadingExtension.IsPathManagerCompatible ? 390 : 230;
 #if DEBUG
 			height += 160;		
 #endif
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.6.0";
+			title.text = "Version 1.6.5";
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;
@@ -74,7 +75,7 @@ namespace TrafficManager.UI {
 			y += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn = _createButton(LoadingExtension.Instance.DespawnEnabled ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
+				_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
 				y += 40;
 			}
 
@@ -245,16 +246,16 @@ namespace TrafficManager.UI {
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficLightTool.SetToolMode(ToolMode.None);
 
-			TrafficPriority.ClearTraffic();
+			TrafficPriority.RequestClearTraffic();
 		}
 
 		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficLightTool.SetToolMode(ToolMode.None);
 
-			LoadingExtension.Instance.DespawnEnabled = !LoadingExtension.Instance.DespawnEnabled;
+			Options.setEnableDespawning(!Options.enableDespawning);
 
 			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn.text = LoadingExtension.Instance.DespawnEnabled
+				_buttonToggleDespawn.text = Options.enableDespawning
 					? Translation.GetString("Disable_despawning")
 					: Translation.GetString("Enable_despawning");
 			}

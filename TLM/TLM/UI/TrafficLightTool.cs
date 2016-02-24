@@ -101,6 +101,8 @@ namespace TrafficManager.UI {
 		}
 
 		public static void SetToolMode(ToolMode mode) {
+			Log._Debug($"SetToolMode: {mode}");
+
 			_toolMode = mode;
 			nodeSelectionLocked = false;
 
@@ -160,6 +162,8 @@ namespace TrafficManager.UI {
 		/// </summary>
 		/// <param name="cameraInfo"></param>
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+			Log._Debug($"RenderOverlay");
+
 			switch (_toolMode) {
 				case ToolMode.SwitchTrafficLight:
 					if (m_toolController.IsInsideUI || !Cursor.visible) {
@@ -204,6 +208,9 @@ namespace TrafficManager.UI {
 		/// </summary>
 		protected override void OnToolUpdate() {
 			base.OnToolUpdate();
+
+			Log._Debug($"OnToolUpdate");
+
 			_mouseDown = Input.GetMouseButton(0);
 
 			if (_mouseDown) {
@@ -261,6 +268,8 @@ namespace TrafficManager.UI {
 		}
 
 		protected override void OnToolGUI() {
+			Log._Debug($"OnToolGUI");
+
 			try {
 				if (!Input.GetMouseButtonDown(0)) {
 					mouseClickProcessed = false;
@@ -271,6 +280,7 @@ namespace TrafficManager.UI {
 					_guiNodes();
 #if DEBUG
 					_guiVehicles();
+					_guiCitizens();
 #endif
 				}
 
@@ -493,9 +503,9 @@ namespace TrafficManager.UI {
 		public override void SimulationStep() {
 			base.SimulationStep();
 
-			currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 2;
+			/*currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 2;
 
-			/*string displayToolTipText = tooltipText;
+			string displayToolTipText = tooltipText;
 			if (displayToolTipText != null) {
 				if (currentFrame <= tooltipStartFrame + 50) {
 					ShowToolInfo(true, displayToolTipText, (Vector3)tooltipWorldPos);
@@ -508,11 +518,11 @@ namespace TrafficManager.UI {
 				}
 			}*/
 
-			bool elementsHovered = determineHoveredElements();
-
 			if (_toolMode == ToolMode.None) {
 				ToolCursor = null;
 			} else {
+				bool elementsHovered = determineHoveredElements();
+
 				var netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault(nt => nt.m_prefab != null);
 
 				if (netTool != null && elementsHovered) {
@@ -813,6 +823,7 @@ namespace TrafficManager.UI {
 
 			if (SelectedNode != 0) {
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNode);
+				nodeSimulation.housekeeping(true);
 
 				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
 					_guiManualTrafficLightsCrosswalk(ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode]);
@@ -1516,8 +1527,19 @@ namespace TrafficManager.UI {
 			_counterStyle.fontSize = (int)(11f * zoom);
 			_counterStyle.normal.textColor = new Color(1f, 1f, 0f);
 
-
+			uint totalDensity = 0u;
 			uint curLaneId = segment.m_lanes;
+			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
+				if (curLaneId == 0)
+					break;
+
+				totalDensity += CustomRoadAI.currentLaneDensities[curLaneId];
+
+				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+			}
+
+
+			curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
 				if (curLaneId == 0)
@@ -1533,9 +1555,9 @@ namespace TrafficManager.UI {
 					labelStr += ", in start-up phase";
 				else
 					labelStr += ", avg. speed: " + CustomRoadAI.laneMeanSpeeds[curLaneId] + " %";
-				labelStr += ", avg. density: " + CustomRoadAI.laneMeanDensities[curLaneId] + " %";
+				labelStr += ", avg. density: " + (totalDensity > 0 ? Math.Min(100f, ((float)CustomRoadAI.currentLaneDensities[curLaneId] * 100f) / (float)totalDensity) : 0f) + " %";
 #if DEBUG
-				labelStr += " (" + CustomRoadAI.currentLaneDensities[curLaneId] + "/" + CustomRoadAI.maxLaneDensities[curLaneId] + ")";
+				labelStr += " (" + CustomRoadAI.currentLaneDensities[curLaneId] + "/" + totalDensity + ")";
 #endif
 				labelStr += "\n";
 
@@ -1598,8 +1620,7 @@ namespace TrafficManager.UI {
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
 
 					float meanLaneSpeed = 0f;
-					float meanLaneDensity = 0f;
-
+					
 					int lIndex = 0;
 					uint laneId = segments.m_buffer[i].m_lanes;
 					int validLanes = 0;
@@ -1608,7 +1629,6 @@ namespace TrafficManager.UI {
 						if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
 							if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
 								meanLaneSpeed += (float)CustomRoadAI.laneMeanSpeeds[laneId];
-								meanLaneDensity += (float)CustomRoadAI.laneMeanDensities[laneId];
 								++validLanes;
 							}
 						}
@@ -1618,14 +1638,12 @@ namespace TrafficManager.UI {
 
 					if (validLanes > 0) {
 						meanLaneSpeed /= Convert.ToSingle(validLanes);
-						meanLaneDensity /= Convert.ToSingle(validLanes);
 					}
 
 					if (CustomRoadAI.InStartupPhase)
 						labelStr += " (in start-up phase,";
 					else
-						labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + " %,";
-					labelStr += " avg. density: " + String.Format("{0:0.##}", meanLaneDensity) + " %)";
+						labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + " %)";
 
 #if DEBUG
 					labelStr += "\nstart: " + segments.m_buffer[i].m_startNode + ", end: " + segments.m_buffer[i].m_endNode;
@@ -1687,7 +1705,7 @@ namespace TrafficManager.UI {
 				if (vehicle.m_flags == Vehicle.Flags.None) // node is unused
 					continue;
 
-				Vector3 pos = vehicle.m_frame0.m_position;
+				Vector3 pos = vehicle.GetLastFramePosition();
 				var screenPos = Camera.main.WorldToScreenPoint(pos);
 				screenPos.y = Screen.height - screenPos.y;
 
@@ -1726,7 +1744,41 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		ExtVehicleType[] infoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram };
+		private void _guiCitizens() {
+			Array16<CitizenInstance> citizenInstances = Singleton<CitizenManager>.instance.m_instances;
+			for (int i = 1; i < citizenInstances.m_size; ++i) {
+				CitizenInstance citizenInstance = citizenInstances.m_buffer[i];
+				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
+					continue;
+
+				Vector3 pos = citizenInstance.GetLastFramePosition();
+				var screenPos = Camera.main.WorldToScreenPoint(pos);
+				screenPos.y = Screen.height - screenPos.y;
+
+				if (screenPos.z < 0)
+					continue;
+
+				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+				var diff = pos - camPos;
+				if (diff.magnitude > DebugCloseLod)
+					continue; // do not draw if too distant
+
+				var zoom = 1.0f / diff.magnitude * 150f;
+
+				_counterStyle.fontSize = (int)(10f * zoom);
+				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
+				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
+
+				String labelStr = "Cit. " + i;
+				
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
+
+				GUI.Box(labelRect, labelStr, _counterStyle);
+			}
+		}
+
+		ExtVehicleType[] infoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service };
 
 		private void _guiTimedTrafficLights() {
 			_cursorInSecondaryPanel = false;
@@ -1739,6 +1791,7 @@ namespace TrafficManager.UI {
 
 			foreach (var nodeId in SelectedNodeIndexes) {
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				nodeSimulation.housekeeping(true);
 				if (nodeSimulation == null || !nodeSimulation.IsTimedLight())
 					continue;
 				TimedTrafficLights timedNode = nodeSimulation.TimedLight;

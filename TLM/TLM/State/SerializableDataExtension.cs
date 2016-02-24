@@ -20,7 +20,7 @@ namespace TrafficManager.State {
 
 		private static ISerializableData _serializableData;
 		private static Configuration _configuration;
-		public static bool StateLoaded;
+		public static bool StateLoading = false;
 
 		public override void OnCreated(ISerializableData serializableData) {
 			_serializableData = serializableData;
@@ -31,81 +31,92 @@ namespace TrafficManager.State {
 		
 		public override void OnLoadData() {
 			Log.Info("Loading Traffic Manager: PE Data");
-			Flags.OnBeforeLoadData();
-			CustomRoadAI.OnBeforeLoadData();
-			byte[] data = _serializableData.LoadData(DataId);
-			DeserializeData(data);
+			StateLoading = true;
+			try {
+				Flags.OnBeforeLoadData();
+				CustomRoadAI.OnBeforeLoadData();
+				byte[] data = _serializableData.LoadData(DataId);
+				DeserializeData(data);
 
-			// load options
-			byte[] options = _serializableData.LoadData("TMPE_Options");
-			if (options != null) {
-				if (options.Length >= 1) {
-					Options.setSimAccuracy(options[0]);
-				}
-
-				/*if (options.Length >= 2) {
-					Options.setLaneChangingRandomization(options[1]);
-				}*/
-
-				if (options.Length >= 3) {
-					Options.setRecklessDrivers(options[2]);
-				}
-
-				if (options.Length >= 4) {
-					Options.setRelaxedBusses(options[3] == (byte)1);
-				}
-
-				if (options.Length >= 5) {
-					Options.setNodesOverlay(options[4] == (byte)1);
-				}
-
-				if (options.Length >= 6) {
-					Options.setMayEnterBlockedJunctions(options[5] == (byte)1);
-				}
-
-				if (options.Length >= 7) {
-#if !TAM
-					if (!LoadingExtension.IsPathManagerCompatible) {
-						Options.setAdvancedAI(false);
-					} else {
-#endif
-						Options.setAdvancedAI(options[6] == (byte)1);
-#if !TAM
+				// load options
+				byte[] options = _serializableData.LoadData("TMPE_Options");
+				if (options != null) {
+					if (options.Length >= 1) {
+						Options.setSimAccuracy(options[0]);
 					}
+
+					if (options.Length >= 2) {
+						Options.setLaneChangingRandomization(options[1]);
+					}
+
+					if (options.Length >= 3) {
+						Options.setRecklessDrivers(options[2]);
+					}
+
+					if (options.Length >= 4) {
+						Options.setRelaxedBusses(options[3] == (byte)1);
+					}
+
+					if (options.Length >= 5) {
+						Options.setNodesOverlay(options[4] == (byte)1);
+					}
+
+					if (options.Length >= 6) {
+						Options.setMayEnterBlockedJunctions(options[5] == (byte)1);
+					}
+
+					if (options.Length >= 7) {
+#if !TAM
+						if (!LoadingExtension.IsPathManagerCompatible) {
+							Options.setAdvancedAI(false);
+						} else {
 #endif
-				}
+							Options.setAdvancedAI(options[6] == (byte)1);
+#if !TAM
+						}
+#endif
+					}
 
-				if (options.Length >= 8) {
-					Options.setHighwayRules(options[7] == (byte)1);
-				}
+					if (options.Length >= 8) {
+						Options.setHighwayRules(options[7] == (byte)1);
+					}
 
-				if (options.Length >= 9) {
-					Options.setPrioritySignsOverlay(options[8] == (byte)1);
-				}
+					if (options.Length >= 9) {
+						Options.setPrioritySignsOverlay(options[8] == (byte)1);
+					}
 
-				if (options.Length >= 10) {
-					Options.setTimedLightsOverlay(options[9] == (byte)1);
-				}
+					if (options.Length >= 10) {
+						Options.setTimedLightsOverlay(options[9] == (byte)1);
+					}
 
-				if (options.Length >= 11) {
-					Options.setSpeedLimitsOverlay(options[10] == (byte)1);
-				}
+					if (options.Length >= 11) {
+						Options.setSpeedLimitsOverlay(options[10] == (byte)1);
+					}
 
-				if (options.Length >= 12) {
-					Options.setVehicleRestrictionsOverlay(options[11] == (byte)1);
-				}
+					if (options.Length >= 12) {
+						Options.setVehicleRestrictionsOverlay(options[11] == (byte)1);
+					}
 
-				if (options.Length >= 13) {
-					Options.setStrongerRoadConditionEffects(options[12] == (byte)1);
-				}
+					if (options.Length >= 13) {
+						Options.setStrongerRoadConditionEffects(options[12] == (byte)1);
+					}
 
-				if (options.Length >= 14) {
-					Options.allowUTurns = options[13] == (byte)1;
-				}
+					if (options.Length >= 14) {
+						Options.setAllowUTurns(options[13] == (byte)1);
+					}
 
-				if (options.Length >= 15) {
-					Options.allowLaneChangesWhileGoingStraight = options[14] == (byte)1;
+					if (options.Length >= 15) {
+						Options.setAllowLaneChangesWhileGoingStraight(options[14] == (byte)1);
+					}
+
+					if (options.Length >= 16) {
+						Options.setEnableDespawning(options[15] == (byte)1);
+					}
 				}
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: {e.ToString()}");
+            } finally {
+				StateLoading = false;
 			}
 
 			// load toggled traffic lights
@@ -624,7 +635,24 @@ namespace TrafficManager.State {
 				_serializableData.SaveData(DataId, memoryStream.ToArray());
 
 				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] { (byte)Options.simAccuracy, (byte)Options.laneChangingRandomization, (byte)Options.recklessDrivers, (byte)(Options.relaxedBusses ? 1 : 0), (byte) (Options.nodesOverlay ? 1 : 0), (byte)(Options.allowEnterBlockedJunctions ? 1 : 0), (byte)(Options.advancedAI ? 1 : 0), (byte)(Options.highwayRules ? 1 : 0), (byte)(Options.prioritySignsOverlay ? 1 : 0), (byte)(Options.timedLightsOverlay ? 1 : 0), (byte)(Options.speedLimitsOverlay ? 1 : 0), (byte)(Options.vehicleRestrictionsOverlay ? 1 : 0), (byte)(Options.strongerRoadConditionEffects ? 1 : 0), (byte)(Options.allowUTurns ? 1 : 0), (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0) });
+				_serializableData.SaveData("TMPE_Options", new byte[] {
+					(byte)Options.simAccuracy,
+					(byte)Options.laneChangingRandomization,
+					(byte)Options.recklessDrivers,
+					(byte)(Options.relaxedBusses ? 1 : 0),
+					(byte) (Options.nodesOverlay ? 1 : 0),
+					(byte)(Options.allowEnterBlockedJunctions ? 1 : 0),
+					(byte)(Options.advancedAI ? 1 : 0),
+					(byte)(Options.highwayRules ? 1 : 0),
+					(byte)(Options.prioritySignsOverlay ? 1 : 0),
+					(byte)(Options.timedLightsOverlay ? 1 : 0),
+					(byte)(Options.speedLimitsOverlay ? 1 : 0),
+					(byte)(Options.vehicleRestrictionsOverlay ? 1 : 0),
+					(byte)(Options.strongerRoadConditionEffects ? 1 : 0),
+					(byte)(Options.allowUTurns ? 1 : 0),
+					(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
+					(byte)(Options.enableDespawning ? 1 : 0)
+				});
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
 			} finally {

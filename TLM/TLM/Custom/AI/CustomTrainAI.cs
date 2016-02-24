@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.State;
 using TrafficManager.Traffic;
 using UnityEngine;
 
@@ -99,7 +100,7 @@ namespace TrafficManager.Custom.AI {
 						}
 					}
 				}
-				if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == Vehicle.Flags.None || vehicleData.m_blockCounter == 255) {
+				if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == Vehicle.Flags.None || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				}
 			} catch (Exception ex) {

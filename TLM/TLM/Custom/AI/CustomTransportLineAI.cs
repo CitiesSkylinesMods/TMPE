@@ -69,11 +69,15 @@ namespace TrafficManager.Custom.AI {
 			}
 			uint path;
 			ExtVehicleType extVehicleType = ExtVehicleType.Bus;
-			if ((vehicleType & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None)
+			if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None)
 				extVehicleType = ExtVehicleType.PassengerTrain;
 			if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None)
 				extVehicleType = ExtVehicleType.Tram;
-			//Log._Debug($"Transport line. vehicleType={vehicleType}");
+			if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
+				extVehicleType = ExtVehicleType.PassengerShip;
+			if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
+				extVehicleType = ExtVehicleType.PassengerPlane;
+			//Log._Debug($"Transport line. extVehicleType={extVehicleType}");
 
 			if (Singleton<CustomPathManager>.instance.CreatePath(extVehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {
 				if (startPosA.m_segment != 0 && startPosB.m_segment != 0) {

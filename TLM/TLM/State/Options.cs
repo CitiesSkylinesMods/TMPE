@@ -9,6 +9,8 @@ using ICities;
 using TrafficManager.Traffic;
 using TrafficManager.State;
 using TrafficManager.UI;
+using ColossalFramework.Plugins;
+using ColossalFramework.Globalization;
 
 namespace TrafficManager.State {
 
@@ -26,6 +28,7 @@ namespace TrafficManager.State {
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
+		private static UICheckBox enableDespawningToggle = null;
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
@@ -68,26 +71,25 @@ namespace TrafficManager.State {
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
 		public static bool strongerRoadConditionEffects = true;
+		public static bool enableDespawning = true;
+		//public static byte publicTransportUsage = 1;
 		public static float pathCostMultiplicator = 2f; // debug value
-		public static float pathCostMultiplicator2 = 50f; // debug value
+		public static float pathCostMultiplicator2 = 0f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 2.5f; // debug value
-		public static float someValue2 = 4f; // debug value
-		public static float someValue3 = 0f; // debug value
-		public static float someValue4 = 0f; // debug value
-
-		private static new bool enabled = false;
+		public static float someValue = 1.5f; // debug value
+		public static float someValue2 = 2f; // debug value
+		public static float someValue3 = 3f; // debug value
+		public static float someValue4 = 50f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
-			if (!enabled)
-				return;
 			simAccuracyDropdown = mainGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
 			recklessDriversDropdown = mainGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
+			//publicTransportUsageDropdown = mainGroup.AddDropdown(Translation.GetString("Citizens_use_public_transportation") + ":", new string[] { Translation.GetString("Very_often"), Translation.GetString("Often"), Translation.GetString("Sometimes"), Translation.GetString("Rarely"), Translation.GetString("Very_rarely") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			relaxedBussesToggle = mainGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 #if DEBUG
 			allRelaxedToggle = mainGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
@@ -96,10 +98,11 @@ namespace TrafficManager.State {
 			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
+			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 			aiGroup = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules")+" (BETA feature)", highwayRules, onHighwayRulesChanged) as UICheckBox;
-			laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often_(50_%)"), Translation.GetString("Often_(25_%)"), Translation.GetString("Sometimes_(10_%)"), Translation.GetString("Rarely_(5_%)"), Translation.GetString("Very_rarely_(2.5_%)"), Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
 			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
 			timedLightsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
@@ -124,131 +127,217 @@ namespace TrafficManager.State {
 #endif
 		}
 
-		internal static void SetEnabled(bool enabled) {
-			Options.enabled = enabled;
-			UIView.library.Get<OptionsMainPanel>("OptionsPanel").Invoke("RefreshPlugins", 0f);
+		private static bool checkGameLoaded() {
+			if (!SerializableDataExtension.StateLoading && !LoadingExtension.IsGameLoaded()) {
+				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Nope!", Translation.GetString("Settings_are_defined_for_each_savegame_separately") + ". https://www.viathinksoft.de/tmpe/#options", false);
+				return false;
+			}
+			return true;
 		}
 
 		private static void onPrioritySignsOverlayChanged(bool newPrioritySignsOverlay) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"prioritySignsOverlay changed to {newPrioritySignsOverlay}");
 			prioritySignsOverlay = newPrioritySignsOverlay;
 		}
 
 		private static void onTimedLightsOverlayChanged(bool newTimedLightsOverlay) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"timedLightsOverlay changed to {newTimedLightsOverlay}");
 			timedLightsOverlay = newTimedLightsOverlay;
 		}
 
 		private static void onSpeedLimitsOverlayChanged(bool newSpeedLimitsOverlay) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"speedLimitsOverlay changed to {newSpeedLimitsOverlay}");
 			speedLimitsOverlay = newSpeedLimitsOverlay;
 		}
 
 		private static void onVehicleRestrictionsOverlayChanged(bool newVehicleRestrictionsOverlay) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
 		}
 
 		private static void onDisableSomething1Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"disableSomething1 changed to {newDisableSomething}");
 			disableSomething1 = newDisableSomething;
 		}
 
 		private static void onDisableSomething2Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"disableSomething2 changed to {newDisableSomething}");
 			disableSomething2 = newDisableSomething;
 		}
 
 		private static void onDisableSomething3Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"disableSomething3 changed to {newDisableSomething}");
 			disableSomething3 = newDisableSomething;
 		}
 
 		private static void onDisableSomething4Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"disableSomething4 changed to {newDisableSomething}");
 			disableSomething4 = newDisableSomething;
 		}
 
 		private static void onDisableSomething5Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"disableSomething5 changed to {newDisableSomething}");
 			disableSomething5 = newDisableSomething;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Simulation accuracy changed to {newAccuracy}");
 			simAccuracy = newAccuracy;
 		}
 
 		private static void onLaneChangingRandomizationChanged(int newLaneChangingRandomization) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Lane changing frequency changed to {newLaneChangingRandomization}");
 			laneChangingRandomization = newLaneChangingRandomization;
 		}
 
 		private static void onRecklessDriversChanged(int newRecklessDrivers) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Reckless driver amount changed to {newRecklessDrivers}");
 			recklessDrivers = newRecklessDrivers;
 		}
 
 		private static void onRelaxedBussesChanged(bool newRelaxedBusses) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Relaxed busses changed to {newRelaxedBusses}");
 			relaxedBusses = newRelaxedBusses;
 		}
 
 		private static void onAllRelaxedChanged(bool newAllRelaxed) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"All relaxed changed to {newAllRelaxed}");
 			allRelaxed = newAllRelaxed;
 		}
 
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Highway rules changed to {newHighwayRules}");
 			highwayRules = newHighwayRules;
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
 		}
 		private static void onAdvancedAIChanged(bool newAdvancedAI) {
+			if (!checkGameLoaded())
+				return;
+
 #if !TAM
-			if (LoadingExtension.IsPathManagerCompatible) {
-				Log._Debug($"advancedAI busses changed to {newAdvancedAI}");
-				advancedAI = newAdvancedAI;
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				if (newAdvancedAI) {
+					setAdvancedAI(false);
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Advanced AI cannot be activated", "The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
+				}
 			} else
 #endif
-			if (newAdvancedAI) {
-				setAdvancedAI(false);
-				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Advanced AI cannot be activated", "The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
-			}
+			Log._Debug($"advancedAI changed to {newAdvancedAI}");
+			advancedAI = newAdvancedAI;
 		}
 
 		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"allowEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
 			allowEnterBlockedJunctions = newMayEnterBlockedJunctions;
 		}
 
 		private static void onAllowUTurnsChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"allowUTurns changed to {newValue}");
 			allowUTurns = newValue;
 		}
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
 			allowLaneChangesWhileGoingStraight = newValue;
 		}
 
 		private static void onStrongerRoadConditionEffectsChanged(bool newStrongerRoadConditionEffects) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"strongerRoadConditionEffects changed to {newStrongerRoadConditionEffects}");
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
 		}
 
+		private static void onEnableDespawningChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				setEnableDespawning(true);
+				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Despawning cannot be modified", "The despawning option cannot be changed because you are using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
+			} else
+#endif
+			Log._Debug($"enableDespawning changed to {value}");
+			enableDespawning = value;
+		}
+
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Nodes overlay changed to {newNodesOverlay}");
 			nodesOverlay = newNodesOverlay;
 		}
 
 		private static void onShowLanesChanged(bool newShowLanes) {
+			if (!checkGameLoaded())
+				return;
+
 			Log._Debug($"Show lanes changed to {newShowLanes}");
 			showLanes = newShowLanes;
 		}
 
 		private static void onPathCostMultiplicatorChanged(string newPathCostMultiplicatorStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
 				pathCostMultiplicator = newPathCostMultiplicator;
@@ -259,6 +348,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onPathCostMultiplicator2Changed(string newPathCostMultiplicatorStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
 				pathCostMultiplicator2 = newPathCostMultiplicator;
@@ -269,6 +361,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onSomeValueChanged(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue = newSomeValue;
@@ -279,6 +374,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onSomeValue2Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue2 = newSomeValue;
@@ -289,6 +387,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onSomeValue3Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue3 = newSomeValue;
@@ -299,6 +400,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onSomeValue4Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue4 = newSomeValue;
@@ -309,6 +413,9 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickForgetToggledLights() {
+			if (!checkGameLoaded())
+				return;
+
 			Flags.resetTrafficLights(false);
 		}
 
@@ -355,7 +462,16 @@ namespace TrafficManager.State {
 		}
 
 		public static void setHighwayRules(bool newHighwayRules) {
-			highwayRules = newHighwayRules;
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				newHighwayRules = false;
+				highwayRules = false;
+			} else {
+#endif
+				highwayRules = newHighwayRules;
+#if !TAM
+			}
+#endif
 			if (highwayRulesToggle != null)
 				highwayRulesToggle.isChecked = newHighwayRules;
 		}
@@ -369,6 +485,7 @@ namespace TrafficManager.State {
 		public static void setAdvancedAI(bool newAdvancedAI) {
 #if !TAM
 			if (!LoadingExtension.IsPathManagerCompatible) {
+				newAdvancedAI = false;
 				advancedAI = false;
 			} else {
 #endif
@@ -390,6 +507,34 @@ namespace TrafficManager.State {
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
 			if (strongerRoadConditionEffectsToggle != null)
 				strongerRoadConditionEffectsToggle.isChecked = newStrongerRoadConditionEffects;
+		}
+
+		public static void setEnableDespawning(bool value) {
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				value = true;
+				enableDespawning = true;
+			} else {
+#endif
+				enableDespawning = value;
+#if !TAM
+			}
+#endif
+
+			if (enableDespawningToggle != null)
+				enableDespawningToggle.isChecked = value;
+		}
+
+		public static void setAllowUTurns(bool value) {
+			allowUTurns = value;
+			if (allowUTurnsToggle != null)
+				allowUTurnsToggle.isChecked = value;
+		}
+
+		public static void setAllowLaneChangesWhileGoingStraight(bool value) {
+			allowLaneChangesWhileGoingStraight = value;
+			if (allowLaneChangesWhileGoingStraightToggle != null)
+				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
 		}
 
 		public static void setPrioritySignsOverlay(bool newPrioritySignsOverlay) {

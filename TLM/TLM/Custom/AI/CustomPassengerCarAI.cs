@@ -3,6 +3,7 @@ using ColossalFramework;
 using UnityEngine;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Traffic;
+using TrafficManager.State;
 
 namespace TrafficManager.Custom.AI
 {
@@ -11,7 +12,7 @@ namespace TrafficManager.Custom.AI
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
 			try {
-				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && LoadingExtension.Instance.DespawnEnabled) {
+				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && Options.enableDespawning) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} else {
 					base.SimulationStep(vehicleId, ref data, physicsLodRefPos);

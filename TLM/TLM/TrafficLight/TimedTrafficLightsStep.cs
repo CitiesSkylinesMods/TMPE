@@ -178,7 +178,7 @@ namespace TrafficManager.TrafficLight {
 
 					if (curStepSegmentLights.PedestrianLightState != null && prevStepSegmentLights.PedestrianLightState != null && nextStepSegmentLights.PedestrianLightState != null) {
 						RoadBaseAI.TrafficLightState pedLightState = calcLightState((RoadBaseAI.TrafficLightState)prevStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)curStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)nextStepSegmentLights.PedestrianLightState, atStartTransition, atEndTransition);
-						Log._Debug($"TimedStep.SetLights: Setting pedestrian light state @ seg. {segmentId} to {pedLightState} {curStepSegmentLights.ManualPedestrianMode}");
+						//Log._Debug($"TimedStep.SetLights: Setting pedestrian light state @ seg. {segmentId} to {pedLightState} {curStepSegmentLights.ManualPedestrianMode}");
                         liveSegmentLights.ManualPedestrianMode = curStepSegmentLights.ManualPedestrianMode;
 						liveSegmentLights.PedestrianLightState = pedLightState;
 						//Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId}: Ped.: {liveSegmentLights.PedestrianLightState.ToString()}");

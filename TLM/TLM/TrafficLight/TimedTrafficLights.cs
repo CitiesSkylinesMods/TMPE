@@ -1,3 +1,5 @@
+#define DEBUGTTLx
+
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
@@ -159,48 +161,68 @@ namespace TrafficManager.TrafficLight {
 
 		public void SimulationStep() {
 			var currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 5;
+#if DEBUGTTL
 			Log._Debug($"TTL SimStep: currentFrame={currentFrame} lastSimulationStep={lastSimulationStep}");
+#endif
 			if (lastSimulationStep >= currentFrame) {
+#if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* lastSimulationStep >= currentFrame");
+#endif
 				return;
 			}
 			lastSimulationStep = currentFrame;
 
 			if (!isMasterNode() || !IsStarted()) {
+#if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
+#endif
 				return;
 			}
 			if (!housekeeping(false)) {
+#if DEBUGTTL
 				Log.Warning($"TTL SimStep: *STOP* Housekeeping detected that this timed traffic light has become invalid: {NodeId}.");
+#endif
 				Stop();
 				return;
 			}
 
 			if (!Steps[CurrentStep].isValid()) {
+#if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}) is not valid.");
+#endif
 				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false);
 				return;
 			}
 
+#if DEBUGTTL
 			Log._Debug($"TTL SimStep: Setting lights (1)");
+#endif
 			SetLights();
 
 			if (!Steps[CurrentStep].StepDone(true)) {
+#if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}) is not done.");
+#endif
 				return;
 			}
 			// step is done
 
+#if DEBUGTTL
 			Log._Debug($"TTL SimStep: Setting lights (2)");
+#endif
 			SetLights();
 
 			if (!Steps[CurrentStep].isEndTransitionDone()) {
+#if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}): end transition is not done.");
+#endif
 				return;
 			}
 			// ending transition (yellow) finished
 
+#if DEBUGTTL
 			Log._Debug($"TTL SimStep: ending transition done. NodeGroup={string.Join(", ", NodeGroup.Select(x => x.ToString()).ToArray())}, nodeId={NodeId}, NumSteps={NumSteps()}");
+#endif
 
 			// change step
 			var newCurrentStep = (CurrentStep + 1) % NumSteps();

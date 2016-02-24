@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
 	class CustomCitizenAI : CitizenAI {
+		public static readonly int[] FREE_TRANSPORT_USAGE_PROBABILITY = { 80, 50, 5 };
+		public static readonly int[] TRANSPORT_USAGE_PROBABILITY = { 40, 25, 10 };
+
 		// CitizenAI
 		public bool CustomStartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
 			NetInfo.LaneType laneType = NetInfo.LaneType.Pedestrian;
@@ -40,22 +43,38 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosA;
 			if (this.FindPathPosition(instanceID, ref citizenData, startPos, laneType, vehicleType, allowUnderground, out startPosA) &&
 				this.FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA)) {
-				if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
-					laneType |= NetInfo.LaneType.PublicTransport;
+
+				// NON-STOCK CODE START //
+				Citizen.Wealth wealthLevel = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel;
+
+				byte districtId = Singleton<DistrictManager>.instance.GetDistrict(startPos);
+				DistrictPolicies.Services servicePolicies = Singleton<DistrictManager>.instance.m_districts.m_buffer[(int)districtId].m_servicePolicies;
+				int transportUsageProb = (servicePolicies & DistrictPolicies.Services.FreeTransport) != DistrictPolicies.Services.None ? FREE_TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel] : TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel];
+
+				//bool mayUseTransport = false;
+				if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) { // STOCK CODE
+					if (vehicleInfo == null || (instanceID % 100)+1 <= transportUsageProb) {
+						laneType |= NetInfo.LaneType.PublicTransport; // STOCK CODE
+						//mayUseTransport = true;
+						//Log._Debug($"CustomCitizenAI: citizen {instanceID} can use public transport");
+					}
 				}
+				// NON-STOCK CODE END //
 				PathUnit.Position position2 = default(PathUnit.Position);
 				uint path;
+				// NON-STOCK CODE START //
 				ExtVehicleType? extVehicleType = null;
-				if (vehicleInfo != null) {
-					if (! Options.disableSomething2)
-						Log._Debug($"CustomCitizenAI: vehicleId={vehicleInfo.m_instanceID.Vehicle}");
-                    extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleInfo.m_instanceID.Vehicle, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleInfo.m_instanceID.Vehicle]);
-				}
-				bool res = false;
-				if (extVehicleType == null)
+				if (vehicleInfo != null)
+					extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicleInfo(vehicleInfo);
+				//Log._Debug($"CustomCitizenAI: citizen instance {instanceID}, id {citizenData.m_citizen}. {vehicleType} {extVehicleType} mayUseTransport={mayUseTransport} wealthLevel={wealthLevel}");
+                bool res = false;
+				if (Options.disableSomething5 || extVehicleType == null)
+				// NON-STOCK CODE END //
 					res = Singleton<CustomPathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);
+				// NON-STOCK CODE START //
 				else
 					res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)extVehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);
+				// NON-STOCK CODE END //
 				if (res) {
 					if (citizenData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(citizenData.m_path);

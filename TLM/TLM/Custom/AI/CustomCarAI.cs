@@ -93,7 +93,7 @@ namespace TrafficManager.Custom.AI {
 			int num3 = (privateServiceIndex == -1) ? 150 : 100;
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) == Vehicle.Flags.None && vehicleData.m_cargoParent == 0) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if ((int)vehicleData.m_blockCounter == num3) {
+			} else if ((int)vehicleData.m_blockCounter == num3 && Options.enableDespawning) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -240,7 +240,7 @@ namespace TrafficManager.Custom.AI {
 											break;
 									}
 
-									if (vehicleLightState == RoadBaseAI.TrafficLightState.Green && !Options.allowEnterBlockedJunctions) {
+									if ((vehicleLightState == RoadBaseAI.TrafficLightState.Green || vehicleLightState == RoadBaseAI.TrafficLightState.RedToGreen) && !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode == destinationNodeId)) {
 										var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, destinationNodeId);
 
 										if (hasIncomingCars) {
@@ -395,9 +395,9 @@ namespace TrafficManager.Custom.AI {
 															var info3 = netManager.m_segments.m_buffer[position.m_segment].Info;
 															if (info3.m_lanes != null && info3.m_lanes.Length > position.m_lane) {
 																//maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, info3.m_lanes[position.m_lane].m_speedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
-																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info3.m_lanes[position.m_lane]), netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve) * 0.8f;
+																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info3.m_lanes[position.m_lane]), netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 															} else {
-																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f) * 0.8f;
+																maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 															}
 															return;
 													}
@@ -536,6 +536,9 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		internal static bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None)
+				return true;
+
 			return ((vehicleData.Info.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 

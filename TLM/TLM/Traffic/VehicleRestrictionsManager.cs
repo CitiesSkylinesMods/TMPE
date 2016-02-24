@@ -72,7 +72,7 @@ namespace TrafficManager.Traffic {
 		internal static ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
 			if (Flags.IsInitDone()) {
 				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
-				if (fastArray != null && fastArray.Length >= laneIndex && fastArray[laneIndex] != null) {
+				if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
 					return (ExtVehicleType)fastArray[laneIndex];
 				}
 			}
@@ -86,8 +86,12 @@ namespace TrafficManager.Traffic {
 				ret |= ExtVehicleType.RoadPublicTransport | ExtVehicleType.Emergency;
 			else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
 				ret |= ExtVehicleType.RoadVehicle;
-			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None)
+			if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None)
 				ret |= ExtVehicleType.RailVehicle;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Ship;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Plane;
 
 			return ret;
 		}

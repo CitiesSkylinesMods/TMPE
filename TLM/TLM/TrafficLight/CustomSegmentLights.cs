@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEBUGHKx
+
+using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.Traffic;
@@ -48,27 +50,33 @@ namespace TrafficManager.TrafficLight {
 				if (ManualPedestrianMode)
 					return pedestrianLightState;
 				else {
-					RoadBaseAI.TrafficLightState? vehicleState = null;
-					foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
-						if (vehicleState == null || e.Value.GetLightMain() == RoadBaseAI.TrafficLightState.Green)
-							vehicleState = e.Value.GetLightMain();
-						if (vehicleState == RoadBaseAI.TrafficLightState.Green)
-							break;
-					}
-					if (vehicleState == null) {
-						return RoadBaseAI.TrafficLightState.Red;
-					}
-					return CustomSegmentLight.InvertLight((RoadBaseAI.TrafficLightState)vehicleState);
+					return GetAutoPedestrianLightState();
 				}
 			}
 			set {
 				if (pedestrianLightState == null) {
+#if DEBUGHK
 					Log._Debug($"CustomSegmentLights: Refusing to change pedestrian light at segment {segmentId}");
+#endif
                     return;
 				}
-				Log._Debug($"CustomSegmentLights: Setting pedestrian light at segment {segmentId}");
+				//Log._Debug($"CustomSegmentLights: Setting pedestrian light at segment {segmentId}");
 				pedestrianLightState = value;
 			}
+		}
+
+		public RoadBaseAI.TrafficLightState GetAutoPedestrianLightState() {
+			RoadBaseAI.TrafficLightState? vehicleState = null;
+			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
+				if (vehicleState == null || e.Value.GetLightMain() != RoadBaseAI.TrafficLightState.Red)
+					vehicleState = e.Value.GetLightMain();
+				if (vehicleState == RoadBaseAI.TrafficLightState.Green)
+					break;
+			}
+			if (vehicleState == null) {
+				return RoadBaseAI.TrafficLightState.Red;
+			}
+			return CustomSegmentLight.InvertLight((RoadBaseAI.TrafficLightState)vehicleState);
 		}
 
 		public bool ManualPedestrianMode {
@@ -116,7 +124,9 @@ namespace TrafficManager.TrafficLight {
 			HashSet<ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypesAsSet(segmentId, nodeId);
 			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, nodeId);
 			SeparateVehicleTypes = ExtVehicleType.None;
+#if DEBUGHK
 			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}, allAllowedTypes={string.Join(", ", allAllowedTypes.Select(x => x.ToString()).ToArray())}");
+#endif
 			bool addPedestrianLight = false;
 			uint numLights = 0;
 			foreach (ExtVehicleType allowedTypes in allAllowedTypes) {
@@ -125,7 +135,9 @@ namespace TrafficManager.TrafficLight {
 						continue;
 
 					if ((allowedTypes & mask) != ExtVehicleType.None && (allowedTypes & ~(mask | ExtVehicleType.Emergency)) == ExtVehicleType.None) {
+#if DEBUGHK
 						Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: adding {mask} light");
+#endif
 
 						if (!CustomLights.ContainsKey(mask)) {
 							CustomLights.Add(mask, new TrafficLight.CustomSegmentLight(this, nodeId, segmentId, mainState, leftState, rightState));
@@ -143,7 +155,9 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (allAllowedTypes.Count > numLights) {
+#if DEBUGHK
 				Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: adding main vehicle light: {mainVehicleType}");
+#endif
 
 				// traffic lights for cars
 				if (!CustomLights.ContainsKey(mainVehicleType)) {
@@ -152,10 +166,16 @@ namespace TrafficManager.TrafficLight {
 				}
 				autoPedestrianVehicleType = mainVehicleType;
 				mainSegmentLight = CustomLights[mainVehicleType];
-				addPedestrianLight = (allAllowedMask & ExtVehicleType.RailVehicle) == ExtVehicleType.None;
+				addPedestrianLight = allAllowedMask == ExtVehicleType.None || (allAllowedMask & ~ExtVehicleType.RailVehicle) != ExtVehicleType.None;
 			} else {
 				addPedestrianLight = true;
 			}
+
+#if DEBUGHK
+			if (addPedestrianLight) {
+				Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: adding ped. light");
+			}
+#endif
 
 			if (mayDelete) {
 				// delete traffic lights for non-existing configurations
@@ -168,7 +188,9 @@ namespace TrafficManager.TrafficLight {
 				}
 
 				foreach (ExtVehicleType vehicleType in vehicleTypesToDelete) {
+#if DEBUGHK
 					Log._Debug($"Deleting traffic light for {vehicleType} at segment {segmentId}, node {nodeId}");
+#endif
 					CustomLights.Remove(vehicleType);
 					VehicleTypes.Remove(vehicleType);
 				}
@@ -180,7 +202,9 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (addPedestrianLight) {
+#if DEBUGHK
 				Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: adding pedestrian light");
+#endif
 				if (pedestrianLightState == null)
 					pedestrianLightState = pedState;
 			} else {

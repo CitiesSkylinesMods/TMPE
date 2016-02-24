@@ -34,6 +34,11 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		private static HashSet<ushort> priorityNodes = new HashSet<ushort>();
 
+		/// <summary>
+		/// Determines if vehicles should be cleared
+		/// </summary>
+		private static bool ClearTrafficRequested = false;
+
 		private static uint lastTrafficLightUpdateFrame = 0;
 
 		static TrafficPriority() {
@@ -247,6 +252,10 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		internal static void RequestClearTraffic() {
+			ClearTrafficRequested = true;
+		}
+
 		/// <summary>
 		/// Adds/Sets a node as a priority node
 		/// </summary>
@@ -264,8 +273,8 @@ namespace TrafficManager.Traffic {
 					continue;
 				if (TrafficPriority.IsPrioritySegment(nodeId, segmentId))
 					continue;
-				if (CustomRoadAI.GetSegmentGeometry(segmentId).IsOutgoingOneWay(nodeId))
-					continue;
+				/*if (CustomRoadAI.GetSegmentGeometry(segmentId).IsOutgoingOneWay(nodeId))
+					continue;*/ // we need this for pedestrian traffic lights
 
 				TrafficPriority.AddPrioritySegment(nodeId, segmentId, SegmentEnd.PriorityType.None);
 				++ret;
@@ -284,7 +293,9 @@ namespace TrafficManager.Traffic {
 
 				VehiclePosition targetVehiclePos = GetVehiclePosition(targetVehicleId);
 				if (!targetVehiclePos.Valid) {
-					Log._Debug($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Target position is invalid!");
+#if DEBUG
+					Log.Warning($"HasIncomingVehicles: {targetVehicleId} @ {nodeId}, fromSegment: {targetVehiclePos.FromSegment}, toSegment: {targetVehiclePos.ToSegment}. Target position is invalid!");
+#endif
 					return false;
 				}
 
@@ -337,6 +348,11 @@ namespace TrafficManager.Traffic {
 						}
 #endif
 						continue; // should not happen
+					}
+
+					SegmentGeometry incomingGeometry = CustomRoadAI.GetSegmentGeometry(incomingSegmentId);
+					if (incomingGeometry.IsOutgoingOneWay(nodeId)) {
+						continue;
 					}
 
 					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
@@ -1025,8 +1041,10 @@ namespace TrafficManager.Traffic {
 		private static List<ushort> vehicleIdsToDelete = new List<ushort>();
 
 		public static void segmentHousekeeping(ushort segmentId) {
-			if (Options.disableSomething4)
-				return;
+			if (ClearTrafficRequested) {
+				TrafficPriority.ClearTraffic();
+				ClearTrafficRequested = false;
+			}
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
@@ -1078,9 +1096,6 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static void nodeHousekeeping(ushort nodeId) {
-			if (Options.disableSomething4)
-				return;
-
 			try {
 				uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 

@@ -58,16 +58,17 @@ Vehicles_may_enter_blocked_junctions Veículos podem entrar em cruzamentos bloqu
 All_vehicles_may_ignore_lane_arrows Todos os veículos podem ignorar setas da pista
 Busses_may_ignore_lane_arrows ônibus podem ignorar setas da pista
 Reckless_driving Direção imprudente (recurso BETA)
-TMPE_Title Traffic Manager: President Edition\n(As configurações são definidas para cada jogo salvo separadamente)
+TMPE_Title Traffic Manager: President Edition
+Settings_are_defined_for_each_savegame_separately As configurações são definidas para cada jogo salvo separadamente
 Simulation_accuracy A precisão da simulação (maior precisão reduz o desempenho)
 Enable_highway_specific_lane_merging/splitting_rules Habilitar regras de divisão e mesclagem de rodovia
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Motoristas gostam de mudar sua faixa:\n(só é aplicado se IA avançada de veiculo estiver habilitado)
 Maintenance Manunteção
-Very_often_(50_%) Muitas vezes (50 %)
-Often_(25_%) Frequentemente (25 %)
-Sometimes_(10_%) Às vezes (10 %)
-Rarely_(5_%) Raramente (5 %)
-Very_rarely_(2.5_%) Muito raramente (2,5 %)
+Very_often Muitas vezes
+Often Frequentemente
+Sometimes Às vezes
+Rarely Raramente
+Very_rarely Muito raramente
 Only_if_necessary Apenas se necessário
 Nodes_and_segments Cruzamentos e segmentos
 Lanes Faixas
@@ -88,7 +89,7 @@ Select_junction Selecionar cruzamento
 Cancel Cancelar
 Speed_limits Limite de Velocidade
 Persistently_visible_overlays Persistently visible overlays
-Priority_signs Placas de preferência
+Priority_signs Priority signs
 Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
 Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
 Allow_u-turns Allow u-turns
@@ -99,3 +100,16 @@ Vehicle_restrictions Vehicle restrictions
 Copy Copy
 Paste Paste
 Invert Invert
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
+Allow_all_vehicles Allow all vehicles
+Ban_all_vehicles Ban all vehicles
+Set_all_traffic_lights_to_red Set all traffic lights to red
+Rotate_left Rotate left
+Rotate_right Rotate right
+Name Name
+Apply Apply
+Select_a_timed_traffic_light_program Select a timed traffic light program
+The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
+Advanced_AI_cannot_be_activated Advanced AI cannot be activated
+The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+

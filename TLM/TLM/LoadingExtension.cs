@@ -35,7 +35,6 @@ namespace TrafficManager {
 #endif
 		public static bool IsPathManagerReplaced = false;
 		public CustomPathManager CustomPathManager { get; set; }
-        public bool DespawnEnabled { get; set; }
         public bool DetourInited { get; set; }
         public bool NodeSimulationLoaded { get; set; }
 		public List<Detour> Detours { get; set; }
@@ -65,7 +64,7 @@ namespace TrafficManager {
 			if (!LoadingExtension.Instance.DetourInited) {
 				bool detourFailed = false;
 
-				Log._Debug("Redirecting Vehicle AI Calculate Segment Calls (1)");
+				Log.Info("Redirecting Vehicle AI Calculate Segment Calls (1)");
 				try {
 					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("CalculateSegmentPosition",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -94,7 +93,7 @@ namespace TrafficManager {
 				}
 
 
-				Log._Debug("Redirecting Vehicle AI Calculate Segment Calls (2)");
+				Log.Info("Redirecting Vehicle AI Calculate Segment Calls (2)");
 				try {
 					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("CalculateSegmentPosition",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -117,7 +116,30 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting RoadBaseAI.SimulationStep for nodes");
+				Log.Info("Redirecting TramBaseAI Calculate Segment Calls (2)");
+				try {
+					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (byte),
+								typeof (Vector3).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(),
+								typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(CustomTramBaseAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TramBaseAI::CalculateSegmentPosition (2).");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting RoadBaseAI.SimulationStep for nodes");
 				try {
 					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetNode).MakeByRefType() }),
 						typeof(CustomRoadAI).GetMethod("CustomNodeSimulationStep")));
@@ -126,7 +148,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting RoadBaseAI.SimulationStep for segments");
+				Log.Info("Redirecting RoadBaseAI.SimulationStep for segments");
 				try {
 					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("SimulationStep", new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() }),
 						typeof(CustomRoadAI).GetMethod("CustomSegmentSimulationStep")));
@@ -134,7 +156,7 @@ namespace TrafficManager {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
 				}
 
-				Log._Debug("Redirecting Human AI Calls");
+				Log.Info("Redirecting Human AI Calls");
 				try {
 					Detours.Add(new Detour(typeof(HumanAI).GetMethod("CheckTrafficLights",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -147,7 +169,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting CarAI Simulation Step Calls");
+				Log.Info("Redirecting CarAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(CarAI).GetMethod("SimulationStep",
 								new[] {
@@ -161,7 +183,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting PassengerCarAI Simulation Step Calls");
+				Log.Info("Redirecting PassengerCarAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("SimulationStep",
 							new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
@@ -171,7 +193,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting CargoTruckAI Simulation Step Calls");
+				Log.Info("Redirecting CargoTruckAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("SimulationStep",
 								new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
@@ -181,7 +203,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirecting TrainAI Simulation Step Calls");
+				Log.Info("Redirecting TrainAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(TrainAI).GetMethod("SimulationStep",
 								new[] {
@@ -195,7 +217,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Redirection TramBaseAI::SimulationStep calls");
+				Log.Info("Redirection TramBaseAI::SimulationStep calls");
 				try {
 					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("SimulationStep",
 							BindingFlags.Public | BindingFlags.Instance,
@@ -241,14 +263,13 @@ namespace TrafficManager {
 					detourFailed = true;
 				}*/
 
-				if (IsPathManagerCompatible) {
-					Log._Debug("Redirecting Car AI Calculate Segment Calls");
-					try {
-						Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
+				Log.Info("Redirecting Car AI Calculate Segment Calls");
+				try {
+					Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
 								typeof (ushort),
 								typeof (Vehicle).MakeByRefType(),
 								typeof (PathUnit.Position),
@@ -262,15 +283,44 @@ namespace TrafficManager {
 								typeof (Vector3).MakeByRefType(),
 								typeof (Vector3).MakeByRefType(),
 								typeof (float).MakeByRefType()
-								},
-								null),
-								typeof(CustomCarAI).GetMethod("CustomCalculateSegmentPosition")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CarAI::CalculateSegmentPosition.");
-						detourFailed = true;
-					}
+							},
+							null),
+							typeof(CustomCarAI).GetMethod("CustomCalculateSegmentPosition")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::CalculateSegmentPosition.");
+					detourFailed = true;
+				}
 
-					Log._Debug("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
+				Log.Info("Redirection TramBaseAI Calculate Segment Position calls");
+				try {
+					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (PathUnit.Position),
+									typeof (PathUnit.Position),
+									typeof (uint),
+									typeof (byte),
+									typeof (PathUnit.Position),
+									typeof (uint),
+									typeof (byte),
+									typeof (int),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(CustomTramBaseAI).GetMethod("CustomCalculateSegmentPosition")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TramBaseAI::CalculateSegmentPosition");
+					detourFailed = true;
+				}
+
+				if (IsPathManagerCompatible) {
+					Log.Info("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
 					try {
 						Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -293,7 +343,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TrainAI Calculate Segment Position calls for non-Traffic++");
+					Log.Info("Redirection TrainAI Calculate Segment Position calls for non-Traffic++");
 					try {
 						Detours.Add(new Detour(typeof(TrainAI).GetMethod("CalculateSegmentPosition",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -316,35 +366,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TramBaseAI Calculate Segment Position calls");
-					try {
-						Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("CalculateSegmentPosition",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (PathUnit.Position),
-									typeof (PathUnit.Position),
-									typeof (uint),
-									typeof (byte),
-									typeof (PathUnit.Position),
-									typeof (uint),
-									typeof (byte),
-									typeof (int),
-									typeof (Vector3).MakeByRefType(),
-									typeof (Vector3).MakeByRefType(),
-									typeof (float).MakeByRefType()
-								},
-								null),
-								typeof(CustomTramBaseAI).GetMethod("CustomCalculateSegmentPosition")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TramBaseAI::CalculateSegmentPosition");
-						detourFailed = true;
-					}
-
-					Log._Debug("Redirection AmbulanceAI::StartPathFind calls");
+					Log.Info("Redirection AmbulanceAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(AmbulanceAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -366,7 +388,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection BusAI::StartPathFind calls");
+					Log.Info("Redirection BusAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(BusAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -388,7 +410,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection CarAI::StartPathFind calls");
+					Log.Info("Redirection CarAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(CarAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -410,7 +432,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection CargoTruckAI::StartPathFind calls");
+					Log.Info("Redirection CargoTruckAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -432,7 +454,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection FireTruckAI::StartPathFind calls");
+					Log.Info("Redirection FireTruckAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(FireTruckAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -454,7 +476,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection PassengerCarAI::StartPathFind calls");
+					Log.Info("Redirection PassengerCarAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -476,7 +498,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection PoliceCarAI::StartPathFind calls");
+					Log.Info("Redirection PoliceCarAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(PoliceCarAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -498,7 +520,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TaxiAI::StartPathFind calls");
+					Log.Info("Redirection TaxiAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(TaxiAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -520,7 +542,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TrainAI::StartPathFind calls");
+					Log.Info("Redirection TrainAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(TrainAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -541,7 +563,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection CitizenAI::StartPathFind calls");
+					Log.Info("Redirection CitizenAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -561,7 +583,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TransportLineAI::StartPathFind calls");
+					Log.Info("Redirection TransportLineAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(TransportLineAI).GetMethod("StartPathFind",
 								BindingFlags.Public | BindingFlags.Static,
@@ -581,7 +603,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log._Debug("Redirection TramBaseAI::StartPathFind calls");
+					Log.Info("Redirection TramBaseAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -603,7 +625,7 @@ namespace TrafficManager {
 					}
 				}
 
-				Log._Debug("Redirection RoadBaseAI::SetTrafficLightState calls");
+				Log.Info("Redirection RoadBaseAI::SetTrafficLightState calls");
 				try {
 					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("SetTrafficLightState",
 							BindingFlags.Public | BindingFlags.Static,
@@ -625,7 +647,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Reverse-Redirection CustomTrainAI::CheckOverlap calls (1)");
+				Log.Info("Reverse-Redirection CustomTrainAI::CheckOverlap calls (1)");
 				try {
 					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("CheckOverlap",
 							BindingFlags.NonPublic | BindingFlags.Static,
@@ -654,7 +676,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log._Debug("Reverse-Redirection CustomTrainAI::CheckOverlap calls (2)");
+				Log.Info("Reverse-Redirection CustomTrainAI::CheckOverlap calls (2)");
 				try {
 					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("CheckOverlap",
 							BindingFlags.NonPublic | BindingFlags.Static,
@@ -692,7 +714,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 				
-				Log._Debug("Redirection TrainAI::CheckNextLane calls");
+				Log.Info("Redirection TrainAI::CheckNextLane calls");
 				try {
 					Detours.Add(new Detour(typeof(TrainAI).GetMethod("CheckNextLane",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -736,7 +758,6 @@ namespace TrafficManager {
 
             ToolMode = TrafficManagerMode.None;
 			Detours = new List<Detour>();
-            DespawnEnabled = true;
             DetourInited = false;
             CustomPathManager = new CustomPathManager();
         }
@@ -757,7 +778,6 @@ namespace TrafficManager {
 				Instance = this;
 			revertDetours();
 			gameLoaded = false;
-			Options.SetEnabled(false);
 
 			try {
 				TrafficPriority.OnLevelUnloading();
@@ -783,13 +803,11 @@ namespace TrafficManager {
             Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
 			Instance = this;
 
-			Options.SetEnabled(false);
 			gameLoaded = false;
             switch (mode) {
                 case LoadMode.NewGame:
                 case LoadMode.LoadGame:
 					gameLoaded = true;
-					Options.SetEnabled(true);
 					break;
 				default:
 					return;
@@ -871,8 +889,9 @@ namespace TrafficManager {
 
 						Log._Debug($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
 						var namespaceStr = extension.GetType().Namespace.ToString();
-						if ("Improved_AI".Equals(namespaceStr)) {
+						if ("Improved_AI".Equals(namespaceStr) || "CSL_Traffic".Equals(namespaceStr)) {
 							IsPathManagerCompatible = false; // Improved AI found
+							Log.Info($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}. Custom PathManager detected.");
 						}
 					}
 				} else {
@@ -880,7 +899,7 @@ namespace TrafficManager {
 				}
 
 				if (Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
-					Log._Debug("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
+					Log.Info("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
 					IsPathManagerCompatible = false;
 				}
 			}

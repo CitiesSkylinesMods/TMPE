@@ -21,9 +21,6 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="vehicleId"></param>
 		/// <param name="vehicleData"></param>
 		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic, byte maxUpcomingPathPositions, bool debug = false) {
-			if (Options.disableSomething3)
-				return;
-
 			if (maxUpcomingPathPositions <= 0)
 				maxUpcomingPathPositions = 1; // we need at least one upcoming path position
 
@@ -268,42 +265,64 @@ namespace TrafficManager.Custom.AI {
 		internal static ExtVehicleType? DetermineVehicleTypeFromVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None)
 				return ExtVehicleType.Emergency;
-			else {
+			/*else {
 				VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
 				if (vehiclePos != null && vehiclePos.Valid && vehiclePos.VehicleType != ExtVehicleType.Emergency)
 					return vehiclePos.VehicleType;
-			}
+			}*/
 
 			VehicleAI ai = vehicleData.Info.m_vehicleAI;
 			return DetermineVehicleTypeFromAIType(ai, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != Vehicle.Flags.None);
 		}
 
+		internal static ExtVehicleType? DetermineVehicleTypeFromVehicleInfo(VehicleInfo vehicleInfo) {
+			VehicleAI ai = vehicleInfo.m_vehicleAI;
+			return DetermineVehicleTypeFromAIType(ai, false);
+		}
+
 		internal static ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
-			if (ai is PassengerCarAI)
-				return ExtVehicleType.PassengerCar;
-			if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI) {
-				if (emergencyOnDuty)
-					return ExtVehicleType.Emergency;
-				return ExtVehicleType.Service;
+			switch (ai.m_info.m_vehicleType) {
+				case VehicleInfo.VehicleType.Bicycle:
+					return ExtVehicleType.Bicycle;
+				case VehicleInfo.VehicleType.Car:
+					if (ai is PassengerCarAI)
+						return ExtVehicleType.PassengerCar;
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI) {
+						if (emergencyOnDuty)
+							return ExtVehicleType.Emergency;
+						return ExtVehicleType.Service;
+					}
+					if (ai is CarTrailerAI)
+						return ExtVehicleType.None;
+					if (ai is BusAI)
+						return ExtVehicleType.Bus;
+					if (ai is TaxiAI)
+						return ExtVehicleType.Taxi;
+					if (ai is CargoTruckAI)
+						return ExtVehicleType.CargoTruck;
+					if (ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI)
+						return ExtVehicleType.Service;
+					break;
+				case VehicleInfo.VehicleType.Metro:
+				case VehicleInfo.VehicleType.Train:
+					if (ai is PassengerTrainAI)
+						return ExtVehicleType.PassengerTrain;
+					if (ai is CargoTrainAI)
+						return ExtVehicleType.CargoTrain;
+					break;
+				case VehicleInfo.VehicleType.Tram:
+					return ExtVehicleType.Tram;
+				case VehicleInfo.VehicleType.Ship:
+					if (ai is PassengerShipAI)
+						return ExtVehicleType.PassengerShip;
+					//if (ai is CargoShipAI)
+						return ExtVehicleType.CargoShip;
+					//break;
+				case VehicleInfo.VehicleType.Plane:
+					//if (ai is PassengerPlaneAI)
+						return ExtVehicleType.PassengerPlane;
+					//break;
 			}
-			if (ai is BusAI)
-				return ExtVehicleType.Bus;
-			if (ai is TaxiAI)
-				return ExtVehicleType.Taxi;
-			if (ai is CargoTruckAI)
-				return ExtVehicleType.CargoTruck;
-			if (ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI)
-				return ExtVehicleType.Service;
-			if (ai is PassengerTrainAI)
-				return ExtVehicleType.PassengerTrain;
-			if (ai is CargoTrainAI)
-				return ExtVehicleType.CargoTrain;
-			if (ai is BicycleAI)
-				return ExtVehicleType.Bicycle;
-			if (ai is TramAI)
-				return ExtVehicleType.Tram;
-			if (ai is CarTrailerAI)
-				return ExtVehicleType.None;
 			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
 			return null;
 		}
