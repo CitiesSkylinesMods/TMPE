@@ -89,27 +89,27 @@ Remove_junction_from_timed_light Не соединять с данным све�
 Select_junction Выбрать перекресток
 Cancel Отмена
 Speed_limits Ограничение скорости
-Persistently_visible_overlays Persistently visible overlays
-Priority_signs Priority signs
-Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
-Allow_u-turns Allow u-turns
-Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
-Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
-Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
-Vehicle_restrictions Vehicle restrictions
-Copy Copy
-Paste Paste
-Invert Invert
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
-Allow_all_vehicles Allow all vehicles
-Ban_all_vehicles Ban all vehicles
-Set_all_traffic_lights_to_red Set all traffic lights to red
-Rotate_left Rotate left
-Rotate_right Rotate right
-Name Name
-Apply Apply
-Select_a_timed_traffic_light_program Select a timed traffic light program
-The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
-Advanced_AI_cannot_be_activated Advanced AI cannot be activated
-The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+Persistently_visible_overlays Постоянно видимые оверлеи
+Priority_signs Знаки приоритета
+Vehicles_may_do_u-turns_at_junctions Транспорт разворачивается на перекрёстках
+Vehicles_going_straight_may_change_lanes_at_junctions Транспорт перестраивается на другую полосу перекрёстка
+Allow_u-turns Позволить развороты
+Allow_lane_changing_for_vehicles_going_straight Позволить транспорту, идущего прямо, сменить полосу
+Allow_vehicles_to_enter_a_blocked_junction Транспорт может заезжать в тупик
+Road_condition_has_a_bigger_impact_on_vehicle_speed Состояние дороги оказывает большее влияние на скорость
+Vehicle_restrictions Ограничения транспорта
+Copy Копировать
+Paste Вставить
+Invert Инвертировать
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Ввести ограничения транспорта на всех участках дорог между двумя перекрёстками
+Allow_all_vehicles Разрешить всему транспорту
+Ban_all_vehicles Запретить всему транспорту
+Set_all_traffic_lights_to_red Включить везде красный свет
+Rotate_left Повернуть налево
+Rotate_right Повернуть направо
+Name Название
+Apply Применить
+Select_a_timed_traffic_light_program Выбор программы временного светофора
+The_chosen_traffic_light_program_is_incompatible_to_this_junction Выбранный шаблон светофора несовместим с данным перекрёстком
+Advanced_AI_cannot_be_activated Продвинутый AI не может быть активирован
+The_Advanced_Vehicle_AI_cannot_be_activated Продвинутый AI не активирован, потому что вами уже используется иной мод, что меняет поведение транспорта (например Improved AI, Traffic++).

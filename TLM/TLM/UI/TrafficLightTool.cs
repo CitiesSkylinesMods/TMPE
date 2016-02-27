@@ -279,8 +279,8 @@ namespace TrafficManager.UI {
 				if (Options.nodesOverlay) {
 					_guiNodes();
 #if DEBUG
-					_guiVehicles();
-					_guiCitizens();
+					/*_guiVehicles();*/
+					//_guiCitizens();
 #endif
 				}
 
@@ -586,9 +586,9 @@ namespace TrafficManager.UI {
 
 						float startDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[startNodeId].m_position).magnitude;
 						float endDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[endNodeId].m_position).magnitude;
-						if (startDist < 10f)
+						if (startDist < endDist && startDist < 25f)
 							_hoveredNetNodeIdx = startNodeId;
-						else if (endDist < 10f)
+						else if (endDist < startDist && endDist < 25f)
 							_hoveredNetNodeIdx = endNodeId;
 					}
 				}
@@ -1747,6 +1747,9 @@ namespace TrafficManager.UI {
 		private void _guiCitizens() {
 			Array16<CitizenInstance> citizenInstances = Singleton<CitizenManager>.instance.m_instances;
 			for (int i = 1; i < citizenInstances.m_size; ++i) {
+				if (i % (int)Options.someValue4 != 0)
+					continue;
+
 				CitizenInstance citizenInstance = citizenInstances.m_buffer[i];
 				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
 					continue;
@@ -4018,18 +4021,19 @@ namespace TrafficManager.UI {
 					var trafficSegment = TrafficPriority.PrioritySegments[segmentId];
 					if (trafficSegment == null)
 						continue;
+					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId);
 
 					List<SegmentEnd> prioritySegments = new List<SegmentEnd>();
 					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node1) == null) {
 						SegmentEnd tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
-						if (tmpSeg1 != null) {
+						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(trafficSegment.Node1)) {
 							prioritySegments.Add(tmpSeg1);
 							nodeIdsWithSigns.Add(trafficSegment.Node1);
 						}
 					}
 					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node2) == null) {
 						SegmentEnd tmpSeg2 = TrafficPriority.GetPrioritySegment(trafficSegment.Node2, segmentId);
-						if (tmpSeg2 != null) {
+						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(trafficSegment.Node2)) {
 							prioritySegments.Add(tmpSeg2);
 							nodeIdsWithSigns.Add(trafficSegment.Node2);
 						}

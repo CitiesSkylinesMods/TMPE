@@ -89,27 +89,27 @@ Remove_junction_from_timed_light Wyklucz skrzyżowanie z tego węzła sygnalizac
 Select_junction Wybierz skrzyżowanie 
 Cancel Anuluj 
 Speed_limits Ograniczenia prędkości
-Persistently_visible_overlays Persistently visible overlays
-Priority_signs Priority signs
-Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
-Allow_u-turns Allow u-turns
-Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
-Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
-Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
-Vehicle_restrictions Vehicle restrictions
-Copy Copy
-Paste Paste
-Invert Invert
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
-Allow_all_vehicles Allow all vehicles
-Ban_all_vehicles Ban all vehicles
-Set_all_traffic_lights_to_red Set all traffic lights to red
-Rotate_left Rotate left
-Rotate_right Rotate right
-Name Name
-Apply Apply
-Select_a_timed_traffic_light_program Select a timed traffic light program
-The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
-Advanced_AI_cannot_be_activated Advanced AI cannot be activated
-The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+Persistently_visible_overlays Trwale widoczne nakładki
+Priority_signs Znaki pierwszeństwa
+Vehicles_may_do_u-turns_at_junctions Pojazdy mogą zawracać na skrzyżowaniach
+Vehicles_going_straight_may_change_lanes_at_junctions Pojazdy jadące na wprost mogą zmieniać pasy ruchu na skrzyżowaniach
+Allow_u-turns Zezwól na zawracanie
+Allow_lane_changing_for_vehicles_going_straight Zezwól na zmianę pasa ruchu dla pojazdów jadących na wprost
+Allow_vehicles_to_enter_a_blocked_junction Zezwól pojazdom na wjazd na zablokowane skrzyżowanie
+Road_condition_has_a_bigger_impact_on_vehicle_speed Kondycja nawierzchni drogi ma większy wpływ na prędkość pojazdu
+Vehicle_restrictions Ograniczenia ruchu pojazdów
+Copy Kopiuj
+Paste Wklej
+Invert Odwróć
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Zastosuj ograniczenia ruchu pojazdów do wszystkich segmentów drogi pomiędzy dwoma skrzyżowaniami
+Allow_all_vehicles Zezwól dla wszystkich pojazdów 
+Ban_all_vehicles Zablokuj dla wszystkich pojazdów
+Set_all_traffic_lights_to_red Ustaw wszystkie sygnalizatory na sygnał czerwony
+Rotate_left Obróć w lewo
+Rotate_right Obróć w prawo
+Name Nazwa
+Apply Zastosuj
+Select_a_timed_traffic_light_program Wybierz program dla czasowej sygnalizacji świetlnej
+The_chosen_traffic_light_program_is_incompatible_to_this_junction Wybrany szablon sygnalizacji jest niekompatybilny z tym skrzyżowaniem
+Advanced_AI_cannot_be_activated Nie można włączyć Zaawansowanej SI
+The_Advanced_Vehicle_AI_cannot_be_activated Zaawansowana SI nie może zostać włączona, ponieważ aktywowana została inna modyfikacja zmieniająca zachowanie pojazdów (np:. Improved AI lub Traffic++).

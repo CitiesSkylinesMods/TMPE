@@ -91,25 +91,25 @@ Cancel Annuler
 Speed_limits Limitations de vitesse
 Persistently_visible_overlays Annonces en superposition visibles de façon permanente
 Priority_signs Signes de priorité
-Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
-Allow_u-turns Allow u-turns
-Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
-Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
-Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
-Vehicle_restrictions Vehicle restrictions
-Copy Copy
-Paste Paste
-Invert Invert
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
-Allow_all_vehicles Allow all vehicles
-Ban_all_vehicles Ban all vehicles
-Set_all_traffic_lights_to_red Set all traffic lights to red
-Rotate_left Rotate left
-Rotate_right Rotate right
-Name Name
-Apply Apply
-Select_a_timed_traffic_light_program Select a timed traffic light program
-The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
-Advanced_AI_cannot_be_activated Advanced AI cannot be activated
-The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+Vehicles_may_do_u-turns_at_junctions Les véhicules peuvent faire demi-tour aux intersections
+Vehicles_going_straight_may_change_lanes_at_junctions Les véhicules allant tout droit peuvent changer de voie aux intersections
+Allow_u-turns Autoriser les demi-tours
+Allow_lane_changing_for_vehicles_going_straight Autoriser le changement de voie pour les véhicules allant tout droit
+Allow_vehicles_to_enter_a_blocked_junction Autoriser les véhicules à entrer dans une jonction bloquée
+Road_condition_has_a_bigger_impact_on_vehicle_speed La condition de la voirie a une plus grand impact sur la vitesse des véhicules
+Vehicle_restrictions Restrictions des véhicules
+Copy Copier
+Paste Coller
+Invert Inverser
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Appliquer les restrictions de véhicules à tous les segments de route entre deux jonctions
+Allow_all_vehicles Autoriser tous les véhicules
+Ban_all_vehicles Bannir tous les véhicules
+Set_all_traffic_lights_to_red Mettre tous les feux au rouge
+Rotate_left Rotation vers la gauche
+Rotate_right Rotation vers la droite
+Name Nommer
+Apply Appliquer
+Select_a_timed_traffic_light_program Sélectionner un programme de chronométrage de feux
+The_chosen_traffic_light_program_is_incompatible_to_this_junction Le modèle de chronométrage choisi est incompatible avec cette jonction
+Advanced_AI_cannot_be_activated L'IA avancée ne peut pas être activée
+The_Advanced_Vehicle_AI_cannot_be_activated L'IA avancée de véhicule ne peut être activée car vous utilisez déjà un autre mod qui modifie modifie le comportement des véhicules (par exemple Improved AI ou Traffic++).

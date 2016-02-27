@@ -2,6 +2,15 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.6, 02/27/2016
+- It should now be easier to select segment ends in order to change lane arrows.
+- Priority signs now cannot be setup at outgoing one-ways.
+- Updated French translation (thanks to @simon.royer007 for translating!)
+- Updated Polish translation (thanks to @Krzychu1245 for translating!)
+- Updated Portuguese translation (thanks to @igordeeoliveira for translating!)
+- Updated Russian translation (thanks to @FireGames for translating!)
+- Bugfix: U-turning vehicles were not obeying the correct directional traffic light (thanks to@ t1a2l for pointing out this problem)
+
 1.6.5, 02/24/2016
 - Added despawning setting to options dialog
 - Improved detection of Traffic++ V2

@@ -88,28 +88,28 @@ Remove_junction_from_timed_light Remover cruzamento do semáforo
 Select_junction Selecionar cruzamento
 Cancel Cancelar
 Speed_limits Limite de Velocidade
-Persistently_visible_overlays Persistently visible overlays
-Priority_signs Priority signs
-Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
-Allow_u-turns Allow u-turns
-Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
-Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
-Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
-Vehicle_restrictions Vehicle restrictions
-Copy Copy
-Paste Paste
-Invert Invert
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
-Allow_all_vehicles Allow all vehicles
-Ban_all_vehicles Ban all vehicles
-Set_all_traffic_lights_to_red Set all traffic lights to red
-Rotate_left Rotate left
-Rotate_right Rotate right
-Name Name
-Apply Apply
-Select_a_timed_traffic_light_program Select a timed traffic light program
-The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
-Advanced_AI_cannot_be_activated Advanced AI cannot be activated
-The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+Persistently_visible_overlays Sobreposições persistentemente visíveis
+Priority_signs Placas de preferência 
+Vehicles_may_do_u-turns_at_junctions Veículos podem fazer retorno nos cruzamentos
+Vehicles_going_straight_may_change_lanes_at_junctions Veículos seguindo reto pode mudar de faixa nos cruzamentos
+Allow_u-turns Permitir retornos
+Allow_lane_changing_for_vehicles_going_straight Permitir mudança de faixa para veículos seguindo reto
+Allow_vehicles_to_enter_a_blocked_junction Permitir entrada de veículos em cruzamentos bloqueados
+Road_condition_has_a_bigger_impact_on_vehicle_speed Condição de estrada tem um impacto maior na velocidade do veículo
+Vehicle_restrictions Restrições de veículos
+Copy Copiar
+Paste Colar
+Invert Inveter
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Aplicar restrições de veículos para todos os segmentos de estrada entre dois cruzamentos
+Allow_all_vehicles Permitir todos os veículos
+Ban_all_vehicles Proibir todos os veículos
+Set_all_traffic_lights_to_red Definir todos os semáforos para vermelho
+Rotate_left Girar para a esquerda
+Rotate_right Girar para a direita
+Name Nome
+Apply Aplicar
+Select_a_timed_traffic_light_program Selecione um programa de semáforo cronometrado
+The_chosen_traffic_light_program_is_incompatible_to_this_junction O padrão de semáforo escolhido é incompatível com este cruzamento
+Advanced_AI_cannot_be_activated IA avançada não pode ser ativada
+The_Advanced_Vehicle_AI_cannot_be_activated a IA avançada não pode ser ativada porque você já esta usando outro mod que modifica o comportamento do veículo (Traffic++, Improved AI por exemplo)
 

@@ -264,7 +264,7 @@ namespace TrafficManager.State {
 			if (!LoadingExtension.IsPathManagerCompatible) {
 				if (newAdvancedAI) {
 					setAdvancedAI(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Advanced AI cannot be activated", "The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
 				}
 			} else
 #endif

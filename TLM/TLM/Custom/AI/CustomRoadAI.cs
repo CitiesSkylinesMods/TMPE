@@ -208,7 +208,9 @@ namespace TrafficManager.Custom.AI {
 			SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId);
 
 			// get traffic light state from responsible traffic light
-			if (geometry.IsLeftSegment(toSegmentId, nodeId)) {
+			if (toSegmentId == fromSegmentId) {
+				vehicleLightState = TrafficPriority.IsLeftHandDrive() ? light.GetLightRight() : light.GetLightLeft();
+			} else if (geometry.IsLeftSegment(toSegmentId, nodeId)) {
 				vehicleLightState = light.GetLightLeft();
 			} else if (geometry.IsRightSegment(toSegmentId, nodeId)) {
 				vehicleLightState = light.GetLightRight();
