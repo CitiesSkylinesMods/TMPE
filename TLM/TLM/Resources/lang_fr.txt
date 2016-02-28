@@ -113,3 +113,4 @@ Select_a_timed_traffic_light_program Sélectionner un programme de chronométrag
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Le modèle de chronométrage choisi est incompatible avec cette jonction
 Advanced_AI_cannot_be_activated L'IA avancée ne peut pas être activée
 The_Advanced_Vehicle_AI_cannot_be_activated L'IA avancée de véhicule ne peut être activée car vous utilisez déjà un autre mod qui modifie modifie le comportement des véhicules (par exemple Improved AI ou Traffic++).
+Enable_dynamic_path_calculation Enable dynamic path calculation

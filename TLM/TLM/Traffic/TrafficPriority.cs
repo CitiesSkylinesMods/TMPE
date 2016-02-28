@@ -648,7 +648,7 @@ namespace TrafficManager.Traffic {
 						/*RemoveVehicleFromSegments(incomingCarId);
 						Vehicles[incomingCarId].Valid = false;*/
 
-						if (Options.simAccuracy <= 1) {
+						if (Options.simAccuracy <= 2) {
 							CustomVehicleAI.HandleVehicle(incomingCarId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId], false, false, 1);
 							if (!Vehicles[incomingCarId].Valid)
 								return true;

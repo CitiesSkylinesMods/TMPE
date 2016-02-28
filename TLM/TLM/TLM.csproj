@@ -156,6 +156,8 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lanechange_allowed.png" />
+    <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
     <EmbeddedResource Include="Resources\bicycle_infosign.png" />
     <EmbeddedResource Include="Resources\bus_infosign.png" />
     <EmbeddedResource Include="Resources\cargotrain_infosign.png" />

@@ -32,6 +32,7 @@ namespace TrafficManager.State {
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
+		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox showLanesToggle = null;
 		private static UIButton forgetTrafficLightsBtn = null;
@@ -68,22 +69,23 @@ namespace TrafficManager.State {
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool advancedAI = false;
+		public static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
 		public static bool strongerRoadConditionEffects = true;
 		public static bool enableDespawning = true;
 		//public static byte publicTransportUsage = 1;
-		public static float pathCostMultiplicator = 2f; // debug value
+		public static float pathCostMultiplicator = 1f; // debug value
 		public static float pathCostMultiplicator2 = 0f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 1.5f; // debug value
-		public static float someValue2 = 2f; // debug value
-		public static float someValue3 = 3f; // debug value
-		public static float someValue4 = 50f; // debug value
+		public static float someValue = 3f; // debug value
+		public static float someValue2 = 0.005f; // debug value
+		public static float someValue3 = 2f; // debug value
+		public static float someValue4 = 3f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -95,12 +97,15 @@ namespace TrafficManager.State {
 			allRelaxedToggle = mainGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
 			allowEnterBlockedJunctionsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
-			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions") + " (BETA feature)", allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 			aiGroup = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
+#if DEBUG
+			dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
+#endif
 			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules")+" (BETA feature)", highwayRules, onHighwayRulesChanged) as UICheckBox;
 			laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
@@ -247,15 +252,6 @@ namespace TrafficManager.State {
 			allRelaxed = newAllRelaxed;
 		}
 
-		private static void onHighwayRulesChanged(bool newHighwayRules) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"Highway rules changed to {newHighwayRules}");
-			highwayRules = newHighwayRules;
-			Flags.clearHighwayLaneArrows();
-			Flags.applyAllFlags();
-		}
 		private static void onAdvancedAIChanged(bool newAdvancedAI) {
 			if (!checkGameLoaded())
 				return;
@@ -266,10 +262,61 @@ namespace TrafficManager.State {
 					setAdvancedAI(false);
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
 				}
-			} else
+			} else {
 #endif
-			Log._Debug($"advancedAI changed to {newAdvancedAI}");
-			advancedAI = newAdvancedAI;
+				Log._Debug($"advancedAI changed to {newAdvancedAI}");
+				advancedAI = newAdvancedAI;
+#if !TAM
+			}
+#endif
+		}
+
+		private static void onHighwayRulesChanged(bool newHighwayRules) {
+			if (!checkGameLoaded())
+				return;
+
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				if (newHighwayRules) {
+					setAdvancedAI(false);
+					setDynamicPathRecalculation(false);
+					setHighwayRules(false);
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
+				}
+			} else {
+#endif
+				Log._Debug($"Highway rules changed to {newHighwayRules}");
+				highwayRules = newHighwayRules;
+				Flags.clearHighwayLaneArrows();
+				Flags.applyAllFlags();
+				if (newHighwayRules)
+					setAdvancedAI(true);
+#if !TAM
+			}
+#endif
+		}
+
+		private static void onDynamicPathRecalculationChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				if (value) {
+					setAdvancedAI(false);
+					setDynamicPathRecalculation(false);
+					setHighwayRules(false);
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
+				}
+			} else {
+#endif
+				Log._Debug($"dynamicPathRecalculation changed to {value}");
+				dynamicPathRecalculation = value;
+				if (value)
+					setAdvancedAI(true);
+#if !TAM
+			}
+#endif
 		}
 
 		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
@@ -495,6 +542,26 @@ namespace TrafficManager.State {
 #endif
 			if (advancedAIToggle != null)
 				advancedAIToggle.isChecked = newAdvancedAI;
+
+			if (!newAdvancedAI) {
+				setDynamicPathRecalculation(false);
+				setHighwayRules(false);
+			}
+		}
+
+		public static void setDynamicPathRecalculation(bool value) {
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				value = false;
+				dynamicPathRecalculation = false;
+			} else {
+#endif
+				dynamicPathRecalculation = value;
+#if !TAM
+			}
+#endif
+			if (dynamicPathRecalculationToggle != null)
+				dynamicPathRecalculationToggle.isChecked = value;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {

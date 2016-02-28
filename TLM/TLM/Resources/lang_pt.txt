@@ -112,4 +112,4 @@ Select_a_timed_traffic_light_program Selecione um programa de semáforo cronomet
 The_chosen_traffic_light_program_is_incompatible_to_this_junction O padrão de semáforo escolhido é incompatível com este cruzamento
 Advanced_AI_cannot_be_activated IA avançada não pode ser ativada
 The_Advanced_Vehicle_AI_cannot_be_activated a IA avançada não pode ser ativada porque você já esta usando outro mod que modifica o comportamento do veículo (Traffic++, Improved AI por exemplo)
-
+Enable_dynamic_path_calculation Enable dynamic path calculation

@@ -113,3 +113,4 @@ Select_a_timed_traffic_light_program Выбор программы времен�
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Выбранный шаблон светофора несовместим с данным перекрёстком
 Advanced_AI_cannot_be_activated Продвинутый AI не может быть активирован
 The_Advanced_Vehicle_AI_cannot_be_activated Продвинутый AI не активирован, потому что вами уже используется иной мод, что меняет поведение транспорта (например Improved AI, Traffic++).
+Enable_dynamic_path_calculation Enable dynamic path calculation

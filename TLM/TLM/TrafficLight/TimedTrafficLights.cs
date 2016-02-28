@@ -162,7 +162,7 @@ namespace TrafficManager.TrafficLight {
 		public void SimulationStep() {
 			var currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 5;
 #if DEBUGTTL
-			Log._Debug($"TTL SimStep: currentFrame={currentFrame} lastSimulationStep={lastSimulationStep}");
+			Log._Debug($"TTL SimStep: nodeId={NodeId} currentFrame={currentFrame} lastSimulationStep={lastSimulationStep}");
 #endif
 			if (lastSimulationStep >= currentFrame) {
 #if DEBUGTTL
@@ -174,13 +174,13 @@ namespace TrafficManager.TrafficLight {
 
 			if (!isMasterNode() || !IsStarted()) {
 #if DEBUGTTL
-				Log._Debug($"TTL SimStep: *STOP* isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
+				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
 #endif
 				return;
 			}
 			if (!housekeeping(false)) {
 #if DEBUGTTL
-				Log.Warning($"TTL SimStep: *STOP* Housekeeping detected that this timed traffic light has become invalid: {NodeId}.");
+				Log.Warning($"TTL SimStep: *STOP* NodeId={NodeId} Housekeeping detected that this timed traffic light has become invalid: {NodeId}.");
 #endif
 				Stop();
 				return;
@@ -188,40 +188,40 @@ namespace TrafficManager.TrafficLight {
 
 			if (!Steps[CurrentStep].isValid()) {
 #if DEBUGTTL
-				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}) is not valid.");
+				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}) is not valid.");
 #endif
 				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false);
 				return;
 			}
 
 #if DEBUGTTL
-			Log._Debug($"TTL SimStep: Setting lights (1)");
+			Log._Debug($"TTL SimStep: NodeId={NodeId} Setting lights (1)");
 #endif
 			SetLights();
 
 			if (!Steps[CurrentStep].StepDone(true)) {
 #if DEBUGTTL
-				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}) is not done.");
+				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}) is not done.");
 #endif
 				return;
 			}
 			// step is done
 
 #if DEBUGTTL
-			Log._Debug($"TTL SimStep: Setting lights (2)");
+			Log._Debug($"TTL SimStep: NodeId={NodeId} Setting lights (2)");
 #endif
 			SetLights();
 
 			if (!Steps[CurrentStep].isEndTransitionDone()) {
 #if DEBUGTTL
-				Log._Debug($"TTL SimStep: *STOP* current step ({CurrentStep}): end transition is not done.");
+				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}): end transition is not done.");
 #endif
 				return;
 			}
 			// ending transition (yellow) finished
 
 #if DEBUGTTL
-			Log._Debug($"TTL SimStep: ending transition done. NodeGroup={string.Join(", ", NodeGroup.Select(x => x.ToString()).ToArray())}, nodeId={NodeId}, NumSteps={NumSteps()}");
+			Log._Debug($"TTL SimStep: NodeId={NodeId} ending transition done. NodeGroup={string.Join(", ", NodeGroup.Select(x => x.ToString()).ToArray())}, nodeId={NodeId}, NumSteps={NumSteps()}");
 #endif
 
 			// change step

@@ -90,11 +90,14 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 			int privateServiceIndex = ItemClass.GetPrivateServiceIndex(this.m_info.m_class.m_service);
-			int num3 = (privateServiceIndex == -1) ? 150 : 100;
+			int maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) == Vehicle.Flags.None && vehicleData.m_cargoParent == 0) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if ((int)vehicleData.m_blockCounter == num3 && Options.enableDespawning) {
+			} else if ((int)vehicleData.m_blockCounter == maxBlockCounter && Options.enableDespawning) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+			} else if (vehicleData.m_leadingVehicle == 0 && CustomVehicleAI.ShouldRecalculatePath(vehicleId, ref vehicleData, maxBlockCounter)) {
+				CustomVehicleAI.MarkPathRecalculation(vehicleId);
+				InvalidPath(vehicleId, ref vehicleData, vehicleId, ref vehicleData);
 			}
 		}
 
@@ -112,7 +115,7 @@ namespace TrafficManager.Custom.AI {
 			var camPos = Camera.main.transform.position;
 			bool simulatePrioritySigns = (lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver;
 
-			if (Options.simAccuracy <= 0) {
+			if (Options.simAccuracy <= 2) {
 				if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car) {
 					VehiclePosition vehiclePos = TrafficPriority.GetVehiclePosition(vehicleId);
 					if (vehiclePos.Valid && simulatePrioritySigns) { // TODO check if this should be !vehiclePos.Valid

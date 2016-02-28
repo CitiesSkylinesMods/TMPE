@@ -76,11 +76,24 @@ namespace TrafficManager.Custom.AI {
 						uint curLaneId = data.m_lanes;
 						int nextNumLanes = data.Info.m_lanes.Length;
 						uint laneIndex = 0;
-						bool firstWithTraffic = true;
 						bool resetDensity = false;
+						uint maxDensity = 0u;
+						while (laneIndex < nextNumLanes && curLaneId != 0u) {
+							uint currentDensity = currentLaneDensities[curLaneId];
+							if (maxDensity == 0 || currentDensity > maxDensity)
+								maxDensity = currentDensity;
+
+							laneIndex++;
+							curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+						}
+						if (maxDensity > 25000)
+							resetDensity = true;
+
+						curLaneId = data.m_lanes;
+						laneIndex = 0;
 						while (laneIndex < nextNumLanes && curLaneId != 0u) {
 							uint buf = currentLaneTrafficBuffer[curLaneId];
-							uint currentDensities = currentLaneDensities[curLaneId];
+							uint currentDensity = currentLaneDensities[curLaneId];
 
 							//currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Math.Max(1u, maxDens))); // 0 .. 100
 
@@ -103,22 +116,17 @@ namespace TrafficManager.Custom.AI {
 							}*/
 
 							if (currentMeanSpeed >= laneMeanSpeeds[curLaneId])
-								laneMeanSpeeds[curLaneId] = (byte)Math.Min((int)laneMeanSpeeds[curLaneId] + 5, currentMeanSpeed);
+								laneMeanSpeeds[curLaneId] = (byte)Math.Min((int)laneMeanSpeeds[curLaneId] + 2, currentMeanSpeed);
 							else
-								laneMeanSpeeds[curLaneId] = (byte)Math.Max((int)laneMeanSpeeds[curLaneId] - 5, 0);
+								laneMeanSpeeds[curLaneId] = (byte)Math.Max((int)laneMeanSpeeds[curLaneId] - 2, 0);
 
 							//laneMeanDensities[curLaneId] = currentMeanDensity;
 
 							currentLaneTrafficBuffer[curLaneId] = 0;
 							currentLaneSpeeds[curLaneId] = 0;
 
-							if (currentLaneDensities[curLaneId] > 0 && firstWithTraffic) {
-								resetDensity = (currentLaneDensities[curLaneId] > 1000000);
-								firstWithTraffic = false;
-							}
-
 							if (resetDensity) {
-								currentLaneDensities[curLaneId] /= 2u;
+								currentLaneDensities[curLaneId] /= 100u;
 							}
 
 							laneIndex++;

@@ -776,7 +776,7 @@ namespace TrafficManager {
 			base.OnLevelUnloading();
 			if (Instance == null)
 				Instance = this;
-			revertDetours();
+			//revertDetours();
 			gameLoaded = false;
 
 			try {

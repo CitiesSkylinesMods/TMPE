@@ -113,3 +113,4 @@ Select_a_timed_traffic_light_program Wybierz program dla czasowej sygnalizacji �
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Wybrany szablon sygnalizacji jest niekompatybilny z tym skrzyżowaniem
 Advanced_AI_cannot_be_activated Nie można włączyć Zaawansowanej SI
 The_Advanced_Vehicle_AI_cannot_be_activated Zaawansowana SI nie może zostać włączona, ponieważ aktywowana została inna modyfikacja zmieniająca zachowanie pojazdów (np:. Improved AI lub Traffic++).
+Enable_dynamic_path_calculation Enable dynamic path calculation

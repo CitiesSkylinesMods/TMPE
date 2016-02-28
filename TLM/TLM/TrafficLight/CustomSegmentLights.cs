@@ -74,7 +74,7 @@ namespace TrafficManager.TrafficLight {
 					break;
 			}
 			if (vehicleState == null) {
-				return RoadBaseAI.TrafficLightState.Red;
+				vehicleState = RoadBaseAI.TrafficLightState.Red;
 			}
 			return CustomSegmentLight.InvertLight((RoadBaseAI.TrafficLightState)vehicleState);
 		}

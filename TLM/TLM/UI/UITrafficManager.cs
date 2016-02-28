@@ -47,7 +47,7 @@ namespace TrafficManager.UI {
 			relativePosition = new Vector3(85f, 80f);
 
 			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.6.6";
+			title.text = "Version 1.6.7";
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;

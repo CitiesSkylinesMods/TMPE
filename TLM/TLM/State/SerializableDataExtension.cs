@@ -112,6 +112,10 @@ namespace TrafficManager.State {
 					if (options.Length >= 16) {
 						Options.setEnableDespawning(options[15] == (byte)1);
 					}
+
+					if (options.Length >= 17) {
+						Options.setDynamicPathRecalculation(options[16] == (byte)1);
+					}
 				}
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: {e.ToString()}");
@@ -651,7 +655,8 @@ namespace TrafficManager.State {
 					(byte)(Options.strongerRoadConditionEffects ? 1 : 0),
 					(byte)(Options.allowUTurns ? 1 : 0),
 					(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
-					(byte)(Options.enableDespawning ? 1 : 0)
+					(byte)(Options.enableDespawning ? 1 : 0),
+					(byte)(Options.dynamicPathRecalculation ? 1 : 0)
 				});
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);

@@ -1555,7 +1555,7 @@ namespace TrafficManager.UI {
 					labelStr += ", in start-up phase";
 				else
 					labelStr += ", avg. speed: " + CustomRoadAI.laneMeanSpeeds[curLaneId] + " %";
-				labelStr += ", avg. density: " + (totalDensity > 0 ? Math.Min(100f, ((float)CustomRoadAI.currentLaneDensities[curLaneId] * 100f) / (float)totalDensity) : 0f) + " %";
+				labelStr += ", avg. density: " + String.Format("{0:0.#}", (totalDensity > 0 ? Math.Min(100f, ((float)CustomRoadAI.currentLaneDensities[curLaneId] * 100f) / (float)totalDensity) : 0f)) + " %";
 #if DEBUG
 				labelStr += " (" + CustomRoadAI.currentLaneDensities[curLaneId] + "/" + totalDensity + ")";
 #endif
@@ -1641,7 +1641,7 @@ namespace TrafficManager.UI {
 					}
 
 					if (CustomRoadAI.InStartupPhase)
-						labelStr += " (in start-up phase,";
+						labelStr += " (in start-up phase)";
 					else
 						labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + " %)";
 
@@ -2842,7 +2842,7 @@ namespace TrafficManager.UI {
 
 			if (!geometry.AreHighwayRulesEnabled(startNode)) {
 				if (!geometry.IsOneWay()) {
-					Flags.setUTurnAllowed(SelectedSegment, startNode, GUILayout.Toggle(Flags.getUTurnAllowed(SelectedSegment, startNode), Translation.GetString("Allow_u-turns"), new GUILayoutOption[] { }));
+					Flags.setUTurnAllowed(SelectedSegment, startNode, GUILayout.Toggle(Flags.getUTurnAllowed(SelectedSegment, startNode), Translation.GetString("Allow_u-turns") + " (BETA feature)", new GUILayoutOption[] { }));
 				}
 				if (geometry.HasOutgoingStraightSegment(SelectedNode)) {
 					Flags.setStraightLaneChangingAllowed(SelectedSegment, startNode, GUILayout.Toggle(Flags.getStraightLaneChangingAllowed(SelectedSegment, startNode), Translation.GetString("Allow_lane_changing_for_vehicles_going_straight"), new GUILayoutOption[] { }));
@@ -2926,7 +2926,7 @@ namespace TrafficManager.UI {
 
 				ExtVehicleType allowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, laneIndex, laneId, laneInfo);
 
-				int y = 0;
+				uint y = 0;
 #if DEBUGx
 				Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
@@ -2950,28 +2950,10 @@ namespace TrafficManager.UI {
 					if (allowed && viewOnly)
 						continue; // do not draw allowed vehicles in view-only mode
 
-					Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
-
-					var signScreenPos = Camera.main.WorldToScreenPoint(signCenter);
-					signScreenPos.y = Screen.height - signScreenPos.y;
-					diff = signCenter - camPos;
-
-					var zoom = 1.0f / diff.magnitude * 100f;
-					var size = (viewOnly ? 0.7f : 1f) * vehicleRestrictionsSignSize * zoom;
-					
-					var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
-					bool hoveredHandle = !viewOnly && IsMouseOver(boundingBox);
-
-					if (hoveredHandle) {
-						// mouse hovering over sign
-						guiColor.a = 0.8f;
+					bool hoveredHandle;
+					DrawRestrictionsSign(viewOnly, camPos, out diff, xu, yu, f, zero, x, y, ref guiColor, TrafficLightToolTextureResources.VehicleRestrictionTextures[vehicleType][allowed], out hoveredHandle);
+					if (hoveredHandle)
 						hovered = true;
-					} else {
-						guiColor.a = 0.5f;
-					}
-
-					GUI.color = guiColor;
-					GUI.DrawTexture(boundingBox, TrafficLightToolTextureResources.VehicleRestrictionTextures[vehicleType][allowed]);
 
 					if (hoveredHandle && !mouseClickProcessed && Input.GetMouseButtonDown(0)) {
 						// toggle vehicle restrictions
@@ -2990,6 +2972,29 @@ namespace TrafficManager.UI {
 			GUI.color = guiColor;
 
 			return hovered;
+		}
+
+		private void DrawRestrictionsSign(bool viewOnly, Vector3 camPos, out Vector3 diff, Vector3 xu, Vector3 yu, float f, Vector3 zero, uint x, uint y, ref Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
+			Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
+
+			var signScreenPos = Camera.main.WorldToScreenPoint(signCenter);
+			signScreenPos.y = Screen.height - signScreenPos.y;
+			diff = signCenter - camPos;
+
+			var zoom = 1.0f / diff.magnitude * 100f;
+			var size = (viewOnly ? 0.7f : 1f) * vehicleRestrictionsSignSize * zoom;
+
+			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
+			hoveredHandle = !viewOnly && IsMouseOver(boundingBox);
+			if (hoveredHandle) {
+				// mouse hovering over sign
+				guiColor.a = 0.8f;
+			} else {
+				guiColor.a = 0.5f;
+			}
+
+			GUI.color = guiColor;
+			GUI.DrawTexture(boundingBox, signTexture);
 		}
 
 		private static void calculateSegmentCenterByDir(ushort segmentId, Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir) {

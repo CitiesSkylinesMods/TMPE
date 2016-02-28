@@ -2,6 +2,15 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.7, 02/27/2016
+- Tuned AI parameters
+- Improved traffic density measurements
+- Improved lane changing near junctions: Reintroduced costs for lane changing before junctions
+- Improved vehicle behavior near blocked roads (e.g. while a building is burning)
+- Bugfix: Automatic pedestrian lights for outgoing one-ways fixed
+- Bugfix: U-turns did not have appropriate costs assigned
+- Bugfix: The time span between AI traffic measurements was too high
+
 1.6.6, 02/27/2016
 - It should now be easier to select segment ends in order to change lane arrows.
 - Priority signs now cannot be setup at outgoing one-ways.

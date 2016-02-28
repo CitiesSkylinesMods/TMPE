@@ -46,6 +46,8 @@ namespace TrafficManager.UI
 		public static readonly Dictionary<ushort, Texture2D> SpeedLimitTextures;
 		public static readonly Dictionary<ExtVehicleType, Dictionary<bool, Texture2D>> VehicleRestrictionTextures;
 		public static readonly Dictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+		public static readonly Texture2D LaneChangeForbiddenTexture2D;
+		public static readonly Texture2D LaneChangeAllowedTexture2D;
 
 		static TrafficLightToolTextureResources()
         {
@@ -119,6 +121,9 @@ namespace TrafficManager.UI
 					e.Value[b] = LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200, 200);
 				}
 			}
+
+			LaneChangeAllowedTexture2D = LoadDllResource("lanechange_allowed.png", 200, 200);
+			LaneChangeForbiddenTexture2D = LoadDllResource("lanechange_forbidden.png", 200, 200);
 
 			VehicleInfoSignTextures = new Dictionary<ExtVehicleType, Texture2D>();
 			VehicleInfoSignTextures[ExtVehicleType.Bicycle] = LoadDllResource("bicycle_infosign.png", 449, 411);

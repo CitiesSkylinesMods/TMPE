@@ -113,3 +113,4 @@ Select_a_timed_traffic_light_program Wähle ein zeitgesteuertes Ampelprogramm au
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Das ausgewählte Ampelprogramm ist inkompatibel zu dieser Kreuzung
 Advanced_AI_cannot_be_activated Erweiterte Fahrzeug-KI kann nicht aktiviert werden
 The_Advanced_Vehicle_AI_cannot_be_activated Die erweiterte Fahrzeug-KI kann nicht aktiviert werden, weil du bereits einen anderen Mod verwendest, der das Verhalten von Fahrzeugen verändern (z.B. Improved AI oder Traffic++).
+Enable_dynamic_path_calculation Aktiviere die dynamische Pfadberechnung
