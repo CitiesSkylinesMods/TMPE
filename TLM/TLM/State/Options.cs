@@ -58,7 +58,7 @@ namespace TrafficManager.State {
 		public static int simAccuracy = 1;
 		public static int laneChangingRandomization = 2;
 		public static int recklessDrivers = 3;
-		public static bool relaxedBusses = false;
+		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
 		public static bool prioritySignsOverlay = true;
 		public static bool timedLightsOverlay = true;
@@ -72,7 +72,7 @@ namespace TrafficManager.State {
 		public static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
-		public static bool strongerRoadConditionEffects = true;
+		public static bool strongerRoadConditionEffects = false;
 		public static bool enableDespawning = true;
 		//public static byte publicTransportUsage = 1;
 		public static float pathCostMultiplicator = 1f; // debug value
@@ -82,10 +82,10 @@ namespace TrafficManager.State {
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 3f; // debug value
-		public static float someValue2 = 0.005f; // debug value
+		public static float someValue = 2f; // debug value
+		public static float someValue2 = 1.5f; // debug value
 		public static float someValue3 = 2f; // debug value
-		public static float someValue4 = 3f; // debug value
+		public static float someValue4 = 5f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -265,7 +265,7 @@ namespace TrafficManager.State {
 			} else {
 #endif
 				Log._Debug($"advancedAI changed to {newAdvancedAI}");
-				advancedAI = newAdvancedAI;
+				setAdvancedAI(newAdvancedAI);
 #if !TAM
 			}
 #endif

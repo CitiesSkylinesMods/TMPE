@@ -42,7 +42,7 @@ namespace TrafficManager.Custom.PathFinding {
 			Log._Debug("Creating " + numOfStockPathFinds + " custom PathFind objects.");
 			_replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
 			try {
-				while (!Monitor.TryEnter(this.m_bufferLock)) { }
+				Monitor.Enter(this.m_bufferLock);
 
 				for (var i = 0; i < numOfStockPathFinds; i++) {
 					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();

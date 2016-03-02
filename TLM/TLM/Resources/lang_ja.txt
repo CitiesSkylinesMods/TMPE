@@ -89,28 +89,29 @@ Remove_junction_from_timed_light この信号から交差点を削除
 Select_junction 交差点を選択してください 
 Cancel キャンセル 
 Speed_limits 速度制限
-Persistently_visible_overlays Persistently visible overlays
-Priority_signs Priority signs
-Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
-Allow_u-turns Allow u-turns
-Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
-Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
-Road_condition_has_a_bigger_impact_on_vehicle_speed Road condition has a bigger impact on vehicle speed
-Vehicle_restrictions Vehicle restrictions
-Copy Copy
-Paste Paste
-Invert Invert
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Apply vehicle restrictions to all road segments between two junctions
-Allow_all_vehicles Allow all vehicles
-Ban_all_vehicles Ban all vehicles
-Set_all_traffic_lights_to_red Set all traffic lights to red
-Rotate_left Rotate left
-Rotate_right Rotate right
-Name Name
-Apply Apply
-Select_a_timed_traffic_light_program Select a timed traffic light program
-The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen traffic light pattern is incompatible to this junction
-Advanced_AI_cannot_be_activated Advanced AI cannot be activated
-The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
+Persistently_visible_overlays オーバーレイ表示し続ける情報
+Priority_signs 優先関係標識
+Vehicles_may_do_u-turns_at_junctions 交差点でのUターンを許可
+Vehicles_going_straight_may_change_lanes_at_junctions 直進車両の交差点での車線変更を許可
+Allow_u-turns Uターンを許可
+Allow_lane_changing_for_vehicles_going_straight 直進車両の車線変更を許可
+Allow_vehicles_to_enter_a_blocked_junction 交差点内での停車を許可
+Road_condition_has_a_bigger_impact_on_vehicle_speed 路面状況がより大きな影響を車両速度に与える
+Vehicle_restrictions 車両規制
+Copy コピー
+Paste 貼り付け
+Invert 反転
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 交差点間の全道路に車両規制を適用
+Allow_all_vehicles 全車両を許可
+Ban_all_vehicles 全車両を禁止
+Set_all_traffic_lights_to_red 全信号を赤に設定
+Rotate_left 左に回転
+Rotate_right 右に回転
+Name 名前
+Apply 適用
+Select_a_timed_traffic_light_program 時間設定付き信号のプログラムを選択してください
+The_chosen_traffic_light_program_is_incompatible_to_this_junction 選択された信号パターンはこの交差点と互換性がありません
+Advanced_AI_cannot_be_activated Advanced Vehicle AIは有効にできません
+The_Advanced_Vehicle_AI_cannot_be_activated Advanced Vehicle AIは、車両の振る舞いを変える他のMOD(例えばImproved
+AIやTraffic++)を既に使っているため、有効にできません.
 Enable_dynamic_path_calculation Enable dynamic path calculation

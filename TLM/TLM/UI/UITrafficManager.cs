@@ -6,6 +6,7 @@ using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.State;
+using TrafficManager.Custom.PathFinding;
 
 namespace TrafficManager.UI {
 #if !TAM
@@ -29,6 +30,7 @@ namespace TrafficManager.UI {
 #endif
 
 		public static TrafficLightTool TrafficLightTool;
+		public static UILabel title;
 
 		public override void Start() {
 			if (LoadingExtension.Instance == null) {
@@ -46,8 +48,8 @@ namespace TrafficManager.UI {
 #endif
 			relativePosition = new Vector3(85f, 80f);
 
-			UILabel title = AddUIComponent<UILabel>();
-			title.text = "Version 1.6.7";
+			title = AddUIComponent<UILabel>();
+			title.text = "Version 1.6.10";
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;
@@ -150,6 +152,15 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
+#if DEBUG
+			if (title != null) {
+				if (CustomPathManager._replacementPathFinds != null && CustomPathManager._replacementPathFinds.Length >= 1)
+					title.text = CustomPathManager._replacementPathFinds[0].m_queuedPathFindCount.ToString();
+				else
+					title.text = "n/a";
+			}
+#endif
+
 			ushort vehicleId = Convert.ToUInt16(_goToField.text);
 			Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
 			if ((vehicle.m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None) {
@@ -282,83 +293,7 @@ namespace TrafficManager.UI {
 		}*/
 
 		public override void Update() {
-			switch (TrafficLightTool.getToolMode()) {
-				case ToolMode.None: _basePanel(); break;
-				case ToolMode.SwitchTrafficLight: _switchTrafficPanel(); break;
-				case ToolMode.AddPrioritySigns: _addStopSignPanel(); break;
-				case ToolMode.ManualSwitch: _manualSwitchPanel(); break;
-				case ToolMode.TimedLightsSelectNode: _timedControlNodesPanel(); break;
-				case ToolMode.TimedLightsShowLights: _timedControlLightsPanel(); break;
-				case ToolMode.LaneChange: _laneChangePanel(); break;
-			}
-		}
-
-		private void _basePanel() {
-
-		}
-
-		private void _switchTrafficPanel() {
-
-		}
-
-		private void _addStopSignPanel() {
-
-		}
-
-		private void _manualSwitchPanel() {
-
-		}
-
-		private void _timedControlNodesPanel() {
-		}
-
-		private void _timedControlLightsPanel() {
-		}
-
-		private void _laneChangePanel() {
-			try {
-				if (TrafficLightTool.SelectedSegment == 0) return;
-				var instance = Singleton<NetManager>.instance;
-
-				var info = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].Info;
-
-				var num2 = instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_lanes;
-				var num3 = 0;
-
-				var dir = NetInfo.Direction.Forward;
-				if (instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_startNode == TrafficLightTool.SelectedNode)
-					dir = NetInfo.Direction.Backward;
-				var dir3 = ((instance.m_segments.m_buffer[TrafficLightTool.SelectedSegment].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-
-				while (num3 < info.m_lanes.Length && num2 != 0u) {
-					if (info.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian && info.m_lanes[num3].m_direction == dir3) {
-						//segmentLights[num3].Show();
-						//segmentLights[num3].relativePosition = new Vector3(35f, (float)(xPos + (offsetIdx * 40f)));
-						//segmentLights[num3].text = ((NetLane.Flags)instance.m_lanes.m_buffer[num2].m_flags & ~NetLane.Flags.Created).ToString();
-
-						//if (segmentLights[num3].containsMouse)
-						//{
-						//    if (Input.GetMouseButton(0) && !segmentMouseDown)
-						//    {
-						//        switchLane(num2);
-						//        segmentMouseDown = true;
-
-						//        if (
-						//            !TrafficPriority.isPrioritySegment(TrafficLightTool.SelectedNode,
-						//                TrafficLightTool.SelectedSegment))
-						//        {
-						//            TrafficPriority.addPrioritySegment(TrafficLightTool.SelectedNode, TrafficLightTool.SelectedSegment, PrioritySegment.PriorityType.None);
-						//        }
-						//    }
-						//}
-					}
-
-					num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-					num3++;
-				}
-			} catch (Exception e) {
-				Log.Error("Exception in _laneChangePanel: " + e.ToString());
-			}
+			
 		}
 	}
 #endif

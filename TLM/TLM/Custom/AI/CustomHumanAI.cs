@@ -29,7 +29,7 @@ namespace TrafficManager.Custom.AI {
 				}
 			} else {
 				if (lights.PedestrianLightState == null) {
-					Log._Debug($"A pedestrian wants to cross node {node} at segment {segment} but there is no pedestrian traffic light!");
+					//Log._Debug($"A pedestrian wants to cross node {node} at segment {segment} but there is no pedestrian traffic light!");
 					pedestrianLightState = lights.GetAutoPedestrianLightState();
 				} else {
 					pedestrianLightState = (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;

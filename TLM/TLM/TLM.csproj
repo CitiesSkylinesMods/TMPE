@@ -86,18 +86,15 @@
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Traffic\SegmentGeometry.cs" />
-    <Compile Include="LaneRestrictions.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="UI\Translation.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Traffic\Direction.cs" />
     <Compile Include="Traffic\SpeedLimitManager.cs" />
-    <Compile Include="Traffic\TrafficRoadRestrictions.cs" />
     <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\SegmentEnd.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
-    <Compile Include="SegmentRestrictions.cs" />
     <Compile Include="SelfDestruct.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
@@ -156,6 +153,7 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_es.txt" />
     <EmbeddedResource Include="Resources\lanechange_allowed.png" />
     <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
     <EmbeddedResource Include="Resources\bicycle_infosign.png" />

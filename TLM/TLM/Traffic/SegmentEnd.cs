@@ -125,11 +125,11 @@ namespace TrafficManager.Traffic {
 					}
 				}
 
-				debug = vehicleManager.m_vehicles.m_buffer[vehicleId].Info.m_vehicleType == VehicleInfo.VehicleType.Tram;
+				//debug = vehicleManager.m_vehicles.m_buffer[vehicleId].Info.m_vehicleType == VehicleInfo.VehicleType.Tram;
 #if DEBUG
-				if (debug) {
+				/*if (debug) {
 					Log._Debug($"getNumCarsGoingToSegment: Handling vehicle {vehicleId} going from {carPos.FromSegment}/{SegmentId} to {carPos.ToSegment}. carState={globalPos.CarState}. lastUpdate={globalPos.LastCarStateUpdate}");
-                }
+                }*/
 #endif
 
 				uint avgSegmentLength = (uint)Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_averageLength;

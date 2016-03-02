@@ -52,11 +52,8 @@ namespace TrafficManager.TrafficLight {
 				rightLight = value;
 			}
 		}
-		//public RoadBaseAI.TrafficLightState LightPedestrian;
 
 		CustomSegmentLights lights;
-
-		//public bool PedestrianEnabled;
 
 		public CustomSegmentLight(CustomSegmentLights lights, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight) {
 			this.NodeId = nodeId;
@@ -66,9 +63,6 @@ namespace TrafficManager.TrafficLight {
 			LightMain = mainLight;
 			LightLeft = mainLight;
 			LightRight = mainLight;
-			/*LightPedestrian = mainLight == RoadBaseAI.TrafficLightState.Green
-				? RoadBaseAI.TrafficLightState.Red
-				: RoadBaseAI.TrafficLightState.Green;*/
 
 			UpdateVisuals();
 		}
@@ -81,7 +75,6 @@ namespace TrafficManager.TrafficLight {
 			LightMain = mainLight;
 			LightLeft = leftLight;
 			LightRight = rightLight;
-			//LightPedestrian = pedestrianLight;
 
 			UpdateVisuals();
 		}
@@ -98,10 +91,6 @@ namespace TrafficManager.TrafficLight {
 			return LightRight;
 		}
 
-		/*public RoadBaseAI.TrafficLightState GetLightPedestrian() {
-			return LightPedestrian;
-		}*/
-
 		public void ChangeMode() {
 			SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(SegmentId);
 			geometry.Recalculate(true, true);
@@ -109,7 +98,7 @@ namespace TrafficManager.TrafficLight {
 			var hasForwardSegment = geometry.HasOutgoingStraightSegment(NodeId);
 			var hasRightSegment = geometry.HasOutgoingRightSegment(NodeId);
 
-			Log._Debug($"ChangeMode. node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
+			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {
@@ -139,10 +128,6 @@ namespace TrafficManager.TrafficLight {
 				//LightPedestrian = _checkPedestrianLight();
 			}
 		}
-		
-		/*public void ManualPedestrian() {
-			PedestrianEnabled = !PedestrianEnabled;
-		}*/
 
 		public void ChangeLightMain() {
 			var invertedLight = LightMain == RoadBaseAI.TrafficLightState.Green
@@ -164,10 +149,6 @@ namespace TrafficManager.TrafficLight {
 				LightMain = invertedLight;
 			}
 
-			/*if (!PedestrianEnabled) {
-				LightPedestrian = _checkPedestrianLight();
-			}*/
-
 			UpdateVisuals();
 		}
 
@@ -177,10 +158,6 @@ namespace TrafficManager.TrafficLight {
 				: RoadBaseAI.TrafficLightState.Green;
 
 			LightLeft = invertedLight;
-
-			/*if (!PedestrianEnabled) {
-				LightPedestrian = _checkPedestrianLight();
-			}*/
 
 			UpdateVisuals();
 		}
@@ -192,10 +169,6 @@ namespace TrafficManager.TrafficLight {
 
 			LightRight = invertedLight;
 
-			/*if (!PedestrianEnabled) {
-				LightPedestrian = _checkPedestrianLight();
-			}*/
-
 			UpdateVisuals();
 		}
 
@@ -203,6 +176,15 @@ namespace TrafficManager.TrafficLight {
 			return LightMain == RoadBaseAI.TrafficLightState.Green ||
 				LightLeft == RoadBaseAI.TrafficLightState.Green ||
 				LightRight == RoadBaseAI.TrafficLightState.Green;
+		}
+
+		public bool isAnyInTransition() {
+			return LightMain == RoadBaseAI.TrafficLightState.RedToGreen ||
+				LightLeft == RoadBaseAI.TrafficLightState.RedToGreen ||
+				LightRight == RoadBaseAI.TrafficLightState.RedToGreen ||
+				LightMain == RoadBaseAI.TrafficLightState.GreenToRed ||
+				LightLeft == RoadBaseAI.TrafficLightState.GreenToRed ||
+				LightRight == RoadBaseAI.TrafficLightState.GreenToRed;
 		}
 
 		public bool isLeftGreen() {
@@ -216,20 +198,6 @@ namespace TrafficManager.TrafficLight {
 		public bool isRightGreen() {
 			return LightRight == RoadBaseAI.TrafficLightState.Green;
 		}
-
-		/*public void ChangeLightPedestrian() {
-			if (PedestrianEnabled) {
-				var invertedLight = LightPedestrian == RoadBaseAI.TrafficLightState.Green
-					? RoadBaseAI.TrafficLightState.Red
-					: RoadBaseAI.TrafficLightState.Green;
-
-				LightPedestrian = invertedLight;
-				UpdateVisuals();
-			}
-		}*/
-
-		/*RoadBaseAI.TrafficLightState lastVehicleLightState = RoadBaseAI.TrafficLightState.Red;
-		RoadBaseAI.TrafficLightState lastPedestrianLightState = RoadBaseAI.TrafficLightState.Red;*/
 
 		public void UpdateVisuals() {
 			var instance = Singleton<NetManager>.instance;
@@ -260,6 +228,17 @@ namespace TrafficManager.TrafficLight {
 					break;
 			}
 
+			vehicleLightState = GetVisualLightState();
+
+			pedestrianLightState = lights.PedestrianLightState == null ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
+
+			uint now = ((currentFrameIndex - num) >> 8) & 1;
+			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
+			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
+		}
+
+		public RoadBaseAI.TrafficLightState GetVisualLightState() {
+			RoadBaseAI.TrafficLightState vehicleLightState;
 			// any green?
 			if (mainLight == RoadBaseAI.TrafficLightState.Green ||
 				leftLight == RoadBaseAI.TrafficLightState.Green ||
@@ -279,20 +258,7 @@ namespace TrafficManager.TrafficLight {
 				vehicleLightState = RoadBaseAI.TrafficLightState.GreenToRed;
 			}
 
-			//pedestrianLightState = LightPedestrian;
-			pedestrianLightState = lights.PedestrianLightState == null ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
-
-			uint now = ((currentFrameIndex - num) >> 8) & 1;
-			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
-			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], (1u-now) << 8, vehicleLightState, pedestrianLightState, false, false);
-
-			/*if (vehicleLightState != lastVehicleLightState || pedestrianLightState != lastPedestrianLightState) {
-				// force rendering
-				Singleton<NetManager>.instance.UpdateSegmentRenderer(segmentId, true);
-			}
-
-			lastVehicleLightState = vehicleLightState;
-			lastPedestrianLightState = pedestrianLightState;*/
+			return vehicleLightState;
 		}
 
 		private RoadBaseAI.TrafficLightState _checkPedestrianLight() {
@@ -311,7 +277,6 @@ namespace TrafficManager.TrafficLight {
 			LightMain = InvertLight(LightMain);
 			LightLeft = InvertLight(LightLeft);
 			LightRight = InvertLight(LightRight);
-			//LightPedestrian = invertLight(LightPedestrian);
 		}
 
 		public static RoadBaseAI.TrafficLightState InvertLight(RoadBaseAI.TrafficLightState light) { // TODO refactor

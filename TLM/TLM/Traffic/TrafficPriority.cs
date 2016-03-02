@@ -11,7 +11,7 @@ using System.Threading;
 namespace TrafficManager.Traffic {
 	class TrafficPriority {
 		private static uint[] segmentsCheckLoadBalanceMod = new uint[] { 127, 255, 511, 1023, 2047 };
-
+		
 		public static float maxStopVelocity = 0.5f;
 
 		/// <summary>
@@ -1047,6 +1047,9 @@ namespace TrafficManager.Traffic {
 			}
 
 			NetManager netManager = Singleton<NetManager>.instance;
+
+			if (CustomRoadAI.initDone)
+				CustomRoadAI.GetSegmentGeometry(segmentId).VerifySegmentsByCount();
 
 			// update lane arrows
 			uint laneId = netManager.m_segments.m_buffer[segmentId].m_lanes;

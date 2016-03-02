@@ -138,9 +138,7 @@ namespace TrafficManager.UI {
 				}
 			}
 
-			if (mode != ToolMode.LaneRestrictions) {
-				_selectedSegmentIds.Clear();
-			}
+			_selectedSegmentIds.Clear();
 		}
 
 		// Overridden to disable base class behavior
@@ -186,9 +184,6 @@ namespace TrafficManager.UI {
 				case ToolMode.LaneChange:
 					_renderOverlayLaneChange(cameraInfo);
 					break;
-				case ToolMode.LaneRestrictions:
-					_renderOverlayLaneRestrictions(cameraInfo);
-					break;
 				case ToolMode.VehicleRestrictions:
 					/*if (m_toolController.IsInsideUI || !Cursor.visible) {
 						return;
@@ -208,7 +203,6 @@ namespace TrafficManager.UI {
 		/// </summary>
 		protected override void OnToolUpdate() {
 			base.OnToolUpdate();
-
 			Log._Debug($"OnToolUpdate");
 
 			_mouseDown = Input.GetMouseButton(0);
@@ -220,7 +214,7 @@ namespace TrafficManager.UI {
 
 				bool elementsHovered = determineHoveredElements();
 
-				if (!elementsHovered) {
+				if (!elementsHovered || _cursorInSecondaryPanel) {
 					//Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: " + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
 					return;
 				}
@@ -257,9 +251,6 @@ namespace TrafficManager.UI {
 						break;
 					case ToolMode.SpeedLimits:
 						break;
-					case ToolMode.LaneRestrictions:
-						LaneRestrictionsToolMode();
-						break;
 				}
 			} else {
 				//showTooltip(false, null, Vector3.zero);
@@ -267,7 +258,7 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		protected override void OnToolGUI() {
+		protected override void OnToolGUI(Event e) {
 			Log._Debug($"OnToolGUI");
 
 			try {
@@ -310,17 +301,17 @@ namespace TrafficManager.UI {
 						_guiLaneChange();
 						break;
 					case ToolMode.VehicleRestrictions:
-						//_guiVehicleRestrictions();
+						_guiVehicleRestrictions();
 						break;
 					case ToolMode.SpeedLimits:
 						_guiSpeedLimits();
 						break;
-					case ToolMode.LaneRestrictions:
-						_guiLaneRestrictions();
+					default:
+						base.OnToolGUI(e);
 						break;
 				}
-			} catch (Exception e) {
-				Log.Error("GUI Error: " + e.ToString());
+			} catch (Exception ex) {
+				Log.Error("GUI Error: " + ex.ToString());
 			}
 		}
 
@@ -458,29 +449,15 @@ namespace TrafficManager.UI {
 		}
 
 		private void _renderOverlayVehicleRestrictions(RenderManager.CameraInfo cameraInfo) {
+			if (SelectedSegment != 0)
+				NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment], GetToolColor(true, false), GetToolColor(true, false));
+
+			if (_cursorInSecondaryPanel)
+				return;
 
 			if (_hoveredSegmentIdx != 0 && _hoveredSegmentIdx != SelectedSegment && !overlayHandleHovered) {
 				NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx], GetToolColor(false, false), GetToolColor(false, false));
 			}
-
-			if (SelectedSegment == 0) return;
-
-			NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment], GetToolColor(true, false), GetToolColor(true, false));
-		}
-
-		private void _renderOverlayLaneRestrictions(RenderManager.CameraInfo cameraInfo) {
-			if (_selectedSegmentIds.Count > 0) {
-				// ReSharper disable once LoopCanBePartlyConvertedToQuery - can't be converted because segment is pass by ref
-				foreach (var index in _selectedSegmentIds) {
-					NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[index], GetToolColor(true, false),
-						GetToolColor(true, false));
-				}
-			}
-
-			if (_hoveredSegmentIdx == 0) return;
-
-			NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx], GetToolColor(false, false),
-				GetToolColor(false, false));
 		}
 
 		private void _renderOverlayDraw(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color) {
@@ -778,43 +755,6 @@ namespace TrafficManager.UI {
 				_switchTrafficLights();
 			} else {
 				//Log.Message("No junction");
-			}
-		}
-
-		private void LaneRestrictionsToolMode() {
-			var info = Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx].Info;
-
-			if (TrafficRoadRestrictions.IsSegment(_hoveredSegmentIdx)) {
-				if (_selectedSegmentIds.Count > 0) {
-					showTooltip(Translation.GetString("Road_is_already_in_a_group!"),
-						Singleton<NetManager>.instance.m_nodes.m_buffer[Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx].m_startNode]
-							.m_position);
-				} else {
-					var restSegment = TrafficRoadRestrictions.GetSegment(_hoveredSegmentIdx);
-
-					_selectedSegmentIds = new List<ushort>(restSegment.SegmentGroup);
-				}
-			} else {
-				if (IsSegmentSelected(_hoveredSegmentIdx)) {
-					RemoveSelectedSegment(_hoveredSegmentIdx);
-				} else {
-					if (_selectedSegmentIds.Count > 0) {
-						var segment2 =
-							Singleton<NetManager>.instance.m_segments.m_buffer[_selectedSegmentIds[0]
-								];
-						var info2 = segment2.Info;
-
-						if (info.m_lanes.Length != info2.m_lanes.Length) {
-							showTooltip(Translation.GetString("All_selected_roads_must_be_of_the_same_type!"),
-								Singleton<NetManager>.instance.m_nodes.m_buffer[Singleton<NetManager>.instance.m_segments.m_buffer[_hoveredSegmentIdx].m_startNode]
-									.m_position);
-						} else {
-							AddSelectedSegment(_hoveredSegmentIdx);
-						}
-					} else {
-						AddSelectedSegment(_hoveredSegmentIdx);
-					}
-				}
 			}
 		}
 
@@ -1538,7 +1478,6 @@ namespace TrafficManager.UI {
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
 
-
 			curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
@@ -1555,7 +1494,7 @@ namespace TrafficManager.UI {
 					labelStr += ", in start-up phase";
 				else
 					labelStr += ", avg. speed: " + CustomRoadAI.laneMeanSpeeds[curLaneId] + " %";
-				labelStr += ", avg. density: " + String.Format("{0:0.#}", (totalDensity > 0 ? Math.Min(100f, ((float)CustomRoadAI.currentLaneDensities[curLaneId] * 100f) / (float)totalDensity) : 0f)) + " %";
+				labelStr += ", avg. density: " + CustomRoadAI.laneMeanDensities[curLaneId] + " %";
 #if DEBUG
 				labelStr += " (" + CustomRoadAI.currentLaneDensities[curLaneId] + "/" + totalDensity + ")";
 #endif
@@ -1799,6 +1738,17 @@ namespace TrafficManager.UI {
 					continue;
 				TimedTrafficLights timedNode = nodeSimulation.TimedLight;
 
+				var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+
+				var nodeScreenPos = Camera.main.WorldToScreenPoint(nodePos);
+				nodeScreenPos.y = Screen.height - nodeScreenPos.y;
+
+				if (nodeScreenPos.z < 0)
+					continue;
+
+				var diff = nodePos - Camera.main.transform.position;
+				var zoom = 1.0f / diff.magnitude * 100f;
+
 				for (var i = 0; i < 8; i++) {
 					ushort srcSegmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i); // source segment
 
@@ -1810,27 +1760,21 @@ namespace TrafficManager.UI {
 						liveSegmentLights.MakeRedOrGreen();
 					}
 
-					var position = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-					var offset = 25f;
+					var offset = 17f;
+					Vector3 segmentLightPos = nodePos;
 
 					if (Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startNode == nodeId) {
-						position.x += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.x * offset;
-						position.y += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.y * offset;
-						position.z += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.z * offset;
+						segmentLightPos.x += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.x * offset;
+						segmentLightPos.y += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.y;
+						segmentLightPos.z += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startDirection.z * offset;
 					} else {
-						position.x += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.x * offset;
-						position.y += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.y * offset;
-						position.z += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.z * offset;
+						segmentLightPos.x += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.x * offset;
+						segmentLightPos.y += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.y;
+						segmentLightPos.z += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.z * offset;
 					}
 
-					var screenPos = Camera.main.WorldToScreenPoint(position);
+					var screenPos = Camera.main.WorldToScreenPoint(segmentLightPos);
 					screenPos.y = Screen.height - screenPos.y;
-
-					if (screenPos.z < 0)
-						continue;
-
-					var diff = position - Camera.main.transform.position;
-					var zoom = 1.0f / diff.magnitude * 100f;
 
 					var timedActive = nodeSimulation.IsTimedLightActive();
 					var guiColor = GUI.color;
@@ -3050,24 +2994,180 @@ namespace TrafficManager.UI {
 			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 		}
 
-		//private int speedLimitPage = 0;
-		//private int speedLimitsPerPage = 13;
+		private void _guiVehicleRestrictions() {
+			if (SelectedSegment <= 0)
+				return;
+
+			_cursorInSecondaryPanel = false;
+
+			var style = new GUIStyle {
+				normal = { background = _secondPanelTexture },
+				alignment = TextAnchor.MiddleCenter,
+				border =
+				{
+					bottom = 2,
+					top = 2,
+					right = 2,
+					left = 2
+				}
+			};
+
+			var windowRect = ResizeGUI(new Rect(155, 45, 620, 80));
+			GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"), style);
+			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
+		}
+
+		private void _guiVehicleRestrictionsWindow(int num) {
+			if (GUILayout.Button(Translation.GetString("Invert"))) {
+				// invert pattern
+
+				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].Info;
+				List<object[]> sortedLanes = getSortedVehicleLanes(SelectedSegment, segmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (object[] laneData in sortedLanes) {
+					uint laneId = (uint)laneData[0];
+					uint laneIndex = (uint)laneData[2];
+					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+					ExtVehicleType baseMask = ExtVehicleType.None;
+					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
+						baseMask = ExtVehicleType.RoadVehicle;
+					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
+						baseMask = ExtVehicleType.RailVehicle;
+					}
+
+					if (baseMask == ExtVehicleType.None)
+						continue;
+
+					ExtVehicleType allowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegment, laneIndex, laneId, laneInfo);
+					allowedTypes = ~allowedTypes & baseMask;
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegment, laneIndex, laneId, allowedTypes);
+				}
+			}
+
+			GUILayout.BeginHorizontal();
+			if (GUILayout.Button(Translation.GetString("Allow_all_vehicles"))) {
+				// allow all vehicle types
+
+				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].Info;
+				List<object[]> sortedLanes = getSortedVehicleLanes(SelectedSegment, segmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (object[] laneData in sortedLanes) {
+					uint laneId = (uint)laneData[0];
+					uint laneIndex = (uint)laneData[2];
+					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+					ExtVehicleType baseMask = ExtVehicleType.None;
+					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
+						baseMask = ExtVehicleType.RoadVehicle;
+					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
+						baseMask = ExtVehicleType.RailVehicle;
+					}
+
+					if (baseMask == ExtVehicleType.None)
+						continue;
+
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegment, laneIndex, laneId, baseMask);
+				}
+			}
+
+			if (GUILayout.Button(Translation.GetString("Ban_all_vehicles"))) {
+				// ban all vehicle types
+
+				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].Info;
+				List<object[]> sortedLanes = getSortedVehicleLanes(SelectedSegment, segmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (object[] laneData in sortedLanes) {
+					uint laneId = (uint)laneData[0];
+					uint laneIndex = (uint)laneData[2];
+					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+					ExtVehicleType baseMask = ExtVehicleType.None;
+					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
+						baseMask = ExtVehicleType.RoadVehicle;
+					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
+						baseMask = ExtVehicleType.RailVehicle;
+					}
+
+					if (baseMask == ExtVehicleType.None)
+						continue;
+
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegment, laneIndex, laneId, ~baseMask);
+				}
+			}
+			GUILayout.EndHorizontal();
+
+			if (GUILayout.Button(Translation.GetString("Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions"))) {
+				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].Info;
+				List<object[]> selectedSortedLanes = getSortedVehicleLanes(SelectedSegment, selectedSegmentInfo, null);
+
+				LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
+				HashSet<ushort> processedNodes = new HashSet<ushort>();
+				HashSet<ushort> processedSegments = new HashSet<ushort>();
+				processedSegments.Add(SelectedSegment);
+
+				ushort selectedStartNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].m_startNode;
+				ushort selectedEndNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegment].m_endNode;
+
+				if (selectedStartNodeId != 0)
+					nodesToProcess.AddFirst(selectedStartNodeId);
+				if (selectedEndNodeId != 0)
+					nodesToProcess.AddFirst(selectedEndNodeId);
+
+				while (nodesToProcess.First != null) {
+					ushort nodeId = nodesToProcess.First.Value;
+					nodesToProcess.RemoveFirst();
+					processedNodes.Add(nodeId);
+
+					if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2)
+						continue; // junction. stop.
+
+					// explore segments at node
+					for (var s = 0; s < 8; s++) {
+						var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+
+						if (segmentId <= 0 || processedSegments.Contains(segmentId))
+							continue;
+						processedSegments.Add(segmentId);
+
+						NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+						List<object[]> sortedLanes = getSortedVehicleLanes(segmentId, segmentInfo, null);
+
+						if (sortedLanes.Count == selectedSortedLanes.Count) {
+							// number of lanes matches selected segment
+							for (int i = 0; i < sortedLanes.Count; ++i) {
+								object[] selectedLaneData = selectedSortedLanes[i];
+								object[] laneData = sortedLanes[i];
+
+								uint selectedLaneId = (uint)selectedLaneData[0];
+								uint selectedLaneIndex = (uint)selectedLaneData[2];
+								NetInfo.Lane selectedLaneInfo = segmentInfo.m_lanes[selectedLaneIndex];
+
+								uint laneId = (uint)laneData[0];
+								uint laneIndex = (uint)laneData[2];
+								NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+								// apply restrictions of selected segment & lane
+								VehicleRestrictionsManager.SetAllowedVehicleTypes(segmentId, laneIndex, laneId, VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegment, selectedLaneIndex, selectedLaneId, selectedLaneInfo));
+							}
+
+							// add nodes to explore
+							ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
+							ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+
+							if (startNodeId != 0 && !processedNodes.Contains(startNodeId))
+								nodesToProcess.AddFirst(startNodeId);
+							if (endNodeId != 0 && !processedNodes.Contains(endNodeId))
+								nodesToProcess.AddFirst(endNodeId);
+						}
+					}
+				}
+			}
+		}
+
 		private int curSpeedLimitIndex = 0;
 
 		private void _guiSpeedLimitsWindow(int num) {
-			//int speedLimitPages = SpeedLimitManager.AvailableSpeedLimits.Count % speedLimitsPerPage == 0 ? SpeedLimitManager.AvailableSpeedLimits.Count / speedLimitsPerPage : SpeedLimitManager.AvailableSpeedLimits.Count / speedLimitsPerPage + 1;
 			GUILayout.BeginHorizontal();
-			
-			/*GUILayout.BeginVertical();
-			GUILayout.FlexibleSpace();
-			if (GUILayout.Button("< " + Translation.GetString("Previous"))) {
-				speedLimitPage = (speedLimitPage + speedLimitPages - 1) % speedLimitPages;
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndVertical();*/
 
 			Color oldColor = GUI.color;
-			//for (int i = speedLimitPage * speedLimitsPerPage; i < Math.Min(SpeedLimitManager.AvailableSpeedLimits.Count, speedLimitPage * speedLimitsPerPage + speedLimitsPerPage); ++i) {
 			for (int i = 0; i < SpeedLimitManager.AvailableSpeedLimits.Count; ++i) {
 				if (curSpeedLimitIndex != i)
 					GUI.color = Color.gray;
@@ -3081,14 +3181,6 @@ namespace TrafficManager.UI {
 					GUILayout.BeginHorizontal();
 				}
 			}
-
-			/*GUILayout.BeginVertical();
-			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(Translation.GetString("Next") + " >")) {
-				speedLimitPage = (speedLimitPage + 1) % speedLimitPages;
-			}
-			GUILayout.FlexibleSpace();
-			GUILayout.EndVertical();*/
 
 			GUILayout.EndHorizontal();
 		}
@@ -3159,237 +3251,6 @@ namespace TrafficManager.UI {
 				GUI.color = guiColor;
 			}
 			return hovered;
-		}
-
-		private void _guiLaneRestrictions() {
-			_cursorInSecondaryPanel = false;
-
-			if (_selectedSegmentIds.Count < 1) {
-				return;
-			}
-
-			var instance = Singleton<NetManager>.instance;
-			var info2 = instance.m_segments.m_buffer[_selectedSegmentIds[0]].Info;
-
-			var num2 = instance.m_segments.m_buffer[_selectedSegmentIds[0]].m_lanes;
-			const int num3 = 0;
-
-			var numLanes = 0;
-
-			// TODO - I think this needs to be rewritten. Doesn't make sense.
-			while (num3 < info2.m_lanes.Length && num2 != 0u) {
-				if (info2.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					info2.m_lanes[num3].m_laneType != NetInfo.LaneType.Parking &&
-					info2.m_lanes[num3].m_laneType != NetInfo.LaneType.None) {
-					numLanes++;
-				}
-
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-			}
-
-			var style = new GUIStyle {
-				normal = { background = _secondPanelTexture },
-				alignment = TextAnchor.MiddleCenter,
-				border =
-				{
-					bottom = 2,
-					top = 2,
-					right = 2,
-					left = 2
-				}
-			};
-
-			var width = !TrafficRoadRestrictions.IsSegment(_selectedSegmentIds[0]) ? 120 : numLanes * 120;
-
-			var windowRect3 = new Rect(275, 80, width, 185);
-
-			if (CustomRoadAI.GetSegmentGeometry(SelectedSegment).IsOneWay()) {
-				GUILayout.Window(251, windowRect3, _guiLaneRestrictionsOneWayWindow, "", style);
-			}
-
-			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
-		}
-
-		private int _setSpeed = -1;
-
-		private void _guiLaneRestrictionsOneWayWindow(int num) {
-			if (!TrafficRoadRestrictions.IsSegment(_selectedSegmentIds[0])) {
-				if (!GUILayout.Button(Translation.GetString("Create_group"))) return;
-
-				foreach (var segmentId in _selectedSegmentIds) {
-					TrafficRoadRestrictions.AddSegment(segmentId, _selectedSegmentIds);
-
-					var instance0 = Singleton<NetManager>.instance;
-
-					var segment0 = instance0.m_segments.m_buffer[segmentId];
-
-					var info0 = segment0.Info;
-
-					var num20 = segment0.m_lanes;
-					var num30 = 0;
-
-					var restSegment = TrafficRoadRestrictions.GetSegment(segmentId);
-
-					var laneList0 = new List<float[]>();
-					var maxValue0 = 0f;
-
-					while (num30 < info0.m_lanes.Length && num20 != 0u) {
-						if (info0.m_lanes[num30].m_laneType != NetInfo.LaneType.Pedestrian &&
-							info0.m_lanes[num30].m_laneType != NetInfo.LaneType.Parking &&
-							info0.m_lanes[num30].m_laneType != NetInfo.LaneType.None) {
-							laneList0.Add(new[] { num20, info0.m_lanes[num30].m_position, num30 });
-							maxValue0 = Mathf.Max(maxValue0, info0.m_lanes[num30].m_position);
-						}
-
-						num20 = instance0.m_lanes.m_buffer[(int)((UIntPtr)num20)].m_nextLane;
-						num30++;
-					}
-
-					if (!CustomRoadAI.GetSegmentGeometry(segmentId).IsOneWay()) {
-						laneList0.Sort(delegate (float[] x, float[] y) {
-							if (Mathf.Abs(y[1]) > Mathf.Abs(x[1])) {
-								return -1;
-							}
-
-							return 1;
-						});
-					} else {
-						laneList0.Sort(delegate (float[] x, float[] y) {
-							if (x[1] + maxValue0 > y[1] + maxValue0) {
-								return -1;
-							}
-							return 1;
-						});
-					}
-
-					foreach (var lane in laneList0) {
-						restSegment.AddLane((uint)lane[0], (int)lane[2], info0.m_lanes[(int)lane[2]].m_finalDirection);
-					}
-				}
-				return;
-			}
-
-			if (GUILayout.Button(Translation.GetString("Delete_group"))) {
-				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
-					TrafficRoadRestrictions.RemoveSegment(selectedSegmentIndex);
-				}
-
-				_selectedSegmentIds.Clear();
-				return;
-			}
-
-			if (GUILayout.Button(Translation.GetString("Add_zoning"), GUILayout.Width(140))) {
-				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
-					var info = Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].Info;
-
-					CreateZoneBlocks(selectedSegmentIndex, ref Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex], info);
-				}
-			}
-
-			if (GUILayout.Button(Translation.GetString("Remove_zoning"), GUILayout.Width(140))) {
-				foreach (var selectedSegmentIndex in _selectedSegmentIds) {
-					Singleton<ZoneManager>.instance.ReleaseBlock(Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockStartLeft);
-					Singleton<ZoneManager>.instance.ReleaseBlock(Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockStartRight);
-					Singleton<ZoneManager>.instance.ReleaseBlock(Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockEndLeft);
-					Singleton<ZoneManager>.instance.ReleaseBlock(Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockEndRight);
-
-					Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockStartLeft = 0;
-					Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockStartRight = 0;
-					Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockEndLeft = 0;
-					Singleton<NetManager>.instance.m_segments.m_buffer[selectedSegmentIndex].m_blockEndRight = 0;
-				}
-			}
-
-			var instance = Singleton<NetManager>.instance;
-			var info2 = instance.m_segments.m_buffer[_selectedSegmentIds[0]].Info;
-			var num2 = instance.m_segments.m_buffer[_selectedSegmentIds[0]].m_lanes;
-			var num3 = 0;
-
-			var laneList = new List<float[]>();
-
-			var maxValue = 0f;
-
-			while (num3 < info2.m_lanes.Length && num2 != 0u) {
-				if (info2.m_lanes[num3].m_laneType != NetInfo.LaneType.Pedestrian &&
-					info2.m_lanes[num3].m_laneType != NetInfo.LaneType.Parking &&
-					info2.m_lanes[num3].m_laneType != NetInfo.LaneType.None) {
-					laneList.Add(new[] { num2, info2.m_lanes[num3].m_position, num3 });
-					maxValue = Mathf.Max(maxValue, info2.m_lanes[num3].m_position);
-				}
-
-				num2 = instance.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
-			}
-
-			if (!CustomRoadAI.GetSegmentGeometry(_selectedSegmentIds[0]).IsOneWay()) {
-				laneList.Sort(delegate (float[] x, float[] y) {
-					if (Mathf.Abs(y[1]) > Mathf.Abs(x[1])) {
-						return -1;
-					}
-
-					return 1;
-				});
-			} else {
-				laneList.Sort(delegate (float[] x, float[] y) {
-					if (x[1] + maxValue > y[1] + maxValue) {
-						return -1;
-					}
-					return 1;
-				});
-			}
-
-			GUILayout.BeginHorizontal();
-			for (var i = 0; i < laneList.Count; i++) {
-				GUILayout.BeginVertical();
-				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1));
-
-				if (info2.m_lanes[(int)laneList[i][2]].m_laneType == NetInfo.LaneType.Vehicle) {
-					var resSegment = TrafficRoadRestrictions.GetSegment(_selectedSegmentIds[0]);
-					var resSpeed = resSegment.SpeedLimits[(int)laneList[i][2]];
-
-					if (_setSpeed == (int)laneList[i][2]) {
-						_sliderValues[(int)laneList[i][2]] =
-							GUILayout.HorizontalSlider(_sliderValues[(int)laneList[i][2]],
-								20f, 150f, GUILayout.Height(20));
-
-						if (GUILayout.Button(String.Format(Translation.GetString("Set_Speed"), ((int)_sliderValues[(int)laneList[i][2]]).ToString()))) {
-							foreach (var restrictionSegment in _selectedSegmentIds.Select(TrafficRoadRestrictions.GetSegment)) {
-								restrictionSegment.SpeedLimits[(int)laneList[i][2]] =
-									_sliderValues[(int)laneList[i][2]] /
-									50f;
-							}
-
-							_setSpeed = -1;
-						}
-					} else {
-						if (GUILayout.Button(Translation.GetString("Max_speed") + " " + (int)(resSpeed > 0.1f ? resSpeed * 50f : info2.m_lanes[(int)laneList[i][2]].m_speedLimit * 50f))) {
-							_sliderValues[(int)laneList[i][2]] = info2.m_lanes[(int)laneList[i][2]].m_speedLimit * 50f;
-							_setSpeed = (int)laneList[i][2];
-						}
-					}
-
-					//if (GUILayout.Button(lane.enableCars ? "Disable cars" : "Enable cars", lane.enableCars ? style1 : style2))
-					//{
-					//    lane.toggleCars();
-					//}
-					//if (GUILayout.Button(lane.enableCargo ? "Disable cargo" : "Enable cargo", lane.enableCargo ? style1 : style2))
-					//{
-					//    lane.toggleCargo();
-					//}
-					//if (GUILayout.Button(lane.enableService ? "Disable service" : "Enable service", lane.enableService ? style1 : style2))
-					//{
-					//    lane.toggleService();
-					//}
-					//if (GUILayout.Button(lane.enableTransport ? "Disable transport" : "Enable transport", lane.enableTransport ? style1 : style2))
-					//{
-					//    lane.toggleTransport();
-					//}
-				}
-
-				GUILayout.EndVertical();
-			}
-			GUILayout.EndHorizontal();
 		}
 
 		private Texture2D MakeTex(int width, int height, Color col) {

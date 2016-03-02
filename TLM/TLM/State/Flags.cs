@@ -277,17 +277,17 @@ namespace TrafficManager.State {
 				return; // disallow custom lane arrows in highway rule mode
 
 			laneArrowFlags[laneId] = flags;
-			applyLaneArrowFlags(laneId);
+			applyLaneArrowFlags(laneId, false);
 		}
 
-		public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags) {
-			if (!mayHaveLaneArrows(laneId)) {
+		public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags, bool check=true) {
+			if (check && !mayHaveLaneArrows(laneId)) {
 				removeLaneArrowFlags(laneId);
 				return;
 			}
 			
 			highwayLaneArrowFlags[laneId] = flags;
-			applyLaneArrowFlags(laneId);
+			applyLaneArrowFlags(laneId, false);
 		}
 
 		public static bool toggleLaneArrowFlags(uint laneId, LaneArrows flags) {
@@ -309,7 +309,7 @@ namespace TrafficManager.State {
 
 			arrows ^= flags;
 			laneArrowFlags[laneId] = arrows;
-			applyLaneArrowFlags(laneId);
+			applyLaneArrowFlags(laneId, false);
 			return true;
 		}
 
@@ -525,13 +525,13 @@ namespace TrafficManager.State {
 			}
 		}
 
-		public static bool applyLaneArrowFlags(uint laneId) {
+		public static bool applyLaneArrowFlags(uint laneId, bool check=true) {
 			if (laneId <= 0)
 				return true;
 
 			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
-			if (!mayHaveLaneArrows(laneId))
+			if (check && !mayHaveLaneArrows(laneId))
 				return false;
 
 			LaneArrows? hwArrows = highwayLaneArrowFlags[laneId];

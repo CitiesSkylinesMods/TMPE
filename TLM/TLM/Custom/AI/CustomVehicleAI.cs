@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
 	class CustomVehicleAI : VehicleAI {
-		private static readonly int MIN_BLOCK_RECALC_VALUE = 25;
+		private static readonly int MIN_BLOCK_COUNTER_PATH_RECALC_VALUE = 3;
 
 		internal static void HandleVehicle(ushort vehicleId, ref Vehicle vehicleData, bool addTraffic, bool realTraffic) {
 			HandleVehicle(vehicleId, ref vehicleData, addTraffic, realTraffic, 2);
@@ -148,10 +148,11 @@ namespace TrafficManager.Custom.AI {
 #if DEBUGV
 			logBuffer.Add("* vehicleId " + vehicleId + ". ToNode: " + vehiclePos.ToNode + ". FromSegment: " + vehiclePos.FromSegment/* + ". FromLaneId: " + TrafficPriority.Vehicles[vehicleId].FromLaneId*/);
 #endif
-			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0) {
+			if (addTraffic && vehicleData.m_leadingVehicle == 0 && realTimePositions.Count > 0 && realTimePositions[0].m_segment != 0) {
 				// add traffic to lane
 				uint laneId = PathManager.GetLaneID(realTimePositions[0]);
-				CustomRoadAI.AddTraffic(laneId, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
+				//Log._Debug($"HandleVehicle: adding traffic to segment {realTimePositions[0].m_segment}, lane {realTimePositions[0].m_lane}");
+                CustomRoadAI.AddTraffic(laneId, Singleton<NetManager>.instance.m_segments.m_buffer[realTimePositions[0].m_segment].Info.m_lanes[realTimePositions[0].m_lane], (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), (ushort)Mathf.RoundToInt(lastFrameData.m_velocity.magnitude), realTraffic);
 			}
 
 #if DEBUGV
@@ -283,15 +284,16 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		internal static ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
+			if (emergencyOnDuty)
+				return ExtVehicleType.Emergency;
+
 			switch (ai.m_info.m_vehicleType) {
 				case VehicleInfo.VehicleType.Bicycle:
 					return ExtVehicleType.Bicycle;
 				case VehicleInfo.VehicleType.Car:
 					if (ai is PassengerCarAI)
 						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI) {
-						if (emergencyOnDuty)
-							return ExtVehicleType.Emergency;
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI) {
 						return ExtVehicleType.Service;
 					}
 					if (ai is CarTrailerAI)
@@ -302,8 +304,6 @@ namespace TrafficManager.Custom.AI {
 						return ExtVehicleType.Taxi;
 					if (ai is CargoTruckAI)
 						return ExtVehicleType.CargoTruck;
-					if (ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI)
-						return ExtVehicleType.Service;
 					break;
 				case VehicleInfo.VehicleType.Metro:
 				case VehicleInfo.VehicleType.Train:
@@ -332,20 +332,24 @@ namespace TrafficManager.Custom.AI {
 		public static bool ShouldRecalculatePath(ushort vehicleId, ref Vehicle vehicleData, int maxBlockCounter) {
 			if (vehicleData.m_leadingVehicle != 0)
 				return false;
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == Vehicle.Flags.None)
+				return false;
 			if (!Options.dynamicPathRecalculation)
 				return false;
-			if (TrafficPriority.GetVehiclePosition(vehicleId).LastPathRecalculation >= Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10) // ~16 sec.
+			if (TrafficPriority.GetVehiclePosition(vehicleId).LastPathRecalculation >= GetVehiclePathRecalculationFrame())
 				return false;
 			if (vehicleData.m_path != 0) {
 				PathUnit.Position pos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(vehicleData.m_pathPositionIndex >> 1);
 				if (pos.m_segment != 0) {
-					NetAI netAI = Singleton<NetManager>.instance.m_segments.m_buffer[pos.m_segment].Info.m_netAI;
-					if (netAI is RoadBaseAI && ((RoadBaseAI)netAI).m_highwayRules)
+					bool isHighway = CustomRoadAI.GetSegmentGeometry(pos.m_segment).IsHighway();
+					if (isHighway)
 						return false; // no recalculation on highways
 				}
 			}
 
-			float recalcDecisionValue = Math.Max(Options.someValue2, ((float)vehicleData.m_blockCounter - (float)MIN_BLOCK_RECALC_VALUE) / ((float)maxBlockCounter - (float)MIN_BLOCK_RECALC_VALUE));
+			return (vehicleData.m_blockCounter >= MIN_BLOCK_COUNTER_PATH_RECALC_VALUE);
+
+			/*float recalcDecisionValue = Math.Max(0.005f, ((float)vehicleData.m_blockCounter - (float)MIN_BLOCK_RECALC_VALUE) / ((float)maxBlockCounter - (float)MIN_BLOCK_RECALC_VALUE));
 			float bias = 1f;
 			switch (Options.simAccuracy) {
 				case 1:
@@ -363,11 +367,23 @@ namespace TrafficManager.Custom.AI {
 			}
 			//Log._Debug($"Path recalculation for vehicle {vehicleId}: recalcDecisionValue={recalcDecisionValue} bias={bias}");
 			recalcDecisionValue *= bias;
-			return UnityEngine.Random.Range(0f, 1f) < recalcDecisionValue;
+			return UnityEngine.Random.Range(0f, 1f) < recalcDecisionValue;*/
 		}
 
+		/// <summary>
+		/// Retrieves the current (shifted) frame index that is used to store dynamic path recalculation data.
+		/// </summary>
+		/// <returns></returns>
+		private static uint GetVehiclePathRecalculationFrame() {
+			return Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
+		}
+
+		/// <summary>
+		/// Stores that the given vehicle's path has been dynamically recalculated at the current frame.
+		/// </summary>
+		/// <param name="vehicleId"></param>
 		internal static void MarkPathRecalculation(ushort vehicleId) {
-			TrafficPriority.GetVehiclePosition(vehicleId).LastPathRecalculation = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10;
+			TrafficPriority.GetVehiclePosition(vehicleId).LastPathRecalculation = GetVehiclePathRecalculationFrame();
 		}
 	}
 }

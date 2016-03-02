@@ -2,6 +2,18 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.10, 03/02/2016
+- Additional controls for vehicle restrictions added
+- Bugfix: Clicking on a Traffic Manager overlay resulted into vanilla game components (e.g. houses, vehicles) being activated 
+
+1.6.9, 03/02/2016
+- Updated for game patch 1.3.2-f1
+
+1.6.8, 03/01/2016
+- Path-finding: Major performance improvements
+- Updated Japanese translation (thanks to @Akira Ishizaki for translating!)
+- Added Spanish translation
+
 1.6.7, 02/27/2016
 - Tuned AI parameters
 - Improved traffic density measurements

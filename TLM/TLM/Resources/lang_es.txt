@@ -1,0 +1,115 @@
+Switch_traffic_lights Agregar/Borrar semáforos
+Add_priority_signs Agregar señales de tránsito
+Manual_traffic_lights Semáforos manuales
+Timed_traffic_lights Semáforos programados
+Change_lane_arrows Editar flechas de pistas
+Clear_Traffic Limpiar Tráfico
+Disable_despawning Desactivar desaparición
+Enable_despawning Activar desaparición
+NODE_IS_LIGHT El cruce tiene semáforos.\nBorra los semáforos seleccionando "Agregar/Borrar semáforos" y haz clic en este cruce.
+NODE_IS_TIMED_LIGHT El cruce es parte de un programa temporizado.\nSelecciona "Semáforos programados", haz clic en este cruce y luego en "Eliminar".
+Select_nodes_windowTitle Seleccionar cruces
+Select_nodes Seleccionar cruces
+Node Cruce
+Deselect_all_nodes Deseleccionar todos los cruces
+Setup_timed_traffic_light Ajustar semáforos programados
+State Estado
+Skip Saltar
+up arriba
+down abajo
+View Ver
+Edit Editar
+Delete Borrar
+Timed_traffic_lights_manager Administrador de semáforos programados
+Add_step Añadir fase
+Remove_timed_traffic_light Borrar semáforo programado
+Min._Time: Tiempo min:
+Max._Time: Tiempo máx:
+Save Guardar
+Add Agregar
+Sensitivity Sensibilidad
+Very_Low Muy Baja
+Low Baja
+Medium Media
+High Alta
+Very_high Muy alta
+Extreme_long_green/red_phases Fases verde/rojo extremadamente largas
+Very_long_green/red_phases Fases verde/rojo muy largas
+Long_green/red_phases Fases verde/rojo largas
+Moderate_green/red_phases Fases verde/rojo moderadas
+Short_green/red_phases Fases verde/rojo cortas
+Very_short_green/red_phases Fases verde/rojo muy cortas
+Extreme_short_green/red_phases Fases verde/rojo extremadamente cortas
+Hide_counters Ocultar contadores
+Show_counters Mostrar contadores
+Start Iniciar
+Stop Detener
+Enable_test_mode_(stay_in_current_step) Activar modo de prueba (mantiene la fase actual)
+avg._flow Tránsito promedio
+avg._wait Espera promedio
+min/max min/máx
+Lane Vía
+Set_Speed Ajustar Velocidad {0}
+Max_speed Velocidad Máxima
+Segment Segmento
+incoming viniendo
+Enable_Advanced_Vehicle_AI Activar IA de vehículos avanzada
+Vehicles_may_enter_blocked_junctions Vehículos pueden entrar a cruces bloqueados
+All_vehicles_may_ignore_lane_arrows Todos los vehículos pueden ignorar las flechas de las vías
+Busses_may_ignore_lane_arrows Buses pueden ignorar flechas de las vías
+Reckless_driving Conducción agresiva (BETA)
+TMPE_Title Traffic Manager: President Edition
+Settings_are_defined_for_each_savegame_separately Los ajustes son definidos para cada partida por separado
+Simulation_accuracy Precisión de la simulación (más alto reduce el rendimiento)
+Enable_highway_specific_lane_merging/splitting_rules Activar control de unión/división de vías de autopista
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Conductores prefieren cambiar de vía (sólo si IA Avanzada está activada)
+Maintenance Mantenimiento
+Very_often Muy frecuentemente
+Often Frecuentemente
+Sometimes A veces
+Rarely Raramente
+Very_rarely Muy raramente
+Only_if_necessary Sólo si es necesario
+Nodes_and_segments Cruces y segmentos
+Lanes Vías
+Path_Of_Evil_(10_%) El mismo infierno (10 %)
+Rush_Hour_(5_%) Hora Punta (5 %)
+Minor_Complaints_(2_%) Colisiones menores (2 %)
+Holy_City_(0_%) Ciudad divina (0 %)
+Forget_toggled_traffic_lights Borrar semáforos (no afecta semáforos programados)
+Road_is_already_in_a_group! ¡La calle ya está en un grupo!
+All_selected_roads_must_be_of_the_same_type! ¡Todas las calles deben ser del mismo tipo!
+Create_group Crear Grupo
+Delete_group Borrar Grupo
+Add_zoning Agregar zona
+Remove_zoning Borrar zona
+Lane_Arrow_Changer_Disabled El editor de flechas está desactivado debido a que has activado el control de autopistas.
+Add_junction_to_timed_light Agregar cruce a este conjunto temporizador
+Remove_junction_from_timed_light Remover cruce de este conjunnto temporizador
+Select_junction Seleccionar un cruce
+Cancel Cancelar
+Speed_limits Límites de velocidad
+Persistently_visible_overlays Datos mostrados en el juego
+Priority_signs Señales de prioridad
+Vehicles_may_do_u-turns_at_junctions Los vehículos pueden hacer giros en "U" en los cruces
+Vehicles_going_straight_may_change_lanes_at_junctions Los vehículos que circulan recto pueden cambiar de pista en intersecciones
+Allow_u-turns Permitir giros en "U"
+Allow_lane_changing_for_vehicles_going_straight Permitir cambio de pista a los vehículos que circulan recto
+Allow_vehicles_to_enter_a_blocked_junction Permitor que los vehículos ingresen a cruces bloqueados
+Road_condition_has_a_bigger_impact_on_vehicle_speed La condición de la calle tiene un mayor impacto en la rapidez de los vehículos
+Vehicle_restrictions Restricción vehicular
+Copy Copiar
+Paste Pegar
+Invert Invertir
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Aplicar restricción vehicular a todas los segmentos de calle entre dos cruces
+Allow_all_vehicles Permitir a todos los vehículos
+Ban_all_vehicles Prohibir a todos los vehículos
+Set_all_traffic_lights_to_red Poner todos los semáforos en rojo
+Rotate_left Girar a la izq.
+Rotate_right Girar a la der.
+Name Nombre
+Apply Aplicar
+Select_a_timed_traffic_light_program Seleccionar un semáforo programado
+The_chosen_traffic_light_program_is_incompatible_to_this_junction El programa de semáforo elegido es incompatible para este cruce
+Advanced_AI_cannot_be_activated IA Avanzada no puede ser activada
+The_Advanced_Vehicle_AI_cannot_be_activated La IA de vehículos avanzada no puede ser activada debido a que estás usando algún otro mod que modifica el comportamiento de los vehículos (por ejemplo Improved AI o Traffic++)

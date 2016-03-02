@@ -8,9 +8,6 @@ using TrafficManager.State;
 namespace TrafficManager.Custom.AI {
 	class CustomResidentAI : ResidentAI {
 		public bool CustomDoRandomMove() {
-			if (Options.disableSomething2)
-				return false;
-
 			uint vehicleCount = (uint)Singleton<VehicleManager>.instance.m_vehicleCount;
 			uint instanceCount = (uint)Singleton<CitizenManager>.instance.m_instanceCount;
 			if (vehicleCount * 65536u > instanceCount * 16384u) { // why not "vehicleCount * 4u > instanceCount"?

@@ -68,7 +68,7 @@ namespace TrafficManager.Custom.AI {
 					extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicleInfo(vehicleInfo);
 				//Log._Debug($"CustomCitizenAI: citizen instance {instanceID}, id {citizenData.m_citizen}. {vehicleType} {extVehicleType} mayUseTransport={mayUseTransport} wealthLevel={wealthLevel}");
                 bool res = false;
-				if (Options.disableSomething5 || extVehicleType == null)
+				if (extVehicleType == null)
 				// NON-STOCK CODE END //
 					res = Singleton<CustomPathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);
 				// NON-STOCK CODE START //
