@@ -68,7 +68,7 @@ namespace TrafficManager.Custom.AI {
 				simStartFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 			try {
-				if (TrafficLightTool.getToolMode() != ToolMode.AddPrioritySigns) {
+				if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns) {
 					try {
 						TrafficPriority.nodeHousekeeping(nodeId);
 					} catch (Exception e) {

@@ -2,6 +2,18 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.12, 03/03/2016
+- Improved memory usage
+- Bugfix: Adding/removing junctions to/from existing timed traffic lights did not work (thanks to @nieksen for pointing out this problem)
+- Bugfix: Separate timed traffic lights were sometimes not saved (thanks to @nieksen for pointing out this problem)
+- Bugfix: Fixed an initialization error (thanks to @GordonDry for pointing out this problem)
+
+1.6.11, 03/03/2016
+- Added Chinese translation
+- By pressing "Page up"/"Page down" you can now switch between traffic and default map view
+- Size of information icons and signs is now based on your screen resolution
+- UI code refactored 
+
 1.6.10, 03/02/2016
 - Additional controls for vehicle restrictions added
 - Bugfix: Clicking on a Traffic Manager overlay resulted in vanilla game components (e.g. houses, vehicles) being activated 
@@ -30,7 +42,7 @@ A work-in-progress modification for **Cities: Skylines** to add additional road 
 - Updated Polish translation (thanks to @Krzychu1245 for translating!)
 - Updated Portuguese translation (thanks to @igordeeoliveira for translating!)
 - Updated Russian translation (thanks to @FireGames for translating!)
-- Bugfix: U-turning vehicles were not obeying the correct directional traffic light (thanks to@ t1a2l for pointing out this problem)
+- Bugfix: U-turning vehicles were not obeying the correct directional traffic light (thanks to @t1a2l for pointing out this problem)
 
 1.6.5, 02/24/2016
 - Added despawning setting to options dialog

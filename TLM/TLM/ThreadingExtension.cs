@@ -10,22 +10,11 @@ namespace TrafficManager {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 #if !TAM
-			//Debug.Log("Checking for NULL LoadingExtension Instance");
-			if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null) {
+			if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null || LoadingExtension.Instance.UI == null) {
                 return;
             }
 
-           // Log.Message("Getting ToolMode");
-            if (LoadingExtension.Instance.ToolMode != TrafficManagerMode.None &&
-                ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool) {
-                Log._Debug("Closing UI");
-                LoadingExtension.Instance.UI.Close();
-            }
-
-            //Debug.Log("Checking if TrafficLightTool is Visible");
-            //Log.Message("ToolController: " + ToolsModifierControl.toolController);
-            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficLightTool && (LoadingExtension.Instance.UI != null && LoadingExtension.Instance.UI.IsVisible())) {
-                Log._Debug("Closing UI");
+            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficManagerTool && LoadingExtension.Instance.UI.IsVisible()) {
                 LoadingExtension.Instance.UI.Close();
             }
 			

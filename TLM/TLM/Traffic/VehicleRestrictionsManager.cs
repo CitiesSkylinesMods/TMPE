@@ -7,10 +7,6 @@ using TrafficManager.State;
 
 namespace TrafficManager.Traffic {
 	class VehicleRestrictionsManager {
-		static VehicleRestrictionsManager() {
-			
-		}
-
 		/// <summary>
 		/// Determines the allowed vehicle types that may approach the given node from the given segment.
 		/// </summary>
@@ -52,7 +48,9 @@ namespace TrafficManager.Traffic {
 				ushort toNodeId = (laneInfo.m_direction == dir3) ? netManager.m_segments.m_buffer[segmentId].m_endNode : netManager.m_segments.m_buffer[segmentId].m_startNode;
 
 				if (toNodeId == nodeId) {
-					ret.Add(GetAllowedVehicleTypes(segmentId, laneIndex, curLaneId, laneInfo));
+					ExtVehicleType vehicleTypes = GetAllowedVehicleTypes(segmentId, laneIndex, curLaneId, laneInfo);
+					if (vehicleTypes != ExtVehicleType.None)
+						ret.Add(vehicleTypes);
 				}
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				++laneIndex;
@@ -175,6 +173,10 @@ namespace TrafficManager.Traffic {
 
 		public static bool IsEmergencyAllowed(ExtVehicleType? allowedTypes) {
 			return IsAllowed(allowedTypes, ExtVehicleType.Emergency);
+		}
+
+		internal static ExtVehicleType GetAllowedVehicleTypes(object selectedSegment, uint selectedLaneIndex, uint selectedLaneId, NetInfo.Lane selectedLaneInfo) {
+			throw new NotImplementedException();
 		}
 
 		public static bool IsPassengerCarAllowed(ExtVehicleType? allowedTypes) {

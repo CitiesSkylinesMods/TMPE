@@ -83,7 +83,7 @@ namespace TrafficManager.UI {
 				}
 
 				UITrafficManager.deactivateButtons();
-				TrafficLightTool.SetToolMode(ToolMode.None);
+				TrafficManagerTool.SetToolMode(ToolMode.None);
 				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
 
 				_uiShown = false;

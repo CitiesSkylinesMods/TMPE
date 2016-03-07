@@ -6,7 +6,7 @@ namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 		public string Name => "Traffic Manager: President Edition";
 
-		public string Description => "Traffic Manager";
+		public string Description => "Manage your city's traffic";
 
 		public void OnEnabled() {
 			Log._Debug("TrafficManagerMod Enabled");

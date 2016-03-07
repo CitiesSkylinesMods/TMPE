@@ -33,8 +33,11 @@ namespace TrafficManager.State {
 			Log.Info("Loading Traffic Manager: PE Data");
 			StateLoading = true;
 			try {
+				Log.Info("Initializing flags");
 				Flags.OnBeforeLoadData();
+				Log.Info("Initializing segment geometries");
 				CustomRoadAI.OnBeforeLoadData();
+				Log.Info("Initialization done. Loading mod data now.");
 				byte[] data = _serializableData.LoadData(DataId);
 				DeserializeData(data);
 
@@ -123,6 +126,8 @@ namespace TrafficManager.State {
 				StateLoading = false;
 			}
 
+			Log.Info("OnLoadData completed.");
+
 			// load toggled traffic lights
 			//byte[] trafficLight = _serializableData.LoadData("TMPE_Options");
 		}
@@ -206,71 +211,16 @@ namespace TrafficManager.State {
 				Log.Warning("Priority segments data structure undefined!");
 			}
 
-			// load nodes with traffic light simulation
-			/*if (_configuration.NodeDictionary != null) {
-				Log.Info($"Loading {_configuration.NodeDictionary.Count()} traffic light simulations");
-				foreach (var node in _configuration.NodeDictionary) {
-					if (node.Length < 4)
-						continue;
-					if (TrafficLightSimulation.GetNodeSimulation((ushort)node[0]) != null)
-						continue;
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[node[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-						continue;
-#if DEBUG
-					Log._Debug($"Adding node simulation {node[0]}");
-#endif
-					try {
-						TrafficLightSimulation.AddNodeToSimulation((ushort)node[0]);
-						var nodeDict = TrafficLightSimulation.GetNodeSimulation((ushort)node[0]);
-
-						nodeDict.ManualTrafficLights = Convert.ToBoolean(node[1]);
-						nodeDict.TimedTrafficLights = Convert.ToBoolean(node[2]);
-						nodeDict.TimedTrafficLightsActive = Convert.ToBoolean(node[3]);
-					} catch (Exception e) {
-						// if we failed, just means it's old corrupt data. Ignore it and continue.
-						Log.Warning("Error loading data from the NodeDictionary: " + e.Message);
-					}
+			// load vehicle restrictions (warning: has to be done before loading timed lights!)
+			if (_configuration.LaneAllowedVehicleTypes != null) {
+				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
+				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
+					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}");
+					Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, laneVehicleTypes.vehicleTypes);
 				}
 			} else {
-				Log.Warning("Traffic light simulation data structure undefined!");
-			}*/
-
-			// Load live traffic lights
-			/*if (_configuration.ManualSegments != null) {
-				Log.Message($"Loading {_configuration.ManualSegments.Count()} live traffic lights");
-				foreach (var segmentData in _configuration.ManualSegments) {
-					if (segmentData.Length < 10)
-						continue;
-
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segmentData[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-						continue;
-					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentData[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
-						continue;
-					if (TrafficLightsManual.IsSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]))
-						continue;
-#if DEBUG
-					Log.Message($"Adding Light to node {segmentData[0]}, segment {segmentData[1]}");
-#endif
-					try {
-						Flags.setNodeTrafficLight((ushort)segmentData[0], true);
-						TrafficLightsManual.AddSegmentLight((ushort)segmentData[0], (ushort)segmentData[1], RoadBaseAI.TrafficLightState.Green);
-						var segment = TrafficLightsManual.GetSegmentLight((ushort)segmentData[0], (ushort)segmentData[1]);
-						segment.CurrentMode = (ManualSegmentLight.Mode)segmentData[2];
-						segment.LightLeft = (RoadBaseAI.TrafficLightState)segmentData[3];
-						segment.LightMain = (RoadBaseAI.TrafficLightState)segmentData[4];
-						segment.LightRight = (RoadBaseAI.TrafficLightState)segmentData[5];
-						segment.LightPedestrian = (RoadBaseAI.TrafficLightState)segmentData[6];
-						segment.LastChange = (uint)segmentData[7];
-						segment.LastChangeFrame = (uint)segmentData[8];
-						segment.PedestrianEnabled = Convert.ToBoolean(segmentData[9]);
-					} catch (Exception e) {
-						// if we failed, just means it's old corrupt data. Ignore it and continue.
-						Log.Warning("Error loading data from the ManualSegments: " + e.Message);
-					}
-				}
-			} else {
-				Log.Warning("Live traffic lights data structure undefined!");
-			}*/
+				Log.Warning("Lane speed limit structure undefined!");
+			}
 
 			var timedStepCount = 0;
 			var timedStepSegmentCount = 0;
@@ -293,12 +243,16 @@ namespace TrafficManager.State {
 
 					int j = 0;
 					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
+						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
 						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
+							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 							CustomSegmentLights lights = null;
-							if (!step.segmentLights.TryGetValue(e.Key, out lights))
+							if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
+								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
 								continue;
+							}
 							Configuration.CustomSegmentLights cnfLights = e.Value;
 
 							Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
@@ -307,9 +261,12 @@ namespace TrafficManager.State {
 							lights.PedestrianLightState = cnfLights.pedestrianLightState;
 
 							foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
+								Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
 								CustomSegmentLight light = null;
-								if (!lights.CustomLights.TryGetValue(e2.Key, out light))
+								if (!lights.CustomLights.TryGetValue(e2.Key, out light)) {
+									Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
 									continue;
+								}
 								Configuration.CustomSegmentLight cnfLight = e2.Value;
 
 								light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
@@ -528,17 +485,6 @@ namespace TrafficManager.State {
 				Log.Warning("Lane speed limit structure undefined!");
 			}
 
-			// load vehicle restrictions
-			if (_configuration.LaneAllowedVehicleTypes != null) {
-				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
-				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
-					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}");
-					Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, laneVehicleTypes.vehicleTypes);
-				}
-			} else {
-				Log.Warning("Lane speed limit structure undefined!");
-			}
-
 			// Load segment-at-node flags
 			if (_configuration.SegmentNodeConfs != null) {
 				Log.Info($"Loading segment-at-node data. {_configuration.SegmentNodeConfs.Count} elements");
@@ -719,6 +665,8 @@ namespace TrafficManager.State {
 				if (sim == null || !sim.IsTimedLight())
 					return;
 
+				Log._Debug($"Going to save timed light at node {i}.");
+
 				var timedNode = sim.TimedLight;
 				timedNode.handleNewSegments();
 
@@ -731,6 +679,7 @@ namespace TrafficManager.State {
 				cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
 				for (var j = 0; j < timedNode.NumSteps(); j++) {
+					Log._Debug($"Saving timed light step {j} at node {i}.");
 					TimedTrafficLightsStep timedStep = timedNode.Steps[j];
 					Configuration.TimedTrafficLightsStep cnfTimedStep = new Configuration.TimedTrafficLightsStep();
 					cnfTimedLights.timedSteps.Add(cnfTimedStep);
@@ -740,6 +689,8 @@ namespace TrafficManager.State {
 					cnfTimedStep.waitFlowBalance = timedStep.waitFlowBalance;
 					cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
 					foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.segmentLights) {
+						Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {i}.");
+
 						CustomSegmentLights segLights = e.Value;
 						Configuration.CustomSegmentLights cnfSegLights = new Configuration.CustomSegmentLights();
 						cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
@@ -753,6 +704,8 @@ namespace TrafficManager.State {
 						Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
 
 						foreach (KeyValuePair<Traffic.ExtVehicleType, CustomSegmentLight> e2 in segLights.CustomLights) {
+							Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {i}.");
+
 							CustomSegmentLight segLight = e2.Value;
 							Configuration.CustomSegmentLight cnfSegLight = new Configuration.CustomSegmentLight();
 							cnfSegLights.customLights.Add(e2.Key, cnfSegLight);

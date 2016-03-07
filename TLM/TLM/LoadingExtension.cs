@@ -39,7 +39,7 @@ namespace TrafficManager {
         public bool NodeSimulationLoaded { get; set; }
 		public List<Detour> Detours { get; set; }
         public TrafficManagerMode ToolMode { get; set; }
-        public TrafficLightTool TrafficLightTool { get; set; }
+        public TrafficManagerTool TrafficManagerTool { get; set; }
 #if !TAM
 		public UIBase UI { get; set; }
 #endif
@@ -740,7 +740,10 @@ namespace TrafficManager {
 				}
 
 				if (detourFailed) {
+					Log.Info("Detours failed");
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+				} else {
+					Log.Info("Detours successful");
 				}
 
 				LoadingExtension.Instance.DetourInited = true;
@@ -752,7 +755,7 @@ namespace TrafficManager {
 		}
 
 		public override void OnCreated(ILoading loading) {
-            SelfDestruct.DestructOldInstances(this);
+            //SelfDestruct.DestructOldInstances(this);
 
             base.OnCreated(loading);
 
@@ -797,7 +800,7 @@ namespace TrafficManager {
 		}
 
 		public override void OnLevelLoaded(LoadMode mode) {
-            Log._Debug("OnLevelLoaded calling base method");
+            Log.Info("OnLevelLoaded");
             base.OnLevelLoaded(mode);
 
             Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
@@ -821,7 +824,7 @@ namespace TrafficManager {
 
 			if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 				try {
-					Log._Debug("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+					Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
 					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
 					var stockPathManager = PathManager.instance;
@@ -860,10 +863,11 @@ namespace TrafficManager {
 				}
 			}
 
-			Log._Debug("Adding Controls to UI.");
+			Log.Info("Adding Controls to UI.");
 			UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
 
 			initDetours();
+			Log.Info("OnLevelLoaded complete.");
 #endif
 		}
 
@@ -925,22 +929,22 @@ namespace TrafficManager {
         }
 
         public void EnableTool() {
-            if (TrafficLightTool == null) {
-                TrafficLightTool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficLightTool>() ??
-                                   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficLightTool>();
+            if (TrafficManagerTool == null) {
+                TrafficManagerTool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
+                                   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
             }
 
-            ToolsModifierControl.toolController.CurrentTool = TrafficLightTool;
-            ToolsModifierControl.SetTool<TrafficLightTool>();
+            ToolsModifierControl.toolController.CurrentTool = TrafficManagerTool;
+            ToolsModifierControl.SetTool<TrafficManagerTool>();
         }
 
         private void DestroyTool() {
-            if (TrafficLightTool != null) {
+            if (TrafficManagerTool != null) {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
 
-                Object.Destroy(TrafficLightTool);
-                TrafficLightTool = null;
+                Object.Destroy(TrafficManagerTool);
+                TrafficManagerTool = null;
             }
         }
 	}

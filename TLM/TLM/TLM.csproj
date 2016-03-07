@@ -82,11 +82,18 @@
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
-    <Compile Include="CustomNetTool.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Traffic\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\SubTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\LaneArrowTool.cs" />
+    <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
+    <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
     <Compile Include="UI\Translation.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Traffic\Direction.cs" />
@@ -105,7 +112,7 @@
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="TrafficLight\CustomTrafficLights.cs" />
     <Compile Include="TrafficLight\TimedTrafficLights.cs" />
-    <Compile Include="UI\TrafficLightTool.cs" />
+    <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\TrafficLightToolTextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
@@ -153,6 +160,8 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_zh-tw.txt" />
+    <EmbeddedResource Include="Resources\lang_zh-cn.txt" />
     <EmbeddedResource Include="Resources\lang_es.txt" />
     <EmbeddedResource Include="Resources\lanechange_allowed.png" />
     <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
