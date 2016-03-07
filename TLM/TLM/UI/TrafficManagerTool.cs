@@ -301,6 +301,7 @@ namespace TrafficManager.UI {
 					HoveredNodeId = nodeOutput.m_netNode;
 				}
 
+				// find currently hovered segment
 				var segmentInput = new RaycastInput(this.m_mouseRay, this.m_mouseRayLength);
 				segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
 				segmentInput.m_netService.m_service = ItemClass.Service.Road;
@@ -315,6 +316,7 @@ namespace TrafficManager.UI {
 					HoveredSegmentId = segmentOutput.m_netSegment;
 
 					if (HoveredNodeId <= 0) {
+						// alternative way to get a node hit: check distance to start and end nodes of the segment
 						ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_startNode;
 						ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_endNode;
 
