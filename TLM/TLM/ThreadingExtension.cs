@@ -17,11 +17,6 @@ namespace TrafficManager {
             if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficManagerTool && LoadingExtension.Instance.UI.IsVisible()) {
                 LoadingExtension.Instance.UI.Close();
             }
-			
-            if (!LoadingExtension.Instance.NodeSimulationLoaded) {
-                LoadingExtension.Instance.NodeSimulationLoaded = true;
-                ToolsModifierControl.toolController.gameObject.AddComponent<CustomRoadAI>();
-            }
 
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 LoadingExtension.Instance.UI.Close();

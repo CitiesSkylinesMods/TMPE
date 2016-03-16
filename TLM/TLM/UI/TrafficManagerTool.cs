@@ -52,15 +52,16 @@ namespace TrafficManager.UI {
 			return m_toolController;
 		}
 
-		internal static Rect ResizeGUI(Rect rect) {
-			var rectX = (rect.x / 800f) * (float)Screen.currentResolution.width;
-			var rectY = (rect.y / 600f) * (float)Screen.currentResolution.height;
+		internal static Rect MoveGUI(Rect rect) {
+			/*var rectX = (rect.x / 800f) * (float)Screen.currentResolution.width;
+			var rectY = (rect.y / 600f) * (float)Screen.currentResolution.height;*/
 
-			return new Rect(rectX, rectY, rect.width, rect.height);
+			//return new Rect(rectX, rectY, rect.width, rect.height);
+			return new Rect(85f + (float)Translation.getMenuWidth() + 50f + rect.x, 80f + 10f + rect.y, rect.width, rect.height);
 		}
 
 		internal float GetBaseZoom() {
-			return (float)Screen.currentResolution.width / 1920f;
+			return (float)Screen.currentResolution.height / 1200f;
 		}
 
 		protected override void Awake() {
@@ -329,13 +330,13 @@ namespace TrafficManager.UI {
 					}
 				}
 
-				if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
+				/*if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
 					Log._Debug($"*** Mouse ray @ node {HoveredNodeId}, segment {HoveredSegmentId}, toolMode={GetToolMode()}");
-                }
+                }*/
 
 				return (HoveredNodeId != 0 || HoveredSegmentId != 0);
 			} else {
-				Log._Debug($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {activeSubTool == null} {activeSubTool.IsCursorInPanel()}");
+				//Log._Debug($"Mouse ray invalid: {UIView.IsInsideUI()} {Cursor.visible} {activeSubTool == null} {activeSubTool.IsCursorInPanel()}");
             }
 
 			return mouseRayValid;

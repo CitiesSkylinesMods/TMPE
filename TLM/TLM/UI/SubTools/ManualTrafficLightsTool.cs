@@ -224,7 +224,7 @@ namespace TrafficManager.UI.SubTools {
 			if (!MainTool.CheckClicked())
 				return true;
 
-			segmentLights.ManualPedestrianMode = true;
+			segmentLights.ManualPedestrianMode = !segmentLights.ManualPedestrianMode;
 			return true;
 		}
 

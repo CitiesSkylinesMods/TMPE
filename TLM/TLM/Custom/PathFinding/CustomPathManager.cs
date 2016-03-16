@@ -130,5 +130,16 @@ namespace TrafficManager.Custom.PathFinding {
 			this.ReleasePath(unit);
 			return false;
 		}
+
+		private void StopPathFinds() {
+			foreach (CustomPathFind pathFind in _replacementPathFinds) {
+				UnityEngine.Object.Destroy(pathFind);
+			}
+		}
+
+		protected virtual void OnDestroy() {
+			Log._Debug("CustomPathManager: OnDestroy");
+			StopPathFinds();
+		}
 	}
 }

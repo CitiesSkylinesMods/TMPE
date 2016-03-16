@@ -2,6 +2,16 @@
 A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
 
 # Changelog
+1.6.13, 03/16/2016
+- Added Dutch translation
+- The pedestrian light mode of a traffic light can now be switched back to automatic
+- Vehicles approaching a different speed limit change their speed more gradually
+- The size of signs and symbols in the overlay is determined by screen resolution height, not by width
+- Path-finding: Performance improvements
+- Path-finding: Fine-tuned lane changing behaviour
+- Bugfix: After loading another savegame, timed traffic lights stopped working for a certain time
+- Bugfix: Lane speed calculation corrected
+
 1.6.12, 03/03/2016
 - Improved memory usage
 - Bugfix: Adding/removing junctions to/from existing timed traffic lights did not work (thanks to @nieksen for pointing out this problem)

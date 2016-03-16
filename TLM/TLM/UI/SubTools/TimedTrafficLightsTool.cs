@@ -17,8 +17,8 @@ namespace TrafficManager.UI.SubTools {
 		private bool nodeSelectionLocked = false;
 		private List<ushort> SelectedNodeIndexes = new List<ushort>();
 		private bool _cursorInSecondaryPanel;
-		private Rect _windowRect = TrafficManagerTool.ResizeGUI(new Rect(155, 45, 480, 350));
-		private Rect _windowRect2 = TrafficManagerTool.ResizeGUI(new Rect(155, 45, 300, 150));
+		private Rect _windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 480, 350));
+		private Rect _windowRect2 = TrafficManagerTool.MoveGUI(new Rect(0, 0, 300, 150));
 		private bool _timedPanelAdd = false;
 		private int _timedEditStep = -1;
 		private ushort _hoveredNode = 0;
@@ -661,7 +661,7 @@ namespace TrafficManager.UI.SubTools {
 								hoveredSegment = true;
 
 								if (MainTool.CheckClicked()) {
-									liveSegmentLights.ManualPedestrianMode = true;
+									liveSegmentLights.ManualPedestrianMode = !liveSegmentLights.ManualPedestrianMode;
 								}
 							}
 						}

@@ -82,8 +82,8 @@ namespace TrafficManager.State {
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 2f; // debug value
-		public static float someValue2 = 1.5f; // debug value
+		public static float someValue = 5f; // debug value
+		public static float someValue2 = 4f; // debug value
 		public static float someValue3 = 2f; // debug value
 		public static float someValue4 = 5f; // debug value
 

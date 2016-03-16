@@ -18,6 +18,7 @@ namespace TrafficManager.UI.SubTools {
 		private static Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 		private static float speedLimitSignSize = 80f;
 		private Texture2D SecondPanelTexture;
+		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 210));
 
 		public SpeedLimitsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			SecondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
@@ -46,7 +47,6 @@ namespace TrafficManager.UI.SubTools {
 				}
 			};
 
-			var windowRect = TrafficManagerTool.ResizeGUI(new Rect(155, 45, 7 * 105, 210));
 			GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"), style);
 			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 			overlayHandleHovered = false;

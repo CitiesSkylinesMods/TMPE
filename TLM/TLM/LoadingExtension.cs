@@ -56,12 +56,13 @@ namespace TrafficManager {
 					RedirectionHelper.RevertRedirect(d.OriginalMethod, d.Redirect);
 				}
 				LoadingExtension.Instance.DetourInited = false;
+				Detours.Clear();
 			}
 		}
 
 		public void initDetours() {
-			Log.Info("Init detours");
 			if (!LoadingExtension.Instance.DetourInited) {
+				Log.Info("Init detours");
 				bool detourFailed = false;
 
 				Log.Info("Redirecting Vehicle AI Calculate Segment Calls (1)");
@@ -777,10 +778,12 @@ namespace TrafficManager {
 		public override void OnLevelUnloading() {
 			Log.Info("OnLevelUnloading");
 			base.OnLevelUnloading();
-			if (Instance == null)
-				Instance = this;
-			//revertDetours();
+			Instance = this;
+			revertDetours();
 			gameLoaded = false;
+
+			Object.Destroy(UI);
+			UI = null;
 
 			try {
 				TrafficPriority.OnLevelUnloading();
@@ -788,11 +791,9 @@ namespace TrafficManager {
 				CustomRoadAI.OnLevelUnloading();
 				CustomTrafficLights.OnLevelUnloading();
 				TrafficLightSimulation.OnLevelUnloading();
+				VehicleRestrictionsManager.OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
-
-				if (Instance != null)
-					Instance.NodeSimulationLoaded = false;
 			} catch (Exception e) {
 				Log.Error("Exception unloading mod. " + e.Message);
 				// ignored - prevents collision with other mods
@@ -856,8 +857,11 @@ namespace TrafficManager {
 
 					Object.Destroy(stockPathManager, 10f);
 
+					Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType().ToString());
+
 					IsPathManagerReplaced = true;
-				} catch (Exception) {
+				} catch (Exception ex) {
+					Log.Error($"Path manager replacement error: {ex.ToString()}");
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
 					IsPathManagerCompatible = false;
 				}
@@ -886,12 +890,12 @@ namespace TrafficManager {
 				}
 
 				if (loadingExtensions != null) {
-					Log._Debug("Loaded extensions:");
+					Log.Info("Loaded extensions:");
 					foreach (ILoadingExtension extension in loadingExtensions) {
 						if (extension.GetType().Namespace == null)
 							continue;
 
-						Log._Debug($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
+						Log.Info($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
 						var namespaceStr = extension.GetType().Namespace.ToString();
 						if ("Improved_AI".Equals(namespaceStr) || "CSL_Traffic".Equals(namespaceStr)) {
 							IsPathManagerCompatible = false; // Improved AI found
