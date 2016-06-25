@@ -1,4 +1,5 @@
 ﻿#define DEBUGHKx
+#define DEBUGGETx
 
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,10 @@ namespace TrafficManager.TrafficLight {
 			get; private set;
 		} = new LinkedList<ExtVehicleType>();
 
+		public Dictionary<byte, ExtVehicleType> VehicleTypeByLaneIndex {
+			get; private set;
+		} = new Dictionary<byte, ExtVehicleType>();
+
 		/// <summary>
 		/// Vehicles types that have their own traffic light
 		/// </summary>
@@ -66,18 +71,30 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public RoadBaseAI.TrafficLightState GetAutoPedestrianLightState() {
-			RoadBaseAI.TrafficLightState? vehicleState = null;
+			RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Green;
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
-				RoadBaseAI.TrafficLightState visualState = e.Value.GetVisualLightState();
-				if (vehicleState == null || visualState != RoadBaseAI.TrafficLightState.Red)
-					vehicleState = visualState;
-				if (vehicleState == RoadBaseAI.TrafficLightState.Green)
+				RoadBaseAI.TrafficLightState vehState = e.Value.GetVisualLightState();
+
+				if (vehState == RoadBaseAI.TrafficLightState.Red)
+					continue;
+
+				if (vehState == RoadBaseAI.TrafficLightState.Green) {
+					pedState = RoadBaseAI.TrafficLightState.Red;
 					break;
+				}
+
+				if (vehState == RoadBaseAI.TrafficLightState.RedToGreen) {
+					pedState = RoadBaseAI.TrafficLightState.GreenToRed;
+					continue;
+				}
+
+				if (vehState == RoadBaseAI.TrafficLightState.GreenToRed &&
+					pedState != RoadBaseAI.TrafficLightState.GreenToRed) {
+					pedState = RoadBaseAI.TrafficLightState.RedToGreen;
+				}
 			}
-			if (vehicleState == null) {
-				vehicleState = RoadBaseAI.TrafficLightState.Red;
-			}
-			return CustomSegmentLight.InvertLight((RoadBaseAI.TrafficLightState)vehicleState);
+			
+			return pedState;
 		}
 
 		public bool ManualPedestrianMode {
@@ -116,13 +133,13 @@ namespace TrafficManager.TrafficLight {
 			housekeeping(false, mainState, leftState, rightState, pedState);
 		}
 
-		private static ExtVehicleType[] singleLaneVehicleTypes = new ExtVehicleType[] { ExtVehicleType.Tram, ExtVehicleType.Bus | ExtVehicleType.Taxi, ExtVehicleType.Service, ExtVehicleType.CargoTruck };
+		private static ExtVehicleType[] singleLaneVehicleTypes = new ExtVehicleType[] { ExtVehicleType.Tram, ExtVehicleType.Service, ExtVehicleType.CargoTruck, ExtVehicleType.RoadPublicTransport | ExtVehicleType.Service };
 
 		internal void housekeeping(bool mayDelete, RoadBaseAI.TrafficLightState mainState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState leftState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState rightState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Red) {
 			// we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)
 
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>();
-			HashSet<ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypesAsSet(segmentId, nodeId);
+			Dictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict(segmentId, nodeId);
 			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, nodeId);
 			SeparateVehicleTypes = ExtVehicleType.None;
 #if DEBUGHK
@@ -130,10 +147,15 @@ namespace TrafficManager.TrafficLight {
 #endif
 			bool addPedestrianLight = false;
 			uint numLights = 0;
-			foreach (ExtVehicleType allowedTypes in allAllowedTypes) {
+			VehicleTypeByLaneIndex.Clear();
+			HashSet<byte> laneIndicesWithoutSeparateLights = new HashSet<byte>(allAllowedTypes.Keys);
+			foreach (KeyValuePair<byte, ExtVehicleType> e in allAllowedTypes) {
+				byte laneIndex = e.Key;
+				ExtVehicleType allowedTypes = e.Value;
+
 				foreach (ExtVehicleType mask in singleLaneVehicleTypes) {
 					if (setupLights.Contains(mask))
-						continue;
+						break;
 
 					if ((allowedTypes & mask) != ExtVehicleType.None && (allowedTypes & ~(mask | ExtVehicleType.Emergency)) == ExtVehicleType.None) {
 #if DEBUGHK
@@ -144,6 +166,8 @@ namespace TrafficManager.TrafficLight {
 							CustomLights.Add(mask, new TrafficLight.CustomSegmentLight(this, nodeId, segmentId, mainState, leftState, rightState));
 							VehicleTypes.AddFirst(mask);
 						}
+						VehicleTypeByLaneIndex[laneIndex] = mask;
+						laneIndicesWithoutSeparateLights.Remove(laneIndex);
 						++numLights;
 						addPedestrianLight = true;
 						autoPedestrianVehicleType = mask;
@@ -167,6 +191,8 @@ namespace TrafficManager.TrafficLight {
 				}
 				autoPedestrianVehicleType = mainVehicleType;
 				mainSegmentLight = CustomLights[mainVehicleType];
+				foreach (byte laneIndex in laneIndicesWithoutSeparateLights)
+					VehicleTypeByLaneIndex[laneIndex] = ExtVehicleType.None;
 				addPedestrianLight = allAllowedMask == ExtVehicleType.None || (allAllowedMask & ~ExtVehicleType.RailVehicle) != ExtVehicleType.None;
 			} else {
 				addPedestrianLight = true;
@@ -211,6 +237,10 @@ namespace TrafficManager.TrafficLight {
 			} else {
 				pedestrianLightState = null;
 			}
+
+#if DEBUGHK
+			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: Housekeeping complete. VehicleTypeByLaneIndex={string.Join("; ", VehicleTypeByLaneIndex.Select(x => x.Key + "=" + x.Value).ToArray())} CustomLights={string.Join("; ", CustomLights.Select(x => x.Key.ToString()).ToArray())}");
+#endif
 		}
 
 		public void UpdateVisuals() {
@@ -241,16 +271,39 @@ namespace TrafficManager.TrafficLight {
 			return clone;
 		}
 
-		internal CustomSegmentLight GetCustomLight(ExtVehicleType vehicleType) {
-			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
-				if ((e.Key & vehicleType) != ExtVehicleType.None)
-					return e.Value;
+		internal CustomSegmentLight GetCustomLight(byte laneIndex) {
+			if (!VehicleTypeByLaneIndex.ContainsKey(laneIndex)) {
+#if DEBUGGET
+				Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): No vehicle type found for lane index");
+#endif
+				return mainSegmentLight;
 			}
+			ExtVehicleType vehicleType = VehicleTypeByLaneIndex[laneIndex];
+#if DEBUGGET
+			Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): Vehicle type is {vehicleType}");
+#endif
+			if (!CustomLights.ContainsKey(vehicleType)) {
+#if DEBUGGET
+				Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): No custom light found for vehicle type {vehicleType}");
+#endif
+				return mainSegmentLight;
+			}
+			CustomSegmentLight light = CustomLights[vehicleType];
+#if DEBUGGET
+			Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): Returning custom light for vehicle type {vehicleType}");
+#endif
+
+			return light;
+		}
+
+		internal CustomSegmentLight GetCustomLight(ExtVehicleType vehicleType) {
+			if (CustomLights.ContainsKey(vehicleType))
+				return CustomLights[vehicleType];
+			else
+				return mainSegmentLight;
 
 			/*if (vehicleType != ExtVehicleType.None)
 				Log._Debug($"No traffic light for vehicle type {vehicleType} defined at segment {segmentId}, node {nodeId}.");*/
-			
-			return mainSegmentLight;
 		}
 
 		internal void MakeRed() {

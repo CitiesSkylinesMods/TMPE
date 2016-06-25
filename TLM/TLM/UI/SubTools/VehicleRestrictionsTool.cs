@@ -116,19 +116,14 @@ namespace TrafficManager.UI.SubTools {
 					uint laneIndex = (uint)laneData[2];
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = ExtVehicleType.None;
-					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
-						baseMask = ExtVehicleType.RoadVehicle;
-					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
-						baseMask = ExtVehicleType.RailVehicle;
-					}
+					ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneInfo);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
 
 					ExtVehicleType allowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo);
 					allowedTypes = ~allowedTypes & baseMask;
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, laneIndex, laneId, allowedTypes);
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, allowedTypes);
 				}
 			}
 
@@ -136,115 +131,110 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button(Translation.GetString("Allow_all_vehicles"))) {
 				// allow all vehicle types
 
-				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, segmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
 					uint laneIndex = (uint)laneData[2];
-					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = ExtVehicleType.None;
-					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
-						baseMask = ExtVehicleType.RoadVehicle;
-					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
-						baseMask = ExtVehicleType.RailVehicle;
-					}
+					ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneInfo);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
 
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, laneIndex, laneId, baseMask);
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, baseMask);
 				}
 			}
 
 			if (GUILayout.Button(Translation.GetString("Ban_all_vehicles"))) {
 				// ban all vehicle types
 
-				NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, segmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
 					uint laneIndex = (uint)laneData[2];
-					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = ExtVehicleType.None;
-					if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
-						baseMask = ExtVehicleType.RoadVehicle;
-					} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
-						baseMask = ExtVehicleType.RailVehicle;
-					}
-
-					if (baseMask == ExtVehicleType.None)
-						continue;
-
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, laneIndex, laneId, ~baseMask);
+					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, ExtVehicleType.None);
 				}
 			}
 			GUILayout.EndHorizontal();
 
 			if (GUILayout.Button(Translation.GetString("Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions"))) {
-				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null);
+				ApplyRestrictionsToAllSegments();
+			}
+		}
 
-				LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
-				HashSet<ushort> processedNodes = new HashSet<ushort>();
-				HashSet<ushort> processedSegments = new HashSet<ushort>();
-				processedSegments.Add(SelectedSegmentId);
+		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {
+			NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+			List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null);
 
-				ushort selectedStartNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode;
-				ushort selectedEndNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_endNode;
+			LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
+			HashSet<ushort> processedNodes = new HashSet<ushort>();
+			HashSet<ushort> processedSegments = new HashSet<ushort>();
+			processedSegments.Add(SelectedSegmentId);
 
-				if (selectedStartNodeId != 0)
-					nodesToProcess.AddFirst(selectedStartNodeId);
-				if (selectedEndNodeId != 0)
-					nodesToProcess.AddFirst(selectedEndNodeId);
+			ushort selectedStartNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode;
+			ushort selectedEndNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_endNode;
 
-				while (nodesToProcess.First != null) {
-					ushort nodeId = nodesToProcess.First.Value;
-					nodesToProcess.RemoveFirst();
-					processedNodes.Add(nodeId);
+			if (selectedStartNodeId != 0)
+				nodesToProcess.AddFirst(selectedStartNodeId);
+			if (selectedEndNodeId != 0)
+				nodesToProcess.AddFirst(selectedEndNodeId);
 
-					if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2)
-						continue; // junction. stop.
+			while (nodesToProcess.First != null) {
+				ushort nodeId = nodesToProcess.First.Value;
+				nodesToProcess.RemoveFirst();
+				processedNodes.Add(nodeId);
 
-					// explore segments at node
-					for (var s = 0; s < 8; s++) {
-						var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+				if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2)
+					continue; // junction. stop.
 
-						if (segmentId <= 0 || processedSegments.Contains(segmentId))
-							continue;
-						processedSegments.Add(segmentId);
+				// explore segments at node
+				for (var s = 0; s < 8; s++) {
+					var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
 
-						NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-						List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null);
+					if (segmentId <= 0 || processedSegments.Contains(segmentId))
+						continue;
+					processedSegments.Add(segmentId);
 
-						if (sortedLanes.Count == selectedSortedLanes.Count) {
-							// number of lanes matches selected segment
-							for (int i = 0; i < sortedLanes.Count; ++i) {
-								object[] selectedLaneData = selectedSortedLanes[i];
-								object[] laneData = sortedLanes[i];
+					NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+					List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null);
 
-								uint selectedLaneId = (uint)selectedLaneData[0];
-								uint selectedLaneIndex = (uint)selectedLaneData[2];
-								NetInfo.Lane selectedLaneInfo = segmentInfo.m_lanes[selectedLaneIndex];
+					if (sortedLanes.Count == selectedSortedLanes.Count) {
+						// number of lanes matches selected segment
+						int sli = -1;
+						for (int i = 0; i < sortedLanes.Count; ++i) {
+							++sli;
 
-								uint laneId = (uint)laneData[0];
-								uint laneIndex = (uint)laneData[2];
-								NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+							if (sortedLaneIndex != null && sli != sortedLaneIndex)
+								continue;
 
-								// apply restrictions of selected segment & lane
-								VehicleRestrictionsManager.SetAllowedVehicleTypes(segmentId, laneIndex, laneId, VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
-							}
+							object[] selectedLaneData = selectedSortedLanes[i];
+							object[] laneData = sortedLanes[i];
 
-							// add nodes to explore
-							ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
-							ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+							uint selectedLaneId = (uint)selectedLaneData[0];
+							uint selectedLaneIndex = (uint)selectedLaneData[2];
+							NetInfo.Lane selectedLaneInfo = segmentInfo.m_lanes[selectedLaneIndex];
 
-							if (startNodeId != 0 && !processedNodes.Contains(startNodeId))
-								nodesToProcess.AddFirst(startNodeId);
-							if (endNodeId != 0 && !processedNodes.Contains(endNodeId))
-								nodesToProcess.AddFirst(endNodeId);
+							uint laneId = (uint)laneData[0];
+							uint laneIndex = (uint)laneData[2];
+							NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+							// apply restrictions of selected segment & lane
+							VehicleRestrictionsManager.SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
 						}
+
+						// add nodes to explore
+						ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
+						ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+
+						if (startNodeId != 0 && !processedNodes.Contains(startNodeId))
+							nodesToProcess.AddFirst(startNodeId);
+						if (endNodeId != 0 && !processedNodes.Contains(endNodeId))
+							nodesToProcess.AddFirst(endNodeId);
 					}
 				}
 			}
@@ -297,7 +287,9 @@ namespace TrafficManager.UI.SubTools {
 			List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null);
 			bool hovered = false;
 			HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
+			int sortedLaneIndex = -1;
 			foreach (object[] laneData in sortedLanes) {
+				++sortedLaneIndex;
 				uint laneId = (uint)laneData[0];
 				uint laneIndex = (uint)laneData[2];
 
@@ -353,6 +345,11 @@ namespace TrafficManager.UI.SubTools {
 						// toggle vehicle restrictions
 						//Log._Debug($"Setting vehicle restrictions of segment {segmentId}, lane idx {laneIndex}, {vehicleType.ToString()} to {!allowed}");
 						VehicleRestrictionsManager.ToggleAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType, !allowed);
+
+						// TODO use SegmentTraverser
+						if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+							ApplyRestrictionsToAllSegments(sortedLaneIndex);
+						}
 					}
 
 					++y;

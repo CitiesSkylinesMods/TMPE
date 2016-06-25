@@ -18,6 +18,7 @@ namespace TrafficManager.Custom.AI {
 		public bool CustomStartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
 			NetInfo.LaneType laneType = NetInfo.LaneType.Pedestrian;
 			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
+			bool randomParking = false;
 			if (vehicleInfo != null) {
 				if (vehicleInfo.m_class.m_subService == ItemClass.SubService.PublicTransportTaxi) {
 					if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTaxi) == CitizenInstance.Flags.None && Singleton<DistrictManager>.instance.m_districts.m_buffer[0].m_productionData.m_finalTaxiCapacity != 0u) {
@@ -30,6 +31,9 @@ namespace TrafficManager.Custom.AI {
 				} else {
 					laneType |= NetInfo.LaneType.Vehicle;
 					vehicleType |= vehicleInfo.m_vehicleType;
+					if (citizenData.m_targetBuilding != 0 && Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)citizenData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office) {
+						randomParking = true;
+					}
 				}
 			}
 			PathUnit.Position vehiclePosition = default(PathUnit.Position);
@@ -63,17 +67,11 @@ namespace TrafficManager.Custom.AI {
 				PathUnit.Position position2 = default(PathUnit.Position);
 				uint path;
 				// NON-STOCK CODE START //
-				ExtVehicleType? extVehicleType = null;
-				if (vehicleInfo != null)
-					extVehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicleInfo(vehicleInfo);
+				ExtVehicleType extVehicleType = ExtVehicleType.PassengerCar;
+				if (vehicleInfo != null && vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle)
+					extVehicleType = ExtVehicleType.Bicycle;
 				//Log._Debug($"CustomCitizenAI: citizen instance {instanceID}, id {citizenData.m_citizen}. {vehicleType} {extVehicleType} mayUseTransport={mayUseTransport} wealthLevel={wealthLevel}");
-                bool res = false;
-				if (extVehicleType == null)
-				// NON-STOCK CODE END //
-					res = Singleton<CustomPathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);
-				// NON-STOCK CODE START //
-				else
-					res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)extVehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false);
+                bool res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)extVehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
 				// NON-STOCK CODE END //
 				if (res) {
 					if (citizenData.m_path != 0u) {

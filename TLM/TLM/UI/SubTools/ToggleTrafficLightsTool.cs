@@ -23,8 +23,8 @@ namespace TrafficManager.UI.SubTools {
 					if (sim != null && sim.IsTimedLight()) {
 						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
 					} else {
-						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, true); // TODO refactor!
-						Flags.setNodeTrafficLight(HoveredNodeId, false); // TODO refactor!
+						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, true, true);
+						Flags.setNodeTrafficLight(HoveredNodeId, false);
 					}
 				} else {
 					TrafficPriority.RemovePrioritySegments(HoveredNodeId);

@@ -1,116 +1,117 @@
-﻿Switch_traffic_lights 红绿灯开关 
-Add_priority_signs 道路优先权   
-Manual_traffic_lights 红绿灯 控制    
-Timed_traffic_lights 红绿灯 设置   
-Change_lane_arrows 行驶道路箭头
-Clear_Traffic 清除车辆 
-Disable_despawning 禁止车辆消失  
-Enable_despawning 允许车辆消失 
-NODE_IS_LIGHT 路口有红绿灯。\选择“红绿灯开并”，点击该节点删除红绿灯。
-NODE_IS_TIMED_LIGHT 路口是一个定时脚本的一部分，\请选择“红绿灯设置”，单击该节点并单击“删除”。
-Select_nodes_windowTitle 选择路口
-Select_nodes 选择路口
-Node 路口
-Deselect_all_nodes 取消所选路口
-Setup_timed_traffic_light 设置定时红绿灯    
-State 状态
-Skip 跳过
-up 向上
-down 向下
-View 视图
-Edit 编辑
-Delete 删除
-Timed_traffic_lights_manager 红绿灯管理器          
-Add_step 添加  
-Remove_timed_traffic_light 删除定时红绿灯     
-Min._Time: 秒.最小
-Max._Time: 秒.最大
-Save 保存
-Add 添
-Sensitivity 灵敏度  
-Very_Low 很低  
+Switch_traffic_lights 增刪號誌燈
+Add_priority_signs 增訂優先通行權
+Manual_traffic_lights 手控號誌燈
+Timed_traffic_lights 號誌燈時相設定
+Change_lane_arrows 改變車道遵行方向
+Clear_Traffic 消除所有車輛
+Disable_despawning 久塞車輛永不消失
+Enable_despawning 允許久塞車輛消失
+NODE_IS_LIGHT 具有預設燈號的道路交岔點。\n選用「增刪號誌燈」並點選該道路交岔點來刪除號誌燈。
+NODE_IS_TIMED_LIGHT 具有自訂程序燈號的道路交岔點。\n先選用「號誌燈時相設定」，再點選該道路交岔點並點選「移除」以移除設定。
+Select_nodes_windowTitle 請點選道路交岔點
+Select_nodes 請點選道路交岔點
+Node 道路交岔點
+Deselect_all_nodes 取消選擇所有道路交岔點
+Setup_timed_traffic_light 設定號誌燈時相
+State 狀態
+Skip 跳過
+up 上移
+down 下移
+View 檢視
+Edit 編輯
+Delete 刪除
+Timed_traffic_lights_manager 號誌燈時相設定工具
+Add_step 增加時相
+Remove_timed_traffic_light 移除號誌燈時相設定
+Min._Time: 最短時間
+Max._Time: 最長時間
+Save 儲存
+Add 增加
+Sensitivity 靈敏度
+Very_Low 非常低
 Low 低
-Medium 中   
-High 高 
+Medium 中
+High 高
 Very_high 非常高
-Extreme_long_green/red_phases 极长 红/绿 灯时间
-Very_long_green/red_phases 非常长 红/绿 灯时间
-Long_green/red_phases 较长 红/绿 灯时间
-Moderate_green/red_phases 适当 红/绿 灯时间   
-Short_green/red_phases 较短 红/绿 灯相间
-Very_short_green/red_phases 非常短 红/绿 灯时间
-Extreme_short_green/red_phases 极短 红/绿 灯时间
-Hide_counters 隐藏计数器
-Show_counters 显示计数器
-Start 开始
+Extreme_long_green/red_phases 最長的紅、綠燈時相
+Very_long_green/red_phases 非常長的紅、綠燈時相
+Long_green/red_phases 稍長的紅、綠燈時相
+Moderate_green/red_phases 中等的紅、綠燈時相
+Short_green/red_phases 稍短的紅、綠燈時相
+Very_short_green/red_phases 非常短的紅、綠燈時相
+Extreme_short_green/red_phases 最短的紅、綠燈時相
+Hide_counters 隱藏讀秒
+Show_counters 顯示讀秒
+Start 啟用
 Stop 停止
-Enable_test_mode_(stay_in_current_step) 测试模式（保持当前状态）
-avg._flow 平均流量
-avg._wait 平均等待
-min/max 最短/最长
-Lane 车道
-Set_Speed 设定速度 {0}
-Max_speed 最大速度
-Segment 道路
-incoming 传入
-Enable_Advanced_Vehicle_AI 启用高级车辆人工AI
-Vehicles_may_enter_blocked_junctions 车辆可以在路口停车      
-All_vehicles_may_ignore_lane_arrows 所有车辆会无视车道箭头
-Busses_may_ignore_lane_arrows 公交会无视车道箭头  
-Reckless_driving 鲁莽驾驶（测试版）    
-TMPE_Title 交通管理:总统版      
-Settings_are_defined_for_each_savegame_separately MOD每个设置 说明文档地址
-Simulation_accuracy 模拟真实度（高会影响性能）            
-Enable_highway_specific_lane_merging/splitting_rules 高速公路特定车道 合流/分离 规则       
-Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 司机会频率变更车道（须要启用高级人工 AI )               
-Maintenance 重置     
-Very_often 非常頻繁    
-Often 頻繁  
-Sometimes 偶尔   
-Rarely 很少
-Very_rarely 极少     
-Only_if_necessary 必要时候  
-Nodes_and_segments 路口和道路的显示
-Lanes 车道  
-Path_Of_Evil_(10_%) 邪恶之路 (10 %)
-Rush_Hour_(5_%) 尖峰时间 (5 %)
-Minor_Complaints_(2_%) 颇有微词 (2 %)
-Holy_City_(0_%) 神圣之城 (0 %)
-Forget_toggled_traffic_lights 重置所有红绿灯设置  
-Road_is_already_in_a_group! 路已经是一组！
-All_selected_roads_must_be_of_the_same_type! 这条道路已经存在该组中！
-Create_group 创建组
-Delete_group 删除组
-Add_zoning 添加分区
-Remove_zoning 删除分区
-Lane_Arrow_Changer_Disabled 因为使用了高速道路规则系统，所以不能改变这条车道的箭头。
-Add_junction_to_timed_light 添加一个路口                  
-Remove_junction_from_timed_light 取消一个路口                       
-Select_junction 选择一个路口
+Enable_test_mode_(stay_in_current_step) 允許測試模式（停留在當前時相）
+avg._flow 平均通過
+avg._wait 平均停等
+min/max 最短/最長
+Lane 車道
+Set_Speed 設定速限 {0}
+Max_speed 最高速限
+Segment 路段
+incoming 進入
+Enable_Advanced_Vehicle_AI 啟用加強版行車 AI
+Vehicles_may_enter_blocked_junctions 塞車回堵時不用保持路口淨空。
+All_vehicles_may_ignore_lane_arrows 所有車輛可忽略車道遵行方向
+Busses_may_ignore_lane_arrows 公車可忽略車道遵行方向
+Reckless_driving 違規駕駛率（功能測試中）
+TMPE_Title 交通管理器：尊爵版
+Settings_are_defined_for_each_savegame_separately 每個存檔保有各自獨立的設定
+Simulation_accuracy 模擬精準度（較高的精準度會降低效能）
+Enable_highway_specific_lane_merging/splitting_rules 施行高速公路獨特的車道單邊出入規則
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 駕駛人變換車道的習慣（僅適用於加強版 AI 啟用時）
+Maintenance 錯誤修復
+Very_often 很頻繁
+Often 經常
+Sometimes 有時候
+Rarely 偶爾
+Very_rarely 甚少
+Only_if_necessary 僅必要時
+Nodes_and_segments 道路交岔點和路段
+Lanes 車道
+Path_Of_Evil_(10_%) 馬路我最大(10%)
+Rush_Hour_(5_%) 上班趕時間(5%)
+Minor_Complaints_(2_%) 對不起借過(2%)
+Holy_City_(0_%) 守法乖寶寶(0%)
+Forget_toggled_traffic_lights 放棄設定的交通燈號
+Road_is_already_in_a_group! 道路已在連鎖群組中
+All_selected_roads_must_be_of_the_same_type! 所有選擇的道路必須是同類型的
+Create_group 創建連鎖群組
+Delete_group 刪除連鎖群組
+Add_zoning 增加區劃
+Remove_zoning 移除區劃
+Lane_Arrow_Changer_Disabled 改變車道遵行方向的功能已關閉，因為您已施行高速公路特規行駛系統
+Add_junction_to_timed_light 將此交岔路口加入號誌燈時相連鎖
+Remove_junction_from_timed_light 將此交岔路口移出號誌燈時相連鎖
+Select_junction 選取一處道路交叉點
 Cancel 取消
-Speed_limits 速度设置
-Persistently_visible_overlays 选择启用功能        
-Priority_signs 道路权限  
-Vehicles_may_do_u-turns_at_junctions 车辆可在路口调头   
-Vehicles_going_straight_may_change_lanes_at_junctions 车辆可能会在路口更换车道                 
-Allow_u-turns 允许调头 
-Allow_lane_changing_for_vehicles_going_straight 允许直线车辆变更车道                 
-Allow_vehicles_to_enter_a_blocked_junction 允许车辆在路口停车 
-Road_condition_has_a_bigger_impact_on_vehicle_speed 道路状况对车辆速度有较大影响       
-Vehicle_restrictions 道路车辆限制  
-Copy 复制
-Paste 粘贴
-Invert 倒置
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 道路车辆限制适用于这个路口所有道路
-Allow_all_vehicles 允许所有车辆
-Ban_all_vehicles 禁止所有车辆
-Set_all_traffic_lights_to_red 把所有灯设置为红灯
-Rotate_left 向左旋转
-Rotate_right 向右旋转
-Name 名称
-Apply 应用
-Select_a_timed_traffic_light_program 选择一个定时交通灯程序
-The_chosen_traffic_light_program_is_incompatible_to_this_junction 所选择的信号灯模式和此路口不兼容
-Advanced_AI_cannot_be_activated 高级车辆AI不能被激活使用
-The_Advanced_Vehicle_AI_cannot_be_activated 使用改变车辆行为的其他MOD（例如ImprovedAI和Traffic ++)，所以高级车辆AI不会有效。
-Enable_dynamic_path_calculation 启用动态路径计算
+Speed_limits 速限
+Persistently_visible_overlays 固定檢視的項目
+Priority_signs 優先通行權標誌
+Vehicles_may_do_u-turns_at_junctions 車輛可在路口迴轉
+Vehicles_going_straight_may_change_lanes_at_junctions 直行車可在交岔路口上變換車道
+Allow_u-turns 允許迴轉
+Allow_lane_changing_for_vehicles_going_straight 允許直行車變換車道
+Allow_vehicles_to_enter_a_blocked_junction 允許塞車回堵時不用保持路口淨空
+Road_condition_has_a_bigger_impact_on_vehicle_speed 道路狀態對車速有較大的影響
+Vehicle_restrictions 車種限定
+Copy 複製
+Paste 貼上
+Invert 對調選擇
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 對兩個路口間的全部路段套用車種限定
+Allow_all_vehicles 通行所有車種
+Ban_all_vehicles 禁行所有車種
+Set_all_traffic_lights_to_red 將所有號誌燈設為紅燈
+Rotate_left 向左轉動
+Rotate_right 向右轉動
+Name 名稱
+Apply 套用
+Select_a_timed_traffic_light_program 請點選一個號誌燈的時相程序
+The_chosen_traffic_light_program_is_incompatible_to_this_junction 所選的號誌燈時相不適用於此交叉路口
+Advanced_AI_cannot_be_activated 加強版 AI 無法啟動
+The_Advanced_Vehicle_AI_cannot_be_activated 加強版車輛AI無法啟動，因為您所使用的其它車輛行控模組正作動中（例如 Improved AI 或 Traffic++）
+Enable_dynamic_path_calculation 啟用動態的路線運算
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes 請注意，此工具造成的改變需要幾分鐘才能完全發揮效果。

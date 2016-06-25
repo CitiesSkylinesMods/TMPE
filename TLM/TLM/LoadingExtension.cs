@@ -14,6 +14,7 @@ using ColossalFramework.UI;
 using ColossalFramework.Math;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
+using TrafficManager.Custom.Manager;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -35,9 +36,8 @@ namespace TrafficManager {
 #endif
 		public static bool IsPathManagerReplaced = false;
 		public CustomPathManager CustomPathManager { get; set; }
-        public bool DetourInited { get; set; }
-        public bool NodeSimulationLoaded { get; set; }
-		public List<Detour> Detours { get; set; }
+        public static bool DetourInited { get; set; }
+		public static List<Detour> Detours { get; set; }
         public TrafficManagerMode ToolMode { get; set; }
         public TrafficManagerTool TrafficManagerTool { get; set; }
 #if !TAM
@@ -50,18 +50,18 @@ namespace TrafficManager {
         }
 
 		public void revertDetours() {
-			if (LoadingExtension.Instance.DetourInited) {
+			if (DetourInited) {
 				Log.Info("Revert detours");
 				foreach (Detour d in Detours) {
 					RedirectionHelper.RevertRedirect(d.OriginalMethod, d.Redirect);
 				}
-				LoadingExtension.Instance.DetourInited = false;
+				DetourInited = false;
 				Detours.Clear();
 			}
 		}
 
 		public void initDetours() {
-			if (!LoadingExtension.Instance.DetourInited) {
+			if (!DetourInited) {
 				Log.Info("Init detours");
 				bool detourFailed = false;
 
@@ -114,6 +114,23 @@ namespace TrafficManager {
 							typeof(CustomVehicleAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
 				} catch (Exception) {
 					Log.Error("Could not redirect VehicleAI::CalculateSegmentPosition (2).");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection VehicleAI::ReleaseVehicle calls");
+				try {
+					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("ReleaseVehicle",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null),
+							typeof(CustomVehicleAI).GetMethod("CustomReleaseVehicle")));
+				} catch (Exception) {
+					Log.Error("Could not redirect VehicleAI::ReleaseVehicle");
 					detourFailed = true;
 				}
 
@@ -178,7 +195,7 @@ namespace TrafficManager {
 									typeof (Vehicle).MakeByRefType(),
 									typeof (Vector3)
 								}),
-								typeof(CustomCarAI).GetMethod("TrafficManagerSimulationStep")));
+								typeof(CustomCarAI).GetMethod("CustomSimulationStep")));
 				} catch (Exception) {
 					Log.Error("Could not redirect CarAI::SimulationStep.");
 					detourFailed = true;
@@ -564,6 +581,27 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
+					Log.Info("Redirection ShipAI::StartPathFind calls");
+					try {
+						Detours.Add(new Detour(typeof(ShipAI).GetMethod("StartPathFind",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (bool),
+									typeof (bool)
+								},
+								null),
+								typeof(CustomShipAI).GetMethod("CustomStartPathFind")));
+					} catch (Exception) {
+						Log.Error("Could not redirect ShipAI::StartPathFind");
+						detourFailed = true;
+					}
+
 					Log.Info("Redirection CitizenAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("StartPathFind",
@@ -645,6 +683,49 @@ namespace TrafficManager {
 							typeof(CustomRoadAI).GetMethod("CustomSetTrafficLightState")));
 				} catch (Exception) {
 					Log.Error("Could not redirect RoadBaseAI::SetTrafficLightState");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection RoadBaseAI::UpdateLanes calls");
+				try {
+					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("UpdateLanes",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+									typeof (bool)
+							},
+							null),
+							typeof(CustomRoadAI).GetMethod("CustomUpdateLanes")));
+				} catch (Exception) {
+					Log.Error("Could not redirect RoadBaseAI::UpdateLanes");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomRoadAI::CheckBuildings calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomRoadAI).GetMethod("CheckBuildings",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+							},
+							null),
+							typeof(RoadBaseAI).GetMethod("CheckBuildings",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomRoadAI::CheckBuildings");
 					detourFailed = true;
 				}
 
@@ -740,6 +821,58 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				/*Log.Info("Redirection NetManager::FinalizeNode calls");
+				try {
+					Detours.Add(new Detour(typeof(NetManager).GetMethod("FinalizeNode",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType()
+							},
+							null),
+							typeof(CustomNetManager).GetMethod("CustomFinalizeNode")));
+				} catch (Exception) {
+					Log.Error("Could not redirect NetManager::FinalizeNode");
+					detourFailed = true;
+				}*/
+
+				Log.Info("Redirection NetManager::FinalizeSegment calls");
+				try {
+					Detours.Add(new Detour(typeof(NetManager).GetMethod("FinalizeSegment",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType()
+							},
+							null),
+							typeof(CustomNetManager).GetMethod("CustomFinalizeSegment")));
+				} catch (Exception) {
+					Log.Error("Could not redirect NetManager::FinalizeSegment");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection NetManager::UpdateSegment calls");
+				try {
+					Detours.Add(new Detour(typeof(NetManager).GetMethod("UpdateSegment",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (int),
+							},
+							null),
+							typeof(CustomNetManager).GetMethod("CustomUpdateSegment")));
+				} catch (Exception) {
+					Log.Error("Could not redirect NetManager::UpdateSegment");
+					detourFailed = true;
+				}
+
 				if (detourFailed) {
 					Log.Info("Detours failed");
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
@@ -747,7 +880,7 @@ namespace TrafficManager {
 					Log.Info("Detours successful");
 				}
 
-				LoadingExtension.Instance.DetourInited = true;
+				DetourInited = true;
 			}
 		}
 
@@ -811,6 +944,23 @@ namespace TrafficManager {
             switch (mode) {
                 case LoadMode.NewGame:
                 case LoadMode.LoadGame:
+					if (BuildConfig.applicationVersion != BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)) {
+						string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
+						string[] versionElms = majorVersionElms[0].Split('.');
+						uint versionA = Convert.ToUInt32(versionElms[0]);
+						uint versionB = Convert.ToUInt32(versionElms[1]);
+						uint versionC = Convert.ToUInt32(versionElms[2]);
+
+						bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB) ||
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC < versionC);
+
+						if (isModTooOld) {
+							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.", false);
+						} else {
+							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.", false);
+						}
+					}
 					gameLoaded = true;
 					break;
 				default:

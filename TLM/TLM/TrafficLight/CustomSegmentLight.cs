@@ -36,6 +36,7 @@ namespace TrafficManager.TrafficLight {
 				leftLight = value;
 			}
 		}
+
 		public RoadBaseAI.TrafficLightState LightMain {
 			get { return mainLight; }
 			set {
@@ -92,11 +93,12 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void ChangeMode() {
-			SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(SegmentId);
-			geometry.Recalculate(true, true);
-			var hasLeftSegment = geometry.HasOutgoingLeftSegment(NodeId);
-			var hasForwardSegment = geometry.HasOutgoingStraightSegment(NodeId);
-			var hasRightSegment = geometry.HasOutgoingRightSegment(NodeId);
+			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
+			//geometry.Recalculate(true, true);
+			bool startNode = geometry.StartNodeId() == NodeId;
+			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
+			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
+			var hasRightSegment = geometry.HasOutgoingRightSegment(startNode);
 
 			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
 
@@ -273,21 +275,23 @@ namespace TrafficManager.TrafficLight {
 			return MemberwiseClone();
 		}
 
-		public void invert() {
+		/*public void invert() {
 			LightMain = InvertLight(LightMain);
 			LightLeft = InvertLight(LightLeft);
 			LightRight = InvertLight(LightRight);
-		}
+		}*/
 
-		public static RoadBaseAI.TrafficLightState InvertLight(RoadBaseAI.TrafficLightState light) { // TODO refactor
-			switch (light) {
+		public static RoadBaseAI.TrafficLightState GetPedestrianLightState(RoadBaseAI.TrafficLightState vehicleLightState) {
+			switch (vehicleLightState) {
 				case RoadBaseAI.TrafficLightState.Red:
-				case RoadBaseAI.TrafficLightState.GreenToRed:
+				default:
 					return RoadBaseAI.TrafficLightState.Green;
 				case RoadBaseAI.TrafficLightState.Green:
-				case RoadBaseAI.TrafficLightState.RedToGreen:
-				default:
 					return RoadBaseAI.TrafficLightState.Red;
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+					return RoadBaseAI.TrafficLightState.GreenToRed;
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					return RoadBaseAI.TrafficLightState.RedToGreen;
 			}
 		}
 
@@ -312,7 +316,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void MakeRed() {
-			LightLeft = RoadBaseAI.TrafficLightState.Red;
+            LightLeft = RoadBaseAI.TrafficLightState.Red;
 			LightMain = RoadBaseAI.TrafficLightState.Red;
 			LightRight = RoadBaseAI.TrafficLightState.Red;
 		}

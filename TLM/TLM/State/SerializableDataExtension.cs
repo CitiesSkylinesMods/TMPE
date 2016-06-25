@@ -35,7 +35,11 @@ namespace TrafficManager.State {
 			try {
 				Log.Info("Initializing flags");
 				Flags.OnBeforeLoadData();
+				Log.Info("Initializing node geometries");
+				NodeGeometry.OnBeforeLoadData();
 				Log.Info("Initializing segment geometries");
+				SegmentGeometry.OnBeforeLoadData();
+				Log.Info("Initializing CustomRoadAI");
 				CustomRoadAI.OnBeforeLoadData();
 				Log.Info("Initialization done. Loading mod data now.");
 				byte[] data = _serializableData.LoadData(DataId);
@@ -152,7 +156,7 @@ namespace TrafficManager.State {
 			LoadDataState();
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
-			TrafficPriority.HandleAllVehicles();
+			VehicleStateManager.InitAllVehicles();
 		}
 
 		private static void LoadDataState() {
@@ -166,46 +170,51 @@ namespace TrafficManager.State {
 			if (_configuration.PrioritySegments != null) {
 				Log.Info($"Loading {_configuration.PrioritySegments.Count()} priority segments");
 				foreach (var segment in _configuration.PrioritySegments) {
-					if (segment.Length < 3)
-						continue;
+					try {
+						if (segment.Length < 3)
+							continue;
 #if DEBUG
-					bool debug = segment[0] == 13630;
+						bool debug = segment[0] == 13630;
 #endif
 
-					if ((SegmentEnd.PriorityType)segment[2] == SegmentEnd.PriorityType.None) {
+						if ((SegmentEnd.PriorityType)segment[2] == SegmentEnd.PriorityType.None) {
 #if DEBUG
-						if (debug)
-							Log._Debug($"Loading priority segment: Not adding 'None' priority segment: {segment[1]} @ node {segment[0]}");
+							if (debug)
+								Log._Debug($"Loading priority segment: Not adding 'None' priority segment: {segment[1]} @ node {segment[0]}");
 #endif
-						continue;
-					}
+							continue;
+						}
 
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segment[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segment[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 #if DEBUG
-						if (debug)
-							Log._Debug($"Loading priority segment: node {segment[0]} is invalid");
+							if (debug)
+								Log._Debug($"Loading priority segment: node {segment[0]} is invalid");
 #endif
-						continue;
+							continue;
+						}
+						if ((Singleton<NetManager>.instance.m_segments.m_buffer[segment[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is invalid");
+#endif
+							continue;
+						}
+						if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
+#endif
+							TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
+							continue;
+						}
+#if DEBUG
+						Log._Debug($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
+#endif
+						TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading data from Priority segments: " + e.ToString());
 					}
-					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segment[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-#if DEBUG
-						if (debug)
-							Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is invalid");
-#endif
-						continue;
-					}
-					if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
-#if DEBUG
-						if (debug)
-							Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
-#endif
-						TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
-						continue;
-					}
-#if DEBUG
-					Log._Debug($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
-#endif
-					TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
 				}
 			} else {
 				Log.Warning("Priority segments data structure undefined!");
@@ -215,11 +224,17 @@ namespace TrafficManager.State {
 			if (_configuration.LaneAllowedVehicleTypes != null) {
 				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
 				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
-					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}");
-					Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, laneVehicleTypes.vehicleTypes);
+					try {
+						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & VehicleRestrictionsManager.GetBaseMask(laneVehicleTypes.laneId);
+						Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
+						Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading data from vehicle restrictions: " + e.ToString());
+					}
 				}
 			} else {
-				Log.Warning("Lane speed limit structure undefined!");
+				Log.Warning("Vehicle restrctions structure undefined!");
 			}
 
 			var timedStepCount = 0;
@@ -231,55 +246,60 @@ namespace TrafficManager.State {
 				Log.Info($"Loading {_configuration.TimedLights.Count()} timed traffic lights (new method)");
 
 				foreach (Configuration.TimedTrafficLights cnfTimedLights in _configuration.TimedLights) {
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[cnfTimedLights.nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-						continue;
-					Flags.setNodeTrafficLight(cnfTimedLights.nodeId, true);
+					try {
+						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[cnfTimedLights.nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+							continue;
+						Flags.setNodeTrafficLight(cnfTimedLights.nodeId, true);
 
-					Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
+						Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
 
-					TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(cnfTimedLights.nodeId);
-					sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
-					var timedNode = sim.TimedLight;
+						TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(cnfTimedLights.nodeId);
+						sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
+						var timedNode = sim.TimedLight;
 
-					int j = 0;
-					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
-						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
-						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
+						int j = 0;
+						foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
+							Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
+							TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
 
-						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
-							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
-							CustomSegmentLights lights = null;
-							if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
-								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
-								continue;
-							}
-							Configuration.CustomSegmentLights cnfLights = e.Value;
-
-							Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
-
-							lights.ManualPedestrianMode = cnfLights.manualPedestrianMode;
-							lights.PedestrianLightState = cnfLights.pedestrianLightState;
-
-							foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
-								Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
-								CustomSegmentLight light = null;
-								if (!lights.CustomLights.TryGetValue(e2.Key, out light)) {
-									Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+							foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
+								Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
+								CustomSegmentLights lights = null;
+								if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
+									Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
 									continue;
 								}
-								Configuration.CustomSegmentLight cnfLight = e2.Value;
+								Configuration.CustomSegmentLights cnfLights = e.Value;
 
-								light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
-								light.LightLeft = cnfLight.leftLight;
-								light.LightMain = cnfLight.mainLight;
-								light.LightRight = cnfLight.rightLight;
+								Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+
+								lights.ManualPedestrianMode = cnfLights.manualPedestrianMode;
+								lights.PedestrianLightState = cnfLights.pedestrianLightState;
+
+								foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
+									Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+									CustomSegmentLight light = null;
+									if (!lights.CustomLights.TryGetValue(e2.Key, out light)) {
+										Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+										continue;
+									}
+									Configuration.CustomSegmentLight cnfLight = e2.Value;
+
+									light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
+									light.LightLeft = cnfLight.leftLight;
+									light.LightMain = cnfLight.mainLight;
+									light.LightRight = cnfLight.rightLight;
+								}
 							}
+							++j;
 						}
-						++j;
-					}
 
-					if (cnfTimedLights.started)
-						timedNode.Start();
+						if (cnfTimedLights.started)
+							timedNode.Start();
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading data from TimedNode (new method): " + e.ToString());
+					}
 				}
 			} else if (_configuration.TimedNodes != null && _configuration.TimedNodeGroups != null) {
 				Log.Info($"Loading {_configuration.TimedNodes.Count()} timed traffic lights (old method)");
@@ -454,7 +474,7 @@ namespace TrafficManager.State {
 							if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment == 0)
 								continue;
 
-							Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
+							//Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
 
 							uint laneArrowFlags = flags & Flags.lfr;
 							uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & Flags.lfr);
@@ -478,8 +498,13 @@ namespace TrafficManager.State {
 			if (_configuration.LaneSpeedLimits != null) {
 				Log.Info($"Loading lane speed limit data. {_configuration.LaneSpeedLimits.Count} elements");
 				foreach (Configuration.LaneSpeedLimit laneSpeedLimit in _configuration.LaneSpeedLimits) {
-					Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
-                    Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+					try {
+						Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading speed limits: " + e.ToString());
+					}
 				}
 			} else {
 				Log.Warning("Lane speed limit structure undefined!");
@@ -489,17 +514,22 @@ namespace TrafficManager.State {
 			if (_configuration.SegmentNodeConfs != null) {
 				Log.Info($"Loading segment-at-node data. {_configuration.SegmentNodeConfs.Count} elements");
 				foreach (Configuration.SegmentNodeConf segNodeConf in _configuration.SegmentNodeConfs) {
-					if ((Singleton<NetManager>.instance.m_segments.m_buffer[segNodeConf.segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
-						continue;
-					Flags.setSegmentNodeFlags(segNodeConf.segmentId, true, segNodeConf.startNodeFlags);
-					Flags.setSegmentNodeFlags(segNodeConf.segmentId, false, segNodeConf.endNodeFlags);
+					try {
+						if ((Singleton<NetManager>.instance.m_segments.m_buffer[segNodeConf.segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+							continue;
+						Flags.setSegmentNodeFlags(segNodeConf.segmentId, true, segNodeConf.startNodeFlags);
+						Flags.setSegmentNodeFlags(segNodeConf.segmentId, false, segNodeConf.endNodeFlags);
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading segment-at-node config: " + e.ToString());
+					}
 				}
 			} else {
 				Log.Warning("Segment-at-node structure undefined!");
 			}
 		}
 
-		private static ushort fixLaneFlags(ushort flags) {
+		/*private static ushort fixLaneFlags(ushort flags) {
 			ushort ret = 0;
 			if ((flags & (ushort)NetLane.Flags.Created) != 0)
 				ret |= (ushort)NetLane.Flags.Created;
@@ -526,13 +556,15 @@ namespace TrafficManager.State {
 			if ((flags & (ushort)NetLane.Flags.EndOneWayRight) != 0)
 				ret |= (ushort)NetLane.Flags.EndOneWayRight;
 			return ret;
-		}
+		}*/
 
 		public override void OnSaveData() {
+			Log.Info("Recalculating segment geometries");
+			SegmentGeometry.OnBeforeSaveData();
 			Log.Info("Saving Mod Data.");
 			var configuration = new Configuration();
 
-			if (TrafficPriority.PrioritySegments != null) {
+			if (TrafficPriority.TrafficSegments != null) {
 				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
 					SavePrioritySegment(i, configuration);
 					SaveSegmentNodeFlags(i, configuration);
@@ -736,26 +768,26 @@ namespace TrafficManager.State {
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				if (TrafficPriority.PrioritySegments[segmentId] == null) {
+				if (TrafficPriority.TrafficSegments[segmentId] == null) {
 					return;
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node1 != 0 && TrafficPriority.PrioritySegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
-					Log.Info($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance1.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node1}, seg. {segmentId}");
+				if (TrafficPriority.TrafficSegments[segmentId].Node1 != 0 && TrafficPriority.TrafficSegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
+					Log.Info($"Saving Priority Segment of type: {TrafficPriority.TrafficSegments[segmentId].Instance1.Type} @ node {TrafficPriority.TrafficSegments[segmentId].Node1}, seg. {segmentId}");
                     configuration.PrioritySegments.Add(new[]
 					{
-						TrafficPriority.PrioritySegments[segmentId].Node1, segmentId,
-						(int) TrafficPriority.PrioritySegments[segmentId].Instance1.Type
+						TrafficPriority.TrafficSegments[segmentId].Node1, segmentId,
+						(int) TrafficPriority.TrafficSegments[segmentId].Instance1.Type
 					});
 				}
 
-				if (TrafficPriority.PrioritySegments[segmentId].Node2 == 0 || TrafficPriority.PrioritySegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
+				if (TrafficPriority.TrafficSegments[segmentId].Node2 == 0 || TrafficPriority.TrafficSegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
 					return;
 
-				Log.Info($"Saving Priority Segment of type: {TrafficPriority.PrioritySegments[segmentId].Instance2.Type} @ node {TrafficPriority.PrioritySegments[segmentId].Node2}, seg. {segmentId}");
+				Log.Info($"Saving Priority Segment of type: {TrafficPriority.TrafficSegments[segmentId].Instance2.Type} @ node {TrafficPriority.TrafficSegments[segmentId].Node2}, seg. {segmentId}");
 				configuration.PrioritySegments.Add(new[] {
-					TrafficPriority.PrioritySegments[segmentId].Node2, segmentId,
-					(int) TrafficPriority.PrioritySegments[segmentId].Instance2.Type
+					TrafficPriority.TrafficSegments[segmentId].Node2, segmentId,
+					(int) TrafficPriority.TrafficSegments[segmentId].Instance2.Type
 				});
 			} catch (Exception e) {
 				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");

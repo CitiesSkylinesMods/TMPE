@@ -1,7 +1,54 @@
 # Cities: Skylines - Traffic Manager: *President Edition*
-A work-in-progress modification for **Cities: Skylines** to add additional road traffic control
+A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.6.22, 06/21/2016:
+- Speed/vehicle restrictions may now be applied to all road segments between two junctions by holding the shift key
+- Reworked how changes in the road network are recognized 
+- Advanced Vehicle AI: Improved lane selection at junctions where bus lanes end
+- Advanced Vehicle AI: Improved lane selection of busses
+- Improved automatic pedestrian lights 
+- Improved separate traffic lights: Traffic lights now control traffic lane-wise
+- UI: Sensitivity slider is only available while adding/editing a step or while in test mode
+- Bugfix: Lane selection on maps with left-hand traffic was incorrect
+- Bugfix: While building in pause mode, changes in the road network were not always recognized causing vehicles to stop/despawn 
+- Bugfix: Police cars off-duty were ignoring lane arrows
+- Bugfix: If public transport stops were near a junction, trams/busses were not counted by timed traffic lights (many thanks to Filip for identifying this problem)
+- Bugfix: Trains/Trams were sometimes ignoring timed traffic lights (many thanks to Filip for identifying this problem)
+- Bugfix: Building roads with bus lanes caused garbage, bodies, etc. to pile up 
+
+1.6.21, 06/14/2016:
+- Bugfix: Too few cargo trains were spawning (thanks to @Scratch, @toruk_makto1, @Mr.Miyagi, @mottoh and @Syparo for pointing out this problem)       
+- Bugfix: Vehicle restrictions did not work as expected (thanks to @nordlaser for pointing out this problem)
+
+1.6.20, 06/11/2016:
+- Bugfix: Priority signs were not working correctly (thanks to @mottoth, @Madgemade for pointing out this problem)
+
+1.6.19, 06/11/2016
+- Bugfix: Timed traffic lights UI not working as expected (thanks to @Madgemade for pointing out this problem)
+
+1.6.18, 06/09/2016
+- Updated for game patch 1.5.0-f4
+- Improved performance of priority signs and timed traffic lights
+- Players can now select elevated rail segments/nodes 
+- Trams and trains now follow priority signs
+- Improved UI behavior when setting up priority signs
+
+1.6.17, 04/20/2016
+- Hotfix for reported path-finding problems
+
+1.6.16, 04/19/2016
+- Updated for game patch 1.4.1-f2
+
+1.6.15, 03/22/2016
+- Updated for game path 1.4.0-f3
+- Possible fix for crashes described by @cosminel1982
+- Added traditional Chinese translation
+
+1.6.14, 03/17/2016
+- Bugfix: Cargo trucks did not obey vehicle restrictions (thanks to @ad.vissers for pointing out this problem)
+- Bugfix: When Advanced AI was deactivated, u-turns did not have costs assigned
+
 1.6.13, 03/16/2016
 - Added Dutch translation
 - The pedestrian light mode of a traffic light can now be switched back to automatic

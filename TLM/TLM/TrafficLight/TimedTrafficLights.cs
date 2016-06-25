@@ -33,17 +33,7 @@ namespace TrafficManager.TrafficLight {
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
 
-			// setup priority segments & live traffic lights
-			foreach (ushort slaveNodeId in nodeGroup) {
-				for (int s = 0; s < 8; ++s) {
-					ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[slaveNodeId].GetSegment(s);
-					if (segmentId <= 0)
-						continue;
-					CustomRoadAI.GetSegmentGeometry(segmentId).Recalculate(true, true);
-					TrafficPriority.AddPrioritySegment(slaveNodeId, segmentId, SegmentEnd.PriorityType.None);
-					CustomTrafficLights.AddLiveSegmentLights(slaveNodeId, segmentId);
-				}
-			}
+			SetupSegmentEnds();
 
 			started = false;
 		}
@@ -53,25 +43,25 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public TimedTrafficLightsStep AddStep(int minTime, int maxTime, float waitFlowBalance, bool makeRed = false) {
-			if (minTime <= 0)
-				minTime = 1;
+			if (minTime < 0)
+				minTime = 0;
 			if (maxTime <= 0)
 				maxTime = 1;
 			if (maxTime < minTime)
 				maxTime = minTime;
 
-			TimedTrafficLightsStep step = new TimedTrafficLightsStep(this, minTime, maxTime, waitFlowBalance, NodeGroup, makeRed);
+			TimedTrafficLightsStep step = new TimedTrafficLightsStep(this, minTime, maxTime, waitFlowBalance, makeRed);
 			Steps.Add(step);
 			return step;
 		}
 
 		public void Start() {
-			if (!housekeeping(false))
-				return;
+			/*if (!housekeeping())
+				return;*/
 
 			CurrentStep = 0;
-			Steps[0].SetLights();
 			Steps[0].Start();
+			Steps[0].SetLights();
 
 			started = true;
 		}
@@ -79,14 +69,19 @@ namespace TrafficManager.TrafficLight {
 		internal void RemoveNodeFromGroup(ushort otherNodeId) {
 			NodeGroup.Remove(otherNodeId);
 			if (NodeGroup.Count <= 0) {
-				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, true);
+				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, true, false);
 				return;
 			}
 			masterNodeId = NodeGroup[0];
 		}
 
-		internal bool housekeeping(bool housekeepCustomLights) {
-			bool mayStart = true;
+		internal bool housekeeping() {
+			if (NodeGroup == null || NodeGroup.Count <= 0) {
+				Stop();
+				return false;
+			}
+
+			/*bool mayStart = true;
 			List<ushort> nodeIdsToDelete = new List<ushort>();
 
 			int i = 0;
@@ -105,35 +100,36 @@ namespace TrafficManager.TrafficLight {
 			foreach (ushort nodeIdToDelete in nodeIdsToDelete) {
 				NodeGroup.Remove(nodeIdToDelete);
 				TrafficLightSimulation.RemoveNodeFromSimulation(nodeIdToDelete, false);
-			}
+			}*/
 
 			// check that live lights exist (TODO refactor?)
-			foreach (ushort timedNodeId in NodeGroup) {
-				for (int s = 0; s < 8; s++) {
-					var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNodeId].GetSegment(s);
+			SetupSegmentEnds();
 
-					if (segmentId == 0)
-						continue;
-					CustomTrafficLights.AddLiveSegmentLights(timedNodeId, segmentId);
-				}
-			}
-
-			if (NodeGroup.Count <= 0) {
+			/*if (NodeGroup.Count <= 0) {
 				Log.Warning($"Timed housekeeping: No lights left. mayStart = false");
 				mayStart = false;
 				return mayStart;
-			}
+			}*/
 			//Log.Warning($"Timed housekeeping: Setting master node to {NodeGroup[0]}");
 			masterNodeId = NodeGroup[0];
 
-			if (housekeepCustomLights)
+			/*if (housekeepCustomLights)
 				foreach (TimedTrafficLightsStep step in Steps) {
 					foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.segmentLights) {
 						e.Value.housekeeping(true);
 					}
 				}
 
-			return mayStart;
+			return mayStart;*/
+			return true;
+		}
+
+		internal void StepHousekeeping() {
+			foreach (TimedTrafficLightsStep step in Steps) {
+				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.segmentLights) {
+					e.Value.housekeeping(true);
+				}
+			}
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -145,6 +141,13 @@ namespace TrafficManager.TrafficLight {
 
 		public void Stop() {
 			started = false;
+		}
+
+		internal void Destroy() {
+			Stop();
+			DestroySegmentEnds();
+			Steps = null;
+			NodeGroup = null;
 		}
 
 		public bool IsStarted() {
@@ -160,6 +163,13 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SimulationStep() {
+			if (!isMasterNode() || !IsStarted()) {
+#if DEBUGTTL
+				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
+#endif
+				return;
+			}
+
 			var currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 5;
 #if DEBUGTTL
 			Log._Debug($"TTL SimStep: nodeId={NodeId} currentFrame={currentFrame} lastSimulationStep={lastSimulationStep}");
@@ -172,25 +182,19 @@ namespace TrafficManager.TrafficLight {
 			}
 			lastSimulationStep = currentFrame;
 
-			if (!isMasterNode() || !IsStarted()) {
-#if DEBUGTTL
-				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
-#endif
-				return;
-			}
-			if (!housekeeping(false)) {
+			/*if (!housekeeping()) {
 #if DEBUGTTL
 				Log.Warning($"TTL SimStep: *STOP* NodeId={NodeId} Housekeeping detected that this timed traffic light has become invalid: {NodeId}.");
 #endif
 				Stop();
 				return;
-			}
+			}*/
 
 			if (!Steps[CurrentStep].isValid()) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}) is not valid.");
 #endif
-				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false);
+				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false, false);
 				return;
 			}
 
@@ -225,16 +229,16 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 			// change step
-			var newCurrentStep = (CurrentStep + 1) % NumSteps();
-			foreach (ushort slaveNodeId in NodeGroup) {
-				TrafficLightSimulation slaveSim = TrafficLightSimulation.GetNodeSimulation(slaveNodeId);
-				if (slaveSim == null || !slaveSim.IsTimedLight()) {
-					continue;
-				}
+			int oldCurrentStep = CurrentStep;
+			while (true) {
+				SkipStep();
 
-				slaveSim.TimedLight.CurrentStep = newCurrentStep;
-				slaveSim.TimedLight.Steps[newCurrentStep].Start();
-				slaveSim.TimedLight.Steps[newCurrentStep].SetLights();
+				if (CurrentStep == oldCurrentStep)
+					break;
+
+				if (Steps[CurrentStep].minTime > 0 || !Steps[CurrentStep].StepDone(false)) {
+					break;
+				}
 			}
 		}
 
@@ -349,12 +353,14 @@ namespace TrafficManager.TrafficLight {
 		internal void handleNewSegments() {
 			if (NumSteps() <= 0) {
 				// no steps defined, just create live traffic lights
-				for (int s = 0; s < 8; ++s) {
+				/*for (int s = 0; s < 8; ++s) {
 					ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
 					if (segmentId <= 0)
 						continue;
-					CustomTrafficLights.AddLiveSegmentLights(NodeId, segmentId);
-				}
+					if (! CustomTrafficLights.IsSegmentLight(NodeId, segmentId))
+						CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
+				}*/
+
 
 				return;
 			}
@@ -365,23 +371,23 @@ namespace TrafficManager.TrafficLight {
 					continue;
 
 				List<ushort> invalidSegmentIds = new List<ushort>();
-				bool isNewSegment = true;
-
-				foreach (KeyValuePair<ushort, CustomSegmentLights> e in Steps[0].segmentLights) {
-					var fromSegmentId = e.Key;
-
-					if (fromSegmentId == segmentId)
-						isNewSegment = false;
-
-					if (!TrafficPriority.IsPrioritySegment(NodeId, fromSegmentId))
-						invalidSegmentIds.Add(fromSegmentId);
-				}
+				bool isNewSegment = !Steps[0].segmentLights.ContainsKey(segmentId);
 
 				if (isNewSegment) {
-					Log._Debug($"New segment detected: {segmentId} @ {NodeId}");
 					// segment was created
-					CustomTrafficLights.AddLiveSegmentLights(NodeId, segmentId);
-					TrafficPriority.AddPrioritySegment(NodeId, segmentId, SegmentEnd.PriorityType.None);
+					Log._Debug($"New segment detected: {segmentId} @ {NodeId}");
+
+					foreach (KeyValuePair<ushort, CustomSegmentLights> e in Steps[0].segmentLights) {
+						var fromSegmentId = e.Key;
+
+						if (!TrafficPriority.IsPrioritySegment(NodeId, fromSegmentId)) {
+							Log._Debug($"Identified old segment {fromSegmentId} @ {NodeId}");
+							invalidSegmentIds.Add(fromSegmentId);
+						}
+					}
+
+					Log._Debug($"Setting up segment end for new segment {segmentId} @ {NodeId}");
+					SetupSegmentEnd(segmentId);
 
 					if (invalidSegmentIds.Count > 0) {
 						var oldSegmentId = invalidSegmentIds[0];
@@ -390,18 +396,36 @@ namespace TrafficManager.TrafficLight {
 
 						// replace the old segment with the newly created one
 						for (int i = 0; i < NumSteps(); ++i) {
-							CustomSegmentLights segmentLights = Steps[i].segmentLights[oldSegmentId];
+							if (!Steps[i].segmentLights.ContainsKey(oldSegmentId)) {
+								Log.Error($"Step {i} at node {NodeId} does not contain step lights for old segment {oldSegmentId}");
+								Steps[i].addSegment(segmentId, true);
+								Steps[i].calcMaxSegmentLength();
+								continue;
+							}
+
+							CustomSegmentLights customLights = Steps[i].segmentLights[oldSegmentId];
+							Log._Debug($"Removing old segment {oldSegmentId} @ {NodeId} from step {i}");
 							Steps[i].segmentLights.Remove(oldSegmentId);
-							segmentLights.SegmentId = segmentId;
-							Steps[i].segmentLights.Add(segmentId, segmentLights);
+							Log._Debug($"Setting new segment id {segmentId} at custom light from step {i}");
+							customLights.SegmentId = segmentId;
+							Steps[i].segmentLights.Add(segmentId, customLights);
 							Steps[i].calcMaxSegmentLength();
+							Log._Debug($"Getting live segment lights of new segment {segmentId} @ {NodeId} and applying mode @ step {i}");
 							CustomSegmentLights liveSegLights = CustomTrafficLights.GetSegmentLights(NodeId, segmentId);
-							foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in segmentLights.CustomLights) {
+							if (liveSegLights == null) {
+								Log.Error($"No live segment lights for seg. {segmentId} @ node {NodeId} found!");
+								CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
+								liveSegLights = CustomTrafficLights.GetSegmentLights(NodeId, segmentId);
+							}
+
+							foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in customLights.CustomLights) {
 								CustomSegmentLight liveSegLight = liveSegLights.GetCustomLight(e.Key);
 								if (liveSegLight == null)
 									continue;
+								Log._Debug($"Updating live segment light mode of new segment {segmentId} @ {NodeId} for vehicle type {e.Key} @ step {i}");
 								liveSegLight.CurrentMode = e.Value.CurrentMode;
 							}
+							Log._Debug($"Finished applying new segment {segmentId} @ {NodeId} @ step {i}");
 						}
 					} else {
 						Log._Debug($"Adding new segment {segmentId} to node {NodeId}");
@@ -414,6 +438,13 @@ namespace TrafficManager.TrafficLight {
 					}
 				}
 			}
+		}
+
+		internal TimedTrafficLights MasterLights() {
+			TrafficLightSimulation masterSim = TrafficLightSimulation.GetNodeSimulation(masterNodeId);
+			if (masterSim == null || !masterSim.IsTimedLight())
+				return null;
+			return masterSim.TimedLight;
 		}
 
 		internal void SetTestMode(bool testMode) {
@@ -512,6 +543,41 @@ namespace TrafficManager.TrafficLight {
 					timedLight.GetStep(i).waitFlowBalance = waitFlowBalances[i];
 				}
 			}
+		}
+
+		private void SetupSegmentEnds() {
+			for (int s = 0; s < 8; ++s) {
+				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
+				if (segmentId == 0)
+					continue;
+				SetupSegmentEnd(segmentId);
+			}
+		}
+
+		private void DestroySegmentEnds() {
+			for (int s = 0; s < 8; ++s) {
+				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
+				if (segmentId == 0)
+					continue;
+				DestroySegmentEnd(segmentId);
+			}
+		}
+
+		private void SetupSegmentEnd(ushort segmentId) {
+			if (segmentId <= 0)
+				return;
+			//SegmentGeometry.Get(segmentId).Recalculate(true, true);
+			if (!TrafficPriority.IsPrioritySegment(NodeId, segmentId))
+				TrafficPriority.AddPrioritySegment(NodeId, segmentId, SegmentEnd.PriorityType.None);
+			/*if (!CustomTrafficLights.IsSegmentLight(nodeId, segmentId))
+				CustomTrafficLights.AddSegmentLights(nodeId, segmentId);*/
+		}
+
+		private void DestroySegmentEnd(ushort segmentId) {
+			if (segmentId <= 0)
+				return;
+			TrafficPriority.RemovePrioritySegment(NodeId, segmentId);
+			//CustomTrafficLights.RemoveSegmentLights(segmentId);
 		}
 	}
 }

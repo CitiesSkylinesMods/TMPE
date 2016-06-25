@@ -9,7 +9,7 @@ namespace TrafficManager.TrafficLight {
 		/// <summary>
 		/// Manual light by segment id
 		/// </summary>
-		public static Dictionary<ushort, CustomSegment> ManualSegments = new Dictionary<ushort, CustomSegment>();		
+		private static Dictionary<ushort, CustomSegment> CustomSegments = new Dictionary<ushort, CustomSegment>();		
 
 		internal static void AddLiveSegmentLights(ushort nodeId, ushort segmentId) {
 			if (IsSegmentLight(nodeId, segmentId))
@@ -34,42 +34,79 @@ namespace TrafficManager.TrafficLight {
 					: RoadBaseAI.TrafficLightState.Red);
 		}
 
-		public static void AddSegmentLights(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState light) {
-			//Log.Message($"Adding segment light: {segmentId} @ {nodeId}");
+		public static void AddSegmentLights(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState light=RoadBaseAI.TrafficLightState.Red) {
+#if DEBUG
+			Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ {nodeId}");
+#endif
+			Cleanup(segmentId);
 
-			if (ManualSegments.ContainsKey(segmentId)) {
-				ManualSegments[segmentId].Node2Lights = new CustomSegmentLights(nodeId, segmentId, light);
-				ManualSegments[segmentId].Node2 = nodeId;
+			if (CustomSegments.ContainsKey(segmentId)) {
+				if (CustomSegments[segmentId].Node1 == nodeId || CustomSegments[segmentId].Node2 == nodeId)
+					return;
+
+#if DEBUG
+				Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ {nodeId} -- Node1={CustomSegments[segmentId].Node1} Node2={CustomSegments[segmentId].Node2}");
+#endif
+
+				if (CustomSegments[segmentId].Node1 == 0) {
+					CustomSegments[segmentId].Node1Lights = new CustomSegmentLights(nodeId, segmentId, light);
+					CustomSegments[segmentId].Node1 = nodeId;
+				} else {
+					CustomSegments[segmentId].Node2Lights = new CustomSegmentLights(nodeId, segmentId, light);
+					CustomSegments[segmentId].Node2 = nodeId;
+				}
 			} else {
-				ManualSegments.Add(segmentId, new CustomSegment());
-				ManualSegments[segmentId].Node1Lights = new CustomSegmentLights(nodeId, segmentId, light);
-				ManualSegments[segmentId].Node1 = nodeId;
+				CustomSegments.Add(segmentId, new CustomSegment());
+				CustomSegments[segmentId].Node1Lights = new CustomSegmentLights(nodeId, segmentId, light);
+				CustomSegments[segmentId].Node1 = nodeId;
 			}
 		}
 
-		public static void RemoveSegmentLight(ushort segmentId) {
-			//Log.Message($"Removing segment light: {segmentId}");
-			ManualSegments.Remove(segmentId);
+		public static void RemoveSegmentLights(ushort segmentId) {
+#if DEBUG
+			Log.Warning($"Removing all segment lights from segment {segmentId}");
+#endif
+			CustomSegments.Remove(segmentId);
 		}
 
 		public static void RemoveSegmentLight(ushort nodeId, ushort segmentId) {
-			//Log.Message($"Removing segment light: {segmentId} @ {nodeId}");
-			if (ManualSegments[segmentId].Node1 == nodeId) {
-				ManualSegments[segmentId].Node1 = 0;
-				ManualSegments[segmentId].Node1Lights = null;
-			} else if (ManualSegments[segmentId].Node2 == nodeId) {
-				ManualSegments[segmentId].Node2 = 0;
-				ManualSegments[segmentId].Node2Lights = null;
+#if DEBUG
+			Log.Warning($"Removing segment light: {segmentId} @ {nodeId}");
+#endif
+
+			if (CustomSegments[segmentId].Node1 == nodeId) {
+				CustomSegments[segmentId].Node1 = 0;
+				CustomSegments[segmentId].Node1Lights = null;
+			} else if (CustomSegments[segmentId].Node2 == nodeId) {
+				CustomSegments[segmentId].Node2 = 0;
+				CustomSegments[segmentId].Node2Lights = null;
 			}
 
-			if (ManualSegments[segmentId].Node1 == 0 && ManualSegments[segmentId].Node2 == 0) {
-				ManualSegments.Remove(segmentId);
+			Cleanup(segmentId);
+		}
+
+		private static void Cleanup(ushort segmentId) {
+			if (!CustomSegments.ContainsKey(segmentId))
+				return;
+
+			NetManager netManager = Singleton<NetManager>.instance;
+			if (CustomSegments[segmentId].Node1 != 0 && (netManager.m_nodes.m_buffer[CustomSegments[segmentId].Node1].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
+				CustomSegments[segmentId].Node1 = 0;
+				CustomSegments[segmentId].Node1Lights = null;
 			}
+
+			if (CustomSegments[segmentId].Node2 != 0 && (netManager.m_nodes.m_buffer[CustomSegments[segmentId].Node2].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
+				CustomSegments[segmentId].Node2 = 0;
+				CustomSegments[segmentId].Node2Lights = null;
+			}
+
+			if (CustomSegments[segmentId].Node1 == 0 && CustomSegments[segmentId].Node2 == 0)
+				CustomSegments.Remove(segmentId);
 		}
 
 		public static bool IsSegmentLight(ushort nodeId, ushort segmentId) {
-			if (ManualSegments.ContainsKey(segmentId)) {
-				var manualSegment = ManualSegments[segmentId];
+			if (CustomSegments.ContainsKey(segmentId)) {
+				var manualSegment = CustomSegments[segmentId];
 
 				if (manualSegment.Node1 == nodeId || manualSegment.Node2 == nodeId) {
 					return true;
@@ -88,8 +125,8 @@ namespace TrafficManager.TrafficLight {
 
 		public static CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 			//Log.Message($"Get segment light: {segmentId} @ {nodeId}");
-			if (ManualSegments.ContainsKey(segmentId)) {
-				var manualSegment = ManualSegments[segmentId];
+			if (CustomSegments.ContainsKey(segmentId)) {
+				var manualSegment = CustomSegments[segmentId];
 
 				if (manualSegment.Node1 == nodeId) {
 					return manualSegment.Node1Lights;
@@ -103,7 +140,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal static void OnLevelUnloading() {
-			ManualSegments.Clear();
+			CustomSegments.Clear();
 		}
 	}
 }

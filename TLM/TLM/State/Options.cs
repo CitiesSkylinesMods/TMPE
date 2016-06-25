@@ -34,9 +34,13 @@ namespace TrafficManager.State {
 		private static UICheckBox advancedAIToggle = null;
 		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
+#if DEBUG
+		private static UICheckBox preferOuterLaneToggle = null;
+#endif
 		private static UICheckBox showLanesToggle = null;
 		private static UIButton forgetTrafficLightsBtn = null;
 #if DEBUG
+		private static UIButton resetSpeedLimitsBtn = null;
 		private static UICheckBox disableSomething5Toggle = null;
 		private static UICheckBox disableSomething4Toggle = null;
 		private static UICheckBox disableSomething3Toggle = null;
@@ -48,6 +52,9 @@ namespace TrafficManager.State {
 		private static UITextField someValue2Field = null;
 		private static UITextField someValue3Field = null;
 		private static UITextField someValue4Field = null;
+		private static UITextField someValue5Field = null;
+		private static UITextField someValue6Field = null;
+		private static UITextField someValue7Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -74,6 +81,7 @@ namespace TrafficManager.State {
 		public static bool showLanes = false;
 		public static bool strongerRoadConditionEffects = false;
 		public static bool enableDespawning = true;
+		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
 		public static float pathCostMultiplicator = 1f; // debug value
 		public static float pathCostMultiplicator2 = 0f; // debug value
@@ -86,6 +94,9 @@ namespace TrafficManager.State {
 		public static float someValue2 = 4f; // debug value
 		public static float someValue3 = 2f; // debug value
 		public static float someValue4 = 5f; // debug value
+		public static float someValue5 = 2f; // debug value
+		public static float someValue6 = 1.5f; // debug value
+		public static float someValue7 = 20f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -106,7 +117,10 @@ namespace TrafficManager.State {
 #if DEBUG
 			dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
 #endif
-			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules")+" (BETA feature)", highwayRules, onHighwayRulesChanged) as UICheckBox;
+			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+#if DEBUG
+			preferOuterLaneToggle = aiGroup.AddCheckbox(Translation.GetString("Prefer_outer_lane") + " (BETA feature)", preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
+#endif
 			laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
 			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
@@ -118,6 +132,7 @@ namespace TrafficManager.State {
 			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
 			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
 #if DEBUG
+			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 			disableSomething1Toggle = maintenanceGroup.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
 			disableSomething2Toggle = maintenanceGroup.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
 			disableSomething3Toggle = maintenanceGroup.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
@@ -129,6 +144,9 @@ namespace TrafficManager.State {
 			someValue2Field = maintenanceGroup.AddTextfield("Some value #2", String.Format("{0:0.##}", someValue2), onSomeValue2Changed) as UITextField;
 			someValue3Field = maintenanceGroup.AddTextfield("Some value #3", String.Format("{0:0.##}", someValue3), onSomeValue3Changed) as UITextField;
 			someValue4Field = maintenanceGroup.AddTextfield("Some value #4", String.Format("{0:0.##}", someValue4), onSomeValue4Changed) as UITextField;
+			someValue5Field = maintenanceGroup.AddTextfield("Some value #5", String.Format("{0:0.##}", someValue5), onSomeValue5Changed) as UITextField;
+			someValue6Field = maintenanceGroup.AddTextfield("Some value #6", String.Format("{0:0.##}", someValue6), onSomeValue6Changed) as UITextField;
+			someValue7Field = maintenanceGroup.AddTextfield("Some value #7", String.Format("{0:0.##}", someValue7), onSomeValue7Changed) as UITextField;
 #endif
 		}
 
@@ -296,6 +314,13 @@ namespace TrafficManager.State {
 #endif
 		}
 
+		private static void onPreferOuterLaneChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			preferOuterLane = val;
+		}
+
 		private static void onDynamicPathRecalculationChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -459,11 +484,57 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onSomeValue5Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue5 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue6Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue6 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue7Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue7 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
 				return;
 
 			Flags.resetTrafficLights(false);
+		}
+
+		private static void onClickResetSpeedLimits() {
+			if (!checkGameLoaded())
+				return;
+
+			Flags.resetSpeedLimits();
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {
@@ -523,6 +594,22 @@ namespace TrafficManager.State {
 				highwayRulesToggle.isChecked = newHighwayRules;
 		}
 
+#if DEBUG
+		public static void setPreferOuterLane(bool val) {
+#if !TAM
+			if (!LoadingExtension.IsPathManagerCompatible) {
+				preferOuterLane = false;
+			} else {
+#endif
+				preferOuterLane = val;
+#if !TAM
+			}
+#endif
+			if (preferOuterLaneToggle != null)
+				preferOuterLaneToggle.isChecked = val;
+		}
+#endif
+
 		public static void setShowLanes(bool newShowLanes) {
 			showLanes = newShowLanes;
 			if (showLanesToggle != null)
@@ -546,6 +633,9 @@ namespace TrafficManager.State {
 			if (!newAdvancedAI) {
 				setDynamicPathRecalculation(false);
 				setHighwayRules(false);
+#if DEBUG
+				setPreferOuterLane(false);
+#endif
 			}
 		}
 

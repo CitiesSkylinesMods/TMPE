@@ -27,6 +27,8 @@ namespace TrafficManager.UI {
 		private static UIButton _goToSegmentButton = null;
 		private static UIButton _goToNodeButton = null;
 		private static UIButton _goToVehicleButton = null;
+		private static UIButton _goToBuildingButton = null;
+		private static UIButton _printDebugInfoButton = null;
 #endif
 
 		public static TrafficManagerTool TrafficLightTool;
@@ -44,12 +46,12 @@ namespace TrafficManager.UI {
 			width = Translation.getMenuWidth();
 			height = LoadingExtension.IsPathManagerCompatible ? 390 : 230;
 #if DEBUG
-			height += 160;		
+			height += 240;		
 #endif
 			relativePosition = new Vector3(85f, 80f);
 
 			title = AddUIComponent<UILabel>();
-			title.text = "Version 1.6.13";
+			title.text = "Version " + TrafficManagerMod.Version;
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;
@@ -89,6 +91,10 @@ namespace TrafficManager.UI {
 			_goToNodeButton = _createButton("Goto node", y, clickGoToNode);
 			y += 40;
 			_goToVehicleButton = _createButton("Goto vehicle", y, clickGoToVehicle);
+			y += 40;
+			_goToBuildingButton = _createButton("Goto building", y, clickGoToBuilding);
+			y += 40;
+			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
 			y += 40;
 #endif
 		}
@@ -151,6 +157,17 @@ namespace TrafficManager.UI {
 			}
 		}
 
+#if DEBUG
+		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort vehicleId = Singleton<BuildingManager>.instance.m_buildings.m_buffer[20284].m_ownVehicles;
+			while (vehicleId != 0) {
+				Vehicle vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+				Log._Debug($"ownVehicle id={vehicleId} flags={vehicleData.m_flags} target={vehicleData.m_targetBuilding} wait={vehicleData.m_waitCounter} transferSize={vehicleData.m_transferSize}");
+				vehicleId = vehicleData.m_nextOwnVehicle;
+			}
+		}
+#endif
+
 		private void clickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
 #if DEBUG
 			if (title != null) {
@@ -163,8 +180,16 @@ namespace TrafficManager.UI {
 
 			ushort vehicleId = Convert.ToUInt16(_goToField.text);
 			Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
-			if ((vehicle.m_flags & Vehicle.Flags.Created) != Vehicle.Flags.None) {
+			if ((vehicle.m_flags & Vehicle.Flags.Created) != 0) {
 				CameraCtrl.GoToVehicle(vehicleId, new Vector3(vehicle.GetLastFramePosition().x, Camera.main.transform.position.y, vehicle.GetLastFramePosition().z));
+			}
+		}
+
+		private void clickGoToBuilding(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort buildingId = Convert.ToUInt16(_goToField.text);
+			Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+			if ((building.m_flags & Building.Flags.Created) != 0) {
+				CameraCtrl.GoToBuilding(buildingId, new Vector3(building.m_position.x, Camera.main.transform.position.y, building.m_position.z));
 			}
 		}
 

@@ -207,7 +207,7 @@ namespace TrafficManager.UI {
 				if (Options.nodesOverlay) {
 					_guiNodes();
 #if DEBUG
-					/*_guiVehicles();*/
+					_guiVehicles();
 					//_guiCitizens();
 #endif
 				}
@@ -289,45 +289,66 @@ namespace TrafficManager.UI {
 
 				// find currently hovered node
 				var nodeInput = new RaycastInput(this.m_mouseRay, this.m_mouseRayLength);
+				// find road nodes
 				nodeInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
 				nodeInput.m_netService.m_service = ItemClass.Service.Road;
-				nodeInput.m_netService2.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.PublicTransport | ItemClass.Layer.MetroTunnels;
+				/*nodeInput.m_netService2.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.PublicTransport | ItemClass.Layer.MetroTunnels;
 				nodeInput.m_netService2.m_service = ItemClass.Service.PublicTransport;
-				nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain;
+				nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain;*/
 				nodeInput.m_ignoreTerrain = true;
-				nodeInput.m_ignoreNodeFlags = NetNode.Flags.None;
+				nodeInput.m_ignoreNodeFlags = NetNode.Flags.Untouchable;
 
 				RaycastOutput nodeOutput;
 				if (RayCast(nodeInput, out nodeOutput)) {
 					HoveredNodeId = nodeOutput.m_netNode;
+				} else {
+					// find train nodes
+					nodeInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
+					nodeInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+					nodeInput.m_netService.m_subService = ItemClass.SubService.PublicTransportTrain;
+					nodeInput.m_ignoreTerrain = true;
+					nodeInput.m_ignoreNodeFlags = NetNode.Flags.Untouchable;
+
+					if (RayCast(nodeInput, out nodeOutput)) {
+						HoveredNodeId = nodeOutput.m_netNode;
+					}
 				}
 
 				// find currently hovered segment
 				var segmentInput = new RaycastInput(this.m_mouseRay, this.m_mouseRayLength);
+				// find road segments
 				segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
 				segmentInput.m_netService.m_service = ItemClass.Service.Road;
-				segmentInput.m_netService2.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.PublicTransport | ItemClass.Layer.MetroTunnels;
-				segmentInput.m_netService2.m_service = ItemClass.Service.PublicTransport;
-				segmentInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain;
 				segmentInput.m_ignoreTerrain = true;
 				segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
 				RaycastOutput segmentOutput;
 				if (RayCast(segmentInput, out segmentOutput)) {
 					HoveredSegmentId = segmentOutput.m_netSegment;
+				} else {
+					// find train segments
+					segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
+					segmentInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+					segmentInput.m_netService.m_subService = ItemClass.SubService.PublicTransportTrain;
+					segmentInput.m_ignoreTerrain = true;
+					segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
-					if (HoveredNodeId <= 0) {
-						// alternative way to get a node hit: check distance to start and end nodes of the segment
-						ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_startNode;
-						ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_endNode;
-
-						float startDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[startNodeId].m_position).magnitude;
-						float endDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[endNodeId].m_position).magnitude;
-						if (startDist < endDist && startDist < 25f)
-							HoveredNodeId = startNodeId;
-						else if (endDist < startDist && endDist < 25f)
-							HoveredNodeId = endNodeId;
+					if (RayCast(segmentInput, out segmentOutput)) {
+						HoveredSegmentId = segmentOutput.m_netSegment;
 					}
+				}
+
+				if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
+					// alternative way to get a node hit: check distance to start and end nodes of the segment
+					ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_startNode;
+					ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_endNode;
+
+					float startDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[startNodeId].m_position).magnitude;
+					float endDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[endNodeId].m_position).magnitude;
+					if (startDist < endDist && startDist < 25f)
+						HoveredNodeId = startNodeId;
+					else if (endDist < startDist && endDist < 25f)
+						HoveredNodeId = endNodeId;
 				}
 
 				/*if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
@@ -345,7 +366,7 @@ namespace TrafficManager.UI {
 		/// <summary>
 		/// Displays lane ids over lanes
 		/// </summary>
-		private void _guiLanes(ref NetSegment segment, ref NetInfo segmentInfo) {
+		private void _guiLanes(ushort segmentId, ref NetSegment segment, ref NetInfo segmentInfo) {
 			GUIStyle _counterStyle = new GUIStyle();
 			Vector3 centerPos = segment.m_bounds.center;
 			var screenPos = Camera.main.WorldToScreenPoint(centerPos);
@@ -370,7 +391,8 @@ namespace TrafficManager.UI {
 				if (curLaneId == 0)
 					break;
 
-				totalDensity += CustomRoadAI.currentLaneDensities[curLaneId];
+				if (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length)
+					totalDensity += CustomRoadAI.currentLaneDensities[segmentId][i];
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -385,15 +407,15 @@ namespace TrafficManager.UI {
 
 				labelStr += "Lane idx " + i + ", id " + curLaneId;
 #if DEBUG
-				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType;
+				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (CustomRoadAI.InStartupPhase)
 					labelStr += ", in start-up phase";
 				else
-					labelStr += ", avg. speed: " + CustomRoadAI.laneMeanSpeeds[curLaneId] + " %";
-				labelStr += ", avg. density: " + CustomRoadAI.laneMeanDensities[curLaneId] + " %";
+					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " %";
+				labelStr += ", rel. density: " + (CustomRoadAI.laneMeanDensities[segmentId] != null && i < CustomRoadAI.laneMeanDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanDensities[segmentId][i] : "?") + " %";
 #if DEBUG
-				labelStr += " (" + CustomRoadAI.currentLaneDensities[curLaneId] + "/" + totalDensity + ")";
+				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 #endif
 				labelStr += "\n";
 
@@ -440,8 +462,13 @@ namespace TrafficManager.UI {
 					_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
 					String labelStr = "Segment " + i;
-#if DEBUG
+#if DEBUGx
 					labelStr += ", flags: " + segments.m_buffer[i].m_flags.ToString() + ", condition: " + segments.m_buffer[i].m_condition;
+#endif
+#if DEBUG
+					SegmentEnd startEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_startNode, (ushort)i);
+					SegmentEnd endEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_endNode, (ushort)i);
+					labelStr += "\nstart veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
 
@@ -453,9 +480,11 @@ namespace TrafficManager.UI {
 					while (lIndex < segmentInfo.m_lanes.Length && laneId != 0u) {
 						NetInfo.Lane lane = segmentInfo.m_lanes[lIndex];
 						if (lane.CheckType(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car)) {
-							if (CustomRoadAI.laneMeanSpeeds[laneId] >= 0) {
-								meanLaneSpeed += (float)CustomRoadAI.laneMeanSpeeds[laneId];
-								++validLanes;
+							if (CustomRoadAI.laneMeanSpeeds[i] != null && lIndex < CustomRoadAI.laneMeanSpeeds[i].Length) {
+								if (CustomRoadAI.laneMeanSpeeds[i][lIndex] >= 0) {
+									meanLaneSpeed += (float)CustomRoadAI.laneMeanSpeeds[i][lIndex];
+									++validLanes;
+								}
 							}
 						}
 						lIndex++;
@@ -481,7 +510,7 @@ namespace TrafficManager.UI {
 					GUI.Label(labelRect, labelStr, _counterStyle);
 
 					if (Options.showLanes)
-						_guiLanes(ref segments.m_buffer[i], ref segmentInfo);
+						_guiLanes((ushort)i, ref segments.m_buffer[i], ref segmentInfo);
 				}
 			}
 		}
@@ -529,7 +558,7 @@ namespace TrafficManager.UI {
 			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
 			for (int i = 1; i < vehicles.m_size; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
-				if (vehicle.m_flags == Vehicle.Flags.None) // node is unused
+				if (vehicle.m_flags == 0) // node is unused
 					continue;
 
 				Vector3 pos = vehicle.GetLastFramePosition();
@@ -550,8 +579,8 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				VehiclePosition vPos = TrafficPriority.GetVehiclePosition((ushort)i);
-				String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehicle.GetLastFrameVelocity().magnitude) + ", len: " + vehicle.CalculateTotalLength((ushort)i) + ", state: " + vPos.CarState;
+				VehicleState vState = VehicleStateManager.GetVehicleState((ushort)i);
+				String labelStr = "Veh. " + i + /*" @ " + String.Format("{0:0.##}", vehicle.GetLastFrameVelocity().magnitude)*/ " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-") + "\npos: " + vState?.GetCurrentPosition()?.SourceSegmentId + "(" + vState?.GetCurrentPosition()?.SourceLaneIndex + ")->" + vState?.GetCurrentPosition()?.TransitNodeId + ", last update: " + vState?.LastPositionUpdate;
 				// add current path info
 				/*var currentPathId = vehicle.m_path;
 				if (currentPathId > 0) {
@@ -562,7 +591,7 @@ namespace TrafficManager.UI {
 					}
 				}*/
 
-			Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
 
 				GUI.Box(labelRect, labelStr, _counterStyle);
@@ -575,9 +604,6 @@ namespace TrafficManager.UI {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<CitizenInstance> citizenInstances = Singleton<CitizenManager>.instance.m_instances;
 			for (int i = 1; i < citizenInstances.m_size; ++i) {
-				if (i % (int)Options.someValue4 != 0)
-					continue;
-
 				CitizenInstance citizenInstance = citizenInstances.m_buffer[i];
 				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
 					continue;
@@ -701,7 +727,7 @@ namespace TrafficManager.UI {
 				if ((segmentInfo.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)
 					goto nextIter;
 
-				NetInfo.Direction dir = segmentInfo.m_lanes[laneIndex].m_direction;
+				NetInfo.Direction dir = segmentInfo.m_lanes[laneIndex].m_finalDirection;
 				Vector3 bezierCenter = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_bezier.Position(0.5f);
 
 				if (!segmentCenterByDir.ContainsKey(dir)) {

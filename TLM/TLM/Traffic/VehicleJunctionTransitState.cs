@@ -1,10 +1,8 @@
-namespace TrafficManager
-{
-    public enum VehicleJunctionTransitState
-    {
-        None,
-        Enter,
-        Stop,
-        Leave
-    }
+namespace TrafficManager {
+	public enum VehicleJunctionTransitState {
+		None,
+		Enter,
+		Stop,
+		Leave
+	}
 }

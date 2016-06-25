@@ -66,23 +66,25 @@ namespace TrafficManager.UI.SubTools {
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
 				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
-				for (ushort segmentId = 0; segmentId < TrafficPriority.PrioritySegments.Length; ++segmentId) {
-					var trafficSegment = TrafficPriority.PrioritySegments[segmentId];
+				for (ushort segmentId = 0; segmentId < TrafficPriority.TrafficSegments.Length; ++segmentId) {
+					var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
 					if (trafficSegment == null)
 						continue;
-					SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(segmentId);
+					SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
 
 					List<SegmentEnd> prioritySegments = new List<SegmentEnd>();
 					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node1) == null) {
 						SegmentEnd tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
-						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(trafficSegment.Node1)) {
+						bool startNode = geometry.StartNodeId() == trafficSegment.Node1;
+						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(startNode)) {
 							prioritySegments.Add(tmpSeg1);
 							nodeIdsWithSigns.Add(trafficSegment.Node1);
 						}
 					}
 					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node2) == null) {
 						SegmentEnd tmpSeg2 = TrafficPriority.GetPrioritySegment(trafficSegment.Node2, segmentId);
-						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(trafficSegment.Node2)) {
+						bool startNode = geometry.StartNodeId() == trafficSegment.Node2;
+						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(startNode)) {
 							prioritySegments.Add(tmpSeg2);
 							nodeIdsWithSigns.Add(trafficSegment.Node2);
 						}
@@ -131,6 +133,7 @@ namespace TrafficManager.UI.SubTools {
 
 						GUI.color = guiColor;
 
+						bool setUndefinedSignsToMainRoad = false;
 						switch (prioritySegment.Type) {
 							case SegmentEnd.PriorityType.Main:
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
@@ -138,6 +141,7 @@ namespace TrafficManager.UI.SubTools {
 									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (1)");
 									//Log.Message("PrioritySegment.Type = Yield");
 									prioritySegment.Type = SegmentEnd.PriorityType.Yield;
+									setUndefinedSignsToMainRoad = true;
 									clicked = false;
 								}
 								break;
@@ -146,6 +150,7 @@ namespace TrafficManager.UI.SubTools {
 								if (clicked && hoveredSegment) {
 									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (2)");
 									prioritySegment.Type = SegmentEnd.PriorityType.Stop;
+									setUndefinedSignsToMainRoad = true;
 									clicked = false;
 								}
 
@@ -154,7 +159,7 @@ namespace TrafficManager.UI.SubTools {
 								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignStopTexture2D);
 								if (clicked && hoveredSegment) {
 									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (3)");
-									prioritySegment.Type = SegmentEnd.PriorityType.None;
+									prioritySegment.Type = SegmentEnd.PriorityType.Main;
 									clicked = false;
 								}
 								break;
@@ -169,9 +174,20 @@ namespace TrafficManager.UI.SubTools {
 									prioritySegment.Type = GetNumberOfMainRoads(nodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]) >= 2
 										? SegmentEnd.PriorityType.Yield
 										: SegmentEnd.PriorityType.Main;
+									if (prioritySegment.Type == SegmentEnd.PriorityType.Yield)
+										setUndefinedSignsToMainRoad = true;
 									clicked = false;
 								}
 								break;
+						}
+
+						if (setUndefinedSignsToMainRoad) {
+							foreach (var otherPrioritySegment in TrafficPriority.GetPrioritySegments(nodeId)) {
+								if (otherPrioritySegment.SegmentId == prioritySegment.SegmentId)
+									continue;
+								if (otherPrioritySegment.Type == SegmentEnd.PriorityType.None)
+									otherPrioritySegment.Type = SegmentEnd.PriorityType.Main;
+							}
 						}
 					}
 				}
@@ -218,15 +234,16 @@ namespace TrafficManager.UI.SubTools {
 
 					// determine if we may add new priority signs to this node
 					bool ok = false;
+					TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
 					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 						// no traffic light set
 						ok = true;
-					} else {
-						TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
-						if (nodeSim == null || !nodeSim.IsTimedLight()) {
-							ok = true;
-						}
+					} else if (nodeSim == null || !nodeSim.IsTimedLight()) {
+						ok = true;
 					}
+
+					if (!Flags.mayHaveTrafficLight(HoveredNodeId))
+						ok = false;
 
 					if (clicked) {
 						//Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + HoveredNodeId + "/" + hoveredExistingNodeId);
@@ -236,11 +253,11 @@ namespace TrafficManager.UI.SubTools {
 						} else if (ok) {
 							if (!TrafficPriority.IsPriorityNode(HoveredNodeId)) {
 								//Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
-								TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false); // TODO refactor!
+								TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false, true);
 								Flags.setNodeTrafficLight(HoveredNodeId, false); // TODO refactor!
 								TrafficPriority.AddPriorityNode(HoveredNodeId);
 							}
-						} else {
+						} else if (nodeSim != null && nodeSim.IsTimedLight()) {
 							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
 						}
 					}
@@ -266,6 +283,15 @@ namespace TrafficManager.UI.SubTools {
 				}
 			}
 			return numMainRoads;
+		}
+
+		public override void Cleanup() {
+			HashSet<ushort> priorityNodeIds = TrafficPriority.GetPriorityNodes();
+			foreach (ushort nodeId in priorityNodeIds) {
+				foreach (SegmentEnd end in TrafficPriority.GetPrioritySegments(nodeId)) {
+					end.Housekeeping();
+				}
+			}
 		}
 	}
 }

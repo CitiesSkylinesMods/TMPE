@@ -41,7 +41,11 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnActivate() {
 			nodeSelectionLocked = false;
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
-				TrafficPriority.nodeHousekeeping(selectedNodeIndex);
+				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
+				if (lightSim != null) {
+					lightSim.housekeeping();
+				}
+				//TrafficPriority.nodeHousekeeping(selectedNodeIndex);
 			}
 		}
 
@@ -66,7 +70,7 @@ namespace TrafficManager.UI.SubTools {
 						}
 					} else {
 						if (SelectedNodeIndexes.Count == 0) {
-							timedSim.housekeeping(true);
+							//timedSim.housekeeping();
 							var timedLight = timedSim.TimedLight;
 
 							if (timedLight != null) {
@@ -102,8 +106,8 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					var timedSim2 = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
-					if (timedSim2 != null)
-						timedSim2.housekeeping(true);
+					/*if (timedSim2 != null)
+						timedSim2.housekeeping();*/
 					TimedTrafficLights timedLight2 = null;
 					if (timedSim2 == null || !timedSim2.IsTimedLight()) {
 						var nodeGroup = new List<ushort>();
@@ -129,7 +133,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					if (SelectedNodeIndexes.Contains(HoveredNodeId)) {
-						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false);
+						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false, false);
 					}
 					RemoveSelectedNode(HoveredNodeId);
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
@@ -347,8 +351,8 @@ namespace TrafficManager.UI.SubTools {
 					if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
 						foreach (var sim in SelectedNodeIndexes.Select(TrafficLightSimulation.GetNodeSimulation)) {
 
-							if (_stepMinValue <= 0)
-								_stepMinValue = 1;
+							if (_stepMinValue < 0)
+								_stepMinValue = 0;
 							if (_stepMaxValue <= 0)
 								_stepMaxValue = 1;
 							if (_stepMaxValue < _stepMinValue)
@@ -368,7 +372,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					GUILayout.EndHorizontal();
-					makeFlowPolicySlider();
+					makeFlowPolicyDisplay(true);
 					GUILayout.BeginHorizontal();
 				}
 
@@ -396,8 +400,8 @@ namespace TrafficManager.UI.SubTools {
 
 					if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
 						foreach (var sim in SelectedNodeIndexes.Select(TrafficLightSimulation.GetNodeSimulation)) {
-							if (_stepMinValue <= 0)
-								_stepMinValue = 1;
+							if (_stepMinValue < 0)
+								_stepMinValue = 0;
 							if (_stepMaxValue <= 0)
 								_stepMaxValue = 1;
 							if (_stepMaxValue < _stepMinValue)
@@ -414,7 +418,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					GUILayout.EndHorizontal();
-					makeFlowPolicySlider();
+					makeFlowPolicyDisplay(true);
 					GUILayout.BeginHorizontal();
 
 				} else {
@@ -445,9 +449,17 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 
+					bool isInTestMode = false;
+					foreach (var sim in SelectedNodeIndexes.Select(TrafficLightSimulation.GetNodeSimulation)) {
+						if (sim.TimedLight.IsInTestMode()) {
+							isInTestMode = true;
+							break;
+						}
+					}
+
 					var curStep = timedNodeMain.CurrentStep;
 					_waitFlowBalance = timedNodeMain.GetStep(curStep).waitFlowBalance;
-					makeFlowPolicySlider();
+					makeFlowPolicyDisplay(isInTestMode);
 					foreach (var sim in SelectedNodeIndexes.Select(TrafficLightSimulation.GetNodeSimulation)) {
 						sim.TimedLight.GetStep(curStep).waitFlowBalance = _waitFlowBalance;
 					}
@@ -505,7 +517,7 @@ namespace TrafficManager.UI.SubTools {
 			_timedShowNumbers = false;
 		}
 
-		private void makeFlowPolicySlider() {
+		private void makeFlowPolicyDisplay(bool editable) {
 			string formatStr;
 			if (_waitFlowBalance < 0.01f)
 				formatStr = "{0:0.###}";
@@ -515,42 +527,46 @@ namespace TrafficManager.UI.SubTools {
 				formatStr = "{0:0.#}";
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(Translation.GetString("Sensitivity") + " (" + String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
-			if (_waitFlowBalance <= 0.01f) {
-				if (_waitFlowBalance >= 0) {
-					if (GUILayout.Button("-.001")) {
-						_waitFlowBalance -= 0.001f;
+			if (editable) {
+				GUILayout.Label(Translation.GetString("Sensitivity") + " (" + String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() + "):");
+				if (_waitFlowBalance <= 0.01f) {
+					if (_waitFlowBalance >= 0) {
+						if (GUILayout.Button("-.001")) {
+							_waitFlowBalance -= 0.001f;
+						}
+					}
+					if (_waitFlowBalance < 0.01f) {
+						if (GUILayout.Button("+.001")) {
+							_waitFlowBalance += 0.001f;
+						}
+					}
+				} else if (_waitFlowBalance <= 0.1f) {
+					if (GUILayout.Button("-.01")) {
+						_waitFlowBalance -= 0.01f;
+					}
+					if (_waitFlowBalance < 0.1f) {
+						if (GUILayout.Button("+.01")) {
+							_waitFlowBalance += 0.01f;
+						}
 					}
 				}
-				if (_waitFlowBalance < 0.01f) {
-					if (GUILayout.Button("+.001")) {
-						_waitFlowBalance += 0.001f;
-					}
-				}
-			} else if (_waitFlowBalance <= 0.1f) {
-				if (GUILayout.Button("-.01")) {
-					_waitFlowBalance -= 0.01f;
-				}
-				if (_waitFlowBalance < 0.1f) {
-					if (GUILayout.Button("+.01")) {
-						_waitFlowBalance += 0.01f;
-					}
-				}
-			}
-			if (_waitFlowBalance < 0)
-				_waitFlowBalance = 0;
-			if (_waitFlowBalance > 5)
-				_waitFlowBalance = 5;
-			GUILayout.EndHorizontal();
+				if (_waitFlowBalance < 0)
+					_waitFlowBalance = 0;
+				if (_waitFlowBalance > 5)
+					_waitFlowBalance = 5;
+				GUILayout.EndHorizontal();
 
-			_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 5f);
-			GUILayout.BeginHorizontal();
-			GUIStyle style = new GUIStyle();
-			style.normal.textColor = Color.white;
-			style.alignment = TextAnchor.LowerLeft;
-			GUILayout.Label(Translation.GetString("Low"), style, new GUILayoutOption[] { GUILayout.Height(10) });
-			style.alignment = TextAnchor.LowerRight;
-			GUILayout.Label(Translation.GetString("High"), style, new GUILayoutOption[] { GUILayout.Height(10) });
+				_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 5f);
+				GUILayout.BeginHorizontal();
+				GUIStyle style = new GUIStyle();
+				style.normal.textColor = Color.white;
+				style.alignment = TextAnchor.LowerLeft;
+				GUILayout.Label(Translation.GetString("Low"), style, new GUILayoutOption[] { GUILayout.Height(10) });
+				style.alignment = TextAnchor.LowerRight;
+				GUILayout.Label(Translation.GetString("High"), style, new GUILayoutOption[] { GUILayout.Height(10) });
+			} else {
+				GUILayout.Label(Translation.GetString("Sensitivity") + ": " + String.Format(formatStr, _waitFlowBalance) + " (" + getWaitFlowBalanceInfo() + ")");
+			}
 			GUILayout.EndHorizontal();
 
 			GUILayout.Space(5);
@@ -575,7 +591,7 @@ namespace TrafficManager.UI.SubTools {
 
 			foreach (var nodeId in SelectedNodeIndexes) {
 				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(nodeId);
-				nodeSimulation.housekeeping(true);
+				//nodeSimulation.housekeeping();
 				if (nodeSimulation == null || !nodeSimulation.IsTimedLight())
 					continue;
 				TimedTrafficLights timedNode = nodeSimulation.TimedLight;
@@ -594,8 +610,13 @@ namespace TrafficManager.UI.SubTools {
 				for (var i = 0; i < 8; i++) {
 					ushort srcSegmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i); // source segment
 
-					if (srcSegmentId == 0 || nodeSimulation == null ||
-						!CustomTrafficLights.IsSegmentLight(nodeId, srcSegmentId)) continue;
+					if (srcSegmentId == 0)
+						continue;
+
+					if (nodeSimulation == null || !CustomTrafficLights.IsSegmentLight(nodeId, srcSegmentId)) {
+						Log._Debug($"segment {srcSegmentId} @ {nodeId} is not a custom segment light. {nodeSimulation==null}");
+						continue;
+					}
 
 					CustomSegmentLights liveSegmentLights = CustomTrafficLights.GetSegmentLights(nodeId, srcSegmentId);
 					if (!nodeSimulation.IsTimedLightActive()) {
@@ -701,6 +722,13 @@ namespace TrafficManager.UI.SubTools {
 
 					int lightOffset = -1;
 					foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
+						HashSet<byte> laneIndices = new HashSet<byte>();
+						foreach (KeyValuePair<byte, ExtVehicleType> e in liveSegmentLights.VehicleTypeByLaneIndex) {
+							if (e.Value == vehicleType)
+								laneIndices.Add(e.Key);
+						}
+						//Log._Debug($"Traffic light @ seg. {srcSegmentId} node {nodeId}. Lane indices for vehicleType {vehicleType}: {string.Join(",", laneIndices.Select(x => x.ToString()).ToArray())}");
+
 						++lightOffset;
 						CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
 
@@ -749,9 +777,6 @@ namespace TrafficManager.UI.SubTools {
 							}
 						}
 
-
-
-
 #if DEBUG
 						if (timedActive /*&& _timedShowNumbers*/) {
 							var prioSeg = TrafficPriority.GetPrioritySegment(nodeId, srcSegmentId);
@@ -766,7 +791,7 @@ namespace TrafficManager.UI.SubTools {
 
 							String labelStr = "n/a";
 							if (prioSeg != null) {
-								labelStr = prioSeg.getNumCars().ToString() + " " + Translation.GetString("incoming");
+								labelStr = prioSeg.GetRegisteredVehicleCount(laneIndices).ToString() + " " + Translation.GetString("incoming");
 								/*for (int k = 0; k < prioSeg.numLanes; ++k) {
 									if (k > 0)
 										labelStr += "/";
@@ -813,12 +838,13 @@ namespace TrafficManager.UI.SubTools {
 							}
 						}
 
-						SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(srcSegmentId);
-						if (geometry.IsOutgoingOneWay(nodeId)) continue;
+						SegmentGeometry geometry = SegmentGeometry.Get(srcSegmentId);
+						bool startNode = geometry.StartNodeId() == nodeId;
+						if (geometry.IsOutgoingOneWay(startNode)) continue;
 
-						var hasLeftSegment = geometry.HasLeftSegment(nodeId);
-						var hasForwardSegment = geometry.HasStraightSegment(nodeId);
-						var hasRightSegment = geometry.HasRightSegment(nodeId);
+						var hasLeftSegment = geometry.HasLeftSegment(startNode);
+						var hasForwardSegment = geometry.HasStraightSegment(startNode);
+						var hasRightSegment = geometry.HasRightSegment(startNode);
 
 						switch (liveSegmentLight.CurrentMode) {
 							case CustomSegmentLight.Mode.Simple: {
@@ -1352,7 +1378,7 @@ namespace TrafficManager.UI.SubTools {
 					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
 					nodeSimulation.SetupTimedTrafficLight(SelectedNodeIndexes);
 
-					for (var s = 0; s < 8; s++) {
+					/*for (var s = 0; s < 8; s++) {
 						var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[selectedNodeIndex].GetSegment(s);
 						if (segment <= 0)
 							continue;
@@ -1362,7 +1388,7 @@ namespace TrafficManager.UI.SubTools {
 						} else {
 							TrafficPriority.GetPrioritySegment(selectedNodeIndex, segment).Type = SegmentEnd.PriorityType.None;
 						}
-					}
+					}*/
 				}
 
 				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
@@ -1390,9 +1416,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeIndexes.Count <= 0) return;
 
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
-				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
-				if (nodeSimulation == null) continue;
-				nodeSimulation.Destroy(true);
+				TrafficLightSimulation.RemoveNodeFromSimulation(selectedNodeIndex, true, false);
 			}
 		}
 
@@ -1528,7 +1552,7 @@ namespace TrafficManager.UI.SubTools {
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights)
 				return;
 
-			foreach (ushort nodeId in TrafficPriority.getPriorityNodes()) {
+			foreach (ushort nodeId in TrafficPriority.GetPriorityNodes()) {
 				if (SelectedNodeIndexes.Contains(nodeId))
 					continue;
 
@@ -1536,7 +1560,7 @@ namespace TrafficManager.UI.SubTools {
 				if (lightSim != null && lightSim.IsTimedLight()) {
 					TimedTrafficLights timedNode = lightSim.TimedLight;
 					if (timedNode == null) {
-						TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, true);
+						TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, true, false);
 						break;
 					}
 

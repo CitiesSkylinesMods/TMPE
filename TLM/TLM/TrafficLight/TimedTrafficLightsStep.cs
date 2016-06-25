@@ -1,3 +1,5 @@
+#define DEBUGMETRICx
+
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
@@ -38,7 +40,6 @@ namespace TrafficManager.TrafficLight {
 
 		public uint lastFlowWaitCalc = 0;
 
-		private List<ushort> groupNodeIds;
 		private TimedTrafficLights timedNode;
 
 		public Dictionary<ushort, CustomSegmentLights> segmentLights = new Dictionary<ushort, CustomSegmentLights>();
@@ -52,13 +53,11 @@ namespace TrafficManager.TrafficLight {
 
 		public float waitFlowBalance = 1f;
 
-		public TimedTrafficLightsStep(TimedTrafficLights timedNode, int minTime, int maxTime, float waitFlowBalance, List<ushort> groupNodeIds, bool makeRed=false) {
+		public TimedTrafficLightsStep(TimedTrafficLights timedNode, int minTime, int maxTime, float waitFlowBalance, bool makeRed=false) {
 			this.minTime = minTime;
 			this.maxTime = maxTime;
 			this.waitFlowBalance = waitFlowBalance;
 			this.timedNode = timedNode;
-
-			this.groupNodeIds = groupNodeIds;
 
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
@@ -107,10 +106,20 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <returns></returns>
 		internal bool isInEndTransition() {
+			if (!timedNode.isMasterNode()) {
+				TimedTrafficLights masterLights = timedNode.MasterLights();
+				if (masterLights != null)
+					return masterLights.Steps[timedNode.CurrentStep].isInEndTransition();
+			}
 			return endTransitionStart != null && getCurrentFrame() <= endTransitionStart && StepDone(false);
 		}
 
 		internal bool isInStartTransition() {
+			if (!timedNode.isMasterNode()) {
+				TimedTrafficLights masterLights = timedNode.MasterLights();
+				if (masterLights != null)
+					return timedNode.MasterLights().Steps[timedNode.CurrentStep].isInStartTransition();
+			}
 			return getCurrentFrame() == startFrame && !StepDone(false);
 		}
 
@@ -161,20 +170,68 @@ namespace TrafficManager.TrafficLight {
 				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
 
+#if DEBUG
+				if (timedNode == null) {
+					Log.Error($"TimedTrafficLightsStep: timedNode is null!");
+					return;
+				}
+#endif
+
 				TimedTrafficLightsStep previousStep = timedNode.Steps[(timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count];
 				TimedTrafficLightsStep nextStep = timedNode.Steps[(timedNode.CurrentStep + 1) % timedNode.Steps.Count];
+
+#if DEBUG
+				if (previousStep == null) {
+					Log.Error($"TimedTrafficLightsStep: previousStep is null!");
+					return;
+				}
+
+				if (nextStep == null) {
+					Log.Error($"TimedTrafficLightsStep: nextStep is null!");
+					return;
+				}
+
+				if (previousStep.segmentLights == null) {
+					Log.Error($"TimedTrafficLightsStep: previousStep.segmentLights is null!");
+					return;
+				}
+
+				if (nextStep.segmentLights == null) {
+					Log.Error($"TimedTrafficLightsStep: nextStep.segmentLights is null!");
+					return;
+				}
+
+				if (segmentLights == null) {
+					Log.Error($"TimedTrafficLightsStep: segmentLights is null!");
+					return;
+				}
+#endif
 
 				foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
 					var segmentId = e.Key;
 					var curStepSegmentLights = e.Value;
+
+#if DEBUG
+					if (!previousStep.segmentLights.ContainsKey(segmentId)) {
+						Log.Error($"TimedTrafficLightsStep: previousStep does not contain lights for segment {segmentId}!");
+						return;
+					}
+
+					if (!nextStep.segmentLights.ContainsKey(segmentId)) {
+						Log.Error($"TimedTrafficLightsStep: nextStep does not contain lights for segment {segmentId}!");
+						return;
+					}
+#endif
+
 					var prevStepSegmentLights = previousStep.segmentLights[segmentId];
 					var nextStepSegmentLights = nextStep.segmentLights[segmentId];
 
 					//segLightState.makeRedOrGreen(); // TODO temporary fix
 
-					var liveSegmentLights = CustomTrafficLights.GetSegmentLights(timedNode.NodeId, segmentId);
-					if (liveSegmentLights == null)
+					var liveSegmentLights = CustomTrafficLights.GetOrLiveSegmentLights(timedNode.NodeId, segmentId);
+					if (liveSegmentLights == null) {
 						continue;
+					}
 
 					if (curStepSegmentLights.PedestrianLightState != null && prevStepSegmentLights.PedestrianLightState != null && nextStepSegmentLights.PedestrianLightState != null) {
 						RoadBaseAI.TrafficLightState pedLightState = calcLightState((RoadBaseAI.TrafficLightState)prevStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)curStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)nextStepSegmentLights.PedestrianLightState, atStartTransition, atEndTransition);
@@ -184,15 +241,40 @@ namespace TrafficManager.TrafficLight {
 						//Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId}: Ped.: {liveSegmentLights.PedestrianLightState.ToString()}");
 					}
 
+#if DEBUG
+					if (curStepSegmentLights.VehicleTypes == null) {
+						Log.Error($"TimedTrafficLightsStep: curStepSegmentLights.VehicleTypes is null!");
+						return;
+					}
+#endif
+
 					foreach (ExtVehicleType vehicleType in curStepSegmentLights.VehicleTypes) {
 						CustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
 						if (liveSegmentLight == null) {
-							Log.Warning($"Timed step @ seg. {segmentId}, node {timedNode.NodeId} has a traffic light for {vehicleType} but the live segment does not have one.");
+#if DEBUG
+							Log._Debug($"Timed step @ seg. {segmentId}, node {timedNode.NodeId} has a traffic light for {vehicleType} but the live segment does not have one.");
+#endif
 							continue;
 						}
 						CustomSegmentLight curStepSegmentLight = curStepSegmentLights.GetCustomLight(vehicleType);
 						CustomSegmentLight prevStepSegmentLight = prevStepSegmentLights.GetCustomLight(vehicleType);
 						CustomSegmentLight nextStepSegmentLight = nextStepSegmentLights.GetCustomLight(vehicleType);
+#if DEBUG
+						if (curStepSegmentLight == null) {
+							Log.Error($"TimedTrafficLightsStep: curStepSegmentLight is null!");
+							return;
+						}
+
+						if (prevStepSegmentLight == null) {
+							Log.Error($"TimedTrafficLightsStep: prevStepSegmentLight is null!");
+							return;
+						}
+
+						if (nextStepSegmentLight == null) {
+							Log.Error($"TimedTrafficLightsStep: nextStepSegmentLight is null!");
+							return;
+						}
+#endif
 
 						liveSegmentLight.CurrentMode = curStepSegmentLight.CurrentMode;
 						liveSegmentLight.LightMain = calcLightState(prevStepSegmentLight.LightMain, curStepSegmentLight.LightMain, nextStepSegmentLight.LightMain, atStartTransition, atEndTransition);
@@ -209,7 +291,7 @@ namespace TrafficManager.TrafficLight {
 					liveSegmentLights.UpdateVisuals();
 				}
 			} catch (Exception e) {
-				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.Message}");
+				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.ToString()}");
 				invalid = true;
 			}
 		}
@@ -290,17 +372,16 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (getCurrentFrame() >= startFrame + minTime) {
-				if (timedNode.masterNodeId != timedNode.NodeId) {
-					TrafficLightSimulation masterSim = TrafficLightSimulation.GetNodeSimulation(timedNode.masterNodeId);
+				if (!timedNode.isMasterNode()) {
+					TimedTrafficLights masterLights = timedNode.MasterLights();
 
-					if (masterSim == null || !masterSim.IsTimedLight()) {
+					if (masterLights == null) {
 						invalid = true;
 						stepDone = true;
 						endTransitionStart = getCurrentFrame();
 						return true;
 					}
-					TimedTrafficLights masterTimedNode = masterSim.TimedLight;
-					bool done = masterTimedNode.Steps[masterTimedNode.CurrentStep].StepDone(updateValues);
+					bool done = masterLights.Steps[masterLights.CurrentStep].StepDone(updateValues);
 #if DEBUG
 					//Log.Message("step finished (1) @ " + nodeId);
 #endif
@@ -327,6 +408,10 @@ namespace TrafficManager.TrafficLight {
 					float newFlow = minFlow;
 					float newWait = maxWait;
 
+#if DEBUGMETRIC
+					newFlow = flow;
+					newWait = wait;
+#else
 					if (Single.IsNaN(newFlow))
 						newFlow = flow;
 					else
@@ -336,9 +421,14 @@ namespace TrafficManager.TrafficLight {
 						newWait = 0;
 					else
 						newWait = 0.1f * newWait + 0.9f * wait; // some smoothing
+#endif
 
 					// if more cars are waiting than flowing, we change the step
+#if DEBUGMETRIC
+					bool done = false;
+#else
 					bool done = newWait > 0 && newFlow < newWait;
+#endif
 					if (updateValues) {
 						minFlow = newFlow;
 						maxWait = newWait;
@@ -364,10 +454,15 @@ namespace TrafficManager.TrafficLight {
 		/// <param name="flow"></param>
 		/// <returns>true if the values could be calculated, false otherwise</returns>
 		public bool calcWaitFlow(out float wait, out float flow) {
-#if DEBUG
-			bool debug = timedNode.NodeId == 17857;
+#if DEBUGMETRIC
+			bool debug = timedNode.NodeId == 17813 || timedNode.NodeId == 7725;
 #else
 			bool debug = false;
+#endif
+
+#if DEBUGMETRIC
+			if (debug)
+				Log.Warning($"TimedTrafficLightsStep.calcWaitFlow: ***START*** @ node {timedNode.NodeId}");
 #endif
 
 			uint numFlows = 0;
@@ -376,7 +471,7 @@ namespace TrafficManager.TrafficLight {
 			uint curMeanWait = 0;
 
 			// we are the master node. calculate traffic data
-			foreach (ushort timedNodeId in groupNodeIds) {
+			foreach (ushort timedNodeId in timedNode.NodeGroup) {
 				TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(timedNodeId);
 				if (sim == null || !sim.IsTimedLight())
 					continue;
@@ -398,85 +493,104 @@ namespace TrafficManager.TrafficLight {
 					// one of the traffic lights at this segment is green: count minimum traffic flowing through
 					SegmentEnd fromSeg = TrafficPriority.GetPrioritySegment(timedNodeId, fromSegmentId);
 					if (fromSeg == null) {
+#if DEBUGMETRIC
+						if (debug)
+							Log.Warning($"TimedTrafficLightsStep.calcWaitFlow: No priority segment @ seg. {fromSegmentId} found!");
+#endif
 						//Log.Warning("stepDone(): prioSeg is null");
 						//segmentIdsToDelete.Add(fromSegmentId);
 						continue; // skip invalid segment
 					}
 
-					bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
+					//bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
 					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
 
-					foreach (ExtVehicleType vehicleType in segLights.VehicleTypes) {
+					foreach (KeyValuePair<byte, ExtVehicleType> e2 in segLights.VehicleTypeByLaneIndex) {
+						byte laneIndex = e2.Key;
+						ExtVehicleType vehicleType = e2.Value;
 						if (vehicleType != ExtVehicleType.None && (validVehicleTypes & vehicleType) == ExtVehicleType.None)
 							continue;
-						CustomSegmentLight segLight = segLights.GetCustomLight(vehicleType);
+						CustomSegmentLight segLight = segLights.GetCustomLight(laneIndex);
 						if (segLight == null) {
 							Log.Warning($"Timed traffic light step: Failed to get custom light for vehicleType {vehicleType} @ seg. {fromSegmentId}, node {timedNode.NodeId}!");
 							continue;
 						}
 
-						Dictionary<ushort, uint>[] carsToSegmentMetrics = new Dictionary<ushort, uint>[startPhase ? 1 : 2];
+#if DEBUGMETRIC
+						if (debug)
+							Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Checking lane {laneIndex} @ seg. {fromSegmentId}. Vehicle types: {vehicleType}");
+#endif
+
+						Dictionary<ushort, uint> carsFlowingToSegmentMetric = null;
+						Dictionary<ushort, uint> allCarsToSegmentMetric = null;
 						try {
-							carsToSegmentMetrics[0] = fromSeg.GetVehicleMetricGoingToSegment(null, vehicleType, segLights.SeparateVehicleTypes, debug);
+							carsFlowingToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(0.1f, laneIndex, debug);
 						} catch (Exception ex) {
-							Log.Warning("calcWaitFlow: " + ex.ToString());
-						}
-						if (!startPhase) {
-							try {
-								carsToSegmentMetrics[1] = fromSeg.GetVehicleMetricGoingToSegment(0.1f, vehicleType, segLights.SeparateVehicleTypes, debug);
-							} catch (Exception ex) {
-								Log.Warning("calcWaitFlow: " + ex.ToString());
-							}
+							Log.Warning("calcWaitFlow (1): " + ex.ToString());
 						}
 
-						if (carsToSegmentMetrics[0] == null)
+						try {
+							allCarsToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(null, laneIndex, debug);
+						} catch (Exception ex) {
+							Log.Warning("calcWaitFlow (2): " + ex.ToString());
+						}
+
+						if (carsFlowingToSegmentMetric == null)
 							continue;
 
 						// build directions from toSegment to fromSegment
 						Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
-						foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[0]) {
+						foreach (KeyValuePair<ushort, uint> f in carsFlowingToSegmentMetric) {
 							var toSegmentId = f.Key;
-							SegmentGeometry geometry = CustomRoadAI.GetSegmentGeometry(fromSegmentId);
-							Direction dir = geometry.GetDirection(toSegmentId, timedNodeId);
+							SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
+							Direction dir = geometry.GetDirection(toSegmentId, timedNodeId == geometry.StartNodeId());
 							directions[toSegmentId] = dir;
+#if DEBUGMETRIC
+							if (debug)
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Calculated direction for seg. {fromSegmentId} -> seg. {toSegmentId}: {dir}");
+#endif
 						}
 
 						// calculate waiting/flowing traffic
-						for (int i = 0; i < carsToSegmentMetrics.Length; ++i) {
-							if (carsToSegmentMetrics[i] == null)
-								continue;
+						foreach (KeyValuePair<ushort, uint> f in allCarsToSegmentMetric) {
+							ushort toSegmentId = f.Key;
+							uint totalNormCarLength = f.Value;
+							uint totalFlowingNormCarLength = carsFlowingToSegmentMetric[f.Key];
 
-							foreach (KeyValuePair<ushort, uint> f in carsToSegmentMetrics[i]) {
-								ushort toSegmentId = f.Key;
-								uint totalNormCarLength = f.Value;
+#if DEBUGMETRIC
+							if (debug)
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Total norm. car length of vehicles on lane {laneIndex} going to seg. {toSegmentId}: {totalNormCarLength}");
+#endif
 
-								bool addToFlow = false;
-								switch (directions[toSegmentId]) {
-									case Direction.Left:
-										if (segLight.isLeftGreen())
-											addToFlow = true;
-										break;
-									case Direction.Right:
-										if (segLight.isRightGreen())
-											addToFlow = true;
-										break;
-									case Direction.Forward:
-									default:
-										if (segLight.isForwardGreen())
-											addToFlow = true;
-										break;
-								}
-
-								if (addToFlow) {
-									if (i > 0 || startPhase) {
-										++numFlows;
-										curMeanFlow += totalNormCarLength;
-									}
-								} else if (i == 0) {
-									++numWaits;
-									curMeanWait += totalNormCarLength;
-								}
+							bool addToFlow = false;
+							switch (directions[toSegmentId]) {
+								case Direction.Turn:
+									addToFlow = TrafficPriority.IsLeftHandDrive() ? segLight.isRightGreen() : segLight.isLeftGreen();
+									break;
+								case Direction.Left:
+									addToFlow = segLight.isLeftGreen();
+									break;
+								case Direction.Right:
+									addToFlow = segLight.isRightGreen();
+									break;
+								case Direction.Forward:
+								default:
+									addToFlow = segLight.isForwardGreen();
+									break;
 							}
+
+							if (addToFlow) {
+								++numFlows;
+								curMeanFlow += totalFlowingNormCarLength;
+							} else {
+								++numWaits;
+								curMeanWait += totalNormCarLength;
+							}
+
+#if DEBUGMETRIC
+							if (debug)
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Vehicles on lane {laneIndex} on seg. {fromSegmentId} going to seg. {toSegmentId} flowing? {addToFlow} curMeanFlow={curMeanFlow}, curMeanWait={curMeanWait}");
+#endif
 						}
 					}
 				}
@@ -494,6 +608,13 @@ namespace TrafficManager.TrafficLight {
 				}
 			}
 
+#if DEBUGMETRIC
+			if (debug)
+				Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: ### Calculation completed. numFlows={numFlows}, numWaits={numWaits}, curMeanFlow={curMeanFlow}, curMeanWait={curMeanWait}");
+
+			wait = curMeanWait;
+			flow = curMeanFlow;
+#else
 			if (numFlows > 0)
 				curMeanFlow /= numFlows;
 			if (numWaits > 0)
@@ -504,6 +625,7 @@ namespace TrafficManager.TrafficLight {
 
 			wait = (float)curMeanWait / 100f;
 			flow = fCurMeanFlow;
+#endif
 			return true;
 		}
 

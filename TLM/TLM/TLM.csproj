@@ -64,12 +64,18 @@
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
+    <Compile Include="Custom\AI\CustomShipAI.cs" />
     <Compile Include="Custom\AI\CustomTaxiAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
+    <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
+    <Compile Include="Traffic\NodeGeometry.cs" />
+    <Compile Include="Traffic\SegmentEndGeometry.cs" />
+    <Compile Include="Traffic\VehiclePosition.cs" />
+    <Compile Include="Traffic\VehicleStateManager.cs" />
     <Compile Include="Traffic\VehicleRestrictionsManager.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
@@ -95,9 +101,13 @@
     <Compile Include="State\Options.cs" />
     <Compile Include="Traffic\Direction.cs" />
     <Compile Include="Traffic\SpeedLimitManager.cs" />
-    <Compile Include="Traffic\VehiclePosition.cs" />
+    <Compile Include="Traffic\VehicleState.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="Util\GenericUnsubscriber.cs" />
+    <Compile Include="Util\IObservable.cs" />
+    <Compile Include="Util\IObserver.cs" />
+    <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
@@ -116,11 +126,11 @@
     <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
     <Compile Include="Traffic\TrafficPriority.cs" />
     <Compile Include="Traffic\TrafficSegment.cs" />
-    <Compile Include="Traffic\VehicleType.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\UITimedLights.cs" />
     <Compile Include="UI\UITrafficManager.cs" />
+    <Compile Include="Util\SegmentTraverser.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\light_1_1.png" />

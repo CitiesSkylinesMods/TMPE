@@ -12,7 +12,7 @@ namespace TrafficManager.Custom.AI
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos)
         {
 			try {
-				if ((data.m_flags & Vehicle.Flags.Congestion) != Vehicle.Flags.None && Options.enableDespawning) {
+				if ((data.m_flags & Vehicle.Flags.Congestion) != 0 && Options.enableDespawning) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} else {
 					base.SimulationStep(vehicleId, ref data, physicsLodRefPos);
@@ -56,7 +56,12 @@ namespace TrafficManager.Custom.AI
 			CitizenInfo info2 = instance.m_instances.m_buffer[(int)driverInstance].Info;
 			NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.Pedestrian;
 			VehicleInfo.VehicleType vehicleType = this.m_info.m_vehicleType;
-			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != Vehicle.Flags.None;
+			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
+			bool randomParking = false;
+			ushort targetBuilding = instance.m_instances.m_buffer[(int)driverInstance].m_targetBuilding;
+			if (targetBuilding != 0 && Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuilding].Info.m_class.m_service > ItemClass.Service.Office) {
+				randomParking = true;
+			}
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
 			float num;
@@ -70,7 +75,7 @@ namespace TrafficManager.Custom.AI
 				PathUnit.Position endPosB = default(PathUnit.Position);
 				SimulationManager instance2 = Singleton<SimulationManager>.instance;
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.PassengerCar, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f)) {
+				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.PassengerCar, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

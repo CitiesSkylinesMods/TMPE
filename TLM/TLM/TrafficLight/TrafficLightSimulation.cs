@@ -4,9 +4,11 @@ using TrafficManager.Traffic;
 using System.Collections.Generic;
 using TrafficManager.State;
 using TrafficManager.Custom.AI;
+using System.Linq;
+using TrafficManager.Util;
 
 namespace TrafficManager.TrafficLight {
-	public class TrafficLightSimulation {
+	public class TrafficLightSimulation : IObserver<NodeGeometry> {
 		/// <summary>
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
@@ -19,9 +21,24 @@ namespace TrafficManager.TrafficLight {
 			get; private set;
 		} = null;
 
-		public readonly ushort nodeId;
+		public ushort NodeId {
+			get; private set;
+		}
 
 		private bool manualTrafficLights = false;
+
+		private IDisposable nodeGeoUnsubscriber = null;
+
+		public TrafficLightSimulation(ushort nodeId) {
+			Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
+			Flags.setNodeTrafficLight(nodeId, true);
+			this.NodeId = nodeId;
+			nodeGeoUnsubscriber = NodeGeometry.Get(nodeId).Subscribe(this);
+		}
+
+		~TrafficLightSimulation() {
+			nodeGeoUnsubscriber?.Dispose();
+		}
 
 		public void SetupManualTrafficLight() {
 			if (IsTimedLight())
@@ -43,22 +60,21 @@ namespace TrafficManager.TrafficLight {
 			if (IsManualLight())
 				DestroyManualTrafficLight();
 
-			TimedLight = new TimedTrafficLights(nodeId, nodeGroup);
+			TimedLight = new TimedTrafficLights(NodeId, nodeGroup);
 
 			setupLiveSegments();
 		}
 
 		public void DestroyTimedTrafficLight() {
-			if (TimedLight != null)
-				TimedLight.Stop();
+			var timedLight = TimedLight;
 			TimedLight = null;
 
-			if (!IsManualLight())
-				destroyLiveSegments();
-		}
+			if (timedLight != null) {
+				timedLight.Destroy();
+			}
 
-        public TrafficLightSimulation(ushort nodeId) {
-            this.nodeId = nodeId;
+			/*if (!IsManualLight() && timedLight != null)
+				timedLight.Destroy();*/
 		}
 
 		public bool IsTimedLight() {
@@ -77,55 +93,21 @@ namespace TrafficManager.TrafficLight {
 			return IsManualLight() || IsTimedLightActive();
 		}
 
-        public void SimulationStep() {
-            //Log.Warning("step: " + NodeId);
-            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
-			if (IsTimedLightActive()) {
-				TimedLight.SimulationStep();
-            }
-
-			// TODO check this
-			/*for (var l = 0; l < 8; l++) {
-                var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(l);
-                if (segment == 0) continue;
-                if (!TrafficLight.CustomTrafficLights.IsSegmentLight(nodeId, segment)) continue;
-
-                var segmentLights = TrafficLight.CustomTrafficLights.GetSegmentLights(nodeId, segment);
-
-                segmentLights.LastChange = (currentFrameIndex >> 6) - segmentLights.LastChangeFrame;
-            }*/
-        }
-
-		/// <summary>
-		/// Stops & destroys the traffic light simulation(s) at this node (group)
-		/// </summary>
-		public void Destroy(bool destroyGroup) {
-			if (TimedLight != null) {
-				List<ushort> oldNodeGroup = new List<ushort>(TimedLight.NodeGroup);
-				foreach (var timedNodeId in oldNodeGroup) {
-					var otherNodeSim = GetNodeSimulation(timedNodeId);
-					if (otherNodeSim == null) {
-						continue;
-					}
-
-					if (destroyGroup || timedNodeId == nodeId) {
-						Log._Debug($"Removing simulation @ node {timedNodeId}");
-						otherNodeSim.DestroyTimedTrafficLight();
-						LightSimulationByNodeId.Remove(timedNodeId);
-					} else {
-						if (!otherNodeSim.IsTimedLight()) {
-							Log.Warning($"Unable to destroy timed traffic light of group. Node {timedNodeId} is not a timed traffic light.");
-						} else {
-							otherNodeSim.TimedLight.RemoveNodeFromGroup(nodeId);
-						}
+		public static void SimulationStep() {
+			try {
+				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in LightSimulationByNodeId) {
+					try {
+						var nodeSim = e.Value;
+						if (nodeSim.IsTimedLightActive())
+							nodeSim.TimedLight.SimulationStep();
+					} catch (Exception ex) {
+						Log.Warning($"Error occured while simulating traffic light @ node {e.Key}: {ex.ToString()}");
 					}
 				}
+			} catch (Exception ex) {
+				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
+				Log.Warning($"Error occured while iterating over traffic light simulations: {ex.ToString()}");
 			}
-
-			//Flags.setNodeTrafficLight(nodeId, false);
-			DestroyManualTrafficLight();
-			LightSimulationByNodeId.Remove(nodeId);
 		}
 
 		/// <summary>
@@ -140,10 +122,47 @@ namespace TrafficManager.TrafficLight {
 			return LightSimulationByNodeId[nodeId];
 		}
 
-		public static void RemoveNodeFromSimulation(ushort nodeId, bool destroyGroup) {
+		/// <summary>
+		/// Destroys the traffic light and removes it
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="destroyGroup"></param>
+		public static void RemoveNodeFromSimulation(ushort nodeId, bool destroyGroup, bool removeTrafficLight) {
 			if (!LightSimulationByNodeId.ContainsKey(nodeId))
 				return;
-			TrafficLightSimulation.LightSimulationByNodeId[nodeId].Destroy(destroyGroup);
+
+			TrafficLightSimulation sim = TrafficLightSimulation.LightSimulationByNodeId[nodeId];
+
+			if (sim.TimedLight != null) {
+				// remove/destroy other timed traffic lights in group
+				List<ushort> oldNodeGroup = new List<ushort>(sim.TimedLight.NodeGroup);
+				foreach (var timedNodeId in oldNodeGroup) {
+					var otherNodeSim = GetNodeSimulation(timedNodeId);
+					if (otherNodeSim == null) {
+						continue;
+					}
+
+					if (destroyGroup || timedNodeId == nodeId) {
+						//Log._Debug($"Slave: Removing simulation @ node {timedNodeId}");
+						otherNodeSim.DestroyTimedTrafficLight();
+						otherNodeSim.DestroyManualTrafficLight();
+						otherNodeSim.nodeGeoUnsubscriber.Dispose();
+						LightSimulationByNodeId.Remove(timedNodeId);
+						if (removeTrafficLight)
+							Flags.setNodeTrafficLight(timedNodeId, false);
+					} else {
+						otherNodeSim.TimedLight.RemoveNodeFromGroup(nodeId);
+					}
+				}
+			}
+
+			//Flags.setNodeTrafficLight(nodeId, false);
+			sim.DestroyTimedTrafficLight();
+			sim.DestroyManualTrafficLight();
+			sim.nodeGeoUnsubscriber?.Dispose();
+			LightSimulationByNodeId.Remove(nodeId);
+			if (removeTrafficLight)
+				Flags.setNodeTrafficLight(nodeId, false);
 		}
 
 		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
@@ -158,44 +177,67 @@ namespace TrafficManager.TrafficLight {
 			LightSimulationByNodeId.Clear();
 		}
 
-		internal void handleNewSegments() {
-			if (IsTimedLight())
-				TimedLight.handleNewSegments();
-		}
+		public void OnUpdate(NodeGeometry nodeGeometry) {
+			Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId} ({nodeGeometry.NodeId})");
 
-		internal void housekeeping(bool mayDeleteSegmentLights) {
+			if (!Flags.mayHaveTrafficLight(NodeId)) {
+				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
+				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false, true);
+			}
+
+			if (!IsManualLight() && !IsTimedLight())
+				return;
+
+			if (!nodeGeometry.IsValid()) {
+				// node has become invalid. Remove manual/timed traffic light and destroy custom lights
+				RemoveNodeFromSimulation(NodeId, false, false);
+				return;
+			}
+
 			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
 
 				if (segmentId == 0) continue;
-				if (TrafficLight.CustomTrafficLights.IsSegmentLight(nodeId, segmentId)) {
-					TrafficLight.CustomTrafficLights.GetSegmentLights(nodeId, segmentId).housekeeping(mayDeleteSegmentLights);
+
+				Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId}: Adding live traffic lights to segment {segmentId}");
+
+				// add custom lights
+				if (!TrafficLight.CustomTrafficLights.IsSegmentLight(NodeId, segmentId)) {
+					TrafficLight.CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
 				}
+
+				// housekeep timed light
+				TrafficLight.CustomTrafficLights.GetSegmentLights(NodeId, segmentId).housekeeping(true);
 			}
 
-			if (IsTimedLight()) {
-				TimedLight.housekeeping(mayDeleteSegmentLights);
-			}
+			TimedLight?.handleNewSegments();
+			TimedLight?.housekeeping();
+		}
+
+		internal void housekeeping() {
+			TimedLight?.StepHousekeeping(); // removes unused step lights
 		}
 
 		private void setupLiveSegments() {
 			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
 
 				if (segmentId == 0)
 					continue;
-				CustomRoadAI.GetSegmentGeometry(segmentId)?.Recalculate(true, true);
-				TrafficLight.CustomTrafficLights.AddLiveSegmentLights(nodeId, segmentId);
+				//SegmentGeometry.Get(segmentId)?.Recalculate(true, true);
+				if (!TrafficLight.CustomTrafficLights.IsSegmentLight(NodeId, segmentId)) {
+					TrafficLight.CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
+				}
 			}
 		}
 
 		private void destroyLiveSegments() {
 			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
 
 				if (segmentId == 0) continue;
-				if (TrafficLight.CustomTrafficLights.IsSegmentLight(nodeId, segmentId)) {
-					TrafficLight.CustomTrafficLights.RemoveSegmentLight(nodeId, segmentId);
+				if (TrafficLight.CustomTrafficLights.IsSegmentLight(NodeId, segmentId)) {
+					TrafficLight.CustomTrafficLights.RemoveSegmentLight(NodeId, segmentId);
 				}
 			}
 		}

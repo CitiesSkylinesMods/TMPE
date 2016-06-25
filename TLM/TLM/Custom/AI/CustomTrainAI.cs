@@ -13,10 +13,11 @@ namespace TrafficManager.Custom.AI {
 	public class CustomTrainAI : TrainAI { // correct would be to inherit from VehicleAI (in order to keep the correct references to `base`)
 		public void TrafficManagerSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			try {
-				if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != Vehicle.Flags.None) {
+				if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 					byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
 					if ((pathFindFlags & 4) != 0) {
 						this.PathFindReady(vehicleId, ref vehicleData);
+						VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
 					} else if ((pathFindFlags & 8) != 0 || vehicleData.m_path == 0u) {
 						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
@@ -24,11 +25,11 @@ namespace TrafficManager.Custom.AI {
 						vehicleData.Unspawn(vehicleId);
 						return;
 					}
-				} else if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != Vehicle.Flags.None) {
+				} else if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
 				}
 
-				bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != Vehicle.Flags.None;
+				bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
 				ushort frontVehicleId;
 				if (reversed) {
 					frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
@@ -38,9 +39,16 @@ namespace TrafficManager.Custom.AI {
 
 				/// NON-STOCK CODE START ///
 				try {
-					CustomVehicleAI.HandleVehicle(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], false, false, 5);
+					//Log._Debug($"HandleVehicle for trams. vehicleId={vehicleId} frontVehicleId={frontVehicleId}");
+					VehicleStateManager.LogTraffic(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], true);
 				} catch (Exception e) {
-					Log.Error("TrainAI TrafficManagerSimulationStep Error: " + e.ToString());
+					Log.Error("TrainAI TrafficManagerSimulationStep (1) Error: " + e.ToString());
+				}
+
+				try {
+					VehicleStateManager.UpdateVehiclePos(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId]);
+				} catch (Exception e) {
+					Log.Error("TrainAI TrafficManagerSimulationStep (2) Error: " + e.ToString());
 				}
 				/// NON-STOCK CODE END ///
 
@@ -50,7 +58,7 @@ namespace TrafficManager.Custom.AI {
 				if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 					return;
 				}
-				bool flag2 = (vehicleData.m_flags & Vehicle.Flags.Reversed) != Vehicle.Flags.None;
+				bool flag2 = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
 				if (flag2 != reversed) {
 					reversed = flag2;
 					if (reversed) {
@@ -63,7 +71,7 @@ namespace TrafficManager.Custom.AI {
 					if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 						return;
 					}
-					flag2 = ((vehicleData.m_flags & Vehicle.Flags.Reversed) != Vehicle.Flags.None);
+					flag2 = ((vehicleData.m_flags & Vehicle.Flags.Reversed) != 0);
 					if (flag2 != reversed) {
 						Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 						return;
@@ -100,25 +108,13 @@ namespace TrafficManager.Custom.AI {
 						}
 					}
 				}
-				if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == Vehicle.Flags.None || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
+				if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				}
 			} catch (Exception ex) {
 				Log.Error("Error in TrainAI.SimulationStep: " + ex.ToString());
 			}
 		}
-
-		/*public void TmCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
-			NetManager instance = Singleton<NetManager>.instance;
-			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
-			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
-			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]);
-				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
-			} else {
-				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
-			}
-		}*/
 
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager instance = Singleton<NetManager>.instance;
@@ -132,14 +128,25 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
+		public bool CustomStartPathFind(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
 			/// NON-STOCK CODE START ///
-			ExtVehicleType? vehicleType = CustomVehicleAI.DetermineVehicleTypeFromVehicle(vehicleID, ref vehicleData);
-			//Log._Debug($"CustomTrainAI.CustomStartPathFind. vehicleID={vehicleID}. type={this.GetType().ToString()} vehicleType={vehicleType}");
+			ExtVehicleType? vehicleType = VehicleStateManager.DetermineVehicleType(ref vehicleData);
+			if (vehicleType == ExtVehicleType.CargoTrain)
+				vehicleType = ExtVehicleType.CargoVehicle;
+#if DEBUG
+			/*bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+			ushort frontVehicleId;
+			if (reversed) {
+				frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+			} else {
+				frontVehicleId = vehicleId;
+			}
+			Log._Debug($"CustomTrainAI.CustomStartPathFind. vehicleID={vehicleId}. reversed={reversed} frontVehicleId={frontVehicleId} type={this.GetType().ToString()} vehicleType={vehicleType} target={vehicleData.m_targetBuilding}");*/
+#endif
 			/// NON-STOCK CODE END ///
 
 			VehicleInfo info = this.m_info;
-			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == Vehicle.Flags.None && Vector3.Distance(startPos, endPos) < 100f) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == 0 && Vector3.Distance(startPos, endPos) < 100f) {
 				startPos = endPos;
 			}
 			bool allowUnderground;
@@ -148,7 +155,7 @@ namespace TrafficManager.Custom.AI {
 				allowUnderground = true;
 				allowUnderground2 = true;
 			} else {
-				allowUnderground = ((vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != Vehicle.Flags.None);
+				allowUnderground = ((vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0);
 				allowUnderground2 = false;
 			}
 			PathUnit.Position startPosA;
@@ -220,54 +227,31 @@ namespace TrafficManager.Custom.AI {
 					maxSpeed = 0f;
 					return;
 				}
-				ushort num2;
+				ushort targetNodeId;
 				if (offset < position.m_offset) {
-					num2 = instance.m_segments.m_buffer[(int)position.m_segment].m_startNode;
+					targetNodeId = instance.m_segments.m_buffer[(int)position.m_segment].m_startNode;
 				} else {
-					num2 = instance.m_segments.m_buffer[(int)position.m_segment].m_endNode;
+					targetNodeId = instance.m_segments.m_buffer[(int)position.m_segment].m_endNode;
 				}
-				ushort num3;
+				ushort prevTargetNodeId;
 				if (prevOffset == 0) {
-					num3 = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
+					prevTargetNodeId = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
 				} else {
-					num3 = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
+					prevTargetNodeId = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
-				if (num2 == num3) {
-					NetNode.Flags flags = instance.m_nodes.m_buffer[(int)num2].m_flags;
-					if ((flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
-						uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-						uint num4 = (uint)(((int)num3 << 8) / 32768);
-						uint num5 = currentFrameIndex - num4 & 255u;
-						RoadBaseAI.TrafficLightState vehicleLightState;
-						RoadBaseAI.TrafficLightState pedestrianLightState;
-						bool flag;
-						bool pedestrians;
-						/// NON-STOCK CODE START ///
-						CustomRoadAI.GetTrafficLightState(vehicleID, ref vehicleData, num3, prevPos.m_segment, position.m_segment, ref instance.m_segments.m_buffer[(int)prevPos.m_segment], currentFrameIndex - num4, out vehicleLightState, out pedestrianLightState, out flag, out pedestrians);
-						/// NON-STOCK CODE END ///
-						//RoadBaseAI.GetTrafficLightState(num3, ref instance.m_segments.m_buffer[(int)prevPos.m_segment], currentFrameIndex - num4, out vehicleLightState, out pedestrianLightState, out flag, out pedestrians);
-						if (!flag && num5 >= 196u) {
-							flag = true;
-							RoadBaseAI.SetTrafficLightState(num3, ref instance.m_segments.m_buffer[(int)prevPos.m_segment], currentFrameIndex - num4, vehicleLightState, pedestrianLightState, flag, pedestrians);
-						}
-						switch (vehicleLightState) {
-							case RoadBaseAI.TrafficLightState.RedToGreen:
-								if (num5 < 60u) {
-									maxSpeed = 0f;
-									return;
-								}
-								break;
-							case RoadBaseAI.TrafficLightState.Red:
-								maxSpeed = 0f;
-								return;
-							case RoadBaseAI.TrafficLightState.GreenToRed:
-								if (num5 >= 30u) {
-									maxSpeed = 0f;
-									return;
-								}
-								break;
-						}
-					}
+				if (targetNodeId == prevTargetNodeId) {
+					float oldMaxSpeed = maxSpeed;
+#if DEBUG
+					bool debug = false;// targetNodeId == 14527 || targetNodeId == 15048;
+					if (debug)
+						Log._Debug($"Train {vehicleID} wants to change segment. seg. {prevPos.m_segment} -> node {targetNodeId} -> seg. {position.m_segment}");
+#else
+					bool debug = false;
+#endif
+					bool mayChange = CustomVehicleAI.MayChangeSegment(vehicleID, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, out maxSpeed, debug);
+					if (! mayChange)
+						return;
+					maxSpeed = oldMaxSpeed;
 				}
 			}
 		}

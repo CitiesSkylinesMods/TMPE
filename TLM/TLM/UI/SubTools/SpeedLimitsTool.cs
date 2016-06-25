@@ -173,6 +173,78 @@ namespace TrafficManager.UI.SubTools {
 					ushort speedLimitToSet = SpeedLimitManager.AvailableSpeedLimits[curSpeedLimitIndex];
 					//Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()} to {speedLimitToSet}");
 					SpeedLimitManager.SetSpeedLimit(segmentId, e.Key, speedLimitToSet);
+
+					// TODO use SegmentTraverser
+					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+						NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+						List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, selectedSegmentInfo, null);
+
+						LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
+						HashSet<ushort> processedNodes = new HashSet<ushort>();
+						HashSet<ushort> processedSegments = new HashSet<ushort>();
+						processedSegments.Add(SelectedSegmentId);
+
+						ushort selectedStartNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
+						ushort selectedEndNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+
+						if (selectedStartNodeId != 0)
+							nodesToProcess.AddFirst(selectedStartNodeId);
+						if (selectedEndNodeId != 0)
+							nodesToProcess.AddFirst(selectedEndNodeId);
+
+						while (nodesToProcess.First != null) {
+							ushort nodeId = nodesToProcess.First.Value;
+							nodesToProcess.RemoveFirst();
+							processedNodes.Add(nodeId);
+
+							if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2)
+								continue; // junction. stop.
+
+							// explore segments at node
+							for (var s = 0; s < 8; s++) {
+								var otherSegmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
+
+								if (otherSegmentId <= 0 || processedSegments.Contains(otherSegmentId))
+									continue;
+								processedSegments.Add(otherSegmentId);
+
+								NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info;
+								List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(otherSegmentId, segmentInfo, null);
+
+								if (sortedLanes.Count == selectedSortedLanes.Count) {
+									// number of lanes matches selected segment
+									for (int i = 0; i < sortedLanes.Count; ++i) {
+										object[] selectedLaneData = selectedSortedLanes[i];
+										object[] laneData = sortedLanes[i];
+
+										uint selectedLaneId = (uint)selectedLaneData[0];
+										uint selectedLaneIndex = (uint)selectedLaneData[2];
+										NetInfo.Lane selectedLaneInfo = segmentInfo.m_lanes[selectedLaneIndex];
+
+										uint laneId = (uint)laneData[0];
+										uint laneIndex = (uint)laneData[2];
+										NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+										if (laneInfo.m_finalDirection == e.Key) {
+											SpeedLimitManager.SetSpeedLimit(otherSegmentId, laneInfo.m_finalDirection, speedLimitToSet);
+										}
+
+										// apply restrictions of selected segment & lane
+										//VehicleRestrictionsManager.SetAllowedVehicleTypes(otherSegmentId, segmentInfo, laneIndex, laneInfo, laneId, VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
+									}
+
+									// add nodes to explore
+									ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].m_startNode;
+									ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].m_endNode;
+
+									if (startNodeId != 0 && !processedNodes.Contains(startNodeId))
+										nodesToProcess.AddFirst(startNodeId);
+									if (endNodeId != 0 && !processedNodes.Contains(endNodeId))
+										nodesToProcess.AddFirst(endNodeId);
+								}
+							}
+						}
+					}
 					//mouseClickProcessed = true;
 				}
 

@@ -62,7 +62,7 @@ TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Einstellungen werden pro Spielstand gespeichert
 Simulation_accuracy Genauigkeit der Simulation (höhere Genauigkeit reduziert Performance)
 Enable_highway_specific_lane_merging/splitting_rules Aktiviere spezielle Verkehrsregeln auf der Autobahn
-Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Autofahrer wechseln ihre Spur (wird nur angewendet wenn die AI eingeschaltet ist)
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Autofahrer wechseln ihre Spur (wird nur angewendet wenn die KI eingeschaltet ist)
 Maintenance Wartung
 Very_often Sehr häufig
 Often Häufig
