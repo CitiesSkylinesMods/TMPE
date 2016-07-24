@@ -1,4 +1,6 @@
-﻿using ColossalFramework;
+﻿#define USEPATHWAITCOUNTERx
+
+using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
@@ -12,21 +14,45 @@ using UnityEngine;
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
+#if USEPATHWAITCOUNTER
+			VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
+#endif
+
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
-				if ((pathFindFlags & 4) != 0) {
+				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
+#if USEPATHWAITCOUNTER
+					state.PathWaitCounter = 0; // NON-STOCK CODE
+#endif
 					this.PathfindSuccess(vehicleId, ref vehicleData);
 					this.PathFindReady(vehicleId, ref vehicleData);
 					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
-				} else if ((pathFindFlags & 8) != 0 || vehicleData.m_path == 0u) {
+				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0
+#if USEPATHWAITCOUNTER
+|| ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
+#endif
+) { // NON-STOCK CODE
+#if USEPATHWAITCOUNTER
+					state.PathWaitCounter = 0; // NON-STOCK CODE
+#endif
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					vehicleData.m_path = 0u;
 					this.PathfindFailure(vehicleId, ref vehicleData);
 					return;
 				}
-			} else if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
-				this.TrySpawn(vehicleId, ref vehicleData);
+#if USEPATHWAITCOUNTER
+				else {
+					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter + 1); // NON-STOCK CODE
+				}
+#endif
+			} else {
+#if USEPATHWAITCOUNTER
+				state.PathWaitCounter = 0; // NON-STOCK CODE
+#endif
+				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
+					this.TrySpawn(vehicleId, ref vehicleData);
+				}
 			}
 
 			/// NON-STOCK CODE START ///
@@ -72,7 +98,7 @@ namespace TrafficManager.Custom.AI {
 					break;
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 && Options.enableDespawning) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -104,7 +130,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.Tram, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.Tram, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}
@@ -117,6 +143,14 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+			if (Options.simAccuracy <= 1) {
+				try {
+					VehicleStateManager.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
+				} catch (Exception e) {
+					Log.Error("TramAI CustomCalculateSegmentPosition Error: " + e.ToString());
+				}
+			}
+
 			NetManager netManager = Singleton<NetManager>.instance;
 			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			Vector3 b = netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].CalculatePosition((float)prevOffset * 0.003921569f);

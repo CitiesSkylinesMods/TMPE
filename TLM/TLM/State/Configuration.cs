@@ -83,9 +83,29 @@ namespace TrafficManager {
 			public bool? enterWhenBlockedAllowed = null; 
 		}
 
+		[Serializable]
+		public class LaneConnection {
+			public uint lowerLaneId;
+			public uint higherLaneId;
+			public bool lowerStartNode;
+
+			public LaneConnection(uint lowerLaneId, uint higherLaneId, bool lowerStartNode) {
+				if (lowerLaneId >= higherLaneId)
+					throw new ArgumentException();
+				this.lowerLaneId = lowerLaneId;
+				this.higherLaneId = higherLaneId;
+				this.lowerStartNode = lowerStartNode;
+			}
+		}
+
 		public string NodeTrafficLights = ""; // TODO rework
 		public string NodeCrosswalk = ""; // TODO rework
 		public string LaneFlags = ""; // TODO rework
+
+		/// <summary>
+		/// Stored lane connections
+		/// </summary>
+		public List<LaneConnection> LaneConnections = new List<LaneConnection>();
 
 		/// <summary>
 		/// Stored lane speed limits

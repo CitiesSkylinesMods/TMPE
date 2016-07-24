@@ -83,7 +83,6 @@ namespace TrafficManager.Traffic {
 			this.SegmentId = segmentId;
 			startNodeGeometry = new SegmentEndGeometry(segmentId, true);
 			endNodeGeometry = new SegmentEndGeometry(segmentId, false);
-			Recalculate(false);
 		}
 		
 		/// <summary>
@@ -145,13 +144,21 @@ namespace TrafficManager.Traffic {
 		/// <param name="force">Specifies if recalculation should be enforced.</param>
 		public void Recalculate(bool propagate, bool output = false) {
 			if (!IsValid()) {
-				if (wasValid && propagate) {
-					startNodeGeometry.Recalculate(true);
-					endNodeGeometry.Recalculate(true);
+				if (wasValid) {
+					if (propagate) {
+						startNodeGeometry.Recalculate(true);
+						endNodeGeometry.Recalculate(true);
+					}
+					cleanup();
+
+					NotifyObservers();
 				}
-				cleanup();
 				return;
 			}
+
+#if DEBUG
+			//output = StartNodeId() == 12210 || EndNodeId() == 12210;
+#endif
 
 			wasValid = true;
 
@@ -222,10 +229,7 @@ namespace TrafficManager.Traffic {
 #if DEBUG
 				//Log._Debug($"Recalculation of segment {SegmentId} completed. Valid? {IsValid()}");
 #endif
-				List<IObserver<SegmentGeometry>> myObservers = new List<IObserver<SegmentGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
-				foreach (IObserver<SegmentGeometry> observer in myObservers) {
-					observer.OnUpdate(this);
-				}
+				NotifyObservers();
 			} finally {
 #if DEBUG
 				if (output)
@@ -421,8 +425,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected segments at the given node</returns>
 		public int CountOtherSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumConnectedSegments;
 		}
@@ -435,8 +437,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected left segments at the given node</returns>
 		public int CountLeftSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumLeftSegments;
 		}
@@ -449,8 +449,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected right segments at the given node</returns>
 		public int CountRightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumRightSegments;
 		}
@@ -463,10 +461,20 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected straight segments at the given node</returns>
 		public int CountStraightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumStraightSegments;
+		}
+
+		/// <summary>
+		/// Determines the number of incoming segments connected to the managed segment at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>number of connected incoming left segments at the given node</returns>
+		public int CountIncomingSegments(bool startNode) {
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.NumIncomingSegments;
 		}
 
 		/// <summary>
@@ -477,8 +485,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected incoming left segments at the given node</returns>
 		public int CountIncomingLeftSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumIncomingLeftSegments;
 		}
@@ -491,8 +497,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected incoming right segments at the given node</returns>
 		public int CountIncomingRightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumIncomingRightSegments;
 		}
@@ -505,10 +509,20 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected incoming straight segments at the given node</returns>
 		public int CountIncomingStraightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumIncomingStraightSegments;
+		}
+
+		/// <summary>
+		/// Determines the number of outgoing segments connected to the managed segment at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>number of connected incoming left segments at the given node</returns>
+		public int CountOutgoingSegments(bool startNode) {
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.NumOutgoingSegments;
 		}
 
 		/// <summary>
@@ -519,8 +533,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected outgoing left segments at the given node</returns>
 		public int CountOutgoingLeftSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumOutgoingLeftSegments;
 		}
@@ -533,8 +545,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected outgoing right segments at the given node</returns>
 		public int CountOutgoingRightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumOutgoingRightSegments;
 		}
@@ -547,8 +557,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>number of connected outgoing straight segments at the given node</returns>
 		public int CountOutgoingStraightSegments(bool startNode) {
-			if (!IsValid())
-				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.NumOutgoingStraightSegments;
 		}
@@ -561,8 +569,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to left segments at the given node, else false.</returns>
 		public bool HasLeftSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountLeftSegments(startNode) > 0;
 		}
 
@@ -574,8 +580,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to right segments at the given node, else false.</returns>
 		public bool HasRightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountRightSegments(startNode) > 0;
 		}
 
@@ -587,8 +591,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to straight segments at the given node, else false.</returns>
 		public bool HasStraightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountStraightSegments(startNode) > 0;
 		}
 
@@ -600,8 +602,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to incoming left segments at the given node, else false.</returns>
 		public bool HasIncomingLeftSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountIncomingLeftSegments(startNode) > 0;
 		}
 
@@ -613,8 +613,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to incoming right segments at the given node, else false.</returns>
 		public bool HasIncomingRightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountIncomingRightSegments(startNode) > 0;
 		}
 
@@ -626,8 +624,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to incoming straight segments at the given node, else false.</returns>
 		public bool HasIncomingStraightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountIncomingStraightSegments(startNode) > 0;
 		}
 
@@ -639,8 +635,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing left segments at the given node, else false.</returns>
 		public bool HasOutgoingLeftSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountOutgoingLeftSegments(startNode) > 0;
 		}
 
@@ -652,8 +646,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing right segments at the given node, else false.</returns>
 		public bool HasOutgoingRightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountOutgoingRightSegments(startNode) > 0;
 		}
 
@@ -665,8 +657,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is connected to outgoing straight segments at the given node, else false.</returns>
 		public bool HasOutgoingStraightSegment(bool startNode) {
-			if (!IsValid())
-				return false;
 			return CountOutgoingStraightSegments(startNode) > 0;
 		}
 
@@ -679,7 +669,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if the other segment is, according to the stored geometry data, connected on the left-hand side of the managed segment at the given node</returns>
 		public bool IsLeftSegment(ushort toSegmentId, bool startNode) {
-			if (!IsValid() || !IsValid(toSegmentId))
+			if (!IsValid(toSegmentId))
 				return false;
 			if (toSegmentId == SegmentId)
 				return false;
@@ -697,7 +687,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if the other segment is, according to the stored geometry data, connected on the right-hand side of the managed segment at the given node</returns>
 		public bool IsRightSegment(ushort toSegmentId, bool startNode) {
-			if (!IsValid() || !IsValid(toSegmentId))
+			if (!IsValid(toSegmentId))
 				return false;
 			if (toSegmentId == SegmentId)
 				return false;
@@ -715,7 +705,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if the other segment is, according to the stored geometry data, connected straight-wise to the managed segment at the given node</returns>
 		public bool IsStraightSegment(ushort toSegmentId, bool startNode) {
-			if (!IsValid() || !IsValid(toSegmentId))
+			if (!IsValid(toSegmentId))
 				return false;
 			if (toSegmentId == SegmentId)
 				return false;
@@ -725,15 +715,66 @@ namespace TrafficManager.Traffic {
 		}
 
 		/// <summary>
+		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a left segment at the given node relatively to the managed segment.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="toSegmentId">other segment that ought to be left, relatively to the managed segment</param>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>true, if the other segment is, according to the stored geometry data, connected on the left-hand side of the managed segment at the given node</returns>
+		public bool IsIncomingLeftSegment(ushort toSegmentId, bool startNode) {
+			if (!IsValid(toSegmentId))
+				return false;
+			if (toSegmentId == SegmentId)
+				return false;
+
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.IncomingLeftSegments.Contains(toSegmentId);
+		}
+
+		/// <summary>
+		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a right segment at the given node relatively to the managed segment.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="toSegmentId">other segment that ought to be right, relatively to the managed segment</param>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>true, if the other segment is, according to the stored geometry data, connected on the right-hand side of the managed segment at the given node</returns>
+		public bool IsIncomingRightSegment(ushort toSegmentId, bool startNode) {
+			if (!IsValid(toSegmentId))
+				return false;
+			if (toSegmentId == SegmentId)
+				return false;
+
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.IncomingRightSegments.Contains(toSegmentId);
+		}
+
+		/// <summary>
+		/// Determines if, according to the stored geometry data, the given segment is connected to the managed segment and is a straight segment at the given node relatively to the managed segment.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="toSegmentId">other segment that ought to be straight, relatively to the managed segment</param>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>true, if the other segment is, according to the stored geometry data, connected straight-wise to the managed segment at the given node</returns>
+		public bool IsIncomingStraightSegment(ushort toSegmentId, bool startNode) {
+			if (!IsValid(toSegmentId))
+				return false;
+			if (toSegmentId == SegmentId)
+				return false;
+
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.IncomingStraightSegments.Contains(toSegmentId);
+		}
+
+		/// <summary>
 		/// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
 		/// 
 		/// A segment geometry verification is not performed.
 		/// </summary>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is only connected to highways at the given node, false otherwise</returns>
 		public bool HasOnlyHighways(bool startNode) {
-			if (!IsValid())
-				return false;
-
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.OnlyHighways;
 		}
@@ -774,9 +815,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is an outgoing one-way road at the given node, false otherwise</returns>
 		public bool IsOutgoingOneWay(bool startNode) {
-			if (!IsValid())
-				return false;
-
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.OutgoingOneWay;
 		}
@@ -789,10 +827,29 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>true, if, according to the stored geometry data, the managed segment is an incoming one-way road at the given node, false otherwise</returns>
 		public bool IsIncomingOneWay(bool startNode) {
-			if (!IsValid())
-				return false;
-
 			return (IsOneWay() && !IsOutgoingOneWay(startNode));
+		}
+
+		/// <summary>
+		/// Determines if, according to the stored geometry data, the managed segment is an incoming road at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>true, if, according to the stored geometry data, the managed segment is an incoming road at the given node, false otherwise</returns>
+		public bool IsIncoming(bool startNode) {
+			return !IsOutgoingOneWay(startNode);
+		}
+
+		/// <summary>
+		/// Determines if, according to the stored geometry data, the managed segment is an outgoing road at the given node.
+		/// 
+		/// A segment geometry verification is not performed.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns>true, if, according to the stored geometry data, the managed segment is an outgoing road at the given node, false otherwise</returns>
+		public bool IsOutgoing(bool startNode) {
+			return !IsIncomingOneWay(startNode);
 		}
 
 		/// <summary>
@@ -804,7 +861,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>relative direction of the other segment relatively to the managed segment at the given node</returns>
 		public Direction GetDirection(ushort otherSegmentId, bool startNode) {
-			if (!IsValid() || !IsValid(otherSegmentId))
+			if (!IsValid(otherSegmentId))
 				return Direction.Forward;
 
 			if (otherSegmentId == SegmentId)
@@ -825,8 +882,6 @@ namespace TrafficManager.Traffic {
 		/// <param name="startNode"></param>
 		/// <returns></returns>
 		public bool AreHighwayRulesEnabled(bool startNode) {
-			if (!IsValid())
-				return false;
 			if (!Options.highwayRules)
 				return false;
 			if (!IsIncomingOneWay(startNode))
@@ -1049,6 +1104,9 @@ namespace TrafficManager.Traffic {
 			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i] = new SegmentGeometry(i);
 			}
+			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+				segmentGeometries[i].Recalculate(false);
+			}
 			Log._Debug($"Calculated segment geometries.");
 		}
 
@@ -1062,6 +1120,13 @@ namespace TrafficManager.Traffic {
 
 		public static SegmentGeometry Get(ushort segmentId) {
 			return segmentGeometries[segmentId];
+		}
+
+		private void NotifyObservers() {
+			List<IObserver<SegmentGeometry>> myObservers = new List<IObserver<SegmentGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
+			foreach (IObserver<SegmentGeometry> observer in myObservers) {
+				observer.OnUpdate(this);
+			}
 		}
 	}
 }

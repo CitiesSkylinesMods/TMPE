@@ -18,6 +18,10 @@ namespace TrafficManager.Traffic {
 			get; private set;
 		} = 0;
 
+		public bool IsSimpleJunction {
+			get; private set;
+		} = false;
+
 		public SegmentEndGeometry[] SegmentEndGeometries {
 			get; private set;
 		} = new SegmentEndGeometry[8];
@@ -58,17 +62,14 @@ namespace TrafficManager.Traffic {
 			}
 			return new GenericUnsubscriber<NodeGeometry>(observers, observer, Lock);
 		}
-
-		internal void RemoveSegment(ushort segmentId) {
-			RemoveSegment(segmentId, true);
-		}
-
-		internal void AddSegment(ushort segmentId, bool startNode) {
+		
+		internal void AddSegment(ushort segmentId, bool startNode, bool propagate) {
 #if DEBUGGEO
 			Log._Debug($"NodeGeometry: Add segment {segmentId}, start? {startNode} @ node {NodeId}");
 #endif
 			if (!IsValid()) {
 				Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
+				Recalculate();
 				return;
 			}
 			
@@ -81,15 +82,18 @@ namespace TrafficManager.Traffic {
 				}
 			}
 
-			Recalculate(segmentId);
+			if (propagate)
+				RecalculateSegments(segmentId);
+			Recalculate();
 		}
 
-		private void RemoveSegment(ushort segmentId, bool recalculate) {
+		internal void RemoveSegment(ushort segmentId, bool propagate) {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, recalc? {recalculate}");
+			Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, propagate? {propagate}");
 #endif
 			if (!IsValid()) {
 				Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
+				Recalculate();
 				return;
 			}
 
@@ -99,23 +103,18 @@ namespace TrafficManager.Traffic {
 				}
 			}
 
-			if (recalculate)
-				Recalculate(segmentId);
+			if (propagate)
+				RecalculateSegments(segmentId);
+			Recalculate();
 		}
 
-		private void RemoveSegments() {
-#if DEBUGGEO
-			Log._Debug($"NodeGeometry: Remove all segments @ node {NodeId}");
-#endif
-
-			for (int i = 0; i < 8; ++i) {
-				SegmentEndGeometries[i] = null;
-			}
+		private void Cleanup() {
+			IsSimpleJunction = false;
 		}
 
-		internal void Recalculate(ushort? ignoreSegmentId=null) {
+		internal void RecalculateSegments(ushort? ignoreSegmentId= null) {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Recalculate. ignoreSegmentId={ignoreSegmentId}");
+			Log._Debug($"NodeGeometry: Propagate @ {NodeId}. ignoreSegmentId={ignoreSegmentId}");
 #endif
 
 			// recalculate (other) segments
@@ -123,16 +122,28 @@ namespace TrafficManager.Traffic {
 				if (SegmentEndGeometries[i] != null) {
 					if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
 						continue;
-					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId}");
+#if DEBUGGEO
+					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
+#endif
 					SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(false);
 				}
 			}
+		}
+
+		internal void Recalculate() {
+#if DEBUGGEO
+			Log._Debug($"NodeGeometry: Recalculate @ {NodeId}");
+#endif
+
+			Cleanup();
 
 			Flags.applyNodeTrafficLightFlag(NodeId);
 
 			// check if node is valid
 			if (!IsValid()) {
-				RemoveSegments();
+				for (int i = 0; i < 8; ++i) {
+					SegmentEndGeometries[i] = null;
+				}
 				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false, true);
 				Flags.setNodeTrafficLight(NodeId, false);
 			} else {
@@ -145,6 +156,10 @@ namespace TrafficManager.Traffic {
 						var segmentId = netManager.m_nodes.m_buffer[NodeId].GetSegment(s);
 						if (segmentId <= 0)
 							continue;
+
+#if DEBUGx
+						Log._Debug($"NodeGeometry.Recalculate: Housekeeping segment {segmentId}");
+#endif
 
 						SegmentEnd prioritySegment = TrafficPriority.GetPrioritySegment(NodeId, segmentId);
 						if (prioritySegment == null) {
@@ -168,6 +183,28 @@ namespace TrafficManager.Traffic {
 						numSegmentsWithSigns += TrafficPriority.AddPriorityNode(NodeId);
 					}
 				}
+
+				// calculate node properties
+				byte incomingSegments = 0;
+				byte outgoingSegments = 0;
+				for (int i = 0; i < 8; ++i) {
+					if (SegmentEndGeometries[i] == null)
+						continue;
+#if DEBUGGEO
+					Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");
+#endif
+
+					bool startNode = SegmentEndGeometries[i].StartNode;
+					if (SegmentEndGeometries[i].GetSegmentGeometry().IsIncoming(startNode))
+						++incomingSegments;
+					if (SegmentEndGeometries[i].GetSegmentGeometry().IsOutgoing(startNode))
+						++outgoingSegments;
+				}
+
+				IsSimpleJunction = incomingSegments == 1 || outgoingSegments == 1;
+#if DEBUGGEO
+				Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
+#endif
 			}
 
 			NotifyObservers();
@@ -194,7 +231,7 @@ namespace TrafficManager.Traffic {
 			for (ushort i = 0; i < nodeGeometries.Length; ++i) {
 				nodeGeometries[i] = new NodeGeometry(i);
 			}
-			Log._Debug($"Calculated node geometries.");
+			Log._Debug($"Built node geometries.");
 		}
 
 		public static NodeGeometry Get(ushort nodeId) {

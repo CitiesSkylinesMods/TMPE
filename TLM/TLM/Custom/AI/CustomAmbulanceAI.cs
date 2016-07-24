@@ -29,7 +29,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (Singleton<CustomPathManager>.instance.CreatePath((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

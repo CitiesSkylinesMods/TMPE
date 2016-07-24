@@ -83,7 +83,7 @@ Create_group グループの作成
 Delete_group グループの削除
 Add_zoning 区間の追加
 Remove_zoning 区間の削除
-Lane_Arrow_Changer_Disabled 高速道路ルールシステムを適用しているため、この車線の矢印は変更できません
+Lane_Arrow_Changer_Disabled_Highway 高速道路ルールシステムを適用しているため、この車線の矢印は変更できません
 Add_junction_to_timed_light この信号に交差点を追加
 Remove_junction_from_timed_light この信号から交差点を削除 
 Select_junction 交差点を選択してください 
@@ -115,3 +115,13 @@ Advanced_AI_cannot_be_activated Advanced Vehicle AIは有効にできません
 The_Advanced_Vehicle_AI_cannot_be_activated Advanced Vehicle AIは、車両の振る舞いを変える他のMOD(例えばImproved
 AIやTraffic++)を既に使っているため、有効にできません.
 Enable_dynamic_path_calculation Enable dynamic path calculation
+Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
+Lane_connector Lane connector
+Connected_lanes Connected lanes
+Use_alternative_view_mode Use alternative view mode
+Road_type Road type
+Default_speed_limit Default speed limit
+Unit_system Unit system
+Metric Metric
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available)

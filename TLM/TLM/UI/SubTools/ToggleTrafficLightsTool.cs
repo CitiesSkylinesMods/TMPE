@@ -15,22 +15,21 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void OnClickOverlay() {
-			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+		public override void OnPrimaryClickOverlay() {
+			if (HoveredNodeId == 0)
+				return;
 
-					TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
-					if (sim != null && sim.IsTimedLight()) {
-						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
-					} else {
-						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, true, true);
-						Flags.setNodeTrafficLight(HoveredNodeId, false);
-					}
-				} else {
-					TrafficPriority.RemovePrioritySegments(HoveredNodeId);
-					Flags.setNodeTrafficLight(HoveredNodeId, true);
-				}
+			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
+				return;
+
+			TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
+			if (sim != null && sim.IsTimedLight()) {
+				MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
+				return;
 			}
+
+			TrafficPriority.RemovePrioritySegments(HoveredNodeId);
+			Flags.setNodeTrafficLight(HoveredNodeId, (Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None);
 		}
 
 		public override void OnToolGUI(Event e) {

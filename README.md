@@ -2,6 +2,29 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.0, 07/23/2016:
+- New feature: Traffic++ lane connector
+- Busses now may only ignore lane arrows if driving on a bus lane
+- Rewritten and simplified vehicle position tracking near timed traffic lights and priority signs for performance reasons
+- Improved performance of priority sign rules
+- AI: Cims now ignore junctions where pedestrian lights never change to green
+- AI: Removed the need to define a lane changing probability 
+- AI: Tweaked lane changing parameters
+- AI: Highway rules are automatically disabled at complex junctions (= more than 1 incoming and more than 1 outgoing roads)
+- Improved UI performance if overlays are deactivated
+- Simulation accuracy now also controls time intervals between traffic measurements
+- Added compatibility detection for the Rainfall mod
+- Improved fault-tolerance of the load/save system
+- Default wait-flow balance is set to 0.8
+- Bugfix: Taxis were allowed to ignore lane arrows
+- Bugfix: AI: Highway rules on left-hand traffic maps did not work the same as on right-hand traffic maps
+- Bugfix: Upgrading a road segment next to a timed traffic light removed the traffic light leading to an inconsistent state (thanks to @ad.vissers for pointing out this problem)
+
+1.6.22, 06/29/2016:
+- AI: Taxis now may not ignore lane arrows and are using bus lanes whenever possible (thanks to @Cochy for pointing out this issue)
+- AI: Busses may only ignore lane arrows while driving on a bus lane
+- Bugfix: Traffic measurement at timed traffic lights was incorrect
+
 1.6.22, 06/21/2016:
 - Speed/vehicle restrictions may now be applied to all road segments between two junctions by holding the shift key
 - Reworked how changes in the road network are recognized 

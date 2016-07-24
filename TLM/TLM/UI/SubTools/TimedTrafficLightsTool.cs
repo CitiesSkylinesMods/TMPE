@@ -26,7 +26,7 @@ namespace TrafficManager.UI.SubTools {
 		private int _timedViewedStep = -1;
 		private int _stepMinValue = 1;
 		private int _stepMaxValue = 1;
-		private float _waitFlowBalance = 1f;
+		private float _waitFlowBalance = 0.8f;
 		private string _stepMinValueStr = "1";
 		private string _stepMaxValueStr = "1";
 
@@ -49,7 +49,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			if (HoveredNodeId <= 0 || nodeSelectionLocked)
 				return;
 
@@ -358,7 +358,7 @@ namespace TrafficManager.UI.SubTools {
 							if (_stepMaxValue < _stepMinValue)
 								_stepMaxValue = _stepMinValue;
 							if (_waitFlowBalance <= 0)
-								_waitFlowBalance = 1f;
+								_waitFlowBalance = 0.8f;
 
 							sim.TimedLight.GetStep(_timedEditStep).minTime = (int)_stepMinValue;
 							sim.TimedLight.GetStep(_timedEditStep).maxTime = (int)_stepMaxValue;
@@ -783,22 +783,17 @@ namespace TrafficManager.UI.SubTools {
 
 							var counterSize = 20f * zoom;
 							var yOffset = counterSize + 77f * zoom - modeHeight * 2;
-							var carNumRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset, counterSize, counterSize);
+							//var carNumRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset, counterSize, counterSize);
 							var segIdRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset - counterSize - 2f, counterSize, counterSize);
 
 							_counterStyle.fontSize = (int)(15f * zoom);
 							_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
-							String labelStr = "n/a";
+							/*String labelStr = "n/a";
 							if (prioSeg != null) {
 								labelStr = prioSeg.GetRegisteredVehicleCount(laneIndices).ToString() + " " + Translation.GetString("incoming");
-								/*for (int k = 0; k < prioSeg.numLanes; ++k) {
-									if (k > 0)
-										labelStr += "/";
-									labelStr += prioSeg.CarsOnLanes[k];
-								}*/
 							}
-							GUI.Label(carNumRect, labelStr, _counterStyle);
+							GUI.Label(carNumRect, labelStr, _counterStyle);*/
 
 							_counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 							GUI.Label(segIdRect, Translation.GetString("Segment") + " " + srcSegmentId, _counterStyle);
@@ -1372,7 +1367,7 @@ namespace TrafficManager.UI.SubTools {
 				}
 				if (!GUILayout.Button(Translation.GetString("Setup_timed_traffic_light"))) return;
 
-				_waitFlowBalance = 1f;
+				_waitFlowBalance = 0.8f;
 				foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 					TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
 					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
@@ -1544,7 +1539,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowIcons() {
+		public override void ShowGUIOverlay() {
 			if (!Options.timedLightsOverlay &&
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsAddNode &&
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsRemoveNode &&
@@ -1552,14 +1547,26 @@ namespace TrafficManager.UI.SubTools {
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights)
 				return;
 
-			foreach (ushort nodeId in TrafficPriority.GetPriorityNodes()) {
-				if (SelectedNodeIndexes.Contains(nodeId))
+			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+#if DEBUG
+				bool debug = nodeId == 21361;
+#endif
+				if (SelectedNodeIndexes.Contains(nodeId)) {
+#if DEBUG
+					if (debug)
+						Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} is selected");
+#endif
 					continue;
+				}
 
 				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 				if (lightSim != null && lightSim.IsTimedLight()) {
 					TimedTrafficLights timedNode = lightSim.TimedLight;
 					if (timedNode == null) {
+#if DEBUG
+						if (debug)
+							Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} does not have an instance of TimedTrafficLights. Removing node from simulation");
+#endif
 						TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, true, false);
 						break;
 					}

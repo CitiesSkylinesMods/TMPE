@@ -28,7 +28,7 @@ namespace TrafficManager.UI.SubTools {
 			return _cursorInSecondaryPanel;
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			
 		}
 
@@ -57,7 +57,7 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void ShowIcons() {
+		public override void ShowGUIOverlay() {
 			ShowSigns(true);
 		}
 
@@ -66,6 +66,9 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void ShowSigns(bool viewOnly) {
+			if (viewOnly && !Options.speedLimitsOverlay)
+				return;
+
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			bool handleHovered = false;
 			for (int i = 1; i < segments.m_size; ++i) {
@@ -100,7 +103,8 @@ namespace TrafficManager.UI.SubTools {
 			for (int i = 0; i < SpeedLimitManager.AvailableSpeedLimits.Count; ++i) {
 				if (curSpeedLimitIndex != i)
 					GUI.color = Color.gray;
-				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.AvailableSpeedLimits[i]], GUILayout.Width(100), GUILayout.Height(100))) {
+				float signSize = TrafficManagerTool.AdaptWidth(100);
+				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
 					curSpeedLimitIndex = i;
 				}
 				GUI.color = oldColor;

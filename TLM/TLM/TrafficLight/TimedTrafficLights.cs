@@ -59,6 +59,23 @@ namespace TrafficManager.TrafficLight {
 			/*if (!housekeeping())
 				return;*/
 
+			for (int s = 0; s < 8; ++s) {
+				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
+				if (segmentId == 0)
+					continue;
+				bool needsAlwaysGreenPedestrian = true;
+				foreach (TimedTrafficLightsStep step in Steps) {
+					if (!step.segmentLights.ContainsKey(segmentId))
+						continue;
+					if (step.segmentLights[segmentId].PedestrianLightState == RoadBaseAI.TrafficLightState.Green) {
+						needsAlwaysGreenPedestrian = false;
+						break;
+					}
+				}
+
+				CustomTrafficLights.GetOrLiveSegmentLights(NodeId, segmentId).InvalidPedestrianLight = needsAlwaysGreenPedestrian;
+			}
+
 			CurrentStep = 0;
 			Steps[0].Start();
 			Steps[0].SetLights();
@@ -76,8 +93,14 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal bool housekeeping() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.housekeeping");
+#endif
 			if (NodeGroup == null || NodeGroup.Count <= 0) {
 				Stop();
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.housekeeping");
+#endif
 				return false;
 			}
 
@@ -121,15 +144,24 @@ namespace TrafficManager.TrafficLight {
 				}
 
 			return mayStart;*/
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.housekeeping");
+#endif
 			return true;
 		}
 
 		internal void StepHousekeeping() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.StepHousekeeping");
+#endif
 			foreach (TimedTrafficLightsStep step in Steps) {
 				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.segmentLights) {
 					e.Value.housekeeping(true);
 				}
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.StepHousekeeping");
+#endif
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
@@ -163,9 +195,15 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SimulationStep() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.SimulationStep");
+#endif
 			if (!isMasterNode() || !IsStarted()) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
+#endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
 #endif
 				return;
 			}
@@ -177,6 +215,9 @@ namespace TrafficManager.TrafficLight {
 			if (lastSimulationStep >= currentFrame) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* lastSimulationStep >= currentFrame");
+#endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
 #endif
 				return;
 			}
@@ -195,6 +236,9 @@ namespace TrafficManager.TrafficLight {
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}) is not valid.");
 #endif
 				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false, false);
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
+#endif
 				return;
 			}
 
@@ -207,6 +251,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}) is not done.");
 #endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
+#endif
 				return;
 			}
 			// step is done
@@ -214,11 +261,14 @@ namespace TrafficManager.TrafficLight {
 #if DEBUGTTL
 			Log._Debug($"TTL SimStep: NodeId={NodeId} Setting lights (2)");
 #endif
-			SetLights();
+			SetLights(); // check if this is needed
 
 			if (!Steps[CurrentStep].isEndTransitionDone()) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}): end transition is not done.");
+#endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
 #endif
 				return;
 			}
@@ -231,15 +281,28 @@ namespace TrafficManager.TrafficLight {
 			// change step
 			int oldCurrentStep = CurrentStep;
 			while (true) {
-				SkipStep();
+				SkipStep(false);
 
 				if (CurrentStep == oldCurrentStep)
 					break;
 
-				if (Steps[CurrentStep].minTime > 0 || !Steps[CurrentStep].StepDone(false)) {
+				if (Steps[CurrentStep].minTime > 0)
+					break;
+
+				float flow, wait;
+				bool couldCalculateFlowWaitStats = Steps[CurrentStep].calcWaitFlow(out wait, out flow);
+
+				if (! couldCalculateFlowWaitStats)
+					break;
+
+				if (flow >= wait) {
 					break;
 				}
 			}
+			Steps[CurrentStep].SetLights();
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
+#endif
 		}
 
 		public void SetLights() {
@@ -254,7 +317,7 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		public void SkipStep() {
+		public void SkipStep(bool setLights=true) {
 			if (!isMasterNode())
 				return;
 
@@ -268,7 +331,8 @@ namespace TrafficManager.TrafficLight {
 				slaveSim.TimedLight.Steps[CurrentStep].SetStepDone();
 				slaveSim.TimedLight.CurrentStep = newCurrentStep;
 				slaveSim.TimedLight.Steps[newCurrentStep].Start();
-				slaveSim.TimedLight.Steps[newCurrentStep].SetLights();
+				if (setLights)
+					slaveSim.TimedLight.Steps[newCurrentStep].SetLights();
 			}
 		}
 
@@ -326,29 +390,6 @@ namespace TrafficManager.TrafficLight {
 		public void RemoveStep(int id) {
 			Steps.RemoveAt(id);
 		}
-
-		/*public static TimedTrafficLights AddTimedLight(ushort nodeid, List<ushort> nodeGroup, bool vehiclesMayEnterBlockedJunctions) {
-			TimedScripts.Add(nodeid, new TimedTrafficLights(nodeid, nodeGroup, vehiclesMayEnterBlockedJunctions));
-			return TimedScripts[nodeid];
-		}
-
-		public static void RemoveTimedLight(ushort nodeid) {
-			TimedScripts.Remove(nodeid);
-		}
-
-		public static bool IsTimedLight(ushort nodeid) {
-			return TimedScripts.ContainsKey(nodeid);
-		}
-
-		public static TimedTrafficLights GetTimedLight(ushort nodeid) {
-			if (!IsTimedLight(nodeid))
-				return null;
-			return TimedScripts[nodeid];
-		}
-
-		internal static void OnLevelUnloading() {
-			TimedScripts.Clear();
-		}*/
 
 		internal void handleNewSegments() {
 			if (NumSteps() <= 0) {

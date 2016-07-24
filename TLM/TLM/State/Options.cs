@@ -15,8 +15,10 @@ using ColossalFramework.Globalization;
 namespace TrafficManager.State {
 
 	public class Options : MonoBehaviour {
+		public static readonly int DYNAMIC_RECALC_MIN_PROCESSOR_COUNT = 8;
+
 		private static UIDropDown simAccuracyDropdown = null;
-		private static UIDropDown laneChangingRandomizationDropdown = null;
+		//private static UIDropDown laneChangingRandomizationDropdown = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
@@ -24,7 +26,9 @@ namespace TrafficManager.State {
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
 		private static UICheckBox vehicleRestrictionsOverlayToggle = null;
+		private static UICheckBox connectedLanesOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
+		private static UICheckBox vehicleOverlayToggle = null;
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
@@ -55,6 +59,8 @@ namespace TrafficManager.State {
 		private static UITextField someValue5Field = null;
 		private static UITextField someValue6Field = null;
 		private static UITextField someValue7Field = null;
+		private static UITextField someValue8Field = null;
+		private static UITextField someValue9Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -63,7 +69,7 @@ namespace TrafficManager.State {
 		private static UIHelperBase maintenanceGroup = null;
 
 		public static int simAccuracy = 1;
-		public static int laneChangingRandomization = 2;
+		//public static int laneChangingRandomization = 2;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
@@ -71,12 +77,14 @@ namespace TrafficManager.State {
 		public static bool timedLightsOverlay = true;
 		public static bool speedLimitsOverlay = true;
 		public static bool vehicleRestrictionsOverlay = true;
+		public static bool connectedLanesOverlay = true;
 		public static bool nodesOverlay = false;
+		public static bool vehicleOverlay = false;
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool advancedAI = false;
-		public static bool dynamicPathRecalculation = false;
+		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 		public static bool showLanes = false;
 		public static bool strongerRoadConditionEffects = false;
@@ -90,13 +98,15 @@ namespace TrafficManager.State {
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 5f; // debug value
-		public static float someValue2 = 4f; // debug value
+		public static float someValue = 3f; // debug value
+		public static float someValue2 = 1.25f; // debug value
 		public static float someValue3 = 2f; // debug value
 		public static float someValue4 = 5f; // debug value
-		public static float someValue5 = 2f; // debug value
+		public static float someValue5 = 1.5f; // debug value
 		public static float someValue6 = 1.5f; // debug value
-		public static float someValue7 = 20f; // debug value
+		public static float someValue7 = 0.75f; // debug value
+		public static float someValue8 = 3f; // debug value
+		public static float someValue9 = 0.8f; // debug value
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -115,20 +125,25 @@ namespace TrafficManager.State {
 			aiGroup = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 #if DEBUG
-			dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
+			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
+				dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
 #endif
 			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 #if DEBUG
 			preferOuterLaneToggle = aiGroup.AddCheckbox(Translation.GetString("Prefer_outer_lane") + " (BETA feature)", preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 #endif
-			laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
+			//laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
 			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
 			timedLightsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
 			speedLimitsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
 			vehicleRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
+			connectedLanesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
 			nodesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
 			showLanesToggle = overlayGroup.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+#if DEBUG
+			vehicleOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
+#endif
 			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
 			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
 #if DEBUG
@@ -147,6 +162,8 @@ namespace TrafficManager.State {
 			someValue5Field = maintenanceGroup.AddTextfield("Some value #5", String.Format("{0:0.##}", someValue5), onSomeValue5Changed) as UITextField;
 			someValue6Field = maintenanceGroup.AddTextfield("Some value #6", String.Format("{0:0.##}", someValue6), onSomeValue6Changed) as UITextField;
 			someValue7Field = maintenanceGroup.AddTextfield("Some value #7", String.Format("{0:0.##}", someValue7), onSomeValue7Changed) as UITextField;
+			someValue8Field = maintenanceGroup.AddTextfield("Some value #8", String.Format("{0:0.##}", someValue8), onSomeValue8Changed) as UITextField;
+			someValue9Field = maintenanceGroup.AddTextfield("Some value #9", String.Format("{0:0.##}", someValue9), onSomeValue9Changed) as UITextField;
 #endif
 		}
 
@@ -188,6 +205,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
+		}
+
+		private static void onConnectedLanesOverlayChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"connectedLanesOverlay changed to {newValue}");
+			connectedLanesOverlay = newValue;
 		}
 
 		private static void onDisableSomething1Changed(bool newDisableSomething) {
@@ -238,13 +263,13 @@ namespace TrafficManager.State {
 			simAccuracy = newAccuracy;
 		}
 
-		private static void onLaneChangingRandomizationChanged(int newLaneChangingRandomization) {
+		/*private static void onLaneChangingRandomizationChanged(int newLaneChangingRandomization) {
 			if (!checkGameLoaded())
 				return;
 
 			Log._Debug($"Lane changing frequency changed to {newLaneChangingRandomization}");
 			laneChangingRandomization = newLaneChangingRandomization;
-		}
+		}*/
 
 		private static void onRecklessDriversChanged(int newRecklessDrivers) {
 			if (!checkGameLoaded())
@@ -406,6 +431,14 @@ namespace TrafficManager.State {
 			showLanes = newShowLanes;
 		}
 
+		private static void onVehicleOverlayChanged(bool newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Vehicle overlay changed to {newVal}");
+			vehicleOverlay = newVal;
+		}
+
 		private static void onPathCostMultiplicatorChanged(string newPathCostMultiplicatorStr) {
 			if (!checkGameLoaded())
 				return;
@@ -523,6 +556,32 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onSomeValue8Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue8 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue9Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue9 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
 				return;
@@ -543,11 +602,11 @@ namespace TrafficManager.State {
 				simAccuracyDropdown.selectedIndex = newAccuracy;
 		}
 
-		public static void setLaneChangingRandomization(int newLaneChangingRandomization) {
+		/*public static void setLaneChangingRandomization(int newLaneChangingRandomization) {
 			laneChangingRandomization = newLaneChangingRandomization;
 			if (laneChangingRandomizationDropdown != null)
 				laneChangingRandomizationDropdown.selectedIndex = newLaneChangingRandomization;
-		}
+		}*/
 
 		public static void setRecklessDrivers(int newRecklessDrivers) {
 			recklessDrivers = newRecklessDrivers;
@@ -640,6 +699,11 @@ namespace TrafficManager.State {
 		}
 
 		public static void setDynamicPathRecalculation(bool value) {
+#if DEBUG
+			/*if (SystemInfo.processorCount < DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
+				value = false;*/
+#endif
+
 #if !TAM
 			if (!LoadingExtension.IsPathManagerCompatible) {
 				value = false;
@@ -652,6 +716,10 @@ namespace TrafficManager.State {
 #endif
 			if (dynamicPathRecalculationToggle != null)
 				dynamicPathRecalculationToggle.isChecked = value;
+		}
+
+		public static bool IsDynamicPathRecalculationActive() {
+			return Options.dynamicPathRecalculation;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
@@ -718,13 +786,25 @@ namespace TrafficManager.State {
 				vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
 		}
 
+		public static void setConnectedLanesOverlay(bool newValue) {
+			connectedLanesOverlay = newValue;
+			if (connectedLanesOverlayToggle != null)
+				connectedLanesOverlayToggle.isChecked = newValue;
+		}
+
 		public static void setNodesOverlay(bool newNodesOverlay) {
 			nodesOverlay = newNodesOverlay;
 			if (nodesOverlayToggle != null)
 				nodesOverlayToggle.isChecked = newNodesOverlay;
 		}
 
-		internal static int getLaneChangingRandomizationTargetValue() {
+		public static void setVehicleOverlay(bool newVal) {
+			vehicleOverlay = newVal;
+			if (vehicleOverlayToggle != null)
+				vehicleOverlayToggle.isChecked = newVal;
+		}
+
+		/*internal static int getLaneChangingRandomizationTargetValue() {
 			int ret = 100;
 			switch (laneChangingRandomization) {
 				case 0:
@@ -744,9 +824,9 @@ namespace TrafficManager.State {
 					break;
 			}
 			return ret;
-		}
+		}*/
 
-		internal static float getLaneChangingProbability() {
+		/*internal static float getLaneChangingProbability() {
 			switch (laneChangingRandomization) {
 				case 0:
 					return 0.5f;
@@ -760,7 +840,7 @@ namespace TrafficManager.State {
 					return 0.01f;
 			}
 			return 0.01f;
-		}
+		}*/
 
 		internal static int getRecklessDriverModulo() {
 			switch (recklessDrivers) {

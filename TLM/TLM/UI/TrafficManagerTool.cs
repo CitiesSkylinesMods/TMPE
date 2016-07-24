@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define MARKCONGESTEDSEGMENTSx
+#define USEPATHWAITCOUNTERx
+#define ABSDENSITYx
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ColossalFramework;
@@ -18,9 +22,6 @@ namespace TrafficManager.UI {
 	public class TrafficManagerTool : DefaultTool {
 		private static ToolMode _toolMode;
 
-		private bool _mouseDown;
-		private bool _mouseClicked;
-
 		internal ushort HoveredNodeId;
 		internal ushort HoveredSegmentId;
 
@@ -33,7 +34,7 @@ namespace TrafficManager.UI {
 		private String tooltipText = null;
 		private Vector3? tooltipWorldPos = null;*/
 
-		private static SubTool[] subTools = new SubTool[11];
+		private static SubTool[] subTools = new SubTool[12];
 		private static bool initDone = false;
 
 		public static ushort SelectedNodeId { get; internal set; }
@@ -57,7 +58,12 @@ namespace TrafficManager.UI {
 			var rectY = (rect.y / 600f) * (float)Screen.currentResolution.height;*/
 
 			//return new Rect(rectX, rectY, rect.width, rect.height);
-			return new Rect(85f + (float)Translation.getMenuWidth() + 50f + rect.x, 80f + 10f + rect.y, rect.width, rect.height);
+			return new Rect(85f + (float)Translation.getMenuWidth() + AdaptWidth(50f + rect.x), 80f + 10f + rect.y, AdaptWidth(rect.width), rect.height);
+		}
+
+		internal static float AdaptWidth(float originalWidth) {
+			return originalWidth;
+			//return originalWidth * ((float)Screen.currentResolution.width / 1920f);
 		}
 
 		internal float GetBaseZoom() {
@@ -65,7 +71,7 @@ namespace TrafficManager.UI {
 		}
 
 		protected override void Awake() {
-			//Log._Debug($"TrafficLightTool: Awake {this.GetHashCode()}");
+			Log._Debug($"TrafficLightTool: Awake {this.GetHashCode()}");
 			base.Awake();
 
 			if (!initDone) {
@@ -81,6 +87,7 @@ namespace TrafficManager.UI {
 				subTools[(int)ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this);
 				subTools[(int)ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
 				subTools[(int)ToolMode.LaneChange] = new LaneArrowTool(this);
+				subTools[(int)ToolMode.LaneConnector] = new LaneConnectorTool(this);
 				Log.Info("TrafficManagerTool: Awake - Initialization completed.");
 				initDone = true;
 			} else {
@@ -90,6 +97,18 @@ namespace TrafficManager.UI {
 					subTools[i].MainTool = this;
 				}
 			}
+
+			for (int i = 0; i < subTools.Length; ++i) {
+				if (subTools[i] == null)
+					continue;
+				subTools[i].Initialize();
+			}
+		}
+
+		public static SubTool GetSubTool(ToolMode mode) {
+			if (!initDone)
+				return null;
+			return subTools[(int)mode];
 		}
 		
 		public static ToolMode GetToolMode() {
@@ -154,6 +173,14 @@ namespace TrafficManager.UI {
 				//Log._Debug($"Rendering overlay in {_toolMode}");
 				activeSubTool.RenderOverlay(cameraInfo);
 			}
+
+			for (int i = 0; i < subTools.Length; ++i) {
+				if (subTools[i] == null)
+					continue;
+				if (i == (int)GetToolMode())
+					continue;
+				subTools[i].RenderInfoOverlay(cameraInfo);
+			}
 		}
 
 		/// <summary>
@@ -169,29 +196,42 @@ namespace TrafficManager.UI {
 			} else if (Input.GetKeyUp(KeyCode.PageUp))
 				InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
 
-			_mouseDown = Input.GetMouseButton(0);
+			bool primaryMouseClicked = Input.GetMouseButtonDown(0);
+			bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
 
-			if (_mouseDown) {
-				if (_mouseClicked) return;
+			// check if clicked
+			if (!primaryMouseClicked && !secondaryMouseClicked)
+				return;
 
-				_mouseClicked = true;
+			// check if mouse is inside panel
+			if (UIBase.GetMenu().containsMouse) {
+#if DEBUG
+				Log._Debug($"TrafficManagerTool: OnToolUpdate: Menu contains mouse. Ignoring click.");
+#endif
+				return;
+			}
 
-				bool elementsHovered = determineHoveredElements();
+			bool elementsHovered = determineHoveredElements();
 
-				if (!elementsHovered || (activeSubTool != null && activeSubTool.IsCursorInPanel())) {
-					//Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: " + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
-					return;
-				}
-				if (HoveredSegmentId == 0 && HoveredNodeId == 0) {
-					//Log.Message("no hovered segment");
-					return;
-				}
+			if (/*!elementsHovered || (*/activeSubTool != null && activeSubTool.IsCursorInPanel()/*)*/) {
+#if DEBUG
+				Log._Debug($"TrafficManagerTool: OnToolUpdate: Subtool contains mouse. Ignoring click.");
+#endif
+				//Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: " + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
+				return;
+			}
 
-				if (activeSubTool != null)
-					activeSubTool.OnClickOverlay();
-			} else {
-				//showTooltip(false, null, Vector3.zero);
-				_mouseClicked = false;
+			/*if (HoveredSegmentId == 0 && HoveredNodeId == 0) {
+				//Log.Message("no hovered segment");
+				return;
+			}*/
+
+			if (activeSubTool != null) {
+				if (primaryMouseClicked)
+					activeSubTool.OnPrimaryClickOverlay();
+
+				if (secondaryMouseClicked)
+					activeSubTool.OnSecondaryClickOverlay();
 			}
 		}
 
@@ -206,18 +246,21 @@ namespace TrafficManager.UI {
 				_guiSegments();
 				if (Options.nodesOverlay) {
 					_guiNodes();
+				}
+
 #if DEBUG
+				if (Options.vehicleOverlay) {
 					_guiVehicles();
 					//_guiCitizens();
-#endif
 				}
+#endif
 
 				for (int i = 0; i < subTools.Length; ++i) {
 					if (subTools[i] == null)
 						continue;
 					if (i == (int)GetToolMode())
 						continue;
-					subTools[i].ShowIcons();
+					subTools[i].ShowGUIOverlay();
 				}
 
 				var guiColor = GUI.color;
@@ -231,6 +274,20 @@ namespace TrafficManager.UI {
 			} catch (Exception ex) {
 				Log.Error("GUI Error: " + ex.ToString());
 			}
+		}
+
+		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId) {
+			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
+
+			Bezier3 bezier;
+			bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+			bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+
+			var color = GetToolColor(Input.GetMouseButton(0), false);
+
+			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection, false, false, out bezier.b, out bezier.c);
+
+			DrawOverlayBezier(cameraInfo, bezier, color);
 		}
 
 		internal void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color) {
@@ -275,6 +332,10 @@ namespace TrafficManager.UI {
 					ToolCursor = netTool.m_upgradeCursor;
 				}
 			}
+		}
+
+		public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
+			return RayCast(input, out output);
 		}
 
 		private bool determineHoveredElements() {
@@ -409,11 +470,14 @@ namespace TrafficManager.UI {
 #if DEBUG
 				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
-				if (CustomRoadAI.InStartupPhase)
+				/*if (CustomRoadAI.InStartupPhase)
 					labelStr += ", in start-up phase";
-				else
+				else*/
 					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " %";
-				labelStr += ", rel. density: " + (CustomRoadAI.laneMeanDensities[segmentId] != null && i < CustomRoadAI.laneMeanDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanDensities[segmentId][i] : "?") + " %";
+				labelStr += ", rel. density: " + (CustomRoadAI.laneMeanRelDensities[segmentId] != null && i < CustomRoadAI.laneMeanRelDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanRelDensities[segmentId][i] : "?") + " %";
+#if ABSDENSITY
+				labelStr += ", abs. density: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
+#endif
 #if DEBUG
 				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 #endif
@@ -468,9 +532,14 @@ namespace TrafficManager.UI {
 #if DEBUG
 					SegmentEnd startEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_startNode, (ushort)i);
 					SegmentEnd endEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_endNode, (ushort)i);
-					labelStr += "\nstart veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end veh.: " + endEnd?.GetRegisteredVehicleCount();
+					labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
+#if MARKCONGESTEDSEGMENTS
+					if (CustomRoadAI.initDone && CustomRoadAI.segmentCongestion[i]) {
+						labelStr += " congested!";
+					}
+#endif
 
 					float meanLaneSpeed = 0f;
 					
@@ -495,9 +564,9 @@ namespace TrafficManager.UI {
 						meanLaneSpeed /= Convert.ToSingle(validLanes);
 					}
 
-					if (CustomRoadAI.InStartupPhase)
+					/*if (CustomRoadAI.InStartupPhase)
 						labelStr += " (in start-up phase)";
-					else
+					else*/
 						labelStr += " (avg. speed: " + String.Format("{0:0.##}", meanLaneSpeed) + " %)";
 
 #if DEBUG
@@ -556,20 +625,23 @@ namespace TrafficManager.UI {
 		private void _guiVehicles() {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
+			LaneConnectionManager connManager = Singleton<LaneConnectionManager>.instance;
+			SimulationManager simManager = Singleton<SimulationManager>.instance;
+			NetManager netManager = Singleton<NetManager>.instance;
 			for (int i = 1; i < vehicles.m_size; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
 					continue;
 
-				Vector3 pos = vehicle.GetLastFramePosition();
-				var screenPos = Camera.main.WorldToScreenPoint(pos);
+				Vector3 vehPos = vehicle.GetLastFramePosition();
+				var screenPos = Camera.main.WorldToScreenPoint(vehPos);
 				screenPos.y = Screen.height - screenPos.y;
 
 				if (screenPos.z < 0)
 					continue;
 
-				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-				var diff = pos - camPos;
+				var camPos = simManager.m_simulationView.m_position;
+				var diff = vehPos - camPos;
 				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
 
@@ -580,16 +652,40 @@ namespace TrafficManager.UI {
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 				VehicleState vState = VehicleStateManager.GetVehicleState((ushort)i);
-				String labelStr = "Veh. " + i + /*" @ " + String.Format("{0:0.##}", vehicle.GetLastFrameVelocity().magnitude)*/ " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-") + "\npos: " + vState?.GetCurrentPosition()?.SourceSegmentId + "(" + vState?.GetCurrentPosition()?.SourceLaneIndex + ")->" + vState?.GetCurrentPosition()?.TransitNodeId + ", last update: " + vState?.LastPositionUpdate;
-				// add current path info
-				/*var currentPathId = vehicle.m_path;
-				if (currentPathId > 0) {
-					var vehiclePathUnit = Singleton<PathManager>.instance.m_pathUnits.m_buffer[currentPathId];
-					if ((vehiclePathUnit.m_pathFindFlags & PathUnit.FLAG_READY) != 0) {
-						var realTimePosition = vehiclePathUnit.GetPosition(vehicle.m_pathPositionIndex >> 1);
-						labelStr += "\n@ seg " + realTimePosition.m_segment + "\nlane " + realTimePosition.m_lane + "\noff " + realTimePosition.m_offset;
-					}
+				PathUnit.Position? curPos = vState?.GetCurrentPathPosition(ref vehicle);
+				PathUnit.Position? nextPos = vState?.GetNextPathPosition(ref vehicle);
+				bool? startNode = vState?.CurrentSegmentEnd?.StartNode;
+				ushort? segmentId = vState?.CurrentSegmentEnd?.SegmentId;
+				ushort? transitNodeId = vState?.CurrentSegmentEnd?.NodeId;
+				/*float distanceToTransitNode = Single.NaN;
+				float timeToTransitNode = Single.NaN;*/
+				float vehSpeed = vehicle.GetLastFrameVelocity().magnitude;
+
+				Vector3? targetPos = null;
+				if (transitNodeId != null)
+					targetPos = netManager.m_nodes.m_buffer[(ushort)transitNodeId].m_position;
+
+				/*if (transitNodeId != null && segmentId != null && startNode != null && curPos != null) {
+					bool outgoing = false;
+					connManager.GetLaneEndPoint((ushort)segmentId, (bool)startNode, ((PathUnit.Position)curPos).m_lane, null, null, out outgoing, out targetPos);
 				}*/
+
+				/*if (targetPos != null) {
+					distanceToTransitNode = ((Vector3)targetPos - vehPos).magnitude;
+					if (vehSpeed > 0)
+						timeToTransitNode = distanceToTransitNode / vehSpeed;
+					else
+						timeToTransitNode = Single.PositiveInfinity;
+				}*/
+				String labelStr = "V #" + i + " @ " + vState?.CurrentSegmentEnd?.SegmentId;
+				//String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehSpeed) + "/" + (vState != null ? vState.CurrentMaxSpeed.ToString() : "-") + " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-");
+#if PATHRECALC
+				labelStr += ", recalc: " + (vState != null ? vState.LastPathRecalculation.ToString() : "-");
+#endif
+				//labelStr += "\npos: " + curPos?.m_segment + "(" + curPos?.m_lane + ")->" + nextPos?.m_segment + "(" + nextPos?.m_lane + ")" /* + ", dist: " + distanceToTransitNode + ", time: " + timeToTransitNode*/ + ", last update: " + vState?.LastPositionUpdate;
+#if USEPATHWAITCOUNTER
+				labelStr += ", wait: " + vState?.PathWaitCounter;
+#endif
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -640,11 +736,11 @@ namespace TrafficManager.UI {
 
 			NetInfo.Direction? dir = null;
 			NetInfo.Direction? dir2 = null;
-			NetInfo.Direction? dir3 = null;
+			//NetInfo.Direction? dir3 = null;
 			if (nodeId != null) {
 				dir = nodeId == Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
 				dir2 = ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection((NetInfo.Direction)dir);
-				dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
+				//dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
 			}
 
 			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
@@ -665,6 +761,9 @@ namespace TrafficManager.UI {
 				if ((float)x[1] == (float)y[1])
 					return 0;
 
+				//if ((dir2 == NetInfo.Direction.Forward && (float)y[1] < (float)x[1]) || (dir2 == NetInfo.Direction.Backward && (float)x[1] < (float)y[1])) {
+				// return 1;
+				// }
 				if ((dir2 == NetInfo.Direction.Forward) ^ (float)x[1] < (float)y[1]) {
 					return 1;
 				}

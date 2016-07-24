@@ -19,7 +19,7 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			if (SelectedNodeId != 0) return;
 
 			TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);

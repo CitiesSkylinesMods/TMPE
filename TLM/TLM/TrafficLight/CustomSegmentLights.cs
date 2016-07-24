@@ -28,6 +28,8 @@ namespace TrafficManager.TrafficLight {
 
 		public uint LastChangeFrame;
 
+		public bool InvalidPedestrianLight = false;
+
 		public Dictionary<ExtVehicleType, CustomSegmentLight> CustomLights {
 			get; private set;
 		} = new Dictionary<ExtVehicleType, CustomSegmentLight>();
@@ -50,10 +52,10 @@ namespace TrafficManager.TrafficLight {
 		public RoadBaseAI.TrafficLightState? PedestrianLightState {
 			get {
 				if (pedestrianLightState == null)
-					return null; // no pedestrian crossing at this point
+					return RoadBaseAI.TrafficLightState.Green; // no pedestrian crossing at this point
 
-				if (ManualPedestrianMode)
-					return pedestrianLightState;
+				if (ManualPedestrianMode && pedestrianLightState != null)
+					return (RoadBaseAI.TrafficLightState)pedestrianLightState;
 				else {
 					return GetAutoPedestrianLightState();
 				}
@@ -71,6 +73,16 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public RoadBaseAI.TrafficLightState GetAutoPedestrianLightState() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.GetAutoPedestrianLightState");
+#endif
+			if (InvalidPedestrianLight) {
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetAutoPedestrianLightState");
+#endif
+				return RoadBaseAI.TrafficLightState.Green;
+			}
+
 			RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Green;
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
 				RoadBaseAI.TrafficLightState vehState = e.Value.GetVisualLightState();
@@ -93,7 +105,10 @@ namespace TrafficManager.TrafficLight {
 					pedState = RoadBaseAI.TrafficLightState.RedToGreen;
 				}
 			}
-			
+
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetAutoPedestrianLightState");
+#endif
 			return pedState;
 		}
 
@@ -136,6 +151,9 @@ namespace TrafficManager.TrafficLight {
 		private static ExtVehicleType[] singleLaneVehicleTypes = new ExtVehicleType[] { ExtVehicleType.Tram, ExtVehicleType.Service, ExtVehicleType.CargoTruck, ExtVehicleType.RoadPublicTransport | ExtVehicleType.Service };
 
 		internal void housekeeping(bool mayDelete, RoadBaseAI.TrafficLightState mainState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState leftState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState rightState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Red) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.housekeeping");
+#endif
 			// we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)
 
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>();
@@ -241,6 +259,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUGHK
 			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}: Housekeeping complete. VehicleTypeByLaneIndex={string.Join("; ", VehicleTypeByLaneIndex.Select(x => x.Key + "=" + x.Value).ToArray())} CustomLights={string.Join("; ", CustomLights.Select(x => x.Key.ToString()).ToArray())}");
 #endif
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.housekeeping");
+#endif
 		}
 
 		public void UpdateVisuals() {
@@ -254,6 +275,9 @@ namespace TrafficManager.TrafficLight {
 		}
 		
 		public object Clone() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.Clone");
+#endif
 			CustomSegmentLights clone = new CustomSegmentLights(nodeId, segmentId);
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
 				clone.CustomLights.Add(e.Key, (CustomSegmentLight)e.Value.Clone());
@@ -268,13 +292,22 @@ namespace TrafficManager.TrafficLight {
 			//clone.mainSegmentLight = clone.CustomLights[autoPedestrianVehicleType];
 			//}
 			clone.housekeeping(false);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.Clone");
+#endif
 			return clone;
 		}
 
 		internal CustomSegmentLight GetCustomLight(byte laneIndex) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.GetCustomLight(laneIndex)");
+#endif
 			if (!VehicleTypeByLaneIndex.ContainsKey(laneIndex)) {
 #if DEBUGGET
 				Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): No vehicle type found for lane index");
+#endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetCustomLight(laneIndex)");
 #endif
 				return mainSegmentLight;
 			}
@@ -286,6 +319,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUGGET
 				Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): No custom light found for vehicle type {vehicleType}");
 #endif
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetCustomLight(laneIndex)");
+#endif
 				return mainSegmentLight;
 			}
 			CustomSegmentLight light = CustomLights[vehicleType];
@@ -293,32 +329,61 @@ namespace TrafficManager.TrafficLight {
 			Log._Debug($"CustomSegmentLights.GetCustomLight({laneIndex}): Returning custom light for vehicle type {vehicleType}");
 #endif
 
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetCustomLight(laneIndex)");
+#endif
 			return light;
 		}
 
 		internal CustomSegmentLight GetCustomLight(ExtVehicleType vehicleType) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.GetCustomLight(vehicleType)");
+#endif
+
+			CustomSegmentLight ret = null;
 			if (CustomLights.ContainsKey(vehicleType))
-				return CustomLights[vehicleType];
+				ret = CustomLights[vehicleType];
 			else
-				return mainSegmentLight;
+				ret = mainSegmentLight;
+
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.GetCustomLight(vehicleType)");
+#endif
+
+			return ret;
 
 			/*if (vehicleType != ExtVehicleType.None)
 				Log._Debug($"No traffic light for vehicle type {vehicleType} defined at segment {segmentId}, node {nodeId}.");*/
 		}
 
 		internal void MakeRed() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.MakeRed");
+#endif
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
 				e.Value.MakeRed();
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.MakeRed");
+#endif
 		}
 
 		internal void MakeRedOrGreen() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.MakeRedOrGreen");
+#endif
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
 				e.Value.MakeRedOrGreen();
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.MakeRedOrGreen");
+#endif
 		}
 
 		internal void SetLights(CustomSegmentLights otherLights) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.SetLights");
+#endif
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in otherLights.CustomLights) {
 				CustomSegmentLight ourLight = null;
 				if (!CustomLights.TryGetValue(e.Key, out ourLight))
@@ -331,9 +396,15 @@ namespace TrafficManager.TrafficLight {
 			}
 			pedestrianLightState = otherLights.pedestrianLightState;
 			ManualPedestrianMode = otherLights.ManualPedestrianMode;
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.SetLights");
+#endif
 		}
 
 		internal void ChangeLightPedestrian() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLights.ChangeLightPedestrian");
+#endif
 			if (PedestrianLightState != null) {
 				var invertedLight = PedestrianLightState == RoadBaseAI.TrafficLightState.Green
 					? RoadBaseAI.TrafficLightState.Red
@@ -342,6 +413,9 @@ namespace TrafficManager.TrafficLight {
 				PedestrianLightState = invertedLight;
 				UpdateVisuals();
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.ChangeLightPedestrian");
+#endif
 		}
 
 		private static uint getCurrentFrame() {

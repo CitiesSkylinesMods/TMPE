@@ -202,6 +202,9 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void UpdateVisuals() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLight.UpdateVisuals");
+#endif
 			var instance = Singleton<NetManager>.instance;
 
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
@@ -237,9 +240,15 @@ namespace TrafficManager.TrafficLight {
 			uint now = ((currentFrameIndex - num) >> 8) & 1;
 			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
 			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLight.UpdateVisuals");
+#endif
 		}
 
 		public RoadBaseAI.TrafficLightState GetVisualLightState() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLight.GetVisualLightState");
+#endif
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			// any green?
 			if (mainLight == RoadBaseAI.TrafficLightState.Green ||
@@ -260,6 +269,9 @@ namespace TrafficManager.TrafficLight {
 				vehicleLightState = RoadBaseAI.TrafficLightState.GreenToRed;
 			}
 
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLight.GetVisualLightState");
+#endif
 			return vehicleLightState;
 		}
 
@@ -282,20 +294,35 @@ namespace TrafficManager.TrafficLight {
 		}*/
 
 		public static RoadBaseAI.TrafficLightState GetPedestrianLightState(RoadBaseAI.TrafficLightState vehicleLightState) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLight.GetPedestrianLightState");
+#endif
+			RoadBaseAI.TrafficLightState ret = RoadBaseAI.TrafficLightState.Green;
 			switch (vehicleLightState) {
 				case RoadBaseAI.TrafficLightState.Red:
 				default:
-					return RoadBaseAI.TrafficLightState.Green;
+					ret = RoadBaseAI.TrafficLightState.Green;
+					break;
 				case RoadBaseAI.TrafficLightState.Green:
-					return RoadBaseAI.TrafficLightState.Red;
+					ret = RoadBaseAI.TrafficLightState.Red;
+					break;
 				case RoadBaseAI.TrafficLightState.RedToGreen:
-					return RoadBaseAI.TrafficLightState.GreenToRed;
+					ret = RoadBaseAI.TrafficLightState.GreenToRed;
+					break;
 				case RoadBaseAI.TrafficLightState.GreenToRed:
-					return RoadBaseAI.TrafficLightState.RedToGreen;
+					ret = RoadBaseAI.TrafficLightState.RedToGreen;
+					break;
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLight.GetPedestrianLightState");
+#endif
+			return ret;
 		}
 
 		internal void MakeRedOrGreen() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("CustomSegmentLight.MakeRedOrGreen");
+#endif
 			if (LightLeft == RoadBaseAI.TrafficLightState.RedToGreen) {
 				LightLeft = RoadBaseAI.TrafficLightState.Green;
 			} else if (LightLeft == RoadBaseAI.TrafficLightState.GreenToRed) {
@@ -313,6 +340,9 @@ namespace TrafficManager.TrafficLight {
 			} else if (LightRight == RoadBaseAI.TrafficLightState.GreenToRed) {
 				LightRight = RoadBaseAI.TrafficLightState.Red;
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLight.MakeRedOrGreen");
+#endif
 		}
 
 		internal void MakeRed() {

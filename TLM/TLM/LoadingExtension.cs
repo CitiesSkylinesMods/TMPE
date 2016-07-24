@@ -32,9 +32,16 @@ namespace TrafficManager {
 
         public static LoadingExtension Instance;
 #if !TAM
-		public static bool IsPathManagerCompatible = true;
+		public static bool IsPathManagerCompatible {
+			get; private set;
+		} = true;
 #endif
-		public static bool IsPathManagerReplaced = false;
+		public static bool IsPathManagerReplaced {
+			get; private set;
+		} = false;
+		public static bool IsRainfallLoaded {
+			get; private set;
+		} = false;
 		public CustomPathManager CustomPathManager { get; set; }
         public static bool DetourInited { get; set; }
 		public static List<Detour> Detours { get; set; }
@@ -927,6 +934,9 @@ namespace TrafficManager {
 				VehicleRestrictionsManager.OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
+#if TRACE
+				Singleton<CodeProfiler>.instance.OnLevelUnloading();
+#endif
 			} catch (Exception e) {
 				Log.Error("Exception unloading mod. " + e.Message);
 				// ignored - prevents collision with other mods
@@ -970,8 +980,10 @@ namespace TrafficManager {
 			TrafficPriority.OnLevelLoading();
 #if !TAM
 			determinePathManagerCompatible();
-			
-			//SpeedLimitManager.GetDefaultSpeedLimits();
+			IsRainfallLoaded = CheckRainfallIsLoaded();
+#if DEBUG
+			SpeedLimitManager.GetDefaultSpeedLimits();
+#endif
 
 			if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 				try {
@@ -1068,7 +1080,37 @@ namespace TrafficManager {
 		}
 #endif
 
-        public void SetToolMode(TrafficManagerMode mode) {
+		private bool CheckRainfallIsLoaded() {
+			bool rainfall = false;
+
+			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
+			List<ILoadingExtension> loadingExtensions = null;
+			if (loadingWrapperLoadingExtensionsField != null) {
+				loadingExtensions = (List<ILoadingExtension>)loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
+			} else {
+				Log._Debug("Could not get loading extensions field");
+			}
+
+			if (loadingExtensions != null) {
+				foreach (ILoadingExtension extension in loadingExtensions) {
+					if (extension.GetType().Namespace == null)
+						continue;
+
+					var namespaceStr = extension.GetType().Namespace.ToString();
+					if ("Rainfall".Equals(namespaceStr)) {
+						Log.Info("The mod Rainfall has been detected.");
+						rainfall = true;
+						break;
+					}
+				}
+			} else {
+				Log._Debug("Could not get loading extensions");
+			}
+
+			return rainfall;
+		}
+
+		public void SetToolMode(TrafficManagerMode mode) {
             if (mode == ToolMode) return;
 
             //UI.toolMode = mode;

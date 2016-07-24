@@ -31,7 +31,7 @@ namespace TrafficManager.UI.SubTools {
 			return _cursorInSecondaryPanel;
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			//Log._Debug($"Restrictions: {HoveredSegmentId} {overlayHandleHovered}");
 			if (HoveredSegmentId == 0) return;
 			if (overlayHandleHovered) return;
@@ -78,11 +78,14 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowIcons() {
+		public override void ShowGUIOverlay() {
 			ShowSigns(true);
 		}
 
 		private void ShowSigns(bool viewOnly) {
+			if (viewOnly && !Options.vehicleRestrictionsOverlay)
+				return;
+
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			bool handleHovered = false;
 			for (int i = 1; i < segments.m_size; ++i) {

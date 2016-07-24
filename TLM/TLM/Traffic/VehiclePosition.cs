@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.Traffic {
-	public class VehiclePosition {
+	public struct VehiclePosition {
 		/// <summary>
 		/// Vehicle is coming from this segment/lane ...
 		/// </summary>

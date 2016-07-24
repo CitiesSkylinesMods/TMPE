@@ -16,7 +16,7 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			
 		}
 
@@ -37,22 +37,10 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!Flags.mayHaveTrafficLight(HoveredNodeId)) return;
 
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
-
-			Bezier3 bezier;
-			bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-			bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-
-			var color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
-
-			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-				segment.m_endDirection,
-				false, false, out bezier.b, out bezier.c);
-
-			MainTool.DrawOverlayBezier(cameraInfo, bezier, color);
+			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
 		}
 
-		public override void ShowIcons() {
+		public override void ShowGUIOverlay() {
 			ShowGUI(true);
 		}
 
@@ -66,7 +54,7 @@ namespace TrafficManager.UI.SubTools {
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
 				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
-				for (ushort segmentId = 0; segmentId < TrafficPriority.TrafficSegments.Length; ++segmentId) {
+				for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 					var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
 					if (trafficSegment == null)
 						continue;
@@ -286,10 +274,12 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
-			HashSet<ushort> priorityNodeIds = TrafficPriority.GetPriorityNodes();
-			foreach (ushort nodeId in priorityNodeIds) {
-				foreach (SegmentEnd end in TrafficPriority.GetPrioritySegments(nodeId)) {
-					end.Housekeeping();
+			foreach (TrafficSegment trafficSegment in TrafficPriority.TrafficSegments) {
+				try {
+					trafficSegment?.Instance1?.Housekeeping();
+					trafficSegment?.Instance2?.Housekeeping();
+				} catch (Exception e) {
+					Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
 				}
 			}
 		}

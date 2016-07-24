@@ -40,6 +40,9 @@ namespace TrafficManager.Traffic {
 		private ushort[] rightSegments = new ushort[7];
 		private byte numRightSegments = 0;
 
+		private byte numIncomingSegments = 0;
+		private byte numOutgoingSegments = 0;
+
 		private ushort[] incomingRightSegments = new ushort[7];
 		private byte numIncomingRightSegments = 0;
 
@@ -113,6 +116,16 @@ namespace TrafficManager.Traffic {
 		public byte NumRightSegments {
 			get { return numRightSegments; }
 			private set { numRightSegments = value; }
+		}
+
+		public byte NumIncomingSegments {
+			get { return numIncomingSegments; }
+			private set { numIncomingSegments = value; }
+		}
+
+		public byte NumOutgoingSegments {
+			get { return numOutgoingSegments; }
+			private set { numOutgoingSegments = value; }
 		}
 
 		public ushort[] IncomingRightSegments {
@@ -210,6 +223,9 @@ namespace TrafficManager.Traffic {
 			NumIncomingStraightSegments = 0;
 			NumOutgoingStraightSegments = 0;
 
+			NumIncomingSegments = 0;
+			NumOutgoingSegments = 0;
+
 			OnlyHighways = false;
 			OutgoingOneWay = false;
 
@@ -288,8 +304,8 @@ namespace TrafficManager.Traffic {
 			Cleanup();
 
 			if (!IsValid()) {
-				if (nodeIdBeforeRecalc != 0 && propagate)
-					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId);
+				if (nodeIdBeforeRecalc != 0)
+					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId, propagate);
 
 				return;
 			}
@@ -357,15 +373,18 @@ namespace TrafficManager.Traffic {
 				ConnectedSegments[NumConnectedSegments++] = otherSegmentId;
 			}
 
+			NumIncomingSegments = (byte)(NumIncomingLeftSegments + NumIncomingStraightSegments + NumIncomingRightSegments);
+			numOutgoingSegments = (byte)(NumOutgoingLeftSegments + NumOutgoingStraightSegments + NumOutgoingRightSegments);
+
 			if (!hasOtherSegments)
 				onlyHighways = false;
 
 			// propagate information to other segments
-			if (nodeIdBeforeRecalc != nodeId && propagate) {
+			if (nodeIdBeforeRecalc != nodeId) {
 				if (nodeIdBeforeRecalc != 0)
-					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId);
+					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId, propagate);
 
-				NodeGeometry.Get(nodeId).AddSegment(SegmentId, StartNode);
+				NodeGeometry.Get(nodeId).AddSegment(SegmentId, StartNode, propagate);
 			}
 		}
 

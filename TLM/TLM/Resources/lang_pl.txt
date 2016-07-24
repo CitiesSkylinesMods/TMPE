@@ -83,7 +83,7 @@ Create_group Stwórz grupę
 Delete_group Skasuj grupę
 Add_zoning Aktywuj Strefy
 Remove_zoning Skasuj Strefy
-Lane_Arrow_Changer_Disabled Zmiana strzałek pasów została wyłączona dla tego pasa ponieważ aktywowałeś/łaś Zmienione zasady łączenia pasów dla Autostrad
+Lane_Arrow_Changer_Disabled_Highway Zmiana strzałek pasów została wyłączona dla tego pasa ponieważ aktywowałeś/łaś Zmienione zasady łączenia pasów dla Autostrad
 Add_junction_to_timed_light Dodaj skrzyżowanie do tego węzła sygnalizacji
 Remove_junction_from_timed_light Wyklucz skrzyżowanie z tego węzła sygnalizacji
 Select_junction Wybierz skrzyżowanie 
@@ -113,4 +113,14 @@ Select_a_timed_traffic_light_program Wybierz program dla czasowej sygnalizacji �
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Wybrany szablon sygnalizacji jest niekompatybilny z tym skrzyżowaniem
 Advanced_AI_cannot_be_activated Nie można włączyć Zaawansowanej SI
 The_Advanced_Vehicle_AI_cannot_be_activated Zaawansowana SI nie może zostać włączona, ponieważ aktywowana została inna modyfikacja zmieniająca zachowanie pojazdów (np:. Improved AI lub Traffic++).
-Enable_dynamic_path_calculation Enable dynamic path calculation
+Enable_dynamic_path_calculation Aktywuj dynamiczne wyznaczanie ścieżki
+Lane_Arrow_Changer_Disabled_Connection Zmiana strzałek pasów ruchu jest niedostępna, ponieważ pasy ruchu zostały połączone ręcznie.
+Lane_connector Połącz pasy ruchu
+Connected_lanes Connected lanes
+Use_alternative_view_mode Użyj alternatywnego widoku
+Road_type Typ drogi
+Default_speed_limit Domyślny limit prędkości
+Unit_system System jednostek
+Metric Metryczne
+Imperial Imperialne
+Use_more_CPU_cores_for_route_calculation_if_available Użyj więcej rdzeni procesora do obliczania tras (jeśli dostępne)

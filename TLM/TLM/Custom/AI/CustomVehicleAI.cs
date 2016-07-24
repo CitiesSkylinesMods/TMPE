@@ -1,8 +1,14 @@
-﻿using ColossalFramework;
+﻿#define EXTRAPFx
+#define QUEUEDSTATSx
+#define PATHRECALCx
+
+using ColossalFramework;
+using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
@@ -10,9 +16,9 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
 	class CustomVehicleAI : VehicleAI {
-		public static readonly int MaxPriorityWaitTime = 200;
+		public static readonly int MaxPriorityWaitTime = 50;
 
-		private static readonly int MIN_BLOCK_COUNTER_PATH_RECALC_VALUE = 3;
+		//private static readonly int MIN_BLOCK_COUNTER_PATH_RECALC_VALUE = 3;
 
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
 
@@ -40,46 +46,70 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public static bool ShouldRecalculatePath(ushort vehicleId, ref Vehicle vehicleData, int maxBlockCounter) {
+#if PATHRECALC
+		public static bool ShouldRecalculatePath(ushort vehicleId, ref Vehicle vehicleData, int maxBlockCounter, out ushort segmentId) {
+			segmentId = 0;
+			if (! Options.IsDynamicPathRecalculationActive())
+				return false;
+			if (Options.simAccuracy > 1)
+				return false;
+			if (!CustomPathManager.InitDone
+#if EXTRAPF
+				|| CustomPathManager.ExtraQueuedPathFinds > Options.someValue8
+#elif QUEUEDSTATS
+				|| CustomPathManager.TotalQueuedPathFinds > Options.someValue8
+#endif
+				)
+				return false;
 			if (vehicleData.m_leadingVehicle != 0)
 				return false;
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0)
+			if (vehicleData.m_path == 0)
 				return false;
-			if (!Options.dynamicPathRecalculation)
+			/*if (vehicleData.GetLastFrameVelocity().magnitude > Options.someValue9)
+				return false;*/
+			/*if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0)
+				return false;*/
+			VehicleState state = VehicleStateManager.GetVehicleState(vehicleId);
+			if (state == null || state.LastPathRecalculation >= GetVehiclePathRecalculationFrame())
 				return false;
-			if (VehicleStateManager.GetVehicleState(vehicleId).LastPathRecalculation >= GetVehiclePathRecalculationFrame())
+			if (vehicleData.GetLastFrameVelocity().magnitude > Options.someValue9 * state.CurrentMaxSpeed)
 				return false;
-			if (vehicleData.m_path != 0) {
-				PathUnit.Position pos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(vehicleData.m_pathPositionIndex >> 1);
-				if (pos.m_segment != 0) {
-					bool isHighway = SegmentGeometry.Get(pos.m_segment).IsHighway();
-					if (isHighway)
-						return false; // no recalculation on highways
+			NetManager netManager = Singleton<NetManager>.instance;
+			bool recalc = false;
+			ushort outSegmentId = 0;
+			state.ProcessCurrentAndNextPathPosition(ref vehicleData, delegate (ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+				if (curPos.m_segment == 0 || nextPos.m_segment == 0)
+					return;
+				if (state.LastPathRecalculationSegmentId == curPos.m_segment)
+					return;
+				if (curPos.m_lane >= netManager.m_segments.m_buffer[curPos.m_segment].Info.m_lanes.Length)
+					return;
+				if (nextPos.m_lane >= netManager.m_segments.m_buffer[nextPos.m_segment].Info.m_lanes.Length)
+					return;
+
+				if (CustomRoadAI.laneMeanSpeeds[nextPos.m_segment] == null || nextPos.m_lane >= CustomRoadAI.laneMeanSpeeds[nextPos.m_segment].Length) {
+					return;
 				}
-			}
 
-			return (vehicleData.m_blockCounter >= MIN_BLOCK_COUNTER_PATH_RECALC_VALUE);
+				if (CustomRoadAI.laneMeanSpeeds[nextPos.m_segment][nextPos.m_lane] >= 60) {
+					return;
+				}
 
-			/*float recalcDecisionValue = Math.Max(0.005f, ((float)vehicleData.m_blockCounter - (float)MIN_BLOCK_RECALC_VALUE) / ((float)maxBlockCounter - (float)MIN_BLOCK_RECALC_VALUE));
-			float bias = 1f;
-			switch (Options.simAccuracy) {
-				case 1:
-					bias = 1.25f;
-					break;
-				case 2:
-					bias = 1.5f;
-					break;
-				case 3:
-					bias = 2f;
-					break;
-				case 4:
-					bias = 3f;
-					break;
-			}
-			//Log._Debug($"Path recalculation for vehicle {vehicleId}: recalcDecisionValue={recalcDecisionValue} bias={bias}");
-			recalcDecisionValue *= bias;
-			return UnityEngine.Random.Range(0f, 1f) < recalcDecisionValue;*/
+				/*if (CustomRoadAI.laneMeanDensities[nextPos.m_segment] == null || nextPos.m_lane >= CustomRoadAI.laneMeanDensities[nextPos.m_segment].Length)
+					return;
+				byte nextDensity = CustomRoadAI.laneMeanDensities[nextPos.m_segment][nextPos.m_lane];
+
+				if (nextDensity < 0.5) // TODO incorporate number of lanes (density is measured relatively)
+					return;*/
+
+				recalc = true;
+				outSegmentId = curPos.m_segment;
+			});
+
+			segmentId = outSegmentId;
+			return recalc;
 		}
+#endif
 
 		/// <summary>
 		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
@@ -120,21 +150,43 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
 		internal static bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug=false) {
+			debug = false;
 			if (prevTargetNodeId != targetNodeId) {
 				// method should only be called if targetNodeId == prevTargetNode
 				maxSpeed = 0f;
 				return true;
 			}
 
+			bool forceUpdatePos = false;
+			VehicleState vehicleState = null;
 			try {
-				VehicleStateManager.UpdateVehiclePos(vehicleId, ref vehicleData);
+				vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
+
+				if (vehicleState == null) {
+					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData);
+					vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
+
+					if (vehicleState == null) {
+#if DEBUG
+						Log._Debug($"Could not get vehicle state of {vehicleId}!");
+#endif
+					} else {
+						forceUpdatePos = true;
+					}
+				}
 			} catch (Exception e) {
-				Log.Error("VehicleAI MayChangeSegment Error: " + e.ToString());
+				Log.Error("VehicleAI MayChangeSegment vehicle state error: " + e.ToString());
+			}
+
+			if (forceUpdatePos || Options.simAccuracy >= 2) {
+				try {
+					VehicleStateManager.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
+				} catch (Exception e) {
+					Log.Error("VehicleAI MayChangeSegment Error: " + e.ToString());
+				}
 			}
 
 			var netManager = Singleton<NetManager>.instance;
-
-			bool simulatePrioritySigns = true;  //(lastFrameVehiclePos - camPos).sqrMagnitude < FarLod && !isRecklessDriver;
 
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 			uint prevTargetNodeLower8Bits = (uint)((prevTargetNodeId << 8) / 32768);
@@ -181,6 +233,18 @@ namespace TrafficManager.Custom.AI {
 							}
 							if (!sufficientSpace) {
 								maxSpeed = 0f;
+								try {
+									if (vehicleState != null) {
+#if DEBUG
+										if (debug)
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to BLOCKED");
+#endif
+
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+									}
+								} catch (Exception e) {
+									Log.Error("VehicleAI MayChangeSegment error while setting junction state to BLOCKED: " + e.ToString());
+								}
 								return false;
 							}
 						}
@@ -198,16 +262,12 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			try {
-				VehicleState vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
-
-				if (vehicleState == null || vehicleState.GetCurrentPosition() == null) {
-					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData);
-					vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
+				if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
 #if DEBUG
-					if (vehicleState == null) {
-						Log._Debug($"Could not get vehicle state of {vehicleId}!");
-					}
+					if (debug)
+						Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from BLOCKED to ENTER");
 #endif
+					vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
 				}
 
 				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0) {
@@ -297,7 +357,7 @@ namespace TrafficManager.Custom.AI {
 							maxSpeed = 0f;
 							return false;
 						}
-					} else if (vehicleState != null && vehicleState.Valid && simulatePrioritySigns) {
+					} else if (vehicleState != null) {
 #if DEBUG
 						//bool debug = destinationNodeId == 10864;
 						//bool debug = destinationNodeId == 13531;
@@ -326,6 +386,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 							var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 							var frame = currentFrameIndex2 >> 4;
+							float speed = lastFrameData.m_velocity.magnitude;
 
 							if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
@@ -341,35 +402,40 @@ namespace TrafficManager.Custom.AI {
 									case SegmentEnd.PriorityType.Stop:
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, vel={lastFrameData.m_velocity.magnitude}");
+											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, vel={speed}");
 #endif
-										if (true || vehicleState.WaitTime < MaxPriorityWaitTime) {
+
+										if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MaxPriorityWaitTime)) {
 #if DEBUG
 											if (debug)
 												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (lastFrameData.m_velocity.magnitude <= TrafficPriority.maxStopVelocity) {
+											if (speed <= TrafficPriority.maxStopVelocity) {
 												vehicleState.WaitTime++;
 
 												float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
 												if (vehicleState.WaitTime >= minStopWaitTime) {
-													hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
+													if (Options.simAccuracy >= 4) {
+														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+													} else {
+														hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
-													if (debug)
-														Log._Debug($"hasIncomingCars: {hasIncomingCars}");
+														if (debug)
+															Log._Debug($"hasIncomingCars: {hasIncomingCars}");
 #endif
 
-													if (hasIncomingCars) {
-														maxSpeed = 0f;
-														return false;
-													}
+														if (hasIncomingCars) {
+															maxSpeed = 0f;
+															return false;
+														}
 #if DEBUG
-													if (debug)
-														Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
+														if (debug)
+															Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
 #endif
-													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+													}
 												} else {
 													maxSpeed = 0;
 													return false;
@@ -392,43 +458,46 @@ namespace TrafficManager.Custom.AI {
 										if (debug)
 											Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={vehicleState.WaitTime}");
 #endif
-										if (true || vehicleState.WaitTime < MaxPriorityWaitTime) {
+
+										if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MaxPriorityWaitTime)) {
 											vehicleState.WaitTime++;
 #if DEBUG
 											if (debug)
 												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-											hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
-#endif
-											if (hasIncomingCars) {
-												if (lastFrameData.m_velocity.magnitude > 0) {
-													maxSpeed = Math.Max(0f, lastFrameData.m_velocity.magnitude - vehicleState.ReduceSpeedByValueToYield);
+
+											if (speed <= TrafficPriority.maxYieldVelocity || Options.simAccuracy <= 2) {
+												if (Options.simAccuracy >= 4) {
+													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													maxSpeed = 0;
-												}
+													hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
-												/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
-													Log.Message($"Vehicle {vehicleId} is yielding at node {destinationNodeId}. Speed: {maxSpeed}, Waiting time: {TrafficPriority.Vehicles[vehicleId].WaitTime}");*/
+													if (debug)
+														Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
 #endif
-												return false;
+
+													if (hasIncomingCars) {
+														maxSpeed = 0f;
+														return false;
+													} else {
+#if DEBUG
+														if (debug)
+															Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
+#endif
+														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+													}
+												}
 											} else {
 #if DEBUG
-												/*if (TrafficPriority.Vehicles[vehicleId].ToNode == 8621)
-													Log.Message($"Vehicle {vehicleId} is NOT yielding at node {destinationNodeId}.");*/
+												if (debug)
+													Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {speed} by {vehicleState.ReduceSpeedByValueToYield})");
 #endif
-												if (lastFrameData.m_velocity.magnitude > 0) {
-													maxSpeed = Math.Max(1f, lastFrameData.m_velocity.magnitude - vehicleState.ReduceSpeedByValueToYield * 0.5f);
-												}
+
+												// vehicle has not yet reached yield speed
+												maxSpeed = TrafficPriority.maxYieldVelocity;
+												return false;
 											}
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
-#endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 										} else {
 #if DEBUG
 											if (debug)
@@ -438,12 +507,17 @@ namespace TrafficManager.Custom.AI {
 										}
 										break;
 									case SegmentEnd.PriorityType.Main:
+									case SegmentEnd.PriorityType.None:
 #if DEBUG
 										if (debug)
 											Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={vehicleState.WaitTime}");
 #endif
 										maxSpeed = 0f;
-										if (vehicleState.WaitTime < MaxPriorityWaitTime) {
+
+										if (Options.simAccuracy == 4)
+											return true;
+
+										if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.WaitTime < MaxPriorityWaitTime)) {
 											vehicleState.WaitTime++;
 #if DEBUG
 											if (debug)
@@ -451,7 +525,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
+											hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
 											if (debug)
 												Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -468,6 +542,16 @@ namespace TrafficManager.Custom.AI {
 										}
 										return true;
 								}
+							} else if (speed <= TrafficPriority.maxStopVelocity) {
+								// vehicle is not moving. reset allowance to leave junction
+#if DEBUG
+								if (debug)
+									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
+#endif
+								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+
+								maxSpeed = 0f;
+								return false;
 							}
 						}
 					}
@@ -491,8 +575,15 @@ namespace TrafficManager.Custom.AI {
 		/// Stores that the given vehicle's path has been dynamically recalculated at the current frame.
 		/// </summary>
 		/// <param name="vehicleId"></param>
-		internal static void MarkPathRecalculation(ushort vehicleId) {
-			VehicleStateManager.GetVehicleState(vehicleId).LastPathRecalculation = GetVehiclePathRecalculationFrame();
+#if PATHRECALC
+		internal static void MarkPathRecalculation(ushort vehicleId, ushort segmentId) {
+			VehicleState state = VehicleStateManager.GetVehicleState(vehicleId);
+			if (state == null)
+				return;
+			state.LastPathRecalculation = GetVehiclePathRecalculationFrame();
+			state.LastPathRecalculationSegmentId = segmentId;
+			state.PathRecalculationRequested = true;
 		}
+#endif
 	}
 }

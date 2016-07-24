@@ -23,7 +23,7 @@ namespace TrafficManager.UI.SubTools {
 			return _cursorInSecondaryPanel;
 		}
 
-		public override void OnClickOverlay() {
+		public override void OnPrimaryClickOverlay() {
 			if (HoveredNodeId == 0 || HoveredSegmentId == 0) return;
 
 			var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
-			if (HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
+			if (!_cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
 				var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
 
 				if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
@@ -102,6 +102,7 @@ namespace TrafficManager.UI.SubTools {
 
 			List<object[]> laneList = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, info, SelectedNodeId);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
+			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();
 
@@ -129,18 +130,36 @@ namespace TrafficManager.UI.SubTools {
 				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
 					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
 				}
+				Flags.LaneArrowChangeResult res = Flags.LaneArrowChangeResult.Invalid;
+				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					if (!Flags.toggleLaneArrowFlags((uint)laneList[i][0], Flags.LaneArrows.Left) && SelectedNodeId > 0)
-						MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+					buttonClicked = true;
+					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Left, out res);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
-					if (!Flags.toggleLaneArrowFlags((uint)laneList[i][0], Flags.LaneArrows.Forward) && SelectedNodeId > 0)
-						MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+					buttonClicked = true;
+					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Forward, out res);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					if (!Flags.toggleLaneArrowFlags((uint)laneList[i][0], Flags.LaneArrows.Right) && SelectedNodeId > 0)
-						MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+					buttonClicked = true;
+					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Right, out res);
 				}
+
+				if (buttonClicked) {
+					switch (res) {
+						case Flags.LaneArrowChangeResult.Invalid:
+						case Flags.LaneArrowChangeResult.Success:
+						default:
+							break;
+						case Flags.LaneArrowChangeResult.HighwayArrows:
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							break;
+						case Flags.LaneArrowChangeResult.LaneConnection:
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							break;
+					}
+				}
+
 				GUILayout.EndHorizontal();
 				GUILayout.EndVertical();
 				GUILayout.EndVertical();
@@ -149,8 +168,6 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginVertical();
-
-			bool startNode = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId;
 
 			if (!geometry.AreHighwayRulesEnabled(startNode)) {
 				if (!geometry.IsOneWay()) {

@@ -83,7 +83,7 @@ Create_group Create group
 Delete_group Delete group
 Add_zoning Add zoning
 Remove_zoning Remove zoning
-Lane_Arrow_Changer_Disabled The lane arrow changer for this lane is disabled because you activated the highway rule system.
+Lane_Arrow_Changer_Disabled_Highway The lane arrow changer for this lane is disabled because you activated the highway rule system.
 Add_junction_to_timed_light Add a junction to this traffic light
 Remove_junction_from_timed_light Remove a junction from this traffic light
 Select_junction Select a junction
@@ -114,3 +114,13 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen tra
 Advanced_AI_cannot_be_activated Advanced AI cannot be activated
 The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
 Enable_dynamic_path_calculation Enable dynamic path calculation
+Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
+Lane_connector Lane connector
+Connected_lanes Connected lanes
+Use_alternative_view_mode Use alternative view mode
+Road_type Road type
+Default_speed_limit Default speed limit
+Unit_system Unit system
+Metric Metric
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available) 

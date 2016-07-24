@@ -83,7 +83,7 @@ Create_group
 Delete_group
 Add_zoning
 Remove_zoning
-Lane_Arrow_Changer_Disabled
+Lane_Arrow_Changer_Disabled_Highway
 Add_junction_to_timed_light
 Remove_junction_from_timed_light
 Select_junction
@@ -114,3 +114,13 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction
 Advanced_AI_cannot_be_activated
 The_Advanced_Vehicle_AI_cannot_be_activated
 Enable_dynamic_path_calculation
+Lane_Arrow_Changer_Disabled_Connection
+Lane_connector
+Connected_lanes
+Use_alternative_view_mode
+Road_type
+Default_speed_limit
+Unit_system
+Metric
+Imperial
+Use_more_CPU_cores_for_route_calculation_if_available

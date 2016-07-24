@@ -33,15 +33,18 @@ namespace TrafficManager.UI {
 		}
 
 		public void OnToolUpdate() {
-			OnClickOverlay();
+			//OnLeftClickOverlay();
 		}
 
-		public abstract void OnClickOverlay();
+		public abstract void OnPrimaryClickOverlay();
+		public virtual void OnSecondaryClickOverlay() { }
 		public abstract void OnToolGUI(Event e);
 		public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
+		public virtual void Initialize() { }
 		public virtual void Cleanup() { }
 		public virtual void OnActivate() { }
-		public virtual void ShowIcons() { }
+		public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+		public virtual void ShowGUIOverlay() { }
 		public virtual bool IsCursorInPanel() {
 			return false;
 		}

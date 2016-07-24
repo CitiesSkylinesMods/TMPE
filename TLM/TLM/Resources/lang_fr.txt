@@ -83,7 +83,7 @@ Create_group Créer un groupe
 Delete_group Supprimer un groupe
 Add_zoning Ajouter le zonage
 Remove_zoning Retirer le zonage
-Lane_Arrow_Changer_Disabled Le modificateur de directions pour cette voie est désactivé car vous avez activé le système de règles pour autoroutes.
+Lane_Arrow_Changer_Disabled_Highway Le modificateur de directions pour cette voie est désactivé car vous avez activé le système de règles pour autoroutes.
 Add_junction_to_timed_light Ajouter une intersection à ce feu tricolore
 Remove_junction_from_timed_light Retirer une intersection de ce feu tricolore
 Select_junction Sélectionnez une intersection
@@ -114,3 +114,13 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Le modèle de 
 Advanced_AI_cannot_be_activated L'IA avancée ne peut pas être activée
 The_Advanced_Vehicle_AI_cannot_be_activated L'IA avancée de véhicule ne peut être activée car vous utilisez déjà un autre mod qui modifie modifie le comportement des véhicules (par exemple Improved AI ou Traffic++).
 Enable_dynamic_path_calculation Enable dynamic path calculation
+Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
+Lane_connector Lane connector
+Connected_lanes Connected lanes
+Use_alternative_view_mode Use alternative view mode
+Road_type Road type
+Default_speed_limit Default speed limit
+Unit_system Unit system
+Metric Metric
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available)

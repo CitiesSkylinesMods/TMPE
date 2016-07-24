@@ -83,6 +83,7 @@ Create_group Criar grupo
 Delete_group Apagar grupo
 Add_zoning Adicionar zoneamento
 Remove_zoning Remover zoneamento
+Lane_Arrow_Changer_Disabled_Highway O trocador de seta de pista esta desabilitado porque você ativou o sistema de regras para rodovia.
 Add_junction_to_timed_light Adicionar cruzamento ao semáforo
 Remove_junction_from_timed_light Remover cruzamento do semáforo
 Select_junction Selecionar cruzamento
@@ -112,4 +113,14 @@ Select_a_timed_traffic_light_program Selecione um programa de semáforo cronomet
 The_chosen_traffic_light_program_is_incompatible_to_this_junction O padrão de semáforo escolhido é incompatível com este cruzamento
 Advanced_AI_cannot_be_activated IA avançada não pode ser ativada
 The_Advanced_Vehicle_AI_cannot_be_activated a IA avançada não pode ser ativada porque você já esta usando outro mod que modifica o comportamento do veículo (Traffic++, Improved AI por exemplo)
-Enable_dynamic_path_calculation Enable dynamic path calculation
+Enable_dynamic_path_calculation Ativar o cálculo de caminho dinâmico
+Lane_Arrow_Changer_Disabled_Connection O trocador de seta de pista esta desabilitado para essa pista porque você criou uma conexão de pista manualmente.
+Lane_connector Conector de pistas
+Connected_lanes Pistas conectadas
+Use_alternative_view_mode Usar modo de visão alternativo
+Road_type Tipo de pista
+Default_speed_limit Limite de velocidade padrão
+Unit_system Sistema de unidade
+Metric Metrico
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Usar mais nucleos de CPU para calcular a rota (se disponivel)

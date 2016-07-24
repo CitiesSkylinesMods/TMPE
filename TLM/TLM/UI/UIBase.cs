@@ -66,15 +66,7 @@ namespace TrafficManager.UI {
 				} catch (Exception e) {
 					Log.Error("Error on Show(): " + e.ToString());
 				}
-				var uiView = UIView.GetAView();
-				var trafficManager = uiView.FindUIComponent("UITrafficManager");
-				if (trafficManager != null) {
-					Log._Debug("Showing TM UI");
-					trafficManager.Show();
-				} else {
-					Log._Debug("Showing TM UI: create");
-					uiView.AddUIComponent(typeof(UITrafficManager));
-				}
+				GetMenu().Show();
 				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.Activated);
 				_uiShown = true;
 			} else {
@@ -100,6 +92,17 @@ namespace TrafficManager.UI {
 				_uiShown = false;
 			} else {
 				Log._Debug("TM UI Close: LoadingExtension.Instance is null!");
+			}
+		}
+
+		internal static UITrafficManager GetMenu() {
+			var uiView = UIView.GetAView();
+			var menu = uiView.FindUIComponent("UITrafficManager");
+			if (menu != null) {
+				return (UITrafficManager)menu;
+			} else {
+				uiView.AddUIComponent(typeof(UITrafficManager));
+				return (UITrafficManager)uiView.FindUIComponent("UITrafficManager");
 			}
 		}
 	}

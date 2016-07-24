@@ -12,7 +12,8 @@ namespace TrafficManager.TrafficLight {
 		/// <summary>
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
-		public static Dictionary<ushort, TrafficLightSimulation> LightSimulationByNodeId = new Dictionary<ushort, TrafficLightSimulation>();
+		//public static TrafficLightSimulation[] TrafficLightSimulations = new TrafficLightSimulation[NetManager.MAX_NODE_COUNT];
+		public static Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations = new Dictionary<ushort, TrafficLightSimulation>();
 
 		/// <summary>
 		/// Timed traffic light by node id
@@ -94,12 +95,18 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public static void SimulationStep() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.SimulationStep");
+#endif
 			try {
-				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in LightSimulationByNodeId) {
+				foreach (KeyValuePair<ushort, TrafficLightSimulation> e in TrafficLightSimulations) {
 					try {
 						var nodeSim = e.Value;
-						if (nodeSim.IsTimedLightActive())
+						var nodeId = e.Key;
+						if (nodeSim.IsTimedLightActive()) {
+							Flags.applyNodeTrafficLightFlag(nodeId);
 							nodeSim.TimedLight.SimulationStep();
+						}
 					} catch (Exception ex) {
 						Log.Warning($"Error occured while simulating traffic light @ node {e.Key}: {ex.ToString()}");
 					}
@@ -108,6 +115,9 @@ namespace TrafficManager.TrafficLight {
 				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
 				Log.Warning($"Error occured while iterating over traffic light simulations: {ex.ToString()}");
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.SimulationStep");
+#endif
 		}
 
 		/// <summary>
@@ -115,11 +125,11 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <param name="nodeId"></param>
 		public static TrafficLightSimulation AddNodeToSimulation(ushort nodeId) {
-			if (LightSimulationByNodeId.ContainsKey(nodeId)) {
-				return LightSimulationByNodeId[nodeId];
+			if (TrafficLightSimulations.ContainsKey(nodeId)) {
+				return TrafficLightSimulations[nodeId];
 			}
-			LightSimulationByNodeId.Add(nodeId, new TrafficLightSimulation(nodeId));
-			return LightSimulationByNodeId[nodeId];
+			TrafficLightSimulations.Add(nodeId, new TrafficLightSimulation(nodeId));
+			return TrafficLightSimulations[nodeId];
 		}
 
 		/// <summary>
@@ -128,10 +138,10 @@ namespace TrafficManager.TrafficLight {
 		/// <param name="nodeId"></param>
 		/// <param name="destroyGroup"></param>
 		public static void RemoveNodeFromSimulation(ushort nodeId, bool destroyGroup, bool removeTrafficLight) {
-			if (!LightSimulationByNodeId.ContainsKey(nodeId))
+			if (!TrafficLightSimulations.ContainsKey(nodeId))
 				return;
 
-			TrafficLightSimulation sim = TrafficLightSimulation.LightSimulationByNodeId[nodeId];
+			TrafficLightSimulation sim = TrafficLightSimulation.TrafficLightSimulations[nodeId];
 
 			if (sim.TimedLight != null) {
 				// remove/destroy other timed traffic lights in group
@@ -147,7 +157,7 @@ namespace TrafficManager.TrafficLight {
 						otherNodeSim.DestroyTimedTrafficLight();
 						otherNodeSim.DestroyManualTrafficLight();
 						otherNodeSim.nodeGeoUnsubscriber.Dispose();
-						LightSimulationByNodeId.Remove(timedNodeId);
+						TrafficLightSimulations.Remove(timedNodeId);
 						if (removeTrafficLight)
 							Flags.setNodeTrafficLight(timedNodeId, false);
 					} else {
@@ -160,25 +170,38 @@ namespace TrafficManager.TrafficLight {
 			sim.DestroyTimedTrafficLight();
 			sim.DestroyManualTrafficLight();
 			sim.nodeGeoUnsubscriber?.Dispose();
-			LightSimulationByNodeId.Remove(nodeId);
+			TrafficLightSimulations.Remove(nodeId);
 			if (removeTrafficLight)
 				Flags.setNodeTrafficLight(nodeId, false);
 		}
 
 		public static TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
-			if (LightSimulationByNodeId.ContainsKey(nodeId)) {
-				return LightSimulationByNodeId[nodeId];
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.GetNodeSimulation");
+#endif
+
+			TrafficLightSimulation ret = null;
+			if (TrafficLightSimulations.ContainsKey(nodeId)) {
+				ret = TrafficLightSimulations[nodeId];
 			}
 
-			return null;
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.GetNodeSimulation");
+#endif
+			return ret;
 		}
 
 		internal static void OnLevelUnloading() {
-			LightSimulationByNodeId.Clear();
+			TrafficLightSimulations.Clear();
+			/*for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				TrafficLightSimulations[nodeId] = null;
+			}*/
 		}
 
 		public void OnUpdate(NodeGeometry nodeGeometry) {
+#if DEBUG
 			Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId} ({nodeGeometry.NodeId})");
+#endif
 
 			if (!Flags.mayHaveTrafficLight(NodeId)) {
 				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
@@ -199,7 +222,9 @@ namespace TrafficManager.TrafficLight {
 
 				if (segmentId == 0) continue;
 
+#if DEBUG
 				Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId}: Adding live traffic lights to segment {segmentId}");
+#endif
 
 				// add custom lights
 				if (!TrafficLight.CustomTrafficLights.IsSegmentLight(NodeId, segmentId)) {
@@ -210,12 +235,21 @@ namespace TrafficManager.TrafficLight {
 				TrafficLight.CustomTrafficLights.GetSegmentLights(NodeId, segmentId).housekeeping(true);
 			}
 
+			// ensure there is a physical traffic light
+			Flags.setNodeTrafficLight(NodeId, true);
+
 			TimedLight?.handleNewSegments();
 			TimedLight?.housekeeping();
 		}
 
 		internal void housekeeping() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.housekeeping");
+#endif
 			TimedLight?.StepHousekeeping(); // removes unused step lights
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.housekeeping");
+#endif
 		}
 
 		private void setupLiveSegments() {

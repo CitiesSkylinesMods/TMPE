@@ -1,3 +1,6 @@
+#define QUEUEDSTATSx
+#define EXTRAPFx
+
 using System;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +10,7 @@ using ColossalFramework.Math;
 using JetBrains.Annotations;
 using UnityEngine;
 using TrafficManager.Traffic;
+using TrafficManager.State;
 
 // ReSharper disable InconsistentNaming
 
@@ -15,6 +19,22 @@ namespace TrafficManager.Custom.PathFinding {
 		internal static CustomPathFind[] _replacementPathFinds;
 
 		public static CustomPathManager _instance;
+
+#if QUEUEDSTATS
+		public static uint TotalQueuedPathFinds {
+			get; private set;
+		} = 0;
+
+#if EXTRAPF
+		public static uint ExtraQueuedPathFinds {
+			get; private set;
+		} = 0;
+#endif
+#endif
+
+		public static bool InitDone {
+			get; private set;
+		} = false;
 
 		//On waking up, replace the stock pathfinders with the custom one
 		[UsedImplicitly]
@@ -38,16 +58,26 @@ namespace TrafficManager.Custom.PathFinding {
 
 			var stockPathFinds = GetComponents<PathFind>();
 			var numOfStockPathFinds = stockPathFinds.Length;
+			int numCustomPathFinds = numOfStockPathFinds;
+#if EXTRAPF
+			++numCustomPathFinds;
+#endif
 
-			Log._Debug("Creating " + numOfStockPathFinds + " custom PathFind objects.");
-			_replacementPathFinds = new CustomPathFind[numOfStockPathFinds];
+			Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
+			_replacementPathFinds = new CustomPathFind[numCustomPathFinds];
 			try {
 				Monitor.Enter(this.m_bufferLock);
 
-				for (var i = 0; i < numOfStockPathFinds; i++) {
+				for (var i = 0; i < numCustomPathFinds; i++) {
 					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
-					if (i == 0)
+					if (i == 0) {
 						_replacementPathFinds[i].IsMasterPathFind = true;
+					}
+#if EXTRAPF
+					else if (i == numCustomPathFinds - 1) {
+						_replacementPathFinds[i].IsExtraPathFind = true;
+					}
+#endif
 				}
 
 				Log._Debug("Setting _replacementPathFinds");
@@ -62,23 +92,41 @@ namespace TrafficManager.Custom.PathFinding {
 			} finally {
 				Monitor.Exit(this.m_bufferLock);
 			}
+
+			InitDone = true;
 		}
 
-		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPos, PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPos, ref PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
 			PathUnit.Position position = default(PathUnit.Position);
-			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPos, position, endPos, position, position, laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
+			return this.CreatePath(false, vehicleType, out unit, ref randomizer, buildIndex, ref startPos, ref position, ref endPos, ref position, ref position, laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
 		}
 
-		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
-			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPosA, ref PathUnit.Position startPosB, ref PathUnit.Position endPosA, ref PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+			PathUnit.Position def = default(PathUnit.Position);
+			return this.CreatePath(false, vehicleType, out unit, ref randomizer, buildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, ref def, laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
 		}
 
-		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
-			return this.CreatePath(vehicleType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position), laneTypes, vehicleTypes, maxLength, isHeavyVehicle, ignoreBlocked, stablePath, skipQueue, false);
+		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPosA, ref PathUnit.Position startPosB, ref PathUnit.Position endPosA, ref PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
+			PathUnit.Position def = default(PathUnit.Position);
+			return this.CreatePath(false, vehicleType, out unit, ref randomizer, buildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, ref def, laneTypes, vehicleTypes, maxLength, isHeavyVehicle, ignoreBlocked, stablePath, skipQueue, false);
 		}
 
+		public bool CreatePath(bool recalc, ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPos, ref PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+			PathUnit.Position position = default(PathUnit.Position);
+			return this.CreatePath(recalc, vehicleType, out unit, ref randomizer, buildIndex, ref startPos, ref position, ref endPos, ref position, ref position, laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
+		}
 
-		public bool CreatePath(ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking) {
+		public bool CreatePath(bool recalc, ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPosA, ref PathUnit.Position startPosB, ref PathUnit.Position endPosA, ref PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
+			PathUnit.Position def = default(PathUnit.Position);
+			return this.CreatePath(recalc, vehicleType, out unit, ref randomizer, buildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, ref def, laneTypes, vehicleTypes, maxLength, false, false, false, false, false);
+		}
+
+		public bool CreatePath(bool recalc, ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPosA, ref PathUnit.Position startPosB, ref PathUnit.Position endPosA, ref PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
+			PathUnit.Position def = default(PathUnit.Position);
+			return this.CreatePath(recalc, vehicleType, out unit, ref randomizer, buildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, ref def, laneTypes, vehicleTypes, maxLength, isHeavyVehicle, ignoreBlocked, stablePath, skipQueue, false);
+		}
+
+		public bool CreatePath(bool recalc, ExtVehicleType vehicleType, out uint unit, ref Randomizer randomizer, uint buildIndex, ref PathUnit.Position startPosA, ref PathUnit.Position startPosB, ref PathUnit.Position endPosA, ref PathUnit.Position endPosB, ref PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking) {
 			uint num;
 			try {
 				Monitor.Enter(this.m_bufferLock);
@@ -118,12 +166,29 @@ namespace TrafficManager.Custom.PathFinding {
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_length = maxLength;
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount = 20;
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_referenceCount = 1;
-			int num2 = 10000000;
+			int minQueued = 10000000;
 			CustomPathFind pathFind = null;
+#if QUEUEDSTATS
+			TotalQueuedPathFinds = 0;
+#if EXTRAPF
+			ExtraQueuedPathFinds = 0;
+#endif
+#endif
 			for (int i = 0; i < _replacementPathFinds.Length; i++) {
 				CustomPathFind pathFindCandidate = _replacementPathFinds[i];
-				if (pathFindCandidate.IsAvailable && pathFindCandidate.m_queuedPathFindCount < num2) {
-					num2 = pathFindCandidate.m_queuedPathFindCount;
+#if QUEUEDSTATS
+				TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
+#if EXTRAPF
+				if (pathFindCandidate.IsExtraPathFind)
+					ExtraQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
+#endif
+#endif
+				if (pathFindCandidate.IsAvailable
+#if EXTRAPF
+					&& (!pathFindCandidate.IsExtraPathFind || recalc)
+#endif
+					&& pathFindCandidate.m_queuedPathFindCount < minQueued) {
+					minQueued = pathFindCandidate.m_queuedPathFindCount;
 					pathFind = pathFindCandidate;
 				}
 			}

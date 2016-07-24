@@ -83,7 +83,7 @@ Create_group Crear Grupo
 Delete_group Borrar Grupo
 Add_zoning Agregar zona
 Remove_zoning Borrar zona
-Lane_Arrow_Changer_Disabled El editor de flechas está desactivado debido a que has activado el control de autopistas.
+Lane_Arrow_Changer_Disabled_Highway El editor de flechas está desactivado debido a que has activado el control de autopistas.
 Add_junction_to_timed_light Agregar cruce a este conjunto temporizador
 Remove_junction_from_timed_light Remover cruce de este conjunnto temporizador
 Select_junction Seleccionar un cruce
@@ -113,3 +113,14 @@ Select_a_timed_traffic_light_program Seleccionar un semáforo programado
 The_chosen_traffic_light_program_is_incompatible_to_this_junction El programa de semáforo elegido es incompatible para este cruce
 Advanced_AI_cannot_be_activated IA Avanzada no puede ser activada
 The_Advanced_Vehicle_AI_cannot_be_activated La IA de vehículos avanzada no puede ser activada debido a que estás usando algún otro mod que modifica el comportamiento de los vehículos (por ejemplo Improved AI o Traffic++)
+Enable_dynamic_path_calculation Activar el cálculo dinámico de las rutas
+Lane_Arrow_Changer_Disabled_Connection El modificador de flechas de la carretera fue desactivado porque has creado las conexiones manualmente.
+Lane_connector Conector de carriles
+Connected_lanes Carriles conectados
+Use_alternative_view_mode Usar modo de vista alternativo
+Road_type Tipo de carretera
+Default_speed_limit Límite de velocidad por defecto
+Unit_system Sistema de medida
+Metric Métrico
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Usar más nucleos del procesador para el cálculo de rutas (si está disponible)

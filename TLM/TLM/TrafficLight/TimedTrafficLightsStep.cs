@@ -166,6 +166,9 @@ namespace TrafficManager.TrafficLight {
 		}
 		
 		public void SetLights(bool noTransition) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.SetLights");
+#endif
 			try {
 				bool atEndTransition = !noTransition && isInEndTransition(); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
@@ -173,6 +176,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 				if (timedNode == null) {
 					Log.Error($"TimedTrafficLightsStep: timedNode is null!");
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 					return;
 				}
 #endif
@@ -183,11 +189,17 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 				if (previousStep == null) {
 					Log.Error($"TimedTrafficLightsStep: previousStep is null!");
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 					return;
 				}
 
 				if (nextStep == null) {
 					Log.Error($"TimedTrafficLightsStep: nextStep is null!");
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 					return;
 				}
 
@@ -198,11 +210,17 @@ namespace TrafficManager.TrafficLight {
 
 				if (nextStep.segmentLights == null) {
 					Log.Error($"TimedTrafficLightsStep: nextStep.segmentLights is null!");
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 					return;
 				}
 
 				if (segmentLights == null) {
 					Log.Error($"TimedTrafficLightsStep: segmentLights is null!");
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 					return;
 				}
 #endif
@@ -214,11 +232,17 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 					if (!previousStep.segmentLights.ContainsKey(segmentId)) {
 						Log.Error($"TimedTrafficLightsStep: previousStep does not contain lights for segment {segmentId}!");
+#if TRACE
+						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 						return;
 					}
 
 					if (!nextStep.segmentLights.ContainsKey(segmentId)) {
 						Log.Error($"TimedTrafficLightsStep: nextStep does not contain lights for segment {segmentId}!");
+#if TRACE
+						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 						return;
 					}
 #endif
@@ -244,6 +268,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 					if (curStepSegmentLights.VehicleTypes == null) {
 						Log.Error($"TimedTrafficLightsStep: curStepSegmentLights.VehicleTypes is null!");
+#if TRACE
+						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 						return;
 					}
 #endif
@@ -262,16 +289,25 @@ namespace TrafficManager.TrafficLight {
 #if DEBUG
 						if (curStepSegmentLight == null) {
 							Log.Error($"TimedTrafficLightsStep: curStepSegmentLight is null!");
+#if TRACE
+							Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 							return;
 						}
 
 						if (prevStepSegmentLight == null) {
 							Log.Error($"TimedTrafficLightsStep: prevStepSegmentLight is null!");
+#if TRACE
+							Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 							return;
 						}
 
 						if (nextStepSegmentLight == null) {
 							Log.Error($"TimedTrafficLightsStep: nextStepSegmentLight is null!");
+#if TRACE
+							Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 							return;
 						}
 #endif
@@ -294,6 +330,9 @@ namespace TrafficManager.TrafficLight {
 				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.ToString()}");
 				invalid = true;
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#endif
 		}
 
 		/// <summary>
@@ -321,6 +360,9 @@ namespace TrafficManager.TrafficLight {
 		/// Updates timed segment lights according to "real-world" traffic light states
 		/// </summary>
 		public void UpdateLights() {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.UpdateLights");
+#endif
 			foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
 				var segmentId = e.Key;
 				var segLights = e.Value;
@@ -332,6 +374,9 @@ namespace TrafficManager.TrafficLight {
 
 				segLights.SetLights(liveSegLights);
 			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.UpdateLights");
+#endif
 		}
 
 		/// <summary>
@@ -355,11 +400,21 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool StepDone(bool updateValues) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.StepDone");
+#endif
 			if (timedNode.IsInTestMode()) {
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 				return false;
 			}
-			if (stepDone)
+			if (stepDone) {
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 				return true;
+			}
 
 			if (getCurrentFrame() >= startFrame + maxTime) {
 				// maximum time reached. switch!
@@ -368,6 +423,9 @@ namespace TrafficManager.TrafficLight {
 #endif
 				stepDone = true;
 				endTransitionStart = getCurrentFrame();
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 				return stepDone;
 			}
 
@@ -379,6 +437,9 @@ namespace TrafficManager.TrafficLight {
 						invalid = true;
 						stepDone = true;
 						endTransitionStart = getCurrentFrame();
+#if TRACE
+						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 						return true;
 					}
 					bool done = masterLights.Steps[masterLights.CurrentStep].StepDone(updateValues);
@@ -388,6 +449,9 @@ namespace TrafficManager.TrafficLight {
 					stepDone = done;
 					if (stepDone)
 						endTransitionStart = getCurrentFrame();
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 					return stepDone;
 				} else {
 					// we are the master node
@@ -397,6 +461,9 @@ namespace TrafficManager.TrafficLight {
 						if (!calcWaitFlow(out wait, out flow)) {
 							stepDone = true;
 							endTransitionStart = getCurrentFrame();
+#if TRACE
+							Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 							return stepDone;
 						} else {
 							lastFlowWaitCalc = curFrame;
@@ -440,10 +507,16 @@ namespace TrafficManager.TrafficLight {
 						stepDone = done;
 					if (stepDone)
 						endTransitionStart = getCurrentFrame();
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 					return stepDone;
 				}
 			}
 
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
 			return false;
 		}
 
@@ -454,8 +527,12 @@ namespace TrafficManager.TrafficLight {
 		/// <param name="flow"></param>
 		/// <returns>true if the values could be calculated, false otherwise</returns>
 		public bool calcWaitFlow(out float wait, out float flow) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.calcWaitFlow");
+#endif
+
 #if DEBUGMETRIC
-			bool debug = timedNode.NodeId == 17813 || timedNode.NodeId == 7725;
+			bool debug = timedNode.NodeId == 3201;
 #else
 			bool debug = false;
 #endif
@@ -524,13 +601,13 @@ namespace TrafficManager.TrafficLight {
 						Dictionary<ushort, uint> carsFlowingToSegmentMetric = null;
 						Dictionary<ushort, uint> allCarsToSegmentMetric = null;
 						try {
-							carsFlowingToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(0.1f, laneIndex, debug);
+							carsFlowingToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(false, laneIndex, debug);
 						} catch (Exception ex) {
 							Log.Warning("calcWaitFlow (1): " + ex.ToString());
 						}
 
 						try {
-							allCarsToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(null, laneIndex, debug);
+							allCarsToSegmentMetric = fromSeg.GetVehicleMetricGoingToSegment(true, laneIndex, debug);
 						} catch (Exception ex) {
 							Log.Warning("calcWaitFlow (2): " + ex.ToString());
 						}
@@ -540,7 +617,7 @@ namespace TrafficManager.TrafficLight {
 
 						// build directions from toSegment to fromSegment
 						Dictionary<ushort, Direction> directions = new Dictionary<ushort, Direction>();
-						foreach (KeyValuePair<ushort, uint> f in carsFlowingToSegmentMetric) {
+						foreach (KeyValuePair<ushort, uint> f in allCarsToSegmentMetric) {
 							var toSegmentId = f.Key;
 							SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
 							Direction dir = geometry.GetDirection(toSegmentId, timedNodeId == geometry.StartNodeId());
@@ -604,6 +681,9 @@ namespace TrafficManager.TrafficLight {
 					invalid = true;
 					flow = 0f;
 					wait = 0f;
+#if TRACE
+					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.calcWaitFlow");
+#endif
 					return false;
 				}
 			}
@@ -621,10 +701,13 @@ namespace TrafficManager.TrafficLight {
 				curMeanWait /= numWaits;
 
 			float fCurMeanFlow = curMeanFlow;
-			fCurMeanFlow /= 100f * waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
+			fCurMeanFlow /= waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
 
-			wait = (float)curMeanWait / 100f;
+			wait = (float)curMeanWait;
 			flow = fCurMeanFlow;
+#endif
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.calcWaitFlow");
 #endif
 			return true;
 		}

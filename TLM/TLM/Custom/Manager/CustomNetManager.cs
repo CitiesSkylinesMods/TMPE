@@ -36,7 +36,9 @@ namespace TrafficManager.Custom.Manager {
 
 			// NON-STOCK CODE START
 			try {
-				Log._Debug($"CustomNetManager: CustomFinalizeSegment {segment}");
+#if DEBUG
+				//Log._Debug($"CustomNetManager: CustomFinalizeSegment {segment}");
+#endif
 				SegmentGeometry.Get(segment)?.Recalculate(true);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomFinalizeSegment @ seg. {segment}: " + e.ToString());
@@ -60,7 +62,9 @@ namespace TrafficManager.Custom.Manager {
 
 			// NON-STOCK CODE START
 			try {
-				Log._Debug($"CustomNetManager: CustomUpdateSegment {segment}");
+#if DEBUG
+				//Log._Debug($"CustomNetManager: CustomUpdateSegment {segment}");
+#endif
 				SegmentGeometry.Get(segment)?.Recalculate(true);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomUpdateSegment @ seg. {segment}: " + e.ToString());

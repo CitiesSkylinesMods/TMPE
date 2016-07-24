@@ -1,3 +1,6 @@
+#define QUEUEDSTATSx
+#define EXTRAPFx
+
 using System;
 using System.Linq;
 using ColossalFramework;
@@ -7,28 +10,37 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.Custom.PathFinding;
+using System.Collections.Generic;
 
 namespace TrafficManager.UI {
 #if !TAM
 	public class UITrafficManager : UIPanel {
 		//private static UIState _uiState = UIState.None;
 
+#if DEBUG
+		private static bool showPathFindStats = false;
+#endif
+
 		private static UIButton _buttonSwitchTraffic;
 		private static UIButton _buttonPrioritySigns;
 		private static UIButton _buttonManualControl;
 		private static UIButton _buttonTimedMain;
 		private static UIButton _buttonLaneChange;
+		private static UIButton _buttonLaneConnector;
 		private static UIButton _buttonVehicleRestrictions;
 		private static UIButton _buttonSpeedLimits;
 		private static UIButton _buttonClearTraffic;
 		private static UIButton _buttonToggleDespawn;
-		private static UITextField _goToField = null;
 #if DEBUG
+		private static UITextField _goToField = null;
 		private static UIButton _goToSegmentButton = null;
 		private static UIButton _goToNodeButton = null;
 		private static UIButton _goToVehicleButton = null;
 		private static UIButton _goToBuildingButton = null;
 		private static UIButton _printDebugInfoButton = null;
+		private static UIButton _noneToVehicleButton = null;
+		private static UIButton _vehicleToNoneButton = null;
+		private static UIButton _togglePathFindStatsButton = null;
 #endif
 
 		public static TrafficManagerTool TrafficLightTool;
@@ -44,9 +56,9 @@ namespace TrafficManager.UI {
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
 			width = Translation.getMenuWidth();
-			height = LoadingExtension.IsPathManagerCompatible ? 390 : 230;
+			height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
 #if DEBUG
-			height += 240;		
+			height += 40 * 9;		
 #endif
 			relativePosition = new Vector3(85f, 80f);
 
@@ -66,6 +78,9 @@ namespace TrafficManager.UI {
 
 			if (LoadingExtension.IsPathManagerCompatible) {
 				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
+				y += 40;
+
+				_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
 				y += 40;
 
 				_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
@@ -95,6 +110,12 @@ namespace TrafficManager.UI {
 			_goToBuildingButton = _createButton("Goto building", y, clickGoToBuilding);
 			y += 40;
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
+			y += 40;
+			_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
+			y += 40;
+			_vehicleToNoneButton = _createButton("Vehicle -> None", y, clickVehicleToNone);
+			y += 40;
+			_togglePathFindStatsButton = _createButton("Toggle PathFind stats", y, clickTogglePathFindStats);
 			y += 40;
 #endif
 		}
@@ -144,12 +165,14 @@ namespace TrafficManager.UI {
 			return button;
 		}
 
+#if DEBUG
 		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort segmentId = Convert.ToUInt16(_goToField.text);
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
 				CameraCtrl.GoToSegment(segmentId, new Vector3(Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.x, Camera.main.transform.position.y, Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.z));
 			}
 		}
+
 		private void clickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort nodeId = Convert.ToUInt16(_goToField.text);
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
@@ -157,7 +180,6 @@ namespace TrafficManager.UI {
 			}
 		}
 
-#if DEBUG
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort vehicleId = Singleton<BuildingManager>.instance.m_buildings.m_buffer[20284].m_ownVehicles;
 			while (vehicleId != 0) {
@@ -166,18 +188,64 @@ namespace TrafficManager.UI {
 				vehicleId = vehicleData.m_nextOwnVehicle;
 			}
 		}
-#endif
+
+		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();
+
+		private void clickNoneToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
+			Dictionary<NetInfo, ushort> ret = new Dictionary<NetInfo, ushort>();
+			int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
+			for (uint i = 0; i < numLoaded; ++i) {
+				NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+				if (!(info.m_netAI is RoadBaseAI))
+					continue;
+				RoadBaseAI ai = (RoadBaseAI)info.m_netAI;
+				if (!ai.m_highwayRules)
+					continue;
+				NetInfo.Lane[] laneInfos = info.m_lanes;
+
+				for (byte k = 0; k < Math.Min(2, laneInfos.Length); ++k) {
+					NetInfo.Lane laneInfo = laneInfos[k];
+					if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+						laneInfo.m_vehicleType = VehicleInfo.VehicleType.Car;
+						laneInfo.m_laneType = NetInfo.LaneType.Vehicle;
+						Log._Debug($"Changing vehicle type of lane {k} @ {info.name} from None to Car, lane type from None to Vehicle");
+
+						if (!customEmergencyLanes.ContainsKey(info.name))
+							customEmergencyLanes.Add(info.name, new List<byte>());
+						customEmergencyLanes[info.name].Add(k);
+					}
+				}
+			}
+		}
+
+		private void clickTogglePathFindStats(UIComponent component, UIMouseEventParameter eventParam) {
+			showPathFindStats = !showPathFindStats;
+		}
+
+		private void clickVehicleToNone(UIComponent component, UIMouseEventParameter eventParam) {
+			foreach (KeyValuePair<string, List<byte>> e in customEmergencyLanes) {
+				NetInfo info = PrefabCollection<NetInfo>.FindLoaded(e.Key);
+				if (info == null) {
+					Log.Warning($"Could not find NetInfo by name {e.Key}");
+					continue;
+				}
+
+				foreach (byte index in e.Value) {
+					if (index < 0 || index >= info.m_lanes.Length) {
+						Log.Warning($"Illegal lane index {index} for NetInfo {e.Key}");
+						continue;
+					}
+
+					Log._Debug($"Resetting vehicle type of lane {index} @ {info.name}");
+
+					info.m_lanes[index].m_vehicleType = VehicleInfo.VehicleType.None;
+					info.m_lanes[index].m_laneType = NetInfo.LaneType.None;
+				}
+			}
+			customEmergencyLanes.Clear();
+		}
 
 		private void clickGoToVehicle(UIComponent component, UIMouseEventParameter eventParam) {
-#if DEBUG
-			if (title != null) {
-				if (CustomPathManager._replacementPathFinds != null && CustomPathManager._replacementPathFinds.Length >= 1)
-					title.text = CustomPathManager._replacementPathFinds[0].m_queuedPathFindCount.ToString();
-				else
-					title.text = "n/a";
-			}
-#endif
-
 			ushort vehicleId = Convert.ToUInt16(_goToField.text);
 			Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
 			if ((vehicle.m_flags & Vehicle.Flags.Created) != 0) {
@@ -192,6 +260,7 @@ namespace TrafficManager.UI {
 				CameraCtrl.GoToBuilding(buildingId, new Vector3(building.m_position.x, Camera.main.transform.position.y, building.m_position.z));
 			}
 		}
+#endif
 
 		private void clickSwitchTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.SwitchTrafficLight) {
@@ -307,18 +376,25 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		/*protected virtual void ClickLaneRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
-			if (TrafficLightTool.getToolMode() != ToolMode.LaneRestrictions) {
-				_buttonLaneRestrictions.focusedBgSprite = "ButtonMenuFocused";
-				TrafficLightTool.SetToolMode(ToolMode.LaneRestrictions);
+		private void clickLaneConnector(UIComponent component, UIMouseEventParameter eventParam) {
+			if (TrafficManagerTool.GetToolMode() != ToolMode.LaneConnector) {
+				_buttonLaneConnector.focusedBgSprite = "ButtonMenuFocused";
+				TrafficManagerTool.SetToolMode(ToolMode.LaneConnector);
 			} else {
-				_buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
-				TrafficLightTool.SetToolMode(ToolMode.None);
+				_buttonLaneConnector.focusedBgSprite = "ButtonMenu";
+				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
-		}*/
+		}
 
 		public override void Update() {
-			
+#if DEBUG && QUEUEDSTATS
+			if (showPathFindStats && title != null) {
+				title.text = CustomPathManager.TotalQueuedPathFinds.ToString();
+#if EXTRAPF
+				title.text += "+" + CustomPathManager.ExtraQueuedPathFinds.ToString();
+#endif
+			}
+#endif
 		}
 	}
 #endif

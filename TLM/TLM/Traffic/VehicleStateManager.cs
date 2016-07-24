@@ -7,7 +7,7 @@ using TrafficManager.Custom.AI;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
-	class VehicleStateManager {
+	public class VehicleStateManager {
 		/// <summary>
 		/// Known vehicles and their current known positions. Index: vehicle id
 		/// </summary>
@@ -21,47 +21,106 @@ namespace TrafficManager.Traffic {
 		}
 
 		public static VehicleState GetVehicleState(ushort vehicleId) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.GetVehicleState");
+#endif
 			VehicleState ret = VehicleStates[vehicleId];
-			if (ret.Valid)
+			if (ret.Valid) {
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.GetVehicleState");
+#endif
 				return ret;
+			}
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.GetVehicleState");
+#endif
 			return null;
 		}
 
-		public static VehiclePosition GetVehiclePosition(ushort vehicleId) {
+		internal static VehicleState _GetVehicleState(ushort vehicleId) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager._GetVehicleState");
+#endif
+			VehicleState ret = VehicleStates[vehicleId];
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager._GetVehicleState");
+#endif
+			return ret;
+		}
+
+		/*public static VehiclePosition GetVehiclePosition(ushort vehicleId) {
 			VehicleState state = GetVehicleState(vehicleId);
 			if (state == null)
 				return null;
 			return state.GetCurrentPosition();
-		}
+		}*/
 
 		internal static void OnLevelUnloading() {
 			for (int i = 0; i < VehicleStates.Length; ++i)
 				VehicleStates[i].Valid = false;
 		}
 
-		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position currentPos) {
-			VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref currentPos);
+		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(1)");
+#endif
+			VehicleStates[vehicleId].UpdatePosition(ref vehicleData);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateVehiclePos(1)");
+#endif
 		}
 
-		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
-			VehicleStates[vehicleId].UpdatePosition(ref vehicleData);
+		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(2)");
+#endif
+			VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref curPos, ref nextPos);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateVehiclePos(2)");
+#endif
 		}
 
 		internal static void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, bool logSpeed) {
-			VehiclePosition pos = GetVehiclePosition(vehicleId);
-			if (pos == null)
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.LogTraffic");
+#endif
+			VehicleState state = GetVehicleState(vehicleId);
+			if (state == null)
 				return;
 
-			CustomRoadAI.AddTraffic(pos.SourceSegmentId, pos.SourceLaneIndex, (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId)), logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null);
+			ushort length = (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId));
+			ushort? speed = logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null;
+
+			state.ProcessCurrentPathPosition(ref vehicleData, delegate (ref PathUnit.Position pos) {
+				CustomRoadAI.AddTraffic(pos.m_segment, pos.m_lane, length, speed);
+			});
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.LogTraffic");
+#endif
 		}
 
 		internal static void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
-			VehicleStates[vehicleId].Reset();
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnReleaseVehicle");
+#endif
+			VehicleState state = _GetVehicleState(vehicleId);
+			state.Valid = false;
+			state.VehicleType = ExtVehicleType.None;
+			//VehicleStates[vehicleId].Reset();
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnReleaseVehicle");
+#endif
 		}
 
 		internal static void OnPathFindReady(ushort vehicleId, ref Vehicle vehicleData) {
 			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnPathFindReady");
+#endif
 			VehicleStates[vehicleId].OnPathFindReady(ref vehicleData);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnPathFindReady");
+#endif
 		}
 
 		internal static void InitAllVehicles() {
@@ -76,12 +135,31 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
-		internal static ExtVehicleType? DetermineVehicleType(ref Vehicle vehicleData) {
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0)
+		internal static ExtVehicleType? DetermineVehicleType(ushort vehicleId, ref Vehicle vehicleData) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.DetermineVehicleType");
+#endif
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
+#endif
+				VehicleStates[vehicleId].VehicleType = ExtVehicleType.Emergency;
 				return ExtVehicleType.Emergency;
+			}
 
 			VehicleAI ai = vehicleData.Info.m_vehicleAI;
-			return DetermineVehicleTypeFromAIType(ai, false);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.DetermineVehicleTypeFromAIType");
+#endif
+			ExtVehicleType? ret = DetermineVehicleTypeFromAIType(ai, false);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleTypeFromAIType");
+#endif
+			VehicleStates[vehicleId].VehicleType = ret != null ? (ExtVehicleType)ret : ExtVehicleType.None;
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
+#endif
+			return ret;
 		}
 
 		private static ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {

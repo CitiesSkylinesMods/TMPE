@@ -83,7 +83,7 @@ Create_group Gruppe erstellen
 Delete_group Gruppe löschen
 Add_zoning Zonen aktivieren
 Remove_zoning Zonen löschen
-Lane_Arrow_Changer_Disabled Das Ändern der Richtungspfeile ist für diese Spur deaktviert, weil du die speziellen Regeln für Autobahnen aktiviert hast.
+Lane_Arrow_Changer_Disabled_Highway Die Richtungspfeile für diese Spur können nicht geändert werden, weil du die speziellen Regeln für Autobahnen aktiviert hast.
 Add_junction_to_timed_light Kreuzung zur Ampel hinzufügen
 Remove_junction_from_timed_light Kreuzung von der Ampel entfernen
 Select_junction Wähle eine Kreuzung aus
@@ -114,3 +114,14 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Das ausgewähl
 Advanced_AI_cannot_be_activated Erweiterte Fahrzeug-KI kann nicht aktiviert werden
 The_Advanced_Vehicle_AI_cannot_be_activated Die erweiterte Fahrzeug-KI kann nicht aktiviert werden, weil du bereits einen anderen Mod verwendest, der das Verhalten von Fahrzeugen verändern (z.B. Improved AI oder Traffic++).
 Enable_dynamic_path_calculation Aktiviere die dynamische Pfadberechnung
+Enable_dynamic_path_calculation Enable dynamic path calculation
+Lane_Arrow_Changer_Disabled_Connection Die Richtungspfeile für diese Spur können nicht geändert werden, weil du Spuren von Hand verbunden hast.
+Lane_connector Fahrspurverbinder
+Connected_lanes Verbundene Fahrspuren
+Use_alternative_view_mode Verwende den alternativen Anzeigemodus
+Road_type Straßentyp
+Default_speed_limit Standard-Geschwindigkeitsbeschränkung
+Unit_system Einheitensystem
+Metric Metrisch
+Imperial Imperial
+Use_more_CPU_cores_for_route_calculation_if_available Verwende mehr CPU-Kerne zur Routenberechnung (falls verfügbar)

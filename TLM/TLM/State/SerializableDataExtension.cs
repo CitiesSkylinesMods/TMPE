@@ -13,6 +13,7 @@ using Random = UnityEngine.Random;
 using Timer = System.Timers.Timer;
 using TrafficManager.State;
 using TrafficManager.Custom.AI;
+using TrafficManager.UI;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -39,6 +40,8 @@ namespace TrafficManager.State {
 				NodeGeometry.OnBeforeLoadData();
 				Log.Info("Initializing segment geometries");
 				SegmentGeometry.OnBeforeLoadData();
+				Log.Info("Initializing lane connection manager");
+				Singleton<LaneConnectionManager>.instance.OnBeforeLoadData(); // requires segment geometries
 				Log.Info("Initializing CustomRoadAI");
 				CustomRoadAI.OnBeforeLoadData();
 				Log.Info("Initialization done. Loading mod data now.");
@@ -53,7 +56,7 @@ namespace TrafficManager.State {
 					}
 
 					if (options.Length >= 2) {
-						Options.setLaneChangingRandomization(options[1]);
+						//Options.setLaneChangingRandomization(options[1]);
 					}
 
 					if (options.Length >= 3) {
@@ -122,6 +125,10 @@ namespace TrafficManager.State {
 
 					if (options.Length >= 17) {
 						Options.setDynamicPathRecalculation(options[16] == (byte)1);
+					}
+
+					if (options.Length >= 18) {
+						Options.setConnectedLanesOverlay(options[17] == (byte)1);
 					}
 				}
 			} catch (Exception e) {
@@ -494,6 +501,22 @@ namespace TrafficManager.State {
 				Log.Warning("Lane arrow data structure undefined!");
 			}
 
+			// load lane connections
+			if (_configuration.LaneConnections != null) {
+				Log.Info($"Loading {_configuration.LaneConnections.Count()} lane connections");
+				foreach (Configuration.LaneConnection conn in _configuration.LaneConnections) {
+					try {
+						Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
+						Singleton<LaneConnectionManager>.instance.AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
+					} catch (Exception e) {
+						// ignore, as it's probably corrupt save data. it'll be culled on next save
+						Log.Warning("Error loading data from lane connection: " + e.ToString());
+					}
+				}
+			} else {
+				Log.Warning("Lane connection data structure undefined!");
+			}
+
 			// load speed limits
 			if (_configuration.LaneSpeedLimits != null) {
 				Log.Info($"Loading lane speed limit data. {_configuration.LaneSpeedLimits.Count} elements");
@@ -529,35 +552,6 @@ namespace TrafficManager.State {
 			}
 		}
 
-		/*private static ushort fixLaneFlags(ushort flags) {
-			ushort ret = 0;
-			if ((flags & (ushort)NetLane.Flags.Created) != 0)
-				ret |= (ushort)NetLane.Flags.Created;
-			if ((flags & (ushort)NetLane.Flags.Deleted) != 0)
-				ret |= (ushort)NetLane.Flags.Deleted;
-			if ((flags & (ushort)NetLane.Flags.Inverted) != 0)
-				ret |= (ushort)NetLane.Flags.Inverted;
-			if ((flags & (ushort)NetLane.Flags.JoinedJunction) != 0)
-				ret |= (ushort)NetLane.Flags.JoinedJunction;
-			if ((flags & (ushort)NetLane.Flags.Forward) != 0)
-				ret |= (ushort)NetLane.Flags.Forward;
-			if ((flags & (ushort)NetLane.Flags.Left) != 0)
-				ret |= (ushort)NetLane.Flags.Left;
-			if ((flags & (ushort)NetLane.Flags.Right) != 0)
-				ret |= (ushort)NetLane.Flags.Right;
-			if ((flags & (ushort)NetLane.Flags.Stop) != 0)
-				ret |= (ushort)NetLane.Flags.Stop;
-			if ((flags & (ushort)NetLane.Flags.StartOneWayLeft) != 0)
-				ret |= (ushort)NetLane.Flags.StartOneWayLeft;
-			if ((flags & (ushort)NetLane.Flags.StartOneWayRight) != 0)
-				ret |= (ushort)NetLane.Flags.StartOneWayRight;
-			if ((flags & (ushort)NetLane.Flags.EndOneWayLeft) != 0)
-				ret |= (ushort)NetLane.Flags.EndOneWayLeft;
-			if ((flags & (ushort)NetLane.Flags.EndOneWayRight) != 0)
-				ret |= (ushort)NetLane.Flags.EndOneWayRight;
-			return ret;
-		}*/
-
 		public override void OnSaveData() {
 			Log.Info("Recalculating segment geometries");
 			SegmentGeometry.OnBeforeSaveData();
@@ -566,8 +560,17 @@ namespace TrafficManager.State {
 
 			if (TrafficPriority.TrafficSegments != null) {
 				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
-					SavePrioritySegment(i, configuration);
-					SaveSegmentNodeFlags(i, configuration);
+					try {
+						SavePrioritySegment(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving priority segment @ {i}: {e.ToString()}");
+					}
+
+					try {
+						SaveSegmentNodeFlags(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving segment node flags @ {i}: {e.ToString()}");
+					}
 				}
 			}
 
@@ -582,29 +585,49 @@ namespace TrafficManager.State {
 
 				TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(i);
 				if (sim != null && sim.IsTimedLight()) {
-					SaveTimedTrafficLight(i, configuration);
+					try {
+						SaveTimedTrafficLight(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving timed traffic light @ {i}: {e.ToString()}");
+					}
 					// TODO save new traffic lights
 				}
 
-				SaveNodeLights(i, configuration);
+				try {
+					SaveNodeLights(i, configuration);
+				} catch (Exception e) {
+					Log.Error($"Exception occurred while saving node traffic light @ {i}: {e.ToString()}");
+				}
 			}
 
 #if !TAM
 			if (LoadingExtension.IsPathManagerCompatible) {
 #endif
 				for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
-					SaveLaneData(i, configuration);
+					try {
+						SaveLaneData(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
+					}
 				}
 #if !TAM
 			}
 #endif
 
 			foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
-				SaveLaneSpeedLimit(new Configuration.LaneSpeedLimit(e.Key, e.Value), configuration);
+				try {
+					SaveLaneSpeedLimit(new Configuration.LaneSpeedLimit(e.Key, e.Value), configuration);
+				} catch (Exception ex) {
+					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex.ToString()}");
+				}
 			}
 
 			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
-				SaveLaneAllowedVehicleTypes(new Configuration.LaneVehicleTypes(e.Key, e.Value), configuration);
+				try {
+					SaveLaneAllowedVehicleTypes(new Configuration.LaneVehicleTypes(e.Key, e.Value), configuration);
+				} catch (Exception ex) {
+					Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
+				}
 			}
 
 			var binaryFormatter = new BinaryFormatter();
@@ -619,7 +642,7 @@ namespace TrafficManager.State {
 				// save options
 				_serializableData.SaveData("TMPE_Options", new byte[] {
 					(byte)Options.simAccuracy,
-					(byte)Options.laneChangingRandomization,
+					(byte)0,//Options.laneChangingRandomization,
 					(byte)Options.recklessDrivers,
 					(byte)(Options.relaxedBusses ? 1 : 0),
 					(byte) (Options.nodesOverlay ? 1 : 0),
@@ -634,7 +657,8 @@ namespace TrafficManager.State {
 					(byte)(Options.allowUTurns ? 1 : 0),
 					(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
 					(byte)(Options.enableDespawning ? 1 : 0),
-					(byte)(Options.dynamicPathRecalculation ? 1 : 0)
+					(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
+					(byte)(Options.connectedLanesOverlay ? 1 : 0)
 				});
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);
@@ -649,12 +673,31 @@ namespace TrafficManager.State {
 				/*if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) // only save lanes with explicit lane arrows
 					return;*/
 				var laneSegmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-				if (laneSegmentId <= 0)
-					return;
 				if ((Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags & (ushort)NetLane.Flags.Created) == 0 || laneSegmentId == 0)
 					return;
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[laneSegmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 					return;
+
+				if (Flags.laneConnections[i] != null) {
+					for (int nodeArrayIndex = 0; nodeArrayIndex <= 1; ++nodeArrayIndex) {
+						uint[] connectedLaneIds = Flags.laneConnections[i][nodeArrayIndex];
+						bool startNode = nodeArrayIndex == 0;
+						if (connectedLaneIds != null) {
+							foreach (uint otherHigherLaneId in connectedLaneIds) {
+								if (otherHigherLaneId <= i)
+									continue;
+								var otherLaneSegmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)otherHigherLaneId].m_segment;
+								if ((Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)otherHigherLaneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || otherLaneSegmentId == 0)
+									continue;
+								if ((Singleton<NetManager>.instance.m_segments.m_buffer[otherLaneSegmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+									continue;
+
+								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
+								configuration.LaneConnections.Add(new Configuration.LaneConnection(i, (uint)otherHigherLaneId, startNode));
+							}
+						}
+					}
+				}
 
 				//if (TrafficPriority.PrioritySegments.ContainsKey(laneSegmentId)) {
 				Flags.LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);

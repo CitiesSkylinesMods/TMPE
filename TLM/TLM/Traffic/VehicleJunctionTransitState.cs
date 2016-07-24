@@ -3,6 +3,7 @@ namespace TrafficManager {
 		None,
 		Enter,
 		Stop,
-		Leave
+		Leave,
+		Blocked
 	}
 }

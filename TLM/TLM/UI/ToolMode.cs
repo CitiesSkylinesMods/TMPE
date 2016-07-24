@@ -12,6 +12,7 @@ namespace TrafficManager.UI
 		TimedLightsAddNode = 7,
 		TimedLightsRemoveNode = 8,
 		SpeedLimits = 9,
-		VehicleRestrictions = 10
+		VehicleRestrictions = 10,
+		LaneConnector = 11
 	}
 }
