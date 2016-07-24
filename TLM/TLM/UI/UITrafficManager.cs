@@ -337,6 +337,8 @@ namespace TrafficManager.UI {
 				_buttonTimedMain.focusedBgSprite = "ButtonMenu";
 			if (_buttonLaneChange != null)
 				_buttonLaneChange.focusedBgSprite = "ButtonMenu";
+			if (_buttonLaneConnector != null)
+				_buttonLaneConnector.focusedBgSprite = "ButtonMenu";
 			//_buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
 			if (_buttonClearTraffic != null)
 				_buttonClearTraffic.focusedBgSprite = "ButtonMenu";
