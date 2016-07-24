@@ -24,10 +24,19 @@ namespace TrafficManager.Custom.AI {
 #if USEPATHWAITCOUNTER
 					state.PathWaitCounter = 0; // NON-STOCK CODE
 #endif
-					this.PathfindSuccess(vehicleId, ref vehicleData);
-					this.PathFindReady(vehicleId, ref vehicleData);
-					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
-				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0
+					try {
+						this.PathfindSuccess(vehicleId, ref vehicleData);
+						this.PathFindReady(vehicleId, ref vehicleData);
+						VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
+					} catch (Exception e) {
+						Log.Warning($"TramBaseAI.PathFindSuccess/PathFindReady({vehicleId}) threw an exception: {e.ToString()}");
+						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
+						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+						vehicleData.m_path = 0u;
+						this.PathfindFailure(vehicleId, ref vehicleData);
+						return;
+					}
+				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0
 #if USEPATHWAITCOUNTER
 || ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
 #endif

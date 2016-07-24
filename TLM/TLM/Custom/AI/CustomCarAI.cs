@@ -48,7 +48,7 @@ namespace TrafficManager.Custom.AI {
 					this.PathfindSuccess(vehicleId, ref vehicleData);
 					this.TrySpawn(vehicleId, ref vehicleData);
 					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
-				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0
+				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0
 #if USEPATHWAITCOUNTER
 					|| ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
 #endif

@@ -129,6 +129,21 @@ namespace TrafficManager.Traffic {
 			return GetDefaultAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 		}
 
+		internal static bool HasSegmentRestrictions(ushort segmentId) { // TODO clean up restrictions (currently we do not check if restrictions are equal with the base type)
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
+#endif
+			if (Flags.IsInitDone()) {
+				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
+				return fastArray != null;
+			}
+
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
+#endif
+			return false;
+		}
+
 		/// <summary>
 		/// Determines the default set of allowed vehicle types for a given segment and lane.
 		/// </summary>

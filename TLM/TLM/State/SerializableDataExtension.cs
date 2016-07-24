@@ -232,9 +232,14 @@ namespace TrafficManager.State {
 				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
 				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
 					try {
-						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & VehicleRestrictionsManager.GetBaseMask(laneVehicleTypes.laneId);
+						ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneVehicleTypes.laneId);
+						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
 						Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
-						Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
+						if (maskedType != baseMask) {
+							Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
+						} else {
+							Log._Debug($"Masked type does not differ from base type. Ignoring.");
+						}
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from vehicle restrictions: " + e.ToString());

@@ -2,6 +2,11 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.1, 07/24/2016:
+- Reverted "Busses now may only ignore lane arrows if driving on a bus lane" for now
+- Bugfix: Trains were not despawning if no path could be calculated
+- Workaround for third-party issue: TM:PE now detects if the calculation of total vehicle length fails    
+
 1.7.0, 07/23/2016:
 - New feature: Traffic++ lane connector
 - Busses now may only ignore lane arrows if driving on a bus lane

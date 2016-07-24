@@ -114,7 +114,6 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Das ausgewähl
 Advanced_AI_cannot_be_activated Erweiterte Fahrzeug-KI kann nicht aktiviert werden
 The_Advanced_Vehicle_AI_cannot_be_activated Die erweiterte Fahrzeug-KI kann nicht aktiviert werden, weil du bereits einen anderen Mod verwendest, der das Verhalten von Fahrzeugen verändern (z.B. Improved AI oder Traffic++).
 Enable_dynamic_path_calculation Aktiviere die dynamische Pfadberechnung
-Enable_dynamic_path_calculation Enable dynamic path calculation
 Lane_Arrow_Changer_Disabled_Connection Die Richtungspfeile für diese Spur können nicht geändert werden, weil du Spuren von Hand verbunden hast.
 Lane_connector Fahrspurverbinder
 Connected_lanes Verbundene Fahrspuren

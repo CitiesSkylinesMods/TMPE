@@ -578,7 +578,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 			NetManager netManager = Singleton<NetManager>.instance;
 			bool prevIsPedestrianLane = false;
-			bool prevIsBusLane = false; // non-stock
+			//bool prevIsBusLane = false; // non-stock
 			bool prevIsBicycleLane = false;
 			bool prevIsCenterPlatform = false;
 			int similarLaneIndexFromInner = 0; // similar index, starting with 0 at leftmost lane
@@ -588,7 +588,7 @@ namespace TrafficManager.Custom.PathFinding {
 				NetInfo.Lane prevLane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				prevIsPedestrianLane = (prevLane.m_laneType == NetInfo.LaneType.Pedestrian);
 				prevIsBicycleLane = (prevLane.m_laneType == NetInfo.LaneType.Vehicle && (prevLane.m_vehicleType & this._vehicleTypes) == VehicleInfo.VehicleType.Bicycle);
-				prevIsBusLane = (prevLane.m_laneType == NetInfo.LaneType.TransportVehicle && (prevLane.m_vehicleType & this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None);
+				//prevIsBusLane = (prevLane.m_laneType == NetInfo.LaneType.TransportVehicle && (prevLane.m_vehicleType & this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None);
 				prevIsCenterPlatform = prevLane.m_centerPlatform;
 				prevSimiliarLaneCount = prevLane.m_similarLaneCount;
 				if ((byte)(prevLane.m_finalDirection & NetInfo.Direction.Forward) != 0) {
@@ -761,7 +761,7 @@ namespace TrafficManager.Custom.PathFinding {
 					_extVehicleType != ExtVehicleType.Emergency &&
 					(nextIsJunction || nextIsTransition) &&
 					//!Options.allRelaxed &&
-					!(Options.allRelaxed || (Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus && prevIsBusLane)) &&
+					!(Options.allRelaxed || (Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)) &&
 					(this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None;
 
 				// get segment geometry
@@ -998,13 +998,13 @@ namespace TrafficManager.Custom.PathFinding {
 										nextInnerSimilarLaneIndex = (byte)(nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1);
 									}
 
-									bool nextIsBusLane = (nextLane.m_laneType == NetInfo.LaneType.TransportVehicle && (nextLane.m_vehicleType & this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None);
+									/*bool nextIsBusLane = (nextLane.m_laneType == NetInfo.LaneType.TransportVehicle && (nextLane.m_vehicleType & this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None);
 									if (nextIsBusLane && (Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)) {
 										// busses may ignore lane arrows at the next lane
 										if (ProcessItemCosts(true, true, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, false, laneIndex, curLaneId, out foundForced)) {
 											mayTurnAround = true;
 										}
-									} else {
+									} else {*/
 										bool hasLeftArrow = ((NetLane.Flags)netManager.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Left) == NetLane.Flags.Left;
 										bool hasRightArrow = ((NetLane.Flags)netManager.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Right) == NetLane.Flags.Right;
 										bool hasForwardArrow = ((NetLane.Flags)netManager.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.Forward) != NetLane.Flags.None || ((NetLane.Flags)netManager.m_lanes.m_buffer[curLaneId].m_flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None;
@@ -1055,7 +1055,7 @@ namespace TrafficManager.Custom.PathFinding {
 	#endif
 											curLaneI++;
 										}
-									}
+									//}
 								} else {
 									++outgoingVehicleLanes;
 								}

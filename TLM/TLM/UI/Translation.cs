@@ -77,7 +77,11 @@ namespace TrafficManager.UI {
 						}
 						int delimiterIndex = line.Trim().IndexOf(' ');
 						if (delimiterIndex > 0) {
-							translations.Add(line.Substring(0, delimiterIndex), line.Substring(delimiterIndex + 1).Trim().Replace("\\n", "\n"));
+							try {
+								translations.Add(line.Substring(0, delimiterIndex), line.Substring(delimiterIndex + 1).Trim().Replace("\\n", "\n"));
+							} catch (Exception) {
+								Log.Warning($"Failed to add translation for key {line.Substring(0, delimiterIndex)}, language {LocaleManager.instance.language}. Possible duplicate?");
+							}
 						}
 					}
 					loadedLanguage = LocaleManager.instance.language;

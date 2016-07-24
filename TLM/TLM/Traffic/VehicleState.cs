@@ -429,7 +429,12 @@ namespace TrafficManager.Traffic {
 
 			ReduceSpeedByValueToYield = UnityEngine.Random.Range(16f, 28f);
 			Emergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0;
-			TotalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].CalculateTotalLength(VehicleId);
+			try {
+				TotalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].CalculateTotalLength(VehicleId);
+			} catch (Exception) {
+				Log._Debug($"Error occurred while calculating total length of vehicle {VehicleId} ({VehicleType}).");
+				return;
+			}
 			
 			Valid = true;
 		}

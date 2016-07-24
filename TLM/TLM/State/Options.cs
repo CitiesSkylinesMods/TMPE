@@ -73,11 +73,11 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
-		public static bool prioritySignsOverlay = true;
-		public static bool timedLightsOverlay = true;
-		public static bool speedLimitsOverlay = true;
-		public static bool vehicleRestrictionsOverlay = true;
-		public static bool connectedLanesOverlay = true;
+		public static bool prioritySignsOverlay = false;
+		public static bool timedLightsOverlay = false;
+		public static bool speedLimitsOverlay = false;
+		public static bool vehicleRestrictionsOverlay = false;
+		public static bool connectedLanesOverlay = false;
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
 		public static bool allowEnterBlockedJunctions = false;
@@ -102,7 +102,7 @@ namespace TrafficManager.State {
 		public static float someValue2 = 1.25f; // debug value
 		public static float someValue3 = 2f; // debug value
 		public static float someValue4 = 5f; // debug value
-		public static float someValue5 = 1.5f; // debug value
+		public static float someValue5 = 2f; // debug value
 		public static float someValue6 = 1.5f; // debug value
 		public static float someValue7 = 0.75f; // debug value
 		public static float someValue8 = 3f; // debug value
