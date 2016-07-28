@@ -12,8 +12,10 @@ using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
+		private HashSet<ushort> currentPrioritySegmentIds;
+
 		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
-			
+			currentPrioritySegmentIds = new HashSet<ushort>();
 		}
 
 		public override void OnPrimaryClickOverlay() {
@@ -40,6 +42,28 @@ namespace TrafficManager.UI.SubTools {
 			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
 		}
 
+		public override void Initialize() {
+			RefreshCurrentPrioritySegmentIds();
+		}
+
+		public override void OnActivate() {
+			RefreshCurrentPrioritySegmentIds();
+		}
+
+		private void RefreshCurrentPrioritySegmentIds() {
+			currentPrioritySegmentIds.Clear();
+			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					continue;
+
+				var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
+				if (trafficSegment == null)
+					continue;
+
+				currentPrioritySegmentIds.Add(segmentId);
+			}
+		}
+
 		public override void ShowGUIOverlay() {
 			ShowGUI(true);
 		}
@@ -54,7 +78,7 @@ namespace TrafficManager.UI.SubTools {
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
 				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
-				for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				foreach (ushort segmentId in currentPrioritySegmentIds) {
 					var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
 					if (trafficSegment == null)
 						continue;
@@ -238,12 +262,14 @@ namespace TrafficManager.UI.SubTools {
 
 						if (delete) {
 							TrafficPriority.RemovePrioritySegments(hoveredExistingNodeId);
+							RefreshCurrentPrioritySegmentIds();
 						} else if (ok) {
 							if (!TrafficPriority.IsPriorityNode(HoveredNodeId)) {
 								//Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
 								TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false, true);
 								Flags.setNodeTrafficLight(HoveredNodeId, false); // TODO refactor!
 								TrafficPriority.AddPriorityNode(HoveredNodeId);
+								RefreshCurrentPrioritySegmentIds();
 							}
 						} else if (nodeSim != null && nodeSim.IsTimedLight()) {
 							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);

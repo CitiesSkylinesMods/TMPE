@@ -125,3 +125,4 @@ Unit_system 單位制
 Metric 公制
 Imperial 英制
 Use_more_CPU_cores_for_route_calculation_if_available 使用更多的CPU核心來做路線運算 (若有的話)
+Activated_features Activated features

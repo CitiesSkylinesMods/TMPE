@@ -157,8 +157,8 @@ namespace TrafficManager.TrafficLight {
 			// we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)
 
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>();
-			Dictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict(segmentId, nodeId);
-			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, nodeId);
+			Dictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypesAsDict(segmentId, nodeId);
+			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(segmentId, nodeId);
 			SeparateVehicleTypes = ExtVehicleType.None;
 #if DEBUGHK
 			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}, allAllowedTypes={string.Join(", ", allAllowedTypes.Select(x => x.ToString()).ToArray())}");

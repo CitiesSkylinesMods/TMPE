@@ -101,7 +101,7 @@ namespace TrafficManager.UI
 			ClockTestTexture2D = LoadDllResource("clock_test.png", 512, 512);
 
 			SpeedLimitTextures = new Dictionary<ushort, Texture2D>();
-			foreach (ushort speedLimit in SpeedLimitManager.AvailableSpeedLimits) {
+			foreach (ushort speedLimit in SpeedLimitManager.Instance().AvailableSpeedLimits) {
 				SpeedLimitTextures.Add(speedLimit, LoadDllResource(speedLimit.ToString() + ".png", 200, 200));
 			}
 

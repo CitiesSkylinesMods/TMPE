@@ -580,7 +580,7 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					//bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
-					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
+					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
 
 					foreach (KeyValuePair<byte, ExtVehicleType> e2 in segLights.VehicleTypeByLaneIndex) {
 						byte laneIndex = e2.Key;

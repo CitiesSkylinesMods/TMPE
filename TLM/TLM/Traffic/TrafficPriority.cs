@@ -328,7 +328,8 @@ namespace TrafficManager.Traffic {
 			try {
 				VehicleManager vehManager = Singleton<VehicleManager>.instance;
 				NetManager netManager = Singleton<NetManager>.instance;
-				LaneConnectionManager connManager = Singleton<LaneConnectionManager>.instance;
+				LaneConnectionManager connManager = LaneConnectionManager.Instance();
+				VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 
 				uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
@@ -445,7 +446,7 @@ namespace TrafficManager.Traffic {
 						}
 #endif
 
-						VehicleState incomingState = VehicleStateManager._GetVehicleState(incomingVehicleId);
+						VehicleState incomingState = vehStateManager._GetVehicleState(incomingVehicleId);
 						if (! incomingState.Valid) {
 #if DEBUG
 							if (debug)

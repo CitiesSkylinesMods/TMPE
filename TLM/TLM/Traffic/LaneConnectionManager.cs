@@ -11,7 +11,19 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
-	public class LaneConnectionManager : Singleton<LaneConnectionManager>, IObserver<SegmentGeometry> {
+	public class LaneConnectionManager : IObserver<SegmentGeometry> {
+		private static LaneConnectionManager instance = null;
+
+		public static LaneConnectionManager Instance() {
+			if (instance == null)
+				instance = new LaneConnectionManager();
+			return instance;
+		}
+
+		static LaneConnectionManager() {
+			Instance();
+		}
+
 		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 
 		private object geoLock = new object();

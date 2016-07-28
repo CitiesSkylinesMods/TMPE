@@ -1090,7 +1090,7 @@ namespace TrafficManager.Traffic {
 				Flags.removeHighwayLaneArrowFlagsAtSegment(SegmentId); // TODO refactor
 
 				// clear default vehicle type cache
-				VehicleRestrictionsManager.ClearCache(SegmentId);
+				VehicleRestrictionsManager.Instance().ClearCache(SegmentId);
 			} finally {
 				Monitor.Exit(Lock);
 			}

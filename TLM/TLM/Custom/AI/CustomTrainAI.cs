@@ -36,7 +36,6 @@ namespace TrafficManager.Custom.AI {
 //#endif
 						return;
 					}
-					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData); // NON-STOCK CODE
 				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0
 #if USEPATHWAITCOUNTER
 					|| ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
@@ -74,17 +73,23 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			/// NON-STOCK CODE START ///
-			try {
-				//Log._Debug($"HandleVehicle for trams. vehicleId={vehicleId} frontVehicleId={frontVehicleId}");
-				VehicleStateManager.LogTraffic(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], true);
-			} catch (Exception e) {
-				Log.Error("TrainAI TrafficManagerSimulationStep (1) Error: " + e.ToString());
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				try {
+					vehStateManager.UpdateVehiclePos(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId]);
+				} catch (Exception e) {
+					Log.Error("TrainAI TrafficManagerSimulationStep (2) Error: " + e.ToString());
+				}
 			}
 
-			try {
-				VehicleStateManager.UpdateVehiclePos(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId]);
-			} catch (Exception e) {
-				Log.Error("TrainAI TrafficManagerSimulationStep (2) Error: " + e.ToString());
+			if (!Options.isStockLaneChangerUsed()) {
+				try {
+					//Log._Debug($"HandleVehicle for trams. vehicleId={vehicleId} frontVehicleId={frontVehicleId}");
+					vehStateManager.LogTraffic(frontVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], true);
+				} catch (Exception e) {
+					Log.Error("TrainAI TrafficManagerSimulationStep (1) Error: " + e.ToString());
+				}
 			}
 			/// NON-STOCK CODE END ///
 
@@ -149,12 +154,44 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+		public override bool TrySpawn(ushort vehicleID, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
+				return true;
+			}
+			if (vehicleData.m_path != 0u) {
+				PathManager instance = Singleton<PathManager>.instance;
+				PathUnit.Position pathPos;
+				if (instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].GetPosition(0, out pathPos)) {
+					uint laneID = PathManager.GetLaneID(pathPos);
+					if (laneID != 0u && !Singleton<NetManager>.instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(1000f, vehicleID)) {
+						vehicleData.m_flags |= Vehicle.Flags.WaitingSpace;
+						return false;
+					}
+				}
+			}
+			vehicleData.Spawn(vehicleID);
+			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
+			CustomTrainAI.InitializePath(vehicleID, ref vehicleData);
+
+			// NON-STOCK CODE START
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
+			}
+			// NON-STOCK CODE END
+
+			return true;
+		}
+
+		private static void InitializePath(ushort vehicleID, ref Vehicle vehicleData) {
+			Log.Error("CustomTrainAI.InitializePath called");
+		}
+
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager instance = Singleton<NetManager>.instance;
 			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]);
+				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
@@ -163,18 +200,25 @@ namespace TrafficManager.Custom.AI {
 
 		public bool CustomStartPathFind(ushort vehicleId, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
 			/// NON-STOCK CODE START ///
-			ExtVehicleType? vehicleType = VehicleStateManager.DetermineVehicleType(vehicleId, ref vehicleData);
-			if (vehicleType == ExtVehicleType.CargoTrain)
+			ExtVehicleType vehicleType = VehicleStateManager.Instance()._GetVehicleState(vehicleId).VehicleType;
+			if (vehicleType == ExtVehicleType.None) {
+#if DEBUG
+				Log._Debug($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleId} does not have a valid vehicle type!");
+#endif
+				vehicleType = ExtVehicleType.RailVehicle;
+			} else if (vehicleType == ExtVehicleType.CargoTrain)
 				vehicleType = ExtVehicleType.CargoVehicle;
 #if DEBUG
-			/*bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-			ushort frontVehicleId;
-			if (reversed) {
-				frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
-			} else {
-				frontVehicleId = vehicleId;
-			}
-			Log._Debug($"CustomTrainAI.CustomStartPathFind. vehicleID={vehicleId}. reversed={reversed} frontVehicleId={frontVehicleId} type={this.GetType().ToString()} vehicleType={vehicleType} target={vehicleData.m_targetBuilding}");*/
+			/*if (vehicleType == ExtVehicleType.CargoVehicle) {
+				bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+				ushort frontVehicleId;
+				if (reversed) {
+					frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+				} else {
+					frontVehicleId = vehicleId;
+				}
+				Log._Debug($"CustomTrainAI.CustomStartPathFind. vehicleID={vehicleId}. reversed={reversed} frontVehicleId={frontVehicleId} type={this.GetType().ToString()} vehicleType={vehicleType} target={vehicleData.m_targetBuilding}");
+			}*/
 #endif
 			/// NON-STOCK CODE END ///
 
@@ -199,8 +243,8 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float num3;
 			float num4;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
-				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
+			if (PathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
+				PathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
 				if (!startBothWays || num2 > num * 1.2f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -208,11 +252,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				bool res = false;
-				if (vehicleType == null)
-					res = Singleton<PathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false);
-				else
-					res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false);
+				bool res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false);
 				if (res) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
@@ -226,9 +266,9 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomCheckNextLane(ushort vehicleID, ref Vehicle vehicleData, ref float maxSpeed, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, Bezier3 bezier) {
-			if (Options.simAccuracy <= 1) {
+			if ((Options.prioritySignsEnabled || Options.timedLightsEnabled) && Options.simAccuracy <= 1) {
 				try {
-					VehicleStateManager.UpdateVehiclePos(vehicleID, ref vehicleData, ref prevPos, ref position);
+					VehicleStateManager.Instance().UpdateVehiclePos(vehicleID, ref vehicleData, ref prevPos, ref position);
 				} catch (Exception e) {
 					Log.Error("TrainAI CustomCheckNextLane Error: " + e.ToString());
 				}

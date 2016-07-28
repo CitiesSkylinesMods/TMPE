@@ -43,6 +43,13 @@ namespace TrafficManager.State {
 #endif
 		private static UICheckBox showLanesToggle = null;
 		private static UIButton forgetTrafficLightsBtn = null;
+
+		private static UICheckBox enablePrioritySignsToggle = null;
+		private static UICheckBox enableTimedLightsToggle = null;
+		private static UICheckBox enableCustomSpeedLimitsToggle = null;
+		private static UICheckBox enableVehicleRestrictionsToggle = null;
+		private static UICheckBox enableLaneConnectorToggle = null;
+
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
 		private static UICheckBox disableSomething5Toggle = null;
@@ -67,6 +74,7 @@ namespace TrafficManager.State {
 		private static UIHelperBase aiGroup = null;
 		private static UIHelperBase overlayGroup = null;
 		private static UIHelperBase maintenanceGroup = null;
+		private static UIHelperBase featureGroup = null;
 
 		public static int simAccuracy = 1;
 		//public static int laneChangingRandomization = 2;
@@ -91,8 +99,8 @@ namespace TrafficManager.State {
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
-		public static float pathCostMultiplicator = 1f; // debug value
-		public static float pathCostMultiplicator2 = 0f; // debug value
+		public static float pathCostMultiplicator = 0.75f; // debug value
+		public static float pathCostMultiplicator2 = 1f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
@@ -107,6 +115,23 @@ namespace TrafficManager.State {
 		public static float someValue7 = 0.75f; // debug value
 		public static float someValue8 = 3f; // debug value
 		public static float someValue9 = 0.8f; // debug value
+
+		public static bool prioritySignsEnabled = true;
+		public static bool timedLightsEnabled = true;
+		public static bool customSpeedLimitsEnabled = true;
+		public static bool vehicleRestrictionsEnabled = true;
+		public static bool laneConnectorEnabled = true;
+
+		public static bool MenuRebuildRequired {
+			get { return menuRebuildRequired; }
+			private set {
+				menuRebuildRequired = value;
+				if (LoadingExtension.Instance.UI != null)
+					LoadingExtension.Instance.UI.Close();
+			}
+		}
+
+		private static bool menuRebuildRequired = false;
 
 		public static void makeSettings(UIHelperBase helper) {
 			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
@@ -132,6 +157,13 @@ namespace TrafficManager.State {
 #if DEBUG
 			preferOuterLaneToggle = aiGroup.AddCheckbox(Translation.GetString("Prefer_outer_lane") + " (BETA feature)", preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 #endif
+			featureGroup = helper.AddGroup(Translation.GetString("Activated_features"));
+			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
+			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
+			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
+			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
+			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
+
 			//laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
 			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
 			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
@@ -344,6 +376,60 @@ namespace TrafficManager.State {
 				return;
 
 			preferOuterLane = val;
+		}
+
+		private static void onPrioritySignsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			prioritySignsEnabled = val;
+			if (val)
+				VehicleStateManager.Instance().InitAllVehicles();
+			else
+				setPrioritySignsOverlay(false);
+		}
+
+		private static void onTimedLightsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			timedLightsEnabled = val;
+			if (val)
+				VehicleStateManager.Instance().InitAllVehicles();
+			else
+				setTimedLightsOverlay(false);
+		}
+
+		private static void onCustomSpeedLimitsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			customSpeedLimitsEnabled = val;
+			if (!val)
+				setSpeedLimitsOverlay(false);
+		}
+
+		private static void onVehicleRestrictionsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			vehicleRestrictionsEnabled = val;
+			if (!val)
+				setVehicleRestrictionsOverlay(false);
+		}
+
+		private static void onLaneConnectorEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			laneConnectorEnabled = val;
+			if (!val)
+				setConnectedLanesOverlay(false);
 		}
 
 		private static void onDynamicPathRecalculationChanged(bool value) {
@@ -802,6 +888,51 @@ namespace TrafficManager.State {
 			vehicleOverlay = newVal;
 			if (vehicleOverlayToggle != null)
 				vehicleOverlayToggle.isChecked = newVal;
+		}
+
+		public static void setPrioritySignsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			prioritySignsEnabled = newValue;
+			if (enablePrioritySignsToggle != null)
+				enablePrioritySignsToggle.isChecked = newValue;
+			if (!newValue)
+				setPrioritySignsOverlay(false);
+		}
+
+		public static void setTimedLightsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			timedLightsEnabled = newValue;
+			if (enableTimedLightsToggle != null)
+				enableTimedLightsToggle.isChecked = newValue;
+			if (!newValue)
+				setTimedLightsOverlay(false);
+		}
+
+		public static void setCustomSpeedLimitsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			customSpeedLimitsEnabled = newValue;
+			if (enableCustomSpeedLimitsToggle != null)
+				enableCustomSpeedLimitsToggle.isChecked = newValue;
+			if (!newValue)
+				setSpeedLimitsOverlay(false);
+		}
+
+		public static void setVehicleRestrictionsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			vehicleRestrictionsEnabled = newValue;
+			if (enableVehicleRestrictionsToggle != null)
+				enableVehicleRestrictionsToggle.isChecked = newValue;
+			if (!newValue)
+				setVehicleRestrictionsOverlay(false);
+		}
+
+		public static void setLaneConnectorEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			laneConnectorEnabled = newValue;
+			if (enableLaneConnectorToggle != null)
+				enableLaneConnectorToggle.isChecked = newValue;
+			if (!newValue)
+				setConnectedLanesOverlay(false);
 		}
 
 		/*internal static int getLaneChangingRandomizationTargetValue() {

@@ -61,7 +61,6 @@ namespace TrafficManager.Traffic {
 #endif
 		public ExtVehicleType VehicleType;
 
-
 #if PATHFORECAST
 		private LinkedList<VehiclePosition> VehiclePositions; // the last element holds the current position
 		private LinkedListNode<VehiclePosition> CurrentPosition;
@@ -84,30 +83,32 @@ namespace TrafficManager.Traffic {
 		public VehicleState(ushort vehicleId) {
 			this.VehicleId = vehicleId;
 			VehicleType = ExtVehicleType.None;
-			Reset();
+			Reset(false);
 		}
 
-		private void Reset() {
-			Unlink();
+		private void Reset(bool unlink=true) {
+			if (unlink)
+				Unlink();
 
 			Valid = false;
 			TotalLength = 0f;
 			//VehicleType = ExtVehicleType.None;
 			WaitTime = 0;
 			JunctionTransitState = VehicleJunctionTransitState.None;
-			Emergency = false;
 			LastStateUpdate = 0;
 		}
 
 		internal void Unlink() {
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+
 			if (PreviousVehicleIdOnSegment != 0) {
-				VehicleStateManager._GetVehicleState(PreviousVehicleIdOnSegment).NextVehicleIdOnSegment = NextVehicleIdOnSegment;
+				vehStateManager._GetVehicleState(PreviousVehicleIdOnSegment).NextVehicleIdOnSegment = NextVehicleIdOnSegment;
 			} else if (CurrentSegmentEnd != null && CurrentSegmentEnd.FirstRegisteredVehicleId == VehicleId) {
 				CurrentSegmentEnd.FirstRegisteredVehicleId = NextVehicleIdOnSegment;
 			}
 
 			if (NextVehicleIdOnSegment != 0) {
-				VehicleStateManager._GetVehicleState(NextVehicleIdOnSegment).PreviousVehicleIdOnSegment = PreviousVehicleIdOnSegment;
+				vehStateManager._GetVehicleState(NextVehicleIdOnSegment).PreviousVehicleIdOnSegment = PreviousVehicleIdOnSegment;
 			}
 
 			NextVehicleIdOnSegment = 0;
@@ -118,7 +119,7 @@ namespace TrafficManager.Traffic {
 		private void Link(SegmentEnd end) {
 			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
 			if (oldFirstRegVehicleId != 0) {
-				VehicleStateManager._GetVehicleState(oldFirstRegVehicleId).PreviousVehicleIdOnSegment = VehicleId;
+				VehicleStateManager.Instance()._GetVehicleState(oldFirstRegVehicleId).PreviousVehicleIdOnSegment = VehicleId;
 				NextVehicleIdOnSegment = oldFirstRegVehicleId;
 			}
 			end.FirstRegisteredVehicleId = VehicleId;
@@ -329,13 +330,6 @@ namespace TrafficManager.Traffic {
 			return true;
 		}
 
-		/*public VehiclePosition GetCurrentPosition() {
-			LinkedListNode<VehiclePosition> firstNode = CurrentPosition;
-			if (firstNode == null)
-				return null;
-			return firstNode.Value;
-		}*/
-
 		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck=false) {
 			if (! skipCheck && ! CheckValidity(ref vehicleData)) {
 				return;
@@ -371,25 +365,25 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal bool CheckValidity(ref Vehicle vehicleData, bool skipCached=false) {
+#if DEBUG
+			bool debug = skipCached;
+			byte pfFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
+#endif
+
+#if DEBUG
+			if (debug)
+				Log._Debug($"VehicleState.CheckValidity({VehicleId}) called. created: {(vehicleData.m_flags & Vehicle.Flags.Created) != 0} ({vehicleData.m_flags}) handled: {(vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) != VehicleInfo.VehicleType.None} ({vehicleData.Info.m_vehicleType}) has path unit: {vehicleData.m_path != 0} path ready: {(pfFlags & PathUnit.FLAG_READY) != 0} ({pfFlags})");
+#endif
+
 			if (!skipCached && !Valid)
 				return false;
 
-			if ((vehicleData.m_flags & Vehicle.Flags.Created) == 0) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Created) == 0 || (vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) == VehicleInfo.VehicleType.None || vehicleData.m_path <= 0) {
 				Valid = false;
 				return false;
 			}
 
-			if ((vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
-				// vehicle type is not handled by TM:PE
-				Valid = false;
-				return false;
-			}
-
-			if (vehicleData.m_path <= 0) {
-				Valid = false;
-				return false;
-			}
-
+			
 			if ((Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
 				Valid = false;
 				return false;
@@ -413,30 +407,64 @@ namespace TrafficManager.Traffic {
 			return transitNodeId;
 		}
 
-		internal void OnPathFindReady(ref Vehicle vehicleData) {
+		internal void OnVehicleSpawned(ref Vehicle vehicleData) {
+#if DEBUG
+			Log._Debug($"VehicleState.OnPathFindReady called for vehicle {VehicleId} ({VehicleType}");
+#endif
+
 			Reset();
 
 			if (!CheckValidity(ref vehicleData, true)) {
 				return;
 			}
 
-			// determine vehicle type
-			if (VehicleType == ExtVehicleType.None) {
-				VehicleStateManager.DetermineVehicleType(VehicleId, ref vehicleData);
-				if (VehicleType == ExtVehicleType.None)
-					return;
-			}
+			// enforce updating trailers (they are not always present at path-finding time)
+			ApplyVehicleTypeToTrailers();
 
 			ReduceSpeedByValueToYield = UnityEngine.Random.Range(16f, 28f);
-			Emergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0;
 			try {
 				TotalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].CalculateTotalLength(VehicleId);
 			} catch (Exception) {
+				TotalLength = 0;
+#if DEBUG
 				Log._Debug($"Error occurred while calculating total length of vehicle {VehicleId} ({VehicleType}).");
+#endif
 				return;
 			}
 			
 			Valid = true;
+		}
+
+		private void ApplyVehicleTypeToTrailers() {
+			VehicleManager vehManager = Singleton<VehicleManager>.instance;
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+
+#if DEBUG
+			Log._Debug($"Applying VehicleType to trailes of vehicle {VehicleId} to {VehicleType}.");
+#endif
+
+			// apply vehicle type to all leading/trailing vehicles
+			ushort otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_leadingVehicle;
+			while (otherVehicleId != 0) {
+#if DEBUG
+				Log._Debug($"    Setting VehicleType of leader {otherVehicleId} to {VehicleType}.");
+#endif
+				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
+				otherState.Valid = true;
+				otherState.VehicleType = VehicleType;
+				otherVehicleId = vehManager.m_vehicles.m_buffer[otherVehicleId].m_leadingVehicle;
+			}
+
+			otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_trailingVehicle;
+			while (otherVehicleId != 0) {
+#if DEBUG
+				Log._Debug($"    Setting VehicleType of trailer {otherVehicleId} to {VehicleType}.");
+#endif
+				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
+				otherState.Valid = true;
+				otherState.VehicleType = VehicleType;
+				otherVehicleId = vehManager.m_vehicles.m_buffer[otherVehicleId].m_trailingVehicle;
+			}
 		}
 	}
 }

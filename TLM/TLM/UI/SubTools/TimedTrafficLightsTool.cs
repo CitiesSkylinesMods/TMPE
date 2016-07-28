@@ -29,23 +29,42 @@ namespace TrafficManager.UI.SubTools {
 		private float _waitFlowBalance = 0.8f;
 		private string _stepMinValueStr = "1";
 		private string _stepMaxValueStr = "1";
+		private HashSet<ushort> currentTimedNodeIds;
 
 		public TimedTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
-			
+			currentTimedNodeIds = new HashSet<ushort>();
 		}
 
 		public override bool IsCursorInPanel() {
 			return _cursorInSecondaryPanel;
 		}
 
+		public override void Initialize() {
+			RefreshCurrentTimedNodeIds();
+		}
+
+		private void RefreshCurrentTimedNodeIds() {
+			currentTimedNodeIds.Clear();
+			for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+					continue;
+
+				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				if (lightSim != null && lightSim.IsTimedLight()) {
+					currentTimedNodeIds.Add(nodeId);
+				}
+			}
+		}
+
 		public override void OnActivate() {
+			RefreshCurrentTimedNodeIds();
+
 			nodeSelectionLocked = false;
-			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
-				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
+			foreach (ushort nodeId in currentTimedNodeIds) {
+				TrafficLightSimulation lightSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
 				if (lightSim != null) {
 					lightSim.housekeeping();
 				}
-				//TrafficPriority.nodeHousekeeping(selectedNodeIndex);
 			}
 		}
 
@@ -125,6 +144,7 @@ namespace TrafficManager.UI.SubTools {
 					foreach (ushort nodeId in timedLight2.NodeGroup)
 						AddSelectedNode(nodeId);
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					RefreshCurrentTimedNodeIds();
 					break;
 				case ToolMode.TimedLightsRemoveNode:
 					if (SelectedNodeIndexes.Count <= 0) {
@@ -134,6 +154,7 @@ namespace TrafficManager.UI.SubTools {
 
 					if (SelectedNodeIndexes.Contains(HoveredNodeId)) {
 						TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false, false);
+						RefreshCurrentTimedNodeIds();
 					}
 					RemoveSelectedNode(HoveredNodeId);
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
@@ -1372,6 +1393,7 @@ namespace TrafficManager.UI.SubTools {
 					TrafficLightSimulation.AddNodeToSimulation(selectedNodeIndex);
 					var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(selectedNodeIndex);
 					nodeSimulation.SetupTimedTrafficLight(SelectedNodeIndexes);
+					RefreshCurrentTimedNodeIds();
 
 					/*for (var s = 0; s < 8; s++) {
 						var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[selectedNodeIndex].GetSegment(s);
@@ -1413,6 +1435,7 @@ namespace TrafficManager.UI.SubTools {
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				TrafficLightSimulation.RemoveNodeFromSimulation(selectedNodeIndex, true, false);
 			}
+			RefreshCurrentTimedNodeIds();
 		}
 
 		private void AddSelectedNode(ushort node) {
@@ -1568,6 +1591,7 @@ namespace TrafficManager.UI.SubTools {
 							Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} does not have an instance of TimedTrafficLights. Removing node from simulation");
 #endif
 						TrafficLightSimulation.RemoveNodeFromSimulation(nodeId, true, false);
+						RefreshCurrentTimedNodeIds();
 						break;
 					}
 

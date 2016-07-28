@@ -124,3 +124,4 @@ Unit_system System jednostek
 Metric Metryczne
 Imperial Imperialne
 Use_more_CPU_cores_for_route_calculation_if_available Użyj więcej rdzeni procesora do obliczania tras (jeśli dostępne)
+Activated_features Activated features

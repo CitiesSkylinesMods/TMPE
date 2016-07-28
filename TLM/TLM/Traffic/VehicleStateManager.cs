@@ -3,24 +3,43 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using TrafficManager.Custom.AI;
+using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
 	public class VehicleStateManager {
+		private static VehicleStateManager instance = null;
+
+		public static VehicleStateManager Instance() {
+            if (instance == null)
+				instance = new VehicleStateManager();
+			return instance;
+		}
+
+		static VehicleStateManager() {
+			Instance();
+		}
+
 		/// <summary>
 		/// Known vehicles and their current known positions. Index: vehicle id
 		/// </summary>
-		private static VehicleState[] VehicleStates = null;
+		private VehicleState[] VehicleStates = null;
 
-		static VehicleStateManager() {
+		private VehicleStateManager() {
 			VehicleStates = new VehicleState[VehicleManager.MAX_VEHICLE_COUNT];
 			for (ushort i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
 				VehicleStates[i] = new VehicleState(i);
 			}
 		}
 
-		public static VehicleState GetVehicleState(ushort vehicleId) {
+		/// <summary>
+		/// Determines the state of the given vehicle.
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <returns>the vehicle state if the state is valid, null otherwise</returns>
+		public VehicleState GetVehicleState(ushort vehicleId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.GetVehicleState");
 #endif
@@ -37,7 +56,13 @@ namespace TrafficManager.Traffic {
 			return null;
 		}
 
-		internal static VehicleState _GetVehicleState(ushort vehicleId) {
+		/// <summary>
+		/// Determines the state of the given vehicle.
+		/// The returned vehicle state is not necessarily valid.
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <returns>the vehicle state</returns>
+		internal VehicleState _GetVehicleState(ushort vehicleId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager._GetVehicleState");
 #endif
@@ -48,19 +73,12 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		/*public static VehiclePosition GetVehiclePosition(ushort vehicleId) {
-			VehicleState state = GetVehicleState(vehicleId);
-			if (state == null)
-				return null;
-			return state.GetCurrentPosition();
-		}*/
-
-		internal static void OnLevelUnloading() {
+		internal void OnLevelUnloading() {
 			for (int i = 0; i < VehicleStates.Length; ++i)
 				VehicleStates[i].Valid = false;
 		}
 
-		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
+		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(1)");
 #endif
@@ -70,7 +88,7 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal static void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(2)");
 #endif
@@ -80,7 +98,7 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal static void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, bool logSpeed) {
+		internal void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, bool logSpeed) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.LogTraffic");
 #endif
@@ -88,7 +106,9 @@ namespace TrafficManager.Traffic {
 			if (state == null)
 				return;
 
-			ushort length = (ushort)Mathf.RoundToInt(vehicleData.CalculateTotalLength(vehicleId));
+			ushort length = (ushort)state.TotalLength;
+			if (length == 0)
+				return;
 			ushort? speed = logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null;
 
 			state.ProcessCurrentPathPosition(ref vehicleData, delegate (ref PathUnit.Position pos) {
@@ -99,43 +119,53 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal static void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		internal void OnReleaseVehicle(ushort vehicleId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnReleaseVehicle");
 #endif
+#if DEBUG
+			Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
+#endif
 			VehicleState state = _GetVehicleState(vehicleId);
-			state.Valid = false;
 			state.VehicleType = ExtVehicleType.None;
+			state.Valid = false;
 			//VehicleStates[vehicleId].Reset();
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnReleaseVehicle");
 #endif
 		}
 
-		internal static void OnPathFindReady(ushort vehicleId, ref Vehicle vehicleData) {
+		internal void OnVehicleSpawned(ushort vehicleId, ref Vehicle vehicleData) {
 			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnPathFindReady");
 #endif
-			VehicleStates[vehicleId].OnPathFindReady(ref vehicleData);
+			VehicleStates[vehicleId].OnVehicleSpawned(ref vehicleData);
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnPathFindReady");
 #endif
 		}
 
-		internal static void InitAllVehicles() {
-			//Log._Debug("VehicleStateManager: InitAllVehicles()");
-			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-			for (ushort i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
-				try {
-					OnPathFindReady(i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i]);
-				} catch (Exception e) {
-					Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
+		internal void InitAllVehicles() {
+			Log._Debug("VehicleStateManager: InitAllVehicles()");
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+
+				for (ushort vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+					if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0)
+						continue;
+
+					try {
+						DetermineVehicleType(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+						OnVehicleSpawned(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+					} catch (Exception e) {
+						Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
+					}
 				}
 			}
 		}
 
-		internal static ExtVehicleType? DetermineVehicleType(ushort vehicleId, ref Vehicle vehicleData) {
+		internal ExtVehicleType? DetermineVehicleType(ushort vehicleId, ref Vehicle vehicleData) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.DetermineVehicleType");
 #endif
@@ -162,7 +192,7 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		private static ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
+		private ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
 			if (emergencyOnDuty)
 				return ExtVehicleType.Emergency;
 

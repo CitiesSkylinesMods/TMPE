@@ -124,3 +124,4 @@ Unit_system Einheitensystem
 Metric Metrisch
 Imperial Imperial
 Use_more_CPU_cores_for_route_calculation_if_available Verwende mehr CPU-Kerne zur Routenberechnung (falls verfügbar)
+Activated_features Aktivierte Features

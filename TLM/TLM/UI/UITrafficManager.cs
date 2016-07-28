@@ -56,10 +56,9 @@ namespace TrafficManager.UI {
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
 			width = Translation.getMenuWidth();
-			height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
-#if DEBUG
-			height += 40 * 9;		
-#endif
+			height = 30;
+
+			//height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
 			relativePosition = new Vector3(85f, 80f);
 
 			title = AddUIComponent<UILabel>();
@@ -67,56 +66,89 @@ namespace TrafficManager.UI {
 			title.relativePosition = new Vector3(50.0f, 5.0f);
 
 			int y = 30;
+
 			_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), y, clickSwitchTraffic);
 			y += 40;
-			_buttonPrioritySigns = _createButton(Translation.GetString("Add_priority_signs"), y, clickAddPrioritySigns);
-			y += 40;
+			height += 40;
+
+			if (Options.prioritySignsEnabled) {
+				_buttonPrioritySigns = _createButton(Translation.GetString("Add_priority_signs"), y, clickAddPrioritySigns);
+				y += 40;
+				height += 40;
+			}
+
 			_buttonManualControl = _createButton(Translation.GetString("Manual_traffic_lights"), y, clickManualControl);
 			y += 40;
-			_buttonTimedMain = _createButton(Translation.GetString("Timed_traffic_lights"), y, clickTimedAdd);
-			y += 40;
+			height += 40;
+
+			if (Options.timedLightsEnabled) {
+				_buttonTimedMain = _createButton(Translation.GetString("Timed_traffic_lights"), y, clickTimedAdd);
+				y += 40;
+				height += 40;
+			}
 
 			if (LoadingExtension.IsPathManagerCompatible) {
 				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
 				y += 40;
+				height += 40;
 
-				_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
-				y += 40;
+				if (Options.laneConnectorEnabled) {
+					_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
+					y += 40;
+					height += 40;
+				}
 
-				_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
-				y += 40;
+				if (Options.customSpeedLimitsEnabled) {
+					_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
+					y += 40;
+					height += 40;
+				}
 
-				_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
-				y += 40;
+				if (Options.vehicleRestrictionsEnabled) {
+					_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
+					y += 40;
+					height += 40;
+				}
 			}
 
 			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), y, clickClearTraffic);
 			y += 40;
+			height += 40;
 
 			if (LoadingExtension.IsPathManagerCompatible) {
 				_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
 				y += 40;
+				height += 40;
 			}
 
 #if DEBUG
 			_goToField = CreateTextField("", y);
 			y += 40;
+			height += 40;
 			_goToSegmentButton = _createButton("Goto segment", y, clickGoToSegment);
 			y += 40;
+			height += 40;
 			_goToNodeButton = _createButton("Goto node", y, clickGoToNode);
 			y += 40;
+			height += 40;
 			_goToVehicleButton = _createButton("Goto vehicle", y, clickGoToVehicle);
 			y += 40;
+			height += 40;
 			_goToBuildingButton = _createButton("Goto building", y, clickGoToBuilding);
 			y += 40;
+			height += 40;
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
 			y += 40;
+			height += 40;
 			_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
 			y += 40;
+			height += 40;
 			_vehicleToNoneButton = _createButton("Vehicle -> None", y, clickVehicleToNone);
 			y += 40;
+			height += 40;
 			_togglePathFindStatsButton = _createButton("Toggle PathFind stats", y, clickTogglePathFindStats);
 			y += 40;
+			height += 40;
 #endif
 		}
 

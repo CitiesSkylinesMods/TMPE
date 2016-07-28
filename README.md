@@ -2,6 +2,15 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.3, 07/29/2016:
+- Added the possibility to enable/disable mod features (e.g. for performance reasons)
+- Bugfix: Vehicle type determination was incorrect (fixed u-turning trams/trains, stuck vehicles)
+- Bugfix: Clicking on a train/tram node with the lane connector tool led to an uncorrectable error (thanks to @noaccount for reporting this problem)
+- Further code improvements
+
+1.7.2, 07/26/2016:
+- Optimized UI overlay performance
+
 1.7.1, 07/24/2016:
 - Reverted "Busses now may only ignore lane arrows if driving on a bus lane" for now
 - Bugfix: Trains were not despawning if no path could be calculated

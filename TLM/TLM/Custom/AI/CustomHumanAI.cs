@@ -1,11 +1,12 @@
 using ColossalFramework;
+using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
-			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(node);
+			var nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulation.GetNodeSimulation(node) : null;
 
 			var instance = Singleton<NetManager>.instance;
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;

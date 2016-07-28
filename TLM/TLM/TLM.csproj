@@ -70,12 +70,12 @@
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
+    <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\LaneConnectionManager.cs" />
     <Compile Include="Traffic\NodeGeometry.cs" />
     <Compile Include="Traffic\SegmentEndGeometry.cs" />
-    <Compile Include="Traffic\VehiclePosition.cs" />
     <Compile Include="Traffic\VehicleStateManager.cs" />
     <Compile Include="Traffic\VehicleRestrictionsManager.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\SegmentEnd.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
+    <Compile Include="Util\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />

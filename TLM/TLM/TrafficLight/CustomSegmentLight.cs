@@ -100,7 +100,9 @@ namespace TrafficManager.TrafficLight {
 			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
 			var hasRightSegment = geometry.HasOutgoingRightSegment(startNode);
 
+#if DEBUG
 			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
+#endif
 
 			if (CurrentMode == Mode.Simple) {
 				if (!hasLeftSegment) {

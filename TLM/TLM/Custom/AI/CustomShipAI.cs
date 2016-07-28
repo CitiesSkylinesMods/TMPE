@@ -11,8 +11,13 @@ namespace TrafficManager.Custom.AI {
 	class CustomShipAI : ShipAI {
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
 			/// NON-STOCK CODE START ///
-			ExtVehicleType? vehicleType = VehicleStateManager.DetermineVehicleType(vehicleID, ref vehicleData);
-			if (vehicleType == ExtVehicleType.CargoShip)
+			ExtVehicleType vehicleType = VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType;
+			if (vehicleType == ExtVehicleType.None) {
+#if DEBUG
+				Log._Debug($"CustomShipAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+#endif
+				vehicleType = ExtVehicleType.Ship;
+			} else if (vehicleType == ExtVehicleType.CargoShip)
 				vehicleType = ExtVehicleType.CargoVehicle;
 			/// NON-STOCK CODE END ///
 
@@ -33,11 +38,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				bool res = false;
-				if (vehicleType == null)
-					res = Singleton<PathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f);
-				else
-					res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f);
+				bool res = Singleton<CustomPathManager>.instance.CreatePath((ExtVehicleType)vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f);
 				if (res) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

@@ -124,3 +124,4 @@ Unit_system Sistema de unidade
 Metric Metrico
 Imperial Imperial
 Use_more_CPU_cores_for_route_calculation_if_available Usar mais nucleos de CPU para calcular a rota (se disponivel)
+Activated_features Activated features

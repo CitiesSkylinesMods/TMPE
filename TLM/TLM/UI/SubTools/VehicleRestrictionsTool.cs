@@ -13,18 +13,36 @@ namespace TrafficManager.UI.SubTools {
 	public class VehicleRestrictionsTool : SubTool {
 		private static ExtVehicleType[] roadVehicleTypes = new ExtVehicleType[] { ExtVehicleType.PassengerCar, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.CargoTruck, ExtVehicleType.Service, ExtVehicleType.Emergency };
 		private static ExtVehicleType[] railVehicleTypes = new ExtVehicleType[] { ExtVehicleType.PassengerTrain, ExtVehicleType.CargoTrain };
-		private static float vehicleRestrictionsSignSize = 80f;
+		private readonly float vehicleRestrictionsSignSize = 80f;
 		private bool _cursorInSecondaryPanel;
 		private bool overlayHandleHovered;
 		private Texture2D SecondPanelTexture;
 		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 620, 100));
+		private HashSet<ushort> currentRestrictedSegmentIds;
 
 		public VehicleRestrictionsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			SecondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
+			currentRestrictedSegmentIds = new HashSet<ushort>();
 		}
 
 		public override void OnActivate() {
 			_cursorInSecondaryPanel = false;
+			RefreshCurrentRestrictedSegmentIds();
+		}
+
+		private void RefreshCurrentRestrictedSegmentIds() {
+			currentRestrictedSegmentIds.Clear();
+			for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					continue;
+
+				if (VehicleRestrictionsManager.Instance().HasSegmentRestrictions(segmentId))
+					currentRestrictedSegmentIds.Add(segmentId);
+			}
+		}
+
+		public override void Initialize() {
+			RefreshCurrentRestrictedSegmentIds();
 		}
 
 		public override bool IsCursorInPanel() {
@@ -37,6 +55,7 @@ namespace TrafficManager.UI.SubTools {
 			if (overlayHandleHovered) return;
 
 			SelectedSegmentId = HoveredSegmentId;
+			currentRestrictedSegmentIds.Add(SelectedSegmentId);
 			MainTool.CheckClicked(); // TODO do we need that?
 		}
 
@@ -86,15 +105,13 @@ namespace TrafficManager.UI.SubTools {
 			if (viewOnly && !Options.vehicleRestrictionsOverlay)
 				return;
 
+			bool stateUpdated = false;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			bool handleHovered = false;
-			for (int i = 1; i < segments.m_size; ++i) {
-				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
-					continue;
+			foreach (ushort segmentId in currentRestrictedSegmentIds) {
+				var segmentInfo = segments.m_buffer[segmentId].Info;
 
-				var segmentInfo = segments.m_buffer[i].Info;
-
-				Vector3 centerPos = segments.m_buffer[i].m_bounds.center;
+				Vector3 centerPos = segments.m_buffer[segmentId].m_bounds.center;
 				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
 				screenPos.y = Screen.height - screenPos.y;
 
@@ -102,10 +119,17 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 
 				// draw vehicle restrictions
-				if (drawVehicleRestrictionHandles((ushort)i, viewOnly || i != SelectedSegmentId))
+				bool update;
+				if (drawVehicleRestrictionHandles((ushort)segmentId, viewOnly || segmentId != SelectedSegmentId, out update))
 					handleHovered = true;
+
+				if (update)
+					stateUpdated = true;
 			}
 			overlayHandleHovered = handleHovered;
+
+			if (stateUpdated)
+				RefreshCurrentRestrictedSegmentIds();
 		}
 
 		private void _guiVehicleRestrictionsWindow(int num) {
@@ -119,15 +143,16 @@ namespace TrafficManager.UI.SubTools {
 					uint laneIndex = (uint)laneData[2];
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneInfo);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance().GetBaseMask(laneInfo);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
 
-					ExtVehicleType allowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo);
+					ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo);
 					allowedTypes = ~allowedTypes & baseMask;
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, allowedTypes);
+					VehicleRestrictionsManager.Instance().SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, allowedTypes);
 				}
+				RefreshCurrentRestrictedSegmentIds();
 			}
 
 			GUILayout.BeginHorizontal();
@@ -141,13 +166,14 @@ namespace TrafficManager.UI.SubTools {
 					uint laneIndex = (uint)laneData[2];
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneInfo);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance().GetBaseMask(laneInfo);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
 
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, baseMask);
+					VehicleRestrictionsManager.Instance().SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, baseMask);
 				}
+				RefreshCurrentRestrictedSegmentIds();
 			}
 
 			if (GUILayout.Button(Translation.GetString("Ban_all_vehicles"))) {
@@ -160,13 +186,15 @@ namespace TrafficManager.UI.SubTools {
 					uint laneIndex = (uint)laneData[2];
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					VehicleRestrictionsManager.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, ExtVehicleType.None);
+					VehicleRestrictionsManager.Instance().SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, ExtVehicleType.None);
 				}
+				RefreshCurrentRestrictedSegmentIds();
 			}
 			GUILayout.EndHorizontal();
 
 			if (GUILayout.Button(Translation.GetString("Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions"))) {
 				ApplyRestrictionsToAllSegments();
+				RefreshCurrentRestrictedSegmentIds();
 			}
 		}
 
@@ -227,7 +255,7 @@ namespace TrafficManager.UI.SubTools {
 							NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
 							// apply restrictions of selected segment & lane
-							VehicleRestrictionsManager.SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, VehicleRestrictionsManager.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
+							VehicleRestrictionsManager.Instance().SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
 						}
 
 						// add nodes to explore
@@ -243,7 +271,8 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		private bool drawVehicleRestrictionHandles(ushort segmentId, bool viewOnly) {
+		private bool drawVehicleRestrictionHandles(ushort segmentId, bool viewOnly, out bool stateUpdated) {
+			stateUpdated = false;
 			if (!LoadingExtension.IsPathManagerCompatible) {
 				return false;
 			}
@@ -304,16 +333,16 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				ExtVehicleType[] possibleVehicleTypes = null;
-				if (VehicleRestrictionsManager.IsRoadLane(laneInfo)) {
+				if (VehicleRestrictionsManager.Instance().IsRoadLane(laneInfo)) {
 					possibleVehicleTypes = roadVehicleTypes;
-				} else if (VehicleRestrictionsManager.IsRailLane(laneInfo)) {
+				} else if (VehicleRestrictionsManager.Instance().IsRailLane(laneInfo)) {
 					possibleVehicleTypes = railVehicleTypes;
 				} else {
 					++x;
 					continue;
 				}
 
-				ExtVehicleType allowedTypes = VehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
+				ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 
 				uint y = 0;
 #if DEBUGx
@@ -335,7 +364,7 @@ namespace TrafficManager.UI.SubTools {
 				++y;
 #endif
 				foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
-					bool allowed = VehicleRestrictionsManager.IsAllowed(allowedTypes, vehicleType);
+					bool allowed = VehicleRestrictionsManager.Instance().IsAllowed(allowedTypes, vehicleType);
 					if (allowed && viewOnly)
 						continue; // do not draw allowed vehicles in view-only mode
 
@@ -347,7 +376,8 @@ namespace TrafficManager.UI.SubTools {
 					if (hoveredHandle && MainTool.CheckClicked()) {
 						// toggle vehicle restrictions
 						//Log._Debug($"Setting vehicle restrictions of segment {segmentId}, lane idx {laneIndex}, {vehicleType.ToString()} to {!allowed}");
-						VehicleRestrictionsManager.ToggleAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType, !allowed);
+						VehicleRestrictionsManager.Instance().ToggleAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType, !allowed);
+						stateUpdated = true;
 
 						// TODO use SegmentTraverser
 						if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {

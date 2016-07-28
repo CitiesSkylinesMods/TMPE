@@ -124,3 +124,4 @@ Unit_system Системы единиц
 Metric Метрическая
 Imperial Международная
 Use_more_CPU_cores_for_route_calculation_if_available Многоядерный процессор для вычисления маршрута (при наличии)
+Activated_features Activated features

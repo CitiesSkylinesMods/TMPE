@@ -178,7 +178,7 @@ namespace TrafficManager.State {
 				ushort commonNodeId;
 				bool startNode2;
 
-				Singleton<LaneConnectionManager>.instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+				LaneConnectionManager.Instance().GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
 
 				if (CleanupLaneConnections(lane1Id, lane2Id, startNode1))
 					ret = true;
@@ -256,7 +256,7 @@ namespace TrafficManager.State {
 
 			ushort commonNodeId;
 			bool startNode2;
-			Singleton<LaneConnectionManager>.instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+			LaneConnectionManager.Instance().GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
 
 			if (commonNodeId != 0) {
 				CreateLaneConnection(lane1Id, lane2Id, startNode1);
@@ -548,7 +548,7 @@ namespace TrafficManager.State {
 				return false; // disallow custom lane arrows in highway rule mode
 			}
 
-			if (Singleton<LaneConnectionManager>.instance.HasConnections(laneId, startNode)) { // TODO refactor
+			if (LaneConnectionManager.Instance().HasConnections(laneId, startNode)) { // TODO refactor
 				res = LaneArrowChangeResult.LaneConnection;
 				return false; // custom lane connection present
 			}

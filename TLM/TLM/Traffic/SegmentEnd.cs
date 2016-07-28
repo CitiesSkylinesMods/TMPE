@@ -92,13 +92,14 @@ namespace TrafficManager.Traffic {
 		internal void SimulationStep() {
 			if (cleanupRequested) {
 				VehicleManager vehManager = Singleton<VehicleManager>.instance;
+				VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 
 #if DEBUG
 				//Log._Debug($"Cleanup of SegmentEnd {SegmentId} @ {NodeId} requested. Performing cleanup now.");
 #endif
 				ushort vehicleId = FirstRegisteredVehicleId;
 				while (vehicleId != 0) {
-					VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
+					VehicleState state = vehStateManager._GetVehicleState(vehicleId);
 
 					bool removeVehicle = false;
 					if (!state.Valid) {
@@ -128,6 +129,7 @@ namespace TrafficManager.Traffic {
 #endif
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 
 			Dictionary<ushort, uint> ret = includeStopped ? numVehiclesGoingToSegmentId : numVehiclesFlowingToSegmentId;
 
@@ -151,7 +153,7 @@ namespace TrafficManager.Traffic {
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int numProcessed = 0;
 			while (vehicleId != 0) {
-				VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
+				VehicleState state = vehStateManager._GetVehicleState(vehicleId);
 
 				bool breakLoop = false;
 
@@ -241,11 +243,13 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal int GetRegisteredVehicleCount() {
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int ret = 0;
 			while (vehicleId != 0) {
 				++ret;
-				vehicleId = VehicleStateManager._GetVehicleState(vehicleId).NextVehicleIdOnSegment;
+				vehicleId = vehStateManager._GetVehicleState(vehicleId).NextVehicleIdOnSegment;
 			}
 			return ret;
 		}
@@ -259,8 +263,9 @@ namespace TrafficManager.Traffic {
 		}
 
 		private void UnregisterAllVehicles() {
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 			while (FirstRegisteredVehicleId != 0) {
-				VehicleStateManager._GetVehicleState(FirstRegisteredVehicleId).Unlink();
+				vehStateManager._GetVehicleState(FirstRegisteredVehicleId).Unlink();
 			}
 		}
 

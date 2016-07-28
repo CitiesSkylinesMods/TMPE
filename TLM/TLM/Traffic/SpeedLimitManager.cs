@@ -4,12 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
+using UnityEngine;
 
 namespace TrafficManager.Traffic {
-	class SpeedLimitManager {
-		public static readonly List<ushort> AvailableSpeedLimits;
+	public class SpeedLimitManager {
+		private static SpeedLimitManager instance = null;
+		private static readonly float MAX_SPEED = 6f; // 300 km/h
+
+		public static SpeedLimitManager Instance() {
+			if (instance == null)
+				instance = new SpeedLimitManager();
+			return instance;
+		}
 
 		static SpeedLimitManager() {
+			Instance();
+		}
+
+		public readonly List<ushort> AvailableSpeedLimits;
+
+		private SpeedLimitManager() {
 			AvailableSpeedLimits = new List<ushort>();
 			AvailableSpeedLimits.Add(10);
 			AvailableSpeedLimits.Add(20);
@@ -33,7 +47,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="segmentId"></param>
 		/// <param name="finalDir"></param>
 		/// <returns></returns>
-		public static ushort GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
+		public ushort GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetCustomSpeedLimit1");
 #endif
@@ -69,7 +83,7 @@ namespace TrafficManager.Traffic {
 
 			if (validLanes > 0)
 				meanSpeedLimit /= (float)validLanes;
-			ushort ret = ToCustomSpeedLimit(meanSpeedLimit);
+			ushort ret = LaneToCustomSpeedLimit(meanSpeedLimit);
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit1");
 #endif
@@ -83,7 +97,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="segmentInfo"></param>
 		/// <param name="finalDir"></param>
 		/// <returns></returns>
-		public static ushort GetAverageDefaultCustomSpeedLimit(NetInfo segmentInfo, NetInfo.Direction? finalDir=null) {
+		public ushort GetAverageDefaultCustomSpeedLimit(NetInfo segmentInfo, NetInfo.Direction? finalDir=null) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetAverageDefaultCustomSpeedLimit");
 #endif
@@ -102,7 +116,7 @@ namespace TrafficManager.Traffic {
 
 			if (validLanes > 0)
 				meanSpeedLimit /= (float)validLanes;
-			ushort ret = ToCustomSpeedLimit(meanSpeedLimit);
+			ushort ret = LaneToCustomSpeedLimit(meanSpeedLimit);
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetAverageDefaultCustomSpeedLimit");
 #endif
@@ -115,7 +129,7 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <param name="laneId"></param>
 		/// <returns></returns>
-		public static ushort GetCustomSpeedLimit(uint laneId) {
+		public ushort GetCustomSpeedLimit(uint laneId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetCustomSpeedLimit2");
 #endif
@@ -144,7 +158,7 @@ namespace TrafficManager.Traffic {
 			int laneIndex = 0;
 			while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
 				if (curLaneId == laneId) {
-					ushort ret = ToCustomSpeedLimit(segmentInfo.m_lanes[laneIndex].m_speedLimit);
+					ushort ret = LaneToCustomSpeedLimit(segmentInfo.m_lanes[laneIndex].m_speedLimit);
 #if TRACE
 					Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit2");
 #endif
@@ -167,11 +181,11 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <param name="laneId"></param>
 		/// <returns></returns>
-		public static float GetGameSpeedLimit(uint laneId) {
+		public float GetGameSpeedLimit(uint laneId) {
 			return ToGameSpeedLimit(GetCustomSpeedLimit(laneId));
 		}
 
-		internal static float GetLockFreeGameSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+		internal float GetLockFreeGameSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetLockFreeGameSpeedLimit");
 #endif
@@ -209,32 +223,45 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <param name="customSpeedLimit"></param>
 		/// <returns></returns>
-		public static float ToGameSpeedLimit(ushort customSpeedLimit) {
+		public float ToGameSpeedLimit(ushort customSpeedLimit) {
 			if (customSpeedLimit == 0)
-				return 4f;
+				return MAX_SPEED;
 			return (float)customSpeedLimit / 50f;
 		}
 
 		/// <summary>
-		/// Converts a game speed limit to a custom speed limit.
+		/// Converts a lane speed limit to a custom speed limit.
 		/// </summary>
-		/// <param name="gameSpeedLimit"></param>
+		/// <param name="laneSpeedLimit"></param>
 		/// <returns></returns>
-		public static ushort ToCustomSpeedLimit(float gameSpeedLimit) {
-			gameSpeedLimit /= 2f; // 1 == 100 km/h
+		public ushort LaneToCustomSpeedLimit(float laneSpeedLimit, bool roundToSignLimits=true) {
+			laneSpeedLimit /= 2f; // 1 == 100 km/h
+
+			if (! roundToSignLimits) {
+				return (ushort)Mathf.Round(laneSpeedLimit * 100f);
+			}
 
 			// translate the floating point speed limit into our discrete version
 			ushort speedLimit = 0;
-			if (gameSpeedLimit < 0.15f)
+			if (laneSpeedLimit < 0.15f)
 				speedLimit = 10;
-			else if (gameSpeedLimit < 1.15f)
-				speedLimit = (ushort)((ushort)Math.Round(gameSpeedLimit * 10f) * 10u);
-			else if (gameSpeedLimit < 1.25f)
+			else if (laneSpeedLimit < 1.15f)
+				speedLimit = (ushort)((ushort)Math.Round(laneSpeedLimit * 10f) * 10u);
+			else if (laneSpeedLimit < 1.25f)
 				speedLimit = 120;
-			else if (gameSpeedLimit < 1.35f)
+			else if (laneSpeedLimit < 1.35f)
 				speedLimit = 130;
 
 			return speedLimit;
+		}
+
+		/// <summary>
+		/// Converts a vehicle's velocity to a custom speed.
+		/// </summary>
+		/// <param name="vehicleSpeed"></param>
+		/// <returns></returns>
+		public ushort VehicleToCustomSpeed(float vehicleSpeed) {
+			return LaneToCustomSpeedLimit(vehicleSpeed / 8f, false);
 		}
 
 		/// <summary>
@@ -244,7 +271,7 @@ namespace TrafficManager.Traffic {
 		/// <param name="finalDir"></param>
 		/// <param name="speedLimit"></param>
 		/// <returns></returns>
-		public static bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, ushort speedLimit) {
+		public bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, ushort speedLimit) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.SetSpeedLimit");
 #endif
@@ -262,7 +289,9 @@ namespace TrafficManager.Traffic {
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None || d != finalDir)
 					goto nextIter;
 
+#if DEBUG
 				Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to {speedLimit}");
+#endif
 				Flags.setLaneSpeedLimit(curLaneId, speedLimit);
 
 				nextIter:
@@ -276,7 +305,8 @@ namespace TrafficManager.Traffic {
 			return true;
 		}
 
-		public static Dictionary<NetInfo, ushort> GetDefaultSpeedLimits() {
+#if DEBUG
+		public Dictionary<NetInfo, ushort> GetDefaultSpeedLimits() {
 			Dictionary<NetInfo, ushort> ret = new Dictionary<NetInfo, ushort>();
 			int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
 			for (uint i = 0; i < numLoaded; ++i) {
@@ -287,5 +317,6 @@ namespace TrafficManager.Traffic {
 			}
 			return ret;
 		}
+#endif
 	}
 }

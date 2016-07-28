@@ -9,13 +9,13 @@ namespace TrafficManager.UI {
 		public TrafficManagerTool MainTool { get; set; }
 
 		protected ushort HoveredNodeId {
-			get { return MainTool.HoveredNodeId; }
-			set { MainTool.HoveredNodeId = value; }
+			get { return TrafficManagerTool.HoveredNodeId; }
+			set { TrafficManagerTool.HoveredNodeId = value; }
 		}
 
 		protected ushort HoveredSegmentId {
-			get { return MainTool.HoveredSegmentId; }
-			set { MainTool.HoveredSegmentId = value; }
+			get { return TrafficManagerTool.HoveredSegmentId; }
+			set { TrafficManagerTool.HoveredSegmentId = value; }
 		}
 
 		protected ushort SelectedNodeId {

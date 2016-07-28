@@ -80,7 +80,8 @@ namespace TrafficManager.UI {
 				var trafficManager = uiView.FindUIComponent("UITrafficManager");
 				if (trafficManager != null) {
 					Log._Debug("Hiding TM UI");
-					trafficManager.Hide();
+					Destroy(trafficManager);
+					//trafficManager.Hide();
 				} else {
 					Log._Debug("Hiding TM UI: null!");
 				}

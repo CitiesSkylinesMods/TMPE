@@ -36,6 +36,8 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
+			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = ExtVehicleType.Taxi;
+
 #if PATHRECALC
 			VehicleState state = VehicleStateManager._GetVehicleState(vehicleID);
 			bool recalcRequested = state.PathRecalculationRequested;
@@ -72,7 +74,7 @@ namespace TrafficManager.Custom.AI {
 #if PATHRECALC
 					recalcRequested,
 #endif
-					ExtVehicleType.Taxi, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, ref startPosA, ref startPosB, ref endPosA, ref endPosB, laneType, vehicleType, 20000f)) {
+					ExtVehicleType.Taxi, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

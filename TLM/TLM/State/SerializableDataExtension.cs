@@ -41,7 +41,7 @@ namespace TrafficManager.State {
 				Log.Info("Initializing segment geometries");
 				SegmentGeometry.OnBeforeLoadData();
 				Log.Info("Initializing lane connection manager");
-				Singleton<LaneConnectionManager>.instance.OnBeforeLoadData(); // requires segment geometries
+				LaneConnectionManager.Instance().OnBeforeLoadData(); // requires segment geometries
 				Log.Info("Initializing CustomRoadAI");
 				CustomRoadAI.OnBeforeLoadData();
 				Log.Info("Initialization done. Loading mod data now.");
@@ -130,6 +130,26 @@ namespace TrafficManager.State {
 					if (options.Length >= 18) {
 						Options.setConnectedLanesOverlay(options[17] == (byte)1);
 					}
+
+					if (options.Length >= 19) {
+						Options.setPrioritySignsEnabled(options[18] == (byte)1);
+					}
+
+					if (options.Length >= 20) {
+						Options.setTimedLightsEnabled(options[19] == (byte)1);
+					}
+
+					if (options.Length >= 21) {
+						Options.setCustomSpeedLimitsEnabled(options[20] == (byte)1);
+					}
+
+					if (options.Length >= 22) {
+						Options.setVehicleRestrictionsEnabled(options[21] == (byte)1);
+					}
+
+					if (options.Length >= 23) {
+						Options.setLaneConnectorEnabled(options[22] == (byte)1);
+					}
 				}
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: {e.ToString()}");
@@ -159,11 +179,11 @@ namespace TrafficManager.State {
 			} catch (Exception e) {
 				Log.Error($"Error deserializing data: {e.Message}");
 			}
-			
+
 			LoadDataState();
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
-			VehicleStateManager.InitAllVehicles();
+			VehicleStateManager.Instance().InitAllVehicles();
 		}
 
 		private static void LoadDataState() {
@@ -232,7 +252,7 @@ namespace TrafficManager.State {
 				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
 				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
 					try {
-						ExtVehicleType baseMask = VehicleRestrictionsManager.GetBaseMask(laneVehicleTypes.laneId);
+						ExtVehicleType baseMask = VehicleRestrictionsManager.Instance().GetBaseMask(laneVehicleTypes.laneId);
 						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
 						Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 						if (maskedType != baseMask) {
@@ -512,7 +532,7 @@ namespace TrafficManager.State {
 				foreach (Configuration.LaneConnection conn in _configuration.LaneConnections) {
 					try {
 						Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
-						Singleton<LaneConnectionManager>.instance.AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
+						LaneConnectionManager.Instance().AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from lane connection: " + e.ToString());
@@ -560,6 +580,8 @@ namespace TrafficManager.State {
 		public override void OnSaveData() {
 			Log.Info("Recalculating segment geometries");
 			SegmentGeometry.OnBeforeSaveData();
+			Log.Info("Applying all flags");
+			Flags.applyAllFlags();
 			Log.Info("Saving Mod Data.");
 			var configuration = new Configuration();
 
@@ -663,7 +685,12 @@ namespace TrafficManager.State {
 					(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
 					(byte)(Options.enableDespawning ? 1 : 0),
 					(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
-					(byte)(Options.connectedLanesOverlay ? 1 : 0)
+					(byte)(Options.connectedLanesOverlay ? 1 : 0),
+					(byte)(Options.prioritySignsEnabled ? 1 : 0),
+					(byte)(Options.timedLightsEnabled ? 1 : 0),
+					(byte)(Options.customSpeedLimitsEnabled ? 1 : 0),
+					(byte)(Options.vehicleRestrictionsEnabled ? 1 : 0),
+					(byte)(Options.laneConnectorEnabled ? 1 : 0)
 				});
 			} catch (Exception ex) {
 				Log.Error("Unexpected error saving data: " + ex.Message);

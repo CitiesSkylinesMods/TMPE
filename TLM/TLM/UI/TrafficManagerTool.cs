@@ -22,17 +22,13 @@ namespace TrafficManager.UI {
 	public class TrafficManagerTool : DefaultTool {
 		private static ToolMode _toolMode;
 
-		internal ushort HoveredNodeId;
-		internal ushort HoveredSegmentId;
+		internal static ushort HoveredNodeId;
+		internal static ushort HoveredSegmentId;
 
-		private bool mouseClickProcessed;
+		private static bool mouseClickProcessed;
 
-		public const float DebugCloseLod = 300f;
-		public const float PriorityCloseLod = 450f;
-
-		/*private uint tooltipStartFrame = 0;
-		private String tooltipText = null;
-		private Vector3? tooltipWorldPos = null;*/
+		public static readonly float DebugCloseLod = 300f;
+		public static readonly float PriorityCloseLod = 450f;
 
 		private static SubTool[] subTools = new SubTool[12];
 		private static bool initDone = false;
@@ -88,6 +84,13 @@ namespace TrafficManager.UI {
 				subTools[(int)ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
 				subTools[(int)ToolMode.LaneChange] = new LaneArrowTool(this);
 				subTools[(int)ToolMode.LaneConnector] = new LaneConnectorTool(this);
+
+				for (int i = 0; i < subTools.Length; ++i) {
+					if (subTools[i] == null)
+						continue;
+					subTools[i].Initialize();
+				}
+
 				Log.Info("TrafficManagerTool: Awake - Initialization completed.");
 				initDone = true;
 			} else {
@@ -96,12 +99,6 @@ namespace TrafficManager.UI {
 						continue;
 					subTools[i].MainTool = this;
 				}
-			}
-
-			for (int i = 0; i < subTools.Length; ++i) {
-				if (subTools[i] == null)
-					continue;
-				subTools[i].Initialize();
 			}
 		}
 
@@ -248,12 +245,12 @@ namespace TrafficManager.UI {
 					_guiNodes();
 				}
 
-#if DEBUG
+//#if DEBUG
 				if (Options.vehicleOverlay) {
 					_guiVehicles();
 					//_guiCitizens();
 				}
-#endif
+//#endif
 
 				for (int i = 0; i < subTools.Length; ++i) {
 					if (subTools[i] == null)
@@ -468,7 +465,7 @@ namespace TrafficManager.UI {
 
 				labelStr += "Lane idx " + i + ", id " + curLaneId;
 #if DEBUG
-				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
+				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance().GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				/*if (CustomRoadAI.InStartupPhase)
 					labelStr += ", in start-up phase";
@@ -625,9 +622,10 @@ namespace TrafficManager.UI {
 		private void _guiVehicles() {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
-			LaneConnectionManager connManager = Singleton<LaneConnectionManager>.instance;
+			LaneConnectionManager connManager = LaneConnectionManager.Instance();
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 			for (int i = 1; i < vehicles.m_size; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
@@ -651,7 +649,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				VehicleState vState = VehicleStateManager.GetVehicleState((ushort)i);
+				VehicleState vState = vehStateManager._GetVehicleState((ushort)i);
 				PathUnit.Position? curPos = vState?.GetCurrentPathPosition(ref vehicle);
 				PathUnit.Position? nextPos = vState?.GetNextPathPosition(ref vehicle);
 				bool? startNode = vState?.CurrentSegmentEnd?.StartNode;
@@ -659,7 +657,7 @@ namespace TrafficManager.UI {
 				ushort? transitNodeId = vState?.CurrentSegmentEnd?.NodeId;
 				/*float distanceToTransitNode = Single.NaN;
 				float timeToTransitNode = Single.NaN;*/
-				float vehSpeed = vehicle.GetLastFrameVelocity().magnitude;
+				ushort vehSpeed = SpeedLimitManager.Instance().VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
 				Vector3? targetPos = null;
 				if (transitNodeId != null)
@@ -677,7 +675,7 @@ namespace TrafficManager.UI {
 					else
 						timeToTransitNode = Single.PositiveInfinity;
 				}*/
-				String labelStr = "V #" + i + " @ " + vState?.CurrentSegmentEnd?.SegmentId;
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h";
 				//String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehSpeed) + "/" + (vState != null ? vState.CurrentMaxSpeed.ToString() : "-") + " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-");
 #if PATHRECALC
 				labelStr += ", recalc: " + (vState != null ? vState.LastPathRecalculation.ToString() : "-");

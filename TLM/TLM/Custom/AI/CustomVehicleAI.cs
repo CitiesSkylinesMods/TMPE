@@ -22,10 +22,6 @@ namespace TrafficManager.Custom.AI {
 
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
 
-		public void CustomReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
-			VehicleStateManager.OnReleaseVehicle(vehicleId, ref vehicleData);
-		}
-
 		public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			CalculateSegPos(vehicleID, ref vehicleData, position, laneID, offset, out pos, out dir, out maxSpeed);
 		}
@@ -39,7 +35,7 @@ namespace TrafficManager.Custom.AI {
 			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				var laneSpeedLimit = SpeedLimitManager.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]);
+				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
@@ -159,28 +155,16 @@ namespace TrafficManager.Custom.AI {
 
 			bool forceUpdatePos = false;
 			VehicleState vehicleState = null;
-			try {
-				vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
 
-				if (vehicleState == null) {
-					VehicleStateManager.OnPathFindReady(vehicleId, ref vehicleData);
-					vehicleState = VehicleStateManager.GetVehicleState(vehicleId);
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 
-					if (vehicleState == null) {
-#if DEBUG
-						Log._Debug($"Could not get vehicle state of {vehicleId}!");
-#endif
-					} else {
-						forceUpdatePos = true;
-					}
-				}
-			} catch (Exception e) {
-				Log.Error("VehicleAI MayChangeSegment vehicle state error: " + e.ToString());
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				vehicleState = vehStateManager.GetVehicleState(vehicleId);
 			}
 
-			if (forceUpdatePos || Options.simAccuracy >= 2) {
+			if ((Options.prioritySignsEnabled || Options.timedLightsEnabled) && (forceUpdatePos || Options.simAccuracy >= 2)) {
 				try {
-					VehicleStateManager.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
+					vehStateManager.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
 				} catch (Exception e) {
 					Log.Error("VehicleAI MayChangeSegment Error: " + e.ToString());
 				}
@@ -357,7 +341,7 @@ namespace TrafficManager.Custom.AI {
 							maxSpeed = 0f;
 							return false;
 						}
-					} else if (vehicleState != null) {
+					} else if (vehicleState != null && Options.prioritySignsEnabled) {
 #if DEBUG
 						//bool debug = destinationNodeId == 10864;
 						//bool debug = destinationNodeId == 13531;
