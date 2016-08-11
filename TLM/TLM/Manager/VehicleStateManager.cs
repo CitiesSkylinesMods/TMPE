@@ -146,12 +146,12 @@ namespace TrafficManager.Manager {
 #endif
 		}
 
-		internal void OnBeforeSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		internal void OnVehicleSpawned(ushort vehicleId, ref Vehicle vehicleData) {
 			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnPathFindReady");
 #endif
-			VehicleStates[vehicleId].OnBeforeSpawnVehicle(ref vehicleData);
+			VehicleStates[vehicleId].OnVehicleSpawned(ref vehicleData);
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnPathFindReady");
 #endif
@@ -168,7 +168,7 @@ namespace TrafficManager.Manager {
 
 					try {
 						DetermineVehicleType(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-						OnBeforeSpawnVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+						OnVehicleSpawned(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
 					} catch (Exception e) {
 						Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
 					}

@@ -53,6 +53,7 @@ namespace TrafficManager.State {
 
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
+		private static UICheckBox disableSomething6Toggle = null;
 		private static UICheckBox disableSomething5Toggle = null;
 		private static UICheckBox disableSomething4Toggle = null;
 		private static UICheckBox disableSomething3Toggle = null;
@@ -73,6 +74,7 @@ namespace TrafficManager.State {
 		private static UITextField someValue11Field = null;
 		private static UITextField someValue12Field = null;
 		private static UITextField someValue13Field = null;
+		private static UITextField someValue14Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -109,25 +111,27 @@ namespace TrafficManager.State {
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
 		public static float pathCostMultiplicator = 0f; // debug value
-		public static float pathCostMultiplicator2 = 0.25f; // debug value
-		public static bool disableSomething1 = false; // debug switch
+		public static float pathCostMultiplicator2 = 0.3f; // debug value
+		public static bool disableSomething1 = false; // debug switch (enable path-finding debugging)
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 0.65f; // debug value
-		public static float someValue2 = 1.25f; // debug value
-		public static float someValue3 = 2f; // debug value
-		public static float someValue4 = 5f; // debug value
-		public static float someValue5 = 0.5f; // debug value
-		public static float someValue6 = 1.5f; // debug value
-		public static float someValue7 = 0.75f; // debug value
-		public static float someValue8 = 2; // debug value
-		public static float someValue9 = 1; // debug value
-		public static float someValue10 = 0.5f; // debug value
-		public static float someValue11 = 2.5f; // debug value
-		public static float someValue12 = 0.75f; // debug value
-		public static float someValue13 = 0.5f; // debug value
+		public static bool disableSomething6 = false; // debug switch
+		public static float someValue = 1f; // debug value (base lane changing cost factor on highways)
+		public static float someValue2 = 1.25f; // debug value (heavy vehicle lane changing cost factor)
+		public static float someValue3 = 2f; // debug value (lane changing cost base before junctions)
+		public static float someValue4 = 5f; // debug value (artifical lane distance for u-turns)
+		public static float someValue5 = 0.75f; // debug value (base lane changing cost factor on city streets)
+		public static float someValue6 = 1.5f; // debug value (penalty for busses not driving on bus lanes) 
+		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
+		public static float someValue8 = 2f; // debug value (lane density extinction denominator)
+		public static float someValue9 = 1; // debug value (lane density update smoothing)
+		public static float someValue10 = 0.5f; // debug value -- unused --
+		public static float someValue11 = 2.5f; // debug value (> 1 lane changing cost factor)
+		public static float someValue12 = 0.75f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
+		public static float someValue13 = 0.5f; // debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
+		public static float someValue14 = 1.5f; // debug value (cost factor for leaving main highway)
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -198,6 +202,7 @@ namespace TrafficManager.State {
 			disableSomething3Toggle = maintenanceGroup.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
 			disableSomething4Toggle = maintenanceGroup.AddCheckbox("Disable something #4", disableSomething4, onDisableSomething4Changed) as UICheckBox;
 			disableSomething5Toggle = maintenanceGroup.AddCheckbox("Disable something #5", disableSomething5, onDisableSomething5Changed) as UICheckBox;
+			disableSomething6Toggle = maintenanceGroup.AddCheckbox("Disable something #6", disableSomething6, onDisableSomething6Changed) as UICheckBox;
 			pathCostMultiplicatorField = maintenanceGroup.AddTextfield("Pathcost multiplicator (mult)", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
 			pathCostMultiplicator2Field = maintenanceGroup.AddTextfield("Pathcost multiplicator (div)", String.Format("{0:0.##}", pathCostMultiplicator2), onPathCostMultiplicator2Changed) as UITextField;
 			someValueField = maintenanceGroup.AddTextfield("Some value #1", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
@@ -213,6 +218,7 @@ namespace TrafficManager.State {
 			someValue11Field = maintenanceGroup.AddTextfield("Some value #11", String.Format("{0:0.##}", someValue11), onSomeValue11Changed) as UITextField;
 			someValue12Field = maintenanceGroup.AddTextfield("Some value #12", String.Format("{0:0.##}", someValue12), onSomeValue12Changed) as UITextField;
 			someValue13Field = maintenanceGroup.AddTextfield("Some value #13", String.Format("{0:0.##}", someValue13), onSomeValue13Changed) as UITextField;
+			someValue14Field = maintenanceGroup.AddTextfield("Some value #14", String.Format("{0:0.##}", someValue14), onSomeValue14Changed) as UITextField;
 #endif
 		}
 
@@ -302,6 +308,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"disableSomething5 changed to {newDisableSomething}");
 			disableSomething5 = newDisableSomething;
+		}
+
+		private static void onDisableSomething6Changed(bool newDisableSomething) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"disableSomething6 changed to {newDisableSomething}");
+			disableSomething6 = newDisableSomething;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
@@ -731,6 +745,19 @@ namespace TrafficManager.State {
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue13 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue14Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue14 = newSomeValue;
 			} catch (Exception e) {
 				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);

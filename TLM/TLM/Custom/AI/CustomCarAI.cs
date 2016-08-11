@@ -139,13 +139,13 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public override bool TrySpawn(ushort vehicleID, ref Vehicle vehicleData) {
-			// NON-STOCK CODE START
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleStateManager.Instance().OnBeforeSpawnVehicle(vehicleID, ref vehicleData);
-			}
-			// NON-STOCK CODE END
-
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
+				// NON-STOCK CODE START
+				if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+					VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
+				}
+				// NON-STOCK CODE END
+
 				return true;
 			}
 			if (CustomCarAI.CheckOverlap(vehicleData.m_segment, 0, 1000f)) {
@@ -154,6 +154,12 @@ namespace TrafficManager.Custom.AI {
 			}
 			vehicleData.Spawn(vehicleID);
 			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
+
+			// NON-STOCK CODE START
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
+			}
+			// NON-STOCK CODE END
 
 			return true;
 		}

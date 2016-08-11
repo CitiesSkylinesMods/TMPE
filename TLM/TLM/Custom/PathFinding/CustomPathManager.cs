@@ -1,4 +1,4 @@
-#define QUEUEDSTATS
+#define QUEUEDSTATSx
 #define EXTRAPFx
 #define DEBUGPF3x
 
@@ -120,9 +120,9 @@ namespace TrafficManager.Custom.PathFinding {
 						break;
 					}
 
-					/*if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
+					if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
 						Log.Error($"Will release path unit {unit} which is CREATED!");
-					}*/
+					}
 
 					uint nextPathUnit = this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit;
 					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 0;

@@ -6,6 +6,8 @@
 #define DEBUGCOSTSx
 #define MARKCONGESTEDSEGMENTSx
 #define EXTRAPFx
+#define VEHICLERANDx
+#define PREFEROUTERx
 
 using System;
 using System.Linq;
@@ -102,7 +104,9 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _transportVehicle;
 		private ExtVehicleType? _extVehicleType;
 		private ushort? _vehicleId;
+#if VEHICLERAND
 		private float _vehicleRand;
+#endif
 		private bool _extPublicTransport;
 		//private static ushort laneChangeRandCounter = 0;
 #if DEBUG
@@ -161,6 +165,8 @@ namespace TrafficManager.Custom.PathFinding {
 			} else {
 				Log._Debug($"(PF #{_pathFindIndex}, T#{Thread.CurrentThread.ManagedThreadId}, Id #{pfId}) CustomPathFind.Awake: QueueLock is NOT null.");
 			}
+#else
+			QueueLock = new object();
 #endif
 			_laneLocation = new uint[262144]; // 2^18
 			_laneTarget = new PathUnit.Position[262144]; // 2^18
@@ -300,7 +306,9 @@ namespace TrafficManager.Custom.PathFinding {
 			this._transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
 			this._extVehicleType = pathUnitExtVehicleType[unit];
 			this._vehicleId = pathUnitVehicleIds[unit];
+#if VEHICLERAND
 			this._vehicleRand = this._vehicleId == null ? 0f : Math.Min(1f, (float)(_vehicleId % 101) * 0.01f);
+#endif
 			this._extPublicTransport = _extVehicleType != null && (_extVehicleType & ExtVehicleType.PublicTransport) != ExtVehicleType.None;
 #if DEBUGPF
 			//Log._Debug($"CustomPathFind.PathFindImplementation: path unit {unit}, type {_extVehicleType}");
@@ -634,7 +642,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGPF
 			//bool debug = Options.disableSomething1 && item.m_position.m_segment == 1459 && nextNodeId == 19630;
 			//bool debug = Options.disableSomething1 && (item.m_position.m_segment == 3833 || item.m_position.m_segment == 9649);
-			bool debug = Options.disableSomething1 && ((nextNodeId == 27237 && item.m_position.m_segment == 5699) || (nextNodeId == 5304 && item.m_position.m_segment == 9931) || (nextNodeId == 22427 && item.m_position.m_segment == 16166) || (nextNodeId == 18558 && item.m_position.m_segment == 2703));
+			bool debug = Options.disableSomething1 && nextNodeId == 2790 && item.m_position.m_segment == 36426;
 			//bool debug = Options.disableSomething1 && ((nextNodeId == 27237 && item.m_position.m_segment == 5699) || (nextNodeId == 16068 && item.m_position.m_segment == 24398) || (nextNodeId == 12825 && item.m_position.m_segment == 17008));
 #endif
 #if DEBUGPF
@@ -1367,17 +1375,18 @@ namespace TrafficManager.Custom.PathFinding {
 
 									goto nextIter;
 								}
-							} else if (nextCompatibleLaneCount == 1) {
+							/*} else if (nextCompatibleLaneCount == 1) {
 								nextLaneI = 0;
 #if DEBUGPF
 								if (debug)
 									logBuf.Add($"Single target lane found. nextLaneI={nextLaneI}");
 #endif
+								*/
 							} else {
-								// city rules, multiple lanes: lane matching
+								// city rules, multiple lanes or single target lane: lane matching
 #if DEBUGPF
 								if (debug)
-									logBuf.Add($"Multiple target lanes ({nextCompatibleLaneCount}) found. prevSimilarLaneCount={prevSimilarLaneCount}");
+									logBuf.Add($"Target lanes ({nextCompatibleLaneCount}) found. prevSimilarLaneCount={prevSimilarLaneCount}");
 #endif
 
 								// min/max compatible outer similar lane indices
@@ -1450,6 +1459,13 @@ namespace TrafficManager.Custom.PathFinding {
 								// find best matching lane(s)
 								for (short nextOuterSimilarIndex = hasLaneConnections ? (short)0 : minNextOuterSimilarIndex; nextOuterSimilarIndex < (hasLaneConnections ? (short)nextCompatibleLaneCount : (short)(minNextOuterSimilarIndex+1)); ++nextOuterSimilarIndex) {
 									nextLaneI = FindCompatibleLane(ref laneIndexByOuterSimilarIndex, compatibleOuterSimilarIndexesMask, nextOuterSimilarIndex);
+
+#if DEBUGPF
+									if (debug) {
+										logBuf.Add($"BEST MATCHING LANE LOOP ITERATION {nextOuterSimilarIndex}. nextLaneI={nextLaneI} hasLaneConnections={hasLaneConnections} minNextOuterSimilarIndex={minNextOuterSimilarIndex} nextCompatibleLaneCount={nextCompatibleLaneCount} minNextOuterSimilarIndex={minNextOuterSimilarIndex}");
+										logBuf.Add($"nextOuterSimilarIndex < minNextOuterSimilarIndex == {nextOuterSimilarIndex < minNextOuterSimilarIndex}, nextOuterSimilarIndex > maxNextOuterSimilarIndex == {nextOuterSimilarIndex > maxNextOuterSimilarIndex}, hasOutgoingConnections[nextLaneI]={hasOutgoingConnections[nextLaneI]}, nextIsConnectedWithPrevious[nextLaneI]={nextIsConnectedWithPrevious[nextLaneI]}");
+                                    }
+#endif
 
 									if (nextLaneI < 0) {
 										continue;
@@ -2520,7 +2536,9 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 
 								float relLaneDist = nextOuterSimilarLaneIndex - prevOuterSimilarLaneIndex; // relative lane distance
+#if PREFEROUTER
 								bool isPreferredLaneChangingDir = relLaneDist == 1;
+#endif
 
 								float laneDist = !isMiddle && nextSegmentId == item.m_position.m_segment ? Options.someValue4 : (float)Math.Abs(relLaneDist); // absolute lane distance. U-turns are treated as changing lanes, too.
 
@@ -2556,10 +2574,7 @@ namespace TrafficManager.Custom.PathFinding {
 								*/
 
 								// calculate speed metric
-								if (Options.disableSomething2)
-									divMetric = nextMaxSpeed;
-								else
-									divMetric = nextSpeed * nextMaxSpeed; // 0 .. nextMaxSpeed
+								divMetric = nextSpeed * nextMaxSpeed; // 0 .. nextMaxSpeed
 
 								// calculate density metric
 								if (prevSpeed <= Options.someValue13)
@@ -2573,37 +2588,52 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 								float laneMetric = 1f;
+								if (! Options.disableSomething3) {
+									if (laneDist > 0 && // lane would be changed
+										((_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) && // emergency vehicles may do everything
+										!nextIsRealJunction // no lane changing at junctions
+										)) {
+										// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
 
-								if (laneDist > 0 && // lane would be changed
-									((_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) && // emergency vehicles may do everything
-									!nextIsRealJunction // no lane changing at junctions
-									)) {
-									// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
+										float laneChangeCostBase = 1f + // base
+											(nextIsHighway ? Options.someValue : Options.someValue5) * // changing lanes on highways is more expensive than on city streets
+											(_isHeavyVehicle ? Options.someValue2 : 1f) * // changing lanes is more expensive for heavy vehicles
+											(laneDist > 1 ? Options.someValue11 : 1f) // changing more than one lane at a time is expensive
+#if VEHICLERAND
+											* (2f - _vehicleRand)
+#endif
+											; // fast vehicles (= high _vehicleRand) tend to change lanes more often
 
-									float laneChangeCostBase = 1f + // base
-										(nextIsHighway ? Options.someValue : Options.someValue5) * // changing lanes on highways is more expensive than on city streets
-										(_isHeavyVehicle ? Options.someValue2 : 1f) * // changing lanes is more expensive for heavy vehicles
-										(laneDist > 1 ? Options.someValue11 : 1f) * // changing more than one lane at a time is expensive
-										(2f - _vehicleRand); // fast vehicles (= high _vehicleRand) tend to change lanes more often
+#if PREFEROUTER
+										if (isPreferredLaneChangingDir && prevIsHighway && nextIsHighway) {
+											float outerLaneCostFactor = (1f + Options.pathCostMultiplicator * (_vehicleRand - 0.5f)); // [1 - 0.5 * pathCostMultiplicator; 1 + 0.5 * pathCostMultiplicator], depending on _vehicleRand
+											laneChangeCostBase = Math.Max(1f, laneChangeCostBase * outerLaneCostFactor); // slower vehicles tend to stay on the outer lane; faster vehicles on inner lanes
+										}
+#endif
 
-									if (isPreferredLaneChangingDir && prevIsHighway && nextIsHighway) {
-										float outerLaneCostFactor = (1f + Options.pathCostMultiplicator * (_vehicleRand - 0.5f)); // [1 - 0.5 * pathCostMultiplicator; 1 + 0.5 * pathCostMultiplicator], depending on _vehicleRand
-										laneChangeCostBase = Math.Max(1f, laneChangeCostBase * outerLaneCostFactor); // slower vehicles tend to stay on the outer lane; faster vehicles on inner lanes
+										// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
+										laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
+										metric *= laneMetric;
 									}
-
-									// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
-									laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
-									metric *= laneMetric;
 								}
 
-								// avoid lane changing before junctions: multiply with inverted distance to next junction
-								if ((!prevIsHighway || !nextIsHighway) &&
-									!nextIsRealJunction &&
-									(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) &&
-									laneDist > 0 &&
-									nextItem.m_numSegmentsToJunction < 3) {
-									float junctionMetric = (float)Math.Pow(Options.someValue3, Math.Max(0f, 3f - nextItem.m_numSegmentsToJunction));
-									metric *= junctionMetric;
+								if (!Options.disableSomething5) {
+									// avoid lane changing before junctions: multiply with inverted distance to next junction
+									if ((!prevIsHighway || !nextIsHighway) &&
+										!nextIsRealJunction &&
+										(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) &&
+										laneDist > 0 &&
+										nextItem.m_numSegmentsToJunction < 3) {
+										float junctionMetric = (float)Math.Pow(Options.someValue3, Math.Max(0f, 3f - nextItem.m_numSegmentsToJunction));
+										metric *= junctionMetric;
+									}
+								}
+
+								if (!Options.disableSomething6) {
+									// avoid leaving main highway
+									if (nextIsRealJunction && nextIsHighway && (!prevIsHighway || nextNumLanes > prevNumLanes)) {
+										metric *= Options.someValue14;
+									}
 								}
 
 #if DEBUGCOSTS

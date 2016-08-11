@@ -419,7 +419,7 @@ namespace TrafficManager.Traffic {
 			return transitNodeId;
 		}
 
-		internal void OnBeforeSpawnVehicle(ref Vehicle vehicleData) {
+		internal void OnVehicleSpawned(ref Vehicle vehicleData) {
 #if DEBUG
 			//Log._Debug($"VehicleState.OnPathFindReady called for vehicle {VehicleId} ({VehicleType}");
 #endif

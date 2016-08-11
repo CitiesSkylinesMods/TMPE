@@ -16,6 +16,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.UI;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using ColossalFramework.UI;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -35,22 +36,59 @@ namespace TrafficManager.State {
 		public override void OnLoadData() {
 			Log.Info("Loading Traffic Manager: PE Data");
 			StateLoading = true;
+			bool loadingSucceeded = true;
 			try {
 				Log.Info("Initializing flags");
 				Flags.OnBeforeLoadData();
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing Flags: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
+			try {
 				Log.Info("Initializing node geometries");
 				NodeGeometry.OnBeforeLoadData();
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing NodeGeometry: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+			
+			try {
 				Log.Info("Initializing segment geometries");
 				SegmentGeometry.OnBeforeLoadData();
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing SegmentGeometry: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
+			try {
 				Log.Info("Initializing lane connection manager");
 				LaneConnectionManager.Instance().OnBeforeLoadData(); // requires segment geometries
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing LaneConnectionManager: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
+			try {
 				Log.Info("Initializing CustomRoadAI");
 				CustomRoadAI.OnBeforeLoadData();
-				Log.Info("Initialization done. Loading mod data now.");
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing CustomRoadAI: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
+			Log.Info("Initialization done. Loading mod data now.");
+
+			try {
 				byte[] data = _serializableData.LoadData(DataId);
 				DeserializeData(data);
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while deserializing data: {e.ToString()}");
+				loadingSucceeded = false;
+			}
 
-				// load options
+			// load options
+			try {
 				byte[] options = _serializableData.LoadData("TMPE_Options");
 				if (options != null) {
 					if (options.Length >= 1) {
@@ -154,18 +192,21 @@ namespace TrafficManager.State {
 					}
 				}
 			} catch (Exception e) {
-				Log.Error($"OnLoadData: {e.ToString()}");
-            } finally {
-				StateLoading = false;
+				Log.Error($"OnLoadData: Error while loading options: {e.ToString()}");
+				loadingSucceeded = false;
 			}
 
-			Log.Info("OnLoadData completed.");
-
-			// load toggled traffic lights
-			//byte[] trafficLight = _serializableData.LoadData("TMPE_Options");
+			if (loadingSucceeded)
+				Log.Info("OnLoadData completed successfully.");
+			else {
+				Log.Info("An error occurred while loading.");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("An error occurred while loading", "Traffic Manager: President Edition detected an error while loading. Please do NOT save this game under the old filename, otherwise your timed traffic lights, custom lane arrows, etc. are in danger. Instead, please navigate to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow the steps under 'In case problems arise'.", true);
+			}
+			StateLoading = false;
 		}
 
 		private static void DeserializeData(byte[] data) {
+			bool error = false;
 			try {
 				if (data != null && data.Length != 0) {
 					Log.Info("Loading Data from New Load Routine!");
@@ -179,16 +220,40 @@ namespace TrafficManager.State {
 					Log.Warning("No data to deserialize!");
 				}
 			} catch (Exception e) {
-				Log.Error($"Error deserializing data: {e.Message}");
+				Log.Error($"Error deserializing data: {e.ToString()}");
+				error = true;
 			}
 
-			LoadDataState();
-			Flags.clearHighwayLaneArrows();
-			Flags.applyAllFlags();
-			VehicleStateManager.Instance().InitAllVehicles();
+			if (!error) {
+				LoadDataState(out error);
+			}
+
+			try {
+				Flags.clearHighwayLaneArrows();
+			} catch (Exception e) {
+				Log.Error($"Error while clearing highway lane arrows: {e.ToString()}");
+			}
+
+			try {
+				Flags.applyAllFlags();
+			} catch (Exception e) {
+				Log.Error($"Error while applying all flags: {e.ToString()}");
+			}
+
+			try {
+				VehicleStateManager.Instance().InitAllVehicles();
+			} catch (Exception e) {
+				Log.Error($"Error while initializing all vehicles: {e.ToString()}");
+			}
+
+			if (error) {
+				throw new ApplicationException("An error occurred while loading");
+			}
 		}
 
-		private static void LoadDataState() {
+		private static void LoadDataState(out bool error) {
+			error = false;
+
 			Log.Info("Loading State from Config");
 			if (_configuration == null) {
 				Log.Warning("Configuration NULL, Couldn't load save data. Possibly a new game?");
@@ -245,6 +310,7 @@ namespace TrafficManager.State {
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from Priority segments: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
@@ -267,14 +333,12 @@ namespace TrafficManager.State {
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from vehicle restrictions: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
 				Log.Warning("Vehicle restrctions structure undefined!");
 			}
-
-			var timedStepCount = 0;
-			var timedStepSegmentCount = 0;
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
@@ -336,142 +400,18 @@ namespace TrafficManager.State {
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from TimedNode (new method): " + e.ToString());
-					}
-				}
-			} else if (_configuration.TimedNodes != null && _configuration.TimedNodeGroups != null) {
-				Log.Info($"Loading {_configuration.TimedNodes.Count()} timed traffic lights (old method)");
-				for (var i = 0; i < _configuration.TimedNodes.Count; i++) {
-					try {
-						var nodeid = (ushort)_configuration.TimedNodes[i][0];
-						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeid].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-							continue;
-						Flags.setNodeTrafficLight(nodeid, true);
-
-						Log._Debug($"Adding Timed Node {i} at node {nodeid}");
-
-						var nodeGroup = new List<ushort>();
-						for (var j = 0; j < _configuration.TimedNodeGroups[i].Length; j++) {
-							nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
-						}
-
-						TrafficLightSimulation sim = tlsMan.AddNodeToSimulation(nodeid);
-						sim.SetupTimedTrafficLight(nodeGroup);
-						var timedNode = sim.TimedLight;
-
-						timedNode.CurrentStep = _configuration.TimedNodes[i][1];
-
-						for (var j = 0; j < _configuration.TimedNodes[i][2]; j++) {
-							var cfgstep = _configuration.TimedNodeSteps[timedStepCount];
-							// old (pre 1.3.0):
-							//   cfgstep[0]: time of step
-							//   cfgstep[1]: number of segments
-							// new (post 1.3.0):
-							//   cfgstep[0]: min. time of step
-							//   cfgstep[1]: max. time of step
-							//   cfgstep[2]: number of segments
-
-							int minTime = 1;
-							int maxTime = 1;
-							//int numSegments = 0;
-							float waitFlowBalance = 1f;
-
-							if (cfgstep.Length == 2) {
-								minTime = cfgstep[0];
-								maxTime = cfgstep[0];
-								//numSegments = cfgstep[1];
-							} else if (cfgstep.Length >= 3) {
-								minTime = cfgstep[0];
-								maxTime = cfgstep[1];
-								//numSegments = cfgstep[2];
-								if (cfgstep.Length == 4) {
-									waitFlowBalance = Convert.ToSingle(cfgstep[3]) / 10f;
-								}
-								if (cfgstep.Length == 5) {
-									waitFlowBalance = Convert.ToSingle(cfgstep[4]) / 1000f;
-								}
-							}
-
-							Log._Debug($"Adding timed step to node {nodeid}: min/max: {minTime}/{maxTime}, waitFlowBalance: {waitFlowBalance}");
-
-							timedNode.AddStep(minTime, maxTime, waitFlowBalance);
-							var step = timedNode.Steps[j];
-
-							for (var s = 0; s < 8; s++) {
-								var segmentId = netManager.m_nodes.m_buffer[nodeid].GetSegment(s);
-								if (segmentId <= 0)
-									continue;
-
-								bool tooFewSegments = (timedStepSegmentCount >= _configuration.TimedNodeStepSegments.Count);
-
-								var leftLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][0];
-								var mainLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][1];
-								var rightLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][2];
-								var pedLightState = tooFewSegments ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)_configuration.TimedNodeStepSegments[timedStepSegmentCount][3];
-								CustomSegmentLight.Mode? mode = null;
-								if (_configuration.TimedNodeStepSegments[timedStepSegmentCount].Length >= 5) {
-									mode = (CustomSegmentLight.Mode)_configuration.TimedNodeStepSegments[timedStepSegmentCount][4];
-								}
-
-								foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in step.segmentLights[segmentId].CustomLights) {
-									//ManualSegmentLight segmentLight = new ManualSegmentLight(step.NodeId, step.segmentIds[k], mainLightState, leftLightState, rightLightState, pedLightState);
-									e.Value.LightLeft = leftLightState;
-									e.Value.LightMain = mainLightState;
-									e.Value.LightRight = rightLightState;
-									if (mode != null)
-										e.Value.CurrentMode = (CustomSegmentLight.Mode)mode;
-								}
-
-								if (step.segmentLights[segmentId].PedestrianLightState != null)
-									step.segmentLights[segmentId].PedestrianLightState = pedLightState;
-
-								timedStepSegmentCount++;
-							}
-							timedStepCount++;
-						}
-
-						if (Convert.ToBoolean(_configuration.TimedNodes[i][3])) {
-							timedNode.Start();
-						}
-					} catch (Exception e) {
-						// ignore, as it's probably corrupt save data. it'll be culled on next save
-						Log.Warning("Error loading data from the TimedNodes: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
 				Log.Warning("Timed traffic lights data structure undefined!");
 			}
 
-			var trafficLightDefs = _configuration.NodeTrafficLights.Split(',');
+			if (_configuration.NodeTrafficLights != null) {
+				var trafficLightDefs = _configuration.NodeTrafficLights.Split(',');
 
-			Log.Info($"Loading junction traffic light data");
-			if (trafficLightDefs.Length <= 1) {
-				// old method
-				Log.Info($"Using old method to load traffic light data");
-
-				var saveDataIndex = 0;
-				for (var i = 0; i < Singleton<NetManager>.instance.m_nodes.m_buffer.Length; i++) {
-					//Log.Message($"Adding NodeTrafficLights iteration: {i1}");
-					try {
-						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.Road &&
-							Singleton<NetManager>.instance.m_nodes.m_buffer[i].Info.m_class.m_service != ItemClass.Service.PublicTransport) ||
-							(Singleton<NetManager>.instance.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
-							continue;
-
-						// prevent overflow
-						if (_configuration.NodeTrafficLights.Length > saveDataIndex) {
-							var trafficLight = _configuration.NodeTrafficLights[saveDataIndex];
-#if DEBUG
-							Log._Debug("Setting traffic light flag for node " + i + ": " + (trafficLight == '1'));
-#endif
-							Flags.setNodeTrafficLight((ushort)i, trafficLight == '1');
-						}
-						++saveDataIndex;
-					} catch (Exception e) {
-						// ignore as it's probably bad save data.
-						Log.Warning("Error setting the NodeTrafficLights (old): " + e.Message);
-					}
-				}
-			} else {
+				Log.Info($"Loading junction traffic light data");
+	
 				// new method
 				foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
 					try {
@@ -482,9 +422,12 @@ namespace TrafficManager.State {
 						Flags.setNodeTrafficLight(nodeId, flag > 0);
 					} catch (Exception e) {
 						// ignore as it's probably bad save data.
-						Log.Warning("Error setting the NodeTrafficLights (new): " + e.Message);
+						Log.Error($"Error setting the NodeTrafficLights: " + e.ToString());
+						error = true;
 					}
 				}
+			} else {
+				Log.Warning("Junction traffic lights data structure undefined!");
 			}
 
 			if (_configuration.LaneFlags != null) {
@@ -523,7 +466,8 @@ namespace TrafficManager.State {
 #endif
 							Flags.setLaneArrowFlags(laneId, (Flags.LaneArrows)(laneArrowFlags));
 						} catch (Exception e) {
-							Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.Message}");
+							Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.ToString()}");
+							error = true;
 						}
 					}
 				}
@@ -540,7 +484,8 @@ namespace TrafficManager.State {
 						LaneConnectionManager.Instance().AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
-						Log.Warning("Error loading data from lane connection: " + e.ToString());
+						Log.Error("Error loading data from lane connection: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
@@ -557,6 +502,7 @@ namespace TrafficManager.State {
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading speed limits: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
@@ -575,6 +521,7 @@ namespace TrafficManager.State {
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading segment-at-node config: " + e.ToString());
+						error = true;
 					}
 				}
 			} else {
@@ -583,128 +530,161 @@ namespace TrafficManager.State {
 		}
 
 		public override void OnSaveData() {
-			Log.Info("Recalculating segment geometries");
-			SegmentGeometry.OnBeforeSaveData();
-			Log.Info("Applying all flags");
-			Flags.applyAllFlags();
-			Log.Info("Saving Mod Data.");
-			var configuration = new Configuration();
-
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
-
-			if (prioMan.TrafficSegments != null) {
-				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
-					try {
-						SavePrioritySegment(i, configuration);
-					} catch (Exception e) {
-						Log.Error($"Exception occurred while saving priority segment @ {i}: {e.ToString()}");
-					}
-
-					try {
-						SaveSegmentNodeFlags(i, configuration);
-					} catch (Exception e) {
-						Log.Error($"Exception occurred while saving segment node flags @ {i}: {e.ToString()}");
-					}
-				}
-			}
-
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-
-			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
-				/*if (TrafficLightSimulation.LightSimulationByNodeId != null) {
-					SaveTrafficLightSimulation(i, configuration);
-				}*/
-
-				/*if (TrafficLightsManual.ManualSegments != null) {
-					SaveManualTrafficLight(i, configuration);
-				}*/
-
-				TrafficLightSimulation sim = tlsMan.GetNodeSimulation(i);
-				if (sim != null && sim.IsTimedLight()) {
-					try {
-						SaveTimedTrafficLight(i, configuration);
-					} catch (Exception e) {
-						Log.Error($"Exception occurred while saving timed traffic light @ {i}: {e.ToString()}");
-					}
-					// TODO save new traffic lights
-				}
-
-				try {
-					SaveNodeLights(i, configuration);
-				} catch (Exception e) {
-					Log.Error($"Exception occurred while saving node traffic light @ {i}: {e.ToString()}");
-				}
-			}
-
-#if !TAM
-			if (LoadingExtension.IsPathManagerCompatible) {
-#endif
-				for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
-					try {
-						SaveLaneData(i, configuration);
-					} catch (Exception e) {
-						Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
-					}
-				}
-#if !TAM
-			}
-#endif
-
-			foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
-				try {
-					SaveLaneSpeedLimit(new Configuration.LaneSpeedLimit(e.Key, e.Value), configuration);
-				} catch (Exception ex) {
-					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex.ToString()}");
-				}
-			}
-
-			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
-				try {
-					SaveLaneAllowedVehicleTypes(new Configuration.LaneVehicleTypes(e.Key, e.Value), configuration);
-				} catch (Exception ex) {
-					Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
-				}
-			}
-
-			var binaryFormatter = new BinaryFormatter();
-			var memoryStream = new MemoryStream();
+			bool error = false;
 
 			try {
-				binaryFormatter.Serialize(memoryStream, configuration);
-				memoryStream.Position = 0;
-				Log.Info($"Save data byte length {memoryStream.Length}");
-				_serializableData.SaveData(DataId, memoryStream.ToArray());
+				Log.Info("Recalculating segment geometries");
+				SegmentGeometry.OnBeforeSaveData();
+			} catch (Exception e) {
+				Log.Error($"OnSaveData: Exception occurred while calling SegmentGeometry.OnBeforeSaveData: {e.ToString()}");
+				error = true;
+			}
 
-				// save options
-				_serializableData.SaveData("TMPE_Options", new byte[] {
-					(byte)Options.simAccuracy,
-					(byte)0,//Options.laneChangingRandomization,
-					(byte)Options.recklessDrivers,
-					(byte)(Options.relaxedBusses ? 1 : 0),
-					(byte) (Options.nodesOverlay ? 1 : 0),
-					(byte)(Options.allowEnterBlockedJunctions ? 1 : 0),
-					(byte)(Options.advancedAI ? 1 : 0),
-					(byte)(Options.highwayRules ? 1 : 0),
-					(byte)(Options.prioritySignsOverlay ? 1 : 0),
-					(byte)(Options.timedLightsOverlay ? 1 : 0),
-					(byte)(Options.speedLimitsOverlay ? 1 : 0),
-					(byte)(Options.vehicleRestrictionsOverlay ? 1 : 0),
-					(byte)(Options.strongerRoadConditionEffects ? 1 : 0),
-					(byte)(Options.allowUTurns ? 1 : 0),
-					(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
-					(byte)(Options.enableDespawning ? 1 : 0),
-					(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
-					(byte)(Options.connectedLanesOverlay ? 1 : 0),
-					(byte)(Options.prioritySignsEnabled ? 1 : 0),
-					(byte)(Options.timedLightsEnabled ? 1 : 0),
-					(byte)(Options.customSpeedLimitsEnabled ? 1 : 0),
-					(byte)(Options.vehicleRestrictionsEnabled ? 1 : 0),
-					(byte)(Options.laneConnectorEnabled ? 1 : 0)
-				});
-			} catch (Exception ex) {
-				Log.Error("Unexpected error saving data: " + ex.Message);
-			} finally {
-				memoryStream.Close();
+			try {
+				Log.Info("Applying all flags");
+				Flags.applyAllFlags();
+			} catch (Exception e) {
+				Log.Error($"OnSaveData: Exception occurred while applying all flags: {e.ToString()}");
+				error = true;
+			}
+
+			try {
+				Log.Info("Saving Mod Data.");
+				var configuration = new Configuration();
+
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
+				if (prioMan.TrafficSegments != null) {
+					for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
+						try {
+							SavePrioritySegment(i, configuration);
+						} catch (Exception e) {
+							Log.Error($"Exception occurred while saving priority segment @ {i}: {e.ToString()}");
+							error = true;
+						}
+
+						try {
+							SaveSegmentNodeFlags(i, configuration);
+						} catch (Exception e) {
+							Log.Error($"Exception occurred while saving segment node flags @ {i}: {e.ToString()}");
+							error = true;
+						}
+					}
+				}
+
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+
+				for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
+					/*if (TrafficLightSimulation.LightSimulationByNodeId != null) {
+						SaveTrafficLightSimulation(i, configuration);
+					}*/
+
+					/*if (TrafficLightsManual.ManualSegments != null) {
+						SaveManualTrafficLight(i, configuration);
+					}*/
+
+					TrafficLightSimulation sim = tlsMan.GetNodeSimulation(i);
+					if (sim != null && sim.IsTimedLight()) {
+						try {
+							SaveTimedTrafficLight(i, configuration);
+						} catch (Exception e) {
+							Log.Error($"Exception occurred while saving timed traffic light @ {i}: {e.ToString()}");
+							error = true;
+						}
+						// TODO save new traffic lights
+					}
+
+					try {
+						SaveNodeLights(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving node traffic light @ {i}: {e.ToString()}");
+						error = true;
+					}
+				}
+
+	#if !TAM
+				if (LoadingExtension.IsPathManagerCompatible) {
+	#endif
+					for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
+						try {
+							SaveLaneData(i, configuration);
+						} catch (Exception e) {
+							Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
+							error = true;
+						}
+					}
+	#if !TAM
+				}
+	#endif
+
+				foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
+					try {
+						SaveLaneSpeedLimit(new Configuration.LaneSpeedLimit(e.Key, e.Value), configuration);
+					} catch (Exception ex) {
+						Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex.ToString()}");
+						error = true;
+					}
+				}
+
+				foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
+					try {
+						SaveLaneAllowedVehicleTypes(new Configuration.LaneVehicleTypes(e.Key, e.Value), configuration);
+					} catch (Exception ex) {
+						Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
+						error = true;
+					}
+				}
+
+				var binaryFormatter = new BinaryFormatter();
+				var memoryStream = new MemoryStream();
+
+				try {
+					binaryFormatter.Serialize(memoryStream, configuration);
+					memoryStream.Position = 0;
+					Log.Info($"Save data byte length {memoryStream.Length}");
+					_serializableData.SaveData(DataId, memoryStream.ToArray());
+				} catch (Exception ex) {
+					Log.Error("Unexpected error while saving data: " + ex.ToString());
+					error = true;
+				} finally {
+					memoryStream.Close();
+				}
+
+				try {
+					// save options
+					_serializableData.SaveData("TMPE_Options", new byte[] {
+						(byte)Options.simAccuracy,
+						(byte)0,//Options.laneChangingRandomization,
+						(byte)Options.recklessDrivers,
+						(byte)(Options.relaxedBusses ? 1 : 0),
+						(byte) (Options.nodesOverlay ? 1 : 0),
+						(byte)(Options.allowEnterBlockedJunctions ? 1 : 0),
+						(byte)(Options.advancedAI ? 1 : 0),
+						(byte)(Options.highwayRules ? 1 : 0),
+						(byte)(Options.prioritySignsOverlay ? 1 : 0),
+						(byte)(Options.timedLightsOverlay ? 1 : 0),
+						(byte)(Options.speedLimitsOverlay ? 1 : 0),
+						(byte)(Options.vehicleRestrictionsOverlay ? 1 : 0),
+						(byte)(Options.strongerRoadConditionEffects ? 1 : 0),
+						(byte)(Options.allowUTurns ? 1 : 0),
+						(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
+						(byte)(Options.enableDespawning ? 1 : 0),
+						(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
+						(byte)(Options.connectedLanesOverlay ? 1 : 0),
+						(byte)(Options.prioritySignsEnabled ? 1 : 0),
+						(byte)(Options.timedLightsEnabled ? 1 : 0),
+						(byte)(Options.customSpeedLimitsEnabled ? 1 : 0),
+						(byte)(Options.vehicleRestrictionsEnabled ? 1 : 0),
+						(byte)(Options.laneConnectorEnabled ? 1 : 0)
+					});
+				} catch (Exception ex) {
+					Log.Error("Unexpected error while saving options: " + ex.Message);
+					error = true;
+				}
+			} catch (Exception e) {
+				error = true;
+				Log.Error($"Error occurred while saving data: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("An error occurred while saving", "Traffic Manager: President Edition detected an error while saving. To help preventing future errors, please navigate to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow the steps under 'In case problems arise'.", true);
 			}
 		}
 

@@ -253,23 +253,19 @@ namespace TrafficManager.TrafficLight {
 					//Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})   -> segmentId={segmentId} @ NodeId={timedNode.NodeId}");
 #endif
 
-#if DEBUG
 					if (!previousStep.segmentLights.ContainsKey(segmentId)) {
-						Log.Error($"TimedTrafficLightsStep: previousStep does not contain lights for segment {segmentId}!");
-#if TRACE
-						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#if DEBUG
+						Log._Debug($"TimedTrafficLightsStep: previousStep does not contain lights for segment {segmentId}!");
 #endif
-						return;
+						continue;
 					}
 
 					if (!nextStep.segmentLights.ContainsKey(segmentId)) {
-						Log.Error($"TimedTrafficLightsStep: nextStep does not contain lights for segment {segmentId}!");
-#if TRACE
-						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.SetLights");
+#if DEBUG
+						Log._Debug($"TimedTrafficLightsStep: nextStep does not contain lights for segment {segmentId}!");
 #endif
-						return;
+						continue;
 					}
-#endif
 
 					var prevStepSegmentLights = previousStep.segmentLights[segmentId];
 					var nextStepSegmentLights = nextStep.segmentLights[segmentId];
