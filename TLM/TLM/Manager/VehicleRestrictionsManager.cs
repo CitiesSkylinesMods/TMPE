@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Geometry;
 using TrafficManager.State;
+using TrafficManager.Traffic;
 
-namespace TrafficManager.Traffic {
-	class VehicleRestrictionsManager {
+namespace TrafficManager.Manager {
+	public class VehicleRestrictionsManager {
 		private static VehicleRestrictionsManager instance = null;
 
 		public static VehicleRestrictionsManager Instance() {
@@ -88,7 +90,7 @@ namespace TrafficManager.Traffic {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;

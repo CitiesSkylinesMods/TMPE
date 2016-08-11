@@ -1,4 +1,6 @@
-﻿using ColossalFramework;
+﻿#define USEPATHWAITCOUNTERx
+
+using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +8,10 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
+using TrafficManager.Traffic;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Manager {
 	public class VehicleStateManager {
 		private static VehicleStateManager instance = null;
 
@@ -17,6 +20,11 @@ namespace TrafficManager.Traffic {
 				instance = new VehicleStateManager();
 			return instance;
 		}
+
+		/// <summary>
+		/// Determines if vehicles should be cleared
+		/// </summary>
+		private static bool ClearTrafficRequested = false;
 
 		static VehicleStateManager() {
 			Instance();
@@ -128,6 +136,9 @@ namespace TrafficManager.Traffic {
 #endif
 			VehicleState state = _GetVehicleState(vehicleId);
 			state.VehicleType = ExtVehicleType.None;
+#if USEPATHWAITCOUNTER
+			state.PathWaitCounter = 0;
+#endif
 			state.Valid = false;
 			//VehicleStates[vehicleId].Reset();
 #if TRACE
@@ -135,12 +146,12 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal void OnVehicleSpawned(ushort vehicleId, ref Vehicle vehicleData) {
+		internal void OnBeforeSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnPathFindReady");
 #endif
-			VehicleStates[vehicleId].OnVehicleSpawned(ref vehicleData);
+			VehicleStates[vehicleId].OnBeforeSpawnVehicle(ref vehicleData);
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnPathFindReady");
 #endif
@@ -157,7 +168,7 @@ namespace TrafficManager.Traffic {
 
 					try {
 						DetermineVehicleType(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-						OnVehicleSpawned(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+						OnBeforeSpawnVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
 					} catch (Exception e) {
 						Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
 					}
@@ -238,6 +249,37 @@ namespace TrafficManager.Traffic {
 			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
 #endif
 			return null;
+		}
+
+		internal void SimulationStep() {
+			try {
+				if (ClearTrafficRequested) {
+					ClearTraffic();
+					ClearTrafficRequested = false;
+				}
+			} finally { }
+		}
+
+		internal void ClearTraffic() {
+			try {
+				Monitor.Enter(Singleton<VehicleManager>.instance);
+
+				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
+					if (
+						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0)
+						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
+				}
+
+				CustomRoadAI.resetTrafficStats();
+			} catch (Exception ex) {
+				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
+			} finally {
+				Monitor.Exit(Singleton<VehicleManager>.instance);
+			}
+		}
+
+		internal void RequestClearTraffic() {
+			ClearTrafficRequested = true;
 		}
 	}
 }

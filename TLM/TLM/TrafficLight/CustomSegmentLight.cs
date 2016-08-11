@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using ColossalFramework;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Custom.AI;
 
 namespace TrafficManager.TrafficLight {
+	/// <summary>
+	/// Represents the traffic light (left, forward, right) at a specific segment end
+	/// </summary>
 	public class CustomSegmentLight : ICloneable {
 		public enum Mode {
 			Simple = 1, // <^>

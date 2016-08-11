@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Manager;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.UI.SubTools {
 	public class ManualTrafficLightsTool : SubTool {
@@ -22,16 +24,19 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnPrimaryClickOverlay() {
 			if (SelectedNodeId != 0) return;
 
-			TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
+			TrafficLightSimulation sim = tlsMan.GetNodeSimulation(HoveredNodeId);
 			if (sim == null || !sim.IsTimedLight()) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
-					TrafficPriority.RemovePrioritySegments(HoveredNodeId);
+					prioMan.RemovePrioritySegments(HoveredNodeId);
 					Flags.setNodeTrafficLight(HoveredNodeId, true);
 				}
 
 				SelectedNodeId = HoveredNodeId;
 
-				sim = TrafficLightSimulation.AddNodeToSimulation(SelectedNodeId);
+				sim = tlsMan.AddNodeToSimulation(SelectedNodeId);
 				sim.SetupManualTrafficLight();
 
 				/*for (var s = 0; s < 8; s++) {
@@ -49,7 +54,10 @@ namespace TrafficManager.UI.SubTools {
 			var hoveredSegment = false;
 
 			if (SelectedNodeId != 0) {
-				var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNodeId);
+				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+
+				var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
 				nodeSimulation.housekeeping();
 
 				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
@@ -61,10 +69,10 @@ namespace TrafficManager.UI.SubTools {
 					var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(i);
 
 					if (segmentId == 0 || nodeSimulation == null ||
-						!CustomTrafficLights.IsSegmentLight(SelectedNodeId, segmentId)) continue;
+						!customTrafficLightsManager.IsSegmentLight(SelectedNodeId, segmentId)) continue;
 
 					var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-					var segmentLights = CustomTrafficLights.GetSegmentLights(SelectedNodeId, segmentId);
+					var segmentLights = customTrafficLightsManager.GetSegmentLights(SelectedNodeId, segmentId);
 
 					var screenPos = Camera.main.WorldToScreenPoint(position);
 					screenPos.y = Screen.height - screenPos.y;
@@ -651,14 +659,15 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
-			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNodeId);
+			var nodeSimulation = TrafficLightSimulationManager.Instance().GetNodeSimulation(SelectedNodeId);
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
 
 			for (var i = 0; i < 8; i++) {
 				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
 				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(i);
 
 				if (segmentId == 0 ||
-					(nodeSimulation != null && CustomTrafficLights.IsSegmentLight(SelectedNodeId, segmentId)))
+					(nodeSimulation != null && customTrafficLightsManager.IsSegmentLight(SelectedNodeId, segmentId)))
 					continue;
 
 				var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], segmentId);
@@ -670,12 +679,14 @@ namespace TrafficManager.UI.SubTools {
 
 		public override void Cleanup() {
 			if (SelectedNodeId == 0) return;
-			var nodeSimulation = TrafficLightSimulation.GetNodeSimulation(SelectedNodeId);
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+
+			var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
 
 			if (nodeSimulation == null || !nodeSimulation.IsManualLight()) return;
 
 			nodeSimulation.DestroyManualTrafficLight();
-			TrafficLightSimulation.RemoveNodeFromSimulation(SelectedNodeId, true, false);
+			tlsMan.RemoveNodeFromSimulation(SelectedNodeId, true, false);
 		}
 	}
 }

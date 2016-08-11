@@ -8,12 +8,14 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Geometry {
 	/// <summary>
 	/// Manages segment geometry data (e.g. if a segment is one-way or not, which incoming/outgoing segments are connected at the start or end node) of one specific segment.
 	/// Directional data (left, right, straight) is always given relatively to the managed segment.
@@ -860,18 +862,18 @@ namespace TrafficManager.Traffic {
 		/// <param name="otherSegmentId">other segment</param>
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>relative direction of the other segment relatively to the managed segment at the given node</returns>
-		public Direction GetDirection(ushort otherSegmentId, bool startNode) {
+		public ArrowDirection GetDirection(ushort otherSegmentId, bool startNode) {
 			if (!IsValid(otherSegmentId))
-				return Direction.Forward;
+				return ArrowDirection.Forward;
 
 			if (otherSegmentId == SegmentId)
-				return Direction.Turn;
+				return ArrowDirection.Turn;
 			else if (IsRightSegment(otherSegmentId, startNode))
-				return Direction.Right;
+				return ArrowDirection.Right;
 			else if (IsLeftSegment(otherSegmentId, startNode))
-				return Direction.Left;
+				return ArrowDirection.Left;
 			else
-				return Direction.Forward;
+				return ArrowDirection.Forward;
 		}
 
 		/// <summary>
@@ -930,7 +932,7 @@ namespace TrafficManager.Traffic {
 			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
 				dir = NetInfo.Direction.Backward;
 			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
@@ -1023,7 +1025,7 @@ namespace TrafficManager.Traffic {
 			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
 				dir = NetInfo.Direction.Backward;
 			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			var hasForward = false;
 			var hasBackward = false;

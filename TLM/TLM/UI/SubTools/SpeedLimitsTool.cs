@@ -6,9 +6,10 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class SpeedLimitsTool : SubTool {

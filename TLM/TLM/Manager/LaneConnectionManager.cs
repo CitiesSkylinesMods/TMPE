@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TrafficManager.Geometry;
+using TrafficManager.Traffic;
 using TrafficManager.State;
 using TrafficManager.Util;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Manager {
 	public class LaneConnectionManager : IObserver<SegmentGeometry> {
 		private static LaneConnectionManager instance = null;
 
@@ -416,7 +418,7 @@ namespace TrafficManager.Traffic {
 			foreach (ushort connectedSegmentId in connectedSegmentIds) {
 				if (connectedSegmentId == 0)
 					continue;
-				Direction dir = segmentGeo.GetDirection(connectedSegmentId, startNode);
+				ArrowDirection dir = segmentGeo.GetDirection(connectedSegmentId, startNode);
 
 #if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): processing connected segment {connectedSegmentId}. dir={dir}");
@@ -424,18 +426,18 @@ namespace TrafficManager.Traffic {
 
 				// check if arrow has already been set for this direction
 				switch (dir) {
-					case Direction.Turn:
+					case ArrowDirection.Turn:
 					default:
 						continue;
-					case Direction.Forward:
+					case ArrowDirection.Forward:
 						if ((arrows & Flags.LaneArrows.Forward) != Flags.LaneArrows.None)
 							continue;
 						break;
-					case Direction.Left:
+					case ArrowDirection.Left:
 						if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
 							continue;
 						break;
-					case Direction.Right:
+					case ArrowDirection.Right:
 						if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
 							continue;
 						break;
@@ -468,16 +470,16 @@ namespace TrafficManager.Traffic {
 #endif
 				if (addArrow) {
 					switch (dir) {
-						case Direction.Turn:
+						case ArrowDirection.Turn:
 						default:
 							continue;
-						case Direction.Forward:
+						case ArrowDirection.Forward:
 							arrows |= Flags.LaneArrows.Forward;
 							break;
-						case Direction.Left:
+						case ArrowDirection.Left:
 							arrows |= Flags.LaneArrows.Left;
 							break;
-						case Direction.Right:
+						case ArrowDirection.Right:
 							arrows |= Flags.LaneArrows.Right;
 							break;
 					}

@@ -4,12 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.Geometry;
+using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
 	class CustomAmbulanceAI : CarAI {
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
+#if DEBUG
+			//Log._Debug($"CustomAmbulanceAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
+
 			ExtVehicleType vehicleType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service;
 			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = vehicleType;
 
@@ -32,7 +38,12 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath(vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (Singleton<CustomPathManager>.instance.CreatePath(vehicleType, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using TrafficManager.Geometry;
+using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;

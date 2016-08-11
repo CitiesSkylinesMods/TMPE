@@ -3,7 +3,7 @@ using System.Reflection;
 using ColossalFramework;
 using ICities;
 using TrafficManager.Custom.AI;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using TrafficManager.UI;
 using UnityEngine;
@@ -16,6 +16,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
 using TrafficManager.Custom.Manager;
 using System.Linq;
+using TrafficManager.Manager;
 
 namespace TrafficManager {
     public class LoadingExtension : LoadingExtensionBase {
@@ -60,7 +61,8 @@ namespace TrafficManager {
 		public void revertDetours() {
 			if (DetourInited) {
 				Log.Info("Revert detours");
-				foreach (Detour d in Detours.Reverse<Detour>()) {
+				Detours.Reverse();
+				foreach (Detour d in Detours) {
 					RedirectionHelper.RevertRedirect(d.OriginalMethod, d.Redirect);
 				}
 				DetourInited = false;
@@ -575,6 +577,39 @@ namespace TrafficManager {
 				}
 
 				if (IsPathManagerCompatible) {
+					Log.Info("Redirection PathFind::CalculatePath calls for non-Traffic++");
+					try {
+						Detours.Add(new Detour(typeof(PathFind).GetMethod("CalculatePath",
+								BindingFlags.Public | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (uint),
+									typeof (bool)
+								},
+								null),
+								typeof(CustomPathFind).GetMethod("CalculatePath")));
+					} catch (Exception) {
+						Log.Error("Could not redirect PathFind::CalculatePath");
+						detourFailed = true;
+					}
+
+					Log.Info("Redirection PathManager::ReleasePath calls for non-Traffic++");
+					try {
+						Detours.Add(new Detour(typeof(PathManager).GetMethod("ReleasePath",
+								BindingFlags.Public | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (uint)
+								},
+								null),
+								typeof(CustomPathManager).GetMethod("ReleasePath")));
+					} catch (Exception) {
+						Log.Error("Could not redirect PathManager::ReleasePath");
+						detourFailed = true;
+					}
+
 					Log.Info("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
 					try {
 						Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
@@ -1057,6 +1092,9 @@ namespace TrafficManager {
 			Log.Info("OnLevelUnloading");
 			base.OnLevelUnloading();
 			Instance = this;
+			if (IsPathManagerReplaced) {
+				Singleton<PathManager>.instance.WaitForAllPaths();
+			}
 			revertDetours();
 			gameLoaded = false;
 
@@ -1064,11 +1102,11 @@ namespace TrafficManager {
 			UI = null;
 
 			try {
-				TrafficPriority.OnLevelUnloading();
+				TrafficPriorityManager.Instance().OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
 				CustomRoadAI.OnLevelUnloading();
-				CustomTrafficLights.OnLevelUnloading();
-				TrafficLightSimulation.OnLevelUnloading();
+				CustomTrafficLightsManager.Instance().OnLevelUnloading();
+				TrafficLightSimulationManager.Instance().OnLevelUnloading();
 				VehicleRestrictionsManager.Instance().OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
@@ -1115,7 +1153,6 @@ namespace TrafficManager {
 					return;
             }
 
-			TrafficPriority.OnLevelLoading();
 #if !TAM
 			determinePathManagerCompatible();
 			IsRainfallLoaded = CheckRainfallIsLoaded();

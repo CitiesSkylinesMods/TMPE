@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class VehicleRestrictionsTool : SubTool {

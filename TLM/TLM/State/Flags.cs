@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TrafficManager.Geometry;
+using TrafficManager.Manager;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
@@ -83,9 +85,11 @@ namespace TrafficManager.State {
 		}
 
 		public static void resetTrafficLights(bool all) {
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
 				nodeTrafficLightFlag[i] = null;
-				if (! all && TrafficPriority.IsPriorityNode(i))
+				if (! all && prioMan.IsPriorityNode(i))
 					continue;
 				Singleton<NetManager>.instance.UpdateNodeFlags(i);
 			}
@@ -579,7 +583,7 @@ namespace TrafficManager.State {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;

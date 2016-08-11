@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using ColossalFramework;
 using ICities;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -14,6 +14,8 @@ using Timer = System.Timers.Timer;
 using TrafficManager.State;
 using TrafficManager.Custom.AI;
 using TrafficManager.UI;
+using TrafficManager.Manager;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -193,6 +195,8 @@ namespace TrafficManager.State {
 				return;
 			}
 
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 			// load priority segments
 			if (_configuration.PrioritySegments != null) {
 				Log.Info($"Loading {_configuration.PrioritySegments.Count()} priority segments");
@@ -226,18 +230,18 @@ namespace TrafficManager.State {
 #endif
 							continue;
 						}
-						if (TrafficPriority.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
+						if (prioMan.IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
 #endif
-							TrafficPriority.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
+							prioMan.GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
 							continue;
 						}
 #if DEBUG
 						Log._Debug($"Adding Priority Segment of type: {segment[2].ToString()} to segment {segment[1]} @ node {segment[0]}");
 #endif
-						TrafficPriority.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
+						prioMan.AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from Priority segments: " + e.ToString());
@@ -273,6 +277,7 @@ namespace TrafficManager.State {
 			var timedStepSegmentCount = 0;
 
 			NetManager netManager = Singleton<NetManager>.instance;
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
 			if (_configuration.TimedLights != null) {
 				Log.Info($"Loading {_configuration.TimedLights.Count()} timed traffic lights (new method)");
@@ -285,7 +290,7 @@ namespace TrafficManager.State {
 
 						Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
 
-						TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(cnfTimedLights.nodeId);
+						TrafficLightSimulation sim = tlsMan.AddNodeToSimulation(cnfTimedLights.nodeId);
 						sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
 						var timedNode = sim.TimedLight;
 
@@ -349,7 +354,7 @@ namespace TrafficManager.State {
 							nodeGroup.Add(_configuration.TimedNodeGroups[i][j]);
 						}
 
-						TrafficLightSimulation sim = TrafficLightSimulation.AddNodeToSimulation(nodeid);
+						TrafficLightSimulation sim = tlsMan.AddNodeToSimulation(nodeid);
 						sim.SetupTimedTrafficLight(nodeGroup);
 						var timedNode = sim.TimedLight;
 
@@ -585,7 +590,9 @@ namespace TrafficManager.State {
 			Log.Info("Saving Mod Data.");
 			var configuration = new Configuration();
 
-			if (TrafficPriority.TrafficSegments != null) {
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
+			if (prioMan.TrafficSegments != null) {
 				for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
 					try {
 						SavePrioritySegment(i, configuration);
@@ -601,6 +608,8 @@ namespace TrafficManager.State {
 				}
 			}
 
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
 				/*if (TrafficLightSimulation.LightSimulationByNodeId != null) {
 					SaveTrafficLightSimulation(i, configuration);
@@ -610,7 +619,7 @@ namespace TrafficManager.State {
 					SaveManualTrafficLight(i, configuration);
 				}*/
 
-				TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(i);
+				TrafficLightSimulation sim = tlsMan.GetNodeSimulation(i);
 				if (sim != null && sim.IsTimedLight()) {
 					try {
 						SaveTimedTrafficLight(i, configuration);
@@ -768,7 +777,7 @@ namespace TrafficManager.State {
 
 		private static void SaveTimedTrafficLight(ushort i, Configuration configuration) {
 			try {
-				TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(i);
+				TrafficLightSimulation sim = TrafficLightSimulationManager.Instance().GetNodeSimulation(i);
 				if (sim == null || !sim.IsTimedLight())
 					return;
 
@@ -810,7 +819,7 @@ namespace TrafficManager.State {
 
 						Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
 
-						foreach (KeyValuePair<Traffic.ExtVehicleType, CustomSegmentLight> e2 in segLights.CustomLights) {
+						foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e2 in segLights.CustomLights) {
 							Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {i}.");
 
 							CustomSegmentLight segLight = e2.Value;
@@ -843,26 +852,28 @@ namespace TrafficManager.State {
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				if (TrafficPriority.TrafficSegments[segmentId] == null) {
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
+				if (prioMan.TrafficSegments[segmentId] == null) {
 					return;
 				}
 
-				if (TrafficPriority.TrafficSegments[segmentId].Node1 != 0 && TrafficPriority.TrafficSegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
-					Log.Info($"Saving Priority Segment of type: {TrafficPriority.TrafficSegments[segmentId].Instance1.Type} @ node {TrafficPriority.TrafficSegments[segmentId].Node1}, seg. {segmentId}");
+				if (prioMan.TrafficSegments[segmentId].Node1 != 0 && prioMan.TrafficSegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
+					Log.Info($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance1.Type} @ node {prioMan.TrafficSegments[segmentId].Node1}, seg. {segmentId}");
                     configuration.PrioritySegments.Add(new[]
 					{
-						TrafficPriority.TrafficSegments[segmentId].Node1, segmentId,
-						(int) TrafficPriority.TrafficSegments[segmentId].Instance1.Type
+						prioMan.TrafficSegments[segmentId].Node1, segmentId,
+						(int) prioMan.TrafficSegments[segmentId].Instance1.Type
 					});
 				}
 
-				if (TrafficPriority.TrafficSegments[segmentId].Node2 == 0 || TrafficPriority.TrafficSegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
+				if (prioMan.TrafficSegments[segmentId].Node2 == 0 || prioMan.TrafficSegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
 					return;
 
-				Log.Info($"Saving Priority Segment of type: {TrafficPriority.TrafficSegments[segmentId].Instance2.Type} @ node {TrafficPriority.TrafficSegments[segmentId].Node2}, seg. {segmentId}");
+				Log.Info($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance2.Type} @ node {prioMan.TrafficSegments[segmentId].Node2}, seg. {segmentId}");
 				configuration.PrioritySegments.Add(new[] {
-					TrafficPriority.TrafficSegments[segmentId].Node2, segmentId,
-					(int) TrafficPriority.TrafficSegments[segmentId].Instance2.Type
+					prioMan.TrafficSegments[segmentId].Node2, segmentId,
+					(int) prioMan.TrafficSegments[segmentId].Instance2.Type
 				});
 			} catch (Exception e) {
 				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");

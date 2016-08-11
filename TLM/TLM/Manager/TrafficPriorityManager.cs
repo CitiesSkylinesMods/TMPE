@@ -7,27 +7,33 @@ using TrafficManager.Custom.AI;
 using UnityEngine;
 using TrafficManager.State;
 using System.Threading;
+using TrafficManager.Util;
+using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 
-namespace TrafficManager.Traffic {
-	class TrafficPriority {
-		public static float maxStopVelocity = 0.1f;
-		public static float maxYieldVelocity = 0.3f;
+namespace TrafficManager.Manager {
+	public class TrafficPriorityManager : ICustomManager {
+		private static TrafficPriorityManager instance = null;
+
+		public static TrafficPriorityManager Instance() {
+			if (instance == null)
+				instance = new TrafficPriorityManager();
+			return instance;
+		}
+
+		public readonly static float maxStopVelocity = 0.1f;
+		public readonly static float maxYieldVelocity = 0.3f;
 
 		/// <summary>
-		/// Dictionary of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id
+		/// List of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id
 		/// </summary>
-		public static TrafficSegment[] TrafficSegments = null;
+		public TrafficSegment[] TrafficSegments = null;
 
-		/// <summary>
-		/// Determines if vehicles should be cleared
-		/// </summary>
-		private static bool ClearTrafficRequested = false;
-
-		static TrafficPriority() {
+		private TrafficPriorityManager() {
 			TrafficSegments = new TrafficSegment[Singleton<NetManager>.instance.m_segments.m_size];
 		}
 
-		public static SegmentEnd AddPrioritySegment(ushort nodeId, ushort segmentId, SegmentEnd.PriorityType type) {
+		public SegmentEnd AddPrioritySegment(ushort nodeId, ushort segmentId, SegmentEnd.PriorityType type) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.AddPrioritySegment");
 #endif
@@ -98,7 +104,7 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		public static void RemovePrioritySegments(ushort nodeId) { // priorityNodes: OK
+		public void RemovePrioritySegments(ushort nodeId) { // priorityNodes: OK
 			if (nodeId <= 0)
 				return;
 
@@ -111,7 +117,7 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
-		public static List<SegmentEnd> GetPrioritySegments(ushort nodeId) {
+		public List<SegmentEnd> GetPrioritySegments(ushort nodeId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.GetPrioritySegments");
 #endif
@@ -140,7 +146,7 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		public static bool IsPrioritySegment(ushort nodeId, ushort segmentId) {
+		public bool IsPrioritySegment(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.IsPrioritySegment");
 #endif
@@ -157,7 +163,7 @@ namespace TrafficManager.Traffic {
 				NetManager netManager = Singleton<NetManager>.instance;
 				if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
 					RemovePrioritySegment(nodeId, segmentId);
-					CustomTrafficLights.RemoveSegmentLights(segmentId);
+					CustomTrafficLightsManager.Instance().RemoveSegmentLights(segmentId);
 #if TRACE
 					Singleton<CodeProfiler>.instance.Stop("TrafficPriority.IsPrioritySegment");
 #endif
@@ -178,7 +184,7 @@ namespace TrafficManager.Traffic {
 			return false;
 		}
 
-		public static bool IsPriorityNode(ushort nodeId) {
+		public bool IsPriorityNode(ushort nodeId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.IsPriorityNode");
 #endif
@@ -210,7 +216,7 @@ namespace TrafficManager.Traffic {
 			return false;
 		}
 
-		public static SegmentEnd GetPrioritySegment(ushort nodeId, ushort segmentId) {
+		public SegmentEnd GetPrioritySegment(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.GetPrioritySegment");
 #endif
@@ -245,7 +251,7 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
-		internal static void RemovePrioritySegment(ushort nodeId, ushort segmentId) {
+		internal void RemovePrioritySegment(ushort nodeId, ushort segmentId) {
 			if (nodeId <= 0 || segmentId <= 0 || TrafficSegments[segmentId] == null)
 				return;
 			var prioritySegment = TrafficSegments[segmentId];
@@ -271,35 +277,12 @@ namespace TrafficManager.Traffic {
 				TrafficSegments[segmentId] = null;
 		}
 
-		internal static void ClearTraffic() {
-			try {
-				Monitor.Enter(Singleton<VehicleManager>.instance);
-
-				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
-					if (
-						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0 /*&&
-						Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].Info.m_vehicleType == VehicleInfo.VehicleType.Car*/)
-						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
-				}
-
-				CustomRoadAI.resetTrafficStats();
-			} catch (Exception ex) {
-				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
-			} finally {
-				Monitor.Exit(Singleton<VehicleManager>.instance);
-			}
-		}
-
-		internal static void RequestClearTraffic() {
-			ClearTrafficRequested = true;
-		}
-
 		/// <summary>
 		/// Adds/Sets a node as a priority node
 		/// </summary>
 		/// <param name="nodeId"></param>
 		/// <returns>number of priority segments added</returns>
-		internal static byte AddPriorityNode(ushort nodeId) {
+		internal byte AddPriorityNode(ushort nodeId) {
 			if (nodeId <= 0)
 				return 0;
 
@@ -309,18 +292,18 @@ namespace TrafficManager.Traffic {
 
 				if (segmentId == 0)
 					continue;
-				if (TrafficPriority.IsPrioritySegment(nodeId, segmentId))
+				if (IsPrioritySegment(nodeId, segmentId))
 					continue;
 				/*if (SegmentGeometry.Get(segmentId).IsOutgoingOneWay(nodeId))
 					continue;*/ // we need this for pedestrian traffic lights
 
-				TrafficPriority.AddPrioritySegment(nodeId, segmentId, SegmentEnd.PriorityType.None);
+				AddPrioritySegment(nodeId, segmentId, SegmentEnd.PriorityType.None);
 				++ret;
 			}
 			return ret;
 		}
 
-		public static bool HasIncomingVehiclesWithHigherPriority(ushort targetVehicleId, ref Vehicle targetVehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+		public bool HasIncomingVehiclesWithHigherPriority(ushort targetVehicleId, ref Vehicle targetVehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.HasIncomingVehiclesWithHigherPriority");
 #endif
@@ -566,7 +549,7 @@ namespace TrafficManager.Traffic {
 			return false;
 		}
 
-		private static bool HasVehiclePriority(bool debug, ushort transitNodeId, ushort targetCarId, ref Vehicle targetVehicleData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos, bool targetIsOnMainRoad, ushort incomingCarId, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, bool incomingIsOnMainRoad, SegmentEnd targetEnd, SegmentEnd incomingEnd) {
+		private bool HasVehiclePriority(bool debug, ushort transitNodeId, ushort targetCarId, ref Vehicle targetVehicleData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos, bool targetIsOnMainRoad, ushort incomingCarId, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, bool incomingIsOnMainRoad, SegmentEnd targetEnd, SegmentEnd incomingEnd) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.HasVehiclePriority");
 #endif
@@ -637,10 +620,8 @@ namespace TrafficManager.Traffic {
 
 				//var targetVehPos = targetVehState.GetCurrentPosition();
 
-				bool incomingIsOnEmergency = false;// (incomingVehState.VehicleType & ExtVehicleType.Emergency) != ExtVehicleType.None;
-
 				// check if target is on main road and incoming is on low-priority road
-				if (targetIsOnMainRoad && !incomingIsOnMainRoad && !incomingIsOnEmergency) {
+				if (targetIsOnMainRoad && !incomingIsOnMainRoad) {
 #if DEBUG
 					if (debug) {
 						Log._Debug($"  HasVehiclePriority: Target is on main road and incoming is not. Target HAS PRIORITY.");
@@ -665,9 +646,9 @@ namespace TrafficManager.Traffic {
 				SegmentGeometry targetGeometry = SegmentGeometry.Get(targetCurPos.m_segment);
 				SegmentGeometry incomingGeometry = SegmentGeometry.Get(incomingCurPos.m_segment);
 				bool isTargetStartNode = targetGeometry.StartNodeId() == nodeId;
-				Direction targetToDir = targetGeometry.GetDirection(targetNextPos.m_segment, isTargetStartNode);
-				Direction incomingFromRelDir = targetGeometry.GetDirection(incomingCurPos.m_segment, isTargetStartNode);
-				Direction incomingToDir = incomingGeometry.GetDirection(incomingNextPos.m_segment, incomingGeometry.StartNodeId() == nodeId);
+				ArrowDirection targetToDir = targetGeometry.GetDirection(targetNextPos.m_segment, isTargetStartNode);
+				ArrowDirection incomingFromRelDir = targetGeometry.GetDirection(incomingCurPos.m_segment, isTargetStartNode);
+				ArrowDirection incomingToDir = incomingGeometry.GetDirection(incomingNextPos.m_segment, incomingGeometry.StartNodeId() == nodeId);
 #if DEBUG
 				if (debug) {
 					Log._Debug($"  HasVehiclePriority: targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingFromRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
@@ -712,7 +693,7 @@ namespace TrafficManager.Traffic {
 						}
 #endif
 						switch (targetToDir) {
-							case Direction.Left:
+							case ArrowDirection.Left:
 								laneOrderCorrect = IsLaneOrderConflictFree(debug, targetNextPos.m_segment, transitNodeId, targetNextPos.m_lane, incomingNextPos.m_lane); // stay left
 #if DEBUG
 								if (debug) {
@@ -720,11 +701,11 @@ namespace TrafficManager.Traffic {
 								}
 #endif
 								break;
-							case Direction.Forward:
+							case ArrowDirection.Forward:
 							default:
 								switch (incomingFromRelDir) {
-									case Direction.Left:
-									case Direction.Forward:
+									case ArrowDirection.Left:
+									case ArrowDirection.Forward:
 										laneOrderCorrect = IsLaneOrderConflictFree(debug, targetNextPos.m_segment, transitNodeId, incomingNextPos.m_lane, targetNextPos.m_lane); // stay right
 #if DEBUG
 										if (debug) {
@@ -732,7 +713,7 @@ namespace TrafficManager.Traffic {
 										}
 #endif
 										break;
-									case Direction.Right:
+									case ArrowDirection.Right:
 										laneOrderCorrect = IsLaneOrderConflictFree(debug, targetNextPos.m_segment, transitNodeId, targetNextPos.m_lane, incomingNextPos.m_lane); // stay left
 #if DEBUG
 										if (debug) {
@@ -740,7 +721,7 @@ namespace TrafficManager.Traffic {
 										}
 #endif
 										break;
-									case Direction.Turn:
+									case ArrowDirection.Turn:
 									default:
 										laneOrderCorrect = true;
 #if DEBUG
@@ -751,7 +732,7 @@ namespace TrafficManager.Traffic {
 										break;
 								}
 								break;
-							case Direction.Right:
+							case ArrowDirection.Right:
 								laneOrderCorrect = IsLaneOrderConflictFree(debug, targetNextPos.m_segment, transitNodeId, incomingNextPos.m_lane, targetNextPos.m_lane); // stay right
 #if DEBUG
 								if (debug) {
@@ -781,7 +762,7 @@ namespace TrafficManager.Traffic {
 					return true;
 				}
 
-				bool incomingCrossingStreet = incomingToDir == Direction.Forward || incomingToDir == Direction.Left;
+				bool incomingCrossingStreet = incomingToDir == ArrowDirection.Forward || incomingToDir == ArrowDirection.Left;
 
 #if DEBUG
 				if (debug) {
@@ -791,9 +772,9 @@ namespace TrafficManager.Traffic {
 
 				bool ret;
 				switch (targetToDir) {
-					case Direction.Right:
+					case ArrowDirection.Right:
 						// target: BOTTOM->RIGHT
-						if (((!targetIsOnMainRoad && incomingIsOnMainRoad) || incomingIsOnEmergency) && sameTargets && !laneOrderCorrect) {
+						if ((!targetIsOnMainRoad && incomingIsOnMainRoad) && sameTargets && !laneOrderCorrect) {
 #if DEBUG
 							if (debug) {
 								Log._Debug($"  HasVehiclePriority: Target is going RIGHT and is on low-priority road turning right. the other vehicle is on a priority road. target MUST WAIT.");
@@ -807,7 +788,7 @@ namespace TrafficManager.Traffic {
 
 #if DEBUG
 						if (debug) {
-							Log._Debug($"  HasVehiclePriority: Target is going RIGHT without conflict (targetIsOnMainRoad={targetIsOnMainRoad}, incomingIsOnMainRoad={incomingIsOnMainRoad}, incomingIsOnEmergency={incomingIsOnEmergency}, sameTargets={sameTargets}, laneOrderCorrect={laneOrderCorrect}). target HAS PRIORITY.");
+							Log._Debug($"  HasVehiclePriority: Target is going RIGHT without conflict (targetIsOnMainRoad={targetIsOnMainRoad}, incomingIsOnMainRoad={incomingIsOnMainRoad}, sameTargets={sameTargets}, laneOrderCorrect={laneOrderCorrect}). target HAS PRIORITY.");
                         }
 #endif
 
@@ -815,33 +796,33 @@ namespace TrafficManager.Traffic {
 						Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
 #endif
 						return true;
-					case Direction.Forward:
+					case ArrowDirection.Forward:
 					default:
 						// target: BOTTOM->TOP
 						switch (incomingFromRelDir) {
-							case Direction.Right:
-								ret = !incomingIsOnMainRoad && !incomingIsOnEmergency && !incomingCrossingStreet;
+							case ArrowDirection.Right:
+								ret = !incomingIsOnMainRoad && !incomingCrossingStreet;
 #if DEBUG
 								if (debug) {
-									Log._Debug($"  HasVehiclePriority: Target is going FORWARD, incoming is coming from RIGHT. incomingIsOnMainRoad={incomingIsOnMainRoad}, incomingIsOnEmergency={incomingIsOnEmergency}, incomingCrossingStreet={incomingCrossingStreet}, result={ret}");
+									Log._Debug($"  HasVehiclePriority: Target is going FORWARD, incoming is coming from RIGHT. incomingIsOnMainRoad={incomingIsOnMainRoad}, incomingCrossingStreet={incomingCrossingStreet}, result={ret}");
 								}
 #endif
 #if TRACE
 								Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
 #endif
 								return ret;
-							case Direction.Left:
-								ret = (targetIsOnMainRoad && !incomingIsOnEmergency) || !incomingCrossingStreet;
+							case ArrowDirection.Left:
+								ret = true;// ; targetIsOnMainRoad || !incomingCrossingStreet;
 #if DEBUG
 								if (debug) {
-									Log._Debug($"  HasVehiclePriority: Target is going FORWARD, incoming is coming from LEFT. targetIsOnMainRoad={targetIsOnMainRoad}, incomingIsOnEmergency={incomingIsOnEmergency}, incomingCrossingStreet={incomingCrossingStreet}, result={ret}");
+									Log._Debug($"  HasVehiclePriority: Target is going FORWARD, incoming is coming from LEFT. targetIsOnMainRoad={targetIsOnMainRoad}, incomingCrossingStreet={incomingCrossingStreet}, result={ret}");
 								}
 #endif
 #if TRACE
 								Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
 #endif
 								return ret;
-							case Direction.Forward:
+							case ArrowDirection.Forward:
 							default:
 #if DEBUG
 								if (debug) {
@@ -853,10 +834,10 @@ namespace TrafficManager.Traffic {
 #endif
 								return true;
 						}
-					case Direction.Left:
+					case ArrowDirection.Left:
 						// target: BOTTOM->LEFT
 						switch (incomingFromRelDir) {
-							case Direction.Right:
+							case ArrowDirection.Right:
 								ret = !incomingCrossingStreet;
 #if DEBUG
 								if (debug) {
@@ -867,24 +848,24 @@ namespace TrafficManager.Traffic {
 								Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
 #endif
 								return ret;
-							case Direction.Left:
-								if (targetIsOnMainRoad && incomingIsOnMainRoad && !incomingIsOnEmergency) { // bent priority road
+							case ArrowDirection.Left:
+								if (targetIsOnMainRoad && incomingIsOnMainRoad) { // bent priority road
 									ret = true;
 								} else {
 									ret = !incomingCrossingStreet;
 								}
 #if DEBUG
 								if (debug) {
-									Log._Debug($"  HasVehiclePriority: Target is going LEFT, incoming is coming from LEFT. targetIsOnMainRoad={targetIsOnMainRoad}, incomingIsOnMainRoad={incomingIsOnMainRoad}, incomingIsOnEmergency={incomingIsOnEmergency}, incomingCrossingStreet={incomingCrossingStreet}. result={ret}");
+									Log._Debug($"  HasVehiclePriority: Target is going LEFT, incoming is coming from LEFT. targetIsOnMainRoad={targetIsOnMainRoad}, incomingIsOnMainRoad={incomingIsOnMainRoad}, incomingCrossingStreet={incomingCrossingStreet}. result={ret}");
 								}
 #endif
 #if TRACE
 								Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
 #endif
 								return ret;
-							case Direction.Forward:
+							case ArrowDirection.Forward:
 							default:
-								ret = incomingToDir == Direction.Left || incomingToDir == Direction.Turn;
+								ret = incomingToDir == ArrowDirection.Left || incomingToDir == ArrowDirection.Turn;
 #if DEBUG
 								if (debug) {
 									Log._Debug($"  HasVehiclePriority: Target is going LEFT, incoming is coming from FORWARD. incomingToDir={incomingToDir}. result={ret}");
@@ -911,29 +892,15 @@ namespace TrafficManager.Traffic {
 			return false;
 		}
 
-		private static Direction InvertLeftRight(Direction dir) {
-			if (dir == Direction.Left)
-				dir = Direction.Right;
-			else if (dir == Direction.Right)
-				dir = Direction.Left;
+		private static ArrowDirection InvertLeftRight(ArrowDirection dir) {
+			if (dir == ArrowDirection.Left)
+				dir = ArrowDirection.Right;
+			else if (dir == ArrowDirection.Right)
+				dir = ArrowDirection.Left;
 			return dir;
 		}
 
-		internal static void OnLevelLoading() {
-			try {
-				//TrafficPriority.fixJunctions(); // TODO maybe remove this
-			} catch (Exception e) {
-				Log.Error($"OnLevelLoading: {e.ToString()}");
-            }
-		}
-
-		internal static void OnLevelUnloading() {
-			TrafficLightSimulation.TrafficLightSimulations.Clear();
-			for (int i = 0; i < TrafficSegments.Length; ++i)
-				TrafficSegments[i] = null;
-		}
-
-		public static bool IsLaneOrderConflictFree(bool debug, ushort segmentId, ushort nodeId, byte leftLaneIndex, byte rightLaneIndex) { // TODO I think this is incorrect. See TrafficLightTool._guiLaneChangeWindow
+		public bool IsLaneOrderConflictFree(bool debug, ushort segmentId, ushort nodeId, byte leftLaneIndex, byte rightLaneIndex) { // TODO I think this is incorrect. See TrafficLightTool._guiLaneChangeWindow
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.IsLaneOrderConflictFree");
 #endif
@@ -951,7 +918,7 @@ namespace TrafficManager.Traffic {
 
 				NetInfo.Direction dir = nodeId == netManager.m_segments.m_buffer[segmentId].m_startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
 				NetInfo.Direction dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-				NetInfo.Direction dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+				NetInfo.Direction dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 				NetInfo.Lane leftLane = segmentInfo.m_lanes[leftLaneIndex];
 				NetInfo.Lane rightLane = segmentInfo.m_lanes[rightLaneIndex];
@@ -986,14 +953,10 @@ namespace TrafficManager.Traffic {
 
 		//private static ushort nextValidityCheckedSegment = 0;
 
-		public static void SegmentSimulationStep(ushort segmentId) {
+		public void SegmentSimulationStep(ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.SegmentSimulationStep");
 #endif
-			if (ClearTrafficRequested) {
-				TrafficPriority.ClearTraffic();
-				ClearTrafficRequested = false;
-			}
 
 			// simulate segment-ends
 			TrafficSegment trafficSegment = TrafficSegments[segmentId];
@@ -1008,6 +971,12 @@ namespace TrafficManager.Traffic {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("TrafficPriority.SegmentSimulationStep");
 #endif
+		}
+
+		public void OnLevelUnloading() {
+			TrafficLightSimulationManager.Instance().TrafficLightSimulations.Clear();
+			for (int i = 0; i < TrafficSegments.Length; ++i)
+				TrafficSegments[i] = null;
 		}
 	}
 }

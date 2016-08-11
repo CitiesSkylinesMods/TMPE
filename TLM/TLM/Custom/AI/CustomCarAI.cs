@@ -6,12 +6,14 @@ using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using ColossalFramework.Math;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
+using TrafficManager.Manager;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // correct would be to inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -31,38 +33,31 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="vehicleData"></param>
 		/// <param name="physicsLodRefPos"></param>
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-#if USEPATHWAITCOUNTER
-			VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
-#endif
-
 			PathManager pathMan = Singleton<PathManager>.instance;
 #if DEBUG
-			if (!Options.disableSomething1) {
+			/*if (!Options.disableSomething1) {
 				Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}) called. flags: {vehicleData.m_flags} pfFlags: {pathMan.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags}");
-            }
+            }*/
 #endif
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				PathManager pathManager = Singleton<PathManager>.instance;
 				byte pathFindFlags = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
-				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 
 #if USEPATHWAITCOUNTER
+				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
 					state.PathWaitCounter = 0; // NON-STOCK CODE
+				}
 #endif
+
+				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					vehicleData.m_pathPositionIndex = 255;
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					vehicleData.m_flags &= ~Vehicle.Flags.Arriving;
 					this.PathfindSuccess(vehicleId, ref vehicleData);
 					this.TrySpawn(vehicleId, ref vehicleData);
-				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0
-#if USEPATHWAITCOUNTER
-					|| ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
-#endif
-					) { // NON-STOCK CODE
-#if USEPATHWAITCOUNTER
-					state.PathWaitCounter = 0; // NON-STOCK CODE
-#endif
+				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0) { // path == 0: non-stock code!
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					vehicleData.m_path = 0u;
@@ -71,13 +66,11 @@ namespace TrafficManager.Custom.AI {
 				}
 #if USEPATHWAITCOUNTER
 				else {
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
 					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter+1); // NON-STOCK CODE
 				}
 #endif
 			} else {
-#if USEPATHWAITCOUNTER
-				state.PathWaitCounter = 0; // NON-STOCK CODE
-#endif
 				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
 				}
@@ -134,7 +127,7 @@ namespace TrafficManager.Custom.AI {
 			int maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) == 0 && vehicleData.m_cargoParent == 0) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if ((int)vehicleData.m_blockCounter == maxBlockCounter && Options.enableDespawning) {
+			} else if ((int)vehicleData.m_blockCounter >= maxBlockCounter && Options.enableDespawning) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 #if PATHRECALC
@@ -146,6 +139,12 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public override bool TrySpawn(ushort vehicleID, ref Vehicle vehicleData) {
+			// NON-STOCK CODE START
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				VehicleStateManager.Instance().OnBeforeSpawnVehicle(vehicleID, ref vehicleData);
+			}
+			// NON-STOCK CODE END
+
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
 				return true;
 			}
@@ -155,12 +154,6 @@ namespace TrafficManager.Custom.AI {
 			}
 			vehicleData.Spawn(vehicleID);
 			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
-
-			// NON-STOCK CODE START
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
-			}
-			// NON-STOCK CODE END
 
 			return true;
 		}
@@ -347,6 +340,10 @@ namespace TrafficManager.Custom.AI {
 			bool recalcRequested = state.PathRecalculationRequested;
 			state.PathRecalculationRequested = false;
 #endif
+#if DEBUG
+			//Log._Debug($"CustomCarAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
+
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
@@ -374,12 +371,17 @@ namespace TrafficManager.Custom.AI {
 					vehicleType = ExtVehicleType.RoadVehicle;
 				}
 
-				bool res = Singleton<CustomPathManager>.instance.CreatePath(
+				if (Singleton<CustomPathManager>.instance.CreatePath(
 #if PATHRECALC
 					recalcRequested, 
 #endif
-					(ExtVehicleType)vehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false);
-				if (res) {
+					(ExtVehicleType)vehicleType, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
+using TrafficManager.Manager;
 using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {

@@ -8,8 +8,10 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using UnityEngine;
+using TrafficManager.Manager;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI {
@@ -20,10 +22,15 @@ namespace TrafficManager.Custom.AI {
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
-				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
+
 #if USEPATHWAITCOUNTER
+				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
 					state.PathWaitCounter = 0; // NON-STOCK CODE
+				}
 #endif
+
+				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					try {
 						this.PathfindSuccess(vehicleId, ref vehicleData);
 						this.PathFindReady(vehicleId, ref vehicleData);
@@ -35,14 +42,7 @@ namespace TrafficManager.Custom.AI {
 						this.PathfindFailure(vehicleId, ref vehicleData);
 						return;
 					}
-				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0
-#if USEPATHWAITCOUNTER
-|| ((pathFindFlags & PathUnit.FLAG_CREATED) != 0 && state.PathWaitCounter == ushort.MaxValue)
-#endif
-) { // NON-STOCK CODE
-#if USEPATHWAITCOUNTER
-					state.PathWaitCounter = 0; // NON-STOCK CODE
-#endif
+				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0) {
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					vehicleData.m_path = 0u;
@@ -51,13 +51,11 @@ namespace TrafficManager.Custom.AI {
 				}
 #if USEPATHWAITCOUNTER
 				else {
-					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter + 1); // NON-STOCK CODE
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
+					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter+1); // NON-STOCK CODE
 				}
 #endif
 			} else {
-#if USEPATHWAITCOUNTER
-				state.PathWaitCounter = 0; // NON-STOCK CODE
-#endif
 				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
 				}
@@ -112,12 +110,18 @@ namespace TrafficManager.Custom.AI {
 					break;
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || vehicleData.m_blockCounter == 255) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
 
 		public override bool TrySpawn(ushort vehicleID, ref Vehicle vehicleData) {
+			// NON-STOCK CODE START
+			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				VehicleStateManager.Instance().OnBeforeSpawnVehicle(vehicleID, ref vehicleData);
+			}
+			// NON-STOCK CODE END
+
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
 				return true;
 			}
@@ -136,12 +140,6 @@ namespace TrafficManager.Custom.AI {
 			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
 			CustomTramBaseAI.InitializePath(vehicleID, ref vehicleData);
 
-			// NON-STOCK CODE START
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
-			}
-			// NON-STOCK CODE END
-
 			return true;
 		}
 
@@ -150,7 +148,9 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
-			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = ExtVehicleType.Tram;
+#if DEBUG
+			//Log._Debug($"CustomTramBaseAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
 
 			VehicleInfo info = this.m_info;
 			bool allowUnderground;
@@ -178,7 +178,12 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.Tram, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+				if (Singleton<CustomPathManager>.instance.CreatePath(ExtVehicleType.Tram, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

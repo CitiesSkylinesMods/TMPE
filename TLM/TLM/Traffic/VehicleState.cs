@@ -9,6 +9,8 @@ using ColossalFramework;
 using UnityEngine;
 using System.Collections.Generic;
 using TrafficManager.TrafficLight;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {
@@ -77,7 +79,17 @@ namespace TrafficManager.Traffic {
 		}
 
 #if USEPATHWAITCOUNTER
-		public ushort PathWaitCounter { get; internal set; } = 0;
+		public ushort PathWaitCounter {
+			get { return pathWaitCounter; }
+			internal set {
+				pathWaitCounter = value;
+				if (pathWaitCounter >= 32767) {
+					Log.Warning($"Path wait counter hit maximum for vehicle {VehicleId}. Check path {Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].m_path}!");
+				}
+			}
+		}
+
+		private ushort pathWaitCounter = 0;
 #endif
 
 		public VehicleState(ushort vehicleId) {
@@ -337,7 +349,7 @@ namespace TrafficManager.Traffic {
 
 			LastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			SegmentEnd end = TrafficPriority.GetPrioritySegment(GetTransitNodeId(ref curPos, ref nextPos), curPos.m_segment);
+			SegmentEnd end = TrafficPriorityManager.Instance().GetPrioritySegment(GetTransitNodeId(ref curPos, ref nextPos), curPos.m_segment);
 			
 			if (CurrentSegmentEnd != end) {
 				if (CurrentSegmentEnd != null) {
@@ -366,13 +378,13 @@ namespace TrafficManager.Traffic {
 
 		internal bool CheckValidity(ref Vehicle vehicleData, bool skipCached=false) {
 #if DEBUG
-			bool debug = skipCached;
-			byte pfFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
+			//bool debug = skipCached;
+			//byte pfFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
 #endif
 
 #if DEBUG
-			if (debug)
-				Log._Debug($"VehicleState.CheckValidity({VehicleId}) called. created: {(vehicleData.m_flags & Vehicle.Flags.Created) != 0} ({vehicleData.m_flags}) handled: {(vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) != VehicleInfo.VehicleType.None} ({vehicleData.Info.m_vehicleType}) has path unit: {vehicleData.m_path != 0} path ready: {(pfFlags & PathUnit.FLAG_READY) != 0} ({pfFlags})");
+			//if (debug)
+			//Log._Debug($"VehicleState.CheckValidity({VehicleId}) called. created: {(vehicleData.m_flags & Vehicle.Flags.Created) != 0} ({vehicleData.m_flags}) handled: {(vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) != VehicleInfo.VehicleType.None} ({vehicleData.Info.m_vehicleType}) has path unit: {vehicleData.m_path != 0} path ready: {(pfFlags & PathUnit.FLAG_READY) != 0} ({pfFlags})");
 #endif
 
 			if (!skipCached && !Valid)
@@ -407,9 +419,9 @@ namespace TrafficManager.Traffic {
 			return transitNodeId;
 		}
 
-		internal void OnVehicleSpawned(ref Vehicle vehicleData) {
+		internal void OnBeforeSpawnVehicle(ref Vehicle vehicleData) {
 #if DEBUG
-			Log._Debug($"VehicleState.OnPathFindReady called for vehicle {VehicleId} ({VehicleType}");
+			//Log._Debug($"VehicleState.OnPathFindReady called for vehicle {VehicleId} ({VehicleType}");
 #endif
 
 			Reset();
@@ -440,14 +452,14 @@ namespace TrafficManager.Traffic {
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
 
 #if DEBUG
-			Log._Debug($"Applying VehicleType to trailes of vehicle {VehicleId} to {VehicleType}.");
+			//Log._Debug($"Applying VehicleType to trailes of vehicle {VehicleId} to {VehicleType}.");
 #endif
 
 			// apply vehicle type to all leading/trailing vehicles
 			ushort otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_leadingVehicle;
 			while (otherVehicleId != 0) {
 #if DEBUG
-				Log._Debug($"    Setting VehicleType of leader {otherVehicleId} to {VehicleType}.");
+				//Log._Debug($"    Setting VehicleType of leader {otherVehicleId} to {VehicleType}.");
 #endif
 				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
 				otherState.Valid = true;
@@ -458,7 +470,7 @@ namespace TrafficManager.Traffic {
 			otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_trailingVehicle;
 			while (otherVehicleId != 0) {
 #if DEBUG
-				Log._Debug($"    Setting VehicleType of trailer {otherVehicleId} to {VehicleType}.");
+				//Log._Debug($"    Setting VehicleType of trailer {otherVehicleId} to {VehicleType}.");
 #endif
 				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
 				otherState.Valid = true;

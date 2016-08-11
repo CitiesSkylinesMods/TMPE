@@ -113,15 +113,15 @@ Select_a_timed_traffic_light_program Sélectionner un programme de chronométrag
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Le modèle de chronométrage choisi est incompatible avec cette jonction
 Advanced_AI_cannot_be_activated L'IA avancée ne peut pas être activée
 The_Advanced_Vehicle_AI_cannot_be_activated L'IA avancée de véhicule ne peut être activée car vous utilisez déjà un autre mod qui modifie modifie le comportement des véhicules (par exemple Improved AI ou Traffic++).
-Enable_dynamic_path_calculation Enable dynamic path calculation
-Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
-Lane_connector Lane connector
-Connected_lanes Connected lanes
-Use_alternative_view_mode Use alternative view mode
-Road_type Road type
-Default_speed_limit Default speed limit
-Unit_system Unit system
-Metric Metric
-Imperial Imperial
-Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available)
-Activated_features Activated features
+Enable_dynamic_path_calculation Activer le calcul dynamique des chemins
+Lane_Arrow_Changer_Disabled_Connection Le modificateur des directions de voies est désactivé pour cette voie car vous avez manuellement créé des connections de voies.
+Lane_connector Connecteur de voies
+Connected_lanes Voies connectées
+Use_alternative_view_mode Utiliser le mode de vue alternatif
+Road_type Type de route
+Default_speed_limit Limite de vitesse par défaut
+Unit_system Système d'unités
+Metric Système métrique
+Imperial Système impérial
+Use_more_CPU_cores_for_route_calculation_if_available Utiliser plus de cœurs du CPU pour le calcul de trajets (si disponible)
+Activated_features caractéristiques activées

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.Traffic {
-	public enum Direction {
+	public enum ArrowDirection {
 		Left,
 		Forward,
 		Right,

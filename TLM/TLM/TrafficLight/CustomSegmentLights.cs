@@ -4,12 +4,17 @@
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Custom.AI;
 using System.Linq;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.TrafficLight {
+	/// <summary>
+	/// Represents the set of custom traffic lights located at a node
+	/// </summary>
 	public class CustomSegmentLights : ICloneable {
 		private ushort nodeId;
 		private ushort segmentId;

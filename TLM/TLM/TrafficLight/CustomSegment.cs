@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 
 namespace TrafficManager.TrafficLight
 {

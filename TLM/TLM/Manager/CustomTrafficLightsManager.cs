@@ -1,17 +1,35 @@
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
+using TrafficManager.Util;
+using TrafficManager.TrafficLight;
 
-namespace TrafficManager.TrafficLight {
-	class CustomTrafficLights {
+namespace TrafficManager.Manager {
+	/// <summary>
+	/// Manages the states of all custom traffic lights on the map
+	/// </summary>
+	public class CustomTrafficLightsManager : ICustomManager {
+		private static CustomTrafficLightsManager instance = null;
+
+		public static CustomTrafficLightsManager Instance() {
+			if (instance == null)
+				instance = new CustomTrafficLightsManager();
+			return instance;
+		}
 
 		/// <summary>
-		/// Manual light by segment id
+		/// custom traffic lights by segment id
 		/// </summary>
-		private static CustomSegment[] CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
+		private CustomSegment[] CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
 		
-		internal static void AddLiveSegmentLights(ushort nodeId, ushort segmentId) {
+		/// <summary>
+		/// Adds custom traffic lights at the specified node and segment.
+		/// Light states (red, yellow, green) are taken from the "live" state, that is the traffic light's light state right before the custom light takes control.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		internal void AddLiveSegmentLights(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.AddLiveSegmentLights");
 #endif
@@ -21,8 +39,6 @@ namespace TrafficManager.TrafficLight {
 #endif
 				return;
 			}
-
-			//Log.Message($"Adding live segment light: {segmentId} @ {nodeId}");
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
@@ -44,7 +60,14 @@ namespace TrafficManager.TrafficLight {
 #endif
 		}
 
-		public static void AddSegmentLights(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState light=RoadBaseAI.TrafficLightState.Red) {
+		/// <summary>
+		/// Adds custom traffic lights at the specified node and segment.
+		/// Light stats are set to the given light state, or to "Red" if no light state is given.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		/// <param name="lightState">(optional) light state to set</param>
+		public void AddSegmentLights(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState lightState=RoadBaseAI.TrafficLightState.Red) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.AddSegmentLights");
 #endif
@@ -67,15 +90,15 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 				if (customSegment.Node1 == 0) {
-					customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, light);
+					customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
 					customSegment.Node1 = nodeId;
 				} else {
-					customSegment.Node2Lights = new CustomSegmentLights(nodeId, segmentId, light);
+					customSegment.Node2Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
 					customSegment.Node2 = nodeId;
 				}
 			} else {
 				customSegment = new CustomSegment();
-				customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, light);
+				customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
 				customSegment.Node1 = nodeId;
 				CustomSegments[segmentId] = customSegment;
 			}
@@ -84,14 +107,23 @@ namespace TrafficManager.TrafficLight {
 #endif
 		}
 
-		public static void RemoveSegmentLights(ushort segmentId) {
+		/// <summary>
+		/// Removes all custom traffic lights at both ends of the given segment.
+		/// </summary>
+		/// <param name="segmentId"></param>
+		public void RemoveSegmentLights(ushort segmentId) {
 #if DEBUG
 			Log.Warning($"Removing all segment lights from segment {segmentId}");
 #endif
 			CustomSegments[segmentId] = null;
 		}
 
-		public static void RemoveSegmentLight(ushort nodeId, ushort segmentId) {
+		/// <summary>
+		/// Removes the custom traffic light at the given segment end.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		public void RemoveSegmentLight(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.RemoveSegmentLight");
 #endif
@@ -121,7 +153,12 @@ namespace TrafficManager.TrafficLight {
 #endif
 		}
 
-		private static void Cleanup(ushort segmentId) {
+		/// <summary>
+		/// Performs a housekeeping operation for all custom traffic lights at the given segment.
+		/// It is checked wheter the segment and connected nodes are still valid. If not, corresponding custom traffic lights are removed.
+		/// </summary>
+		/// <param name="segmentId"></param>
+		private void Cleanup(ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.Cleanup");
 #endif
@@ -152,7 +189,13 @@ namespace TrafficManager.TrafficLight {
 #endif
 		}
 
-		public static bool IsSegmentLight(ushort nodeId, ushort segmentId) {
+		/// <summary>
+		/// Checks if a custom traffic light is present at the given segment end.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		/// <returns></returns>
+		public bool IsSegmentLight(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.IsSegmentLight");
 #endif
@@ -177,7 +220,13 @@ namespace TrafficManager.TrafficLight {
 			return false;
 		}
 
-		public static CustomSegmentLights GetOrLiveSegmentLights(ushort nodeId, ushort segmentId) {
+		/// <summary>
+		/// Retrieves the custom traffic light at the given segment end. If none exists, a new custom traffic light is created and returned.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		/// <returns>existing or new custom traffic light at segment end</returns>
+		public CustomSegmentLights GetOrLiveSegmentLights(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.GetOrLiveSegmentLights");
 #endif
@@ -191,7 +240,13 @@ namespace TrafficManager.TrafficLight {
 			return ret;
 		}
 
-		public static CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
+		/// <summary>
+		/// Retrieves the custom traffic light at the given segment end.
+		/// </summary>
+		/// <param name="nodeId"></param>
+		/// <param name="segmentId"></param>
+		/// <returns>existing custom traffic light at segment end, <code>null</code> if none exists</returns>
+		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.GetSegmentLights");
 #endif
@@ -224,7 +279,7 @@ namespace TrafficManager.TrafficLight {
 			return null;
 		}
 
-		internal static void OnLevelUnloading() {
+		public void OnLevelUnloading() {
 			CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
 		}
 	}

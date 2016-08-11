@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class ToggleTrafficLightsTool : SubTool {
@@ -22,13 +23,13 @@ namespace TrafficManager.UI.SubTools {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None)
 				return;
 
-			TrafficLightSimulation sim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
+			TrafficLightSimulation sim = TrafficLightSimulationManager.Instance().GetNodeSimulation(HoveredNodeId);
 			if (sim != null && sim.IsTimedLight()) {
 				MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
 				return;
 			}
 
-			TrafficPriority.RemovePrioritySegments(HoveredNodeId);
+			TrafficPriorityManager.Instance().RemovePrioritySegments(HoveredNodeId);
 			Flags.setNodeTrafficLight(HoveredNodeId, (Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None);
 		}
 

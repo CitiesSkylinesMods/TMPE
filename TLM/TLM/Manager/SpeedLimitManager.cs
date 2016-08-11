@@ -6,16 +6,17 @@ using System.Text;
 using TrafficManager.State;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Manager {
 	public class SpeedLimitManager {
 		private static SpeedLimitManager instance = null;
-		private static readonly float MAX_SPEED = 6f; // 300 km/h
 
 		public static SpeedLimitManager Instance() {
 			if (instance == null)
 				instance = new SpeedLimitManager();
 			return instance;
 		}
+
+		private static readonly float MAX_SPEED = 6f; // 300 km/h
 
 		static SpeedLimitManager() {
 			Instance();

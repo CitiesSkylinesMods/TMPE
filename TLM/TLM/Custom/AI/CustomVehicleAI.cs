@@ -10,9 +10,11 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomVehicleAI : VehicleAI {
@@ -342,6 +344,8 @@ namespace TrafficManager.Custom.AI {
 							return false;
 						}
 					} else if (vehicleState != null && Options.prioritySignsEnabled) {
+						TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 #if DEBUG
 						//bool debug = destinationNodeId == 10864;
 						//bool debug = destinationNodeId == 13531;
@@ -353,7 +357,7 @@ namespace TrafficManager.Custom.AI {
 							Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
-						var prioritySegment = TrafficPriority.GetPrioritySegment(targetNodeId, prevPos.m_segment);
+						var prioritySegment = prioMan.GetPrioritySegment(targetNodeId, prevPos.m_segment);
 						if (prioritySegment != null) {
 #if DEBUG
 							if (debug)
@@ -396,7 +400,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriority.maxStopVelocity) {
+											if (speed <= TrafficPriorityManager.maxStopVelocity) {
 												vehicleState.WaitTime++;
 
 												float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
@@ -404,7 +408,7 @@ namespace TrafficManager.Custom.AI {
 													if (Options.simAccuracy >= 4) {
 														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 													} else {
-														hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
 														if (debug)
 															Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -451,11 +455,11 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriority.maxYieldVelocity || Options.simAccuracy <= 2) {
+											if (speed <= TrafficPriorityManager.maxYieldVelocity || Options.simAccuracy <= 2) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
 													if (debug)
 														Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
@@ -479,7 +483,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 												// vehicle has not yet reached yield speed
-												maxSpeed = TrafficPriority.maxYieldVelocity;
+												maxSpeed = TrafficPriorityManager.maxYieldVelocity;
 												return false;
 											}
 										} else {
@@ -509,7 +513,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
 #if DEBUG
 											if (debug)
 												Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -526,7 +530,7 @@ namespace TrafficManager.Custom.AI {
 										}
 										return true;
 								}
-							} else if (speed <= TrafficPriority.maxStopVelocity) {
+							} else if (speed <= TrafficPriorityManager.maxStopVelocity) {
 								// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 								if (debug)

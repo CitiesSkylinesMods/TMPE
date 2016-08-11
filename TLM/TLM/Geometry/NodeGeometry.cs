@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TrafficManager.Manager;
 using TrafficManager.State;
+using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Geometry {
 	public class NodeGeometry : IObservable<NodeGeometry> {
 		private static NodeGeometry[] nodeGeometries;
 
@@ -139,17 +141,21 @@ namespace TrafficManager.Traffic {
 
 			Flags.applyNodeTrafficLightFlag(NodeId);
 
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+
 			// check if node is valid
 			if (!IsValid()) {
 				for (int i = 0; i < 8; ++i) {
 					SegmentEndGeometries[i] = null;
 				}
-				TrafficLightSimulation.RemoveNodeFromSimulation(NodeId, false, true);
+				tlsMan.RemoveNodeFromSimulation(NodeId, false, true);
 				Flags.setNodeTrafficLight(NodeId, false);
 			} else {
 				NetManager netManager = Singleton<NetManager>.instance;
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 				bool hasTrafficLight = (netManager.m_nodes.m_buffer[NodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
-				var nodeSim = TrafficLightSimulation.GetNodeSimulation(NodeId);
+				var nodeSim = tlsMan.GetNodeSimulation(NodeId);
 				if (nodeSim == null) {
 					byte numSegmentsWithSigns = 0;
 					for (var s = 0; s < 8; s++) {
@@ -161,7 +167,7 @@ namespace TrafficManager.Traffic {
 						Log._Debug($"NodeGeometry.Recalculate: Housekeeping segment {segmentId}");
 #endif
 
-						SegmentEnd prioritySegment = TrafficPriority.GetPrioritySegment(NodeId, segmentId);
+						SegmentEnd prioritySegment = prioMan.GetPrioritySegment(NodeId, segmentId);
 						if (prioritySegment == null) {
 							continue;
 						}
@@ -180,7 +186,7 @@ namespace TrafficManager.Traffic {
 
 					if (numSegmentsWithSigns > 0) {
 						// add priority segments for newly created segments
-						numSegmentsWithSigns += TrafficPriority.AddPriorityNode(NodeId);
+						numSegmentsWithSigns += prioMan.AddPriorityNode(NodeId);
 					}
 				}
 

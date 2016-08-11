@@ -6,11 +6,12 @@ using UnityEngine;
 using ColossalFramework;
 using ColossalFramework.UI;
 using ICities;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.State;
 using TrafficManager.UI;
 using ColossalFramework.Plugins;
 using ColossalFramework.Globalization;
+using TrafficManager.Manager;
 
 namespace TrafficManager.State {
 
@@ -68,6 +69,10 @@ namespace TrafficManager.State {
 		private static UITextField someValue7Field = null;
 		private static UITextField someValue8Field = null;
 		private static UITextField someValue9Field = null;
+		private static UITextField someValue10Field = null;
+		private static UITextField someValue11Field = null;
+		private static UITextField someValue12Field = null;
+		private static UITextField someValue13Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -76,7 +81,7 @@ namespace TrafficManager.State {
 		private static UIHelperBase maintenanceGroup = null;
 		private static UIHelperBase featureGroup = null;
 
-		public static int simAccuracy = 1;
+		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = true;
@@ -94,27 +99,35 @@ namespace TrafficManager.State {
 		public static bool advancedAI = false;
 		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
+#if DEBUG
+		public static bool showLanes = true;
+#else
 		public static bool showLanes = false;
+#endif
 		public static bool strongerRoadConditionEffects = false;
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
-		public static float pathCostMultiplicator = 0.75f; // debug value
-		public static float pathCostMultiplicator2 = 1f; // debug value
+		public static float pathCostMultiplicator = 0f; // debug value
+		public static float pathCostMultiplicator2 = 0.25f; // debug value
 		public static bool disableSomething1 = false; // debug switch
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
-		public static float someValue = 3f; // debug value
+		public static float someValue = 0.65f; // debug value
 		public static float someValue2 = 1.25f; // debug value
 		public static float someValue3 = 2f; // debug value
 		public static float someValue4 = 5f; // debug value
-		public static float someValue5 = 2f; // debug value
+		public static float someValue5 = 0.5f; // debug value
 		public static float someValue6 = 1.5f; // debug value
 		public static float someValue7 = 0.75f; // debug value
-		public static float someValue8 = 3f; // debug value
-		public static float someValue9 = 0.8f; // debug value
+		public static float someValue8 = 2; // debug value
+		public static float someValue9 = 1; // debug value
+		public static float someValue10 = 0.5f; // debug value
+		public static float someValue11 = 2.5f; // debug value
+		public static float someValue12 = 0.75f; // debug value
+		public static float someValue13 = 0.5f; // debug value
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -126,7 +139,7 @@ namespace TrafficManager.State {
 			get { return menuRebuildRequired; }
 			private set {
 				menuRebuildRequired = value;
-				if (LoadingExtension.Instance.UI != null)
+				if (LoadingExtension.Instance != null && LoadingExtension.Instance.UI != null)
 					LoadingExtension.Instance.UI.Close();
 			}
 		}
@@ -196,6 +209,10 @@ namespace TrafficManager.State {
 			someValue7Field = maintenanceGroup.AddTextfield("Some value #7", String.Format("{0:0.##}", someValue7), onSomeValue7Changed) as UITextField;
 			someValue8Field = maintenanceGroup.AddTextfield("Some value #8", String.Format("{0:0.##}", someValue8), onSomeValue8Changed) as UITextField;
 			someValue9Field = maintenanceGroup.AddTextfield("Some value #9", String.Format("{0:0.##}", someValue9), onSomeValue9Changed) as UITextField;
+			someValue10Field = maintenanceGroup.AddTextfield("Some value #10", String.Format("{0:0.##}", someValue10), onSomeValue10Changed) as UITextField;
+			someValue11Field = maintenanceGroup.AddTextfield("Some value #11", String.Format("{0:0.##}", someValue11), onSomeValue11Changed) as UITextField;
+			someValue12Field = maintenanceGroup.AddTextfield("Some value #12", String.Format("{0:0.##}", someValue12), onSomeValue12Changed) as UITextField;
+			someValue13Field = maintenanceGroup.AddTextfield("Some value #13", String.Format("{0:0.##}", someValue13), onSomeValue13Changed) as UITextField;
 #endif
 		}
 
@@ -662,6 +679,58 @@ namespace TrafficManager.State {
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue9 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue10Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue10 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue11Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue11 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue12Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue12 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue13Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue13 = newSomeValue;
 			} catch (Exception e) {
 				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);

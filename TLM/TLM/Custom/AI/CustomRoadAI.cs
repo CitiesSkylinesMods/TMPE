@@ -1,33 +1,34 @@
 #define MARKCONGESTEDSEGMENTSx
-#define ABSDENSITYx
+#define ABSDENSITY
+#define RELDENSITYx
 
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.TrafficLight;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using UnityEngine;
 using ColossalFramework.Math;
 using System.Threading;
 using TrafficManager.UI;
 using TrafficManager.State;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomRoadAI : RoadBaseAI {
-		private static ushort[] nodeHousekeepingMask = { 3, 7, 15, 31, 63 };
-		private static ushort[] segmentHousekeepingMask = { 15, 31, 63, 127, 255 };
-
 		// TODO create accessor method for these arrays
 		public static ushort[][] currentLaneTrafficBuffer;
-#if ABSDENSITY
-		public static ushort[][] previousLaneTrafficBuffer;
-#endif
 
 		public static uint[][] currentLaneSpeeds;
 		public static uint[][] currentLaneDensities;
+#if ABSDENSITY
+		public static uint[][] maxLaneDensities;
+#endif
 
 		public static byte[][] laneMeanSpeeds;
+#if RELDENSITY
 		public static byte[][] laneMeanRelDensities;
+#endif
 #if ABSDENSITY
 		public static byte[][] laneMeanAbsDensities;
 #endif
@@ -42,15 +43,36 @@ namespace TrafficManager.Custom.AI {
 
 		//public static bool InStartupPhase = true;
 
+		internal static void DestroySegmentStats(ushort segmentId) {
+			if (!initDone)
+				return;
+
+			currentLaneSpeeds[segmentId] = null;
+			currentLaneDensities[segmentId] = null;
+#if ABSDENSITY
+			maxLaneDensities[segmentId] = null;
+#endif
+			laneMeanSpeeds[segmentId] = null;
+#if RELDENSITY
+			laneMeanRelDensities[segmentId] = null;
+#endif
+#if ABSDENSITY
+			laneMeanAbsDensities[segmentId] = null;
+#endif
+			currentLaneTrafficBuffer[segmentId] = null;
+		}
+
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
 			if (simStartFrame == 0)
 				simStartFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 			if (Options.timedLightsEnabled) {
 				try {
-					TrafficLightSimulation.SimulationStep();
+					TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
-					var nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
+					tlsMan.SimulationStep();
+
+					var nodeSim = tlsMan.GetNodeSimulation(nodeId);
 					if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 						OriginalSimulationStep(nodeId, ref data);
 					}
@@ -64,7 +86,24 @@ namespace TrafficManager.Custom.AI {
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
 			if (initDone) {
 				try {
-					TrafficPriority.SegmentSimulationStep(segmentID);
+					uint curLaneId = data.m_lanes;
+					int numLanes = data.Info.m_lanes.Length;
+					uint laneIndex = 0;
+
+					while (laneIndex < numLanes && curLaneId != 0u) {
+						Flags.applyLaneArrowFlags(curLaneId);
+
+						laneIndex++;
+						curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+					}
+
+					TrafficPriorityManager.Instance().SegmentSimulationStep(segmentID);
+				} catch (Exception e) {
+					Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
+				}
+
+				try {
+					VehicleStateManager.Instance().SimulationStep();
 				} catch (Exception e) {
 					Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
 				}
@@ -93,19 +132,20 @@ namespace TrafficManager.Custom.AI {
 							uint curLaneId = data.m_lanes;
 							int numLanes = data.Info.m_lanes.Length;
 							uint laneIndex = 0;
-							//bool resetDensity = false;
 							uint maxDensity = 0u;
 							uint densitySum = 0u;
 
 							if (currentLaneTrafficBuffer[segmentID] == null || currentLaneTrafficBuffer[segmentID].Length < numLanes) {
 								currentLaneTrafficBuffer[segmentID] = new ushort[numLanes];
 #if ABSDENSITY
-								previousLaneTrafficBuffer[segmentID] = new ushort[numLanes];
+								maxLaneDensities[segmentID] = new uint[numLanes];
 #endif
 								currentLaneSpeeds[segmentID] = new uint[numLanes];
 								currentLaneDensities[segmentID] = new uint[numLanes];
 								laneMeanSpeeds[segmentID] = new byte[numLanes];
+#if RELDENSITY
 								laneMeanRelDensities[segmentID] = new byte[numLanes];
+#endif
 #if ABSDENSITY
 								laneMeanAbsDensities[segmentID] = new byte[numLanes];
 #endif
@@ -120,8 +160,6 @@ namespace TrafficManager.Custom.AI {
 								laneIndex++;
 								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 							}
-							/*if (maxDensity > 250)
-								resetDensity = true;*/
 
 							curLaneId = data.m_lanes;
 							laneIndex = 0;
@@ -131,10 +169,16 @@ namespace TrafficManager.Custom.AI {
 #endif
 							while (laneIndex < numLanes && curLaneId != 0u) {
 								ushort currentBuf = currentLaneTrafficBuffer[segmentID][laneIndex];
-#if ABSDENSITY
-								ushort previousBuf = previousLaneTrafficBuffer[segmentID][laneIndex];
-#endif
 								uint currentDensity = currentLaneDensities[segmentID][laneIndex];
+#if ABSDENSITY
+								uint maxLaneDensity = maxLaneDensities[segmentID][laneIndex];
+								if (currentDensity > maxLaneDensity) {
+									maxLaneDensities[segmentID][laneIndex] = currentDensity;
+									maxLaneDensity = currentDensity;
+								} else {
+									maxLaneDensities[segmentID][laneIndex] = (maxLaneDensity * 9) / 10;
+								}
+#endif
 
 								//currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Math.Max(1u, maxDens))); // 0 .. 100
 
@@ -166,23 +210,23 @@ namespace TrafficManager.Custom.AI {
 									laneMeanSpeeds[segmentID][laneIndex] = (byte)Math.Max((int)previousMeanSpeed - 10, 0);
 
 #if ABSDENSITY
-								if (currentBuf > previousBuf)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Min((int)laneMeanAbsDensities[segmentID][laneIndex] + 10, 100);
-								else if (currentBuf == 0 || currentBuf < previousBuf)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Max((int)laneMeanAbsDensities[segmentID][laneIndex] - 10, 0);
-								previousLaneTrafficBuffer[segmentID][laneIndex] = currentBuf;
+
+								if (maxLaneDensity > 0)
+									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((Math.Min(currentDensity * 100 / maxLaneDensity, 100) * (uint)Options.someValue9 + laneMeanAbsDensities[segmentID][laneIndex]) / ((uint)Options.someValue9 + 1));
+								else
+									laneMeanAbsDensities[segmentID][laneIndex] /= (byte)Options.someValue8;
 #endif
 
+#if RELDENSITY
 								if (densitySum > 0)
 									laneMeanRelDensities[segmentID][laneIndex] = (byte)Math.Min(100u, (currentDensity * 100u) / densitySum);
 								else
 									laneMeanRelDensities[segmentID][laneIndex] = (byte)0;
+#endif
 								currentLaneTrafficBuffer[segmentID][laneIndex] = 0;
 								currentLaneSpeeds[segmentID][laneIndex] = 0;
 
-								//if (resetDensity) {
-								currentLaneDensities[segmentID][laneIndex] /= 10u;
-								//}
+								currentLaneDensities[segmentID][laneIndex] = 0u;
 
 								laneIndex++;
 								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -207,7 +251,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulation.GetNodeSimulation(nodeId) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState);
 			} else {
@@ -216,7 +260,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulation.GetNodeSimulation(nodeId) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 			} else {
@@ -228,7 +272,7 @@ namespace TrafficManager.Custom.AI {
 
 		private static void GetCustomTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, TrafficLightSimulation nodeSim = null) {
 			if (nodeSim == null) {
-				nodeSim = TrafficLightSimulation.GetNodeSimulation(nodeId);
+				nodeSim = TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId);
 				if (nodeSim == null) {
 					Log.Error($"GetCustomTrafficLightState: node traffic light simulation not found at node {nodeId}! Vehicle {vehicleId} comes from segment {fromSegmentId} and goes to node {nodeId}");
 					vehicleLightState = TrafficLightState.Green;
@@ -240,7 +284,7 @@ namespace TrafficManager.Custom.AI {
 
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
-			CustomSegmentLights lights = CustomTrafficLights.GetSegmentLights(nodeId, fromSegmentId);
+			CustomSegmentLights lights = CustomTrafficLightsManager.Instance().GetSegmentLights(nodeId, fromSegmentId);
 			CustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
 			if (lights == null || light == null) {
 				Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null? {lights == null} light null? {light == null}");
@@ -256,7 +300,7 @@ namespace TrafficManager.Custom.AI {
 
 			// get traffic light state from responsible traffic light
 			if (toSegmentId == fromSegmentId) {
-				vehicleLightState = TrafficPriority.IsLeftHandDrive() ? light.GetLightRight() : light.GetLightLeft();
+				vehicleLightState = TrafficPriorityManager.IsLeftHandDrive() ? light.GetLightRight() : light.GetLightLeft();
 			} else if (geometry.IsLeftSegment(toSegmentId, isStartNode)) {
 				vehicleLightState = light.GetLightLeft();
 			} else if (geometry.IsRightSegment(toSegmentId, isStartNode)) {
@@ -278,7 +322,7 @@ namespace TrafficManager.Custom.AI {
 
 		public static void OriginalSetTrafficLightState(bool customCall, ushort nodeID, ref NetSegment segmentData, uint frame, RoadBaseAI.TrafficLightState vehicleLightState, RoadBaseAI.TrafficLightState pedestrianLightState, bool vehicles, bool pedestrians) {
 			/// NON-STOCK CODE START ///
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulation.GetNodeSimulation(nodeID) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeID) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive() || customCall) {
 				/// NON-STOCK CODE END ///
 				int num = (int)pedestrianLightState << 2 | (int)vehicleLightState;
@@ -337,7 +381,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		#region stock code
+#region stock code
 		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {
 			NetManager instance = Singleton<NetManager>.instance;
 			bool flag = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
@@ -849,7 +893,7 @@ namespace TrafficManager.Custom.AI {
 			}
 			data.m_problems = problem;
 		}
-		#endregion
+#endregion
 
 		internal static void OnLevelUnloading() {
 			initDone = false;
@@ -859,14 +903,17 @@ namespace TrafficManager.Custom.AI {
 			if (!initDone) {
 				currentLaneTrafficBuffer = new ushort[NetManager.MAX_SEGMENT_COUNT][];
 #if ABSDENSITY
-				previousLaneTrafficBuffer = new ushort[NetManager.MAX_SEGMENT_COUNT][];
+				
 #endif
 				currentLaneSpeeds = new uint[NetManager.MAX_SEGMENT_COUNT][];
 				currentLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
 				laneMeanSpeeds = new byte[NetManager.MAX_SEGMENT_COUNT][];
+#if RELDENSITY
 				laneMeanRelDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
+#endif
 #if ABSDENSITY
 				laneMeanAbsDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
+				maxLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
 #endif
 #if MARKCONGESTEDSEGMENTS
 				segmentCongestion = new bool[NetManager.MAX_SEGMENT_COUNT];
@@ -878,12 +925,12 @@ namespace TrafficManager.Custom.AI {
 
 		internal static void resetTrafficStats() {
 			for (ushort i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				if (laneMeanRelDensities[i] != null) {
-					for (int k = 0; k < laneMeanRelDensities[i].Length; ++k) {
+				if (currentLaneTrafficBuffer[i] != null) {
+					for (int k = 0; k < currentLaneTrafficBuffer[i].Length; ++k) {
 						laneMeanSpeeds[i][k] = 50;
 						currentLaneTrafficBuffer[i][k] = 0;
 #if ABSDENSITY
-						previousLaneTrafficBuffer[i][k] = 0;
+						maxLaneDensities[i][k] = 0;
 #endif
 					}
 				}
@@ -897,7 +944,7 @@ namespace TrafficManager.Custom.AI {
 		internal static void AddTraffic(ushort segmentId, byte laneIndex, ushort vehicleLength, ushort? speed) {
 			if (!initDone)
 				return;
-			if (laneMeanRelDensities[segmentId] == null || laneIndex >= laneMeanRelDensities[segmentId].Length)
+			if (currentLaneTrafficBuffer[segmentId] == null || laneIndex >= currentLaneTrafficBuffer[segmentId].Length)
 				return;
 
 			if (speed != null) {

@@ -1,16 +1,17 @@
-#define QUEUEDSTATSx
+#define QUEUEDSTATS
 #define EXTRAPFx
 
 using System;
 using System.Linq;
 using ColossalFramework;
 using ColossalFramework.UI;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI {
 #if !TAM
@@ -385,7 +386,7 @@ namespace TrafficManager.UI {
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficManagerTool.SetToolMode(ToolMode.None);
 
-			TrafficPriority.RequestClearTraffic();
+			VehicleStateManager.Instance().RequestClearTraffic();
 		}
 
 		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {

@@ -2,8 +2,23 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.5, 08/07/2016:
+- Bugfix: AI: Cims were using pocket cars whenever possible
+- Bugfix: AI: Path-finding failures led to much less vehicles spawning
+- Bugfix: AI: Lane selection at junctions with custom lane connection was not always working properly (e.g. for Network Extensions roads with middle lane)
+- Bugfix: While editing a timed traffic light it could happen that the traffic light was deleted
+
+1.7.4, 07/31/2016:
+- AI: Switched from relative to absolute traffic density measurement
+- AI: Tuned new parameters
+- Bugfix: Activated/Disabled features were not loaded correctly
+- Bugfix: AI: At specific junctions the lane changer did not work as intended
+- Possible fix for OSX performance issues
+- Code improvements
+- Added French translations (thanks to @simon.royer007 for translating!)
+
 1.7.3, 07/29/2016:
-- Added the possibility to enable/disable mod features (e.g. for performance reasons)
+- Added the ability to enable/disable mod features (e.g. for performance reasons)
 - Bugfix: Vehicle type determination was incorrect (fixed u-turning trams/trains, stuck vehicles)
 - Bugfix: Clicking on a train/tram node with the lane connector tool led to an uncorrectable error (thanks to @noaccount for reporting this problem)
 - Further code improvements

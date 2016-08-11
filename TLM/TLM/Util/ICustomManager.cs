@@ -5,7 +5,6 @@ using System.Text;
 
 namespace TrafficManager.Util {
 	public interface ICustomManager {
-		void OnLevelLoaded();
-		void OnLevelUnloaded();
+		void OnLevelUnloading();
 	}
 }

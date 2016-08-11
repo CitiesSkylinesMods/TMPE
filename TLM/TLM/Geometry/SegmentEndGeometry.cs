@@ -6,7 +6,7 @@ using System.Text;
 using TrafficManager.State;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Geometry {
 	public class SegmentEndGeometry {
 		public ushort SegmentId {
 			get; private set;
@@ -252,15 +252,15 @@ namespace TrafficManager.Traffic {
 			}
 
 			for (int k = 0; k < 7; ++k) {
-				if (IncomingRightSegments[k] == 0)
-					break;
-				ret[i++] = IncomingRightSegments[k];
-			}
-
-			for (int k = 0; k < 7; ++k) {
 				if (IncomingStraightSegments[k] == 0)
 					break;
 				ret[i++] = IncomingStraightSegments[k];
+			}
+
+			for (int k = 0; k < 7; ++k) {
+				if (IncomingRightSegments[k] == 0)
+					break;
+				ret[i++] = IncomingRightSegments[k];
 			}
 
 			return ret;
@@ -322,7 +322,7 @@ namespace TrafficManager.Traffic {
 
 			bool hasOtherSegments = false;
 			for (var s = 0; s < 8; s++) {
-				var otherSegmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(s);
+				ushort otherSegmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(s);
 				if (otherSegmentId == 0 || otherSegmentId == SegmentId)
 					continue;
 				/*ItemClass otherConnectionClass = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info.GetConnectionClass();

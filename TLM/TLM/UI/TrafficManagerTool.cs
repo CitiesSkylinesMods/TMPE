@@ -1,6 +1,6 @@
 ﻿#define MARKCONGESTEDSEGMENTSx
 #define USEPATHWAITCOUNTERx
-#define ABSDENSITYx
+#define ABSDENSITY
 
 using System;
 using System.Collections.Generic;
@@ -10,12 +10,14 @@ using ColossalFramework.Math;
 using ColossalFramework.UI;
 using JetBrains.Annotations;
 using TrafficManager.Custom.AI;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.UI;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.TrafficLight;
 using TrafficManager.UI.SubTools;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -471,12 +473,12 @@ namespace TrafficManager.UI {
 					labelStr += ", in start-up phase";
 				else*/
 					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " %";
-				labelStr += ", rel. density: " + (CustomRoadAI.laneMeanRelDensities[segmentId] != null && i < CustomRoadAI.laneMeanRelDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanRelDensities[segmentId][i] : "?") + " %";
-#if ABSDENSITY
-				labelStr += ", abs. density: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
-#endif
+				//labelStr += ", rel. dens.: " + (CustomRoadAI.laneMeanRelDensities[segmentId] != null && i < CustomRoadAI.laneMeanRelDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanRelDensities[segmentId][i] : "?") + " %";
 #if DEBUG
-				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
+				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
+#endif
+#if ABSDENSITY
+				labelStr += ", abs. dens.: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
 #endif
 				labelStr += "\n";
 
@@ -494,6 +496,7 @@ namespace TrafficManager.UI {
 		/// </summary>
 		private void _guiSegments() {
 			GUIStyle _counterStyle = new GUIStyle();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			for (int i = 1; i < segments.m_size; ++i) {
 				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
@@ -527,8 +530,8 @@ namespace TrafficManager.UI {
 					labelStr += ", flags: " + segments.m_buffer[i].m_flags.ToString() + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
-					SegmentEnd startEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_startNode, (ushort)i);
-					SegmentEnd endEnd = TrafficPriority.GetPrioritySegment(segments.m_buffer[i].m_endNode, (ushort)i);
+					SegmentEnd startEnd = prioMan.GetPrioritySegment(segments.m_buffer[i].m_startNode, (ushort)i);
+					SegmentEnd endEnd = prioMan.GetPrioritySegment(segments.m_buffer[i].m_endNode, (ushort)i);
 					labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
@@ -675,15 +678,15 @@ namespace TrafficManager.UI {
 					else
 						timeToTransitNode = Single.PositiveInfinity;
 				}*/
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h";
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")";
+#if USEPATHWAITCOUNTER
+				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
+#endif
 				//String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehSpeed) + "/" + (vState != null ? vState.CurrentMaxSpeed.ToString() : "-") + " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-");
 #if PATHRECALC
 				labelStr += ", recalc: " + (vState != null ? vState.LastPathRecalculation.ToString() : "-");
 #endif
 				//labelStr += "\npos: " + curPos?.m_segment + "(" + curPos?.m_lane + ")->" + nextPos?.m_segment + "(" + nextPos?.m_lane + ")" /* + ", dist: " + distanceToTransitNode + ", time: " + timeToTransitNode*/ + ", last update: " + vState?.LastPositionUpdate;
-#if USEPATHWAITCOUNTER
-				labelStr += ", wait: " + vState?.PathWaitCounter;
-#endif
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -789,7 +792,7 @@ namespace TrafficManager.UI {
 			if (nodeId != null) {
 				dir = (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode == nodeId) ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
 				dir2 = ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection((NetInfo.Direction)dir);
-				dir3 = TrafficPriority.IsLeftHandDrive() ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
+				dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
 			}
 
 			var numLanes = 0;
@@ -860,14 +863,16 @@ namespace TrafficManager.UI {
 		}
 		
 		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
 				var segmentId2 = node.GetSegment(s);
 
 				if (segmentId2 == 0 ||
-					!TrafficPriority.IsPrioritySegment(nodeId, segmentId2))
+					!prioMan.IsPrioritySegment(nodeId, segmentId2))
 					continue;
-				var prioritySegment2 = TrafficPriority.GetPrioritySegment(nodeId,
+				var prioritySegment2 = prioMan.GetPrioritySegment(nodeId,
 					segmentId2);
 
 				if (prioritySegment2.Type == SegmentEnd.PriorityType.Main) {

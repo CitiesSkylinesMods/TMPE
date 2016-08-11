@@ -4,8 +4,10 @@ using System;
 using ColossalFramework;
 using UnityEngine;
 using TrafficManager.Custom.PathFinding;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.State;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Custom.AI
 {
@@ -49,7 +51,9 @@ namespace TrafficManager.Custom.AI
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = ExtVehicleType.PassengerCar;
+#if DEBUG
+			//Log._Debug($"CustomPassengerCarAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
 
 #if PATHRECALC
 			VehicleState state = VehicleStateManager._GetVehicleState(vehicleID);
@@ -92,7 +96,12 @@ namespace TrafficManager.Custom.AI
 #else
 					false
 #endif
-					, ExtVehicleType.PassengerCar, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
+					, ExtVehicleType.PassengerCar, vehicleID, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

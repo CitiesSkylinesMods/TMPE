@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -32,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			// no highlight for existing priority node in sign mode
-			if (TrafficPriority.IsPriorityNode(HoveredNodeId))
+			if (TrafficPriorityManager.Instance().IsPriorityNode(HoveredNodeId))
 				return;
 
 			if (HoveredNodeId == 0) return;
@@ -56,7 +58,7 @@ namespace TrafficManager.UI.SubTools {
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 					continue;
 
-				var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
+				var trafficSegment = TrafficPriorityManager.Instance().TrafficSegments[segmentId];
 				if (trafficSegment == null)
 					continue;
 
@@ -73,28 +75,31 @@ namespace TrafficManager.UI.SubTools {
 				if (viewOnly && !Options.prioritySignsOverlay)
 					return;
 
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
 				var hoveredSegment = false;
 				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
 
 				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
 				foreach (ushort segmentId in currentPrioritySegmentIds) {
-					var trafficSegment = TrafficPriority.TrafficSegments[segmentId];
+					var trafficSegment = prioMan.TrafficSegments[segmentId];
 					if (trafficSegment == null)
 						continue;
 					SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
 
 					List<SegmentEnd> prioritySegments = new List<SegmentEnd>();
-					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node1) == null) {
-						SegmentEnd tmpSeg1 = TrafficPriority.GetPrioritySegment(trafficSegment.Node1, segmentId);
+					if (tlsMan.GetNodeSimulation(trafficSegment.Node1) == null) {
+						SegmentEnd tmpSeg1 = prioMan.GetPrioritySegment(trafficSegment.Node1, segmentId);
 						bool startNode = geometry.StartNodeId() == trafficSegment.Node1;
 						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(startNode)) {
 							prioritySegments.Add(tmpSeg1);
 							nodeIdsWithSigns.Add(trafficSegment.Node1);
 						}
 					}
-					if (TrafficLightSimulation.GetNodeSimulation(trafficSegment.Node2) == null) {
-						SegmentEnd tmpSeg2 = TrafficPriority.GetPrioritySegment(trafficSegment.Node2, segmentId);
+					if (tlsMan.GetNodeSimulation(trafficSegment.Node2) == null) {
+						SegmentEnd tmpSeg2 = prioMan.GetPrioritySegment(trafficSegment.Node2, segmentId);
 						bool startNode = geometry.StartNodeId() == trafficSegment.Node2;
 						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(startNode)) {
 							prioritySegments.Add(tmpSeg2);
@@ -194,7 +199,7 @@ namespace TrafficManager.UI.SubTools {
 						}
 
 						if (setUndefinedSignsToMainRoad) {
-							foreach (var otherPrioritySegment in TrafficPriority.GetPrioritySegments(nodeId)) {
+							foreach (var otherPrioritySegment in prioMan.GetPrioritySegments(nodeId)) {
 								if (otherPrioritySegment.SegmentId == prioritySegment.SegmentId)
 									continue;
 								if (otherPrioritySegment.Type == SegmentEnd.PriorityType.None)
@@ -246,7 +251,7 @@ namespace TrafficManager.UI.SubTools {
 
 					// determine if we may add new priority signs to this node
 					bool ok = false;
-					TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(HoveredNodeId);
+					TrafficLightSimulation nodeSim = tlsMan.GetNodeSimulation(HoveredNodeId);
 					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 						// no traffic light set
 						ok = true;
@@ -261,14 +266,14 @@ namespace TrafficManager.UI.SubTools {
 						//Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + HoveredNodeId + "/" + hoveredExistingNodeId);
 
 						if (delete) {
-							TrafficPriority.RemovePrioritySegments(hoveredExistingNodeId);
+							prioMan.RemovePrioritySegments(hoveredExistingNodeId);
 							RefreshCurrentPrioritySegmentIds();
 						} else if (ok) {
-							if (!TrafficPriority.IsPriorityNode(HoveredNodeId)) {
+							if (!prioMan.IsPriorityNode(HoveredNodeId)) {
 								//Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
-								TrafficLightSimulation.RemoveNodeFromSimulation(HoveredNodeId, false, true);
+								tlsMan.RemoveNodeFromSimulation(HoveredNodeId, false, true);
 								Flags.setNodeTrafficLight(HoveredNodeId, false); // TODO refactor!
-								TrafficPriority.AddPriorityNode(HoveredNodeId);
+								prioMan.AddPriorityNode(HoveredNodeId);
 								RefreshCurrentPrioritySegmentIds();
 							}
 						} else if (nodeSim != null && nodeSim.IsTimedLight()) {
@@ -282,14 +287,16 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
 				var segmentId2 = node.GetSegment(s);
 
 				if (segmentId2 == 0 ||
-					!TrafficPriority.IsPrioritySegment(nodeId, segmentId2))
+					!prioMan.IsPrioritySegment(nodeId, segmentId2))
 					continue;
-				var prioritySegment2 = TrafficPriority.GetPrioritySegment(nodeId,
+				var prioritySegment2 = prioMan.GetPrioritySegment(nodeId,
 					segmentId2);
 
 				if (prioritySegment2.Type == SegmentEnd.PriorityType.Main) {
@@ -300,7 +307,9 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
-			foreach (TrafficSegment trafficSegment in TrafficPriority.TrafficSegments) {
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+
+			foreach (TrafficSegment trafficSegment in prioMan.TrafficSegments) {
 				try {
 					trafficSegment?.Instance1?.Housekeeping();
 					trafficSegment?.Instance2?.Housekeeping();

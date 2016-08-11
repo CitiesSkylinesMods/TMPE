@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 
 namespace TrafficManager.Util {
 	public class SegmentTraverser {

@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ColossalFramework;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using TrafficManager.Custom.AI;
 using TrafficManager.Util;
 using System.Threading;
 using TrafficManager.State;
 using TrafficManager.UI;
+using TrafficManager.Manager;
 
 /// <summary>
 /// A segment end describes a directional traffic segment connected to a controlled node
@@ -176,7 +177,7 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriority.maxStopVelocity) {
+					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriorityManager.maxStopVelocity) {
 #if DEBUGMETRIC
 					if (debug)
 						Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");
@@ -271,7 +272,7 @@ namespace TrafficManager.Traffic {
 
 		public void OnUpdate(SegmentGeometry geometry) {
 			if (!geometry.IsValid()) {
-				TrafficPriority.RemovePrioritySegment(NodeId, SegmentId);
+				TrafficPriorityManager.Instance().RemovePrioritySegment(NodeId, SegmentId);
 				return;
 			}
 
@@ -292,8 +293,8 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal void Housekeeping() {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns && TrafficLightSimulation.GetNodeSimulation(NodeId) == null && Type == PriorityType.None)
-				TrafficPriority.RemovePrioritySegments(NodeId);
+			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns && TrafficLightSimulationManager.Instance().GetNodeSimulation(NodeId) == null && Type == PriorityType.None)
+				TrafficPriorityManager.Instance().RemovePrioritySegments(NodeId);
 		}
 	}
 }

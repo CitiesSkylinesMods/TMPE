@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.Geometry;
+using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using UnityEngine;
 
@@ -36,7 +38,9 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = ExtVehicleType.Taxi;
+#if DEBUG
+			//Log._Debug($"CustomTaxiAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
 
 #if PATHRECALC
 			VehicleState state = VehicleStateManager._GetVehicleState(vehicleID);
@@ -74,7 +78,12 @@ namespace TrafficManager.Custom.AI {
 #if PATHRECALC
 					recalcRequested,
 #endif
-					ExtVehicleType.Taxi, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
+					ExtVehicleType.Taxi, vehicleID, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

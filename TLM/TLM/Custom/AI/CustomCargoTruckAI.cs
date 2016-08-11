@@ -4,8 +4,10 @@ using System;
 using ColossalFramework;
 using UnityEngine;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.Traffic;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
@@ -44,11 +46,13 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
+#if DEBUG
+			//Log._Debug($"CustomCargoTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
+#endif
+
 			if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource | Vehicle.Flags.GoingBack)) != 0) {
 				return base.StartPathFind(vehicleID, ref vehicleData, startPos, endPos, startBothWays, endBothWays, undergroundTarget);
 			}
-
-			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = ExtVehicleType.CargoTruck;
 
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
@@ -98,7 +102,12 @@ namespace TrafficManager.Custom.AI {
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (instance.CreatePath(ExtVehicleType.CargoVehicle, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+#if USEPATHWAITCOUNTER
+					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					state.PathWaitCounter = 0;
+#endif
+
 					if (vehicleData.m_path != 0u) {
 						instance.ReleasePath(vehicleData.m_path);
 					}

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
+using TrafficManager.Geometry;
 using TrafficManager.Traffic;
 using UnityEngine;
 
@@ -79,7 +80,7 @@ namespace TrafficManager.Custom.AI {
 				extVehicleType = ExtVehicleType.PassengerPlane;
 			//Log._Debug($"Transport line. extVehicleType={extVehicleType}");
 
-			if (Singleton<CustomPathManager>.instance.CreatePath(extVehicleType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {
+			if (Singleton<CustomPathManager>.instance.CreatePath(extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {
 				if (startPosA.m_segment != 0 && startPosB.m_segment != 0) {
 					NetNode[] expr_2F5_cp_0 = instance.m_nodes.m_buffer;
 					ushort expr_2F5_cp_1 = data.m_startNode;

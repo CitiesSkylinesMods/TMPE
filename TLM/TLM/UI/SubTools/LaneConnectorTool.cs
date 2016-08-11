@@ -8,10 +8,11 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using TrafficManager.Traffic;
+using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneConnectorTool : SubTool {
