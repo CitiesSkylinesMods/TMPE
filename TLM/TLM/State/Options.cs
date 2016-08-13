@@ -75,6 +75,8 @@ namespace TrafficManager.State {
 		private static UITextField someValue12Field = null;
 		private static UITextField someValue13Field = null;
 		private static UITextField someValue14Field = null;
+		private static UITextField someValue15Field = null;
+		private static UITextField someValue16Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -127,11 +129,13 @@ namespace TrafficManager.State {
 		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
 		public static float someValue8 = 2f; // debug value (lane density extinction denominator)
 		public static float someValue9 = 1; // debug value (lane density update smoothing)
-		public static float someValue10 = 0.5f; // debug value -- unused --
+		public static float someValue10 = 15f; // debug value (maximum incoming vehicle distance to junction for priority signs)
 		public static float someValue11 = 2.5f; // debug value (> 1 lane changing cost factor)
 		public static float someValue12 = 0.75f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
 		public static float someValue13 = 0.5f; // debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
 		public static float someValue14 = 1.5f; // debug value (cost factor for leaving main highway)
+		public static float someValue15 = 10f; // debug value (maximum junction approach time for priority signs)
+		public static float someValue16 = 100f; // debug value (lane changing cost reduction modulo)
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -219,6 +223,8 @@ namespace TrafficManager.State {
 			someValue12Field = maintenanceGroup.AddTextfield("Some value #12", String.Format("{0:0.##}", someValue12), onSomeValue12Changed) as UITextField;
 			someValue13Field = maintenanceGroup.AddTextfield("Some value #13", String.Format("{0:0.##}", someValue13), onSomeValue13Changed) as UITextField;
 			someValue14Field = maintenanceGroup.AddTextfield("Some value #14", String.Format("{0:0.##}", someValue14), onSomeValue14Changed) as UITextField;
+			someValue15Field = maintenanceGroup.AddTextfield("Some value #15", String.Format("{0:0.##}", someValue15), onSomeValue15Changed) as UITextField;
+			someValue16Field = maintenanceGroup.AddTextfield("Some value #16", String.Format("{0:0.##}", someValue16), onSomeValue16Changed) as UITextField;
 #endif
 		}
 
@@ -758,6 +764,32 @@ namespace TrafficManager.State {
 			try {
 				float newSomeValue = Single.Parse(newSomeValueStr);
 				someValue14 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue15Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue15 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue16Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue16 = newSomeValue;
 			} catch (Exception e) {
 				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);

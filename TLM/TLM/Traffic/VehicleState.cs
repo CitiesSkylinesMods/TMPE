@@ -24,7 +24,8 @@ namespace TrafficManager.Traffic {
 		public VehicleJunctionTransitState JunctionTransitState {
 			get { return junctionTransitState; }
 			set {
-				LastStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex >> VehicleState.STATE_UPDATE_SHIFT;
+				if (value != junctionTransitState)
+					LastStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex >> VehicleState.STATE_UPDATE_SHIFT;
 				junctionTransitState = value;
 			}
 		}

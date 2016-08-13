@@ -671,14 +671,15 @@ namespace TrafficManager.UI {
 					connManager.GetLaneEndPoint((ushort)segmentId, (bool)startNode, ((PathUnit.Position)curPos).m_lane, null, null, out outgoing, out targetPos);
 				}*/
 
-				/*if (targetPos != null) {
+				float distanceToTransitNode = Single.NaN;
+				if (targetPos != null) {
 					distanceToTransitNode = ((Vector3)targetPos - vehPos).magnitude;
-					if (vehSpeed > 0)
+					/*if (vehSpeed > 0)
 						timeToTransitNode = distanceToTransitNode / vehSpeed;
 					else
-						timeToTransitNode = Single.PositiveInfinity;
-				}*/
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")";
+						timeToTransitNode = Single.PositiveInfinity;*/
+				}
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ") dist: " + distanceToTransitNode;
 #if USEPATHWAITCOUNTER
 				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
 #endif

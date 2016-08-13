@@ -29,6 +29,7 @@ namespace TrafficManager.UI.SubTools {
 		//private bool initDone = false;
 
 		class NodeLaneMarker {
+			internal ushort segmentId;
 			internal ushort nodeId;
 			internal bool startNode;
 			internal Vector3 position;
@@ -59,6 +60,8 @@ namespace TrafficManager.UI.SubTools {
 			if (viewOnly && !Options.connectedLanesOverlay)
 				return;
 
+			NetManager netManager = Singleton<NetManager>.instance;
+
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
 			Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -73,30 +76,32 @@ namespace TrafficManager.UI.SubTools {
 				if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
 					continue; // do not draw if too distant
 
-				foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
-					foreach (NodeLaneMarker targetLaneMarker in sourceLaneMarker.connectedMarkers) {
-						// render lane connection
-						RenderLane(cameraInfo, sourceLaneMarker.position, targetLaneMarker.position, nodePos, sourceLaneMarker.color);
+				foreach (NodeLaneMarker laneMarker in nodeMarkers) {
+					foreach (NodeLaneMarker targetLaneMarker in laneMarker.connectedMarkers) {
+						// render lane connection from laneMarker to targetLaneMarker
+						RenderLane(cameraInfo, laneMarker.position, targetLaneMarker.position, nodePos, laneMarker.color);
 					}
 
 					if (!viewOnly && nodeId == SelectedNodeId) {
-						bounds.center = sourceLaneMarker.position;
+						bounds.center = laneMarker.position;
 						bool markerIsHovered = bounds.IntersectRay(mouseRay);
 
-						// draw source marker in source selection mode, draw target marker and selected source marker in target selection mode
-						bool drawMarker = (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource && sourceLaneMarker.isSource) ||
+						// draw source marker in source selection mode,
+						// draw target marker (if segment turning angles are within bounds) and selected source marker in target selection mode
+						bool drawMarker = (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource && laneMarker.isSource) ||
 							(GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget && (
-							(!sourceLaneMarker.isSource &&
-							//(sourceLaneMarker.laneType & selectedMarker.laneType) != NetInfo.LaneType.None &&
-							(sourceLaneMarker.vehicleType & selectedMarker.vehicleType) != VehicleInfo.VehicleType.None) || sourceLaneMarker == selectedMarker));
+							(!laneMarker.isSource &&
+							(laneMarker.vehicleType & selectedMarker.vehicleType) != VehicleInfo.VehicleType.None &&
+							CheckSegmentsTurningAngle(selectedMarker.segmentId, ref netManager.m_segments.m_buffer[selectedMarker.segmentId], selectedMarker.startNode, laneMarker.segmentId, ref netManager.m_segments.m_buffer[laneMarker.segmentId], laneMarker.startNode)
+							) || laneMarker == selectedMarker));
 						// highlight hovered marker and selected marker
-						bool highlightMarker = drawMarker && (sourceLaneMarker == selectedMarker || markerIsHovered);
+						bool highlightMarker = drawMarker && (laneMarker == selectedMarker || markerIsHovered);
 
 						if (drawMarker) {
 							if (highlightMarker) {
-								sourceLaneMarker.radius = 2f;
+								laneMarker.radius = 2f;
 							} else
-								sourceLaneMarker.radius = 1f;
+								laneMarker.radius = 1f;
 						} else {
 							markerIsHovered = false;
 						}
@@ -104,11 +109,11 @@ namespace TrafficManager.UI.SubTools {
 						if (markerIsHovered) {
 							/*if (hoveredMarker != sourceLaneMarker)
 								Log._Debug($"Marker @ lane {sourceLaneMarker.laneId} hovered");*/
-							hoveredMarker = sourceLaneMarker;
+							hoveredMarker = laneMarker;
 						}
 
 						if (drawMarker)
-							RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, sourceLaneMarker.color, sourceLaneMarker.position, sourceLaneMarker.radius, -1f, 1280f, false, true);
+							RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, laneMarker.color, laneMarker.position, laneMarker.radius, -1f, 1280f, false, true);
 					}
 				}
 			}
@@ -311,30 +316,6 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			RefreshCurrentNodeMarkers();
-
-			/*NetManager netManager = Singleton<NetManager>.instance;
-
-			allNodeMarkers.Clear();
-
-			HashSet<ushort> processedNodes = new HashSet<ushort>();
-			for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-				if (!Flags.CheckLane(laneId))
-					continue;
-
-				ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
-				ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
-				ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
-
-				if (startNodeId != 0 && !processedNodes.Contains(startNodeId)) {
-					this.allNodeMarkers[startNodeId] = GetNodeMarkers(startNodeId);
-					processedNodes.Add(startNodeId);
-				}
-
-				if (endNodeId != 0 && !processedNodes.Contains(endNodeId)) {
-					this.allNodeMarkers[endNodeId] = GetNodeMarkers(endNodeId);
-					processedNodes.Add(endNodeId);
-				}
-			}*/
 		}
 
 		private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId) {
@@ -358,12 +339,13 @@ namespace TrafficManager.UI.SubTools {
 				uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
 				for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++) {
 					if ((lanes[laneIndex].m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
-						(lanes[laneIndex].m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+						(lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None) {
 
 						Vector3? pos = null;
 						bool isSource = false;
 						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, lanes[laneIndex], out isSource, out pos)) {
 							nodeMarkers.Add(new NodeLaneMarker() {
+								segmentId = segmentId,
 								laneId = laneId,
 								nodeId = nodeId,
 								startNode = !isEndNode,
@@ -401,6 +383,43 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			return nodeMarkers;
+		}
+
+		/// <summary>
+		/// Checks if the turning angle between two segments at the given node is within bounds.
+		/// </summary>
+		/// <param name="sourceSegmentId"></param>
+		/// <param name="sourceSegment"></param>
+		/// <param name="sourceStartNode"></param>
+		/// <param name="targetSegmentId"></param>
+		/// <param name="targetSegment"></param>
+		/// <param name="targetStartNode"></param>
+		/// <returns></returns>
+		private bool CheckSegmentsTurningAngle(ushort sourceSegmentId, ref NetSegment sourceSegment, bool sourceStartNode, ushort targetSegmentId, ref NetSegment targetSegment, bool targetStartNode) {
+			NetManager netManager = Singleton<NetManager>.instance;
+
+			NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
+			NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;
+			
+			float turningAngle = 0.01f - Mathf.Min(sourceSegmentInfo.m_maxTurnAngleCos, targetSegmentInfo.m_maxTurnAngleCos);
+			if (turningAngle < 1f) {
+				Vector3 sourceDirection;
+				if (sourceStartNode) {
+					sourceDirection = sourceSegment.m_startDirection;
+				} else {
+					sourceDirection = sourceSegment.m_endDirection;
+				}
+
+				Vector3 targetDirection;
+				if (targetStartNode) {
+					targetDirection = targetSegment.m_startDirection;
+				} else {
+					targetDirection = targetSegment.m_endDirection;
+				}
+				float dirDotProd = sourceDirection.x * targetDirection.x + sourceDirection.z * targetDirection.z;
+				return dirDotProd < turningAngle;
+			}
+			return true;
 		}
 
 		private void RenderLane(RenderManager.CameraInfo cameraInfo, Vector3 start, Vector3 end, Vector3 middlePoint, Color color, float size = 0.1f) {

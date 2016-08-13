@@ -278,7 +278,7 @@ namespace TrafficManager.Manager {
 		}
 
 		/// <summary>
-		/// Adds/Sets a node as a priority node
+		/// Adds priority segments at a node
 		/// </summary>
 		/// <param name="nodeId"></param>
 		/// <returns>number of priority segments added</returns>
@@ -303,6 +303,14 @@ namespace TrafficManager.Manager {
 			return ret;
 		}
 
+		/// <summary>
+		/// Checks if a vehicle (the target vehicle) has to wait for other incoming vehicles at a junction with priority signs.
+		/// </summary>
+		/// <param name="targetVehicleId">target vehicle</param>
+		/// <param name="targetVehicleData">target vehicle data</param>
+		/// <param name="curPos">Current path unit the target vehicle is located at</param>
+		/// <param name="nextPos">Next path unit the target vehicle will be located at</param>
+		/// <returns>true if the target vehicle must wait for other vehicles, false otherwise</returns>
 		public bool HasIncomingVehiclesWithHigherPriority(ushort targetVehicleId, ref Vehicle targetVehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.HasIncomingVehiclesWithHigherPriority");
@@ -329,7 +337,7 @@ namespace TrafficManager.Manager {
 #if DEBUG
 				//bool debug = nodeId == 30634;
 				//bool debug = transitNodeId == 21371;
-				bool debug = false; // transitNodeId == 9367;
+				bool debug = false; // transitNodeId == 27423;
 				if (debug) {
 					Log._Debug($"HasIncomingVehicles: ##### Checking vehicle {targetVehicleId} at node {transitNodeId}. Coming from seg. {curPos.m_segment}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
 				}
@@ -444,12 +452,14 @@ namespace TrafficManager.Manager {
 							Log._Debug($"HasIncomingVehicles: Checking against incoming vehicle {incomingVehicleId}.");
 #endif
 
-						if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave || incomingState.JunctionTransitState == VehicleJunctionTransitState.Enter || incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop) {
-								
-
+						if (incomingState.JunctionTransitState != VehicleJunctionTransitState.None) {
 							bool conflicting = false;
 							incomingState.ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref vehManager.m_vehicles.m_buffer[incomingVehicleId], ref curPos, ref nextPos, ref targetVehicleData, delegate (ref Vehicle incomingVehicleData, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, ref Vehicle targetVehData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos) {
-								if (incomingState.JunctionTransitState != VehicleJunctionTransitState.Stop && (incomingState.JunctionTransitState != VehicleJunctionTransitState.Leave || (incomingState.LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) < (frame >> VehicleState.STATE_UPDATE_SHIFT))) {
+
+							if (
+								incomingState.JunctionTransitState == VehicleJunctionTransitState.Enter ||
+								(incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave && (incomingState.LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) >= (frame >> VehicleState.STATE_UPDATE_SHIFT))) {
+									// incoming vehicle is (1) entering the junction or (2) leaving but last state update ocurred very recently.
 									Vector3 incomingPos = incomingVehicleData.GetLastFramePosition();
 									Vector3 incomingVel = incomingVehicleData.GetLastFrameVelocity();
 									Vector3 incomingToNode = transitNodePos - incomingPos;
@@ -465,10 +475,15 @@ namespace TrafficManager.Manager {
 									}
 #if DEBUG
 									if (debug)
-										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is moving towards the transit node ({dot}).");
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is moving towards the transit node ({dot}). Distance: {incomingToNode.magnitude}");
 #endif
 
-									if (Options.simAccuracy <= 1 && !Single.IsInfinity(targetTimeToTransitNode) && !Single.IsNaN(targetTimeToTransitNode)) {
+									// check if estimated approach time of the incoming vehicle is within bounds (only if incoming vehicle is far enough away from the junction and target vehicle is moving)
+									if (Options.simAccuracy <= 1 &&
+											!Single.IsInfinity(targetTimeToTransitNode) &&
+											!Single.IsNaN(targetTimeToTransitNode) &&
+											incomingToNode.magnitude > Options.someValue10) {
+										// check speeds
 										float incomingSpeed = incomingVel.magnitude;
 										float incomingDistanceToTransitNode = incomingToNode.magnitude;
 										float incomingTimeToTransitNode = Single.NaN;
@@ -479,7 +494,7 @@ namespace TrafficManager.Manager {
 											incomingTimeToTransitNode = Single.PositiveInfinity;
 
 										float timeDiff = Mathf.Abs(incomingTimeToTransitNode - targetTimeToTransitNode);
-										if (timeDiff > 10f) {
+										if (timeDiff > Options.someValue15) {
 #if DEBUG
 											if (debug)
 												Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} needs {incomingTimeToTransitNode} time units to get to the node where target needs {targetTimeToTransitNode} time units (diff = {timeDiff}). Difference to large. *IGNORING*");
@@ -504,6 +519,19 @@ namespace TrafficManager.Manager {
 #endif
 								}
 
+								if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked &&
+									(incomingState.LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) < (frame >> VehicleState.STATE_UPDATE_SHIFT)
+								) {
+#if DEBUG
+									if (debug)
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is BLOCKED and has waited a bit. *IGNORING*");
+#endif
+
+									// incoming vehicle waits because the junction is blocked and we waited a little. Allow target vehicle to enter the junciton.
+									return;
+								}
+
+								// check priority rules
 								if (HasVehiclePriority(debug, transitNodeId, targetVehicleId, ref targetVehData, ref targetCurPos, ref targetNextPos, targetOnMain, incomingVehicleId, ref incomingCurPos, ref incomingNextPos, incomingOnMain, targetFromPrioritySegment, incomingFromPrioritySegment)) {
 #if DEBUG
 									if (debug)
@@ -519,7 +547,9 @@ namespace TrafficManager.Manager {
 									return;
 								}
 							});
+
 							if (conflicting) {
+								// the target vehicle must wait
 #if TRACE
 								Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasIncomingVehiclesWithHigherPriority");
 #endif
@@ -532,6 +562,7 @@ namespace TrafficManager.Manager {
 #endif
 						}
 
+						// check next incoming vehicle
 						incomingVehicleId = incomingState.NextVehicleIdOnSegment;
 					}
 				}
@@ -549,7 +580,24 @@ namespace TrafficManager.Manager {
 			return false;
 		}
 
-		private bool HasVehiclePriority(bool debug, ushort transitNodeId, ushort targetCarId, ref Vehicle targetVehicleData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos, bool targetIsOnMainRoad, ushort incomingCarId, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, bool incomingIsOnMainRoad, SegmentEnd targetEnd, SegmentEnd incomingEnd) {
+		/// <summary>
+		/// Implements priority checking for two vehicles approaching or waiting at a junction.
+		/// </summary>
+		/// <param name="debug"></param>
+		/// <param name="transitNodeId">id of the junction</param>
+		/// <param name="targetVehicleId">target vehicle for which priority is being checked</param>
+		/// <param name="targetVehicleData">target vehicle data</param>
+		/// <param name="targetCurPos">target vehicle current path position</param>
+		/// <param name="targetNextPos">target vehicle next path position</param>
+		/// <param name="targetIsOnMainRoad">true if the target vehicle is coming from a main road</param>
+		/// <param name="incomingVehicleId">possibly conflicting incoming vehicle</param>
+		/// <param name="incomingCurPos">incoming vehicle current path position</param>
+		/// <param name="incomingNextPos">incoming vehicle next path position</param>
+		/// <param name="incomingIsOnMainRoad">true if the incoming vehicle is coming from a main road</param>
+		/// <param name="targetEnd">segment end the target vehicle is coming from</param>
+		/// <param name="incomingEnd">segment end the incoming vehicle is coming from</param>
+		/// <returns>true if the target vehicle has priority, false otherwise</returns>
+		private bool HasVehiclePriority(bool debug, ushort transitNodeId, ushort targetVehicleId, ref Vehicle targetVehicleData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos, bool targetIsOnMainRoad, ushort incomingVehicleId, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, bool incomingIsOnMainRoad, SegmentEnd targetEnd, SegmentEnd incomingEnd) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.HasVehiclePriority");
 #endif
@@ -559,7 +607,7 @@ namespace TrafficManager.Manager {
 				//debug = nodeId == 13531;
 				if (debug) {
 					Log._Debug("");
-					Log._Debug($"  HasVehiclePriority: *** Checking if {targetCarId} (main road = {targetIsOnMainRoad}) @ (seg. {targetCurPos.m_segment}, lane {targetCurPos.m_lane}) -> (seg. {targetNextPos.m_segment}, lane {targetNextPos.m_lane}) has priority over {incomingCarId} (main road = {incomingIsOnMainRoad}) @ (seg. {incomingCurPos.m_segment}, lane {incomingCurPos.m_lane}) -> (seg. {incomingNextPos.m_segment}, lane {incomingNextPos.m_lane}).");
+					Log._Debug($"  HasVehiclePriority: *** Checking if {targetVehicleId} (main road = {targetIsOnMainRoad}) @ (seg. {targetCurPos.m_segment}, lane {targetCurPos.m_lane}) -> (seg. {targetNextPos.m_segment}, lane {targetNextPos.m_lane}) has priority over {incomingVehicleId} (main road = {incomingIsOnMainRoad}) @ (seg. {incomingCurPos.m_segment}, lane {incomingCurPos.m_lane}) -> (seg. {incomingNextPos.m_segment}, lane {incomingNextPos.m_lane}).");
                 }
 #endif
 
@@ -574,7 +622,7 @@ namespace TrafficManager.Manager {
 				ushort nodeId = targetEnd.NodeId;
 
 				// delete invalid target car
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetCarId].m_flags & Vehicle.Flags.Created) == 0) {
+				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[targetVehicleId].m_flags & Vehicle.Flags.Created) == 0) {
 					targetEnd.RequestCleanup();
 #if TRACE
 					Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
@@ -583,7 +631,7 @@ namespace TrafficManager.Manager {
 				}
 
 				// delete invalid incoming car
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingCarId].m_flags & Vehicle.Flags.Created) == 0) {
+				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId].m_flags & Vehicle.Flags.Created) == 0) {
 					incomingEnd.RequestCleanup();
 #if TRACE
 					Singleton<CodeProfiler>.instance.Stop("TrafficPriority.HasVehiclePriority");
@@ -646,9 +694,9 @@ namespace TrafficManager.Manager {
 				SegmentGeometry targetGeometry = SegmentGeometry.Get(targetCurPos.m_segment);
 				SegmentGeometry incomingGeometry = SegmentGeometry.Get(incomingCurPos.m_segment);
 				bool isTargetStartNode = targetGeometry.StartNodeId() == nodeId;
-				ArrowDirection targetToDir = targetGeometry.GetDirection(targetNextPos.m_segment, isTargetStartNode);
-				ArrowDirection incomingFromRelDir = targetGeometry.GetDirection(incomingCurPos.m_segment, isTargetStartNode);
-				ArrowDirection incomingToDir = incomingGeometry.GetDirection(incomingNextPos.m_segment, incomingGeometry.StartNodeId() == nodeId);
+				ArrowDirection targetToDir = targetGeometry.GetDirection(targetNextPos.m_segment, isTargetStartNode); // target direction of target vehicle (relative to incoming direction of target vehicle)
+				ArrowDirection incomingFromRelDir = targetGeometry.GetDirection(incomingCurPos.m_segment, isTargetStartNode); // incoming direction of incoming vehicle (relative to incoming direction of target vehicle)
+				ArrowDirection incomingToDir = incomingGeometry.GetDirection(incomingNextPos.m_segment, incomingGeometry.StartNodeId() == nodeId); // target direction of incoming vehicle (relative to incoming direction of incoming vehicle)
 #if DEBUG
 				if (debug) {
 					Log._Debug($"  HasVehiclePriority: targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingFromRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
@@ -753,7 +801,7 @@ namespace TrafficManager.Manager {
 				if (sameTargets && laneOrderCorrect) {
 #if DEBUG
 					if (debug) {
-						Log._Debug($"  HasVehiclePriority: Lane order between car {targetCarId} and {incomingCarId} is correct. Target HAS PRIORITY.");
+						Log._Debug($"  HasVehiclePriority: Lane order between car {targetVehicleId} and {incomingVehicleId} is correct. Target HAS PRIORITY.");
 					}
 #endif
 #if TRACE
@@ -762,6 +810,32 @@ namespace TrafficManager.Manager {
 					return true;
 				}
 
+				if (!targetIsOnMainRoad && !incomingIsOnMainRoad) {
+#if DEBUG
+					if (debug) {
+						Log._Debug($"  HasVehiclePriority: Both target {targetVehicleId} and incoming {incomingVehicleId} are coming from a low-priority road.");
+					}
+#endif
+
+					// the right-most vehicle has priority
+					if (incomingFromRelDir == ArrowDirection.Left) {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"  HasVehiclePriority: Incoming comes from left. Target HAS PRIORITY!");
+						}
+#endif
+						return true;
+					} else if (incomingFromRelDir == ArrowDirection.Right) {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"  HasVehiclePriority: Incoming comes from right. Target MUST WAIT!");
+						}
+#endif
+						return false;
+					} else {
+						// turn/forward
+					}
+				}
 				bool incomingCrossingStreet = incomingToDir == ArrowDirection.Forward || incomingToDir == ArrowDirection.Left;
 
 #if DEBUG
@@ -812,7 +886,7 @@ namespace TrafficManager.Manager {
 #endif
 								return ret;
 							case ArrowDirection.Left:
-								ret = true;// ; targetIsOnMainRoad || !incomingCrossingStreet;
+								ret = targetIsOnMainRoad || !incomingCrossingStreet; // TODO check
 #if DEBUG
 								if (debug) {
 									Log._Debug($"  HasVehiclePriority: Target is going FORWARD, incoming is coming from LEFT. targetIsOnMainRoad={targetIsOnMainRoad}, incomingCrossingStreet={incomingCrossingStreet}, result={ret}");
@@ -900,6 +974,15 @@ namespace TrafficManager.Manager {
 			return dir;
 		}
 
+		/// <summary>
+		/// Checks if lane <paramref name="leftLaneIndex"/> lies to the left of lane <paramref name="rightLaneIndex"/>.
+		/// </summary>
+		/// <param name="debug"></param>
+		/// <param name="segmentId"></param>
+		/// <param name="nodeId"></param>
+		/// <param name="leftLaneIndex"></param>
+		/// <param name="rightLaneIndex"></param>
+		/// <returns></returns>
 		public bool IsLaneOrderConflictFree(bool debug, ushort segmentId, ushort nodeId, byte leftLaneIndex, byte rightLaneIndex) { // TODO I think this is incorrect. See TrafficLightTool._guiLaneChangeWindow
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TrafficPriority.IsLaneOrderConflictFree");
@@ -946,12 +1029,10 @@ namespace TrafficManager.Manager {
 		/// <summary>
 		/// Determines if the map uses a left-hand traffic system
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>true if vehicles drive on the left side of the road, false otherwise</returns>
 		public static bool IsLeftHandDrive() {
 			return Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
 		}
-
-		//private static ushort nextValidityCheckedSegment = 0;
 
 		public void SegmentSimulationStep(ushort segmentId) {
 #if TRACE

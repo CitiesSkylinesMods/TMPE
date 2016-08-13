@@ -35,15 +35,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ColossalManaged">
-      <HintPath>..\References\ColossalManaged.dll</HintPath>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
-      <HintPath>..\References\ICities.dll</HintPath>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -53,7 +53,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
-      <HintPath>..\References\UnityEngine.dll</HintPath>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -132,7 +132,6 @@
     <Compile Include="Traffic\TrafficSegment.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
-    <Compile Include="UI\UITimedLights.cs" />
     <Compile Include="UI\UITrafficManager.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
   </ItemGroup>
