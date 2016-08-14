@@ -2593,52 +2593,47 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 								float laneMetric = 1f;
-								if (! Options.disableSomething3) {
-									if (laneDist > 0 && // lane would be changed
-										(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) && // emergency vehicles may do everything
-										//!nextIsRealJunction // no lane changing at junctions
-										(!wantToChangeLane || laneDist > 1)) { // randomized lane changing
+								
+								if (laneDist > 0 && // lane would be changed
+									(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) && // emergency vehicles may do everything
+									//!nextIsRealJunction // no lane changing at junctions
+									(!wantToChangeLane || laneDist > 1)) { // randomized lane changing
 										
-										// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
-										float laneChangeCostBase = 1f + // base
-											(nextIsHighway ? Options.someValue : Options.someValue5) * // changing lanes on highways is more expensive than on city streets
-											(_isHeavyVehicle ? Options.someValue2 : 1f) * // changing lanes is more expensive for heavy vehicles
-											(laneDist > 1 ? Options.someValue11 : 1f) // changing more than one lane at a time is expensive
+									// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
+									float laneChangeCostBase = 1f + // base
+										(nextIsHighway ? Options.someValue : Options.someValue5) * // changing lanes on highways is more expensive than on city streets
+										(_isHeavyVehicle ? Options.someValue2 : 1f) * // changing lanes is more expensive for heavy vehicles
+										(laneDist > 1 ? Options.someValue11 : 1f) // changing more than one lane at a time is expensive
 #if VEHICLERAND
-											* (2f - _vehicleRand)
+										* (2f - _vehicleRand)
 #endif
-											; // fast vehicles (= high _vehicleRand) tend to change lanes more often
+										; // fast vehicles (= high _vehicleRand) tend to change lanes more often
 
 #if PREFEROUTER
-										if (isPreferredLaneChangingDir && prevIsHighway && nextIsHighway) {
-											float outerLaneCostFactor = (1f + Options.pathCostMultiplicator * (_vehicleRand - 0.5f)); // [1 - 0.5 * pathCostMultiplicator; 1 + 0.5 * pathCostMultiplicator], depending on _vehicleRand
-											laneChangeCostBase = Math.Max(1f, laneChangeCostBase * outerLaneCostFactor); // slower vehicles tend to stay on the outer lane; faster vehicles on inner lanes
-										}
+									if (isPreferredLaneChangingDir && prevIsHighway && nextIsHighway) {
+										float outerLaneCostFactor = (1f + Options.pathCostMultiplicator * (_vehicleRand - 0.5f)); // [1 - 0.5 * pathCostMultiplicator; 1 + 0.5 * pathCostMultiplicator], depending on _vehicleRand
+										laneChangeCostBase = Math.Max(1f, laneChangeCostBase * outerLaneCostFactor); // slower vehicles tend to stay on the outer lane; faster vehicles on inner lanes
+									}
 #endif
 
-										// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
-										laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
-										metric *= laneMetric;
-									}
+									// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
+									laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
+									metric *= laneMetric;
 								}
 
-								if (!Options.disableSomething5) {
-									// avoid lane changing before junctions: multiply with inverted distance to next junction
-									if ((!prevIsHighway || !nextIsHighway) &&
-										!nextIsRealJunction &&
-										(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) &&
-										laneDist > 0 &&
-										nextItem.m_numSegmentsToJunction < 3) {
-										float junctionMetric = (float)Math.Pow(Options.someValue3, Math.Max(0f, 3f - nextItem.m_numSegmentsToJunction));
-										metric *= junctionMetric;
-									}
+								// avoid lane changing before junctions: multiply with inverted distance to next junction
+								if ((!prevIsHighway || !nextIsHighway) &&
+									!nextIsRealJunction &&
+									(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) &&
+									laneDist > 0 &&
+									nextItem.m_numSegmentsToJunction < 3) {
+									float junctionMetric = (float)Math.Pow(Options.someValue3, Math.Max(0f, 3f - nextItem.m_numSegmentsToJunction));
+									metric *= junctionMetric;
 								}
 
-								if (!Options.disableSomething6) {
-									// avoid leaving main highway
-									if (nextIsRealJunction && nextIsHighway && (!prevIsHighway || nextNumLanes > prevNumLanes)) {
-										metric *= Options.someValue14;
-									}
+								// avoid leaving main highway
+								if (nextIsRealJunction && nextIsHighway && (!prevIsHighway || nextNumLanes > prevNumLanes)) {
+									metric *= Options.someValue14;
 								}
 
 #if DEBUGCOSTS

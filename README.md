@@ -2,6 +2,19 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.6, 08/14/2016:
+- New feature: Players may now prohibit cims from crossing the street
+- AI: Tuned randomization of lane changing behavior
+- AI: Introduced path-finding costs for leaving main highway (should reduce amount of detours taken)
+- UI: Clicking with the secondary mouse button now deselects the currently selected node/segment for all tools
+- Added the possibility to connect train track lanes with the lane connector (as requested by @pilot.patrick93)
+- Moved options from "Change lane arrows" to "Vehicle restrictions" tool
+- Updated Russian translation
+- Bugfix: AI: At specific junctions, vehicles were not obeying lane connections correctly (thanks to @Mariobro14 for pointing out this problem)
+- Bugfix: AI: Path-finding costs for u-turns were not correctly calculated (thanks to @Mariobro14 for pointing out this problem)
+- Bugfix: Vehicles were endlessly waiting for each other at junctions with certain priority sign configurations
+- Bugfix: AI: Lane changing costs corrected
+
 1.7.5, 08/07/2016:
 - Bugfix: AI: Cims were using pocket cars whenever possible
 - Bugfix: AI: Path-finding failures led to much less vehicles spawning
