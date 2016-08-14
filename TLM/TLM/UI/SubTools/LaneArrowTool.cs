@@ -38,6 +38,13 @@ namespace TrafficManager.UI.SubTools {
 			SelectedNodeId = HoveredNodeId;
 		}
 
+		public override void OnSecondaryClickOverlay() {
+			if (!IsCursorInPanel()) {
+				SelectedSegmentId = 0;
+				SelectedNodeId = 0;
+			}
+		}
+
 		public override void OnToolGUI(Event e) {
 			_cursorInSecondaryPanel = false;
 
@@ -76,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 				return; // do not draw if too distant
 
 			int width = Math.Max(3 * 128 + 20, numLanes * 128);
-			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 130);
+			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
 			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", style);
 			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
 		}
@@ -166,20 +173,6 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			GUILayout.EndHorizontal();
-
-			GUILayout.BeginVertical();
-
-			if (!geometry.AreHighwayRulesEnabled(startNode)) {
-				if (!geometry.IsOneWay()) {
-					Flags.setUTurnAllowed(SelectedSegmentId, startNode, GUILayout.Toggle(Flags.getUTurnAllowed(SelectedSegmentId, startNode), Translation.GetString("Allow_u-turns") + " (BETA feature)", new GUILayoutOption[] { }));
-				}
-				if (geometry.HasOutgoingStraightSegment(startNode)) {
-					Flags.setStraightLaneChangingAllowed(SelectedSegmentId, startNode, GUILayout.Toggle(Flags.getStraightLaneChangingAllowed(SelectedSegmentId, startNode), Translation.GetString("Allow_lane_changing_for_vehicles_going_straight"), new GUILayoutOption[] { }));
-				}
-				Flags.setEnterWhenBlockedAllowed(SelectedSegmentId, startNode, GUILayout.Toggle(Flags.getEnterWhenBlockedAllowed(SelectedSegmentId, startNode), Translation.GetString("Allow_vehicles_to_enter_a_blocked_junction"), new GUILayoutOption[] { }));
-			}
-
-			GUILayout.EndVertical();
 		}
 	}
 }

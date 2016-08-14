@@ -27,6 +27,7 @@ namespace TrafficManager.State {
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
 		private static UICheckBox vehicleRestrictionsOverlayToggle = null;
+		private static UICheckBox junctionRestrictionsOverlayToggle = null;
 		private static UICheckBox connectedLanesOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
 		private static UICheckBox vehicleOverlayToggle = null;
@@ -49,6 +50,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableTimedLightsToggle = null;
 		private static UICheckBox enableCustomSpeedLimitsToggle = null;
 		private static UICheckBox enableVehicleRestrictionsToggle = null;
+		private static UICheckBox enableJunctionRestrictionsToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
 #if DEBUG
@@ -77,6 +79,7 @@ namespace TrafficManager.State {
 		private static UITextField someValue14Field = null;
 		private static UITextField someValue15Field = null;
 		private static UITextField someValue16Field = null;
+		private static UITextField someValue17Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -94,6 +97,7 @@ namespace TrafficManager.State {
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
 		public static bool vehicleRestrictionsOverlay = false;
+		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
@@ -123,7 +127,7 @@ namespace TrafficManager.State {
 		public static float someValue = 1f; // debug value (base lane changing cost factor on highways)
 		public static float someValue2 = 1.25f; // debug value (heavy vehicle lane changing cost factor)
 		public static float someValue3 = 2f; // debug value (lane changing cost base before junctions)
-		public static float someValue4 = 5f; // debug value (artifical lane distance for u-turns)
+		public static float someValue4 = 2f; // debug value (artifical lane distance for u-turns)
 		public static float someValue5 = 0.75f; // debug value (base lane changing cost factor on city streets)
 		public static float someValue6 = 1.5f; // debug value (penalty for busses not driving on bus lanes) 
 		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
@@ -136,11 +140,13 @@ namespace TrafficManager.State {
 		public static float someValue14 = 1.5f; // debug value (cost factor for leaving main highway)
 		public static float someValue15 = 10f; // debug value (maximum junction approach time for priority signs)
 		public static float someValue16 = 100f; // debug value (lane changing cost reduction modulo)
+		public static float someValue17 = 0f; // debug value --unused--
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
 		public static bool customSpeedLimitsEnabled = true;
 		public static bool vehicleRestrictionsEnabled = true;
+		public static bool junctionRestrictionsEnabled = true;
 		public static bool laneConnectorEnabled = true;
 
 		public static bool MenuRebuildRequired {
@@ -183,6 +189,7 @@ namespace TrafficManager.State {
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
 			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
+			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
 			//laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
@@ -191,6 +198,7 @@ namespace TrafficManager.State {
 			timedLightsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
 			speedLimitsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
 			vehicleRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
+			junctionRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
 			connectedLanesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
 			nodesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
 			showLanesToggle = overlayGroup.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
@@ -225,6 +233,7 @@ namespace TrafficManager.State {
 			someValue14Field = maintenanceGroup.AddTextfield("Some value #14", String.Format("{0:0.##}", someValue14), onSomeValue14Changed) as UITextField;
 			someValue15Field = maintenanceGroup.AddTextfield("Some value #15", String.Format("{0:0.##}", someValue15), onSomeValue15Changed) as UITextField;
 			someValue16Field = maintenanceGroup.AddTextfield("Some value #16", String.Format("{0:0.##}", someValue16), onSomeValue16Changed) as UITextField;
+			someValue17Field = maintenanceGroup.AddTextfield("Some value #17", String.Format("{0:0.##}", someValue17), onSomeValue17Changed) as UITextField;
 #endif
 		}
 
@@ -266,6 +275,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
+		}
+
+		private static void onJunctionRestrictionsOverlayChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"junctionRestrictionsOverlay changed to {newValue}");
+			junctionRestrictionsOverlay = newValue;
 		}
 
 		private static void onConnectedLanesOverlayChanged(bool newValue) {
@@ -457,6 +474,16 @@ namespace TrafficManager.State {
 			vehicleRestrictionsEnabled = val;
 			if (!val)
 				setVehicleRestrictionsOverlay(false);
+		}
+
+		private static void onJunctionRestrictionsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			junctionRestrictionsEnabled = val;
+			if (!val)
+				setJunctionRestrictionsOverlay(false);
 		}
 
 		private static void onLaneConnectorEnabledChanged(bool val) {
@@ -796,6 +823,19 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onSomeValue17Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue17 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
 				return;
@@ -1000,6 +1040,12 @@ namespace TrafficManager.State {
 				vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
 		}
 
+		public static void setJunctionRestrictionsOverlay(bool newValue) {
+			junctionRestrictionsOverlay = newValue;
+			if (junctionRestrictionsOverlayToggle != null)
+				junctionRestrictionsOverlayToggle.isChecked = newValue;
+		}
+
 		public static void setConnectedLanesOverlay(bool newValue) {
 			connectedLanesOverlay = newValue;
 			if (connectedLanesOverlayToggle != null)
@@ -1052,6 +1098,15 @@ namespace TrafficManager.State {
 				enableVehicleRestrictionsToggle.isChecked = newValue;
 			if (!newValue)
 				setVehicleRestrictionsOverlay(false);
+		}
+
+		public static void setJunctionRestrictionsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			junctionRestrictionsEnabled = newValue;
+			if (enableJunctionRestrictionsToggle != null)
+				enableJunctionRestrictionsToggle.isChecked = newValue;
+			if (!newValue)
+				setJunctionRestrictionsOverlay(false);
 		}
 
 		public static void setLaneConnectorEnabled(bool newValue) {

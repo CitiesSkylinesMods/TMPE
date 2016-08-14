@@ -125,3 +125,4 @@ Metric Système métrique
 Imperial Système impérial
 Use_more_CPU_cores_for_route_calculation_if_available Utiliser plus de cœurs du CPU pour le calcul de trajets (si disponible)
 Activated_features caractéristiques activées
+Junction_restrictions Restrictions de jonction

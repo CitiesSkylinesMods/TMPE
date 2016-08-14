@@ -61,6 +61,12 @@ namespace TrafficManager.UI.SubTools {
 			MainTool.CheckClicked(); // TODO do we need that?
 		}
 
+		public override void OnSecondaryClickOverlay() {
+			if (!IsCursorInPanel()) {
+				SelectedSegmentId = 0;
+			}
+		}
+
 		public override void OnToolGUI(Event e) {
 			if (SelectedSegmentId != 0) {
 				_cursorInSecondaryPanel = false;
@@ -108,8 +114,8 @@ namespace TrafficManager.UI.SubTools {
 				return;
 
 			bool stateUpdated = false;
-			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			bool handleHovered = false;
+			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			foreach (ushort segmentId in currentRestrictedSegmentIds) {
 				var segmentInfo = segments.m_buffer[segmentId].Info;
 
@@ -303,7 +309,7 @@ namespace TrafficManager.UI.SubTools {
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
 				yu = -yu;
 			Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-			float f = viewOnly ? 4f : 7f;
+			float f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
 			ItemClass connectionClass = segmentInfo.GetConnectionClass();
 			int maxNumSigns = 0;
 			if (connectionClass.m_service == ItemClass.Service.Road)

@@ -50,6 +50,12 @@ namespace TrafficManager.UI
 		public static readonly Dictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 		public static readonly Texture2D LaneChangeForbiddenTexture2D;
 		public static readonly Texture2D LaneChangeAllowedTexture2D;
+		public static readonly Texture2D UturnAllowedTexture2D;
+		public static readonly Texture2D UturnForbiddenTexture2D;
+		public static readonly Texture2D EnterBlockedJunctionAllowedTexture2D;
+		public static readonly Texture2D EnterBlockedJunctionForbiddenTexture2D;
+		public static readonly Texture2D PedestrianCrossingAllowedTexture2D;
+		public static readonly Texture2D PedestrianCrossingForbiddenTexture2D;
 
 		static TrafficLightToolTextureResources()
         {
@@ -126,6 +132,15 @@ namespace TrafficManager.UI
 
 			LaneChangeAllowedTexture2D = LoadDllResource("lanechange_allowed.png", 200, 200);
 			LaneChangeForbiddenTexture2D = LoadDllResource("lanechange_forbidden.png", 200, 200);
+
+			UturnAllowedTexture2D = LoadDllResource("uturn_allowed.png", 200, 200);
+			UturnForbiddenTexture2D = LoadDllResource("uturn_forbidden.png", 200, 200);
+
+			EnterBlockedJunctionAllowedTexture2D = LoadDllResource("enterblocked_allowed.png", 200, 200);
+			EnterBlockedJunctionForbiddenTexture2D = LoadDllResource("enterblocked_forbidden.png", 200, 200);
+
+			PedestrianCrossingAllowedTexture2D = LoadDllResource("crossing_allowed.png", 200, 200);
+			PedestrianCrossingForbiddenTexture2D = LoadDllResource("crossing_forbidden.png", 200, 200);
 
 			VehicleInfoSignTextures = new Dictionary<ExtVehicleType, Texture2D>();
 			VehicleInfoSignTextures[ExtVehicleType.Bicycle] = LoadDllResource("bicycle_infosign.png", 449, 411);

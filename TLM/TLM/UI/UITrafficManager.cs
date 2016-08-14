@@ -29,6 +29,7 @@ namespace TrafficManager.UI {
 		private static UIButton _buttonLaneChange;
 		private static UIButton _buttonLaneConnector;
 		private static UIButton _buttonVehicleRestrictions;
+		private static UIButton _buttonJunctionRestrictions;
 		private static UIButton _buttonSpeedLimits;
 		private static UIButton _buttonClearTraffic;
 		private static UIButton _buttonToggleDespawn;
@@ -107,6 +108,12 @@ namespace TrafficManager.UI {
 
 				if (Options.vehicleRestrictionsEnabled) {
 					_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
+					y += 40;
+					height += 40;
+				}
+
+				if (Options.junctionRestrictionsEnabled) {
+					_buttonJunctionRestrictions = _createButton(Translation.GetString("Junction_restrictions"), y, clickJunctionRestrictions);
 					y += 40;
 					height += 40;
 				}
@@ -356,6 +363,16 @@ namespace TrafficManager.UI {
 			}
 		}
 
+		private void clickJunctionRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
+			if (TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions) {
+				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenuFocused";
+				TrafficManagerTool.SetToolMode(ToolMode.JunctionRestrictions);
+			} else {
+				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
+				TrafficManagerTool.SetToolMode(ToolMode.None);
+			}
+		}
+
 		/// <summary>
 		/// Removes the focused sprite from all menu buttons
 		/// </summary>
@@ -379,6 +396,8 @@ namespace TrafficManager.UI {
 				_buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
 			if (_buttonVehicleRestrictions != null)
 				_buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
+			if (_buttonJunctionRestrictions != null)
+				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
 			if (_buttonToggleDespawn != null)
 				_buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
 		}

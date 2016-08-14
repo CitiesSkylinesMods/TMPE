@@ -71,6 +71,7 @@
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Manager\JunctionRestrictionsManager.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="UI\SubTool.cs" />
+    <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
@@ -232,6 +234,14 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\lang_nl.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\crossing_allowed.png" />
+    <EmbeddedResource Include="Resources\crossing_forbidden.png" />
+    <EmbeddedResource Include="Resources\enterblocked_allowed.png" />
+    <EmbeddedResource Include="Resources\enterblocked_forbidden.png" />
+    <EmbeddedResource Include="Resources\uturn_allowed.png" />
+    <EmbeddedResource Include="Resources\uturn_forbidden.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

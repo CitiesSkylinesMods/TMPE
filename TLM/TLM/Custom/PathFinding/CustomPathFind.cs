@@ -958,13 +958,18 @@ namespace TrafficManager.Custom.PathFinding {
 					if (nextSegmentId == 0) {
 						break;
 					}
-					if (!explorePrevSegment && nextSegmentId == prevSegmentId) {
+
+					bool uturn = nextSegmentId == prevSegmentId;
+					if (!explorePrevSegment && uturn) {
 						break;
 					}
 
+					NetInfo nextSegmentInfo = netManager.m_segments.m_buffer[nextSegmentId].Info;
 					bool nextIsUntouchable = (netManager.m_segments.m_buffer[nextSegmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None;
+					// a simple transition is (1) no junction, (2) no transition and (3) where lane count is equal
+					bool nextIsSimpleTransition = !nextIsTransition && !nextIsRealJunction && nextSegmentInfo.m_lanes.Length == prevSegmentInfo.m_lanes.Length;
 
-					 if (!isStrictLaneArrowPolicyEnabled || nextIsUntouchable) {
+					if (!isStrictLaneArrowPolicyEnabled || nextIsUntouchable) {
 						// don't obey lane arrows
 
 #if DEBUGPF
@@ -979,7 +984,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 						// NON-STOCK CODE END //
-						if (ProcessItemCosts(true, true, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode)) {
+						if (ProcessItemCosts(nextIsSimpleTransition || uturn, true, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode)) {
 							mayTurnAround = true;
 						}
 						// NON-STOCK CODE START //
@@ -1012,7 +1017,6 @@ namespace TrafficManager.Custom.PathFinding {
 							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: !enablePedestrian");
 #endif
 
-						var nextSegmentInfo = netManager.m_segments.m_buffer[nextSegmentId].Info;
 						bool isIncomingRight = false;
 						bool isIncomingStraight = false;
 						bool isIncomingLeft = false;
@@ -1200,9 +1204,6 @@ namespace TrafficManager.Custom.PathFinding {
 							short laneDiff = (short)((short)nextCompatibleLaneCount - (short)prevSimilarLaneCount);
 							bool applyHighwayRulesAtSegment = applyHighwayRules && (nextIsRealJunction || Math.Abs(laneDiff) == 1);
 
-							// a simple transition is (1) no junction, (2) no transition and (3) where lane count is equal
-							bool nextIsSimpleTransition = !nextIsTransition && !nextIsRealJunction && nextSegmentInfo.m_lanes.Length == prevSegmentInfo.m_lanes.Length;
-
 #if DEBUGPF
 							if (debug) {
 								logBuf.Add($"Compatible lanes found.");
@@ -1368,7 +1369,7 @@ namespace TrafficManager.Custom.PathFinding {
 										}
 #endif
 
-										if (ProcessItemCosts(nextIsSimpleTransition, false, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
+										if (ProcessItemCosts(nextIsSimpleTransition || uturn, false, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
 											mayTurnAround = true;
 										}
 #if DEBUGPF
@@ -1499,7 +1500,7 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 #endif
 
-									if (ProcessItemCosts(nextIsSimpleTransition, false, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
+									if (ProcessItemCosts(nextIsSimpleTransition || uturn, false, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
 										mayTurnAround = true;
 									}
 #if DEBUGPF
@@ -1563,7 +1564,7 @@ namespace TrafficManager.Custom.PathFinding {
 							}
 #endif
 
-							if (ProcessItemCosts(nextIsSimpleTransition, true, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
+							if (ProcessItemCosts(nextIsSimpleTransition || uturn, true, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, out foundForced)) {
 								mayTurnAround = true;
 							}
 
@@ -2252,10 +2253,11 @@ namespace TrafficManager.Custom.PathFinding {
 			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 			bool nextIsHighway = SegmentGeometry.Get(nextSegmentId).IsHighway();
 			bool nextIsRealJunction = SegmentGeometry.Get(item.m_position.m_segment).CountOtherSegments(nextIsStartNodeOfPrevSegment) > 1;
+			bool uturn = !isMiddle && nextSegmentId == item.m_position.m_segment;
 
 			// determines if a vehicles wants to change lanes here (randomized). If true, costs for changing to an adjacent lane are reduced
 			bool wantToChangeLane = false;
-			if (useAdvancedAI) {
+			if (useAdvancedAI && !uturn) {
 				laneChangeRandCounter = (ushort)((laneChangeRandCounter + 1) % (int)Options.someValue16);
 				wantToChangeLane = (laneChangeRandCounter == 0);
 			}
@@ -2543,7 +2545,7 @@ namespace TrafficManager.Custom.PathFinding {
 								bool isPreferredLaneChangingDir = relLaneDist == 1;
 #endif
 
-								float laneDist = !isMiddle && nextSegmentId == item.m_position.m_segment ? Options.someValue4 : (float)Math.Abs(relLaneDist); // absolute lane distance. U-turns are treated as changing lanes, too.
+								float laneDist = uturn ? Options.someValue4 : (float)Math.Abs(relLaneDist); // absolute lane distance. U-turns are treated as changing lanes, too.
 
 								if (forceLaneIndex == null && prevIsHighway && nextIsHighway && laneDist > 1) {
 									// disable lane changing by more than one on highways
@@ -2791,6 +2793,11 @@ namespace TrafficManager.Custom.PathFinding {
 				return;
 			}
 			// NON-STOCK CODE START
+			// check if pedestrians are not allowed to cross here
+			if (!JunctionRestrictionsManager.Instance().IsPedestrianCrossingAllowed(nextSegmentId, targetNodeId == nextSegment.m_startNode))
+				return;
+
+			// check if pedestrian light won't change to green
 			CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(targetNodeId, nextSegmentId);
 			if (lights != null) {
 				if (lights.InvalidPedestrianLight) {
@@ -2975,6 +2982,7 @@ namespace TrafficManager.Custom.PathFinding {
 			_laneLocation[item.m_laneID] = (_pathFindIndex << 16 | (uint)bufferIndex);
 			_laneTarget[item.m_laneID] = target;
 		}
+
 		private void GetLaneDirection(PathUnit.Position pathPos, out NetInfo.Direction direction, out NetInfo.LaneType type) {
 			NetManager instance = Singleton<NetManager>.instance;
 			NetInfo info = instance.m_segments.m_buffer[pathPos.m_segment].Info;

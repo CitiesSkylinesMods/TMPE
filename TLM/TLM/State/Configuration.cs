@@ -80,7 +80,8 @@ namespace TrafficManager {
 		public class SegmentNodeFlags {
 			public bool? uturnAllowed = null;
 			public bool? straightLaneChangingAllowed = null;
-			public bool? enterWhenBlockedAllowed = null; 
+			public bool? enterWhenBlockedAllowed = null;
+			public bool? pedestrianCrossingAllowed = null;
 		}
 
 		[Serializable]

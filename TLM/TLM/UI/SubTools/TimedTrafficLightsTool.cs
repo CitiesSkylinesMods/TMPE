@@ -74,6 +74,13 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
+		public override void OnSecondaryClickOverlay() {
+			if (!IsCursorInPanel()) {
+				Cleanup();
+				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+			}
+		}
+
 		public override void OnPrimaryClickOverlay() {
 			if (HoveredNodeId <= 0 || nodeSelectionLocked)
 				return;
@@ -544,6 +551,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
+			SelectedNodeId = 0;
 			ClearSelectedNodes();
 			_timedShowNumbers = false;
 		}

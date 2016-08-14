@@ -41,7 +41,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!Flags.mayHaveTrafficLight(HoveredNodeId)) return;
 
-			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
+			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
 		}
 
 		public override void Initialize() {
@@ -67,7 +67,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void ShowGUIOverlay() {
-			ShowGUI(true);
+			if (TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions)
+				ShowGUI(true);
 		}
 
 		public void ShowGUI(bool viewOnly) {

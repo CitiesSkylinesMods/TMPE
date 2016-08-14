@@ -32,7 +32,7 @@ namespace TrafficManager.UI {
 		public static readonly float DebugCloseLod = 300f;
 		public static readonly float PriorityCloseLod = 450f;
 
-		private static SubTool[] subTools = new SubTool[12];
+		private static SubTool[] subTools = new SubTool[13];
 		private static bool initDone = false;
 
 		public static ushort SelectedNodeId { get; internal set; }
@@ -86,6 +86,7 @@ namespace TrafficManager.UI {
 				subTools[(int)ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
 				subTools[(int)ToolMode.LaneChange] = new LaneArrowTool(this);
 				subTools[(int)ToolMode.LaneConnector] = new LaneConnectorTool(this);
+				subTools[(int)ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this);
 
 				for (int i = 0; i < subTools.Length; ++i) {
 					if (subTools[i] == null)
@@ -275,14 +276,14 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId) {
+		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, bool warning=false) {
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
 
 			Bezier3 bezier;
 			bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 			bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-			var color = GetToolColor(Input.GetMouseButton(0), false);
+			var color = GetToolColor(warning, false);
 
 			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection, false, false, out bezier.b, out bezier.c);
 

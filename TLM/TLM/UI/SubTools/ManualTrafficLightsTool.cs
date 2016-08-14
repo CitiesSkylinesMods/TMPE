@@ -21,6 +21,11 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
+		public override void OnSecondaryClickOverlay() {
+			Cleanup();
+			SelectedNodeId = 0;
+		}
+
 		public override void OnPrimaryClickOverlay() {
 			if (SelectedNodeId != 0) return;
 

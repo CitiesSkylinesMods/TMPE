@@ -125,3 +125,4 @@ Metric
 Imperial
 Use_more_CPU_cores_for_route_calculation_if_available
 Activated_features
+Junction_restrictions

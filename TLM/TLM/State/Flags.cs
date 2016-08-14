@@ -680,7 +680,7 @@ namespace TrafficManager.State {
 			bool? valueToSet = value;
 			if (value == Options.allowUTurns)
 				valueToSet = null;
-
+			
 			int index = startNode ? 0 : 1;
 			if (segmentNodeFlags[segmentId][index] == null) {
 				if (valueToSet == null)
@@ -689,6 +689,33 @@ namespace TrafficManager.State {
 				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
 			}
 			segmentNodeFlags[segmentId][index].uturnAllowed = valueToSet;
+		}
+
+		public static bool getPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
+			if (!IsInitDone())
+				return false;
+
+			int index = startNode ? 0 : 1;
+
+			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
+			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].pedestrianCrossingAllowed == null)
+				return true;
+			return (bool)nodeFlags[index].pedestrianCrossingAllowed;
+		}
+
+		public static void setPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool value) {
+			bool? valueToSet = value;
+			if (value)
+				valueToSet = null;
+
+			int index = startNode ? 0 : 1;
+			if (segmentNodeFlags[segmentId][index] == null) {
+				if (valueToSet == null)
+					return;
+
+				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
+			}
+			segmentNodeFlags[segmentId][index].pedestrianCrossingAllowed = valueToSet;
 		}
 
 		public static bool getStraightLaneChangingAllowed(ushort segmentId, bool startNode) {
@@ -876,6 +903,11 @@ namespace TrafficManager.State {
 			}
 		}
 
+		public static void resetSegmentNodeFlags(ushort segmentId, bool startNode) {
+			int index = startNode ? 0 : 1;
+			segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
+		}
+		
 		internal static void OnLevelUnloading() {
 			initDone = false;
 

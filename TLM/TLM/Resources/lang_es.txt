@@ -125,3 +125,4 @@ Metric Métrico
 Imperial Imperial
 Use_more_CPU_cores_for_route_calculation_if_available Usar más nucleos del procesador para el cálculo de rutas (si está disponible)
 Activated_features Activated features
+Junction_restrictions Junction restrictions

@@ -156,7 +156,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (GetMarkerSelectionMode() == MarkerSelectionMode.None && HoveredNodeId != 0) {
 				// draw hovered node
-				MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
+				MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
 			}
 		}
 
