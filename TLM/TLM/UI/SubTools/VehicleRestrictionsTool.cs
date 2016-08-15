@@ -68,27 +68,17 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnToolGUI(Event e) {
+			base.OnToolGUI(e);
+
 			if (SelectedSegmentId != 0) {
 				_cursorInSecondaryPanel = false;
 
-				var style = new GUIStyle {
-					normal = { background = SecondPanelTexture },
-					alignment = TextAnchor.MiddleCenter,
-					border =
-					{
-						bottom = 2,
-						top = 2,
-						right = 2,
-						left = 2
-					}
-				};
-
-				GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"), style);
+				windowRect = GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"));
 				_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
 				overlayHandleHovered = false;
 			}
-			ShowSigns(false);
+			//ShowSigns(false);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -105,14 +95,14 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay() {
-			ShowSigns(true);
-		}
-
-		private void ShowSigns(bool viewOnly) {
+		public override void ShowGUIOverlay(bool viewOnly) {
 			if (viewOnly && !Options.vehicleRestrictionsOverlay)
 				return;
 
+			ShowSigns(viewOnly);
+		}
+
+		private void ShowSigns(bool viewOnly) {
 			bool stateUpdated = false;
 			bool handleHovered = false;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
@@ -204,6 +194,8 @@ namespace TrafficManager.UI.SubTools {
 				ApplyRestrictionsToAllSegments();
 				RefreshCurrentRestrictedSegmentIds();
 			}
+
+			GUI.DragWindow();
 		}
 
 		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {

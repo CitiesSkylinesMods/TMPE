@@ -36,15 +36,26 @@ namespace TrafficManager.UI {
 			//OnLeftClickOverlay();
 		}
 
+		float nativeWidth = 1920;
+		float nativeHeight = 1200;
+
+		/// <summary>
+		/// Called whenever the 
+		/// </summary>
 		public abstract void OnPrimaryClickOverlay();
 		public virtual void OnSecondaryClickOverlay() { }
-		public abstract void OnToolGUI(Event e);
+		public virtual void OnToolGUI(Event e) {
+			//set up scaling
+			float rx = Screen.currentResolution.width / nativeWidth;
+			float ry = Screen.currentResolution.height / nativeHeight;
+			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));
+		}
 		public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
 		public virtual void Initialize() { }
 		public virtual void Cleanup() { }
 		public virtual void OnActivate() { }
 		public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
-		public virtual void ShowGUIOverlay() { }
+		public virtual void ShowGUIOverlay(bool viewOnly) { }
 		public virtual bool IsCursorInPanel() {
 			return false;
 		}

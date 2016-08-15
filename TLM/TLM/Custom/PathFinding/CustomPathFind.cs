@@ -2209,7 +2209,7 @@ namespace TrafficManager.Custom.PathFinding {
 					if (debug)
 						logBuf.Add($"ProcessItemCosts: applying strict lane avoidance on deactivated advaned AI");
 #endif
-					prevCost *= 50f;
+					prevCost *= 100f;
 				}
 
 				// add costs for u-turns
@@ -2409,7 +2409,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 									// apply vehicle restrictions
-									customDeltaCost *= 50f;
+									customDeltaCost *= 100f;
 								} else if (avoidLane && (_extVehicleType == null || (_extVehicleType & (ExtVehicleType.CargoTruck | ExtVehicleType.PassengerCar)) != ExtVehicleType.None)) {
 #if DEBUGPF
 									if (debug)

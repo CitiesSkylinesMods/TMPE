@@ -56,7 +56,7 @@ namespace TrafficManager.UI {
 			var rectY = (rect.y / 600f) * (float)Screen.currentResolution.height;*/
 
 			//return new Rect(rectX, rectY, rect.width, rect.height);
-			return new Rect(85f + (float)Translation.getMenuWidth() + AdaptWidth(50f + rect.x), 80f + 10f + rect.y, AdaptWidth(rect.width), rect.height);
+			return new Rect(85f + (float)Translation.getMenuWidth() + 25f + AdaptWidth(rect.x), 80f + 10f + rect.y, AdaptWidth(rect.width), rect.height);
 		}
 
 		internal static float AdaptWidth(float originalWidth) {
@@ -251,16 +251,16 @@ namespace TrafficManager.UI {
 //#if DEBUG
 				if (Options.vehicleOverlay) {
 					_guiVehicles();
-					//_guiCitizens();
+					_guiCitizens();
 				}
 //#endif
 
 				for (int i = 0; i < subTools.Length; ++i) {
 					if (subTools[i] == null)
 						continue;
-					if (i == (int)GetToolMode())
-						continue;
-					subTools[i].ShowGUIOverlay();
+					/*if (i == (int)GetToolMode())
+						continue;*/
+					subTools[i].ShowGUIOverlay(i != (int)GetToolMode());
 				}
 
 				var guiColor = GUI.color;
@@ -725,7 +725,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				String labelStr = "Cit. " + i;
+				String labelStr = "Cit. " + i + ", transport: " + CustomCitizenAI.currentTransportMode[i];
 				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

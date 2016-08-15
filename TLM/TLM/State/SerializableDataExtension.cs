@@ -423,7 +423,7 @@ namespace TrafficManager.State {
 				// new method
 				foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
 					try {
-						Log.Info($"Traffic light split data: {split[0]} , {split[1]}");
+						Log._Debug($"Traffic light split data: {split[0]} , {split[1]}");
 						var nodeId = Convert.ToUInt16(split[0]);
 						uint flag = Convert.ToUInt16(split[1]);
 
@@ -448,7 +448,7 @@ namespace TrafficManager.State {
 				if (lanes.Length > 1) {
 					foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
 						try {
-							Log.Info($"Split Data: {split[0]} , {split[1]}");
+							Log._Debug($"Split Data: {split[0]} , {split[1]}");
 							var laneId = Convert.ToUInt32(split[0]);
 							uint flags = Convert.ToUInt32(split[1]);
 
@@ -540,13 +540,13 @@ namespace TrafficManager.State {
 		public override void OnSaveData() {
 			bool error = false;
 
-			try {
+			/*try {
 				Log.Info("Recalculating segment geometries");
 				SegmentGeometry.OnBeforeSaveData();
 			} catch (Exception e) {
 				Log.Error($"OnSaveData: Exception occurred while calling SegmentGeometry.OnBeforeSaveData: {e.ToString()}");
 				error = true;
-			}
+			}*/
 
 			try {
 				Log.Info("Applying all flags");
@@ -610,9 +610,9 @@ namespace TrafficManager.State {
 					}
 				}
 
-	#if !TAM
+#if !TAM
 				if (LoadingExtension.IsPathManagerCompatible) {
-	#endif
+#endif
 					for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
 						try {
 							SaveLaneData(i, configuration);
@@ -621,9 +621,9 @@ namespace TrafficManager.State {
 							error = true;
 						}
 					}
-	#if !TAM
+#if !TAM
 				}
-	#endif
+#endif
 
 				foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
 					try {

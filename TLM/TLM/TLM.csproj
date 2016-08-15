@@ -243,6 +243,9 @@
     <EmbeddedResource Include="Resources\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\uturn_forbidden.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\110.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "D:\Games\Steam\steamapps\workshop\content\255710\583429740"

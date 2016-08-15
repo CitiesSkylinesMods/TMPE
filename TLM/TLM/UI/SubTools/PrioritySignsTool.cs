@@ -25,7 +25,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnToolGUI(Event e) {
-			ShowGUI(false);
+			//ShowGUI(false);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -66,16 +66,18 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay() {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions)
-				ShowGUI(true);
+		public override void ShowGUIOverlay(bool viewOnly) {
+			if (viewOnly && !Options.prioritySignsOverlay)
+				return;
+
+			if (TrafficManagerTool.GetToolMode() == ToolMode.JunctionRestrictions)
+				return;
+
+			ShowGUI(viewOnly);
 		}
 
 		public void ShowGUI(bool viewOnly) {
 			try {
-				if (viewOnly && !Options.prioritySignsOverlay)
-					return;
-
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
 
@@ -226,8 +228,8 @@ namespace TrafficManager.UI.SubTools {
 					nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
 					if (nodeScreenPosition.z < 0)
 						continue;
-					var zoom = 1.0f / diff.magnitude * 100f;
-					var size = 100f * zoom;
+					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
+					var size = 90f * zoom;
 					var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
 
 					var guiColor = GUI.color;

@@ -26,10 +26,10 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnToolGUI(Event e) {
-			if (SelectedNodeId != 0) {
+			/*if (SelectedNodeId != 0) {
 				overlayHandleHovered = false;
 			}
-			ShowSigns(false);
+			ShowSigns(false);*/
 		}
 
 		public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -48,14 +48,18 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay() {
-			ShowSigns(true);
-		}
-
-		private void ShowSigns(bool viewOnly) {
+		public override void ShowGUIOverlay(bool viewOnly) {
 			if (viewOnly && !Options.junctionRestrictionsOverlay)
 				return;
 
+			if (SelectedNodeId != 0) {
+				overlayHandleHovered = false;
+			}
+
+			ShowSigns(viewOnly);
+		}
+
+		private void ShowSigns(bool viewOnly) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 

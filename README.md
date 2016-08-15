@@ -2,6 +2,15 @@
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control
 
 # Changelog
+1.7.7, 08/16/2016:
+- AI: Instead of walking long distances, citizens now use a car
+- AI: Citizens will remember their last used mode of transport (e.g. they will not drive to work and come return by bus anymore)
+- AI: Increased path-finding costs for traversing over restricted road segments
+- Added "110" speed limit
+- GUI: Windows are draggable
+- GUI: Improved window scaling on lower resolutions
+- Improved performance while saving
+
 1.7.6, 08/14/2016:
 - New feature: Players may now prohibit cims from crossing the street
 - AI: Tuned randomization of lane changing behavior

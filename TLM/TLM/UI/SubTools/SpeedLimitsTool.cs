@@ -18,6 +18,7 @@ namespace TrafficManager.UI.SubTools {
 		private bool overlayHandleHovered;
 		private Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 		private readonly float speedLimitSignSize = 80f;
+		private readonly int guiSpeedSignSize = 100;
 		private Texture2D SecondPanelTexture;
 		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 210));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
@@ -31,37 +32,35 @@ namespace TrafficManager.UI.SubTools {
 			return _cursorInSecondaryPanel;
 		}
 
+		public override void OnActivate() {
+			
+		}
+
 		public override void OnPrimaryClickOverlay() {
 			
 		}
 
 		public override void OnToolGUI(Event e) {
+			base.OnToolGUI(e);
+
 			_cursorInSecondaryPanel = false;
 
-			var style = new GUIStyle {
-				normal = { background = SecondPanelTexture },
-				alignment = TextAnchor.MiddleCenter,
-				border =
-				{
-					bottom = 2,
-					top = 2,
-					right = 2,
-					left = 2
-				}
-			};
-
-			GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"), style);
+			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"));
 			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
-			overlayHandleHovered = false;
-			ShowSigns(false);
+			//overlayHandleHovered = false;
+			//ShowSigns(false);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
 			
 		}
 
-		public override void ShowGUIOverlay() {
-			ShowSigns(true);
+		public override void ShowGUIOverlay(bool viewOnly) {
+			if (viewOnly && !Options.speedLimitsOverlay)
+				return;
+
+			overlayHandleHovered = false;
+			ShowSigns(viewOnly);
 		}
 
 		public override void Cleanup() {
@@ -75,9 +74,6 @@ namespace TrafficManager.UI.SubTools {
 		private Vector3? lastCamPos = null;
 
 		private void ShowSigns(bool viewOnly) {
-			if (viewOnly && !Options.speedLimitsOverlay)
-				return;
-
 			Quaternion camRot = Camera.main.transform.rotation;
 			Vector3 camPos = Camera.main.transform.position;
 
@@ -116,6 +112,8 @@ namespace TrafficManager.UI.SubTools {
 			foreach (ushort segmentId in currentlyVisibleSegmentIds) {
 				Vector3 screenPos = Camera.main.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center);
 				screenPos.y = Screen.height - screenPos.y;
+				if (screenPos.z < 0)
+					continue;
 
 				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
@@ -135,7 +133,7 @@ namespace TrafficManager.UI.SubTools {
 			for (int i = 0; i < SpeedLimitManager.Instance().AvailableSpeedLimits.Count; ++i) {
 				if (curSpeedLimitIndex != i)
 					GUI.color = Color.gray;
-				float signSize = TrafficManagerTool.AdaptWidth(100);
+				float signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
 				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance().AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
 					curSpeedLimitIndex = i;
 				}
@@ -148,6 +146,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			GUILayout.EndHorizontal();
+			GUI.DragWindow();
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, bool viewOnly, ref Vector3 camPos) {

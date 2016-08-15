@@ -21,16 +21,15 @@ namespace TrafficManager {
 
 		private static string logFilename = Path.Combine(Application.dataPath, "TMPE.log");
 		private static Stopwatch sw = Stopwatch.StartNew();
-#if DEBUG
 		private static bool logToConsole = false;
-#endif
+
 
 		static Log() {
 			File.Delete(logFilename);
 		}
 
+		[Conditional("DEBUG")]
 		public static void _Debug(string s) {
-#if DEBUG
 			try {
 				Monitor.Enter(logLock);
 				if (logToConsole)
@@ -41,7 +40,6 @@ namespace TrafficManager {
 			} finally {
 				Monitor.Exit(logLock);
 			}
-#endif
 		}
 
 		public static void Info(string s) {

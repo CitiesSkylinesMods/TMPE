@@ -36,6 +36,7 @@ namespace TrafficManager.Manager {
 			AvailableSpeedLimits.Add(80);
 			AvailableSpeedLimits.Add(90);
 			AvailableSpeedLimits.Add(100);
+			AvailableSpeedLimits.Add(110);
 			AvailableSpeedLimits.Add(120);
 			AvailableSpeedLimits.Add(130);
 			AvailableSpeedLimits.Add(0);
@@ -246,12 +247,8 @@ namespace TrafficManager.Manager {
 			ushort speedLimit = 0;
 			if (laneSpeedLimit < 0.15f)
 				speedLimit = 10;
-			else if (laneSpeedLimit < 1.15f)
-				speedLimit = (ushort)((ushort)Math.Round(laneSpeedLimit * 10f) * 10u);
-			else if (laneSpeedLimit < 1.25f)
-				speedLimit = 120;
 			else if (laneSpeedLimit < 1.35f)
-				speedLimit = 130;
+				speedLimit = (ushort)((ushort)Math.Round(laneSpeedLimit * 10f) * 10u);
 
 			return speedLimit;
 		}

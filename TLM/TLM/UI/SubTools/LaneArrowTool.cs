@@ -46,6 +46,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnToolGUI(Event e) {
+			//base.OnToolGUI(e);
+
 			_cursorInSecondaryPanel = false;
 
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
@@ -82,7 +84,7 @@ namespace TrafficManager.UI.SubTools {
 			if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
 				return; // do not draw if too distant
 
-			int width = Math.Max(3 * 128 + 20, numLanes * 128);
+			int width = numLanes * 128;
 			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
 			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", style);
 			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
