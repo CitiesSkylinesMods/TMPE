@@ -1151,10 +1151,15 @@ namespace TrafficManager.UI.SubTools {
 						bool startNode = geometry.StartNodeId() == nodeId;
 						if (geometry.IsOutgoingOneWay(startNode)) continue;
 
-						var hasLeftSegment = geometry.HasLeftSegment(startNode);
-						var hasForwardSegment = geometry.HasStraightSegment(startNode);
-						var hasRightSegment = geometry.HasRightSegment(startNode);
+						var hasOutgoingLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
+						var hasOutgoingForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
+						var hasOutgoingRightSegment = geometry.HasOutgoingRightSegment(startNode);
 
+						/*var hasLeftSegment = geometry.HasLeftSegment(startNode);
+						var hasForwardSegment = geometry.HasStraightSegment(startNode);
+						var hasRightSegment = geometry.HasRightSegment(startNode);*/
+
+						bool hasOtherLight = false;
 						switch (liveSegmentLight.CurrentMode) {
 							case CustomSegmentLight.Mode.Simple: {
 									// no arrow light
@@ -1214,7 +1219,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 								break;
 							case CustomSegmentLight.Mode.SingleLeft:
-								if (hasLeftSegment) {
+								if (hasOutgoingLeftSegment) {
 									// left arrow light
 									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
@@ -1278,15 +1283,18 @@ namespace TrafficManager.UI.SubTools {
 									new Rect(offsetScreenPos.x - lightWidth / 2 - pedestrianWidth - (_timedPanelAdd || _timedEditStep >= 0 ? lightWidth : 0f) + 5f * zoom,
 										offsetScreenPos.y - lightHeight / 2, lightWidth, lightHeight);
 
-								if (hasForwardSegment && hasRightSegment) {
+								if (hasOutgoingForwardSegment && hasOutgoingRightSegment) {
 									drawForwardRightLightTexture(liveSegmentLight.LightMain, myRect5);
-								} else if (!hasRightSegment) {
+									hasOtherLight = true;
+								} else if (hasOutgoingForwardSegment) {
 									drawStraightLightTexture(liveSegmentLight.LightMain, myRect5);
-								} else {
+									hasOtherLight = true;
+								} else if (hasOutgoingRightSegment) {
 									drawRightLightTexture(liveSegmentLight.LightMain, myRect5);
+									hasOtherLight = true;
 								}
 
-								if (myRect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+								if (hasOtherLight && myRect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
 									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 4;
 									_hoveredNode = nodeId;
@@ -1339,28 +1347,32 @@ namespace TrafficManager.UI.SubTools {
 
 									var lightType = 0;
 
-									if (hasForwardSegment && hasLeftSegment) {
+									hasOtherLight = false;
+									if (hasOutgoingForwardSegment && hasOutgoingLeftSegment) {
+										hasOtherLight = true;
 										drawForwardLeftLightTexture(liveSegmentLight.LightMain, myRect4);
 
 										lightType = 1;
-									} else if (!hasLeftSegment) {
-										if (!hasRightSegment) {
+									} else if (hasOutgoingForwardSegment) {
+										hasOtherLight = true;
+										if (!hasOutgoingRightSegment) {
 											myRect4 = new Rect(offsetScreenPos.x - lightWidth / 2 - (_timedPanelAdd || _timedEditStep >= 0 ? lightWidth : 0f) - pedestrianWidth + 5f * zoom,
 												offsetScreenPos.y - lightHeight / 2, lightWidth, lightHeight);
 										}
 
 										drawStraightLightTexture(liveSegmentLight.LightMain, myRect4);
-									} else {
-										if (!hasRightSegment) {
+									} else if (hasOutgoingLeftSegment) {
+										hasOtherLight = true;
+										if (!hasOutgoingRightSegment) {
 											myRect4 = new Rect(offsetScreenPos.x - lightWidth / 2 - (_timedPanelAdd || _timedEditStep >= 0 ? lightWidth : 0f) - pedestrianWidth + 5f * zoom,
 												offsetScreenPos.y - lightHeight / 2, lightWidth, lightHeight);
 										}
 
-										drawMainLightTexture(liveSegmentLight.LightMain, myRect4);
+										drawLeftLightTexture(liveSegmentLight.LightMain, myRect4);
 									}
 
 
-									if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (hasOtherLight && myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
 										_hoveredNode = nodeId;
@@ -1386,7 +1398,7 @@ namespace TrafficManager.UI.SubTools {
 										}
 
 										var myRectCounterNum =
-											new Rect(offsetScreenPos.x - counterSize + 15f * zoom + (counter >= 10 ? (counter >= 100 ? -10 * zoom : -5 * zoom) : 0f) - pedestrianWidth + 5f * zoom - (_timedPanelAdd || _timedEditStep >= 0 ? (hasRightSegment ? lightWidth * 2 : lightWidth) : (hasRightSegment ? lightWidth : 0f)),
+											new Rect(offsetScreenPos.x - counterSize + 15f * zoom + (counter >= 10 ? (counter >= 100 ? -10 * zoom : -5 * zoom) : 0f) - pedestrianWidth + 5f * zoom - (_timedPanelAdd || _timedEditStep >= 0 ? (hasOutgoingRightSegment ? lightWidth * 2 : lightWidth) : (hasOutgoingRightSegment ? lightWidth : 0f)),
 												offsetScreenPos.y - numOffset, counterSize, counterSize);
 
 										_counterStyle.fontSize = (int)(18f * zoom);
@@ -1403,7 +1415,7 @@ namespace TrafficManager.UI.SubTools {
 									}
 
 									// right arrow light
-									if (hasRightSegment) {
+									if (hasOutgoingRightSegment) {
 										guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
 													 _hoveredNode == nodeId
 											? 0.92f
@@ -1468,17 +1480,17 @@ namespace TrafficManager.UI.SubTools {
 								break;
 							default:
 								// left arrow light
-								if (hasLeftSegment) {
+								if (hasOutgoingLeftSegment) {
 									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 									GUI.color = guiColor;
 
 									var offsetLight = lightWidth;
 
-									if (hasRightSegment)
+									if (hasOutgoingRightSegment)
 										offsetLight += lightWidth;
 
-									if (hasForwardSegment)
+									if (hasOutgoingForwardSegment)
 										offsetLight += lightWidth;
 
 									var myRect4 =
@@ -1535,14 +1547,14 @@ namespace TrafficManager.UI.SubTools {
 								}
 
 								// forward arrow light
-								if (hasForwardSegment) {
+								if (hasOutgoingForwardSegment) {
 									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 									GUI.color = guiColor;
 
 									var offsetLight = lightWidth;
 
-									if (hasRightSegment)
+									if (hasOutgoingRightSegment)
 										offsetLight += lightWidth;
 
 									var myRect6 =
@@ -1599,7 +1611,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 
 								// right arrow light
-								if (hasRightSegment) {
+								if (hasOutgoingRightSegment) {
 									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId ? 0.92f : 0.6f;
 
 									GUI.color = guiColor;

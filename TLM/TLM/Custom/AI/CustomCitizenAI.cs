@@ -40,7 +40,7 @@ namespace TrafficManager.Custom.AI {
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			Citizen.Wealth wealthLevel = citMan.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel;
 			bool couldUseTaxi = false; // could cim use a taxi if it was not forbidden because of randomization?
-			//bool couldUseCar = false;
+			bool couldUseCar = false;
 			bool couldUseBike = false;
 			bool wouldAffordTaxiVoluntarily = false;
 
@@ -62,7 +62,7 @@ namespace TrafficManager.Custom.AI {
 					if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
 						couldUseBike = true;
 					} else if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Car) {
-						//couldUseCar = true;
+						couldUseCar = true;
 					}
 					// NON-STOCK CODE END
 
@@ -82,7 +82,8 @@ namespace TrafficManager.Custom.AI {
 			bool usePublicTransport = false;
 
 			if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) { // STOCK CODE
-				if (currentTransportMode[instanceID] == TransportMode.PublicTransport || useTaxi || (currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
+				if (currentTransportMode[instanceID] == TransportMode.PublicTransport || useTaxi ||
+					(currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
 					usePublicTransport = true;
 				}
 			}
@@ -98,7 +99,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			if (couldUseBike) {
-				// bikes may be transported
+				// everyone who has a bike may use it
 				useBike = true;
 			}
 
@@ -107,8 +108,8 @@ namespace TrafficManager.Custom.AI {
 					useCar = true;
 				} else if ((wouldAffordTaxiVoluntarily && currentTransportMode[instanceID] == TransportMode.Taxi) || couldUseTaxi) {
 					useTaxi = true;
-				} else {
-					// fallback
+				} else if (couldUseCar) {
+					// pocket car fallback
 					useCar = true;
 				}
 			}
@@ -123,26 +124,23 @@ namespace TrafficManager.Custom.AI {
 				extVehicleType |= ExtVehicleType.PublicTransport;
 			}
 
-			if (useBike) {
+			if (useBike && vehicleInfo != null) {
 				laneType |= NetInfo.LaneType.Vehicle;
-				if (vehicleInfo != null)
-					vehicleType |= vehicleInfo.m_vehicleType;
+				vehicleType |= vehicleInfo.m_vehicleType;
 				extVehicleType |= ExtVehicleType.Bicycle;
 			}
 
-			if (useTaxi) {
+			if (useTaxi && vehicleInfo != null) {
 				currentTransportMode[instanceID] = TransportMode.Taxi;
 				laneType |= (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
-				if (vehicleInfo != null)
-					vehicleType |= vehicleInfo.m_vehicleType;
+				vehicleType |= vehicleInfo.m_vehicleType;
 				extVehicleType |= ExtVehicleType.Taxi;
 			}
 			
-			if (useCar) {
+			if (useCar && vehicleInfo != null) {
 				currentTransportMode[instanceID] = TransportMode.Car;
 				laneType |= NetInfo.LaneType.Vehicle;
-				if (vehicleInfo != null)
-					vehicleType |= vehicleInfo.m_vehicleType;
+				vehicleType |= vehicleInfo.m_vehicleType;
 				extVehicleType |= ExtVehicleType.PassengerCar;
 			}
 

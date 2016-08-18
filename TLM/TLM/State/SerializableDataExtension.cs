@@ -17,6 +17,7 @@ using TrafficManager.UI;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using ColossalFramework.UI;
+using TrafficManager.Util;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -289,14 +290,14 @@ namespace TrafficManager.State {
 							continue;
 						}
 
-						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[segment[0]].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+						if (! NetUtil.IsNodeValid((ushort)segment[0])) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"Loading priority segment: node {segment[0]} is invalid");
 #endif
 							continue;
 						}
-						if ((Singleton<NetManager>.instance.m_segments.m_buffer[segment[1]].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+						if (! NetUtil.IsSegmentValid((ushort)segment[1])) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is invalid");
@@ -356,7 +357,7 @@ namespace TrafficManager.State {
 
 				foreach (Configuration.TimedTrafficLights cnfTimedLights in _configuration.TimedLights) {
 					try {
-						if ((Singleton<NetManager>.instance.m_nodes.m_buffer[cnfTimedLights.nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+						if (! NetUtil.IsNodeValid(cnfTimedLights.nodeId))
 							continue;
 						Flags.setNodeTrafficLight(cnfTimedLights.nodeId, true);
 
@@ -459,7 +460,7 @@ namespace TrafficManager.State {
 							if (flags > ushort.MaxValue)
 								continue;
 
-							if ((Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment == 0)
+							if (! NetUtil.IsLaneValid(laneId))
 								continue;
 
 							//Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
@@ -522,7 +523,7 @@ namespace TrafficManager.State {
 				Log.Info($"Loading segment-at-node data. {_configuration.SegmentNodeConfs.Count} elements");
 				foreach (Configuration.SegmentNodeConf segNodeConf in _configuration.SegmentNodeConfs) {
 					try {
-						if ((Singleton<NetManager>.instance.m_segments.m_buffer[segNodeConf.segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+						if (!NetUtil.IsSegmentValid(segNodeConf.segmentId))
 							continue;
 						Flags.setSegmentNodeFlags(segNodeConf.segmentId, true, segNodeConf.startNodeFlags);
 						Flags.setSegmentNodeFlags(segNodeConf.segmentId, false, segNodeConf.endNodeFlags);
@@ -703,10 +704,7 @@ namespace TrafficManager.State {
 				//NetLane.Flags flags = (NetLane.Flags)lane.m_flags;
 				/*if ((flags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None) // only save lanes with explicit lane arrows
 					return;*/
-				var laneSegmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-				if ((Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_flags & (ushort)NetLane.Flags.Created) == 0 || laneSegmentId == 0)
-					return;
-				if ((Singleton<NetManager>.instance.m_segments.m_buffer[laneSegmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+				if (! NetUtil.IsLaneValid(i))
 					return;
 
 				if (Flags.laneConnections[i] != null) {
@@ -717,10 +715,7 @@ namespace TrafficManager.State {
 							foreach (uint otherHigherLaneId in connectedLaneIds) {
 								if (otherHigherLaneId <= i)
 									continue;
-								var otherLaneSegmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)otherHigherLaneId].m_segment;
-								if ((Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)otherHigherLaneId].m_flags & (ushort)NetLane.Flags.Created) == 0 || otherLaneSegmentId == 0)
-									continue;
-								if ((Singleton<NetManager>.instance.m_segments.m_buffer[otherLaneSegmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+								if (!NetUtil.IsLaneValid(otherHigherLaneId))
 									continue;
 
 								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
@@ -734,7 +729,7 @@ namespace TrafficManager.State {
 				Flags.LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);
 				if (laneArrows != null) {
 					uint laneArrowInt = (uint)laneArrows;
-					Log._Debug($"Saving lane data for lane {i}, segment {laneSegmentId}, setting to {laneArrows.ToString()} ({laneArrowInt})");
+					Log._Debug($"Saving lane data for lane {i}, setting to {laneArrows.ToString()} ({laneArrowInt})");
                     configuration.LaneFlags += $"{i}:{laneArrowInt},";
 				}
 				//}
@@ -752,11 +747,13 @@ namespace TrafficManager.State {
 				if (hasTrafficLight == null)
 					return;
 
+#if DEBUG
 				if ((bool)hasTrafficLight) {
-					Log.Info($"Saving that node {i} has a traffic light");
+					Log._Debug($"Saving that node {i} has a traffic light");
 				} else {
-					Log.Info($"Saving that node {i} does not have a traffic light");
+					Log._Debug($"Saving that node {i} does not have a traffic light");
 				}
+#endif
 				configuration.NodeTrafficLights += $"{i}:{Convert.ToUInt16((bool)hasTrafficLight)},";
 				return;
 			} catch (Exception e) {
@@ -849,7 +846,7 @@ namespace TrafficManager.State {
 				}
 
 				if (prioMan.TrafficSegments[segmentId].Node1 != 0 && prioMan.TrafficSegments[segmentId].Instance1.Type != SegmentEnd.PriorityType.None) {
-					Log.Info($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance1.Type} @ node {prioMan.TrafficSegments[segmentId].Node1}, seg. {segmentId}");
+					Log._Debug($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance1.Type} @ node {prioMan.TrafficSegments[segmentId].Node1}, seg. {segmentId}");
                     configuration.PrioritySegments.Add(new[]
 					{
 						prioMan.TrafficSegments[segmentId].Node1, segmentId,
@@ -860,7 +857,7 @@ namespace TrafficManager.State {
 				if (prioMan.TrafficSegments[segmentId].Node2 == 0 || prioMan.TrafficSegments[segmentId].Instance2.Type == SegmentEnd.PriorityType.None)
 					return;
 
-				Log.Info($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance2.Type} @ node {prioMan.TrafficSegments[segmentId].Node2}, seg. {segmentId}");
+				Log._Debug($"Saving Priority Segment of type: {prioMan.TrafficSegments[segmentId].Instance2.Type} @ node {prioMan.TrafficSegments[segmentId].Node2}, seg. {segmentId}");
 				configuration.PrioritySegments.Add(new[] {
 					prioMan.TrafficSegments[segmentId].Node2, segmentId,
 					(int) prioMan.TrafficSegments[segmentId].Instance2.Type
@@ -872,13 +869,32 @@ namespace TrafficManager.State {
 
 		private static void SaveSegmentNodeFlags(ushort segmentId, Configuration configuration) {
 			try {
-				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+				NetManager netManager = Singleton<NetManager>.instance;
+
+				if (! NetUtil.IsSegmentValid(segmentId))
 					return;
 
-				Configuration.SegmentNodeFlags startNodeFlags = Flags.getSegmentNodeFlags(segmentId, true);
-				Configuration.SegmentNodeFlags endNodeFlags = Flags.getSegmentNodeFlags(segmentId, false);
+				ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
+				ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
+
+				Configuration.SegmentNodeFlags startNodeFlags = NetUtil.IsNodeValid(startNodeId) ? Flags.getSegmentNodeFlags(segmentId, true) : null;
+				Configuration.SegmentNodeFlags endNodeFlags = NetUtil.IsNodeValid(endNodeId) ? Flags.getSegmentNodeFlags(segmentId, false) : null;
 
 				if (startNodeFlags == null && endNodeFlags == null)
+					return;
+
+				bool isDefaultConfiguration = true;
+				if (startNodeFlags != null) {
+					if (!startNodeFlags.IsDefault())
+						isDefaultConfiguration = false;
+				}
+
+				if (endNodeFlags != null) {
+					if (!endNodeFlags.IsDefault())
+						isDefaultConfiguration = false;
+				}
+
+				if (isDefaultConfiguration)
 					return;
 
 				Configuration.SegmentNodeConf conf = new Configuration.SegmentNodeConf(segmentId);
@@ -886,7 +902,7 @@ namespace TrafficManager.State {
 				conf.startNodeFlags = startNodeFlags;
 				conf.endNodeFlags = endNodeFlags;
 
-				Log.Info($"Saving segment-at-node flags for seg. {segmentId}");
+				Log._Debug($"Saving segment-at-node flags for seg. {segmentId}");
 				configuration.SegmentNodeConfs.Add(conf);
 			} catch (Exception e) {
 				Log.Error($"Error adding Priority Segments to Save: {e.ToString()}");

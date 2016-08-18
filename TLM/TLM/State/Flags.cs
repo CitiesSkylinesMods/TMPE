@@ -132,7 +132,7 @@ namespace TrafficManager.State {
 #endif
 
 			if (!mayHaveTrafficLight(nodeId)) {
-				Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
+				//Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
 				return;
 			}
 

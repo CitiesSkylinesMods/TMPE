@@ -70,7 +70,7 @@ namespace TrafficManager.Geometry {
 			Log._Debug($"NodeGeometry: Add segment {segmentId}, start? {startNode} @ node {NodeId}");
 #endif
 			if (!IsValid()) {
-				Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
+				//Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
 				Recalculate();
 				return;
 			}
@@ -94,7 +94,7 @@ namespace TrafficManager.Geometry {
 			Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, propagate? {propagate}");
 #endif
 			if (!IsValid()) {
-				Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
+				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
 				Recalculate();
 				return;
 			}

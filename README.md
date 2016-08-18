@@ -4,6 +4,11 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.7.8, 08/18/2016:
+- Bugfix: Cims sometimes got stuck (thanks to all reports and especially to @Thilawyn for providing a savegame)
+- GUI: Improved traffic light arrow disply
+- Improved performance while saving
+
 1.7.7, 08/16/2016:
 - AI: Instead of walking long distances, citizens now use a car
 - AI: Citizens will remember their last used mode of transport (e.g. they will not drive to work and come return by bus anymore)

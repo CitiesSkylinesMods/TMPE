@@ -114,6 +114,7 @@
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />

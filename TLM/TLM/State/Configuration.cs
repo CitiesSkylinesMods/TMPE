@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
+using TrafficManager.State;
 
 // TODO this class should be moved to TrafficManager.State, but the deserialization fails if we just do that now. Anyway, we should get rid of these crazy lists of arrays. So let's move the class when we decide rework the load/save system.
 namespace TrafficManager {
@@ -82,6 +83,15 @@ namespace TrafficManager {
 			public bool? straightLaneChangingAllowed = null;
 			public bool? enterWhenBlockedAllowed = null;
 			public bool? pedestrianCrossingAllowed = null;
+
+			internal bool IsDefault() {
+				bool uturnIsDefault = uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
+				bool straightChangeIsDefault = straightLaneChangingAllowed == null || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
+				bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == null || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
+				bool pedCrossingIsDefault = pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
+
+				return uturnIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
+			}
 		}
 
 		[Serializable]

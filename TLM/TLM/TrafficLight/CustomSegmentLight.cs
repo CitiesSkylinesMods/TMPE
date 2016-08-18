@@ -25,7 +25,26 @@ namespace TrafficManager.TrafficLight {
 			get; set;
 		}
 
-		public Mode CurrentMode = Mode.Simple;
+		public Mode CurrentMode {
+			get { return currentMode; }
+			set {
+				currentMode = value;
+				switch (currentMode) {
+					case Mode.Simple:
+						leftLight = RoadBaseAI.TrafficLightState.Red;
+						rightLight = RoadBaseAI.TrafficLightState.Red;
+						break;
+					case Mode.SingleLeft:
+						rightLight = mainLight;
+						break;
+					case Mode.SingleRight:
+						leftLight = mainLight;
+						break;
+				}
+			}
+		}
+
+		private Mode currentMode = Mode.Simple;
 
 		private RoadBaseAI.TrafficLightState leftLight;
 		private RoadBaseAI.TrafficLightState mainLight;

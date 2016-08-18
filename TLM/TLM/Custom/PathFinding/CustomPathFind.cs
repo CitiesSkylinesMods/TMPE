@@ -129,7 +129,12 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool[] nextIsConnectedWithPrevious = new bool[16];
 		private ushort compatibleOuterSimilarIndexesMask = (ushort)0;
 		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
-		private static readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+
+		private readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+		private readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance();
+		private readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance();
+		private readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance();
+		private readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
 
 		public bool IsMasterPathFind = false;
 #if EXTRAPF
@@ -659,7 +664,6 @@ namespace TrafficManager.Custom.PathFinding {
 #else
 			bool debug = false;
 #endif
-			LaneConnectionManager laneConnManager = LaneConnectionManager.Instance();
 
 #if DEBUGPF2
 			bool debug2 = debug; //Options.disableSomething1 && _extVehicleType == ExtVehicleType.Bicycle;
@@ -2020,8 +2024,6 @@ namespace TrafficManager.Custom.PathFinding {
 
 			//bool emergencyLaneSelection = (Options.disableSomething3 && _extVehicleType == ExtVehicleType.Emergency);
 
-			LaneConnectionManager laneConnManager = Options.laneConnectorEnabled ? LaneConnectionManager.Instance() : null;
-
 			foundForced = false;
 			bool blocked = false;
 			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
@@ -2789,7 +2791,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			// NON-STOCK CODE START
 			// check if pedestrians are not allowed to cross here
-			if (!JunctionRestrictionsManager.Instance().IsPedestrianCrossingAllowed(nextSegmentId, targetNodeId == nextSegment.m_startNode))
+			if (!junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, targetNodeId == nextSegment.m_startNode))
 				return;
 
 			// check if pedestrian light won't change to green
@@ -3140,7 +3142,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) == VehicleInfo.VehicleType.None)
 				return true;
 
-			ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
+			ExtVehicleType allowedTypes = vehicleRestrictionsManager.GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 #if DEBUGPF
 			if (debug) {
 				Log._Debug($"CanUseLane: segmentId={segmentId} laneIndex={laneIndex} _extVehicleType={_extVehicleType} _vehicleTypes={_vehicleTypes} _laneTypes={_laneTypes} _transportVehicle={_transportVehicle} _isHeavyVehicle={_isHeavyVehicle} allowedTypes={allowedTypes} res={((allowedTypes & _extVehicleType) != ExtVehicleType.None)}");
@@ -3159,7 +3161,7 @@ namespace TrafficManager.Custom.PathFinding {
 		/// <param name="lane"></param>
 		/// <returns></returns>
 		protected virtual float GetLaneSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane lane) {
-			return Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentId, (uint)laneIndex, laneId, lane) : lane.m_speedLimit;
+			return Options.customSpeedLimitsEnabled ? speedLimitManager.GetLockFreeGameSpeedLimit(segmentId, (uint)laneIndex, laneId, lane) : lane.m_speedLimit;
 		}
 	}
 }
