@@ -10,7 +10,6 @@
 #define PREFEROUTERx
 
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ColossalFramework;
@@ -130,11 +129,11 @@ namespace TrafficManager.Custom.PathFinding {
 		private ushort compatibleOuterSimilarIndexesMask = (ushort)0;
 		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
 
-		private readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
-		private readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance();
-		private readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance();
-		private readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance();
-		private readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+		private static readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+		private static readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance();
+		private static readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance();
+		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance();
+		private static readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
 
 		public bool IsMasterPathFind = false;
 #if EXTRAPF
@@ -2783,7 +2782,6 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 #endif
 
-#region stock code
 		// 4
 		private void ProcessItemPedBicycle(BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment nextSegment, byte connectOffset, byte laneSwitchOffset, int laneIndex, uint lane) {
 			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
@@ -2905,7 +2903,6 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			}
 		}
-#endregion
 
 		private float CalculateLaneSpeed(float speedLimit, byte startOffset, byte endOffset, ref NetSegment segment, NetInfo.Lane laneInfo) {
 			if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram)) != VehicleInfo.VehicleType.None)

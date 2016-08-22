@@ -7,7 +7,6 @@ using ColossalFramework;
 using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Custom.AI;
-using System.Linq;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 
@@ -53,6 +52,10 @@ namespace TrafficManager.TrafficLight {
 		public ExtVehicleType SeparateVehicleTypes {
 			get; private set;
 		} = ExtVehicleType.None;
+
+		public override string ToString() {
+			return "";
+		}
 
 		public RoadBaseAI.TrafficLightState? PedestrianLightState {
 			get {

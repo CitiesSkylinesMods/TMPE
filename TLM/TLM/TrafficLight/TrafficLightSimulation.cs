@@ -4,7 +4,6 @@ using TrafficManager.Geometry;
 using System.Collections.Generic;
 using TrafficManager.State;
 using TrafficManager.Custom.AI;
-using System.Linq;
 using TrafficManager.Util;
 using TrafficManager.Manager;
 
@@ -96,17 +95,18 @@ namespace TrafficManager.TrafficLight {
 			Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId} ({nodeGeometry.NodeId})");
 #endif
 
-			if (!Flags.mayHaveTrafficLight(NodeId)) {
-				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
-				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, false, true);
-			}
-
 			if (!IsManualLight() && !IsTimedLight())
 				return;
 
 			if (!nodeGeometry.IsValid()) {
 				// node has become invalid. Remove manual/timed traffic light and destroy custom lights
 				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, false, false);
+				return;
+			}
+
+			if (!Flags.mayHaveTrafficLight(NodeId)) {
+				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
+				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, false, true);
 				return;
 			}
 

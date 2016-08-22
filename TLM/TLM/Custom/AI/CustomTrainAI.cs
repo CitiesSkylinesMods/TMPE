@@ -4,7 +4,6 @@ using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;

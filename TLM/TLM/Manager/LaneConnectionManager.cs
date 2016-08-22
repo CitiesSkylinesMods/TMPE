@@ -3,7 +3,6 @@
 using ColossalFramework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
@@ -58,7 +57,13 @@ namespace TrafficManager.Manager {
 				return false;
 			}
 
-			bool ret = connectedLanes.Contains(targetLaneId);
+			bool ret = false;
+			foreach (uint laneId in connectedLanes)
+				if (laneId == targetLaneId) {
+					ret = true;
+					break;
+				}
+
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.AreLanesConnected");
 #endif

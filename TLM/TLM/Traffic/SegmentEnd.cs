@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ColossalFramework;
 using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;

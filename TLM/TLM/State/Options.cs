@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 using ColossalFramework;
@@ -37,6 +36,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableDespawningToggle = null;
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
+		private static UICheckBox realisticMassTransitUsageToggle = null;
 		private static UICheckBox advancedAIToggle = null;
 		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
@@ -113,6 +113,7 @@ namespace TrafficManager.State {
 		public static bool showLanes = false;
 #endif
 		public static bool strongerRoadConditionEffects = false;
+		public static bool realisticMassTransitUsage = false;
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
@@ -173,6 +174,9 @@ namespace TrafficManager.State {
 			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions") + " (BETA feature)", allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
+#if DEBUG
+			realisticMassTransitUsageToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_usage_of_mass_transit"), realisticMassTransitUsage, onRealisticMassTransitUsageChanged) as UICheckBox;
+#endif
 			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 			aiGroup = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
@@ -549,6 +553,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"strongerRoadConditionEffects changed to {newStrongerRoadConditionEffects}");
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
+		}
+
+		private static void onRealisticMassTransitUsageChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"realisticMassTransitUsage changed to {newValue}");
+			realisticMassTransitUsage = newValue;
 		}
 
 		private static void onEnableDespawningChanged(bool value) {
@@ -986,6 +998,12 @@ namespace TrafficManager.State {
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
 			if (strongerRoadConditionEffectsToggle != null)
 				strongerRoadConditionEffectsToggle.isChecked = newStrongerRoadConditionEffects;
+		}
+
+		public static void setRealisticMassTransitUsage(bool newValue) {
+			realisticMassTransitUsage = newValue;
+			if (realisticMassTransitUsageToggle != null)
+				realisticMassTransitUsageToggle.isChecked = newValue;
 		}
 
 		public static void setEnableDespawning(bool value) {

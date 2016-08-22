@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.Custom.AI;
 using TrafficManager.Geometry;
-using System.Linq;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using System.Linq;
 
 namespace TrafficManager.TrafficLight {
 	public class TimedTrafficLights {
@@ -273,6 +273,9 @@ namespace TrafficManager.TrafficLight {
 
 			// change step
 			CurrentStep = (CurrentStep + 1) % NumSteps();
+#if DEBUGTTL
+			Log._Debug($"TTL SimStep: NodeId={NodeId} starting next step: {CurrentStep}");
+#endif
 			Steps[CurrentStep].Start();
 			/*int oldCurrentStep = CurrentStep;
 			while (true) {
@@ -294,6 +297,9 @@ namespace TrafficManager.TrafficLight {
 					break;
 				}
 			}*/
+#if DEBUGTTL
+			Log._Debug($"TTL SimStep: NodeId={NodeId} setting lgihts of next step: {CurrentStep}");
+#endif
 			Steps[CurrentStep].SetLights();
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");

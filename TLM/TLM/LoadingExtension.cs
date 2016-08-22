@@ -15,7 +15,6 @@ using ColossalFramework.Math;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
 using TrafficManager.Custom.Manager;
-using System.Linq;
 using TrafficManager.Manager;
 
 namespace TrafficManager {
@@ -385,6 +384,29 @@ namespace TrafficManager {
 					Log.Error("Could not redirect TramBaseAI::CalculateSegmentPosition (2).");
 					detourFailed = true;
 				}
+
+				Log.Info("Redirecting RoadBaseAI::GetTrafficLightNodeState calls");
+				try {
+					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("GetTrafficLightNodeState",
+							BindingFlags.Public | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+									typeof (NetNode.Flags).MakeByRefType(),
+									typeof (Color).MakeByRefType()
+							},
+							null),
+							typeof(CustomRoadAI).GetMethod("CustomGetTrafficLightNodeState")));
+				} catch (Exception) {
+					Log.Error("Could not redirect RoadBaseAI::GetTrafficLightNodeState");
+					detourFailed = true;
+				}
+
+				//public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
 
 				Log.Info("Redirecting RoadBaseAI.SimulationStep for nodes");
 				try {

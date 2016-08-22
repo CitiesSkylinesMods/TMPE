@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEBUGVISUALSx
+
+using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using TrafficManager.Geometry;
@@ -26,25 +28,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public Mode CurrentMode {
-			get { return currentMode; }
-			set {
-				currentMode = value;
-				switch (currentMode) {
-					case Mode.Simple:
-						leftLight = RoadBaseAI.TrafficLightState.Red;
-						rightLight = RoadBaseAI.TrafficLightState.Red;
-						break;
-					case Mode.SingleLeft:
-						rightLight = mainLight;
-						break;
-					case Mode.SingleRight:
-						leftLight = mainLight;
-						break;
-				}
-			}
-		}
-
-		private Mode currentMode = Mode.Simple;
+			get; set;
+		} = Mode.Simple;
 
 		private RoadBaseAI.TrafficLightState leftLight;
 		private RoadBaseAI.TrafficLightState mainLight;
@@ -148,10 +133,17 @@ namespace TrafficManager.TrafficLight {
 				CurrentMode = Mode.Simple;
 			}
 
-			if (CurrentMode == Mode.Simple) {
-				LightLeft = LightMain;
-				LightRight = LightMain;
-				//LightPedestrian = _checkPedestrianLight();
+			switch (CurrentMode) {
+				case Mode.Simple:
+					leftLight = mainLight;
+					rightLight = mainLight;
+					break;
+				case Mode.SingleLeft:
+					rightLight = mainLight;
+					break;
+				case Mode.SingleRight:
+					leftLight = mainLight;
+					break;
 			}
 		}
 
@@ -258,8 +250,11 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			vehicleLightState = GetVisualLightState();
-
 			pedestrianLightState = lights.PedestrianLightState == null ? RoadBaseAI.TrafficLightState.Red : (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
+
+#if DEBUGVISUALS
+			Log._Debug($"Setting visual traffic light state of node {NodeId}, seg. {SegmentId} to vehicleState={vehicleLightState} pedState={pedestrianLightState}");
+#endif
 
 			uint now = ((currentFrameIndex - num) >> 8) & 1;
 			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);

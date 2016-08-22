@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using ColossalFramework;
@@ -18,6 +17,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using ColossalFramework.UI;
 using TrafficManager.Util;
+using System.Linq;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -67,6 +67,14 @@ namespace TrafficManager.State {
 				LaneConnectionManager.Instance().OnBeforeLoadData(); // requires segment geometries
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while initializing LaneConnectionManager: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
+			try {
+				Log.Info("Initializing CitizenAI");
+				CustomCitizenAI.OnBeforeLoadData();
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing CitizenAI: {e.ToString()}");
 				loadingSucceeded = false;
 			}
 
@@ -199,6 +207,10 @@ namespace TrafficManager.State {
 					if (options.Length >= 25) {
 						Options.setJunctionRestrictionsEnabled(options[24] == (byte)1);
 					}
+
+					if (options.Length >= 26) {
+						Options.setRealisticMassTransitUsage(options[25] == (byte)1);
+					}
 				}
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while loading options: {e.ToString()}");
@@ -273,7 +285,7 @@ namespace TrafficManager.State {
 
 			// load priority segments
 			if (_configuration.PrioritySegments != null) {
-				Log.Info($"Loading {_configuration.PrioritySegments.Count()} priority segments");
+				Log.Info($"Loading {_configuration.PrioritySegments.Count} priority segments");
 				foreach (var segment in _configuration.PrioritySegments) {
 					try {
 						if (segment.Length < 3)
@@ -353,7 +365,7 @@ namespace TrafficManager.State {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
 			if (_configuration.TimedLights != null) {
-				Log.Info($"Loading {_configuration.TimedLights.Count()} timed traffic lights (new method)");
+				Log.Info($"Loading {_configuration.TimedLights.Count} timed traffic lights (new method)");
 
 				foreach (Configuration.TimedTrafficLights cnfTimedLights in _configuration.TimedLights) {
 					try {
@@ -486,7 +498,7 @@ namespace TrafficManager.State {
 
 			// load lane connections
 			if (_configuration.LaneConnections != null) {
-				Log.Info($"Loading {_configuration.LaneConnections.Count()} lane connections");
+				Log.Info($"Loading {_configuration.LaneConnections.Count} lane connections");
 				foreach (Configuration.LaneConnection conn in _configuration.LaneConnections) {
 					try {
 						Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
@@ -686,7 +698,8 @@ namespace TrafficManager.State {
 						(byte)(Options.vehicleRestrictionsEnabled ? 1 : 0),
 						(byte)(Options.laneConnectorEnabled ? 1 : 0),
 						(byte)(Options.junctionRestrictionsOverlay ? 1 : 0),
-						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0)
+						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0),
+						(byte)(Options.realisticMassTransitUsage ? 1 : 0),
 				});
 				} catch (Exception ex) {
 					Log.Error("Unexpected error while saving options: " + ex.Message);

@@ -1,7 +1,6 @@
 ﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TrafficManager.State;
 using UnityEngine;
@@ -238,7 +237,13 @@ namespace TrafficManager.Geometry {
 		}
 
 		public bool IsConnectedTo(ushort otherSegmentId) {
-			return IsValid() && ConnectedSegments.Contains(otherSegmentId);
+			if (! IsValid())
+				return false;
+
+			foreach (ushort segId in ConnectedSegments)
+				if (segId == otherSegmentId)
+					return true;
+			return false;
 		}
 
 		public ushort[] GetIncomingSegments() {

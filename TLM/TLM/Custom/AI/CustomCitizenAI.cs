@@ -2,7 +2,6 @@
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
@@ -19,14 +18,14 @@ namespace TrafficManager.Custom.AI {
 			Taxi
 		}
 
-		public static readonly int[] FREE_TRANSPORT_USAGE_PROBABILITY = { 90, 80, 50 };
+		public static readonly int[] FREE_TRANSPORT_USAGE_PROBABILITY = { 95, 80, 50 };
 		public static readonly int[] TRANSPORT_USAGE_PROBABILITY = { 50, 40, 30 };
-		public static readonly int[] DAY_TAXI_USAGE_PROBABILITY = { 5, 10, 50 };
-		public static readonly int[] NIGHT_TAXI_USAGE_PROBABILITY = { 10, 40, 70 };
+		public static readonly int[] DAY_TAXI_USAGE_PROBABILITY = { 5, 25, 50 }; // if a taxi is available and assigned to this citizen, this probability kicks in
+		public static readonly int[] NIGHT_TAXI_USAGE_PROBABILITY = { 25, 75, 100 }; // if a taxi is available and assigned to this citizen, this probability kicks in
 
 		internal static TransportMode[] currentTransportMode = new TransportMode[CitizenManager.MAX_INSTANCE_COUNT];
 
-		internal void OnLevelUnloading() {
+		internal static void OnBeforeLoadData() {
 			for (int i = 0; i < currentTransportMode.Length; ++i)
 				currentTransportMode[i] = TransportMode.None;
 		}
@@ -39,6 +38,7 @@ namespace TrafficManager.Custom.AI {
 
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			Citizen.Wealth wealthLevel = citMan.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel;
+
 			bool couldUseTaxi = false; // could cim use a taxi if it was not forbidden because of randomization?
 			bool couldUseCar = false;
 			bool couldUseBike = false;
@@ -51,9 +51,14 @@ namespace TrafficManager.Custom.AI {
 						Singleton<DistrictManager>.instance.m_districts.m_buffer[0].m_productionData.m_finalTaxiCapacity != 0u) {
 						couldUseTaxi = true;
 
-						if (currentTransportMode[instanceID] == TransportMode.Taxi || (currentTransportMode[instanceID] == TransportMode.None &&
-							((simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < NIGHT_TAXI_USAGE_PROBABILITY[(int)wealthLevel]) ||
-							(!simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < DAY_TAXI_USAGE_PROBABILITY[(int)wealthLevel])))) {
+						if (currentTransportMode[instanceID] == TransportMode.Taxi ||
+							(currentTransportMode[instanceID] == TransportMode.None &&
+							(
+								(!Options.realisticMassTransitUsage && simManager.m_isNightTime && simManager.m_randomizer.Int32(2) == 0) ||
+								(Options.realisticMassTransitUsage &&
+								((simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < NIGHT_TAXI_USAGE_PROBABILITY[(int)wealthLevel]) ||
+								(!simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < DAY_TAXI_USAGE_PROBABILITY[(int)wealthLevel])))
+							))) {
 							wouldAffordTaxiVoluntarily = true; // NON-STOCK CODE
 						}
 					}
@@ -72,18 +77,22 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			byte districtId = Singleton<DistrictManager>.instance.GetDistrict(startPos);
-			DistrictPolicies.Services servicePolicies = Singleton<DistrictManager>.instance.m_districts.m_buffer[(int)districtId].m_servicePolicies;
-			int transportUsageProb = (servicePolicies & DistrictPolicies.Services.FreeTransport) != DistrictPolicies.Services.None ? FREE_TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel] : TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel];
-
 			bool useTaxi = false;
 			bool useBike = false;
 			bool useCar = false;
 			bool usePublicTransport = false;
 
 			if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) { // STOCK CODE
+				int transportUsageProb = 0;
+				if (Options.realisticMassTransitUsage) {
+					byte districtId = Singleton<DistrictManager>.instance.GetDistrict(startPos);
+					DistrictPolicies.Services servicePolicies = Singleton<DistrictManager>.instance.m_districts.m_buffer[(int)districtId].m_servicePolicies;
+					transportUsageProb = (servicePolicies & DistrictPolicies.Services.FreeTransport) != DistrictPolicies.Services.None ? FREE_TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel] : TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel];
+				}
+
 				if (currentTransportMode[instanceID] == TransportMode.PublicTransport || useTaxi ||
-					(currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
+					! Options.realisticMassTransitUsage ||
+					(Options.realisticMassTransitUsage && currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
 					usePublicTransport = true;
 				}
 			}

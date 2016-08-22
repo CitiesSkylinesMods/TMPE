@@ -3,7 +3,6 @@
 using ColossalFramework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using TrafficManager.Custom.AI;
@@ -14,6 +13,7 @@ using TrafficManager.Util;
 using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using System.Linq;
 
 namespace TrafficManager.Geometry {
 	/// <summary>
@@ -677,7 +677,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.LeftSegments.Contains(toSegmentId);
+
+			bool contains = false;
+			foreach (ushort segId in endGeometry.LeftSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>
@@ -695,7 +702,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.RightSegments.Contains(toSegmentId);
+
+			bool contains = false;
+			foreach (ushort segId in endGeometry.RightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>
@@ -713,7 +727,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.StraightSegments.Contains(toSegmentId);
+			
+			bool contains = false;
+			foreach (ushort segId in endGeometry.StraightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>
@@ -731,7 +752,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.IncomingLeftSegments.Contains(toSegmentId);
+
+			bool contains = false;
+			foreach (ushort segId in endGeometry.IncomingLeftSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>
@@ -749,7 +777,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.IncomingRightSegments.Contains(toSegmentId);
+			
+			bool contains = false;
+			foreach (ushort segId in endGeometry.IncomingRightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>
@@ -767,7 +802,14 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.IncomingStraightSegments.Contains(toSegmentId);
+			
+			bool contains = false;
+			foreach (ushort segId in endGeometry.IncomingStraightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
 		}
 
 		/// <summary>

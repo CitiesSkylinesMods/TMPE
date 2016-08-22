@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ColossalFramework;
 using TrafficManager.TrafficLight;
 using TrafficManager.Custom.AI;
@@ -1055,7 +1054,6 @@ namespace TrafficManager.Manager {
 		}
 
 		public void OnLevelUnloading() {
-			TrafficLightSimulationManager.Instance().TrafficLightSimulations.Clear();
 			for (int i = 0; i < TrafficSegments.Length; ++i)
 				TrafficSegments[i] = null;
 		}

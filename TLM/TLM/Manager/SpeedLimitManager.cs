@@ -1,7 +1,6 @@
 ﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TrafficManager.State;
 using UnityEngine;
@@ -248,7 +247,7 @@ namespace TrafficManager.Manager {
 			if (laneSpeedLimit < 0.15f)
 				speedLimit = 10;
 			else if (laneSpeedLimit < 1.35f)
-				speedLimit = (ushort)((ushort)Math.Round(laneSpeedLimit * 10f) * 10u);
+				speedLimit = (ushort)((ushort)Mathf.Round(laneSpeedLimit * 10f) * 10u);
 
 			return speedLimit;
 		}

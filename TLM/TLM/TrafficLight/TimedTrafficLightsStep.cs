@@ -1,3 +1,4 @@
+#define DEBUGSTEPx
 #define DEBUGTTLx
 #define DEBUGMETRICx
 
@@ -166,6 +167,15 @@ namespace TrafficManager.TrafficLight {
 			minFlow = Single.NaN;
 			maxWait = Single.NaN;
 			lastFlowWaitCalc = 0;
+
+#if DEBUGSTEP
+			Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
+			Log._Debug($"minTime: {minTime} maxTime: {maxTime}");
+			foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
+				Log._Debug($"\tSegment {e.Key}:");
+				Log._Debug($"\t{e.Value.ToString()}");
+			}
+#endif
 		}
 
 		internal static uint getCurrentFrame() {
@@ -341,8 +351,8 @@ namespace TrafficManager.TrafficLight {
 						liveSegmentLight.LightLeft = calcLightState(prevStepSegmentLight.LightLeft, curStepSegmentLight.LightLeft, nextStepSegmentLight.LightLeft, atStartTransition, atEndTransition);
 						liveSegmentLight.LightRight = calcLightState(prevStepSegmentLight.LightRight, curStepSegmentLight.LightRight, nextStepSegmentLight.LightRight, atStartTransition, atEndTransition);
 
-#if DEBUG
-						//Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})     -> *SETTING* LightLeft={liveSegmentLight.LightLeft} LightMain={liveSegmentLight.LightMain} LightRight={liveSegmentLight.LightRight} for segmentId={segmentId} @ NodeId={timedNode.NodeId} for vehicle {vehicleType}");
+#if DEBUGTTL
+						Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})     -> *SETTING* LightLeft={liveSegmentLight.LightLeft} LightMain={liveSegmentLight.LightMain} LightRight={liveSegmentLight.LightRight} for segmentId={segmentId} @ NodeId={timedNode.NodeId} for vehicle {vehicleType}");
 #endif
 
 						//Log._Debug($"Step @ {timedNode.NodeId}: Segment {segmentId} for vehicle type {vehicleType}: L: {liveSegmentLight.LightLeft.ToString()} F: {liveSegmentLight.LightMain.ToString()} R: {liveSegmentLight.LightRight.ToString()}");

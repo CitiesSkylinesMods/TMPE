@@ -381,7 +381,85 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-#region stock code
+		public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeID) : null;
+			bool customSim = nodeSim != null && nodeSim.IsSimulationActive();
+
+			uint num = Singleton<SimulationManager>.instance.m_referenceFrameIndex - 15u;
+			uint num2 = (uint)(((int)nodeID << 8) / 32768);
+			uint num3 = num - num2 & 255u;
+			RoadBaseAI.TrafficLightState trafficLightState;
+			RoadBaseAI.TrafficLightState trafficLightState2;
+			RoadBaseAI.GetTrafficLightState(nodeID, ref segmentData, num - num2, out trafficLightState, out trafficLightState2);
+			color.a = 0.5f;
+			switch (trafficLightState) {
+				case RoadBaseAI.TrafficLightState.Green:
+					color.g = 1f;
+					break;
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+					if (customSim) {
+						color.r = 1f;
+					} else {
+						if (num3 < 45u) {
+							color.g = 0f;
+						} else if (num3 < 60u) {
+							color.r = 1f;
+						} else {
+							color.g = 1f;
+						}
+					}
+					break;
+				case RoadBaseAI.TrafficLightState.Red:
+					color.g = 0f;
+					break;
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					if (customSim) {
+						color.r = 1f;
+					} else {
+						if (num3 < 45u) {
+							color.r = 1f;
+						} else {
+							color.g = 0f;
+						}
+					}
+					break;
+			}
+			switch (trafficLightState2) {
+				case RoadBaseAI.TrafficLightState.Green:
+					color.b = 1f;
+					break;
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+					if (customSim) {
+						color.b = 0f;
+					} else {
+						if (num3 < 45u) {
+							color.b = 0f;
+						} else {
+							color.b = 1f;
+						}
+					}
+					break;
+				case RoadBaseAI.TrafficLightState.Red:
+					color.b = 0f;
+					break;
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					if (customSim) {
+						color.b = 0f;
+					} else {
+						if (num3 < 45u) {
+							if ((num3 / 8u & 1u) == 1u) {
+								color.b = 1f;
+							}
+						} else {
+							color.b = 0f;
+						}
+					}
+					break;
+			}
+		}
+
+		#region stock code
+
 		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {
 			NetManager instance = Singleton<NetManager>.instance;
 			bool flag = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;

@@ -4,9 +4,15 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.7.9, 08/22/2016
+- In-game traffic light states are now correctly rendered when showing "yellow"
+- Removed negative effects on public transport usage
+- GUI: Traffic light states do not flicker anymore
+- Performance improvements 
+
 1.7.8, 08/18/2016:
 - Bugfix: Cims sometimes got stuck (thanks to all reports and especially to @Thilawyn for providing a savegame)
-- GUI: Improved traffic light arrow disply
+- GUI: Improved traffic light arrow display
 - Improved performance while saving
 
 1.7.7, 08/16/2016:
