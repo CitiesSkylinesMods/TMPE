@@ -18,10 +18,10 @@ namespace TrafficManager.Custom.AI {
 			Taxi
 		}
 
-		public static readonly int[] FREE_TRANSPORT_USAGE_PROBABILITY = { 95, 80, 50 };
-		public static readonly int[] TRANSPORT_USAGE_PROBABILITY = { 50, 40, 30 };
+		public static readonly int[] FREE_TRANSPORT_USAGE_PROBABILITY = { 90, 80, 50 };
+		public static readonly int[] TRANSPORT_USAGE_PROBABILITY = { 70, 60, 40 };
 		public static readonly int[] DAY_TAXI_USAGE_PROBABILITY = { 5, 25, 50 }; // if a taxi is available and assigned to this citizen, this probability kicks in
-		public static readonly int[] NIGHT_TAXI_USAGE_PROBABILITY = { 25, 75, 100 }; // if a taxi is available and assigned to this citizen, this probability kicks in
+		public static readonly int[] NIGHT_TAXI_USAGE_PROBABILITY = { 25, 75, 90 }; // if a taxi is available and assigned to this citizen, this probability kicks in
 
 		internal static TransportMode[] currentTransportMode = new TransportMode[CitizenManager.MAX_INSTANCE_COUNT];
 
@@ -30,8 +30,74 @@ namespace TrafficManager.Custom.AI {
 				currentTransportMode[i] = TransportMode.None;
 		}
 
-		// CitizenAI
 		public bool CustomStartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
+			ExtVehicleType extVehicleType = ExtVehicleType.None;
+
+			NetInfo.LaneType laneType = NetInfo.LaneType.Pedestrian;
+			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
+			bool randomParking = false;
+			if (vehicleInfo != null) {
+				if (vehicleInfo.m_class.m_subService == ItemClass.SubService.PublicTransportTaxi) {
+					if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTaxi) == CitizenInstance.Flags.None && Singleton<DistrictManager>.instance.m_districts.m_buffer[0].m_productionData.m_finalTaxiCapacity != 0u) {
+						SimulationManager instance = Singleton<SimulationManager>.instance;
+						if (instance.m_isNightTime || instance.m_randomizer.Int32(2u) == 0) {
+							laneType |= (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
+							vehicleType |= vehicleInfo.m_vehicleType;
+							extVehicleType = ExtVehicleType.Taxi; // NON-STOCK CODE
+						}
+					}
+				} else {
+					// NON-STOCK CODE START
+					if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
+						extVehicleType = ExtVehicleType.Bicycle;
+					} else if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Car) {
+						extVehicleType = ExtVehicleType.PassengerCar;
+					}
+					// NON-STOCK CODE END
+
+					laneType |= NetInfo.LaneType.Vehicle;
+					vehicleType |= vehicleInfo.m_vehicleType;
+					if (citizenData.m_targetBuilding != 0 && Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)citizenData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office) {
+						randomParking = true;
+					}
+				}
+			}
+			PathUnit.Position vehiclePosition = default(PathUnit.Position);
+			ushort parkedVehicle = Singleton<CitizenManager>.instance.m_citizens.m_buffer[(int)((UIntPtr)citizenData.m_citizen)].m_parkedVehicle;
+			if (parkedVehicle != 0) {
+				Vector3 position = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[(int)parkedVehicle].m_position;
+				PathManager.FindPathPosition(position, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, false, false, 32f, out vehiclePosition);
+			}
+			bool allowUnderground = (citizenData.m_flags & (CitizenInstance.Flags.Underground | CitizenInstance.Flags.Transition)) != CitizenInstance.Flags.None;
+			PathUnit.Position startPosA;
+			PathUnit.Position endPosA;
+			if (this.FindPathPosition(instanceID, ref citizenData, startPos, laneType, vehicleType, allowUnderground, out startPosA) && this.FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA)) {
+				if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
+					laneType |= NetInfo.LaneType.PublicTransport;
+				}
+				PathUnit.Position position2 = default(PathUnit.Position);
+				uint path;
+
+				bool res = false;
+				if (extVehicleType == ExtVehicleType.None)
+					res = Singleton<PathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
+				else
+					res = Singleton<CustomPathManager>.instance.CreatePath(false, extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
+
+				if (res) {
+					if (citizenData.m_path != 0u) {
+						Singleton<PathManager>.instance.ReleasePath(citizenData.m_path);
+					}
+					citizenData.m_path = path;
+					citizenData.m_flags |= CitizenInstance.Flags.WaitingPath;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// CitizenAI
+		public bool CustomStartPathFind2(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
 			CitizenManager citMan = Singleton<CitizenManager>.instance;
 			if (citMan.m_citizens.m_buffer[citizenData.m_citizen].CurrentLocation == Citizen.Location.Home)
 				currentTransportMode[instanceID] = TransportMode.None; // reset currently used transport mode at home
@@ -53,12 +119,9 @@ namespace TrafficManager.Custom.AI {
 
 						if (currentTransportMode[instanceID] == TransportMode.Taxi ||
 							(currentTransportMode[instanceID] == TransportMode.None &&
-							(
-								(!Options.realisticMassTransitUsage && simManager.m_isNightTime && simManager.m_randomizer.Int32(2) == 0) ||
-								(Options.realisticMassTransitUsage &&
-								((simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < NIGHT_TAXI_USAGE_PROBABILITY[(int)wealthLevel]) ||
-								(!simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < DAY_TAXI_USAGE_PROBABILITY[(int)wealthLevel])))
-							))) {
+							((simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < NIGHT_TAXI_USAGE_PROBABILITY[(int)wealthLevel]) ||
+							(!simManager.m_isNightTime && simManager.m_randomizer.Int32(100) < DAY_TAXI_USAGE_PROBABILITY[(int)wealthLevel]))
+							)) {
 							wouldAffordTaxiVoluntarily = true; // NON-STOCK CODE
 						}
 					}
@@ -83,16 +146,12 @@ namespace TrafficManager.Custom.AI {
 			bool usePublicTransport = false;
 
 			if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) { // STOCK CODE
-				int transportUsageProb = 0;
-				if (Options.realisticMassTransitUsage) {
-					byte districtId = Singleton<DistrictManager>.instance.GetDistrict(startPos);
-					DistrictPolicies.Services servicePolicies = Singleton<DistrictManager>.instance.m_districts.m_buffer[(int)districtId].m_servicePolicies;
-					transportUsageProb = (servicePolicies & DistrictPolicies.Services.FreeTransport) != DistrictPolicies.Services.None ? FREE_TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel] : TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel];
-				}
+				byte districtId = Singleton<DistrictManager>.instance.GetDistrict(startPos);
+				DistrictPolicies.Services servicePolicies = Singleton<DistrictManager>.instance.m_districts.m_buffer[(int)districtId].m_servicePolicies;
+				int transportUsageProb = (servicePolicies & DistrictPolicies.Services.FreeTransport) != DistrictPolicies.Services.None ? FREE_TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel] : TRANSPORT_USAGE_PROBABILITY[(int)wealthLevel];
 
 				if (currentTransportMode[instanceID] == TransportMode.PublicTransport || useTaxi ||
-					! Options.realisticMassTransitUsage ||
-					(Options.realisticMassTransitUsage && currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
+					(currentTransportMode[instanceID] == TransportMode.None && simManager.m_randomizer.Int32(100) < transportUsageProb)) {
 					usePublicTransport = true;
 				}
 			}
