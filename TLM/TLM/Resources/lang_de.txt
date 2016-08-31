@@ -126,4 +126,4 @@ Imperial Imperial
 Use_more_CPU_cores_for_route_calculation_if_available Verwende mehr CPU-Kerne zur Routenberechnung (falls verfügbar)
 Activated_features Aktivierte Features
 Junction_restrictions Kreuzungsbeschränkungen
-Enable_more_realistic_usage_of_mass_transit Aktiviere die realistischere Nutzung des ÖPNV
+Prohibit_spawning_of_pocket_cars Verbiete Cims das Spawnen von Autos "aus der Tasche heraus"

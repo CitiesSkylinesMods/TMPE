@@ -32,11 +32,7 @@ namespace TrafficManager.Manager {
 					continue;
 
 				Configuration.SegmentNodeFlags flags = Flags.getSegmentNodeFlags(segmentId, netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId);
-				if ((flags.enterWhenBlockedAllowed != null && (bool)flags.enterWhenBlockedAllowed != Options.allowEnterBlockedJunctions) ||
-					(flags.straightLaneChangingAllowed != null && (bool)flags.straightLaneChangingAllowed != Options.allowLaneChangesWhileGoingStraight) ||
-					(flags.uturnAllowed != null && (bool)flags.uturnAllowed != Options.allowUTurns) ||
-					(flags.pedestrianCrossingAllowed != null && !(bool)flags.pedestrianCrossingAllowed))
-					return true;
+				return !flags.IsDefault();
 			}
 			return false;
 		}

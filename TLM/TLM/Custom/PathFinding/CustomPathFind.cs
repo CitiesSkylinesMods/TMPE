@@ -832,23 +832,32 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			} else {
 				bool mayTurnAround = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-				bool pedestrianAllowed = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0;
+				bool allowPedSwitch = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0; // allow pedestrian switching to vehicle?
 				bool nextIsBeautificationNode = false;
 				byte nextConnectOffset = 0;
-				if (pedestrianAllowed) {
+				if (allowPedSwitch) {
 					if (prevIsBicycleLane) {
 						nextConnectOffset = connectOffset;
 						nextIsBeautificationNode = (nextNode.Info.m_class.m_service == ItemClass.Service.Beautification);
 					} else if (this._vehicleLane != 0u) {
+						// there is a parked vehicle position
 						if (this._vehicleLane != item.m_laneID) {
-							pedestrianAllowed = false;
+							// we have not reached the parked vehicle yet
+							allowPedSwitch = false;
 						} else {
+							// pedestrian switches to parked vehicle
 							nextConnectOffset = this._vehicleOffset;
 						}
 					} else if (this._stablePath) {
+						// enter a bus
 						nextConnectOffset = 128;
 					} else {
-						nextConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);
+						// pocket car spawning
+						if (Options.prohibitPocketCars) {
+							allowPedSwitch = false;
+						} else {
+							nextConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);
+						}
 					}
 				}
 
@@ -1662,8 +1671,8 @@ namespace TrafficManager.Custom.PathFinding {
 					this.ProcessItemCosts(false, false, debug, item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, false);
 				}
 
-				if (pedestrianAllowed) {
-					// turn-around for pedestrians
+				if (allowPedSwitch) {
+					// switch from walking to driving a car, bus, etc.
 
 					nextSegmentId = item.m_position.m_segment;
 					int nextLaneIndex;
@@ -1679,8 +1688,8 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 						this.ProcessItemPedBicycle(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[(int)nextSegmentId], nextConnectOffset, nextConnectOffset, nextLaneIndex, nextLaneId); // ped
 					}
-				}
-			}
+				} // allowPedSwitch
+			} // !prevIsPedestrianLane
 
 			if (nextNode.m_lane != 0u) {
 				// transport lines, cargo lines, etc.
@@ -2597,7 +2606,7 @@ namespace TrafficManager.Custom.PathFinding {
 								
 								if (laneDist > 0 && // lane would be changed
 									(_extVehicleType != ExtVehicleType.Emergency || Options.disableSomething4) && // emergency vehicles may do everything
-									//!nextIsRealJunction // no lane changing at junctions
+									!nextIsRealJunction && // no lane changing at junctions
 									(!wantToChangeLane || laneDist > 1)) { // randomized lane changing
 										
 									// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
@@ -2841,11 +2850,11 @@ namespace TrafficManager.Custom.PathFinding {
 			float prevCost = netManager.m_segments.m_buffer[(int)item.m_position.m_segment].m_averageLength;
 			// NON-STOCK CODE START
 			//if (_extVehicleType == ExtVehicleType.Bicycle) {
-				if ((vehicleType & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None) {
+				/*if ((vehicleType & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None) {
 					prevCost *= 0.95f;
 				} else if ((netManager.m_segments.m_buffer[(int)item.m_position.m_segment].m_flags & NetSegment.Flags.BikeBan) != NetSegment.Flags.None) {
 					prevCost *= 5f;
-				}
+				}*/
 			//}
 			ushort sourceNodeId = (targetNodeId == netManager.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? netManager.m_segments.m_buffer[item.m_position.m_segment].m_endNode : netManager.m_segments.m_buffer[item.m_position.m_segment].m_startNode; // no lane changing directly in front of a junction
 			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;

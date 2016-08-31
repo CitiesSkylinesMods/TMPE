@@ -151,6 +151,10 @@ namespace TrafficManager.Geometry {
 						startNodeGeometry.Recalculate(true);
 						endNodeGeometry.Recalculate(true);
 					}
+
+					Flags.resetSegmentNodeFlags(SegmentId, false); // TODO refactor
+					Flags.resetSegmentNodeFlags(SegmentId, true); // TODO refactor
+
 					cleanup();
 
 					NotifyObservers();
@@ -1132,8 +1136,6 @@ namespace TrafficManager.Geometry {
 
 				// reset highway lane arrows
 				Flags.removeHighwayLaneArrowFlagsAtSegment(SegmentId); // TODO refactor
-				Flags.resetSegmentNodeFlags(SegmentId, false);
-				Flags.resetSegmentNodeFlags(SegmentId, true);
 
 				// clear default vehicle type cache
 				VehicleRestrictionsManager.Instance().ClearCache(SegmentId);

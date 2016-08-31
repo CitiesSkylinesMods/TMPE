@@ -79,9 +79,11 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				bool res = false;
-				if (extVehicleType == ExtVehicleType.None)
+				if (extVehicleType == ExtVehicleType.None) {
 					res = Singleton<PathManager>.instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
-				else
+					/*if (Options.disableSomething6)
+						Log._Debug($"extVehicleType could not be determined for citizen instance {instanceID}");*/
+				} else
 					res = Singleton<CustomPathManager>.instance.CreatePath(false, extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
 
 				if (res) {

@@ -15,7 +15,7 @@ namespace TrafficManager.Custom.AI {
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
 			var num = (uint)((node << 8) / 32768);
-			var num2 = currentFrameIndex - num & 255u;
+			var stepWaitTime = currentFrameIndex - num & 255u;
 
 			// NON-STOCK CODE START //
 			RoadBaseAI.TrafficLightState pedestrianLightState;
@@ -27,7 +27,7 @@ namespace TrafficManager.Custom.AI {
 				bool pedestrians;
 
 				RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
-				if ((pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) && !pedestrians && num2 >= 196u) {
+				if ((pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) && !pedestrians && stepWaitTime >= 196u) {
 					RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
 					return true;
 				}
@@ -42,7 +42,7 @@ namespace TrafficManager.Custom.AI {
 
 			switch (pedestrianLightState) {
 				case RoadBaseAI.TrafficLightState.RedToGreen:
-					if (num2 < 60u) {
+					if (stepWaitTime < 60u) {
 						return false;
 					}
 					break;

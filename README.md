@@ -4,6 +4,13 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.7.10, 08/31/2016
+- Players can now disable spawning of pocket cars
+- Updated Chinese (simplified) translation
+- Bugfix: Timed traffic lights were flickering
+- Bugfix: Pedestrian traffic lights were not working as expected
+- Bugfix: When upgrading/removing/adding a road segment, nearby junction restrictions were removed
+
 1.7.9, 08/22/2016
 - In-game traffic light states are now correctly rendered when showing "yellow"
 - Removed negative effects on public transport usage

@@ -293,7 +293,7 @@ namespace TrafficManager.UI.SubTools {
 								else
 									labelLayout = layoutGreen;
 							} else {
-								labelLayout = timedNodeMain.GetStep(i).isInEndTransition() ? layoutYellow : layoutGreen;
+								labelLayout = timedNodeMain.GetStep(i).IsInEndTransition() ? layoutYellow : layoutGreen;
 							}
 							GUILayout.Label(labelStr, labelLayout);
 							GUILayout.Space(5);

@@ -126,4 +126,4 @@ Imperial Système impérial
 Use_more_CPU_cores_for_route_calculation_if_available Utiliser plus de cœurs du CPU pour le calcul de trajets (si disponible)
 Activated_features caractéristiques activées
 Junction_restrictions Restrictions de jonction
-Enable_more_realistic_usage_of_mass_transit Activer l'utilisation plus réaliste du transport en commun
+Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars

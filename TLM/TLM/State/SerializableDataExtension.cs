@@ -209,7 +209,7 @@ namespace TrafficManager.State {
 					}
 
 					if (options.Length >= 26) {
-						Options.setRealisticMassTransitUsage(options[25] == (byte)1);
+						Options.setProhibitPocketCars(options[25] == (byte)1);
 					}
 				}
 			} catch (Exception e) {
@@ -343,6 +343,9 @@ namespace TrafficManager.State {
 				Log.Info($"Loading lane vehicle restriction data. {_configuration.LaneAllowedVehicleTypes.Count} elements");
 				foreach (Configuration.LaneVehicleTypes laneVehicleTypes in _configuration.LaneAllowedVehicleTypes) {
 					try {
+						if (!NetUtil.IsLaneValid(laneVehicleTypes.laneId))
+							continue;
+
 						ExtVehicleType baseMask = VehicleRestrictionsManager.Instance().GetBaseMask(laneVehicleTypes.laneId);
 						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
 						Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
@@ -385,6 +388,9 @@ namespace TrafficManager.State {
 							TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
 
 							foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
+								if (!NetUtil.IsSegmentValid(e.Key))
+									continue;
+
 								Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 								CustomSegmentLights lights = null;
 								if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
@@ -440,6 +446,9 @@ namespace TrafficManager.State {
 						var nodeId = Convert.ToUInt16(split[0]);
 						uint flag = Convert.ToUInt16(split[1]);
 
+						if (!NetUtil.IsNodeValid(nodeId))
+							continue;
+
 						Flags.setNodeTrafficLight(nodeId, flag > 0);
 					} catch (Exception e) {
 						// ignore as it's probably bad save data.
@@ -465,14 +474,14 @@ namespace TrafficManager.State {
 							var laneId = Convert.ToUInt32(split[0]);
 							uint flags = Convert.ToUInt32(split[1]);
 
+							if (!NetUtil.IsLaneValid(laneId))
+								continue;
+
 							//make sure we don't cause any overflows because of bad save data.
 							if (Singleton<NetManager>.instance.m_lanes.m_buffer.Length <= laneId)
 								continue;
 
 							if (flags > ushort.MaxValue)
-								continue;
-
-							if (! NetUtil.IsLaneValid(laneId))
 								continue;
 
 							//Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = fixLaneFlags(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags);
@@ -501,6 +510,10 @@ namespace TrafficManager.State {
 				Log.Info($"Loading {_configuration.LaneConnections.Count} lane connections");
 				foreach (Configuration.LaneConnection conn in _configuration.LaneConnections) {
 					try {
+						if (!NetUtil.IsLaneValid(conn.lowerLaneId))
+							continue;
+						if (!NetUtil.IsLaneValid(conn.higherLaneId))
+							continue;
 						Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
 						LaneConnectionManager.Instance().AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 					} catch (Exception e) {
@@ -518,6 +531,8 @@ namespace TrafficManager.State {
 				Log.Info($"Loading lane speed limit data. {_configuration.LaneSpeedLimits.Count} elements");
 				foreach (Configuration.LaneSpeedLimit laneSpeedLimit in _configuration.LaneSpeedLimits) {
 					try {
+						if (!NetUtil.IsLaneValid(laneSpeedLimit.laneId))
+							continue;
 						Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
 						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
 					} catch (Exception e) {
@@ -699,7 +714,7 @@ namespace TrafficManager.State {
 						(byte)(Options.laneConnectorEnabled ? 1 : 0),
 						(byte)(Options.junctionRestrictionsOverlay ? 1 : 0),
 						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0),
-						(byte)(Options.realisticMassTransitUsage ? 1 : 0),
+						(byte)(Options.prohibitPocketCars ? 1 : 0),
 				});
 				} catch (Exception ex) {
 					Log.Error("Unexpected error while saving options: " + ex.Message);

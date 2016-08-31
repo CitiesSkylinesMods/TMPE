@@ -10,8 +10,10 @@ using TrafficManager.Geometry;
 using TrafficManager.Custom.AI;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.State;
 
 namespace TrafficManager.TrafficLight {
+	// TODO class marked for complete rework in version 1.9
 	public class TimedTrafficLightsStep : ICloneable {
 		/// <summary>
 		/// The number of time units this traffic light remains in the current state at least
@@ -95,7 +97,12 @@ namespace TrafficManager.TrafficLight {
 		/// Checks if the green-to-red (=yellow) phase is finished
 		/// </summary>
 		/// <returns></returns>
-		internal bool isEndTransitionDone() {
+		internal bool IsEndTransitionDone() {
+			if (!timedNode.IsMasterNode()) {
+				TimedTrafficLights masterLights = timedNode.MasterLights();
+				return masterLights.Steps[masterLights.CurrentStep].IsEndTransitionDone();
+			}
+
 			bool isStepDone = StepDone(false);
 			bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && isStepDone;
 #if DEBUGTTL
@@ -108,12 +115,12 @@ namespace TrafficManager.TrafficLight {
 		/// Checks if the green-to-red (=yellow) phase is currently active
 		/// </summary>
 		/// <returns></returns>
-		internal bool isInEndTransition() {
-			if (!timedNode.isMasterNode()) {
+		internal bool IsInEndTransition() {
+			if (!timedNode.IsMasterNode()) {
 				TimedTrafficLights masterLights = timedNode.MasterLights();
-				if (masterLights != null)
-					return masterLights.Steps[timedNode.CurrentStep].isInEndTransition();
+				return masterLights.Steps[masterLights.CurrentStep].IsInEndTransition();
 			}
+
 			bool isStepDone = StepDone(false);
 			bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && isStepDone;
 #if DEBUGTTL
@@ -122,11 +129,10 @@ namespace TrafficManager.TrafficLight {
 			return ret;
 		}
 
-		internal bool isInStartTransition() {
-			if (!timedNode.isMasterNode()) {
+		internal bool IsInStartTransition() {
+			if (!timedNode.IsMasterNode()) {
 				TimedTrafficLights masterLights = timedNode.MasterLights();
-				if (masterLights != null)
-					return timedNode.MasterLights().Steps[timedNode.CurrentStep].isInStartTransition();
+				return masterLights.Steps[masterLights.CurrentStep].IsInStartTransition();
 			}
 
 			bool isStepDone = StepDone(false);
@@ -168,13 +174,17 @@ namespace TrafficManager.TrafficLight {
 			maxWait = Single.NaN;
 			lastFlowWaitCalc = 0;
 
-#if DEBUGSTEP
-			Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
-			Log._Debug($"minTime: {minTime} maxTime: {maxTime}");
-			foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
-				Log._Debug($"\tSegment {e.Key}:");
-				Log._Debug($"\t{e.Value.ToString()}");
-			}
+#if DEBUG
+			/*if (Options.disableSomething3) {
+				if (timedNode.NodeId == 31605) {
+					Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
+					Log._Debug($"minTime: {minTime} maxTime: {maxTime}");
+					foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
+						Log._Debug($"\tSegment {e.Key}:");
+						Log._Debug($"\t{e.Value.ToString()}");
+					}
+				}
+			}*/
 #endif
 		}
 
@@ -196,8 +206,8 @@ namespace TrafficManager.TrafficLight {
 			try {
 				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
 
-				bool atEndTransition = !noTransition && (isInEndTransition() || isEndTransitionDone()); // = yellow
-				bool atStartTransition = !noTransition && !atEndTransition && isInStartTransition(); // = red + yellow
+				bool atEndTransition = !noTransition && (IsInEndTransition() || IsEndTransitionDone()); // = yellow
+				bool atStartTransition = !noTransition && !atEndTransition && IsInStartTransition(); // = red + yellow
 
 #if DEBUG
 				if (timedNode == null) {
@@ -287,7 +297,9 @@ namespace TrafficManager.TrafficLight {
 						continue;
 					}
 
-					if (curStepSegmentLights.PedestrianLightState != null && prevStepSegmentLights.PedestrianLightState != null && nextStepSegmentLights.PedestrianLightState != null) {
+					if (curStepSegmentLights.PedestrianLightState != null &&
+						prevStepSegmentLights.PedestrianLightState != null &&
+						nextStepSegmentLights.PedestrianLightState != null) {
 						RoadBaseAI.TrafficLightState pedLightState = calcLightState((RoadBaseAI.TrafficLightState)prevStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)curStepSegmentLights.PedestrianLightState, (RoadBaseAI.TrafficLightState)nextStepSegmentLights.PedestrianLightState, atStartTransition, atEndTransition);
 						//Log._Debug($"TimedStep.SetLights: Setting pedestrian light state @ seg. {segmentId} to {pedLightState} {curStepSegmentLights.ManualPedestrianMode}");
                         liveSegmentLights.ManualPedestrianMode = curStepSegmentLights.ManualPedestrianMode;
@@ -438,6 +450,12 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool StepDone(bool updateValues) {
+			if (!timedNode.IsMasterNode()) {
+				TimedTrafficLights masterLights = timedNode.MasterLights();
+				return masterLights.Steps[masterLights.CurrentStep].StepDone(updateValues);
+			}
+			// we are the master node
+
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.StepDone");
 #endif
@@ -470,94 +488,79 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (getCurrentFrame() >= startFrame + minTime) {
-				if (!timedNode.isMasterNode()) {
-					TimedTrafficLights masterLights = timedNode.MasterLights();
-					bool done = masterLights.Steps[masterLights.CurrentStep].StepDone(updateValues);
-#if DEBUG
-					//Log.Message("step finished (1) @ " + nodeId);
-#endif
-					if (!stepDone && done && updateValues) {
-						stepDone = done;
-						endTransitionStart = getCurrentFrame();
-					}
-#if TRACE
-					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
-#endif
-					return stepDone;
-				} else {
-					// we are the master node
-					float wait, flow;
-					uint curFrame = getCurrentFrame();
-					//Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
-					if (lastFlowWaitCalc < curFrame) {
-						//Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
-						if (!calcWaitFlow(out wait, out flow)) {
-							//Log._Debug($"TTL @ {timedNode.NodeId}: calcWaitFlow failed!");
-							if (!stepDone && updateValues) {
-								//Log._Debug($"TTL @ {timedNode.NodeId}: !stepDone && updateValues");
-								stepDone = true;
-								endTransitionStart = getCurrentFrame();
-							}
-#if TRACE
-							Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
-#endif
-							return stepDone;
-						} else {
-							if (updateValues) {
-								lastFlowWaitCalc = curFrame;
-								//Log._Debug($"TTL @ {timedNode.NodeId}: updated lastFlowWaitCalc=curFrame={curFrame}");
-							}
+				
+					
+				float wait, flow;
+				uint curFrame = getCurrentFrame();
+				//Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
+				if (lastFlowWaitCalc < curFrame) {
+					//Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
+					if (!calcWaitFlow(out wait, out flow)) {
+						//Log._Debug($"TTL @ {timedNode.NodeId}: calcWaitFlow failed!");
+						if (!stepDone && updateValues) {
+							//Log._Debug($"TTL @ {timedNode.NodeId}: !stepDone && updateValues");
+							stepDone = true;
+							endTransitionStart = getCurrentFrame();
 						}
-					} else {
-						flow = minFlow;
-						wait = maxWait;
-						//Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc>=curFrame wait={maxWait} flow={minFlow}");
-					}
-
-					float newFlow = minFlow;
-					float newWait = maxWait;
-
-#if DEBUGMETRIC
-					newFlow = flow;
-					newWait = wait;
-#else
-					if (Single.IsNaN(newFlow))
-						newFlow = flow;
-					else
-						newFlow = 0.1f * newFlow + 0.9f * flow; // some smoothing
-
-					if (Single.IsNaN(newWait))
-						newWait = 0;
-					else
-						newWait = 0.1f * newWait + 0.9f * wait; // some smoothing
-#endif
-
-					// if more cars are waiting than flowing, we change the step
-#if DEBUGMETRIC
-					bool done = false;
-#else
-					bool done = newWait > 0 && newFlow < newWait;
-#endif
-
-					//Log._Debug($"TTL @ {timedNode.NodeId}: newWait={newWait} newFlow={newFlow} updateValues={updateValues} stepDone={stepDone} done={done}");
-
-					if (updateValues) {
-						minFlow = newFlow;
-						maxWait = newWait;
-						//Log._Debug($"TTL @ {timedNode.NodeId}: updated minFlow=newFlow={minFlow} maxWait=newWait={maxWait}");
-					}
-#if DEBUG
-					//Log.Message("step finished (2) @ " + nodeId);
-#endif
-					if (updateValues && !stepDone && done) {
-						stepDone = done;
-						endTransitionStart = getCurrentFrame();
-					}
 #if TRACE
-					Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+						Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
 #endif
-					return stepDone;
+						return stepDone;
+					} else {
+						if (updateValues) {
+							lastFlowWaitCalc = curFrame;
+							//Log._Debug($"TTL @ {timedNode.NodeId}: updated lastFlowWaitCalc=curFrame={curFrame}");
+						}
+					}
+				} else {
+					flow = minFlow;
+					wait = maxWait;
+					//Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc>=curFrame wait={maxWait} flow={minFlow}");
 				}
+
+				float newFlow = minFlow;
+				float newWait = maxWait;
+
+#if DEBUGMETRIC
+				newFlow = flow;
+				newWait = wait;
+#else
+				if (Single.IsNaN(newFlow))
+					newFlow = flow;
+				else
+					newFlow = 0.1f * newFlow + 0.9f * flow; // some smoothing
+
+				if (Single.IsNaN(newWait))
+					newWait = 0;
+				else
+					newWait = 0.1f * newWait + 0.9f * wait; // some smoothing
+#endif
+
+				// if more cars are waiting than flowing, we change the step
+#if DEBUGMETRIC
+				bool done = false;
+#else
+				bool done = newWait > 0 && newFlow < newWait;
+#endif
+
+				//Log._Debug($"TTL @ {timedNode.NodeId}: newWait={newWait} newFlow={newFlow} updateValues={updateValues} stepDone={stepDone} done={done}");
+
+				if (updateValues) {
+					minFlow = newFlow;
+					maxWait = newWait;
+					//Log._Debug($"TTL @ {timedNode.NodeId}: updated minFlow=newFlow={minFlow} maxWait=newWait={maxWait}");
+				}
+#if DEBUG
+				//Log.Message("step finished (2) @ " + nodeId);
+#endif
+				if (updateValues && !stepDone && done) {
+					stepDone = done;
+					endTransitionStart = getCurrentFrame();
+				}
+#if TRACE
+				Singleton<CodeProfiler>.instance.Stop("TimedTrafficLightsStep.StepDone");
+#endif
+				return stepDone;
 			}
 
 #if TRACE

@@ -131,7 +131,7 @@ namespace TrafficManager.Manager {
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnReleaseVehicle");
 #endif
 #if DEBUG
-			Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
+			//Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
 #endif
 			VehicleState state = _GetVehicleState(vehicleId);
 			state.VehicleType = ExtVehicleType.None;

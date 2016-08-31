@@ -10,7 +10,7 @@ namespace TrafficManager.Custom.Manager {
 	public class CustomVehicleManager : VehicleManager {
 		public void CustomReleaseVehicle(ushort vehicleId) {
 #if DEBUG
-			Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
+			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
 			VehicleStateManager.Instance().OnReleaseVehicle(vehicleId);
 			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[(int)vehicleId]);

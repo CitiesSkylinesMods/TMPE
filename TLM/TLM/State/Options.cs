@@ -36,7 +36,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableDespawningToggle = null;
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
-		private static UICheckBox realisticMassTransitUsageToggle = null;
+		private static UICheckBox prohibitPocketCarsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
 		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
@@ -113,7 +113,7 @@ namespace TrafficManager.State {
 		public static bool showLanes = false;
 #endif
 		public static bool strongerRoadConditionEffects = false;
-		public static bool realisticMassTransitUsage = false;
+		public static bool prohibitPocketCars = false;
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
@@ -171,12 +171,10 @@ namespace TrafficManager.State {
 			allRelaxedToggle = mainGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
 			allowEnterBlockedJunctionsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
-			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions") + " (BETA feature)", allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
-#if DEBUG
-			realisticMassTransitUsageToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_usage_of_mass_transit"), realisticMassTransitUsage, onRealisticMassTransitUsageChanged) as UICheckBox;
-#endif
+			prohibitPocketCarsToggle = mainGroup.AddCheckbox(Translation.GetString("Prohibit_spawning_of_pocket_cars") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
 			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 			aiGroup = helper.AddGroup("Advanced Vehicle AI");
 			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
@@ -555,12 +553,12 @@ namespace TrafficManager.State {
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
 		}
 
-		private static void onRealisticMassTransitUsageChanged(bool newValue) {
+		private static void onProhibitPocketCarsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 
-			Log._Debug($"realisticMassTransitUsage changed to {newValue}");
-			realisticMassTransitUsage = newValue;
+			Log._Debug($"prohibitPocketCars changed to {newValue}");
+			prohibitPocketCars = newValue;
 		}
 
 		private static void onEnableDespawningChanged(bool value) {
@@ -1000,10 +998,10 @@ namespace TrafficManager.State {
 				strongerRoadConditionEffectsToggle.isChecked = newStrongerRoadConditionEffects;
 		}
 
-		public static void setRealisticMassTransitUsage(bool newValue) {
-			realisticMassTransitUsage = newValue;
-			if (realisticMassTransitUsageToggle != null)
-				realisticMassTransitUsageToggle.isChecked = newValue;
+		public static void setProhibitPocketCars(bool newValue) {
+			prohibitPocketCars = newValue;
+			if (prohibitPocketCarsToggle != null)
+				prohibitPocketCarsToggle.isChecked = newValue;
 		}
 
 		public static void setEnableDespawning(bool value) {

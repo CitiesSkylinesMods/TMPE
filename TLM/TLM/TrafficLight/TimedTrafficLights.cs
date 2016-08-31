@@ -10,6 +10,8 @@ using TrafficManager.Manager;
 using System.Linq;
 
 namespace TrafficManager.TrafficLight {
+	// TODO [version 1.9] define TimedTrafficLights per node group, not per individual nodes
+	// TODO class marked for complete rework in version 1.9
 	public class TimedTrafficLights {
 		public ushort NodeId {
 			get; private set;
@@ -40,11 +42,13 @@ namespace TrafficManager.TrafficLight {
 			started = false;
 		}
 
-		public bool isMasterNode() {
+		public bool IsMasterNode() {
 			return masterNodeId == NodeId;
 		}
 
 		public TimedTrafficLightsStep AddStep(int minTime, int maxTime, float waitFlowBalance, bool makeRed = false) {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			if (minTime < 0)
 				minTime = 0;
 			if (maxTime <= 0)
@@ -58,6 +62,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Start() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			/*if (!housekeeping())
 				return;*/
 
@@ -88,6 +94,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void RemoveNodeFromGroup(ushort otherNodeId) {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			NodeGroup.Remove(otherNodeId);
 			if (NodeGroup.Count <= 0) {
 				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, true, false);
@@ -97,6 +105,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal bool housekeeping() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.housekeeping");
 #endif
@@ -155,6 +165,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void StepHousekeeping() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.StepHousekeeping");
 #endif
@@ -169,6 +181,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			var oldStep = Steps[oldPos];
 
 			Steps.RemoveAt(oldPos);
@@ -176,10 +190,14 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Stop() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			started = false;
 		}
 
 		internal void Destroy() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			Stop();
 			DestroySegmentEnds();
 			Steps = null;
@@ -187,22 +205,30 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool IsStarted() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			return started;
 		}
 
 		public int NumSteps() {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			return Steps.Count;
 		}
 
 		public TimedTrafficLightsStep GetStep(int stepId) {
+			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
+
 			return Steps[stepId];
 		}
 
 		public void SimulationStep() {
+			// TODO [version 1.9] this method is currently called on each node, but should be called on the master node only
+
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("TimedTrafficLights.SimulationStep");
 #endif
-			if (!isMasterNode() || !IsStarted()) {
+			if (!IsMasterNode() || !IsStarted()) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} isMasterNode={isMasterNode()} IsStarted={IsStarted()}");
 #endif
@@ -211,6 +237,7 @@ namespace TrafficManager.TrafficLight {
 #endif
 				return;
 			}
+			// we are the master node
 
 			var currentFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 5;
 #if DEBUGTTL
@@ -256,7 +283,7 @@ namespace TrafficManager.TrafficLight {
 #endif
 			SetLights(); // check if this is needed
 
-			if (!Steps[CurrentStep].isEndTransitionDone()) {
+			if (!Steps[CurrentStep].IsEndTransitionDone()) {
 #if DEBUGTTL
 				Log._Debug($"TTL SimStep: *STOP* NodeId={NodeId} current step ({CurrentStep}): end transition is not done.");
 #endif
@@ -272,38 +299,23 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 			// change step
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 			CurrentStep = (CurrentStep + 1) % NumSteps();
-#if DEBUGTTL
-			Log._Debug($"TTL SimStep: NodeId={NodeId} starting next step: {CurrentStep}");
-#endif
-			Steps[CurrentStep].Start();
-			/*int oldCurrentStep = CurrentStep;
-			while (true) {
-				SkipStep(false);
-
-				if (CurrentStep == oldCurrentStep)
-					break;
-
-				if (Steps[CurrentStep].minTime > 0)
-					break;
-
-				float flow, wait;
-				bool couldCalculateFlowWaitStats = Steps[CurrentStep].calcWaitFlow(out wait, out flow);
-
-				if (! couldCalculateFlowWaitStats)
-					break;
-
-				if (flow >= wait) {
-					break;
+			foreach (ushort slaveNodeId in NodeGroup) {
+				TrafficLightSimulation slaveSim = tlsMan.GetNodeSimulation(slaveNodeId);
+				if (slaveSim == null || !slaveSim.IsTimedLight()) {
+					continue;
 				}
-			}*/
+				TimedTrafficLights timedLights = slaveSim.TimedLight;
+				timedLights.CurrentStep = CurrentStep;
+
 #if DEBUGTTL
-			Log._Debug($"TTL SimStep: NodeId={NodeId} setting lgihts of next step: {CurrentStep}");
+			Log._Debug($"TTL SimStep: NodeId={slaveNodeId} setting lgihts of next step: {CurrentStep}");
 #endif
-			Steps[CurrentStep].SetLights();
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("TimedTrafficLights.SimulationStep");
-#endif
+
+				timedLights.Steps[CurrentStep].Start();
+				timedLights.Steps[CurrentStep].SetLights();
+			}
 		}
 
 		public void SetLights() {
@@ -321,7 +333,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SkipStep(bool setLights=true) {
-			if (!isMasterNode())
+			if (!IsMasterNode())
 				return;
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();

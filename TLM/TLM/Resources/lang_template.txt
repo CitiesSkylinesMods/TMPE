@@ -126,4 +126,4 @@ Imperial
 Use_more_CPU_cores_for_route_calculation_if_available
 Activated_features
 Junction_restrictions
-Enable_more_realistic_usage_of_mass_transit
+Prohibit_spawning_of_pocket_cars

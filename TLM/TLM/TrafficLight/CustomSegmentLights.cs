@@ -53,10 +53,6 @@ namespace TrafficManager.TrafficLight {
 			get; private set;
 		} = ExtVehicleType.None;
 
-		public override string ToString() {
-			return "";
-		}
-
 		public RoadBaseAI.TrafficLightState? PedestrianLightState {
 			get {
 				if (pedestrianLightState == null)
@@ -98,10 +94,11 @@ namespace TrafficManager.TrafficLight {
 				if (vehState == RoadBaseAI.TrafficLightState.Red)
 					continue;
 
-				if (vehState == RoadBaseAI.TrafficLightState.Green) {
+				// Transitions are not handled here. They are handley by TimedTrafficLightsStep
+				//if (vehState == RoadBaseAI.TrafficLightState.Green) {
 					pedState = RoadBaseAI.TrafficLightState.Red;
 					break;
-				}
+				/*}
 
 				if (vehState == RoadBaseAI.TrafficLightState.RedToGreen) {
 					pedState = RoadBaseAI.TrafficLightState.GreenToRed;
@@ -111,7 +108,7 @@ namespace TrafficManager.TrafficLight {
 				if (vehState == RoadBaseAI.TrafficLightState.GreenToRed &&
 					pedState != RoadBaseAI.TrafficLightState.GreenToRed) {
 					pedState = RoadBaseAI.TrafficLightState.RedToGreen;
-				}
+				}*/
 			}
 
 #if TRACE
@@ -121,12 +118,28 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool ManualPedestrianMode {
-			get; set;
-		} = false;
+			get { return manualPedestrianMode; }
+			set {
+				if (! manualPedestrianMode && value) {
+					PedestrianLightState = GetAutoPedestrianLightState();
+				}
+				manualPedestrianMode = value;
+			}
+		}
+
+		private bool manualPedestrianMode = false;
 
 		protected RoadBaseAI.TrafficLightState? pedestrianLightState = null;
 		private ExtVehicleType autoPedestrianVehicleType = ExtVehicleType.None;
 		protected CustomSegmentLight mainSegmentLight = null;
+
+		public override string ToString() {
+			String ret = $"InvalidPedestrianLight={InvalidPedestrianLight} PedestrianLightState={PedestrianLightState} ManualPedestrianMode={ManualPedestrianMode}\n";
+			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
+				ret += $"\tVehicleType={e.Key} Light={e.Value.ToString()}\n";
+			}
+			return ret;
+		}
 
 		protected CustomSegmentLights(ushort nodeId, ushort segmentId) {
 			this.nodeId = nodeId;

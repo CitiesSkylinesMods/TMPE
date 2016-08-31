@@ -63,6 +63,10 @@ namespace TrafficManager.TrafficLight {
 
 		CustomSegmentLights lights;
 
+		public override string ToString() {
+			return $"LightLeft={LightLeft} LightMain={LightMain} LightRight={LightRight} CurrentMode={CurrentMode}";
+		}
+
 		public CustomSegmentLight(CustomSegmentLights lights, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight) {
 			this.NodeId = nodeId;
 			this.SegmentId = segmentId;
