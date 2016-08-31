@@ -834,21 +834,22 @@ namespace TrafficManager.Custom.AI {
 			bool flag = false;
 			if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
 				float num6 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector));
-				if (num6 > vector.y + 1f) {
+				// NON-STOCK CODE START
+				// Rainfall compatibility
+				float _roadwayFloodedTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodedTolerance", 100)/100f : 1f;
+				if (num6 > vector.y + _roadwayFloodedTolerance) {
 					flag = true;
 					data.m_flags |= NetSegment.Flags.Flooded;
 					problem = Notification.AddProblems(problem, Notification.Problem.Flood | Notification.Problem.MajorProblem);
 				} else {
 					data.m_flags &= ~NetSegment.Flags.Flooded;
-					// NON-STOCK CODE START
-					// Rainfall compatibility
-					float add = LoadingExtension.IsRainfallLoaded ? 0.5f : 0f;
-					// NON-STOCK CODE END
-					if (num6 > vector.y + add) {
+					float _roadwayFloodingTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodingTolerance", 50)/100f : 0f;
+					if (num6 > vector.y + _roadwayFloodingTolerance) {
 						flag = true;
 						problem = Notification.AddProblems(problem, Notification.Problem.Flood);
 					}
 				}
+				// NON-STOCK CODE END
 			}
 			DistrictManager instance3 = Singleton<DistrictManager>.instance;
 			byte district = instance3.GetDistrict(vector);
