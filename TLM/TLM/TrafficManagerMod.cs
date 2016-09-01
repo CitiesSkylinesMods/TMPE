@@ -5,13 +5,13 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.7.10";
+		public static readonly string Version = "1.7.11";
 
-		public static readonly uint GameVersion = 155313168u;
+		public static readonly uint GameVersion = 155443984u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 5u;
-		public static readonly uint GameVersionC = 0u;
-		public static readonly uint GameVersionBuild = 4u;
+		public static readonly uint GameVersionC = 1u;
+		public static readonly uint GameVersionBuild = 3u;
 
 		public string Name => "Traffic Manager: President Edition";
 
