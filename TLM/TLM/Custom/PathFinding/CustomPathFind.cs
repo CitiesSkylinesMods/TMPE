@@ -3139,7 +3139,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if (!Options.vehicleRestrictionsEnabled)
 				return true;
 
-			if (_extVehicleType == null || _extVehicleType == ExtVehicleType.None)
+			if (_extVehicleType == null || _extVehicleType == ExtVehicleType.None || _extVehicleType == ExtVehicleType.Tram)
 				return true;
 
 			if (laneInfo == null)

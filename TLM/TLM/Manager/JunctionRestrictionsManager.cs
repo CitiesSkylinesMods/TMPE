@@ -32,7 +32,8 @@ namespace TrafficManager.Manager {
 					continue;
 
 				Configuration.SegmentNodeFlags flags = Flags.getSegmentNodeFlags(segmentId, netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId);
-				return !flags.IsDefault();
+				if (!flags.IsDefault())
+					return true;
 			}
 			return false;
 		}

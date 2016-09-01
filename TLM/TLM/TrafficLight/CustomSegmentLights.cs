@@ -417,6 +417,8 @@ namespace TrafficManager.TrafficLight {
 			}
 			pedestrianLightState = otherLights.pedestrianLightState;
 			ManualPedestrianMode = otherLights.ManualPedestrianMode;
+			if (ManualPedestrianMode)
+				PedestrianLightState = otherLights.PedestrianLightState;
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.SetLights");
 #endif
