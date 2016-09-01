@@ -212,7 +212,7 @@ namespace TrafficManager.Custom.AI {
 #if ABSDENSITY
 
 								if (maxLaneDensity > 0)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((Math.Min(currentDensity * 100 / maxLaneDensity, 100) * (uint)Options.someValue9 + laneMeanAbsDensities[segmentID][laneIndex]) / ((uint)Options.someValue9 + 1));
+									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((Math.Min(currentDensity * 100 / maxLaneDensity, 100) + laneMeanAbsDensities[segmentID][laneIndex] * (uint)Options.someValue9) / ((uint)Options.someValue9 + 1));
 								else
 									laneMeanAbsDensities[segmentID][laneIndex] /= (byte)Options.someValue8;
 #endif

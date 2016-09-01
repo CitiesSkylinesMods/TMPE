@@ -11,7 +11,7 @@ User manual: http://www.viathinksoft.de/tmpe
 - Bugfix: Pedestrian traffic lights were not working as expected
 - Bugfix: When upgrading/removing/adding a road segment, nearby junction restrictions were removed
 - Bugfix: Setting up vehicle restrictions affects trams (thanks to @chem for reporting)
-- Bugfix: Manual pedestrian traffic light state were not correctly handled
+- Bugfix: Manual pedestrian traffic light states were not correctly handled
 - Bugfix: Junction restrictions overlay did not show all restricted junctions
 
 1.7.9, 08/22/2016
