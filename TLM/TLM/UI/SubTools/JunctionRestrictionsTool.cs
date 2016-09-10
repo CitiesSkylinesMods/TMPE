@@ -63,6 +63,10 @@ namespace TrafficManager.UI.SubTools {
 			NetManager netManager = Singleton<NetManager>.instance;
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
+			if (!viewOnly && SelectedNodeId != 0) {
+				currentRestrictedNodeIds.Add(SelectedNodeId);
+			}
+
 			bool stateUpdated = false;
 			bool handleHovered = false;
 			foreach (ushort nodeId in currentRestrictedNodeIds) {
@@ -103,7 +107,6 @@ namespace TrafficManager.UI.SubTools {
 				return;
 
 			SelectedNodeId = HoveredNodeId;
-			currentRestrictedNodeIds.Add(SelectedNodeId);
 		}
 
 		public override void OnSecondaryClickOverlay() {

@@ -45,7 +45,7 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				//Log._Debug($"CustomPoliceCarAI.CustomStartPathFind: Vehicle {vehicleID}, type {vehicleType}");
-				if (Singleton<CustomPathManager>.instance.CreatePath(
+				if (CustomPathManager._instance.CreatePath(
 #if PATHRECALC
 					recalcRequested,
 #endif 

@@ -1,4 +1,4 @@
-﻿#define MARKCONGESTEDSEGMENTSx
+﻿#define MARKCONGESTEDSEGMENTS
 #define USEPATHWAITCOUNTERx
 #define ABSDENSITY
 
@@ -473,7 +473,7 @@ namespace TrafficManager.UI {
 				/*if (CustomRoadAI.InStartupPhase)
 					labelStr += ", in start-up phase";
 				else*/
-					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " %";
+					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " ";
 				//labelStr += ", rel. dens.: " + (CustomRoadAI.laneMeanRelDensities[segmentId] != null && i < CustomRoadAI.laneMeanRelDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanRelDensities[segmentId][i] : "?") + " %";
 #if DEBUG
 				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
@@ -538,7 +538,7 @@ namespace TrafficManager.UI {
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
 #if MARKCONGESTEDSEGMENTS
 					if (CustomRoadAI.initDone && CustomRoadAI.segmentCongestion[i]) {
-						labelStr += " congested!";
+						labelStr += " CONGESTED!";
 					}
 #endif
 
@@ -563,6 +563,7 @@ namespace TrafficManager.UI {
 
 					if (validLanes > 0) {
 						meanLaneSpeed /= Convert.ToSingle(validLanes);
+						meanLaneSpeed *= 0.01f; // to %
 					}
 
 					/*if (CustomRoadAI.InStartupPhase)

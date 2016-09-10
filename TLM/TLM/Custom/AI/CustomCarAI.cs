@@ -377,7 +377,7 @@ namespace TrafficManager.Custom.AI {
 					vehicleType = ExtVehicleType.RoadVehicle;
 				}
 
-				if (Singleton<CustomPathManager>.instance.CreatePath(
+				if (CustomPathManager._instance.CreatePath(
 #if PATHRECALC
 					recalcRequested, 
 #endif

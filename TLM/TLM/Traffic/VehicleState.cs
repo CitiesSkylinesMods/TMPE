@@ -155,11 +155,22 @@ namespace TrafficManager.Traffic {
 			return ProcessCurrentAndNextPathPosition(ref vehicleData, (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
 		}
 
+		public bool ProcessTrailerCurrentAndNextPathPosition(ref Vehicle vehicleData, ref Vehicle trailerData, DualPathPositionProcessor processor) {
+			return ProcessTrailerCurrentAndNextPathPosition(ref vehicleData, ref trailerData, (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
+		}
+
 		public bool ProcessCurrentAndNextPathPosition(ref Vehicle vehicleData, byte index, DualPathPositionProcessor processor) {
 			if (index < 11)
 				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, processor);
 			else
 				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit], index, processor);
+		}
+
+		public bool ProcessTrailerCurrentAndNextPathPosition(ref Vehicle vehicleData, ref Vehicle trailerData, byte index, DualPathPositionProcessor processor) {
+			if (index < 11)
+				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, processor);
+			else
+				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit], index, processor);
 		}
 
 		public bool ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref Vehicle vehicleData, ref PathUnit.Position otherVehicleCurPos, ref PathUnit.Position otherVehicleNextPos, ref Vehicle otherVehicleData, QuadPathPositionProcessor processor) {
@@ -374,6 +385,19 @@ namespace TrafficManager.Traffic {
 
 			ProcessCurrentAndNextPathPosition(ref vehicleData, delegate (ref Vehicle vehData, ref PathUnit.Position currentPosition, ref PathUnit.Position nextPosition) {
 				UpdatePosition(ref vehData, ref currentPosition, ref nextPosition);
+			});
+
+			// update position of trailers
+			ushort trailerId = vehicleData.m_trailingVehicle;
+			while (trailerId != 0) {
+				VehicleStateManager.Instance().UpdateTrailerPos(trailerId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId], VehicleId, ref vehicleData);
+				trailerId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
+			}
+		}
+
+		internal void UpdatePosition(ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
+			ProcessTrailerCurrentAndNextPathPosition(ref vehicleData, ref trailerData, delegate (ref Vehicle trailData, ref PathUnit.Position currentPosition, ref PathUnit.Position nextPosition) {
+				UpdatePosition(ref trailData, ref currentPosition, ref nextPosition, true);
 			});
 		}
 

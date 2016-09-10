@@ -90,7 +90,7 @@ namespace TrafficManager.Custom.AI
 				SimulationManager instance2 = Singleton<SimulationManager>.instance;
 				uint path;
 				PathUnit.Position def = default(PathUnit.Position);
-				if (Singleton<CustomPathManager>.instance.CreatePath(
+				if (CustomPathManager._instance.CreatePath(
 #if PATHRECALC
 					recalcRequested
 #else

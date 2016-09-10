@@ -95,6 +95,16 @@ namespace TrafficManager.Manager {
 #endif
 		}
 
+		internal void UpdateTrailerPos(ushort trailerId, ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
+#if TRACE
+			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateTrailerPos(1)");
+#endif
+			VehicleStates[trailerId].UpdatePosition(ref trailerData, vehicleId, ref vehicleData);
+#if TRACE
+			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateTrailerPos(1)");
+#endif
+		}
+
 		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(2)");

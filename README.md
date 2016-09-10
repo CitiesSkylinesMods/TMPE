@@ -4,6 +4,15 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.7.12, 09/05/2016
+- AI: Lane changes are reduced on congested road segments
+- Timed traffic lights should now correctly detect trains and trams
+- Bugfix: GUI: Junction restriction icons sometimes disappear
+- Updated Chinese (simplified) translation
+
+1.7.11, 09/01/2016
+- Updated to game version 1.5.1-f3
+
 1.7.10, 08/31/2016
 - Players can now disable spawning of pocket cars
 - Updated Chinese (simplified) translation

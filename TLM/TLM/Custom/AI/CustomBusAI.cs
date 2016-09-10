@@ -41,7 +41,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (Singleton<CustomPathManager>.instance.CreatePath(
+				if (CustomPathManager._instance.CreatePath(
 #if PATHRECALC
 					recalcRequested,
 #endif

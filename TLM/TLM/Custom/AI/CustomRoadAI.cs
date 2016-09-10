@@ -1,4 +1,4 @@
-#define MARKCONGESTEDSEGMENTSx
+#define MARKCONGESTEDSEGMENTS
 #define ABSDENSITY
 #define RELDENSITYx
 
@@ -25,7 +25,7 @@ namespace TrafficManager.Custom.AI {
 		public static uint[][] maxLaneDensities;
 #endif
 
-		public static byte[][] laneMeanSpeeds;
+		public static ushort[][] laneMeanSpeeds; // per ten thousands
 #if RELDENSITY
 		public static byte[][] laneMeanRelDensities;
 #endif
@@ -142,12 +142,15 @@ namespace TrafficManager.Custom.AI {
 #endif
 								currentLaneSpeeds[segmentID] = new uint[numLanes];
 								currentLaneDensities[segmentID] = new uint[numLanes];
-								laneMeanSpeeds[segmentID] = new byte[numLanes];
+								laneMeanSpeeds[segmentID] = new ushort[numLanes];
 #if RELDENSITY
 								laneMeanRelDensities[segmentID] = new byte[numLanes];
 #endif
 #if ABSDENSITY
 								laneMeanAbsDensities[segmentID] = new byte[numLanes];
+
+								for (int i = 0; i < numLanes; ++i)
+									laneMeanSpeeds[segmentID][i] = 5000;
 #endif
 							}
 
@@ -183,36 +186,30 @@ namespace TrafficManager.Custom.AI {
 								//currentMeanDensity = (byte)Math.Min(100u, (uint)((currentDensities * 100u) / Math.Max(1u, maxDens))); // 0 .. 100
 
 								//byte currentMeanSpeed = (byte)(InStartupPhase ? 10 : 100);
-								byte currentMeanSpeed = 100;
+								uint currentMeanSpeed = 10000;
 								// we use integer division here because it's faster
 								if (currentBuf > 0) {
 									uint currentSpeeds = currentLaneSpeeds[segmentID][laneIndex];
-									currentMeanSpeed = (byte)Math.Min(100u, ((currentSpeeds * 100u) / currentBuf) / ((uint)(Math.Max(SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex]) * 8f, 1f)))); // 0 .. 100, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+									currentMeanSpeed = (uint)Math.Min(10000u, ((currentSpeeds * 10000) / currentBuf) / ((uint)(Math.Max(SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex]) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 								}
 
+								//laneMeanSpeeds[segmentID][laneIndex] = currentMeanSpeed;
+								ushort previousMeanSpeed = laneMeanSpeeds[segmentID][laneIndex];
+								uint speedUpdateSmoothing = currentMeanSpeed > previousMeanSpeed ? (uint)Options.someValue19 : (uint)Options.someValue17;
+								laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)previousMeanSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));
+
 #if MARKCONGESTEDSEGMENTS
-								if (currentMeanSpeed <= 30) {
+								if (laneMeanSpeeds[segmentID][laneIndex] <= 6000) { // <= 60 %
 									setCongested = true;
-								} else if (currentMeanSpeed >= 60) {
+								} else if (currentMeanSpeed >= 7000) { // >= 70 %
 									unsetCongested = true;
 								}
 #endif
 
-								/*if (segmentID == 22980) {
-									Log._Debug($"Lane {curLaneId}: currentMeanSpeed={currentMeanSpeed} currentMeanDensity={currentMeanDensity}");
-								}*/
-
-								//laneMeanSpeeds[segmentID][laneIndex] = currentMeanSpeed;
-								byte previousMeanSpeed = laneMeanSpeeds[segmentID][laneIndex];
-								if (currentMeanSpeed > previousMeanSpeed)
-									laneMeanSpeeds[segmentID][laneIndex] = (byte)Math.Min((int)previousMeanSpeed + 10, 100);
-								else if (currentMeanSpeed == 0 || currentMeanSpeed < previousMeanSpeed)
-									laneMeanSpeeds[segmentID][laneIndex] = (byte)Math.Max((int)previousMeanSpeed - 10, 0);
-
 #if ABSDENSITY
 
 								if (maxLaneDensity > 0)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((Math.Min(currentDensity * 100 / maxLaneDensity, 100) + laneMeanAbsDensities[segmentID][laneIndex] * (uint)Options.someValue9) / ((uint)Options.someValue9 + 1));
+									laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Min(currentDensity * 100 / maxLaneDensity, 100);
 								else
 									laneMeanAbsDensities[segmentID][laneIndex] /= (byte)Options.someValue8;
 #endif
@@ -986,7 +983,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 				currentLaneSpeeds = new uint[NetManager.MAX_SEGMENT_COUNT][];
 				currentLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
-				laneMeanSpeeds = new byte[NetManager.MAX_SEGMENT_COUNT][];
+				laneMeanSpeeds = new ushort[NetManager.MAX_SEGMENT_COUNT][];
 #if RELDENSITY
 				laneMeanRelDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
 #endif
@@ -1006,7 +1003,7 @@ namespace TrafficManager.Custom.AI {
 			for (ushort i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
 				if (currentLaneTrafficBuffer[i] != null) {
 					for (int k = 0; k < currentLaneTrafficBuffer[i].Length; ++k) {
-						laneMeanSpeeds[i][k] = 50;
+						laneMeanSpeeds[i][k] = 10000;
 						currentLaneTrafficBuffer[i][k] = 0;
 #if ABSDENSITY
 						maxLaneDensities[i][k] = 0;

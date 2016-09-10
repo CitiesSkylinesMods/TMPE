@@ -84,7 +84,7 @@ namespace TrafficManager.Custom.AI {
 					/*if (Options.disableSomething6)
 						Log._Debug($"extVehicleType could not be determined for citizen instance {instanceID}");*/
 				} else
-					res = Singleton<CustomPathManager>.instance.CreatePath(false, extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
+					res = CustomPathManager._instance.CreatePath(false, extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
 
 				if (res) {
 					if (citizenData.m_path != 0u) {
@@ -228,7 +228,7 @@ namespace TrafficManager.Custom.AI {
 				//Log._Debug($"CustomCitizenAI: citizen instance {instanceID}, id {citizenData.m_citizen}. vehicleType={vehicleType} laneType={laneType} extVehicleType={extVehicleType} usePublicTransport={usePublicTransport} useTaxi={useTaxi} useBike={useBike} useCar={useCar} wealthLevel={wealthLevel}");
 #endif
 				// NON-STOCK CODE END //
-				if (Singleton<CustomPathManager>.instance.CreatePath(false, (ExtVehicleType)extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking)) {
+				if (CustomPathManager._instance.CreatePath(false, (ExtVehicleType)extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, position2, endPosA, position2, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking)) {
 					if (citizenData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(citizenData.m_path);
 					}

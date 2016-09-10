@@ -92,7 +92,7 @@ namespace TrafficManager.Custom.AI {
 				endPosFound = true;
 			}
 			if (startPosFound && endPosFound) {
-				CustomPathManager instance = Singleton<CustomPathManager>.instance;
+				CustomPathManager instance = CustomPathManager._instance;
 				if (!startBothWays || num < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
