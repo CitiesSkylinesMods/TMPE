@@ -127,3 +127,4 @@ Use_more_CPU_cores_for_route_calculation_if_available 计算路线将使用更�
 Activated_features 激活功能
 Junction_restrictions 路口管制
 Prohibit_spawning_of_pocket_cars 禁止口袋胶囊汽车生产(测试版功能)
+Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles

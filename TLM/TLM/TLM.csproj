@@ -72,6 +72,7 @@
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
+    <Compile Include="Manager\UtilityManager.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />

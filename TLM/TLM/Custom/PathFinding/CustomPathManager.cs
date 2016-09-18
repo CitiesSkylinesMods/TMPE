@@ -1,4 +1,4 @@
-#define QUEUEDSTATS
+#define QUEUEDSTATSx
 #define EXTRAPFx
 #define DEBUGPF3x
 
@@ -17,7 +17,17 @@ using TrafficManager.Traffic;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathManager : PathManager {
-		internal static CustomPathFind[] _replacementPathFinds;
+		internal struct PathUnitQueueItem {
+			internal uint nextPathUnitId;
+		}
+
+		/// <summary>
+		/// Holds a linked list of path units waiting to be calculated
+		/// </summary>
+		internal PathUnitQueueItem[] queueItems;
+		internal object QueueItemLock;
+
+		internal CustomPathFind[] _replacementPathFinds;
 
 		public static CustomPathManager _instance;
 
@@ -56,6 +66,9 @@ namespace TrafficManager.Custom.PathFinding {
 			m_bufferLock = stockPathManager.m_bufferLock;
 
 			Log._Debug("Waking up CustomPathManager.");
+
+			QueueItemLock = new object();
+			queueItems = new PathUnitQueueItem[PathManager.MAX_PATHUNIT_COUNT];
 
 			var stockPathFinds = GetComponents<PathFind>();
 			var numOfStockPathFinds = stockPathFinds.Length;
@@ -119,9 +132,9 @@ namespace TrafficManager.Custom.PathFinding {
 						break;
 					}
 
-					if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
+					/*if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
 						Log.Error($"Will release path unit {unit} which is CREATED!");
-					}
+					}*/
 
 					uint nextPathUnit = this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit;
 					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 0;

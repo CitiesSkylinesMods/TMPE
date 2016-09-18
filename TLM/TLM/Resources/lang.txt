@@ -127,3 +127,4 @@ Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for rou
 Activated_features Activated features
 Junction_restrictions Junction restrictions
 Prohibit_spawning_of_pocket_cars Prohibit cims to spawn pocket cars
+Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles

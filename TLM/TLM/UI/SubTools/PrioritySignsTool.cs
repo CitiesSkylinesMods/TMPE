@@ -54,7 +54,7 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RefreshCurrentPrioritySegmentIds() {
 			currentPrioritySegmentIds.Clear();
-			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 					continue;
 
@@ -62,7 +62,7 @@ namespace TrafficManager.UI.SubTools {
 				if (trafficSegment == null)
 					continue;
 
-				currentPrioritySegmentIds.Add(segmentId);
+				currentPrioritySegmentIds.Add((ushort)segmentId);
 			}
 		}
 

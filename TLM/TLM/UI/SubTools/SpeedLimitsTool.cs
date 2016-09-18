@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 				// cache visible segments
 				currentlyVisibleSegmentIds.Clear();
 
-				for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 					if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 						continue;
 					if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
@@ -101,7 +101,7 @@ namespace TrafficManager.UI.SubTools {
 						(connectionClass.m_service == ItemClass.Service.PublicTransport && connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain)))
 						continue;
 
-					currentlyVisibleSegmentIds.Add(segmentId);
+					currentlyVisibleSegmentIds.Add((ushort)segmentId);
 				}
 
 				lastCamPos = camPos;

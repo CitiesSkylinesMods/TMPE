@@ -304,7 +304,7 @@ namespace TrafficManager.TrafficLight {
 				clone.CustomLights.Add(e.Key, (CustomSegmentLight)e.Value.Clone());
 			}
 			clone.pedestrianLightState = pedestrianLightState;
-			clone.ManualPedestrianMode = ManualPedestrianMode;
+			clone.manualPedestrianMode = manualPedestrianMode;
 			clone.VehicleTypes = new LinkedList<ExtVehicleType>(VehicleTypes);
 			clone.LastChangeFrame = LastChangeFrame;
 			clone.autoPedestrianVehicleType = autoPedestrianVehicleType;
@@ -416,9 +416,7 @@ namespace TrafficManager.TrafficLight {
 				//ourLight.LightPedestrian = e.Value.LightPedestrian;
 			}
 			pedestrianLightState = otherLights.pedestrianLightState;
-			ManualPedestrianMode = otherLights.ManualPedestrianMode;
-			if (ManualPedestrianMode)
-				PedestrianLightState = otherLights.PedestrianLightState;
+			manualPedestrianMode = otherLights.manualPedestrianMode;
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("CustomSegmentLights.SetLights");
 #endif

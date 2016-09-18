@@ -36,8 +36,8 @@ namespace TrafficManager.Manager {
 
 		private VehicleStateManager() {
 			VehicleStates = new VehicleState[VehicleManager.MAX_VEHICLE_COUNT];
-			for (ushort i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
-				VehicleStates[i] = new VehicleState(i);
+			for (uint i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
+				VehicleStates[i] = new VehicleState((ushort)i);
 			}
 		}
 
@@ -171,13 +171,13 @@ namespace TrafficManager.Manager {
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-				for (ushort vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+				for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
 					if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0)
 						continue;
 
 					try {
-						DetermineVehicleType(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-						OnVehicleSpawned(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+						DetermineVehicleType((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+						OnVehicleSpawned((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
 					} catch (Exception e) {
 						Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
 					}

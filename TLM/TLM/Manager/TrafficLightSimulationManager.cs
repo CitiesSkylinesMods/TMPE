@@ -165,7 +165,7 @@ namespace TrafficManager.Manager {
 
 		public void OnLevelUnloading() {
 			NodesWithTrafficLightSimulation = new ushort[0];
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				TrafficLightSimulations[nodeId] = null;
 			}
 		}

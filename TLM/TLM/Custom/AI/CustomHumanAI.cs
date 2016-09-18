@@ -1,5 +1,3 @@
-#define DEBUGTTL
-
 using ColossalFramework;
 using TrafficManager.State;
 using TrafficManager.Geometry;

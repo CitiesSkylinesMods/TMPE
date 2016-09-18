@@ -127,12 +127,12 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RefreshCurrentRestrictedNodeIds() {
 			currentRestrictedNodeIds.Clear();
-			for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
 
-				if (JunctionRestrictionsManager.Instance().HasJunctionRestrictions(nodeId))
-					currentRestrictedNodeIds.Add(nodeId);
+				if (JunctionRestrictionsManager.Instance().HasJunctionRestrictions((ushort)nodeId))
+					currentRestrictedNodeIds.Add((ushort)nodeId);
 			}
 		}
 

@@ -49,13 +49,13 @@ namespace TrafficManager.UI.SubTools {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
 			currentTimedNodeIds.Clear();
-			for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
 
-				TrafficLightSimulation lightSim = tlsMan.GetNodeSimulation(nodeId);
+				TrafficLightSimulation lightSim = tlsMan.GetNodeSimulation((ushort)nodeId);
 				if (lightSim != null && lightSim.IsTimedLight()) {
-					currentTimedNodeIds.Add(nodeId);
+					currentTimedNodeIds.Add((ushort)nodeId);
 				}
 			}
 		}
@@ -420,7 +420,7 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				GUILayout.EndHorizontal();
-			}
+			} // foreach step
 
 			GUILayout.BeginHorizontal();
 
@@ -850,11 +850,11 @@ namespace TrafficManager.UI.SubTools {
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 #if DEBUG
 				bool debug = nodeId == 21361;
 #endif
-				if (SelectedNodeIndexes.Contains(nodeId)) {
+				if (SelectedNodeIndexes.Contains((ushort)nodeId)) {
 #if DEBUG
 					if (debug)
 						Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} is selected");
@@ -862,7 +862,7 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				TrafficLightSimulation lightSim = tlsMan.GetNodeSimulation(nodeId);
+				TrafficLightSimulation lightSim = tlsMan.GetNodeSimulation((ushort)nodeId);
 				if (lightSim != null && lightSim.IsTimedLight()) {
 					TimedTrafficLights timedNode = lightSim.TimedLight;
 					if (timedNode == null) {
@@ -870,7 +870,7 @@ namespace TrafficManager.UI.SubTools {
 						if (debug)
 							Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} does not have an instance of TimedTrafficLights. Removing node from simulation");
 #endif
-						tlsMan.RemoveNodeFromSimulation(nodeId, true, false);
+						tlsMan.RemoveNodeFromSimulation((ushort)nodeId, true, false);
 						RefreshCurrentTimedNodeIds();
 						break;
 					}

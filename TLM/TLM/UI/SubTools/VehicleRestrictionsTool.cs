@@ -34,12 +34,12 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RefreshCurrentRestrictedSegmentIds() {
 			currentRestrictedSegmentIds.Clear();
-			for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+			for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 					continue;
 
-				if (VehicleRestrictionsManager.Instance().HasSegmentRestrictions(segmentId))
-					currentRestrictedSegmentIds.Add(segmentId);
+				if (VehicleRestrictionsManager.Instance().HasSegmentRestrictions((ushort)segmentId))
+					currentRestrictedSegmentIds.Add((ushort)segmentId);
 			}
 		}
 

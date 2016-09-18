@@ -45,6 +45,7 @@ namespace TrafficManager.State {
 #endif
 		private static UICheckBox showLanesToggle = null;
 		private static UIButton forgetTrafficLightsBtn = null;
+		private static UIButton resetStuckEntitiesBtn = null;
 
 		private static UICheckBox enablePrioritySignsToggle = null;
 		private static UICheckBox enableTimedLightsToggle = null;
@@ -82,6 +83,9 @@ namespace TrafficManager.State {
 		private static UITextField someValue17Field = null;
 		private static UITextField someValue18Field = null;
 		private static UITextField someValue19Field = null;
+		private static UITextField someValue20Field = null;
+		private static UITextField someValue21Field = null;
+		private static UITextField someValue22Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -120,32 +124,35 @@ namespace TrafficManager.State {
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
 		public static float pathCostMultiplicator = 0f; // debug value
-		public static float pathCostMultiplicator2 = 0.2f; // debug value
+		public static float pathCostMultiplicator2 = 0.3f; // debug value
 		public static bool disableSomething1 = false; // debug switch (enable path-finding debugging)
 		public static bool disableSomething2 = false; // debug switch
 		public static bool disableSomething3 = false; // debug switch
 		public static bool disableSomething4 = false; // debug switch
 		public static bool disableSomething5 = false; // debug switch
 		public static bool disableSomething6 = false; // debug switch
-		public static float someValue = 1f; // debug value (base lane changing cost factor on highways)
+		public static float someValue = 2f; // debug value (base lane changing cost factor on highways)
 		public static float someValue2 = 1.25f; // debug value (heavy vehicle lane changing cost factor)
 		public static float someValue3 = 1.5f; // debug value (lane changing cost base before junctions)
 		public static float someValue4 = 2f; // debug value (artifical lane distance for u-turns)
-		public static float someValue5 = 0.75f; // debug value (base lane changing cost factor on city streets)
+		public static float someValue5 = 0.5f; // debug value (base lane changing cost factor on city streets)
 		public static float someValue6 = 1.5f; // debug value (penalty for busses not driving on bus lanes) 
 		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
-		public static float someValue8 = 2f; // debug value (lane density extinction denominator)
-		public static float someValue9 = 1; // debug value --unused--
+		public static float someValue8 = 2f; // debug value (lane density extinction substrahend)
+		public static float someValue9 = 0f; // debug value (lane density positive update smoothing)
 		public static float someValue10 = 15f; // debug value (maximum incoming vehicle distance to junction for priority signs)
 		public static float someValue11 = 2.5f; // debug value (> 1 lane changing cost factor)
-		public static float someValue12 = 0.8f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
+		public static float someValue12 = 0.7f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
 		public static float someValue13 = 0.5f; // debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
 		public static float someValue14 = 1f; // debug value (cost factor for leaving main highway)
 		public static float someValue15 = 10f; // debug value (maximum junction approach time for priority signs)
-		public static float someValue16 = 1000f; // debug value (lane changing cost reduction modulo)
-		public static float someValue17 = 99f; // debug value (lane speed negative update smoothing)
+		public static float someValue16 = 250f; // debug value (lane changing cost reduction modulo)
+		public static float someValue17 = 24f; // debug value (lane speed negative update smoothing)
 		public static float someValue18 = 2.5f; // debug value (congestion lane changing base cost)
-		public static float someValue19 = 199f; // debug value (lane speed positive update smoothing)
+		public static float someValue19 = 49f; // debug value (lane speed positive update smoothing)
+		public static float someValue20 = 3000f; // debug value (lower congestion threshold (per ten-thousands))
+		public static float someValue21 = 5000f; // debug value (upper congestion threshold (per ten-thousands))
+		public static float someValue22 = 2f; // debug value (lane density negative update smoothing)
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -213,6 +220,7 @@ namespace TrafficManager.State {
 #endif
 			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
 			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
+			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
 #if DEBUG
 			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 			disableSomething1Toggle = maintenanceGroup.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
@@ -242,6 +250,9 @@ namespace TrafficManager.State {
 			someValue17Field = maintenanceGroup.AddTextfield("Some value #17", String.Format("{0:0.##}", someValue17), onSomeValue17Changed) as UITextField;
 			someValue18Field = maintenanceGroup.AddTextfield("Some value #18", String.Format("{0:0.##}", someValue18), onSomeValue18Changed) as UITextField;
 			someValue19Field = maintenanceGroup.AddTextfield("Some value #19", String.Format("{0:0.##}", someValue19), onSomeValue19Changed) as UITextField;
+			someValue20Field = maintenanceGroup.AddTextfield("Some value #20", String.Format("{0:0.##}", someValue20), onSomeValue20Changed) as UITextField;
+			someValue21Field = maintenanceGroup.AddTextfield("Some value #21", String.Format("{0:0.##}", someValue21), onSomeValue21Changed) as UITextField;
+			someValue22Field = maintenanceGroup.AddTextfield("Some value #22", String.Format("{0:0.##}", someValue22), onSomeValue22Changed) as UITextField;
 #endif
 		}
 
@@ -878,11 +889,57 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onSomeValue20Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue20 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue21Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue21 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
+		private static void onSomeValue22Changed(string newSomeValueStr) {
+			if (!checkGameLoaded())
+				return;
+
+			try {
+				float newSomeValue = Single.Parse(newSomeValueStr);
+				someValue22 = newSomeValue;
+			} catch (Exception e) {
+				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
+				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
+			}
+		}
+
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
 				return;
 
 			Flags.resetTrafficLights(false);
+		}
+
+		private static void onClickResetStuckEntities() {
+			if (!checkGameLoaded())
+				return;
+
+			UtilityManager.Instance().RequestResetStuckEntities();
 		}
 
 		private static void onClickResetSpeedLimits() {

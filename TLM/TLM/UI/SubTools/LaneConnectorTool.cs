@@ -285,14 +285,14 @@ namespace TrafficManager.UI.SubTools {
 		private void RefreshCurrentNodeMarkers() {
 			currentNodeMarkers.Clear();
 
-			for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
 
-				List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(nodeId);
+				List<NodeLaneMarker> nodeMarkers = GetNodeMarkers((ushort)nodeId);
 				if (nodeMarkers == null)
 					continue;
-				currentNodeMarkers[nodeId] = nodeMarkers;
+				currentNodeMarkers[(ushort)nodeId] = nodeMarkers;
 			}
 		}
 

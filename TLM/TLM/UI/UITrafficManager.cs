@@ -1,4 +1,4 @@
-#define QUEUEDSTATS
+#define QUEUEDSTATSx
 #define EXTRAPFx
 
 using System;
@@ -43,6 +43,7 @@ namespace TrafficManager.UI {
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _togglePathFindStatsButton = null;
+		private static UIButton _removeStuckEntitiesButton = null;
 #endif
 
 		public static TrafficManagerTool TrafficLightTool;
@@ -157,6 +158,9 @@ namespace TrafficManager.UI {
 			_togglePathFindStatsButton = _createButton("Toggle PathFind stats", y, clickTogglePathFindStats);
 			y += 40;
 			height += 40;
+			_removeStuckEntitiesButton = _createButton("Remove stuck entities", y, clickRemoveStuckEntities);
+			y += 40;
+			height += 40;
 #endif
 		}
 
@@ -260,6 +264,12 @@ namespace TrafficManager.UI {
 
 		private void clickTogglePathFindStats(UIComponent component, UIMouseEventParameter eventParam) {
 			showPathFindStats = !showPathFindStats;
+		}
+
+		private void clickRemoveStuckEntities(UIComponent component, UIMouseEventParameter eventParam) {
+			TrafficManagerTool.SetToolMode(ToolMode.None);
+
+			UtilityManager.Instance().RequestResetStuckEntities();
 		}
 
 		private void clickVehicleToNone(UIComponent component, UIMouseEventParameter eventParam) {

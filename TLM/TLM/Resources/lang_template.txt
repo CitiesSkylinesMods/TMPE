@@ -127,3 +127,4 @@ Use_more_CPU_cores_for_route_calculation_if_available
 Activated_features
 Junction_restrictions
 Prohibit_spawning_of_pocket_cars
+Reset_stuck_cims_and_vehicles

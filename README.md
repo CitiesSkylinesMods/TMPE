@@ -4,7 +4,14 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
-1.7.12, 09/05/2016
+1.7.13, 09/15/2016
+- Implemented a permanent fix to solve problems with stuck vehicles/cims caused by third party mods
+- Added a button to reset stuck vehicles/cims (see mod settings menu)
+- AI: Improved lane selection algorithm
+- Bugfix: AI: Lane merging was not working as expected
+- Bugfix: Pedestrian light states were sometimes not being stored correctly (thanks to Filip for pointing out this problem)
+
+1.7.12, 09/09/2016
 - AI: Lane changes are reduced on congested road segments
 - Timed traffic lights should now correctly detect trains and trams
 - Bugfix: GUI: Junction restriction icons sometimes disappear
@@ -478,7 +485,8 @@ User manual: http://www.viathinksoft.de/tmpe
 - Add/Remove traffic lights
 - Adaptive timed traffic lights
 - Add priority signs
-- Change lanes
+- Change lane arrows
+- Connect individual lanes with each other
 - Add/Remove crosswalks
 - Manually control traffic lights
 - Timed traffic lights
