@@ -14,6 +14,36 @@ using TrafficManager.Manager;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {
+		public enum ArrivalMode {
+			None,
+			/// <summary>
+			/// Indicates that parking failed
+			/// </summary>
+			ParkingFailed,
+			/// <summary>
+			/// Indicates that a path to an alternative parking position is currently being calculated
+			/// </summary>
+			CalculatingPathToAltParkPos,
+			/// <summary>
+			/// Indicates that the vehicle is on a path to an alternative parking position
+			/// </summary>
+			OnPathToAltParkPos,
+			/// <summary>
+			/// Indicates that the vehicle is being parked on an alternative parking position
+			/// </summary>
+			AltParkSucceeded,
+			/// <summary>
+			/// Indicates that no alternative parking position could be found
+			/// </summary>
+			AltParkFailed,
+		}
+
+		public enum ParkingSpaceLocation {
+			None,
+			RoadSide,
+			Building
+		}
+
 #if DEBUGVSTATE
 		private static readonly ushort debugVehicleId = 6316;
 #endif
@@ -54,15 +84,40 @@ namespace TrafficManager.Traffic {
 				}
 				return valid;
 			}
-			set { valid = value; }
+			internal set { valid = value; }
 		}
-		public bool Emergency;
+		public bool Emergency {
+			get; internal set;
+		}
+
+		public ArrivalMode CurrentArrivalMode {
+			get; internal set;
+		}
+
+		public int FailedParkingAttempts {
+			get; internal set;
+		}
+
+		public ushort AltParkingSpaceLocationId {
+			get; internal set;
+		}
+
+		public ParkingSpaceLocation AltParkingSpaceLocation {
+			get; internal set;
+		}
+
 #if PATHRECALC
 		public uint LastPathRecalculation = 0;
 		public ushort LastPathRecalculationSegmentId = 0;
 		public bool PathRecalculationRequested { get; internal set; } = false;
 #endif
-		public ExtVehicleType VehicleType;
+		public ExtVehicleType VehicleType {
+			get; internal set;
+		}
+
+		public bool HeavyVehicle {
+			get; internal set;
+		}
 
 #if PATHFORECAST
 		private LinkedList<VehiclePosition> VehiclePositions; // the last element holds the current position
@@ -96,10 +151,14 @@ namespace TrafficManager.Traffic {
 		public VehicleState(ushort vehicleId) {
 			this.VehicleId = vehicleId;
 			VehicleType = ExtVehicleType.None;
+			CurrentArrivalMode = ArrivalMode.None;
+			FailedParkingAttempts = 0;
+			AltParkingSpaceLocation = ParkingSpaceLocation.None;
+			AltParkingSpaceLocationId = 0;
 			Reset(false);
 		}
 
-		private void Reset(bool unlink=true) {
+		private void Reset(bool unlink=true) { // TODO this is called in wrong places!
 			if (unlink)
 				Unlink();
 
@@ -109,6 +168,8 @@ namespace TrafficManager.Traffic {
 			WaitTime = 0;
 			JunctionTransitState = VehicleJunctionTransitState.None;
 			LastStateUpdate = 0;
+			//CurrentArrivalMode = ArrivalMode.None; // debug, remove this!
+			FailedParkingAttempts = 0; // debug, remove this!
 		}
 
 		internal void Unlink() {

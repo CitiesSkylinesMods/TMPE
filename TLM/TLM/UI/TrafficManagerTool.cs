@@ -447,18 +447,18 @@ namespace TrafficManager.UI {
 			_counterStyle.normal.textColor = new Color(1f, 1f, 0f);
 
 			uint totalDensity = 0u;
-			uint curLaneId = segment.m_lanes;
+			//uint curLaneId = segment.m_lanes;
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
-				if (curLaneId == 0)
-					break;
+				/*if (curLaneId == 0)
+					break;*/
 
 				if (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length)
 					totalDensity += CustomRoadAI.currentLaneDensities[segmentId][i];
 
-				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+				//curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
 
-			curLaneId = segment.m_lanes;
+			uint curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
 				if (curLaneId == 0)
@@ -474,12 +474,13 @@ namespace TrafficManager.UI {
 					labelStr += ", in start-up phase";
 				else*/
 					labelStr += ", avg. speed: " + (CustomRoadAI.laneMeanSpeeds[segmentId] != null && i < CustomRoadAI.laneMeanSpeeds[segmentId].Length ? ""+CustomRoadAI.laneMeanSpeeds[segmentId][i] : "?") + " ";
-				//labelStr += ", rel. dens.: " + (CustomRoadAI.laneMeanRelDensities[segmentId] != null && i < CustomRoadAI.laneMeanRelDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanRelDensities[segmentId][i] : "?") + " %";
+				labelStr += ", rel. dens.: " + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length && totalDensity > 0 ? "" + Math.Min(CustomRoadAI.currentLaneDensities[segmentId][i] * 100 / totalDensity, 100) : "?") + " %";
 #if DEBUG
-				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
+				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
+				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 #endif
 #if ABSDENSITY
-				labelStr += ", abs. dens.: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
+				//labelStr += ", abs. dens.: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
 #endif
 				labelStr += "\n";
 
@@ -636,7 +637,7 @@ namespace TrafficManager.UI {
 				if (vehicle.m_flags == 0) // node is unused
 					continue;
 
-				Vector3 vehPos = vehicle.GetLastFramePosition();
+				Vector3 vehPos = vehicle.GetSmoothPosition((ushort)i);
 				var screenPos = Camera.main.WorldToScreenPoint(vehPos);
 				screenPos.y = Screen.height - screenPos.y;
 
@@ -681,7 +682,7 @@ namespace TrafficManager.UI {
 					else
 						timeToTransitNode = Single.PositiveInfinity;*/
 				}
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ") dist: " + distanceToTransitNode;
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")\na: " + vState.CurrentArrivalMode.ToString() + " f: " + vState.FailedParkingAttempts + " l: " + vState.AltParkingSpaceLocation + " lid: " + vState.AltParkingSpaceLocationId;
 #if USEPATHWAITCOUNTER
 				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
 #endif
@@ -708,7 +709,7 @@ namespace TrafficManager.UI {
 				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
 					continue;
 
-				Vector3 pos = citizenInstance.GetLastFramePosition();
+				Vector3 pos = citizenInstance.GetSmoothPosition((ushort)i);
 				var screenPos = Camera.main.WorldToScreenPoint(pos);
 				screenPos.y = Screen.height - screenPos.y;
 
@@ -726,7 +727,9 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				String labelStr = "Cit. " + i + ", transport: " + CustomCitizenAI.currentTransportMode[i];
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance((ushort)i);
+
+				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", d: " + extInstance.CurrentDepartureMode;
 				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -735,7 +738,7 @@ namespace TrafficManager.UI {
 			}
 		}
 		
-		internal static List<object[]> GetSortedVehicleLanes(ushort segmentId, NetInfo info, ushort? nodeId) { // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
+		internal static List<object[]> GetSortedVehicleLanes(ushort segmentId, NetInfo info, ushort? nodeId, VehicleInfo.VehicleType vehicleTypeFilter) { // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
 			var laneList = new List<object[]>();
 
 			NetInfo.Direction? dir = null;
@@ -751,7 +754,7 @@ namespace TrafficManager.UI {
 			uint laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
 				if ((info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
-					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None &&
+					(info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None &&
 					(dir2 == null || info.m_lanes[laneIndex].m_finalDirection == dir2)) {
 					laneList.Add(new object[] { curLaneId, info.m_lanes[laneIndex].m_position, laneIndex });
 				}
@@ -765,9 +768,6 @@ namespace TrafficManager.UI {
 				if ((float)x[1] == (float)y[1])
 					return 0;
 
-				//if ((dir2 == NetInfo.Direction.Forward && (float)y[1] < (float)x[1]) || (dir2 == NetInfo.Direction.Backward && (float)x[1] < (float)y[1])) {
-				// return 1;
-				// }
 				if ((dir2 == NetInfo.Direction.Forward) ^ (float)x[1] < (float)y[1]) {
 					return 1;
 				}
@@ -780,7 +780,7 @@ namespace TrafficManager.UI {
 			return base.GetToolColor(warning, error);
 		}
 
-		internal static int GetSegmentNumVehicleLanes(ushort segmentId, ushort? nodeId, out int numDirections) {
+		internal static int GetSegmentNumVehicleLanes(ushort segmentId, ushort? nodeId, out int numDirections, VehicleInfo.VehicleType vehicleTypeFilter) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 			var num2 = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
@@ -802,7 +802,7 @@ namespace TrafficManager.UI {
 
 			while (laneIndex < info.m_lanes.Length && num2 != 0u) {
 				if (((info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
-					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None) &&
+					(info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None) &&
 					(dir3 == null || info.m_lanes[laneIndex].m_direction == dir3)) {
 
 					if (!directions.Contains(info.m_lanes[laneIndex].m_direction)) {

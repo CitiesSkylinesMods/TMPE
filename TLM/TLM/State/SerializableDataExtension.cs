@@ -86,6 +86,14 @@ namespace TrafficManager.State {
 				loadingSucceeded = false;
 			}
 
+			try {
+				Log.Info("Initializing SpeedLimitManager");
+				SpeedLimitManager.Instance().OnBeforeLoadData();
+			} catch (Exception e) {
+				Log.Error($"OnLoadData: Error while initializing SpeedLimitManager: {e.ToString()}");
+				loadingSucceeded = false;
+			}
+
 			Log.Info("Initialization done. Loading mod data now.");
 
 			try {
@@ -526,6 +534,23 @@ namespace TrafficManager.State {
 				Log.Warning("Lane connection data structure undefined!");
 			}
 
+			// Load custom default speed limits
+			SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+			if (_configuration.CustomDefaultSpeedLimits != null) {
+				Log.Info($"Loading custom default speed limit data. {_configuration.CustomDefaultSpeedLimits.Count} elements");
+				foreach (KeyValuePair<string, float> e in _configuration.CustomDefaultSpeedLimits) {
+					if (!speedLimitManager.NetInfoByName.ContainsKey(e.Key))
+						continue;
+
+					ushort customSpeedLimit = speedLimitManager.LaneToCustomSpeedLimit(e.Value, true);
+					int customSpeedLimitIndex = speedLimitManager.AvailableSpeedLimits.IndexOf(customSpeedLimit);
+					if (customSpeedLimitIndex >= 0) {
+						NetInfo info = speedLimitManager.NetInfoByName[e.Key];
+						speedLimitManager.SetCustomNetInfoSpeedLimitIndex(info, customSpeedLimitIndex);
+					}
+				}
+			}
+
 			// load speed limits
 			if (_configuration.LaneSpeedLimits != null) {
 				Log.Info($"Loading lane speed limit data. {_configuration.LaneSpeedLimits.Count} elements");
@@ -533,8 +558,13 @@ namespace TrafficManager.State {
 					try {
 						if (!NetUtil.IsLaneValid(laneSpeedLimit.laneId))
 							continue;
-						Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
-						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+						NetInfo info = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_lanes.m_buffer[laneSpeedLimit.laneId].m_segment].Info;
+						int customSpeedLimitIndex = speedLimitManager.GetCustomNetInfoSpeedLimitIndex(info);
+						if (customSpeedLimitIndex < 0 || speedLimitManager.AvailableSpeedLimits[customSpeedLimitIndex] != laneSpeedLimit.speedLimit) {
+							// lane speed limit differs from default speed limit
+							Log._Debug($"Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+							Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+						}
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading speed limits: " + e.ToString());
@@ -671,6 +701,15 @@ namespace TrafficManager.State {
 					}
 				}
 
+				foreach (KeyValuePair<string, int> e in SpeedLimitManager.Instance().CustomLaneSpeedLimitIndexByNetInfoName) {
+					try {
+						SaveCustomDefaultSpeedLimit(e.Key, e.Value, configuration);
+					} catch (Exception ex) {
+						Log.Error($"Exception occurred while saving custom default speed limits @ {e.Key}: {ex.ToString()}");
+						error = true;
+					}
+				}
+
 				var binaryFormatter = new BinaryFormatter();
 				var memoryStream = new MemoryStream();
 
@@ -724,6 +763,18 @@ namespace TrafficManager.State {
 				error = true;
 				Log.Error($"Error occurred while saving data: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("An error occurred while saving", "Traffic Manager: President Edition detected an error while saving. To help preventing future errors, please navigate to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow the steps under 'In case problems arise'.", true);
+			}
+		}
+
+		private void SaveCustomDefaultSpeedLimit(string infoName, int customSpeedLimitIndex, Configuration configuration) {
+			try {
+				SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+				ushort customSpeedLimit = speedLimitManager.AvailableSpeedLimits[customSpeedLimitIndex];
+				float gameSpeedLimit = speedLimitManager.ToGameSpeedLimit(customSpeedLimit);
+
+				configuration.CustomDefaultSpeedLimits.Add(infoName, gameSpeedLimit);
+			} catch (Exception e) {
+				Log.Error($"Error occurred while saving custom default speed limit: {e.ToString()}");
 			}
 		}
 

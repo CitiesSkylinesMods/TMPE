@@ -145,6 +145,8 @@ namespace TrafficManager.Manager {
 #endif
 			VehicleState state = _GetVehicleState(vehicleId);
 			state.VehicleType = ExtVehicleType.None;
+			state.CurrentArrivalMode = VehicleState.ArrivalMode.None;
+			state.FailedParkingAttempts = 0;
 #if USEPATHWAITCOUNTER
 			state.PathWaitCounter = 0;
 #endif
@@ -205,7 +207,16 @@ namespace TrafficManager.Manager {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleTypeFromAIType");
 #endif
-			VehicleStates[vehicleId].VehicleType = ret != null ? (ExtVehicleType)ret : ExtVehicleType.None;
+
+			if (ret != null) {
+				VehicleStates[vehicleId].VehicleType = (ExtVehicleType)ret;
+				if ((ExtVehicleType)ret == ExtVehicleType.CargoTruck) {
+					VehicleStates[vehicleId].HeavyVehicle = ((CargoTruckAI)ai).m_isHeavyVehicle;
+				}
+			} else {
+				VehicleStates[vehicleId].VehicleType = ExtVehicleType.None;
+				VehicleStates[vehicleId].HeavyVehicle = false;
+			}
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
 #endif

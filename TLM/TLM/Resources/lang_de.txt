@@ -128,3 +128,4 @@ Activated_features Aktivierte Features
 Junction_restrictions Kreuzungsbeschränkungen
 Prohibit_spawning_of_pocket_cars Verbiete Cims das Spawnen von Autos "aus der Tasche heraus"
 Reset_stuck_cims_and_vehicles Setze steckengebliebene Cims und Fahrzeuge zurück
+Default_speed_limits Standard-Geschwindigkeitsbeschränkungen

@@ -138,6 +138,11 @@ namespace TrafficManager {
 		/// </summary>
 		public List<SegmentNodeConf> SegmentNodeConfs = new List<SegmentNodeConf>();
 
+		/// <summary>
+		/// Custom default speed limits (in game speed units)
+		/// </summary>
+		public Dictionary<string, float> CustomDefaultSpeedLimits = new Dictionary<string, float>();
+
 		public List<int[]> PrioritySegments = new List<int[]>(); // TODO rework
 		public List<int[]> NodeDictionary = new List<int[]>(); // TODO rework
 		public List<int[]> ManualSegments = new List<int[]>(); // TODO rework

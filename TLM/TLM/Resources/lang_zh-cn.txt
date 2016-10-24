@@ -128,3 +128,4 @@ Activated_features 激活功能
 Junction_restrictions 路口管制
 Prohibit_spawning_of_pocket_cars 禁止口袋胶囊汽车生产(测试版功能)
 Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
+Default_speed_limits Default speed limits

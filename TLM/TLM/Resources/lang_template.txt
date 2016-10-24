@@ -128,3 +128,4 @@ Activated_features
 Junction_restrictions
 Prohibit_spawning_of_pocket_cars
 Reset_stuck_cims_and_vehicles
+Default_speed_limits

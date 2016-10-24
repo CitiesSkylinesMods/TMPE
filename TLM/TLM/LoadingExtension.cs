@@ -43,6 +43,10 @@ namespace TrafficManager {
 		public static bool IsRainfallLoaded {
 			get; private set;
 		} = false;
+		public static bool IsRushHourLoaded {
+			get; private set;
+		} = false;
+
 		public CustomPathManager CustomPathManager { get; set; }
         public static bool DetourInited { get; set; }
 		public static List<Detour> Detours { get; set; }
@@ -98,6 +102,357 @@ namespace TrafficManager {
 								null)));
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect CustomVehicleManager::ReleaseVehicleImplementation");
+					detourFailed = true;
+				}
+
+				/*Log.Info("Reverse-Redirection CitizenAI::SimulationStep calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCitizenAI).GetMethod("SimulationStep",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (CitizenInstance.Frame).MakeByRefType(),
+									typeof (bool)
+							},
+							null),
+							typeof(CitizenAI).GetMethod("SimulationStep",
+								BindingFlags.Public | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (CitizenInstance.Frame).MakeByRefType(),
+									typeof (bool)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CitizenAI::SimulationStep");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CitizenAI::InvalidPath calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCitizenAI).GetMethod("InvalidPath",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(CitizenAI).GetMethod("InvalidPath",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CitizenAI::InvalidPath");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CitizenAI::FindPathPosition calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCitizenAI).GetMethod("FindPathPosition",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Vector3),
+									typeof (NetInfo.LaneType),
+									typeof (VehicleInfo.VehicleType),
+									typeof (bool),
+									typeof (PathUnit.Position).MakeByRefType()
+							},
+							null),
+							typeof(CitizenAI).GetMethod("FindPathPosition",
+								BindingFlags.Public | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Vector3),
+									typeof (NetInfo.LaneType),
+									typeof (VehicleInfo.VehicleType),
+									typeof (bool),
+									typeof (PathUnit.Position).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CitizenAI::FindPathPosition");
+					detourFailed = true;
+				}*/
+
+				Log.Info("Reverse-Redirection HumanAI::ArriveAtDestination calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("ArriveAtDestination",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (bool)
+							},
+							null),
+							typeof(HumanAI).GetMethod("ArriveAtDestination",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (bool)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::ArriveAtDestination");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::PathfindFailure calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("PathfindFailure",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(HumanAI).GetMethod("PathfindFailure",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::PathfindFailure");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::PathfindSuccess calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("PathfindSuccess",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(HumanAI).GetMethod("PathfindSuccess",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::PathfindSuccess");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::Spawn calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("Spawn",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(HumanAI).GetMethod("Spawn",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::ArriveAtDestination");
+					detourFailed = true;
+				}
+
+				/*Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpaceBuilding calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Building).MakeByRefType(),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+							},
+							null),
+							typeof(PassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Building).MakeByRefType(),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect PassengerCarAI::FindParkingSpaceBuilding");
+					detourFailed = true;
+				}*/
+
+				Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpaceRoadSide calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceRoadSide",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType(),
+									typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(PassengerCarAI).GetMethod("FindParkingSpaceRoadSide",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType(),
+									typeof (float).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect PassengerCarAI::FindParkingSpaceRoadSide");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpace calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpace",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType(),
+									typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(PassengerCarAI).GetMethod("FindParkingSpace",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType(),
+									typeof (float).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect PassengerCarAI::FindParkingSpace");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpaceProp calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceProp",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (PropInfo),
+									typeof (Vector3),
+									typeof (float),
+									typeof (bool),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+							},
+							null),
+							typeof(PassengerCarAI).GetMethod("FindParkingSpaceProp",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (PropInfo),
+									typeof (Vector3),
+									typeof (float),
+									typeof (bool),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect PassengerCarAI::FindParkingSpaceProp");
 					detourFailed = true;
 				}
 
@@ -451,6 +806,24 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				/*Log.Info("Redirection CarAI::InvalidPath calls");
+				try {
+					Detours.Add(new Detour(typeof(CarAI).GetMethod("InvalidPath",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType()
+							},
+							null), typeof(CustomCarAI).GetMethod("InvalidPath")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::InvalidPath");
+					detourFailed = true;
+				}*/
+
 				Log.Info("Redirecting CarAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(CarAI).GetMethod("SimulationStep",
@@ -465,6 +838,65 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirecting HumanAI Simulation Step Calls");
+				try {
+					Detours.Add(new Detour(typeof(HumanAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Vector3)
+								}),
+								typeof(CustomHumanAI).GetMethod("CustomSimulationStep")));
+				} catch (Exception) {
+					Log.Error("Could not redirect HumanAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				/*Log.Info("Redirecting TouristAI Simulation Step Calls");
+				try {
+					Detours.Add(new Detour(typeof(TouristAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Vector3)
+								}),
+								typeof(CustomTouristAI).GetMethod("CustomSimulationStep")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TouristAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting ResidentAI Simulation Step Calls");
+				try {
+					Detours.Add(new Detour(typeof(ResidentAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Vector3)
+								}),
+								typeof(CustomResidentAI).GetMethod("CustomSimulationStep")));
+				} catch (Exception) {
+					Log.Error("Could not redirect ResidentAI::SimulationStep.");
+					detourFailed = true;
+				}*/
+
+				Log.Info("Redirection ResidentAI::GetVehicleInfo calls");
+				try {
+					Detours.Add(new Detour(typeof(ResidentAI).GetMethod("GetVehicleInfo",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (bool)
+							},
+							null), typeof(CustomResidentAI).GetMethod("CustomGetVehicleInfo")));
+				} catch (Exception) {
+					Log.Error("Could not redirect ResidentAI::GetVehicleInfo");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirecting PassengerCarAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("SimulationStep",
@@ -472,6 +904,26 @@ namespace TrafficManager {
 							typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep")));
 				} catch (Exception) {
 					Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection PassengerCarAI::ParkVehicle calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("ParkVehicle",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (int),
+								typeof (byte).MakeByRefType()
+							},
+							null), typeof(CustomPassengerCarAI).GetMethod("ParkVehicle")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::ParkVehicle");
 					detourFailed = true;
 				}
 
@@ -788,7 +1240,44 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log.Info("Redirection PassengerCarAI::StartPathFind calls");
+					/*Log.Info("Redirection PassengerCarAI::FindParkingSpaceBuilding calls");
+					try {
+						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Building).MakeByRefType(),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+								},
+								null),
+								typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+								new[] {
+									typeof (ushort),
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Building).MakeByRefType(),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float).MakeByRefType(),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+								})));
+					} catch (Exception) {
+						Log.Error("Could not redirect PassengerCarAI::FindParkingSpaceBuilding");
+						detourFailed = true;
+					}*/
+
+					Log.Info("Redirection PassengerCarAI::StartPathFind(1) calls");
 					try {
 						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -804,9 +1293,39 @@ namespace TrafficManager {
 									typeof (bool)
 								},
 								null),
-								typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind")));
+								typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (bool),
+									typeof (bool),
+									typeof (bool)
+								})));
 					} catch (Exception) {
-						Log.Error("Could not redirect PassengerCarAI::StartPathFind");
+						Log.Error("Could not redirect PassengerCarAI::StartPathFind(1)");
+						detourFailed = true;
+					}
+
+					Log.Info("Redirection PassengerCarAI::StartPathFind(2) calls");
+					try {
+						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+								},
+								null),
+								typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+								})));
+					} catch (Exception) {
+						Log.Error("Could not redirect PassengerCarAI::StartPathFind(2)");
 						detourFailed = true;
 					}
 
@@ -1178,9 +1697,7 @@ namespace TrafficManager {
 #if !TAM
 			determinePathManagerCompatible();
 			IsRainfallLoaded = CheckRainfallIsLoaded();
-#if DEBUG
-			SpeedLimitManager.Instance().GetDefaultSpeedLimits();
-#endif
+			IsRushHourLoaded = CheckRushHourIsLoaded();
 
 			if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
 				try {
@@ -1230,6 +1747,10 @@ namespace TrafficManager {
 			UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
 
 			initDetours();
+
+			Log.Info("Calling OnLevelLoaded.");
+			CustomPassengerCarAI.OnLevelLoaded();
+
 			Log.Info("OnLevelLoaded complete.");
 #endif
 		}
@@ -1278,7 +1799,15 @@ namespace TrafficManager {
 #endif
 
 		private bool CheckRainfallIsLoaded() {
-			bool rainfall = false;
+			return Check3rdPartyModLoaded("Rainfall");
+		}
+
+		private bool CheckRushHourIsLoaded() {
+			return Check3rdPartyModLoaded("RushHour");
+		}
+
+		private bool Check3rdPartyModLoaded(string namespaceStr) {
+			bool thirPartyModLoaded = false;
 
 			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
 			List<ILoadingExtension> loadingExtensions = null;
@@ -1293,10 +1822,10 @@ namespace TrafficManager {
 					if (extension.GetType().Namespace == null)
 						continue;
 
-					var namespaceStr = extension.GetType().Namespace.ToString();
-					if ("Rainfall".Equals(namespaceStr)) {
-						Log.Info("The mod Rainfall has been detected.");
-						rainfall = true;
+					var nsStr = extension.GetType().Namespace.ToString();
+					if (namespaceStr.Equals(nsStr)) {
+						Log.Info($"The mod '{namespaceStr}' has been detected.");
+						thirPartyModLoaded = true;
 						break;
 					}
 				}
@@ -1304,7 +1833,7 @@ namespace TrafficManager {
 				Log._Debug("Could not get loading extensions");
 			}
 
-			return rainfall;
+			return thirPartyModLoaded;
 		}
 
 		public void SetToolMode(TrafficManagerMode mode) {

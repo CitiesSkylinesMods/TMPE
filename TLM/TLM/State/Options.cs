@@ -56,36 +56,10 @@ namespace TrafficManager.State {
 
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
-		private static UICheckBox disableSomething6Toggle = null;
-		private static UICheckBox disableSomething5Toggle = null;
-		private static UICheckBox disableSomething4Toggle = null;
-		private static UICheckBox disableSomething3Toggle = null;
-		private static UICheckBox disableSomething2Toggle = null;
-		private static UICheckBox disableSomething1Toggle = null;
+		private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
+		private static List<UITextField> debugValueFields = new List<UITextField>();
 		private static UITextField pathCostMultiplicatorField = null;
 		private static UITextField pathCostMultiplicator2Field = null;
-		private static UITextField someValueField = null;
-		private static UITextField someValue2Field = null;
-		private static UITextField someValue3Field = null;
-		private static UITextField someValue4Field = null;
-		private static UITextField someValue5Field = null;
-		private static UITextField someValue6Field = null;
-		private static UITextField someValue7Field = null;
-		private static UITextField someValue8Field = null;
-		private static UITextField someValue9Field = null;
-		private static UITextField someValue10Field = null;
-		private static UITextField someValue11Field = null;
-		private static UITextField someValue12Field = null;
-		private static UITextField someValue13Field = null;
-		private static UITextField someValue14Field = null;
-		private static UITextField someValue15Field = null;
-		private static UITextField someValue16Field = null;
-		private static UITextField someValue17Field = null;
-		private static UITextField someValue18Field = null;
-		private static UITextField someValue19Field = null;
-		private static UITextField someValue20Field = null;
-		private static UITextField someValue21Field = null;
-		private static UITextField someValue22Field = null;
 #endif
 
 		private static UIHelperBase mainGroup = null;
@@ -105,8 +79,13 @@ namespace TrafficManager.State {
 		public static bool vehicleRestrictionsOverlay = false;
 		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
+#if DEBUG
+		public static bool nodesOverlay = true;
+		public static bool vehicleOverlay = true;
+#else
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
+#endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
@@ -114,7 +93,7 @@ namespace TrafficManager.State {
 		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 #if DEBUG
-		public static bool showLanes = true;
+		public static bool showLanes = false;
 #else
 		public static bool showLanes = false;
 #endif
@@ -122,37 +101,47 @@ namespace TrafficManager.State {
 		public static bool prohibitPocketCars = false;
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
+		public static bool realisticTransport = true;
 		//public static byte publicTransportUsage = 1;
-		public static float pathCostMultiplicator = 0f; // debug value
-		public static float pathCostMultiplicator2 = 0.3f; // debug value
-		public static bool disableSomething1 = false; // debug switch (enable path-finding debugging)
-		public static bool disableSomething2 = false; // debug switch
-		public static bool disableSomething3 = false; // debug switch
-		public static bool disableSomething4 = false; // debug switch
-		public static bool disableSomething5 = false; // debug switch
-		public static bool disableSomething6 = false; // debug switch
-		public static float someValue = 2f; // debug value (base lane changing cost factor on highways)
-		public static float someValue2 = 1.25f; // debug value (heavy vehicle lane changing cost factor)
-		public static float someValue3 = 1.5f; // debug value (lane changing cost base before junctions)
-		public static float someValue4 = 2f; // debug value (artifical lane distance for u-turns)
-		public static float someValue5 = 0.5f; // debug value (base lane changing cost factor on city streets)
-		public static float someValue6 = 1.5f; // debug value (penalty for busses not driving on bus lanes) 
-		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
-		public static float someValue8 = 2f; // debug value (lane density extinction substrahend)
-		public static float someValue9 = 0f; // debug value (lane density positive update smoothing)
-		public static float someValue10 = 15f; // debug value (maximum incoming vehicle distance to junction for priority signs)
-		public static float someValue11 = 2.5f; // debug value (> 1 lane changing cost factor)
-		public static float someValue12 = 0.7f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
-		public static float someValue13 = 0.5f; // debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
-		public static float someValue14 = 1f; // debug value (cost factor for leaving main highway)
-		public static float someValue15 = 10f; // debug value (maximum junction approach time for priority signs)
-		public static float someValue16 = 250f; // debug value (lane changing cost reduction modulo)
-		public static float someValue17 = 24f; // debug value (lane speed negative update smoothing)
-		public static float someValue18 = 2.5f; // debug value (congestion lane changing base cost)
-		public static float someValue19 = 49f; // debug value (lane speed positive update smoothing)
-		public static float someValue20 = 3000f; // debug value (lower congestion threshold (per ten-thousands))
-		public static float someValue21 = 5000f; // debug value (upper congestion threshold (per ten-thousands))
-		public static float someValue22 = 2f; // debug value (lane density negative update smoothing)
+
+		public static bool[] debugSwitches = {
+			false,
+			true,
+			true,
+			false,
+			false,
+			false
+		};
+
+		public static float[] debugValues = {
+			0.5f, // 0: debug value (path-finding density weight)
+			0.25f, // 1: debug value (base lane changing cost factor on highways)
+			1.5f, // 2: debug value (heavy vehicle lane changing cost factor)
+			1.5f, // 3: debug value (lane changing cost base before junctions)
+			2f, // 4: debug value (artifical lane distance for u-turns)
+			0.1f, // 5: debug value (base lane changing cost factor on city streets)
+			1.5f, // 6: debug value (penalty for busses not driving on bus lanes) 
+			0.75f, // 7: debug value (reward for public transport staying on transport lane) 
+			2f, // 8: debug value (lane density extinction substrahend)
+			0f, // 9: debug value (lane density positive update smoothing)
+			15f, // 10: debug value (maximum incoming vehicle distance to junction for priority signs)
+			2.5f, // 11: debug value (> 1 lane changing cost factor)
+			0.5f, // 12: debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
+			0.5f, // 13: debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
+			512f, // 14: debug value (parking space search radius; used if pocket car spawning is disabled)
+			10f, // 15: debug value (maximum junction approach time for priority signs)
+			250f, // 16: debug value (lane changing cost reduction modulo)
+			9f, // 17: debug value (lane speed negative update smoothing)
+			2.5f, // 18: debug value (congestion lane changing base cost)
+			19f, // 19: debug value (lane speed positive update smoothing)
+			3000f, // 20: debug value (lower congestion threshold (per ten-thousands))
+			5000f, // 21: debug value (upper congestion threshold (per ten-thousands))
+			2f, // 22: debug value (lane density negative update smoothing)
+			10f, // 23: debug value (lane density random interval)
+			10f, // 24: debug value (lane speed random interval)
+			25f, // 25: maximum penalty for heavy vehicles driving on an inner lane (in %)
+			100f // 26: maximum number of parking attempts for passenger cars
+		};
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -223,36 +212,19 @@ namespace TrafficManager.State {
 			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
 #if DEBUG
 			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
-			disableSomething1Toggle = maintenanceGroup.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
-			disableSomething2Toggle = maintenanceGroup.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
-			disableSomething3Toggle = maintenanceGroup.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
-			disableSomething4Toggle = maintenanceGroup.AddCheckbox("Disable something #4", disableSomething4, onDisableSomething4Changed) as UICheckBox;
-			disableSomething5Toggle = maintenanceGroup.AddCheckbox("Disable something #5", disableSomething5, onDisableSomething5Changed) as UICheckBox;
-			disableSomething6Toggle = maintenanceGroup.AddCheckbox("Disable something #6", disableSomething6, onDisableSomething6Changed) as UICheckBox;
-			pathCostMultiplicatorField = maintenanceGroup.AddTextfield("Pathcost multiplicator (mult)", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
-			pathCostMultiplicator2Field = maintenanceGroup.AddTextfield("Pathcost multiplicator (div)", String.Format("{0:0.##}", pathCostMultiplicator2), onPathCostMultiplicator2Changed) as UITextField;
-			someValueField = maintenanceGroup.AddTextfield("Some value #1", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
-			someValue2Field = maintenanceGroup.AddTextfield("Some value #2", String.Format("{0:0.##}", someValue2), onSomeValue2Changed) as UITextField;
-			someValue3Field = maintenanceGroup.AddTextfield("Some value #3", String.Format("{0:0.##}", someValue3), onSomeValue3Changed) as UITextField;
-			someValue4Field = maintenanceGroup.AddTextfield("Some value #4", String.Format("{0:0.##}", someValue4), onSomeValue4Changed) as UITextField;
-			someValue5Field = maintenanceGroup.AddTextfield("Some value #5", String.Format("{0:0.##}", someValue5), onSomeValue5Changed) as UITextField;
-			someValue6Field = maintenanceGroup.AddTextfield("Some value #6", String.Format("{0:0.##}", someValue6), onSomeValue6Changed) as UITextField;
-			someValue7Field = maintenanceGroup.AddTextfield("Some value #7", String.Format("{0:0.##}", someValue7), onSomeValue7Changed) as UITextField;
-			someValue8Field = maintenanceGroup.AddTextfield("Some value #8", String.Format("{0:0.##}", someValue8), onSomeValue8Changed) as UITextField;
-			someValue9Field = maintenanceGroup.AddTextfield("Some value #9", String.Format("{0:0.##}", someValue9), onSomeValue9Changed) as UITextField;
-			someValue10Field = maintenanceGroup.AddTextfield("Some value #10", String.Format("{0:0.##}", someValue10), onSomeValue10Changed) as UITextField;
-			someValue11Field = maintenanceGroup.AddTextfield("Some value #11", String.Format("{0:0.##}", someValue11), onSomeValue11Changed) as UITextField;
-			someValue12Field = maintenanceGroup.AddTextfield("Some value #12", String.Format("{0:0.##}", someValue12), onSomeValue12Changed) as UITextField;
-			someValue13Field = maintenanceGroup.AddTextfield("Some value #13", String.Format("{0:0.##}", someValue13), onSomeValue13Changed) as UITextField;
-			someValue14Field = maintenanceGroup.AddTextfield("Some value #14", String.Format("{0:0.##}", someValue14), onSomeValue14Changed) as UITextField;
-			someValue15Field = maintenanceGroup.AddTextfield("Some value #15", String.Format("{0:0.##}", someValue15), onSomeValue15Changed) as UITextField;
-			someValue16Field = maintenanceGroup.AddTextfield("Some value #16", String.Format("{0:0.##}", someValue16), onSomeValue16Changed) as UITextField;
-			someValue17Field = maintenanceGroup.AddTextfield("Some value #17", String.Format("{0:0.##}", someValue17), onSomeValue17Changed) as UITextField;
-			someValue18Field = maintenanceGroup.AddTextfield("Some value #18", String.Format("{0:0.##}", someValue18), onSomeValue18Changed) as UITextField;
-			someValue19Field = maintenanceGroup.AddTextfield("Some value #19", String.Format("{0:0.##}", someValue19), onSomeValue19Changed) as UITextField;
-			someValue20Field = maintenanceGroup.AddTextfield("Some value #20", String.Format("{0:0.##}", someValue20), onSomeValue20Changed) as UITextField;
-			someValue21Field = maintenanceGroup.AddTextfield("Some value #21", String.Format("{0:0.##}", someValue21), onSomeValue21Changed) as UITextField;
-			someValue22Field = maintenanceGroup.AddTextfield("Some value #22", String.Format("{0:0.##}", someValue22), onSomeValue22Changed) as UITextField;
+			debugSwitchFields.Clear();
+			for (int i = 0; i < debugSwitches.Length; ++i) {
+				int index = i;
+				string varName = $"Debug switch #{i}";
+				debugSwitchFields.Add(maintenanceGroup.AddCheckbox(varName, debugSwitches[i], delegate (bool newVal) { onBoolValueChanged(varName, newVal, ref debugSwitches[index]); }) as UICheckBox);
+			}
+
+			debugValueFields.Clear();
+			for (int i = 0; i < debugValues.Length; ++i) {
+				int index = i;
+				string varName = $"Debug value #{i}";
+				debugValueFields.Add(maintenanceGroup.AddTextfield(varName, String.Format("{0:0.##}", debugValues[i]), delegate(string newValStr) { onFloatValueChanged(varName, newValStr, ref debugValues[index]); }) as UITextField);
+			}
 #endif
 		}
 
@@ -310,54 +282,6 @@ namespace TrafficManager.State {
 
 			Log._Debug($"connectedLanesOverlay changed to {newValue}");
 			connectedLanesOverlay = newValue;
-		}
-
-		private static void onDisableSomething1Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething1 changed to {newDisableSomething}");
-			disableSomething1 = newDisableSomething;
-		}
-
-		private static void onDisableSomething2Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething2 changed to {newDisableSomething}");
-			disableSomething2 = newDisableSomething;
-		}
-
-		private static void onDisableSomething3Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething3 changed to {newDisableSomething}");
-			disableSomething3 = newDisableSomething;
-		}
-
-		private static void onDisableSomething4Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething4 changed to {newDisableSomething}");
-			disableSomething4 = newDisableSomething;
-		}
-
-		private static void onDisableSomething5Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething5 changed to {newDisableSomething}");
-			disableSomething5 = newDisableSomething;
-		}
-
-		private static void onDisableSomething6Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething6 changed to {newDisableSomething}");
-			disableSomething6 = newDisableSomething;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {
@@ -616,317 +540,28 @@ namespace TrafficManager.State {
 			vehicleOverlay = newVal;
 		}
 
-		private static void onPathCostMultiplicatorChanged(string newPathCostMultiplicatorStr) {
+		private static void onFloatValueChanged(string varName, string newValueStr, ref float var) {
 			if (!checkGameLoaded())
 				return;
 
 			try {
-				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
-				pathCostMultiplicator = newPathCostMultiplicator;
+				float newValue = Single.Parse(newValueStr);
+				var = newValue;
+				Log._Debug($"{varName} changed to {newValue}");
 			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
-                //UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onPathCostMultiplicator2Changed(string newPathCostMultiplicatorStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
-				pathCostMultiplicator2 = newPathCostMultiplicator;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
+				Log.Warning($"An invalid value was inserted: '{newValueStr}'. Error: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
 			}
 		}
 
-		private static void onSomeValueChanged(string newSomeValueStr) {
+		private static void onBoolValueChanged(string varName, bool newVal, ref bool var) {
 			if (!checkGameLoaded())
 				return;
 
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
+			var = newVal;
+			Log._Debug($"{varName} changed to {newVal}");
 		}
 
-		private static void onSomeValue2Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue2 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue3Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue3 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue4Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue4 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue5Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue5 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue6Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue6 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue7Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue7 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue8Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue8 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue9Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue9 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue10Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue10 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue11Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue11 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue12Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue12 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue13Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue13 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue14Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue14 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue15Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue15 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue16Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue16 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue17Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue17 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue18Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue18 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue19Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue19 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue20Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue20 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue21Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue21 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue22Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue22 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
 
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
@@ -966,14 +601,6 @@ namespace TrafficManager.State {
 			if (recklessDriversDropdown != null)
 				recklessDriversDropdown.selectedIndex = newRecklessDrivers;
 		}
-
-#if DEBUG
-		public static void setPathCostMultiplicator(float newPathCostMultiplicator) {
-			pathCostMultiplicator = newPathCostMultiplicator;
-			if (pathCostMultiplicatorField != null)
-				pathCostMultiplicatorField.text = newPathCostMultiplicator.ToString();
-		}
-#endif
 
 		internal static bool isStockLaneChangerUsed() {
 			return !advancedAI;

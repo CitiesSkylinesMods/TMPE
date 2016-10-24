@@ -31,7 +31,16 @@ namespace TrafficManager.UI.SubTools {
 		private float _waitFlowBalance = 0.8f;
 		private string _stepMinValueStr = "1";
 		private string _stepMaxValueStr = "1";
+		private bool timedLightActive = false;
+		private int currentStep = -1;
+		private int numSteps = 0;
+		private bool inTestMode = false;
 		private HashSet<ushort> currentTimedNodeIds;
+
+		private GUIStyle layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
+		private GUIStyle layoutRed = new GUIStyle { normal = { textColor = new Color(1f, 0f, 0f) } };
+		private GUIStyle layoutGreen = new GUIStyle { normal = { textColor = new Color(0f, 1f, 0f) } };
+		private GUIStyle layoutYellow = new GUIStyle { normal = { textColor = new Color(1f, 1f, 0f) } };
 
 		public TimedTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			currentTimedNodeIds = new HashSet<ushort>();
@@ -236,10 +245,6 @@ namespace TrafficManager.UI.SubTools {
 
 		private void _guiTimedControlPanel(int num) {
 			//Log._Debug("guiTimedControlPanel");
-			var layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
-			var layoutRed = new GUIStyle { normal = { textColor = new Color(1f, 0f, 0f) } };
-			var layoutGreen = new GUIStyle { normal = { textColor = new Color(0f, 1f, 0f) } };
-			var layoutYellow = new GUIStyle { normal = { textColor = new Color(1f, 1f, 0f) } };
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
 
@@ -247,10 +252,10 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Label(Translation.GetString("Select_junction"));
 				if (GUILayout.Button(Translation.GetString("Cancel"))) {
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
-				} else {
-					GUI.DragWindow();
-					return;
 				}
+
+				GUI.DragWindow();
+				return;
 			}
 
 			var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeIndexes[0]);
@@ -263,18 +268,25 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
+			if (Event.current.type == EventType.Layout) {
+				timedLightActive = nodeSimulation.IsTimedLightActive();
+				currentStep = timedNodeMain.CurrentStep;
+				inTestMode = timedNodeMain.IsInTestMode();
+				numSteps = timedNodeMain.NumSteps();
+			}
+
 			for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
 				GUILayout.BeginHorizontal();
 
 				if (_timedEditStep != i) {
-					if (nodeSimulation.IsTimedLightActive()) {
-						if (i == timedNodeMain.CurrentStep) {
+					if (timedLightActive) {
+						if (i == currentStep) {
 							GUILayout.BeginVertical();
 							GUILayout.Space(5);
 							String labelStr = Translation.GetString("State") + " " + (i + 1) + ": (" + Translation.GetString("min/max") + ")" + timedNodeMain.GetStep(i).MinTimeRemaining() + "/" + timedNodeMain.GetStep(i).MaxTimeRemaining();
 							float flow = Single.NaN;
 							float wait = Single.NaN;
-							if (timedNodeMain.IsInTestMode()) {
+							if (inTestMode) {
 								try {
 									timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(out wait, out flow);
 								} catch (Exception e) {
@@ -287,7 +299,7 @@ namespace TrafficManager.UI.SubTools {
 							if (!Single.IsNaN(flow) && !Single.IsNaN(wait))
 								labelStr += " " + Translation.GetString("avg._flow") + ": " + String.Format("{0:0.##}", flow) + " " + Translation.GetString("avg._wait") + ": " + String.Format("{0:0.##}", wait);
 							GUIStyle labelLayout = layout;
-							if (timedNodeMain.IsInTestMode() && !Single.IsNaN(wait) && !Single.IsNaN(flow)) {
+							if (inTestMode && !Single.IsNaN(wait) && !Single.IsNaN(flow)) {
 								if (wait > 0 && flow < wait)
 									labelLayout = layoutRed;
 								else
@@ -327,7 +339,7 @@ namespace TrafficManager.UI.SubTools {
 								GUILayout.Space(50);
 							}
 
-							if (i < timedNodeMain.NumSteps() - 1) {
+							if (i < numSteps - 1) {
 								if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(48))) {
 									foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 										sim.TimedLight.MoveStep(i, i + 1);
@@ -424,7 +436,7 @@ namespace TrafficManager.UI.SubTools {
 
 			GUILayout.BeginHorizontal();
 
-			if (_timedEditStep < 0 && !nodeSimulation.IsTimedLightActive()) {
+			if (_timedEditStep < 0 && !timedLightActive) {
 				if (_timedPanelAdd) {
 					nodeSelectionLocked = true;
 					// new step
@@ -480,8 +492,8 @@ namespace TrafficManager.UI.SubTools {
 
 			GUILayout.Space(5);
 
-			if (timedNodeMain.NumSteps() > 1 && _timedEditStep < 0) {
-				if (nodeSimulation.IsTimedLightActive()) {
+			if (numSteps > 1 && _timedEditStep < 0) {
+				if (timedLightActive) {
 					if (GUILayout.Button(_timedShowNumbers ? Translation.GetString("Hide_counters") : Translation.GetString("Show_counters"))) {
 						_timedShowNumbers = !_timedShowNumbers;
 					}
@@ -492,23 +504,23 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 
-					bool isInTestMode = false;
+					/*bool isInTestMode = false;
 					foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 						if (sim.TimedLight.IsInTestMode()) {
 							isInTestMode = true;
 							break;
 						}
-					}
+					}*/
 
 					var curStep = timedNodeMain.CurrentStep;
 					_waitFlowBalance = timedNodeMain.GetStep(curStep).waitFlowBalance;
-					makeFlowPolicyDisplay(isInTestMode);
+					makeFlowPolicyDisplay(inTestMode);
 					foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 						sim.TimedLight.GetStep(curStep).waitFlowBalance = _waitFlowBalance;
 					}
 
 					//var mayEnterIfBlocked = GUILayout.Toggle(timedNodeMain.vehiclesMayEnterBlockedJunctions, Translation.GetString("Vehicles_may_enter_blocked_junctions"), new GUILayoutOption[] { });
-					var testMode = GUILayout.Toggle(timedNodeMain.IsInTestMode(), Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
+					var testMode = GUILayout.Toggle(inTestMode, Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
 					foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 						sim.TimedLight.SetTestMode(testMode);
 						//sim.TimedLight.vehiclesMayEnterBlockedJunctions = mayEnterIfBlocked;
