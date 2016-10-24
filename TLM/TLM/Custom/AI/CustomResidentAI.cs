@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomResidentAI : HumanAI {
-		public VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
+		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
