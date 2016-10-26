@@ -146,7 +146,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			GUILayout.EndHorizontal();
-			GUI.DragWindow();
+			DragWindow(ref windowRect);
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, bool viewOnly, ref Vector3 camPos) {

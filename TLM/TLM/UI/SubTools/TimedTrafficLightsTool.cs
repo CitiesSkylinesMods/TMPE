@@ -248,7 +248,7 @@ namespace TrafficManager.UI.SubTools {
 				if (GUILayout.Button(Translation.GetString("Cancel"))) {
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 				} else {
-					GUI.DragWindow();
+					DragWindow(ref _windowRect);
 					return;
 				}
 			}
@@ -259,7 +259,7 @@ namespace TrafficManager.UI.SubTools {
 			if (nodeSimulation == null || timedNodeMain == null) {
 				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 				//Log._Debug("nodesim or timednodemain is null");
-				GUI.DragWindow();
+				DragWindow(ref _windowRect);
 				return;
 			}
 
@@ -531,7 +531,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			if (_timedEditStep >= 0) {
-				GUI.DragWindow();
+				DragWindow(ref _windowRect);
 				return;
 			}
 
@@ -555,7 +555,7 @@ namespace TrafficManager.UI.SubTools {
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 
-			GUI.DragWindow();
+			DragWindow(ref _windowRect);
 			return;
 		}
 
@@ -681,7 +681,7 @@ namespace TrafficManager.UI.SubTools {
 				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 			}
 
-			GUI.DragWindow();
+			DragWindow(ref _windowRect2);
 		}
 
 		private string getWaitFlowBalanceInfo() {
