@@ -1679,12 +1679,16 @@ namespace TrafficManager {
 						uint versionC = Convert.ToUInt32(versionElms[2]);
 
 						bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
-							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB) ||
-							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC < versionC);
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB)/* ||
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC < versionC)*/;
+
+						bool isModNewer = TrafficManagerMod.GameVersionA < versionA ||
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB > versionB)/* ||
+							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC > versionC)*/;
 
 						if (isModTooOld) {
 							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.", false);
-						} else {
+						} else if (isModNewer) {
 							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.", false);
 						}
 					}

@@ -195,7 +195,7 @@ namespace TrafficManager.UI.SubTools {
 				RefreshCurrentRestrictedSegmentIds();
 			}
 
-			GUI.DragWindow();
+			DragWindow(ref windowRect);
 		}
 
 		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {

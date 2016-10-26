@@ -58,5 +58,15 @@ namespace TrafficManager.UI {
 		public virtual bool IsCursorInPanel() {
 			return false;
 		}
+
+		protected void DragWindow(ref Rect window) {
+			window.x = Mathf.Clamp(window.x, 0, Screen.width - window.width);
+			window.y = Mathf.Clamp(window.y, 0, Screen.height - window.height);
+
+			bool primaryMouseDown = Input.GetMouseButton(0);
+			if (primaryMouseDown) {
+				GUI.DragWindow();
+			}
+		}
 	}
 }

@@ -4,6 +4,12 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.7.15, 10/26/2016
+- Bugfix: Timed traffic lights window disappears when clicking on it with the middle mouse button (thanks to @Nexus and @Mariobro14 for helping me identifying the cause of this bug)
+
+1.7.14, 10/18/2016 
+- Updated for game version 1.5.2-f3
+
 1.7.13, 09/15/2016
 - Implemented a permanent fix to solve problems with stuck vehicles/cims caused by third party mods
 - Added a button to reset stuck vehicles/cims (see mod settings menu)

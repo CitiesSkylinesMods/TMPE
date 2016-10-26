@@ -236,8 +236,6 @@ namespace TrafficManager.UI {
 		}
 
 		protected override void OnToolGUI(Event e) {
-			//Log._Debug($"OnToolGUI");
-
 			try {
 				if (!Input.GetMouseButtonDown(0)) {
 					mouseClickProcessed = false;

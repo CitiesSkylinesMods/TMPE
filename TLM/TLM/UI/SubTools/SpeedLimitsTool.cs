@@ -143,6 +143,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (mainNetInfos == null || mainNetInfos.Count <= 0) {
 				Log._Debug($"mainNetInfos={mainNetInfos}");
+				DragWindow(ref defaultsWindowRect);
 				return;
 			}
 
@@ -280,7 +281,7 @@ namespace TrafficManager.UI.SubTools {
 
 			GUILayout.EndVertical();
 
-			GUI.DragWindow();
+			DragWindow(ref defaultsWindowRect);
 		}
 
 		private void UpdateRoadTex(NetInfo info) {
@@ -317,7 +318,7 @@ namespace TrafficManager.UI.SubTools {
 				defaultsWindowVisible = true;
 			}
 
-			GUI.DragWindow();
+			DragWindow(ref windowRect);
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, bool viewOnly, ref Vector3 camPos) {
