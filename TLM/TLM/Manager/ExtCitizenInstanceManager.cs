@@ -14,6 +14,10 @@ namespace TrafficManager.Manager {
 	public class ExtCitizenInstanceManager {
 		private static ExtCitizenInstanceManager instance = null;
 
+		internal void OnReleaseInstance(ushort instanceId) {
+			GetExtInstance(instanceId).Reset();
+		}
+
 		public static ExtCitizenInstanceManager Instance() {
             if (instance == null)
 				instance = new ExtCitizenInstanceManager();
@@ -42,14 +46,7 @@ namespace TrafficManager.Manager {
 		/// <param name="instanceId"></param>
 		/// <returns>the additional citizen instance data</returns>
 		public ExtCitizenInstance GetExtInstance(ushort instanceId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.GetVehicleState");
-#endif
-			ExtCitizenInstance ret = ExtInstances[instanceId];
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.GetVehicleState");
-#endif
-			return ret;
+			return ExtInstances[instanceId];
 		}
 		
 		internal void OnLevelUnloading() {

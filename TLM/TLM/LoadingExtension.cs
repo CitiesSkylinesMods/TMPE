@@ -105,6 +105,31 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Reverse-Redirection CustomCitizenManager::ReleaseCitizenInstanceImplementation calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCitizenManager).GetMethod("ReleaseCitizenInstanceImplementation",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+							},
+							null),
+							typeof(CitizenManager).GetMethod("ReleaseCitizenInstanceImplementation",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomCitizenManager::ReleaseCitizenInstanceImplementation");
+					detourFailed = true;
+				}
+
 				/*Log.Info("Reverse-Redirection CitizenAI::SimulationStep calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomCitizenAI).GetMethod("SimulationStep",
@@ -679,6 +704,22 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirection CitizenManager::ReleaseCitizenInstance calls");
+				try {
+					Detours.Add(new Detour(typeof(CitizenManager).GetMethod("ReleaseCitizenInstance",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort)
+							},
+							null),
+							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizenInstance")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CitizenManager::ReleaseCitizenInstance");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirection VehicleManager::ReleaseVehicle calls");
 				try {
 					Detours.Add(new Detour(typeof(VehicleManager).GetMethod("ReleaseVehicle",
@@ -790,6 +831,23 @@ namespace TrafficManager {
 							typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights")));
 				} catch (Exception) {
 					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection BuildingAI::GetColor calls");
+				try {
+					Detours.Add(new Detour(typeof(BuildingAI).GetMethod("GetColor",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Building).MakeByRefType(),
+								typeof (InfoManager.InfoMode)
+							},
+							null), typeof(CustomBuildingAI).GetMethod("CustomGetColor")));
+				} catch (Exception) {
+					Log.Error("Could not redirect BuildingAI::GetColor");
 					detourFailed = true;
 				}
 
@@ -924,6 +982,23 @@ namespace TrafficManager {
 							null), typeof(CustomPassengerCarAI).GetMethod("ParkVehicle")));
 				} catch (Exception) {
 					Log.Error("Could not redirect PassengerCarAI::ParkVehicle");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection PassengerCarAI::GetLocalizedStatus calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("GetLocalizedStatus",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (InstanceID).MakeByRefType()
+							},
+							null), typeof(CustomPassengerCarAI).GetMethod("CustomGetLocalizedStatus")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::GetLocalizedStatus");
 					detourFailed = true;
 				}
 
@@ -1649,6 +1724,8 @@ namespace TrafficManager {
 				CustomTrafficLightsManager.Instance().OnLevelUnloading();
 				TrafficLightSimulationManager.Instance().OnLevelUnloading();
 				VehicleRestrictionsManager.Instance().OnLevelUnloading();
+				ExtCitizenInstanceManager.Instance().OnLevelUnloading();
+				ExtBuildingManager.Instance().OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
 #if TRACE

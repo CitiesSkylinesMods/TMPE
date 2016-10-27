@@ -18,7 +18,8 @@ namespace TrafficManager.Custom.AI {
 			if (Options.prohibitPocketCars) {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
-					Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle. Reusing vehicle info.");
+					if (Options.debugSwitches[2])
+						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle. Reusing vehicle info.");
 					return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 				}
 			}

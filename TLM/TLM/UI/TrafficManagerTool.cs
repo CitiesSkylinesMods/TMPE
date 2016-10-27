@@ -249,11 +249,18 @@ namespace TrafficManager.UI {
 //#if DEBUG
 				if (Options.vehicleOverlay) {
 					_guiVehicles();
+				}
+
+				if (Options.citizenOverlay) {
 					_guiCitizens();
+				}
+
+				if (Options.buildingOverlay) {
+					_guiBuildings();
 				}
 //#endif
 
-				for (int i = 0; i < subTools.Length; ++i) {
+					for (int i = 0; i < subTools.Length; ++i) {
 					if (subTools[i] == null)
 						continue;
 					/*if (i == (int)GetToolMode())
@@ -654,6 +661,7 @@ namespace TrafficManager.UI {
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 				VehicleState vState = vehStateManager._GetVehicleState((ushort)i);
+				ExtCitizenInstance driverInst = vState.GetDriverExtInstance();
 				PathUnit.Position? curPos = vState?.GetCurrentPathPosition(ref vehicle);
 				PathUnit.Position? nextPos = vState?.GetNextPathPosition(ref vehicle);
 				bool? startNode = vState?.CurrentSegmentEnd?.StartNode;
@@ -680,7 +688,7 @@ namespace TrafficManager.UI {
 					else
 						timeToTransitNode = Single.PositiveInfinity;*/
 				}
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")\na: " + vState.CurrentArrivalMode.ToString() + " f: " + vState.FailedParkingAttempts + " l: " + vState.AltParkingSpaceLocation + " lid: " + vState.AltParkingSpaceLocationId;
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")\nd: " + driverInst?.InstanceId + " m: " + driverInst?.CurrentPathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.AltParkingSpaceLocation + " lid: " + driverInst?.AltParkingSpaceLocationId;
 #if USEPATHWAITCOUNTER
 				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
 #endif
@@ -727,7 +735,7 @@ namespace TrafficManager.UI {
 
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance((ushort)i);
 
-				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", d: " + extInstance.CurrentDepartureMode;
+				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.CurrentPathMode.ToString();
 				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -735,7 +743,44 @@ namespace TrafficManager.UI {
 				GUI.Box(labelRect, labelStr, _counterStyle);
 			}
 		}
-		
+
+		private void _guiBuildings() {
+			GUIStyle _counterStyle = new GUIStyle();
+			Array16<Building> buildings = Singleton<BuildingManager>.instance.m_buildings;
+			for (int i = 1; i < buildings.m_size; ++i) {
+				Building building = buildings.m_buffer[i];
+				if (building.m_flags == Building.Flags.None)
+					continue;
+
+				Vector3 pos = building.m_position;
+				var screenPos = Camera.main.WorldToScreenPoint(pos);
+				screenPos.y = Screen.height - screenPos.y;
+
+				if (screenPos.z < 0)
+					continue;
+
+				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+				var diff = pos - camPos;
+				if (diff.magnitude > DebugCloseLod)
+					continue; // do not draw if too distant
+
+				var zoom = 1.0f / diff.magnitude * 150f;
+
+				_counterStyle.fontSize = (int)(10f * zoom);
+				_counterStyle.normal.textColor = new Color(0f, 1f, 0f);
+				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
+
+				ExtBuilding extBuilding = ExtBuildingManager.Instance().GetExtBuilding((ushort)i);
+
+				String labelStr = "Building " + i + ", PDemand: " + extBuilding.ParkingSpaceDemand;
+
+				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
+
+				GUI.Box(labelRect, labelStr, _counterStyle);
+			}
+		}
+
 		internal static List<object[]> GetSortedVehicleLanes(ushort segmentId, NetInfo info, ushort? nodeId, VehicleInfo.VehicleType vehicleTypeFilter) { // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
 			var laneList = new List<object[]>();
 

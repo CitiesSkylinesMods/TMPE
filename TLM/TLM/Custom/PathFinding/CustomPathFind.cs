@@ -822,9 +822,20 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 
 				// switch from vehicle to pedestrian lane (parking)
-				if (!Options.prohibitPocketCars || _extVehicleType != ExtVehicleType.PassengerCar || (byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == 0) {
-					// if pocket cars are prohibited, a citizen may only park their car once per path
+				bool parkingAllowed = true;
+				if (Options.prohibitPocketCars) {
+					if (_extVehicleType == ExtVehicleType.PassengerCar) {
+						if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
+							// if pocket cars are prohibited, a citizen may only park their car once per path
+							parkingAllowed = false;
+						} else if ((byte)(item.m_lanesUsed & NetInfo.LaneType.PublicTransport) == 0) {
+							// if the citizen is walking to their target (= no public transport used), the passenger car must be parked in the very last moment
+							parkingAllowed = item.m_laneID == _endLaneA || item.m_laneID == _endLaneB;
+						}
+					}
+				}
 
+				if (parkingAllowed) {
 					NetInfo.LaneType laneType = this._laneTypes & ~NetInfo.LaneType.Pedestrian;
 					VehicleInfo.VehicleType vehicleType = this._vehicleTypes & ~VehicleInfo.VehicleType.Bicycle;
 					if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {

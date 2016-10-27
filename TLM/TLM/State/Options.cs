@@ -30,6 +30,8 @@ namespace TrafficManager.State {
 		private static UICheckBox connectedLanesOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
 		private static UICheckBox vehicleOverlayToggle = null;
+		private static UICheckBox citizenOverlayToggle = null;
+		private static UICheckBox buildingOverlayToggle = null;
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
@@ -82,9 +84,13 @@ namespace TrafficManager.State {
 #if DEBUG
 		public static bool nodesOverlay = true;
 		public static bool vehicleOverlay = true;
+		public static bool citizenOverlay = true;
+		public static bool buildingOverlay = true;
 #else
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
+		public static bool citizenOverlay = false;
+		public static bool buildingOverlay = false;
 #endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
@@ -206,6 +212,8 @@ namespace TrafficManager.State {
 			showLanesToggle = overlayGroup.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
 #if DEBUG
 			vehicleOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
+			citizenOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Citizens"), citizenOverlay, onCitizenOverlayChanged) as UICheckBox;
+			buildingOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Buildings"), buildingOverlay, onBuildingOverlayChanged) as UICheckBox;
 #endif
 			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
 			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
@@ -538,6 +546,22 @@ namespace TrafficManager.State {
 
 			Log._Debug($"Vehicle overlay changed to {newVal}");
 			vehicleOverlay = newVal;
+		}
+
+		private static void onCitizenOverlayChanged(bool newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Citizen overlay changed to {newVal}");
+			citizenOverlay = newVal;
+		}
+
+		private static void onBuildingOverlayChanged(bool newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Building overlay changed to {newVal}");
+			buildingOverlay = newVal;
 		}
 
 		private static void onFloatValueChanged(string varName, string newValueStr, ref float var) {

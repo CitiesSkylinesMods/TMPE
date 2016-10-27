@@ -6,28 +6,28 @@ using UnityEngine;
 
 namespace TrafficManager.Traffic {
 	public class ExtCitizenInstance {
-		private ushort InstanceId;
+		public ushort InstanceId { get; private set; }
 
-		[Flags]
+		/*[Flags]
 		public enum ExtFlags {
 			None,
 			CannotUsePassengerCar
-		}
+		}*/
 
-		public enum DepartureMode {
+		public enum PathMode {
 			None,
 			/// <summary>
 			/// 
 			/// </summary>
-			CalculatingPathToParkPos,
+			CalculatingWalkingPathToParkedCar,
 			/// <summary>
 			/// 
 			/// </summary>
-			OnPathToParkPos,
+			WalkingToParkedCar,
 			/// <summary>
 			/// 
 			/// </summary>
-			ParkPosReached,
+			ParkedCarReached,
 			/// <summary>
 			/// 
 			/// </summary>
@@ -35,26 +35,90 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// 
 			/// </summary>
-			OnCarPath
+			CalculatingKnownCarPath,
+			/// <summary>
+			/// 
+			/// </summary>
+			DrivingToTarget,
+			/// <summary>
+			/// 
+			/// </summary>
+			DrivingToKnownParkPos,
+			/// <summary>
+			/// Indicates that the vehicle is being parked on an alternative parking position
+			/// </summary>
+			ParkingSucceeded,
+			/// <summary>
+			/// Indicates that parking failed
+			/// </summary>
+			ParkingFailed,
+			/// <summary>
+			/// Indicates that a path to an alternative parking position is currently being calculated
+			/// </summary>
+			CalculatingPathToAltParkPos,
+			/// <summary>
+			/// Indicates that the vehicle is on a path to an alternative parking position
+			/// </summary>
+			DrivingToAltParkPos,
+			/// <summary>
+			/// Indicates that no alternative parking position could be found
+			/// </summary>
+			AltParkFindFailed,
+			/// <summary>
+			/// 
+			/// </summary>
+			CalculatingWalkingPathToTarget,
+			/// <summary>
+			/// 
+			/// </summary>
+			WalkingToTarget
 		}
 
-		public ExtFlags Flags { get; internal set; }
+		public enum ParkingSpaceLocation {
+			None,
+			RoadSide,
+			Building
+		}
 
-		public DepartureMode CurrentDepartureMode { get; internal set; }
+		/*public ExtFlags Flags {
+			get; internal set;
+		}*/
 
-		public Vector3 ParkedVehicleTargetPosition { get; internal set; }
+		public PathMode CurrentPathMode {
+			get; internal set;
+		}
+		
+		public int FailedParkingAttempts {
+			get; internal set;
+		}
 
-		public ExtCitizenInstance() {
+		public ushort AltParkingSpaceLocationId {
+			get; internal set;
+		}
+
+		public ParkingSpaceLocation AltParkingSpaceLocation {
+			get; internal set;
+		}
+
+		public PathUnit.Position? AltParkingPathStartPosition {
+			get; internal set;
+		}
+
+		public Vector3 ParkedVehicleTargetPosition {
+			get; internal set;
+		}
+		
+		public ExtCitizenInstance(ushort instanceId) {
+			this.InstanceId = instanceId;
 			Reset();
 		}
 
-		public ExtCitizenInstance(ushort instanceId) {
-			this.InstanceId = instanceId;
-		}
-
 		internal void Reset() {
-			Flags = ExtFlags.None;
-			CurrentDepartureMode = DepartureMode.None;
+			//Flags = ExtFlags.None;
+			CurrentPathMode = PathMode.None;
+			FailedParkingAttempts = 0;
+			AltParkingSpaceLocation = ParkingSpaceLocation.None;
+			AltParkingSpaceLocationId = 0;
 			ParkedVehicleTargetPosition = default(Vector3);
 		}
 	}

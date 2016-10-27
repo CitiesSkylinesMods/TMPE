@@ -11,39 +11,10 @@ using System.Collections.Generic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.Custom.AI;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {
-		public enum ArrivalMode {
-			None,
-			/// <summary>
-			/// Indicates that parking failed
-			/// </summary>
-			ParkingFailed,
-			/// <summary>
-			/// Indicates that a path to an alternative parking position is currently being calculated
-			/// </summary>
-			CalculatingPathToAltParkPos,
-			/// <summary>
-			/// Indicates that the vehicle is on a path to an alternative parking position
-			/// </summary>
-			OnPathToAltParkPos,
-			/// <summary>
-			/// Indicates that the vehicle is being parked on an alternative parking position
-			/// </summary>
-			AltParkSucceeded,
-			/// <summary>
-			/// Indicates that no alternative parking position could be found
-			/// </summary>
-			AltParkFailed,
-		}
-
-		public enum ParkingSpaceLocation {
-			None,
-			RoadSide,
-			Building
-		}
-
 #if DEBUGVSTATE
 		private static readonly ushort debugVehicleId = 6316;
 #endif
@@ -90,22 +61,6 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-		public ArrivalMode CurrentArrivalMode {
-			get; internal set;
-		}
-
-		public int FailedParkingAttempts {
-			get; internal set;
-		}
-
-		public ushort AltParkingSpaceLocationId {
-			get; internal set;
-		}
-
-		public ParkingSpaceLocation AltParkingSpaceLocation {
-			get; internal set;
-		}
-
 #if PATHRECALC
 		public uint LastPathRecalculation = 0;
 		public ushort LastPathRecalculationSegmentId = 0;
@@ -134,6 +89,8 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
+		internal ushort DriverInstanceId = 0;
+
 #if USEPATHWAITCOUNTER
 		public ushort PathWaitCounter {
 			get { return pathWaitCounter; }
@@ -151,10 +108,6 @@ namespace TrafficManager.Traffic {
 		public VehicleState(ushort vehicleId) {
 			this.VehicleId = vehicleId;
 			VehicleType = ExtVehicleType.None;
-			CurrentArrivalMode = ArrivalMode.None;
-			FailedParkingAttempts = 0;
-			AltParkingSpaceLocation = ParkingSpaceLocation.None;
-			AltParkingSpaceLocationId = 0;
 			Reset(false);
 		}
 
@@ -168,8 +121,17 @@ namespace TrafficManager.Traffic {
 			WaitTime = 0;
 			JunctionTransitState = VehicleJunctionTransitState.None;
 			LastStateUpdate = 0;
-			//CurrentArrivalMode = ArrivalMode.None; // debug, remove this!
-			FailedParkingAttempts = 0; // debug, remove this!
+		}
+
+		public ExtCitizenInstance GetDriverExtInstance() {
+			if (DriverInstanceId == 0) {
+				DriverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+			}
+
+			if (DriverInstanceId != 0) {
+				return ExtCitizenInstanceManager.Instance().GetExtInstance(DriverInstanceId);
+			}
+			return null;
 		}
 
 		internal void Unlink() {

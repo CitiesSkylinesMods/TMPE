@@ -145,8 +145,11 @@ namespace TrafficManager.Manager {
 #endif
 			VehicleState state = _GetVehicleState(vehicleId);
 			state.VehicleType = ExtVehicleType.None;
-			state.CurrentArrivalMode = VehicleState.ArrivalMode.None;
-			state.FailedParkingAttempts = 0;
+			ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
+			if (driverExtInstance != null) {
+				driverExtInstance.FailedParkingAttempts = 0;
+				state.DriverInstanceId = 0;
+			}
 #if USEPATHWAITCOUNTER
 			state.PathWaitCounter = 0;
 #endif
