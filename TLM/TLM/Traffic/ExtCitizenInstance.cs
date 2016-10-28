@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,10 +62,6 @@ namespace TrafficManager.Traffic {
 			/// </summary>
 			DrivingToAltParkPos,
 			/// <summary>
-			/// Indicates that no alternative parking position could be found
-			/// </summary>
-			AltParkFindFailed,
-			/// <summary>
 			/// 
 			/// </summary>
 			CalculatingWalkingPathToTarget,
@@ -111,6 +108,10 @@ namespace TrafficManager.Traffic {
 		public ExtCitizenInstance(ushort instanceId) {
 			this.InstanceId = instanceId;
 			Reset();
+		}
+
+		public uint GetCitizenId() {
+			return Singleton<CitizenManager>.instance.m_instances.m_buffer[InstanceId].m_citizen;
 		}
 
 		internal void Reset() {

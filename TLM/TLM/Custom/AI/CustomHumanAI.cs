@@ -7,6 +7,7 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Custom.PathFinding;
 using System;
+using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
@@ -30,7 +31,8 @@ namespace TrafficManager.Custom.AI {
 							pathFindSucceeded = false;
 						}
 					} else if (pathFindFailed) {
-						CustomHumanAI.OnPathFindFailure(instanceID, ref instanceData);
+						ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
+						CustomHumanAI.OnPathFindFailure(extInstance);
 					}
 				}
 				// NON-STOCK CODE END
@@ -57,7 +59,7 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
-				if (CustomHumanAI.NeedsNextPath(instanceID, ref instanceData)) {
+				if (CustomHumanAI.NeedsCarPath(instanceID, ref instanceData)) {
 					this.InvalidPath(instanceID, ref instanceData);
 					return;
 				}
@@ -86,12 +88,20 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		internal static void OnPathFindFailure(ushort instanceID, ref CitizenInstance instanceData) {
-			ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
-			//extInstance.CurrentPathMode = ExtCitizenInstance.PathMode.None;
-			extInstance.Reset();
+		internal static void OnPathFindFailure(ExtCitizenInstance extInstance) {
+			switch (extInstance.CurrentPathMode) {
+				case PathMode.CalculatingCarPath:
+				case PathMode.CalculatingKnownCarPath:
+				case PathMode.CalculatingWalkingPathToParkedCar:
+					extInstance.CurrentPathMode = PathMode.CalculatingWalkingPathToTarget;
+					break;
+				default:
+					extInstance.Reset();
+					break;
+			}
+			
 			if (Options.debugSwitches[1])
-				Log._Debug($"CustomHumanAI.OnPathFindFailure: Path-finding failed for citizen instance {instanceID}. Path: {instanceData.m_path}, CurrentDepartureMode={extInstance.CurrentPathMode}");
+				Log._Debug($"CustomHumanAI.OnPathFindFailure: Path-finding failed for citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.CurrentPathMode}");
 		}
 
 		internal static bool OnPathFindSuccess(ushort instanceID, ref CitizenInstance instanceData, out bool handlePathFindFailure) {
@@ -177,7 +187,7 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
-		internal static bool NeedsNextPath(ushort instanceID, ref CitizenInstance instanceData) {
+		internal static bool NeedsCarPath(ushort instanceID, ref CitizenInstance instanceData) {
 			ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
 			bool walkingToCar = extInstance.CurrentPathMode == ExtCitizenInstance.PathMode.WalkingToParkedCar;
 			bool walkingToTarget = extInstance.CurrentPathMode == ExtCitizenInstance.PathMode.WalkingToTarget;
@@ -188,12 +198,12 @@ namespace TrafficManager.Custom.AI {
 					if (walkingToCar) {
 						extInstance.CurrentPathMode = ExtCitizenInstance.PathMode.ParkedCarReached;
 						if (Options.debugSwitches[2])
-							Log._Debug($"CustomHumanAI.NeedsNextPath: Citizen instance {instanceID} reached parking position. Calculating remaining path now. CurrentDepartureMode={extInstance.CurrentPathMode}");
+							Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position. Calculating remaining path now. CurrentDepartureMode={extInstance.CurrentPathMode}");
 						return true;
 					} else {
 						extInstance.Reset();
 						if (Options.debugSwitches[2])
-							Log._Debug($"CustomHumanAI.NeedsNextPath: Citizen instance {instanceID} reached target. CurrentDepartureMode={extInstance.CurrentPathMode}");
+							Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached target. CurrentDepartureMode={extInstance.CurrentPathMode}");
 						return false;
 					}
 				}
