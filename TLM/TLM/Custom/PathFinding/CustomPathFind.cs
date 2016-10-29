@@ -2653,7 +2653,7 @@ namespace TrafficManager.Custom.PathFinding {
 								// calculate density metric
 								/*if (prevSpeed <= Options.someValue13)
 									prevDensity = 1f;*/
-								multMetric = Options.debugValues[12] + Options.debugValues[0] * prevDensity;
+								multMetric = Options.debugValues[12] + (1f - Options.debugValues[12]) * prevDensity;
 
 								// calculate density/speed metric
 								metric = Math.Max(0.01f, multMetric) / Math.Max(0.01f, divMetric);

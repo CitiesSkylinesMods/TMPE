@@ -714,6 +714,8 @@ namespace TrafficManager.UI {
 				CitizenInstance citizenInstance = citizenInstances.m_buffer[i];
 				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
 					continue;
+				if ((citizenInstance.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None)
+					continue;
 
 				Vector3 pos = citizenInstance.GetSmoothPosition((ushort)i);
 				var screenPos = Camera.main.WorldToScreenPoint(pos);

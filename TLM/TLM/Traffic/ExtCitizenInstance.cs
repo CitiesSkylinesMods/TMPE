@@ -20,6 +20,10 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// 
 			/// </summary>
+			RequiresPathToParkedCar,
+			/// <summary>
+			/// 
+			/// </summary>
 			CalculatingWalkingPathToParkedCar,
 			/// <summary>
 			/// 

@@ -1510,6 +1510,23 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
+					Log.Info("Redirection CitizenAI::InvalidPath calls");
+					try {
+						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("InvalidPath",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType()
+								},
+								null),
+								typeof(CustomCitizenAI).GetMethod("CustomInvalidPath")));
+					} catch (Exception) {
+						Log.Error("Could not redirect CitizenAI::InvalidPath");
+						detourFailed = true;
+					}
+
 					Log.Info("Redirection TransportLineAI::StartPathFind calls");
 					try {
 						Detours.Add(new Detour(typeof(TransportLineAI).GetMethod("StartPathFind",

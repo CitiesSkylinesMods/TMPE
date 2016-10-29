@@ -57,7 +57,7 @@ namespace TrafficManager.Custom.AI {
 								}*/
 
 								if (driverExtInstance != null)
-									CustomHumanAI.OnPathFindFailure(driverExtInstance);
+									CustomPassengerCarAI.OnPathFindFailure(driverExtInstance, vehicleId);
 							}
 						}
 					}
@@ -69,7 +69,15 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+		protected static void OnPathFindFailure(ExtCitizenInstance extInstance, ushort vehicleId) {
+			if (Options.debugSwitches[1])
+				Log._Debug($"CustomHumanAI.OnPathFindFailure: Path-finding failed for vehicle {vehicleId}, citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.CurrentPathMode}");
+			extInstance.Reset();
+		}
+
 		internal static void OnPathFindSuccess(ushort vehicleId, ExtCitizenInstance driverExtInstance) {
+			if (Options.debugSwitches[2])
+				Log._Debug($"CustomPassengerCarAI.OnPathFindSuccess: Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.InstanceId}! CurrentPathMode={driverExtInstance.CurrentPathMode}");
 			if (driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.CalculatingPathToAltParkPos) {
 				driverExtInstance.CurrentPathMode = ExtCitizenInstance.PathMode.DrivingToAltParkPos;
 				driverExtInstance.AltParkingPathStartPosition = null;
@@ -714,11 +722,11 @@ namespace TrafficManager.Custom.AI {
 					if (Options.debugSwitches[2])
 						Log._Debug($"Succeeded in finding unspawn position lane offset for building {buildingID}, segment {segmentId}, unspawnPos={unspawnPos}! lanePos={lanePos}, dist={dist}, laneId={laneId}, laneIndex={laneIndex}, laneOffset={laneOffset}");
 
-					if (dist > 16f) {
+					/*if (dist > 16f) {
 						if (Options.debugSwitches[2])
 							Log._Debug($"Distance between unspawn position and lane position is too big! {dist} unspawnPos={unspawnPos} lanePos={lanePos}");
 						return false;
-					}
+					}*/
 
 					parkOffset = laneOffset;
 				} else {
@@ -945,7 +953,7 @@ namespace TrafficManager.Custom.AI {
 
 					// NON-STOCK CODE START
 					if (prohibitPocketCars) {
-						if ((driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToTarget || driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
+						if ((driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToAltParkPos || driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
 							// decrease parking space demand of target building
 							ExtBuildingManager.Instance().GetExtBuilding(targetBuildingId).RemoveParkingSpaceDemand();
 						}
@@ -963,7 +971,7 @@ namespace TrafficManager.Custom.AI {
 				} else if (prohibitPocketCars) {
 					// could not find parking space. vehicle would despawn.
 
-					if ((driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToTarget || driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
+					if ((driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToAltParkPos || driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
 						// increase parking space demand of target building
 						ExtBuildingManager.Instance().GetExtBuilding(targetBuildingId).AddParkingSpaceDemand();
 					}
@@ -1024,7 +1032,7 @@ namespace TrafficManager.Custom.AI {
 									if (driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.ParkingSucceeded) {
 										if (Options.debugSwitches[2])
 											Log._Debug($"Parking succeeded (alternative parking spot): Doing nothing for citizen instance {citizenInstanceId}! path: {citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_path}");
-										ExtCitizenInstanceManager.Instance().GetExtInstance(citizenInstanceId).CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingWalkingPathToTarget;
+										//ExtCitizenInstanceManager.Instance().GetExtInstance(citizenInstanceId).CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingWalkingPathToTarget;
 										continue;
 									}
 								}
@@ -1055,9 +1063,9 @@ namespace TrafficManager.Custom.AI {
 				if (driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.ParkingSucceeded) {
 					if (Options.debugSwitches[2])
 						Log._Debug($"Parking succeeded (alternative parking spot): Citizen instance {driverExtInstance} has to walk for the remaining path!");
-					driverExtInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingWalkingPathToTarget;
+					/*driverExtInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingWalkingPathToTarget;
 					if (Options.debugSwitches[2])
-						Log._Debug($"Setting CurrentPathMode of vehicle {vehicleID} to {driverExtInstance.CurrentPathMode}");
+						Log._Debug($"Setting CurrentPathMode of vehicle {vehicleID} to {driverExtInstance.CurrentPathMode}");*/
 				}
 			}
 

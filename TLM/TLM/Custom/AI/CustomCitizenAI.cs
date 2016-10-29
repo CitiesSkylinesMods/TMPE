@@ -79,8 +79,13 @@ namespace TrafficManager.Custom.AI {
 					}
 				} else if (knownParkingSpaceLocation == ParkingSpaceLocation.Building) {
 					// found a building with parking space
+					if (PathManager.FindPathPosition(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, 256f, out endPathPos)) {
+						calculateEndPos = false;
+					}
+					
 					endPos = parkPos;
 					allowRandomParking = false;
+
 					//extDriverInstance.CurrentPathMode = successMode;// ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
 					if (Options.debugSwitches[2])
 						Log._Debug($"Navigating citizen instance {extDriverInstance.InstanceId} to parking building {knownParkingSpaceLocationId}! CurrentPathMode={extDriverInstance.CurrentPathMode}");
@@ -91,12 +96,29 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
+			if (Options.debugSwitches[2])
+				Log._Debug($"CustomCitizenAI.CustomStartPathFind: called for citizen instance {instanceID}, citizen {citizenData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
+
 			// NON-STOCK CODE START
 			ExtVehicleType extVehicleType = ExtVehicleType.None;
 			ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+			PathMode pathMode = PathMode.None;
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
 
+				switch (extInstance.CurrentPathMode) {
+					case PathMode.RequiresPathToParkedCar:
+						if (Options.debugSwitches[2])
+							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.CurrentPathMode}. Switching to 'CalculatingWalkingPathToParkedCar'.");
+						extInstance.CurrentPathMode = PathMode.CalculatingWalkingPathToParkedCar;
+						break;
+					case PathMode.ParkingSucceeded:
+						if (Options.debugSwitches[2])
+							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.CurrentPathMode}. Change to 'CalculatingWalkingPathToTarget'.");
+						extInstance.CurrentPathMode = PathMode.CalculatingWalkingPathToTarget;
+						break;
+				}
+				
 				if (extInstance.CurrentPathMode == ExtCitizenInstance.PathMode.CalculatingWalkingPathToParkedCar) {
 					vehicleInfo = null;
 					endPos = extInstance.ParkedVehicleTargetPosition;
@@ -107,6 +129,8 @@ namespace TrafficManager.Custom.AI {
 					// reuse parked vehicle if no vehicle info was given
 					vehicleInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 				}
+
+				pathMode = extInstance.CurrentPathMode;
 			}
 			// NON-STOCK CODE END
 
@@ -169,9 +193,8 @@ namespace TrafficManager.Custom.AI {
 
 					if (parkedVehicleId == 0) {
 						if (Options.debugSwitches[1])
-							Log._Debug($">> Citizen {citizenData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId} does not have a parked vehicle! startPos: {startPos} endPos: {endPos}");
+							Log._Debug($">> Citizen {citizenData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId} does not have a parked vehicle! startPos: {startPos} endPos: {endPos} CurrentPathMode={extInstance.CurrentPathMode}");
 
-						//if (! isAtOutsideConnection) {
 						if (Options.debugSwitches[2])
 							Log._Debug($"Citizen {citizenData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId} is NOT coming from an outside connection");
 
@@ -195,18 +218,14 @@ namespace TrafficManager.Custom.AI {
 
 							if (sourceBuildingId != 0) {
 								ExtBuildingManager.Instance().GetExtBuilding(sourceBuildingId).AddParkingSpaceDemand();
-
-								//Notification.Problem oldProblems = Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_problems;
-								//Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_problems = Notification.AddProblems(oldProblems, Notification.Problem.RoadNotConnected);
 							}
 						}
-					//}
 					}
 
 					// check if a parked vehicle is present if it should be reached
 					if (extInstance.CurrentPathMode == ExtCitizenInstance.PathMode.ParkedCarReached) {
 						if (Options.debugSwitches[2])
-							Log._Debug($"Citizen instance {instanceID} has reached its parked vehicle. Requesting path-find for remaining route. CurrentDepartureMode={extInstance.CurrentPathMode} canUseOwnPassengerCar={canUseOwnPassengerCar}");
+							Log._Debug($"Citizen instance {instanceID} has reached its parked vehicle {parkedVehicleId}. Requesting path-find for remaining route. CurrentDepartureMode={extInstance.CurrentPathMode} canUseOwnPassengerCar={canUseOwnPassengerCar}");
 
 						// parked vehicle must be present by now
 						if (parkedVehicleId == 0) {
@@ -221,13 +240,15 @@ namespace TrafficManager.Custom.AI {
 					}
 				} else {
 					if (Options.debugSwitches[2])
-						Log._Debug($"Citizen instance {instanceID} is coming from an outside connection. CurrentDepartureMode={extInstance.CurrentPathMode} canUseOwnPassengerCar={canUseOwnPassengerCar}");
+						Log._Debug($"Citizen instance {instanceID} is coming from an outside connection. CurrentDepartureMode={extInstance.CurrentPathMode} canUseOwnPassengerCar={canUseOwnPassengerCar} parkedVehicleId={parkedVehicleId}");
 					extInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingCarPath;
 				}
 
 				// if the citizen is a resident and is starting its journey: find a suitable parking space near the target
 				if (canUseOwnPassengerCar) {
 					if (isAtOutsideConnection || extInstance.CurrentPathMode == ExtCitizenInstance.PathMode.ParkedCarReached) {
+						if (Options.debugSwitches[2])
+							Log._Debug($"Citizen instance {instanceID} has reached parked vehicle {parkedVehicleId} or is coming from an outside connection. Finding parking space at target. CurrentDepartureMode={extInstance.CurrentPathMode}");
 
 						bool calcEndPos;
 						bool allowRandPark;
@@ -235,13 +256,15 @@ namespace TrafficManager.Custom.AI {
 							extInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
 							calculateEndPos = calcEndPos;
 							allowRandomParking = allowRandPark;
+							if (Options.debugSwitches[2])
+								Log._Debug($"Finding known parking space for citizen instance {instanceID}, parked vehicle {parkedVehicleId} succeeded. CurrentDepartureMode={extInstance.CurrentPathMode}");
 						}
 					}
 
 					if (extInstance.CurrentPathMode == PathMode.ParkedCarReached) {
 						// no known parking space found. calculate direct path to target
 						if (Options.debugSwitches[2])
-							Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.CurrentPathMode}. Setting it to CalculatingCarPath.");
+							Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.CurrentPathMode}. Setting it to CalculatingCarPath. parkedVehicleId={parkedVehicleId}");
 						extInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingCarPath;
 					}
 				}
@@ -265,8 +288,8 @@ namespace TrafficManager.Custom.AI {
 			}
 			bool allowUnderground = (citizenData.m_flags & (CitizenInstance.Flags.Underground | CitizenInstance.Flags.Transition)) != CitizenInstance.Flags.None;
 
-			if (Options.debugSwitches[1])
-				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, extVehicleType={extVehicleType}, startPos={startPos}, endPos={endPos}");
+			if (Options.debugSwitches[2])
+				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
 
 			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA); // NON-STOCK CODE
 
@@ -295,6 +318,11 @@ namespace TrafficManager.Custom.AI {
 					return true;
 				}
 			}
+			if (Options.prohibitPocketCars) {
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
+				if (Options.debugSwitches[1])
+					Log._Debug($"CustomCitizenAI.CustomStartPathFind: failed for citizen instance {instanceID} (CurrentPathMode={extInstance.CurrentPathMode}). startPosA={startPosA}, endPosA={endPosA}, foundEndPos={foundEndPos}");
+			}
 			return false;
 		}
 
@@ -318,6 +346,7 @@ namespace TrafficManager.Custom.AI {
 				ushort parkedVehicleId;
 				if (Singleton<VehicleManager>.instance.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, citizenId)) {
 					Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetParkedVehicle(citizenId, parkedVehicleId);
+					Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
 					if (Options.debugSwitches[1])
 						Log._Debug($"[SUCCESS] Spawned parked passenger car at road side for citizen {citizenId}: {parkedVehicleId}");
 					return true;
@@ -340,6 +369,7 @@ namespace TrafficManager.Custom.AI {
 				ushort parkedVehicleId;
 				if (Singleton<VehicleManager>.instance.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, citizenId)) {
 					Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetParkedVehicle(citizenId, parkedVehicleId);
+					Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
 					if (Options.debugSwitches[1] && homeId != 0)
 						Log._Debug($"[SUCCESS] Spawned parked passenger car next to building for citizen {citizenId}: {parkedVehicleId}");
 					return true;
@@ -358,10 +388,20 @@ namespace TrafficManager.Custom.AI {
 			Log.Error($"CitizenAI.FindPathPosition is not overriden!");
 			startPosA = default(PathUnit.Position);
 			return false;
-		}
-
-		protected void InvalidPath(ushort instanceID, ref CitizenInstance instanceData) {
-			Log.Error($"CitizenAI.InvalidPath is not overriden!");
 		}*/
+
+		public void CustomInvalidPath(ushort instanceID, ref CitizenInstance instanceData) {
+			/*if (Options.debugSwitches[4])
+				Log.Warning($"CustomCitizenAI.CustomInvalidPath: called for citizen instance {instanceID}");*/
+
+			if (instanceData.m_path != 0u) {
+				Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
+				instanceData.m_path = 0u;
+			}
+			instanceData.m_flags &= ~(CitizenInstance.Flags.WaitingTransport | CitizenInstance.Flags.EnteringVehicle | CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi);
+			if (!this.StartPathFind(instanceID, ref instanceData)) {
+				instanceData.Unspawn(instanceID);
+			}
+		}
 	}
 }

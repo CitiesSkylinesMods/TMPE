@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,10 +21,16 @@ namespace TrafficManager.Traffic {
 
 		internal void AddParkingSpaceDemand() {
 			ParkingSpaceDemand = (byte)Math.Min(100, (int)ParkingSpaceDemand + 10);
+			RequestColorUpdate();
 		}
 
 		internal void RemoveParkingSpaceDemand() {
 			ParkingSpaceDemand = (byte)Math.Max(0, (int)ParkingSpaceDemand - 10);
+			RequestColorUpdate();
+		}
+
+		private void RequestColorUpdate() {
+			Singleton<BuildingManager>.instance.UpdateBuildingColors(BuildingId);
 		}
 	}
 }

@@ -120,7 +120,7 @@ namespace TrafficManager.State {
 		};
 
 		public static float[] debugValues = {
-			0.5f, // 0: debug value (path-finding density weight)
+			0f, // 0: -- unused --
 			0.25f, // 1: debug value (base lane changing cost factor on highways)
 			1.5f, // 2: debug value (heavy vehicle lane changing cost factor)
 			1.5f, // 3: debug value (lane changing cost base before junctions)
@@ -132,8 +132,8 @@ namespace TrafficManager.State {
 			0f, // 9: debug value (lane density positive update smoothing)
 			15f, // 10: debug value (maximum incoming vehicle distance to junction for priority signs)
 			2.5f, // 11: debug value (> 1 lane changing cost factor)
-			0.5f, // 12: debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
-			0.5f, // 13: debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
+			0.75f, // 12: debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
+			0f, // 13: -- unused --
 			512f, // 14: debug value (parking space search radius; used if pocket car spawning is disabled)
 			10f, // 15: debug value (maximum junction approach time for priority signs)
 			250f, // 16: debug value (lane changing cost reduction modulo)
@@ -146,7 +146,7 @@ namespace TrafficManager.State {
 			10f, // 23: debug value (lane density random interval)
 			10f, // 24: debug value (lane speed random interval)
 			25f, // 25: maximum penalty for heavy vehicles driving on an inner lane (in %)
-			100f // 26: maximum number of parking attempts for passenger cars
+			10000f // 26: maximum number of parking attempts for passenger cars
 		};
 
 		public static bool prioritySignsEnabled = true;
