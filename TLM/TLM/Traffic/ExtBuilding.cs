@@ -19,13 +19,13 @@ namespace TrafficManager.Traffic {
 			ParkingSpaceDemand = 0;
 		}
 
-		internal void AddParkingSpaceDemand() {
-			ParkingSpaceDemand = (byte)Math.Min(100, (int)ParkingSpaceDemand + 10);
+		internal void AddParkingSpaceDemand(int delta=5) {
+			ParkingSpaceDemand = (byte)Math.Min(100, (int)ParkingSpaceDemand + delta);
 			RequestColorUpdate();
 		}
 
-		internal void RemoveParkingSpaceDemand() {
-			ParkingSpaceDemand = (byte)Math.Max(0, (int)ParkingSpaceDemand - 10);
+		internal void RemoveParkingSpaceDemand(int delta=5) {
+			ParkingSpaceDemand = (byte)Math.Max(0, (int)ParkingSpaceDemand - delta);
 			RequestColorUpdate();
 		}
 

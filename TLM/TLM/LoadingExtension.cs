@@ -896,6 +896,19 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirecting CommonBuildingAI::SimulationStep Calls");
+				try {
+					Detours.Add(new Detour(typeof(CommonBuildingAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Building).MakeByRefType()
+								}),
+								typeof(CustomCommonBuildingAI).GetMethod("CustomSimulationStep")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CommonBuildingAI::SimulationStep.");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirecting HumanAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(HumanAI).GetMethod("SimulationStep",
