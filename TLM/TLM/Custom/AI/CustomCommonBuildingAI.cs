@@ -10,8 +10,11 @@ namespace TrafficManager.Custom.AI {
 		public void CustomSimulationStep(ushort buildingID, ref Building data) {
 			// NON-STOCK CODE START
 			uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
-			if ((frameIndex & 1u) == 0u)
-				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemoveParkingSpaceDemand(1);
+			if ((frameIndex & 1u) == 0u) {
+				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemoveParkingSpaceDemand(1u);
+				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(1u, true);
+                ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(1u, false);
+            }
 			// NON-STOCK CODE END
 
 			base.SimulationStep(buildingID, ref data);

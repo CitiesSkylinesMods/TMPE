@@ -147,7 +147,8 @@ namespace TrafficManager.Manager {
 			state.VehicleType = ExtVehicleType.None;
 			ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
 			if (driverExtInstance != null) {
-				driverExtInstance.FailedParkingAttempts = 0;
+				//driverExtInstance.FailedParkingAttempts = 0;
+				driverExtInstance.Reset();
 				state.DriverInstanceId = 0;
 			}
 #if USEPATHWAITCOUNTER

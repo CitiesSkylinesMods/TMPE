@@ -39,7 +39,9 @@ namespace TrafficManager.UI {
 
 		public static ushort SelectedSegmentId { get; internal set; }
 
-		internal static ExtVehicleType[] InfoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service };
+        public static TransportDemandViewMode CurrentTransportDemandViewMode { get; internal set; } = TransportDemandViewMode.Outgoing;
+
+        internal static ExtVehicleType[] InfoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service };
 
 		private static SubTool activeSubTool = null;
 
@@ -688,7 +690,7 @@ namespace TrafficManager.UI {
 					else
 						timeToTransitNode = Single.PositiveInfinity;*/
 				}
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")\nd: " + driverInst?.InstanceId + " m: " + driverInst?.CurrentPathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.AltParkingSpaceLocation + " lid: " + driverInst?.AltParkingSpaceLocationId;
+				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + ")\nd: " + driverInst?.InstanceId + " m: " + driverInst?.PathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.ParkingSpaceLocation + " lid: " + driverInst?.ParkingSpaceLocationId;
 #if USEPATHWAITCOUNTER
 				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
 #endif
@@ -737,7 +739,7 @@ namespace TrafficManager.UI {
 
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance((ushort)i);
 
-				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.CurrentPathMode.ToString();
+				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.PathMode.ToString();
 				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -774,7 +776,7 @@ namespace TrafficManager.UI {
 
 				ExtBuilding extBuilding = ExtBuildingManager.Instance().GetExtBuilding((ushort)i);
 
-				String labelStr = "Building " + i + ", PDemand: " + extBuilding.ParkingSpaceDemand;
+				String labelStr = "Building " + i + ", PDemand: " + extBuilding.ParkingSpaceDemand + ", IncTDem: " + extBuilding.IncomingPublicTransportDemand + ", OutTDem: " + extBuilding.OutgoingPublicTransportDemand;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

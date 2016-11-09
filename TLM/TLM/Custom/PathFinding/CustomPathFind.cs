@@ -329,10 +329,10 @@ namespace TrafficManager.Custom.PathFinding {
 			if ((byte)(this._laneTypes & NetInfo.LaneType.Vehicle) != 0) {
 				this._laneTypes |= NetInfo.LaneType.TransportVehicle;
 			}
-			int num = (int)(this.PathUnits.m_buffer[unit].m_positionCount & 15);
-			int num2 = this.PathUnits.m_buffer[unit].m_positionCount >> 4;
+			int posCount = (int)(this.PathUnits.m_buffer[unit].m_positionCount & 15);
+			int vehiclePosIndicator = this.PathUnits.m_buffer[unit].m_positionCount >> 4;
 			BufferItem bufferItemStartA;
-			if (data.m_position00.m_segment != 0 && num >= 1) {
+			if (data.m_position00.m_segment != 0 && posCount >= 1) {
 				this._startLaneA = PathManager.GetLaneID(data.m_position00);
 				this._startOffsetA = data.m_position00.m_offset;
 				bufferItemStartA.m_laneID = this._startLaneA;
@@ -346,7 +346,7 @@ namespace TrafficManager.Custom.PathFinding {
 				bufferItemStartA = default(BufferItem);
 			}
 			BufferItem bufferItemStartB;
-			if (data.m_position02.m_segment != 0 && num >= 3) {
+			if (data.m_position02.m_segment != 0 && posCount >= 3) {
 				this._startLaneB = PathManager.GetLaneID(data.m_position02);
 				this._startOffsetB = data.m_position02.m_offset;
 				bufferItemStartB.m_laneID = this._startLaneB;
@@ -360,7 +360,7 @@ namespace TrafficManager.Custom.PathFinding {
 				bufferItemStartB = default(BufferItem);
 			}
 			BufferItem bufferItemEndA;
-			if (data.m_position01.m_segment != 0 && num >= 2) {
+			if (data.m_position01.m_segment != 0 && posCount >= 2) {
 				this._endLaneA = PathManager.GetLaneID(data.m_position01);
 				bufferItemEndA.m_laneID = this._endLaneA;
 				bufferItemEndA.m_position = data.m_position01;
@@ -373,7 +373,7 @@ namespace TrafficManager.Custom.PathFinding {
 				bufferItemEndA = default(BufferItem);
 			}
 			BufferItem bufferItemEndB;
-			if (data.m_position03.m_segment != 0 && num >= 4) {
+			if (data.m_position03.m_segment != 0 && posCount >= 4) {
 				this._endLaneB = PathManager.GetLaneID(data.m_position03);
 				bufferItemEndB.m_laneID = this._endLaneB;
 				bufferItemEndB.m_position = data.m_position03;
@@ -385,7 +385,7 @@ namespace TrafficManager.Custom.PathFinding {
 				this._endLaneB = 0u;
 				bufferItemEndB = default(BufferItem);
 			}
-			if (data.m_position11.m_segment != 0 && num2 >= 1) {
+			if (data.m_position11.m_segment != 0 && vehiclePosIndicator >= 1) {
 				this._vehicleLane = PathManager.GetLaneID(data.m_position11);
 				this._vehicleOffset = data.m_position11.m_offset;
 			} else {
@@ -831,6 +831,9 @@ namespace TrafficManager.Custom.PathFinding {
 						} else if ((byte)(item.m_lanesUsed & NetInfo.LaneType.PublicTransport) == 0) {
 							// if the citizen is walking to their target (= no public transport used), the passenger car must be parked in the very last moment
 							parkingAllowed = item.m_laneID == _endLaneA || item.m_laneID == _endLaneB;
+							if (Options.debugSwitches[4]) {
+								Log._Debug($"Path unit {unitId}: public transport has not been used. ");
+							}
 						}
 					}
 				}

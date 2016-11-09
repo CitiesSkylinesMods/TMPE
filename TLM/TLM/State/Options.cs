@@ -112,8 +112,8 @@ namespace TrafficManager.State {
 
 		public static bool[] debugSwitches = {
 			false,
-			true,
-			true,
+			false,
+			false,
 			false,
 			false,
 			false
@@ -146,7 +146,9 @@ namespace TrafficManager.State {
 			10f, // 23: debug value (lane density random interval)
 			10f, // 24: debug value (lane speed random interval)
 			25f, // 25: maximum penalty for heavy vehicles driving on an inner lane (in %)
-			10000f // 26: maximum number of parking attempts for passenger cars
+			10000f, // 26: maximum number of parking attempts for passenger cars
+			2f,
+            1f
 		};
 
 		public static bool prioritySignsEnabled = true;
@@ -160,8 +162,8 @@ namespace TrafficManager.State {
 			get { return menuRebuildRequired; }
 			private set {
 				menuRebuildRequired = value;
-				if (LoadingExtension.Instance != null && LoadingExtension.Instance.UI != null)
-					LoadingExtension.Instance.UI.Close();
+				if (LoadingExtension.Instance != null && LoadingExtension.Instance.BaseUI != null)
+					LoadingExtension.Instance.BaseUI.Close();
 			}
 		}
 

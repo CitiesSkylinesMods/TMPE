@@ -53,10 +53,12 @@ namespace TrafficManager {
         public TrafficManagerMode ToolMode { get; set; }
         public TrafficManagerTool TrafficManagerTool { get; set; }
 #if !TAM
-		public UIBase UI { get; set; }
+		public UIBase BaseUI { get; private set; }
 #endif
 
-		private static bool gameLoaded = false;
+        public UITransportDemand TransportDemandUI { get; private set; }
+
+        private static bool gameLoaded = false;
 
         public LoadingExtension() {
         }
@@ -243,6 +245,60 @@ namespace TrafficManager {
 								null)));
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect HumanAI::ArriveAtDestination");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::GetBuildingTargetPosition calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("GetBuildingTargetPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (float)
+							},
+							null),
+							typeof(HumanAI).GetMethod("GetBuildingTargetPosition",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (float)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::GetBuildingTargetPosition");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::GetVehicleInfo calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("GetVehicleInfo",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (bool)
+							},
+							null),
+							typeof(HumanAI).GetMethod("GetVehicleInfo",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (bool)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::GetVehicleInfo");
 					detourFailed = true;
 				}
 
@@ -821,19 +877,6 @@ namespace TrafficManager {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
 				}
 
-				Log.Info("Redirecting Human AI Calls");
-				try {
-					Detours.Add(new Detour(typeof(HumanAI).GetMethod("CheckTrafficLights",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[] { typeof(ushort), typeof(ushort) },
-							null),
-							typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights")));
-				} catch (Exception) {
-					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
-					detourFailed = true;
-				}
-
 				Log.Info("Redirection BuildingAI::GetColor calls");
 				try {
 					Detours.Add(new Detour(typeof(BuildingAI).GetMethod("GetColor",
@@ -923,33 +966,34 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				/*Log.Info("Redirecting TouristAI Simulation Step Calls");
+				Log.Info("Redirecting HumanAI::CheckTrafficLights Calls");
 				try {
-					Detours.Add(new Detour(typeof(TouristAI).GetMethod("SimulationStep",
-								new[] {
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (Vector3)
-								}),
-								typeof(CustomTouristAI).GetMethod("CustomSimulationStep")));
+					Detours.Add(new Detour(typeof(HumanAI).GetMethod("CheckTrafficLights",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[] { typeof(ushort), typeof(ushort) },
+							null),
+							typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights")));
 				} catch (Exception) {
-					Log.Error("Could not redirect TouristAI::SimulationStep.");
+					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting ResidentAI Simulation Step Calls");
+				Log.Info("Redirecting HumanAI::ArriveAtTarget Calls");
 				try {
-					Detours.Add(new Detour(typeof(ResidentAI).GetMethod("SimulationStep",
-								new[] {
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (Vector3)
-								}),
-								typeof(CustomResidentAI).GetMethod("CustomSimulationStep")));
+					Detours.Add(new Detour(typeof(HumanAI).GetMethod("ArriveAtTarget",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[] {
+								typeof(ushort),
+								typeof(CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(CustomHumanAI).GetMethod("CustomArriveAtTarget")));
 				} catch (Exception) {
-					Log.Error("Could not redirect ResidentAI::SimulationStep.");
+					Log.Error("Could not redirect HumanAI::ArriveAtTarget.");
 					detourFailed = true;
-				}*/
+				}
 
 				Log.Info("Redirection ResidentAI::GetVehicleInfo calls");
 				try {
@@ -1012,6 +1056,23 @@ namespace TrafficManager {
 							null), typeof(CustomPassengerCarAI).GetMethod("CustomGetLocalizedStatus")));
 				} catch (Exception) {
 					Log.Error("Could not redirect PassengerCarAI::GetLocalizedStatus");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection ResidentAI::GetLocalizedStatus calls");
+				try {
+					Detours.Add(new Detour(typeof(ResidentAI).GetMethod("GetLocalizedStatus",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (InstanceID).MakeByRefType()
+							},
+							null), typeof(CustomResidentAI).GetMethod("CustomGetLocalizedStatus")));
+				} catch (Exception) {
+					Log.Error("Could not redirect ResidentAI::GetLocalizedStatus");
 					detourFailed = true;
 				}
 
@@ -1744,10 +1805,12 @@ namespace TrafficManager {
 			revertDetours();
 			gameLoaded = false;
 
-			Object.Destroy(UI);
-			UI = null;
+			Object.Destroy(BaseUI);
+            BaseUI = null;
+            Object.Destroy(TransportDemandUI);
+            TransportDemandUI = null;
 
-			try {
+            try {
 				TrafficPriorityManager.Instance().OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
 				CustomRoadAI.OnLevelUnloading();
@@ -1855,9 +1918,13 @@ namespace TrafficManager {
 			}
 
 			Log.Info("Adding Controls to UI.");
-			UI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
+			BaseUI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
 
-			initDetours();
+            // Init transport demand UI
+            var uiView = UIView.GetAView();
+            TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
+
+            initDetours();
 
 			Log.Info("Calling OnLevelLoaded.");
 			CustomPassengerCarAI.OnLevelLoaded();

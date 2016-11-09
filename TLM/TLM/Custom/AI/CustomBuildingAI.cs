@@ -7,6 +7,7 @@ using System.Text;
 using TrafficManager.Manager;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.UI;
 using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
@@ -17,6 +18,9 @@ namespace TrafficManager.Custom.AI {
 				if (infoMode == InfoManager.InfoMode.Traffic) {
 					ExtBuilding extBuilding = ExtBuildingManager.Instance().GetExtBuilding(buildingID);
 					return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Mathf.Clamp01((float)extBuilding.ParkingSpaceDemand * 0.01f));
+				} else if (infoMode == InfoManager.InfoMode.Transport && !(data.Info.m_buildingAI is DepotAI)) {
+					ExtBuilding extBuilding = ExtBuildingManager.Instance().GetExtBuilding(buildingID);
+					return Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_negativeColor, Mathf.Clamp01((float)(TrafficManagerTool.CurrentTransportDemandViewMode == TransportDemandViewMode.Outgoing ? extBuilding.OutgoingPublicTransportDemand : extBuilding.IncomingPublicTransportDemand) * 0.01f));
 				}
 			}
 			// NON-STOCK CODE END

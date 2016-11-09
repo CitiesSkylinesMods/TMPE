@@ -130,6 +130,8 @@
     <Compile Include="Traffic\VehicleState.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="UI\TransportDemandViewMode.cs" />
+    <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />
