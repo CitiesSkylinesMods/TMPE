@@ -988,7 +988,7 @@ namespace TrafficManager.Custom.AI {
 
 					if (/*(driverExtInstance.PathMode == ExtCitizenInstance.ExtPathMode.DrivingToAltParkPos || driverExtInstance.PathMode == ExtCitizenInstance.ExtPathMode.DrivingToKnownParkPos) && */targetBuildingId != 0) {
 						// increase parking space demand of target building
-						ExtBuildingManager.Instance().GetExtBuilding(targetBuildingId).AddParkingSpaceDemand(5u);
+						ExtBuildingManager.Instance().GetExtBuilding(targetBuildingId).AddParkingSpaceDemand(10u);
 					}
 
 					// Find parking space in the vicinity, redo path-finding to the parking space, park the vehicle and do citizen path-finding to the current target

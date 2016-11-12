@@ -117,7 +117,6 @@ namespace TrafficManager.Manager {
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetAverageDefaultCustomSpeedLimit");
 #endif
 
-			// calculate the currently set mean speed limit
 			float meanSpeedLimit = 0f;
 			uint validLanes = 0;
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
@@ -138,13 +137,43 @@ namespace TrafficManager.Manager {
 			return ret;
 		}
 
-		/// <summary>
-		/// Determines the currently set speed limit for the given lane in terms of discrete speed limit levels.
+        /// <summary>
+		/// Determines the average custom speed limit for a given NetInfo object in terms of discrete speed limit levels.
 		/// An in-game speed limit of 2.0 (e.g. on highway) is hereby translated into a discrete speed limit value of 100 (km/h).
 		/// </summary>
-		/// <param name="laneId"></param>
+		/// <param name="segmentInfo"></param>
+		/// <param name="finalDir"></param>
 		/// <returns></returns>
-		public ushort GetCustomSpeedLimit(uint laneId) {
+		public ushort GetAverageCustomSpeedLimit(ushort segmentId, ref NetSegment segment, NetInfo segmentInfo, NetInfo.Direction? finalDir = null) {
+            // calculate the currently set mean speed limit
+            float meanSpeedLimit = 0f;
+            uint validLanes = 0;
+            uint curLaneId = segment.m_lanes;
+            for (uint laneIndex = 0; laneIndex < segmentInfo.m_lanes.Length; ++laneIndex) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+                NetInfo.Direction d = laneInfo.m_finalDirection;
+                if ((segmentInfo.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None || (finalDir != null && d != finalDir)) {
+                    curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                    continue;
+                }
+
+                meanSpeedLimit += GetLockFreeGameSpeedLimit(segmentId, laneIndex, curLaneId, laneInfo);
+                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                ++validLanes;
+            }
+
+            if (validLanes > 0)
+                meanSpeedLimit /= (float)validLanes;
+            return (ushort)Mathf.Round(meanSpeedLimit);
+        }
+
+        /// <summary>
+        /// Determines the currently set speed limit for the given lane in terms of discrete speed limit levels.
+        /// An in-game speed limit of 2.0 (e.g. on highway) is hereby translated into a discrete speed limit value of 100 (km/h).
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <returns></returns>
+        public ushort GetCustomSpeedLimit(uint laneId) {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetCustomSpeedLimit2");
 #endif
