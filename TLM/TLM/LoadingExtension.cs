@@ -275,33 +275,6 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Reverse-Redirection HumanAI::GetVehicleInfo calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("GetVehicleInfo",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (bool)
-							},
-							null),
-							typeof(HumanAI).GetMethod("GetVehicleInfo",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (bool)
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect HumanAI::GetVehicleInfo");
-					detourFailed = true;
-				}
-
 				Log.Info("Reverse-Redirection HumanAI::PathfindFailure calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("PathfindFailure",
@@ -1012,6 +985,23 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirection TouristAI::GetVehicleInfo calls");
+				try {
+					Detours.Add(new Detour(typeof(TouristAI).GetMethod("GetVehicleInfo",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (bool)
+							},
+							null), typeof(CustomTouristAI).GetMethod("CustomGetVehicleInfo")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TouristAI::GetVehicleInfo");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirecting PassengerCarAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("SimulationStep",
@@ -1036,7 +1026,7 @@ namespace TrafficManager {
 								typeof (int),
 								typeof (byte).MakeByRefType()
 							},
-							null), typeof(CustomPassengerCarAI).GetMethod("ParkVehicle")));
+							null), typeof(CustomPassengerCarAI).GetMethod("CustomParkVehicle")));
 				} catch (Exception) {
 					Log.Error("Could not redirect PassengerCarAI::ParkVehicle");
 					detourFailed = true;

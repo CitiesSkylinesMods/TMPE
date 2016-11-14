@@ -30,6 +30,12 @@ namespace TrafficManager.Traffic {
 			Failed
 		}
 
+		public enum ExtPathType {
+			None,
+			WalkingOnly,
+			DrivingOnly
+		}
+
 		public enum ExtPathMode {
 			None,
 			/// <summary>
@@ -87,7 +93,11 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// 
 			/// </summary>
-			WalkingToTarget
+			WalkingToTarget,
+			/// <summary>
+			/// 
+			/// </summary>
+			PublicTransportToTarget
 		}
 
 		public enum ExtParkingSpaceLocation {
@@ -208,7 +218,7 @@ namespace TrafficManager.Traffic {
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
 
-				if (CustomPathManager._instance.CreatePath(false, ExtVehicleType.None, 0, (ushort)0, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false)) {
+				if (CustomPathManager._instance.CreatePath(false, ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false)) {
 					if (Options.debugSwitches[2])
 						Log._Debug($"Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
 
@@ -218,6 +228,26 @@ namespace TrafficManager.Traffic {
 				}
 			}
 			return false;
+		}
+
+		internal ExtPathType GetPathType() {
+			switch (PathMode) {
+				case ExtPathMode.CalculatingCarPathToAltParkPos:
+				case ExtPathMode.CalculatingCarPathToKnownParkPos:
+				case ExtPathMode.CalculatingCarPathToTarget:
+				case ExtPathMode.DrivingToAltParkPos:
+				case ExtPathMode.DrivingToKnownParkPos:
+				case ExtPathMode.DrivingToTarget:
+					return ExtPathType.DrivingOnly;
+				case ExtPathMode.CalculatingWalkingPathToParkedCar:
+				case ExtPathMode.CalculatingWalkingPathToTarget:
+				case ExtPathMode.RequiresWalkingPathToParkedCar:
+				case ExtPathMode.WalkingToParkedCar:
+				case ExtPathMode.WalkingToTarget:
+					return ExtPathType.WalkingOnly;
+				default:
+					return ExtPathType.None;
+			}
 		}
 	}
 }

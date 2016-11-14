@@ -295,6 +295,7 @@ namespace TrafficManager.Custom.AI {
 			bool allowRandomParking = true;
 			bool movingToAlternativeParkingPos = false;
 			bool foundStartingPos = false;
+			ExtPathType extPathType = ExtPathType.None;
 			if (Options.prohibitPocketCars) {
 				VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleData.GetFirstVehicle(vehicleID));
 				ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
@@ -361,6 +362,8 @@ namespace TrafficManager.Custom.AI {
 							}
 							break;
 					}
+
+					extPathType = driverExtInstance.GetPathType();
 				}
 			}
 			// NON-STOCK CODE END
@@ -391,7 +394,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			if (Options.debugSwitches[1])
-				Log._Debug($"Requesting path-finding for passenger care {vehicleID}, startPos={startPos}, endPos={endPos}");
+				Log._Debug($"Requesting path-finding for passenger car {vehicleID}, startPos={startPos}, endPos={endPos}, extPathType={extPathType}");
 
 			// NON-STOCK CODE START
 			if (! foundStartingPos) {
@@ -416,7 +419,7 @@ namespace TrafficManager.Custom.AI {
 #else
 					false
 #endif
-					, ExtVehicleType.PassengerCar, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
+					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
@@ -447,8 +450,6 @@ namespace TrafficManager.Custom.AI {
 			Vector3 buildingParkPos;
 			Quaternion buildingParkRot;
 			float buildingParkOffset;
-			bool foundParkingPosRoadSide = false;
-			bool foundParkingPosBuilding = false;
 
 			ushort parkingSpaceSegmentId = CustomPassengerCarAI.FindParkingSpaceAtRoadSide(0, targetPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, Options.debugValues[14], true, out roadParkPos, out roadParkRot, out roadParkOffset);
 			ushort parkingBuildingId = CustomPassengerCarAI.FindParkingSpaceAtBuilding(vehicleInfo, homeId, 0, 0, targetPos, Options.debugValues[14], true, out buildingParkPos, out buildingParkRot, out buildingParkOffset);
@@ -460,7 +461,6 @@ namespace TrafficManager.Custom.AI {
 						// road parking space is closer
 						if (Options.debugSwitches[2])
 							Log._Debug($"Found an (alternative) road-side parking position for vehicle {vehicleId} @ segment {parkingSpaceSegmentId} after comparing distance with a bulding parking position @ {parkingBuildingId}!");
-						foundParkingPosRoadSide = true;
 						parkPos = roadParkPos;
 						parkRot = roadParkRot;
 						parkOffset = roadParkOffset;
@@ -471,7 +471,6 @@ namespace TrafficManager.Custom.AI {
 						// building parking space is closer
 						if (Options.debugSwitches[2])
 							Log._Debug($"Found an alternative building parking position for vehicle {vehicleId} at building {parkingBuildingId} after comparing distance with a road-side parking position @ {parkingSpaceSegmentId}!");
-						foundParkingPosBuilding = true;
 						parkPos = buildingParkPos;
 						parkRot = buildingParkRot;
 						parkOffset = buildingParkOffset;
@@ -483,7 +482,6 @@ namespace TrafficManager.Custom.AI {
 					// road-side but no building parking space found
 					if (Options.debugSwitches[2])
 						Log._Debug($"Found an alternative road-side parking position for vehicle {vehicleId} @ segment {parkingSpaceSegmentId}!");
-					foundParkingPosRoadSide = true;
 					parkPos = roadParkPos;
 					parkRot = roadParkRot;
 					parkOffset = roadParkOffset;
@@ -495,7 +493,6 @@ namespace TrafficManager.Custom.AI {
 				// building but no road-side parking space found
 				if (Options.debugSwitches[2])
 					Log._Debug($"Found an alternative building parking position for vehicle {vehicleId} at building {parkingBuildingId}!");
-				foundParkingPosBuilding = true;
 				parkPos = buildingParkPos;
 				parkRot = buildingParkRot;
 				parkOffset = buildingParkOffset;
@@ -844,7 +841,7 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		public bool ParkVehicle(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
+		public bool CustomParkVehicle(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
 			// NON-STOCK CODE START
 			VehicleState state = null;
 			ExtCitizenInstance driverExtInstance = null;
@@ -1088,8 +1085,6 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		private static bool CustomFindParkingSpace(VehicleInfo vehicleInfo, ushort homeID, Vector3 refPos, Vector3 searchDir, ushort segment, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			Type experimentsToggleType = null;
-
 			float searchRadius = 16f;
 			uint chanceOfParkingOffRoad = 3u;
 

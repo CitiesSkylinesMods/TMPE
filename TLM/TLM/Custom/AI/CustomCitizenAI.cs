@@ -120,6 +120,7 @@ namespace TrafficManager.Custom.AI {
 						break;
 					case ExtPathMode.WalkingToParkedCar:
 					case ExtPathMode.WalkingToTarget:
+					case ExtPathMode.PublicTransportToTarget:
 						if (Options.debugSwitches[2])
 							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.PathMode}. Change to 'None'.");
 						extInstance.Reset();
@@ -271,6 +272,12 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
+			ExtPathType extPathType = ExtPathType.None;
+			if (Options.prohibitPocketCars) {
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
+				extPathType = extInstance.GetPathType();
+			}
+
 			// NON-STOCK CODE END
 
 			if (parkedVehicleId != 0 && canUseOwnPassengerCar) {
@@ -280,7 +287,7 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (citizenData.m_flags & (CitizenInstance.Flags.Underground | CitizenInstance.Flags.Transition)) != CitizenInstance.Flags.None;
 
 			if (Options.debugSwitches[2])
-				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
+				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, extPathType={extPathType}, startPos ={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
 
 			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA); // NON-STOCK CODE
 
@@ -294,7 +301,7 @@ namespace TrafficManager.Custom.AI {
 				}
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint path;
-				bool res = CustomPathManager._instance.CreatePath(false, extVehicleType, 0, canUseOwnPassengerCar ? parkedVehicleId : (ushort)0, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, dummyPathPos, endPosA, dummyPathPos, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
+				bool res = CustomPathManager._instance.CreatePath(false, extVehicleType, 0, extPathType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, dummyPathPos, endPosA, dummyPathPos, vehiclePosition, laneType, vehicleType, 20000f, false, false, false, false, randomParking);
 
 				if (res) {
 					if (Options.debugSwitches[2])
@@ -391,6 +398,32 @@ namespace TrafficManager.Custom.AI {
 			instanceData.m_flags &= ~(CitizenInstance.Flags.WaitingTransport | CitizenInstance.Flags.EnteringVehicle | CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi);
 			if (!this.StartPathFind(instanceID, ref instanceData)) {
 				instanceData.Unspawn(instanceID);
+			}
+		}
+
+		internal static Citizen.AgeGroup GetAgeGroup(Citizen.AgePhase agePhase) {
+			switch (agePhase) {
+				case Citizen.AgePhase.Child:
+					return Citizen.AgeGroup.Child;
+				case Citizen.AgePhase.Teen0:
+				case Citizen.AgePhase.Teen1:
+					return Citizen.AgeGroup.Teen;
+				case Citizen.AgePhase.Young0:
+				case Citizen.AgePhase.Young1:
+				case Citizen.AgePhase.Young2:
+					return Citizen.AgeGroup.Young;
+				case Citizen.AgePhase.Adult0:
+				case Citizen.AgePhase.Adult1:
+				case Citizen.AgePhase.Adult2:
+				case Citizen.AgePhase.Adult3:
+					return Citizen.AgeGroup.Adult;
+				case Citizen.AgePhase.Senior0:
+				case Citizen.AgePhase.Senior1:
+				case Citizen.AgePhase.Senior2:
+				case Citizen.AgePhase.Senior3:
+					return Citizen.AgeGroup.Senior;
+				default:
+					return Citizen.AgeGroup.Adult;
 			}
 		}
 	}

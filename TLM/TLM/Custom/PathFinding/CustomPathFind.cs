@@ -101,7 +101,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _transportVehicle;
 		private ExtVehicleType? _extVehicleType;
 		private ushort? _vehicleId;
-		private ushort? _parkedVehicleId;
+		private ExtCitizenInstance.ExtPathType? _extPathType;
 		private bool _extPublicTransport;
 		private static ushort laneChangeRandCounter = 0;
 #if DEBUG
@@ -138,7 +138,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 		private ExtVehicleType?[] pathUnitExtVehicleType = null;
 		private ushort?[] pathUnitVehicleIds = null;
-		private ushort?[] pathUnitParkedVehicleIds = null;
+		private ExtCitizenInstance.ExtPathType?[] pathUnitPathTypes = null;
 
 		protected virtual void Awake() {
 #if DEBUG
@@ -177,7 +177,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if (pathUnitExtVehicleType == null) {
 				pathUnitExtVehicleType = new ExtVehicleType?[PathUnits.m_size];
 				pathUnitVehicleIds = new ushort?[PathUnits.m_size];
-				pathUnitParkedVehicleIds = new ushort?[PathUnits.m_size];
+				pathUnitPathTypes = new ExtCitizenInstance.ExtPathType?[PathUnits.m_size];
 			}
 
 			m_pathfindProfiler = new ThreadProfiler();
@@ -211,7 +211,7 @@ namespace TrafficManager.Custom.PathFinding {
 			return ExtCalculatePath(null, null, null, unit, skipQueue);
 		}
 
-		public bool ExtCalculatePath(ExtVehicleType? vehicleType, ushort? vehicleId, ushort? parkedVehicleId, uint unit, bool skipQueue) {
+		public bool ExtCalculatePath(ExtVehicleType? vehicleType, ushort? vehicleId, ExtCitizenInstance.ExtPathType? pathType, uint unit, bool skipQueue) {
 			if (Singleton<PathManager>.instance.AddPathReference(unit)) {
 				try {
 					Monitor.Enter(QueueLock);
@@ -276,7 +276,7 @@ namespace TrafficManager.Custom.PathFinding {
 					++this.m_queuedPathFindCount;
 					pathUnitExtVehicleType[unit] = vehicleType;
 					pathUnitVehicleIds[unit] = vehicleId;
-					pathUnitParkedVehicleIds[unit] = parkedVehicleId;
+					pathUnitPathTypes[unit] = pathType;
 #if DEBUGPF3
 					Log._Debug($"(PF #{_pathFindIndex}, T#{Thread.CurrentThread.ManagedThreadId}, Id #{pfId}) CustomPathFind.CalculatePath({vehicleType}, {vehicleId}, {unit}, {skipQueue}) finished. QueueFirst={QueueFirst} QueueLast={QueueLast} Calculating={Calculating}");
 					List<uint> allUnits = new List<uint>();
@@ -321,7 +321,7 @@ namespace TrafficManager.Custom.PathFinding {
 			this._transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
 			this._extVehicleType = pathUnitExtVehicleType[unit];
 			this._vehicleId = pathUnitVehicleIds[unit];
-			this._parkedVehicleId = pathUnitParkedVehicleIds[unit];
+			this._extPathType = pathUnitPathTypes[unit];
 			this._extPublicTransport = _extVehicleType != null && (_extVehicleType & ExtVehicleType.PublicTransport) != ExtVehicleType.None;
 #if DEBUGPF
 			//Log._Debug($"CustomPathFind.PathFindImplementation: path unit {unit}, type {_extVehicleType}");
@@ -892,7 +892,7 @@ namespace TrafficManager.Custom.PathFinding {
 						nextConnectOffset = 128;
 					} else {
 						// pocket car spawning
-						if (Options.prohibitPocketCars && _extVehicleType == ExtVehicleType.PassengerCar && _parkedVehicleId == null) {
+						if (Options.prohibitPocketCars && _extVehicleType == ExtVehicleType.PassengerCar && _extPathType == ExtCitizenInstance.ExtPathType.WalkingOnly) {
 							allowPedSwitch = false;
 						} else {
 							nextConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);

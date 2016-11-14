@@ -104,10 +104,14 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
+			return CustomResidentAI.GetVehicleInfo(instanceID, ref citizenData, forceProbability);
+		}
+
+		public static VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
-			
+
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
@@ -119,36 +123,8 @@ namespace TrafficManager.Custom.AI {
 			}
 			// NON-STOCK CODE END
 
-			Citizen.AgeGroup ageGroup;
-			switch (this.m_info.m_agePhase) {
-				case Citizen.AgePhase.Child:
-					ageGroup = Citizen.AgeGroup.Child;
-					break;
-				case Citizen.AgePhase.Teen0:
-				case Citizen.AgePhase.Teen1:
-					ageGroup = Citizen.AgeGroup.Teen;
-					break;
-				case Citizen.AgePhase.Young0:
-				case Citizen.AgePhase.Young1:
-				case Citizen.AgePhase.Young2:
-					ageGroup = Citizen.AgeGroup.Young;
-					break;
-				case Citizen.AgePhase.Adult0:
-				case Citizen.AgePhase.Adult1:
-				case Citizen.AgePhase.Adult2:
-				case Citizen.AgePhase.Adult3:
-					ageGroup = Citizen.AgeGroup.Adult;
-					break;
-				case Citizen.AgePhase.Senior0:
-				case Citizen.AgePhase.Senior1:
-				case Citizen.AgePhase.Senior2:
-				case Citizen.AgePhase.Senior3:
-					ageGroup = Citizen.AgeGroup.Senior;
-					break;
-				default:
-					ageGroup = Citizen.AgeGroup.Adult;
-					break;
-			}
+			Citizen.AgeGroup ageGroup = CustomCitizenAI.GetAgeGroup(citizenData.Info.m_agePhase);
+
 			int carProb;
 			int bikeProb;
 			int taxiProb;
@@ -236,11 +212,11 @@ namespace TrafficManager.Custom.AI {
 				case Citizen.AgeGroup.Teen:
 					return 5;
 				case Citizen.AgeGroup.Young:
-					return 15;
+					return Options.prohibitPocketCars ? 100 : 15;
 				case Citizen.AgeGroup.Adult:
-					return 20;
+					return Options.prohibitPocketCars ? 100 : 20;
 				case Citizen.AgeGroup.Senior:
-					return 10;
+					return Options.prohibitPocketCars ? 100 : 10;
 				default:
 					return 0;
 			}

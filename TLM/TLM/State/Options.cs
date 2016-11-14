@@ -137,14 +137,14 @@ namespace TrafficManager.State {
 			512f, // 14: debug value (parking space search radius; used if pocket car spawning is disabled)
 			10f, // 15: debug value (maximum junction approach time for priority signs)
 			250f, // 16: debug value (lane changing cost reduction modulo)
-			9f, // 17: debug value (lane speed negative update smoothing)
+			19f, // 17: debug value (lane speed negative update smoothing)
 			2.5f, // 18: debug value (congestion lane changing base cost)
-			19f, // 19: debug value (lane speed positive update smoothing)
-			3000f, // 20: debug value (lower congestion threshold (per ten-thousands))
+			29f, // 19: debug value (lane speed positive update smoothing)
+			2000f, // 20: debug value (lower congestion threshold (per ten-thousands))
 			5000f, // 21: debug value (upper congestion threshold (per ten-thousands))
 			2f, // 22: debug value (lane density negative update smoothing)
 			10f, // 23: debug value (lane density random interval)
-			10f, // 24: debug value (lane speed random interval)
+			25f, // 24: debug value (lane speed random interval)
 			50f, // 25: maximum penalty for heavy vehicles driving on an inner lane (in %)
 			10000f, // 26: maximum number of parking attempts for passenger cars
 			10f,

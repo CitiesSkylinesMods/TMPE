@@ -81,6 +81,7 @@
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
     <Compile Include="Custom\AI\CustomTaxiAI.cs" />
+    <Compile Include="Custom\AI\CustomTouristAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />

@@ -159,7 +159,7 @@ namespace TrafficManager.Custom.AI {
 								// we use integer division here because it's faster
 								if (currentBuf > 0) {
 									uint currentSpeeds = currentLaneSpeeds[segmentID][laneIndex];
-									currentMeanSpeed = (uint)Math.Min(10000u, ((currentSpeeds * 10000) / currentBuf) / ((uint)(Math.Max(SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex]) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+									currentMeanSpeed = (uint)Math.Min(10000u, ((currentSpeeds * 10000) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 								}
 
 								// calculate mean speed

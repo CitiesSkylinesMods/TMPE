@@ -308,7 +308,7 @@ namespace TrafficManager.Manager {
 					continue;
 
 				NetInfo laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment].Info;
-				if (laneInfo.name != info.name && !childNetInfoNamesByCustomizableNetInfoName[info.name].Contains(laneInfo.name))
+				if (laneInfo.name != info.name && (!childNetInfoNamesByCustomizableNetInfoName.ContainsKey(info.name) || !childNetInfoNamesByCustomizableNetInfoName[info.name].Contains(laneInfo.name)))
 					continue;
 
 				Flags.setLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
@@ -328,7 +328,7 @@ namespace TrafficManager.Manager {
 					continue;
 
 				NetInfo laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment].Info;
-				if (laneInfo.name != info.name && childNetInfoNamesByCustomizableNetInfoName.ContainsKey(info.name) && !childNetInfoNamesByCustomizableNetInfoName[info.name].Contains(laneInfo.name))
+				if (laneInfo.name != info.name && (!childNetInfoNamesByCustomizableNetInfoName.ContainsKey(info.name) || !childNetInfoNamesByCustomizableNetInfoName[info.name].Contains(laneInfo.name)))
 					continue;
 
 				Flags.removeLaneSpeedLimit(laneId);
