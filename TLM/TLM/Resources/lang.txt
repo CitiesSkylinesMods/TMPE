@@ -129,5 +129,14 @@ Junction_restrictions Junction restrictions
 Prohibit_spawning_of_pocket_cars Prohibit cims to spawn pocket cars
 Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
 Default_speed_limits Default speed limits
-Searching_for_a_parking_spot Searching for a parking spot
+Looking_for_a_parking_spot Looking for a parking spot
 Driving_to_a_parking_spot Driving to a parking spot
+Driving_to_another_parking_spot Driving to another parking spot
+Entering_vehicle Entering vehicle
+Walking_to_car Walking to car
+Using_public_transport Using public transport
+Walking Walking
+Thinking_of_a_good_parking_spot Thinking of a good parking spot
+Switch_view Switch view
+Outgoing_demand Outgoing demand
+Incoming_demand Incoming demand

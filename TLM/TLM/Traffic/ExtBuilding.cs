@@ -41,7 +41,7 @@ namespace TrafficManager.Traffic {
 			Singleton<BuildingManager>.instance.UpdateBuildingColors(BuildingId);
 		}
 
-		internal void ModifyParkingSpaceDemand(Vector3 parkPos, int minDelta=-5, int maxDelta=10) {
+		internal void ModifyParkingSpaceDemand(Vector3 parkPos, int minDelta=-10, int maxDelta=10) {
 			Vector3 buildingPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[BuildingId].m_position;
 			float distance = Mathf.Clamp((parkPos - buildingPos).magnitude, 0f, Options.debugValues[14]);
 

@@ -29,17 +29,18 @@ namespace TrafficManager.Custom.AI {
 			VehicleInfo info = this.m_info;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startSqrDistA;
+			float startSqrDistB;
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (PathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out endPosA, out endPosB, out num3, out num4)) {
-				if (!startBothWays || num < 10f) {
+			float endSqrDistA;
+			float endSqrDistB;
+			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+				CustomPathManager.FindPathPositionWithSpiralLoop(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+				if (!startBothWays || startSqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num3 < 10f) {
+				if (!endBothWays || endSqrDistA < 10f) {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;

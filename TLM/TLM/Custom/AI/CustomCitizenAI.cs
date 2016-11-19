@@ -79,7 +79,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				} else if (knownParkingSpaceLocation == ExtParkingSpaceLocation.Building) {
 					// found a building with parking space
-					if (PathManager.FindPathPosition(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, 256f, out endPathPos)) {
+					if (CustomPathManager.FindPathPositionWithSpiralLoop(parkPos, endPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, Options.debugValues[31], out endPathPos)) {
 						calculateEndPos = false;
 					}
 					
@@ -237,9 +237,13 @@ namespace TrafficManager.Custom.AI {
 				// if the citizen is a resident and is starting its journey: find a suitable parking space near the target
 				if (extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ParkedCarReached) {
 					if (Options.debugSwitches[2])
-						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode}");
+						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode} parkedVehicleId={parkedVehicleId}");
 
 					startLaneType &= ~NetInfo.LaneType.Pedestrian;
+					startPos = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position;
+
+					if (Options.debugSwitches[2])
+						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Setting startLaneType={startLaneType}, startPos={startPos} for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode}");
 
 					bool calcEndPos;
 					bool allowRandPark;
@@ -285,12 +289,12 @@ namespace TrafficManager.Custom.AI {
 
 			if (parkedVehicleId != 0 && canUseOwnPassengerCar) {
 				Vector3 position = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position;
-				PathManager.FindPathPosition(position, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, false, false, 32f, out vehiclePosition);
+				CustomPathManager.FindPathPositionWithSpiralLoop(position, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, false, false, 32f, out vehiclePosition);
 			}
 			bool allowUnderground = (citizenData.m_flags & (CitizenInstance.Flags.Underground | CitizenInstance.Flags.Transition)) != CitizenInstance.Flags.None;
 
 			if (Options.debugSwitches[2])
-				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, extPathType={extPathType}, startPos ={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
+				Log._Debug($"Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, extPathType={extPathType}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
 
 			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA); // NON-STOCK CODE
 
@@ -326,18 +330,18 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		internal static bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo) {
+		internal static bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
 			if (Options.debugSwitches[1] && homeId != 0)
 				Log._Debug($"Trying to spawn parked passenger car for citizen {citizenId}, home {homeId} @ {refPos}");
-			if (TrySpawnParkedPassengerCarRoadSide(citizenId, refPos, vehicleInfo))
+			if (TrySpawnParkedPassengerCarRoadSide(citizenId, refPos, vehicleInfo, out parkPos))
 				return true;
-			return TrySpawnParkedPassengerCarBuilding(citizenId, homeId, refPos, vehicleInfo);
+			return TrySpawnParkedPassengerCarBuilding(citizenId, homeId, refPos, vehicleInfo, out parkPos);
 		}
 
-		protected static bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo) {
-			if (Options.debugSwitches[1])
+		protected static bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
+			if (Options.debugSwitches[2])
 				Log._Debug($"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
-			Vector3 parkPos = Vector3.zero;
+			parkPos = Vector3.zero;
 			Quaternion parkRot = Quaternion.identity;
 			float parkOffset = 0f;
 
@@ -347,7 +351,7 @@ namespace TrafficManager.Custom.AI {
 				if (Singleton<VehicleManager>.instance.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, citizenId)) {
 					Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetParkedVehicle(citizenId, parkedVehicleId);
 					Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags &= (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
-					if (Options.debugSwitches[1])
+					if (Options.debugSwitches[2])
 						Log._Debug($"[SUCCESS] Spawned parked passenger car at road side for citizen {citizenId}: {parkedVehicleId}");
 					return true;
 				}
@@ -357,10 +361,10 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		protected static bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo) {
+		protected static bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
 			if (Options.debugSwitches[1] && homeId != 0)
 				Log._Debug($"Trying to spawn parked passenger car next to building for citizen {citizenId} @ {refPos}");
-			Vector3 parkPos = Vector3.zero;
+			parkPos = Vector3.zero;
 			Quaternion parkRot = Quaternion.identity;
 			float parkOffset;
 

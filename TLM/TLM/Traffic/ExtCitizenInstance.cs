@@ -216,21 +216,25 @@ namespace TrafficManager.Traffic {
 
 			PathUnit.Position parkPathPos;
 			PathUnit.Position targetPathPos;
-			if (PathManager.FindPathPosition(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, 256f, out parkPathPos) &&
-				PathManager.FindPathPosition(targetPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, 256f, out targetPathPos)) {
+			if (CustomPathManager.FindPathPositionWithSpiralLoop(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, Options.debugValues[31], out parkPathPos) &&
+				CustomPathManager.FindPathPositionWithSpiralLoop(targetPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, Options.debugValues[31], out targetPathPos)) {
 
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
 
 				if (CustomPathManager._instance.CreatePath(false, ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false)) {
 					if (Options.debugSwitches[2])
-						Log._Debug($"Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
+						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
 
 					ReturnPathId = pathId;
 					ReturnPathState = ExtPathState.Calculating;
 					return true;
 				}
 			}
+
+			if (Options.debugSwitches[1])
+				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {InstanceId}.");
+
 			return false;
 		}
 

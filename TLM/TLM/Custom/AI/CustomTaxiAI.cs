@@ -59,15 +59,15 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startSqrDistA;
+			float startSqrDistB;
 			PathUnit.Position endPosA;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
+			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
 				info2.m_citizenAI.FindPathPosition(passengerInstance, ref instance.m_instances.m_buffer[(int)passengerInstance], endPos, laneType, vehicleType, undergroundTarget, out endPosA)) {
 				if ((instance.m_instances.m_buffer[(int)passengerInstance].m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 					laneType |= NetInfo.LaneType.PublicTransport;
 				}
-				if (!startBothWays || num < 10f) {
+				if (!startBothWays || startSqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
 				PathUnit.Position endPosB = default(PathUnit.Position);

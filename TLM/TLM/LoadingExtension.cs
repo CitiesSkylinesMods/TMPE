@@ -1066,6 +1066,23 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirection TouristAI::GetLocalizedStatus calls");
+				try {
+					Detours.Add(new Detour(typeof(TouristAI).GetMethod("GetLocalizedStatus",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (InstanceID).MakeByRefType()
+							},
+							null), typeof(CustomTouristAI).GetMethod("CustomGetLocalizedStatus")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TouristAI::GetLocalizedStatus");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirecting CargoTruckAI Simulation Step Calls");
 				try {
 					Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("SimulationStep",
@@ -1447,7 +1464,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log.Info("Redirection PassengerCarAI::StartPathFind(2) calls");
+					/*Log.Info("Redirection PassengerCarAI::StartPathFind(2) calls");
 					try {
 						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -1466,7 +1483,7 @@ namespace TrafficManager {
 					} catch (Exception) {
 						Log.Error("Could not redirect PassengerCarAI::StartPathFind(2)");
 						detourFailed = true;
-					}
+					}*/
 
 					Log.Info("Redirection PoliceCarAI::StartPathFind calls");
 					try {

@@ -12,6 +12,7 @@ using UnityEngine;
 using TrafficManager.Geometry;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Util;
 
 // ReSharper disable InconsistentNaming
 
@@ -185,10 +186,10 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		public bool CreatePath(bool recalc, ExtVehicleType vehicleType, ushort vehicleId, ExtCitizenInstance.ExtPathType pathType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking) {
-			uint num;
+			uint pathUnitId;
 			try {
 				Monitor.Enter(this.m_bufferLock);
-				if (!this.m_pathUnits.CreateItem(out num, ref randomizer)) {
+				if (!this.m_pathUnits.CreateItem(out pathUnitId, ref randomizer)) {
 					unit = 0u;
 					bool result = false;
 					return result;
@@ -197,7 +198,8 @@ namespace TrafficManager.Custom.PathFinding {
 			} finally {
 				Monitor.Exit(this.m_bufferLock);
 			}
-			unit = num;
+			unit = pathUnitId;
+
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 1;
 			if (isHeavyVehicle) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
@@ -211,7 +213,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if (randomParking) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 128;
 			}
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_pathFindFlags = 0;
+			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_buildIndex = buildIndex;
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position00 = startPosA;
 			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position01 = endPosA;
@@ -255,6 +257,133 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			this.ReleasePath(unit);
 			return false;
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, allowUnderground, requireConnect, maxDistance, out pathPos);
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
+			PathUnit.Position position2;
+			float distanceSqrA;
+			float distanceSqrB;
+			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPos, out position2, out distanceSqrA, out distanceSqrB);
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, stopType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		}
+
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			int centerI = (int)(position.z / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f);
+			int centerJ = (int)(position.x / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f);
+			int radius = Math.Max(1, (int)(maxDistance / ((float)NetManager.NODEGRID_CELL_SIZE / 2f) + 1f));
+
+			NetManager netManager = Singleton<NetManager>.instance;
+			/*pathPosA.m_segment = 0;
+			pathPosA.m_lane = 0;
+			pathPosA.m_offset = 0;*/
+			distanceSqrA = 1E+10f;
+			/*pathPosB.m_segment = 0;
+			pathPosB.m_lane = 0;
+			pathPosB.m_offset = 0;*/
+			distanceSqrB = 1E+10f;
+			float minDist = -1f;
+
+			PathUnit.Position myPathPosA = default(PathUnit.Position);
+			float myDistanceSqrA = float.MaxValue;
+			PathUnit.Position myPathPosB = default(PathUnit.Position);
+			float myDistanceSqrB = float.MaxValue;
+
+			int lastSpiralDist = 0;
+			bool found = false;
+
+			LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, delegate (int i, int j) {
+				if (i < 0 || i >= NetManager.NODEGRID_RESOLUTION || j < 0 || j >= NetManager.NODEGRID_RESOLUTION)
+					return true;
+
+				int spiralDist = Math.Max(Math.Abs(i - centerI), Math.Abs(j - centerJ)); // maximum norm
+
+				if (found && spiralDist > lastSpiralDist) {
+					// last iteration
+					return false;
+				}
+
+				ushort segmentId = netManager.m_segmentGrid[i * NetManager.NODEGRID_RESOLUTION + j];
+				int iterations = 0;
+				while (segmentId != 0) {
+					NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+					if (segmentInfo != null &&
+						segmentInfo.m_class.m_service == service &&
+						(netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Flooded) == NetSegment.Flags.None && (allowUnderground || !segmentInfo.m_netAI.IsUnderground())
+						) {
+
+						ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
+						ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
+						Vector3 startNodePos = netManager.m_nodes.m_buffer[startNodeId].m_position;
+						Vector3 endNodePos = netManager.m_nodes.m_buffer[endNodeId].m_position;
+	
+						Vector3 posA; int laneIndexA; float laneOffsetA;
+						Vector3 posB; int laneIndexB; float laneOffsetB;
+
+						if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(position, laneType, vehicleType, stopType, requireConnect, out posA, out laneIndexA, out laneOffsetA, out posB, out laneIndexB, out laneOffsetB)) {
+							float dist = Vector3.SqrMagnitude(position - posA);
+							if (secondaryPosition != null)
+								dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
+
+							if (minDist < 0f || dist < minDist) {
+								found = true;
+
+								minDist = dist;
+								myPathPosA.m_segment = segmentId;
+								myPathPosA.m_lane = (byte)laneIndexA;
+								myPathPosA.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetA * 255f), 0, 255);
+								myDistanceSqrA = dist;
+
+								dist = Vector3.SqrMagnitude(position - posB);
+								if (secondaryPosition != null)
+									dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posB);
+
+								if (laneIndexB < 0) {
+									myPathPosB.m_segment = 0;
+									myPathPosB.m_lane = 0;
+									myPathPosB.m_offset = 0;
+									myDistanceSqrB = float.MaxValue;
+								} else {
+									myPathPosB.m_segment = segmentId;
+									myPathPosB.m_lane = (byte)laneIndexB;
+									myPathPosB.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetB * 255f), 0, 255);
+									myDistanceSqrB = dist;
+								}
+							}
+						}
+					}
+
+					segmentId = netManager.m_segments.m_buffer[segmentId].m_nextGridSegment;
+					if (++iterations >= NetManager.MAX_SEGMENT_COUNT) {
+						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+						break;
+					}
+				}
+
+				lastSpiralDist = spiralDist;
+				return true;
+			});
+
+			pathPosA = myPathPosA;
+			distanceSqrA = myDistanceSqrA;
+			pathPosB = myPathPosB;
+			distanceSqrB = myDistanceSqrB;
+			
+			return pathPosA.m_segment != 0;
 		}
 
 		private void StopPathFinds() {
