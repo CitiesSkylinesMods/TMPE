@@ -314,6 +314,7 @@ namespace TrafficManager.Custom.AI {
 							startBothWays = false;
 							break;
 						case ExtPathMode.None:
+						case ExtPathMode.ParkedCarReached:
 						case ExtPathMode.DrivingToTarget:
 						case ExtPathMode.DrivingToKnownParkPos:
 						case ExtPathMode.ParkingFailed:

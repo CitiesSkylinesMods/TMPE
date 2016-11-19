@@ -88,6 +88,8 @@ namespace TrafficManager.Custom.PathFinding {
 		private float _maxLength;
 		private uint _startLaneA;
 		private uint _startLaneB;
+		private ushort _startSegmentA;
+		private ushort _startSegmentB;
 		private uint _endLaneA;
 		private uint _endLaneB;
 		private uint _vehicleLane;
@@ -191,7 +193,6 @@ namespace TrafficManager.Custom.PathFinding {
 
 		}
 
-#region stock code
 		protected virtual void OnDestroy() {
 #if DEBUGLOCKS
 			uint lockIter = 0;
@@ -334,6 +335,7 @@ namespace TrafficManager.Custom.PathFinding {
 			BufferItem bufferItemStartA;
 			if (data.m_position00.m_segment != 0 && posCount >= 1) {
 				this._startLaneA = PathManager.GetLaneID(data.m_position00);
+				this._startSegmentA = data.m_position00.m_segment; // NON-STOCK CODE
 				this._startOffsetA = data.m_position00.m_offset;
 				bufferItemStartA.m_laneID = this._startLaneA;
 				bufferItemStartA.m_position = data.m_position00;
@@ -342,12 +344,14 @@ namespace TrafficManager.Custom.PathFinding {
 				bufferItemStartA.m_numSegmentsToJunction = 0;
 			} else {
 				this._startLaneA = 0u;
+				this._startSegmentA = 0; // NON-STOCK CODE
 				this._startOffsetA = 0;
 				bufferItemStartA = default(BufferItem);
 			}
 			BufferItem bufferItemStartB;
 			if (data.m_position02.m_segment != 0 && posCount >= 3) {
 				this._startLaneB = PathManager.GetLaneID(data.m_position02);
+				this._startSegmentB = data.m_position02.m_segment; // NON-STOCK CODE
 				this._startOffsetB = data.m_position02.m_offset;
 				bufferItemStartB.m_laneID = this._startLaneB;
 				bufferItemStartB.m_position = data.m_position02;
@@ -356,6 +360,7 @@ namespace TrafficManager.Custom.PathFinding {
 				bufferItemStartB.m_numSegmentsToJunction = 0;
 			} else {
 				this._startLaneB = 0u;
+				this._startSegmentB = 0; // NON-STOCK CODE
 				this._startOffsetB = 0;
 				bufferItemStartB = default(BufferItem);
 			}
@@ -647,7 +652,6 @@ namespace TrafficManager.Custom.PathFinding {
 			//Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Cannot find path (pfCurrentState={pfCurrentState}) for unit {unit}");
 #endif
 		}
-#endregion
 
 		// be aware:
 		//   (1) path-finding works from target to start. the "next" segment is always the previous and the "previous" segment is always the next segment on the path!
@@ -892,7 +896,8 @@ namespace TrafficManager.Custom.PathFinding {
 						nextConnectOffset = 128;
 					} else {
 						// pocket car spawning
-						if (Options.prohibitPocketCars && _extVehicleType == ExtVehicleType.PassengerCar && _extPathType == ExtCitizenInstance.ExtPathType.WalkingOnly) {
+						if (Options.prohibitPocketCars &&
+								(_extPathType == ExtCitizenInstance.ExtPathType.WalkingOnly || (_extPathType == ExtCitizenInstance.ExtPathType.DrivingOnly && item.m_position.m_segment != _startSegmentA && item.m_position.m_segment != _startSegmentB))) {
 							allowPedSwitch = false;
 						} else {
 							nextConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);
