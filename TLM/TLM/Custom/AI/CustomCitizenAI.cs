@@ -97,7 +97,7 @@ namespace TrafficManager.Custom.AI {
 
 		public bool CustomStartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo) {
 			if (Options.debugSwitches[2])
-				Log._Debug($"CustomCitizenAI.CustomStartPathFind: called for citizen instance {instanceID}, citizen {citizenData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
+				Log.Warning($"CustomCitizenAI.CustomStartPathFind: called for citizen instance {instanceID}, citizen {citizenData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding}");
 
 			// NON-STOCK CODE START
 			ExtVehicleType extVehicleType = ExtVehicleType.None;
@@ -184,6 +184,7 @@ namespace TrafficManager.Custom.AI {
 					// NON-STOCK CODE END
 				}
 			}
+			NetInfo.LaneType startLaneType = laneType;
 			PathUnit.Position vehiclePosition = default(PathUnit.Position);
 
 			// NON-STOCK CODE START
@@ -237,6 +238,8 @@ namespace TrafficManager.Custom.AI {
 				if (extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ParkedCarReached) {
 					if (Options.debugSwitches[2])
 						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode}");
+
+					startLaneType &= ~NetInfo.LaneType.Pedestrian;
 
 					bool calcEndPos;
 					bool allowRandPark;
@@ -292,7 +295,7 @@ namespace TrafficManager.Custom.AI {
 			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, laneType, vehicleType, false, out endPosA); // NON-STOCK CODE
 
 			PathUnit.Position startPosA;
-			if (FindPathPosition(instanceID, ref citizenData, startPos, laneType, vehicleType, allowUnderground, out startPosA) &&
+			if (FindPathPosition(instanceID, ref citizenData, startPos, startLaneType, vehicleType, allowUnderground, out startPosA) &&
 				foundEndPos // NON-STOCK CODE
 				) {
 

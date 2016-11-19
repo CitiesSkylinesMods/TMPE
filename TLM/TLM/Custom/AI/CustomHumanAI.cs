@@ -110,9 +110,46 @@ namespace TrafficManager.Custom.AI {
 					if (Options.debugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Citizen instance {instanceID} arrives at parked car.");
 
-					//GetBuildingTargetPosition(instanceID, ref citizenData, 0f);
-					if (Options.debugSwitches[2])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep: Calculated new targetPos for citizen instance {instanceID}: {instanceData.m_targetPos} (parked vehicle position)");
+					/*PathUnit.Position closestVehLanePathPos;
+					if (PathManager.FindPathPosition(instanceData.GetLastFramePosition(), ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, false, false, 256f, out closestVehLanePathPos)) {
+						bool spawned = this.SpawnVehicle(instanceID, ref instanceData, closestVehLanePathPos);
+						ushort vehId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle;
+
+						if (Options.debugSwitches[2])
+							Log._Debug($"CustomHumanAI.CustomSimulationStep: Spawning vehicle for citizen instance {instanceID} at parked car position. spawned={spawned} vehicleId={vehId}");
+
+						if (spawned) {
+							// enter the vehicle
+							instanceData.m_flags &= ~CitizenInstance.Flags.EnteringVehicle;
+
+							if (instanceData.m_path != 0) {
+								Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
+								instanceData.m_path = 0u;
+							}
+
+							instanceData.Unspawn(instanceID);
+
+							instanceData.m_targetPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_targetBuilding].m_position;
+
+							// set target position to a position on vehicle lane
+							//uint closestVehLaneId = PathManager.GetLaneID(closestVehLanePathPos);
+							//Vector3 closestVehLanePos;
+							//float closestVehLaneOffset;
+							//Singleton<NetManager>.instance.m_lanes.m_buffer[closestVehLaneId].GetClosestPosition(instanceData.GetLastFramePosition(), out closestVehLanePos, out closestVehLaneOffset);
+
+							//instanceData.m_targetPos = closestVehLanePos;
+
+							if (Options.debugSwitches[2])
+								Log._Debug($"CustomHumanAI.CustomSimulationStep: Setting target position of citizen instance {instanceID} to position of target building {instanceData.m_targetBuilding}, seg={closestVehLanePathPos.m_segment}, lane={closestVehLanePathPos.m_lane}, offset={closestVehLanePathPos.m_offset}");
+							return;
+						}
+					} else {
+						if (Options.debugSwitches[1])
+							Log._Debug($"CustomHumanAI.CustomSimulationStep: Could not find sidewalk position near parked vehicle/could not spawn vehicle for citizen instance {instanceID}.");
+						extInstance.Reset();
+						this.InvalidPath(instanceID, ref instanceData);
+						return;
+					}*/
 					this.InvalidPath(instanceID, ref instanceData);
 					return;
 				}
@@ -398,7 +435,7 @@ namespace TrafficManager.Custom.AI {
 				return false;
 			}
 
-			bool walkingToCar = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToParkedCar;
+			bool walkingToCar = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToParkedCar || extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ReachingParkedCar;
 			bool walkingToTarget = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget || extInstance.PathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget;
 			bool spawned = ((instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None);
 
@@ -415,26 +452,33 @@ namespace TrafficManager.Custom.AI {
 				// check if path is complete
 				PathUnit.Position pos;
 				if (instanceData.m_pathPositionIndex != 255 && (instanceData.m_path == 0 || !CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].GetPosition(instanceData.m_pathPositionIndex >> 1, out pos))) {
-					float dist = (instanceData.GetLastFramePosition() - (Vector3)instanceData.m_targetPos).magnitude;
-					//if (dist < 2f) {
 					if (walkingToCar) {
 						ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 						if (parkedVehicleId != 0) {
-							extInstance.PathMode = ExtCitizenInstance.ExtPathMode.ParkedCarReached;
 							instanceData.m_targetPos = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position;
-							if (Options.debugSwitches[2])
-								Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position (dist={dist}). Calculating remaining path now. CurrentDepartureMode={extInstance.PathMode}");
-							return true;
+							float dist = (instanceData.GetLastFramePosition() - (Vector3)instanceData.m_targetPos).magnitude;
+
+							if (dist >= 3f) {
+								extInstance.PathMode = ExtPathMode.ReachingParkedCar;
+								if (Options.debugSwitches[2])
+									Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} is currently reaching their parked car {parkedVehicleId} (dist={dist}). CurrentDepartureMode={extInstance.PathMode}");
+								return false;
+							} else {
+								extInstance.PathMode = ExtCitizenInstance.ExtPathMode.ParkedCarReached;
+								if (Options.debugSwitches[2])
+									Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position (dist={dist}). Set targetPos to parked vehicle position. Calculating remaining path now. CurrentDepartureMode={extInstance.PathMode}");
+								return true;
+							}
 						} else {
 							extInstance.Reset();
 							if (Options.debugSwitches[1])
-								Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position (dist={dist}) but does not own a parked car. Illegal state! Setting CurrentDepartureMode={extInstance.PathMode}");
+								Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position but does not own a parked car. Illegal state! Setting CurrentDepartureMode={extInstance.PathMode}");
 							return false;
 						}
 					} else {
 						extInstance.Reset();
 						if (Options.debugSwitches[2])
-							Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached target (dist={dist}). CurrentDepartureMode={extInstance.PathMode}");
+							Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached target. CurrentDepartureMode={extInstance.PathMode}");
 						return false;
 					}
 				}

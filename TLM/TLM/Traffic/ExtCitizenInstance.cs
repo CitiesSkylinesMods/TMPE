@@ -53,6 +53,10 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// 
 			/// </summary>
+			ReachingParkedCar,
+			/// <summary>
+			/// 
+			/// </summary>
 			ParkedCarReached,
 			/// <summary>
 			/// 
