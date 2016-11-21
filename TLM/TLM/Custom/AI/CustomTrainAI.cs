@@ -244,8 +244,8 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float endSqrDistA;
 			float endSqrDistB;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
-				CustomPathManager.FindPathPositionWithSpiralLoop(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
 				if (!startBothWays || startSqrDistB > startSqrDistA * 1.2f) {
 					startPosB = default(PathUnit.Position);
 				}

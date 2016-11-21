@@ -283,9 +283,17 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			int iMin = Mathf.Max((int)((position.z - (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), 0);
+			int iMax = Mathf.Min((int)((position.z + (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), NetManager.NODEGRID_RESOLUTION-1);
+
+			int jMin = Mathf.Max((int)((position.x - (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), 0);
+			int jMax = Mathf.Min((int)((position.x + (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), NetManager.NODEGRID_RESOLUTION - 1);
+
+			int width = iMax-iMin+1;
+			int height = jMax-jMin+1;
+
 			int centerI = (int)(position.z / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f);
 			int centerJ = (int)(position.x / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f);
-			int radius = Math.Max(1, (int)(maxDistance / ((float)NetManager.NODEGRID_CELL_SIZE / 2f) + 1f));
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			/*pathPosA.m_segment = 0;
@@ -296,7 +304,7 @@ namespace TrafficManager.Custom.PathFinding {
 			pathPosB.m_lane = 0;
 			pathPosB.m_offset = 0;*/
 			distanceSqrB = 1E+10f;
-			float minDist = -1f;
+			float minDist = float.MaxValue;
 
 			PathUnit.Position myPathPosA = default(PathUnit.Position);
 			float myDistanceSqrA = float.MaxValue;
@@ -306,7 +314,7 @@ namespace TrafficManager.Custom.PathFinding {
 			int lastSpiralDist = 0;
 			bool found = false;
 
-			LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, delegate (int i, int j) {
+			LoopUtil.SpiralLoop(centerI, centerJ, width, height, delegate (int i, int j) {
 				if (i < 0 || i >= NetManager.NODEGRID_RESOLUTION || j < 0 || j >= NetManager.NODEGRID_RESOLUTION)
 					return true;
 
@@ -339,7 +347,7 @@ namespace TrafficManager.Custom.PathFinding {
 							if (secondaryPosition != null)
 								dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
 
-							if (minDist < 0f || dist < minDist) {
+							if (dist < minDist) {
 								found = true;
 
 								minDist = dist;

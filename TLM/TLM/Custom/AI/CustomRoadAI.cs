@@ -164,13 +164,13 @@ namespace TrafficManager.Custom.AI {
 
 								// calculate mean speed
 								ushort previousMeanSpeed = laneMeanSpeeds[segmentID][laneIndex];
-								uint speedUpdateSmoothing = currentMeanSpeed > previousMeanSpeed ? (uint)Options.debugValues[19] : (uint)Options.debugValues[17];
+								uint speedUpdateSmoothing = currentMeanSpeed > previousMeanSpeed ? (uint)GlobalConfig.Instance().LaneSpeedPositiveUpdateSmoothing : (uint)GlobalConfig.Instance().LaneSpeedNegativeUpdateSmoothing;
 								laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)previousMeanSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));
 
 								// determine if segment is congested
-								if (laneMeanSpeeds[segmentID][laneIndex] <= Options.debugValues[20]) {
+								if (laneMeanSpeeds[segmentID][laneIndex] <= GlobalConfig.Instance().LowerSpeedCongestionThreshold) {
 									setCongested = true;
-								} else if (currentMeanSpeed >= Options.debugValues[21]) {
+								} else if (currentMeanSpeed >= GlobalConfig.Instance().UpperSpeedCongestionThreshold) {
 									unsetCongested = true;
 								}
 

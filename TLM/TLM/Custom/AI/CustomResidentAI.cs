@@ -47,21 +47,15 @@ namespace TrafficManager.Custom.AI {
 						
 						if (targetBuilding == homeId) {
 							target = InstanceID.Empty;
-							ret = Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
+							return Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
 						} else if (targetBuilding == workId) {
 							target = InstanceID.Empty;
-							ret = Locale.Get((!isStudent) ? "CITIZEN_STATUS_DRIVINGTO_WORK" : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
+							return Locale.Get((!isStudent) ? "CITIZEN_STATUS_DRIVINGTO_WORK" : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
 						} else {
 							target = InstanceID.Empty;
 							target.Building = targetBuilding;
-							ret = Locale.Get("CITIZEN_STATUS_DRIVINGTO");
+							return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 						}
-
-						if (Options.prohibitPocketCars) {
-							ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
-							ret = CustomPassengerCarAI.EnrichLocalizedStatus(ret, extInstance);
-						}
-						return ret;
 					}
 				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport) {
 					if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != CitizenInstance.Flags.None) {
@@ -115,10 +109,12 @@ namespace TrafficManager.Custom.AI {
 				ret = Locale.Get("CITIZEN_STATUS_GOINGTO");
 			}
 
+			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
 				ret = CustomHumanAI.EnrichLocalizedStatus(ret, extInstance);
 			}
+			// NON-STOCK CODE END
 			return ret;
 		}
 
@@ -135,8 +131,10 @@ namespace TrafficManager.Custom.AI {
 			if (Options.prohibitPocketCars) {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
-					if (Options.debugSwitches[2])
+#if DEBUG
+					if (GlobalConfig.Instance().DebugSwitches[2])
 						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#endif
 					return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 				}
 			}

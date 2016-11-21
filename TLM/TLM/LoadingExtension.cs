@@ -1591,7 +1591,7 @@ namespace TrafficManager {
 						detourFailed = true;
 					}
 
-					Log.Info("Redirection CitizenAI::InvalidPath calls");
+					/*Log.Info("Redirection CitizenAI::InvalidPath calls");
 					try {
 						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("InvalidPath",
 								BindingFlags.NonPublic | BindingFlags.Instance,
@@ -1606,7 +1606,7 @@ namespace TrafficManager {
 					} catch (Exception) {
 						Log.Error("Could not redirect CitizenAI::InvalidPath");
 						detourFailed = true;
-					}
+					}*/
 
 					Log.Info("Redirection TransportLineAI::StartPathFind calls");
 					try {

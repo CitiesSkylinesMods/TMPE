@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Manager;
+using TrafficManager.State;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCommonBuildingAI : BuildingAI {
@@ -11,9 +12,9 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
 			if ((frameIndex & 1u) == 0u) {
-				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemoveParkingSpaceDemand(1u);
-				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(1u, true);
-                ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(1u, false);
+				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemoveParkingSpaceDemand(GlobalConfig.Instance().ParkingSpaceDemandDecrement);
+				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance().PublicTransportDemandDecrement, true);
+                ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance().PublicTransportDemandDecrement, false);
             }
 			// NON-STOCK CODE END
 

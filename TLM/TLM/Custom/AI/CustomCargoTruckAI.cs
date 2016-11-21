@@ -59,12 +59,12 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position startPosB;
 			float num;
 			float num2;
-			bool startPosFound = CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2);
+			bool startPosFound = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2);
 			PathUnit.Position position;
 			PathUnit.Position position2;
 			float num3;
 			float num4;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, allowUnderground, false, 32f, out position, out position2, out num3, out num4)) {
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, allowUnderground, false, 32f, out position, out position2, out num3, out num4)) {
 				if (!startPosFound || num3 < num) {
 					startPosA = position;
 					startPosB = position2;
@@ -77,12 +77,12 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float num5;
 			float num6;
-			bool endPosFound = CustomPathManager.FindPathPositionWithSpiralLoop(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, undergroundTarget, false, 32f, out endPosA, out endPosB, out num5, out num6);
+			bool endPosFound = CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, undergroundTarget, false, 32f, out endPosA, out endPosB, out num5, out num6);
 			PathUnit.Position position3;
 			PathUnit.Position position4;
 			float num7;
 			float num8;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, undergroundTarget, false, 32f, out position3, out position4, out num7, out num8)) {
+			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, undergroundTarget, false, 32f, out position3, out position4, out num7, out num8)) {
 				if (!endPosFound || num7 < num5) {
 					endPosA = position3;
 					endPosB = position4;

@@ -175,7 +175,7 @@ namespace TrafficManager.TrafficLight {
 			lastFlowWaitCalc = 0;
 
 #if DEBUG
-			/*if (Options.debugSwitches[2]) {
+			/*if (GlobalConfig.Instance().DebugSwitches[2]) {
 				if (timedNode.NodeId == 31605) {
 					Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
 					Log._Debug($"minTime: {minTime} maxTime: {maxTime}");

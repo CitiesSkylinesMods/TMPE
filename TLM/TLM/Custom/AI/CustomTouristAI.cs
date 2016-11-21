@@ -38,13 +38,7 @@ namespace TrafficManager.Custom.AI {
 
 						target = InstanceID.Empty;
 						target.Building = targetBuilding;
-						ret = Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-
-						if (Options.prohibitPocketCars) {
-							ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
-							ret = CustomPassengerCarAI.EnrichLocalizedStatus(ret, extInstance);
-						}
-						return ret;
+						return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 					}
 				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport) {
 					if (flag) {
@@ -69,10 +63,12 @@ namespace TrafficManager.Custom.AI {
 			target.Building = targetBuilding;
 			ret = Locale.Get("CITIZEN_STATUS_GOINGTO");
 
+			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
 				ret = CustomHumanAI.EnrichLocalizedStatus(ret, extInstance);
 			}
+			// NON-STOCK CODE END
 			return ret;
 		}
 
@@ -89,8 +85,10 @@ namespace TrafficManager.Custom.AI {
 			if (Options.prohibitPocketCars) {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
-					if (Options.debugSwitches[2])
+#if DEBUG
+					if (GlobalConfig.Instance().DebugSwitches[2])
 						Log._Debug($"CustomTouristAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#endif
 					return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 				}
 			}

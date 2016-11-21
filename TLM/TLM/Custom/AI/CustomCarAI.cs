@@ -35,7 +35,7 @@ namespace TrafficManager.Custom.AI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			PathManager pathMan = Singleton<PathManager>.instance;
 #if DEBUG
-			/*if (!Options.debugSwitches[0]) {
+			/*if (!GlobalConfig.Instance().DebugSwitches[0]) {
 				Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}) called. flags: {vehicleData.m_flags} pfFlags: {pathMan.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags}");
             }*/
 #endif
@@ -367,8 +367,8 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float num3;
 			float num4;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
-				CustomPathManager.FindPathPositionWithSpiralLoop(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
 				if (!startBothWays || num < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -395,8 +395,10 @@ namespace TrafficManager.Custom.AI {
 					state.PathWaitCounter = 0;
 #endif
 
-					if (Options.debugSwitches[2])
+#if DEBUG
+					if (GlobalConfig.Instance().DebugSwitches[2])
 						Log._Debug($"Path-finding starts for car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+#endif
 
 
 					if (vehicleData.m_path != 0u) {

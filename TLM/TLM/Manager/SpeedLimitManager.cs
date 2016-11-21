@@ -489,7 +489,6 @@ namespace TrafficManager.Manager {
 		public void OnBeforeLoadData() {
 			// determine vanilla speed limits and customizable NetInfos
 			SteamHelper.DLC_BitMask dlcMask = SteamHelper.GetOwnedDLCMask();
-			dlcMask &= ~SteamHelper.DLC_BitMask.SnowFallDLC; // DEBUG
 
 			int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
 			customizableNetInfos.Clear();
@@ -498,7 +497,7 @@ namespace TrafficManager.Manager {
 			for (uint i = 0; i < numLoaded; ++i) {
 				NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
 				//Log._Debug($"Iterating over: {info.name}, {info.m_netAI == null}");
-				if (info.m_placementStyle == ItemClass.Placement.Manual && info.m_netAI != null && info.m_netAI is RoadBaseAI && (uint)(info.m_dlcRequired & dlcMask) != 0u) {
+				if (info.m_placementStyle == ItemClass.Placement.Manual && info.m_netAI != null && info.m_netAI is RoadBaseAI && (info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
 					string infoName = info.name;
 					if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
 						Log._Debug($"Loaded road NetInfo: {infoName}");

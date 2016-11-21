@@ -62,7 +62,7 @@ namespace TrafficManager.Custom.AI {
 			float startSqrDistA;
 			float startSqrDistB;
 			PathUnit.Position endPosA;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
 				info2.m_citizenAI.FindPathPosition(passengerInstance, ref instance.m_instances.m_buffer[(int)passengerInstance], endPos, laneType, vehicleType, undergroundTarget, out endPosA)) {
 				if ((instance.m_instances.m_buffer[(int)passengerInstance].m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 					laneType |= NetInfo.LaneType.PublicTransport;

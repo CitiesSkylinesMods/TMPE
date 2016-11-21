@@ -219,6 +219,10 @@ namespace TrafficManager.State {
 					if (options.Length >= 26) {
 						Options.setProhibitPocketCars(options[25] == (byte)1);
 					}
+
+					if (options.Length >= 27) {
+						Options.setPreferOuterLane(options[26] == (byte)1);
+					}
 				}
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while loading options: {e.ToString()}");
@@ -754,6 +758,7 @@ namespace TrafficManager.State {
 						(byte)(Options.junctionRestrictionsOverlay ? 1 : 0),
 						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0),
 						(byte)(Options.prohibitPocketCars ? 1 : 0),
+						(byte)(Options.preferOuterLane ? 1 : 0)
 				});
 				} catch (Exception ex) {
 					Log.Error("Unexpected error while saving options: " + ex.Message);

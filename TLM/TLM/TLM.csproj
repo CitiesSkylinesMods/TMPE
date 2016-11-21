@@ -95,6 +95,7 @@
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\UtilityManager.cs" />
     <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
+    <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="Traffic\ExtBuilding.cs" />

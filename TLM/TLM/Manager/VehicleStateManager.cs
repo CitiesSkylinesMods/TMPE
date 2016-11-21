@@ -149,8 +149,8 @@ namespace TrafficManager.Manager {
 			if (driverExtInstance != null) {
 				//driverExtInstance.FailedParkingAttempts = 0;
 				driverExtInstance.Reset();
-				state.DriverInstanceId = 0;
 			}
+			//state.DriverInstanceId = 0;
 #if USEPATHWAITCOUNTER
 			state.PathWaitCounter = 0;
 #endif

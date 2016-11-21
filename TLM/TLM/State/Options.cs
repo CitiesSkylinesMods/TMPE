@@ -63,9 +63,12 @@ namespace TrafficManager.State {
 		private static UITextField pathCostMultiplicatorField = null;
 		private static UITextField pathCostMultiplicator2Field = null;
 #endif
+		private static UIButton reloadGlobalConfBtn = null;
+		private static UIButton resetGlobalConfBtn = null;
 
 		private static UIHelperBase mainGroup = null;
-		private static UIHelperBase aiGroup = null;
+		private static UIHelperBase vehAiGroup = null;
+		private static UIHelperBase parkAiGroup = null;
 		private static UIHelperBase overlayGroup = null;
 		private static UIHelperBase maintenanceGroup = null;
 		private static UIHelperBase featureGroup = null;
@@ -83,8 +86,8 @@ namespace TrafficManager.State {
 		public static bool connectedLanesOverlay = false;
 #if DEBUG
 		public static bool nodesOverlay = true;
-		public static bool vehicleOverlay = true;
-		public static bool citizenOverlay = true;
+		public static bool vehicleOverlay = false;
+		public static bool citizenOverlay = false;
 		public static bool buildingOverlay = true;
 #else
 		public static bool nodesOverlay = false;
@@ -107,52 +110,7 @@ namespace TrafficManager.State {
 		public static bool prohibitPocketCars = false;
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
-		public static bool realisticTransport = true;
 		//public static byte publicTransportUsage = 1;
-
-		public static bool[] debugSwitches = {
-			false,
-			false,
-			false,
-			false,
-			false,
-			false
-		};
-
-		public static float[] debugValues = {
-			0f, // 0: -- unused --
-			0.25f, // 1: debug value (base lane changing cost factor on highways)
-			1.5f, // 2: debug value (heavy vehicle lane changing cost factor)
-			1.5f, // 3: debug value (lane changing cost base before junctions)
-			2f, // 4: debug value (artifical lane distance for u-turns)
-			0.1f, // 5: debug value (base lane changing cost factor on city streets)
-			1.5f, // 6: debug value (penalty for busses not driving on bus lanes) 
-			0.75f, // 7: debug value (reward for public transport staying on transport lane) 
-			2f, // 8: debug value (lane density extinction substrahend)
-			0f, // 9: debug value (lane density positive update smoothing)
-			15f, // 10: debug value (maximum incoming vehicle distance to junction for priority signs)
-			2.5f, // 11: debug value (> 1 lane changing cost factor)
-			0.75f, // 12: debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = both speed and density are considered)
-			0f, // 13: -- unused --
-			256f, // 14: debug value (parking space search radius; used if pocket car spawning is disabled)
-			10f, // 15: debug value (maximum junction approach time for priority signs)
-			250f, // 16: debug value (lane changing cost reduction modulo)
-			19f, // 17: debug value (lane speed negative update smoothing)
-			2.5f, // 18: debug value (congestion lane changing base cost)
-			29f, // 19: debug value (lane speed positive update smoothing)
-			2000f, // 20: debug value (lower congestion threshold (per ten-thousands))
-			5000f, // 21: debug value (upper congestion threshold (per ten-thousands))
-			2f, // 22: debug value (lane density negative update smoothing)
-			10f, // 23: debug value (lane density random interval)
-			15f, // 24: debug value (lane speed random interval)
-			25f, // 25: maximum penalty for heavy vehicles driving on an inner lane (in %)
-			10000f, // 26: maximum number of parking attempts for passenger cars
-			10f, // 27:
-            1f, // 28:
-			256f, // 29: minimum required distance between target building and parked car for using a car
-			6f, // 30: minimum required distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
-			32f // 31: maximum distance between building and pedestrian lane
-		};
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -173,31 +131,45 @@ namespace TrafficManager.State {
 		private static bool menuRebuildRequired = false;
 
 		public static void makeSettings(UIHelperBase helper) {
-			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
-			simAccuracyDropdown = mainGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
-			recklessDriversDropdown = mainGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			//publicTransportUsageDropdown = mainGroup.AddDropdown(Translation.GetString("Citizens_use_public_transportation") + ":", new string[] { Translation.GetString("Very_often"), Translation.GetString("Often"), Translation.GetString("Sometimes"), Translation.GetString("Rarely"), Translation.GetString("Very_rarely") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			relaxedBussesToggle = mainGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
-#if DEBUG
-			allRelaxedToggle = mainGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
-#endif
-			allowEnterBlockedJunctionsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
-			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
-			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
-			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
-			prohibitPocketCarsToggle = mainGroup.AddCheckbox(Translation.GetString("Prohibit_spawning_of_pocket_cars") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
-			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
-			aiGroup = helper.AddGroup("Advanced Vehicle AI");
-			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
-#if DEBUG
-			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
-				dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
-#endif
-			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
-#if DEBUG
-			preferOuterLaneToggle = aiGroup.AddCheckbox(Translation.GetString("Prefer_outer_lane") + " (BETA feature)", preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
-#endif
-			featureGroup = helper.AddGroup(Translation.GetString("Activated_features"));
+			// tabbing code is borrowed from RushHour mod
+			// https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
+
+			UIHelper actualHelper = helper as UIHelper;
+			UIComponent container = actualHelper.self as UIComponent;
+
+			//Find the tab button in the KeyMappingPanel, so we can copy it
+			UIButton tabTemplate = GameObject.Find("KeyMappingTabStrip").GetComponentInChildren<UIButton>();
+
+			UITabstrip tabStrip = container.AddUIComponent<UITabstrip>();
+			tabStrip.relativePosition = new Vector3(0, 0);
+			tabStrip.size = new Vector2(container.width - 20, 40);
+
+			UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
+			tabContainer.relativePosition = new Vector3(0, 40);
+			tabContainer.size = new Vector2(container.width - 20, container.height - tabStrip.height - 20);
+			tabStrip.tabPages = tabContainer;
+
+			int tabIndex = 0;
+			// GENERAL
+
+			UIButton settingsButton = tabStrip.AddTab(Translation.GetString("General"), tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = Translation.GetString("General");
+			tabStrip.selectedIndex = tabIndex;
+
+			UIPanel currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			UIHelper panelHelper = new UIHelper(currentPanel);
+
+			simAccuracyDropdown = panelHelper.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+
+			featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
 			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
@@ -205,40 +177,155 @@ namespace TrafficManager.State {
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
-			//laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
-			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
-			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
-			timedLightsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
-			speedLimitsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
-			vehicleRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
-			junctionRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
-			connectedLanesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
-			nodesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
-			showLanesToggle = overlayGroup.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+			// GAMEPLAY
+			++tabIndex;
+
+			settingsButton = tabStrip.AddTab(Translation.GetString("Gameplay"), tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = Translation.GetString("Gameplay");
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			recklessDriversDropdown = panelHelper.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
+			strongerRoadConditionEffectsToggle = panelHelper.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
+			enableDespawningToggle = panelHelper.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
+
+			vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
+			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 #if DEBUG
-			vehicleOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
-			citizenOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Citizens"), citizenOverlay, onCitizenOverlayChanged) as UICheckBox;
-			buildingOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Buildings"), buildingOverlay, onBuildingOverlayChanged) as UICheckBox;
+			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
+			//dynamicPathRecalculationToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
 #endif
-			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
-			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
-			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+			highwayRulesToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_vehicles_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
+
+			parkAiGroup = panelHelper.AddGroup("Parking AI");
+			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+
+			// VEHICLE RESTRICTIONS
+			++tabIndex;
+
+			settingsButton = tabStrip.AddTab(Translation.GetString("Vehicle_restrictions"), tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = Translation.GetString("Vehicle_restrictions");
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			relaxedBussesToggle = panelHelper.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
 #if DEBUG
-			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
+			allRelaxedToggle = panelHelper.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
+#endif
+			allowEnterBlockedJunctionsToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
+			allowUTurnsToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+			allowLaneChangesWhileGoingStraightToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
+
+			// OVERLAYS
+			++tabIndex;
+
+			settingsButton = tabStrip.AddTab(Translation.GetString("Overlays"), tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = Translation.GetString("Overlays");
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			prioritySignsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
+			timedLightsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
+			speedLimitsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
+			vehicleRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
+			junctionRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
+			connectedLanesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
+			nodesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+			showLanesToggle = panelHelper.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+#if DEBUG
+			vehicleOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
+			citizenOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Citizens"), citizenOverlay, onCitizenOverlayChanged) as UICheckBox;
+			buildingOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Buildings"), buildingOverlay, onBuildingOverlayChanged) as UICheckBox;
+#endif
+
+			// MAINTENANCE
+			++tabIndex;
+
+			settingsButton = tabStrip.AddTab(Translation.GetString("Maintenance"), tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = Translation.GetString("Maintenance");
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			forgetTrafficLightsBtn = panelHelper.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
+			resetStuckEntitiesBtn = panelHelper.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+			resetSpeedLimitsBtn = panelHelper.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
+			reloadGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
+			resetGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
+#if DEBUG
+			// DEBUG
+			/*++tabIndex;
+
+			settingsButton = tabStrip.AddTab("Debug", tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = "Debug";
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+			
 			debugSwitchFields.Clear();
 			for (int i = 0; i < debugSwitches.Length; ++i) {
 				int index = i;
 				string varName = $"Debug switch #{i}";
-				debugSwitchFields.Add(maintenanceGroup.AddCheckbox(varName, debugSwitches[i], delegate (bool newVal) { onBoolValueChanged(varName, newVal, ref debugSwitches[index]); }) as UICheckBox);
+				debugSwitchFields.Add(panelHelper.AddCheckbox(varName, debugSwitches[i], delegate (bool newVal) { onBoolValueChanged(varName, newVal, ref debugSwitches[index]); }) as UICheckBox);
 			}
 
 			debugValueFields.Clear();
 			for (int i = 0; i < debugValues.Length; ++i) {
 				int index = i;
 				string varName = $"Debug value #{i}";
-				debugValueFields.Add(maintenanceGroup.AddTextfield(varName, String.Format("{0:0.##}", debugValues[i]), delegate(string newValStr) { onFloatValueChanged(varName, newValStr, ref debugValues[index]); }) as UITextField);
-			}
+				debugValueFields.Add(panelHelper.AddTextfield(varName, String.Format("{0:0.##}", debugValues[i]), delegate(string newValStr) { onFloatValueChanged(varName, newValStr, ref debugValues[index]); }, null) as UITextField);
+			}*/
 #endif
+
+			tabStrip.selectedIndex = 0;
 		}
 
 		private static bool checkGameLoaded() {
@@ -611,6 +698,20 @@ namespace TrafficManager.State {
 				return;
 
 			Flags.resetSpeedLimits();
+		}
+
+		private static void onClickReloadGlobalConf() {
+			if (!checkGameLoaded())
+				return;
+
+			GlobalConfig.Reload();
+		}
+
+		private static void onClickResetGlobalConf() {
+			if (!checkGameLoaded())
+				return;
+
+			GlobalConfig.Reset();
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {

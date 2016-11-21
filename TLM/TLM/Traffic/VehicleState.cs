@@ -89,7 +89,7 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-		internal ushort DriverInstanceId = 0;
+		//internal ushort DriverInstanceId = 0;
 
 #if USEPATHWAITCOUNTER
 		public ushort PathWaitCounter {
@@ -124,12 +124,23 @@ namespace TrafficManager.Traffic {
 		}
 
 		public ExtCitizenInstance GetDriverExtInstance() {
-			if (DriverInstanceId == 0) {
+			/*if (DriverInstanceId == 0) {
 				DriverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
 			}
+#if DEBUG
+			else {
+				ushort liveDriverInstId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+				if (liveDriverInstId != DriverInstanceId) {
+					Log.Error($"Driver citizen instance mismatch for vehicle {VehicleId}: True driver: {liveDriverInstId} Stored driver: {DriverInstanceId}");
+					DriverInstanceId = liveDriverInstId;
+				}
+			}
+#endif
+			*/
 
-			if (DriverInstanceId != 0) {
-				return ExtCitizenInstanceManager.Instance().GetExtInstance(DriverInstanceId);
+			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+			if (driverInstanceId != 0) {
+				return ExtCitizenInstanceManager.Instance().GetExtInstance(driverInstanceId);
 			}
 			return null;
 		}
@@ -473,6 +484,7 @@ namespace TrafficManager.Traffic {
 #endif
 
 			Reset();
+			//DriverInstanceId = 0;
 
 			if (!CheckValidity(ref vehicleData, true)) {
 				return;

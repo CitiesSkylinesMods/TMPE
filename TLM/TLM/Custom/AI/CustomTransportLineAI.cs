@@ -37,7 +37,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position startPosB;
 			float startSqrDistA;
 			float startSqrDistB;
-			if (!CustomPathManager.FindPathPositionWithSpiralLoop(position, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB)) {
+			if (!CustomPathManager.FindPathPosition(position, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB)) {
 				CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
 				return true;
 			}
@@ -45,7 +45,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float endSqrDistA;
 			float endSqrDistB;
-			if (!CustomPathManager.FindPathPositionWithSpiralLoop(position2, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+			if (!CustomPathManager.FindPathPosition(position2, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
 				CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
 				return true;
 			}
