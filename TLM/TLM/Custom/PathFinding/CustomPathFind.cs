@@ -2202,7 +2202,7 @@ namespace TrafficManager.Custom.PathFinding {
 						if (_isHeavyVehicle) {
 							if (Options.preferOuterLane && prevIsHighway && prevNumLanes > 1 && !prevIsJunction)
 								prevDensity += ((float)prevOuterSimilarLaneIndex / (float)(prevNumLanes-1)) * _conf.HeavyVehicleMaxInnerLanePenalty;
-						} else if (! prevIsCongested)
+						} else
 							prevDensity += _pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (int)_conf.LaneDensityRandInterval / 2;
 
 						prevDensity = (float)Math.Min(1f, Math.Max(0.05f, Math.Round(prevDensity / 5f) / 20f)); // 0.05, 0.1, 0.15, ..., 1

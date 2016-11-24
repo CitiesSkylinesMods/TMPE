@@ -89,7 +89,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane speed random interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 15f;
+		public float LaneSpeedRandInterval = 20f;
 
 
 		/// <summary>
@@ -155,24 +155,24 @@ namespace TrafficManager.State {
 
 
 		/// <summary>
-		/// lane speed negative update smoothing
+		/// Minimum speed update factor
 		/// </summary>
-		public float LaneSpeedNegativeUpdateSmoothing = 19f;
+		public float MinSpeedUpdateFactor = 0.05f;
 
 		/// <summary>
-		/// lane speed positive update smoothing
+		/// Maximum speed update factor
 		/// </summary>
-		public float LaneSpeedPositiveUpdateSmoothing = 29f;
+		public float MaxSpeedUpdateFactor = 0.25f;
 
 		/// <summary>
 		/// lower congestion threshold (per ten-thousands)
 		/// </summary>
-		public int LowerSpeedCongestionThreshold = 2000;
+		public int LowerSpeedCongestionThreshold = 6000;
 
 		/// <summary>
 		/// upper congestion threshold (per ten-thousands)
 		/// </summary>
-		public int UpperSpeedCongestionThreshold = 5000;
+		public int UpperSpeedCongestionThreshold = 7000;
 
 
 		/// <summary>
@@ -223,7 +223,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// parking space demand increment when no parking spot could be found while trying to spawn a parked vehicle
 		/// </summary>
-		public uint FailedSpawnParkingSpaceDemandIncrement = 10u;
+		public uint FailedSpawnParkingSpaceDemandIncrement = 20u;
+
+		/// <summary>
+		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
+		/// </summary>
+		public uint MaxSpeedDifference = 1500u;
 
 		private static GlobalConfig WriteDefaultConfig() {
 			GlobalConfig conf = new GlobalConfig();

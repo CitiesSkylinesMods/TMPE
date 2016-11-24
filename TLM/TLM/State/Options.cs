@@ -102,7 +102,7 @@ namespace TrafficManager.State {
 		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 #if DEBUG
-		public static bool showLanes = false;
+		public static bool showLanes = true;
 #else
 		public static bool showLanes = false;
 #endif

@@ -28,6 +28,8 @@ namespace TrafficManager.Custom.AI {
 		private static ushort lastSimulatedSegmentId = 0;
 		private static byte trafficMeasurementMod = 0;
 
+		private static uint[] minSpeeds = { 10000u, 10000u };
+
 		//public static bool InStartupPhase = true;
 
 		internal static void DestroySegmentStats(ushort segmentId) {
@@ -107,10 +109,12 @@ namespace TrafficManager.Custom.AI {
 
 					if (doTrafficMeasurement) {
 						try {
+							GlobalConfig conf = GlobalConfig.Instance();
+
 							// calculate traffic density
+							NetInfo segmentInfo = data.Info;
 							uint curLaneId = data.m_lanes;
-							int numLanes = data.Info.m_lanes.Length;
-							uint laneIndex = 0;
+							int numLanes = segmentInfo.m_lanes.Length;
 							//uint densitySum = 0u;
 
 							// ensure valid array sizes
@@ -124,70 +128,98 @@ namespace TrafficManager.Custom.AI {
 								//laneMeanAbsDensities[segmentID] = new byte[numLanes];
 
 								for (int i = 0; i < numLanes; ++i)
-									laneMeanSpeeds[segmentID][i] = 5000;
+									laneMeanSpeeds[segmentID][i] = 10000;
 							}
 
-							// calculate total density sum
-							/*while (laneIndex < numLanes && curLaneId != 0u) {
-								uint currentDensity = currentLaneDensities[segmentID][laneIndex];
-								//densitySum += currentDensity;
+							// calculate max./min. lane speed
+							for (int i = 0; i < minSpeeds.Length; ++i)
+								minSpeeds[i] = 10000u;
 
-								laneIndex++;
-								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-							}*/
+							for (uint li = 0; li < numLanes; ++li) {
+								NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
+								if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)
+									continue;
+
+								int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+
+								uint curSpeed = laneMeanSpeeds[segmentID][li];
+								if (curSpeed < minSpeeds[dirIndex])
+									minSpeeds[dirIndex] = curSpeed;
+							}
 
 							curLaneId = data.m_lanes;
-							laneIndex = 0;
 
 							bool setCongested = false;
 							bool unsetCongested = false;
 
+							uint laneIndex = 0;
 							while (laneIndex < numLanes && curLaneId != 0u) {
-								ushort currentBuf = currentLaneTrafficBuffer[segmentID][laneIndex];
-								//uint currentDensity = currentLaneDensities[segmentID][laneIndex];
+								NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-								// update maximum density seen on this lane
-								/*uint maxLaneDensity = maxLaneDensities[segmentID][laneIndex];
-								if (currentDensity > maxLaneDensity) {
-									maxLaneDensities[segmentID][laneIndex] = currentDensity;
-									maxLaneDensity = currentDensity;
-								} else if (maxLaneDensity > 0) {
-									maxLaneDensities[segmentID][laneIndex] = Math.Min(maxLaneDensity-1, (maxLaneDensity * 98u) / 100u);
-								}*/
+								if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
+									int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
 
-								uint currentMeanSpeed = 10000;
-								// we use integer division here because it's faster
-								if (currentBuf > 0) {
-									uint currentSpeeds = currentLaneSpeeds[segmentID][laneIndex];
-									currentMeanSpeed = (uint)Math.Min(10000u, ((currentSpeeds * 10000) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+									ushort currentBuf = currentLaneTrafficBuffer[segmentID][laneIndex];
+									//uint currentDensity = currentLaneDensities[segmentID][laneIndex];
+
+									// update maximum density seen on this lane
+									/*uint maxLaneDensity = maxLaneDensities[segmentID][laneIndex];
+									if (currentDensity > maxLaneDensity) {
+										maxLaneDensities[segmentID][laneIndex] = currentDensity;
+										maxLaneDensity = currentDensity;
+									} else if (maxLaneDensity > 0) {
+										maxLaneDensities[segmentID][laneIndex] = Math.Min(maxLaneDensity-1, (maxLaneDensity * 98u) / 100u);
+									}*/
+
+									ushort curSpeed = 10000;
+									// we use integer division here because it's faster
+									if (currentBuf > 0) {
+										curSpeed = (ushort)Math.Min(10000u, ((currentLaneSpeeds[segmentID][laneIndex] * 10000u) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+									}
+
+									// calculate mean speed
+									uint minSpeed = minSpeeds[dirIndex];
+									ushort prevSpeed = laneMeanSpeeds[segmentID][laneIndex];
+									float maxSpeedDiff = Mathf.Abs((short)curSpeed - (short)minSpeed);
+
+									float updateFactor = Mathf.Clamp(1f - (float)maxSpeedDiff / (float)conf.MaxSpeedDifference, conf.MinSpeedUpdateFactor, conf.MaxSpeedUpdateFactor);
+									ushort newSpeed = (ushort)Mathf.Clamp((float)prevSpeed + ((float)curSpeed - (float)prevSpeed) * updateFactor, 0, 10000);
+
+									if (newSpeed < minSpeed) {
+										minSpeed = newSpeed;
+									} else {
+										int maxTolerableSpeed = (int)minSpeed + (int)conf.MaxSpeedDifference;
+										if (newSpeed > maxTolerableSpeed)
+											newSpeed = (ushort)maxTolerableSpeed;
+									}
+
+									laneMeanSpeeds[segmentID][laneIndex] = newSpeed;
+
+									/*uint speedUpdateSmoothing = currentMeanSpeed > prevSpeed ? (uint)conf.LaneSpeedPositiveUpdateSmoothing : (uint)conf.LaneSpeedNegativeUpdateSmoothing;
+									laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)prevSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));*/
+
+									// determine if segment is congested
+									if (newSpeed <= conf.LowerSpeedCongestionThreshold) {
+										setCongested = true;
+									} else if (newSpeed >= conf.UpperSpeedCongestionThreshold) {
+										unsetCongested = true;
+									}
+
+									// calculate mean density
+									//ushort currentMeanDensity = (ushort) (maxLaneDensity > 0 ? Math.Min(currentDensity * 100 / maxLaneDensity, 100) : 0);
+									//ushort previousMeanDensity = laneMeanAbsDensities[segmentID][laneIndex];
+									//ushort densityUpdateSmoothing = currentMeanDensity > previousMeanDensity ? (ushort)Options.debugValues[9] : (ushort)Options.debugValues[22];
+									/*if (maxLaneDensity > 0)
+										laneMeanAbsDensities[segmentID][laneIndex] = (byte)((previousMeanDensity * densityUpdateSmoothing + currentMeanDensity) / (densityUpdateSmoothing + 1));
+									else
+										laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Max(0, (int)previousMeanDensity - (int)Options.debugValues[8]);*/
+									//laneMeanAbsDensities[segmentID][laneIndex] = (byte)currentMeanDensity;
+
+									// reset buffers
+									currentLaneDensities[segmentID][laneIndex] /= 2;
+									currentLaneTrafficBuffer[segmentID][laneIndex] = 0;
+									currentLaneSpeeds[segmentID][laneIndex] = 0;
 								}
-
-								// calculate mean speed
-								ushort previousMeanSpeed = laneMeanSpeeds[segmentID][laneIndex];
-								uint speedUpdateSmoothing = currentMeanSpeed > previousMeanSpeed ? (uint)GlobalConfig.Instance().LaneSpeedPositiveUpdateSmoothing : (uint)GlobalConfig.Instance().LaneSpeedNegativeUpdateSmoothing;
-								laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)previousMeanSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));
-
-								// determine if segment is congested
-								if (laneMeanSpeeds[segmentID][laneIndex] <= GlobalConfig.Instance().LowerSpeedCongestionThreshold) {
-									setCongested = true;
-								} else if (currentMeanSpeed >= GlobalConfig.Instance().UpperSpeedCongestionThreshold) {
-									unsetCongested = true;
-								}
-
-								// calculate mean density
-								//ushort currentMeanDensity = (ushort) (maxLaneDensity > 0 ? Math.Min(currentDensity * 100 / maxLaneDensity, 100) : 0);
-								//ushort previousMeanDensity = laneMeanAbsDensities[segmentID][laneIndex];
-								//ushort densityUpdateSmoothing = currentMeanDensity > previousMeanDensity ? (ushort)Options.debugValues[9] : (ushort)Options.debugValues[22];
-								/*if (maxLaneDensity > 0)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((previousMeanDensity * densityUpdateSmoothing + currentMeanDensity) / (densityUpdateSmoothing + 1));
-								else
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Max(0, (int)previousMeanDensity - (int)Options.debugValues[8]);*/
-								//laneMeanAbsDensities[segmentID][laneIndex] = (byte)currentMeanDensity;
-
-								// reset buffers
-								currentLaneDensities[segmentID][laneIndex] /= 2;
-								currentLaneTrafficBuffer[segmentID][laneIndex] = 0;
-								currentLaneSpeeds[segmentID][laneIndex] = 0;
 
 								laneIndex++;
 								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
