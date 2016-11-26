@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,14 +10,33 @@ namespace TrafficManager.State {
 	[XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
+		public const string BACKUP_FILENAME = FILENAME + ".bak";
+		private static int LATEST_VERSION = 1;
+#if DEBUG
+		private static uint lastModificationCheckFrame = 0;
+#endif
 
 		private static GlobalConfig instance = null;
 
 		public static GlobalConfig Instance() {
-			if (instance == null)
+			if (instance == null) {
 				Reload();
+			}
+#if DEBUG
+			else {
+				uint curFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
+				if (lastModificationCheckFrame == 0) {
+					lastModificationCheckFrame = curFrame;
+				} else if (lastModificationCheckFrame < curFrame) {
+					lastModificationCheckFrame = curFrame;
+					ReloadIfNewer();
+				}
+			}
+#endif
 			return instance;
 		}
+
+		private static DateTime ModifiedTime = DateTime.MinValue;
 
 		static GlobalConfig() {
 			Instance();
@@ -25,7 +45,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Configuration version
 		/// </summary>
-		public int Version = 1;
+		public int Version = LATEST_VERSION;
 
 		public bool[] DebugSwitches = {
 			false,
@@ -142,6 +162,10 @@ namespace TrafficManager.State {
 		/// </summary>
 		public float MaxBuildingToPedestrianLaneDistance = 64f;
 
+		/// <summary>
+		/// Maximum allowed distance between home and parked car when travelling home without forced to use the car
+		/// </summary>
+		public float MaxParkedCarDistanceToHome = 768f;
 
 		/// <summary>
 		/// maximum incoming vehicle square distance to junction for priority signs
@@ -228,49 +252,91 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
 		/// </summary>
-		public uint MaxSpeedDifference = 1500u;
+		public uint MaxSpeedDifference = 1250u;
 
-		private static GlobalConfig WriteDefaultConfig() {
+		private static GlobalConfig WriteDefaultConfig(out DateTime modifiedTime) {
 			GlobalConfig conf = new GlobalConfig();
-			WriteConfig(conf);
+			modifiedTime = WriteConfig(conf);
 			return conf;
 		}
 
-		private static void WriteConfig(GlobalConfig config) {
+		private static DateTime WriteConfig(GlobalConfig config, string filename=FILENAME) {
 			try {
-				Log.Info($"Writing global config to file '{FILENAME}'...");
+				Log.Info($"Writing global config to file '{filename}'...");
 				XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
-				using (TextWriter writer = new StreamWriter(FILENAME)) {
+				using (TextWriter writer = new StreamWriter(filename)) {
 					serializer.Serialize(writer, config);
 				}
 			} catch (Exception e) {
 				Log.Error($"Could not write global config: {e.ToString()}");
 			}
+
+			try {
+				return File.GetLastWriteTime(FILENAME);
+			} catch (Exception e) {
+				Log.Warning($"Could not determine modification date of global config: {e.ToString()}");
+				return DateTime.Now;
+			}
 		}
 
-		public static GlobalConfig Load() {
+		public static GlobalConfig Load(out DateTime modifiedTime) {
 			try {
+				modifiedTime = File.GetLastWriteTime(FILENAME);
+
 				Log.Info($"Loading global config from file '{FILENAME}'...");
 				using (FileStream fs = new FileStream(FILENAME, FileMode.Open)) {
 					XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
-					WriteConfig(conf);
 					return conf;
 				}
 			} catch (Exception e) {
 				Log.Warning("Could not load global config. Generating default config.");
-				return WriteDefaultConfig();
+				return WriteDefaultConfig(out modifiedTime);
 			}
 		}
 
-		public static void Reload() {
-			instance = Load();
+		public static void Reload(bool checkVersion=true) {
+			DateTime modifiedTime;
+			GlobalConfig conf = Load(out modifiedTime);
+			if (checkVersion && conf.Version != -1 && conf.Version < LATEST_VERSION) {
+				// backup old config and reset
+				string filename = BACKUP_FILENAME;
+				try {
+					int backupIndex = 0;
+					while (File.Exists(filename)) {
+						filename = BACKUP_FILENAME + "." + backupIndex;
+						++backupIndex;
+					}
+					WriteConfig(conf, filename);
+				} catch (Exception e) {
+					Log.Warning($"Error occurred while saving backup config to '{filename}': {e.ToString()}");
+				}
+				Reset();
+			} else {
+				instance = conf;
+				ModifiedTime = modifiedTime;
+				WriteConfig(instance);
+			}
 		}
 
 		public static void Reset() {
 			Log.Info($"Resetting global config.");
-			instance = WriteDefaultConfig();
+			DateTime modifiedTime;
+			instance = WriteDefaultConfig(out modifiedTime);
+			ModifiedTime = modifiedTime;
+		}
+
+		private static void ReloadIfNewer() {
+			try {
+				DateTime modifiedTime = File.GetLastWriteTime(FILENAME);
+				if (modifiedTime > ModifiedTime) {
+					Log.Info($"Detected modification of global config.");
+					Reload(false);
+				}
+			} catch (Exception e) {
+				Log.Warning("Could not determine modification date of global config.");
+			}
 		}
 	}
 }
