@@ -139,9 +139,6 @@ namespace TrafficManager.UI.SubTools {
 		private bool drawSignHandles(ushort nodeId, bool viewOnly, ref Vector3 camPos, out bool stateUpdated) {
 			bool hovered = false;
 			stateUpdated = false;
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				return false;
-			}
 
 			if (viewOnly && !Options.junctionRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions)
 				return false;

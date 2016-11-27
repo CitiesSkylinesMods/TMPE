@@ -429,48 +429,20 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (newAdvancedAI) {
-					setAdvancedAI(false);
-					setDynamicPathRecalculation(false);
-					setHighwayRules(false);
-					setPreferOuterLane(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"advancedAI changed to {newAdvancedAI}");
-				setAdvancedAI(newAdvancedAI);
-#if !TAM
-			}
-#endif
+			Log._Debug($"advancedAI changed to {newAdvancedAI}");
+			setAdvancedAI(newAdvancedAI);
 		}
 
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (newHighwayRules) {
-					setAdvancedAI(false);
-					setDynamicPathRecalculation(false);
-					setHighwayRules(false);
-					setPreferOuterLane(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"Highway rules changed to {newHighwayRules}");
-				highwayRules = newHighwayRules;
-				Flags.clearHighwayLaneArrows();
-				Flags.applyAllFlags();
-				if (newHighwayRules)
-					setAdvancedAI(true);
-#if !TAM
-			}
-#endif
+			Log._Debug($"Highway rules changed to {newHighwayRules}");
+			highwayRules = newHighwayRules;
+			Flags.clearHighwayLaneArrows();
+			Flags.applyAllFlags();
+			if (newHighwayRules)
+				setAdvancedAI(true);
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
@@ -548,23 +520,10 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (value) {
-					setAdvancedAI(false);
-					setDynamicPathRecalculation(false);
-					setHighwayRules(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"dynamicPathRecalculation changed to {value}");
-				dynamicPathRecalculation = value;
-				if (value)
-					setAdvancedAI(true);
-#if !TAM
-			}
-#endif
+			Log._Debug($"dynamicPathRecalculation changed to {value}");
+			dynamicPathRecalculation = value;
+			if (value)
+				setAdvancedAI(true);
 		}
 
 		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
@@ -619,12 +578,6 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				setEnableDespawning(true);
-				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Despawning cannot be modified", "The despawning option cannot be changed because you are using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
-			} else
-#endif
 			Log._Debug($"enableDespawning changed to {value}");
 			enableDespawning = value;
 		}
@@ -762,34 +715,18 @@ namespace TrafficManager.State {
 		}
 
 		public static void setHighwayRules(bool newHighwayRules) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				highwayRules = false;
-			} else {
-#endif
-				highwayRules = newHighwayRules;
-#if !TAM
-			}
-#endif
+			highwayRules = newHighwayRules;
+
 			if (highwayRulesToggle != null)
 				highwayRulesToggle.isChecked = highwayRules;
 		}
 
-#if DEBUG
 		public static void setPreferOuterLane(bool val) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				preferOuterLane = false;
-			} else {
-#endif
-				preferOuterLane = val;
-#if !TAM
-			}
-#endif
+			preferOuterLane = val;
+
 			if (preferOuterLaneToggle != null)
 				preferOuterLaneToggle.isChecked = preferOuterLane;
 		}
-#endif
 
 		public static void setShowLanes(bool newShowLanes) {
 			showLanes = newShowLanes;
@@ -798,16 +735,8 @@ namespace TrafficManager.State {
 		}
 
 		public static void setAdvancedAI(bool newAdvancedAI) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				newAdvancedAI = false;
-				advancedAI = false;
-			} else {
-#endif
-				advancedAI = newAdvancedAI;
-#if !TAM
-			}
-#endif
+			advancedAI = newAdvancedAI;
+
 			if (advancedAIToggle != null)
 				advancedAIToggle.isChecked = newAdvancedAI;
 
@@ -824,16 +753,8 @@ namespace TrafficManager.State {
 				value = false;*/
 #endif
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				value = false;
-				dynamicPathRecalculation = false;
-			} else {
-#endif
-				dynamicPathRecalculation = value;
-#if !TAM
-			}
-#endif
+			dynamicPathRecalculation = value;
+
 			if (dynamicPathRecalculationToggle != null)
 				dynamicPathRecalculationToggle.isChecked = value;
 		}
@@ -867,16 +788,7 @@ namespace TrafficManager.State {
 		}
 
 		public static void setEnableDespawning(bool value) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				value = true;
-				enableDespawning = true;
-			} else {
-#endif
-				enableDespawning = value;
-#if !TAM
-			}
-#endif
+			enableDespawning = value;
 
 			if (enableDespawningToggle != null)
 				enableDespawningToggle.isChecked = value;

@@ -32,17 +32,15 @@ namespace TrafficManager {
 		}
 
         public static LoadingExtension Instance;
-#if !TAM
-		public static bool IsPathManagerCompatible {
-			get; private set;
-		} = true;
-#endif
+
 		public static bool IsPathManagerReplaced {
 			get; private set;
 		} = false;
+
 		public static bool IsRainfallLoaded {
 			get; private set;
 		} = false;
+
 		public static bool IsRushHourLoaded {
 			get; private set;
 		} = false;
@@ -1206,448 +1204,447 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				if (IsPathManagerCompatible) {
-					Log.Info("Redirection PathFind::CalculatePath calls for non-Traffic++");
-					try {
-						Detours.Add(new Detour(typeof(PathFind).GetMethod("CalculatePath",
-								BindingFlags.Public | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (uint),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomPathFind).GetMethod("CalculatePath")));
-					} catch (Exception) {
-						Log.Error("Could not redirect PathFind::CalculatePath");
-						detourFailed = true;
-					}
+				
+				Log.Info("Redirection PathFind::CalculatePath calls for non-Traffic++");
+				try {
+					Detours.Add(new Detour(typeof(PathFind).GetMethod("CalculatePath",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (uint),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomPathFind).GetMethod("CalculatePath")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PathFind::CalculatePath");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection PathManager::ReleasePath calls for non-Traffic++");
-					try {
-						Detours.Add(new Detour(typeof(PathManager).GetMethod("ReleasePath",
-								BindingFlags.Public | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (uint)
-								},
-								null),
-								typeof(CustomPathManager).GetMethod("ReleasePath")));
-					} catch (Exception) {
-						Log.Error("Could not redirect PathManager::ReleasePath");
-						detourFailed = true;
-					}
+				Log.Info("Redirection PathManager::ReleasePath calls for non-Traffic++");
+				try {
+					Detours.Add(new Detour(typeof(PathManager).GetMethod("ReleasePath",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (uint)
+							},
+							null),
+							typeof(CustomPathManager).GetMethod("ReleasePath")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PathManager::ReleasePath");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
-					try {
-						Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (PathUnit.Position),
-									typeof (uint),
-									typeof (byte),
-									typeof (Vector3).MakeByRefType(),
-									typeof (Vector3).MakeByRefType(),
-									typeof (float).MakeByRefType()
-								},
-								null),
-								typeof(CustomCarAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
-						detourFailed = true;
-					}
+				Log.Info("Redirection CarAI Calculate Segment Position calls for non-Traffic++");
+				try {
+					Detours.Add(new Detour(typeof(CarAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (byte),
+								typeof (Vector3).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(),
+								typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(CustomCarAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::CalculateSegmentPosition");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection TrainAI Calculate Segment Position calls for non-Traffic++");
-					try {
-						Detours.Add(new Detour(typeof(TrainAI).GetMethod("CalculateSegmentPosition",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (PathUnit.Position),
-									typeof (uint),
-									typeof (byte),
-									typeof (Vector3).MakeByRefType(),
-									typeof (Vector3).MakeByRefType(),
-									typeof (float).MakeByRefType()
-								},
-								null),
-								typeof(CustomTrainAI).GetMethod("TmCalculateSegmentPositionPathFinder")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TrainAI::CalculateSegmentPosition (2)");
-						detourFailed = true;
-					}
+				Log.Info("Redirection TrainAI Calculate Segment Position calls for non-Traffic++");
+				try {
+					Detours.Add(new Detour(typeof(TrainAI).GetMethod("CalculateSegmentPosition",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (PathUnit.Position),
+								typeof (uint),
+								typeof (byte),
+								typeof (Vector3).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(),
+								typeof (float).MakeByRefType()
+							},
+							null),
+							typeof(CustomTrainAI).GetMethod("TmCalculateSegmentPositionPathFinder")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::CalculateSegmentPosition (2)");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection AmbulanceAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(AmbulanceAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomAmbulanceAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect AmbulanceAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection AmbulanceAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(AmbulanceAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomAmbulanceAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect AmbulanceAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection BusAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(BusAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomBusAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect BusAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection BusAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(BusAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomBusAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect BusAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection CarAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(CarAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomCarAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CarAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection CarAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(CarAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomCarAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection CargoTruckAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomCargoTruckAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CargoTruckAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection CargoTruckAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomCargoTruckAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CargoTruckAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection FireTruckAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(FireTruckAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomFireTruckAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect FireTruckAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection FireTruckAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(FireTruckAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomFireTruckAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect FireTruckAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					/*Log.Info("Redirection PassengerCarAI::FindParkingSpaceBuilding calls");
-					try {
-						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("FindParkingSpaceBuilding",
-								BindingFlags.NonPublic | BindingFlags.Static,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (ushort),
-									typeof (ushort),
-									typeof (Building).MakeByRefType(),
-									typeof (Vector3),
-									typeof (float),
-									typeof (float),
-									typeof (float).MakeByRefType(),
-									typeof (Vector3).MakeByRefType(),
-									typeof (Quaternion).MakeByRefType()
-								},
-								null),
-								typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceBuilding",
-								new[] {
-									typeof (ushort),
-									typeof (ushort),
-									typeof (ushort),
-									typeof (Building).MakeByRefType(),
-									typeof (Vector3),
-									typeof (float),
-									typeof (float),
-									typeof (float).MakeByRefType(),
-									typeof (Vector3).MakeByRefType(),
-									typeof (Quaternion).MakeByRefType()
-								})));
-					} catch (Exception) {
-						Log.Error("Could not redirect PassengerCarAI::FindParkingSpaceBuilding");
-						detourFailed = true;
-					}*/
+				/*Log.Info("Redirection PassengerCarAI::FindParkingSpaceBuilding calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (ushort),
+								typeof (ushort),
+								typeof (Building).MakeByRefType(),
+								typeof (Vector3),
+								typeof (float),
+								typeof (float),
+								typeof (float).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(),
+								typeof (Quaternion).MakeByRefType()
+							},
+							null),
+							typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+							new[] {
+								typeof (ushort),
+								typeof (ushort),
+								typeof (ushort),
+								typeof (Building).MakeByRefType(),
+								typeof (Vector3),
+								typeof (float),
+								typeof (float),
+								typeof (float).MakeByRefType(),
+								typeof (Vector3).MakeByRefType(),
+								typeof (Quaternion).MakeByRefType()
+							})));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::FindParkingSpaceBuilding");
+					detourFailed = true;
+				}*/
 
-					Log.Info("Redirection PassengerCarAI::StartPathFind(1) calls");
-					try {
-						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
-								new[] {
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								})));
-					} catch (Exception) {
-						Log.Error("Could not redirect PassengerCarAI::StartPathFind(1)");
-						detourFailed = true;
-					}
+				Log.Info("Redirection PassengerCarAI::StartPathFind(1) calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
+							new[] {
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							})));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::StartPathFind(1)");
+					detourFailed = true;
+				}
 
-					/*Log.Info("Redirection PassengerCarAI::StartPathFind(2) calls");
-					try {
-						Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType()
-								},
-								null),
-								typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
-								new[] {
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType()
-								})));
-					} catch (Exception) {
-						Log.Error("Could not redirect PassengerCarAI::StartPathFind(2)");
-						detourFailed = true;
-					}*/
+				/*Log.Info("Redirection PassengerCarAI::StartPathFind(2) calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType()
+							},
+							null),
+							typeof(CustomPassengerCarAI).GetMethod("CustomStartPathFind",
+							new[] {
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType()
+							})));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::StartPathFind(2)");
+					detourFailed = true;
+				}*/
 
-					Log.Info("Redirection PoliceCarAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(PoliceCarAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomPoliceCarAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect PoliceCarAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection PoliceCarAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(PoliceCarAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomPoliceCarAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PoliceCarAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection TaxiAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(TaxiAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomTaxiAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TaxiAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection TaxiAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(TaxiAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomTaxiAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TaxiAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection TrainAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(TrainAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomTrainAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TrainAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection TrainAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(TrainAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomTrainAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection ShipAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(ShipAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomShipAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect ShipAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection ShipAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(ShipAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomShipAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect ShipAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection CitizenAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (VehicleInfo)
-								},
-								null),
-								typeof(CustomCitizenAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CitizenAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection CitizenAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(CitizenAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (VehicleInfo)
+							},
+							null),
+							typeof(CustomCitizenAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CitizenAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					/*Log.Info("Redirection CitizenAI::InvalidPath calls");
-					try {
-						Detours.Add(new Detour(typeof(CitizenAI).GetMethod("InvalidPath",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType()
-								},
-								null),
-								typeof(CustomCitizenAI).GetMethod("CustomInvalidPath")));
-					} catch (Exception) {
-						Log.Error("Could not redirect CitizenAI::InvalidPath");
-						detourFailed = true;
-					}*/
+				/*Log.Info("Redirection CitizenAI::InvalidPath calls");
+				try {
+					Detours.Add(new Detour(typeof(CitizenAI).GetMethod("InvalidPath",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType()
+							},
+							null),
+							typeof(CustomCitizenAI).GetMethod("CustomInvalidPath")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CitizenAI::InvalidPath");
+					detourFailed = true;
+				}*/
 
-					Log.Info("Redirection TransportLineAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(TransportLineAI).GetMethod("StartPathFind",
-								BindingFlags.Public | BindingFlags.Static,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType(),
-									typeof (ItemClass.Service),
-									typeof (VehicleInfo.VehicleType),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomTransportLineAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TransportLineAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection TransportLineAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(TransportLineAI).GetMethod("StartPathFind",
+							BindingFlags.Public | BindingFlags.Static,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (NetSegment).MakeByRefType(),
+								typeof (ItemClass.Service),
+								typeof (VehicleInfo.VehicleType),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomTransportLineAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TransportLineAI::StartPathFind");
+					detourFailed = true;
+				}
 
-					Log.Info("Redirection TramBaseAI::StartPathFind calls");
-					try {
-						Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("StartPathFind",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-									typeof (Vector3),
-									typeof (Vector3),
-									typeof (bool),
-									typeof (bool)
-								},
-								null),
-								typeof(CustomTramBaseAI).GetMethod("CustomStartPathFind")));
-					} catch (Exception) {
-						Log.Error("Could not redirect TramBaseAI::StartPathFind");
-						detourFailed = true;
-					}
+				Log.Info("Redirection TramBaseAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomTramBaseAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TramBaseAI::StartPathFind");
+					detourFailed = true;
 				}
 
 				Log.Info("Redirection RoadBaseAI::SetTrafficLightState calls");
@@ -1875,12 +1872,10 @@ namespace TrafficManager {
 					return;
             }
 
-#if !TAM
-			determinePathManagerCompatible();
 			IsRainfallLoaded = CheckRainfallIsLoaded();
 			IsRushHourLoaded = CheckRushHourIsLoaded();
 
-			if (IsPathManagerCompatible && ! IsPathManagerReplaced) {
+			if (! IsPathManagerReplaced) {
 				try {
 					Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
 					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1920,7 +1915,6 @@ namespace TrafficManager {
 				} catch (Exception ex) {
 					Log.Error($"Path manager replacement error: {ex.ToString()}");
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
-					IsPathManagerCompatible = false;
 				}
 			}
 
@@ -1937,51 +1931,7 @@ namespace TrafficManager {
 			CustomPassengerCarAI.OnLevelLoaded();
 
 			Log.Info("OnLevelLoaded complete.");
-#endif
 		}
-
-
-#if !TAM
-		private void determinePathManagerCompatible() {
-			IsPathManagerCompatible = true;
-			if (!IsPathManagerReplaced) {
-
-				var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
-				List<ILoadingExtension> loadingExtensions = null;
-				if (loadingWrapperLoadingExtensionsField != null) {
-					loadingExtensions = (List<ILoadingExtension>) loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
-				} else {
-					Log._Debug("Could not get loading extensions field");
-				}
-
-				if (loadingExtensions != null) {
-					Log.Info("Loaded extensions:");
-					foreach (ILoadingExtension extension in loadingExtensions) {
-						if (extension.GetType().Namespace == null)
-							continue;
-
-						Log.Info($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}");
-						var namespaceStr = extension.GetType().Namespace.ToString();
-						if ("Improved_AI".Equals(namespaceStr) || "CSL_Traffic".Equals(namespaceStr)) {
-							IsPathManagerCompatible = false; // Improved AI found
-							Log.Info($"type: {extension.GetType().ToString()} type namespace: {extension.GetType().Namespace.ToString()} toString: {extension.ToString()}. Custom PathManager detected.");
-						}
-					}
-				} else {
-					Log._Debug("Could not get loading extensions");
-				}
-
-				if (Singleton<PathManager>.instance.GetType() != typeof(PathManager)) {
-					Log.Info("PathManager manipulation detected. Disabling custom PathManager " + Singleton<PathManager>.instance.GetType().ToString());
-					IsPathManagerCompatible = false;
-				}
-			}
-
-			if (!IsPathManagerCompatible) {
-				Options.setAdvancedAI(false);
-			}
-		}
-#endif
 
 		private bool CheckRainfallIsLoaded() {
 			return Check3rdPartyModLoaded("Rainfall");

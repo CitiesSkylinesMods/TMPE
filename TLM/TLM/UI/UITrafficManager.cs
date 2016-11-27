@@ -91,45 +91,43 @@ namespace TrafficManager.UI {
 				height += 40;
 			}
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
+			
+			_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
+			y += 40;
+			height += 40;
+
+			if (Options.laneConnectorEnabled) {
+				_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
 				y += 40;
 				height += 40;
+			}
 
-				if (Options.laneConnectorEnabled) {
-					_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
-					y += 40;
-					height += 40;
-				}
+			if (Options.customSpeedLimitsEnabled) {
+				_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
+				y += 40;
+				height += 40;
+			}
 
-				if (Options.customSpeedLimitsEnabled) {
-					_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
-					y += 40;
-					height += 40;
-				}
+			if (Options.vehicleRestrictionsEnabled) {
+				_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
+				y += 40;
+				height += 40;
+			}
 
-				if (Options.vehicleRestrictionsEnabled) {
-					_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
-					y += 40;
-					height += 40;
-				}
-
-				if (Options.junctionRestrictionsEnabled) {
-					_buttonJunctionRestrictions = _createButton(Translation.GetString("Junction_restrictions"), y, clickJunctionRestrictions);
-					y += 40;
-					height += 40;
-				}
+			if (Options.junctionRestrictionsEnabled) {
+				_buttonJunctionRestrictions = _createButton(Translation.GetString("Junction_restrictions"), y, clickJunctionRestrictions);
+				y += 40;
+				height += 40;
 			}
 
 			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), y, clickClearTraffic);
 			y += 40;
 			height += 40;
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
-				y += 40;
-				height += 40;
-			}
+			
+			_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
+			y += 40;
+			height += 40;
 
 #if DEBUG
 			_goToField = CreateTextField("", y);
@@ -447,11 +445,9 @@ namespace TrafficManager.UI {
 
 			Options.setEnableDespawning(!Options.enableDespawning);
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn.text = Options.enableDespawning
-					? Translation.GetString("Disable_despawning")
-					: Translation.GetString("Enable_despawning");
-			}
+			_buttonToggleDespawn.text = Options.enableDespawning
+				? Translation.GetString("Disable_despawning")
+				: Translation.GetString("Enable_despawning");
 		}
 
 		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {

@@ -133,15 +133,7 @@ namespace TrafficManager.State {
 					}
 
 					if (options.Length >= 7) {
-#if !TAM
-						if (!LoadingExtension.IsPathManagerCompatible) {
-							Options.setAdvancedAI(false);
-						} else {
-#endif
-							Options.setAdvancedAI(options[6] == (byte)1);
-#if !TAM
-						}
-#endif
+						Options.setAdvancedAI(options[6] == (byte)1);
 					}
 
 					if (options.Length >= 8) {
@@ -672,20 +664,14 @@ namespace TrafficManager.State {
 					}
 				}
 
-#if !TAM
-				if (LoadingExtension.IsPathManagerCompatible) {
-#endif
-					for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
-						try {
-							SaveLaneData(i, configuration);
-						} catch (Exception e) {
-							Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
-							error = true;
-						}
+				for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
+					try {
+						SaveLaneData(i, configuration);
+					} catch (Exception e) {
+						Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
+						error = true;
 					}
-#if !TAM
 				}
-#endif
 
 				foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
 					try {

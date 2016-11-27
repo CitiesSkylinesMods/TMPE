@@ -273,9 +273,6 @@ namespace TrafficManager.UI.SubTools {
 
 		private bool drawVehicleRestrictionHandles(ushort segmentId, bool viewOnly, out bool stateUpdated) {
 			stateUpdated = false;
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				return false;
-			}
 
 			if (viewOnly && !Options.vehicleRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions)
 				return false;

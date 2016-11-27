@@ -322,10 +322,6 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, bool viewOnly, ref Vector3 camPos) {
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				return false;
-			}
-
 			if (viewOnly && !Options.speedLimitsOverlay)
 				return false;
 
