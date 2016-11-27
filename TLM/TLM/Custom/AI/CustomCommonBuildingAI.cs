@@ -20,7 +20,11 @@ namespace TrafficManager.Custom.AI {
 
 			base.SimulationStep(buildingID, ref data);
 			if ((data.m_flags & Building.Flags.Demolishing) != Building.Flags.None) {
-				Singleton<BuildingManager>.instance.ReleaseBuilding(buildingID);
+				uint rand = (uint)(((int)buildingID << 8) / 49152);
+				uint frameIndexRand = Singleton<SimulationManager>.instance.m_currentFrameIndex - rand;
+				if ((data.m_flags & Building.Flags.Collapsed) == Building.Flags.None || data.GetFrameData(frameIndexRand - 256u).m_constructState == 0) {
+					Singleton<BuildingManager>.instance.ReleaseBuilding(buildingID);
+				}
 			}
 		}
 

@@ -14,21 +14,21 @@ namespace TrafficManager.Custom.AI {
 	class CustomTaxiAI : CarAI {
 		public static ushort GetPassengerInstance(ushort vehicleID, ref Vehicle data) {
 			CitizenManager instance = Singleton<CitizenManager>.instance;
-			uint num = data.m_citizenUnits;
-			int num2 = 0;
-			while (num != 0u) {
-				uint nextUnit = instance.m_units.m_buffer[(int)((UIntPtr)num)].m_nextUnit;
+			uint curUnitId = data.m_citizenUnits;
+			int numIterations = 0;
+			while (curUnitId != 0u) {
+				uint nextUnit = instance.m_units.m_buffer[curUnitId].m_nextUnit;
 				for (int i = 0; i < 5; i++) {
-					uint citizen = instance.m_units.m_buffer[(int)((UIntPtr)num)].GetCitizen(i);
-					if (citizen != 0u) {
-						ushort instance2 = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_instance;
-						if (instance2 != 0) {
-							return instance2;
+					uint citizenId = instance.m_units.m_buffer[curUnitId].GetCitizen(i);
+					if (citizenId != 0u) {
+						ushort citizenInstanceId = instance.m_citizens.m_buffer[citizenId].m_instance;
+						if (citizenInstanceId != 0) {
+							return citizenInstanceId;
 						}
 					}
 				}
-				num = nextUnit;
-				if (++num2 > 524288) {
+				curUnitId = nextUnit;
+				if (++numIterations > 524288) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}

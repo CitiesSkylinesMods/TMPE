@@ -50,9 +50,6 @@
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="RushHour">
-      <HintPath>D:\Games\Steam\steamapps\workshop\content\255710\605590542\RushHour.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
@@ -118,6 +115,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
@@ -143,6 +141,7 @@
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
@@ -276,6 +275,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\110.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MenuButton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

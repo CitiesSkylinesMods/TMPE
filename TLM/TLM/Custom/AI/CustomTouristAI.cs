@@ -12,6 +12,10 @@ using TrafficManager.Traffic;
 namespace TrafficManager.Custom.AI {
 	public class CustomTouristAI : TouristAI {
 		public string CustomGetLocalizedStatus(ushort instanceID, ref CitizenInstance data, out InstanceID target) {
+			if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None) {
+				target = InstanceID.Empty;
+				return Locale.Get("CITIZEN_STATUS_CONFUSED");
+			}
 			CitizenManager instance = Singleton<CitizenManager>.instance;
 			uint citizen = data.m_citizen;
 			ushort vehicleId = 0;
@@ -40,7 +44,7 @@ namespace TrafficManager.Custom.AI {
 						target.Building = targetBuilding;
 						return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 					}
-				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport) {
+				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport || info.m_class.m_service == ItemClass.Service.Disaster) {
 					if (flag) {
 						target = InstanceID.Empty;
 						return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");

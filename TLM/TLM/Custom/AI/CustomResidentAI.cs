@@ -15,6 +15,10 @@ using static TrafficManager.Traffic.ExtCitizenInstance;
 namespace TrafficManager.Custom.AI {
 	public class CustomResidentAI : HumanAI {
 		public string CustomGetLocalizedStatus(ushort instanceID, ref CitizenInstance data, out InstanceID target) {
+			if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None) {
+				target = InstanceID.Empty;
+				return Locale.Get("CITIZEN_STATUS_CONFUSED");
+			}
 			CitizenManager instance = Singleton<CitizenManager>.instance;
 			uint citizen = data.m_citizen;
 			bool isStudent = false;
@@ -57,7 +61,7 @@ namespace TrafficManager.Custom.AI {
 							return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 						}
 					}
-				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport) {
+				} else if (info.m_class.m_service == ItemClass.Service.PublicTransport || info.m_class.m_service == ItemClass.Service.Disaster) {
 					if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != CitizenInstance.Flags.None) {
 						target = InstanceID.Empty;
 						return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
@@ -208,15 +212,15 @@ namespace TrafficManager.Custom.AI {
 			}
 			switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
-					return 40 + bikeEncouragement;
+					return ResidentAI.BIKE_PROBABILITY_CHILD + bikeEncouragement;
 				case Citizen.AgeGroup.Teen:
-					return 30 + bikeEncouragement;
+					return ResidentAI.BIKE_PROBABILITY_TEEN + bikeEncouragement;
 				case Citizen.AgeGroup.Young:
-					return 20 + bikeEncouragement;
+					return ResidentAI.BIKE_PROBABILITY_YOUNG + bikeEncouragement;
 				case Citizen.AgeGroup.Adult:
-					return 10 + bikeEncouragement;
+					return ResidentAI.BIKE_PROBABILITY_ADULT + bikeEncouragement;
 				case Citizen.AgeGroup.Senior:
-					return 0 + bikeEncouragement;
+					return ResidentAI.BIKE_PROBABILITY_SENIOR + bikeEncouragement;
 				default:
 					return 0;
 			}
@@ -225,15 +229,15 @@ namespace TrafficManager.Custom.AI {
 		private static int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
-					return 0;
+					return ResidentAI.CAR_PROBABILITY_CHILD;
 				case Citizen.AgeGroup.Teen:
-					return 5;
+					return ResidentAI.CAR_PROBABILITY_TEEN;
 				case Citizen.AgeGroup.Young:
-					return /*Options.prohibitPocketCars ? 100 :*/ 15;
+					return ResidentAI.CAR_PROBABILITY_YOUNG;
 				case Citizen.AgeGroup.Adult:
-					return /*Options.prohibitPocketCars ? 100 :*/ 20;
+					return ResidentAI.CAR_PROBABILITY_ADULT;
 				case Citizen.AgeGroup.Senior:
-					return /*Options.prohibitPocketCars ? 100 :*/ 10;
+					return ResidentAI.CAR_PROBABILITY_SENIOR;
 				default:
 					return 0;
 			}

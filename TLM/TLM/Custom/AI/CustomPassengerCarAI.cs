@@ -1,4 +1,5 @@
 #define PATHRECALCx
+#define RUSHHOURx
 
 using System;
 using ColossalFramework;
@@ -365,7 +366,7 @@ namespace TrafficManager.Custom.AI {
 #else
 					false
 #endif
-					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking)) {
+					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
@@ -689,10 +690,10 @@ namespace TrafficManager.Custom.AI {
 				return false;
 			}
 
-			if ((building.m_flags & Building.Flags.BurnedDown) != Building.Flags.None) {
+			if ((building.m_flags & Building.Flags.Collapsed) != Building.Flags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance().DebugSwitches[4])
-					Log._Debug($"Refusing to find parking space at building {buildingID}! Building is burned down.");
+					Log._Debug($"Refusing to find parking space at building {buildingID}! Building is collapsed.");
 #endif
 				return false;
 			}
@@ -758,7 +759,7 @@ namespace TrafficManager.Custom.AI {
 
 			float propMaxDistance = 9999f; // NON-STOCK CODE
 
-			if (buildingInfo.m_props != null) {
+			if (buildingInfo.m_props != null && (buildingInfo.m_hasParkingSpaces & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				for (int i = 0; i < buildingInfo.m_props.Length; i++) {
 					BuildingInfo.Prop prop = buildingInfo.m_props[i];
 					Randomizer randomizer = new Randomizer((int)buildingID << 6 | prop.m_index);
@@ -1143,6 +1144,7 @@ namespace TrafficManager.Custom.AI {
 
 		internal static void OnLevelLoaded() {
 			try {
+#if RUSHHOUR
 				if (LoadingExtension.IsRushHourLoaded) {
 					rushHourParkingSearchRadiusField = typeof(RushHour.Experiments.ExperimentsToggle).GetField("ParkingSearchRadius", BindingFlags.Public | BindingFlags.Static);
 					rushHourImprovedParkingAiField = typeof(RushHour.Experiments.ExperimentsToggle).GetField("ImprovedParkingAI", BindingFlags.Public | BindingFlags.Static);
@@ -1151,6 +1153,7 @@ namespace TrafficManager.Custom.AI {
 					Log._Debug($"improvedParkingAiField = {rushHourImprovedParkingAiField}, value={rushHourImprovedParkingAiField.GetValue(null)}");
 #endif
 				}
+#endif
 			} catch (Exception ex) {
 				Log.Error("CustomPassengerCarAI.OnLevelLoaded: " + ex.ToString());
 			}

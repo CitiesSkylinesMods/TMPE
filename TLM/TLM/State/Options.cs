@@ -19,6 +19,7 @@ namespace TrafficManager.State {
 
 		private static UIDropDown simAccuracyDropdown = null;
 		//private static UIDropDown laneChangingRandomizationDropdown = null;
+		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
@@ -75,6 +76,7 @@ namespace TrafficManager.State {
 
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
+		public static bool realisticSpeeds = true;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
@@ -137,9 +139,6 @@ namespace TrafficManager.State {
 			UIHelper actualHelper = helper as UIHelper;
 			UIComponent container = actualHelper.self as UIComponent;
 
-			//Find the tab button in the KeyMappingPanel, so we can copy it
-			UIButton tabTemplate = GameObject.Find("KeyMappingTabStrip").GetComponentInChildren<UIButton>();
-
 			UITabstrip tabStrip = container.AddUIComponent<UITabstrip>();
 			tabStrip.relativePosition = new Vector3(0, 0);
 			tabStrip.size = new Vector2(container.width - 20, 40);
@@ -152,10 +151,7 @@ namespace TrafficManager.State {
 			int tabIndex = 0;
 			// GENERAL
 
-			UIButton settingsButton = tabStrip.AddTab(Translation.GetString("General"), tabTemplate, true);
-			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
-			settingsButton.autoSize = true;
-			settingsButton.tooltip = Translation.GetString("General");
+			AddOptionTab(tabStrip, Translation.GetString("General"));// tabStrip.AddTab(Translation.GetString("General"), tabTemplate, true);
 			tabStrip.selectedIndex = tabIndex;
 
 			UIPanel currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -180,10 +176,7 @@ namespace TrafficManager.State {
 			// GAMEPLAY
 			++tabIndex;
 
-			settingsButton = tabStrip.AddTab(Translation.GetString("Gameplay"), tabTemplate, true);
-			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
-			settingsButton.autoSize = true;
-			settingsButton.tooltip = Translation.GetString("Gameplay");
+			AddOptionTab(tabStrip, Translation.GetString("Gameplay"));
 			tabStrip.selectedIndex = tabIndex;
 
 			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -195,6 +188,7 @@ namespace TrafficManager.State {
 
 			panelHelper = new UIHelper(currentPanel);
 
+			realisticSpeedsToggle = panelHelper.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
 			recklessDriversDropdown = panelHelper.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			strongerRoadConditionEffectsToggle = panelHelper.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			enableDespawningToggle = panelHelper.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
@@ -214,10 +208,7 @@ namespace TrafficManager.State {
 			// VEHICLE RESTRICTIONS
 			++tabIndex;
 
-			settingsButton = tabStrip.AddTab(Translation.GetString("Vehicle_restrictions"), tabTemplate, true);
-			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
-			settingsButton.autoSize = true;
-			settingsButton.tooltip = Translation.GetString("Vehicle_restrictions");
+			AddOptionTab(tabStrip, Translation.GetString("Vehicle_restrictions"));
 			tabStrip.selectedIndex = tabIndex;
 
 			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -240,10 +231,7 @@ namespace TrafficManager.State {
 			// OVERLAYS
 			++tabIndex;
 
-			settingsButton = tabStrip.AddTab(Translation.GetString("Overlays"), tabTemplate, true);
-			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
-			settingsButton.autoSize = true;
-			settingsButton.tooltip = Translation.GetString("Overlays");
+			AddOptionTab(tabStrip, Translation.GetString("Overlays"));
 			tabStrip.selectedIndex = tabIndex;
 
 			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -272,10 +260,7 @@ namespace TrafficManager.State {
 			// MAINTENANCE
 			++tabIndex;
 
-			settingsButton = tabStrip.AddTab(Translation.GetString("Maintenance"), tabTemplate, true);
-			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
-			settingsButton.autoSize = true;
-			settingsButton.tooltip = Translation.GetString("Maintenance");
+			AddOptionTab(tabStrip, Translation.GetString("Maintenance"));
 			tabStrip.selectedIndex = tabIndex;
 
 			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -326,6 +311,22 @@ namespace TrafficManager.State {
 #endif
 
 			tabStrip.selectedIndex = 0;
+		}
+
+		private static UIButton AddOptionTab(UITabstrip tabStrip, string caption) {
+			UIButton tabButton = tabStrip.AddTab(caption);
+
+			tabButton.normalBgSprite = "SubBarButtonBase";
+			tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
+			tabButton.focusedBgSprite = "SubBarButtonBaseFocused";
+			tabButton.hoveredBgSprite = "SubBarButtonBaseHovered";
+			tabButton.pressedBgSprite = "SubBarButtonBasePressed";
+
+			tabButton.textPadding = new RectOffset(10, 10, 10, 10);
+			tabButton.autoSize = true;
+			tabButton.tooltip = caption;
+
+			return tabButton;
 		}
 
 		private static bool checkGameLoaded() {
@@ -432,6 +433,9 @@ namespace TrafficManager.State {
 			if (!LoadingExtension.IsPathManagerCompatible) {
 				if (newAdvancedAI) {
 					setAdvancedAI(false);
+					setDynamicPathRecalculation(false);
+					setHighwayRules(false);
+					setPreferOuterLane(false);
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
 				}
 			} else {
@@ -453,6 +457,7 @@ namespace TrafficManager.State {
 					setAdvancedAI(false);
 					setDynamicPathRecalculation(false);
 					setHighwayRules(false);
+					setPreferOuterLane(false);
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
 				}
 			} else {
@@ -600,6 +605,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
 			prohibitPocketCars = newValue;
+		}
+
+		private static void onRealisticSpeedsChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"realisticSpeeds changed to {value}");
+			realisticSpeeds = value;
 		}
 
 		private static void onEnableDespawningChanged(bool value) {
@@ -751,7 +764,6 @@ namespace TrafficManager.State {
 		public static void setHighwayRules(bool newHighwayRules) {
 #if !TAM
 			if (!LoadingExtension.IsPathManagerCompatible) {
-				newHighwayRules = false;
 				highwayRules = false;
 			} else {
 #endif
@@ -760,7 +772,7 @@ namespace TrafficManager.State {
 			}
 #endif
 			if (highwayRulesToggle != null)
-				highwayRulesToggle.isChecked = newHighwayRules;
+				highwayRulesToggle.isChecked = highwayRules;
 		}
 
 #if DEBUG
@@ -775,7 +787,7 @@ namespace TrafficManager.State {
 			}
 #endif
 			if (preferOuterLaneToggle != null)
-				preferOuterLaneToggle.isChecked = val;
+				preferOuterLaneToggle.isChecked = preferOuterLane;
 		}
 #endif
 
@@ -802,9 +814,7 @@ namespace TrafficManager.State {
 			if (!newAdvancedAI) {
 				setDynamicPathRecalculation(false);
 				setHighwayRules(false);
-#if DEBUG
 				setPreferOuterLane(false);
-#endif
 			}
 		}
 
@@ -848,6 +858,12 @@ namespace TrafficManager.State {
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
+		}
+
+		public static void setRealisticSpeeds(bool newValue) {
+			realisticSpeeds = newValue;
+			if (realisticSpeedsToggle != null)
+				realisticSpeedsToggle.isChecked = newValue;
 		}
 
 		public static void setEnableDespawning(bool value) {

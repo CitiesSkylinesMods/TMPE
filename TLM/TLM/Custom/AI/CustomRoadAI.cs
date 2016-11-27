@@ -453,29 +453,29 @@ namespace TrafficManager.Custom.AI {
 
 		#region stock code
 
-		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {
+		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) { // pure stock code
 			NetManager instance = Singleton<NetManager>.instance;
 			bool flag = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
 			Vector3 vector;
-			Vector3 from;
-			bool smoothStart;
-			data.CalculateCorner(segmentID, true, true, true, out vector, out from, out smoothStart);
 			Vector3 a;
-			Vector3 to;
-			bool smoothEnd;
-			data.CalculateCorner(segmentID, true, false, true, out a, out to, out smoothEnd);
+			bool smoothStart;
+			data.CalculateCorner(segmentID, true, true, true, out vector, out a, out smoothStart);
 			Vector3 a2;
-			Vector3 to2;
-			data.CalculateCorner(segmentID, true, true, false, out a2, out to2, out smoothStart);
+			Vector3 b;
+			bool smoothEnd;
+			data.CalculateCorner(segmentID, true, false, true, out a2, out b, out smoothEnd);
+			Vector3 a3;
+			Vector3 b2;
+			data.CalculateCorner(segmentID, true, true, false, out a3, out b2, out smoothStart);
 			Vector3 vector2;
-			Vector3 from2;
-			data.CalculateCorner(segmentID, true, false, false, out vector2, out from2, out smoothEnd);
+			Vector3 a4;
+			data.CalculateCorner(segmentID, true, false, false, out vector2, out a4, out smoothEnd);
 			if ((data.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
-				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(a2.z - vector.z, a2.x - vector.x) * 40.7436638f) & 255);
-				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(a.z - vector2.z, a.x - vector2.x) * 40.7436638f) & 255);
+				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(a3.z - vector.z, a3.x - vector.x) * 40.7436638f) & 255);
+				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(a2.z - vector2.z, a2.x - vector2.x) * 40.7436638f) & 255);
 			} else {
-				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector.z - a2.z, vector.x - a2.x) * 40.7436638f) & 255);
-				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector2.z - a.z, vector2.x - a.x) * 40.7436638f) & 255);
+				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector.z - a3.z, vector.x - a3.x) * 40.7436638f) & 255);
+				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector2.z - a2.z, vector2.x - a2.x) * 40.7436638f) & 255);
 			}
 			int num = 0;
 			int num2 = 0;
@@ -538,15 +538,15 @@ namespace TrafficManager.Custom.AI {
 				if ((data.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
 					num17 = 1f - num17;
 				}
-				Vector3 vector3 = vector + (a2 - vector) * num17;
-				Vector3 startDir = Vector3.Lerp(from, to2, num17);
-				Vector3 vector4 = vector2 + (a - vector2) * num17;
-				Vector3 endDir = Vector3.Lerp(from2, to, num17);
+				Vector3 vector3 = vector + (a3 - vector) * num17;
+				Vector3 startDir = Vector3.Lerp(a, b2, num17);
+				Vector3 vector4 = vector2 + (a2 - vector2) * num17;
+				Vector3 endDir = Vector3.Lerp(a4, b, num17);
 				vector3.y += lane.m_verticalOffset;
 				vector4.y += lane.m_verticalOffset;
-				Vector3 b;
+				Vector3 b3;
 				Vector3 c;
-				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b, out c);
+				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
 				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right);
 				flags2 &= ~(NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
 				flags2 |= flags;
@@ -656,7 +656,7 @@ namespace TrafficManager.Custom.AI {
 						flags2 |= NetLane.Flags.Forward;
 					}
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b, c, vector4);
+				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b3, c, vector4);
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_segment = segmentID;
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags2;
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_firstTarget = (byte)num18;
@@ -720,7 +720,7 @@ namespace TrafficManager.Custom.AI {
 			Log.Error("CustomRoadAI.CheckBuildings called.");
 		}
 
-		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) {
+		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) { // pure stock code
 			if ((data.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 				if ((data.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None) {
 					TrainTrackBaseAI.LevelCrossingSimulationStep(nodeID, ref data);
@@ -756,7 +756,8 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) {
+		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) { // stock + custom code
+			// base.SimulationStep START
 			if ((data.m_flags & NetSegment.Flags.Original) == NetSegment.Flags.None) {
 				NetManager netManager = Singleton<NetManager>.instance;
 				Vector3 pos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
@@ -787,10 +788,14 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
+			// base.SimulationStep END
 
 			SimulationManager instance = Singleton<SimulationManager>.instance;
 			NetManager instance2 = Singleton<NetManager>.instance;
 			Notification.Problem problem = Notification.RemoveProblems(data.m_problems, Notification.Problem.Flood | Notification.Problem.Snow);
+			if ((data.m_flags & NetSegment.Flags.AccessFailed) != NetSegment.Flags.None && Singleton<SimulationManager>.instance.m_randomizer.Int32(16u) == 0) {
+				data.m_flags &= ~NetSegment.Flags.AccessFailed;
+			}
 			float num = 0f;
 			uint num2 = data.m_lanes;
 			int num3 = 0;
@@ -834,6 +839,9 @@ namespace TrafficManager.Custom.AI {
 					flag = true;
 					data.m_flags |= NetSegment.Flags.Flooded;
 					problem = Notification.AddProblems(problem, Notification.Problem.Flood | Notification.Problem.MajorProblem);
+					Vector3 min = data.m_bounds.min;
+					Vector3 max = data.m_bounds.max;
+					RoadBaseAI.FloodParkedCars(min.x, min.z, max.x, max.z);
 				} else {
 					data.m_flags &= ~NetSegment.Flags.Flooded;
 					float _roadwayFloodingTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodingTolerance", 50)/100f : 0f;
@@ -850,6 +858,15 @@ namespace TrafficManager.Custom.AI {
 			int num7 = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
 			if ((this.m_info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
+					if (flag && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
+						TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
+						offer.Priority = 4;
+						offer.NetSegment = segmentID;
+						offer.Position = vector;
+						offer.Amount = 1;
+						Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.FloodWater, offer);
+					}
+
 					int num8 = (int)data.m_wetness;
 					if (!instance2.m_treatWetAsSnow) {
 						if (flag) {
@@ -879,13 +896,13 @@ namespace TrafficManager.Custom.AI {
 							} else if (Singleton<SimulationManager>.instance.m_randomizer.Int32(4u) == 0) {
 								num8 = Mathf.Max(num8 - 1, 0);
 							}
-							if (num8 >= 64 && (data.m_flags & (NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
-								TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
-								offer.Priority = num8 / 50;
-								offer.NetSegment = segmentID;
-								offer.Position = vector;
-								offer.Amount = 1;
-								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer);
+							if (num8 >= 64 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
+								TransferManager.TransferOffer offer2 = default(TransferManager.TransferOffer);
+								offer2.Priority = num8 / 50;
+								offer2.NetSegment = segmentID;
+								offer2.Position = vector;
+								offer2.Amount = 1;
+								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer2);
 							}
 							if (num8 >= 192) {
 								problem = Notification.AddProblems(problem, Notification.Problem.Snow);
@@ -921,13 +938,13 @@ namespace TrafficManager.Custom.AI {
 				if (!this.m_highwayRules) {
 					int num16 = instance.m_randomizer.Int32(num15, num15 + 99) / 100;
 					data.m_condition = (byte)Mathf.Max((int)data.m_condition - num16, 0);
-					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(20u) == 0) {
-						TransferManager.TransferOffer offer2 = default(TransferManager.TransferOffer);
-						offer2.Priority = (int)((255 - data.m_condition) / 50);
-						offer2.NetSegment = segmentID;
-						offer2.Position = vector;
-						offer2.Amount = 1;
-						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer2);
+					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(20u) == 0) {
+						TransferManager.TransferOffer offer3 = default(TransferManager.TransferOffer);
+						offer3.Priority = (int)((255 - data.m_condition) / 50);
+						offer3.NetSegment = segmentID;
+						offer3.Position = vector;
+						offer3.Amount = 1;
+						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer3);
 					}
 				}
 			}
@@ -961,6 +978,18 @@ namespace TrafficManager.Custom.AI {
 				GuideController properties = Singleton<GuideManager>.instance.m_properties;
 				if (properties != null) {
 					Singleton<NetManager>.instance.m_shortRoadTraffic.Activate(properties.m_shortRoadTraffic, segmentID);
+				}
+			}
+			if ((data.m_flags & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
+				GuideController properties2 = Singleton<GuideManager>.instance.m_properties;
+				if (properties2 != null) {
+					Singleton<NetManager>.instance.m_roadDestroyed.Activate(properties2.m_roadDestroyed, segmentID);
+					Singleton<NetManager>.instance.m_roadDestroyed2.Activate(properties2.m_roadDestroyed2, this.m_info.m_class.m_service);
+				}
+				if ((ulong)(instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15))) {
+					int delta = Mathf.RoundToInt(data.m_averageLength);
+					StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.DestroyedLength);
+					statisticBase.Add(delta);
 				}
 			}
 			data.m_problems = problem;

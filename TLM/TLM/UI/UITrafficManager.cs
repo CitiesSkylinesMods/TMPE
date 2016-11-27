@@ -63,7 +63,7 @@ namespace TrafficManager.UI {
 			height = 30;
 
 			//height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
-			relativePosition = new Vector3(85f, 80f);
+			relativePosition = new Vector3(85f, 65f);
 
 			title = AddUIComponent<UILabel>();
 			title.text = "Version " + TrafficManagerMod.Version;

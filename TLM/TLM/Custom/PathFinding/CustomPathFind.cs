@@ -101,6 +101,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _stablePath;
 		private bool _randomParking;
 		private bool _transportVehicle;
+		private NetSegment.Flags _disableMask;
 		private ExtVehicleType? _extVehicleType;
 		private ushort? _vehicleId;
 		private ExtCitizenInstance.ExtPathType? _extPathType;
@@ -324,6 +325,10 @@ namespace TrafficManager.Custom.PathFinding {
 			this._stablePath = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 64) != 0);
 			this._randomParking = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 128) != 0);
 			this._transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
+			this._disableMask = (NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed);
+			if ((this.PathUnits.m_buffer[unit].m_simulationFlags & 32) == 0) {
+				this._disableMask |= NetSegment.Flags.Flooded;
+			}
 			this._extVehicleType = pathUnitExtVehicleType[unit];
 			this._vehicleId = pathUnitVehicleIds[unit];
 			this._extPathType = pathUnitPathTypes[unit];
@@ -1958,7 +1963,7 @@ namespace TrafficManager.Custom.PathFinding {
 #region stock code
 		// 2
 		private void ProcessItemPublicTransport(BufferItem item, ushort targetNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, uint nextLane, byte offset, byte connectOffset) {
-			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
+			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 				return;
 			}
 			NetManager instance = Singleton<NetManager>.instance;
@@ -2090,7 +2095,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 			foundForced = false;
 			bool blocked = false;
-			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
+			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 #if DEBUGPF
 				if (debug)
 					logBuf.Add($"ProcessItemCosts: Segment is PathFailed or Flooded: {nextSegment.m_flags}");
@@ -2856,7 +2861,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 		// 4
 		private void ProcessItemPedBicycle(BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, byte connectOffset, byte laneSwitchOffset, int laneIndex, uint lane) {
-			if ((nextSegment.m_flags & (NetSegment.Flags.PathFailed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
+			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 				return;
 			}
 			// NON-STOCK CODE START

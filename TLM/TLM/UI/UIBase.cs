@@ -1,12 +1,16 @@
 using ColossalFramework.UI;
 using System;
+using System.Collections.Generic;
 using TrafficManager.TrafficLight;
+using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI {
 #if !TAM
 	public class UIBase : UICustomControl {
-		private bool _uiShown;
+		
+		private UIMainMenuButton button;
+		private bool _uiShown = false;
 
 		public UIBase() {
 			Log._Debug("##### Initializing UIBase.");
@@ -16,47 +20,18 @@ namespace TrafficManager.UI {
 			var uiView = UIView.GetAView();
 
 			// Add a new button to the view.
-			var button = (UIButton)uiView.AddUIComponent(typeof(UIButton));
-
-			// Set the text to show on the button.
-			button.text = "Traffic President";
-
-			// Set the button dimensions.
-			button.width = 150;
-			button.height = 30;
-
-			// Style the button to look like a menu button.
-			button.normalBgSprite = "ButtonMenu";
-			button.disabledBgSprite = "ButtonMenuDisabled";
-			button.hoveredBgSprite = "ButtonMenuHovered";
-			button.focusedBgSprite = "ButtonMenuFocused";
-			button.pressedBgSprite = "ButtonMenuPressed";
-			button.textColor = new Color32(255, 255, 255, 255);
-			button.disabledTextColor = new Color32(7, 7, 7, 255);
-			button.hoveredTextColor = new Color32(7, 132, 255, 255);
-			button.focusedTextColor = new Color32(255, 255, 255, 255);
-			button.pressedTextColor = new Color32(30, 30, 44, 255);
-
-			// Enable button sounds.
-			button.playAudioEvents = true;
-
-			// Place the button.
-			button.relativePosition = new Vector3(180f, 20f);
-
-			// Respond to button click.
-			button.eventClick += ButtonClick;
-		}
-
-		private void ButtonClick(UIComponent uiComponent, UIMouseEventParameter eventParam) {
-			if (!_uiShown) {
-				Show();
-			} else {
-				Close();
-			}
+			button = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
 		}
 
 		public bool IsVisible() {
 			return _uiShown;
+		}
+
+		public void ToggleMainMenu() {
+			if (IsVisible())
+				Close();
+			else
+				Show();
 		}
 
 		public void Show() {
@@ -69,6 +44,7 @@ namespace TrafficManager.UI {
 				GetMenu().Show();
 				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.Activated);
 				_uiShown = true;
+				button.UpdateSprites();
 			} else {
 				Log._Debug("TM UI Show: LoadingExtension.Instance is null!");
 			}
@@ -89,8 +65,8 @@ namespace TrafficManager.UI {
 				UITrafficManager.deactivateButtons();
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
-
 				_uiShown = false;
+				button.UpdateSprites();
 			} else {
 				Log._Debug("TM UI Close: LoadingExtension.Instance is null!");
 			}

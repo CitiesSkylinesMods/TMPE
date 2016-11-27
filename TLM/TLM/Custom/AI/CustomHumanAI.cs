@@ -15,6 +15,15 @@ using TrafficManager.UI;
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
 		public void CustomSimulationStep(ushort instanceID, ref CitizenInstance instanceData, Vector3 physicsLodRefPos) {
+			if ((instanceData.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None && (instanceData.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None) {
+				uint citizenId = instanceData.m_citizen;
+				Singleton<CitizenManager>.instance.ReleaseCitizenInstance(instanceID);
+				if (citizenId != 0u) {
+					Singleton<CitizenManager>.instance.ReleaseCitizen(citizenId);
+				}
+				return;
+			}
+
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance(instanceID);
@@ -149,7 +158,7 @@ namespace TrafficManager.Custom.AI {
 					vehicleId = 0;
 				}
 			}
-			if (vehicleId == 0 && (instanceData.m_flags & (CitizenInstance.Flags.Character | CitizenInstance.Flags.WaitingPath)) == CitizenInstance.Flags.None) {
+			if (vehicleId == 0 && (instanceData.m_flags & (CitizenInstance.Flags.Character | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) == CitizenInstance.Flags.None) {
 				instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
 				this.ArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);

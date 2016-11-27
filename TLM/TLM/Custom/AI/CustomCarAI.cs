@@ -301,14 +301,18 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			//ExtVehicleType? vehicleType = VehicleStateManager.GetVehicleState(vehicleId)?.VehicleType;
-			float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
-			if (state != null && state.HeavyVehicle)
-				maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.85 .. 1
-			else if (isRecklessDriver)
-				maxSpeed *= 1.2f + vehicleRand * 0.8f; // woohooo, 1.2 .. 2
-			else
-				maxSpeed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
+			if (Options.realisticSpeeds) {
+				float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
+				if (state != null && state.HeavyVehicle)
+					maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.85 .. 1
+				else if (isRecklessDriver)
+					maxSpeed *= 1.2f + vehicleRand * 0.8f; // woohooo, 1.2 .. 2
+				else
+					maxSpeed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
+			} else {
+				if (isRecklessDriver)
+					maxSpeed *= 1.4f;
+			}
 
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 
@@ -361,18 +365,18 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startDistSqrA;
+			float startDistSqrB;
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
-				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
-				if (!startBothWays || num < 10f) {
+			float endDistSqrA;
+			float endDistSqrB;
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startDistSqrA, out startDistSqrB) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out endDistSqrA, out endDistSqrB)) {
+				if (!startBothWays || startDistSqrA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num3 < 10f) {
+				if (!endBothWays || endDistSqrA < 10f) {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;

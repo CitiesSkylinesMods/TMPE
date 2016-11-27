@@ -181,7 +181,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Minimum speed update factor
 		/// </summary>
-		public float MinSpeedUpdateFactor = 0.05f;
+		public float MinSpeedUpdateFactor = 0.025f;
 
 		/// <summary>
 		/// Maximum speed update factor
@@ -254,6 +254,16 @@ namespace TrafficManager.State {
 		/// </summary>
 		public uint MaxSpeedDifference = 1250u;
 
+		/// <summary>
+		/// Main menu button position
+		/// </summary>
+		public int MainMenuButtonX = 464;
+		public int MainMenuButtonY = 10;
+
+		internal static void WriteConfig() {
+			ModifiedTime = WriteConfig(Instance());
+		}
+
 		private static GlobalConfig WriteDefaultConfig(out DateTime modifiedTime) {
 			GlobalConfig conf = new GlobalConfig();
 			modifiedTime = WriteConfig(conf);
@@ -315,8 +325,7 @@ namespace TrafficManager.State {
 				Reset();
 			} else {
 				instance = conf;
-				ModifiedTime = modifiedTime;
-				WriteConfig(instance);
+				ModifiedTime = WriteConfig(instance);
 			}
 		}
 
