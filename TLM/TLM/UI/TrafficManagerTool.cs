@@ -1,6 +1,5 @@
 ﻿#define MARKCONGESTEDSEGMENTS
 #define USEPATHWAITCOUNTERx
-#define ABSDENSITY
 
 using System;
 using System.Collections.Generic;
@@ -486,9 +485,7 @@ namespace TrafficManager.UI {
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 				labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 #endif
-#if ABSDENSITY
 				//labelStr += ", abs. dens.: " + (CustomRoadAI.laneMeanAbsDensities[segmentId] != null && i < CustomRoadAI.laneMeanAbsDensities[segmentId].Length ? "" + CustomRoadAI.laneMeanAbsDensities[segmentId][i] : "?") + " %";
-#endif
 				labelStr += "\n";
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -545,8 +542,13 @@ namespace TrafficManager.UI {
 #endif
 					labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
 #if MARKCONGESTEDSEGMENTS
-					if (CustomRoadAI.initDone && CustomRoadAI.segmentCongestion[i]) {
-						labelStr += " CONGESTED!";
+					if (CustomRoadAI.initDone && CustomRoadAI.segmentDirCongestion[i] != null) {
+						if (CustomRoadAI.segmentDirCongestion[i][0]) {
+							labelStr += " CONGESTED/";
+						}
+						if (CustomRoadAI.segmentDirCongestion[i][1]) {
+							labelStr += "CONGESTED";
+						}
 					}
 #endif
 

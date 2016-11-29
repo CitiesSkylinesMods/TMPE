@@ -252,7 +252,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
 		/// </summary>
-		public uint MaxSpeedDifference = 1250u;
+		public uint MaxSpeedDifference = 750u;
 
 		/// <summary>
 		/// Main menu button position
@@ -300,7 +300,7 @@ namespace TrafficManager.State {
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
 					return conf;
 				}
-			} catch (Exception e) {
+			} catch (Exception) {
 				Log.Warning("Could not load global config. Generating default config.");
 				return WriteDefaultConfig(out modifiedTime);
 			}
@@ -343,7 +343,7 @@ namespace TrafficManager.State {
 					Log.Info($"Detected modification of global config.");
 					Reload(false);
 				}
-			} catch (Exception e) {
+			} catch (Exception) {
 				Log.Warning("Could not determine modification date of global config.");
 			}
 		}

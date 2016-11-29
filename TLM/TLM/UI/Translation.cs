@@ -97,15 +97,15 @@ namespace TrafficManager.UI {
 				case "en":
 				case "de":
 				default:
-					return 210;
+					return 220;
 				case "ru":
 				case "pl":
-					return 250;
+					return 260;
 				case "es":
 				case "fr":
-					return 230;
+					return 240;
 				case "nl":
-					return 260;
+					return 270;
 			}
 		}
 

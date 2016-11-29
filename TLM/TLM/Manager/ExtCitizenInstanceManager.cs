@@ -50,6 +50,10 @@ namespace TrafficManager.Manager {
 		}
 		
 		internal void OnLevelUnloading() {
+			Reset();
+		}
+
+		internal void Reset() {
 			for (int i = 0; i < ExtInstances.Length; ++i)
 				ExtInstances[i].Reset();
 		}

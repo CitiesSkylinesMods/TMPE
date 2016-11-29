@@ -266,7 +266,10 @@ namespace TrafficManager.Custom.AI {
 										Log._Debug($"Reached maximum number of parking attempts for vehicle {vehicleID}! GIVING UP.");
 #endif
 									driverExtInstance.Reset();
-									return false;
+
+									// pocket car fallback
+									vehicleData.m_flags |= Vehicle.Flags.Parking;
+									return true;
 								}
 							} else {
 								driverExtInstance.PathMode = ExtPathMode.CalculatingCarPathToKnownParkPos;
@@ -276,7 +279,7 @@ namespace TrafficManager.Custom.AI {
 							bool calcEndPos;
 							Vector3 parkPos;
 
-							if (CustomCitizenAI.FindParkingSpaceForExtInstance(endPos, vehicleData.Info, driverExtInstance, homeId, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
+							if (CustomCitizenAI.FindParkingSpaceForExtInstance(endPos, vehicleData.Info, driverExtInstance, homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
 								calculateEndPos = calcEndPos;
 								allowRandomParking = false;
 								movingToParkingPos = true;
@@ -353,6 +356,19 @@ namespace TrafficManager.Custom.AI {
 
 			if (foundStartingPos &&
 				foundEndPos) { // NON-STOCK CODE
+
+				// NON-STOCK CODE START
+				bool allowEscapeTransport = true;
+				if (Options.restrictEvacBussesToShelter) {
+					if (targetBuilding != 0) {
+						BuildingInfo targetBuildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuilding].Info;
+						allowEscapeTransport = targetBuildingInfo.GetService() == ItemClass.Service.Disaster && targetBuildingInfo.GetClassLevel() == ItemClass.Level.Level4;
+					} else {
+						allowEscapeTransport = false;
+					}
+				}
+				// NON-STOCK CODE END
+
 				if (!startBothWays || sqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -366,7 +382,7 @@ namespace TrafficManager.Custom.AI {
 #else
 					false
 #endif
-					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking, false)) {
+					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking, false, allowEscapeTransport)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
@@ -374,7 +390,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 					if (GlobalConfig.Instance().DebugSwitches[2])
-						Log._Debug($"Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+						Log._Debug($"Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, allowEscapeTransport={allowEscapeTransport}");
 #endif
 
 					if (vehicleData.m_path != 0u) {
@@ -465,7 +481,7 @@ namespace TrafficManager.Custom.AI {
 				parkOffset = -1f;
 #if DEBUG
 				if (GlobalConfig.Instance().DebugSwitches[2])
-					Log._Debug($"Could not a road-side or building parking position for vehicle {vehicleId}!");
+					Log._Debug($"Could not find a road-side or building parking position for vehicle {vehicleId}!");
 #endif
 				return false;
 			}
@@ -682,7 +698,7 @@ namespace TrafficManager.Custom.AI {
 				return false;
 			}
 
-			if ((building.m_flags & Building.Flags.Active) == Building.Flags.None) {
+			if ((building.m_problems & Notification.Problem.TurnedOff) != Notification.Problem.None) {
 #if DEBUG
 				if (GlobalConfig.Instance().DebugSwitches[4])
 					Log._Debug($"Refusing to find parking space at building {buildingID}! Building is not active.");
@@ -1007,8 +1023,10 @@ namespace TrafficManager.Custom.AI {
 							if (curCitizenId != 0u) {
 								ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[curCitizenId].m_instance;
 								if (citizenInstanceId != 0) {
+#if DEBUG
 									if (GlobalConfig.Instance().DebugSwitches[2])
 										Log._Debug($"Releasing path for citizen instance {citizenInstanceId} sitting in vehicle {vehicleID} (was {citizenManager.m_instances.m_buffer[citizenInstanceId].m_path}).");
+#endif
 									if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0) {
 										Singleton<PathManager>.instance.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
 										citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;

@@ -524,7 +524,6 @@ namespace TrafficManager.Custom.AI {
 
 						return false;
 					}
-					return true;
 				} else if (extInstance.PathMode == ExtCitizenInstance.ExtPathMode.CalculatingWalkingPathToTarget) {
 					// final walking path to target has been calculated
 					extInstance.PathMode = ExtCitizenInstance.ExtPathMode.WalkingToTarget;
@@ -655,13 +654,13 @@ namespace TrafficManager.Custom.AI {
 
 
 #if DEBUG
-			if (GlobalConfig.Instance().DebugSwitches[4] && (walkingToCar || walkingToTarget)) {
+			/*if (GlobalConfig.Instance().DebugSwitches[4] && (walkingToCar || walkingToTarget)) {
 				bool? hasParkedVehicle = null;
 				if (walkingToCar) {
 					hasParkedVehicle = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle != 0;
 				}
 				Log._Debug($"CustomHumanAI.NeedsCarPath: called for citizen instance {instanceID}. walkingToCar={walkingToCar}, walkingToTarget={walkingToTarget}, spawned={spawned}, hasParkedVehicle={hasParkedVehicle}");
-			}
+			}*/
 #endif
 
 			if (walkingToCar || walkingToTarget) {
@@ -679,8 +678,8 @@ namespace TrafficManager.Custom.AI {
 							if (dist >= GlobalConfig.Instance().MaxParkedCarInstanceSwitchDistance) {
 								extInstance.PathMode = ExtPathMode.ReachingParkedCar;
 #if DEBUG
-								if (GlobalConfig.Instance().DebugSwitches[2])
-									Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} is currently reaching their parked car {parkedVehicleId} (dist={dist}). CurrentDepartureMode={extInstance.PathMode}");
+								/*if (GlobalConfig.Instance().DebugSwitches[4])
+									Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} is currently reaching their parked car {parkedVehicleId} (dist={dist}). CurrentDepartureMode={extInstance.PathMode}");*/
 #endif
 								return false;
 							} else {

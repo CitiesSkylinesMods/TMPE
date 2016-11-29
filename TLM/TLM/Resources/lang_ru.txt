@@ -57,7 +57,7 @@ Enable_Advanced_Vehicle_AI Активировать продвинутый AI
 Vehicles_may_enter_blocked_junctions Транспорт может заезжать в тупики
 All_vehicles_may_ignore_lane_arrows Весь транспорт может игнорировать стрелки движения
 Busses_may_ignore_lane_arrows Автобусы могут игнорировать стрелки движения
-Reckless_driving Опасное вождение (БЕТА статус)
+Reckless_driving Опасное вождение
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Настройки для каждого сохранения свои
 Simulation_accuracy Точность моделирования (высокое значение снижает производительность)
@@ -114,6 +114,7 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Выбранн
 Advanced_AI_cannot_be_activated Продвинутый AI не может быть активирован по причине используемого вами другого мода, который изменяет поведение транспорта (например Improved AI, Traffic++).
 The_Advanced_Vehicle_AI_cannot_be_activated Продвинутый AI не активирован, потому что вами уже используется иной мод, что меняет поведение транспорта (например Improved AI, Traffic++).
 Enable_dynamic_path_calculation Вкл. динамическое вычисление пути
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Changes made with this tool will take full effect after some minutes
 Lane_Arrow_Changer_Disabled_Connection Переключатель стрелки движения для этого перекрёстка отключён, потому что вы создали соединение перекрёстка вручную.
 Lane_connector Соединение перекрёстка
 Connected_lanes Связанные маршруты
@@ -124,7 +125,36 @@ Unit_system Системы единиц
 Metric Метрическая
 Imperial Международная
 Use_more_CPU_cores_for_route_calculation_if_available Многоядерный процессор для вычисления маршрута (при наличии)
-Activated_features Activated features
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
-Default_speed_limits Default speed limits
+Activated_features Активированные опции
+Junction_restrictions Junction restrictions
+Prohibit_spawning_of_pocket_cars Запрет появления малых автомобилей
+Reset_stuck_cims_and_vehicles Сброс застрявших пешеходов и транспорта
+Default_speed_limits Ограничения скорости по умолчанию
+Looking_for_a_parking_spot Поиск места для парковки
+Driving_to_a_parking_spot Движение к месту парковки
+Driving_to_another_parking_spot Движение на другую парковку
+Entering_vehicle Вход в транспорт
+Walking_to_car Идут к автомобилям
+Using_public_transport Используют общественный транспорт
+Walking Прогуливаются
+Thinking_of_a_good_parking_spot Думают о хорошем месте для парковки
+Switch_view Переключение обзора
+Outgoing_demand Исходящее требование
+Incoming_demand Входящее требование
+Advanced_Vehicle_AI Продвинутый AI транспорта
+Heavy_trucks_prefer_outer_lanes_on_highways Большегрузные траки предпочитают крайние полосы на шоссе
+Parking_AI AI парковки
+Enable_more_realistic_parking Вкл. более реалистическую парковку
+Reset_custom_speed_limits Сбросить свои ограничения скорости
+Reload_global_configuration Перезагрузить общую конфигурацию
+Reset_global_configuration Сбросить глобальную конфигурацию
+General Общее
+Gameplay Геймплей
+Overlays Оверлеи
+Realistic_speeds Реалистичные скорости
+Evacuation_busses_may_ignore_traffic_rules Автобусы эвакуации игнорируют правила движения
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Автобусы эвакуации используются только чтобы достигнуть жилья
+Vehicle_behavior Поведение транспорта
+Policies_&_Restrictions Политики & Ограничения
+At_junctions На перекрёстках
+In_case_of_emergency В случае крайней необходимости

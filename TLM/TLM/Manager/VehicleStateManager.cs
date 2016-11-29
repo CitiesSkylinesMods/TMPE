@@ -267,6 +267,10 @@ namespace TrafficManager.Manager {
 				case VehicleInfo.VehicleType.Plane:
 					//if (ai is PassengerPlaneAI)
 					return ExtVehicleType.PassengerPlane;
+				//break;
+				case VehicleInfo.VehicleType.Helicopter:
+					//if (ai is PassengerPlaneAI)
+					return ExtVehicleType.Helicopter;
 					//break;
 			}
 #if DEBUGVSTATE

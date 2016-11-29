@@ -21,7 +21,7 @@ namespace TrafficManager.Custom.AI {
 
 		public static ushort[][] laneMeanSpeeds; // per ten thousands
 		//public static byte[][] laneMeanAbsDensities;
-		public static bool[] segmentCongestion;
+		public static bool[][] segmentDirCongestion;
 
 		public static bool initDone = false;
 		public static uint simStartFrame = 0;
@@ -124,6 +124,7 @@ namespace TrafficManager.Custom.AI {
 								currentLaneSpeeds[segmentID] = new uint[numLanes];
 								currentLaneDensities[segmentID] = new uint[numLanes];
 								laneMeanSpeeds[segmentID] = new ushort[numLanes];
+								segmentDirCongestion[segmentID] = new bool[2];
 
 								//laneMeanAbsDensities[segmentID] = new byte[numLanes];
 
@@ -148,9 +149,6 @@ namespace TrafficManager.Custom.AI {
 							}
 
 							curLaneId = data.m_lanes;
-
-							bool setCongested = false;
-							bool unsetCongested = false;
 
 							uint laneIndex = 0;
 							while (laneIndex < numLanes && curLaneId != 0u) {
@@ -177,7 +175,7 @@ namespace TrafficManager.Custom.AI {
 										curSpeed = (ushort)Math.Min(10000u, ((currentLaneSpeeds[segmentID][laneIndex] * 10000u) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 									}
 
-									// calculate mean speed
+									// calculate reported mean speed
 									uint minSpeed = minSpeeds[dirIndex];
 									ushort prevSpeed = laneMeanSpeeds[segmentID][laneIndex];
 									float maxSpeedDiff = Mathf.Abs((short)curSpeed - (short)minSpeed);
@@ -186,7 +184,7 @@ namespace TrafficManager.Custom.AI {
 									ushort newSpeed = (ushort)Mathf.Clamp((float)prevSpeed + ((float)curSpeed - (float)prevSpeed) * updateFactor, 0, 10000);
 
 									if (newSpeed < minSpeed) {
-										minSpeed = newSpeed;
+										minSpeeds[dirIndex] = newSpeed;
 									} else {
 										int maxTolerableSpeed = (int)minSpeed + (int)conf.MaxSpeedDifference;
 										if (newSpeed > maxTolerableSpeed)
@@ -197,13 +195,6 @@ namespace TrafficManager.Custom.AI {
 
 									/*uint speedUpdateSmoothing = currentMeanSpeed > prevSpeed ? (uint)conf.LaneSpeedPositiveUpdateSmoothing : (uint)conf.LaneSpeedNegativeUpdateSmoothing;
 									laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)prevSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));*/
-
-									// determine if segment is congested
-									if (newSpeed <= conf.LowerSpeedCongestionThreshold) {
-										setCongested = true;
-									} else if (newSpeed >= conf.UpperSpeedCongestionThreshold) {
-										unsetCongested = true;
-									}
 
 									// calculate mean density
 									//ushort currentMeanDensity = (ushort) (maxLaneDensity > 0 ? Math.Min(currentDensity * 100 / maxLaneDensity, 100) : 0);
@@ -225,11 +216,14 @@ namespace TrafficManager.Custom.AI {
 								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 							}
 
-							// (un)mark segment as congested
-							if (setCongested)
-								segmentCongestion[segmentID] = true;
-							else if (unsetCongested)
-								segmentCongestion[segmentID] = false;
+							for (int i = 0; i < 2; ++i) {
+								// determine if segment direction is congested
+								if (minSpeeds[i] <= conf.LowerSpeedCongestionThreshold) {
+									segmentDirCongestion[segmentID][i] = true;
+								} else if (minSpeeds[i] >= conf.UpperSpeedCongestionThreshold) {
+									segmentDirCongestion[segmentID][i] = false;
+								}
+							}
 						} catch (Exception e) {
 							Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
 						}
@@ -1008,7 +1002,7 @@ namespace TrafficManager.Custom.AI {
 				laneMeanSpeeds = new ushort[NetManager.MAX_SEGMENT_COUNT][];
 				//laneMeanAbsDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
 				//maxLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
-				segmentCongestion = new bool[NetManager.MAX_SEGMENT_COUNT];
+				segmentDirCongestion = new bool[NetManager.MAX_SEGMENT_COUNT][];
 
 				resetTrafficStats();
 				initDone = true;
@@ -1024,7 +1018,10 @@ namespace TrafficManager.Custom.AI {
 						//maxLaneDensities[i][k] = 0;
 					}
 				}
-				segmentCongestion[i] = false;
+				if (segmentDirCongestion[i] != null) {
+					segmentDirCongestion[i][0] = false;
+					segmentDirCongestion[i][1] = false;
+				}
 			}
 			simStartFrame = 0;
 		}

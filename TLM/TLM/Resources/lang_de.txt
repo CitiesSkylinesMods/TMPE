@@ -92,11 +92,11 @@ Speed_limits Geschwindigkeitsbeschr.
 Persistently_visible_overlays Dauerhaft sichtbare Overlays
 Priority_signs Vorfahrtsschilder
 Vehicles_may_do_u-turns_at_junctions Fahrzeuge dürfen an Kreuzungen wenden
-Vehicles_going_straight_may_change_lanes_at_junctions Fahrzeuge dürfen die Spur wechseln, wenn sie an Kreuzungen geradeaus fahren
+Vehicles_going_straight_may_change_lanes_at_junctions Fahrz. dürfen die Spur wechseln, wenn sie an Kreuzungen geradeaus fahren
 Allow_u-turns Wenden erlauben
 Allow_lane_changing_for_vehicles_going_straight Spurwechsel für Fahrzeuge erlauben, die geradeaus fahren
 Allow_vehicles_to_enter_a_blocked_junction Erlaube Fahrzeuge, in eine blockierte Kreuzung einzufahren
-Road_condition_has_a_bigger_impact_on_vehicle_speed Der Straßenzustand hat einen größeren Einfluss auf die Fahrzeuggeschwindigkeit
+Road_condition_has_a_bigger_impact_on_vehicle_speed Der Straßenzustand hat einen größeren Einfluss auf die Geschwindigkeit
 Vehicle_restrictions Fahrzeugbeschränkungen
 Copy Kopieren
 Paste Einfügen
@@ -129,3 +129,31 @@ Junction_restrictions Kreuzungsbeschränkungen
 Prohibit_spawning_of_pocket_cars Verbiete Cims das Spawnen von Autos "aus der Tasche heraus"
 Reset_stuck_cims_and_vehicles Setze steckengebliebene Cims und Fahrzeuge zurück
 Default_speed_limits Standard-Geschwindigkeitsbeschränkungen
+Looking_for_a_parking_spot Sucht einen Parkplatz
+Driving_to_a_parking_spot Fährt zum Parkplatz
+Driving_to_another_parking_spot Fährt zu einem anderen Parkplatz
+Entering_vehicle Steigt ins Auto ein
+Walking_to_car Läuft zum Auto
+Using_public_transport Verwendet ÖPNV
+Walking Läuft
+Thinking_of_a_good_parking_spot Erinnert sich an einen Parkplatz
+Switch_view Ansicht wechseln
+Outgoing_demand Ausgehende Nachfrage
+Incoming_demand Eingehende Nachfrage
+Advanced_Vehicle_AI Verbesserte Fahrzeug-KI
+Heavy_trucks_prefer_outer_lanes_on_highways Schwere Laster bevorzugen die äußeren Spuren auf Autobahnen
+Parking_AI Parkplatz-KI
+Enable_more_realistic_parking Aktiviere realistisches Parken
+Reset_custom_speed_limits Geschwindigkeitsbegrenzungen auf Standard zurücksetzen
+Reload_global_configuration Globale Konfiguration neuladen
+Reset_global_configuration Globale Konfiguration zurücksetzen
+General Allgemein
+Gameplay Gameplay
+Overlays Overlays
+Realistic_speeds Realistische Geschwindigkeiten
+Evacuation_busses_may_ignore_traffic_rules Evakuierungsbusse dürfen Verkehrsregeln missachten
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Evakuierungsbusse dienen nur zum Erreichen einer Notunterkunft
+Vehicle_behavior Fahrzeugverhalten
+Policies_&_Restrictions Richtlinien & Einschränkungen
+At_junctions An Kreuzungen
+In_case_of_emergency Im Notfall

@@ -57,7 +57,7 @@ Enable_Advanced_Vehicle_AI Enable Advanced Vehicle AI
 Vehicles_may_enter_blocked_junctions Vehicles may enter blocked junctions
 All_vehicles_may_ignore_lane_arrows All vehicles may ignore lane arrows
 Busses_may_ignore_lane_arrows Busses may ignore lane arrows
-Reckless_driving Reckless driving (BETA feature)
+Reckless_driving Reckless driving
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Settings are defined for each savegame separately
 Simulation_accuracy Simulation accuracy (higher accuracy reduces performance)
@@ -114,6 +114,7 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen tra
 Advanced_AI_cannot_be_activated Advanced AI cannot be activated
 The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
 Enable_dynamic_path_calculation Enable dynamic path calculation
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Changes made with this tool will take full effect after some minutes
 Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
 Lane_connector Lane connector
 Connected_lanes Connected lanes
@@ -141,7 +142,8 @@ Switch_view Switch view
 Outgoing_demand Outgoing demand
 Incoming_demand Incoming demand
 Advanced_Vehicle_AI Advanced Vehicle AI
-Heavy_vehicles_prefer_outer_lanes_on_highways Heavy vehicles prefer outer lanes on highways
+Heavy_trucks_prefer_outer_lanes_on_highways Heavy vehicles prefer outer lanes on highways
+Parking_AI Parking AI
 Enable_more_realistic_parking Enable more realistic parking
 Reset_custom_speed_limits Reset custom speed limits
 Reload_global_configuration Reload global configuration
@@ -149,3 +151,10 @@ Reset_global_configuration Reset global configuration
 General General
 Gameplay Gameplay
 Overlays Overlays
+Realistic_speeds Realistic speeds
+Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
+Vehicle_behavior Vehicle behavior
+Policies_&_Restrictions Policies & Restrictions
+At_junctions At junctions
+In_case_of_emergency In case of emergency

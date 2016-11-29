@@ -80,7 +80,7 @@ namespace TrafficManager.Custom.AI {
 			return CustomTouristAI.GetVehicleInfo(instanceID, ref citizenData, forceProbability);
 		}
 
-		public static VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
+		public static new VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}

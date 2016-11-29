@@ -1,4 +1,3 @@
-#define QUEUEDSTATS
 #define EXTRAPFx
 
 using System;
@@ -40,7 +39,7 @@ namespace TrafficManager.UI {
 			width = 156;
 			height = 48;
             
-            relativePosition = new Vector3(340f, 5f);
+            relativePosition = new Vector3(540f, 10f);
 
             viewModeLabel = AddUIComponent<UILabel>();
             viewModeLabel.text = Translation.GetString("Outgoing_demand");
@@ -82,7 +81,7 @@ namespace TrafficManager.UI {
 
         private void ParentVisibilityChanged(UIComponent component, bool value) {
             Log._Debug($"Public transport info view panel changed visibility: {value}");
-            if (value)
+            if (value && Options.prohibitPocketCars)
                 this.Show();
             else
                 this.Hide();
