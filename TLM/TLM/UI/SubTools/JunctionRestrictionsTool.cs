@@ -131,7 +131,7 @@ namespace TrafficManager.UI.SubTools {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 					continue;
 
-				if (JunctionRestrictionsManager.Instance().HasJunctionRestrictions((ushort)nodeId))
+				if (JunctionRestrictionsManager.Instance.HasJunctionRestrictions((ushort)nodeId))
 					currentRestrictedNodeIds.Add((ushort)nodeId);
 			}
 		}
@@ -185,13 +185,13 @@ namespace TrafficManager.UI.SubTools {
 				int y = 0;
 
 				// draw "lane-changing when going straight allowed" sign at (0; 0)
-				bool allowed = JunctionRestrictionsManager.Instance().IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
+				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowLaneChangesWhileGoingStraight)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.LaneChangeAllowedTexture2D : TrafficLightToolTextureResources.LaneChangeForbiddenTexture2D, out signHovered);
 					if (signHovered) {
 						hovered = true;
 						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance().ToggleLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
+							JunctionRestrictionsManager.Instance.ToggleLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 							stateUpdated = true;
 						}
 					}
@@ -203,14 +203,14 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				// draw "u-turns allowed" sign at (1; 0)
-				allowed = JunctionRestrictionsManager.Instance().IsUturnAllowed(segmentId, startNode);
+				allowed = JunctionRestrictionsManager.Instance.IsUturnAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowUTurns)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.UturnAllowedTexture2D : TrafficLightToolTextureResources.UturnForbiddenTexture2D, out signHovered);
 					if (signHovered) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance().ToggleUturnAllowed(segmentId, startNode);
+							JunctionRestrictionsManager.Instance.ToggleUturnAllowed(segmentId, startNode);
 							stateUpdated = true;
 						}
 					}
@@ -220,14 +220,14 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				// draw "entering blocked junctions allowed" sign at (0; 1)
-				allowed = JunctionRestrictionsManager.Instance().IsEnteringBlockedJunctionAllowed(segmentId, startNode);
+				allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.EnterBlockedJunctionAllowedTexture2D : TrafficLightToolTextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
 					if (signHovered) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance().ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
+							JunctionRestrictionsManager.Instance.ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
 							stateUpdated = true;
 						}
 					}
@@ -239,14 +239,14 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				// draw "pedestrian crossing allowed" sign at (1; 1)
-				allowed = JunctionRestrictionsManager.Instance().IsPedestrianCrossingAllowed(segmentId, startNode);
+				allowed = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentId, startNode);
 				if (!viewOnly || !allowed) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.PedestrianCrossingAllowedTexture2D : TrafficLightToolTextureResources.PedestrianCrossingForbiddenTexture2D, out signHovered);
 					if (signHovered) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance().TogglePedestrianCrossingAllowed(segmentId, startNode);
+							JunctionRestrictionsManager.Instance.TogglePedestrianCrossingAllowed(segmentId, startNode);
 							stateUpdated = true;
 						}
 					}

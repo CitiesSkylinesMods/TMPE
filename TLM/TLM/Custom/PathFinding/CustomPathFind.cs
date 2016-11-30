@@ -132,11 +132,11 @@ namespace TrafficManager.Custom.PathFinding {
 
 		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
 
-		private static readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
-		private static readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance();
-		private static readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance();
-		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance();
-		private static readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+		private static readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+		private static readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance;
+		private static readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance;
+		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance;
+		private static readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
 		public bool IsMasterPathFind = false;
 #if EXTRAPF
@@ -302,7 +302,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 		// PathFind
 		protected void PathFindImplementation(uint unit, ref PathUnit data) {
-			_conf = GlobalConfig.Instance(); // NON-STOCK CODE
+			_conf = GlobalConfig.Instance; // NON-STOCK CODE
 
 			NetManager instance = Singleton<NetManager>.instance;
 			this._laneTypes = (NetInfo.LaneType)this.PathUnits.m_buffer[unit].m_laneTypes;

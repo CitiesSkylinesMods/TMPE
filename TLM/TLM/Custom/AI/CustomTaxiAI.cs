@@ -79,7 +79,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 					ExtVehicleType.Taxi, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
 #if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
 #endif
 

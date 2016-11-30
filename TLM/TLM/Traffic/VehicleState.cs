@@ -140,13 +140,13 @@ namespace TrafficManager.Traffic {
 
 			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
 			if (driverInstanceId != 0) {
-				return ExtCitizenInstanceManager.Instance().GetExtInstance(driverInstanceId);
+				return ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
 			}
 			return null;
 		}
 
 		internal void Unlink() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 			if (PreviousVehicleIdOnSegment != 0) {
 				vehStateManager._GetVehicleState(PreviousVehicleIdOnSegment).NextVehicleIdOnSegment = NextVehicleIdOnSegment;
@@ -166,7 +166,7 @@ namespace TrafficManager.Traffic {
 		private void Link(SegmentEnd end) {
 			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
 			if (oldFirstRegVehicleId != 0) {
-				VehicleStateManager.Instance()._GetVehicleState(oldFirstRegVehicleId).PreviousVehicleIdOnSegment = VehicleId;
+				VehicleStateManager.Instance._GetVehicleState(oldFirstRegVehicleId).PreviousVehicleIdOnSegment = VehicleId;
 				NextVehicleIdOnSegment = oldFirstRegVehicleId;
 			}
 			end.FirstRegisteredVehicleId = VehicleId;
@@ -395,7 +395,7 @@ namespace TrafficManager.Traffic {
 
 			LastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			SegmentEnd end = TrafficPriorityManager.Instance().GetPrioritySegment(GetTransitNodeId(ref curPos, ref nextPos), curPos.m_segment);
+			SegmentEnd end = TrafficPriorityManager.Instance.GetPrioritySegment(GetTransitNodeId(ref curPos, ref nextPos), curPos.m_segment);
 			
 			if (CurrentSegmentEnd != end) {
 				if (CurrentSegmentEnd != null) {
@@ -424,7 +424,7 @@ namespace TrafficManager.Traffic {
 			// update position of trailers
 			ushort trailerId = vehicleData.m_trailingVehicle;
 			while (trailerId != 0) {
-				VehicleStateManager.Instance().UpdateTrailerPos(trailerId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId], VehicleId, ref vehicleData);
+				VehicleStateManager.Instance.UpdateTrailerPos(trailerId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId], VehicleId, ref vehicleData);
 				trailerId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
 			}
 		}
@@ -509,7 +509,7 @@ namespace TrafficManager.Traffic {
 
 		private void ApplyVehicleTypeToTrailers() {
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 #if DEBUG
 			//Log._Debug($"Applying VehicleType to trailes of vehicle {VehicleId} to {VehicleType}.");

@@ -23,7 +23,7 @@ namespace TrafficManager.Custom.AI {
 			state.PathRecalculationRequested = false;
 #endif
 			ExtVehicleType vehicleType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service;
-			VehicleStateManager.Instance()._GetVehicleState(vehicleID).VehicleType = vehicleType;
+			VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType = vehicleType;
 
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
@@ -51,7 +51,7 @@ namespace TrafficManager.Custom.AI {
 #endif 
 					vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 #if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
 #endif
 

@@ -55,7 +55,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void RefreshCurrentTimedNodeIds() {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			currentTimedNodeIds.Clear();
 			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
@@ -70,7 +70,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnActivate() {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			RefreshCurrentTimedNodeIds();
 
@@ -94,7 +94,7 @@ namespace TrafficManager.UI.SubTools {
 			if (HoveredNodeId <= 0 || nodeSelectionLocked)
 				return;
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			switch (TrafficManagerTool.GetToolMode()) {
 				case ToolMode.TimedLightsSelectNode:
@@ -246,7 +246,7 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiTimedControlPanel(int num) {
 			//Log._Debug("guiTimedControlPanel");
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			if (TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsAddNode || TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsRemoveNode) {
 				GUILayout.Label(Translation.GetString("Select_junction"));
@@ -641,9 +641,9 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void _guiTimedTrafficLights() {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			_cursorInSecondaryPanel = false;
 
@@ -656,7 +656,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void _guiTimedTrafficLightsNodeWindow(int num) {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			if (SelectedNodeIndexes.Count < 1) {
 				GUILayout.Label(Translation.GetString("Select_nodes"));
@@ -716,7 +716,7 @@ namespace TrafficManager.UI.SubTools {
 		private void DisableTimed() {
 			if (SelectedNodeIndexes.Count <= 0) return;
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			foreach (var selectedNodeIndex in SelectedNodeIndexes) {
 				tlsMan.RemoveNodeFromSimulation(selectedNodeIndex, true, false);
@@ -860,7 +860,7 @@ namespace TrafficManager.UI.SubTools {
 				ShowGUI();
 			}*/
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 #if DEBUG
@@ -910,8 +910,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void ShowGUI() {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			var hoveredSegment = false;
 
@@ -1105,7 +1105,7 @@ namespace TrafficManager.UI.SubTools {
 
 #if DEBUG
 						if (timedActive /*&& _timedShowNumbers*/) {
-							var prioSeg = TrafficPriorityManager.Instance().GetPrioritySegment(nodeId, srcSegmentId);
+							var prioSeg = TrafficPriorityManager.Instance.GetPrioritySegment(nodeId, srcSegmentId);
 
 							var counterSize = 20f * zoom;
 							var yOffset = counterSize + 77f * zoom - modeHeight * 2;

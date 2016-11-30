@@ -64,7 +64,7 @@ namespace TrafficManager.State {
 
 			try {
 				Log.Info("Initializing lane connection manager");
-				LaneConnectionManager.Instance().OnBeforeLoadData(); // requires segment geometries
+				LaneConnectionManager.Instance.OnBeforeLoadData(); // requires segment geometries
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while initializing LaneConnectionManager: {e.ToString()}");
 				loadingSucceeded = false;
@@ -88,7 +88,7 @@ namespace TrafficManager.State {
 
 			try {
 				Log.Info("Initializing SpeedLimitManager");
-				SpeedLimitManager.Instance().OnBeforeLoadData();
+				SpeedLimitManager.Instance.OnBeforeLoadData();
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while initializing SpeedLimitManager: {e.ToString()}");
 				loadingSucceeded = false;
@@ -278,7 +278,7 @@ namespace TrafficManager.State {
 			}
 
 			try {
-				VehicleStateManager.Instance().InitAllVehicles();
+				VehicleStateManager.Instance.InitAllVehicles();
 			} catch (Exception e) {
 				Log.Error($"Error while initializing all vehicles: {e.ToString()}");
 			}
@@ -297,7 +297,7 @@ namespace TrafficManager.State {
 				return;
 			}
 
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			// load priority segments
 			if (_configuration.PrioritySegments != null) {
@@ -362,7 +362,7 @@ namespace TrafficManager.State {
 						if (!NetUtil.IsLaneValid(laneVehicleTypes.laneId))
 							continue;
 
-						ExtVehicleType baseMask = VehicleRestrictionsManager.Instance().GetBaseMask(laneVehicleTypes.laneId);
+						ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneVehicleTypes.laneId);
 						ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
 						Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 						if (maskedType != baseMask) {
@@ -381,7 +381,7 @@ namespace TrafficManager.State {
 			}
 
 			NetManager netManager = Singleton<NetManager>.instance;
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			if (_configuration.TimedLights != null) {
 				Log.Info($"Loading {_configuration.TimedLights.Count} timed traffic lights (new method)");
@@ -531,7 +531,7 @@ namespace TrafficManager.State {
 						if (!NetUtil.IsLaneValid(conn.higherLaneId))
 							continue;
 						Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
-						LaneConnectionManager.Instance().AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
+						LaneConnectionManager.Instance.AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Error("Error loading data from lane connection: " + e.ToString());
@@ -543,7 +543,7 @@ namespace TrafficManager.State {
 			}
 
 			// Load custom default speed limits
-			SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+			SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 			if (_configuration.CustomDefaultSpeedLimits != null) {
 				Log.Info($"Loading custom default speed limit data. {_configuration.CustomDefaultSpeedLimits.Count} elements");
 				foreach (KeyValuePair<string, float> e in _configuration.CustomDefaultSpeedLimits) {
@@ -626,7 +626,7 @@ namespace TrafficManager.State {
 				Log.Info("Saving Mod Data.");
 				var configuration = new Configuration();
 
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 				if (prioMan.TrafficSegments != null) {
 					for (ushort i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; i++) {
@@ -646,7 +646,7 @@ namespace TrafficManager.State {
 					}
 				}
 
-				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 				for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; i++) {
 					/*if (TrafficLightSimulation.LightSimulationByNodeId != null) {
@@ -703,7 +703,7 @@ namespace TrafficManager.State {
 					}
 				}
 
-				foreach (KeyValuePair<string, int> e in SpeedLimitManager.Instance().CustomLaneSpeedLimitIndexByNetInfoName) {
+				foreach (KeyValuePair<string, int> e in SpeedLimitManager.Instance.CustomLaneSpeedLimitIndexByNetInfoName) {
 					try {
 						SaveCustomDefaultSpeedLimit(e.Key, e.Value, configuration);
 					} catch (Exception ex) {
@@ -774,7 +774,7 @@ namespace TrafficManager.State {
 
 		private void SaveCustomDefaultSpeedLimit(string infoName, int customSpeedLimitIndex, Configuration configuration) {
 			try {
-				SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance();
+				SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 				ushort customSpeedLimit = speedLimitManager.AvailableSpeedLimits[customSpeedLimitIndex];
 				float gameSpeedLimit = speedLimitManager.ToGameSpeedLimit(customSpeedLimit);
 
@@ -849,7 +849,7 @@ namespace TrafficManager.State {
 
 		private static void SaveTimedTrafficLight(ushort i, Configuration configuration) {
 			try {
-				TrafficLightSimulation sim = TrafficLightSimulationManager.Instance().GetNodeSimulation(i);
+				TrafficLightSimulation sim = TrafficLightSimulationManager.Instance.GetNodeSimulation(i);
 				if (sim == null || !sim.IsTimedLight())
 					return;
 
@@ -924,7 +924,7 @@ namespace TrafficManager.State {
 
 		private static void SavePrioritySegment(ushort segmentId, Configuration configuration) {
 			try {
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 				if (prioMan.TrafficSegments[segmentId] == null) {
 					return;

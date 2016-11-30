@@ -13,16 +13,10 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class LaneConnectionManager : IObserver<SegmentGeometry> {
-		private static LaneConnectionManager instance = null;
-
-		public static LaneConnectionManager Instance() {
-			if (instance == null)
-				instance = new LaneConnectionManager();
-			return instance;
-		}
-
+		public static LaneConnectionManager Instance { get; private set; } = null;
+		
 		static LaneConnectionManager() {
-			Instance();
+			Instance = new LaneConnectionManager();
 		}
 
 		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();

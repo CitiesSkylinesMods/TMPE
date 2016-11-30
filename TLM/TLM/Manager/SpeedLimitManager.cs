@@ -9,13 +9,7 @@ using static ColossalFramework.UI.UITextureAtlas;
 
 namespace TrafficManager.Manager {
 	public class SpeedLimitManager {
-		private static SpeedLimitManager instance = null;
-
-		public static SpeedLimitManager Instance() {
-			if (instance == null)
-				instance = new SpeedLimitManager();
-			return instance;
-		}
+		public static SpeedLimitManager Instance { get; private set; } = null;
 
 		private static readonly float MAX_SPEED = 6f; // 300 km/h
 		private Dictionary<string, float[]> vanillaLaneSpeedLimitsByNetInfoName; // For each NetInfo (by name) and lane index: game default speed limit
@@ -26,7 +20,7 @@ namespace TrafficManager.Manager {
 		internal Dictionary<string, NetInfo> NetInfoByName; // For each name: NetInfo
 
 		static SpeedLimitManager() {
-			Instance();
+			Instance = new SpeedLimitManager();
 		}
 
 		public readonly List<ushort> AvailableSpeedLimits;
@@ -491,9 +485,14 @@ namespace TrafficManager.Manager {
 			SteamHelper.DLC_BitMask dlcMask = SteamHelper.GetOwnedDLCMask();
 
 			int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
+
+			vanillaLaneSpeedLimitsByNetInfoName.Clear();
 			customizableNetInfos.Clear();
 			CustomLaneSpeedLimitIndexByNetInfoName.Clear();
+			childNetInfoNamesByCustomizableNetInfoName.Clear();
+			NetInfoByName.Clear();
 
+			Log._Debug($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded.");
 			for (uint i = 0; i < numLoaded; ++i) {
 				NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
 				//Log._Debug($"Iterating over: {info.name}, {info.m_netAI == null}");

@@ -175,7 +175,7 @@ namespace TrafficManager.TrafficLight {
 			lastFlowWaitCalc = 0;
 
 #if DEBUG
-			/*if (GlobalConfig.Instance().DebugSwitches[2]) {
+			/*if (GlobalConfig.Instance.DebugSwitches[2]) {
 				if (timedNode.NodeId == 31605) {
 					Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
 					Log._Debug($"minTime: {minTime} maxTime: {maxTime}");
@@ -204,7 +204,7 @@ namespace TrafficManager.TrafficLight {
 			Singleton<CodeProfiler>.instance.Start("TimedTrafficLightsStep.SetLights");
 #endif
 			try {
-				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 				bool atEndTransition = !noTransition && (IsInEndTransition() || IsEndTransitionDone()); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && IsInStartTransition(); // = red + yellow
@@ -390,7 +390,7 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <param name="segmentId"></param>
 		internal void addSegment(ushort segmentId, bool makeRed) {
-			segmentLights.Add(segmentId, (CustomSegmentLights)CustomTrafficLightsManager.Instance().GetOrLiveSegmentLights(timedNode.NodeId, segmentId).Clone());
+			segmentLights.Add(segmentId, (CustomSegmentLights)CustomTrafficLightsManager.Instance.GetOrLiveSegmentLights(timedNode.NodeId, segmentId).Clone());
 			if (makeRed)
 				segmentLights[segmentId].MakeRed();
 			else
@@ -418,7 +418,7 @@ namespace TrafficManager.TrafficLight {
 				var segLights = e.Value;
 				
 				//if (segment == 0) continue;
-				var liveSegLights = CustomTrafficLightsManager.Instance().GetSegmentLights(timedNode.NodeId, segmentId);
+				var liveSegLights = CustomTrafficLightsManager.Instance.GetSegmentLights(timedNode.NodeId, segmentId);
 				if (liveSegLights == null)
 					continue;
 
@@ -596,8 +596,8 @@ namespace TrafficManager.TrafficLight {
 			uint curMeanFlow = 0;
 			uint curMeanWait = 0;
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			// we are the master node. calculate traffic data
 			foreach (ushort timedNodeId in timedNode.NodeGroup) {
@@ -627,7 +627,7 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					//bool startPhase = getCurrentFrame() <= startFrame + minTime + 2; // during start phase all vehicles on "green" segments are counted as flowing
-					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.Instance().GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
+					ExtVehicleType validVehicleTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(fromSegmentId, timedNode.NodeId);
 
 					foreach (KeyValuePair<byte, ExtVehicleType> e2 in segLights.VehicleTypeByLaneIndex) {
 						byte laneIndex = e2.Key;

@@ -467,7 +467,7 @@ namespace TrafficManager.State {
 			MenuRebuildRequired = true;
 			prioritySignsEnabled = val;
 			if (val)
-				VehicleStateManager.Instance().InitAllVehicles();
+				VehicleStateManager.Instance.InitAllVehicles();
 			else
 				setPrioritySignsOverlay(false);
 		}
@@ -479,7 +479,7 @@ namespace TrafficManager.State {
 			MenuRebuildRequired = true;
 			timedLightsEnabled = val;
 			if (val)
-				VehicleStateManager.Instance().InitAllVehicles();
+				VehicleStateManager.Instance.InitAllVehicles();
 			else
 				setTimedLightsOverlay(false);
 		}
@@ -588,7 +588,7 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
 			prohibitPocketCars = newValue;
-			ExtCitizenInstanceManager.Instance().Reset();
+			ExtCitizenInstanceManager.Instance.Reset();
 		}
 
 		private static void onRealisticSpeedsChanged(bool value) {
@@ -681,7 +681,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-			UtilityManager.Instance().RequestResetStuckEntities();
+			UtilityManager.Instance.RequestResetStuckEntities();
 		}
 
 		private static void onClickResetSpeedLimits() {
@@ -822,7 +822,7 @@ namespace TrafficManager.State {
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
-			ExtCitizenInstanceManager.Instance().Reset();
+			ExtCitizenInstanceManager.Instance.Reset();
 		}
 
 		public static void setRealisticSpeeds(bool newValue) {

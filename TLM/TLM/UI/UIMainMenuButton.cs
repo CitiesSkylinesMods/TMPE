@@ -18,7 +18,7 @@ namespace TrafficManager.UI {
 
 		public override void Start() {
 			// Place the button.
-			GlobalConfig config = GlobalConfig.Instance();
+			GlobalConfig config = GlobalConfig.Instance;
 			absolutePosition = new Vector3(config.MainMenuButtonX, config.MainMenuButtonY);
 
 			// Set the atlas and background/foreground
@@ -55,7 +55,7 @@ namespace TrafficManager.UI {
 		}
 
 		protected override void OnPositionChanged() {
-			GlobalConfig config = GlobalConfig.Instance();
+			GlobalConfig config = GlobalConfig.Instance;
 
 			config.MainMenuButtonX = (int)absolutePosition.x;
 			config.MainMenuButtonY = (int)absolutePosition.y;

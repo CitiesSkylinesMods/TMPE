@@ -100,17 +100,17 @@ namespace TrafficManager.TrafficLight {
 
 			if (!nodeGeometry.IsValid()) {
 				// node has become invalid. Remove manual/timed traffic light and destroy custom lights
-				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, false, false);
+				TrafficLightSimulationManager.Instance.RemoveNodeFromSimulation(NodeId, false, false);
 				return;
 			}
 
 			if (!Flags.mayHaveTrafficLight(NodeId)) {
 				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
-				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, false, true);
+				TrafficLightSimulationManager.Instance.RemoveNodeFromSimulation(NodeId, false, true);
 				return;
 			}
 
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			for (var s = 0; s < 8; s++) {
 				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
@@ -148,7 +148,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void setupLiveSegments() {
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			for (var s = 0; s < 8; s++) {
 				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
@@ -163,7 +163,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void destroyLiveSegments() {
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			for (var s = 0; s < 8; s++) {
 				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);

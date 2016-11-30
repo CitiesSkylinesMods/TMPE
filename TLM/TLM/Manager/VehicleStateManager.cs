@@ -12,13 +12,7 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class VehicleStateManager {
-		private static VehicleStateManager instance = null;
-
-		public static VehicleStateManager Instance() {
-            if (instance == null)
-				instance = new VehicleStateManager();
-			return instance;
-		}
+		public static VehicleStateManager Instance { get; private set; } = null;
 
 		/// <summary>
 		/// Determines if vehicles should be cleared
@@ -26,7 +20,7 @@ namespace TrafficManager.Manager {
 		private static bool ClearTrafficRequested = false;
 
 		static VehicleStateManager() {
-			Instance();
+			Instance = new VehicleStateManager();
 		}
 
 		/// <summary>
@@ -220,6 +214,10 @@ namespace TrafficManager.Manager {
 			} else {
 				VehicleStates[vehicleId].VehicleType = ExtVehicleType.None;
 				VehicleStates[vehicleId].HeavyVehicle = false;
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[4])
+					Log._Debug($"Could not determine vehicle type of {vehicleId}. Info={vehicleData.Info?.name}");
+#endif
 			}
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
@@ -279,7 +277,7 @@ namespace TrafficManager.Manager {
 			return null;
 		}
 
-		internal void SimulationStep() {
+		internal void SimulationStep() { // TODO refactor
 			try {
 				if (ClearTrafficRequested) {
 					ClearTraffic();

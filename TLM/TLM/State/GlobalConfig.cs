@@ -1,9 +1,12 @@
-﻿using ColossalFramework;
+﻿#define RUSHHOUR
+
+using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace TrafficManager.State {
@@ -16,30 +19,42 @@ namespace TrafficManager.State {
 		private static uint lastModificationCheckFrame = 0;
 #endif
 
-		private static GlobalConfig instance = null;
+		public static int? RushHourParkingSearchRadius { get; private set; } = null;
 
-		public static GlobalConfig Instance() {
-			if (instance == null) {
-				Reload();
-			}
-#if DEBUG
-			else {
-				uint curFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
-				if (lastModificationCheckFrame == 0) {
-					lastModificationCheckFrame = curFrame;
-				} else if (lastModificationCheckFrame < curFrame) {
-					lastModificationCheckFrame = curFrame;
-					ReloadIfNewer();
-				}
-			}
+#if RUSHHOUR
+		private static DateTime? rushHourConfigModifiedTime = null;
+		private const string RUSHHOUR_CONFIG_FILENAME = "RushHourOptions.xml";
+		private static uint lastRushHourConfigCheck = 0;
 #endif
-			return instance;
+
+		public static GlobalConfig Instance { get; private set; } = null;
+
+		internal static void OnLevelUnloading() {
+			Instance = null;
+#if RUSHHOUR
+			rushHourConfigModifiedTime = null;
+			lastRushHourConfigCheck = 0;
+			RushHourParkingSearchRadius = null;
+#endif
 		}
+
+		//public static GlobalConfig Instance() {
+//#if DEBUG
+//			uint curDebugFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10;
+//			if (lastModificationCheckFrame == 0) {
+//				lastModificationCheckFrame = curDebugFrame;
+//			} else if (lastModificationCheckFrame < curDebugFrame) {
+//				lastModificationCheckFrame = curDebugFrame;
+//				ReloadIfNewer();
+//			}
+//#endif
+			//return Instance;
+		//}
 
 		private static DateTime ModifiedTime = DateTime.MinValue;
 
 		static GlobalConfig() {
-			Instance();
+			Reload();
 		}
 
 		/// <summary>
@@ -261,7 +276,7 @@ namespace TrafficManager.State {
 		public int MainMenuButtonY = 10;
 
 		internal static void WriteConfig() {
-			ModifiedTime = WriteConfig(Instance());
+			ModifiedTime = WriteConfig(Instance);
 		}
 
 		private static GlobalConfig WriteDefaultConfig(out DateTime modifiedTime) {
@@ -324,15 +339,15 @@ namespace TrafficManager.State {
 				}
 				Reset();
 			} else {
-				instance = conf;
-				ModifiedTime = WriteConfig(instance);
+				Instance = conf;
+				ModifiedTime = WriteConfig(Instance);
 			}
 		}
 
 		public static void Reset() {
 			Log.Info($"Resetting global config.");
 			DateTime modifiedTime;
-			instance = WriteDefaultConfig(out modifiedTime);
+			Instance = WriteDefaultConfig(out modifiedTime);
 			ModifiedTime = modifiedTime;
 		}
 
@@ -346,6 +361,47 @@ namespace TrafficManager.State {
 			} catch (Exception) {
 				Log.Warning("Could not determine modification date of global config.");
 			}
+		}
+
+#if RUSHHOUR
+		private static void ReloadRushHourConfigIfNewer() { // TODO refactor
+			try {
+				DateTime newModifiedTime = File.GetLastWriteTime(RUSHHOUR_CONFIG_FILENAME);
+				if (rushHourConfigModifiedTime != null) {
+					if (newModifiedTime <= rushHourConfigModifiedTime)
+						return;
+				}
+
+				rushHourConfigModifiedTime = newModifiedTime;
+
+				XmlDocument doc = new XmlDocument();
+				doc.Load(RUSHHOUR_CONFIG_FILENAME);
+				XmlNode root = doc.DocumentElement;
+
+				XmlNode betterParkingNode = root.SelectSingleNode("OptionPanel/data/BetterParking");
+				XmlNode parkingSpaceRadiusNode = root.SelectSingleNode("OptionPanel/data/ParkingSearchRadius");
+
+				if ("True".Equals(betterParkingNode.InnerText)) {
+					RushHourParkingSearchRadius = int.Parse(parkingSpaceRadiusNode.InnerText);
+				}
+
+				Log._Debug($"RushHour config has changed. Setting searchRadius={RushHourParkingSearchRadius}");
+			} catch (Exception ex) {
+				Log.Error("GlobalConfig.ReloadRushHourConfigIfNewer: " + ex.ToString());
+			}
+		}
+#endif
+
+		public void SimulationStep() {
+#if RUSHHOUR
+			if (LoadingExtension.IsRushHourLoaded) {
+				uint curFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 12;
+				if (lastRushHourConfigCheck < curFrame) {
+					lastRushHourConfigCheck = curFrame;
+					ReloadRushHourConfigIfNewer();
+				}
+			}
+#endif
 		}
 	}
 }

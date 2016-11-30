@@ -8,16 +8,10 @@ using TrafficManager.Traffic;
 
 namespace TrafficManager.Manager {
 	public class JunctionRestrictionsManager {
-		private static JunctionRestrictionsManager instance = null;
-
-		public static JunctionRestrictionsManager Instance() {
-			if (instance == null)
-				instance = new JunctionRestrictionsManager();
-			return instance;
-		}
+		public static JunctionRestrictionsManager Instance { get; private set; } = null;
 
 		static JunctionRestrictionsManager() {
-			Instance();
+			Instance = new JunctionRestrictionsManager();
 		}
 
 		internal bool HasJunctionRestrictions(ushort nodeId) {

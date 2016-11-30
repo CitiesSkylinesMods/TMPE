@@ -12,16 +12,14 @@ using TrafficManager.Geometry;
 
 namespace TrafficManager.Manager {
 	public class TrafficPriorityManager : ICustomManager {
-		private static TrafficPriorityManager instance = null;
+		public static TrafficPriorityManager Instance { get; private set; } = null;
 
-		public static TrafficPriorityManager Instance() {
-			if (instance == null)
-				instance = new TrafficPriorityManager();
-			return instance;
+		static TrafficPriorityManager() {
+			Instance = new TrafficPriorityManager();
 		}
 
-		public readonly static float maxStopVelocity = 0.1f;
-		public readonly static float maxYieldVelocity = 0.3f;
+		public const float MAX_STOP_VELOCITY = 0.1f;
+		public const float MAX_YÌELD_VELOCITY = 0.3f;
 
 		/// <summary>
 		/// List of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id
@@ -162,7 +160,7 @@ namespace TrafficManager.Manager {
 				NetManager netManager = Singleton<NetManager>.instance;
 				if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
 					RemovePrioritySegment(nodeId, segmentId);
-					CustomTrafficLightsManager.Instance().RemoveSegmentLights(segmentId);
+					CustomTrafficLightsManager.Instance.RemoveSegmentLights(segmentId);
 #if TRACE
 					Singleton<CodeProfiler>.instance.Stop("TrafficPriority.IsPrioritySegment");
 #endif
@@ -318,8 +316,8 @@ namespace TrafficManager.Manager {
 			try {
 				VehicleManager vehManager = Singleton<VehicleManager>.instance;
 				NetManager netManager = Singleton<NetManager>.instance;
-				LaneConnectionManager connManager = LaneConnectionManager.Instance();
-				VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+				LaneConnectionManager connManager = LaneConnectionManager.Instance;
+				VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 				uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
@@ -481,7 +479,7 @@ namespace TrafficManager.Manager {
 									if (Options.simAccuracy <= 1 &&
 											!Single.IsInfinity(targetTimeToTransitNode) &&
 											!Single.IsNaN(targetTimeToTransitNode) &&
-											incomingToNode.sqrMagnitude > GlobalConfig.Instance().MaxPriorityCheckSqrDist) {
+											incomingToNode.sqrMagnitude > GlobalConfig.Instance.MaxPriorityCheckSqrDist) {
 										// check speeds
 										float incomingSpeed = incomingVel.magnitude;
 										float incomingDistanceToTransitNode = incomingToNode.magnitude;
@@ -493,7 +491,7 @@ namespace TrafficManager.Manager {
 											incomingTimeToTransitNode = Single.PositiveInfinity;
 
 										float timeDiff = Mathf.Abs(incomingTimeToTransitNode - targetTimeToTransitNode);
-										if (timeDiff > GlobalConfig.Instance().MaxPriorityApproachTime) {
+										if (timeDiff > GlobalConfig.Instance.MaxPriorityApproachTime) {
 #if DEBUG
 											if (debug)
 												Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} needs {incomingTimeToTransitNode} time units to get to the node where target needs {targetTimeToTransitNode} time units (diff = {timeDiff}). Difference to large. *IGNORING*");

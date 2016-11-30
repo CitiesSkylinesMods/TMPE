@@ -10,12 +10,10 @@ namespace TrafficManager.Manager {
 	/// Manages the states of all custom traffic lights on the map
 	/// </summary>
 	public class CustomTrafficLightsManager : ICustomManager {
-		private static CustomTrafficLightsManager instance = null;
+		public static CustomTrafficLightsManager Instance { get; private set; } = null;
 
-		public static CustomTrafficLightsManager Instance() {
-			if (instance == null)
-				instance = new CustomTrafficLightsManager();
-			return instance;
+		static CustomTrafficLightsManager() {
+			Instance = new CustomTrafficLightsManager();
 		}
 
 		/// <summary>

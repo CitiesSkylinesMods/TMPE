@@ -24,7 +24,7 @@ namespace TrafficManager.Custom.AI {
 
 #if USEPATHWAITCOUNTER
 				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
-					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
+					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
 					state.PathWaitCounter = 0; // NON-STOCK CODE
 				}
 #endif
@@ -50,7 +50,7 @@ namespace TrafficManager.Custom.AI {
 				}
 #if USEPATHWAITCOUNTER
 				else {
-					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleId);
+					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
 					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter+1); // NON-STOCK CODE
 				}
 #endif
@@ -61,7 +61,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			/// NON-STOCK CODE START ///
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
 			ushort frontVehicleId;
@@ -118,7 +118,7 @@ namespace TrafficManager.Custom.AI {
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
 				// NON-STOCK CODE START
 				if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-					VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
+					VehicleStateManager.Instance.OnVehicleSpawned(vehicleID, ref vehicleData);
 				}
 				// NON-STOCK CODE END
 
@@ -141,7 +141,7 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleStateManager.Instance().OnVehicleSpawned(vehicleID, ref vehicleData);
+				VehicleStateManager.Instance.OnVehicleSpawned(vehicleID, ref vehicleData);
 			}
 			// NON-STOCK CODE END
 
@@ -186,7 +186,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				if (CustomPathManager._instance.CreatePath(ExtVehicleType.Tram, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
 #if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
+					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
 #endif
 
@@ -204,7 +204,7 @@ namespace TrafficManager.Custom.AI {
 		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			if ((Options.prioritySignsEnabled || Options.timedLightsEnabled) && Options.simAccuracy <= 1) {
 				try {
-					VehicleStateManager.Instance().UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
+					VehicleStateManager.Instance.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
 				} catch (Exception e) {
 					Log.Error("TramAI CustomCalculateSegmentPosition Error: " + e.ToString());
 				}
@@ -249,7 +249,7 @@ namespace TrafficManager.Custom.AI {
 			}
 			NetInfo info = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, speedLimit, netManager.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
@@ -261,7 +261,7 @@ namespace TrafficManager.Custom.AI {
 			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, speedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);

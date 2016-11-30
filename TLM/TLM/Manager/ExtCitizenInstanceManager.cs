@@ -12,20 +12,14 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class ExtCitizenInstanceManager {
-		private static ExtCitizenInstanceManager instance = null;
+		public static ExtCitizenInstanceManager Instance { get; private set; } = null;
 
 		internal void OnReleaseInstance(ushort instanceId) {
 			GetExtInstance(instanceId).Reset();
 		}
 
-		public static ExtCitizenInstanceManager Instance() {
-            if (instance == null)
-				instance = new ExtCitizenInstanceManager();
-			return instance;
-		}
-
 		static ExtCitizenInstanceManager() {
-			Instance();
+			Instance = new ExtCitizenInstanceManager();
 		}
 
 		/// <summary>

@@ -92,7 +92,7 @@ namespace TrafficManager.Traffic {
 		internal void SimulationStep() {
 			if (cleanupRequested) {
 				VehicleManager vehManager = Singleton<VehicleManager>.instance;
-				VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+				VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 #if DEBUG
 				//Log._Debug($"Cleanup of SegmentEnd {SegmentId} @ {NodeId} requested. Performing cleanup now.");
@@ -129,7 +129,7 @@ namespace TrafficManager.Traffic {
 #endif
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 			Dictionary<ushort, uint> ret = includeStopped ? numVehiclesGoingToSegmentId : numVehiclesFlowingToSegmentId;
 
@@ -176,7 +176,7 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriorityManager.maxStopVelocity) {
+					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriorityManager.MAX_STOP_VELOCITY) {
 #if DEBUGMETRIC
 					if (debug)
 						Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");
@@ -243,7 +243,7 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal int GetRegisteredVehicleCount() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int ret = 0;
@@ -263,7 +263,7 @@ namespace TrafficManager.Traffic {
 		}
 
 		private void UnregisterAllVehicles() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 			while (FirstRegisteredVehicleId != 0) {
 				vehStateManager._GetVehicleState(FirstRegisteredVehicleId).Unlink();
 			}
@@ -271,7 +271,7 @@ namespace TrafficManager.Traffic {
 
 		public void OnUpdate(SegmentGeometry geometry) {
 			if (!geometry.IsValid()) {
-				TrafficPriorityManager.Instance().RemovePrioritySegment(NodeId, SegmentId);
+				TrafficPriorityManager.Instance.RemovePrioritySegment(NodeId, SegmentId);
 				return;
 			}
 
@@ -292,8 +292,8 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal void Housekeeping() {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns && TrafficLightSimulationManager.Instance().GetNodeSimulation(NodeId) == null && Type == PriorityType.None)
-				TrafficPriorityManager.Instance().RemovePrioritySegments(NodeId);
+			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns && TrafficLightSimulationManager.Instance.GetNodeSimulation(NodeId) == null && Type == PriorityType.None)
+				TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 		}
 	}
 }

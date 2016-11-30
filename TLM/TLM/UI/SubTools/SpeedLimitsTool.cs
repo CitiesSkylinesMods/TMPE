@@ -80,6 +80,8 @@ namespace TrafficManager.UI.SubTools {
 			currentlyVisibleSegmentIds.Clear();
 			lastCamPos = null;
 			lastCamRot = null;
+			currentInfoIndex = -1;
+			currentSpeedLimitIndex = -1;
 		}
 
 		private Quaternion? lastCamRot = null;
@@ -139,10 +141,10 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void _guiDefaultsWindow(int num) {
-			List<NetInfo> mainNetInfos = SpeedLimitManager.Instance().GetCustomizableNetInfos();
+			List<NetInfo> mainNetInfos = SpeedLimitManager.Instance.GetCustomizableNetInfos();
 
 			if (mainNetInfos == null || mainNetInfos.Count <= 0) {
-				Log._Debug($"mainNetInfos={mainNetInfos}");
+				Log._Debug($"mainNetInfos={mainNetInfos?.Count}");
 				DragWindow(ref defaultsWindowRect);
 				return;
 			}
@@ -159,7 +161,7 @@ namespace TrafficManager.UI.SubTools {
 				UpdateRoadTex(info);
 
 			if (currentSpeedLimitIndex < 0) {
-				currentSpeedLimitIndex = SpeedLimitManager.Instance().GetCustomNetInfoSpeedLimitIndex(info);
+				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
 				Log._Debug($"set currentSpeedLimitIndex to {currentSpeedLimitIndex}");
 			}
 			//Log._Debug($"currentInfoIndex={currentInfoIndex} currentSpeedLimitIndex={currentSpeedLimitIndex}");
@@ -185,7 +187,7 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button("←", GUILayout.Width(50))) {
 				currentInfoIndex = (currentInfoIndex + mainNetInfos.Count - 1) % mainNetInfos.Count;
 				info = mainNetInfos[currentInfoIndex];
-				currentSpeedLimitIndex = SpeedLimitManager.Instance().GetCustomNetInfoSpeedLimitIndex(info);
+				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
 				UpdateRoadTex(info);
 			}
 			GUILayout.FlexibleSpace();
@@ -207,7 +209,7 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button("→", GUILayout.Width(50))) {
 				currentInfoIndex = (currentInfoIndex + 1) % mainNetInfos.Count;
 				info = mainNetInfos[currentInfoIndex];
-				currentSpeedLimitIndex = SpeedLimitManager.Instance().GetCustomNetInfoSpeedLimitIndex(info);
+				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
 				UpdateRoadTex(info);
 			}
 			GUILayout.FlexibleSpace();
@@ -233,7 +235,7 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginVertical();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("←", GUILayout.Width(50))) {
-				currentSpeedLimitIndex = (currentSpeedLimitIndex + SpeedLimitManager.Instance().AvailableSpeedLimits.Count - 1) % SpeedLimitManager.Instance().AvailableSpeedLimits.Count;
+				currentSpeedLimitIndex = (currentSpeedLimitIndex + SpeedLimitManager.Instance.AvailableSpeedLimits.Count - 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
 			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
@@ -244,7 +246,7 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 
 			// speed limit sign
-			GUILayout.Box(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance().AvailableSpeedLimits[currentSpeedLimitIndex]], GUILayout.Width(guiSpeedSignSize), GUILayout.Height(guiSpeedSignSize));
+			GUILayout.Box(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[currentSpeedLimitIndex]], GUILayout.Width(guiSpeedSignSize), GUILayout.Height(guiSpeedSignSize));
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
@@ -254,7 +256,7 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginVertical();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("→", GUILayout.Width(50))) {
-				currentSpeedLimitIndex = (currentSpeedLimitIndex + 1) % SpeedLimitManager.Instance().AvailableSpeedLimits.Count;
+				currentSpeedLimitIndex = (currentSpeedLimitIndex + 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
 			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
@@ -268,13 +270,13 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
-				SpeedLimitManager.Instance().FixCurrentSpeedLimits(info);
-				SpeedLimitManager.Instance().SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
+				SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
+				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
 			}
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Save") + " & " + Translation.GetString("Apply"), GUILayout.Width(120))) {
-				SpeedLimitManager.Instance().SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
-				SpeedLimitManager.Instance().ClearCurrentSpeedLimits(info);
+				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
+				SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
 			}
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
@@ -297,11 +299,11 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginHorizontal();
 
 			Color oldColor = GUI.color;
-			for (int i = 0; i < SpeedLimitManager.Instance().AvailableSpeedLimits.Count; ++i) {
+			for (int i = 0; i < SpeedLimitManager.Instance.AvailableSpeedLimits.Count; ++i) {
 				if (curSpeedLimitIndex != i)
 					GUI.color = Color.gray;
 				float signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
-				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance().AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
+				if (GUILayout.Button(TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
 					curSpeedLimitIndex = i;
 				}
 				GUI.color = oldColor;
@@ -353,16 +355,16 @@ namespace TrafficManager.UI.SubTools {
 				GUI.color = guiColor;
 
 				try {
-					GUI.DrawTexture(boundingBox, TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance().GetCustomSpeedLimit(segmentId, e.Key)]);
+					GUI.DrawTexture(boundingBox, TrafficLightToolTextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key)]);
 				} catch (Exception ex) {
-					Log.Error("segment " + segmentId + " limit: " + SpeedLimitManager.Instance().GetCustomSpeedLimit(segmentId, e.Key) + ", ex: " + ex.ToString());
+					Log.Error("segment " + segmentId + " limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key) + ", ex: " + ex.ToString());
 				}
 
 				if (hoveredHandle && Input.GetMouseButton(0)) {
 					// change the speed limit to the selected one
-					ushort speedLimitToSet = SpeedLimitManager.Instance().AvailableSpeedLimits[curSpeedLimitIndex];
+					ushort speedLimitToSet = SpeedLimitManager.Instance.AvailableSpeedLimits[curSpeedLimitIndex];
 					//Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()} to {speedLimitToSet}");
-					SpeedLimitManager.Instance().SetSpeedLimit(segmentId, e.Key, speedLimitToSet);
+					SpeedLimitManager.Instance.SetSpeedLimit(segmentId, e.Key, speedLimitToSet);
 
 					// TODO use SegmentTraverser
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
@@ -417,7 +419,7 @@ namespace TrafficManager.UI.SubTools {
 										NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
 										if (laneInfo.m_finalDirection == e.Key) {
-											SpeedLimitManager.Instance().SetSpeedLimit(otherSegmentId, laneInfo.m_finalDirection, speedLimitToSet);
+											SpeedLimitManager.Instance.SetSpeedLimit(otherSegmentId, laneInfo.m_finalDirection, speedLimitToSet);
 										}
 
 										// apply restrictions of selected segment & lane

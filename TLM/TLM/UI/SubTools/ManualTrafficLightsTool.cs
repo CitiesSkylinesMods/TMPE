@@ -29,8 +29,8 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnPrimaryClickOverlay() {
 			if (SelectedNodeId != 0) return;
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			TrafficLightSimulation sim = tlsMan.GetNodeSimulation(HoveredNodeId);
 			if (sim == null || !sim.IsTimedLight()) {
@@ -59,8 +59,8 @@ namespace TrafficManager.UI.SubTools {
 			var hoveredSegment = false;
 
 			if (SelectedNodeId != 0) {
-				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
-				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 				var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
 				nodeSimulation.housekeeping();
@@ -664,8 +664,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
-			var nodeSimulation = TrafficLightSimulationManager.Instance().GetNodeSimulation(SelectedNodeId);
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			var nodeSimulation = TrafficLightSimulationManager.Instance.GetNodeSimulation(SelectedNodeId);
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			for (var i = 0; i < 8; i++) {
 				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
@@ -684,7 +684,7 @@ namespace TrafficManager.UI.SubTools {
 
 		public override void Cleanup() {
 			if (SelectedNodeId == 0) return;
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
 

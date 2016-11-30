@@ -9,12 +9,10 @@ using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightSimulationManager : ICustomManager {
-		private static TrafficLightSimulationManager instance = null;
+		public static TrafficLightSimulationManager Instance { get; private set; } = null;
 
-		public static TrafficLightSimulationManager Instance() {
-			if (instance == null)
-				instance = new TrafficLightSimulationManager();
-			return instance;
+		static TrafficLightSimulationManager() {
+			Instance = new TrafficLightSimulationManager();
 		}
 
 		/// <summary>

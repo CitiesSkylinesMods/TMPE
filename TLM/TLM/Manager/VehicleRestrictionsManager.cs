@@ -8,16 +8,10 @@ using TrafficManager.Traffic;
 
 namespace TrafficManager.Manager {
 	public class VehicleRestrictionsManager {
-		private static VehicleRestrictionsManager instance = null;
-
-		public static VehicleRestrictionsManager Instance() {
-			if (instance == null)
-				instance = new VehicleRestrictionsManager();
-			return instance;
-		}
+		public static VehicleRestrictionsManager Instance { get; private set; } = null;
 
 		static VehicleRestrictionsManager() {
-			Instance();
+			Instance = new VehicleRestrictionsManager();
 		}
 
 		/// <summary>

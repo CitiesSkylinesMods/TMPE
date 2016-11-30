@@ -12,18 +12,12 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class ExtBuildingManager {
-		private static ExtBuildingManager instance = null;
-
-		public static ExtBuildingManager Instance() {
-            if (instance == null)
-				instance = new ExtBuildingManager();
-			return instance;
-		}
+		public static ExtBuildingManager Instance { get; private set; } = null;
 
 		static ExtBuildingManager() {
-			Instance();
+			Instance = new ExtBuildingManager();
 		}
-
+		
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>

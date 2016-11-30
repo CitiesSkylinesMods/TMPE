@@ -6,12 +6,10 @@ using System.Text;
 
 namespace TrafficManager.Manager {
 	public class UtilityManager {
-		private static UtilityManager instance = null;
+		public static UtilityManager Instance { get; private set; } = null;
 
-		public static UtilityManager Instance() {
-			if (instance == null)
-				instance = new UtilityManager();
-			return instance;
+		static UtilityManager() {
+			Instance = new UtilityManager();
 		}
 
 		/// <summary>

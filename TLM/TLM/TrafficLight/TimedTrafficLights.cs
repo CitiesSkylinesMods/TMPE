@@ -67,7 +67,7 @@ namespace TrafficManager.TrafficLight {
 			/*if (!housekeeping())
 				return;*/
 
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
 
 			for (int s = 0; s < 8; ++s) {
 				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
@@ -98,7 +98,7 @@ namespace TrafficManager.TrafficLight {
 
 			NodeGroup.Remove(otherNodeId);
 			if (NodeGroup.Count <= 0) {
-				TrafficLightSimulationManager.Instance().RemoveNodeFromSimulation(NodeId, true, false);
+				TrafficLightSimulationManager.Instance.RemoveNodeFromSimulation(NodeId, true, false);
 				return;
 			}
 			masterNodeId = NodeGroup[0];
@@ -299,7 +299,7 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 			// change step
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			CurrentStep = (CurrentStep + 1) % NumSteps();
 			foreach (ushort slaveNodeId in NodeGroup) {
 				TrafficLightSimulation slaveSim = tlsMan.GetNodeSimulation(slaveNodeId);
@@ -319,7 +319,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void SetLights() {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			// set lights
 			foreach (ushort slaveNodeId in NodeGroup) {
@@ -336,7 +336,7 @@ namespace TrafficManager.TrafficLight {
 			if (!IsMasterNode())
 				return;
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			var newCurrentStep = (CurrentStep + 1) % NumSteps();
 			foreach (ushort slaveNodeId in NodeGroup) {
@@ -359,7 +359,7 @@ namespace TrafficManager.TrafficLight {
 			var numFrames = Steps[CurrentStep].MaxTimeRemaining();
 
 			RoadBaseAI.TrafficLightState currentState;
-			CustomSegmentLights segmentLights = CustomTrafficLightsManager.Instance().GetSegmentLights(NodeId, segmentId);
+			CustomSegmentLights segmentLights = CustomTrafficLightsManager.Instance.GetSegmentLights(NodeId, segmentId);
 			if (segmentLights == null) {
 				Log._Debug($"CheckNextChange: No segment lights at node {NodeId}, segment {segmentId}");
                 return 99;
@@ -423,8 +423,8 @@ namespace TrafficManager.TrafficLight {
 				return;
 			}
 
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			for (int s = 0; s < 8; ++s) {
 				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
@@ -502,7 +502,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal TimedTrafficLights MasterLights() {
-			TrafficLightSimulation masterSim = TrafficLightSimulationManager.Instance().GetNodeSimulation(masterNodeId);
+			TrafficLightSimulation masterSim = TrafficLightSimulationManager.Instance.GetNodeSimulation(masterNodeId);
 			if (masterSim == null || !masterSim.IsTimedLight())
 				return null;
 			return masterSim.TimedLight;
@@ -528,7 +528,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void Join(TimedTrafficLights otherTimedLight) {
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			if (NumSteps() < otherTimedLight.NumSteps()) {
 				// increase the number of steps at our timed lights
@@ -630,7 +630,7 @@ namespace TrafficManager.TrafficLight {
 			if (segmentId <= 0)
 				return;
 
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			if (!prioMan.IsPrioritySegment(NodeId, segmentId))
 				prioMan.AddPrioritySegment(NodeId, segmentId, SegmentEnd.PriorityType.None);
@@ -639,7 +639,7 @@ namespace TrafficManager.TrafficLight {
 		private void DestroySegmentEnd(ushort segmentId) {
 			if (segmentId <= 0)
 				return;
-			TrafficPriorityManager.Instance().RemovePrioritySegment(NodeId, segmentId);
+			TrafficPriorityManager.Instance.RemovePrioritySegment(NodeId, segmentId);
 		}
 	}
 }

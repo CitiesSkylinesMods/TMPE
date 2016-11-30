@@ -36,7 +36,7 @@ namespace TrafficManager.Custom.AI {
 			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
@@ -157,7 +157,7 @@ namespace TrafficManager.Custom.AI {
 			bool forceUpdatePos = false;
 			VehicleState vehicleState = null;
 
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
 				vehicleState = vehStateManager.GetVehicleState(vehicleId);
@@ -343,7 +343,7 @@ namespace TrafficManager.Custom.AI {
 							return false;
 						}
 					} else if (vehicleState != null && Options.prioritySignsEnabled) {
-						TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+						TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 #if DEBUG
 						//bool debug = destinationNodeId == 10864;
@@ -399,7 +399,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriorityManager.maxStopVelocity) {
+											if (speed <= TrafficPriorityManager.MAX_STOP_VELOCITY) {
 												vehicleState.WaitTime++;
 
 												float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
@@ -454,7 +454,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriorityManager.maxYieldVelocity || Options.simAccuracy <= 2) {
+											if (speed <= TrafficPriorityManager.MAX_YÌELD_VELOCITY || Options.simAccuracy <= 2) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
@@ -482,7 +482,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 												// vehicle has not yet reached yield speed
-												maxSpeed = TrafficPriorityManager.maxYieldVelocity;
+												maxSpeed = TrafficPriorityManager.MAX_YÌELD_VELOCITY;
 												return false;
 											}
 										} else {
@@ -529,7 +529,7 @@ namespace TrafficManager.Custom.AI {
 										}
 										return true;
 								}
-							} else if (speed <= TrafficPriorityManager.maxStopVelocity) {
+							} else if (speed <= TrafficPriorityManager.MAX_STOP_VELOCITY) {
 								// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 								if (debug)

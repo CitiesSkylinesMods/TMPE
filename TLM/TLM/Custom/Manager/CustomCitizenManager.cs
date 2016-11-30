@@ -10,7 +10,7 @@ namespace TrafficManager.Custom.Manager {
 	public class CustomCitizenManager : CitizenManager {
 
 		public void CustomReleaseCitizenInstance(ushort instanceId) {
-			ExtCitizenInstanceManager.Instance().OnReleaseInstance(instanceId);
+			ExtCitizenInstanceManager.Instance.OnReleaseInstance(instanceId);
 			this.ReleaseCitizenInstanceImplementation(instanceId, ref this.m_instances.m_buffer[(int)instanceId]);
 		}
 

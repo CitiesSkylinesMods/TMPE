@@ -50,7 +50,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (Options.timedLightsEnabled) {
 				try {
-					TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+					TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 					tlsMan.SimulationStep();
 
@@ -79,14 +79,7 @@ namespace TrafficManager.Custom.AI {
 						curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 					}
 
-					TrafficPriorityManager.Instance().SegmentSimulationStep(segmentID);
-				} catch (Exception e) {
-					Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
-				}
-
-				try {
-					VehicleStateManager.Instance().SimulationStep();
-					UtilityManager.Instance().SimulationStep();
+					TrafficPriorityManager.Instance.SegmentSimulationStep(segmentID);
 				} catch (Exception e) {
 					Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
 				}
@@ -109,7 +102,7 @@ namespace TrafficManager.Custom.AI {
 
 					if (doTrafficMeasurement) {
 						try {
-							GlobalConfig conf = GlobalConfig.Instance();
+							GlobalConfig conf = GlobalConfig.Instance;
 
 							// calculate traffic density
 							NetInfo segmentInfo = data.Info;
@@ -172,7 +165,7 @@ namespace TrafficManager.Custom.AI {
 									ushort curSpeed = 10000;
 									// we use integer division here because it's faster
 									if (currentBuf > 0) {
-										curSpeed = (ushort)Math.Min(10000u, ((currentLaneSpeeds[segmentID][laneIndex] * 10000u) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+										curSpeed = (ushort)Math.Min(10000u, ((currentLaneSpeeds[segmentID][laneIndex] * 10000u) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 									}
 
 									// calculate reported mean speed
@@ -238,7 +231,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState);
 			} else {
@@ -247,7 +240,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 			} else {
@@ -259,7 +252,7 @@ namespace TrafficManager.Custom.AI {
 
 		private static void GetCustomTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, TrafficLightSimulation nodeSim = null) {
 			if (nodeSim == null) {
-				nodeSim = TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeId);
+				nodeSim = TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId);
 				if (nodeSim == null) {
 					Log.Error($"GetCustomTrafficLightState: node traffic light simulation not found at node {nodeId}! Vehicle {vehicleId} comes from segment {fromSegmentId} and goes to node {nodeId}");
 					vehicleLightState = TrafficLightState.Green;
@@ -271,7 +264,7 @@ namespace TrafficManager.Custom.AI {
 
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
-			CustomSegmentLights lights = CustomTrafficLightsManager.Instance().GetSegmentLights(nodeId, fromSegmentId);
+			CustomSegmentLights lights = CustomTrafficLightsManager.Instance.GetSegmentLights(nodeId, fromSegmentId);
 			CustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
 			if (lights == null || light == null) {
 				Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null? {lights == null} light null? {light == null}");
@@ -309,7 +302,7 @@ namespace TrafficManager.Custom.AI {
 
 		public static void OriginalSetTrafficLightState(bool customCall, ushort nodeID, ref NetSegment segmentData, uint frame, RoadBaseAI.TrafficLightState vehicleLightState, RoadBaseAI.TrafficLightState pedestrianLightState, bool vehicles, bool pedestrians) {
 			/// NON-STOCK CODE START ///
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeID) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive() || customCall) {
 				/// NON-STOCK CODE END ///
 				int num = (int)pedestrianLightState << 2 | (int)vehicleLightState;
@@ -369,7 +362,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance().GetNodeSimulation(nodeID) : null;
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
 			bool customSim = nodeSim != null && nodeSim.IsSimulationActive();
 
 			uint num = Singleton<SimulationManager>.instance.m_referenceFrameIndex - 15u;

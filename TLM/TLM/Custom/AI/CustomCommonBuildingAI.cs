@@ -12,9 +12,9 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
 			if ((frameIndex & 1u) == 0u) {
-				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemoveParkingSpaceDemand(GlobalConfig.Instance().ParkingSpaceDemandDecrement);
-				ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance().PublicTransportDemandDecrement, true);
-                ExtBuildingManager.Instance().GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance().PublicTransportDemandDecrement, false);
+				ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingSpaceDemandDecrement);
+				ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, true);
+                ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, false);
             }
 			// NON-STOCK CODE END
 

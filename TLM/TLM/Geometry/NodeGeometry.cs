@@ -140,7 +140,7 @@ namespace TrafficManager.Geometry {
 
 			Flags.applyNodeTrafficLightFlag(NodeId);
 
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 			// check if node is valid
 			if (!IsValid()) {
@@ -151,7 +151,7 @@ namespace TrafficManager.Geometry {
 				Flags.setNodeTrafficLight(NodeId, false);
 			} else {
 				NetManager netManager = Singleton<NetManager>.instance;
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 				bool hasTrafficLight = (netManager.m_nodes.m_buffer[NodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 				var nodeSim = tlsMan.GetNodeSimulation(NodeId);

@@ -1138,7 +1138,7 @@ namespace TrafficManager.Geometry {
 				Flags.removeHighwayLaneArrowFlagsAtSegment(SegmentId); // TODO refactor
 
 				// clear default vehicle type cache
-				VehicleRestrictionsManager.Instance().ClearCache(SegmentId);
+				VehicleRestrictionsManager.Instance.ClearCache(SegmentId);
 			} finally {
 				Monitor.Exit(Lock);
 			}

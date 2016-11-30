@@ -146,7 +146,7 @@ namespace TrafficManager.UI.SubTools {
 						selectedMarker = null;
 						foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
 							foreach (NodeLaneMarker targetLaneMarker in sourceLaneMarker.connectedMarkers) {
-								LaneConnectionManager.Instance().RemoveLaneConnection(sourceLaneMarker.laneId, targetLaneMarker.laneId, sourceLaneMarker.startNode);
+								LaneConnectionManager.Instance.RemoveLaneConnection(sourceLaneMarker.laneId, targetLaneMarker.laneId, sourceLaneMarker.startNode);
 							}
 						}
 					}
@@ -223,13 +223,13 @@ namespace TrafficManager.UI.SubTools {
 				} else if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget) {
 					// select target marker
 					//bool success = false;
-					if (LaneConnectionManager.Instance().RemoveLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to remove connection
+					if (LaneConnectionManager.Instance.RemoveLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to remove connection
 						selectedMarker.connectedMarkers.Remove(hoveredMarker);
 #if DEBUGCONN
 						Log._Debug($"TppLaneConnectorTool: removed lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
 #endif
 						//success = true;
-					} else if (LaneConnectionManager.Instance().AddLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to add connection
+					} else if (LaneConnectionManager.Instance.AddLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to add connection
 						selectedMarker.connectedMarkers.Add(hoveredMarker);
 #if DEBUGCONN
 						Log._Debug($"TppLaneConnectorTool: added lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
@@ -325,7 +325,7 @@ namespace TrafficManager.UI.SubTools {
 				return null;
 
 			List<NodeLaneMarker> nodeMarkers = new List<NodeLaneMarker>();
-			LaneConnectionManager connManager = LaneConnectionManager.Instance();
+			LaneConnectionManager connManager = LaneConnectionManager.Instance;
 
 			int offsetMultiplier = NetManager.instance.m_nodes.m_buffer[nodeId].CountSegments() <= 2 ? 3 : 1;
 			for (int i = 0; i < 8; i++) {
@@ -369,7 +369,7 @@ namespace TrafficManager.UI.SubTools {
 				if (!laneMarker1.isSource)
 					continue;
 
-				uint[] connections = LaneConnectionManager.Instance().GetLaneConnections(laneMarker1.laneId, laneMarker1.startNode);
+				uint[] connections = LaneConnectionManager.Instance.GetLaneConnections(laneMarker1.laneId, laneMarker1.startNode);
 				if (connections == null || connections.Length == 0)
 					continue;
 

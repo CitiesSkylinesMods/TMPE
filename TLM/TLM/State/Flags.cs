@@ -84,7 +84,7 @@ namespace TrafficManager.State {
 		}
 
 		public static void resetTrafficLights(bool all) {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			for (ushort i = 0; i < Singleton<NetManager>.instance.m_nodes.m_size; ++i) {
 				nodeTrafficLightFlag[i] = null;
@@ -181,7 +181,7 @@ namespace TrafficManager.State {
 				ushort commonNodeId;
 				bool startNode2;
 
-				LaneConnectionManager.Instance().GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+				LaneConnectionManager.Instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
 
 				if (CleanupLaneConnections(lane1Id, lane2Id, startNode1))
 					ret = true;
@@ -259,7 +259,7 @@ namespace TrafficManager.State {
 
 			ushort commonNodeId;
 			bool startNode2;
-			LaneConnectionManager.Instance().GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+			LaneConnectionManager.Instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
 
 			if (commonNodeId != 0) {
 				CreateLaneConnection(lane1Id, lane2Id, startNode1);
@@ -565,7 +565,7 @@ namespace TrafficManager.State {
 				return false; // disallow custom lane arrows in highway rule mode
 			}
 
-			if (LaneConnectionManager.Instance().HasConnections(laneId, startNode)) { // TODO refactor
+			if (LaneConnectionManager.Instance.HasConnections(laneId, startNode)) { // TODO refactor
 				res = LaneArrowChangeResult.LaneConnection;
 				return false; // custom lane connection present
 			}

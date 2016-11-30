@@ -4,6 +4,25 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.0, 11/29/2016
+- Updated to game version 1.6.0-f4
+- New feature: Default speed limits
+- New feature: Parking AI (replaces "Prohibit cims from spawning pocket cars")
+- New option: Heavy vehicles prefer outer lanes on highways
+- New option: Realistic speeds
+- New option: Evacuation busses may ignore traffic rules (Natural Disasters DLC required)
+- New option: Evacuation busses may only be used to reach a shelter (Natural Disasters DLC required)
+- AI: Improved lane selection, especially on busy roads
+- AI: Improved mean lane speed measurement
+- Traffic info view shows parking space demand if Parking AI is activated
+- Public transport info view shows transport demand if Parking AI is activated
+- Added info texts for citizen and vehicle tool tips if Parking AI is activated
+- Extracted internal configuration to XML configuration file
+- Changed main menu button due to changes in the game's user interface
+- Main menu button is now moveable
+- Removed compatibility check for Traffic++ V2 (Traffic++ V2 is no longer compatible with TMPE because maintaining compatibility is no longer feasible due to the high effort)
+- Updated translations: German, Portuguese, Russian, Dutch, Chinese (traditional)
+
 1.7.15, 10/26/2016
 - Bugfix: Timed traffic lights window disappears when clicking on it with the middle mouse button (thanks to @Nexus and @Mariobro14 for helping me identifying the cause of this bug)
 

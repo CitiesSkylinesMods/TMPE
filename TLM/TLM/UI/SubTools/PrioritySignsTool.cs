@@ -34,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			// no highlight for existing priority node in sign mode
-			if (TrafficPriorityManager.Instance().IsPriorityNode(HoveredNodeId))
+			if (TrafficPriorityManager.Instance.IsPriorityNode(HoveredNodeId))
 				return;
 
 			if (HoveredNodeId == 0) return;
@@ -58,7 +58,7 @@ namespace TrafficManager.UI.SubTools {
 				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
 					continue;
 
-				var trafficSegment = TrafficPriorityManager.Instance().TrafficSegments[segmentId];
+				var trafficSegment = TrafficPriorityManager.Instance.TrafficSegments[segmentId];
 				if (trafficSegment == null)
 					continue;
 
@@ -78,8 +78,8 @@ namespace TrafficManager.UI.SubTools {
 
 		public void ShowGUI(bool viewOnly) {
 			try {
-				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance();
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
 				var hoveredSegment = false;
@@ -290,7 +290,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
@@ -310,7 +310,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			foreach (TrafficSegment trafficSegment in prioMan.TrafficSegments) {
 				try {

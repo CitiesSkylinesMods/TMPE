@@ -1815,16 +1815,17 @@ namespace TrafficManager {
             TransportDemandUI = null;
 
             try {
-				TrafficPriorityManager.Instance().OnLevelUnloading();
+				TrafficPriorityManager.Instance.OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
 				CustomRoadAI.OnLevelUnloading();
-				CustomTrafficLightsManager.Instance().OnLevelUnloading();
-				TrafficLightSimulationManager.Instance().OnLevelUnloading();
-				VehicleRestrictionsManager.Instance().OnLevelUnloading();
-				ExtCitizenInstanceManager.Instance().OnLevelUnloading();
-				ExtBuildingManager.Instance().OnLevelUnloading();
+				CustomTrafficLightsManager.Instance.OnLevelUnloading();
+				TrafficLightSimulationManager.Instance.OnLevelUnloading();
+				VehicleRestrictionsManager.Instance.OnLevelUnloading();
+				ExtCitizenInstanceManager.Instance.OnLevelUnloading();
+				ExtBuildingManager.Instance.OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
+				GlobalConfig.OnLevelUnloading();
 #if TRACE
 				Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
@@ -1869,6 +1870,7 @@ namespace TrafficManager {
 					gameLoaded = true;
 					break;
 				default:
+					Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
 					return;
             }
 

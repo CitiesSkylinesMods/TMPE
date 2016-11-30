@@ -12,7 +12,7 @@ namespace TrafficManager.Custom.Manager {
 #if DEBUG
 			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
-			VehicleStateManager.Instance().OnReleaseVehicle(vehicleId);
+			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId);
 			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[(int)vehicleId]);
 		}
 
@@ -69,7 +69,7 @@ namespace TrafficManager.Custom.Manager {
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);
 
-				VehicleStateManager.Instance().DetermineVehicleType(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
+				VehicleStateManager.Instance.DetermineVehicleType(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
 
 				return true;
 			}

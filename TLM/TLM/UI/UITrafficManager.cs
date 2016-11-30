@@ -271,7 +271,7 @@ namespace TrafficManager.UI {
 		private void clickRemoveStuckEntities(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficManagerTool.SetToolMode(ToolMode.None);
 
-			UtilityManager.Instance().RequestResetStuckEntities();
+			UtilityManager.Instance.RequestResetStuckEntities();
 		}
 
 		private void clickVehicleToNone(UIComponent component, UIMouseEventParameter eventParam) {
@@ -437,7 +437,7 @@ namespace TrafficManager.UI {
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficManagerTool.SetToolMode(ToolMode.None);
 
-			VehicleStateManager.Instance().RequestClearTraffic();
+			VehicleStateManager.Instance.RequestClearTraffic();
 		}
 
 		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {

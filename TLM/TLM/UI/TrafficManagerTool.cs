@@ -474,7 +474,7 @@ namespace TrafficManager.UI {
 
 				labelStr += "Lane idx " + i + ", id " + curLaneId;
 #if DEBUG
-				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance().GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
+				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				/*if (CustomRoadAI.InStartupPhase)
 					labelStr += ", in start-up phase";
@@ -502,7 +502,7 @@ namespace TrafficManager.UI {
 		/// </summary>
 		private void _guiSegments() {
 			GUIStyle _counterStyle = new GUIStyle();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			for (int i = 1; i < segments.m_size; ++i) {
 				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
@@ -637,10 +637,10 @@ namespace TrafficManager.UI {
 		private void _guiVehicles() {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
-			LaneConnectionManager connManager = LaneConnectionManager.Instance();
+			LaneConnectionManager connManager = LaneConnectionManager.Instance;
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance();
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 			for (int i = 1; i < vehicles.m_size; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
@@ -673,7 +673,7 @@ namespace TrafficManager.UI {
 				ushort? transitNodeId = vState?.CurrentSegmentEnd?.NodeId;
 				/*float distanceToTransitNode = Single.NaN;
 				float timeToTransitNode = Single.NaN;*/
-				ushort vehSpeed = SpeedLimitManager.Instance().VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
+				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
 				Vector3? targetPos = null;
 				if (transitNodeId != null)
@@ -739,7 +739,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance().GetExtInstance((ushort)i);
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance((ushort)i);
 
 				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.PathMode.ToString();
 				
@@ -776,7 +776,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(0f, 1f, 0f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				ExtBuilding extBuilding = ExtBuildingManager.Instance().GetExtBuilding((ushort)i);
+				ExtBuilding extBuilding = ExtBuildingManager.Instance.GetExtBuilding((ushort)i);
 
 				String labelStr = "Building " + i + ", PDemand: " + extBuilding.ParkingSpaceDemand + ", IncTDem: " + extBuilding.IncomingPublicTransportDemand + ", OutTDem: " + extBuilding.OutgoingPublicTransportDemand;
 
@@ -915,7 +915,7 @@ namespace TrafficManager.UI {
 		}
 		
 		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance();
+			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 			var numMainRoads = 0;
 			for (var s = 0; s < 8; s++) {
