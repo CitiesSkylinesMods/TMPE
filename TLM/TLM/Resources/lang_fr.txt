@@ -128,3 +128,32 @@ Activated_features caractéristiques activées
 Junction_restrictions Restrictions de jonction
 Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
 Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
+Default_speed_limits Limites des vitesse par défaut
+Looking_for_a_parking_spot Looking for a parking spot
+Driving_to_a_parking_spot Driving to a parking spot
+Driving_to_another_parking_spot Driving to another parking spot
+Entering_vehicle Entering vehicle
+Walking_to_car Walking to car
+Using_public_transport Using public transport
+Walking Walking
+Thinking_of_a_good_parking_spot Thinking of a good parking spot
+Switch_view Switch view
+Outgoing_demand Outgoing demand
+Incoming_demand Incoming demand
+Advanced_Vehicle_AI Advanced Vehicle AI
+Heavy_trucks_prefer_outer_lanes_on_highways Heavy vehicles prefer outer lanes on highways
+Parking_AI Parking AI
+Enable_more_realistic_parking Enable more realistic parking
+Reset_custom_speed_limits Reset custom speed limits
+Reload_global_configuration Reload global configuration
+Reset_global_configuration Reset global configuration
+General General
+Gameplay Gameplay
+Overlays Overlays
+Realistic_speeds Realistic speeds
+Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
+Vehicle_behavior Vehicle behavior
+Policies_&_Restrictions Policies & Restrictions
+At_junctions At junctions
+In_case_of_emergency In case of emergency

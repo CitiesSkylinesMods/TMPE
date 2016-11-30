@@ -10,16 +10,16 @@ namespace TrafficManager {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 #if !TAM
-			if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null || LoadingExtension.Instance.UI == null) {
+			if (LoadingExtension.Instance == null || ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null || LoadingExtension.Instance.BaseUI == null) {
                 return;
             }
 
-            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficManagerTool && LoadingExtension.Instance.UI.IsVisible()) {
-                LoadingExtension.Instance.UI.Close();
+            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.Instance.TrafficManagerTool && LoadingExtension.Instance.BaseUI.IsVisible()) {
+                LoadingExtension.Instance.BaseUI.Close();
             }
 
             if (Input.GetKeyDown(KeyCode.Escape)) {
-                LoadingExtension.Instance.UI.Close();
+                LoadingExtension.Instance.BaseUI.Close();
             }
 #endif
         }

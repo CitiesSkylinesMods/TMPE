@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.Custom.AI;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {
@@ -54,15 +55,24 @@ namespace TrafficManager.Traffic {
 				}
 				return valid;
 			}
-			set { valid = value; }
+			internal set { valid = value; }
 		}
-		public bool Emergency;
+		public bool Emergency {
+			get; internal set;
+		}
+
 #if PATHRECALC
 		public uint LastPathRecalculation = 0;
 		public ushort LastPathRecalculationSegmentId = 0;
 		public bool PathRecalculationRequested { get; internal set; } = false;
 #endif
-		public ExtVehicleType VehicleType;
+		public ExtVehicleType VehicleType {
+			get; internal set;
+		}
+
+		public bool HeavyVehicle {
+			get; internal set;
+		}
 
 #if PATHFORECAST
 		private LinkedList<VehiclePosition> VehiclePositions; // the last element holds the current position
@@ -78,6 +88,8 @@ namespace TrafficManager.Traffic {
 		public ushort NextVehicleIdOnSegment {
 			get; internal set;
 		}
+
+		//internal ushort DriverInstanceId = 0;
 
 #if USEPATHWAITCOUNTER
 		public ushort PathWaitCounter {
@@ -99,7 +111,7 @@ namespace TrafficManager.Traffic {
 			Reset(false);
 		}
 
-		private void Reset(bool unlink=true) {
+		private void Reset(bool unlink=true) { // TODO this is called in wrong places!
 			if (unlink)
 				Unlink();
 
@@ -109,6 +121,28 @@ namespace TrafficManager.Traffic {
 			WaitTime = 0;
 			JunctionTransitState = VehicleJunctionTransitState.None;
 			LastStateUpdate = 0;
+		}
+
+		public ExtCitizenInstance GetDriverExtInstance() {
+			/*if (DriverInstanceId == 0) {
+				DriverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+			}
+#if DEBUG
+			else {
+				ushort liveDriverInstId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+				if (liveDriverInstId != DriverInstanceId) {
+					Log.Error($"Driver citizen instance mismatch for vehicle {VehicleId}: True driver: {liveDriverInstId} Stored driver: {DriverInstanceId}");
+					DriverInstanceId = liveDriverInstId;
+				}
+			}
+#endif
+			*/
+
+			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+			if (driverInstanceId != 0) {
+				return ExtCitizenInstanceManager.Instance().GetExtInstance(driverInstanceId);
+			}
+			return null;
 		}
 
 		internal void Unlink() {
@@ -450,6 +484,7 @@ namespace TrafficManager.Traffic {
 #endif
 
 			Reset();
+			//DriverInstanceId = 0;
 
 			if (!CheckValidity(ref vehicleData, true)) {
 				return;

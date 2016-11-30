@@ -29,21 +29,22 @@ namespace TrafficManager.Custom.AI {
 			VehicleInfo info = this.m_info;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startSqrDistA;
+			float startSqrDistB;
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (PathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out endPosA, out endPosB, out num3, out num4)) {
-				if (!startBothWays || num < 10f) {
+			float endSqrDistA;
+			float endSqrDistB;
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, false, false, 64f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+				if (!startBothWays || startSqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num3 < 10f) {
+				if (!endBothWays || endSqrDistA < 10f) {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
+				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

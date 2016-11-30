@@ -19,9 +19,12 @@ namespace TrafficManager.State {
 
 		private static UIDropDown simAccuracyDropdown = null;
 		//private static UIDropDown laneChangingRandomizationDropdown = null;
+		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
+		private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
+		private static UICheckBox restrictEvacBussesToShelterToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
@@ -30,6 +33,10 @@ namespace TrafficManager.State {
 		private static UICheckBox connectedLanesOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
 		private static UICheckBox vehicleOverlayToggle = null;
+#if DEBUG
+		private static UICheckBox citizenOverlayToggle = null;
+		private static UICheckBox buildingOverlayToggle = null;
+#endif
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
@@ -40,9 +47,7 @@ namespace TrafficManager.State {
 		private static UICheckBox advancedAIToggle = null;
 		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
-#if DEBUG
 		private static UICheckBox preferOuterLaneToggle = null;
-#endif
 		private static UICheckBox showLanesToggle = null;
 		private static UIButton forgetTrafficLightsBtn = null;
 		private static UIButton resetStuckEntitiesBtn = null;
@@ -56,57 +61,39 @@ namespace TrafficManager.State {
 
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
-		private static UICheckBox disableSomething6Toggle = null;
-		private static UICheckBox disableSomething5Toggle = null;
-		private static UICheckBox disableSomething4Toggle = null;
-		private static UICheckBox disableSomething3Toggle = null;
-		private static UICheckBox disableSomething2Toggle = null;
-		private static UICheckBox disableSomething1Toggle = null;
+		private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
+		private static List<UITextField> debugValueFields = new List<UITextField>();
 		private static UITextField pathCostMultiplicatorField = null;
 		private static UITextField pathCostMultiplicator2Field = null;
-		private static UITextField someValueField = null;
-		private static UITextField someValue2Field = null;
-		private static UITextField someValue3Field = null;
-		private static UITextField someValue4Field = null;
-		private static UITextField someValue5Field = null;
-		private static UITextField someValue6Field = null;
-		private static UITextField someValue7Field = null;
-		private static UITextField someValue8Field = null;
-		private static UITextField someValue9Field = null;
-		private static UITextField someValue10Field = null;
-		private static UITextField someValue11Field = null;
-		private static UITextField someValue12Field = null;
-		private static UITextField someValue13Field = null;
-		private static UITextField someValue14Field = null;
-		private static UITextField someValue15Field = null;
-		private static UITextField someValue16Field = null;
-		private static UITextField someValue17Field = null;
-		private static UITextField someValue18Field = null;
-		private static UITextField someValue19Field = null;
-		private static UITextField someValue20Field = null;
-		private static UITextField someValue21Field = null;
-		private static UITextField someValue22Field = null;
 #endif
-
-		private static UIHelperBase mainGroup = null;
-		private static UIHelperBase aiGroup = null;
-		private static UIHelperBase overlayGroup = null;
-		private static UIHelperBase maintenanceGroup = null;
-		private static UIHelperBase featureGroup = null;
+		private static UIButton reloadGlobalConfBtn = null;
+		private static UIButton resetGlobalConfBtn = null;
 
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
+		public static bool realisticSpeeds = true;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
+		public static bool evacBussesMayIgnoreRules = false;
+		public static bool restrictEvacBussesToShelter = false;
 		public static bool prioritySignsOverlay = false;
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
 		public static bool vehicleRestrictionsOverlay = false;
 		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
+#if DEBUG
+		public static bool nodesOverlay = true;
+		public static bool vehicleOverlay = false;
+		public static bool citizenOverlay = false;
+		public static bool buildingOverlay = true;
+#else
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
+		public static bool citizenOverlay = false;
+		public static bool buildingOverlay = false;
+#endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
@@ -123,36 +110,6 @@ namespace TrafficManager.State {
 		public static bool enableDespawning = true;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
-		public static float pathCostMultiplicator = 0f; // debug value
-		public static float pathCostMultiplicator2 = 0.3f; // debug value
-		public static bool disableSomething1 = false; // debug switch (enable path-finding debugging)
-		public static bool disableSomething2 = false; // debug switch
-		public static bool disableSomething3 = false; // debug switch
-		public static bool disableSomething4 = false; // debug switch
-		public static bool disableSomething5 = false; // debug switch
-		public static bool disableSomething6 = false; // debug switch
-		public static float someValue = 2f; // debug value (base lane changing cost factor on highways)
-		public static float someValue2 = 1.25f; // debug value (heavy vehicle lane changing cost factor)
-		public static float someValue3 = 1.5f; // debug value (lane changing cost base before junctions)
-		public static float someValue4 = 2f; // debug value (artifical lane distance for u-turns)
-		public static float someValue5 = 0.5f; // debug value (base lane changing cost factor on city streets)
-		public static float someValue6 = 1.5f; // debug value (penalty for busses not driving on bus lanes) 
-		public static float someValue7 = 0.75f; // debug value (reward for public transport staying on transport lane) 
-		public static float someValue8 = 2f; // debug value (lane density extinction substrahend)
-		public static float someValue9 = 0f; // debug value (lane density positive update smoothing)
-		public static float someValue10 = 15f; // debug value (maximum incoming vehicle distance to junction for priority signs)
-		public static float someValue11 = 2.5f; // debug value (> 1 lane changing cost factor)
-		public static float someValue12 = 0.7f; // debug value (speed-to-density balance factor, 1 = only speed is considered, 0 = only density is considered)
-		public static float someValue13 = 0.5f; // debug value (minimum current lane speed (0..1) after which density may affect path-finding costs)
-		public static float someValue14 = 1f; // debug value (cost factor for leaving main highway)
-		public static float someValue15 = 10f; // debug value (maximum junction approach time for priority signs)
-		public static float someValue16 = 250f; // debug value (lane changing cost reduction modulo)
-		public static float someValue17 = 24f; // debug value (lane speed negative update smoothing)
-		public static float someValue18 = 2.5f; // debug value (congestion lane changing base cost)
-		public static float someValue19 = 49f; // debug value (lane speed positive update smoothing)
-		public static float someValue20 = 3000f; // debug value (lower congestion threshold (per ten-thousands))
-		public static float someValue21 = 5000f; // debug value (upper congestion threshold (per ten-thousands))
-		public static float someValue22 = 2f; // debug value (lane density negative update smoothing)
 
 		public static bool prioritySignsEnabled = true;
 		public static bool timedLightsEnabled = true;
@@ -165,39 +122,47 @@ namespace TrafficManager.State {
 			get { return menuRebuildRequired; }
 			private set {
 				menuRebuildRequired = value;
-				if (LoadingExtension.Instance != null && LoadingExtension.Instance.UI != null)
-					LoadingExtension.Instance.UI.Close();
+				if (LoadingExtension.Instance != null && LoadingExtension.Instance.BaseUI != null)
+					LoadingExtension.Instance.BaseUI.Close();
 			}
 		}
 
 		private static bool menuRebuildRequired = false;
 
 		public static void makeSettings(UIHelperBase helper) {
-			mainGroup = helper.AddGroup(Translation.GetString("TMPE_Title"));
-			simAccuracyDropdown = mainGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
-			recklessDriversDropdown = mainGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			//publicTransportUsageDropdown = mainGroup.AddDropdown(Translation.GetString("Citizens_use_public_transportation") + ":", new string[] { Translation.GetString("Very_often"), Translation.GetString("Often"), Translation.GetString("Sometimes"), Translation.GetString("Rarely"), Translation.GetString("Very_rarely") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			relaxedBussesToggle = mainGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
-#if DEBUG
-			allRelaxedToggle = mainGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
-#endif
-			allowEnterBlockedJunctionsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
-			allowUTurnsToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
-			allowLaneChangesWhileGoingStraightToggle = mainGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
-			strongerRoadConditionEffectsToggle = mainGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
-			prohibitPocketCarsToggle = mainGroup.AddCheckbox(Translation.GetString("Prohibit_spawning_of_pocket_cars") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
-			enableDespawningToggle = mainGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
-			aiGroup = helper.AddGroup("Advanced Vehicle AI");
-			advancedAIToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
-#if DEBUG
-			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
-				dynamicPathRecalculationToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
-#endif
-			highwayRulesToggle = aiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
-#if DEBUG
-			preferOuterLaneToggle = aiGroup.AddCheckbox(Translation.GetString("Prefer_outer_lane") + " (BETA feature)", preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
-#endif
-			featureGroup = helper.AddGroup(Translation.GetString("Activated_features"));
+			// tabbing code is borrowed from RushHour mod
+			// https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
+
+			UIHelper actualHelper = helper as UIHelper;
+			UIComponent container = actualHelper.self as UIComponent;
+
+			UITabstrip tabStrip = container.AddUIComponent<UITabstrip>();
+			tabStrip.relativePosition = new Vector3(0, 0);
+			tabStrip.size = new Vector2(container.width - 20, 40);
+
+			UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
+			tabContainer.relativePosition = new Vector3(0, 40);
+			tabContainer.size = new Vector2(container.width - 20, container.height - tabStrip.height - 20);
+			tabStrip.tabPages = tabContainer;
+
+			int tabIndex = 0;
+			// GENERAL
+
+			AddOptionTab(tabStrip, Translation.GetString("General"));// tabStrip.AddTab(Translation.GetString("General"), tabTemplate, true);
+			tabStrip.selectedIndex = tabIndex;
+
+			UIPanel currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			UIHelper panelHelper = new UIHelper(currentPanel);
+
+			simAccuracyDropdown = panelHelper.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+
+			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
 			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
@@ -205,55 +170,171 @@ namespace TrafficManager.State {
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
-			//laneChangingRandomizationDropdown = aiGroup.AddDropdown(Translation.GetString("Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled):"), new string[] { Translation.GetString("Very_often") + " (50 %)", Translation.GetString("Often") + " (25 %)", Translation.GetString("Sometimes") + " (10 %)", Translation.GetString("Rarely") + " (5 %)", Translation.GetString("Very_rarely") + " (2.5 %)", Translation.GetString("Only_if_necessary") }, laneChangingRandomization, onLaneChangingRandomizationChanged) as UIDropDown;
-			overlayGroup = helper.AddGroup(Translation.GetString("Persistently_visible_overlays"));
-			prioritySignsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
-			timedLightsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
-			speedLimitsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
-			vehicleRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
-			junctionRestrictionsOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
-			connectedLanesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
-			nodesOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
-			showLanesToggle = overlayGroup.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+			// GAMEPLAY
+			++tabIndex;
+
+			AddOptionTab(tabStrip, Translation.GetString("Gameplay"));
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			var vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
+
+			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
+			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
+			strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
+			enableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
+
+			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
+			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 #if DEBUG
-			vehicleOverlayToggle = overlayGroup.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
+			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
+			//dynamicPathRecalculationToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
 #endif
-			maintenanceGroup = helper.AddGroup(Translation.GetString("Maintenance"));
-			forgetTrafficLightsBtn = maintenanceGroup.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
-			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+			highwayRulesToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
+
+			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
+			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+
+			// VEHICLE RESTRICTIONS
+			++tabIndex;
+
+			AddOptionTab(tabStrip, Translation.GetString("Policies_&_Restrictions"));
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			var atJunctionsGroup = panelHelper.AddGroup(Translation.GetString("At_junctions"));
 #if DEBUG
-			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
-			disableSomething1Toggle = maintenanceGroup.AddCheckbox("Enable path-finding debugging", disableSomething1, onDisableSomething1Changed) as UICheckBox;
-			disableSomething2Toggle = maintenanceGroup.AddCheckbox("Disable something #2", disableSomething2, onDisableSomething2Changed) as UICheckBox;
-			disableSomething3Toggle = maintenanceGroup.AddCheckbox("Disable something #3", disableSomething3, onDisableSomething3Changed) as UICheckBox;
-			disableSomething4Toggle = maintenanceGroup.AddCheckbox("Disable something #4", disableSomething4, onDisableSomething4Changed) as UICheckBox;
-			disableSomething5Toggle = maintenanceGroup.AddCheckbox("Disable something #5", disableSomething5, onDisableSomething5Changed) as UICheckBox;
-			disableSomething6Toggle = maintenanceGroup.AddCheckbox("Disable something #6", disableSomething6, onDisableSomething6Changed) as UICheckBox;
-			pathCostMultiplicatorField = maintenanceGroup.AddTextfield("Pathcost multiplicator (mult)", String.Format("{0:0.##}", pathCostMultiplicator), onPathCostMultiplicatorChanged) as UITextField;
-			pathCostMultiplicator2Field = maintenanceGroup.AddTextfield("Pathcost multiplicator (div)", String.Format("{0:0.##}", pathCostMultiplicator2), onPathCostMultiplicator2Changed) as UITextField;
-			someValueField = maintenanceGroup.AddTextfield("Some value #1", String.Format("{0:0.##}", someValue), onSomeValueChanged) as UITextField;
-			someValue2Field = maintenanceGroup.AddTextfield("Some value #2", String.Format("{0:0.##}", someValue2), onSomeValue2Changed) as UITextField;
-			someValue3Field = maintenanceGroup.AddTextfield("Some value #3", String.Format("{0:0.##}", someValue3), onSomeValue3Changed) as UITextField;
-			someValue4Field = maintenanceGroup.AddTextfield("Some value #4", String.Format("{0:0.##}", someValue4), onSomeValue4Changed) as UITextField;
-			someValue5Field = maintenanceGroup.AddTextfield("Some value #5", String.Format("{0:0.##}", someValue5), onSomeValue5Changed) as UITextField;
-			someValue6Field = maintenanceGroup.AddTextfield("Some value #6", String.Format("{0:0.##}", someValue6), onSomeValue6Changed) as UITextField;
-			someValue7Field = maintenanceGroup.AddTextfield("Some value #7", String.Format("{0:0.##}", someValue7), onSomeValue7Changed) as UITextField;
-			someValue8Field = maintenanceGroup.AddTextfield("Some value #8", String.Format("{0:0.##}", someValue8), onSomeValue8Changed) as UITextField;
-			someValue9Field = maintenanceGroup.AddTextfield("Some value #9", String.Format("{0:0.##}", someValue9), onSomeValue9Changed) as UITextField;
-			someValue10Field = maintenanceGroup.AddTextfield("Some value #10", String.Format("{0:0.##}", someValue10), onSomeValue10Changed) as UITextField;
-			someValue11Field = maintenanceGroup.AddTextfield("Some value #11", String.Format("{0:0.##}", someValue11), onSomeValue11Changed) as UITextField;
-			someValue12Field = maintenanceGroup.AddTextfield("Some value #12", String.Format("{0:0.##}", someValue12), onSomeValue12Changed) as UITextField;
-			someValue13Field = maintenanceGroup.AddTextfield("Some value #13", String.Format("{0:0.##}", someValue13), onSomeValue13Changed) as UITextField;
-			someValue14Field = maintenanceGroup.AddTextfield("Some value #14", String.Format("{0:0.##}", someValue14), onSomeValue14Changed) as UITextField;
-			someValue15Field = maintenanceGroup.AddTextfield("Some value #15", String.Format("{0:0.##}", someValue15), onSomeValue15Changed) as UITextField;
-			someValue16Field = maintenanceGroup.AddTextfield("Some value #16", String.Format("{0:0.##}", someValue16), onSomeValue16Changed) as UITextField;
-			someValue17Field = maintenanceGroup.AddTextfield("Some value #17", String.Format("{0:0.##}", someValue17), onSomeValue17Changed) as UITextField;
-			someValue18Field = maintenanceGroup.AddTextfield("Some value #18", String.Format("{0:0.##}", someValue18), onSomeValue18Changed) as UITextField;
-			someValue19Field = maintenanceGroup.AddTextfield("Some value #19", String.Format("{0:0.##}", someValue19), onSomeValue19Changed) as UITextField;
-			someValue20Field = maintenanceGroup.AddTextfield("Some value #20", String.Format("{0:0.##}", someValue20), onSomeValue20Changed) as UITextField;
-			someValue21Field = maintenanceGroup.AddTextfield("Some value #21", String.Format("{0:0.##}", someValue21), onSomeValue21Changed) as UITextField;
-			someValue22Field = maintenanceGroup.AddTextfield("Some value #22", String.Format("{0:0.##}", someValue22), onSomeValue22Changed) as UITextField;
+			allRelaxedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
+			relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
+			allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
+			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
+
+			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
+				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
+				evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
+				restrictEvacBussesToShelterToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_only_be_used_to_reach_a_shelter"), restrictEvacBussesToShelter, onRestrictEvacBussesToShelterChanged) as UICheckBox;
+			}
+
+			// OVERLAYS
+			++tabIndex;
+
+			AddOptionTab(tabStrip, Translation.GetString("Overlays"));
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			prioritySignsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsOverlay, onPrioritySignsOverlayChanged) as UICheckBox;
+			timedLightsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
+			speedLimitsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
+			vehicleRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
+			junctionRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
+			connectedLanesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
+			nodesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
+			showLanesToggle = panelHelper.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+#if DEBUG
+			vehicleOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
+			citizenOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Citizens"), citizenOverlay, onCitizenOverlayChanged) as UICheckBox;
+			buildingOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Buildings"), buildingOverlay, onBuildingOverlayChanged) as UICheckBox;
+#endif
+
+			// MAINTENANCE
+			++tabIndex;
+
+			AddOptionTab(tabStrip, Translation.GetString("Maintenance"));
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			forgetTrafficLightsBtn = panelHelper.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
+			resetStuckEntitiesBtn = panelHelper.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+#if DEBUG
+			resetSpeedLimitsBtn = panelHelper.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
+#endif
+			reloadGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
+			resetGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
+#if DEBUG
+			// DEBUG
+			/*++tabIndex;
+
+			settingsButton = tabStrip.AddTab("Debug", tabTemplate, true);
+			settingsButton.textPadding = new RectOffset(10, 10, 10, 10);
+			settingsButton.autoSize = true;
+			settingsButton.tooltip = "Debug";
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+			
+			debugSwitchFields.Clear();
+			for (int i = 0; i < debugSwitches.Length; ++i) {
+				int index = i;
+				string varName = $"Debug switch #{i}";
+				debugSwitchFields.Add(panelHelper.AddCheckbox(varName, debugSwitches[i], delegate (bool newVal) { onBoolValueChanged(varName, newVal, ref debugSwitches[index]); }) as UICheckBox);
+			}
+
+			debugValueFields.Clear();
+			for (int i = 0; i < debugValues.Length; ++i) {
+				int index = i;
+				string varName = $"Debug value #{i}";
+				debugValueFields.Add(panelHelper.AddTextfield(varName, String.Format("{0:0.##}", debugValues[i]), delegate(string newValStr) { onFloatValueChanged(varName, newValStr, ref debugValues[index]); }, null) as UITextField);
+			}*/
+#endif
+
+			tabStrip.selectedIndex = 0;
+		}
+
+		private static UIButton AddOptionTab(UITabstrip tabStrip, string caption) {
+			UIButton tabButton = tabStrip.AddTab(caption);
+
+			tabButton.normalBgSprite = "SubBarButtonBase";
+			tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
+			tabButton.focusedBgSprite = "SubBarButtonBaseFocused";
+			tabButton.hoveredBgSprite = "SubBarButtonBaseHovered";
+			tabButton.pressedBgSprite = "SubBarButtonBasePressed";
+
+			tabButton.textPadding = new RectOffset(10, 10, 10, 10);
+			tabButton.autoSize = true;
+			tabButton.tooltip = caption;
+
+			return tabButton;
 		}
 
 		private static bool checkGameLoaded() {
@@ -312,54 +393,6 @@ namespace TrafficManager.State {
 			connectedLanesOverlay = newValue;
 		}
 
-		private static void onDisableSomething1Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething1 changed to {newDisableSomething}");
-			disableSomething1 = newDisableSomething;
-		}
-
-		private static void onDisableSomething2Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething2 changed to {newDisableSomething}");
-			disableSomething2 = newDisableSomething;
-		}
-
-		private static void onDisableSomething3Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething3 changed to {newDisableSomething}");
-			disableSomething3 = newDisableSomething;
-		}
-
-		private static void onDisableSomething4Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething4 changed to {newDisableSomething}");
-			disableSomething4 = newDisableSomething;
-		}
-
-		private static void onDisableSomething5Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething5 changed to {newDisableSomething}");
-			disableSomething5 = newDisableSomething;
-		}
-
-		private static void onDisableSomething6Changed(bool newDisableSomething) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"disableSomething6 changed to {newDisableSomething}");
-			disableSomething6 = newDisableSomething;
-		}
-
 		private static void onSimAccuracyChanged(int newAccuracy) {
 			if (!checkGameLoaded())
 				return;
@@ -404,44 +437,20 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (newAdvancedAI) {
-					setAdvancedAI(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"advancedAI changed to {newAdvancedAI}");
-				setAdvancedAI(newAdvancedAI);
-#if !TAM
-			}
-#endif
+			Log._Debug($"advancedAI changed to {newAdvancedAI}");
+			setAdvancedAI(newAdvancedAI);
 		}
 
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (newHighwayRules) {
-					setAdvancedAI(false);
-					setDynamicPathRecalculation(false);
-					setHighwayRules(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"Highway rules changed to {newHighwayRules}");
-				highwayRules = newHighwayRules;
-				Flags.clearHighwayLaneArrows();
-				Flags.applyAllFlags();
-				if (newHighwayRules)
-					setAdvancedAI(true);
-#if !TAM
-			}
-#endif
+			Log._Debug($"Highway rules changed to {newHighwayRules}");
+			highwayRules = newHighwayRules;
+			Flags.clearHighwayLaneArrows();
+			Flags.applyAllFlags();
+			if (newHighwayRules)
+				setAdvancedAI(true);
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
@@ -519,23 +528,26 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				if (value) {
-					setAdvancedAI(false);
-					setDynamicPathRecalculation(false);
-					setHighwayRules(false);
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Advanced_AI_cannot_be_activated"), Translation.GetString("The_Advanced_Vehicle_AI_cannot_be_activated"), false);
-				}
-			} else {
-#endif
-				Log._Debug($"dynamicPathRecalculation changed to {value}");
-				dynamicPathRecalculation = value;
-				if (value)
-					setAdvancedAI(true);
-#if !TAM
-			}
-#endif
+			Log._Debug($"dynamicPathRecalculation changed to {value}");
+			dynamicPathRecalculation = value;
+			if (value)
+				setAdvancedAI(true);
+		}
+
+		private static void onEvacBussesMayIgnoreRulesChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"evacBussesMayIgnoreRules changed to {value}");
+			evacBussesMayIgnoreRules = value;
+		}
+
+		private static void onRestrictEvacBussesToShelterChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"restrictEvacBussesToShelter changed to {value}");
+			restrictEvacBussesToShelter = value;
 		}
 
 		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
@@ -576,18 +588,21 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
 			prohibitPocketCars = newValue;
+			ExtCitizenInstanceManager.Instance().Reset();
+		}
+
+		private static void onRealisticSpeedsChanged(bool value) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"realisticSpeeds changed to {value}");
+			realisticSpeeds = value;
 		}
 
 		private static void onEnableDespawningChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				setEnableDespawning(true);
-				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Despawning cannot be modified", "The despawning option cannot be changed because you are using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).", false);
-			} else
-#endif
 			Log._Debug($"enableDespawning changed to {value}");
 			enableDespawning = value;
 		}
@@ -616,317 +631,44 @@ namespace TrafficManager.State {
 			vehicleOverlay = newVal;
 		}
 
-		private static void onPathCostMultiplicatorChanged(string newPathCostMultiplicatorStr) {
+		private static void onCitizenOverlayChanged(bool newVal) {
 			if (!checkGameLoaded())
 				return;
 
-			try {
-				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
-				pathCostMultiplicator = newPathCostMultiplicator;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
-                //UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
+			Log._Debug($"Citizen overlay changed to {newVal}");
+			citizenOverlay = newVal;
 		}
 
-		private static void onPathCostMultiplicator2Changed(string newPathCostMultiplicatorStr) {
+		private static void onBuildingOverlayChanged(bool newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Building overlay changed to {newVal}");
+			buildingOverlay = newVal;
+		}
+
+		private static void onFloatValueChanged(string varName, string newValueStr, ref float var) {
 			if (!checkGameLoaded())
 				return;
 
 			try {
-				float newPathCostMultiplicator = Single.Parse(newPathCostMultiplicatorStr);
-				pathCostMultiplicator2 = newPathCostMultiplicator;
+				float newValue = Single.Parse(newValueStr);
+				var = newValue;
+				Log._Debug($"{varName} changed to {newValue}");
 			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newPathCostMultiplicatorStr}'. Error: {e.ToString()}");
+				Log.Warning($"An invalid value was inserted: '{newValueStr}'. Error: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
 			}
 		}
 
-		private static void onSomeValueChanged(string newSomeValueStr) {
+		private static void onBoolValueChanged(string varName, bool newVal, ref bool var) {
 			if (!checkGameLoaded())
 				return;
 
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
+			var = newVal;
+			Log._Debug($"{varName} changed to {newVal}");
 		}
 
-		private static void onSomeValue2Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue2 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue3Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue3 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue4Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue4 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue5Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue5 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue6Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue6 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue7Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue7 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue8Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue8 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue9Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue9 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue10Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue10 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue11Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue11 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue12Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue12 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue13Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue13 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue14Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue14 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue15Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue15 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue16Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue16 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue17Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue17 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue18Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue18 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue19Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue19 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue20Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue20 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue21Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue21 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
-
-		private static void onSomeValue22Changed(string newSomeValueStr) {
-			if (!checkGameLoaded())
-				return;
-
-			try {
-				float newSomeValue = Single.Parse(newSomeValueStr);
-				someValue22 = newSomeValue;
-			} catch (Exception e) {
-				Log.Warning($"An invalid value was inserted: '{newSomeValueStr}'. Error: {e.ToString()}");
-				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Invalid value", "An invalid value was inserted.", false);
-			}
-		}
 
 		private static void onClickForgetToggledLights() {
 			if (!checkGameLoaded())
@@ -949,6 +691,20 @@ namespace TrafficManager.State {
 			Flags.resetSpeedLimits();
 		}
 
+		private static void onClickReloadGlobalConf() {
+			if (!checkGameLoaded())
+				return;
+
+			GlobalConfig.Reload();
+		}
+
+		private static void onClickResetGlobalConf() {
+			if (!checkGameLoaded())
+				return;
+
+			GlobalConfig.Reset();
+		}
+
 		public static void setSimAccuracy(int newAccuracy) {
 			simAccuracy = newAccuracy;
 			if (simAccuracyDropdown != null)
@@ -967,14 +723,6 @@ namespace TrafficManager.State {
 				recklessDriversDropdown.selectedIndex = newRecklessDrivers;
 		}
 
-#if DEBUG
-		public static void setPathCostMultiplicator(float newPathCostMultiplicator) {
-			pathCostMultiplicator = newPathCostMultiplicator;
-			if (pathCostMultiplicatorField != null)
-				pathCostMultiplicatorField.text = newPathCostMultiplicator.ToString();
-		}
-#endif
-
 		internal static bool isStockLaneChangerUsed() {
 			return !advancedAI;
 		}
@@ -992,35 +740,18 @@ namespace TrafficManager.State {
 		}
 
 		public static void setHighwayRules(bool newHighwayRules) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				newHighwayRules = false;
-				highwayRules = false;
-			} else {
-#endif
-				highwayRules = newHighwayRules;
-#if !TAM
-			}
-#endif
+			highwayRules = newHighwayRules;
+
 			if (highwayRulesToggle != null)
-				highwayRulesToggle.isChecked = newHighwayRules;
+				highwayRulesToggle.isChecked = highwayRules;
 		}
 
-#if DEBUG
 		public static void setPreferOuterLane(bool val) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				preferOuterLane = false;
-			} else {
-#endif
-				preferOuterLane = val;
-#if !TAM
-			}
-#endif
+			preferOuterLane = val;
+
 			if (preferOuterLaneToggle != null)
-				preferOuterLaneToggle.isChecked = val;
+				preferOuterLaneToggle.isChecked = preferOuterLane;
 		}
-#endif
 
 		public static void setShowLanes(bool newShowLanes) {
 			showLanes = newShowLanes;
@@ -1029,25 +760,15 @@ namespace TrafficManager.State {
 		}
 
 		public static void setAdvancedAI(bool newAdvancedAI) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				newAdvancedAI = false;
-				advancedAI = false;
-			} else {
-#endif
-				advancedAI = newAdvancedAI;
-#if !TAM
-			}
-#endif
+			advancedAI = newAdvancedAI;
+
 			if (advancedAIToggle != null)
 				advancedAIToggle.isChecked = newAdvancedAI;
 
 			if (!newAdvancedAI) {
 				setDynamicPathRecalculation(false);
 				setHighwayRules(false);
-#if DEBUG
 				setPreferOuterLane(false);
-#endif
 			}
 		}
 
@@ -1057,22 +778,32 @@ namespace TrafficManager.State {
 				value = false;*/
 #endif
 
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				value = false;
-				dynamicPathRecalculation = false;
-			} else {
-#endif
-				dynamicPathRecalculation = value;
-#if !TAM
-			}
-#endif
+			dynamicPathRecalculation = value;
+
 			if (dynamicPathRecalculationToggle != null)
 				dynamicPathRecalculationToggle.isChecked = value;
 		}
 
 		public static bool IsDynamicPathRecalculationActive() {
 			return Options.dynamicPathRecalculation;
+		}
+
+		public static void setEvacBussesMayIgnoreRules(bool value) {
+			if (! SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC))
+				value = false;
+
+			evacBussesMayIgnoreRules = value;
+			if (evacBussesMayIgnoreRulesToggle != null)
+				evacBussesMayIgnoreRulesToggle.isChecked = value;
+		}
+
+		public static void setRestrictEvacBussesToShelter(bool value) {
+			if (!SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC))
+				value = false;
+
+			restrictEvacBussesToShelter = value;
+			if (restrictEvacBussesToShelterToggle != null)
+				restrictEvacBussesToShelterToggle.isChecked = value;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
@@ -1091,19 +822,17 @@ namespace TrafficManager.State {
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
+			ExtCitizenInstanceManager.Instance().Reset();
+		}
+
+		public static void setRealisticSpeeds(bool newValue) {
+			realisticSpeeds = newValue;
+			if (realisticSpeedsToggle != null)
+				realisticSpeedsToggle.isChecked = newValue;
 		}
 
 		public static void setEnableDespawning(bool value) {
-#if !TAM
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				value = true;
-				enableDespawning = true;
-			} else {
-#endif
-				enableDespawning = value;
-#if !TAM
-			}
-#endif
+			enableDespawning = value;
 
 			if (enableDespawningToggle != null)
 				enableDespawningToggle.isChecked = value;

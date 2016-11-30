@@ -53,7 +53,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
 			int numDirections;
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections);
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 			if (numLanes <= 0) {
 				SelectedNodeId = 0;
 				SelectedSegmentId = 0;
@@ -109,7 +109,7 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiLaneChangeWindow(int num) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
-			List<object[]> laneList = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, info, SelectedNodeId);
+			List<object[]> laneList = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, info, SelectedNodeId, VehicleInfo.VehicleType.Car);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
 			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 

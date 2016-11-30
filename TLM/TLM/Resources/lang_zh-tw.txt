@@ -125,7 +125,36 @@ Unit_system 單位制
 Metric 公制
 Imperial 英制
 Use_more_CPU_cores_for_route_calculation_if_available 使用更多的CPU核心來做路線運算 (若有的話)
-Activated_features Activated features
-Junction_restrictions Junction restrictions
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
+Activated_features 已啟用的功能
+Junction_restrictions 交岔路口動線連接制定
+Prohibit_spawning_of_pocket_cars 禁止行人憑空變出汽車移動
+Reset_stuck_cims_and_vehicles 重置卡死的行人和車輛
+Default_speed_limits 預設速限
+Looking_for_a_parking_spot 尋找停車位中
+Driving_to_a_parking_spot 開往停車位中
+Driving_to_another_parking_spot 開往另一處停車位中
+Entering_vehicle 上車中
+Walking_to_car 走向汽車中
+Using_public_transport 使用大眾交通工具中
+Walking 走路中
+Thinking_of_a_good_parking_spot 盤算一個好停車位中
+Switch_view 切換檢視
+Outgoing_demand 出貨需求
+Incoming_demand 進貨需求
+Advanced_Vehicle_AI 加強版行車AI
+Heavy_trucks_prefer_outer_lanes_on_highways 大型車在高速公路上優先行駛於外側車道
+Parking_AI 道路停車AI
+Enable_more_realistic_parking 啟用更多現實中的停車位
+Reset_custom_speed_limits 重置自訂速限
+Reload_global_configuration 重新載入所有設定
+Reset_global_configuration 重置所有設定
+General 普通
+Gameplay 遊戲
+Overlays 重疊
+Realistic_speeds 現實速度
+Evacuation_busses_may_ignore_traffic_rules 緊急疏散公車可忽略交通規則
+Evacuation_busses_may_only_be_used_to_reach_a_shelter 緊急疏散公車僅可用於到達避難所
+Vehicle_behavior 車輛行為
+Policies_&_Restrictions 政策與限制
+At_junctions 位在交岔路口
+In_case_of_emergency 在緊急狀況下

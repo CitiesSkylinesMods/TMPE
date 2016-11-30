@@ -481,7 +481,7 @@ namespace TrafficManager.Manager {
 									if (Options.simAccuracy <= 1 &&
 											!Single.IsInfinity(targetTimeToTransitNode) &&
 											!Single.IsNaN(targetTimeToTransitNode) &&
-											incomingToNode.magnitude > Options.someValue10) {
+											incomingToNode.sqrMagnitude > GlobalConfig.Instance().MaxPriorityCheckSqrDist) {
 										// check speeds
 										float incomingSpeed = incomingVel.magnitude;
 										float incomingDistanceToTransitNode = incomingToNode.magnitude;
@@ -493,7 +493,7 @@ namespace TrafficManager.Manager {
 											incomingTimeToTransitNode = Single.PositiveInfinity;
 
 										float timeDiff = Mathf.Abs(incomingTimeToTransitNode - targetTimeToTransitNode);
-										if (timeDiff > Options.someValue15) {
+										if (timeDiff > GlobalConfig.Instance().MaxPriorityApproachTime) {
 #if DEBUG
 											if (debug)
 												Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} needs {incomingTimeToTransitNode} time units to get to the node where target needs {targetTimeToTransitNode} time units (diff = {timeDiff}). Difference to large. *IGNORING*");

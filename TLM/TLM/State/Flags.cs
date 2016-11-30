@@ -355,7 +355,7 @@ namespace TrafficManager.State {
 			return true;
 		}
 
-		public static void setLaneSpeedLimit(uint laneId, ushort speedLimit) {
+		public static void setLaneSpeedLimit(uint laneId, ushort? speedLimit) {
 			if (!CheckLane(laneId))
 				return;
 
@@ -372,6 +372,10 @@ namespace TrafficManager.State {
 				laneIndex++;
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
+		}
+
+		public static void removeLaneSpeedLimit(uint laneId) {
+			setLaneSpeedLimit(laneId, null);
 		}
 
 		public static void setLaneSpeedLimit(ushort segmentId, uint laneIndex, ushort speedLimit) {
@@ -395,7 +399,7 @@ namespace TrafficManager.State {
 			setLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
 		}
 
-		public static void setLaneSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, ushort speedLimit) {
+		public static void setLaneSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, ushort? speedLimit) {
 			if (segmentId <= 0 || laneIndex < 0 || laneId <= 0)
 				return;
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
@@ -413,19 +417,29 @@ namespace TrafficManager.State {
 				Log._Debug($"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. {segmentId} to {speedLimit}");
 #endif
 
-				laneSpeedLimit[laneId] = speedLimit;
+				if (speedLimit == null) {
+					laneSpeedLimit.Remove(laneId);
 
-				// save speed limit into the fast-access array.
-				// (1) ensure that the array is defined and large enough
-				if (laneSpeedLimitArray[segmentId] == null) {
-					laneSpeedLimitArray[segmentId] = new ushort?[segmentInfo.m_lanes.Length];
-				} else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-					var oldArray = laneSpeedLimitArray[segmentId];
-					laneSpeedLimitArray[segmentId] = new ushort?[segmentInfo.m_lanes.Length];
-					Array.Copy(oldArray, laneSpeedLimitArray[segmentId], oldArray.Length);
+					if (laneSpeedLimitArray[segmentId] == null)
+						return;
+					if (laneIndex >= laneSpeedLimitArray[segmentId].Length)
+						return;
+					laneSpeedLimitArray[segmentId][laneIndex] = null;
+				} else {
+					laneSpeedLimit[laneId] = (ushort)speedLimit;
+
+					// save speed limit into the fast-access array.
+					// (1) ensure that the array is defined and large enough
+					if (laneSpeedLimitArray[segmentId] == null) {
+						laneSpeedLimitArray[segmentId] = new ushort?[segmentInfo.m_lanes.Length];
+					} else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
+						var oldArray = laneSpeedLimitArray[segmentId];
+						laneSpeedLimitArray[segmentId] = new ushort?[segmentInfo.m_lanes.Length];
+						Array.Copy(oldArray, laneSpeedLimitArray[segmentId], oldArray.Length);
+					}
+					// (2) insert the custom speed limit
+					laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
 				}
-				// (2) insert the custom speed limit
-				laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
 			} finally {
 				Monitor.Exit(laneSpeedLimitLock);
 			}

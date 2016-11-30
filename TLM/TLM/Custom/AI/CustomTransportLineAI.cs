@@ -8,7 +8,7 @@ using TrafficManager.Traffic;
 using UnityEngine;
 
 namespace TrafficManager.Custom.AI {
-	class CustomTransportLineAI : TransportLineAI {
+	class CustomTransportLineAI : TransportLineAI { // TODO inherit from NetAI (in order to keep the correct references to `base`)
 		public static bool CustomStartPathFind(ushort segmentID, ref NetSegment data, ItemClass.Service netService, VehicleInfo.VehicleType vehicleType, bool skipQueue) {
 			if (data.m_path != 0u) {
 				Singleton<PathManager>.instance.ReleasePath(data.m_path);
@@ -35,17 +35,17 @@ namespace TrafficManager.Custom.AI {
 			Vector3 position2 = instance.m_nodes.m_buffer[(int)data.m_endNode].m_position;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
-			if (!PathManager.FindPathPosition(position, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out startPosA, out startPosB, out num, out num2)) {
+			float startSqrDistA;
+			float startSqrDistB;
+			if (!CustomPathManager.FindPathPosition(position, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB)) {
 				CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
 				return true;
 			}
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (!PathManager.FindPathPosition(position2, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
+			float endSqrDistA;
+			float endSqrDistB;
+			if (!CustomPathManager.FindPathPosition(position2, netService, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
 				CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
 				return true;
 			}
@@ -79,7 +79,7 @@ namespace TrafficManager.Custom.AI {
 				extVehicleType = ExtVehicleType.PassengerPlane;
 			//Log._Debug($"Transport line. extVehicleType={extVehicleType}");
 
-			if (CustomPathManager._instance.CreatePath(extVehicleType, null, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {
+			if (CustomPathManager._instance.CreatePath(extVehicleType, 0, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {
 				if (startPosA.m_segment != 0 && startPosB.m_segment != 0) {
 					NetNode[] expr_2F5_cp_0 = instance.m_nodes.m_buffer;
 					ushort expr_2F5_cp_1 = data.m_startNode;

@@ -16,7 +16,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.Custom.AI {
-	public class CustomCarAI : CarAI { // correct would be to inherit from VehicleAI (in order to keep the correct references to `base`)
+	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
 		public void Awake() {
 
 		}
@@ -35,7 +35,7 @@ namespace TrafficManager.Custom.AI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			PathManager pathMan = Singleton<PathManager>.instance;
 #if DEBUG
-			/*if (!Options.disableSomething1) {
+			/*if (!GlobalConfig.Instance().DebugSwitches[0]) {
 				Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}) called. flags: {vehicleData.m_flags} pfFlags: {pathMan.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags}");
             }*/
 #endif
@@ -258,6 +258,7 @@ namespace TrafficManager.Custom.AI {
 			var netManager = Singleton<NetManager>.instance;
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
 			bool highwayRules = (segmentInfo.m_netAI is RoadBaseAI && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules);
+			VehicleState state = VehicleStateManager.Instance().GetVehicleState(vehicleId);
 
 			if (!highwayRules) {
 				if (netManager.m_treatWetAsSnow) {
@@ -300,16 +301,18 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			//ExtVehicleType? vehicleType = VehicleStateManager.GetVehicleState(vehicleId)?.VehicleType;
-			float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
-			if (isRecklessDriver)
-				maxSpeed *= 1.5f + vehicleRand * 0.5f; // woohooo, 1.5 .. 2
-			else
-				maxSpeed *= 0.7f + vehicleRand * 0.6f; // a little variance, 0.7 .. 1.3
-			/*else if ((vehicleType & ExtVehicleType.PassengerCar) != ExtVehicleType.None)
-				maxSpeed *= 0.7f + vehicleRand * 0.4f; // a little variance, 0.7 .. 1.1
-			else if ((vehicleType & ExtVehicleType.Taxi) != ExtVehicleType.None)
-				maxSpeed *= 0.9f + vehicleRand * 0.4f; // a little variance, 0.9 .. 1.3*/
+			if (Options.realisticSpeeds) {
+				float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
+				if (state != null && state.HeavyVehicle)
+					maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.85 .. 1
+				else if (isRecklessDriver)
+					maxSpeed *= 1.2f + vehicleRand * 0.8f; // woohooo, 1.2 .. 2
+				else
+					maxSpeed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
+			} else {
+				if (isRecklessDriver)
+					maxSpeed *= 1.4f;
+			}
 
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 
@@ -334,11 +337,21 @@ namespace TrafficManager.Custom.AI {
 		internal static bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0)
 				return true;
+			if (Options.evacBussesMayIgnoreRules && vehicleData.Info.GetService() == ItemClass.Service.Disaster)
+				return true;
 			if (Options.recklessDrivers == 3)
 				return false;
 
 			return ((vehicleData.Info.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
+
+		/*public void InvalidPath(ushort vehicleID, ref Vehicle vehicleData, ushort leaderID, ref Vehicle leaderData) {
+			vehicleData.m_targetPos0 = vehicleData.m_targetPos3;
+			vehicleData.m_targetPos1 = vehicleData.m_targetPos3;
+			vehicleData.m_targetPos2 = vehicleData.m_targetPos3;
+			vehicleData.m_targetPos3.w = 0f;
+			base.InvalidPath(vehicleID, ref vehicleData, leaderID, ref leaderData);
+		}*/
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if PATHRECALC
@@ -354,18 +367,18 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startDistSqrA;
+			float startDistSqrB;
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
-				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
-				if (!startBothWays || num < 10f) {
+			float endDistSqrA;
+			float endDistSqrB;
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startDistSqrA, out startDistSqrB) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, undergroundTarget, false, 32f, out endPosA, out endPosB, out endDistSqrA, out endDistSqrB)) {
+				if (!startBothWays || startDistSqrA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num3 < 10f) {
+				if (!endBothWays || endDistSqrA < 10f) {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
@@ -381,12 +394,18 @@ namespace TrafficManager.Custom.AI {
 #if PATHRECALC
 					recalcRequested, 
 #endif
-					(ExtVehicleType)vehicleType, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+					(ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false, true)) {
 
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
 #endif
+
+#if DEBUG
+					if (GlobalConfig.Instance().DebugSwitches[2])
+						Log._Debug($"Path-finding starts for car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+#endif
+
 
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

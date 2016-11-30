@@ -124,7 +124,36 @@ Unit_system Sistema de unidade
 Metric Metrico
 Imperial Imperial
 Use_more_CPU_cores_for_route_calculation_if_available Usar mais nucleos de CPU para calcular a rota (se disponivel)
-Activated_features Activated features
-Junction_restrictions Junction restrictions
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
+Activated_features Recursos ativados
+Junction_restrictions Restrições de junção
+Prohibit_spawning_of_pocket_cars Proibir o spawn de carros de bolso
+Reset_stuck_cims_and_vehicles Resetar carros e cims presos
+Default_speed_limits Limites de velocidade padrão
+Looking_for_a_parking_spot Procurando uma vaga de estacionamento
+Driving_to_a_parking_spot Dirigindo para uma vaga de estacionamento
+Driving_to_another_parking_spot Dirigindo para outra vaga de estacionamento
+Entering_vehicle Entrando no veículo
+Walking_to_car Caminhando para carro
+Using_public_transport Usando transporte público
+Walking Caminhando
+Thinking_of_a_good_parking_spot Pensando em uma boa vaga de estacionamento
+Switch_view Trocar visão
+Outgoing_demand Demanda de saída
+Incoming_demand Demanda de entrada
+Advanced_Vehicle_AI IA avançada de veículo
+Heavy_trucks_prefer_outer_lanes_on_highways Os veículos pesados preferem faixas externas nas rodovias
+Parking_AI IA de estacionamento
+Enable_more_realistic_parking Habilitar estacionamento mais realista
+Reset_custom_speed_limits Resetar limites de velocidade modificados
+Reload_global_configuration Recarregar configuração global
+Reset_global_configuration Resetar configuração global
+General Geral
+Gameplay Gameplay
+Overlays Sobreposições
+Realistic_speeds Velocidades realistas
+Evacuation_busses_may_ignore_traffic_rules Os ônibus de evacuação podem ignorar as regras de trânsito
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Os ônibus de evacuação só podem ser usados para alcançar um abrigo
+Vehicle_behavior Comportamento do veículo
+Policies_&_Restrictions Políticas e Restrições
+At_junctions Nas junções
+In_case_of_emergency Em caso de emergência

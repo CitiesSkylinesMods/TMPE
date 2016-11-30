@@ -145,6 +145,12 @@ namespace TrafficManager.Manager {
 #endif
 			VehicleState state = _GetVehicleState(vehicleId);
 			state.VehicleType = ExtVehicleType.None;
+			ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
+			if (driverExtInstance != null) {
+				//driverExtInstance.FailedParkingAttempts = 0;
+				driverExtInstance.Reset();
+			}
+			//state.DriverInstanceId = 0;
 #if USEPATHWAITCOUNTER
 			state.PathWaitCounter = 0;
 #endif
@@ -205,7 +211,16 @@ namespace TrafficManager.Manager {
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleTypeFromAIType");
 #endif
-			VehicleStates[vehicleId].VehicleType = ret != null ? (ExtVehicleType)ret : ExtVehicleType.None;
+
+			if (ret != null) {
+				VehicleStates[vehicleId].VehicleType = (ExtVehicleType)ret;
+				if ((ExtVehicleType)ret == ExtVehicleType.CargoTruck) {
+					VehicleStates[vehicleId].HeavyVehicle = ((CargoTruckAI)ai).m_isHeavyVehicle;
+				}
+			} else {
+				VehicleStates[vehicleId].VehicleType = ExtVehicleType.None;
+				VehicleStates[vehicleId].HeavyVehicle = false;
+			}
 #if TRACE
 			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
 #endif
@@ -252,6 +267,10 @@ namespace TrafficManager.Manager {
 				case VehicleInfo.VehicleType.Plane:
 					//if (ai is PassengerPlaneAI)
 					return ExtVehicleType.PassengerPlane;
+				//break;
+				case VehicleInfo.VehicleType.Helicopter:
+					//if (ai is PassengerPlaneAI)
+					return ExtVehicleType.Helicopter;
 					//break;
 			}
 #if DEBUGVSTATE

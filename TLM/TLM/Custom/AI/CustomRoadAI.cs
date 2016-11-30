@@ -17,16 +17,18 @@ namespace TrafficManager.Custom.AI {
 
 		public static uint[][] currentLaneSpeeds;
 		public static uint[][] currentLaneDensities;
-		public static uint[][] maxLaneDensities;
+		//public static uint[][] maxLaneDensities;
 
 		public static ushort[][] laneMeanSpeeds; // per ten thousands
-		public static byte[][] laneMeanAbsDensities;
-		public static bool[] segmentCongestion;
+		//public static byte[][] laneMeanAbsDensities;
+		public static bool[][] segmentDirCongestion;
 
 		public static bool initDone = false;
 		public static uint simStartFrame = 0;
 		private static ushort lastSimulatedSegmentId = 0;
 		private static byte trafficMeasurementMod = 0;
+
+		private static uint[] minSpeeds = { 10000u, 10000u };
 
 		//public static bool InStartupPhase = true;
 
@@ -36,9 +38,9 @@ namespace TrafficManager.Custom.AI {
 
 			currentLaneSpeeds[segmentId] = null;
 			currentLaneDensities[segmentId] = null;
-			maxLaneDensities[segmentId] = null;
+			//maxLaneDensities[segmentId] = null;
 			laneMeanSpeeds[segmentId] = null;
-			laneMeanAbsDensities[segmentId] = null;
+			//laneMeanAbsDensities[segmentId] = null;
 			currentLaneTrafficBuffer[segmentId] = null;
 		}
 
@@ -107,96 +109,121 @@ namespace TrafficManager.Custom.AI {
 
 					if (doTrafficMeasurement) {
 						try {
+							GlobalConfig conf = GlobalConfig.Instance();
+
 							// calculate traffic density
+							NetInfo segmentInfo = data.Info;
 							uint curLaneId = data.m_lanes;
-							int numLanes = data.Info.m_lanes.Length;
-							uint laneIndex = 0;
-							uint densitySum = 0u;
+							int numLanes = segmentInfo.m_lanes.Length;
+							//uint densitySum = 0u;
 
 							// ensure valid array sizes
 							if (currentLaneTrafficBuffer[segmentID] == null || currentLaneTrafficBuffer[segmentID].Length < numLanes) {
 								currentLaneTrafficBuffer[segmentID] = new ushort[numLanes];
-								maxLaneDensities[segmentID] = new uint[numLanes];
+								//maxLaneDensities[segmentID] = new uint[numLanes];
 								currentLaneSpeeds[segmentID] = new uint[numLanes];
 								currentLaneDensities[segmentID] = new uint[numLanes];
 								laneMeanSpeeds[segmentID] = new ushort[numLanes];
+								segmentDirCongestion[segmentID] = new bool[2];
 
-								laneMeanAbsDensities[segmentID] = new byte[numLanes];
+								//laneMeanAbsDensities[segmentID] = new byte[numLanes];
 
 								for (int i = 0; i < numLanes; ++i)
-									laneMeanSpeeds[segmentID][i] = 5000;
+									laneMeanSpeeds[segmentID][i] = 10000;
 							}
 
-							// calculate total density sum
-							while (laneIndex < numLanes && curLaneId != 0u) {
-								uint currentDensity = currentLaneDensities[segmentID][laneIndex];
-								densitySum += currentDensity;
+							// calculate max./min. lane speed
+							for (int i = 0; i < minSpeeds.Length; ++i)
+								minSpeeds[i] = 10000u;
 
-								laneIndex++;
-								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+							for (uint li = 0; li < numLanes; ++li) {
+								NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
+								if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)
+									continue;
+
+								int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+
+								uint curSpeed = laneMeanSpeeds[segmentID][li];
+								if (curSpeed < minSpeeds[dirIndex])
+									minSpeeds[dirIndex] = curSpeed;
 							}
 
 							curLaneId = data.m_lanes;
-							laneIndex = 0;
 
-							bool setCongested = false;
-							bool unsetCongested = false;
-
+							uint laneIndex = 0;
 							while (laneIndex < numLanes && curLaneId != 0u) {
-								ushort currentBuf = currentLaneTrafficBuffer[segmentID][laneIndex];
-								uint currentDensity = currentLaneDensities[segmentID][laneIndex];
+								NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-								// update maximum density seen on this lane
-								uint maxLaneDensity = maxLaneDensities[segmentID][laneIndex];
-								if (currentDensity > maxLaneDensity) {
-									maxLaneDensities[segmentID][laneIndex] = currentDensity;
-									maxLaneDensity = currentDensity;
-								} else {
-									maxLaneDensities[segmentID][laneIndex] = (maxLaneDensity * 95u) / 100u;
+								if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
+									int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+
+									ushort currentBuf = currentLaneTrafficBuffer[segmentID][laneIndex];
+									//uint currentDensity = currentLaneDensities[segmentID][laneIndex];
+
+									// update maximum density seen on this lane
+									/*uint maxLaneDensity = maxLaneDensities[segmentID][laneIndex];
+									if (currentDensity > maxLaneDensity) {
+										maxLaneDensities[segmentID][laneIndex] = currentDensity;
+										maxLaneDensity = currentDensity;
+									} else if (maxLaneDensity > 0) {
+										maxLaneDensities[segmentID][laneIndex] = Math.Min(maxLaneDensity-1, (maxLaneDensity * 98u) / 100u);
+									}*/
+
+									ushort curSpeed = 10000;
+									// we use integer division here because it's faster
+									if (currentBuf > 0) {
+										curSpeed = (ushort)Math.Min(10000u, ((currentLaneSpeeds[segmentID][laneIndex] * 10000u) / currentBuf) / ((uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex])) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+									}
+
+									// calculate reported mean speed
+									uint minSpeed = minSpeeds[dirIndex];
+									ushort prevSpeed = laneMeanSpeeds[segmentID][laneIndex];
+									float maxSpeedDiff = Mathf.Abs((short)curSpeed - (short)minSpeed);
+
+									float updateFactor = Mathf.Clamp(1f - (float)maxSpeedDiff / (float)conf.MaxSpeedDifference, conf.MinSpeedUpdateFactor, conf.MaxSpeedUpdateFactor);
+									ushort newSpeed = (ushort)Mathf.Clamp((float)prevSpeed + ((float)curSpeed - (float)prevSpeed) * updateFactor, 0, 10000);
+
+									if (newSpeed < minSpeed) {
+										minSpeeds[dirIndex] = newSpeed;
+									} else {
+										int maxTolerableSpeed = (int)minSpeed + (int)conf.MaxSpeedDifference;
+										if (newSpeed > maxTolerableSpeed)
+											newSpeed = (ushort)maxTolerableSpeed;
+									}
+
+									laneMeanSpeeds[segmentID][laneIndex] = newSpeed;
+
+									/*uint speedUpdateSmoothing = currentMeanSpeed > prevSpeed ? (uint)conf.LaneSpeedPositiveUpdateSmoothing : (uint)conf.LaneSpeedNegativeUpdateSmoothing;
+									laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)prevSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));*/
+
+									// calculate mean density
+									//ushort currentMeanDensity = (ushort) (maxLaneDensity > 0 ? Math.Min(currentDensity * 100 / maxLaneDensity, 100) : 0);
+									//ushort previousMeanDensity = laneMeanAbsDensities[segmentID][laneIndex];
+									//ushort densityUpdateSmoothing = currentMeanDensity > previousMeanDensity ? (ushort)Options.debugValues[9] : (ushort)Options.debugValues[22];
+									/*if (maxLaneDensity > 0)
+										laneMeanAbsDensities[segmentID][laneIndex] = (byte)((previousMeanDensity * densityUpdateSmoothing + currentMeanDensity) / (densityUpdateSmoothing + 1));
+									else
+										laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Max(0, (int)previousMeanDensity - (int)Options.debugValues[8]);*/
+									//laneMeanAbsDensities[segmentID][laneIndex] = (byte)currentMeanDensity;
+
+									// reset buffers
+									currentLaneDensities[segmentID][laneIndex] /= 2;
+									currentLaneTrafficBuffer[segmentID][laneIndex] = 0;
+									currentLaneSpeeds[segmentID][laneIndex] = 0;
 								}
-
-								uint currentMeanSpeed = 10000;
-								// we use integer division here because it's faster
-								if (currentBuf > 0) {
-									uint currentSpeeds = currentLaneSpeeds[segmentID][laneIndex];
-									currentMeanSpeed = (uint)Math.Min(10000u, ((currentSpeeds * 10000) / currentBuf) / ((uint)(Math.Max(SpeedLimitManager.Instance().GetLockFreeGameSpeedLimit(segmentID, laneIndex, curLaneId, data.Info.m_lanes[laneIndex]) * 8f, 1f)))); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
-								}
-
-								// calculate mean speed
-								ushort previousMeanSpeed = laneMeanSpeeds[segmentID][laneIndex];
-								uint speedUpdateSmoothing = currentMeanSpeed > previousMeanSpeed ? (uint)Options.someValue19 : (uint)Options.someValue17;
-								laneMeanSpeeds[segmentID][laneIndex] = (ushort)Math.Max(0, Math.Min(((uint)previousMeanSpeed * speedUpdateSmoothing + (uint)currentMeanSpeed) / (speedUpdateSmoothing + 1), 10000));
-
-								// determine if segment is congested
-								if (laneMeanSpeeds[segmentID][laneIndex] <= Options.someValue20) {
-									setCongested = true;
-								} else if (currentMeanSpeed >= Options.someValue21) {
-									unsetCongested = true;
-								}
-
-								// calculate mean density
-								ushort currentMeanDensity = (ushort) (maxLaneDensity > 0 ? Math.Min(currentDensity * 100 / maxLaneDensity, 100) : 0);
-								ushort previousMeanDensity = laneMeanAbsDensities[segmentID][laneIndex];
-								ushort densityUpdateSmoothing = currentMeanDensity > previousMeanDensity ? (ushort)Options.someValue9 : (ushort)Options.someValue22;
-								if (maxLaneDensity > 0)
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)((previousMeanDensity * densityUpdateSmoothing + currentMeanDensity) / (densityUpdateSmoothing + 1));
-								else
-									laneMeanAbsDensities[segmentID][laneIndex] = (byte)Math.Max(0, (int)previousMeanDensity - (int)Options.someValue8);
-
-								// reset buffers
-								currentLaneTrafficBuffer[segmentID][laneIndex] = 0;
-								currentLaneSpeeds[segmentID][laneIndex] = 0;
-								currentLaneDensities[segmentID][laneIndex] = 0u;
 
 								laneIndex++;
 								curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 							}
 
-							// (un)mark segment as congested
-							if (setCongested)
-								segmentCongestion[segmentID] = true;
-							else if (unsetCongested)
-								segmentCongestion[segmentID] = false;
+							for (int i = 0; i < 2; ++i) {
+								// determine if segment direction is congested
+								if (minSpeeds[i] <= conf.LowerSpeedCongestionThreshold) {
+									segmentDirCongestion[segmentID][i] = true;
+								} else if (minSpeeds[i] >= conf.UpperSpeedCongestionThreshold) {
+									segmentDirCongestion[segmentID][i] = false;
+								}
+							}
 						} catch (Exception e) {
 							Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
 						}
@@ -420,29 +447,29 @@ namespace TrafficManager.Custom.AI {
 
 		#region stock code
 
-		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {
+		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) { // pure stock code
 			NetManager instance = Singleton<NetManager>.instance;
 			bool flag = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
 			Vector3 vector;
-			Vector3 from;
-			bool smoothStart;
-			data.CalculateCorner(segmentID, true, true, true, out vector, out from, out smoothStart);
 			Vector3 a;
-			Vector3 to;
-			bool smoothEnd;
-			data.CalculateCorner(segmentID, true, false, true, out a, out to, out smoothEnd);
+			bool smoothStart;
+			data.CalculateCorner(segmentID, true, true, true, out vector, out a, out smoothStart);
 			Vector3 a2;
-			Vector3 to2;
-			data.CalculateCorner(segmentID, true, true, false, out a2, out to2, out smoothStart);
+			Vector3 b;
+			bool smoothEnd;
+			data.CalculateCorner(segmentID, true, false, true, out a2, out b, out smoothEnd);
+			Vector3 a3;
+			Vector3 b2;
+			data.CalculateCorner(segmentID, true, true, false, out a3, out b2, out smoothStart);
 			Vector3 vector2;
-			Vector3 from2;
-			data.CalculateCorner(segmentID, true, false, false, out vector2, out from2, out smoothEnd);
+			Vector3 a4;
+			data.CalculateCorner(segmentID, true, false, false, out vector2, out a4, out smoothEnd);
 			if ((data.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
-				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(a2.z - vector.z, a2.x - vector.x) * 40.7436638f) & 255);
-				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(a.z - vector2.z, a.x - vector2.x) * 40.7436638f) & 255);
+				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(a3.z - vector.z, a3.x - vector.x) * 40.7436638f) & 255);
+				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(a2.z - vector2.z, a2.x - vector2.x) * 40.7436638f) & 255);
 			} else {
-				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector.z - a2.z, vector.x - a2.x) * 40.7436638f) & 255);
-				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector2.z - a.z, vector2.x - a.x) * 40.7436638f) & 255);
+				data.m_cornerAngleStart = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector.z - a3.z, vector.x - a3.x) * 40.7436638f) & 255);
+				data.m_cornerAngleEnd = (byte)(Mathf.RoundToInt(Mathf.Atan2(vector2.z - a2.z, vector2.x - a2.x) * 40.7436638f) & 255);
 			}
 			int num = 0;
 			int num2 = 0;
@@ -505,15 +532,15 @@ namespace TrafficManager.Custom.AI {
 				if ((data.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
 					num17 = 1f - num17;
 				}
-				Vector3 vector3 = vector + (a2 - vector) * num17;
-				Vector3 startDir = Vector3.Lerp(from, to2, num17);
-				Vector3 vector4 = vector2 + (a - vector2) * num17;
-				Vector3 endDir = Vector3.Lerp(from2, to, num17);
+				Vector3 vector3 = vector + (a3 - vector) * num17;
+				Vector3 startDir = Vector3.Lerp(a, b2, num17);
+				Vector3 vector4 = vector2 + (a2 - vector2) * num17;
+				Vector3 endDir = Vector3.Lerp(a4, b, num17);
 				vector3.y += lane.m_verticalOffset;
 				vector4.y += lane.m_verticalOffset;
-				Vector3 b;
+				Vector3 b3;
 				Vector3 c;
-				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b, out c);
+				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
 				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right);
 				flags2 &= ~(NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
 				flags2 |= flags;
@@ -623,7 +650,7 @@ namespace TrafficManager.Custom.AI {
 						flags2 |= NetLane.Flags.Forward;
 					}
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b, c, vector4);
+				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b3, c, vector4);
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_segment = segmentID;
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags2;
 				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_firstTarget = (byte)num18;
@@ -687,7 +714,7 @@ namespace TrafficManager.Custom.AI {
 			Log.Error("CustomRoadAI.CheckBuildings called.");
 		}
 
-		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) {
+		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) { // pure stock code
 			if ((data.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
 				if ((data.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None) {
 					TrainTrackBaseAI.LevelCrossingSimulationStep(nodeID, ref data);
@@ -723,7 +750,8 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) {
+		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) { // stock + custom code
+			// base.SimulationStep START
 			if ((data.m_flags & NetSegment.Flags.Original) == NetSegment.Flags.None) {
 				NetManager netManager = Singleton<NetManager>.instance;
 				Vector3 pos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
@@ -754,10 +782,14 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
+			// base.SimulationStep END
 
 			SimulationManager instance = Singleton<SimulationManager>.instance;
 			NetManager instance2 = Singleton<NetManager>.instance;
 			Notification.Problem problem = Notification.RemoveProblems(data.m_problems, Notification.Problem.Flood | Notification.Problem.Snow);
+			if ((data.m_flags & NetSegment.Flags.AccessFailed) != NetSegment.Flags.None && Singleton<SimulationManager>.instance.m_randomizer.Int32(16u) == 0) {
+				data.m_flags &= ~NetSegment.Flags.AccessFailed;
+			}
 			float num = 0f;
 			uint num2 = data.m_lanes;
 			int num3 = 0;
@@ -801,6 +833,9 @@ namespace TrafficManager.Custom.AI {
 					flag = true;
 					data.m_flags |= NetSegment.Flags.Flooded;
 					problem = Notification.AddProblems(problem, Notification.Problem.Flood | Notification.Problem.MajorProblem);
+					Vector3 min = data.m_bounds.min;
+					Vector3 max = data.m_bounds.max;
+					RoadBaseAI.FloodParkedCars(min.x, min.z, max.x, max.z);
 				} else {
 					data.m_flags &= ~NetSegment.Flags.Flooded;
 					float _roadwayFloodingTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodingTolerance", 50)/100f : 0f;
@@ -817,6 +852,15 @@ namespace TrafficManager.Custom.AI {
 			int num7 = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
 			if ((this.m_info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
+					if (flag && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
+						TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
+						offer.Priority = 4;
+						offer.NetSegment = segmentID;
+						offer.Position = vector;
+						offer.Amount = 1;
+						Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.FloodWater, offer);
+					}
+
 					int num8 = (int)data.m_wetness;
 					if (!instance2.m_treatWetAsSnow) {
 						if (flag) {
@@ -846,13 +890,13 @@ namespace TrafficManager.Custom.AI {
 							} else if (Singleton<SimulationManager>.instance.m_randomizer.Int32(4u) == 0) {
 								num8 = Mathf.Max(num8 - 1, 0);
 							}
-							if (num8 >= 64 && (data.m_flags & (NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
-								TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
-								offer.Priority = num8 / 50;
-								offer.NetSegment = segmentID;
-								offer.Position = vector;
-								offer.Amount = 1;
-								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer);
+							if (num8 >= 64 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
+								TransferManager.TransferOffer offer2 = default(TransferManager.TransferOffer);
+								offer2.Priority = num8 / 50;
+								offer2.NetSegment = segmentID;
+								offer2.Position = vector;
+								offer2.Amount = 1;
+								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer2);
 							}
 							if (num8 >= 192) {
 								problem = Notification.AddProblems(problem, Notification.Problem.Snow);
@@ -888,13 +932,13 @@ namespace TrafficManager.Custom.AI {
 				if (!this.m_highwayRules) {
 					int num16 = instance.m_randomizer.Int32(num15, num15 + 99) / 100;
 					data.m_condition = (byte)Mathf.Max((int)data.m_condition - num16, 0);
-					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(20u) == 0) {
-						TransferManager.TransferOffer offer2 = default(TransferManager.TransferOffer);
-						offer2.Priority = (int)((255 - data.m_condition) / 50);
-						offer2.NetSegment = segmentID;
-						offer2.Position = vector;
-						offer2.Amount = 1;
-						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer2);
+					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(20u) == 0) {
+						TransferManager.TransferOffer offer3 = default(TransferManager.TransferOffer);
+						offer3.Priority = (int)((255 - data.m_condition) / 50);
+						offer3.NetSegment = segmentID;
+						offer3.Position = vector;
+						offer3.Amount = 1;
+						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer3);
 					}
 				}
 			}
@@ -930,6 +974,18 @@ namespace TrafficManager.Custom.AI {
 					Singleton<NetManager>.instance.m_shortRoadTraffic.Activate(properties.m_shortRoadTraffic, segmentID);
 				}
 			}
+			if ((data.m_flags & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
+				GuideController properties2 = Singleton<GuideManager>.instance.m_properties;
+				if (properties2 != null) {
+					Singleton<NetManager>.instance.m_roadDestroyed.Activate(properties2.m_roadDestroyed, segmentID);
+					Singleton<NetManager>.instance.m_roadDestroyed2.Activate(properties2.m_roadDestroyed2, this.m_info.m_class.m_service);
+				}
+				if ((ulong)(instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15))) {
+					int delta = Mathf.RoundToInt(data.m_averageLength);
+					StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.DestroyedLength);
+					statisticBase.Add(delta);
+				}
+			}
 			data.m_problems = problem;
 		}
 #endregion
@@ -944,9 +1000,9 @@ namespace TrafficManager.Custom.AI {
 				currentLaneSpeeds = new uint[NetManager.MAX_SEGMENT_COUNT][];
 				currentLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
 				laneMeanSpeeds = new ushort[NetManager.MAX_SEGMENT_COUNT][];
-				laneMeanAbsDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
-				maxLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
-				segmentCongestion = new bool[NetManager.MAX_SEGMENT_COUNT];
+				//laneMeanAbsDensities = new byte[NetManager.MAX_SEGMENT_COUNT][];
+				//maxLaneDensities = new uint[NetManager.MAX_SEGMENT_COUNT][];
+				segmentDirCongestion = new bool[NetManager.MAX_SEGMENT_COUNT][];
 
 				resetTrafficStats();
 				initDone = true;
@@ -959,10 +1015,13 @@ namespace TrafficManager.Custom.AI {
 					for (int k = 0; k < currentLaneTrafficBuffer[i].Length; ++k) {
 						laneMeanSpeeds[i][k] = 10000;
 						currentLaneTrafficBuffer[i][k] = 0;
-						maxLaneDensities[i][k] = 0;
+						//maxLaneDensities[i][k] = 0;
 					}
 				}
-				segmentCongestion[i] = false;
+				if (segmentDirCongestion[i] != null) {
+					segmentDirCongestion[i][0] = false;
+					segmentDirCongestion[i][1] = false;
+				}
 			}
 			simStartFrame = 0;
 		}

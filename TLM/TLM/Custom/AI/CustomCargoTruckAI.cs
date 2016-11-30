@@ -57,52 +57,52 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
-			bool startPosFound = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2);
-			PathUnit.Position position;
-			PathUnit.Position position2;
-			float num3;
-			float num4;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, allowUnderground, false, 32f, out position, out position2, out num3, out num4)) {
-				if (!startPosFound || num3 < num) {
-					startPosA = position;
-					startPosB = position2;
-					num = num3;
-					num2 = num4;
+			float startDistSqrA;
+			float startDistSqrB;
+			bool startPosFound = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, allowUnderground, false, 32f, out startPosA, out startPosB, out startDistSqrA, out startDistSqrB);
+			PathUnit.Position startAltPosA;
+			PathUnit.Position startAltPosB;
+			float startAltDistSqrA;
+			float startAltDistSqrB;
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, allowUnderground, false, 32f, out startAltPosA, out startAltPosB, out startAltDistSqrA, out startAltDistSqrB)) {
+				if (!startPosFound || startAltDistSqrA < startDistSqrA) {
+					startPosA = startAltPosA;
+					startPosB = startAltPosB;
+					startDistSqrA = startAltDistSqrA;
+					startDistSqrB = startAltDistSqrB;
 				}
 				startPosFound = true;
 			}
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num5;
-			float num6;
-			bool endPosFound = CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, undergroundTarget, false, 32f, out endPosA, out endPosB, out num5, out num6);
-			PathUnit.Position position3;
-			PathUnit.Position position4;
-			float num7;
-			float num8;
-			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, undergroundTarget, false, 32f, out position3, out position4, out num7, out num8)) {
-				if (!endPosFound || num7 < num5) {
-					endPosA = position3;
-					endPosB = position4;
-					num5 = num7;
-					num6 = num8;
+			float endDistSqrA;
+			float endDistSqrB;
+			bool endPosFound = CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, undergroundTarget, false, 32f, out endPosA, out endPosB, out endDistSqrA, out endDistSqrB);
+			PathUnit.Position endAltPosA;
+			PathUnit.Position endAltPosB;
+			float endAltDistSqrA;
+			float endAltDistSqrB;
+			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, undergroundTarget, false, 32f, out endAltPosA, out endAltPosB, out endAltDistSqrA, out endAltDistSqrB)) {
+				if (!endPosFound || endAltDistSqrA < endDistSqrA) {
+					endPosA = endAltPosA;
+					endPosB = endAltPosB;
+					endDistSqrA = endAltDistSqrA;
+					endDistSqrB = endAltDistSqrB;
 				}
 				endPosFound = true;
 			}
 			if (startPosFound && endPosFound) {
 				CustomPathManager instance = CustomPathManager._instance;
-				if (!startBothWays || num < 10f) {
+				if (!startBothWays || startDistSqrA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num5 < 10f) {
+				if (!endBothWays || endDistSqrA < 10f) {
 					endPosB = default(PathUnit.Position);
 				}
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

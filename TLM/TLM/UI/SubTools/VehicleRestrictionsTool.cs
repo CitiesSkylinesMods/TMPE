@@ -135,7 +135,7 @@ namespace TrafficManager.UI.SubTools {
 				// invert pattern
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
 					uint laneIndex = (uint)laneData[2];
@@ -158,7 +158,7 @@ namespace TrafficManager.UI.SubTools {
 				// allow all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
 					uint laneIndex = (uint)laneData[2];
@@ -178,7 +178,7 @@ namespace TrafficManager.UI.SubTools {
 				// ban all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
 					uint laneIndex = (uint)laneData[2];
@@ -200,7 +200,7 @@ namespace TrafficManager.UI.SubTools {
 
 		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {
 			NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-			List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null);
+			List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 			LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
 			HashSet<ushort> processedNodes = new HashSet<ushort>();
@@ -232,7 +232,7 @@ namespace TrafficManager.UI.SubTools {
 					processedSegments.Add(segmentId);
 
 					NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-					List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null);
+					List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 					if (sortedLanes.Count == selectedSortedLanes.Count) {
 						// number of lanes matches selected segment
@@ -273,9 +273,6 @@ namespace TrafficManager.UI.SubTools {
 
 		private bool drawVehicleRestrictionHandles(ushort segmentId, bool viewOnly, out bool stateUpdated) {
 			stateUpdated = false;
-			if (!LoadingExtension.IsPathManagerCompatible) {
-				return false;
-			}
 
 			if (viewOnly && !Options.vehicleRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions)
 				return false;
@@ -293,7 +290,7 @@ namespace TrafficManager.UI.SubTools {
 				return false; // do not draw if too distant
 
 			int numDirections;
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections);
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 			// draw vehicle restrictions over each lane
 			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
@@ -316,7 +313,7 @@ namespace TrafficManager.UI.SubTools {
 
 			uint x = 0;
 			var guiColor = GUI.color;
-			List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null);
+			List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 			bool hovered = false;
 			HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
 			int sortedLaneIndex = -1;

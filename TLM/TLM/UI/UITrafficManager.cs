@@ -39,6 +39,7 @@ namespace TrafficManager.UI {
 		private static UIButton _goToNodeButton = null;
 		private static UIButton _goToVehicleButton = null;
 		private static UIButton _goToBuildingButton = null;
+		private static UIButton _goToCitizenInstanceButton = null;
 		private static UIButton _printDebugInfoButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
@@ -62,7 +63,7 @@ namespace TrafficManager.UI {
 			height = 30;
 
 			//height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
-			relativePosition = new Vector3(85f, 80f);
+			relativePosition = new Vector3(85f, 65f);
 
 			title = AddUIComponent<UILabel>();
 			title.text = "Version " + TrafficManagerMod.Version;
@@ -90,45 +91,43 @@ namespace TrafficManager.UI {
 				height += 40;
 			}
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
+			
+			_buttonLaneChange = _createButton(Translation.GetString("Change_lane_arrows"), y, clickChangeLanes);
+			y += 40;
+			height += 40;
+
+			if (Options.laneConnectorEnabled) {
+				_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
 				y += 40;
 				height += 40;
+			}
 
-				if (Options.laneConnectorEnabled) {
-					_buttonLaneConnector = _createButton(Translation.GetString("Lane_connector"), y, clickLaneConnector);
-					y += 40;
-					height += 40;
-				}
+			if (Options.customSpeedLimitsEnabled) {
+				_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
+				y += 40;
+				height += 40;
+			}
 
-				if (Options.customSpeedLimitsEnabled) {
-					_buttonSpeedLimits = _createButton(Translation.GetString("Speed_limits"), y, clickSpeedLimits);
-					y += 40;
-					height += 40;
-				}
+			if (Options.vehicleRestrictionsEnabled) {
+				_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
+				y += 40;
+				height += 40;
+			}
 
-				if (Options.vehicleRestrictionsEnabled) {
-					_buttonVehicleRestrictions = _createButton(Translation.GetString("Vehicle_restrictions"), y, clickVehicleRestrictions);
-					y += 40;
-					height += 40;
-				}
-
-				if (Options.junctionRestrictionsEnabled) {
-					_buttonJunctionRestrictions = _createButton(Translation.GetString("Junction_restrictions"), y, clickJunctionRestrictions);
-					y += 40;
-					height += 40;
-				}
+			if (Options.junctionRestrictionsEnabled) {
+				_buttonJunctionRestrictions = _createButton(Translation.GetString("Junction_restrictions"), y, clickJunctionRestrictions);
+				y += 40;
+				height += 40;
 			}
 
 			_buttonClearTraffic = _createButton(Translation.GetString("Clear_Traffic"), y, clickClearTraffic);
 			y += 40;
 			height += 40;
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
-				y += 40;
-				height += 40;
-			}
+			
+			_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
+			y += 40;
+			height += 40;
 
 #if DEBUG
 			_goToField = CreateTextField("", y);
@@ -144,6 +143,9 @@ namespace TrafficManager.UI {
 			y += 40;
 			height += 40;
 			_goToBuildingButton = _createButton("Goto building", y, clickGoToBuilding);
+			y += 40;
+			height += 40;
+			_goToCitizenInstanceButton = _createButton("Goto citizen inst.", y, clickGoToCitizenInstance);
 			y += 40;
 			height += 40;
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
@@ -308,6 +310,26 @@ namespace TrafficManager.UI {
 			Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
 			if ((building.m_flags & Building.Flags.Created) != 0) {
 				CameraCtrl.GoToBuilding(buildingId, new Vector3(building.m_position.x, Camera.main.transform.position.y, building.m_position.z));
+
+				for (int index = 0; index < BuildingManager.BUILDINGGRID_RESOLUTION * BuildingManager.BUILDINGGRID_RESOLUTION; ++index) {
+					ushort bid = Singleton<BuildingManager>.instance.m_buildingGrid[index];
+					while (bid != 0) {
+						if (bid == buildingId) {
+							int i = index / BuildingManager.BUILDINGGRID_RESOLUTION;
+							int j = index % BuildingManager.BUILDINGGRID_RESOLUTION;
+							Log._Debug($"Found building {buildingId} in building grid @ {index}. i={i}, j={j}");
+						}
+						bid = Singleton<BuildingManager>.instance.m_buildings.m_buffer[bid].m_nextGridBuilding;
+					}
+				}
+			}
+		}
+
+		private void clickGoToCitizenInstance(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort citizenInstanceId = Convert.ToUInt16(_goToField.text);
+			CitizenInstance citizenInstance = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId];
+			if ((citizenInstance.m_flags & CitizenInstance.Flags.Created) != 0) {
+				CameraCtrl.GoToCitizenInstance(citizenInstanceId, new Vector3(citizenInstance.GetLastFramePosition().x, Camera.main.transform.position.y, citizenInstance.GetLastFramePosition().z));
 			}
 		}
 #endif
@@ -423,11 +445,9 @@ namespace TrafficManager.UI {
 
 			Options.setEnableDespawning(!Options.enableDespawning);
 
-			if (LoadingExtension.IsPathManagerCompatible) {
-				_buttonToggleDespawn.text = Options.enableDespawning
-					? Translation.GetString("Disable_despawning")
-					: Translation.GetString("Enable_despawning");
-			}
+			_buttonToggleDespawn.text = Options.enableDespawning
+				? Translation.GetString("Disable_despawning")
+				: Translation.GetString("Enable_despawning");
 		}
 
 		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {

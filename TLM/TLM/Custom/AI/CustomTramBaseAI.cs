@@ -13,7 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.Custom.AI {
-	class CustomTramBaseAI : TramBaseAI {
+	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 #if USEPATHWAITCOUNTER
 			VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
@@ -169,21 +169,22 @@ namespace TrafficManager.Custom.AI {
 			}
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startSqrDistA;
+			float startSqrDistB;
 			PathUnit.Position endPosA;
 			PathUnit.Position endPosB;
-			float num3;
-			float num4;
-			if (PathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) && PathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out num3, out num4)) {
-				if (!startBothWays || num2 > num * 1.2f) {
+			float endSqrDistA;
+			float endSqrDistB;
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+				if (!startBothWays || startSqrDistB > startSqrDistA * 1.2f) {
 					startPosB = default(PathUnit.Position);
 				}
-				if (!endBothWays || num4 > num3 * 1.2f) {
+				if (!endBothWays || endSqrDistB > endSqrDistA * 1.2f) {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath(ExtVehicleType.Tram, vehicleID, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+				if (CustomPathManager._instance.CreatePath(ExtVehicleType.Tram, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

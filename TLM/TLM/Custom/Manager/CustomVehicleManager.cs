@@ -26,6 +26,7 @@ namespace TrafficManager.Custom.Manager {
 				vehicleId = vehId;
 				Vehicle.Frame frame = new Vehicle.Frame(position, Quaternion.identity);
 				this.m_vehicles.m_buffer[(int)vehicleId].m_flags = Vehicle.Flags.Created;
+				this.m_vehicles.m_buffer[(int)vehicleId].m_flags2 = (Vehicle.Flags2)0;
 				if (transferToSource) {
 					this.m_vehicles.m_buffer[vehicleId].m_flags = (this.m_vehicles.m_buffer[vehicleId].m_flags | Vehicle.Flags.TransferToSource);
 				}
@@ -63,6 +64,7 @@ namespace TrafficManager.Custom.Manager {
 				this.m_vehicles.m_buffer[(int)vehicleId].m_pathPositionIndex = 0;
 				this.m_vehicles.m_buffer[(int)vehicleId].m_lastPathOffset = 0;
 				this.m_vehicles.m_buffer[(int)vehicleId].m_gateIndex = 0;
+				this.m_vehicles.m_buffer[(int)vehicleId].m_waterSource = 0;
 				info.m_vehicleAI.CreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);

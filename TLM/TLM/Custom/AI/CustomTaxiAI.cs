@@ -14,21 +14,21 @@ namespace TrafficManager.Custom.AI {
 	class CustomTaxiAI : CarAI {
 		public static ushort GetPassengerInstance(ushort vehicleID, ref Vehicle data) {
 			CitizenManager instance = Singleton<CitizenManager>.instance;
-			uint num = data.m_citizenUnits;
-			int num2 = 0;
-			while (num != 0u) {
-				uint nextUnit = instance.m_units.m_buffer[(int)((UIntPtr)num)].m_nextUnit;
+			uint curUnitId = data.m_citizenUnits;
+			int numIterations = 0;
+			while (curUnitId != 0u) {
+				uint nextUnit = instance.m_units.m_buffer[curUnitId].m_nextUnit;
 				for (int i = 0; i < 5; i++) {
-					uint citizen = instance.m_units.m_buffer[(int)((UIntPtr)num)].GetCitizen(i);
-					if (citizen != 0u) {
-						ushort instance2 = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_instance;
-						if (instance2 != 0) {
-							return instance2;
+					uint citizenId = instance.m_units.m_buffer[curUnitId].GetCitizen(i);
+					if (citizenId != 0u) {
+						ushort citizenInstanceId = instance.m_citizens.m_buffer[citizenId].m_instance;
+						if (citizenInstanceId != 0) {
+							return citizenInstanceId;
 						}
 					}
 				}
-				num = nextUnit;
-				if (++num2 > 524288) {
+				curUnitId = nextUnit;
+				if (++numIterations > 524288) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -59,15 +59,15 @@ namespace TrafficManager.Custom.AI {
 			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
-			float num;
-			float num2;
+			float startSqrDistA;
+			float startSqrDistB;
 			PathUnit.Position endPosA;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out num, out num2) &&
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
 				info2.m_citizenAI.FindPathPosition(passengerInstance, ref instance.m_instances.m_buffer[(int)passengerInstance], endPos, laneType, vehicleType, undergroundTarget, out endPosA)) {
 				if ((instance.m_instances.m_buffer[(int)passengerInstance].m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 					laneType |= NetInfo.LaneType.PublicTransport;
 				}
-				if (!startBothWays || num < 10f) {
+				if (!startBothWays || startSqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
 				PathUnit.Position endPosB = default(PathUnit.Position);
@@ -77,7 +77,7 @@ namespace TrafficManager.Custom.AI {
 #if PATHRECALC
 					recalcRequested,
 #endif
-					ExtVehicleType.Taxi, vehicleID, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
+					ExtVehicleType.Taxi, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneType, vehicleType, 20000f)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance()._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

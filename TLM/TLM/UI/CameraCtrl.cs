@@ -34,5 +34,12 @@ namespace TrafficManager.UI {
 
 			ToolsModifierControl.cameraController.SetTarget(id, pos, true);
 		}
+
+		internal static void GoToCitizenInstance(ushort citizenInstanceId, Vector3 pos) {
+			InstanceID id = default(InstanceID);
+			id.CitizenInstance = citizenInstanceId;
+
+			ToolsModifierControl.cameraController.SetTarget(id, pos, true);
+		}
 	}
 }

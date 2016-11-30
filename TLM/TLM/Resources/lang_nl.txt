@@ -114,17 +114,47 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Het geselectee
 Advanced_AI_cannot_be_activated Verbeterde voertuig-KI kan niet worden geactiveerd
 The_Advanced_Vehicle_AI_cannot_be_activated De verbeterde voertuig-KI kan niet geactiveerd worden, omdat je reeds aan andere mod gebruikt, die het gedrag van voertuigen verandert (bijv. Improved AI of Traffic++).
 Enable_dynamic_path_calculation Activeer dynamische routeberekening
-Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
-Lane_connector Lane connector
-Connected_lanes Connected lanes
-Use_alternative_view_mode Use alternative view mode
-Road_type Road type
-Default_speed_limit Default speed limit
-Unit_system Unit system
-Metric Metric
-Imperial Imperial
-Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available)
-Activated_features Activated features
-Junction_restrictions Junction restrictions
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Changes made with this tool will take full effect after some minutes
+Lane_Arrow_Changer_Disabled_Connection Voor deze rijstrook kan de rijstrookpijl niet aangepast worden, omdat je handmatig rijstrookverbindingen hebt gemaakt.
+Lane_connector Rijstrookverbinder
+Connected_lanes Verbonden rijstroken
+Use_alternative_view_mode Gebruik alternatief aanzicht
+Road_type Wegsoort
+Default_speed_limit Standaard snelheidslimiet
+Unit_system Eenhedenstelsel
+Metric Metrisch
+Imperial Emperisch
+Use_more_CPU_cores_for_route_calculation_if_available Gebruik meer processorkernen voor routeberekening indien beschikbaar
+Activated_features Geactiveerde functies
+Junction_restrictions Splitsingsbeperkingen
+Prohibit_spawning_of_pocket_cars Verbied opduiken van broekzakautomobielen
+Reset_stuck_cims_and_vehicles Reset vastgelopen inwoners en voertuigen
+Default_speed_limits Standaard snelheidslimieten
+Looking_for_a_parking_spot Op zoek naar een parkeerplaats
+Driving_to_a_parking_spot Rijdt naar een parkeerplaats
+Driving_to_another_parking_spot Rijdt naar een andere parkeerplaats
+Entering_vehicle Stapt in voertuig
+Walking_to_car Loopt naar auto
+Using_public_transport Gebruikt openbaar vervoer
+Walking Wandelt
+Thinking_of_a_good_parking_spot Na aan het denken over een goede parkeerplaats
+Switch_view Aanzicht wisselen
+Outgoing_demand Uitgaande vraag
+Incoming_demand Inkomende vraag
+Advanced_Vehicle_AI Geavanceerde voertuig-KI
+Heavy_trucks_prefer_outer_lanes_on_highways Zware vrachtverkeer verkiest buitenste rijstroken op snelwegen
+Parking_AI Parkeer-KI
+Enable_more_realistic_parking Schakel realistischer parkeren in
+Reset_custom_speed_limits Reset aangepaste snelheidslimieten
+Reload_global_configuration Herlaad algemene configuratie
+Reset_global_configuration Reset algemene configuratie
+General Algemeen
+Gameplay Spelverloop
+Overlays Transparanten
+Realistic_speeds Realistische snelheden
+Evacuation_busses_may_ignore_traffic_rules Evacuatiebussen mogen verkeersregels overtreden
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuatiebussen mogen enkel gebruikt worden om schuilkelders te bereiken
+Vehicle_behavior Vortuiggedrag
+Policies_&_Restrictions Beleidsregels & beperkingen
+At_junctions Bij splitsingen
+In_case_of_emergency In geval van nood

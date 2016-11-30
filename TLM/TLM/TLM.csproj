@@ -38,6 +38,10 @@
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
       <Private>False</Private>
@@ -51,30 +55,48 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeProfiler.cs" />
+    <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomBusAI.cs" />
     <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
+    <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
+    <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
     <Compile Include="Custom\AI\CustomTaxiAI.cs" />
+    <Compile Include="Custom\AI\CustomTouristAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
+    <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Manager\ExtBuildingManager.cs" />
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\UtilityManager.cs" />
+    <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
+    <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
+    <Compile Include="Traffic\ExtBuilding.cs" />
+    <Compile Include="Traffic\ExtCitizenInstance.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Manager\LaneConnectionManager.cs" />
     <Compile Include="Geometry\NodeGeometry.cs" />
@@ -93,6 +115,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
@@ -110,11 +133,16 @@
     <Compile Include="Traffic\VehicleState.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="UI\TransportDemandViewMode.cs" />
+    <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\TextureUtil.cs" />
+    <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
@@ -247,6 +275,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\110.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MenuButton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
