@@ -81,9 +81,14 @@ namespace TrafficManager.UI {
 
         private void ParentVisibilityChanged(UIComponent component, bool value) {
             Log._Debug($"Public transport info view panel changed visibility: {value}");
-            if (value && Options.prohibitPocketCars)
-                this.Show();
-            else
+            if (value && Options.prohibitPocketCars) {
+				TrafficManagerTool.CurrentTransportDemandViewMode = TransportDemandViewMode.Outgoing;
+				if (viewModeLabel != null)
+					viewModeLabel.text = Translation.GetString("Outgoing_demand");
+				if (switchViewModeButton != null)
+					switchViewModeButton.text = Translation.GetString("Switch_view");
+				this.Show();
+			} else
                 this.Hide();
         }
     }

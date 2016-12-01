@@ -57,10 +57,13 @@ namespace TrafficManager.UI {
 		protected override void OnPositionChanged() {
 			GlobalConfig config = GlobalConfig.Instance;
 
+			bool saveConfig = (config.MainMenuButtonX != (int)absolutePosition.x || config.MainMenuButtonY != (int)absolutePosition.y);
+
 			config.MainMenuButtonX = (int)absolutePosition.x;
 			config.MainMenuButtonY = (int)absolutePosition.y;
 
-			GlobalConfig.WriteConfig();
+			if (saveConfig)
+				GlobalConfig.WriteConfig();
 		}
 
 		internal void UpdateSprites() {

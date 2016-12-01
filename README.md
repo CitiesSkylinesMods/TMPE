@@ -4,6 +4,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.1, 12/1/2016
+- Updated translations: Polish, Chinese (simplified)
+- Bugfix: Mod crashed when loading a second savegame 
+
 1.8.0, 11/29/2016
 - Updated to game version 1.6.0-f4
 - New feature: Default speed limits

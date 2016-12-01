@@ -124,36 +124,36 @@ Unit_system System jednostek
 Metric Metryczne
 Imperial Imperialne
 Use_more_CPU_cores_for_route_calculation_if_available Użyj więcej rdzeni procesora do obliczania tras (jeśli dostępne)
-Activated_features Activated features
-Junction_restrictions Junction restrictions
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
-Default_speed_limits Default speed limits
-Looking_for_a_parking_spot Looking for a parking spot
-Driving_to_a_parking_spot Driving to a parking spot
-Driving_to_another_parking_spot Driving to another parking spot
-Entering_vehicle Entering vehicle
-Walking_to_car Walking to car
-Using_public_transport Using public transport
-Walking Walking
-Thinking_of_a_good_parking_spot Thinking of a good parking spot
-Switch_view Switch view
-Outgoing_demand Outgoing demand
-Incoming_demand Incoming demand
-Advanced_Vehicle_AI Advanced Vehicle AI
-Heavy_trucks_prefer_outer_lanes_on_highways Heavy vehicles prefer outer lanes on highways
-Parking_AI Parking AI
-Enable_more_realistic_parking Enable more realistic parking
-Reset_custom_speed_limits Reset custom speed limits
-Reload_global_configuration Reload global configuration
-Reset_global_configuration Reset global configuration
-General General
-Gameplay Gameplay
-Overlays Overlays
-Realistic_speeds Realistic speeds
-Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
-Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
-Vehicle_behavior Vehicle behavior
-Policies_&_Restrictions Policies & Restrictions
-At_junctions At junctions
-In_case_of_emergency In case of emergency
+Activated_features Aktywowane funkcje
+Junction_restrictions Ograniczenia na skrzyżowaniach
+Prohibit_spawning_of_pocket_cars Zabroń używania "kieszonkowych samochodów"
+Reset_stuck_cims_and_vehicles Zresetuj zablokowane samochody i ludzi
+Default_speed_limits Standardowe limity prędkości
+Looking_for_a_parking_spot Poszukuje miejsca parkingowego
+Driving_to_a_parking_spot Jedzie do miejsca parkingowego
+Driving_to_another_parking_spot Jedzie do innego miejsca parkingowego
+Entering_vehicle Wsiada do samochodu
+Walking_to_car Idzie do samochodu
+Using_public_transport Używa transportu publicznego
+Walking Idzie
+Thinking_of_a_good_parking_spot Myśli o odpowiednim miejscem parkingowym
+Switch_view Zmień widok
+Outgoing_demand Zapotrzebowanie - wychodzące
+Incoming_demand Zapotrzebowanie - przychodzące
+Advanced_Vehicle_AI Zaawansowana SI pojazdów
+Heavy_trucks_prefer_outer_lanes_on_highways Samochody ciężarowe preferują zewnętrzne pasy na autostradach
+Parking_AI SI parkowania
+Enable_more_realistic_parking Aktywuj bardziej realistyczny system parkowania samochodów
+Reset_custom_speed_limits Zresetuj limity prędkości użytkownika
+Reload_global_configuration Przeładuj ustawienia globalne
+Reset_global_configuration Zresetuj ustawienia globalne
+General Ogólne
+Gameplay Rozgrywka
+Overlays Nakładki
+Realistic_speeds Realistyczne prędkości
+Evacuation_busses_may_ignore_traffic_rules Autobusy ewakuacyjne mogą ignorować przepisy
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Autobusy ewakuacyjne mogą przewozić tylko do schroniena
+Vehicle_behavior Zachowanie pojazdu
+Policies_&_Restrictions Zasady i Ograniczenia
+At_junctions Na strzyżowaniach
+In_case_of_emergency W sytuacjach nadzwyczajnych

@@ -29,8 +29,11 @@ namespace TrafficManager.State {
 
 		public static GlobalConfig Instance { get; private set; } = null;
 
+		static GlobalConfig() {
+			Reload();
+		}
+
 		internal static void OnLevelUnloading() {
-			Instance = null;
 #if RUSHHOUR
 			rushHourConfigModifiedTime = null;
 			lastRushHourConfigCheck = 0;
@@ -52,10 +55,6 @@ namespace TrafficManager.State {
 		//}
 
 		private static DateTime ModifiedTime = DateTime.MinValue;
-
-		static GlobalConfig() {
-			Reload();
-		}
 
 		/// <summary>
 		/// Configuration version

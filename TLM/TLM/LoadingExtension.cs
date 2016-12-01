@@ -1836,16 +1836,18 @@ namespace TrafficManager {
 		}
 
 		public override void OnLevelLoaded(LoadMode mode) {
-            Log.Info("OnLevelLoaded");
+			SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
+			Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}");
             base.OnLevelLoaded(mode);
 
             Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
 			Instance = this;
 
 			gameLoaded = false;
-            switch (mode) {
-                case LoadMode.NewGame:
-                case LoadMode.LoadGame:
+            switch (updateMode) {
+				case SimulationManager.UpdateMode.NewGameFromMap:
+				case SimulationManager.UpdateMode.NewGameFromScenario:
+				case SimulationManager.UpdateMode.LoadGame:
 					if (BuildConfig.applicationVersion != BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)) {
 						string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
 						string[] versionElms = majorVersionElms[0].Split('.');
