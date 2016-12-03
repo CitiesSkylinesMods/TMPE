@@ -48,7 +48,7 @@ namespace TrafficManager.Custom.AI {
 						return;
 					} else if (extInstance.ReturnPathState == ExtPathState.Failed) {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[1])
+						if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"CustomPassengerCarAI.CustomSimulationStep: Return path {extInstance.ReturnPathId} FAILED. Forcing path-finding to fail.");
 #endif
 						pathFindSucceeded = false;
@@ -59,7 +59,7 @@ namespace TrafficManager.Custom.AI {
 						extInstance.ReleaseReturnPath();
 
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[2] && (pathFindFailed || pathFindSucceeded)) {
+					if (GlobalConfig.Instance.DebugSwitches[4] && (pathFindFailed || pathFindSucceeded)) {
 						Log._Debug($"CustomHumanAI::CustomSimulationStep Citizen instance {instanceID}, citizen {instanceData.m_citizen} is called {Singleton<CitizenManager>.instance.GetCitizenName(instanceData.m_citizen)} and is {Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].Age} years old. PathMode={extInstance.PathMode} ReturnPathState={extInstance.ReturnPathState}");
 					}
 #endif
@@ -68,7 +68,7 @@ namespace TrafficManager.Custom.AI {
 						bool handleSoftPathFindFailure;
 						if (!CustomHumanAI.OnPathFindSuccess(instanceID, ref instanceData, out handleSoftPathFindFailure, out handleSuccess)) {
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[1]) {
+							if (GlobalConfig.Instance.DebugSwitches[2]) {
 								ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 								Log._Debug($"CustomHumanAI.CustomSimulationStep: " + (handleSoftPathFindFailure ? "Soft" : "Hard") + $" path-find failure: Citizen instance {instanceID} needs a new path. CurrentPathMode={extInstance.PathMode} parkedVehicleId={parkedVehicleId}");
 							}
@@ -89,7 +89,7 @@ namespace TrafficManager.Custom.AI {
 					} else if (pathFindFailed) {
 						if (CustomHumanAI.OnPathFindFailure(instanceID, ref instanceData, extInstance)) {
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[1]) {
+							if (GlobalConfig.Instance.DebugSwitches[2]) {
 								ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 								Log._Debug($"CustomHumanAI.CustomSimulationStep: Handled path-find failure: Citizen instance {instanceID} needs a new path. CurrentPathMode={extInstance.PathMode} parkedVehicleId={parkedVehicleId}");
 							}
@@ -117,7 +117,7 @@ namespace TrafficManager.Custom.AI {
 					this.PathfindSuccess(instanceID, ref instanceData);
 				} else if (pathFindFailed) { // NON-STOCK CODE
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[1])
+					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: (Vanilla) Path-finding failed for citizen instance {instanceID}. Path: {instanceData.m_path} -- calling HumanAI.PathfindFailure");
 #endif
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
@@ -188,7 +188,7 @@ namespace TrafficManager.Custom.AI {
 
 		internal static bool OnPathFindFailure(ushort instanceID, ref CitizenInstance instanceData, ExtCitizenInstance extInstance) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[1])
+			if (GlobalConfig.Instance.DebugSwitches[2])
 				Log._Debug($"CustomHumanAI.OnPathFindFailure: Path-finding failed for citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.PathMode}");
 #endif
 
@@ -218,7 +218,7 @@ namespace TrafficManager.Custom.AI {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[1])
+					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.OnPathFindFailure: Releasing parked vehicle {parkedVehicleId} for citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.PathMode}");
 #endif
 					Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedVehicleId);
@@ -240,7 +240,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[1])
+			if (GlobalConfig.Instance.DebugSwitches[2])
 				Log._Debug($"CustomHumanAI.OnPathFindFailure: Setting CurrentPathMode for citizen instance {extInstance.InstanceId} to {extInstance.PathMode}, ret={ret}");
 #endif
 
@@ -257,6 +257,10 @@ namespace TrafficManager.Custom.AI {
 
 			if (Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle == 0) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
+
+				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
+					return true;
+				}
 
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 				float sqrDistToParkedVehicle = 0f;
@@ -308,7 +312,7 @@ namespace TrafficManager.Custom.AI {
 
 							if (parkedVehicleId == 0) {
 #if DEBUG
-								if (GlobalConfig.Instance.DebugSwitches[1])
+								if (GlobalConfig.Instance.DebugSwitches[2])
 									Log._Debug($"CustomHumanAI.OnPathFindSuccess: Citizen {instanceData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId} does not have a parked vehicle! CurrentPathMode={extInstance.PathMode}");
 #endif
 
@@ -377,7 +381,7 @@ namespace TrafficManager.Custom.AI {
 											if (CustomCitizenAI.TrySpawnParkedPassengerCar(instanceData.m_citizen, homeId, currentPos, vehicleInfo, out parkPos)) {
 												parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 #if DEBUG
-												if (GlobalConfig.Instance.DebugSwitches[1] && sourceBuildingId != 0)
+												if (GlobalConfig.Instance.DebugSwitches[2] && sourceBuildingId != 0)
 													Log._Debug($"Parked vehicle for citizen {instanceData.m_citizen} (instance {instanceID}) is {parkedVehicleId} now.");
 #endif
 
@@ -386,7 +390,7 @@ namespace TrafficManager.Custom.AI {
 												}
 											} else {
 #if DEBUG
-												if (GlobalConfig.Instance.DebugSwitches[1]) {
+												if (GlobalConfig.Instance.DebugSwitches[2]) {
 													Log._Debug($">> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} (citizen instance {instanceID}). homePos: {Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position}");
 												}
 #endif
@@ -399,14 +403,14 @@ namespace TrafficManager.Custom.AI {
 										default:
 											extInstance.PathMode = ExtCitizenInstance.ExtPathMode.WalkingToTarget;
 #if DEBUG
-											if (GlobalConfig.Instance.DebugSwitches[1])
+											if (GlobalConfig.Instance.DebugSwitches[2])
 												Log._Debug($"CustomHumanAI.OnPathFindSuccess: Citizen {instanceData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId} is using an UNHANDLED {vehicleInfo.GetService()} vehicle. CurrentPathMode={extInstance.PathMode}");
 #endif
 											return true;
 									}*/
 								} else {
 #if DEBUG
-									if (GlobalConfig.Instance.DebugSwitches[1]) {
+									if (GlobalConfig.Instance.DebugSwitches[2]) {
 										Log._Debug($"CustomHumanAI.OnPathFindSuccess: Citizen {instanceData.m_citizen} (citizen instance {instanceID}), source building {sourceBuildingId}, home {homeId} does not own a vehicle.");
 									}
 #endif
@@ -422,7 +426,7 @@ namespace TrafficManager.Custom.AI {
 										handleSoftPathFindFailure = true;
 
 #if DEBUG
-										if (GlobalConfig.Instance.DebugSwitches[1])
+										if (GlobalConfig.Instance.DebugSwitches[2])
 											Log._Debug($"CustomHumanAI.OnPathFindSuccess: Parked vehicle {parkedVehicleId} of citizen instance {instanceID} is {parkedDistToTarget} units away from target building {instanceData.m_targetBuilding}. Forcing citizen to walk. PathMode={extInstance.PathMode}");
 #endif
 
@@ -444,7 +448,7 @@ namespace TrafficManager.Custom.AI {
 								return false;
 							} else {
 #if DEBUG
-								if (GlobalConfig.Instance.DebugSwitches[1])
+								if (GlobalConfig.Instance.DebugSwitches[2])
 									Log._Debug($"CustomHumanAI.OnPathFindSuccess: Citizen instance {instanceID} does not have a parked vehicle! Forcing path-finding to fail.");
 #endif
 
@@ -454,7 +458,7 @@ namespace TrafficManager.Custom.AI {
 							extInstance.PathMode = ExtCitizenInstance.ExtPathMode.DrivingToTarget;
 
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[1])
+							if (GlobalConfig.Instance.DebugSwitches[4])
 								Log._Debug($"CustomHumanAI.OnPathFindSuccess: Citizen {instanceData.m_citizen} (citizen instance {instanceID}) is located at an outside connection: {sourceBuildingId} CurrentPathMode={extInstance.PathMode}");
 #endif
 
@@ -462,7 +466,7 @@ namespace TrafficManager.Custom.AI {
 						}
 					} else {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[2])
+						if (GlobalConfig.Instance.DebugSwitches[4])
 							Log._Debug($"CustomHumanAI.OnPathFindSuccess: Path for citizen instance {instanceID} does not contain passenger car section.");
 #endif
 						if (usesPublicTransport) {
@@ -498,7 +502,7 @@ namespace TrafficManager.Custom.AI {
 						return true;
 					} else {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[1])
+						if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"CustomHumanAI.OnPathFindSuccess: Entering parked vehicle {parkedVehicleId} failed for citizen instance {instanceID}. GIVING UP. CurrentDepartureMode={extInstance.PathMode}");
 #endif
 
@@ -518,7 +522,7 @@ namespace TrafficManager.Custom.AI {
 						return true;
 					} else {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[1])
+						if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"CustomHumanAI.OnPathFindSuccess: Entering parked vehicle {parkedVehicleId} failed for citizen instance {instanceID}. GIVING UP. CurrentDepartureMode={extInstance.PathMode}");
 #endif
 
@@ -549,7 +553,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position vehLanePathPos;
 			if (! CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].GetPosition(0, out vehLanePathPos)) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[1])
+				if (GlobalConfig.Instance.DebugSwitches[2])
 					Log._Debug($"CustomHumanAI.EnterParkedCar: Could not get first car path position of citizen instance {instanceID}!");
 #endif
 
@@ -588,7 +592,7 @@ namespace TrafficManager.Custom.AI {
 
 				if (! vehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[1])
+					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.EnterParkedCar: Could not spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceID}!");
 #endif
 					return false;
@@ -617,7 +621,7 @@ namespace TrafficManager.Custom.AI {
 				instanceData.Unspawn(instanceID);
 
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[2])
+				if (GlobalConfig.Instance.DebugSwitches[4])
 					Log._Debug($"CustomHumanAI.EnterParkedCar: Citizen instance {instanceID} is now entering vehicle {vehicleId}. Set vehicle target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
 #endif
 
@@ -625,7 +629,7 @@ namespace TrafficManager.Custom.AI {
 			} else {
 				// failed to find a road position
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[1])
+				if (GlobalConfig.Instance.DebugSwitches[2])
 					Log._Debug($"CustomHumanAI.EnterParkedCar: Could not find a road position for citizen instance {instanceID} near parked vehicle {parkedVehicleId}!");
 #endif
 				return false;
@@ -637,7 +641,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (instanceData.m_citizen == 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[1])
+				if (GlobalConfig.Instance.DebugSwitches[2])
 					Log._Debug($"CustomHumanAI.NeedsCarPath: citizen instance {instanceID} is not assigned to a valid citizen!");
 #endif
 				extInstance.Reset();
@@ -650,7 +654,9 @@ namespace TrafficManager.Custom.AI {
 				return false;
 
 			bool walkingToCar = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToParkedCar || extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ReachingParkedCar;
-			bool walkingToTarget = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget || extInstance.PathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget;
+			bool walkingToTarget = extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
+				extInstance.PathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget ||
+				extInstance.PathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget;
 
 
 #if DEBUG
@@ -693,7 +699,7 @@ namespace TrafficManager.Custom.AI {
 						} else {
 							extInstance.Reset();
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[1])
+							if (GlobalConfig.Instance.DebugSwitches[2])
 								Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position but does not own a parked car. Illegal state! Setting CurrentDepartureMode={extInstance.PathMode}");
 #endif
 							return false;
@@ -725,6 +731,7 @@ namespace TrafficManager.Custom.AI {
 						ret = Translation.GetString("Walking_to_car") + ", " + ret;
 						break;
 					case ExtPathMode.PublicTransportToTarget:
+					case ExtPathMode.TaxiToTarget:
 						ret = Translation.GetString("Using_public_transport") + ", " + ret;
 						break;
 					case ExtPathMode.CalculatingWalkingPathToTarget:

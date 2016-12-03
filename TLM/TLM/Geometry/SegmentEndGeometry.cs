@@ -328,7 +328,7 @@ namespace TrafficManager.Geometry {
 			bool hasOtherSegments = false;
 			for (var s = 0; s < 8; s++) {
 				ushort otherSegmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(s);
-				if (otherSegmentId == 0 || otherSegmentId == SegmentId)
+				if (otherSegmentId == 0 || otherSegmentId == SegmentId || ! SegmentGeometry.IsValid(otherSegmentId))
 					continue;
 				/*ItemClass otherConnectionClass = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info.GetConnectionClass();
 				if (otherConnectionClass.m_service != connectionClass.m_service)

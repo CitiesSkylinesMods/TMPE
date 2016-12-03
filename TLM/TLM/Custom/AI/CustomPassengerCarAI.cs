@@ -51,7 +51,7 @@ namespace TrafficManager.Custom.AI {
 									return;
 								} else if (driverExtInstance.ReturnPathState == ExtPathState.Failed) {
 #if DEBUG
-									if (GlobalConfig.Instance.DebugSwitches[1])
+									if (GlobalConfig.Instance.DebugSwitches[2])
 										Log._Debug($"CustomPassengerCarAI.CustomSimulationStep: Return path {driverExtInstance.ReturnPathId} FAILED. Forcing path-finding to fail.");
 #endif
 									pathFindSucceeded = false;
@@ -79,7 +79,7 @@ namespace TrafficManager.Custom.AI {
 
 		protected static void OnPathFindFailure(ExtCitizenInstance extInstance, ushort vehicleId) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[1])
+			if (GlobalConfig.Instance.DebugSwitches[2])
 				Log._Debug($"CustomHumanAI.OnPathFindFailure: Path-finding failed for vehicle {vehicleId}, citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.PathMode}");
 #endif
 			extInstance.Reset();
@@ -87,7 +87,7 @@ namespace TrafficManager.Custom.AI {
 
 		internal static void OnPathFindSuccess(ushort vehicleId, ref Vehicle vehicleData, ExtCitizenInstance driverExtInstance) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[2])
+			if (GlobalConfig.Instance.DebugSwitches[4])
 				Log._Debug($"CustomPassengerCarAI.OnPathFindSuccess: Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.InstanceId}! CurrentPathMode={driverExtInstance.PathMode}");
 #endif
 			byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[vehicleData.m_path].m_laneTypes;
@@ -284,7 +284,7 @@ namespace TrafficManager.Custom.AI {
 
 								if (!driverExtInstance.CalculateReturnPath(parkPos, endPos)) {
 #if DEBUG
-									if (GlobalConfig.Instance.DebugSwitches[1])
+									if (GlobalConfig.Instance.DebugSwitches[2])
 										Log._Debug($"Could not calculate return path for citizen instance {driverExtInstance.InstanceId}, vehicle {vehicleID}. Resetting instance.");
 #endif
 									driverExtInstance.Reset();
@@ -340,7 +340,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[1])
+			if (GlobalConfig.Instance.DebugSwitches[4])
 				Log._Debug($"Requesting path-finding for passenger car {vehicleID}, startPos={startPos}, endPos={endPos}, extPathType={extPathType}");
 #endif
 
@@ -549,7 +549,7 @@ namespace TrafficManager.Custom.AI {
 
 					if (FindParkingSpaceBuilding(vehicleInfo, homeID, ignoreParked, buildingId, ref buildingMan.m_buildings.m_buffer[(int)buildingId], segmentId, refPos, ref maxDistance, out innerParkPos, out innerParkRot, out innerParkOffset)) {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[1] && homeID != 0)
+						if (GlobalConfig.Instance.DebugSwitches[4] && homeID != 0)
 							Log._Debug($"FindParkingSpaceBuilding: Found a parking space for {refPos}, homeID {homeID} @ building {buildingId}, {myParkPos}, offset {myParkOffset}!");
 #endif
 						foundBuildingId = buildingId;
@@ -572,7 +572,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (foundBuildingId == 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[1] && homeID != 0)
+				if (GlobalConfig.Instance.DebugSwitches[2] && homeID != 0)
 					Log._Debug($"FindParkingSpaceBuilding: Could not find a parking space for homeID {homeID}!");
 #endif
 
@@ -623,7 +623,7 @@ namespace TrafficManager.Custom.AI {
 					if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
 						if (FindParkingSpaceRoadSide(ignoreParked, segmentId, innerParkPos, width, length, out innerParkPos, out innerParkRot, out innerParkOffset)) {
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[1])
+							if (GlobalConfig.Instance.DebugSwitches[4])
 								Log._Debug($"FindParkingSpaceRoadSide: Found a parking space for refPos {refPos} @ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 #endif
 							foundSegmentId = segmentId;
@@ -634,7 +634,7 @@ namespace TrafficManager.Custom.AI {
 								return false;
 						}
 					} else {
-						/*if (GlobalConfig.Instance.DebugSwitches[1])
+						/*if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"FindParkingSpaceRoadSide: Could not find closest lane position for parking @ {segmentId}!");*/
 					}
 
@@ -650,7 +650,7 @@ namespace TrafficManager.Custom.AI {
 
 			if (foundSegmentId == 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[1])
+				if (GlobalConfig.Instance.DebugSwitches[2])
 					Log._Debug($"FindParkingSpaceRoadSide: Could not find a parking space for refPos {refPos}!");
 #endif
 				return 0;
@@ -826,7 +826,7 @@ namespace TrafficManager.Custom.AI {
 				if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out parkPos, out laneId, out laneIndex, out parkOffset)) {
 					if (FindParkingSpaceRoadSide(ignoreParked, segmentId, parkPos, width, length, out parkPos, out parkRot, out parkOffset)) {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[1])
+						if (GlobalConfig.Instance.DebugSwitches[4])
 							Log._Debug($"FindParkingSpaceRoadSideForVehiclePos: Found a parking space for refPos {refPos} @ {parkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 #endif
 						return true;

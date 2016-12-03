@@ -57,7 +57,7 @@ namespace TrafficManager.UI.SubTools {
 			if (defaultsWindowVisible) {
 				defaultsWindowRect = GUILayout.Window(258, defaultsWindowRect, _guiDefaultsWindow, Translation.GetString("Default_speed_limits"));
 			}
-			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
+			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition) || (defaultsWindowVisible && defaultsWindowRect.Contains(Event.current.mousePosition));
 
 			//overlayHandleHovered = false;
 			//ShowSigns(false);

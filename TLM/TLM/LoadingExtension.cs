@@ -70,6 +70,7 @@ namespace TrafficManager {
 				}
 				DetourInited = false;
 				Detours.Clear();
+				Log.Info("Reverting detours finished.");
 			}
 		}
 

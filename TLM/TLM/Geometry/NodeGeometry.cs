@@ -66,7 +66,8 @@ namespace TrafficManager.Geometry {
 		
 		internal void AddSegment(ushort segmentId, bool startNode, bool propagate) {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Add segment {segmentId}, start? {startNode} @ node {NodeId}");
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($"NodeGeometry: Add segment {segmentId}, start? {startNode} @ node {NodeId}");
 #endif
 			if (!IsValid()) {
 				//Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
@@ -90,7 +91,8 @@ namespace TrafficManager.Geometry {
 
 		internal void RemoveSegment(ushort segmentId, bool propagate) {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, propagate? {propagate}");
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, propagate? {propagate}");
 #endif
 			if (!IsValid()) {
 				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
@@ -115,7 +117,8 @@ namespace TrafficManager.Geometry {
 
 		internal void RecalculateSegments(ushort? ignoreSegmentId= null) {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Propagate @ {NodeId}. ignoreSegmentId={ignoreSegmentId}");
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($"NodeGeometry: Propagate @ {NodeId}. ignoreSegmentId={ignoreSegmentId}");
 #endif
 
 			// recalculate (other) segments
@@ -124,7 +127,8 @@ namespace TrafficManager.Geometry {
 					if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
 						continue;
 #if DEBUGGEO
-					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
+					if (GlobalConfig.Instance.DebugSwitches[5])
+						Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
 					SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(false);
 				}
@@ -133,7 +137,8 @@ namespace TrafficManager.Geometry {
 
 		internal void Recalculate() {
 #if DEBUGGEO
-			Log._Debug($"NodeGeometry: Recalculate @ {NodeId}");
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($"NodeGeometry: Recalculate @ {NodeId}");
 #endif
 
 			Cleanup();
@@ -196,7 +201,8 @@ namespace TrafficManager.Geometry {
 					if (SegmentEndGeometries[i] == null)
 						continue;
 #if DEBUGGEO
-					Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");
+					if (GlobalConfig.Instance.DebugSwitches[5])
+						Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");
 #endif
 
 					bool startNode = SegmentEndGeometries[i].StartNode;
@@ -208,7 +214,8 @@ namespace TrafficManager.Geometry {
 
 				IsSimpleJunction = incomingSegments == 1 || outgoingSegments == 1;
 #if DEBUGGEO
-				Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
 #endif
 			}
 
@@ -232,11 +239,15 @@ namespace TrafficManager.Geometry {
 
 		internal static void OnBeforeLoadData() {
 			nodeGeometries = new NodeGeometry[NetManager.MAX_NODE_COUNT];
+#if DEBUGGEO
 			Log._Debug($"Building {nodeGeometries.Length} node geometries...");
+#endif
 			for (ushort i = 0; i < nodeGeometries.Length; ++i) {
 				nodeGeometries[i] = new NodeGeometry(i);
 			}
+#if DEBUGGEO
 			Log._Debug($"Built node geometries.");
+#endif
 		}
 
 		public static NodeGeometry Get(ushort nodeId) {

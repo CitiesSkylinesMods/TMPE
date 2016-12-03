@@ -667,7 +667,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGPF
 			//bool debug = _conf.DebugSwitches[0] && item.m_position.m_segment == 1459 && nextNodeId == 19630;
 			//bool debug = _conf.DebugSwitches[0] && (item.m_position.m_segment == 3833 || item.m_position.m_segment == 9649);
-			bool debug = _conf.DebugSwitches[0] && nextNodeId == 4150;
+			bool debug = _conf.DebugSwitches[0] && nextNodeId == _conf.PathFindDebugNodeId;
 			//bool debug = _conf.DebugSwitches[0] && ((nextNodeId == 27237 && item.m_position.m_segment == 5699) || (nextNodeId == 16068 && item.m_position.m_segment == 24398) || (nextNodeId == 12825 && item.m_position.m_segment == 17008));
 #endif
 #if DEBUGPF
@@ -2162,7 +2162,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if DEBUGPF
 			if (debug)
-				logBuf.Add($"ProcessItemCosts: useAdvancedAI={useAdvancedAI}, isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={_extVehicleType}, allowAdvancedAI={allowAdvancedAI}, allowLaneChangingCosts={allowLaneChangingCosts} nonBus={((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enableVehicle={enableVehicle}");
+				logBuf.Add($"ProcessItemCosts: useAdvancedAI={useAdvancedAI}, isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={_extVehicleType}, allowAdvancedAI={allowAdvancedAI}, nonBus={((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enableVehicle={enableVehicle}");
 #endif
 
 			float prevMaxSpeed = 1f;
@@ -2422,7 +2422,7 @@ namespace TrafficManager.Custom.PathFinding {
 					// lane direction is compatible
 #if DEBUGPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: Lane direction check passed: {nextLane.m_finalDirection}");
+						logBuf.Add($"ProcessItemCosts: Lane direction check passed: {nextLaneInfo.m_finalDirection}");
 #endif
 					if ((nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes)/* || (emergencyLaneSelection && nextLane.m_vehicleType == VehicleInfo.VehicleType.None)*/) &&
 							(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)) {
@@ -2430,7 +2430,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if DEBUGPF
 						if (debug)
-							logBuf.Add($"ProcessItemCosts: vehicle type check passed: {nextLane.CheckType(allowedLaneTypes, allowedVehicleTypes)} && {(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)}");
+							logBuf.Add($"ProcessItemCosts: vehicle type check passed: {nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes)} && {(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)}");
 #endif
 
 						// NON-STOCK CODE START //
@@ -2507,7 +2507,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if DEBUGPF
 						if (debug)
-							logBuf.Add($"ProcessItemCosts: checking if methodDistance is in range: {nextLane.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < 1000f} ({nextItem.m_methodDistance})");
+							logBuf.Add($"ProcessItemCosts: checking if methodDistance is in range: {nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < 1000f} ({nextItem.m_methodDistance})");
 #endif
 
 						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < 1000f) {
@@ -2869,7 +2869,7 @@ namespace TrafficManager.Custom.PathFinding {
 				return;
 
 			foreach (String toLog in logBuf) {
-				Log._Debug($"Pathfinder ({this._pathFindIndex}) *COSTS*: " + toLog);
+				Log._Debug($"Pathfinder ({this._pathFindIndex}) for unit {Calculating} *COSTS*: " + toLog);
 			}
 			logBuf.Clear();
 		}
@@ -2879,7 +2879,7 @@ namespace TrafficManager.Custom.PathFinding {
 				return;
 
 			foreach (String toLog in logBuf) {
-				Log._Debug($"Pathfinder ({this._pathFindIndex}) for unit {unitId} *MAIN*: " + toLog);
+				Log._Debug($"Pathfinder ({this._pathFindIndex}) for unit {Calculating} *MAIN*: " + toLog);
 			}
 			logBuf.Clear();
 		}

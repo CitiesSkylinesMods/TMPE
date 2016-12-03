@@ -163,7 +163,7 @@ namespace TrafficManager.Geometry {
 			}
 
 #if DEBUG
-			//output = StartNodeId() == 12210 || EndNodeId() == 12210;
+			output = GlobalConfig.Instance.DebugSwitches[5];
 #endif
 
 			wasValid = true;

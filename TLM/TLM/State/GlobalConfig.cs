@@ -62,13 +62,17 @@ namespace TrafficManager.State {
 		public int Version = LATEST_VERSION;
 
 		public bool[] DebugSwitches = {
-			false,
-			false,
-			false,
-			false,
-			false,
-			false
+			false, // path-find debug log
+			false, 
+			false, // parking ai debug log (basic)
+			false, // emergency vehicles may not ignore traffic rules
+			false, // parking ai debug log (extended)
+			false // geometry debug log
 		};
+
+#if DEBUG
+		public ushort PathFindDebugNodeId = 0;
+#endif
 
 		/// <summary>
 		/// base lane changing cost factor on highways

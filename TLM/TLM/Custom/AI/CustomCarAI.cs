@@ -402,7 +402,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[2])
+					if (GlobalConfig.Instance.DebugSwitches[4])
 						Log._Debug($"Path-finding starts for car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
 #endif
 

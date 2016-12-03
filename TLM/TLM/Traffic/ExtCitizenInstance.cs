@@ -101,7 +101,11 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// 
 			/// </summary>
-			PublicTransportToTarget
+			PublicTransportToTarget,
+			/// <summary>
+			/// 
+			/// </summary>
+			TaxiToTarget
 		}
 
 		public enum ExtParkingSpaceLocation {
@@ -204,13 +208,13 @@ namespace TrafficManager.Traffic {
 				if ((returnPathFlags & PathUnit.FLAG_READY) != 0) {
 					ReturnPathState = ExtPathState.Ready;
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[2])
+					if (GlobalConfig.Instance.DebugSwitches[4])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} SUCCEEDED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
 #endif
 				} else if ((returnPathFlags & PathUnit.FLAG_FAILED) != 0) {
 					ReturnPathState = ExtPathState.Failed;
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[1])
+					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} FAILED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
 #endif
 				}
@@ -241,7 +245,7 @@ namespace TrafficManager.Traffic {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[1])
+			if (GlobalConfig.Instance.DebugSwitches[2])
 				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {InstanceId}.");
 #endif
 
