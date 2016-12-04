@@ -14,7 +14,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 1;
+		private static int LATEST_VERSION = 2;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -117,7 +117,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// artifical lane distance for u-turns
 		/// </summary>
-		public int UturnLaneDistance = 2;
+		public int UturnLaneDistance = 8;
 
 		/// <summary>
 		/// lane density random interval
@@ -223,6 +223,11 @@ namespace TrafficManager.State {
 		public uint PublicTransportDemandIncrement = 10u;
 
 		/// <summary>
+		/// public transport demand increment if waiting time was exceeded
+		/// </summary>
+		public uint PublicTransportDemandWaitingIncrement = 3u;
+
+		/// <summary>
 		/// public transport demand decrement on simulation step
 		/// </summary>
 		public uint PublicTransportDemandDecrement = 1u;
@@ -230,7 +235,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// public transport demand decrement on path-find success
 		/// </summary>
-		public uint PublicTransportDemandUsageDecrement = 5u;
+		public uint PublicTransportDemandUsageDecrement = 7u;
 
 		/// <summary>
 		/// parking space demand decrement on simulation step
@@ -240,7 +245,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// minimum parking space demand delta when a passenger car could be spawned
 		/// </summary>
-		public int MinSpawnedCarParkingSpaceDemandDelta = -5;
+		public int MinSpawnedCarParkingSpaceDemandDelta = -10;
 
 		/// <summary>
 		/// maximum parking space demand delta when a passenger car could be spawned
@@ -250,7 +255,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// minimum parking space demand delta when a parking spot could be found
 		/// </summary>
-		public int MinFoundParkPosParkingSpaceDemandDelta = -5;
+		public int MinFoundParkPosParkingSpaceDemandDelta = -10;
 
 		/// <summary>
 		/// maximum parking space demand delta when a parking spot could be found
@@ -260,12 +265,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// parking space demand increment when no parking spot could be found while trying to park
 		/// </summary>
-		public uint FailedParkingSpaceDemandIncrement = 10u;
+		public uint FailedParkingSpaceDemandIncrement = 5u;
 
 		/// <summary>
 		/// parking space demand increment when no parking spot could be found while trying to spawn a parked vehicle
 		/// </summary>
-		public uint FailedSpawnParkingSpaceDemandIncrement = 20u;
+		public uint FailedSpawnParkingSpaceDemandIncrement = 10u;
 
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
@@ -282,8 +287,12 @@ namespace TrafficManager.State {
 			ModifiedTime = WriteConfig(Instance);
 		}
 
-		private static GlobalConfig WriteDefaultConfig(out DateTime modifiedTime) {
+		private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, out DateTime modifiedTime) {
 			GlobalConfig conf = new GlobalConfig();
+			if (oldConfig != null) {
+				conf.MainMenuButtonX = oldConfig.MainMenuButtonX;
+				conf.MainMenuButtonY = oldConfig.MainMenuButtonY;
+			}
 			modifiedTime = WriteConfig(conf);
 			return conf;
 		}
@@ -320,7 +329,7 @@ namespace TrafficManager.State {
 				}
 			} catch (Exception) {
 				Log.Warning("Could not load global config. Generating default config.");
-				return WriteDefaultConfig(out modifiedTime);
+				return WriteDefaultConfig(null, out modifiedTime);
 			}
 		}
 
@@ -340,17 +349,17 @@ namespace TrafficManager.State {
 				} catch (Exception e) {
 					Log.Warning($"Error occurred while saving backup config to '{filename}': {e.ToString()}");
 				}
-				Reset();
+				Reset(conf);
 			} else {
 				Instance = conf;
 				ModifiedTime = WriteConfig(Instance);
 			}
 		}
 
-		public static void Reset() {
+		public static void Reset(GlobalConfig oldConfig) {
 			Log.Info($"Resetting global config.");
 			DateTime modifiedTime;
-			Instance = WriteDefaultConfig(out modifiedTime);
+			Instance = WriteDefaultConfig(oldConfig, out modifiedTime);
 			ModifiedTime = modifiedTime;
 		}
 

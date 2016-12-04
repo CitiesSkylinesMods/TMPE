@@ -702,7 +702,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-			GlobalConfig.Reset();
+			GlobalConfig.Reset(null);
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {

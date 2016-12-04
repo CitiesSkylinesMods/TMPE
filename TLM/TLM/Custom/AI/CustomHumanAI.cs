@@ -66,7 +66,7 @@ namespace TrafficManager.Custom.AI {
 
 					if (pathFindSucceeded) {
 						bool handleSoftPathFindFailure;
-						if (!CustomHumanAI.OnPathFindSuccess(instanceID, ref instanceData, out handleSoftPathFindFailure, out handleSuccess)) {
+						if (!CustomHumanAI.OnPathFindSuccess(instanceID, ref instanceData, ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], out handleSoftPathFindFailure, out handleSuccess)) {
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2]) {
 								ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
@@ -201,6 +201,7 @@ namespace TrafficManager.Custom.AI {
 					case ExtPathMode.None:
 					case ExtPathMode.CalculatingWalkingPathToParkedCar:
 					case ExtPathMode.CalculatingWalkingPathToTarget:
+					case ExtPathMode.TaxiToTarget:
 						if ((instanceData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 							if (instanceData.m_targetBuilding != 0) {
 								ExtBuildingManager.Instance.GetExtBuilding(instanceData.m_targetBuilding).AddPublicTransportDemand((uint)GlobalConfig.Instance.PublicTransportDemandIncrement, false);
@@ -247,32 +248,46 @@ namespace TrafficManager.Custom.AI {
 			return ret;
 		}
 
-		internal static bool OnPathFindSuccess(ushort instanceID, ref CitizenInstance instanceData, out bool handleSoftPathFindFailure, out bool handleSuccess) {
+		internal static bool OnPathFindSuccess(ushort instanceID, ref CitizenInstance instanceData, ref Citizen citizenData, out bool handleSoftPathFindFailure, out bool handleSuccess) {
 			handleSoftPathFindFailure = false;
 			handleSuccess = true;
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
-				Log._Debug($"CustomHumanAI.OnPathFindSuccess: Path-finding succeeded for citizen instance {instanceID}. Path: {instanceData.m_path} vehicle={Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle}");
+				Log._Debug($"CustomHumanAI.OnPathFindSuccess: Path-finding succeeded for citizen instance {instanceID}. Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
 #endif
 
-			if (Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle == 0) {
+			if (citizenData.m_vehicle == 0) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 
 				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
+					// cim uses taxi
+					if (instanceData.m_sourceBuilding != 0)
+						ExtBuildingManager.Instance.GetExtBuilding(instanceData.m_sourceBuilding).RemovePublicTransportDemand((uint)GlobalConfig.Instance.PublicTransportDemandUsageDecrement, true);
+					if (instanceData.m_targetBuilding != 0)
+						ExtBuildingManager.Instance.GetExtBuilding(instanceData.m_targetBuilding).RemovePublicTransportDemand((uint)GlobalConfig.Instance.PublicTransportDemandUsageDecrement, false);
+
 					return true;
 				}
 
-				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
+				ushort parkedVehicleId = citizenData.m_parkedVehicle;
 				float sqrDistToParkedVehicle = 0f;
 				if (parkedVehicleId != 0) {
 					sqrDistToParkedVehicle = (instanceData.GetLastFramePosition() - Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position).sqrMagnitude;
 				}
 
 				byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].m_laneTypes;
+				byte vehicleTypes = CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].m_vehicleTypes;
 				bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
-				bool usesCar = (laneTypes & (byte)(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0;
+				bool usesCar = (laneTypes & (byte)(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && (vehicleTypes & (byte)(VehicleInfo.VehicleType.Car)) != 0;
 
 				if (usesPublicTransport && usesCar && extInstance.PathMode == ExtPathMode.CalculatingCarPathToKnownParkPos) {
+					/*
+					 * when using public transport together with a car (assuming a "source -> walk -> drive -> walk -> use public transport -> walk -> target" path)
+					 * discard parking space information since the cim has to park near the public transport stop
+					 * (instead of parking in the vicinity of the target building).
+					 * 
+					 * TODO we could check if the path looks like "source -> walk -> use public transport -> walk -> drive -> [walk ->] target" (in this case parking space information would still be valid)
+					*/ 
 					extInstance.PathMode = ExtPathMode.CalculatingCarPathToTarget;
 					extInstance.ParkingSpaceLocation = ExtParkingSpaceLocation.None;
 					extInstance.ParkingSpaceLocationId = 0;
@@ -298,6 +313,8 @@ namespace TrafficManager.Custom.AI {
 						ushort sourceBuildingId = instanceData.m_sourceBuilding;
 						if (sourceBuildingId != 0) {
 							isAtOutsideConnection = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;// Info.m_buildingAI is OutsideConnectionAI;
+							if (isAtOutsideConnection && (instanceData.GetLastFramePosition() - Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_position).magnitude > GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance)
+								isAtOutsideConnection = false;
 							//isAtOutsideConnection = Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].Info.m_buildingAI is OutsideConnectionAI;
 						}
 

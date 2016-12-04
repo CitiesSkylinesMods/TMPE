@@ -132,7 +132,13 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
+			bool forceTaxi = false;
 			if (Options.prohibitPocketCars) {
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
+				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
+					forceTaxi = true;
+				}
+
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
 #if DEBUG
@@ -149,7 +155,11 @@ namespace TrafficManager.Custom.AI {
 			int carProb;
 			int bikeProb;
 			int taxiProb;
-			if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
+			if (forceTaxi) {
+				carProb = 0;
+				bikeProb = 0;
+				taxiProb = 100;
+			} else if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
 				carProb = 100;
 				bikeProb = 0;
 				taxiProb = 0;

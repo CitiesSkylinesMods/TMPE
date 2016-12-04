@@ -4,6 +4,12 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.3, 12/4/2016
+- Bugfix: Despite having the Parking AI activated, cims sometimes still spawn pocket cars.
+- Bugfix: When the Parking AI is active, bicycle lanes are not used (thanks to @informmanuel for reporting this issue)
+- Tweaked u-turn behavior
+- Improved info views 
+
 1.8.2, 12/3/2016
 - Bugfix: Taxis were not used (thanks to @[Delta ²k5] for reporting)
 - Bugfix: Minor UI fix in Default speed limits dialog
