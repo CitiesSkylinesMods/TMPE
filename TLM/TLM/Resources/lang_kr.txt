@@ -1,0 +1,160 @@
+Switch_traffic_lights 신호등 추가/제거
+Add_priority_signs 교통 표지판 추가
+Manual_traffic_lights 신호등 직접 통제
+Timed_traffic_lights 신호등 시간표 설정
+Change_lane_arrows 도로 화살표 변경
+Clear_Traffic 모든 교통차량 초기화
+Disable_despawning 차 사라짐 비활성화
+Enable_despawning 차 사라짐 활성화
+NODE_IS_LIGHT 교차로에 신호등을 생성합니다.\n'신호등 추가/제거'를 통해 이 도로 교차로에 신호등을 추가하거나 제거 할 수 있습니다.
+NODE_IS_TIMED_LIGHT 이미 신호등 시간표가 설정되어 있습니다.\n'신호등 시간표 설정'에서 '제거'를 통해 삭제해야지만 가능합니다.
+Select_nodes_windowTitle 선택된 교차로 목록
+Select_nodes 교차로를 선택하세요
+Node 도로
+Deselect_all_nodes 모든 교차로 선택 취소
+Setup_timed_traffic_light 신호등 시간 설정
+State 상태
+Skip 스킵
+up 위로
+down 아래로
+View 보기
+Edit 수정
+Delete 삭제
+Timed_traffic_lights_manager 신호등 시간표 관리자
+Add_step 단계 추가
+Remove_timed_traffic_light 설정된 신호등 시간표 제거
+Min._Time: 최소 시간 :
+Max._Time: 최대 시간 :
+Save 저장
+Add 추가
+Sensitivity 신호등 주기 범위
+Very_Low 매우 낮음
+Low 낮음
+Medium 중간
+High 높음
+Very_high 매우 높음
+Extreme_long_green/red_phases 극도로 긴 신호등 주기 변화
+Very_long_green/red_phases 매우 긴 신호등 주기 변화
+Long_green/red_phases 긴 신호등 주기 변화
+Moderate_green/red_phases 평범한 신호등주기 변화
+Short_green/red_phases 짧은 신호등주기 변화
+Very_short_green/red_phases 매우 짧은 신호등주기 변화
+Extreme_short_green/red_phases 극도로 짧은 신호등주기 변화
+Hide_counters 카운터 숨기기
+Show_counters 카운터 보이기
+Start 시작
+Stop 중지
+Enable_test_mode_(stay_in_current_step) 테스트 모드 활성화 (현 상태를 유지한 채 진행)
+avg._flow 평균 흐름
+avg._wait 평균 대기
+min/max 최소/최대
+Lane 차선
+Set_Speed 설정된 속도 {0}
+Max_speed 최고 속도
+Segment 세그먼트(구간)
+incoming 들어오는
+Enable_Advanced_Vehicle_AI 발전된 차량 AI 활성화
+Vehicles_may_enter_blocked_junctions 차량이 진입 금지도로에 들어갈 수 있습니다.
+All_vehicles_may_ignore_lane_arrows 모든 차량이 도로 화살표를 무시 할 수 있습니다.
+Busses_may_ignore_lane_arrows 버스가 도로 화살표를 무시 할 수 있습니다.
+Reckless_driving 난폭 운전 (베타 기능)
+TMPE_Title 트래픽 매니저 : 대통령 에디션
+Settings_are_defined_for_each_savegame_separately 설정은 각 저장된 게임마다 별개로 작동합니다.
+Simulation_accuracy 시뮬레이션 정확도 (효과가 올라갈수록 성능은 감소합니다)
+Enable_highway_specific_lane_merging/splitting_rules 고속도로 특정도로 병합/분할 기능 활성화
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 운전자가 차선을 변경합니다 (발전된 차량 AI를 사용 중일 때만 적용됩니다)
+Maintenance 유지보수 (추가정보)
+Very_often 매우 자주
+Often 자주
+Sometimes 가끔
+Rarely 드물게
+Very_rarely 매우 드물게
+Only_if_necessary 필요한 경우에만
+Nodes_and_segments 도로와 세그먼트(구간)
+Lanes 차선
+Path_Of_Evil_(10_%) 악마의 도로 (10 %)
+Rush_Hour_(5_%) 출퇴근정도의 혼잡  (5 %)
+Minor_Complaints_(2_%) 사소한 불평들 (2 %)
+Holy_City_(0_%) 평온한 도시 (0 %)
+Forget_toggled_traffic_lights 선택된 신호등 잊기
+Road_is_already_in_a_group! 도로에 이미 완성된 그룹이 있습니다!
+All_selected_roads_must_be_of_the_same_type! 같은 유형이 도로에 선택되어 있습니다!
+Create_group 그룹 생성
+Delete_group 그룹 제거
+Add_zoning 지역설정 추가
+Remove_zoning 지역설정 제거
+Lane_Arrow_Changer_Disabled_Highway 고속도로 시스템 규칙으로 인해 이 도로 화살표는 변경 할 수 없습니다.
+Add_junction_to_timed_light 교차로 신호등 추가
+Remove_junction_from_timed_light 교차로 신호등 제거
+Select_junction 교차로 선택
+Cancel 취소
+Speed_limits 속도 제한
+Persistently_visible_overlays 화면에 출력할 코드 선택
+Priority_signs 교통 표지판
+Vehicles_may_do_u-turns_at_junctions 교차로에서 차량이 유턴 할 수 있습니다.
+Vehicles_going_straight_may_change_lanes_at_junctions 교차로에서 차량이 차선을 변경 할 수 있습니다.
+Allow_u-turns 유턴 허가
+Allow_lane_changing_for_vehicles_going_straight 직진하는 차량의 차선 변경을 허가
+Allow_vehicles_to_enter_a_blocked_junction 차량 출입금지 도로에 차량 출입 허가
+Road_condition_has_a_bigger_impact_on_vehicle_speed 도로상태가 차량속도에 크게 영향을 미칩니다
+Vehicle_restrictions 차량 제한
+Copy 복사
+Paste 붙이기
+Invert 반전
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 두 교차로 사이 도로에 차량 제한 적용
+Allow_all_vehicles 모든 차량 허가
+Ban_all_vehicles 모든 차량 금지
+Set_all_traffic_lights_to_red 모든 신호등을 빨간불로 설정
+Rotate_left 좌회전
+Rotate_right 우회전
+Name 이름
+Apply 적용
+Select_a_timed_traffic_light_program 선택된 신호등 프로그램
+The_chosen_traffic_light_program_is_incompatible_to_this_junction 선택한 교통 신호규칙이 이 교차로와 맞지 않습니다
+Advanced_AI_cannot_be_activated 발전된 AI 활성화 불가
+The_Advanced_Vehicle_AI_cannot_be_activated 이미 다른 모드로 차량 AI 향상을 사용 중이므로 발전된 차량 AI를 사용 할 수 없습니다.(예 : 향상된 AI, 트래픽 C++)
+Enable_dynamic_path_calculation 동적인 경로 계산 활성화
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes 이 기능을 완벽히 적용하려면 몇 분정도 시간이 필요합니다
+Lane_Arrow_Changer_Disabled_Connection 차선 연결로 이미 수정된 교차로이므로 차선변경을 할 수 없습니다.
+Lane_connector 차선 연결
+Connected_lanes 연결된 차선
+Use_alternative_view_mode 대체보기 모드 사용
+Road_type 도로 유형
+Default_speed_limit 기본 속도 제한
+Unit_system 유닛 시스템
+Metric 미터법
+Imperial 마일법
+Use_more_CPU_cores_for_route_calculation_if_available 경로 계산을 위한 더 많은 CPU코어 사용(가능할 경우)
+Activated_features 기능 활성화
+Junction_restrictions 교차로 규칙
+Prohibit_spawning_of_pocket_cars 시민들의 포켓차량 소환 금지
+Reset_stuck_cims_and_vehicles 갇혀있는 시민과 차량 초기화
+Default_speed_limits 기본 속도 제한
+Looking_for_a_parking_spot 주차공간 찾는 중
+Driving_to_a_parking_spot 해당 주차공간으로 운전 중
+Driving_to_another_parking_spot 다른 주차공간으로 운전 중
+Entering_vehicle 차량 탑승 중
+Walking_to_car 차 있던 곳으로 가는 중
+Using_public_transport 대중교통 이용 중
+Walking 걷는 중
+Thinking_of_a_good_parking_spot 주차하기에 좋은 장소를 생각 중
+Switch_view 보기 전환
+Outgoing_demand 나가는 수요
+Incoming_demand 들어오는 수요
+Advanced_Vehicle_AI 발전된 차량 AI
+Heavy_trucks_prefer_outer_lanes_on_highways 무거운(화물)차량은 고속도로 바깥차선을 선호
+Parking_AI 주차 AI
+Enable_more_realistic_parking 좀 더 현실적인 주차 활성화
+Reset_custom_speed_limits 커스텀 속도 초기화
+Reload_global_configuration 글로벌(global) 설정 불러오기
+Reset_global_configuration 글로벌(global) 설정 초기화
+General 기본
+Gameplay 게임플레이
+Overlays 화면표시
+Realistic_speeds 현실적인 속도
+Evacuation_busses_may_ignore_traffic_rules 대피 버스는 교통규칙을 무시합니다
+Evacuation_busses_may_only_be_used_to_reach_a_shelter 대피 버스는 대피소 도착을 위한 용도로만 사용할 수 있습니다
+Vehicle_behavior 차량 제한
+Policies_&_Restrictions 정책 및 제한
+At_junctions 교차로 설정
+In_case_of_emergency 긴급 상황 설정
