@@ -8,7 +8,7 @@ using UnityEngine;
 namespace TrafficManager.UI {
 #if !TAM
 	public class UIBase : UICustomControl {
-		
+
 		private UIMainMenuButton button;
 		private bool _uiShown = false;
 
@@ -23,6 +23,10 @@ namespace TrafficManager.UI {
 			button = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
 		}
 
+		~UIBase() {
+			UnityEngine.Object.Destroy(button);
+		}
+
 		public bool IsVisible() {
 			return _uiShown;
 		}
@@ -35,41 +39,33 @@ namespace TrafficManager.UI {
 		}
 
 		public void Show() {
-			if (LoadingExtension.Instance != null) {
-				try {
-					ToolsModifierControl.mainToolbar.CloseEverything();
-				} catch (Exception e) {
-					Log.Error("Error on Show(): " + e.ToString());
-				}
-				GetMenu().Show();
-				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.Activated);
-				_uiShown = true;
-				button.UpdateSprites();
-			} else {
-				Log._Debug("TM UI Show: LoadingExtension.Instance is null!");
+			try {
+				ToolsModifierControl.mainToolbar.CloseEverything();
+			} catch (Exception e) {
+				Log.Error("Error on Show(): " + e.ToString());
 			}
+			GetMenu().Show();
+			LoadingExtension.SetToolMode(TrafficManagerMode.Activated);
+			_uiShown = true;
+			button.UpdateSprites();
 		}
 
 		public void Close() {
-			if (LoadingExtension.Instance != null) {
-				var uiView = UIView.GetAView();
-				var trafficManager = uiView.FindUIComponent("UITrafficManager");
-				if (trafficManager != null) {
-					Log._Debug("Hiding TM UI");
-					Destroy(trafficManager);
-					//trafficManager.Hide();
-				} else {
-					Log._Debug("Hiding TM UI: null!");
-				}
-
-				UITrafficManager.deactivateButtons();
-				TrafficManagerTool.SetToolMode(ToolMode.None);
-				LoadingExtension.Instance.SetToolMode(TrafficManagerMode.None);
-				_uiShown = false;
-				button.UpdateSprites();
+			var uiView = UIView.GetAView();
+			var trafficManager = uiView.FindUIComponent("UITrafficManager");
+			if (trafficManager != null) {
+				Log._Debug("Hiding TM UI");
+				Destroy(trafficManager);
+				//trafficManager.Hide();
 			} else {
-				Log._Debug("TM UI Close: LoadingExtension.Instance is null!");
+				Log._Debug("Hiding TM UI: null!");
 			}
+
+			UITrafficManager.deactivateButtons();
+			TrafficManagerTool.SetToolMode(ToolMode.None);
+			LoadingExtension.SetToolMode(TrafficManagerMode.None);
+			_uiShown = false;
+			button.UpdateSprites();
 		}
 
 		internal static UITrafficManager GetMenu() {

@@ -18,7 +18,7 @@ namespace TrafficManager.UI {
 	public class UITrafficManager : UIPanel {
 		//private static UIState _uiState = UIState.None;
 
-#if DEBUG
+#if QUEUEDSTATS
 		private static bool showPathFindStats = false;
 #endif
 
@@ -43,19 +43,18 @@ namespace TrafficManager.UI {
 		private static UIButton _printDebugInfoButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
-		private static UIButton _togglePathFindStatsButton = null;
 		private static UIButton _removeStuckEntitiesButton = null;
+#endif
+
+#if QUEUEDSTATS
+		private static UIButton _togglePathFindStatsButton = null;
 #endif
 
 		public static TrafficManagerTool TrafficLightTool;
 		public static UILabel title;
 
 		public override void Start() {
-			if (LoadingExtension.Instance == null) {
-				Log.Error("UITrafficManager.Start(): LoadingExtension is null.");
-				return;
-			}
-			TrafficLightTool = LoadingExtension.Instance.TrafficManagerTool;
+			TrafficLightTool = LoadingExtension.TrafficManagerTool;
 
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
@@ -157,9 +156,13 @@ namespace TrafficManager.UI {
 			_vehicleToNoneButton = _createButton("Vehicle -> None", y, clickVehicleToNone);
 			y += 40;
 			height += 40;
+#endif
+#if QUEUEDSTATS
 			_togglePathFindStatsButton = _createButton("Toggle PathFind stats", y, clickTogglePathFindStats);
 			y += 40;
 			height += 40;
+#endif
+#if DEBUG
 			_removeStuckEntitiesButton = _createButton("Remove stuck entities", y, clickRemoveStuckEntities);
 			y += 40;
 			height += 40;
@@ -263,10 +266,15 @@ namespace TrafficManager.UI {
 				}
 			}
 		}
+#endif
 
+#if QUEUEDSTATS
 		private void clickTogglePathFindStats(UIComponent component, UIMouseEventParameter eventParam) {
 			showPathFindStats = !showPathFindStats;
 		}
+#endif
+
+#if DEBUG
 
 		private void clickRemoveStuckEntities(UIComponent component, UIMouseEventParameter eventParam) {
 			TrafficManagerTool.SetToolMode(ToolMode.None);
@@ -471,7 +479,7 @@ namespace TrafficManager.UI {
 		}
 
 		public override void Update() {
-#if DEBUG && QUEUEDSTATS
+#if QUEUEDSTATS
 			if (showPathFindStats && title != null) {
 				title.text = CustomPathManager.TotalQueuedPathFinds.ToString();
 #if EXTRAPF

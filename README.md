@@ -4,6 +4,17 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.4, 12/11/2016
+- New feature: "Stay on lane": By pressing Shift + S in the Lane Connector tool you can now link connected lanes such that vehicles are not allowed to change lanes at this point. Press Shift + S again to restrict "stay on lane" to either road direction.
+- U-turns are now only allowed to be performed from the innermost lane     
+- TMPE now detects if the number of spawned vehicles is reaching its limit (16384). If so, spawning of service/emergency vehicles is prioritized over spawning other vehicles. 
+- Bugfix: Bicycles cannot change from bicycle lanes to pedestrian lanes
+- Bugfix: Travel probabilities set in the "Citizen Lifecycle Rebalance v2.1" mod are not obeyed (thanks to @informmanuel, @shaundoddmusic for reporting this issue)
+- Bugfix: Number of tourists seems to drop when activating the mod (statistics were not updated, thanks to @hpp7117, @wjrohn for reporting this issue)
+- Bugfix: When loading a second savegame a second main menu button is displayed (thanks to @Cpt. Whitepaw for reporting this issue)
+- Bugfix: While path-finding is in progress vehicles do "bungee-jumping" on the current segment (thanks to @mxolsenx, @Howzitworld for reporting this issue)
+- Bugfix: Cims leaving the city search for parking spaces near the outside connection which is obviously not required   
+
 1.8.3, 12/4/2016
 - Bugfix: Despite having the Parking AI activated, cims sometimes still spawn pocket cars.
 - Bugfix: When the Parking AI is active, bicycle lanes are not used (thanks to @informmanuel for reporting this issue)

@@ -14,6 +14,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -40,9 +41,32 @@ namespace TrafficManager.Custom.AI {
             }*/
 #endif
 
-			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
+			// NON-STOCK CODE START
+			VehicleState state = null;
+			ExtCitizenInstance driverExtInstance = null;
+			bool prohibitPocketCars = Options.prohibitPocketCars;
+			if (prohibitPocketCars) {
+				state = VehicleStateManager.Instance._GetVehicleState(vehicleData.GetFirstVehicle(vehicleId));
+				if (state.VehicleType == ExtVehicleType.PassengerCar) {
+					driverExtInstance = state.GetDriverExtInstance();
+					if (driverExtInstance == null) {
+						prohibitPocketCars = false;
+					} else {
+						driverExtInstance.UpdateReturnPathState();
+					}
+				} else {
+					prohibitPocketCars = false;
+				}
+			}
+			// NON-STOCK CODE END
+
+			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0 &&
+				(! prohibitPocketCars || driverExtInstance.ReturnPathState != ExtCitizenInstance.ExtPathState.Calculating)) {
 				PathManager pathManager = Singleton<PathManager>.instance;
 				byte pathFindFlags = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
+
+				bool pathFindFailed = (pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0; // path == 0: non-stock code!
+				bool pathFindSucceeded = (pathFindFlags & PathUnit.FLAG_READY) != 0;
 
 #if USEPATHWAITCOUNTER
 				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
@@ -51,13 +75,32 @@ namespace TrafficManager.Custom.AI {
 				}
 #endif
 
-				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
+				if (prohibitPocketCars) {
+					if (driverExtInstance.ReturnPathState == ExtPathState.Failed) {
+#if DEBUG
+						if (GlobalConfig.Instance.DebugSwitches[2])
+							Log._Debug($"CustomCarAI.CustomSimulationStep: Return path {driverExtInstance.ReturnPathId} FAILED. Forcing path-finding to fail.");
+#endif
+						pathFindSucceeded = false;
+						pathFindFailed = true;
+					}
+
+					driverExtInstance.ReleaseReturnPath();
+
+					if (pathFindSucceeded) {
+						CustomPassengerCarAI.OnPathFindSuccess(vehicleId, ref vehicleData, driverExtInstance);
+					} else if (pathFindFailed) {
+						CustomPassengerCarAI.OnPathFindFailure(driverExtInstance, vehicleId);
+					}
+				}
+
+				if (pathFindSucceeded) {
 					vehicleData.m_pathPositionIndex = 255;
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					vehicleData.m_flags &= ~Vehicle.Flags.Arriving;
 					this.PathfindSuccess(vehicleId, ref vehicleData);
 					this.TrySpawn(vehicleId, ref vehicleData);
-				} else if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || vehicleData.m_path == 0) { // path == 0: non-stock code!
+				} else if (pathFindFailed) {
 					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 					Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					vehicleData.m_path = 0u;
@@ -106,13 +149,13 @@ namespace TrafficManager.Custom.AI {
 			}
 			this.SimulationStep(vehicleId, ref vehicleData, vehicleId, ref vehicleData, lodPhysics);
 			if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0) {
-				VehicleManager instance2 = Singleton<VehicleManager>.instance;
+				VehicleManager vehManager = Singleton<VehicleManager>.instance;
 				ushort num = vehicleData.m_trailingVehicle;
 				int num2 = 0;
 				while (num != 0) {
-					ushort trailingVehicle = instance2.m_vehicles.m_buffer[(int)num].m_trailingVehicle;
-					VehicleInfo info = instance2.m_vehicles.m_buffer[(int)num].Info;
-					info.m_vehicleAI.SimulationStep(num, ref instance2.m_vehicles.m_buffer[(int)num], vehicleId, ref vehicleData, lodPhysics);
+					ushort trailingVehicle = vehManager.m_vehicles.m_buffer[(int)num].m_trailingVehicle;
+					VehicleInfo info = vehManager.m_vehicles.m_buffer[(int)num].Info;
+					info.m_vehicleAI.SimulationStep(num, ref vehManager.m_vehicles.m_buffer[(int)num], vehicleId, ref vehicleData, lodPhysics);
 					num = trailingVehicle;
 					if (++num2 > 16384) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);

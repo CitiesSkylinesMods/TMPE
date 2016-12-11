@@ -906,6 +906,7 @@ namespace TrafficManager.Custom.PathFinding {
 					} else {
 						// pocket car spawning
 						if (Options.prohibitPocketCars &&
+								_extVehicleType == ExtVehicleType.PassengerCar &&
 								(_extPathType == ExtCitizenInstance.ExtPathType.WalkingOnly || (_extPathType == ExtCitizenInstance.ExtPathType.DrivingOnly && item.m_position.m_segment != _startSegmentA && item.m_position.m_segment != _startSegmentB))) {
 							allowPedSwitch = false;
 						} else {
@@ -1453,7 +1454,10 @@ namespace TrafficManager.Custom.PathFinding {
 								// min/max compatible outer similar lane indices
 								short minNextOuterSimilarIndex = -1;
 								short maxNextOuterSimilarIndex = -1;
-								if (nextIsRealJunction) {
+								if (uturn) {
+									// force u-turns to happen on the most inner lane
+									minNextOuterSimilarIndex = maxNextOuterSimilarIndex = (short)((short)nextCompatibleLaneCount - 1);
+								} else if (nextIsRealJunction) {
 									// at junctions: try to match distinct lanes
 
 									/*if (prevOuterSimilarLaneIndex >= nextCompatibleLaneCount-1) {
@@ -1463,7 +1467,10 @@ namespace TrafficManager.Custom.PathFinding {
 										if (debug)
 											logBuf.Add($"City rules: Splitting inner lane. minNextOuterSimilarLaneIndex={minNextOuterSimilarIndex} maxNextOuterSimilarLaneIndex={maxNextOuterSimilarIndex}");
 #endif
-									} else */if (nextCompatibleLaneCount > prevSimilarLaneCount && prevOuterSimilarLaneIndex == prevSimilarLaneCount-1) {
+									} else */
+									
+									
+									if (nextCompatibleLaneCount > prevSimilarLaneCount && prevOuterSimilarLaneIndex == prevSimilarLaneCount-1) {
 										// merge inner lanes
 										minNextOuterSimilarIndex = prevOuterSimilarLaneIndex;
 										maxNextOuterSimilarIndex = (short)((short)nextCompatibleLaneCount - 1);
@@ -1793,11 +1800,12 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		/// <summary>
-		/// xxx Finds the value in `values` having the (n+1)th lowest index, or, if (n+1) > number of valid elements in `values` finds the value in `values` with the highest index.
+		/// Finds the element in <paramref name="values"/> with the highest associated index <code>i</code> satisfying <code>i</code> &lt;= <paramref name="n" />.
+		/// If no such element is found, the element with the highest index is returned.
 		/// </summary>
 		/// <param name="values">array to be queried</param>
-		/// <param name="validMask">a bitmask holding all valid indices of `values`</param>
-		/// <param name="n">query</param>
+		/// <param name="validMask">a bitmask holding all valid indices of <paramref name="values" /></param>
+		/// <param name="n">query index</param>
 		/// <returns></returns>
 		private static short FindCompatibleLane(ref byte[] values, ushort validMask, short n) {
 			short nextLaneI = -1;
@@ -2335,7 +2343,7 @@ namespace TrafficManager.Custom.PathFinding {
 					if (debug)
 						logBuf.Add($"ProcessItemCosts: applying u-turn cost factor on deactivated advaned AI");
 #endif
-					prevCost *= _conf.UturnLaneDistance;
+					prevCost *= (float)_conf.UturnLaneDistance;
 				}
 			}
 

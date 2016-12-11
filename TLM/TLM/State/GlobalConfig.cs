@@ -14,7 +14,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 2;
+		private static int LATEST_VERSION = 3;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -42,16 +42,16 @@ namespace TrafficManager.State {
 		}
 
 		//public static GlobalConfig Instance() {
-//#if DEBUG
-//			uint curDebugFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10;
-//			if (lastModificationCheckFrame == 0) {
-//				lastModificationCheckFrame = curDebugFrame;
-//			} else if (lastModificationCheckFrame < curDebugFrame) {
-//				lastModificationCheckFrame = curDebugFrame;
-//				ReloadIfNewer();
-//			}
-//#endif
-			//return Instance;
+		//#if DEBUG
+		//			uint curDebugFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10;
+		//			if (lastModificationCheckFrame == 0) {
+		//				lastModificationCheckFrame = curDebugFrame;
+		//			} else if (lastModificationCheckFrame < curDebugFrame) {
+		//				lastModificationCheckFrame = curDebugFrame;
+		//				ReloadIfNewer();
+		//			}
+		//#endif
+		//return Instance;
 		//}
 
 		private static DateTime ModifiedTime = DateTime.MinValue;
@@ -82,7 +82,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// base lane changing cost factor on city streets
 		/// </summary>
-		public float CityRoadLaneChangingBaseCost = 0.1f;
+		public float CityRoadLaneChangingBaseCost = 0.15f;
 
 		/// <summary>
 		/// lane changing cost base before junctions

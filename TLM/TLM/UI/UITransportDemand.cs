@@ -18,11 +18,6 @@ namespace TrafficManager.UI {
 		private static UILabel viewModeLabel;
 
 		public override void Start() {
-			if (LoadingExtension.Instance == null) {
-				Log.Error("UITrafficManager.Start(): LoadingExtension is null.");
-				return;
-			}
-
             var transportInfoViewPanel = GameObject.Find("(Library) PublicTransportInfoViewPanel").GetComponent<PublicTransportInfoViewPanel>();
             if (transportInfoViewPanel != null) {
                 Log._Debug($"Public transport info view panel found.");
@@ -48,7 +43,6 @@ namespace TrafficManager.UI {
 
             switchViewModeButton = _createButton(Translation.GetString("Switch_view"), 3, 3, clickSwitchViewMode);
 		}
-
 
 		private UIButton _createButton(string text, int x, int y, MouseEventHandler eventClick) {
 			var button = AddUIComponent<UIButton>();

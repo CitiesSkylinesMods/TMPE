@@ -122,8 +122,8 @@ namespace TrafficManager.State {
 			get { return menuRebuildRequired; }
 			private set {
 				menuRebuildRequired = value;
-				if (LoadingExtension.Instance != null && LoadingExtension.Instance.BaseUI != null)
-					LoadingExtension.Instance.BaseUI.Close();
+				if (LoadingExtension.BaseUI != null)
+					LoadingExtension.BaseUI.Close();
 			}
 		}
 

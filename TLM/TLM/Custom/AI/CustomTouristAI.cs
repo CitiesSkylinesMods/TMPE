@@ -8,6 +8,7 @@ using System.Text;
 using TrafficManager.Manager;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomTouristAI : TouristAI {
@@ -77,23 +78,25 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
-			return CustomTouristAI.GetVehicleInfo(instanceID, ref citizenData, forceProbability);
-		}
-
-		public static new VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
 
 			// NON-STOCK CODE START
+			bool forceTaxi = false;
 			if (Options.prohibitPocketCars) {
-				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
-				if (parkedVehicleId != 0) {
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
+				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
+					forceTaxi = true;
+				} else {
+					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+					if (parkedVehicleId != 0) {
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomTouristAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+						if (GlobalConfig.Instance.DebugSwitches[2])
+							Log._Debug($"CustomTouristAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
 #endif
-					return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+						return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+					}
 				}
 			}
 			// NON-STOCK CODE END
@@ -101,14 +104,21 @@ namespace TrafficManager.Custom.AI {
 			int carProb;
 			int bikeProb;
 			int taxiProb;
+			// NON-STOCK CODE START
+			if (forceTaxi) {
+				carProb = 0;
+				bikeProb = 0;
+				taxiProb = 100;
+			} else
+			// NON-STOCK CODE END
 			if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
 				carProb = 100;
 				bikeProb = 0;
 				taxiProb = 0;
 			} else {
-				carProb = CustomTouristAI.GetCarProbability();
-				bikeProb = CustomTouristAI.GetBikeProbability();
-				taxiProb = CustomTouristAI.GetTaxiProbability();
+				carProb = GetCarProbability();
+				bikeProb = GetBikeProbability();
+				taxiProb = GetTaxiProbability();
 			}
 			Randomizer randomizer = new Randomizer(citizenData.m_citizen);
 			bool useCar = randomizer.Int32(100u) < carProb;
@@ -131,15 +141,18 @@ namespace TrafficManager.Custom.AI {
 			return null;
 		}
 
-		private static int GetTaxiProbability() {
+		private int GetTaxiProbability() {
+			Log.Error("CustomTouristAI.GetTaxiProbability called!");
 			return 20;
 		}
 
-		private static int GetBikeProbability() {
+		private int GetBikeProbability() {
+			Log.Error("CustomTouristAI.GetBikeProbability called!");
 			return 20;
 		}
 
-		private static int GetCarProbability() {
+		private int GetCarProbability() {
+			Log.Error("CustomTouristAI.GetCarProbability called!");
 			return 20;
 		}
 	}

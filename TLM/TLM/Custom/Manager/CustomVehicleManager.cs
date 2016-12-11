@@ -21,6 +21,17 @@ namespace TrafficManager.Custom.Manager {
 		}
 
 		public bool CustomCreateVehicle(out ushort vehicleId, ref Randomizer r, VehicleInfo info, Vector3 position, TransferManager.TransferReason type, bool transferToSource, bool transferToTarget) {
+			// NON-STOCK CODE START
+			if (this.m_vehicleCount > VehicleManager.MAX_VEHICLE_COUNT - 5) {
+				// prioritize service vehicles and public transport when hitting the vehicle limit
+				ItemClass.Service service = info.GetService();
+				if (service == ItemClass.Service.Residential || service == ItemClass.Service.Industrial || service == ItemClass.Service.Commercial || service == ItemClass.Service.Office) {
+					vehicleId = 0;
+					return false;
+				}
+			}
+			// NON-STOCK CODE END
+
 			ushort vehId;
 			if (this.m_vehicles.CreateItem(out vehId, ref r)) {
 				vehicleId = vehId;

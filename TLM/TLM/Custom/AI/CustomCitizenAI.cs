@@ -224,8 +224,8 @@ namespace TrafficManager.Custom.AI {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 				ushort homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_homeBuilding;
 				
-				// if the citizen is a resident and is starting its journey: find a suitable parking space near the target
-				if (extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ParkedCarReached) {
+				// if the citizen is a resident starting its journey and the target is not an outside connection: find a suitable parking space near the target
+				if (extInstance.PathMode == ExtCitizenInstance.ExtPathMode.ParkedCarReached && (citizenData.m_targetBuilding == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[citizenData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None)) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode} parkedVehicleId={parkedVehicleId}");

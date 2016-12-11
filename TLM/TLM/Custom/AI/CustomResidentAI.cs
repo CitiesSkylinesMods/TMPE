@@ -13,7 +13,7 @@ using UnityEngine;
 using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
-	public class CustomResidentAI : HumanAI {
+	public class CustomResidentAI : ResidentAI {
 		public string CustomGetLocalizedStatus(ushort instanceID, ref CitizenInstance data, out InstanceID target) {
 			if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None) {
 				target = InstanceID.Empty;
@@ -123,10 +123,6 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
-			return CustomResidentAI.GetVehicleInfo(instanceID, ref citizenData, forceProbability);
-		}
-
-		public static new VehicleInfo GetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
@@ -137,15 +133,15 @@ namespace TrafficManager.Custom.AI {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
 					forceTaxi = true;
-				}
-
-				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
-				if (parkedVehicleId != 0) {
+				} else {
+					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+					if (parkedVehicleId != 0) {
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+						if (GlobalConfig.Instance.DebugSwitches[2])
+							Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
 #endif
-					return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+						return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+					}
 				}
 			}
 			// NON-STOCK CODE END
@@ -155,18 +151,21 @@ namespace TrafficManager.Custom.AI {
 			int carProb;
 			int bikeProb;
 			int taxiProb;
+			// NON-STOCK CODE START
 			if (forceTaxi) {
 				carProb = 0;
 				bikeProb = 0;
 				taxiProb = 100;
-			} else if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
+			} else
+			// NON-STOCK CODE END
+			if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
 				carProb = 100;
 				bikeProb = 0;
 				taxiProb = 0;
 			} else {
-				carProb = CustomResidentAI.GetCarProbability(instanceID, ref citizenData, ageGroup);
-				bikeProb = CustomResidentAI.GetBikeProbability(instanceID, ref citizenData, ageGroup);
-				taxiProb = CustomResidentAI.GetTaxiProbability(instanceID, ref citizenData, ageGroup);
+				carProb = GetCarProbability(instanceID, ref citizenData, ageGroup);
+				bikeProb = GetBikeProbability(instanceID, ref citizenData, ageGroup);
+				taxiProb = GetTaxiProbability(instanceID, ref citizenData, ageGroup);
 			}
 			Randomizer randomizer = new Randomizer(citizenData.m_citizen);
 			bool useCar = randomizer.Int32(100u) < carProb;
@@ -189,7 +188,8 @@ namespace TrafficManager.Custom.AI {
 			return null;
 		}
 
-		private static int GetTaxiProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+		private int GetTaxiProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+			Log.Error("CustomResidentAI.GetTaxiProbability called!");
 			switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
 					return 0;
@@ -206,7 +206,8 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		private static int GetBikeProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+		private int GetBikeProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+			Log.Error("CustomResidentAI.GetBikeProbability called!");
 			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			uint citizenId = citizenData.m_citizen;
 			ushort homeId = citizenManager.m_citizens.m_buffer[(int)((UIntPtr)citizenId)].m_homeBuilding;
@@ -236,18 +237,19 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		private static int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+		private int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
+			Log.Error("CustomResidentAI.GetCarProbability called!");
 			switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
-					return ResidentAI.CAR_PROBABILITY_CHILD;
+					return 0;
 				case Citizen.AgeGroup.Teen:
-					return ResidentAI.CAR_PROBABILITY_TEEN;
+					return 5;
 				case Citizen.AgeGroup.Young:
-					return ResidentAI.CAR_PROBABILITY_YOUNG;
+					return 15;
 				case Citizen.AgeGroup.Adult:
-					return ResidentAI.CAR_PROBABILITY_ADULT;
+					return 20;
 				case Citizen.AgeGroup.Senior:
-					return ResidentAI.CAR_PROBABILITY_SENIOR;
+					return 10;
 				default:
 					return 0;
 			}

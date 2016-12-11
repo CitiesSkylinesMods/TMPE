@@ -50,7 +50,7 @@ namespace TrafficManager.UI {
 		}
 
 		protected override void OnClick(UIMouseEventParameter p) {
-			LoadingExtension.Instance.BaseUI.ToggleMainMenu();
+			LoadingExtension.BaseUI.ToggleMainMenu();
 			UpdateSprites();
 		}
 
@@ -67,7 +67,7 @@ namespace TrafficManager.UI {
 		}
 
 		internal void UpdateSprites() {
-			if (! LoadingExtension.Instance.BaseUI.IsVisible()) {
+			if (! LoadingExtension.BaseUI.IsVisible()) {
 				normalBgSprite = disabledBgSprite = focusedBgSprite = MAIN_MENU_BUTTON_BG_BASE;
 				hoveredBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
 				pressedBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;

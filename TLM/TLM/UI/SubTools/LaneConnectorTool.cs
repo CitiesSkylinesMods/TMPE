@@ -22,10 +22,18 @@ namespace TrafficManager.UI.SubTools {
 			SelectTarget
 		}
 
+		enum StayInLaneMode {
+			None,
+			Both,
+			Forward,
+			Backward
+		}
+
 		private Dictionary<ushort, IDisposable> nodeGeometryUnsubscribers;
 		private NodeLaneMarker selectedMarker = null;
 		private NodeLaneMarker hoveredMarker = null;
 		private Dictionary<ushort, List<NodeLaneMarker>> currentNodeMarkers;
+		private StayInLaneMode stayInLaneMode = StayInLaneMode.None;
 		//private bool initDone = false;
 
 		class NodeLaneMarker {
@@ -35,6 +43,8 @@ namespace TrafficManager.UI.SubTools {
 			internal Vector3 position;
 			internal bool isSource;
 			internal uint laneId;
+			internal int innerSimilarLaneIndex;
+			internal NetInfo.Direction finalDirection;
 			internal float radius = 1f;
 			internal Color color;
 			internal List<NodeLaneMarker> connectedMarkers = new List<NodeLaneMarker>();
@@ -138,7 +148,12 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}
 
-				if (Input.GetKey(KeyCode.Delete)) {
+				bool deleteAll = Input.GetKeyDown(KeyCode.Delete);
+				bool stayInLane = Input.GetKeyDown(KeyCode.S) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].CountSegments() == 2;
+				if (stayInLane)
+					deleteAll = true;
+
+				if (deleteAll) {
 					// remove all connections at selected node
 
 					List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId);
@@ -151,6 +166,52 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 					RefreshCurrentNodeMarkers();
+				}
+
+				if (stayInLane) {
+					// "stay in lane"
+					switch (stayInLaneMode) {
+						case StayInLaneMode.None:
+							stayInLaneMode = StayInLaneMode.Both;
+							break;
+						case StayInLaneMode.Both:
+							stayInLaneMode = StayInLaneMode.Forward;
+							break;
+						case StayInLaneMode.Forward:
+							stayInLaneMode = StayInLaneMode.Backward;
+							break;
+						case StayInLaneMode.Backward:
+							stayInLaneMode = StayInLaneMode.None;
+							break;
+					}
+
+					if (stayInLaneMode != StayInLaneMode.None) {
+						List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId);
+						if (nodeMarkers != null) {
+							selectedMarker = null;
+							foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
+								if (!sourceLaneMarker.isSource)
+									continue;
+
+								if (stayInLaneMode == StayInLaneMode.Forward || stayInLaneMode == StayInLaneMode.Backward) {
+									if (sourceLaneMarker.finalDirection == NetInfo.Direction.Backward ^ stayInLaneMode == StayInLaneMode.Backward) {
+										continue;
+									}
+								}
+
+								foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
+									if (targetLaneMarker.isSource || targetLaneMarker.segmentId == sourceLaneMarker.segmentId)
+										continue;
+
+									if (targetLaneMarker.innerSimilarLaneIndex == sourceLaneMarker.innerSimilarLaneIndex) {
+										Log._Debug($"Adding lane connection {sourceLaneMarker.laneId} -> {targetLaneMarker.laneId}");
+										LaneConnectionManager.Instance.AddLaneConnection(sourceLaneMarker.laneId, targetLaneMarker.laneId, sourceLaneMarker.startNode);
+									}
+								}
+							}
+						}
+						RefreshCurrentNodeMarkers();
+					}
 				}
 			}
 
@@ -178,6 +239,7 @@ namespace TrafficManager.UI.SubTools {
 #endif
 						SelectedNodeId = 0;
 						selectedMarker = null;
+						stayInLaneMode = StayInLaneMode.None;
 						return;
 					}
 
@@ -191,6 +253,7 @@ namespace TrafficManager.UI.SubTools {
 						if (markers != null) {
 							SelectedNodeId = HoveredNodeId;
 							selectedMarker = null;
+							stayInLaneMode = StayInLaneMode.None;
 
 							currentNodeMarkers[SelectedNodeId] = markers;
 						}
@@ -204,11 +267,14 @@ namespace TrafficManager.UI.SubTools {
 					// click on free spot. deselect node
 					SelectedNodeId = 0;
 					selectedMarker = null;
+					stayInLaneMode = StayInLaneMode.None;
 					return;
 				}
 			}
 
 			if (hoveredMarker != null) {
+				stayInLaneMode = StayInLaneMode.None;
+
 #if DEBUGCONN
 				Log._Debug($"TppLaneConnectorTool: hoveredMarker != null. selMode={GetMarkerSelectionMode()}");
 #endif
@@ -254,6 +320,7 @@ namespace TrafficManager.UI.SubTools {
 #if DEBUGCONN
 					Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
 #endif
+					stayInLaneMode = StayInLaneMode.None;
 					break;
 				case MarkerSelectionMode.SelectSource:
 					// deselect node
@@ -279,6 +346,7 @@ namespace TrafficManager.UI.SubTools {
 			SelectedNodeId = 0;
 			selectedMarker = null;
 			hoveredMarker = null;
+			stayInLaneMode = StayInLaneMode.None;
 			RefreshCurrentNodeMarkers();
 		}
 
@@ -338,12 +406,13 @@ namespace TrafficManager.UI.SubTools {
 				NetInfo.Lane[] lanes = NetManager.instance.m_segments.m_buffer[segmentId].Info.m_lanes;
 				uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
 				for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++) {
-					if ((lanes[laneIndex].m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
-						(lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None) {
+					NetInfo.Lane laneInfo = lanes[laneIndex];
+					if ((laneInfo.m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
+						(laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None) {
 
 						Vector3? pos = null;
 						bool isSource = false;
-						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, lanes[laneIndex], out isSource, out pos)) {
+						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, laneInfo, out isSource, out pos)) {
 							nodeMarkers.Add(new NodeLaneMarker() {
 								segmentId = segmentId,
 								laneId = laneId,
@@ -352,8 +421,10 @@ namespace TrafficManager.UI.SubTools {
 								position = (Vector3)pos + offset,
 								color = colors[nodeMarkers.Count],
 								isSource = isSource,
-								laneType = lanes[laneIndex].m_laneType,
-								vehicleType = lanes[laneIndex].m_vehicleType
+								laneType = laneInfo.m_laneType,
+								vehicleType = laneInfo.m_vehicleType,
+								innerSimilarLaneIndex = ((byte)(laneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
+								finalDirection = laneInfo.m_finalDirection
 							});
 						}
 					}
@@ -400,7 +471,7 @@ namespace TrafficManager.UI.SubTools {
 
 			NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
 			NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;
-			
+
 			float turningAngle = 0.01f - Mathf.Min(sourceSegmentInfo.m_maxTurnAngleCos, targetSegmentInfo.m_maxTurnAngleCos);
 			if (turningAngle < 1f) {
 				Vector3 sourceDirection;
