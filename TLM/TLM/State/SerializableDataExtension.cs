@@ -223,10 +223,6 @@ namespace TrafficManager.State {
 					if (options.Length >= 29) {
 						Options.setEvacBussesMayIgnoreRules(options[28] == (byte)1);
 					}
-
-					if (options.Length >= 29) {
-						Options.setRestrictEvacBussesToShelter(options[29] == (byte)1);
-					}
 				}
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while loading options: {e.ToString()}");
@@ -758,8 +754,7 @@ namespace TrafficManager.State {
 						(byte)(Options.prohibitPocketCars ? 1 : 0),
 						(byte)(Options.preferOuterLane ? 1 : 0),
 						(byte)(Options.realisticSpeeds ? 1 : 0),
-						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
-						(byte)(Options.restrictEvacBussesToShelter ? 1 : 0)
+						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0)
 				});
 				} catch (Exception ex) {
 					Log.Error("Unexpected error while saving options: " + ex.Message);

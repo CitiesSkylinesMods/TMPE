@@ -100,8 +100,8 @@ namespace TrafficManager.State {
 			}
 
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-				//Log.Message($"Flags: Node {nodeId} may not have a traffic light (not created)");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created)");
+				//Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
 				return false;
 			}
 
@@ -821,10 +821,10 @@ namespace TrafficManager.State {
 
 			bool mayHaveLight = mayHaveTrafficLight(nodeId);
 			if ((bool)flag && mayHaveLight) {
-				//Log.Message($"Adding traffic light @ node {nodeId}");
+				Log._Debug($"Adding traffic light @ node {nodeId}");
 				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
 			} else {
-				//Log.Message($"Removing traffic light @ node {nodeId}");
+				Log._Debug($"Removing traffic light @ node {nodeId}");
 				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				if (!mayHaveLight) {
 					Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
@@ -877,9 +877,7 @@ namespace TrafficManager.State {
 			laneArrowFlags[laneId] = null;
 			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
-			if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
-				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = 0;
-			} else {
+			if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) == NetLane.Flags.Created) {
 				Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &= (ushort)~lfr;
 			}
 		}

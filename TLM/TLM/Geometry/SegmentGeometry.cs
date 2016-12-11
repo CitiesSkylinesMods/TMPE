@@ -198,7 +198,7 @@ namespace TrafficManager.Geometry {
 
 #if DEBUG
 				if (output) {
-					Log.Info($"Recalculating geometries of segment {SegmentId} FINISHED");
+					Log.Info($"Recalculating geometries of segment {SegmentId} FINISHED (flags={Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_flags})");
 					SegmentEndGeometry[] endGeometries = new SegmentEndGeometry[] { startNodeGeometry, endNodeGeometry };
 					Log._Debug($"seg. {SegmentId}. oneWay={oneWay}");
 					Log._Debug($"seg. {SegmentId}. highway={highway}");
@@ -209,6 +209,7 @@ namespace TrafficManager.Geometry {
 							Log._Debug("--- end @ start node ---");
 						else
 							Log._Debug("--- end @ end node ---");
+						Log._Debug($"Node {endGeometry.NodeId()} (flags={Singleton<NetManager>.instance.m_nodes.m_buffer[endGeometry.NodeId()].m_flags})");
 
 						Log._Debug($"seg. {SegmentId}. connectedSegments={ string.Join(", ", endGeometry.ConnectedSegments.Select(x => x.ToString()).ToArray())}");
 

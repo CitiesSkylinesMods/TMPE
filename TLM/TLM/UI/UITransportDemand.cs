@@ -14,10 +14,12 @@ using TrafficManager.Manager;
 
 namespace TrafficManager.UI {
 	public class UITransportDemand : UIPanel {
-		private static UIButton switchViewModeButton;
-		private static UILabel viewModeLabel;
+		private UIButton switchViewModeButton;
+		private UILabel viewModeLabel;
 
 		public override void Start() {
+			base.Start();
+
             var transportInfoViewPanel = GameObject.Find("(Library) PublicTransportInfoViewPanel").GetComponent<PublicTransportInfoViewPanel>();
             if (transportInfoViewPanel != null) {
                 Log._Debug($"Public transport info view panel found.");

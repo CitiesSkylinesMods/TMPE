@@ -42,7 +42,7 @@ namespace TrafficManager {
 		public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 #if !TAM
-			if (ToolsModifierControl.toolController == null || ToolsModifierControl.toolController == null || LoadingExtension.BaseUI == null) {
+			if (ToolsModifierControl.toolController == null || LoadingExtension.BaseUI == null) {
                 return;
             }
 

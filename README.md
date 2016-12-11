@@ -4,6 +4,11 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.5, 12/11/2016
+- Updated to game version 1.6.1-f2
+- Removed option "Evacuation busses may only be used to reach a shelter" (CO fixed this issue)
+- Bugfix: Average speed limits are not correctly calculated for road segments with bicycle lanes (thanks to @Toothless FLY [ROK]LSh.st for reporting this issue)
+
 1.8.4, 12/11/2016
 - New feature: "Stay on lane": By pressing Shift + S in the Lane Connector tool you can now link connected lanes such that vehicles are not allowed to change lanes at this point. Press Shift + S again to restrict "stay on lane" to either road direction.
 - U-turns are now only allowed to be performed from the innermost lane     

@@ -321,18 +321,6 @@ namespace TrafficManager.Custom.AI {
 			if (foundStartingPos &&
 				foundEndPos) { // NON-STOCK CODE
 
-				// NON-STOCK CODE START
-				bool allowEscapeTransport = true;
-				if (Options.restrictEvacBussesToShelter) {
-					if (targetBuildingId != 0) {
-						BuildingInfo targetBuildingInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].Info;
-						allowEscapeTransport = targetBuildingInfo.GetService() == ItemClass.Service.Disaster && targetBuildingInfo.GetClassLevel() == ItemClass.Level.Level4;
-					} else {
-						allowEscapeTransport = false;
-					}
-				}
-				// NON-STOCK CODE END
-
 				if (!startBothWays || sqrDistA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -346,7 +334,7 @@ namespace TrafficManager.Custom.AI {
 #else
 					false
 #endif
-					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, skipQueue, randomParking, false, allowEscapeTransport)) {
+					, ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, skipQueue, randomParking, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;
@@ -354,7 +342,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, allowEscapeTransport={allowEscapeTransport}");
+						Log._Debug($"Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
 #endif
 
 					if (vehicleData.m_path != 0u) {

@@ -106,7 +106,6 @@ namespace TrafficManager.Custom.PathFinding {
 		private ExtVehicleType? _extVehicleType;
 		private ushort? _vehicleId;
 		private ExtCitizenInstance.ExtPathType? _extPathType;
-		private bool _allowEscapeTransport;
 		private bool _leftHandDrive;
 		//private bool _extPublicTransport;
 		private float _vehicleCosts;
@@ -324,7 +323,6 @@ namespace TrafficManager.Custom.PathFinding {
 			this._extVehicleType = CustomPathManager._instance.pathUnitExtVehicleType[unit];
 			this._vehicleId = CustomPathManager._instance.pathUnitVehicleIds[unit];
 			this._extPathType = CustomPathManager._instance.pathUnitPathTypes[unit];
-			this._allowEscapeTransport = CustomPathManager._instance.pathUnitEscapeTransport[unit];
 			this._leftHandDrive = TrafficPriorityManager.IsLeftHandDrive();
 			//this._extPublicTransport = _extVehicleType != null && (_extVehicleType & ExtVehicleType.PublicTransport) != ExtVehicleType.None;
 #if DEBUGPF
@@ -1975,13 +1973,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if (targetDisabled && ((netManager.m_nodes.m_buffer[(int)nextSegment.m_startNode].m_flags | netManager.m_nodes.m_buffer[(int)nextSegment.m_endNode].m_flags) & NetNode.Flags.Disabled) == NetNode.Flags.None) {
 				return;
 			}
-			// NON-STOCK CODE START
-			if (! _allowEscapeTransport) {
-				ushort transportLineId = netManager.m_nodes.m_buffer[targetNodeId].m_transportLine;
-				if (transportLineId != 0 && Singleton<TransportManager>.instance.m_lines.m_buffer[transportLineId].Info.m_transportType == TransportInfo.TransportType.EvacuationBus)
-					return;
-			}
-			// NON-STOCK CODE END
+
 			NetInfo nextSegmentInfo = nextSegment.Info;
 			NetInfo prevSegmentInfo = prevSegment.Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;

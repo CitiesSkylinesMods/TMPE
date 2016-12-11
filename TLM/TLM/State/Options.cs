@@ -24,7 +24,6 @@ namespace TrafficManager.State {
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
 		private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
-		private static UICheckBox restrictEvacBussesToShelterToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
@@ -76,7 +75,6 @@ namespace TrafficManager.State {
 		public static bool relaxedBusses = true;
 		public static bool allRelaxed = false;
 		public static bool evacBussesMayIgnoreRules = false;
-		public static bool restrictEvacBussesToShelter = false;
 		public static bool prioritySignsOverlay = false;
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
@@ -231,7 +229,6 @@ namespace TrafficManager.State {
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
 				evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
-				restrictEvacBussesToShelterToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_only_be_used_to_reach_a_shelter"), restrictEvacBussesToShelter, onRestrictEvacBussesToShelterChanged) as UICheckBox;
 			}
 
 			// OVERLAYS
@@ -542,14 +539,6 @@ namespace TrafficManager.State {
 			evacBussesMayIgnoreRules = value;
 		}
 
-		private static void onRestrictEvacBussesToShelterChanged(bool value) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"restrictEvacBussesToShelter changed to {value}");
-			restrictEvacBussesToShelter = value;
-		}
-
 		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
 			if (!checkGameLoaded())
 				return;
@@ -795,15 +784,6 @@ namespace TrafficManager.State {
 			evacBussesMayIgnoreRules = value;
 			if (evacBussesMayIgnoreRulesToggle != null)
 				evacBussesMayIgnoreRulesToggle.isChecked = value;
-		}
-
-		public static void setRestrictEvacBussesToShelter(bool value) {
-			if (!SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC))
-				value = false;
-
-			restrictEvacBussesToShelter = value;
-			if (restrictEvacBussesToShelterToggle != null)
-				restrictEvacBussesToShelterToggle.isChecked = value;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {
