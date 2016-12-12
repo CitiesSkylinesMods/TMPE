@@ -4,6 +4,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.6, 12/12/2016
+- Added Korean language (thanks to @Toothless FLY [ROK]LSh.st for translating)
+- Updated Chinese language code (zh-cn -> zh) in order to make it compatible with the game (thanks to @Lost丶青柠 for reporting this issue)
+
 1.8.5, 12/11/2016
 - Updated to game version 1.6.1-f2
 - Removed option "Evacuation busses may only be used to reach a shelter" (CO fixed this issue)

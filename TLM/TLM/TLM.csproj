@@ -212,7 +212,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\lang_zh-tw.txt" />
-    <EmbeddedResource Include="Resources\lang_zh-cn.txt" />
     <EmbeddedResource Include="Resources\lang_es.txt" />
     <EmbeddedResource Include="Resources\lanechange_allowed.png" />
     <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
@@ -288,6 +287,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\MenuButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_zh.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_kr.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

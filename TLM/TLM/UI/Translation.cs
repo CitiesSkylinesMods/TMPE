@@ -35,6 +35,9 @@ namespace TrafficManager.UI {
 				case "jaex":
 					language = "ja";
 					break;
+				case "zh-cn":
+					language = "zh";
+					break;
 			}
 
 			string translatedFilename = filename;
