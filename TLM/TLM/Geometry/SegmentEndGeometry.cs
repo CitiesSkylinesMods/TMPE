@@ -11,7 +11,7 @@ namespace TrafficManager.Geometry {
 			get; private set;
 		} = 0;
 
-		public bool StartNode;
+		public bool StartNode { get; private set; }
 
 		public ushort NodeId() {
 			return StartNode ? Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_endNode;

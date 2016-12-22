@@ -9,7 +9,7 @@ namespace TrafficManager.Manager {
 	/// <summary>
 	/// Manages the states of all custom traffic lights on the map
 	/// </summary>
-	public class CustomTrafficLightsManager : ICustomManager {
+	public class CustomTrafficLightsManager : ICustomManager, ICustomSegmentLightManager {
 		public static CustomTrafficLightsManager Instance { get; private set; } = null;
 
 		static CustomTrafficLightsManager() {
@@ -28,13 +28,7 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		/// <param name="segmentId"></param>
 		internal void AddLiveSegmentLights(ushort nodeId, ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.AddLiveSegmentLights");
-#endif
 			if (IsSegmentLight(nodeId, segmentId)) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.AddLiveSegmentLights");
-#endif
 				return;
 			}
 
@@ -53,9 +47,6 @@ namespace TrafficManager.Manager {
 				vehicleLightState == RoadBaseAI.TrafficLightState.Green
 					? RoadBaseAI.TrafficLightState.Green
 					: RoadBaseAI.TrafficLightState.Red);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.AddLiveSegmentLights");
-#endif
 		}
 
 		/// <summary>
@@ -66,9 +57,6 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="lightState">(optional) light state to set</param>
 		public void AddSegmentLights(ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState lightState=RoadBaseAI.TrafficLightState.Red) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.AddSegmentLights");
-#endif
 #if DEBUG
 			Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ {nodeId}");
 #endif
@@ -77,9 +65,6 @@ namespace TrafficManager.Manager {
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment != null) {
 				if (customSegment.Node1 == nodeId || customSegment.Node2 == nodeId) {
-#if TRACE
-					Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.AddSegmentLights");
-#endif
 					return;
 				}
 
@@ -88,21 +73,18 @@ namespace TrafficManager.Manager {
 #endif
 
 				if (customSegment.Node1 == 0) {
-					customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
+					customSegment.Node1Lights = new CustomSegmentLights(this, nodeId, segmentId, lightState);
 					customSegment.Node1 = nodeId;
 				} else {
-					customSegment.Node2Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
+					customSegment.Node2Lights = new CustomSegmentLights(this, nodeId, segmentId, lightState);
 					customSegment.Node2 = nodeId;
 				}
 			} else {
 				customSegment = new CustomSegment();
-				customSegment.Node1Lights = new CustomSegmentLights(nodeId, segmentId, lightState);
+				customSegment.Node1Lights = new CustomSegmentLights(this, nodeId, segmentId, lightState);
 				customSegment.Node1 = nodeId;
 				CustomSegments[segmentId] = customSegment;
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.AddSegmentLights");
-#endif
 		}
 
 		/// <summary>
@@ -122,18 +104,12 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		/// <param name="segmentId"></param>
 		public void RemoveSegmentLight(ushort nodeId, ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.RemoveSegmentLight");
-#endif
 #if DEBUG
 			Log.Warning($"Removing segment light: {segmentId} @ {nodeId}");
 #endif
 
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.RemoveSegmentLight");
-#endif
 				return;
 			}
 
@@ -146,9 +122,6 @@ namespace TrafficManager.Manager {
 			}
 
 			Cleanup(segmentId);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.RemoveSegmentLight");
-#endif
 		}
 
 		/// <summary>
@@ -157,14 +130,8 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="segmentId"></param>
 		private void Cleanup(ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.Cleanup");
-#endif
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.Cleanup");
-#endif
 				return;
 			}
 
@@ -182,9 +149,6 @@ namespace TrafficManager.Manager {
 			if (customSegment.Node1 == 0 && customSegment.Node2 == 0) {
 				CustomSegments[segmentId] = null;
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.Cleanup");
-#endif
 		}
 
 		/// <summary>
@@ -194,27 +158,15 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <returns></returns>
 		public bool IsSegmentLight(ushort nodeId, ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.IsSegmentLight");
-#endif
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.IsSegmentLight");
-#endif
 				return false;
 			}
 
 			if (customSegment.Node1 == nodeId || customSegment.Node2 == nodeId) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.IsSegmentLight");
-#endif
 				return true;
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.IsSegmentLight");
-#endif
 			return false;
 		}
 
@@ -225,16 +177,10 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <returns>existing or new custom traffic light at segment end</returns>
 		public CustomSegmentLights GetOrLiveSegmentLights(ushort nodeId, ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.GetOrLiveSegmentLights");
-#endif
 			if (! IsSegmentLight(nodeId, segmentId))
 				AddLiveSegmentLights(nodeId, segmentId);
 
 			CustomSegmentLights ret = GetSegmentLights(nodeId, segmentId);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.GetOrLiveSegmentLights");
-#endif
 			return ret;
 		}
 
@@ -245,35 +191,20 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <returns>existing custom traffic light at segment end, <code>null</code> if none exists</returns>
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("CustomTrafficLights.GetSegmentLights");
-#endif
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.GetSegmentLights");
-#endif
 				return null;
 			}
 
 			//Log.Message($"Get segment light: {segmentId} @ {nodeId}");
 
 			if (customSegment.Node1 == nodeId) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.GetSegmentLights");
-#endif
 				return customSegment.Node1Lights;
 			}
 			if (customSegment.Node2 == nodeId) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.GetSegmentLights");
-#endif
 				return customSegment.Node2Lights;
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("CustomTrafficLights.GetSegmentLights");
-#endif
 			return null;
 		}
 

@@ -22,11 +22,15 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnSecondaryClickOverlay() {
+			if (IsCursorInPanel())
+				return;
 			Cleanup();
 			SelectedNodeId = 0;
 		}
 
 		public override void OnPrimaryClickOverlay() {
+			if (IsCursorInPanel())
+				return;
 			if (SelectedNodeId != 0) return;
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
@@ -327,7 +331,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightMain();
+			segmentDict.ChangeMainLight();
 			return true;
 		}
 
@@ -357,7 +361,7 @@ namespace TrafficManager.UI.SubTools {
 					hoveredSegment = true;
 
 					if (MainTool.CheckClicked()) {
-						segmentDict.ChangeLightLeft();
+						segmentDict.ChangeLeftLight();
 					}
 				}
 			}
@@ -405,7 +409,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightMain();
+			segmentDict.ChangeMainLight();
 			return true;
 		}
 
@@ -463,7 +467,7 @@ namespace TrafficManager.UI.SubTools {
 				hoveredSegment = true;
 
 				if (MainTool.CheckClicked()) {
-					segmentDict.ChangeLightMain();
+					segmentDict.ChangeMainLight();
 				}
 			}
 
@@ -496,7 +500,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightRight();
+			segmentDict.ChangeRightLight();
 			return true;
 		}
 
@@ -533,10 +537,10 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightLeft();
+			segmentDict.ChangeLeftLight();
 
 			if (!hasForwardSegment) {
-				segmentDict.ChangeLightMain();
+				segmentDict.ChangeMainLight();
 			}
 			return true;
 		}
@@ -572,7 +576,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightMain();
+			segmentDict.ChangeMainLight();
 			return true;
 		}
 
@@ -601,7 +605,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeLightRight();
+			segmentDict.ChangeRightLight();
 			return true;
 		}
 

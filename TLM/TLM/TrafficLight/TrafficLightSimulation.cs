@@ -138,13 +138,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void housekeeping() {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.housekeeping");
-#endif
-			TimedLight?.StepHousekeeping(); // removes unused step lights
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.housekeeping");
-#endif
+			TimedLight?.housekeeping(); // removes unused step lights
 		}
 
 		private void setupLiveSegments() {

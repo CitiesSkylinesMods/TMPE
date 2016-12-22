@@ -69,6 +69,7 @@ namespace TrafficManager.UI.SubTools {
 
 			bool stateUpdated = false;
 			bool handleHovered = false;
+			bool cursorInPanel = this.IsCursorInPanel();
 			foreach (ushort nodeId in currentRestrictedNodeIds) {
 				Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
 				var diff = nodePos - camPos;
@@ -88,7 +89,7 @@ namespace TrafficManager.UI.SubTools {
 
 				// draw junction restrictions
 				bool update;
-				if (drawSignHandles(nodeId, viewOnlyNode, ref camPos, out update))
+				if (drawSignHandles(nodeId, viewOnlyNode, !cursorInPanel, ref camPos, out update))
 					handleHovered = true;
 
 				if (update)
@@ -121,8 +122,12 @@ namespace TrafficManager.UI.SubTools {
 			RefreshCurrentRestrictedNodeIds();
 		}
 
-		public override void Initialize() {
+		public override void Cleanup() {
 			RefreshCurrentRestrictedNodeIds();
+		}
+
+		public override void Initialize() {
+			Cleanup();
 		}
 
 		private void RefreshCurrentRestrictedNodeIds() {
@@ -136,7 +141,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		private bool drawSignHandles(ushort nodeId, bool viewOnly, ref Vector3 camPos, out bool stateUpdated) {
+		private bool drawSignHandles(ushort nodeId, bool viewOnly, bool handleClick, ref Vector3 camPos, out bool stateUpdated) {
 			bool hovered = false;
 			stateUpdated = false;
 
@@ -188,7 +193,7 @@ namespace TrafficManager.UI.SubTools {
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowLaneChangesWhileGoingStraight)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.LaneChangeAllowedTexture2D : TrafficLightToolTextureResources.LaneChangeForbiddenTexture2D, out signHovered);
-					if (signHovered) {
+					if (signHovered && handleClick) {
 						hovered = true;
 						if (MainTool.CheckClicked()) {
 							JunctionRestrictionsManager.Instance.ToggleLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
@@ -206,12 +211,15 @@ namespace TrafficManager.UI.SubTools {
 				allowed = JunctionRestrictionsManager.Instance.IsUturnAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowUTurns)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.UturnAllowedTexture2D : TrafficLightToolTextureResources.UturnForbiddenTexture2D, out signHovered);
-					if (signHovered) {
+					if (signHovered && handleClick) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance.ToggleUturnAllowed(segmentId, startNode);
-							stateUpdated = true;
+							if (!JunctionRestrictionsManager.Instance.ToggleUturnAllowed(segmentId, startNode)) {
+								// TODO MainTool.ShowTooltip(Translation.GetString("..."), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
+							} else {
+								stateUpdated = true;
+							}
 						}
 					}
 
@@ -223,7 +231,7 @@ namespace TrafficManager.UI.SubTools {
 				allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.EnterBlockedJunctionAllowedTexture2D : TrafficLightToolTextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
-					if (signHovered) {
+					if (signHovered && handleClick) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {
@@ -242,7 +250,7 @@ namespace TrafficManager.UI.SubTools {
 				allowed = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentId, startNode);
 				if (!viewOnly || !allowed) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TrafficLightToolTextureResources.PedestrianCrossingAllowedTexture2D : TrafficLightToolTextureResources.PedestrianCrossingForbiddenTexture2D, out signHovered);
-					if (signHovered) {
+					if (signHovered && handleClick) {
 						hovered = true;
 
 						if (MainTool.CheckClicked()) {

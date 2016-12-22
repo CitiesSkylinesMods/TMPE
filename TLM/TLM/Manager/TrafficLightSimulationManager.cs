@@ -27,29 +27,18 @@ namespace TrafficManager.Manager {
 		}
 
 		public void SimulationStep() {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.SimulationStep");
-#endif
-			try {
-				foreach (ushort nodeId in NodesWithTrafficLightSimulation) {
-					try {
-						TrafficLightSimulation nodeSim = TrafficLightSimulations[nodeId];
+			foreach (ushort nodeId in NodesWithTrafficLightSimulation) {
+				try {
+					TrafficLightSimulation nodeSim = TrafficLightSimulations[nodeId];
 
-						if (nodeSim.IsTimedLightActive()) {
-							Flags.applyNodeTrafficLightFlag(nodeId);
-							nodeSim.TimedLight.SimulationStep();
-						}
-					} catch (Exception ex) {
-						Log.Warning($"Error occured while simulating traffic light @ node {nodeId}: {ex.ToString()}");
+					if (nodeSim.IsTimedLightActive()) {
+						//Flags.applyNodeTrafficLightFlag(nodeId);
+						nodeSim.TimedLight.SimulationStep();
 					}
+				} catch (Exception ex) {
+					Log.Warning($"Error occured while simulating traffic light @ node {nodeId}: {ex.ToString()}");
 				}
-			} catch (Exception ex) {
-				// TODO the dictionary was modified (probably a segment connected to a traffic light was changed/removed). rework this
-				Log.Warning($"Error occured while iterating over traffic light simulations: {ex.ToString()}");
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.SimulationStep");
-#endif
 		}
 
 		/// <summary>
@@ -146,18 +135,11 @@ namespace TrafficManager.Manager {
 		}
 
 		public TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("TrafficLightSimulation.GetNodeSimulation");
-#endif
-
 			TrafficLightSimulation ret = null;
 			if (HasSimulation(nodeId)) {
 				ret = TrafficLightSimulations[nodeId];
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("TrafficLightSimulation.GetNodeSimulation");
-#endif
 			return ret;
 		}
 

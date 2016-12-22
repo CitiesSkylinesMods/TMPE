@@ -82,10 +82,10 @@ namespace TrafficManager.State {
 		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
 #if DEBUG
-		public static bool nodesOverlay = true;
+		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
 		public static bool citizenOverlay = false;
-		public static bool buildingOverlay = true;
+		public static bool buildingOverlay = false;
 #else
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
@@ -99,7 +99,7 @@ namespace TrafficManager.State {
 		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 #if DEBUG
-		public static bool showLanes = true;
+		public static bool showLanes = false;
 #else
 		public static bool showLanes = false;
 #endif

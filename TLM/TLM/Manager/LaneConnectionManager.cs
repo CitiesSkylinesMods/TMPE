@@ -12,7 +12,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class LaneConnectionManager : IObserver<SegmentGeometry> {
+	public class LaneConnectionManager : ICustomManager, IObserver<SegmentGeometry> {
 		public static LaneConnectionManager Instance { get; private set; } = null;
 		
 		static LaneConnectionManager() {
@@ -31,13 +31,7 @@ namespace TrafficManager.Manager {
 		/// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
 		/// <returns></returns>
 		public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("LaneConnectionManager.AreLanesConnected");
-#endif
 			if (targetLaneId == 0 || !Flags.IsInitDone() || Flags.laneConnections[sourceLaneId] == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.AreLanesConnected");
-#endif
 				return false;
 			}
 			
@@ -45,9 +39,6 @@ namespace TrafficManager.Manager {
 
 			uint[] connectedLanes = Flags.laneConnections[sourceLaneId][nodeArrayIndex];
 			if (connectedLanes == null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.AreLanesConnected");
-#endif
 				return false;
 			}
 
@@ -58,9 +49,6 @@ namespace TrafficManager.Manager {
 					break;
 				}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.AreLanesConnected");
-#endif
 			return ret;
 		}
 
@@ -70,22 +58,44 @@ namespace TrafficManager.Manager {
 		/// <param name="sourceLaneId"></param>
 		/// <returns></returns>
 		public bool HasConnections(uint sourceLaneId, bool startNode) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("LaneConnectionManager.HasConnections");
-#endif
 			if (!Flags.IsInitDone()) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.HasConnections");
-#endif
 				return false;
 			}
 			int nodeArrayIndex = startNode ? 0 : 1;
 
 			bool ret = Flags.laneConnections[sourceLaneId] != null && Flags.laneConnections[sourceLaneId][nodeArrayIndex] != null;
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("LaneConnectionManager.HasConnections");
-#endif
 			return ret;
+		}
+
+		public bool HasUturnConnections(ushort segmentId, bool startNode) {
+			NetManager netManager = Singleton<NetManager>.instance;
+			int nodeArrayIndex = startNode ? 0 : 1;
+
+			uint sourceLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+			while (sourceLaneId != 0) {
+				uint[] targetLaneIds = GetLaneConnections(sourceLaneId, startNode);
+				foreach (uint targetLaneId in targetLaneIds) {
+					if (netManager.m_lanes.m_buffer[targetLaneId].m_segment == segmentId) {
+						return true;
+					}
+				}
+				sourceLaneId = netManager.m_lanes.m_buffer[sourceLaneId].m_nextLane;
+			}
+			return false;
+		}
+
+		internal int CountConnections(uint sourceLaneId, bool startNode) {
+			if (!Flags.IsInitDone()) {
+				return 0;
+			}
+
+			if (Flags.laneConnections[sourceLaneId] == null)
+				return 0;
+			int nodeArrayIndex = startNode ? 0 : 1;
+			if (Flags.laneConnections[sourceLaneId][nodeArrayIndex] == null)
+				return 0;
+			
+			return Flags.laneConnections[sourceLaneId][nodeArrayIndex].Length;
 		}
 
 		/// <summary>
@@ -250,6 +260,11 @@ namespace TrafficManager.Manager {
 
 				ushort segmentId1 = netManager.m_lanes.m_buffer[laneId1].m_segment;
 				ushort segmentId2 = netManager.m_lanes.m_buffer[laneId2].m_segment;
+
+				if (segmentId1 == segmentId2) {
+					JunctionRestrictionsManager.Instance.SetUturnAllowed(segmentId1, startNode1, true);
+				}
+
 				SubscribeToSegmentGeometry(segmentId1);
 				SubscribeToSegmentGeometry(segmentId2);
 			}
@@ -426,8 +441,14 @@ namespace TrafficManager.Manager {
 				// check if arrow has already been set for this direction
 				switch (dir) {
 					case ArrowDirection.Turn:
-					default:
-						continue;
+						if (TrafficPriorityManager.IsLeftHandDrive()) {
+							if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
+								continue;
+						} else {
+							if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
+								continue;
+						}
+						break;
 					case ArrowDirection.Forward:
 						if ((arrows & Flags.LaneArrows.Forward) != Flags.LaneArrows.None)
 							continue;
@@ -440,6 +461,8 @@ namespace TrafficManager.Manager {
 						if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
 							continue;
 						break;
+					default:
+						continue;
 				}
 
 #if DEBUGCONN
@@ -470,8 +493,12 @@ namespace TrafficManager.Manager {
 				if (addArrow) {
 					switch (dir) {
 						case ArrowDirection.Turn:
-						default:
-							continue;
+							if (TrafficPriorityManager.IsLeftHandDrive()) {
+								arrows |= Flags.LaneArrows.Right;
+							} else {
+								arrows |= Flags.LaneArrows.Left;
+							}
+							break;
 						case ArrowDirection.Forward:
 							arrows |= Flags.LaneArrows.Forward;
 							break;
@@ -481,6 +508,8 @@ namespace TrafficManager.Manager {
 						case ArrowDirection.Right:
 							arrows |= Flags.LaneArrows.Right;
 							break;
+						default:
+							continue;
 					}
 
 #if DEBUGCONN
@@ -543,10 +572,7 @@ namespace TrafficManager.Manager {
 			}
 		}
 
-		internal void OnBeforeLoadData() {
-#if DEBUGCONN
-			Log._Debug($"LaneConnectionManager.OnBeforeLoadData() called.");
-#endif
+		public void OnLevelUnloading() {
 			UnsubscribeFromAllSegmentGeometries();
 		}
 

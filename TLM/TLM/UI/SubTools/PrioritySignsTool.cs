@@ -44,14 +44,6 @@ namespace TrafficManager.UI.SubTools {
 			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
 		}
 
-		public override void Initialize() {
-			RefreshCurrentPrioritySegmentIds();
-		}
-
-		public override void OnActivate() {
-			RefreshCurrentPrioritySegmentIds();
-		}
-
 		private void RefreshCurrentPrioritySegmentIds() {
 			currentPrioritySegmentIds.Clear();
 			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
@@ -320,6 +312,12 @@ namespace TrafficManager.UI.SubTools {
 					Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
 				}
 			}
+
+			RefreshCurrentPrioritySegmentIds();
+		}
+
+		public override void Initialize() {
+			Cleanup();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #define DEBUGFRONTVEHx
 #define DEBUGREGx
-#define DEBUGMETRICx
+#define DEBUGMETRIC
+#define DEBUGMETRIC2
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.Threading;
 using TrafficManager.State;
 using TrafficManager.UI;
 using TrafficManager.Manager;
+using System.Linq;
 
 /// <summary>
 /// A segment end describes a directional traffic segment connected to a controlled node
@@ -63,7 +65,7 @@ namespace TrafficManager.Traffic {
 		//private ushort[] frontVehicleIds;
 
 		/// <summary>
-		/// Number of vehicles / vehicle length goint to a certain segment
+		/// Number of vehicles / vehicle length going to a certain segment
 		/// </summary>
 		private Dictionary<ushort, uint> numVehiclesFlowingToSegmentId; // minimum speed required
 		private Dictionary<ushort, uint> numVehiclesGoingToSegmentId; // no minimum speed required
@@ -124,9 +126,6 @@ namespace TrafficManager.Traffic {
 		/// We use integer arithmetic for better performance.
 		/// </summary>
 		public Dictionary<ushort, uint> GetVehicleMetricGoingToSegment(bool includeStopped=true, byte? laneIndex=null, bool debug = false) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SegmentEnd.GetVehicleMetricGoingToSegment");
-#endif
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
@@ -136,7 +135,7 @@ namespace TrafficManager.Traffic {
 			for (var s = 0; s < 8; s++) {
 				ushort segmentId = netManager.m_nodes.m_buffer[NodeId].GetSegment(s);
 
-				if (segmentId == 0 || segmentId == SegmentId)
+				if (segmentId == 0)
 					continue;
 
 				if (!ret.ContainsKey(segmentId))
@@ -147,7 +146,7 @@ namespace TrafficManager.Traffic {
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}. Target segments: {string.Join(", ", ret.Keys.Select(x => x.ToString()).ToArray())}, Registered Vehicles: {string.Join(", ", GetRegisteredVehicles().Select(x => x.Key.ToString()).ToArray())}");
+				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}. Target segments: {string.Join(", ", ret.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 
 			ushort vehicleId = FirstRegisteredVehicleId;
@@ -163,32 +162,32 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-#if DEBUGMETRIC
+#if DEBUGMETRIC2
 				if (debug)
 					Log._Debug($" GetVehicleMetricGoingToSegment: Checking vehicle {vehicleId}");
 #endif
 
 					if (!ret.ContainsKey(nextPos.m_segment)) {
-#if DEBUGMETRIC
+#if DEBUGMETRIC2
 					if (debug)
-						Log._Debug($"  GetVehicleMetricGoingToSegment: ret does not contain key for target segment {pos.TargetSegmentId}");
+						Log._Debug($"  GetVehicleMetricGoingToSegment: ret does not contain key for target segment {nextPos.m_segment}");
 #endif
 						return;
 					}
 
 					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriorityManager.MAX_STOP_VELOCITY) {
-#if DEBUGMETRIC
-					if (debug)
-						Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");
+#if DEBUGMETRIC2
+						if (debug)
+							Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");
 #endif
 						++numProcessed;
 						return;
 					}
 
 					if (laneIndex != null && curPos.m_lane != laneIndex) {
-#if DEBUGMETRIC
-					if (debug)
-						Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: Lane index mismatch (expected: {laneIndex}, was: {pos.SourceLaneIndex})");
+#if DEBUGMETRIC2
+						if (debug)
+							Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: Lane index mismatch (expected: {laneIndex}, was: {curPos.m_lane})");
 #endif
 						return;
 					}
@@ -202,17 +201,12 @@ namespace TrafficManager.Traffic {
 							Log._Debug($"  GetVehicleMetricGoingToSegment: NormLength of vehicle {vehicleId}: {avgSegmentLength} -> {normLength}");
 #endif
 
-#if DEBUGMETRIC
-						if (debug)
-							ret[pos.TargetSegmentId] += 1;
-						else
-							ret[pos.TargetSegmentId] = Math.Min(100u, ret[pos.TargetSegmentId] + normLength);
-#else
-							ret[nextPos.m_segment] += normLength;
-#endif
+						ret[nextPos.m_segment] += normLength;
 					} else {
 						ret[nextPos.m_segment] += 10;
 					}
+
+					++ret[nextPos.m_segment];
 					++numProcessed;
 
 					if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
@@ -220,9 +214,9 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-#if DEBUGMETRIC
+#if DEBUGMETRIC2
 				if (debug)
-					Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: *added*! Coming from segment {SegmentId}, lane {laneIndex}. Going to segment {pos.TargetSegmentId}, lane {pos.TargetLaneIndex}, minSpeed={TrafficPriority.maxStopVelocity}, speed={speed}");
+					Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: *added*! Coming from segment {SegmentId}, lane {laneIndex}. Going to segment {nextPos.m_segment}, lane {nextPos.m_lane}");
 #endif
 				});
 
@@ -235,9 +229,6 @@ namespace TrafficManager.Traffic {
 #if DEBUGMETRIC
 			if (debug)
 				Log._Debug($"GetVehicleMetricGoingToSegment: Calculation completed. {string.Join(", ", ret.Select(x => x.Key.ToString() + "=" + x.Value.ToString()).ToArray())}");
-#endif
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("SegmentEnd.GetVehicleMetricGoingToSegment");
 #endif
 			return ret;
 		}
@@ -277,14 +268,16 @@ namespace TrafficManager.Traffic {
 
 			StartNode = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode == NodeId;
 			numLanes = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].Info.m_lanes.Length;
-			numVehiclesFlowingToSegmentId = new Dictionary<ushort, uint>(7);
-			numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>(7);
+			numVehiclesFlowingToSegmentId = new Dictionary<ushort, uint>(8);
+			numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>(8);
 			//frontVehicleIds = new ushort[numLanes];
 			ushort[] outgoingSegmentIds = geometry.GetOutgoingSegments(StartNode);
 			foreach (ushort otherSegmentId in outgoingSegmentIds) {
 				numVehiclesFlowingToSegmentId[otherSegmentId] = 0;
 				numVehiclesGoingToSegmentId[otherSegmentId] = 0;
 			}
+			numVehiclesFlowingToSegmentId[SegmentId] = 0;
+			numVehiclesGoingToSegmentId[SegmentId] = 0;
 		}
 
 		public void OnUpdate(NodeGeometry geometry) {

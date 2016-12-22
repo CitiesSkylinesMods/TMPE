@@ -99,11 +99,13 @@
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
+    <Compile Include="Manager\TrafficMeasurementManager.cs" />
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\UtilityManager.cs" />
     <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
     <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLightManager.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="Traffic\ExtBuilding.cs" />
     <Compile Include="Traffic\ExtCitizenInstance.cs" />

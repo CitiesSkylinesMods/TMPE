@@ -17,6 +17,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnPrimaryClickOverlay() {
+			if (IsCursorInPanel())
+				return;
 			if (HoveredNodeId == 0)
 				return;
 

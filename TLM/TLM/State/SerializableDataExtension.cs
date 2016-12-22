@@ -63,26 +63,10 @@ namespace TrafficManager.State {
 			}
 
 			try {
-				Log.Info("Initializing lane connection manager");
-				LaneConnectionManager.Instance.OnBeforeLoadData(); // requires segment geometries
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing LaneConnectionManager: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
-			try {
 				Log.Info("Initializing CitizenAI");
 				CustomCitizenAI.OnBeforeLoadData();
 			} catch (Exception e) {
 				Log.Error($"OnLoadData: Error while initializing CitizenAI: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
-			try {
-				Log.Info("Initializing CustomRoadAI");
-				CustomRoadAI.OnBeforeLoadData();
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing CustomRoadAI: {e.ToString()}");
 				loadingSucceeded = false;
 			}
 
@@ -425,15 +409,14 @@ namespace TrafficManager.State {
 									}
 									Configuration.CustomSegmentLight cnfLight = e2.Value;
 
-									light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
-									light.LightLeft = cnfLight.leftLight;
-									light.LightMain = cnfLight.mainLight;
-									light.LightRight = cnfLight.rightLight;
+									light.currentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
+									light.SetStates(cnfLight.mainLight, cnfLight.leftLight, cnfLight.rightLight, false);
 								}
 							}
 							++j;
 						}
 
+						timedNode.housekeeping();
 						if (cnfTimedLights.started)
 							timedNode.Start();
 					} catch (Exception e) {

@@ -100,8 +100,8 @@ namespace TrafficManager.State {
 			}
 
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created)");
-				//Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				//Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created)");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 
@@ -110,12 +110,14 @@ namespace TrafficManager.State {
 				connectionClass.m_service != ItemClass.Service.PublicTransport
 				) {
 				//Log._Debug($"Flags: Node {nodeId} may not have a traffic light");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 
 			if (connectionClass == null ||
 				(connectionClass.m_service != ItemClass.Service.Road &&
 				connectionClass.m_service != ItemClass.Service.PublicTransport)) {
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 

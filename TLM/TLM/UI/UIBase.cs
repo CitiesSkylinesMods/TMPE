@@ -10,6 +10,7 @@ namespace TrafficManager.UI {
 	public class UIBase : UICustomControl {
 
 		private UIMainMenuButton button;
+		public static UITrafficManager menu { get; private set; }
 		private bool _uiShown = false;
 
 		public UIBase() {
@@ -21,6 +22,9 @@ namespace TrafficManager.UI {
 
 			// Add a new button to the view.
 			button = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
+
+			// add the menu
+			menu = (UITrafficManager)uiView.AddUIComponent(typeof(UITrafficManager));
 		}
 
 		~UIBase() {
@@ -52,14 +56,7 @@ namespace TrafficManager.UI {
 
 		public void Close() {
 			var uiView = UIView.GetAView();
-			var trafficManager = uiView.FindUIComponent("UITrafficManager");
-			if (trafficManager != null) {
-				Log._Debug("Hiding TM UI");
-				Destroy(trafficManager);
-				//trafficManager.Hide();
-			} else {
-				Log._Debug("Hiding TM UI: null!");
-			}
+			GetMenu().Hide();
 
 			UITrafficManager.deactivateButtons();
 			TrafficManagerTool.SetToolMode(ToolMode.None);
@@ -69,14 +66,7 @@ namespace TrafficManager.UI {
 		}
 
 		internal static UITrafficManager GetMenu() {
-			var uiView = UIView.GetAView();
-			var menu = uiView.FindUIComponent("UITrafficManager");
-			if (menu != null) {
-				return (UITrafficManager)menu;
-			} else {
-				uiView.AddUIComponent(typeof(UITrafficManager));
-				return (UITrafficManager)uiView.FindUIComponent("UITrafficManager");
-			}
+			return menu;
 		}
 	}
 #endif

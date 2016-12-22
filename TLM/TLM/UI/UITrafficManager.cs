@@ -55,6 +55,7 @@ namespace TrafficManager.UI {
 
 		public override void Start() {
 			TrafficLightTool = LoadingExtension.TrafficManagerTool;
+			isVisible = false;
 
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);

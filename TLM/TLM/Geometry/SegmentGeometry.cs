@@ -246,6 +246,18 @@ namespace TrafficManager.Geometry {
 			}
 		}
 
+		public SegmentEndGeometry GetEnd(ushort nodeId) {
+			ushort startNodeId = StartNodeId();
+			if (nodeId == startNodeId) {
+				return StartNodeGeometry;
+			} else {
+				ushort endNodeId = EndNodeId();
+				if (nodeId == endNodeId)
+					return EndNodeGeometry;
+			}
+			return null;
+		}
+
 		/// <summary>
 		/// Verifies the information that another is/is not connected to the managed segment. If the verification fails, a recalculation of geometry data is performed.
 		/// The method does not necessarily guarantee that the segment geometry data regarding the queried segment with id "otherSegmentId" is correct.

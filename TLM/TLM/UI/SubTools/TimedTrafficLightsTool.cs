@@ -47,11 +47,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override bool IsCursorInPanel() {
-			return _cursorInSecondaryPanel;
-		}
-
-		public override void Initialize() {
-			RefreshCurrentTimedNodeIds();
+			return base.IsCursorInPanel() || _cursorInSecondaryPanel;
 		}
 
 		private void RefreshCurrentTimedNodeIds() {
@@ -288,7 +284,7 @@ namespace TrafficManager.UI.SubTools {
 							float wait = Single.NaN;
 							if (inTestMode) {
 								try {
-									timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(out wait, out flow);
+									timedNodeMain.GetStep(timedNodeMain.CurrentStep).calcWaitFlow(true, timedNodeMain.CurrentStep, out wait, out flow);
 								} catch (Exception e) {
 									Log.Warning("calcWaitFlow in UI: This is not thread-safe: " + e.ToString());
 								}
@@ -338,7 +334,7 @@ namespace TrafficManager.UI.SubTools {
 							} else {
 								GUILayout.Space(50);
 							}
-
+							
 							if (i < numSteps - 1) {
 								if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(48))) {
 									foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
@@ -357,7 +353,7 @@ namespace TrafficManager.UI.SubTools {
 								_timedViewedStep = i;
 
 								foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
-									sim.TimedLight.GetStep(i).SetLights(true);
+									sim.TimedLight.GetStep(i).UpdateLiveLights(true);
 								}
 							}
 
@@ -373,7 +369,7 @@ namespace TrafficManager.UI.SubTools {
 								nodeSelectionLocked = true;
 
 								foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
-									sim.TimedLight.GetStep(i).SetLights(true);
+									sim.TimedLight.GetStep(i).UpdateLiveLights(true);
 								}
 							}
 
@@ -574,7 +570,19 @@ namespace TrafficManager.UI.SubTools {
 		public override void Cleanup() {
 			SelectedNodeId = 0;
 			ClearSelectedNodes();
+
 			_timedShowNumbers = false;
+			_timedPanelAdd = false;
+			_timedEditStep = -1;
+			_hoveredNode = 0;
+			_timedShowNumbers = false;
+			_timedViewedStep = -1;
+			timedLightActive = false;
+			RefreshCurrentTimedNodeIds();
+		}
+
+		public override void Initialize() {
+			Cleanup();
 		}
 
 		private void makeFlowPolicyDisplay(bool editable) {
@@ -849,11 +857,11 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void ShowGUIOverlay(bool viewOnly) {
-			if (!Options.timedLightsOverlay &&
+			if (viewOnly && !Options.timedLightsOverlay /*&&
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsAddNode &&
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsRemoveNode &&
 				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsSelectNode &&
-				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights)
+				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights*/)
 				return;
 
 			/*if (TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsShowLights) {
@@ -900,7 +908,7 @@ namespace TrafficManager.UI.SubTools {
 					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 					var size = 120f * zoom;
 					var guiColor = GUI.color;
-					guiColor.a = 0.25f;
+					guiColor.a = 0.5f;
 					GUI.color = guiColor;
 					var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
 					//Log._Debug($"GUI Color: {guiColor} {GUI.color}");
@@ -1001,7 +1009,7 @@ namespace TrafficManager.UI.SubTools {
 
 							GUI.DrawTexture(myRect2, liveSegmentLights.ManualPedestrianMode ? TrafficLightToolTextureResources.PedestrianModeManualTexture2D : TrafficLightToolTextureResources.PedestrianModeAutomaticTexture2D);
 
-							if (myRect2.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+							if (myRect2.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 								_hoveredButton[0] = srcSegmentId;
 								_hoveredButton[1] = 1;
 								_hoveredNode = nodeId;
@@ -1030,7 +1038,7 @@ namespace TrafficManager.UI.SubTools {
 								break;
 						}
 
-						if (myRect3.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+						if (myRect3.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 							_hoveredButton[0] = srcSegmentId;
 							_hoveredButton[1] = 2;
 							_hoveredNode = nodeId;
@@ -1073,8 +1081,8 @@ namespace TrafficManager.UI.SubTools {
 								offsetScreenPos.y - modeHeight / 2 + modeHeight - 7f * zoom, modeWidth, modeHeight);
 
 							GUI.DrawTexture(myRect1, TrafficLightToolTextureResources.LightModeTexture2D);
-
-							if (myRect1.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+							
+							if (myRect1.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 								_hoveredButton[0] = srcSegmentId;
 								_hoveredButton[1] = -1;
 								_hoveredNode = nodeId;
@@ -1150,7 +1158,7 @@ namespace TrafficManager.UI.SubTools {
 
 								GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
-								if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+								if (myRectCounterNum.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 2;
 									_hoveredNode = nodeId;
@@ -1185,14 +1193,14 @@ namespace TrafficManager.UI.SubTools {
 
 									drawMainLightTexture(liveSegmentLight.LightMain, myRect4);
 
-									if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (myRect4.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightMain();
+											liveSegmentLight.ChangeMainLight();
 										}
 									}
 
@@ -1219,7 +1227,7 @@ namespace TrafficManager.UI.SubTools {
 
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
-										if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+										if (myRectCounterNum.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 3;
 											_hoveredNode = nodeId;
@@ -1243,14 +1251,14 @@ namespace TrafficManager.UI.SubTools {
 
 									drawLeftLightTexture(liveSegmentLight.LightLeft, myRect4);
 
-									if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (myRect4.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightLeft();
+											liveSegmentLight.ChangeLeftLight();
 										}
 									}
 
@@ -1277,7 +1285,7 @@ namespace TrafficManager.UI.SubTools {
 
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
-										if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+										if (myRectCounterNum.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 3;
 											_hoveredNode = nodeId;
@@ -1306,14 +1314,14 @@ namespace TrafficManager.UI.SubTools {
 									hasOtherLight = true;
 								}
 
-								if (hasOtherLight && myRect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+								if (hasOtherLight && myRect5.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 									_hoveredButton[0] = srcSegmentId;
 									_hoveredButton[1] = 4;
 									_hoveredNode = nodeId;
 									hoveredSegment = true;
 
 									if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-										liveSegmentLight.ChangeLightMain();
+										liveSegmentLight.ChangeMainLight();
 									}
 								}
 
@@ -1340,7 +1348,7 @@ namespace TrafficManager.UI.SubTools {
 
 									GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
-									if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (myRectCounterNum.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 4;
 										_hoveredNode = nodeId;
@@ -1384,14 +1392,14 @@ namespace TrafficManager.UI.SubTools {
 									}
 
 
-									if (hasOtherLight && myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (hasOtherLight && myRect4.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightMain();
+											liveSegmentLight.ChangeMainLight();
 										}
 									}
 
@@ -1418,7 +1426,7 @@ namespace TrafficManager.UI.SubTools {
 
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
-										if (myRectCounterNum.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+										if (myRectCounterNum.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 3;
 											_hoveredNode = nodeId;
@@ -1441,7 +1449,7 @@ namespace TrafficManager.UI.SubTools {
 
 										drawRightLightTexture(liveSegmentLight.LightRight, rect5);
 
-										if (rect5.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+										if (rect5.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 4;
 											_hoveredNode = nodeId;
@@ -1449,7 +1457,7 @@ namespace TrafficManager.UI.SubTools {
 
 											if (MainTool.CheckClicked() && !timedActive &&
 												(_timedPanelAdd || _timedEditStep >= 0)) {
-												liveSegmentLight.ChangeLightRight();
+												liveSegmentLight.ChangeRightLight();
 											}
 										}
 
@@ -1480,7 +1488,7 @@ namespace TrafficManager.UI.SubTools {
 											GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 											if (myRectCounterNum.Contains(Event.current.mousePosition) &&
-												!_cursorInSecondaryPanel) {
+												!IsCursorInPanel()) {
 												_hoveredButton[0] = srcSegmentId;
 												_hoveredButton[1] = 4;
 												_hoveredNode = nodeId;
@@ -1511,14 +1519,14 @@ namespace TrafficManager.UI.SubTools {
 
 									drawLeftLightTexture(liveSegmentLight.LightLeft, myRect4);
 
-									if (myRect4.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (myRect4.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 3;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightLeft();
+											liveSegmentLight.ChangeLeftLight();
 										}
 									}
 
@@ -1549,7 +1557,7 @@ namespace TrafficManager.UI.SubTools {
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 										if (myRectCounterNum.Contains(Event.current.mousePosition) &&
-											!_cursorInSecondaryPanel) {
+											!IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 3;
 											_hoveredNode = nodeId;
@@ -1575,14 +1583,14 @@ namespace TrafficManager.UI.SubTools {
 
 									drawStraightLightTexture(liveSegmentLight.LightMain, myRect6);
 
-									if (myRect6.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (myRect6.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 4;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightMain();
+											liveSegmentLight.ChangeMainLight();
 										}
 									}
 
@@ -1613,7 +1621,7 @@ namespace TrafficManager.UI.SubTools {
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 										if (myRectCounterNum.Contains(Event.current.mousePosition) &&
-											!_cursorInSecondaryPanel) {
+											!IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 4;
 											_hoveredNode = nodeId;
@@ -1634,14 +1642,14 @@ namespace TrafficManager.UI.SubTools {
 
 									drawRightLightTexture(liveSegmentLight.LightRight, rect6);
 
-									if (rect6.Contains(Event.current.mousePosition) && !_cursorInSecondaryPanel) {
+									if (rect6.Contains(Event.current.mousePosition) && !IsCursorInPanel()) {
 										_hoveredButton[0] = srcSegmentId;
 										_hoveredButton[1] = 5;
 										_hoveredNode = nodeId;
 										hoveredSegment = true;
 
 										if (MainTool.CheckClicked() && !timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-											liveSegmentLight.ChangeLightRight();
+											liveSegmentLight.ChangeRightLight();
 										}
 									}
 
@@ -1672,7 +1680,7 @@ namespace TrafficManager.UI.SubTools {
 										GUI.Label(myRectCounterNum, counter.ToString(), _counterStyle);
 
 										if (myRectCounterNum.Contains(Event.current.mousePosition) &&
-											!_cursorInSecondaryPanel) {
+											!IsCursorInPanel()) {
 											_hoveredButton[0] = srcSegmentId;
 											_hoveredButton[1] = 5;
 											_hoveredNode = nodeId;
