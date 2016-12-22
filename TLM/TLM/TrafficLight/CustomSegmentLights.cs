@@ -33,18 +33,7 @@ namespace TrafficManager.TrafficLight {
 
 		public uint LastChangeFrame;
 
-		public bool InvalidPedestrianLight {
-			get {
-				return invalidPedestrianLight;
-			}
-			set {
-				if (invalidPedestrianLight == value)
-					return;
-				invalidPedestrianLight = value;
-				OnChange();
-			}
-		}
-		private bool invalidPedestrianLight = false;
+		public bool InvalidPedestrianLight = false;
 
 		public Dictionary<ExtVehicleType, CustomSegmentLight> CustomLights {
 			get; private set;

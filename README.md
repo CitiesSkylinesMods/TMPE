@@ -4,6 +4,16 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.7, 12/##/2016
+- Bugfix: Trains/Trams are sometimes not detected at timed traffic lights
+- Improved overall user interface performance
+- Improved overlay behavior
+- Improved Advanced AI lane selection
+- Improved traffic measurement
+- Auto pedestrian lights at timed traffic lights behave more intelligently now
+- A timed traffic light step with zero minimum time assigned can now be skipped
+- Using the lane connector to create a u-turn now automatically enables the "u-turn allowed" junction restriction  
+
 1.8.6, 12/12/2016
 - Added Korean language (thanks to @Toothless FLY [ROK]LSh.st for translating)
 - Updated Chinese language code (zh-cn -> zh) in order to make it compatible with the game (thanks to @Lost丶青柠 for reporting this issue)

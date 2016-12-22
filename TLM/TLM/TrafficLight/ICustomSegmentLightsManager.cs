@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.TrafficLight {
-	public interface ICustomSegmentLightManager {
+	public interface ICustomSegmentLightsManager {
 		CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId);
 	}
 }
