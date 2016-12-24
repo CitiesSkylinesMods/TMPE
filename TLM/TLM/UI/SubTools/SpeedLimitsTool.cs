@@ -37,7 +37,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override bool IsCursorInPanel() {
-			return _cursorInSecondaryPanel;
+			return base.IsCursorInPanel() || _cursorInSecondaryPanel;
 		}
 
 		public override void OnActivate() {

@@ -315,7 +315,7 @@ namespace TrafficManager.Custom.AI {
 				foundStartingPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out sqrDistA, out sqrDistB);
 			}
 
-			bool foundEndPos = !calculateEndPos || citizenManager.m_instances.m_buffer[(int)driverInstanceId].Info.m_citizenAI.FindPathPosition(driverInstanceId, ref citizenManager.m_instances.m_buffer[(int)driverInstanceId], endPos, Options.prohibitPocketCars ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleType, undergroundTarget, out endPosA);
+			bool foundEndPos = !calculateEndPos || citizenManager.m_instances.m_buffer[(int)driverInstanceId].Info.m_citizenAI.FindPathPosition(driverInstanceId, ref citizenManager.m_instances.m_buffer[(int)driverInstanceId], endPos, Options.prohibitPocketCars && (targetBuildingId == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleType, undergroundTarget, out endPosA);
 			// NON-STOCK CODE END
 
 			if (foundStartingPos &&
@@ -969,6 +969,10 @@ namespace TrafficManager.Custom.AI {
 					}
 				} else if (prohibitPocketCars) {
 					// could not find parking space. vehicle would despawn.
+					if (targetBuildingId != 0 && (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None) {
+						// target is an outside connection
+						return true;
+					}
 
 					// Find parking space in the vicinity, redo path-finding to the parking space, park the vehicle and do citizen path-finding to the current target
 

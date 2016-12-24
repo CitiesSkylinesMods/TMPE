@@ -226,6 +226,9 @@ namespace TrafficManager.UI.SubTools {
 			Log._Debug($"TppLaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId}");
 #endif
 
+			if (IsCursorInPanel())
+				return;
+
 			if (GetMarkerSelectionMode() == MarkerSelectionMode.None) {
 				if (HoveredNodeId != 0) {
 #if DEBUGCONN
@@ -314,6 +317,9 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnSecondaryClickOverlay() {
+			if (IsCursorInPanel())
+				return;
+
 			switch (GetMarkerSelectionMode()) {
 				case MarkerSelectionMode.None:
 				default:
@@ -372,18 +378,12 @@ namespace TrafficManager.UI.SubTools {
 			return MarkerSelectionMode.SelectTarget;
 		}
 
-		public override void Initialize() {
-#if DEBUGCONN
-			Log.Warning("LaneConnectorTool.Initialize called");
-#endif
-			if (!Flags.IsInitDone()) {
-#if DEBUGCONN
-				Log.Warning("LaneConnectorTool.Initialize: Flags have not been initialized!");
-#endif
-				return;
-			}
-
+		public override void Cleanup() {
 			RefreshCurrentNodeMarkers();
+		}
+
+		public override void Initialize() {
+			Cleanup();
 		}
 
 		private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId) {

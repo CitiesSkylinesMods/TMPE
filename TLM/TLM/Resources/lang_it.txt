@@ -1,0 +1,159 @@
+Switch_traffic_lights Attiva/Disattiva semaforo
+Add_priority_signs Aggiungi segnale stradale
+Manual_traffic_lights Semaforo manuale
+Timed_traffic_lights Semaforo programmato
+Change_lane_arrows Modifica frecce di direzione
+Clear_Traffic Resetta traffico
+Disable_despawning Disabilita il despawn
+Enable_despawning Abilita il despawn
+NODE_IS_LIGHT In questo incrocio c'è un semaforo./nElimina il semaforo scegliendo "Attiva/Disattiva semaforo"
+NODE_IS_TIMED_LIGHT In questo incrocio c'è un semaforo programmato\nPrima seleziona "Semaforo programmato", clicca su questo nodo e poi "Rimuovi".
+Select_nodes_windowTitle Seleziona nodi
+Select_nodes Seleziona nodi
+Node Nodo
+Deselect_all_nodes Deseleziona tutti i nodi
+Setup_timed_traffic_light Configura semaforo programmato
+State Stato
+Skip Salta
+up Su
+down Giù
+View Vedi
+Edit Modifica
+Delete Elimina
+Timed_traffic_lights_manager Gestore semafori programmati
+Add_step Aggiungi step
+Remove_timed_traffic_light Rimuovi semaforo programmato
+Min._Time: Min. Tempo:
+Max._Time: Max. Tempo:
+Save Salva
+Add Aggiungi
+Sensitivity Sensibilità
+Very_Low Molto basso
+Low Basso
+Medium Medio
+High Alto
+Very_high Molto alto
+Extreme_long_green/red_phases Passaggio verde/rosso estremamente lungo
+Very_long_green/red_phases Passaggio verde/rosso molto lungo
+Long_green/red_phases Passaggio verde/rosso lungo
+Moderate_green/red_phases Passaggio verde/rosso moderato
+Short_green/red_phases Passaggio verde/rosso corto
+Very_short_green/red_phases Passaggio verde/rosso molto corto
+Extreme_short_green/red_phases Passaggio verde/rosso estremamente corto
+Hide_counters Nascondi countdown
+Show_counters Mostra countdown
+Start Avvia
+Stop Stop
+Enable_test_mode_(stay_in_current_step) Abilita modalità test (rimani nello step corrente)
+avg._flow Flusso medio
+avg._wait Attesa media
+min/max min/max
+Lane Corsia
+Set_Speed Imposta velocità {0}
+Max_speed Velocità massima
+Segment Segmento
+incoming In arrivo
+Enable_Advanced_Vehicle_AI Abilita IA dei Veicoli Avanzata
+Vehicles_may_enter_blocked_junctions I veicoli possono entrare/occupare un incrocio bloccato
+All_vehicles_may_ignore_lane_arrows Tutti i veicoli possono ignorare le frecce di direzione
+Busses_may_ignore_lane_arrows I bus possono ignorare le frecce di direzione
+Reckless_driving Guida spericolata
+TMPE_Title Traffic Manager: President Edition
+Settings_are_defined_for_each_savegame_separately I settaggi possono essere impostati separatamente per ogni salvataggio
+Simulation_accuracy Precisione simulazione (Un'elevata precisione riduce le performance)
+Enable_highway_specific_lane_merging/splitting_rules Abilita regolazione specifica per le corsie autostradali
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Agli automobilisti piace cambiare corsia (applicata solo se attiva la IA dei Veicoli Avanzata)
+Maintenance Manutenzione
+Very_often Molto di frequente
+Often Di frequente
+Sometimes A volte
+Rarely Raramente
+Very_rarely Molto raramente
+Only_if_necessary Solo se necessario
+Nodes_and_segments Nodi e segmenti
+Lanes Corsie
+Path_Of_Evil_(10_%) Molto elevata (10 %)
+Rush_Hour_(5_%) Elevata (5 %)
+Minor_Complaints_(2_%) Modesta (2 %)
+Holy_City_(0_%) Pacifica (0 %)
+Forget_toggled_traffic_lights "Dimentica" semafori impostati
+Road_is_already_in_a_group! La strada è già in un gruppo!
+All_selected_roads_must_be_of_the_same_type! Tutte le strade selezionate devono essere dello stesso tipo!
+Create_group Crea gruppo
+Delete_group Elimina gruppo
+Add_zoning Aggiungi zoning
+Remove_zoning Rimuovi zoning
+Lane_Arrow_Changer_Disabled_Highway La modifica delle frecce di direzione per questa corsia è disabilitata perchè è attivo il sistema di regole autostradali predefinito. Puoi disabilitarlo nelle opzioni alla voce "Abilita regolazione specifica per le corsie autostradali".
+Remove_junction_from_timed_light Rimuovi un incrocio da questo semaforo
+Select_junction Seleziona un incrocio
+Cancel Annulla
+Speed_limits Limiti di velocità
+Persistently_visible_overlays Overlays visibili persistentemente
+Priority_signs Segnali stradali
+Vehicles_may_do_u-turns_at_junctions I veicoli possono effettuare una svolta a "U" all'incrocio
+Vehicles_going_straight_may_change_lanes_at_junctions I veicoli che proseguono dritto possono cambiare corsia all'incrocio
+Allow_u-turns Permetti le svolte a "U"
+Allow_lane_changing_for_vehicles_going_straight Permetti il cambio corsia per i veicoli che proseguono dritto all'incrocio
+Allow_vehicles_to_enter_a_blocked_junction Permetti ai veicoli di entrare/occupare un incrocio bloccato/intasato
+Road_condition_has_a_bigger_impact_on_vehicle_speed La condizione della strada ha un grosso impatto sulla velocità dei veicoli
+Vehicle_restrictions Restrizioni veicoli
+Copy Copia
+Paste Incolla
+Invert Inverti
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Applica le restrizioni al segmento di strada compreso tra due incroci
+Allow_all_vehicles Permetti l'accesso a tutti i veicoli
+Ban_all_vehicles Banna tutti i veicoli
+Set_all_traffic_lights_to_red Imposta tutti i semafori sul Rosso
+Rotate_left Ruota a sinistra
+Rotate_right Ruota a destra
+Name Nome
+Apply Applica
+Select_a_timed_traffic_light_program Seleziona pattern per il semaforo programmato
+The_chosen_traffic_light_program_is_incompatible_to_this_junction Il pattern scelto è incompatibile con questo incrocio
+Advanced_AI_cannot_be_activated La IA Avanzata non può essere attivata
+The_Advanced_Vehicle_AI_cannot_be_activated La IA Avanzata non può essere attivata perche stai usando un'altra mod che modifica il comportamento dei veicoli (es. Improved AI o Traffic++).
+Enable_dynamic_path_calculation Abilita calcolo del percorso dinamico
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Le modifiche effettuate con questo tool avranno effetto dopo alcuni minuti.
+Lane_Arrow_Changer_Disabled_Connection La modifica delle frecce di direzione per questa corsia è disabilitata perchè hai creato la connessione della corsia a mano.
+Lane_connector Connettore corsia
+Connected_lanes Corsie connesse
+Use_alternative_view_mode Utilizza modilità vista alternativa
+Road_type Tipo di strada
+Default_speed_limit Limite velocità di default
+Unit_system Unità di misura
+Metric Metrico
+Imperial Imperiale
+Use_more_CPU_cores_for_route_calculation_if_available Utilizza più core della CPU per il calcolo del percorso (se disponile) 
+Activated_features Features attivate
+Junction_restrictions Restrizioni incrocio
+Prohibit_spawning_of_pocket_cars Vieta ai "cims" di spawnare "pocket cars"
+Reset_stuck_cims_and_vehicles Resetta cims e veicoli bloccati
+Default_speed_limits Limiti di velocità di default
+Looking_for_a_parking_spot In cerca di un parcheggio
+Driving_to_a_parking_spot Guidando verso un parcheggio
+Driving_to_another_parking_spot Guidando verso un altro parcheggio
+Entering_vehicle Entrando nel veicolo
+Walking_to_car Camminando verso l'auto
+Using_public_transport Utilizzando il trasporto pubblico
+Walking Camminando
+Thinking_of_a_good_parking_spot Pensando ad un buon parcheggio
+Switch_view Cambia vista
+Outgoing_demand Outgoing demand
+Incoming_demand Incoming demand
+Advanced_Vehicle_AI IA Avanzata
+Heavy_trucks_prefer_outer_lanes_on_highways I veicoli pesanti preferiscono corsie esterne sulle autostrade
+Parking_AI Parking AI
+Enable_more_realistic_parking Abilita l'utilizzo più realistico dei parcheggi
+Reset_custom_speed_limits Resetta i limiti di velocita personalizzati
+Reload_global_configuration Ricarica configurazione globale
+Reset_global_configuration Resetta configurazione globale
+General Generale
+Gameplay Gameplay
+Overlays Overlays
+Realistic_speeds Velocità dei veicoli realistica
+Evacuation_busses_may_ignore_traffic_rules I bus di evacuazione possono ignorare le regole stradali
+Evacuation_busses_may_only_be_used_to_reach_a_shelter I bus di evacuazione possono essere usati solo per raggiungere un rifugio
+Vehicle_behavior Comportamente del veicolo
+Policies_&_Restrictions Policies & Restrizioni
+At_junctions Agli incroci
+In_case_of_emergency In caso di emergenza

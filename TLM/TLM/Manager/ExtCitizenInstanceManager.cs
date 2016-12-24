@@ -8,10 +8,11 @@ using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class ExtCitizenInstanceManager {
+	public class ExtCitizenInstanceManager : ICustomManager {
 		public static ExtCitizenInstanceManager Instance { get; private set; } = null;
 
 		internal void OnReleaseInstance(ushort instanceId) {
@@ -43,7 +44,7 @@ namespace TrafficManager.Manager {
 			return ExtInstances[instanceId];
 		}
 		
-		internal void OnLevelUnloading() {
+		public void OnLevelUnloading() {
 			Reset();
 		}
 

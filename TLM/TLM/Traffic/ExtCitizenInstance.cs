@@ -13,65 +13,74 @@ namespace TrafficManager.Traffic {
 
 		public enum ExtPathState {
 			/// <summary>
-			/// 
+			/// No path
 			/// </summary>
 			None,
 			/// <summary>
-			/// 
+			/// Path is currently being calculated
 			/// </summary>
 			Calculating,
 			/// <summary>
-			/// 
+			/// Path-finding has succeeded
 			/// </summary>
 			Ready,
 			/// <summary>
-			/// 
+			/// Path-finding has failed
 			/// </summary>
 			Failed
 		}
 
 		public enum ExtPathType {
+			/// <summary>
+			/// Mixed path
+			/// </summary>
 			None,
+			/// <summary>
+			/// Walking path
+			/// </summary>
 			WalkingOnly,
+			/// <summary>
+			/// Driving path
+			/// </summary>
 			DrivingOnly
 		}
 
 		public enum ExtPathMode {
 			None,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen requires a walking path to their parked car
 			/// </summary>
 			RequiresWalkingPathToParkedCar,
 			/// <summary>
-			/// 
+			/// Indicates that a walking path to the parked car is being calculated
 			/// </summary>
 			CalculatingWalkingPathToParkedCar,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is walking to their parked car
 			/// </summary>
 			WalkingToParkedCar,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is close to their parked car
 			/// </summary>
 			ReachingParkedCar,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen has reached their parked car
 			/// </summary>
 			ParkedCarReached,
 			/// <summary>
-			/// 
+			/// Indicates that a direct car path to the target is being calculated
 			/// </summary>
 			CalculatingCarPathToTarget,
 			/// <summary>
-			/// 
+			/// Indicates that a car path to a known parking spot near the target is being calculated
 			/// </summary>
 			CalculatingCarPathToKnownParkPos,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is currently driving on a direct path to target
 			/// </summary>
 			DrivingToTarget,
 			/// <summary>
-			/// 
+			/// Indiciates that the citizen is currently driving to a known parking spot near the target
 			/// </summary>
 			DrivingToKnownParkPos,
 			/// <summary>
@@ -79,11 +88,11 @@ namespace TrafficManager.Traffic {
 			/// </summary>
 			ParkingSucceeded,
 			/// <summary>
-			/// Indicates that parking failed
+			/// Indicates that parking has failed
 			/// </summary>
 			ParkingFailed,
 			/// <summary>
-			/// Indicates that a path to an alternative parking position is currently being calculated
+			/// Indicates that a path to an alternative parking position is being calculated
 			/// </summary>
 			CalculatingCarPathToAltParkPos,
 			/// <summary>
@@ -91,82 +100,99 @@ namespace TrafficManager.Traffic {
 			/// </summary>
 			DrivingToAltParkPos,
 			/// <summary>
-			/// 
+			/// Indicates that a walking path to target is being calculated
 			/// </summary>
 			CalculatingWalkingPathToTarget,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is currently walking to the target
 			/// </summary>
 			WalkingToTarget,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is using public transport (bus/train/tram/subway) to reach the target
 			/// </summary>
 			PublicTransportToTarget,
 			/// <summary>
-			/// 
+			/// Indicates that the citizen is using a taxi to reach the target
 			/// </summary>
 			TaxiToTarget
 		}
 
 		public enum ExtParkingSpaceLocation {
+			/// <summary>
+			/// No parking space location
+			/// </summary>
 			None,
+			/// <summary>
+			/// Road-side parking space
+			/// </summary>
 			RoadSide,
+			/// <summary>
+			/// Building parking space
+			/// </summary>
 			Building
 		}
 
 		/// <summary>
-		/// 
+		/// Citizen path mode (used for Parking AI)
 		/// </summary>
 		public ExtPathMode PathMode {
-			get; internal set;
+			get {
+				return pathMode;
+			}
+			internal set {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[7]) {
+					Log.Warning($"Changing PathMode for citizen instance {InstanceId}: {pathMode} -> {value}");
+				}
+#endif
+				pathMode = value;
+			}
 		}
+		private ExtPathMode pathMode;
 
 		/// <summary>
-		/// 
+		/// Number of times a formerly found parking space is already occupied after reaching its position
 		/// </summary>
 		public int FailedParkingAttempts {
 			get; internal set;
 		}
 
 		/// <summary>
-		/// 
+		/// Segment id / Building id where a parking space has been found
 		/// </summary>
 		public ushort ParkingSpaceLocationId {
 			get; internal set;
 		}
 
 		/// <summary>
-		/// 
+		/// Type of object (segment/building) where a parking space has been found
 		/// </summary>
 		public ExtParkingSpaceLocation ParkingSpaceLocation {
 			get; internal set;
 		}
 
 		/// <summary>
-		/// 
+		/// Path position that is used as a start position when parking fails
 		/// </summary>
 		public PathUnit.Position? ParkingPathStartPosition {
 			get; internal set;
 		}
 
 		/// <summary>
-		/// 
-		/// </summary>
-		/*public Vector3 ParkedVehiclePosition {
-			get; internal set;
-		}*/
-
-		/// <summary>
-		/// 
+		/// Walking path from (alternative) parking spot to target (only used to check if there is a valid walking path, not actually used at the moment)
 		/// </summary>
 		public uint ReturnPathId {
 			get; internal set;
 		}
 
 		/// <summary>
-		/// 
+		/// State of the return path
 		/// </summary>
 		public ExtPathState ReturnPathState {
+			get; internal set;
+		}
+
+		public float LastDistanceToParkedCar {
 			get; internal set;
 		}
 
@@ -180,15 +206,24 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal void Reset() {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[7]) {
+				Log.Warning($"Resetting PathMode for citizen instance {InstanceId}");
+			}
+#endif
 			//Flags = ExtFlags.None;
 			PathMode = ExtPathMode.None;
 			FailedParkingAttempts = 0;
 			ParkingSpaceLocation = ExtParkingSpaceLocation.None;
 			ParkingSpaceLocationId = 0;
+			LastDistanceToParkedCar = float.MaxValue;
 			//ParkedVehiclePosition = default(Vector3);
 			ReleaseReturnPath();
 		}
 
+		/// <summary>
+		/// Releases the return path
+		/// </summary>
 		internal void ReleaseReturnPath() {
 			if (ReturnPathId != 0) {
 #if DEBUG
@@ -202,6 +237,9 @@ namespace TrafficManager.Traffic {
 			ReturnPathState = ExtPathState.None;
 		}
 
+		/// <summary>
+		/// Checks the calculation state of the return path
+		/// </summary>
 		internal void UpdateReturnPathState() {
 			if (ReturnPathId != 0 && ReturnPathState == ExtPathState.Calculating) {
 				byte returnPathFlags = CustomPathManager._instance.m_pathUnits.m_buffer[ReturnPathId].m_pathFindFlags;
@@ -221,6 +259,12 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
+		/// <summary>
+		/// Starts path-finding of the walking path from parking position <paramref name="parkPos"/> to target position <paramref name="targetPos"/>.
+		/// </summary>
+		/// <param name="parkPos">Parking position</param>
+		/// <param name="targetPos">Target position</param>
+		/// <returns></returns>
 		internal bool CalculateReturnPath(Vector3 parkPos, Vector3 targetPos) {
 			ReleaseReturnPath();
 
@@ -252,6 +296,10 @@ namespace TrafficManager.Traffic {
 			return false;
 		}
 
+		/// <summary>
+		/// Determines the path type through evaluating the current path mode.
+		/// </summary>
+		/// <returns></returns>
 		internal ExtPathType GetPathType() {
 			switch (PathMode) {
 				case ExtPathMode.CalculatingCarPathToAltParkPos:

@@ -122,7 +122,7 @@ namespace TrafficManager.Custom.AI {
 			return ret;
 		}
 
-		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceProbability) {
+		public VehicleInfo CustomGetVehicleInfo(ushort instanceID, ref CitizenInstance citizenData, bool forceCar) {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
@@ -133,15 +133,6 @@ namespace TrafficManager.Custom.AI {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
 					forceTaxi = true;
-				} else {
-					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
-					if (parkedVehicleId != 0) {
-#if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
-#endif
-						return Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
-					}
 				}
 			}
 			// NON-STOCK CODE END
@@ -158,7 +149,7 @@ namespace TrafficManager.Custom.AI {
 				taxiProb = 100;
 			} else
 			// NON-STOCK CODE END
-			if (forceProbability || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
+			if (forceCar || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) != CitizenInstance.Flags.None) {
 				carProb = 100;
 				bikeProb = 0;
 				taxiProb = 0;
@@ -177,7 +168,23 @@ namespace TrafficManager.Custom.AI {
 				service = ItemClass.Service.PublicTransport;
 				subService = ItemClass.SubService.PublicTransportTaxi;
 			}
-			VehicleInfo carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
+			// NON-STOCK CODE START
+			VehicleInfo carInfo = null;
+			if (Options.prohibitPocketCars && useCar && !useTaxi) {
+				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
+				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+				if (parkedVehicleId != 0) {
+#if DEBUG
+					if (GlobalConfig.Instance.DebugSwitches[2])
+						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#endif
+					carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+				}
+			}
+			if (carInfo == null && useCar && !useTaxi)
+			// NON-STOCK CODE END
+				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
+
 			VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, (ageGroup != Citizen.AgeGroup.Child) ? ItemClass.Level.Level2 : ItemClass.Level.Level1);
 			if (useBike && bikeInfo != null) {
 				return bikeInfo;

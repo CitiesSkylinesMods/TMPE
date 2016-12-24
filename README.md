@@ -4,6 +4,22 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.7, 12/24/2016
+- Bugfix: Parking AI: Cims that try to reach their parked car are sometimes teleported to another location where they start to fly through the map in order to reach their car
+- Bugfix: Parking AI: Cims owning a parked car do not consider using other means of transportation
+- Bugfix: Parking AI: Residents are unable to leave the city through a highway outside connection 
+- Bugfix: Trains/Trams are sometimes not detected at timed traffic lights
+- Advanced AI: Improved lane selection
+- The position of the main menu button is now forced inside screen bounds on startup
+- Improved overall user interface performance
+- Improved overlay behavior
+- Improved traffic measurement
+- Auto pedestrian lights at timed traffic lights behave more intelligently now
+- A timed traffic light step with zero minimum time assigned can now be skipped automatically
+- Using the lane connector to create a u-turn now automatically enables the "u-turn allowed" junction restriction
+- Updated French translation (thanks to @simon.royer007 for translating)
+- Added Italian translation (thanks to @Admix for translating)  
+
 1.8.6, 12/12/2016
 - Added Korean language (thanks to @Toothless FLY [ROK]LSh.st for translating)
 - Updated Chinese language code (zh-cn -> zh) in order to make it compatible with the game (thanks to @Lost丶青柠 for reporting this issue)

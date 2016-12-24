@@ -30,16 +30,10 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
 		internal ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, ushort nodeId) { // TODO optimize method (don't depend on collections!)
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypes(1)");
-#endif
 			ExtVehicleType ret = ExtVehicleType.None;
 			foreach (ExtVehicleType vehicleType in GetAllowedVehicleTypesAsSet(segmentId, nodeId)) {
 				ret |= vehicleType;
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypes(1)");
-#endif
 			return ret;
 		}
 
@@ -50,13 +44,7 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
 		internal HashSet<ExtVehicleType> GetAllowedVehicleTypesAsSet(ushort segmentId, ushort nodeId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypesAsSet");
-#endif
 			HashSet<ExtVehicleType> ret = new HashSet<ExtVehicleType>(GetAllowedVehicleTypesAsDict(segmentId, nodeId).Values);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypesAsSet");
-#endif
 			return ret;
 		}
 
@@ -67,17 +55,11 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
 		internal Dictionary<byte, ExtVehicleType> GetAllowedVehicleTypesAsDict(ushort segmentId, ushort nodeId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict");
-#endif
 			Dictionary<byte, ExtVehicleType> ret = new Dictionary<byte, ExtVehicleType>();
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			if (segmentId == 0 || (netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None ||
 				nodeId == 0 || (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict");
-#endif
 				return ret;
 			}
 
@@ -102,9 +84,6 @@ namespace TrafficManager.Manager {
 				++laneIndex;
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict");
-#endif
 			return ret;
 		}
 
@@ -117,37 +96,22 @@ namespace TrafficManager.Manager {
 		/// <param name="laneInfo"></param>
 		/// <returns></returns>
 		internal ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
-#endif
 			if (Flags.IsInitDone()) {
 				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
 				if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
-#if TRACE
-					Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
-#endif
 					return (ExtVehicleType)fastArray[laneIndex];
 				}
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
-#endif
 			return GetDefaultAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 		}
 
 		internal bool HasSegmentRestrictions(ushort segmentId) { // TODO clean up restrictions (currently we do not check if restrictions are equal with the base type)
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
-#endif
 			if (Flags.IsInitDone()) {
 				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
 				return fastArray != null;
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetAllowedVehicleTypes(2)");
-#endif
 			return false;
 		}
 
@@ -160,9 +124,6 @@ namespace TrafficManager.Manager {
 		/// <param name="laneInfo"></param>
 		/// <returns></returns>
 		public ExtVehicleType GetDefaultAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes");
-#endif
 			// manage cached default vehicle types
 			if (defaultVehicleTypeCache == null) {
 				defaultVehicleTypeCache = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
@@ -191,14 +152,8 @@ namespace TrafficManager.Manager {
 				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
 					ret |= ExtVehicleType.Plane;
 				cachedDefaultTypes[laneIndex] = ret;
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes");
-#endif
 				return ret;
 			} else {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes");
-#endif
 				return (ExtVehicleType)defaultVehicleType;
 			}
 		}
@@ -243,13 +198,7 @@ namespace TrafficManager.Manager {
 		/// <param name="allowedTypes"></param>
 		/// <returns></returns>
 		internal bool SetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo, uint laneId, ExtVehicleType allowedTypes) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.SetAllowedVehicleTypes");
-#endif
 			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.SetAllowedVehicleTypes");
-#endif
 				return false;
 			}
 
@@ -257,9 +206,6 @@ namespace TrafficManager.Manager {
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			NotifyStartEndNode(segmentId);
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.SetAllowedVehicleTypes");
-#endif
 			return true;
 		}
 
@@ -273,13 +219,7 @@ namespace TrafficManager.Manager {
 		/// <param name="road"></param>
 		/// <param name="vehicleType"></param>
 		public void AddAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.AddAllowedType");
-#endif
 			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.AddAllowedType");
-#endif
 				return;
 			}
 
@@ -288,10 +228,6 @@ namespace TrafficManager.Manager {
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			NotifyStartEndNode(segmentId);
-
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.AddAllowedType");
-#endif
 		}
 
 		/// <summary>
@@ -304,13 +240,7 @@ namespace TrafficManager.Manager {
 		/// <param name="road"></param>
 		/// <param name="vehicleType"></param>
 		public void RemoveAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.RemoveAllowedType");
-#endif
 			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.RemoveAllowedType");
-#endif
 				return;
 			}
 
@@ -319,23 +249,13 @@ namespace TrafficManager.Manager {
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			NotifyStartEndNode(segmentId);
-
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.RemoveAllowedType");
-#endif
 		}
 
 		public void ToggleAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType, bool add) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleRestrictionsManager.ToggleAllowedType");
-#endif
 			if (add)
 				AddAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType);
 			else
 				RemoveAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleRestrictionsManager.ToggleAllowedType");
-#endif
 		}
 
 		/// <summary>

@@ -40,6 +40,7 @@ namespace TrafficManager.UI {
 		private static UIButton _goToVehicleButton = null;
 		private static UIButton _goToBuildingButton = null;
 		private static UIButton _goToCitizenInstanceButton = null;
+		private static UIButton _goToPosButton = null;
 		private static UIButton _printDebugInfoButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
@@ -55,6 +56,7 @@ namespace TrafficManager.UI {
 
 		public override void Start() {
 			TrafficLightTool = LoadingExtension.TrafficManagerTool;
+			isVisible = false;
 
 			backgroundSprite = "GenericPanel";
 			color = new Color32(75, 75, 135, 255);
@@ -130,6 +132,12 @@ namespace TrafficManager.UI {
 
 #if DEBUG
 			_goToField = CreateTextField("", y);
+			y += 40;
+			height += 40;
+			_goToPosButton = _createButton("Goto position", y, clickGoToPos);
+			y += 40;
+			height += 40;
+			_goToPosButton = _createButton("Clear position", y, clickClearPos);
 			y += 40;
 			height += 40;
 			_goToSegmentButton = _createButton("Goto segment", y, clickGoToSegment);
@@ -215,6 +223,21 @@ namespace TrafficManager.UI {
 		}
 
 #if DEBUG
+		private void clickGoToPos(UIComponent component, UIMouseEventParameter eventParam) {
+			string[] vectorElms = _goToField.text.Split(',');
+			if (vectorElms.Length < 2)
+				return;
+
+			ushort segmentId = Convert.ToUInt16(_goToField.text);
+			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
+				CameraCtrl.GoToPos(new Vector3(float.Parse(vectorElms[0]), Camera.main.transform.position.y, float.Parse(vectorElms[1])));
+			}
+		}
+
+		private void clickClearPos(UIComponent component, UIMouseEventParameter eventParam) {
+			CameraCtrl.ClearPos();
+		}
+
 		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort segmentId = Convert.ToUInt16(_goToField.text);
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {

@@ -14,7 +14,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 3;
+		private static int LATEST_VERSION = 4;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -67,7 +67,9 @@ namespace TrafficManager.State {
 			false, // parking ai debug log (basic)
 			false, // emergency vehicles may not ignore traffic rules
 			false, // parking ai debug log (extended)
-			false // geometry debug log
+			false, // geometry debug log
+			false, // debug pause
+			false // debug PathMode
 		};
 
 #if DEBUG
@@ -77,22 +79,17 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// base lane changing cost factor on highways
 		/// </summary>
-		public float HighwayLaneChangingBaseCost = 0.25f;
+		public float HighwayLaneChangingBaseCost = 1.25f;
 
 		/// <summary>
 		/// base lane changing cost factor on city streets
 		/// </summary>
-		public float CityRoadLaneChangingBaseCost = 0.15f;
-
-		/// <summary>
-		/// lane changing cost base before junctions
-		/// </summary>
-		public float JunctionLaneChangingBaseCost = 1.5f;
+		public float CityRoadLaneChangingBaseCost = 1.1f;
 
 		/// <summary>
 		/// congestion lane changing base cost
 		/// </summary>
-		public float CongestionLaneChangingBaseCost = 2.5f;
+		public float CongestionLaneChangingBaseCost = 1f;
 
 		/// <summary>
 		/// heavy vehicle lane changing cost factor
@@ -112,7 +109,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
-		public int RandomizedLaneChangingModulo = 250;
+		public int RandomizedLaneChangingModulo = 100;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
@@ -143,7 +140,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
 		/// </summary>
-		public float HeavyVehicleMaxInnerLanePenalty = 25f;
+		public float HeavyVehicleMaxInnerLanePenalty = 40f;
 
 
 		/// <summary>
@@ -171,9 +168,9 @@ namespace TrafficManager.State {
 		public float MinParkedCarToTargetBuildingDistance = 256f;
 
 		/// <summary>
-		/// maximum required distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
+		/// maximum required squared distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
 		/// </summary>
-		public float MaxParkedCarInstanceSwitchDistance = 6f;
+		public float MaxParkedCarInstanceSwitchSqrDistance = 6f;
 
 		/// <summary>
 		/// maximum distance between building and pedestrian lane
@@ -205,6 +202,11 @@ namespace TrafficManager.State {
 		/// Maximum speed update factor
 		/// </summary>
 		public float MaxSpeedUpdateFactor = 0.25f;
+
+		/// <summary>
+		/// %/100 of time a segment must be flagged as congested to count as permanently congested
+		/// </summary>
+		public float CongestionSpeedThreshold = 0.6f;
 
 		/// <summary>
 		/// lower congestion threshold (per ten-thousands)
@@ -245,7 +247,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// minimum parking space demand delta when a passenger car could be spawned
 		/// </summary>
-		public int MinSpawnedCarParkingSpaceDemandDelta = -10;
+		public int MinSpawnedCarParkingSpaceDemandDelta = -5;
 
 		/// <summary>
 		/// maximum parking space demand delta when a passenger car could be spawned
@@ -255,7 +257,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// minimum parking space demand delta when a parking spot could be found
 		/// </summary>
-		public int MinFoundParkPosParkingSpaceDemandDelta = -10;
+		public int MinFoundParkPosParkingSpaceDemandDelta = -5;
 
 		/// <summary>
 		/// maximum parking space demand delta when a parking spot could be found
@@ -275,7 +277,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
 		/// </summary>
-		public uint MaxSpeedDifference = 750u;
+		public uint MaxSpeedDifference = 950u;
 
 		/// <summary>
 		/// Main menu button position

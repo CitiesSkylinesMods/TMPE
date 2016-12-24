@@ -100,8 +100,8 @@ namespace TrafficManager.State {
 			}
 
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created)");
-				//Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 
@@ -109,13 +109,16 @@ namespace TrafficManager.State {
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
 				connectionClass.m_service != ItemClass.Service.PublicTransport
 				) {
-				//Log._Debug($"Flags: Node {nodeId} may not have a traffic light");
+				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags} connectionClass={connectionClass?.m_service}");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 
 			if (connectionClass == null ||
 				(connectionClass.m_service != ItemClass.Service.Road &&
 				connectionClass.m_service != ItemClass.Service.PublicTransport)) {
+				Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no connection class). connectionClass={connectionClass?.m_service}");
+				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				return false;
 			}
 
@@ -820,16 +823,17 @@ namespace TrafficManager.State {
 				return;
 
 			bool mayHaveLight = mayHaveTrafficLight(nodeId);
-			if ((bool)flag && mayHaveLight) {
-				Log._Debug($"Adding traffic light @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
-			} else {
-				Log._Debug($"Removing traffic light @ node {nodeId}");
-				Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
-				if (!mayHaveLight) {
-					Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
-					nodeTrafficLightFlag[nodeId] = null;
+			if (mayHaveLight) {
+				if ((bool)flag) {
+					Log._Debug($"Adding traffic light @ node {nodeId}");
+					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
+				} else {
+					Log._Debug($"Removing traffic light @ node {nodeId}");
+					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				}
+			} else if ((bool)flag) {
+				Log.Warning($"Flags: Refusing to apply traffic light flag at node {nodeId}");
+				nodeTrafficLightFlag[nodeId] = null;
 			}
 		}
 

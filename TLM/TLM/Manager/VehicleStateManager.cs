@@ -41,19 +41,10 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleId"></param>
 		/// <returns>the vehicle state if the state is valid, null otherwise</returns>
 		public VehicleState GetVehicleState(ushort vehicleId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.GetVehicleState");
-#endif
 			VehicleState ret = VehicleStates[vehicleId];
 			if (ret.Valid) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.GetVehicleState");
-#endif
 				return ret;
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.GetVehicleState");
-#endif
 			return null;
 		}
 
@@ -64,13 +55,7 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleId"></param>
 		/// <returns>the vehicle state</returns>
 		internal VehicleState _GetVehicleState(ushort vehicleId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager._GetVehicleState");
-#endif
 			VehicleState ret = VehicleStates[vehicleId];
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager._GetVehicleState");
-#endif
 			return ret;
 		}
 
@@ -80,39 +65,30 @@ namespace TrafficManager.Manager {
 		}
 
 		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(1)");
-#endif
-			VehicleStates[vehicleId].UpdatePosition(ref vehicleData);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateVehiclePos(1)");
-#endif
+			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+			if (reversed) {
+				ushort frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+				VehicleStates[frontVehicleId].UpdatePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId]);
+			} else {
+				VehicleStates[vehicleId].UpdatePosition(ref vehicleData);
+			}
 		}
 
 		internal void UpdateTrailerPos(ushort trailerId, ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateTrailerPos(1)");
-#endif
 			VehicleStates[trailerId].UpdatePosition(ref trailerData, vehicleId, ref vehicleData);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateTrailerPos(1)");
-#endif
 		}
 
 		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.UpdateVehiclePos(2)");
-#endif
-			VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref curPos, ref nextPos);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.UpdateVehiclePos(2)");
-#endif
+			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+			if (reversed) {
+				ushort frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+				VehicleStates[frontVehicleId].UpdatePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], ref curPos, ref nextPos);
+			} else {
+				VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref curPos, ref nextPos);
+			}
 		}
 
 		internal void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, bool logSpeed) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.LogTraffic");
-#endif
 			VehicleState state = GetVehicleState(vehicleId);
 			if (state == null)
 				return;
@@ -123,17 +99,11 @@ namespace TrafficManager.Manager {
 			ushort? speed = logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null;
 
 			state.ProcessCurrentPathPosition(ref vehicleData, delegate (ref PathUnit.Position pos) {
-				CustomRoadAI.AddTraffic(pos.m_segment, pos.m_lane, length, speed);
+				TrafficMeasurementManager.Instance.AddTraffic(pos.m_segment, pos.m_lane, length, speed);
 			});
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.LogTraffic");
-#endif
 		}
 
 		internal void OnReleaseVehicle(ushort vehicleId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnReleaseVehicle");
-#endif
 #if DEBUG
 			//Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
 #endif
@@ -150,20 +120,11 @@ namespace TrafficManager.Manager {
 #endif
 			state.Valid = false;
 			//VehicleStates[vehicleId].Reset();
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnReleaseVehicle");
-#endif
 		}
 
 		internal void OnVehicleSpawned(ushort vehicleId, ref Vehicle vehicleData) {
 			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.OnPathFindReady");
-#endif
 			VehicleStates[vehicleId].OnVehicleSpawned(ref vehicleData);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.OnPathFindReady");
-#endif
 		}
 
 		internal void InitAllVehicles() {
@@ -186,25 +147,13 @@ namespace TrafficManager.Manager {
 		}
 
 		internal ExtVehicleType? DetermineVehicleType(ushort vehicleId, ref Vehicle vehicleData) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.DetermineVehicleType");
-#endif
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
-#endif
 				VehicleStates[vehicleId].VehicleType = ExtVehicleType.Emergency;
 				return ExtVehicleType.Emergency;
 			}
 
 			VehicleAI ai = vehicleData.Info.m_vehicleAI;
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("VehicleStateManager.DetermineVehicleTypeFromAIType");
-#endif
 			ExtVehicleType? ret = DetermineVehicleTypeFromAIType(ai, false);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleTypeFromAIType");
-#endif
 
 			if (ret != null) {
 				VehicleStates[vehicleId].VehicleType = (ExtVehicleType)ret;
@@ -219,9 +168,6 @@ namespace TrafficManager.Manager {
 					Log._Debug($"Could not determine vehicle type of {vehicleId}. Info={vehicleData.Info?.name}");
 #endif
 			}
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("VehicleStateManager.DetermineVehicleType");
-#endif
 			return ret;
 		}
 
@@ -296,7 +242,7 @@ namespace TrafficManager.Manager {
 						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
 				}
 
-				CustomRoadAI.resetTrafficStats();
+				TrafficMeasurementManager.Instance.ResetTrafficStats();
 			} catch (Exception ex) {
 				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
 			} finally {

@@ -57,14 +57,8 @@ namespace TrafficManager.Manager {
 		/// <param name="finalDir"></param>
 		/// <returns></returns>
 		public ushort GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetCustomSpeedLimit1");
-#endif
 			// calculate the currently set mean speed limit
 			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit1");
-#endif
 				return 0;
 			}
 
@@ -95,9 +89,6 @@ namespace TrafficManager.Manager {
 			if (validLanes > 0)
 				meanSpeedLimit /= (float)validLanes;
 			ushort ret = LaneToCustomSpeedLimit(meanSpeedLimit);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit1");
-#endif
 			return ret;
 		}
 
@@ -109,10 +100,6 @@ namespace TrafficManager.Manager {
 		/// <param name="finalDir"></param>
 		/// <returns></returns>
 		public ushort GetAverageDefaultCustomSpeedLimit(NetInfo segmentInfo, NetInfo.Direction? finalDir=null) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetAverageDefaultCustomSpeedLimit");
-#endif
-
 			float meanSpeedLimit = 0f;
 			uint validLanes = 0;
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
@@ -129,9 +116,6 @@ namespace TrafficManager.Manager {
 			if (validLanes > 0)
 				meanSpeedLimit /= (float)validLanes;
 			ushort ret = LaneToCustomSpeedLimit(meanSpeedLimit);
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetAverageDefaultCustomSpeedLimit");
-#endif
 			return ret;
 		}
 
@@ -174,15 +158,9 @@ namespace TrafficManager.Manager {
         /// <param name="laneId"></param>
         /// <returns></returns>
         public ushort GetCustomSpeedLimit(uint laneId) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetCustomSpeedLimit2");
-#endif
 			// check custom speed limit
 			ushort? setSpeedLimit = Flags.getLaneSpeedLimit(laneId);
 			if (setSpeedLimit != null) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit2");
-#endif
 				return (ushort)setSpeedLimit;
 			}
 
@@ -190,9 +168,6 @@ namespace TrafficManager.Manager {
 			ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
 
 			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit2");
-#endif
 				return 0;
 			}
 
@@ -203,9 +178,6 @@ namespace TrafficManager.Manager {
 			while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
 				if (curLaneId == laneId) {
 					ushort ret = LaneToCustomSpeedLimit(segmentInfo.m_lanes[laneIndex].m_speedLimit);
-#if TRACE
-					Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit2");
-#endif
 					return ret;
 				}
 
@@ -214,9 +186,6 @@ namespace TrafficManager.Manager {
 			}
 
 			Log.Warning($"Speed limit for lane {laneId} could not be determined.");
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetCustomSpeedLimit2");
-#endif
 			return 0; // no speed limit found
 		}
 
@@ -230,15 +199,9 @@ namespace TrafficManager.Manager {
 		}
 
 		internal float GetLockFreeGameSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.GetLockFreeGameSpeedLimit");
-#endif
 			if (Flags.IsInitDone()) {
 				if (Flags.laneSpeedLimitArray.Length <= segmentId) {
 					Log.Error($"laneSpeedLimitArray.Length = {Flags.laneSpeedLimitArray.Length}, segmentId={segmentId}. Out of range!");
-#if TRACE
-					Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetLockFreeGameSpeedLimit");
-#endif
 					return laneInfo.m_speedLimit;
 				}
 
@@ -249,15 +212,9 @@ namespace TrafficManager.Manager {
 				} else {
 					speedLimit = laneInfo.m_speedLimit;
 				}
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetLockFreeGameSpeedLimit");
-#endif
 				return speedLimit;
 			} else {
 				float ret = GetGameSpeedLimit(laneId);
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.GetLockFreeGameSpeedLimit");
-#endif
 				return ret;
 			}
 		}
@@ -449,13 +406,7 @@ namespace TrafficManager.Manager {
 		/// <param name="speedLimit"></param>
 		/// <returns></returns>
 		public bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, ushort speedLimit) {
-#if TRACE
-			Singleton<CodeProfiler>.instance.Start("SpeedLimitManager.SetSpeedLimit");
-#endif
 			if (segmentId == 0 || !AvailableSpeedLimits.Contains(speedLimit) || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
-#if TRACE
-				Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.SetSpeedLimit");
-#endif
 				return false;
 			}
 
@@ -479,9 +430,6 @@ namespace TrafficManager.Manager {
 				laneIndex++;
 			}
 
-#if TRACE
-			Singleton<CodeProfiler>.instance.Stop("SpeedLimitManager.SetSpeedLimit");
-#endif
 			return true;
 		}
 

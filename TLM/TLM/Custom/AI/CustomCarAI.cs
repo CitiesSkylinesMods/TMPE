@@ -46,6 +46,7 @@ namespace TrafficManager.Custom.AI {
 			ExtCitizenInstance driverExtInstance = null;
 			bool prohibitPocketCars = Options.prohibitPocketCars;
 			if (prohibitPocketCars) {
+				// check for valid driver and update return path state
 				state = VehicleStateManager.Instance._GetVehicleState(vehicleData.GetFirstVehicle(vehicleId));
 				if (state.VehicleType == ExtVehicleType.PassengerCar) {
 					driverExtInstance = state.GetDriverExtInstance();
@@ -61,7 +62,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE END
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0 &&
-				(! prohibitPocketCars || driverExtInstance.ReturnPathState != ExtCitizenInstance.ExtPathState.Calculating)) {
+				(! prohibitPocketCars || driverExtInstance.ReturnPathState != ExtCitizenInstance.ExtPathState.Calculating)) { // NON-STOCK CODE: Parking AI: wait for the return path to be calculated
 				PathManager pathManager = Singleton<PathManager>.instance;
 				byte pathFindFlags = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
 
@@ -77,6 +78,7 @@ namespace TrafficManager.Custom.AI {
 
 				if (prohibitPocketCars) {
 					if (driverExtInstance.ReturnPathState == ExtPathState.Failed) {
+						// no walking path from parking position to target found. flag main path as 'failed'.
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"CustomCarAI.CustomSimulationStep: Return path {driverExtInstance.ReturnPathId} FAILED. Forcing path-finding to fail.");
@@ -122,6 +124,7 @@ namespace TrafficManager.Custom.AI {
 			/// NON-STOCK CODE START ///
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+				// update vehicle position for timed traffic lights and priority signs
 				try {
 					vehStateManager.UpdateVehiclePos(vehicleId, ref vehicleData);
 				} catch (Exception e) {
@@ -130,6 +133,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			if (!Options.isStockLaneChangerUsed()) {
+				// Advanced AI traffic measurement
 				try {
 					vehStateManager.LogTraffic(vehicleId, ref vehicleData, true);
 				} catch (Exception e) {
@@ -216,6 +220,7 @@ namespace TrafficManager.Custom.AI {
 				PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID,
 				byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			if ((Options.prioritySignsEnabled || Options.timedLightsEnabled) && Options.simAccuracy <= 1) {
+				// update vehicle position for timed traffic lights and priority signs
 				try {
 					VehicleStateManager.Instance.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
 				} catch (Exception e) {
@@ -256,12 +261,6 @@ namespace TrafficManager.Custom.AI {
 			// this seems to be like the required braking force in order to stop the vehicle within its half length.
 			var crazyValue = 0.5f * lastFrameData.m_velocity.sqrMagnitude / m_info.m_braking + m_info.m_generatedInfo.m_size.z * 0.5f;
 
-			/*try {
-				VehicleStateManager.UpdateVehiclePos(vehicleId, ref vehicleData);
-			} catch (Exception e) {
-				Log.Error("CarAI TmCalculateSegmentPosition Error: " + e.ToString());
-			}*/
-
 			bool isRecklessDriver = IsRecklessDriver(vehicleId, ref vehicleData);
 			if (targetNodeId == prevTargetNodeId) {
 				if (Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f) {
@@ -273,12 +272,6 @@ namespace TrafficManager.Custom.AI {
 			var info2 = netManager.m_segments.m_buffer[position.m_segment].Info;
 			if (info2.m_lanes != null && info2.m_lanes.Length > position.m_lane) {
 				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info2.m_lanes[position.m_lane]) : info2.m_lanes[position.m_lane].m_speedLimit; // info2.m_lanes[position.m_lane].m_speedLimit;
-
-#if DEBUG
-				/*if (position.m_segment == 275) {
-					Log._Debug($"Applying lane speed limit of {laneSpeedLimit} to lane {laneID} @ seg. {position.m_segment}");
-                }*/
-#endif
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
@@ -374,9 +367,15 @@ namespace TrafficManager.Custom.AI {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
 
-			maxSpeed = CalcMaxSpeed(vehicleId, ref vehicleData, position, pos, maxSpeed, IsRecklessDriver(vehicleId, ref vehicleData));
+			maxSpeed = CalcMaxSpeed(vehicleId, ref vehicleData, position, pos, maxSpeed, IsRecklessDriver(vehicleId, ref vehicleData)); // NON-STOCK CODE
 		}
 
+		/// <summary>
+		/// Determines if the given vehicle is driven by a reckless driver
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <param name="vehicleData"></param>
+		/// <returns></returns>
 		internal static bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0)
 				return true;
@@ -388,13 +387,6 @@ namespace TrafficManager.Custom.AI {
 			return ((vehicleData.Info.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 
-		/*public void InvalidPath(ushort vehicleID, ref Vehicle vehicleData, ushort leaderID, ref Vehicle leaderData) {
-			vehicleData.m_targetPos0 = vehicleData.m_targetPos3;
-			vehicleData.m_targetPos1 = vehicleData.m_targetPos3;
-			vehicleData.m_targetPos2 = vehicleData.m_targetPos3;
-			vehicleData.m_targetPos3.w = 0f;
-			base.InvalidPath(vehicleID, ref vehicleData, leaderID, ref leaderData);
-		}*/
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if PATHRECALC

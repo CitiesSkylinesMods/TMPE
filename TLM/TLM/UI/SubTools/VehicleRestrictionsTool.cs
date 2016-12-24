@@ -43,12 +43,16 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void Initialize() {
+		public override void Cleanup() {
 			RefreshCurrentRestrictedSegmentIds();
 		}
 
+		public override void Initialize() {
+			Cleanup();
+		}
+
 		public override bool IsCursorInPanel() {
-			return _cursorInSecondaryPanel;
+			return base.IsCursorInPanel() || _cursorInSecondaryPanel;
 		}
 
 		public override void OnPrimaryClickOverlay() {

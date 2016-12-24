@@ -1926,12 +1926,13 @@ namespace TrafficManager {
 			try {
 				TrafficPriorityManager.Instance.OnLevelUnloading();
 				CustomCarAI.OnLevelUnloading();
-				CustomRoadAI.OnLevelUnloading();
+				TrafficMeasurementManager.Instance.OnLevelUnloading();
 				CustomTrafficLightsManager.Instance.OnLevelUnloading();
 				TrafficLightSimulationManager.Instance.OnLevelUnloading();
 				VehicleRestrictionsManager.Instance.OnLevelUnloading();
 				ExtCitizenInstanceManager.Instance.OnLevelUnloading();
 				ExtBuildingManager.Instance.OnLevelUnloading();
+				LaneConnectionManager.Instance.OnLevelUnloading();
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
 				GlobalConfig.OnLevelUnloading();
@@ -2047,7 +2048,19 @@ namespace TrafficManager {
 
 			initDetours();
 
+			Log.Info("Fixing non-created nodes with problems...");
+			FixNonCreatedNodeProblems();
+
 			Log.Info("OnLevelLoaded complete.");
+		}
+
+		private void FixNonCreatedNodeProblems() {
+			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if ((NetManager.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+					NetManager.instance.m_nodes.m_buffer[nodeId].m_problems = Notification.Problem.None;
+					NetManager.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
+				}
+			}
 		}
 
 		private bool CheckRainfallIsLoaded() {
@@ -2055,10 +2068,10 @@ namespace TrafficManager {
 		}
 
 		private bool CheckRushHourIsLoaded() {
-			return Check3rdPartyModLoaded("RushHour");
+			return Check3rdPartyModLoaded("RushHour", true);
 		}
 
-		private bool Check3rdPartyModLoaded(string namespaceStr) {
+		private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll=false) {
 			bool thirPartyModLoaded = false;
 
 			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -2071,6 +2084,7 @@ namespace TrafficManager {
 
 			if (loadingExtensions != null) {
 				foreach (ILoadingExtension extension in loadingExtensions) {
+					Log.Info($"Detected extension: {extension.GetType().Name} in namespace {extension.GetType().Namespace}");
 					if (extension.GetType().Namespace == null)
 						continue;
 

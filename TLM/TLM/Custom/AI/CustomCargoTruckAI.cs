@@ -33,6 +33,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+		// stock code
 		private static void RemoveOffers(ushort vehicleId, ref Vehicle data) {
 			if ((data.m_flags & Vehicle.Flags.WaitingTarget) != (Vehicle.Flags)0) {
 				var offer = default(TransferManager.TransferOffer);

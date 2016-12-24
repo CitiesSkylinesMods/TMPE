@@ -6,6 +6,13 @@ using UnityEngine;
 
 namespace TrafficManager.UI {
 	class CameraCtrl {
+		public static void GoToPos(Vector3 pos) {
+			ToolsModifierControl.cameraController.SetOverrideModeOn(pos, Vector2.zero, 10.0f);
+		}
+
+		public static void ClearPos() {
+			ToolsModifierControl.cameraController.SetOverrideModeOff();
+		}
 
 		public static void GoToBuilding(ushort buildingId, Vector3 pos) {
 			InstanceID id = default(InstanceID);

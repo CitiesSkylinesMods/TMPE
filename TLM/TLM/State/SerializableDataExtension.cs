@@ -63,30 +63,6 @@ namespace TrafficManager.State {
 			}
 
 			try {
-				Log.Info("Initializing lane connection manager");
-				LaneConnectionManager.Instance.OnBeforeLoadData(); // requires segment geometries
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing LaneConnectionManager: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
-			try {
-				Log.Info("Initializing CitizenAI");
-				CustomCitizenAI.OnBeforeLoadData();
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing CitizenAI: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
-			try {
-				Log.Info("Initializing CustomRoadAI");
-				CustomRoadAI.OnBeforeLoadData();
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing CustomRoadAI: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
-			try {
 				Log.Info("Initializing SpeedLimitManager");
 				SpeedLimitManager.Instance.OnBeforeLoadData();
 			} catch (Exception e) {
@@ -425,20 +401,29 @@ namespace TrafficManager.State {
 									}
 									Configuration.CustomSegmentLight cnfLight = e2.Value;
 
-									light.CurrentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
-									light.LightLeft = cnfLight.leftLight;
-									light.LightMain = cnfLight.mainLight;
-									light.LightRight = cnfLight.rightLight;
+									light.currentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
+									light.SetStates(cnfLight.mainLight, cnfLight.leftLight, cnfLight.rightLight, false);
 								}
 							}
 							++j;
 						}
-
-						if (cnfTimedLights.started)
-							timedNode.Start();
 					} catch (Exception e) {
 						// ignore, as it's probably corrupt save data. it'll be culled on next save
 						Log.Warning("Error loading data from TimedNode (new method): " + e.ToString());
+						error = true;
+					}
+				}
+
+				foreach (Configuration.TimedTrafficLights cnfTimedLights in _configuration.TimedLights) {
+					try {
+						TrafficLightSimulation sim = tlsMan.GetNodeSimulation(cnfTimedLights.nodeId);
+						var timedNode = sim.TimedLight;
+
+						timedNode.housekeeping();
+						if (cnfTimedLights.started)
+							timedNode.Start();
+					} catch (Exception e) {
+						Log.Warning($"Error starting timed light @ {cnfTimedLights.nodeId}: " + e.ToString());
 						error = true;
 					}
 				}
