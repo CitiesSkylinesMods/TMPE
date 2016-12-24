@@ -67,7 +67,9 @@ namespace TrafficManager.State {
 			false, // parking ai debug log (basic)
 			false, // emergency vehicles may not ignore traffic rules
 			false, // parking ai debug log (extended)
-			false // geometry debug log
+			false, // geometry debug log
+			false, // debug pause
+			false // debug PathMode
 		};
 
 #if DEBUG
@@ -107,7 +109,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
-		public int RandomizedLaneChangingModulo = 500;
+		public int RandomizedLaneChangingModulo = 100;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
@@ -166,9 +168,9 @@ namespace TrafficManager.State {
 		public float MinParkedCarToTargetBuildingDistance = 256f;
 
 		/// <summary>
-		/// maximum required distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
+		/// maximum required squared distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
 		/// </summary>
-		public float MaxParkedCarInstanceSwitchDistance = 6f;
+		public float MaxParkedCarInstanceSwitchSqrDistance = 6f;
 
 		/// <summary>
 		/// maximum distance between building and pedestrian lane

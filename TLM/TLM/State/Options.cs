@@ -117,15 +117,16 @@ namespace TrafficManager.State {
 		public static bool laneConnectorEnabled = true;
 
 		public static bool MenuRebuildRequired {
-			get { return menuRebuildRequired; }
-			private set {
-				menuRebuildRequired = value;
-				if (LoadingExtension.BaseUI != null)
-					LoadingExtension.BaseUI.Close();
+			get { return false; }
+			internal set {
+				if (value) {
+					if (LoadingExtension.BaseUI != null) {
+						LoadingExtension.BaseUI.Close();
+						LoadingExtension.BaseUI.RebuildMenu();
+					}
+				}
 			}
 		}
-
-		private static bool menuRebuildRequired = false;
 
 		public static void makeSettings(UIHelperBase helper) {
 			// tabbing code is borrowed from RushHour mod

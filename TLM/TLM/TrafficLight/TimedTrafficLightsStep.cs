@@ -14,7 +14,7 @@ using TrafficManager.State;
 
 namespace TrafficManager.TrafficLight {
 	// TODO class marked for complete rework in version 1.9
-	public class TimedTrafficLightsStep : ICustomSegmentLightManager {
+	public class TimedTrafficLightsStep : ICustomSegmentLightsManager {
 		/// <summary>
 		/// The number of time units this traffic light remains in the current state at least
 		/// </summary>
@@ -666,14 +666,14 @@ namespace TrafficManager.TrafficLight {
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 			if (nodeId != timedNode.NodeId) {
-				Log.Error($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
+				Log._Debug($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
 				return null;
 			}
 
 			if (segmentLights.ContainsKey(segmentId)) {
 				return segmentLights[segmentId];
 			} else {
-				Log.Error($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not know segment {segmentId}");
+				Log._Debug($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not know segment {segmentId}");
 				return null;
 			}
 		}

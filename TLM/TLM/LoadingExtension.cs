@@ -2068,10 +2068,10 @@ namespace TrafficManager {
 		}
 
 		private bool CheckRushHourIsLoaded() {
-			return Check3rdPartyModLoaded("RushHour");
+			return Check3rdPartyModLoaded("RushHour", true);
 		}
 
-		private bool Check3rdPartyModLoaded(string namespaceStr) {
+		private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll=false) {
 			bool thirPartyModLoaded = false;
 
 			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -2084,6 +2084,7 @@ namespace TrafficManager {
 
 			if (loadingExtensions != null) {
 				foreach (ILoadingExtension extension in loadingExtensions) {
+					Log.Info($"Detected extension: {extension.GetType().Name} in namespace {extension.GetType().Namespace}");
 					if (extension.GetType().Namespace == null)
 						continue;
 

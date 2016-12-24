@@ -1,4 +1,5 @@
-﻿using ColossalFramework.UI;
+﻿using ColossalFramework.Math;
+using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,10 @@ namespace TrafficManager.UI {
 		public override void Start() {
 			// Place the button.
 			GlobalConfig config = GlobalConfig.Instance;
-			absolutePosition = new Vector3(config.MainMenuButtonX, config.MainMenuButtonY);
+
+			Vector3 pos = new Vector3(config.MainMenuButtonX, config.MainMenuButtonY);
+			ClampPosToScreen(ref pos);
+			absolutePosition = pos;
 
 			// Set the atlas and background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonAtlas", TrafficLightToolTextureResources.MainMenuButtonTexture2D, 6, new string[] {
@@ -52,6 +56,17 @@ namespace TrafficManager.UI {
 		protected override void OnClick(UIMouseEventParameter p) {
 			LoadingExtension.BaseUI.ToggleMainMenu();
 			UpdateSprites();
+		}
+
+		private void ClampPosToScreen(ref Vector3 pos) {
+			if (pos.x < 0)
+				pos.x = 0;
+			if (pos.y < 0)
+				pos.y = 0;
+			if (pos.x >= Screen.currentResolution.width)
+				pos.x = Screen.currentResolution.width - 1;
+			if (pos.y >= Screen.currentResolution.height)
+				pos.y = Screen.currentResolution.height - 1;
 		}
 
 		protected override void OnPositionChanged() {

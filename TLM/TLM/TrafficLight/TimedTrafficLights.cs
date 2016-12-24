@@ -190,7 +190,7 @@ namespace TrafficManager.TrafficLight {
 
 		internal bool housekeeping() {
 			// TODO [version 1.9] currently, this method must be called for each node in the node group individually
-			Log._Debug($"Housekeeping timed light @ {NodeId}");
+			//Log._Debug($"Housekeeping timed light @ {NodeId}");
 
 			if (NodeGroup == null || NodeGroup.Count <= 0) {
 				Stop();
@@ -209,7 +209,7 @@ namespace TrafficManager.TrafficLight {
 			int i = 0;
 			foreach (TimedTrafficLightsStep step in Steps) {
 				foreach (CustomSegmentLights lights in step.segmentLights.Values) {
-					Log._Debug($"----- Housekeeping timed light at step {i}, seg. {lights.SegmentId} @ {NodeId}");
+					//Log._Debug($"----- Housekeeping timed light at step {i}, seg. {lights.SegmentId} @ {NodeId}");
 					lights.housekeeping(true);
 					lights.OnChange(true);
 				}

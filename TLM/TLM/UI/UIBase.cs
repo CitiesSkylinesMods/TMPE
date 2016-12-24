@@ -1,6 +1,7 @@
 using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
+using TrafficManager.State;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
@@ -42,12 +43,21 @@ namespace TrafficManager.UI {
 				Show();
 		}
 
+		internal void RebuildMenu() {
+			if (menu != null) {
+				UnityEngine.Object.Destroy(menu);
+			}
+			var uiView = UIView.GetAView();
+			menu = (UITrafficManager)uiView.AddUIComponent(typeof(UITrafficManager));
+		}
+
 		public void Show() {
 			try {
 				ToolsModifierControl.mainToolbar.CloseEverything();
 			} catch (Exception e) {
 				Log.Error("Error on Show(): " + e.ToString());
 			}
+
 			GetMenu().Show();
 			LoadingExtension.SetToolMode(TrafficManagerMode.Activated);
 			_uiShown = true;

@@ -2215,7 +2215,6 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 						// calculate density sum
-						byte prevLaneIndex = 0;
 						uint densitySum = prevDirTrafficData.accumulatedDensities;
 						uint currentDensity = prevLaneTrafficData[item.m_position.m_lane].accumulatedDensities;
 						prevDensity = (ushort)(densitySum > 0 ? Math.Min(currentDensity * 100 / densitySum, 100) : 0);

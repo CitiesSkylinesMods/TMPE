@@ -105,7 +105,7 @@
     <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
     <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\CustomSegmentLights.cs" />
-    <Compile Include="TrafficLight\ICustomSegmentLightManager.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLightsManager.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
     <Compile Include="Traffic\ExtBuilding.cs" />
     <Compile Include="Traffic\ExtCitizenInstance.cs" />

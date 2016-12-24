@@ -79,16 +79,11 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		[Obsolete]
-		public RoadBaseAI.TrafficLightState GetAutoPedestrianLightState() {
-			return AutoPedestrianLightState;
-		}
-
 		public bool ManualPedestrianMode {
 			get { return manualPedestrianMode; }
 			set {
 				if (! manualPedestrianMode && value) {
-					PedestrianLightState = GetAutoPedestrianLightState();
+					PedestrianLightState = AutoPedestrianLightState;
 				}
 				manualPedestrianMode = value;
 			}
@@ -99,7 +94,7 @@ namespace TrafficManager.TrafficLight {
 		internal RoadBaseAI.TrafficLightState? pedestrianLightState = null;
 		protected CustomSegmentLight mainSegmentLight = null;
 
-		public ICustomSegmentLightManager LightsManager {
+		public ICustomSegmentLightsManager LightsManager {
 			get {
 				return lightsManager;
 			}
@@ -108,7 +103,7 @@ namespace TrafficManager.TrafficLight {
 				OnChange();
 			}
 		}
-		private ICustomSegmentLightManager lightsManager;
+		private ICustomSegmentLightsManager lightsManager;
 
 		public override string ToString() {
 			String ret = $"InvalidPedestrianLight={InvalidPedestrianLight} PedestrianLightState={PedestrianLightState} ManualPedestrianMode={ManualPedestrianMode}\n";
@@ -118,14 +113,14 @@ namespace TrafficManager.TrafficLight {
 			return ret;
 		}
 
-		protected CustomSegmentLights(ICustomSegmentLightManager lightsManager, ushort nodeId, ushort segmentId) {
+		protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId) {
 			this.lightsManager = lightsManager;
 			this.nodeId = nodeId;
 			this.segmentId = segmentId;
 			OnChange();
 		}
 
-		public CustomSegmentLights(ICustomSegmentLightManager lightsManager, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainState) {
+		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainState) {
 			this.lightsManager = lightsManager;
 			this.nodeId = nodeId;
 			this.segmentId = segmentId;
@@ -137,7 +132,7 @@ namespace TrafficManager.TrafficLight {
 			OnChange();
 		}
 
-		public CustomSegmentLights(ICustomSegmentLightManager lightsManager, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainState, RoadBaseAI.TrafficLightState leftState, RoadBaseAI.TrafficLightState rightState, RoadBaseAI.TrafficLightState pedState) {
+		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainState, RoadBaseAI.TrafficLightState leftState, RoadBaseAI.TrafficLightState rightState, RoadBaseAI.TrafficLightState pedState) {
 			this.lightsManager = lightsManager;
 			this.nodeId = nodeId;
 			this.segmentId = segmentId;
