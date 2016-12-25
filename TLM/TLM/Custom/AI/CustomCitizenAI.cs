@@ -334,7 +334,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position startPosA;
 
 			if (Options.prohibitPocketCars && (extInstance.PathMode == ExtPathMode.CalculatingCarPathToTarget || extInstance.PathMode == ExtPathMode.CalculatingCarPathToKnownParkPos)) {
-				foundStartPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, laneTypes, vehicleType, allowUnderground, false, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, out startPosA);
+				foundStartPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, laneTypes & ~NetInfo.LaneType.Pedestrian, vehicleType, allowUnderground, false, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, out startPosA);
 			} else {
 				foundStartPos = FindPathPosition(instanceID, ref citizenData, startPos, startLaneType, vehicleType, allowUnderground, out startPosA);
 			}

@@ -134,7 +134,7 @@ namespace TrafficManager.Custom.AI {
 					carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 				}
 			}
-			if (carInfo == null && useCar && !useTaxi)
+			if (carInfo == null && (useCar || useTaxi))
 			// NON-STOCK CODE END
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
 			VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, ItemClass.Level.Level2);

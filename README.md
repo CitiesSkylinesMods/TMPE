@@ -4,6 +4,11 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.8, 12/25/2016
+- Bugfix: Taxis are not being used
+- Bugfix: Prohibiting u-turns with the junction restriction tool does not work (thanks to @Kisoe for reporting this issue)
+- Bugfix: Cars are sometimes floating across the map while trying to park (thanks to @[Delta ²k5] for reporting this issue)
+
 1.8.7, 12/24/2016
 - Bugfix: Parking AI: Cims that try to reach their parked car are sometimes teleported to another location where they start to fly through the map in order to reach their car
 - Bugfix: Parking AI: Cims owning a parked car do not consider using other means of transportation

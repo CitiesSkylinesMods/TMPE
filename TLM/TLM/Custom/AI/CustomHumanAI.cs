@@ -59,7 +59,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[4] && (pathFindFailed || pathFindSucceeded)) {
-						Log._Debug($"CustomHumanAI::CustomSimulationStep Citizen instance {instanceID}, citizen {instanceData.m_citizen} is called {Singleton<CitizenManager>.instance.GetCitizenName(instanceData.m_citizen)} and is {Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].Age/255} years old. PathMode={extInstance.PathMode} ReturnPathState={extInstance.ReturnPathState}");
+						Log._Debug($"CustomHumanAI::CustomSimulationStep Citizen instance {instanceID}, citizen {instanceData.m_citizen} is called {Singleton<CitizenManager>.instance.GetCitizenName(instanceData.m_citizen)} and is {(Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].Age*100)/255} years old. PathMode={extInstance.PathMode} ReturnPathState={extInstance.ReturnPathState}");
 					}
 #endif
 

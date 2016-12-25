@@ -825,10 +825,10 @@ namespace TrafficManager.State {
 			bool mayHaveLight = mayHaveTrafficLight(nodeId);
 			if (mayHaveLight) {
 				if ((bool)flag) {
-					Log._Debug($"Adding traffic light @ node {nodeId}");
+					//Log._Debug($"Adding traffic light @ node {nodeId}");
 					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags |= NetNode.Flags.TrafficLights;
 				} else {
-					Log._Debug($"Removing traffic light @ node {nodeId}");
+					//Log._Debug($"Removing traffic light @ node {nodeId}");
 					Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
 				}
 			} else if ((bool)flag) {

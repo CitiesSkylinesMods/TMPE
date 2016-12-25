@@ -74,9 +74,12 @@ namespace TrafficManager.Manager {
 			uint sourceLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
 			while (sourceLaneId != 0) {
 				uint[] targetLaneIds = GetLaneConnections(sourceLaneId, startNode);
-				foreach (uint targetLaneId in targetLaneIds) {
-					if (netManager.m_lanes.m_buffer[targetLaneId].m_segment == segmentId) {
-						return true;
+
+				if (targetLaneIds != null) {
+					foreach (uint targetLaneId in targetLaneIds) {
+						if (netManager.m_lanes.m_buffer[targetLaneId].m_segment == segmentId) {
+							return true;
+						}
 					}
 				}
 				sourceLaneId = netManager.m_lanes.m_buffer[sourceLaneId].m_nextLane;

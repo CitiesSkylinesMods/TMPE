@@ -943,6 +943,17 @@ namespace TrafficManager.Custom.AI {
 				ushort parkedVehicleId;
 				if (foundParkingSpace && vehicleManager.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, this.m_info, parkPos, parkRot, driverCitizenId)) {
 					// we have reached a parking position
+#if DEBUG
+					float sqrDist = (refPos - parkPos).sqrMagnitude;
+					if (GlobalConfig.Instance.DebugSwitches[4])
+						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance.PathMode} sqrDist={sqrDist}");
+
+					if (GlobalConfig.Instance.DebugSwitches[6] && sqrDist >= 16000) {
+						Log._Debug($"CustomPassengerCarAI.CustomParkVehicle: FORCED PAUSE. Distance very large! Vehicle {vehicleID}. dist={sqrDist}");
+						Singleton<SimulationManager>.instance.SimulationPaused = true;
+					}
+#endif
+
 					citizenManager.m_citizens.m_buffer[(int)((UIntPtr)driverCitizenId)].SetParkedVehicle(driverCitizenId, parkedVehicleId);
 					if (parkOffset >= 0f) {
 						segmentOffset = (byte)(parkOffset * 255f);
