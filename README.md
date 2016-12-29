@@ -4,6 +4,16 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.9, 12/29/2016
+- It is now possible to set speed limits for metro tracks
+- Custom default speed limits may now be defined for train and metro tracks
+- Junction restrictions may now be controlled at bend road segments
+- Customizable junctions are now highlighted by the lane connector tool
+- Improved UI behavior
+- Performance improvements
+- Bugfix: Selecting a junction to set up priority signs sometimes does not work (thanks to @Artemis *Seven* for reporting this issue)
+- Bugfix: Automatic pedestrian lights do not work as expected at junctions with incoming one-ways and on left-hand traffic maps
+
 1.8.8, 12/25/2016
 - Bugfix: Taxis are not being used
 - Bugfix: Prohibiting u-turns with the junction restriction tool does not work (thanks to @Kisoe for reporting this issue)

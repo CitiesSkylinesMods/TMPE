@@ -152,9 +152,6 @@ namespace TrafficManager.Geometry {
 						endNodeGeometry.Recalculate(true);
 					}
 
-					Flags.resetSegmentNodeFlags(SegmentId, false); // TODO refactor
-					Flags.resetSegmentNodeFlags(SegmentId, true); // TODO refactor
-
 					cleanup();
 
 					NotifyObservers();

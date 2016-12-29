@@ -204,7 +204,7 @@ namespace TrafficManager.Custom.AI {
 			ExtVehicleType vehicleType = VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType;
 			if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
-				Log._Debug($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+				Log.Warning($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
 #endif
 				vehicleType = ExtVehicleType.RailVehicle;
 			} else if (vehicleType == ExtVehicleType.CargoTrain)

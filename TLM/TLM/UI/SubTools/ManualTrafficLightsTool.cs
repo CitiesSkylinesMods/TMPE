@@ -40,7 +40,7 @@ namespace TrafficManager.UI.SubTools {
 			if (sim == null || !sim.IsTimedLight()) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 					prioMan.RemovePrioritySegments(HoveredNodeId);
-					Flags.setNodeTrafficLight(HoveredNodeId, true);
+					TrafficLightManager.Instance.AddTrafficLight(HoveredNodeId);
 				}
 
 				SelectedNodeId = HoveredNodeId;
@@ -63,10 +63,12 @@ namespace TrafficManager.UI.SubTools {
 			var hoveredSegment = false;
 
 			if (SelectedNodeId != 0) {
-				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+				CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
 				var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
+				if (nodeSimulation == null || !nodeSimulation.IsManualLight())
+					return;
 				nodeSimulation.housekeeping();
 
 				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
@@ -74,14 +76,13 @@ namespace TrafficManager.UI.SubTools {
 					return;
 				}*/ // TODO check
 
-				for (var i = 0; i < 8; i++) {
-					var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(i);
+				NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
+				foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
+					if (end == null)
+						continue;
 
-					if (segmentId == 0 || nodeSimulation == null ||
-						!customTrafficLightsManager.IsSegmentLight(SelectedNodeId, segmentId)) continue;
-
-					var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-					var segmentLights = customTrafficLightsManager.GetSegmentLights(SelectedNodeId, segmentId);
+					var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[end.SegmentId]);
+					var segmentLights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode);
 
 					var screenPos = Camera.main.WorldToScreenPoint(position);
 					screenPos.y = Screen.height - screenPos.y;
@@ -109,10 +110,10 @@ namespace TrafficManager.UI.SubTools {
 						// pedestrian light
 
 						// SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
-						hoveredSegment = RenderManualPedestrianLightSwitch(zoom, segmentId, screenPos, lightWidth, segmentLights, hoveredSegment);
+						hoveredSegment = RenderManualPedestrianLightSwitch(zoom, end.SegmentId, screenPos, lightWidth, segmentLights, hoveredSegment);
 
 						// SWITCH PEDESTRIAN LIGHT
-						guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 2 && segmentLights.ManualPedestrianMode ? 0.92f : 0.6f;
+						guiColor.a = _hoveredButton[0] == end.SegmentId && _hoveredButton[1] == 2 && segmentLights.ManualPedestrianMode ? 0.92f : 0.6f;
 						GUI.color = guiColor;
 
 						var myRect3 = new Rect(screenPos.x - pedestrianWidth / 2 - lightWidth + 5f * zoom, screenPos.y - pedestrianHeight / 2 + 22f * zoom, pedestrianWidth, pedestrianHeight);
@@ -127,7 +128,7 @@ namespace TrafficManager.UI.SubTools {
 								break;
 						}
 
-						hoveredSegment = IsPedestrianLightHovered(myRect3, segmentId, hoveredSegment, segmentLights);
+						hoveredSegment = IsPedestrianLightHovered(myRect3, end.SegmentId, hoveredSegment, segmentLights);
 					}
 
 					int lightOffset = -1;
@@ -138,16 +139,16 @@ namespace TrafficManager.UI.SubTools {
 						Vector3 offsetScreenPos = screenPos;
 						offsetScreenPos.y -= (lightHeight + 10f * zoom) * lightOffset;
 
-						SetAlpha(segmentId, -1);
+						SetAlpha(end.SegmentId, -1);
 
 						var myRect1 = new Rect(offsetScreenPos.x - modeWidth / 2, offsetScreenPos.y - modeHeight / 2 + modeHeight - 7f * zoom, modeWidth, modeHeight);
 
 						GUI.DrawTexture(myRect1, TrafficLightToolTextureResources.LightModeTexture2D);
 
-						hoveredSegment = GetHoveredSegment(myRect1, segmentId, hoveredSegment, segmentLight);
+						hoveredSegment = GetHoveredSegment(myRect1, end.SegmentId, hoveredSegment, segmentLight);
 
 						// COUNTER
-						hoveredSegment = RenderCounter(segmentId, offsetScreenPos, modeWidth, modeHeight, zoom, segmentLights, hoveredSegment);
+						hoveredSegment = RenderCounter(end.SegmentId, offsetScreenPos, modeWidth, modeHeight, zoom, segmentLights, hoveredSegment);
 
 						if (lightOffset > 0) {
 							// Info sign
@@ -165,37 +166,34 @@ namespace TrafficManager.UI.SubTools {
 							}
 						}
 
-						SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
-						bool startNode = geometry.StartNodeId() == SelectedNodeId;
+						if (end.OutgoingOneWay) continue;
 
-						if (geometry.IsOutgoingOneWay(startNode)) continue;
-
-						var hasLeftSegment = geometry.HasLeftSegment(startNode);
-						var hasForwardSegment = geometry.HasStraightSegment(startNode);
-						var hasRightSegment = geometry.HasRightSegment(startNode);
+						var hasLeftSegment = end.NumLeftSegments > 0;
+						var hasForwardSegment = end.NumStraightSegments > 0;
+						var hasRightSegment = end.NumRightSegments > 0;
 
 						switch (segmentLight.CurrentMode) {
 							case CustomSegmentLight.Mode.Simple:
-								hoveredSegment = SimpleManualSegmentLightMode(segmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
+								hoveredSegment = SimpleManualSegmentLightMode(end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
 								break;
 							case CustomSegmentLight.Mode.SingleLeft:
-								hoveredSegment = LeftForwardRManualSegmentLightMode(hasLeftSegment, segmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment, hasForwardSegment, hasRightSegment);
+								hoveredSegment = LeftForwardRManualSegmentLightMode(hasLeftSegment, end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment, hasForwardSegment, hasRightSegment);
 								break;
 							case CustomSegmentLight.Mode.SingleRight:
-								hoveredSegment = RightForwardLSegmentLightMode(segmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, hasForwardSegment, hasLeftSegment, segmentLight, hasRightSegment, hoveredSegment);
+								hoveredSegment = RightForwardLSegmentLightMode(end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, hasForwardSegment, hasLeftSegment, segmentLight, hasRightSegment, hoveredSegment);
 								break;
 							default:
 								// left arrow light
 								if (hasLeftSegment)
-									hoveredSegment = LeftArrowLightMode(segmentId, lightWidth, hasRightSegment, hasForwardSegment, offsetScreenPos, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
+									hoveredSegment = LeftArrowLightMode(end.SegmentId, lightWidth, hasRightSegment, hasForwardSegment, offsetScreenPos, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
 
 								// forward arrow light
 								if (hasForwardSegment)
-									hoveredSegment = ForwardArrowLightMode(segmentId, lightWidth, hasRightSegment, offsetScreenPos, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
+									hoveredSegment = ForwardArrowLightMode(end.SegmentId, lightWidth, hasRightSegment, offsetScreenPos, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
 
 								// right arrow light
 								if (hasRightSegment)
-									hoveredSegment = RightArrowLightMode(segmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
+									hoveredSegment = RightArrowLightMode(end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
 								break;
 						}
 					}
@@ -669,20 +667,21 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
 			var nodeSimulation = TrafficLightSimulationManager.Instance.GetNodeSimulation(SelectedNodeId);
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+			if (nodeSimulation == null || !nodeSimulation.IsManualLight())
+				return;
+			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
-			for (var i = 0; i < 8; i++) {
-				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
-				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(i);
-
-				if (segmentId == 0 ||
-					(nodeSimulation != null && customTrafficLightsManager.IsSegmentLight(SelectedNodeId, segmentId)))
+			NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
+			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
+				if (end == null)
 					continue;
 
-				var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], segmentId);
+				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
 
-				var width = _hoveredButton[0] == segmentId ? 11.25f : 10f;
-				MainTool.DrawOverlayCircle(cameraInfo, colorGray, position, width, segmentId != _hoveredButton[0]);
+				var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], end.SegmentId);
+
+				var width = _hoveredButton[0] == end.SegmentId ? 11.25f : 10f;
+				MainTool.DrawOverlayCircle(cameraInfo, colorGray, position, width, end.SegmentId != _hoveredButton[0]);
 			}
 		}
 

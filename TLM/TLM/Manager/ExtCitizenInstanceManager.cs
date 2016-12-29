@@ -12,7 +12,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class ExtCitizenInstanceManager : ICustomManager {
+	public class ExtCitizenInstanceManager : AbstractCustomManager {
 		public static ExtCitizenInstanceManager Instance { get; private set; } = null;
 
 		internal void OnReleaseInstance(ushort instanceId) {
@@ -44,7 +44,8 @@ namespace TrafficManager.Manager {
 			return ExtInstances[instanceId];
 		}
 		
-		public void OnLevelUnloading() {
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
 			Reset();
 		}
 

@@ -29,6 +29,7 @@ namespace TrafficManager.UI.SubTools {
 			Backward
 		}
 
+		private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
 		private Dictionary<ushort, IDisposable> nodeGeometryUnsubscribers;
 		private NodeLaneMarker selectedMarker = null;
 		private NodeLaneMarker hoveredMarker = null;
@@ -76,7 +77,6 @@ namespace TrafficManager.UI.SubTools {
 			Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
 			Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			//for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 			foreach (KeyValuePair<ushort, List<NodeLaneMarker>> e in currentNodeMarkers) {
 				ushort nodeId = e.Key;
 				List<NodeLaneMarker> nodeMarkers = e.Value;
@@ -85,6 +85,11 @@ namespace TrafficManager.UI.SubTools {
 				var diff = nodePos - camPos;
 				if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
 					continue; // do not draw if too distant
+
+				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
+					//MainTool.DrawOverlayCircle(cameraInfo, DefaultNodeMarkerColor, netManager.m_nodes.m_buffer[nodeId].m_position, 20f, true);
+					MainTool.DrawNodeCircle(cameraInfo, nodeId, DefaultNodeMarkerColor, true);
+				}
 
 				foreach (NodeLaneMarker laneMarker in nodeMarkers) {
 					foreach (NodeLaneMarker targetLaneMarker in laneMarker.connectedMarkers) {
@@ -408,7 +413,7 @@ namespace TrafficManager.UI.SubTools {
 				for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++) {
 					NetInfo.Lane laneInfo = lanes[laneIndex];
 					if ((laneInfo.m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
-						(laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) != VehicleInfo.VehicleType.None) {
+						(laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None) { // TODO refactor vehicle mask
 
 						Vector3? pos = null;
 						bool isSource = false;

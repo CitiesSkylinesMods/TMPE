@@ -74,8 +74,12 @@ namespace TrafficManager.Geometry {
 				Recalculate();
 				return;
 			}
-			
-			RemoveSegment(segmentId, false); // fallback: remove segment
+
+			for (int i = 0; i < 8; ++i) {
+				if (SegmentEndGeometries[i]?.SegmentId == segmentId) {
+					SegmentEndGeometries[i] = null;
+				}
+			}
 
 			for (int i = 0; i < 8; ++i) {
 				if (SegmentEndGeometries[i] == null) {
@@ -123,15 +127,15 @@ namespace TrafficManager.Geometry {
 
 			// recalculate (other) segments
 			for (int i = 0; i < 8; ++i) {
-				if (SegmentEndGeometries[i] != null) {
-					if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
-						continue;
+				if (SegmentEndGeometries[i] == null)
+					continue;
+				if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
+					continue;
 #if DEBUGGEO
-					if (GlobalConfig.Instance.DebugSwitches[5])
-						Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
-					SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(false);
-				}
+				SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(false);
 			}
 		}
 
@@ -143,57 +147,12 @@ namespace TrafficManager.Geometry {
 
 			Cleanup();
 
-			Flags.applyNodeTrafficLightFlag(NodeId);
-
-			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-
 			// check if node is valid
 			if (!IsValid()) {
 				for (int i = 0; i < 8; ++i) {
 					SegmentEndGeometries[i] = null;
 				}
-				tlsMan.RemoveNodeFromSimulation(NodeId, false, true);
-				Flags.setNodeTrafficLight(NodeId, false);
 			} else {
-				NetManager netManager = Singleton<NetManager>.instance;
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-
-				bool hasTrafficLight = (netManager.m_nodes.m_buffer[NodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
-				var nodeSim = tlsMan.GetNodeSimulation(NodeId);
-				if (nodeSim == null) {
-					byte numSegmentsWithSigns = 0;
-					for (var s = 0; s < 8; s++) {
-						var segmentId = netManager.m_nodes.m_buffer[NodeId].GetSegment(s);
-						if (segmentId <= 0)
-							continue;
-
-#if DEBUGx
-						Log._Debug($"NodeGeometry.Recalculate: Housekeeping segment {segmentId}");
-#endif
-
-						SegmentEnd prioritySegment = prioMan.GetPrioritySegment(NodeId, segmentId);
-						if (prioritySegment == null) {
-							continue;
-						}
-
-						// if node is a traffic light, it must not have priority signs
-						if (hasTrafficLight && prioritySegment.Type != SegmentEnd.PriorityType.None) {
-							Log.Warning($"Housekeeping: Node {NodeId}, Segment {segmentId} is a priority sign but node has a traffic light!");
-							prioritySegment.Type = SegmentEnd.PriorityType.None;
-						}
-
-						// if a priority sign is set, everything is ok
-						if (prioritySegment.Type != SegmentEnd.PriorityType.None) {
-							++numSegmentsWithSigns;
-						}
-					}
-
-					if (numSegmentsWithSigns > 0) {
-						// add priority segments for newly created segments
-						numSegmentsWithSigns += prioMan.AddPriorityNode(NodeId);
-					}
-				}
-
 				// calculate node properties
 				byte incomingSegments = 0;
 				byte outgoingSegments = 0;

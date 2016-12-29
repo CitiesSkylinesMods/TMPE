@@ -12,7 +12,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class ExtBuildingManager : ICustomManager {
+	public class ExtBuildingManager : AbstractCustomManager {
 		public static ExtBuildingManager Instance { get; private set; } = null;
 
 		static ExtBuildingManager() {
@@ -40,7 +40,8 @@ namespace TrafficManager.Manager {
 			return ExtBuildings[buildingId];
 		}
 		
-		public void OnLevelUnloading() {
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
 			for (int i = 0; i < ExtBuildings.Length; ++i)
 				ExtBuildings[i].Reset();
 		}

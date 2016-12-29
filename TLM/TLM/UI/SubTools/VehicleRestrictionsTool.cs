@@ -80,7 +80,7 @@ namespace TrafficManager.UI.SubTools {
 				windowRect = GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"));
 				_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
-				overlayHandleHovered = false;
+				//overlayHandleHovered = false;
 			}
 			//ShowSigns(false);
 		}
@@ -139,6 +139,7 @@ namespace TrafficManager.UI.SubTools {
 				// invert pattern
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+				// TODO refactor vehicle mask
 				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
@@ -162,6 +163,7 @@ namespace TrafficManager.UI.SubTools {
 				// allow all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+				// TODO refactor vehicle mask
 				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (object[] laneData in sortedLanes) {
 					uint laneId = (uint)laneData[0];
@@ -204,6 +206,7 @@ namespace TrafficManager.UI.SubTools {
 
 		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {
 			NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+			// TODO refactor vehicle mask
 			List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 			LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
@@ -236,6 +239,7 @@ namespace TrafficManager.UI.SubTools {
 					processedSegments.Add(segmentId);
 
 					NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+					// TODO refactor vehicle mask
 					List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 					if (sortedLanes.Count == selectedSortedLanes.Count) {
@@ -294,6 +298,7 @@ namespace TrafficManager.UI.SubTools {
 				return false; // do not draw if too distant
 
 			int numDirections;
+			// TODO refactor vehicle mask
 			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 
 			// draw vehicle restrictions over each lane
@@ -317,6 +322,7 @@ namespace TrafficManager.UI.SubTools {
 
 			uint x = 0;
 			var guiColor = GUI.color;
+			// TODO refactor vehicle mask
 			List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
 			bool hovered = false;
 			HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();

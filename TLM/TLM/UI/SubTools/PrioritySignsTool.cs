@@ -11,10 +11,12 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
 		private HashSet<ushort> currentPrioritySegmentIds;
+		SegmentEnd[] prioritySegments = new SegmentEnd[2];
 
 		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			currentPrioritySegmentIds = new HashSet<ushort>();
@@ -34,7 +36,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			// no highlight for existing priority node in sign mode
-			if (TrafficPriorityManager.Instance.IsPriorityNode(HoveredNodeId))
+			if (TrafficPriorityManager.Instance.IsPriorityNode(HoveredNodeId, false))
 				return;
 
 			if (HoveredNodeId == 0) return;
@@ -46,8 +48,8 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RefreshCurrentPrioritySegmentIds() {
 			currentPrioritySegmentIds.Clear();
-			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				if (!NetUtil.IsSegmentValid(segmentId))
 					continue;
 
 				var trafficSegment = TrafficPriorityManager.Instance.TrafficSegments[segmentId];
@@ -72,6 +74,7 @@ namespace TrafficManager.UI.SubTools {
 			try {
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+				TrafficLightManager tlm = TrafficLightManager.Instance;
 
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
 				var hoveredSegment = false;
@@ -84,27 +87,34 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 					SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
 
-					List<SegmentEnd> prioritySegments = new List<SegmentEnd>();
+					prioritySegments[0] = null;
+					prioritySegments[1] = null;
+
 					if (tlsMan.GetNodeSimulation(trafficSegment.Node1) == null) {
 						SegmentEnd tmpSeg1 = prioMan.GetPrioritySegment(trafficSegment.Node1, segmentId);
 						bool startNode = geometry.StartNodeId() == trafficSegment.Node1;
 						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(startNode)) {
-							prioritySegments.Add(tmpSeg1);
+							prioritySegments[0] = tmpSeg1;
 							nodeIdsWithSigns.Add(trafficSegment.Node1);
+							prioMan.AddPriorityNode(trafficSegment.Node1);
 						}
 					}
 					if (tlsMan.GetNodeSimulation(trafficSegment.Node2) == null) {
 						SegmentEnd tmpSeg2 = prioMan.GetPrioritySegment(trafficSegment.Node2, segmentId);
 						bool startNode = geometry.StartNodeId() == trafficSegment.Node2;
 						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(startNode)) {
-							prioritySegments.Add(tmpSeg2);
+							prioritySegments[1] = tmpSeg2;
 							nodeIdsWithSigns.Add(trafficSegment.Node2);
+							prioMan.AddPriorityNode(trafficSegment.Node2);
 						}
 					}
 
 					//Log.Message("init ok");
 
 					foreach (var prioritySegment in prioritySegments) {
+						if (prioritySegment == null)
+							continue;
+
 						var nodeId = prioritySegment.NodeId;
 						//Log.Message("_guiPrioritySigns: nodeId=" + nodeId);
 
@@ -240,7 +250,7 @@ namespace TrafficManager.UI.SubTools {
 				// add a new or delete a priority segment node
 				if (HoveredNodeId != 0 || hoveredExistingNodeId != 0) {
 					bool delete = false;
-					if (hoveredExistingNodeId > 0) {
+					if (hoveredExistingNodeId != 0) {
 						delete = true;
 					}
 
@@ -258,19 +268,19 @@ namespace TrafficManager.UI.SubTools {
 						ok = false;
 
 					if (clicked) {
-						//Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + HoveredNodeId + "/" + hoveredExistingNodeId);
+						Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + HoveredNodeId + "/" + hoveredExistingNodeId + " ok=" + ok);
 
 						if (delete) {
 							prioMan.RemovePrioritySegments(hoveredExistingNodeId);
 							RefreshCurrentPrioritySegmentIds();
 						} else if (ok) {
-							if (!prioMan.IsPriorityNode(HoveredNodeId)) {
-								//Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
+							//if (!prioMan.IsPriorityNode(HoveredNodeId)) {
+								Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
 								tlsMan.RemoveNodeFromSimulation(HoveredNodeId, false, true);
-								Flags.setNodeTrafficLight(HoveredNodeId, false); // TODO refactor!
+								tlm.RemoveTrafficLight(HoveredNodeId);
 								prioMan.AddPriorityNode(HoveredNodeId);
 								RefreshCurrentPrioritySegmentIds();
-							}
+							//}
 						} else if (nodeSim != null && nodeSim.IsTimedLight()) {
 							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
 						}

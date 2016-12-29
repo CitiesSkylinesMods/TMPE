@@ -12,16 +12,12 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class LaneConnectionManager : ICustomManager, IObserver<SegmentGeometry> {
+	public class LaneConnectionManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>> {
 		public static LaneConnectionManager Instance { get; private set; } = null;
 		
 		static LaneConnectionManager() {
 			Instance = new LaneConnectionManager();
 		}
-
-		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
-
-		private object geoLock = new object();
 
 		/// <summary>
 		/// Checks if traffic may flow from source lane to target lane according to setup lane connections
@@ -181,13 +177,14 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="startNode"></param>
 		internal void RemoveLaneConnectionsFromSegment(ushort segmentId, bool startNode) {
-#if DEBUGCONN
+//#if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment({segmentId}, {startNode}) called.");
-#endif
+//#endif
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
 			while (curLaneId != 0) {
+				Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing lane connections from segment {segmentId}, lane {curLaneId}.");
 				RemoveLaneConnections(curLaneId, startNode);
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -275,16 +272,16 @@ namespace TrafficManager.Manager {
 			return ret;
 		}
 
-		public void OnUpdate(SegmentGeometry geometry) {
-			if (!geometry.IsValid()) {
+		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
 #if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.OnUpdate({geometry.SegmentId}): Segment has become invalid. Removing lane connections.");
 #endif
-				RemoveLaneConnectionsFromSegment(geometry.SegmentId, false);
-				RemoveLaneConnectionsFromSegment(geometry.SegmentId, true);
+			RemoveLaneConnectionsFromSegment(geometry.SegmentId, false);
+			RemoveLaneConnectionsFromSegment(geometry.SegmentId, true);
+		}
 
-				UnsubscribeFromSegmentGeometry(geometry.SegmentId);
-			}
+		protected override void HandleValidSegment(SegmentGeometry geometry) {
+
 		}
 
 		/// <summary>
@@ -525,65 +522,58 @@ namespace TrafficManager.Manager {
 			Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): setting lane arrows to {arrows}");
 #endif
 
-			Flags.setLaneArrowFlags(laneId, arrows, true);
+			LaneArrowManager.Instance.SetLaneArrows(laneId, arrows, true);
 		}
 
-		private void UnsubscribeFromSegmentGeometry(ushort segmentId) {
-#if DEBUGCONN
-			Log._Debug($"UnsubscribeFromSegmentGeometry({segmentId}) called.");
-#endif
-			try {
-				Monitor.Enter(geoLock);
+		public bool LoadData(List<Configuration.LaneConnection> data) {
+			bool success = true;
+			Log.Info($"Loading {data.Count} lane connections");
+			foreach (Configuration.LaneConnection conn in data) {
+				try {
+					if (!NetUtil.IsLaneValid(conn.lowerLaneId))
+						continue;
+					if (!NetUtil.IsLaneValid(conn.higherLaneId))
+						continue;
 
-				if (segGeometryUnsubscribers.ContainsKey(segmentId)) {
-					segGeometryUnsubscribers[segmentId].Dispose();
-					segGeometryUnsubscribers.Remove(segmentId);
+					Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
+					AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
+				} catch (Exception e) {
+					// ignore, as it's probably corrupt save data. it'll be culled on next save
+					Log.Error("Error loading data from lane connection: " + e.ToString());
+					success = false;
 				}
-#if DEBUGCONN
-				Log._Debug($"LaneConnectionManager.UnsubscribeFromSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
-#endif
-			} finally {
-				Monitor.Exit(geoLock);
 			}
+			return success;
 		}
 
-		private void UnsubscribeFromAllSegmentGeometries() {
-#if DEBUGCONN
-			Log._Debug($"LaneConnectionManager.UnsubscribeFromAllSegmentGeometries() called.");
-#endif
-			List<ushort> segmentIds = new List<ushort>(segGeometryUnsubscribers.Keys);
-			foreach (ushort segmentId in segmentIds)
-				UnsubscribeFromSegmentGeometry(segmentId);
-		}
+		public List<Configuration.LaneConnection> SaveData(ref bool success) {
+			List<Configuration.LaneConnection> ret = new List<Configuration.LaneConnection>();
+			for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
+				try {
+					if (Flags.laneConnections[i] == null)
+						continue;
+					
+					for (int nodeArrayIndex = 0; nodeArrayIndex <= 1; ++nodeArrayIndex) {
+						uint[] connectedLaneIds = Flags.laneConnections[i][nodeArrayIndex];
+						bool startNode = nodeArrayIndex == 0;
+						if (connectedLaneIds != null) {
+							foreach (uint otherHigherLaneId in connectedLaneIds) {
+								if (otherHigherLaneId <= i)
+									continue;
+								if (!NetUtil.IsLaneValid(otherHigherLaneId))
+									continue;
 
-		private void SubscribeToSegmentGeometry(ushort segmentId) {
-#if DEBUGCONN
-			Log._Debug($"LaneConnectionManager.SubscribeToSegmentGeometry({segmentId}) called.");
-#endif
-			try {
-				Monitor.Enter(geoLock);
-
-				if (! segGeometryUnsubscribers.ContainsKey(segmentId)) {
-					segGeometryUnsubscribers.Add(segmentId, SegmentGeometry.Get(segmentId).Subscribe(this));
+								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
+								ret.Add(new Configuration.LaneConnection(i, (uint)otherHigherLaneId, startNode));
+							}
+						}
+					}
+				} catch (Exception e) {
+					Log.Error($"Exception occurred while saving lane data @ {i}: {e.ToString()}");
+					success = false;
 				}
-
-#if DEBUGCONN
-				Log._Debug($"LaneConnectionManager.SubscribeToSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
-#endif
-			} finally {
-				Monitor.Exit(geoLock);
 			}
-		}
-
-		public void OnLevelUnloading() {
-			UnsubscribeFromAllSegmentGeometries();
-		}
-
-		~LaneConnectionManager() {
-#if DEBUGCONN
-			Log._Debug($"~LaneConnectionManager() called.");
-#endif
-			UnsubscribeFromAllSegmentGeometries();
+			return ret;
 		}
 	}
 }

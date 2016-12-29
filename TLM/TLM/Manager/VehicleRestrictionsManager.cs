@@ -5,9 +5,10 @@ using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
-	public class VehicleRestrictionsManager {
+	public class VehicleRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>> {
 		public static VehicleRestrictionsManager Instance { get; private set; } = null;
 
 		static VehicleRestrictionsManager() {
@@ -18,10 +19,6 @@ namespace TrafficManager.Manager {
 		/// For each segment id and lane index: Holds the default set of vehicle types allowed for the lane
 		/// </summary>
 		private ExtVehicleType?[][] defaultVehicleTypeCache = null;
-
-		internal void OnLevelUnloading() {
-			defaultVehicleTypeCache = null;
-		}
 
 		/// <summary>
 		/// Determines the allowed vehicle types that may approach the given node from the given segment.
@@ -204,6 +201,7 @@ namespace TrafficManager.Manager {
 
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
 			return true;
@@ -227,6 +225,7 @@ namespace TrafficManager.Manager {
 			allowedTypes |= vehicleType;
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 		}
 
@@ -248,6 +247,7 @@ namespace TrafficManager.Manager {
 			allowedTypes &= ~vehicleType;
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex]); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 		}
 
@@ -376,13 +376,65 @@ namespace TrafficManager.Manager {
 		}
 
 		public void NotifyStartEndNode(ushort segmentId) {
-			// notify observers of start node and end node
+			// notify observers of start node and end node (e.g. for separate traffic lights)
 			ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
 			ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
 			if (startNodeId != 0)
 				NodeGeometry.Get(startNodeId).NotifyObservers();
 			if (endNodeId != 0)
 				NodeGeometry.Get(endNodeId).NotifyObservers();
+		}
+
+		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+			Flags.resetSegmentVehicleRestrictions(geometry.SegmentId);
+			ClearCache(geometry.SegmentId);
+		}
+
+		protected override void HandleValidSegment(SegmentGeometry geometry) {
+			
+		}
+
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
+			defaultVehicleTypeCache = null;
+		}
+
+		public bool LoadData(List<Configuration.LaneVehicleTypes> data) {
+			bool success = true;
+			Log.Info($"Loading lane vehicle restriction data. {data.Count} elements");
+			foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
+				try {
+					if (!NetUtil.IsLaneValid(laneVehicleTypes.laneId))
+						continue;
+
+					ExtVehicleType baseMask = GetBaseMask(laneVehicleTypes.laneId);
+					ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
+					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
+					if (maskedType != baseMask) {
+						Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
+					} else {
+						Log._Debug($"Masked type does not differ from base type. Ignoring.");
+					}
+				} catch (Exception e) {
+					// ignore, as it's probably corrupt save data. it'll be culled on next save
+					Log.Warning("Error loading data from vehicle restrictions: " + e.ToString());
+					success = false;
+				}
+			}
+			return success;
+		}
+
+		public List<Configuration.LaneVehicleTypes> SaveData(ref bool success) {
+			List<Configuration.LaneVehicleTypes> ret = new List<Configuration.LaneVehicleTypes>();
+			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
+				try {
+					ret.Add(new Configuration.LaneVehicleTypes(e.Key, e.Value));
+				} catch (Exception ex) {
+					Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
+					success = false;
+				}
+			}
+			return ret;
 		}
 	}
 }

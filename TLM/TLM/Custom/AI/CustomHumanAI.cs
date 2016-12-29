@@ -866,7 +866,8 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START //
 			RoadBaseAI.TrafficLightState pedestrianLightState;
-			CustomSegmentLights lights = CustomTrafficLightsManager.Instance.GetSegmentLights(node, segment);
+			bool startNode = instance.m_segments.m_buffer[segment].m_startNode == node;
+			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode);
 
 			if (lights == null || nodeSimulation == null || !nodeSimulation.IsSimulationActive()) {
 				RoadBaseAI.TrafficLightState vehicleLightState;

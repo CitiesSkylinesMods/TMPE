@@ -19,12 +19,17 @@ namespace TrafficManager.TrafficLight {
 			All = 4 // <, ^, >
 		}
 
+		[Obsolete]
 		public ushort NodeId {
-			get; private set;
+			get {
+				return lights.NodeId;
+			}
 		}
 
 		public ushort SegmentId {
-			get; set;
+			get {
+				return lights.SegmentId;
+			}
 		}
 
 		public Mode CurrentMode {
@@ -94,18 +99,14 @@ namespace TrafficManager.TrafficLight {
 			return $"LightLeft={LightLeft} LightMain={LightMain} LightRight={LightRight} CurrentMode={CurrentMode}";
 		}
 
-		public CustomSegmentLight(CustomSegmentLights lights, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight) {
-			this.NodeId = nodeId;
-			this.SegmentId = segmentId;
+		public CustomSegmentLight(CustomSegmentLights lights, RoadBaseAI.TrafficLightState mainLight) {
 			this.lights = lights;
 
 			SetStates(mainLight, leftLight, rightLight);
 			UpdateVisuals();
 		}
 
-		public CustomSegmentLight(CustomSegmentLights lights, ushort nodeId, ushort segmentId, RoadBaseAI.TrafficLightState mainLight, RoadBaseAI.TrafficLightState leftLight, RoadBaseAI.TrafficLightState rightLight/*, RoadBaseAI.TrafficLightState pedestrianLight*/) {
-			this.NodeId = nodeId;
-			this.SegmentId = segmentId;
+		public CustomSegmentLight(CustomSegmentLights lights, RoadBaseAI.TrafficLightState mainLight, RoadBaseAI.TrafficLightState leftLight, RoadBaseAI.TrafficLightState rightLight/*, RoadBaseAI.TrafficLightState pedestrianLight*/) {
 			this.lights = lights;
 
 			SetStates(mainLight, leftLight, rightLight);
@@ -115,7 +116,7 @@ namespace TrafficManager.TrafficLight {
 
 		public void ChangeMode() {
 			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
-			bool startNode = geometry.StartNodeId() == NodeId;
+			bool startNode = lights.StartNode;
 			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
 			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
 			var hasRightSegment = geometry.HasOutgoingRightSegment(startNode);
@@ -230,8 +231,9 @@ namespace TrafficManager.TrafficLight {
 		public void UpdateVisuals() {
 			var instance = Singleton<NetManager>.instance;
 
+			ushort nodeId = lights.NodeId;
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			uint num = (uint)(((int)NodeId << 8) / 32768);
+			uint num = (uint)(((int)nodeId << 8) / 32768);
 
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
@@ -264,8 +266,8 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 			uint now = ((currentFrameIndex - num) >> 8) & 1;
-			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
-			CustomRoadAI.OriginalSetTrafficLightState(true, NodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
+			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
+			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
 		}
 
 		public RoadBaseAI.TrafficLightState GetVisualLightState() {

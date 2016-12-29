@@ -6,10 +6,12 @@ using TrafficManager.State;
 using TrafficManager.Custom.AI;
 using TrafficManager.Util;
 using TrafficManager.TrafficLight;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.Manager {
-	public class TrafficLightSimulationManager : ICustomManager {
+	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>> {
 		public static TrafficLightSimulationManager Instance { get; private set; } = null;
+		public const int SIM_MOD = 64;
 
 		static TrafficLightSimulationManager() {
 			Instance = new TrafficLightSimulationManager();
@@ -19,7 +21,6 @@ namespace TrafficManager.Manager {
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
 		internal TrafficLightSimulation[] TrafficLightSimulations = new TrafficLightSimulation[NetManager.MAX_NODE_COUNT];
-		internal ushort[] NodesWithTrafficLightSimulation = new ushort[0];
 		//public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations = new Dictionary<ushort, TrafficLightSimulation>();
 
 		private TrafficLightSimulationManager() {
@@ -27,12 +28,16 @@ namespace TrafficManager.Manager {
 		}
 
 		public void SimulationStep() {
-			foreach (ushort nodeId in NodesWithTrafficLightSimulation) {
+			int frame = (int)(Singleton<SimulationManager>.instance.m_currentFrameIndex & (SIM_MOD - 1));
+			int minIndex = frame * (NetManager.MAX_NODE_COUNT / SIM_MOD);
+			int maxIndex = (frame + 1) * (NetManager.MAX_NODE_COUNT / SIM_MOD) - 1;
+
+			for (int nodeId = minIndex; nodeId <= maxIndex; ++nodeId) {
 				try {
 					TrafficLightSimulation nodeSim = TrafficLightSimulations[nodeId];
 
-					if (nodeSim.IsTimedLightActive()) {
-						Flags.applyNodeTrafficLightFlag(nodeId);
+					if (nodeSim != null && nodeSim.IsTimedLightActive()) {
+						//Flags.applyNodeTrafficLightFlag((ushort)nodeId);
 						nodeSim.TimedLight.SimulationStep();
 					}
 				} catch (Exception ex) {
@@ -49,12 +54,8 @@ namespace TrafficManager.Manager {
 			if (HasSimulation(nodeId)) {
 				return TrafficLightSimulations[nodeId];
 			}
-			ushort[] newNodesWithSim = new ushort[NodesWithTrafficLightSimulation.Length + 1];
-			Array.Copy(NodesWithTrafficLightSimulation, newNodesWithSim, NodesWithTrafficLightSimulation.Length);
-			newNodesWithSim[newNodesWithSim.Length-1] = nodeId;
 			TrafficLightSimulations[nodeId] = new TrafficLightSimulation(nodeId);
-			NodesWithTrafficLightSimulation = newNodesWithSim;
-
+			SubscribeToNodeGeometry(nodeId);
 			return TrafficLightSimulations[nodeId];
 		}
 
@@ -68,6 +69,7 @@ namespace TrafficManager.Manager {
 				return;
 
 			TrafficLightSimulation sim = TrafficLightSimulations[nodeId];
+			TrafficLightManager tlm = TrafficLightManager.Instance;
 
 			if (sim.TimedLight != null) {
 				// remove/destroy other timed traffic lights in group
@@ -85,7 +87,7 @@ namespace TrafficManager.Manager {
 						otherNodeSim.NodeGeoUnsubscriber?.Dispose();
 						RemoveNodeFromSimulation(timedNodeId);
 						if (removeTrafficLight)
-							Flags.setNodeTrafficLight(timedNodeId, false);
+							tlm.RemoveTrafficLight(timedNodeId);
 					} else {
 						otherNodeSim.TimedLight.RemoveNodeFromGroup(nodeId);
 					}
@@ -98,56 +100,187 @@ namespace TrafficManager.Manager {
 			sim.NodeGeoUnsubscriber?.Dispose();
 			RemoveNodeFromSimulation(nodeId);
 			if (removeTrafficLight)
-				Flags.setNodeTrafficLight(nodeId, false);
+				tlm.RemoveTrafficLight(nodeId);
 		}
 
-		private bool HasSimulation(ushort nodeId) {
-			foreach (ushort nId in NodesWithTrafficLightSimulation)
-				if (nId == nodeId)
-					return true;
-			return false;
+		public bool HasSimulation(ushort nodeId) {
+			return GetNodeSimulation(nodeId) != null;
 		}
 
 		private void RemoveNodeFromSimulation(ushort nodeId) {
-			// find index
-			int index = -1;
-			for (int i = 0; i < NodesWithTrafficLightSimulation.Length; ++i) {
-				if (NodesWithTrafficLightSimulation[i] == nodeId) {
-					index = i;
-					break;
-				}
-			}
-
-			if (index < 0)
-				return;
-
-			// splice array
-			ushort[] newNodesWithSim = new ushort[NodesWithTrafficLightSimulation.Length - 1];
-			if (index > 0)
-				Array.Copy(NodesWithTrafficLightSimulation, 0, newNodesWithSim, 0, index);
-			int remainingLength = NodesWithTrafficLightSimulation.Length - index - 1;
-			if (remainingLength > 0)
-				Array.Copy(NodesWithTrafficLightSimulation, index+1, newNodesWithSim, index, remainingLength);
-
-			// remove simulation
-			NodesWithTrafficLightSimulation = newNodesWithSim;
+			TrafficLightSimulations[nodeId]?.Destroy();
 			TrafficLightSimulations[nodeId] = null;
+			UnsubscribeFromNodeGeometry(nodeId);
 		}
 
 		public TrafficLightSimulation GetNodeSimulation(ushort nodeId) {
-			TrafficLightSimulation ret = null;
-			if (HasSimulation(nodeId)) {
-				ret = TrafficLightSimulations[nodeId];
-			}
-
-			return ret;
+			return TrafficLightSimulations[nodeId];
 		}
 
-		public void OnLevelUnloading() {
-			NodesWithTrafficLightSimulation = new ushort[0];
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
 			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				TrafficLightSimulations[nodeId] = null;
 			}
+		}
+
+		protected override void HandleInvalidNode(NodeGeometry geometry) {
+			RemoveNodeFromSimulation(geometry.NodeId, false, true);
+		}
+
+		protected override void HandleValidNode(NodeGeometry geometry) {
+			TrafficPriorityManager.Instance.AddPriorityNode(geometry.NodeId, true);
+		}
+
+		public bool LoadData(List<Configuration.TimedTrafficLights> data) {
+			bool success = true;
+			Log.Info($"Loading {data.Count} timed traffic lights (new method)");
+
+			TrafficLightManager tlm = TrafficLightManager.Instance;
+
+			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
+				try {
+					if (!NetUtil.IsNodeValid(cnfTimedLights.nodeId))
+						continue;
+
+					tlm.AddTrafficLight(cnfTimedLights.nodeId);
+
+					Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
+
+					TrafficLightSimulation sim = AddNodeToSimulation(cnfTimedLights.nodeId);
+					sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
+					var timedNode = sim.TimedLight;
+
+					int j = 0;
+					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
+						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
+						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
+
+						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
+							if (!NetUtil.IsSegmentValid(e.Key))
+								continue;
+
+							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
+							CustomSegmentLights lights = null;
+							if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
+								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
+								continue;
+							}
+							Configuration.CustomSegmentLights cnfLights = e.Value;
+
+							Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+
+							lights.ManualPedestrianMode = cnfLights.manualPedestrianMode;
+							lights.PedestrianLightState = cnfLights.pedestrianLightState;
+
+							foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
+								Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+								CustomSegmentLight light = null;
+								if (!lights.CustomLights.TryGetValue(e2.Key, out light)) {
+									Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+									continue;
+								}
+								Configuration.CustomSegmentLight cnfLight = e2.Value;
+
+								light.currentMode = (CustomSegmentLight.Mode)cnfLight.currentMode;
+								light.SetStates(cnfLight.mainLight, cnfLight.leftLight, cnfLight.rightLight, false);
+							}
+						}
+						++j;
+					}
+				} catch (Exception e) {
+					// ignore, as it's probably corrupt save data. it'll be culled on next save
+					Log.Warning("Error loading data from TimedNode (new method): " + e.ToString());
+					success = false;
+				}
+			}
+
+			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
+				try {
+					TrafficLightSimulation sim = GetNodeSimulation(cnfTimedLights.nodeId);
+					var timedNode = sim.TimedLight;
+
+					timedNode.housekeeping();
+					if (cnfTimedLights.started)
+						timedNode.Start();
+				} catch (Exception e) {
+					Log.Warning($"Error starting timed light @ {cnfTimedLights.nodeId}: " + e.ToString());
+					success = false;
+				}
+			}
+
+			return success;
+		}
+
+		public List<Configuration.TimedTrafficLights> SaveData(ref bool success) {
+			List<Configuration.TimedTrafficLights> ret = new List<Configuration.TimedTrafficLights>();
+			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				try {
+					TrafficLightSimulation sim = GetNodeSimulation(nodeId);
+					if (sim == null || !sim.IsTimedLight()) {
+						continue;
+					}
+
+					Log._Debug($"Going to save timed light at node {nodeId}.");
+
+					var timedNode = sim.TimedLight;
+					timedNode.handleNewSegments();
+
+					Configuration.TimedTrafficLights cnfTimedLights = new Configuration.TimedTrafficLights();
+					ret.Add(cnfTimedLights);
+
+					cnfTimedLights.nodeId = timedNode.NodeId;
+					cnfTimedLights.nodeGroup = timedNode.NodeGroup;
+					cnfTimedLights.started = timedNode.IsStarted();
+					cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
+
+					for (var j = 0; j < timedNode.NumSteps(); j++) {
+						Log._Debug($"Saving timed light step {j} at node {nodeId}.");
+						TimedTrafficLightsStep timedStep = timedNode.Steps[j];
+						Configuration.TimedTrafficLightsStep cnfTimedStep = new Configuration.TimedTrafficLightsStep();
+						cnfTimedLights.timedSteps.Add(cnfTimedStep);
+
+						cnfTimedStep.minTime = timedStep.minTime;
+						cnfTimedStep.maxTime = timedStep.maxTime;
+						cnfTimedStep.waitFlowBalance = timedStep.waitFlowBalance;
+						cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
+						foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.segmentLights) {
+							Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
+
+							CustomSegmentLights segLights = e.Value;
+							Configuration.CustomSegmentLights cnfSegLights = new Configuration.CustomSegmentLights();
+							cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
+
+							cnfSegLights.nodeId = segLights.NodeId;
+							cnfSegLights.segmentId = segLights.SegmentId;
+							cnfSegLights.customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>();
+							cnfSegLights.pedestrianLightState = segLights.PedestrianLightState;
+							cnfSegLights.manualPedestrianMode = segLights.ManualPedestrianMode;
+
+							Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
+
+							foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e2 in segLights.CustomLights) {
+								Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {nodeId}.");
+
+								CustomSegmentLight segLight = e2.Value;
+								Configuration.CustomSegmentLight cnfSegLight = new Configuration.CustomSegmentLight();
+								cnfSegLights.customLights.Add(e2.Key, cnfSegLight);
+
+								cnfSegLight.nodeId = segLight.NodeId;
+								cnfSegLight.segmentId = segLight.SegmentId;
+								cnfSegLight.currentMode = (int)segLight.CurrentMode;
+								cnfSegLight.leftLight = segLight.LightLeft;
+								cnfSegLight.mainLight = segLight.LightMain;
+								cnfSegLight.rightLight = segLight.LightRight;
+							}
+						}
+					}
+				} catch (Exception e) {
+					Log.Error($"Exception occurred while saving timed traffic light @ {nodeId}: {e.ToString()}");
+					success = false;
+				}
+			}
+			return ret;
 		}
 	}
 }

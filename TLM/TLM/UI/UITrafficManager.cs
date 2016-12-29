@@ -253,12 +253,7 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
-			ushort vehicleId = Singleton<BuildingManager>.instance.m_buildings.m_buffer[20284].m_ownVehicles;
-			while (vehicleId != 0) {
-				Vehicle vehicleData = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
-				Log._Debug($"ownVehicle id={vehicleId} flags={vehicleData.m_flags} target={vehicleData.m_targetBuilding} wait={vehicleData.m_waitCounter} transferSize={vehicleData.m_transferSize}");
-				vehicleId = vehicleData.m_nextOwnVehicle;
-			}
+			Flags.PrintDebugInfo();
 		}
 
 		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();

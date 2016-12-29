@@ -11,7 +11,7 @@ using TrafficManager.Traffic;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class VehicleStateManager {
+	public class VehicleStateManager : AbstractCustomManager {
 		public static VehicleStateManager Instance { get; private set; } = null;
 
 		/// <summary>
@@ -57,11 +57,6 @@ namespace TrafficManager.Manager {
 		internal VehicleState _GetVehicleState(ushort vehicleId) {
 			VehicleState ret = VehicleStates[vehicleId];
 			return ret;
-		}
-
-		internal void OnLevelUnloading() {
-			for (int i = 0; i < VehicleStates.Length; ++i)
-				VehicleStates[i].Valid = false;
 		}
 
 		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
@@ -195,11 +190,9 @@ namespace TrafficManager.Manager {
 					break;
 				case VehicleInfo.VehicleType.Metro:
 				case VehicleInfo.VehicleType.Train:
-					if (ai is PassengerTrainAI)
-						return ExtVehicleType.PassengerTrain;
-					//if (ai is CargoTrainAI)
-					return ExtVehicleType.CargoTrain;
-				//break;
+					if (ai is CargoTrainAI)
+						return ExtVehicleType.CargoTrain;
+					return ExtVehicleType.PassengerTrain;
 				case VehicleInfo.VehicleType.Tram:
 					return ExtVehicleType.Tram;
 				case VehicleInfo.VehicleType.Ship:
@@ -252,6 +245,17 @@ namespace TrafficManager.Manager {
 
 		internal void RequestClearTraffic() {
 			ClearTrafficRequested = true;
+		}
+
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
+			for (int i = 0; i < VehicleStates.Length; ++i)
+				VehicleStates[i].Valid = false;
+		}
+
+		public override void OnAfterLoadData() {
+			base.OnAfterLoadData();
+			InitAllVehicles();
 		}
 	}
 }

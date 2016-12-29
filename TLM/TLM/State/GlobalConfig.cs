@@ -14,7 +14,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 4;
+		private static int LATEST_VERSION = 5;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -180,7 +180,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed distance between home and parked car when travelling home without forced to use the car
 		/// </summary>
-		public float MaxParkedCarDistanceToHome = 768f;
+		public float MaxParkedCarDistanceToHome = 512f;
 
 		/// <summary>
 		/// maximum incoming vehicle square distance to junction for priority signs

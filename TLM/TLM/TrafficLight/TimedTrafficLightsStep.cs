@@ -72,12 +72,13 @@ namespace TrafficManager.TrafficLight {
 			endTransitionStart = null;
 			stepDone = false;
 
-			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNode.NodeId].GetSegment(s);
-				if (segmentId <= 0)
-					continue;
+			NodeGeometry nodeGeometry = NodeGeometry.Get(timedNode.NodeId);
 
-				addSegment(segmentId, makeRed);
+			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
+				if (end == null)
+					continue;
+				
+				addSegment(end.SegmentId, end.StartNode, makeRed);
 			}
 			calcMaxSegmentLength();
 		}
@@ -206,7 +207,7 @@ namespace TrafficManager.TrafficLight {
 		
 		public void UpdateLiveLights(bool noTransition) {
 			try {
-				CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+				CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
 				bool atEndTransition = !noTransition && (IsInEndTransition() || IsEndTransitionDone()); // = yellow
 				bool atStartTransition = !noTransition && !atEndTransition && IsInStartTransition(); // = red + yellow
@@ -279,7 +280,7 @@ namespace TrafficManager.TrafficLight {
 
 					//segLightState.makeRedOrGreen(); // TODO temporary fix
 
-					var liveSegmentLights = customTrafficLightsManager.GetOrLiveSegmentLights(timedNode.NodeId, segmentId);
+					var liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, curStepSegmentLights.StartNode);
 					if (liveSegmentLights == null) {
 						continue;
 					}
@@ -349,7 +350,7 @@ namespace TrafficManager.TrafficLight {
 					liveSegmentLights.UpdateVisuals();
 				}
 			} catch (Exception e) {
-				Log.Error($"Exception in TimedTrafficStep.SetLights: {e.ToString()}");
+				Log.Error($"Exception in TimedTrafficStep.SetLights for node {timedNode.NodeId}: {e.ToString()}");
 				//invalid = true;
 			}
 		}
@@ -358,8 +359,8 @@ namespace TrafficManager.TrafficLight {
 		/// Adds a new segment to this step. It is cloned from the live custom traffic light. After adding all steps the method `rebuildSegmentIds` must be called.
 		/// </summary>
 		/// <param name="segmentId"></param>
-		internal void addSegment(ushort segmentId, bool makeRed) {
-			CustomSegmentLights clonedLights = (CustomSegmentLights)CustomTrafficLightsManager.Instance.GetOrLiveSegmentLights(timedNode.NodeId, segmentId).Clone();
+		internal void addSegment(ushort segmentId, bool startNode, bool makeRed) {
+			CustomSegmentLights clonedLights = (CustomSegmentLights)CustomSegmentLightsManager.Instance.GetOrLiveSegmentLights(segmentId, startNode).Clone();
 
 			segmentLights.Add(segmentId, clonedLights);
 			if (makeRed)
@@ -387,7 +388,7 @@ namespace TrafficManager.TrafficLight {
 				var segLights = e.Value;
 				
 				//if (segment == 0) continue;
-				var liveSegLights = CustomTrafficLightsManager.Instance.GetSegmentLights(timedNode.NodeId, segmentId);
+				var liveSegLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, segLights.StartNode);
 				if (liveSegLights == null)
 					continue;
 
@@ -552,10 +553,10 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 					Dictionary<ushort, ArrowDirection> directions = null;
-					try {
+					if (slaveStep.timedNode.Directions.ContainsKey(sourceSegmentId)) {
 						directions = slaveStep.timedNode.Directions[sourceSegmentId];
-					} catch (Exception ex) {
-						Log.Warning($"calcWaitFlow: Exception occurred while getting arrow directions for segment {sourceSegmentId}: {ex.ToString()}");
+					} else {
+						//Log._Debug($"calcWaitFlow: No arrow directions defined for segment {sourceSegmentId} @ {timedNodeId}");
 						continue;
 					}
 

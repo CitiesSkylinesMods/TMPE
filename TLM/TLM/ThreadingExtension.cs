@@ -12,11 +12,18 @@ namespace TrafficManager {
 		int ticksSinceLastMinuteUpdate = 0;
 		int ticksSinceLastSecondUpdate = 0;
 
+		TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+
 		public override void OnCreated(IThreading threading) {
 			base.OnCreated(threading);
 
 			ticksSinceLastMinuteUpdate = 0;
 			ticksSinceLastSecondUpdate = 0;
+		}
+
+		public override void OnBeforeSimulationFrame() {
+			base.OnBeforeSimulationFrame();
+			tlsMan.SimulationStep();
 		}
 
 		public override void OnAfterSimulationFrame() {

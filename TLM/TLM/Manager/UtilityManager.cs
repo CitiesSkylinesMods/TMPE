@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.Manager {
-	public class UtilityManager {
+	public class UtilityManager : AbstractCustomManager {
 		public static UtilityManager Instance { get; private set; } = null;
 
 		static UtilityManager() {

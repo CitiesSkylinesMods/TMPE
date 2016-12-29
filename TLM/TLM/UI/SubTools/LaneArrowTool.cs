@@ -9,6 +9,7 @@ using TrafficManager.State;
 using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
+using TrafficManager.Manager;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
@@ -53,7 +54,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
 			int numDirections;
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro); // TODO refactor vehicle mask
 			if (numLanes <= 0) {
 				SelectedNodeId = 0;
 				SelectedSegmentId = 0;
@@ -143,15 +144,15 @@ namespace TrafficManager.UI.SubTools {
 				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Left, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Left, out res);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
 					buttonClicked = true;
-					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Forward, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Forward, out res);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					Flags.toggleLaneArrowFlags((uint)laneList[i][0], startNode, Flags.LaneArrows.Right, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Right, out res);
 				}
 
 				if (buttonClicked) {

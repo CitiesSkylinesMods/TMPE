@@ -18,7 +18,7 @@ namespace TrafficManager.Traffic {
 #if DEBUGVSTATE
 		private static readonly ushort debugVehicleId = 6316;
 #endif
-		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram;
+		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro;
 		public static readonly int STATE_UPDATE_SHIFT = 6;
 
 		private VehicleJunctionTransitState junctionTransitState;

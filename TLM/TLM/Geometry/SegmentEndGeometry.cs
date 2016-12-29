@@ -24,168 +24,114 @@ namespace TrafficManager.Geometry {
 			get; private set;
 		} = 0;
 
-		private ushort[] connectedSegments = new ushort[7];
-		private byte numConnectedSegments = 0;
+		public ushort[] ConnectedSegments {
+			get; private set;
+		} = new ushort[7];
 
-		private ushort[] leftSegments = new ushort[7];
-		private byte numLeftSegments = 0;
+		public byte NumConnectedSegments {
+			get; private set;
+		} = 0;
 
-		private ushort[] incomingLeftSegments = new ushort[7];
-		private byte numIncomingLeftSegments = 0;
+		public ushort[] LeftSegments {
+			get; private set;
+		} = new ushort[7];
 
-		private ushort[] outgoingLeftSegments = new ushort[7];
-		private byte numOutgoingLeftSegments = 0;
+		public byte NumLeftSegments {
+			get; private set;
+		} = 0;
 
-		private ushort[] rightSegments = new ushort[7];
-		private byte numRightSegments = 0;
+		public ushort[] IncomingLeftSegments {
+			get; private set;
+		} = new ushort[7];
 
-		private byte numIncomingSegments = 0;
-		private byte numOutgoingSegments = 0;
+		public byte NumIncomingLeftSegments {
+			get; private set;
+		} = 0;
 
-		private ushort[] incomingRightSegments = new ushort[7];
-		private byte numIncomingRightSegments = 0;
+		public ushort[] OutgoingLeftSegments {
+			get; private set;
+		} = new ushort[7];
 
-		private ushort[] outgoingRightSegments = new ushort[7];
-		private byte numOutgoingRightSegments = 0;
+		public byte NumOutgoingLeftSegments {
+			get; private set;
+		} = 0;
 
-		private ushort[] straightSegments = new ushort[7];
-		private byte numStraightSegments = 0;
+		public ushort[] RightSegments {
+			get; private set;
+		} = new ushort[7];
 
-		private ushort[] incomingStraightSegments = new ushort[7];
-		private byte numIncomingStraightSegments = 0;
+		public byte NumRightSegments {
+			get; private set;
+		} = 0;
 
-		private ushort[] outgoingStraightSegments = new ushort[7];
-		private byte numOutgoingStraightSegments = 0;
+		public byte NumIncomingSegments {
+			get; private set;
+		} = 0;
+
+		public byte NumOutgoingSegments {
+			get; private set;
+		} = 0;
+
+		public ushort[] IncomingRightSegments {
+			get; private set;
+		} = new ushort[7];
+
+		public byte NumIncomingRightSegments {
+			get; private set;
+		} = 0;
+
+		public ushort[] OutgoingRightSegments {
+			get; private set;
+		} = new ushort[7];
+
+		public byte NumOutgoingRightSegments {
+			get; private set;
+		} = 0;
+
+		public ushort[] StraightSegments {
+			get; private set;
+		} = new ushort[7];
+
+		public byte NumStraightSegments {
+			get; private set;
+		} = 0;
+
+		public ushort[] IncomingStraightSegments {
+			get; private set;
+		} = new ushort[7];
+
+		public byte NumIncomingStraightSegments {
+			get; private set;
+		} = 0;
+
+		public ushort[] OutgoingStraightSegments {
+			get; private set;
+		} = new ushort[7];
+
+		public byte NumOutgoingStraightSegments {
+			get; private set;
+		} = 0;
 
 		/// <summary>
 		/// Indicates that the managed segment is only connected to highway segments at the start node
 		/// </summary>
-		private bool onlyHighways = false;
+		public bool OnlyHighways {
+			get; private set;
+		} = false;
 
 		/// <summary>
 		/// Indicates that the managed segment is an outgoing one-way segment at start node. That means vehicles may come from the node.
 		/// </summary>
-		private bool outgoingOneWay = false;
-
-		public ushort[] ConnectedSegments {
-			get { return connectedSegments; }
-			private set { connectedSegments = value; }
-		}
-
-		public byte NumConnectedSegments {
-			get { return numConnectedSegments; }
-			private set { numConnectedSegments = value; }
-		}
-
-		public ushort[] LeftSegments {
-			get { return leftSegments; }
-			private set { leftSegments = value; }
-		}
-
-		public byte NumLeftSegments {
-			get { return numLeftSegments; }
-			private set { numLeftSegments = value; }
-		}
-
-		public ushort[] IncomingLeftSegments {
-			get { return incomingLeftSegments; }
-			private set { incomingLeftSegments = value; }
-		}
-
-		public byte NumIncomingLeftSegments {
-			get { return numIncomingLeftSegments; }
-			private set { numIncomingLeftSegments = value; }
-		}
-
-		public ushort[] OutgoingLeftSegments {
-			get { return outgoingLeftSegments; }
-			private set { outgoingLeftSegments = value; }
-		}
-
-		public byte NumOutgoingLeftSegments {
-			get { return numOutgoingLeftSegments; }
-			private set { numOutgoingLeftSegments = value; }
-		}
-
-		public ushort[] RightSegments {
-			get { return rightSegments; }
-			private set { rightSegments = value; }
-		}
-
-		public byte NumRightSegments {
-			get { return numRightSegments; }
-			private set { numRightSegments = value; }
-		}
-
-		public byte NumIncomingSegments {
-			get { return numIncomingSegments; }
-			private set { numIncomingSegments = value; }
-		}
-
-		public byte NumOutgoingSegments {
-			get { return numOutgoingSegments; }
-			private set { numOutgoingSegments = value; }
-		}
-
-		public ushort[] IncomingRightSegments {
-			get { return incomingRightSegments; }
-			private set { incomingRightSegments = value; }
-		}
-
-		public byte NumIncomingRightSegments {
-			get { return numIncomingRightSegments; }
-			private set { numIncomingRightSegments = value; }
-		}
-
-		public ushort[] OutgoingRightSegments {
-			get { return outgoingRightSegments; }
-			private set { outgoingRightSegments = value; }
-		}
-
-		public byte NumOutgoingRightSegments {
-			get { return numOutgoingRightSegments; }
-			private set { numOutgoingRightSegments = value; }
-		}
-
-		public ushort[] StraightSegments {
-			get { return straightSegments; }
-			private set { straightSegments = value; }
-		}
-
-		public byte NumStraightSegments {
-			get { return numStraightSegments; }
-			private set { numStraightSegments = value; }
-		}
-
-		public ushort[] IncomingStraightSegments {
-			get { return incomingStraightSegments; }
-			private set { incomingStraightSegments = value; }
-		}
-
-		public byte NumIncomingStraightSegments {
-			get { return numIncomingStraightSegments; }
-			private set { numIncomingStraightSegments = value; }
-		}
-
-		public ushort[] OutgoingStraightSegments {
-			get { return outgoingStraightSegments; }
-			private set { outgoingStraightSegments = value; }
-		}
-
-		public byte NumOutgoingStraightSegments {
-			get { return numOutgoingStraightSegments; }
-			private set { numOutgoingStraightSegments = value; }
-		}
-
-		public bool OnlyHighways {
-			get { return onlyHighways; }
-			private set { onlyHighways = value; }
-		}
-
 		public bool OutgoingOneWay {
-			get { return outgoingOneWay; }
-			private set { outgoingOneWay = value; }
-		}
+			get; private set;
+		} = false;
+
+		/// <summary>
+		/// Indicates that the managed segment is an incoming one-way segment at start node. That means vehicles may go to the node.
+		/// </summary>
+		public bool IncomingOneWay {
+			get; private set;
+		} = false;
 
 		public SegmentEndGeometry(ushort segmentId, bool startNode) {
 			SegmentId = segmentId;
@@ -227,6 +173,7 @@ namespace TrafficManager.Geometry {
 
 			OnlyHighways = false;
 			OutgoingOneWay = false;
+			IncomingOneWay = false;
 
 			LastKnownNodeId = 0;
 		}
@@ -320,8 +267,14 @@ namespace TrafficManager.Geometry {
 			ushort nodeId = NodeId();
 			LastKnownNodeId = nodeId;
 
-			outgoingOneWay = SegmentGeometry.calculateIsOutgoingOneWay(SegmentId, nodeId);
-			onlyHighways = true;
+			bool oneway;
+			bool outgoingOneWay;
+			SegmentGeometry.calculateOneWayAtNode(SegmentId, nodeId, out oneway, out outgoingOneWay);
+			OutgoingOneWay = outgoingOneWay;
+			if (oneway && ! OutgoingOneWay) {
+				IncomingOneWay = true;
+			}
+			OnlyHighways = true;
 
 			//ItemClass connectionClass = netManager.m_segments.m_buffer[SegmentId].Info.GetConnectionClass();
 
@@ -341,7 +294,7 @@ namespace TrafficManager.Geometry {
 				SegmentGeometry.calculateOneWayAtNode(otherSegmentId, nodeId, out otherIsOneWay, out otherIsOutgoingOneWay);
 
 				if (!(SegmentGeometry.calculateIsHighway(otherSegmentId) && otherIsOneWay))
-					onlyHighways = false;
+					OnlyHighways = false;
 
 				if (IsRightSegment(SegmentId, otherSegmentId, nodeId)) {
 					RightSegments[NumRightSegments++] = otherSegmentId;
@@ -379,10 +332,10 @@ namespace TrafficManager.Geometry {
 			}
 
 			NumIncomingSegments = (byte)(NumIncomingLeftSegments + NumIncomingStraightSegments + NumIncomingRightSegments);
-			numOutgoingSegments = (byte)(NumOutgoingLeftSegments + NumOutgoingStraightSegments + NumOutgoingRightSegments);
+			NumOutgoingSegments = (byte)(NumOutgoingLeftSegments + NumOutgoingStraightSegments + NumOutgoingRightSegments);
 
 			if (!hasOtherSegments)
-				onlyHighways = false;
+				OnlyHighways = false;
 
 			// propagate information to other segments
 			if (nodeIdBeforeRecalc != nodeId) {

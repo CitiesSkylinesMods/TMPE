@@ -11,7 +11,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Geometry;
 
 namespace TrafficManager.Manager {
-	public class TrafficPriorityManager : ICustomManager {
+	public class TrafficPriorityManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>> {
 		public static TrafficPriorityManager Instance { get; private set; } = null;
 
 		static TrafficPriorityManager() {
@@ -31,13 +31,16 @@ namespace TrafficManager.Manager {
 		}
 
 		public SegmentEnd AddPrioritySegment(ushort nodeId, ushort segmentId, SegmentEnd.PriorityType type) {
-			if (nodeId <= 0 || segmentId <= 0) {
+			if (!NetUtil.IsNodeValid(nodeId))
 				return null;
-			}
+			if (!NetUtil.IsSegmentValid(segmentId))
+				return null;
 
 #if DEBUG
 			Log._Debug("adding PrioritySegment @ node " + nodeId + ", seg. " + segmentId + ", type " + type);
 #endif
+
+			SubscribeToSegmentGeometry(segmentId);
 
 			SegmentEnd ret = null;
 			var trafficSegment = TrafficSegments[segmentId];
@@ -91,8 +94,9 @@ namespace TrafficManager.Manager {
 		}
 
 		public void RemovePrioritySegments(ushort nodeId) { // priorityNodes: OK
-			if (nodeId <= 0)
-				return;
+#if DEBUG
+			Log._Debug($"TrafficPriorityManager.RemovePrioritySegments: Removing priority segments from node {nodeId}");
+#endif
 
 			for (var s = 0; s < 8; s++) {
 				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
@@ -105,7 +109,7 @@ namespace TrafficManager.Manager {
 
 		public List<SegmentEnd> GetPrioritySegments(ushort nodeId) {
 			List<SegmentEnd> ret = new List<SegmentEnd>();
-			if (nodeId <= 0) {
+			if (!NetUtil.IsNodeValid(nodeId)) {
 				return ret;
 			}
 
@@ -131,12 +135,12 @@ namespace TrafficManager.Manager {
 			if (TrafficSegments[segmentId] != null) {
 				var prioritySegment = TrafficSegments[segmentId];
 
-				NetManager netManager = Singleton<NetManager>.instance;
+				/*NetManager netManager = Singleton<NetManager>.instance;
 				if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
 					RemovePrioritySegment(nodeId, segmentId);
 					CustomTrafficLightsManager.Instance.RemoveSegmentLights(segmentId);
 					return false;
-				}
+				}*/
 
 				if (prioritySegment.Node1 == nodeId || prioritySegment.Node2 == nodeId) {
 					return true;
@@ -146,7 +150,7 @@ namespace TrafficManager.Manager {
 			return false;
 		}
 
-		public bool IsPriorityNode(ushort nodeId) {
+		public bool IsPriorityNode(ushort nodeId, bool onlyValidType=true) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			if ((netManager.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
 				return false;
@@ -158,7 +162,8 @@ namespace TrafficManager.Manager {
 				if (segmentId == 0)
 					continue;
 
-				if (IsPrioritySegment(nodeId, segmentId)) {
+				SegmentEnd end = GetPrioritySegment(nodeId, segmentId);
+				if (end != null && (!onlyValidType || end.Type != SegmentEnd.PriorityType.None)) {
 					return true;
 				}
 			}
@@ -186,9 +191,32 @@ namespace TrafficManager.Manager {
 			return ret;
 		}
 
-		internal void RemovePrioritySegment(ushort nodeId, ushort segmentId) {
-			if (nodeId <= 0 || segmentId <= 0 || TrafficSegments[segmentId] == null)
+		internal void RemovePrioritySegment(ushort segmentId) {
+			if (TrafficSegments[segmentId] == null)
 				return;
+
+			var prioritySegment = TrafficSegments[segmentId];
+
+			prioritySegment.Node1 = 0;
+			if (prioritySegment.Instance1 != null)
+				prioritySegment.Instance1.Destroy();
+			prioritySegment.Instance1 = null;
+
+			prioritySegment.Node2 = 0;
+			if (prioritySegment.Instance2 != null)
+				prioritySegment.Instance2.Destroy();
+			prioritySegment.Instance2 = null;
+
+			TrafficSegments[segmentId] = null;
+			UnsubscribeFromSegmentGeometry(segmentId);
+		}
+
+		internal void RemovePrioritySegment(ushort nodeId, ushort segmentId) {
+			if (TrafficSegments[segmentId] == null)
+				return;
+#if DEBUG
+			Log._Debug($"TrafficPriorityManager.RemovePrioritySegment: Removing priority segment from segment {segmentId} @ {nodeId}");
+#endif
 			var prioritySegment = TrafficSegments[segmentId];
 
 			if (prioritySegment.Node1 == nodeId) {
@@ -204,8 +232,10 @@ namespace TrafficManager.Manager {
 				prioritySegment.Instance2 = null;
 			}
 
-			if (prioritySegment.Node1 == 0 && prioritySegment.Node2 == 0)
+			if (prioritySegment.Node1 == 0 && prioritySegment.Node2 == 0) {
 				TrafficSegments[segmentId] = null;
+				UnsubscribeFromSegmentGeometry(segmentId);
+			}
 		}
 
 		/// <summary>
@@ -213,7 +243,7 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="nodeId"></param>
 		/// <returns>number of priority segments added</returns>
-		internal byte AddPriorityNode(ushort nodeId) {
+		internal byte AddPriorityNode(ushort nodeId, bool overwrite=false) {
 			if (nodeId <= 0)
 				return 0;
 
@@ -223,13 +253,13 @@ namespace TrafficManager.Manager {
 
 				if (segmentId == 0)
 					continue;
-				if (IsPrioritySegment(nodeId, segmentId))
+				if (!overwrite && IsPrioritySegment(nodeId, segmentId))
 					continue;
 				/*if (SegmentGeometry.Get(segmentId).IsOutgoingOneWay(nodeId))
 					continue;*/ // we need this for pedestrian traffic lights
 
-				AddPrioritySegment(nodeId, segmentId, SegmentEnd.PriorityType.None);
-				++ret;
+				if (AddPrioritySegment(nodeId, segmentId, SegmentEnd.PriorityType.None) != null)
+					++ret;
 			}
 			return ret;
 		}
@@ -887,9 +917,127 @@ namespace TrafficManager.Manager {
 			trafficSegment.Instance2?.SimulationStep();
 		}
 
-		public void OnLevelUnloading() {
+		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+			RemovePrioritySegment(geometry.SegmentId);
+		}
+
+		protected override void HandleValidSegment(SegmentGeometry geometry) {
+			HousekeepNode(geometry.StartNodeId());
+			HousekeepNode(geometry.EndNodeId());
+		}
+
+		protected void HousekeepNode(ushort nodeId) {
+			if (!NetUtil.IsNodeValid(nodeId)) {
+				RemovePrioritySegments(nodeId);
+				return;
+			}
+			
+			if (! TrafficLightSimulationManager.Instance.HasSimulation(nodeId)) {
+				if (TrafficLightManager.Instance.HasTrafficLight(nodeId) || !IsPriorityNode(nodeId, true)) {
+					RemovePrioritySegments(nodeId);
+				}
+			}
+		}
+
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
 			for (int i = 0; i < TrafficSegments.Length; ++i)
 				TrafficSegments[i] = null;
+		}
+
+		[Obsolete]
+		public bool LoadData(List<int[]> data) {
+			bool success = true;
+			Log.Info($"Loading {data.Count} priority segments (old method)");
+			foreach (var segment in data) {
+				try {
+					if (segment.Length < 3)
+						continue;
+
+					if ((SegmentEnd.PriorityType)segment[2] == SegmentEnd.PriorityType.None) {
+						continue;
+					}
+					if (!NetUtil.IsNodeValid((ushort)segment[0])) {
+						continue;
+					}
+					if (!NetUtil.IsSegmentValid((ushort)segment[1])) {
+						continue;
+					}
+
+					if (IsPrioritySegment((ushort)segment[0], (ushort)segment[1])) {
+						Log._Debug($"Loading priority segment: segment {segment[1]} @ node {segment[0]} is already a priority segment");
+						GetPrioritySegment((ushort)segment[0], (ushort)segment[1]).Type = (SegmentEnd.PriorityType)segment[2];
+						continue;
+					}
+					AddPrioritySegment((ushort)segment[0], (ushort)segment[1], (SegmentEnd.PriorityType)segment[2]);
+				} catch (Exception e) {
+					// ignore, as it's probably corrupt save data. it'll be culled on next save
+					Log.Warning("Error loading data from Priority segments: " + e.ToString());
+					success = false;
+				}
+			}
+			return success;
+		}
+
+		[Obsolete]
+		public List<int[]> SaveData(ref bool success) {
+			return null;
+		}
+
+		public bool LoadData(List<Configuration.PrioritySegment> data) {
+			bool success = true;
+			Log.Info($"Loading {data.Count} priority segments (new method)");
+			foreach (var prioSegData in data) {
+				try {
+					if ((SegmentEnd.PriorityType)prioSegData.priorityType == SegmentEnd.PriorityType.None) {
+						continue;
+					}
+					if (!NetUtil.IsNodeValid(prioSegData.nodeId)) {
+						continue;
+					}
+					if (!NetUtil.IsSegmentValid(prioSegData.segmentId)) {
+						continue;
+					}
+
+					if (IsPrioritySegment(prioSegData.nodeId, prioSegData.segmentId)) {
+						Log._Debug($"Loading priority segment: segment {prioSegData.segmentId} @ node {prioSegData.nodeId} is already a priority segment");
+						GetPrioritySegment(prioSegData.nodeId, prioSegData.segmentId).Type = (SegmentEnd.PriorityType)prioSegData.priorityType;
+						continue;
+					}
+					AddPrioritySegment(prioSegData.nodeId, prioSegData.segmentId, (SegmentEnd.PriorityType)prioSegData.priorityType);
+				} catch (Exception e) {
+					// ignore, as it's probably corrupt save data. it'll be culled on next save
+					Log.Warning("Error loading data from Priority segments: " + e.ToString());
+					success = false;
+				}
+			}
+			return success;
+		}
+
+		List<Configuration.PrioritySegment> ICustomDataManager<List<Configuration.PrioritySegment>>.SaveData(ref bool success) {
+			List<Configuration.PrioritySegment> ret = new List<Configuration.PrioritySegment>();
+			for (int i = 0; i < TrafficSegments.Length; i++) {
+				try {
+					if (TrafficSegments[i] == null)
+						continue;
+
+					TrafficSegment trafficSegment = TrafficSegments[i];
+
+					if (trafficSegment.Node1 != 0 && trafficSegment.Instance1 != null && trafficSegment.Instance1.Type != SegmentEnd.PriorityType.None) {
+						Log._Debug($"Saving Priority Segment of type: {trafficSegment.Instance1.Type} @ node {trafficSegment.Node1}, seg. {i}");
+						ret.Add(new Configuration.PrioritySegment((ushort)i, trafficSegment.Node1, (int)trafficSegment.Instance1.Type));
+					}
+
+					if (trafficSegment.Node2 != 0 && trafficSegment.Instance2 != null && trafficSegment.Instance2.Type != SegmentEnd.PriorityType.None) {
+						Log._Debug($"Saving Priority Segment of type: {trafficSegment.Instance2.Type} @ node {trafficSegment.Node2}, seg. {i}");
+						ret.Add(new Configuration.PrioritySegment((ushort)i, trafficSegment.Node2, (int)trafficSegment.Instance2.Type));
+					}
+				} catch (Exception e) {
+					Log.Error($"Exception occurred while saving priority segment @ {i}: {e.ToString()}");
+					success = false;
+				}
+			}
+			return ret;
 		}
 	}
 }

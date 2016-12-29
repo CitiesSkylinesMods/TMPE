@@ -28,7 +28,7 @@ namespace TrafficManager.TrafficLight {
 
 		public TrafficLightSimulation(ushort nodeId) {
 			Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
-			Flags.setNodeTrafficLight(nodeId, true);
+			TrafficLightManager.Instance.AddTrafficLight(nodeId);
 			this.NodeId = nodeId;
 			NodeGeoUnsubscriber = NodeGeometry.Get(nodeId).Subscribe(this);
 		}
@@ -41,16 +41,12 @@ namespace TrafficManager.TrafficLight {
 			if (IsTimedLight())
 				return;
 			manualTrafficLights = true;
-
-			setupLiveSegments();
 		}
 
 		public void DestroyManualTrafficLight() {
 			if (IsTimedLight())
 				return;
 			manualTrafficLights = false;
-
-			destroyLiveSegments();
 		}
 
 		public void SetupTimedTrafficLight(List<ushort> nodeGroup) {
@@ -58,8 +54,6 @@ namespace TrafficManager.TrafficLight {
 				DestroyManualTrafficLight();
 
 			TimedLight = new TimedTrafficLights(NodeId, nodeGroup);
-
-			setupLiveSegments();
 		}
 
 		public void DestroyTimedTrafficLight() {
@@ -72,6 +66,11 @@ namespace TrafficManager.TrafficLight {
 
 			/*if (!IsManualLight() && timedLight != null)
 				timedLight.Destroy();*/
+		}
+
+		public void Destroy() {
+			DestroyTimedTrafficLight();
+			DestroyManualTrafficLight();
 		}
 
 		public bool IsTimedLight() {
@@ -105,33 +104,32 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (!Flags.mayHaveTrafficLight(NodeId)) {
-				Log.Warning($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
+				Log._Debug($"Housekeeping: Node {NodeId} has traffic light simulation but must not have a traffic light!");
 				TrafficLightSimulationManager.Instance.RemoveNodeFromSimulation(NodeId, false, true);
 				return;
 			}
 
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
-			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-
-				if (segmentId == 0) continue;
+			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
+				if (end == null)
+					continue;
 
 #if DEBUG
-				Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId}: Adding live traffic lights to segment {segmentId}");
+				Log._Debug($"TrafficLightSimulation: OnUpdate @ node {NodeId}: Adding live traffic lights to segment {end.SegmentId}");
 #endif
 
 				// add custom lights
-				if (!customTrafficLightsManager.IsSegmentLight(NodeId, segmentId)) {
-					customTrafficLightsManager.AddSegmentLights(NodeId, segmentId);
-				}
+				/*if (!customTrafficLightsManager.IsSegmentLight(end.SegmentId, end.StartNode)) {
+					customTrafficLightsManager.AddSegmentLights(end.SegmentId, end.StartNode);
+				}*/
 
 				// housekeep timed light
-				customTrafficLightsManager.GetSegmentLights(NodeId, segmentId).housekeeping(true);
+				customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode).housekeeping(true, true);
 			}
 
 			// ensure there is a physical traffic light
-			Flags.setNodeTrafficLight(NodeId, true);
+			TrafficLightManager.Instance.AddTrafficLight(NodeId);
 
 			TimedLight?.handleNewSegments();
 			TimedLight?.housekeeping();
@@ -139,34 +137,6 @@ namespace TrafficManager.TrafficLight {
 
 		internal void housekeeping() {
 			TimedLight?.housekeeping(); // removes unused step lights
-		}
-
-		private void setupLiveSegments() {
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
-
-			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-
-				if (segmentId == 0)
-					continue;
-				//SegmentGeometry.Get(segmentId)?.Recalculate(true, true);
-				if (!customTrafficLightsManager.IsSegmentLight(NodeId, segmentId)) {
-					customTrafficLightsManager.AddSegmentLights(NodeId, segmentId);
-				}
-			}
-		}
-
-		private void destroyLiveSegments() {
-			CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
-
-			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-
-				if (segmentId == 0) continue;
-				if (customTrafficLightsManager.IsSegmentLight(NodeId, segmentId)) {
-					customTrafficLightsManager.RemoveSegmentLight(NodeId, segmentId);
-				}
-			}
 		}
 	}
 }

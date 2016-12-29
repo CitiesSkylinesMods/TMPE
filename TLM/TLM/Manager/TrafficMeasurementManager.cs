@@ -9,7 +9,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
-	public class TrafficMeasurementManager : ICustomManager {
+	public class TrafficMeasurementManager : AbstractCustomManager {
 		public static TrafficMeasurementManager Instance { get; private set; } = null;
 
 		public const ushort MAX_SPEED = 10000;
@@ -235,12 +235,13 @@ namespace TrafficManager.Manager {
 			laneTrafficData[segmentId][laneIndex].accumulatedDensities += vehicleLength;
 		}
 
-		public void OnLevelUnloading() {
-			ResetTrafficStats();
-		}
-
 		protected int GetDirIndex(NetInfo.Direction dir) {
 			return dir == NetInfo.Direction.Backward ? 1 : 0;
+		}
+
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
+			ResetTrafficStats();
 		}
 	}
 }

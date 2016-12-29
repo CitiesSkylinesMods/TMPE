@@ -132,7 +132,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
 
-		private static readonly CustomTrafficLightsManager customTrafficLightsManager = CustomTrafficLightsManager.Instance;
+		private static readonly CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 		private static readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance;
 		private static readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance;
 		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance;
@@ -2907,11 +2907,12 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			// NON-STOCK CODE START
 			// check if pedestrians are not allowed to cross here
-			if (!junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, targetNodeId == nextSegment.m_startNode))
+			bool nextIsStartNode = targetNodeId == nextSegment.m_startNode;
+			if (!junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, nextIsStartNode))
 				return;
 
 			// check if pedestrian light won't change to green
-			CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(targetNodeId, nextSegmentId);
+			CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode);
 			if (lights != null) {
 				if (lights.InvalidPedestrianLight) {
 					return;

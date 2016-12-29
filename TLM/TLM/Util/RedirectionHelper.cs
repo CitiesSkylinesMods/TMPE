@@ -56,13 +56,31 @@ namespace TrafficManager.Util
             RevertJumpTo(fptr1, state);
         }
 
-        /// <summary>
-        /// Primitive patching. Inserts a jump to 'target' at 'site'. Works even if both methods'
-        /// callers have already been compiled.
-        /// </summary>
-        /// <param name="site"></param>
-        /// <param name="target"></param>
-        private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
+		public static bool IsRedirected(MethodInfo from, MethodInfo to) {
+			var fptr1 = from.MethodHandle.GetFunctionPointer();
+			var fptr2 = to.MethodHandle.GetFunctionPointer();
+			return IsRedirected(fptr1, fptr2);
+		}
+
+		private static bool IsRedirected(IntPtr site, IntPtr target) {
+			unsafe {
+				byte* sitePtr = (byte*)site.ToPointer();
+				return *sitePtr == 0x49 &&
+					* (sitePtr + 1) == 0xBB &&
+					*(sitePtr + 2) == (ulong)target.ToInt64() &&
+					*(sitePtr + 10) == 0x41 &&
+					*(sitePtr + 11) == 0xFF &&
+					*(sitePtr + 12) == 0xE3;
+			}
+		}
+
+		/// <summary>
+		/// Primitive patching. Inserts a jump to 'target' at 'site'. Works even if both methods'
+		/// callers have already been compiled.
+		/// </summary>
+		/// <param name="site"></param>
+		/// <param name="target"></param>
+		private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
         {
             RedirectCallsState state = new RedirectCallsState();
 

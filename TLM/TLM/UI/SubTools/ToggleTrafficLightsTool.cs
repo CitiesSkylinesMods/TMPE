@@ -32,7 +32,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			TrafficPriorityManager.Instance.RemovePrioritySegments(HoveredNodeId);
-			Flags.setNodeTrafficLight(HoveredNodeId, (Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None);
+			TrafficLightManager.Instance.ToggleTrafficLight(HoveredNodeId);
 		}
 
 		public override void OnToolGUI(Event e) {

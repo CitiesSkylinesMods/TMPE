@@ -126,21 +126,22 @@ namespace TrafficManager.UI {
 			}
 
 			bool toolModeChanged = (mode != _toolMode);
+			var oldToolMode = _toolMode;
+			_toolMode = mode;
+			activeSubTool = subTools[(int)_toolMode];
 			if (toolModeChanged && activeSubTool != null) {
-				if ((_toolMode == ToolMode.TimedLightsSelectNode || _toolMode == ToolMode.TimedLightsShowLights || _toolMode == ToolMode.TimedLightsAddNode || _toolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
+				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
 					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode)
 						activeSubTool.Cleanup();
 				} else
 					activeSubTool.Cleanup();
 			}
-			_toolMode = mode;
 
 			SelectedNodeId = 0;
 			SelectedSegmentId = 0;
 
-			activeSubTool = null;
 			//Log._Debug($"Getting activeSubTool for mode {_toolMode} {subTools.Count}");
-			activeSubTool = subTools[(int)_toolMode];
+			
 			//subTools.TryGetValue((int)_toolMode, out activeSubTool);
 			//Log._Debug($"activeSubTool is now {activeSubTool}");
 
@@ -150,6 +151,7 @@ namespace TrafficManager.UI {
 
 		// Overridden to disable base class behavior
 		protected override void OnEnable() {
+			Log._Debug($"TrafficManagerTool.OnEnable");
 			for (int i = 0; i < subTools.Length; ++i) {
 				if (subTools[i] == null)
 					continue;
@@ -287,25 +289,27 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, bool warning=false) {
+		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, bool warning=false, bool alpha=false) {
+			DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
+		}
+
+		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, Color color, bool alpha = false) {
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
 
 			Bezier3 bezier;
 			bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 			bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-			var color = GetToolColor(warning, false);
-
 			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection, false, false, out bezier.b, out bezier.c);
 
-			DrawOverlayBezier(cameraInfo, bezier, color);
+			DrawOverlayBezier(cameraInfo, bezier, color, alpha);
 		}
 
-		internal void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color) {
+		internal void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color, bool alpha=false) {
 			const float width = 8f; // 8 - small roads; 16 - big roads
 
 			Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls = Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls + 1;
-			Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(cameraInfo, color, bezier, width * 2f, width, width, -1f, 1280f, false, false);
+			Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(cameraInfo, color, bezier, width * 2f, width, width, -1f, 1280f, false, alpha);
 		}
 
 		internal void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo, Color color, Vector3 position, float width, bool alpha) {
@@ -383,6 +387,17 @@ namespace TrafficManager.UI {
 
 					if (RayCast(nodeInput, out nodeOutput)) {
 						HoveredNodeId = nodeOutput.m_netNode;
+					} else {
+						// find metro nodes
+						nodeInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
+						nodeInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+						nodeInput.m_netService.m_subService = ItemClass.SubService.PublicTransportMetro;
+						nodeInput.m_ignoreTerrain = true;
+						nodeInput.m_ignoreNodeFlags = NetNode.Flags.Untouchable;
+
+						if (RayCast(nodeInput, out nodeOutput)) {
+							HoveredNodeId = nodeOutput.m_netNode;
+						}
 					}
 				}
 
@@ -407,6 +422,17 @@ namespace TrafficManager.UI {
 
 					if (RayCast(segmentInput, out segmentOutput)) {
 						HoveredSegmentId = segmentOutput.m_netSegment;
+					} else {
+						// find metro segments
+						segmentInput.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
+						segmentInput.m_netService.m_service = ItemClass.Service.PublicTransport;
+						segmentInput.m_netService.m_subService = ItemClass.SubService.PublicTransportMetro;
+						segmentInput.m_ignoreTerrain = true;
+						segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
+
+						if (RayCast(segmentInput, out segmentOutput)) {
+							HoveredSegmentId = segmentOutput.m_netSegment;
+						}
 					}
 				}
 
@@ -423,9 +449,9 @@ namespace TrafficManager.UI {
 						HoveredNodeId = endNodeId;
 				}
 
-				/*if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
+				if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
 					Log._Debug($"*** Mouse ray @ node {HoveredNodeId}, segment {HoveredSegmentId}, toolMode={GetToolMode()}");
-                }*/
+                }
 
 				return (HoveredNodeId != 0 || HoveredSegmentId != 0);
 			} else {
@@ -512,8 +538,8 @@ namespace TrafficManager.UI {
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			for (int i = 1; i < segments.m_size; ++i) {
-				/*if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
-					continue;*/
+				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
+					continue;
 #if !DEBUG
 				if ((segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 					continue;
@@ -578,8 +604,8 @@ namespace TrafficManager.UI {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<NetNode> nodes = Singleton<NetManager>.instance.m_nodes;
 			for (int i = 1; i < nodes.m_size; ++i) {
-				/*if ((nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
-					continue;*/
+				if ((nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
+					continue;
 
 				Vector3 pos = nodes.m_buffer[i].m_position;
 				var screenPos = Camera.main.WorldToScreenPoint(pos);

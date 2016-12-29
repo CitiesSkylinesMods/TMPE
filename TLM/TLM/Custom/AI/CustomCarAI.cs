@@ -22,10 +22,6 @@ namespace TrafficManager.Custom.AI {
 
 		}
 
-		internal static void OnLevelUnloading() {
-
-		}
-
 		/// <summary>
 		/// Lightweight simulation step method.
 		/// This method is occasionally being called for different cars.
@@ -420,7 +416,7 @@ namespace TrafficManager.Custom.AI {
 				ExtVehicleType vehicleType = VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType;
 				if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
-					Log._Debug($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+					Log.Warning($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
 #endif
 					vehicleType = ExtVehicleType.RoadVehicle;
 				}

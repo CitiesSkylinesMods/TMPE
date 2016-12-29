@@ -21,7 +21,7 @@ using System.Linq;
 /// (having custom traffic lights or priority signs).
 /// </summary>
 namespace TrafficManager.Traffic {
-	public class SegmentEnd : IObserver<SegmentGeometry>, IObserver<NodeGeometry> {
+	public class SegmentEnd {
 		public enum PriorityType {
 			None = 0,
 			Main = 1,
@@ -45,12 +45,9 @@ namespace TrafficManager.Traffic {
 
 		public PriorityType Type {
 			get { return type; }
-			set { type = value; Housekeeping(); }
+			set { type = value; /*Housekeeping();*/ }
 		}
 		private PriorityType type = PriorityType.None;
-
-		private IDisposable segGeometryUnsubscriber;
-		private IDisposable nodeGeometryUnsubscriber;
 
 		/// <summary>
 		/// Vehicles that are traversing or will traverse this segment
@@ -75,12 +72,7 @@ namespace TrafficManager.Traffic {
 			SegmentId = segmentId;
 			Type = type;
 			FirstRegisteredVehicleId = 0;
-			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
-			OnUpdate(segGeometry);
-			segGeometryUnsubscriber = segGeometry.Subscribe(this);
-			NodeGeometry nodeGeometry = NodeGeometry.Get(nodeId);
-			OnUpdate(nodeGeometry);
-			nodeGeometryUnsubscriber = nodeGeometry.Subscribe(this);
+			Housekeeping();
 		}
 
 		~SegmentEnd() {
@@ -118,7 +110,7 @@ namespace TrafficManager.Traffic {
 				cleanupRequested = false;
 			}
 
-			Housekeeping();
+			//Housekeeping();
 		}
 
 		/// <summary>
@@ -247,10 +239,6 @@ namespace TrafficManager.Traffic {
 
 		internal void Destroy() {
 			UnregisterAllVehicles();
-			if (segGeometryUnsubscriber != null)
-				segGeometryUnsubscriber.Dispose();
-			if (nodeGeometryUnsubscriber != null)
-				nodeGeometryUnsubscriber.Dispose();
 		}
 
 		private void UnregisterAllVehicles() {
@@ -260,33 +248,20 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
-		public void OnUpdate(SegmentGeometry geometry) {
-			if (!geometry.IsValid()) {
-				TrafficPriorityManager.Instance.RemovePrioritySegment(NodeId, SegmentId);
-				return;
-			}
+		internal void Housekeeping() {
+			//Log._Debug($"SegmentEnd.Housekeeping: Housekeeping at segment {SegmentId} @ {NodeId}");
 
 			StartNode = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode == NodeId;
 			numLanes = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].Info.m_lanes.Length;
 			numVehiclesFlowingToSegmentId = new Dictionary<ushort, uint>(8);
 			numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>(8);
-			//frontVehicleIds = new ushort[numLanes];
-			ushort[] outgoingSegmentIds = geometry.GetOutgoingSegments(StartNode);
+			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
 			foreach (ushort otherSegmentId in outgoingSegmentIds) {
 				numVehiclesFlowingToSegmentId[otherSegmentId] = 0;
 				numVehiclesGoingToSegmentId[otherSegmentId] = 0;
 			}
 			numVehiclesFlowingToSegmentId[SegmentId] = 0;
 			numVehiclesGoingToSegmentId[SegmentId] = 0;
-		}
-
-		public void OnUpdate(NodeGeometry geometry) {
-			Housekeeping();
-		}
-
-		internal void Housekeeping() {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns && TrafficLightSimulationManager.Instance.GetNodeSimulation(NodeId) == null && Type == PriorityType.None)
-				TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 		}
 	}
 }

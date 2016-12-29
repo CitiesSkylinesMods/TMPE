@@ -92,6 +92,10 @@ namespace TrafficManager {
 
 				return uturnIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
 			}
+
+			public override string ToString() {
+				return $"uturnAllowed={uturnAllowed}, straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
+			}
 		}
 
 		[Serializable]
@@ -109,14 +113,55 @@ namespace TrafficManager {
 			}
 		}
 
-		public string NodeTrafficLights = ""; // TODO rework
-		public string NodeCrosswalk = ""; // TODO rework
-		public string LaneFlags = ""; // TODO rework
+		[Serializable]
+		public class LaneArrowData {
+			public uint laneId;
+			public uint arrows;
+
+			public LaneArrowData(uint laneId, uint arrows) {
+				this.laneId = laneId;
+				this.arrows = arrows;
+			}
+		}
+
+		[Serializable]
+		public class PrioritySegment {
+			public ushort segmentId;
+			public ushort nodeId;
+			public int priorityType;
+
+			public PrioritySegment(ushort segmentId, ushort nodeId, int priorityType) {
+				this.segmentId = segmentId;
+				this.nodeId = nodeId;
+				this.priorityType = priorityType;
+			}
+		}
+
+		[Serializable]
+		public class NodeTrafficLight {
+			public ushort nodeId;
+			public bool trafficLight;
+
+			public NodeTrafficLight(ushort nodeId, bool trafficLight) {
+				this.nodeId = nodeId;
+				this.trafficLight = trafficLight;
+			}
+		}
+
+		/// <summary>
+		/// Stored toggled traffic lights
+		/// </summary>
+		public List<NodeTrafficLight> ToggledTrafficLights = new List<NodeTrafficLight>();
 
 		/// <summary>
 		/// Stored lane connections
 		/// </summary>
 		public List<LaneConnection> LaneConnections = new List<LaneConnection>();
+
+		/// <summary>
+		/// Stored lane arrows
+		/// </summary>
+		public List<LaneArrowData> LaneArrows = new List<LaneArrowData>();
 
 		/// <summary>
 		/// Stored lane speed limits
@@ -143,13 +188,32 @@ namespace TrafficManager {
 		/// </summary>
 		public Dictionary<string, float> CustomDefaultSpeedLimits = new Dictionary<string, float>();
 
-		public List<int[]> PrioritySegments = new List<int[]>(); // TODO rework
-		public List<int[]> NodeDictionary = new List<int[]>(); // TODO rework
-		public List<int[]> ManualSegments = new List<int[]>(); // TODO rework
+		/// <summary>
+		/// Priority segments
+		/// </summary>
+		public List<PrioritySegment> CustomPrioritySegments = new List<PrioritySegment>();
 
-		public List<int[]> TimedNodes = new List<int[]>(); // TODO rework
-		public List<ushort[]> TimedNodeGroups = new List<ushort[]>(); // TODO rework
-		public List<int[]> TimedNodeSteps = new List<int[]>(); // TODO rework
-		public List<int[]> TimedNodeStepSegments = new List<int[]>(); // TODO rework
+		[Obsolete]
+		public string NodeTrafficLights = "";
+		[Obsolete]
+		public string NodeCrosswalk = "";
+		[Obsolete]
+		public string LaneFlags = "";
+
+		[Obsolete]
+		public List<int[]> PrioritySegments = new List<int[]>();
+		[Obsolete]
+		public List<int[]> NodeDictionary = new List<int[]>();
+		[Obsolete]
+		public List<int[]> ManualSegments = new List<int[]>();
+
+		[Obsolete]
+		public List<int[]> TimedNodes = new List<int[]>();
+		[Obsolete]
+		public List<ushort[]> TimedNodeGroups = new List<ushort[]>();
+		[Obsolete]
+		public List<int[]> TimedNodeSteps = new List<int[]>();
+		[Obsolete]
+		public List<int[]> TimedNodeStepSegments = new List<int[]>();
 	}
 }

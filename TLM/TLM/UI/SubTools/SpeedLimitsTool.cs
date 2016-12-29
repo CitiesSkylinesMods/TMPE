@@ -51,8 +51,6 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnToolGUI(Event e) {
 			base.OnToolGUI(e);
 
-			_cursorInSecondaryPanel = false;
-
 			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"));
 			if (defaultsWindowVisible) {
 				defaultsWindowRect = GUILayout.Window(258, defaultsWindowRect, _guiDefaultsWindow, Translation.GetString("Default_speed_limits"));
@@ -92,6 +90,7 @@ namespace TrafficManager.UI.SubTools {
 			Vector3 camPos = Camera.main.transform.position;
 
 			NetManager netManager = Singleton<NetManager>.instance;
+			SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
 			if (lastCamPos == null || lastCamRot == null || !lastCamRot.Equals(camRot) || !lastCamPos.Equals(camPos)) {
 				// cache visible segments
@@ -110,9 +109,7 @@ namespace TrafficManager.UI.SubTools {
 					if (screenPos.z < 0)
 						continue;
 
-					ItemClass connectionClass = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.GetConnectionClass();
-					if (!(connectionClass.m_service == ItemClass.Service.Road ||
-						(connectionClass.m_service == ItemClass.Service.PublicTransport && connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain)))
+					if (!speedLimitManager.MayHaveCustomSpeedLimits((ushort)segmentId, ref netManager.m_segments.m_buffer[segmentId]))
 						continue;
 
 					currentlyVisibleSegmentIds.Add((ushort)segmentId);
@@ -360,7 +357,7 @@ namespace TrafficManager.UI.SubTools {
 					Log.Error("segment " + segmentId + " limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key) + ", ex: " + ex.ToString());
 				}
 
-				if (hoveredHandle && Input.GetMouseButton(0)) {
+				if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
 					// change the speed limit to the selected one
 					ushort speedLimitToSet = SpeedLimitManager.Instance.AvailableSpeedLimits[curSpeedLimitIndex];
 					//Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()} to {speedLimitToSet}");
@@ -370,7 +367,7 @@ namespace TrafficManager.UI.SubTools {
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
 						// apply new speed limit to connected segments
 						NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-						List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train);
+						List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train); // TODO refactor vehicle mask
 
 						LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
 						HashSet<ushort> processedNodes = new HashSet<ushort>();
@@ -402,7 +399,7 @@ namespace TrafficManager.UI.SubTools {
 								processedSegments.Add(otherSegmentId);
 
 								NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info;
-								List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(otherSegmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train);
+								List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(otherSegmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train); // TODO refactor vehicle mask
 
 								if (sortedLanes.Count == selectedSortedLanes.Count) {
 									// number of lanes matches selected segment

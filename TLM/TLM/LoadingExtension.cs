@@ -56,6 +56,8 @@ namespace TrafficManager {
 
 		public static UITransportDemand TransportDemandUI { get; private set; }
 
+		public static List<ICustomManager> RegisteredManagers { get; private set; }
+
 		private static bool gameLoaded = false;
 
 		public LoadingExtension() {
@@ -1898,8 +1900,29 @@ namespace TrafficManager {
 
 			ToolMode = TrafficManagerMode.None;
 			Detours = new List<Detour>();
+			RegisteredManagers = new List<ICustomManager>();
 			DetourInited = false;
 			CustomPathManager = new CustomPathManager();
+
+			RegisterCustomManagers();
+		}
+
+		private void RegisterCustomManagers() {
+			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
+			RegisteredManagers.Add(ExtBuildingManager.Instance);
+			RegisteredManagers.Add(ExtCitizenInstanceManager.Instance);
+			RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
+			RegisteredManagers.Add(LaneArrowManager.Instance);
+			RegisteredManagers.Add(LaneConnectionManager.Instance);
+			RegisteredManagers.Add(OptionsManager.Instance);
+			RegisteredManagers.Add(SpeedLimitManager.Instance);
+			RegisteredManagers.Add(TrafficLightManager.Instance);
+			RegisteredManagers.Add(TrafficLightSimulationManager.Instance);
+			RegisteredManagers.Add(TrafficMeasurementManager.Instance);
+			RegisteredManagers.Add(TrafficPriorityManager.Instance);
+			RegisteredManagers.Add(UtilityManager.Instance);
+			RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
+			RegisteredManagers.Add(VehicleStateManager.Instance);
 		}
 
 		public override void OnReleased() {
@@ -1915,7 +1938,7 @@ namespace TrafficManager {
 			Log.Info("OnLevelUnloading");
 			base.OnLevelUnloading();
 			if (IsPathManagerReplaced) {
-				Singleton<PathManager>.instance.WaitForAllPaths();
+				CustomPathManager._instance.WaitForAllPaths();
 			}
 
 			/*Object.Destroy(BaseUI);
@@ -1924,15 +1947,18 @@ namespace TrafficManager {
 			TransportDemandUI = null;*/
 
 			try {
-				TrafficPriorityManager.Instance.OnLevelUnloading();
-				CustomCarAI.OnLevelUnloading();
+				foreach (ICustomManager manager in RegisteredManagers) {
+					manager.OnLevelUnloading();
+				}
+
+				/*TrafficPriorityManager.Instance.OnLevelUnloading();
 				TrafficMeasurementManager.Instance.OnLevelUnloading();
 				CustomTrafficLightsManager.Instance.OnLevelUnloading();
 				TrafficLightSimulationManager.Instance.OnLevelUnloading();
 				VehicleRestrictionsManager.Instance.OnLevelUnloading();
 				ExtCitizenInstanceManager.Instance.OnLevelUnloading();
 				ExtBuildingManager.Instance.OnLevelUnloading();
-				LaneConnectionManager.Instance.OnLevelUnloading();
+				LaneConnectionManager.Instance.OnLevelUnloading();*/
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
 				GlobalConfig.OnLevelUnloading();
@@ -2050,6 +2076,11 @@ namespace TrafficManager {
 
 			Log.Info("Fixing non-created nodes with problems...");
 			FixNonCreatedNodeProblems();
+
+			Log.Info("Notifying managers...");
+			foreach (ICustomManager manager in RegisteredManagers) {
+				manager.OnLevelLoading();
+			}
 
 			Log.Info("OnLevelLoaded complete.");
 		}

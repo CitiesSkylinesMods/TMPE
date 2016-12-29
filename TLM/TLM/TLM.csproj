@@ -98,7 +98,14 @@
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Manager\AbstractCustomManager.cs" />
+    <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
+    <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
+    <Compile Include="Manager\ICustomDataManager.cs" />
+    <Compile Include="Manager\LaneArrowManager.cs" />
+    <Compile Include="Manager\OptionsManager.cs" />
+    <Compile Include="Manager\TrafficLightManager.cs" />
     <Compile Include="Manager\TrafficMeasurementManager.cs" />
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\UtilityManager.cs" />
@@ -148,7 +155,7 @@
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
-    <Compile Include="Util\ICustomManager.cs" />
+    <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
@@ -164,7 +171,7 @@
     <Compile Include="TrafficLight\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
     <Compile Include="Manager\TrafficLightSimulationManager.cs" />
-    <Compile Include="Manager\CustomTrafficLightsManager.cs" />
+    <Compile Include="Manager\CustomSegmentLightsManager.cs" />
     <Compile Include="TrafficLight\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -14,13 +14,15 @@ namespace TrafficManager.Custom.AI {
 	public class CustomRoadAI : RoadBaseAI {
 		private static ushort lastSimulatedSegmentId = 0;
 		private static byte trafficMeasurementMod = 0;
+		private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+		private static TrafficLightManager tlm = TrafficLightManager.Instance;
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
+			tlm.NodeSimulationStep(nodeId, ref data);
+
 			if (Options.timedLightsEnabled) {
 				try {
-					TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-
-					tlsMan.SimulationStep();
+					//tlsMan.SimulationStep();
 
 					var nodeSim = tlsMan.GetNodeSimulation(nodeId);
 					if (nodeSim == null || !nodeSim.IsSimulationActive()) {
@@ -117,7 +119,11 @@ namespace TrafficManager.Custom.AI {
 
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
-			CustomSegmentLights lights = CustomTrafficLightsManager.Instance.GetSegmentLights(nodeId, fromSegmentId);
+			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
+			// determine node position at `fromSegment` (start/end)
+			bool isStartNode = geometry.StartNodeId() == nodeId;
+
+			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode);
 
 			if (lights != null) {
 				// get traffic lights state for pedestrians
@@ -133,11 +139,6 @@ namespace TrafficManager.Custom.AI {
 				vehicleLightState = RoadBaseAI.TrafficLightState.Green;
 				return;
 			}
-
-			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
-
-			// determine node position at `toSegment` (start/end)
-			bool isStartNode = geometry.StartNodeId() == nodeId;
 
 			// get traffic light state from responsible traffic light
 			if (toSegmentId == fromSegmentId) {
