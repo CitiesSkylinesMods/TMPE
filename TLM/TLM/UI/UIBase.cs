@@ -44,6 +44,7 @@ namespace TrafficManager.UI {
 		}
 
 		internal void RebuildMenu() {
+			Close();
 			if (menu != null) {
 				UnityEngine.Object.Destroy(menu);
 			}

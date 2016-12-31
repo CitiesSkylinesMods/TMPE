@@ -493,14 +493,14 @@ namespace TrafficManager.Manager {
 
 			List<NetInfo> mainNetInfos = new List<NetInfo>();
 
-			Log._Debug($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded.");
+			Log.Info($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded.");
 			for (uint i = 0; i < numLoaded; ++i) {
 				NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
 				//Log._Debug($"Iterating over: {info.name}, {info.m_netAI == null}");
 				if (/*info.m_placementStyle == ItemClass.Placement.Manual && */info.m_netAI != null && (info.m_netAI is RoadBaseAI || info.m_netAI is MetroTrackAI || info.m_netAI is TrainTrackBaseAI) && (info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
 					string infoName = info.name;
 					if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
-						Log._Debug($"Loaded road NetInfo: {infoName}");
+						Log.Info($"Loaded road NetInfo: {infoName}");
 						NetInfoByName[infoName] = info;
 						mainNetInfos.Add(info);
 
@@ -588,8 +588,8 @@ namespace TrafficManager.Manager {
 				for (int y = 0; y < mainNetInfos.Count; ++y) {
 					NetInfo parentInfo = mainNetInfos[y];
 
-					if (!infoName.Equals(parentInfo.name) && infoName.StartsWith(parentInfo.name)) {
-						Log._Debug($"Identified child NetInfo {infoName} of parent {parentInfo.name}");
+					if (info.m_placementStyle == ItemClass.Placement.Procedural && !infoName.Equals(parentInfo.name) && infoName.StartsWith(parentInfo.name)) {
+						Log.Info($"Identified child NetInfo {infoName} of parent {parentInfo.name}");
 						if (!childNetInfoNamesByCustomizableNetInfoName.ContainsKey(parentInfo.name)) {
 							childNetInfoNamesByCustomizableNetInfoName[parentInfo.name] = new List<string>();
 						}

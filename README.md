@@ -4,6 +4,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.10, 12/31/2016
+- Improved path-finding performance (a bit)
+- Added a check for invalid road thumbnails in the "custom default speed limits" dialog
+
 1.8.9, 12/29/2016
 - It is now possible to set speed limits for metro tracks
 - Custom default speed limits may now be defined for train and metro tracks

@@ -121,7 +121,6 @@ namespace TrafficManager.State {
 			internal set {
 				if (value) {
 					if (LoadingExtension.BaseUI != null) {
-						LoadingExtension.BaseUI.Close();
 						LoadingExtension.BaseUI.RebuildMenu();
 					}
 				}

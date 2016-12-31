@@ -284,12 +284,26 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void UpdateRoadTex(NetInfo info) {
-			SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
+			if (info != null) {
+				if (info.m_Atlas != null && info.m_Atlas.material != null && info.m_Atlas.material.mainTexture != null && info.m_Atlas.material.mainTexture is Texture2D) {
+					Texture2D mainTex = (Texture2D)info.m_Atlas.material.mainTexture;
+					SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
 
-			roadTex = new Texture2D((int)spriteInfo.texture.width, (int)spriteInfo.texture.height, TextureFormat.ARGB32, false);
-			Texture2D mainTex = (Texture2D)info.m_Atlas.material.mainTexture;
-			roadTex.SetPixels(0, 0, roadTex.width, roadTex.height, mainTex.GetPixels((int)(spriteInfo.region.x * mainTex.width), (int)(spriteInfo.region.y * mainTex.height), (int)(spriteInfo.region.width * mainTex.width), (int)(spriteInfo.region.height * mainTex.height)));
-			roadTex.Apply();
+					if (spriteInfo != null && spriteInfo.texture != null && spriteInfo.texture.width > 0 && spriteInfo.texture.height > 0) {
+						try {
+							roadTex = new Texture2D((int)spriteInfo.texture.width, (int)spriteInfo.texture.height, TextureFormat.ARGB32, false);
+							roadTex.SetPixels(0, 0, roadTex.width, roadTex.height, mainTex.GetPixels((int)(spriteInfo.region.x * mainTex.width), (int)(spriteInfo.region.y * mainTex.height), (int)(spriteInfo.region.width * mainTex.width), (int)(spriteInfo.region.height * mainTex.height)));
+							roadTex.Apply();
+							return;
+						} catch (Exception e) {
+							Log.Warning($"Could not get texture from NetInfo {info.name}: {e.ToString()}");
+						}
+					}
+				}
+			}
+
+			// fallback to "noimage" texture
+			roadTex = TrafficLightToolTextureResources.NoImageTexture2D;
 		}
 
 		private void _guiSpeedLimitsWindow(int num) {

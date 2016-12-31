@@ -2912,7 +2912,7 @@ namespace TrafficManager.Custom.PathFinding {
 				return;
 
 			// check if pedestrian light won't change to green
-			CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode);
+			CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
 			if (lights != null) {
 				if (lights.InvalidPedestrianLight) {
 					return;

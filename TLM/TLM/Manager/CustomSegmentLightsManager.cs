@@ -180,6 +180,8 @@ namespace TrafficManager.Manager {
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId).GetEnd(nodeId);
+			if (endGeometry == null)
+				return null;
 			return GetSegmentLights(segmentId, endGeometry.StartNode, false);
 		}
 
