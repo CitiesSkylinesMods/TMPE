@@ -2103,7 +2103,7 @@ namespace TrafficManager {
 		}
 
 		private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll=false) {
-			bool thirPartyModLoaded = false;
+			bool thirdPartyModLoaded = false;
 
 			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
 			List<ILoadingExtension> loadingExtensions = null;
@@ -2115,14 +2115,15 @@ namespace TrafficManager {
 
 			if (loadingExtensions != null) {
 				foreach (ILoadingExtension extension in loadingExtensions) {
-					Log.Info($"Detected extension: {extension.GetType().Name} in namespace {extension.GetType().Namespace}");
+					if (printAll)
+						Log.Info($"Detected extension: {extension.GetType().Name} in namespace {extension.GetType().Namespace}");
 					if (extension.GetType().Namespace == null)
 						continue;
 
 					var nsStr = extension.GetType().Namespace.ToString();
 					if (namespaceStr.Equals(nsStr)) {
 						Log.Info($"The mod '{namespaceStr}' has been detected.");
-						thirPartyModLoaded = true;
+						thirdPartyModLoaded = true;
 						break;
 					}
 				}
@@ -2130,7 +2131,7 @@ namespace TrafficManager {
 				Log._Debug("Could not get loading extensions");
 			}
 
-			return thirPartyModLoaded;
+			return thirdPartyModLoaded;
 		}
 
 		public static void SetToolMode(TrafficManagerMode mode) {

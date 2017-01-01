@@ -127,7 +127,7 @@ namespace TrafficManager.State {
 					var binaryFormatter = new BinaryFormatter();
 					_configuration = (Configuration)binaryFormatter.Deserialize(memoryStream);
 				} else {
-					Log.Warning("No data to deserialize!");
+					Log.Info("No data to deserialize!");
 				}
 			} catch (Exception e) {
 				Log.Error($"Error deserializing data: {e.ToString()}");
@@ -160,7 +160,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Priority segments data structure (old) undefined!");
+				Log.Info("Priority segments data structure (old) undefined!");
 			}
 
 			if (_configuration.CustomPrioritySegments != null) {
@@ -168,7 +168,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Priority segments data structure (new) undefined!");
+				Log.Info("Priority segments data structure (new) undefined!");
 			}
 
 			// load vehicle restrictions (warning: has to be done before loading timed lights!)
@@ -177,7 +177,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Vehicle restrctions structure undefined!");
+				Log.Info("Vehicle restrctions structure undefined!");
 			}
 
 			NetManager netManager = Singleton<NetManager>.instance;
@@ -187,7 +187,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Timed traffic lights data structure undefined!");
+				Log.Info("Timed traffic lights data structure undefined!");
 			}
 
 			// load toggled traffic lights (old method)
@@ -196,7 +196,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Junction traffic lights data structure (old) undefined!");
+				Log.Info("Junction traffic lights data structure (old) undefined!");
 			}
 
 			// load toggled traffic lights (new method)
@@ -205,7 +205,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Junction traffic lights data structure (new) undefined!");
+				Log.Info("Junction traffic lights data structure (new) undefined!");
 			}
 
 			// load lane arrrows (old method)
@@ -214,7 +214,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Lane arrow data structure (old) undefined!");
+				Log.Info("Lane arrow data structure (old) undefined!");
 			}
 
 			// load lane arrows (new method)
@@ -223,7 +223,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Lane arrow data structure (new) undefined!");
+				Log.Info("Lane arrow data structure (new) undefined!");
 			}
 
 			// load lane connections
@@ -232,7 +232,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Lane connection data structure undefined!");
+				Log.Info("Lane connection data structure undefined!");
 			}
 
 			// Load custom default speed limits
@@ -248,7 +248,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Lane speed limit structure undefined!");
+				Log.Info("Lane speed limit structure undefined!");
 			}
 
 			// Load segment-at-node flags
@@ -257,7 +257,7 @@ namespace TrafficManager.State {
 					error = true;
 				}
 			} else {
-				Log.Warning("Segment-at-node structure undefined!");
+				Log.Info("Segment-at-node structure undefined!");
 			}
 		}
 

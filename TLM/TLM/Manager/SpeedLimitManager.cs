@@ -496,20 +496,34 @@ namespace TrafficManager.Manager {
 			Log.Info($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded.");
 			for (uint i = 0; i < numLoaded; ++i) {
 				NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-				//Log._Debug($"Iterating over: {info.name}, {info.m_netAI == null}");
-				if (/*info.m_placementStyle == ItemClass.Placement.Manual && */info.m_netAI != null && (info.m_netAI is RoadBaseAI || info.m_netAI is MetroTrackAI || info.m_netAI is TrainTrackBaseAI) && (info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
-					string infoName = info.name;
-					if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
-						Log.Info($"Loaded road NetInfo: {infoName}");
-						NetInfoByName[infoName] = info;
-						mainNetInfos.Add(info);
 
-						float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
-						for (int k = 0; k < info.m_lanes.Length; ++k) {
-							vanillaLaneSpeedLimits[k] = info.m_lanes[k].m_speedLimit;
-						}
-						vanillaLaneSpeedLimitsByNetInfoName[infoName] = vanillaLaneSpeedLimits;
+				if (info == null || info.m_netAI == null || !(info.m_netAI is RoadBaseAI || info.m_netAI is MetroTrackAI || info.m_netAI is TrainTrackBaseAI) || !(info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
+					if (info == null)
+						Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} is null!");
+					continue;
+				}
+
+				string infoName = info.name;
+				if (infoName == null) {
+					Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo name @ {i} is null!");
+					continue;
+				}
+
+				if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
+					if (info.m_lanes == null) {
+						Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo lanes @ {i} is null!");
+						continue;
 					}
+
+					Log.Info($"Loaded road NetInfo: {infoName}");
+					NetInfoByName[infoName] = info;
+					mainNetInfos.Add(info);
+
+					float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
+					for (int k = 0; k < info.m_lanes.Length; ++k) {
+						vanillaLaneSpeedLimits[k] = info.m_lanes[k].m_speedLimit;
+					}
+					vanillaLaneSpeedLimitsByNetInfoName[infoName] = vanillaLaneSpeedLimits;
 				}
 			}
 
