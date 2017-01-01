@@ -122,6 +122,12 @@
     <Compile Include="Geometry\SegmentEndGeometry.cs" />
     <Compile Include="Manager\VehicleStateManager.cs" />
     <Compile Include="Manager\VehicleRestrictionsManager.cs" />
+    <Compile Include="Traffic\Template\JunctionRestrictionsTemplate.cs" />
+    <Compile Include="Traffic\Template\JunctionTemplate.cs" />
+    <Compile Include="Traffic\Template\LaneConnectionTemplate.cs" />
+    <Compile Include="Traffic\Template\LaneTemplate.cs" />
+    <Compile Include="Traffic\Template\SegmentEndTemplate.cs" />
+    <Compile Include="Traffic\Template\SegmentEndLightsTemplate.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
