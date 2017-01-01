@@ -4,6 +4,9 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.11, 01/02/2017
+- Bugfix: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to @Pirazel and @[P.A.N] Uf0 for reporting this issue)
+
 1.8.10, 12/31/2016
 - Improved path-finding performance (a bit)
 - Added a check for invalid road thumbnails in the "custom default speed limits" dialog
