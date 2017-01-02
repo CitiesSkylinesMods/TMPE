@@ -127,8 +127,18 @@ namespace TrafficManager.UI {
 
 			bool toolModeChanged = (mode != _toolMode);
 			var oldToolMode = _toolMode;
+			var oldSubTool = subTools[(int)oldToolMode];
 			_toolMode = mode;
 			activeSubTool = subTools[(int)_toolMode];
+
+			if (oldSubTool != null) {
+				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
+					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode)
+						oldSubTool.Cleanup();
+				} else
+					oldSubTool.Cleanup();
+			}
+
 			if (toolModeChanged && activeSubTool != null) {
 				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
 					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode)

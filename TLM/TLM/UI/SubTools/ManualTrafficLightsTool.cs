@@ -693,7 +693,6 @@ namespace TrafficManager.UI.SubTools {
 
 			if (nodeSimulation == null || !nodeSimulation.IsManualLight()) return;
 
-			nodeSimulation.DestroyManualTrafficLight();
 			tlsMan.RemoveNodeFromSimulation(SelectedNodeId, true, false);
 		}
 	}

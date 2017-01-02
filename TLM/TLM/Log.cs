@@ -22,14 +22,24 @@ namespace TrafficManager {
 		private static string logFilename = Path.Combine(Application.dataPath, "TMPE.log");
 		private static Stopwatch sw = Stopwatch.StartNew();
 		private static bool logToConsole = false;
+		private static bool logFileAccessible = true;
 
 
 		static Log() {
-			File.Delete(logFilename);
+			try {
+				if (File.Exists(logFilename))
+					File.Delete(logFilename);
+			} catch (Exception) {
+				logFileAccessible = false;
+			}
 		}
 
 		[Conditional("DEBUG")]
 		public static void _Debug(string s) {
+			if (!logFileAccessible) {
+				return;
+			}
+
 			try {
 				Monitor.Enter(logLock);
 				if (logToConsole)
@@ -43,6 +53,10 @@ namespace TrafficManager {
 		}
 
 		public static void Info(string s) {
+			if (!logFileAccessible) {
+				return;
+			}
+
 			try {
 #if DEBUG
 				if (logToConsole)
@@ -58,6 +72,10 @@ namespace TrafficManager {
 		}
 
 		public static void Error(string s) {
+			if (!logFileAccessible) {
+				return;
+			}
+
 			try {
 #if DEBUG
 				if (logToConsole)
@@ -73,6 +91,10 @@ namespace TrafficManager {
 		}
 
 		public static void Warning(string s) {
+			if (!logFileAccessible) {
+				return;
+			}
+
 			try {
 #if DEBUG
 				if (logToConsole)
@@ -88,6 +110,10 @@ namespace TrafficManager {
 		}
 
 		private static void LogToFile(string log, LogLevel level) {
+			if (! logFileAccessible) {
+				return;
+			}
+
 			try {
 				using (StreamWriter w = File.AppendText(logFilename)) {
 					w.WriteLine($"[{level.ToString()}] @ {sw.ElapsedTicks} {log}");
@@ -96,7 +122,9 @@ namespace TrafficManager {
 						w.WriteLine();
 					}
                 }
-			} catch (Exception) { }
+			} catch (Exception) {
+				logFileAccessible = false;
+			}
 		}
 	}
 

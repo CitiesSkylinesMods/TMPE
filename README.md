@@ -4,6 +4,11 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.12, 01/02/2017
+- Updated for game version 1.6.2-f1
+- Bugfix: After leaving the "Manual traffic lights" mode traffic light simulation is not cleaned up correctly (thanks to @ diezelunderwood for reporting this issue)
+- Bugfix: Insufficient access rights to log file causes the mod to crash
+
 1.8.11, 01/02/2017
 - Bugfix: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to @Pirazel and @[P.A.N] Uf0 for reporting this issue)
 

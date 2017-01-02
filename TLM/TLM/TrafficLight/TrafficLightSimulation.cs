@@ -43,10 +43,14 @@ namespace TrafficManager.TrafficLight {
 			manualTrafficLights = true;
 		}
 
-		public void DestroyManualTrafficLight() {
+		internal void DestroyManualTrafficLight() {
 			if (IsTimedLight())
 				return;
+			if (!IsManualLight())
+				return;
 			manualTrafficLights = false;
+
+			TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 		}
 
 		public void SetupTimedTrafficLight(List<ushort> nodeGroup) {
@@ -56,13 +60,17 @@ namespace TrafficManager.TrafficLight {
 			TimedLight = new TimedTrafficLights(NodeId, nodeGroup);
 		}
 
-		public void DestroyTimedTrafficLight() {
+		internal void DestroyTimedTrafficLight() {
+			if (!IsTimedLight())
+				return;
 			var timedLight = TimedLight;
 			TimedLight = null;
 
 			if (timedLight != null) {
 				timedLight.Destroy();
 			}
+
+			TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 
 			/*if (!IsManualLight() && timedLight != null)
 				timedLight.Destroy();*/
