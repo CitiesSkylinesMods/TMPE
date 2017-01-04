@@ -4,7 +4,7 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
-1.8.13, 01/01/2017
+1.8.13, 01/03/2017
 - Bugfix: Timed traffic ligt data can become corrupt when upgrading a road segment next to a traffic light, leading to faulty UI behavior (thanks to @Brain for reporting this issue)
 - Bugfix: The position of the main menu button resets after switching to the free camera mode (thanks to @Impact and @gravage for reporting this issue)
 - Bugfix: A division by zero exception can occur when calculating the average number of waiting/floating vehicles
