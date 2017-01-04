@@ -42,6 +42,7 @@ namespace TrafficManager.UI.SubTools {
 			internal ushort nodeId;
 			internal bool startNode;
 			internal Vector3 position;
+			internal Vector3 secondaryPosition;
 			internal bool isSource;
 			internal uint laneId;
 			internal int innerSimilarLaneIndex;
@@ -136,10 +137,13 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
-
-			float y = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(laneMarker.position);
 			Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-			bounds.center = new Vector3(laneMarker.position.x, y, laneMarker.position.z);
+			bounds.center = laneMarker.position;
+			if (bounds.IntersectRay(mouseRay))
+				return true;
+
+			bounds = new Bounds(Vector3.zero, Vector3.one);
+			bounds.center = laneMarker.secondaryPosition;
 			return bounds.IntersectRay(mouseRay);
 		}
 
@@ -430,7 +434,7 @@ namespace TrafficManager.UI.SubTools {
 
 							pos = (Vector3)pos + offset;
 							float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(((Vector3)pos));
-							Vector3 finalPos = new Vector3(((Vector3)pos).x, terrainY > ((Vector3)pos).y ? terrainY : ((Vector3)pos).y, ((Vector3)pos).z);
+							Vector3 finalPos = new Vector3(((Vector3)pos).x, terrainY, ((Vector3)pos).z);
 
 							nodeMarkers.Add(new NodeLaneMarker() {
 								segmentId = segmentId,
@@ -438,6 +442,7 @@ namespace TrafficManager.UI.SubTools {
 								nodeId = nodeId,
 								startNode = !isEndNode,
 								position = finalPos,
+								secondaryPosition = (Vector3)pos,
 								color = colors[nodeMarkers.Count],
 								isSource = isSource,
 								laneType = laneInfo.m_laneType,

@@ -186,7 +186,9 @@ namespace TrafficManager.Traffic {
 
 					if (Options.simAccuracy <= 2) {
 						uint avgSegmentLength = (uint)netManager.m_segments.m_buffer[SegmentId].m_averageLength;
-						uint normLength = Math.Min(100u, (uint)(state.TotalLength * 100u) / avgSegmentLength);
+						uint normLength = 100u;
+						if (avgSegmentLength > 0)
+							normLength = Math.Min(100u, (uint)(state.TotalLength * 100u) / avgSegmentLength);
 
 #if DEBUGMETRIC
 						if (debug)
