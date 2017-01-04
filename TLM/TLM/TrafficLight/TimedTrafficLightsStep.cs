@@ -280,7 +280,7 @@ namespace TrafficManager.TrafficLight {
 
 					//segLightState.makeRedOrGreen(); // TODO temporary fix
 
-					var liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, curStepSegmentLights.StartNode);
+					var liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, curStepSegmentLights.StartNode, false);
 					if (liveSegmentLights == null) {
 						continue;
 					}
@@ -388,7 +388,7 @@ namespace TrafficManager.TrafficLight {
 				var segLights = e.Value;
 				
 				//if (segment == 0) continue;
-				var liveSegLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, segLights.StartNode);
+				var liveSegLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, segLights.StartNode, false);
 				if (liveSegLights == null)
 					continue;
 

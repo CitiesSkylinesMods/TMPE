@@ -74,7 +74,7 @@ namespace TrafficManager.UI.SubTools {
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-			Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+			//Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
 			Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
 			foreach (KeyValuePair<ushort, List<NodeLaneMarker>> e in currentNodeMarkers) {
@@ -87,7 +87,6 @@ namespace TrafficManager.UI.SubTools {
 					continue; // do not draw if too distant
 
 				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
-					//MainTool.DrawOverlayCircle(cameraInfo, DefaultNodeMarkerColor, netManager.m_nodes.m_buffer[nodeId].m_position, 20f, true);
 					MainTool.DrawNodeCircle(cameraInfo, nodeId, DefaultNodeMarkerColor, true);
 				}
 
@@ -98,8 +97,8 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					if (!viewOnly && nodeId == SelectedNodeId) {
-						bounds.center = laneMarker.position;
-						bool markerIsHovered = bounds.IntersectRay(mouseRay);
+						//bounds.center = laneMarker.position;
+						bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);// bounds.IntersectRay(mouseRay);
 
 						// draw source marker in source selection mode,
 						// draw target marker (if segment turning angles are within bounds) and selected source marker in target selection mode
@@ -127,11 +126,21 @@ namespace TrafficManager.UI.SubTools {
 							hoveredMarker = laneMarker;
 						}
 
-						if (drawMarker)
-							RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, laneMarker.color, laneMarker.position, laneMarker.radius, -1f, 1280f, false, true);
+						if (drawMarker) {
+							//DrawLaneMarker(laneMarker, cameraInfo);
+							RenderManager.instance.OverlayEffect.DrawCircle(cameraInfo, laneMarker.color, laneMarker.position, laneMarker.radius, laneMarker.position.y - 100f, laneMarker.position.y + 100f, false, true);
+						}
 					}
 				}
 			}
+		}
+
+		private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
+
+			float y = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(laneMarker.position);
+			Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+			bounds.center = new Vector3(laneMarker.position.x, y, laneMarker.position.z);
+			return bounds.IntersectRay(mouseRay);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -418,12 +427,17 @@ namespace TrafficManager.UI.SubTools {
 						Vector3? pos = null;
 						bool isSource = false;
 						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, laneInfo, out isSource, out pos)) {
+
+							pos = (Vector3)pos + offset;
+							float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(((Vector3)pos));
+							Vector3 finalPos = new Vector3(((Vector3)pos).x, terrainY > ((Vector3)pos).y ? terrainY : ((Vector3)pos).y, ((Vector3)pos).z);
+
 							nodeMarkers.Add(new NodeLaneMarker() {
 								segmentId = segmentId,
 								laneId = laneId,
 								nodeId = nodeId,
 								startNode = !isEndNode,
-								position = (Vector3)pos + offset,
+								position = finalPos,
 								color = colors[nodeMarkers.Count],
 								isSource = isSource,
 								laneType = laneInfo.m_laneType,

@@ -306,25 +306,28 @@ namespace TrafficManager.UI {
 		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, Color color, bool alpha = false) {
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
 
-			Bezier3 bezier;
-			bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-			bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+			Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+			float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+			if (terrainY > pos.y)
+				pos.y = terrainY;
 
+			Bezier3 bezier;
+			bezier.a = pos;
+			bezier.d = pos;
+			
 			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection, false, false, out bezier.b, out bezier.c);
 
 			DrawOverlayBezier(cameraInfo, bezier, color, alpha);
 		}
 
-		internal void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color, bool alpha=false) {
+		private void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo, Bezier3 bezier, Color color, bool alpha=false) {
 			const float width = 8f; // 8 - small roads; 16 - big roads
-
-			Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls = Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls + 1;
+			Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
 			Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(cameraInfo, color, bezier, width * 2f, width, width, -1f, 1280f, false, alpha);
 		}
 
-		internal void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo, Color color, Vector3 position, float width, bool alpha) {
-			var exprEaCp0 = Singleton<ToolManager>.instance;
-			exprEaCp0.m_drawCallData.m_overlayCalls = exprEaCp0.m_drawCallData.m_overlayCalls + 1;
+		private void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo, Color color, Vector3 position, float width, bool alpha) {
+			Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
 			Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(cameraInfo, color, position, width, position.y - 100f, position.y + 100f, false, alpha);
 		}
 
@@ -459,9 +462,9 @@ namespace TrafficManager.UI {
 						HoveredNodeId = endNodeId;
 				}
 
-				if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
+				/*if (oldHoveredNodeId != HoveredNodeId || oldHoveredSegmentId != HoveredSegmentId) {
 					Log._Debug($"*** Mouse ray @ node {HoveredNodeId}, segment {HoveredSegmentId}, toolMode={GetToolMode()}");
-                }
+                }*/
 
 				return (HoveredNodeId != 0 || HoveredSegmentId != 0);
 			} else {

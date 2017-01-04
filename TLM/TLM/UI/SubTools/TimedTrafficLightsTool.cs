@@ -153,11 +153,9 @@ namespace TrafficManager.UI.SubTools {
 						nodeGroup.Add(HoveredNodeId);
 						timedSim2 = tlsMan.AddNodeToSimulation(HoveredNodeId);
 						timedSim2.SetupTimedTrafficLight(nodeGroup);
-						timedLight2 = timedSim2.TimedLight;
 						//timedLight.vehiclesMayEnterBlockedJunctions = mayEnterBlocked;
-					} else {
-						timedLight2 = timedSim2.TimedLight;
 					}
+					timedLight2 = timedSim2.TimedLight;
 
 					timedLight2.Join(existingTimedLight);
 					ClearSelectedNodes();
@@ -206,10 +204,12 @@ namespace TrafficManager.UI.SubTools {
 				!MainTool.GetToolController().IsInsideUI &&
 				Cursor.visible &&
 				Flags.mayHaveTrafficLight(HoveredNodeId)) {
-				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
+				//var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
 
 				//if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
-				Bezier3 bezier;
+				MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, false, false);
+
+				/*Bezier3 bezier;
 				bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
 				bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
 
@@ -217,16 +217,18 @@ namespace TrafficManager.UI.SubTools {
 
 				NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
 					segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);
+				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);*/
 				//}
 			}
 
 			if (SelectedNodeIndexes.Count <= 0) return;
 
 			foreach (var index in SelectedNodeIndexes) {
-				var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_segment0];
+				//var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_segment0];
 
-				Bezier3 bezier;
+				MainTool.DrawNodeCircle(cameraInfo, index, true, false);
+
+				/*Bezier3 bezier;
 
 				bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_position;
 				bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_position;
@@ -235,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
 
 				NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
 					segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);
+				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);*/
 			}
 		}
 
@@ -255,7 +257,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeIndexes[0]);
-			var timedNodeMain = nodeSimulation.TimedLight;
+			var timedNodeMain = nodeSimulation?.TimedLight;
 
 			if (nodeSimulation == null || timedNodeMain == null) {
 				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
@@ -272,6 +274,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
+				Log._Debug($"Step {i}");
 				GUILayout.BeginHorizontal();
 
 				if (_timedEditStep != i) {
@@ -543,24 +546,27 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
-			GUILayout.Space(30);
+			if (!timedLightActive) {
 
-			if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
-				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsAddNode);
-			}
+				GUILayout.Space(30);
 
-			if (SelectedNodeIndexes.Count > 1) {
-				if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
+				if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
+					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsAddNode);
 				}
-			}
 
-			GUILayout.Space(30);
+				if (SelectedNodeIndexes.Count > 1) {
+					if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
+						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
+					}
+				}
 
-			if (GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
-				DisableTimed();
-				ClearSelectedNodes();
-				TrafficManagerTool.SetToolMode(ToolMode.None);
+				GUILayout.Space(30);
+
+				if (GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
+					DisableTimed();
+					ClearSelectedNodes();
+					TrafficManagerTool.SetToolMode(ToolMode.None);
+				}
 			}
 
 			DragWindow(ref _windowRect);
@@ -948,6 +954,8 @@ namespace TrafficManager.UI.SubTools {
 					ushort srcSegmentId = end.SegmentId; // source segment
 
 					CustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, end.StartNode);
+					if (liveSegmentLights == null)
+						continue;
 					if (!nodeSimulation.IsTimedLightActive()) {
 						liveSegmentLights.MakeRedOrGreen();
 					}

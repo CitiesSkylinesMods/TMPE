@@ -12,6 +12,7 @@ using TrafficManager.Manager;
 using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
+	// TODO move Parking AI features from here to a distinct manager
 	public class CustomCitizenAI : CitizenAI {
 		/// <summary>
 		/// Finds a free parking space in the vicinity of the given target position <paramref name="endPos"/> for the given citizen instance <paramref name="extDriverInstance"/>.

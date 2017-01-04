@@ -444,7 +444,7 @@ namespace TrafficManager.TrafficLight {
 			var numFrames = Steps[CurrentStep].MaxTimeRemaining();
 
 			RoadBaseAI.TrafficLightState currentState;
-			CustomSegmentLights segmentLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, startNode);
+			CustomSegmentLights segmentLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, startNode, false);
 			if (segmentLights == null) {
 				Log._Debug($"CheckNextChange: No segment lights at node {NodeId}, segment {segmentId}");
                 return 99;

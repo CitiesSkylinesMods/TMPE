@@ -82,7 +82,9 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 
 					var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[end.SegmentId]);
-					var segmentLights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode);
+					var segmentLights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode, false);
+					if (segmentLights == null)
+						continue;
 
 					var screenPos = Camera.main.WorldToScreenPoint(position);
 					screenPos.y = Screen.height - screenPos.y;
@@ -651,7 +653,9 @@ namespace TrafficManager.UI.SubTools {
 
 		private void RenderManualSelectionOverlay(RenderManager.CameraInfo cameraInfo) {
 			if (HoveredNodeId == 0) return;
-			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
+
+			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, false, false);
+			/*var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
 
 			//if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) return;
 			Bezier3 bezier;
@@ -662,14 +666,17 @@ namespace TrafficManager.UI.SubTools {
 
 			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
 				segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-			MainTool.DrawOverlayBezier(cameraInfo, bezier, color);
+			MainTool.DrawOverlayBezier(cameraInfo, bezier, color);*/
 		}
 
 		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
 			var nodeSimulation = TrafficLightSimulationManager.Instance.GetNodeSimulation(SelectedNodeId);
 			if (nodeSimulation == null || !nodeSimulation.IsManualLight())
 				return;
-			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
+
+			MainTool.DrawNodeCircle(cameraInfo, SelectedNodeId, true, false);
+
+			/*CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 
 			NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
 			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
@@ -682,7 +689,7 @@ namespace TrafficManager.UI.SubTools {
 
 				var width = _hoveredButton[0] == end.SegmentId ? 11.25f : 10f;
 				MainTool.DrawOverlayCircle(cameraInfo, colorGray, position, width, end.SegmentId != _hoveredButton[0]);
-			}
+			}*/
 		}
 
 		public override void Cleanup() {

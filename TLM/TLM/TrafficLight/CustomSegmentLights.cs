@@ -345,15 +345,16 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void CalculateAutoPedestrianLightState(bool propagate=true) {
+			//Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculating pedestrian light state of node {NodeId}");
 			SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
 			SegmentEndGeometry segmentEndGeometry = StartNode ? segGeo.StartNodeGeometry : segGeo.EndNodeGeometry;
-			ushort nodeId = segmentEndGeometry.NodeId();
 
 			if (segmentEndGeometry == null) {
-				//Log._Debug($"Could not get SegmentEndGeometry for segment {SegmentId} @ {NodeId}.");
+				Log._Debug($"Could not get SegmentEndGeometry for segment {SegmentId} @ {NodeId}.");
 				AutoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
 				return;
 			}
+			ushort nodeId = segmentEndGeometry.NodeId();
 
 			if (propagate) {
 				foreach (ushort otherSegmentId in segmentEndGeometry.ConnectedSegments) {

@@ -123,7 +123,7 @@ namespace TrafficManager.Custom.AI {
 			// determine node position at `fromSegment` (start/end)
 			bool isStartNode = geometry.StartNodeId() == nodeId;
 
-			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode);
+			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode, false);
 
 			if (lights != null) {
 				// get traffic lights state for pedestrians

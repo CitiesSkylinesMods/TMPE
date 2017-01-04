@@ -290,6 +290,7 @@ namespace TrafficManager.State {
 		}
 
 		private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, out DateTime modifiedTime) {
+			Log._Debug($"Writing default config...");
 			GlobalConfig conf = new GlobalConfig();
 			if (oldConfig != null) {
 				conf.MainMenuButtonX = oldConfig.MainMenuButtonX;

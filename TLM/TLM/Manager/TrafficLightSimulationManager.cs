@@ -7,6 +7,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.Util;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
+using System.Linq;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>> {
@@ -72,7 +73,7 @@ namespace TrafficManager.Manager {
 			TrafficLightManager tlm = TrafficLightManager.Instance;
 
 			if (sim.TimedLight != null) {
-				// remove/destroy other timed traffic lights in group
+				// remove/destroy all timed traffic lights in group
 				List<ushort> oldNodeGroup = new List<ushort>(sim.TimedLight.NodeGroup);
 				foreach (var timedNodeId in oldNodeGroup) {
 					var otherNodeSim = GetNodeSimulation(timedNodeId);
@@ -95,7 +96,7 @@ namespace TrafficManager.Manager {
 			}
 
 			//Flags.setNodeTrafficLight(nodeId, false);
-			sim.DestroyTimedTrafficLight();
+			//sim.DestroyTimedTrafficLight();
 			sim.DestroyManualTrafficLight();
 			sim.NodeGeoUnsubscriber?.Dispose();
 			RemoveNodeFromSimulation(nodeId);
@@ -138,17 +139,75 @@ namespace TrafficManager.Manager {
 
 			TrafficLightManager tlm = TrafficLightManager.Instance;
 
+			HashSet<ushort> nodesWithSimulation = new HashSet<ushort>();
+			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
+				nodesWithSimulation.Add(cnfTimedLights.nodeId);
+			}
+
+			Dictionary<ushort, ushort> masterNodeIdBySlaveNodeId = new Dictionary<ushort, ushort>();
+			Dictionary<ushort, List<ushort>> nodeGroupByMasterNodeId = new Dictionary<ushort, List<ushort>>();
 			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
 				try {
-					if (!NetUtil.IsNodeValid(cnfTimedLights.nodeId))
+					// TODO most of this should not be necessary at all if the classes around TimedTrafficLights class were properly designed
+					List<ushort> currentNodeGroup = cnfTimedLights.nodeGroup.Distinct().ToList(); // enforce uniqueness of node ids
+					if (!currentNodeGroup.Contains(cnfTimedLights.nodeId))
+						currentNodeGroup.Add(cnfTimedLights.nodeId);
+					// remove any nodes that are not configured to have a simulation
+					currentNodeGroup = new List<ushort>(currentNodeGroup.Intersect(nodesWithSimulation));
+
+					// remove invalid nodes from the group; find if any of the nodes in the group is already a master node
+					ushort masterNodeId = 0;
+					int foundMasterNodes = 0;
+					for (int i = 0; i < currentNodeGroup.Count;) {
+						ushort nodeId = currentNodeGroup[i];
+						if (!NetUtil.IsNodeValid(currentNodeGroup[i])) {
+							currentNodeGroup.RemoveAt(i);
+							continue;
+						} else if (nodeGroupByMasterNodeId.ContainsKey(nodeId)) {
+							// this is a known master node
+							if (foundMasterNodes > 0) {
+								// we already found another master node. ignore this node.
+								currentNodeGroup.RemoveAt(i);
+								continue;
+							}
+							// we found the first master node
+							masterNodeId = nodeId;
+							++foundMasterNodes;
+						}
+						++i;
+					}
+
+					if (masterNodeId == 0) {
+						// no master node defined yet, set the first node as a master node
+						masterNodeId = currentNodeGroup[0];
+					}
+
+					// ensure the master node is the first node in the list (TimedTrafficLights depends on this at the moment...)
+					currentNodeGroup.Remove(masterNodeId);
+					currentNodeGroup.Insert(0, masterNodeId);
+
+					// update the saved node group and master-slave info
+					nodeGroupByMasterNodeId[masterNodeId] = currentNodeGroup;
+					foreach (ushort nodeId in currentNodeGroup) {
+						masterNodeIdBySlaveNodeId[nodeId] = masterNodeId;
+					}
+				} catch (Exception e) {
+					Log.Warning($"Error building timed traffic light group for TimedNode {cnfTimedLights.nodeId} (NodeGroup: {string.Join(", ", cnfTimedLights.nodeGroup.Select(x => x.ToString()).ToArray())}): " + e.ToString());
+					success = false;
+				}
+			}
+
+			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
+				try {
+					if (!masterNodeIdBySlaveNodeId.ContainsKey(cnfTimedLights.nodeId))
 						continue;
+					ushort masterNodeId = masterNodeIdBySlaveNodeId[cnfTimedLights.nodeId];
+					List<ushort> nodeGroup = nodeGroupByMasterNodeId[masterNodeId];
 
-					tlm.AddTrafficLight(cnfTimedLights.nodeId);
-
-					Log._Debug($"Adding Timed Node at node {cnfTimedLights.nodeId}");
+					Log._Debug($"Adding timed light at node {cnfTimedLights.nodeId}. NodeGroup: {string.Join(", ", nodeGroup.Select(x => x.ToString()).ToArray())}");
 
 					TrafficLightSimulation sim = AddNodeToSimulation(cnfTimedLights.nodeId);
-					sim.SetupTimedTrafficLight(cnfTimedLights.nodeGroup);
+					sim.SetupTimedTrafficLight(nodeGroup);
 					var timedNode = sim.TimedLight;
 
 					int j = 0;
@@ -198,6 +257,9 @@ namespace TrafficManager.Manager {
 			foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
 				try {
 					TrafficLightSimulation sim = GetNodeSimulation(cnfTimedLights.nodeId);
+					if (sim == null || sim.TimedLight == null)
+						continue;
+
 					var timedNode = sim.TimedLight;
 
 					timedNode.housekeeping();

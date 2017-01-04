@@ -4,9 +4,15 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.13, 01/01/2017
+- Bugfix: Timed traffic ligt data can become corrupt when upgrading a road segment next to a traffic light, leading to faulty UI behavior (thanks to @Brain for reporting this issue)
+- Bugfix: The position of the main menu button resets after switching to the free camera mode (thanks to @Impact and @gravage for reporting this issue)
+- Improved selection of overlay markers on underground roads (thanks to @Padi for reminding me of that issue)
+- Minor performance improvements
+
 1.8.12, 01/02/2017
 - Updated for game version 1.6.2-f1
-- Bugfix: After leaving the "Manual traffic lights" mode traffic light simulation is not cleaned up correctly (thanks to @ diezelunderwood for reporting this issue)
+- Bugfix: After leaving the "Manual traffic lights" mode the traffic light simulation is not cleaned up correctly (thanks to @diezelunderwood for reporting this issue)
 - Bugfix: Insufficient access rights to log file causes the mod to crash
 
 1.8.11, 01/02/2017

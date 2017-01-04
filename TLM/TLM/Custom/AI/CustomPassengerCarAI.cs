@@ -18,6 +18,7 @@ using System.Xml;
 using System.IO;
 
 namespace TrafficManager.Custom.AI {
+	// TODO move Parking AI features from here to a distinct manager
 	public class CustomPassengerCarAI : CarAI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && Options.enableDespawning) {
