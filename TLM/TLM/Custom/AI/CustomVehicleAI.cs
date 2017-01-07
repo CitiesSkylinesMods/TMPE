@@ -373,7 +373,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 							var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 							var frame = currentFrameIndex2 >> 4;
-							float speed = lastFrameData.m_velocity.magnitude;
+							float sqrSpeed = lastFrameData.m_velocity.sqrMagnitude;
 
 							if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
@@ -389,7 +389,7 @@ namespace TrafficManager.Custom.AI {
 									case SegmentEnd.PriorityType.Stop:
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, vel={speed}");
+											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, sqrSpeed={sqrSpeed}");
 #endif
 
 										if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MaxPriorityWaitTime)) {
@@ -399,7 +399,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriorityManager.MAX_STOP_VELOCITY) {
+											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 												vehicleState.WaitTime++;
 
 												float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
@@ -454,7 +454,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (speed <= TrafficPriorityManager.MAX_YÌELD_VELOCITY || Options.simAccuracy <= 2) {
+											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_YÌELD_VELOCITY || Options.simAccuracy <= 2) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
@@ -478,7 +478,7 @@ namespace TrafficManager.Custom.AI {
 											} else {
 #if DEBUG
 												if (debug)
-													Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {speed} by {vehicleState.ReduceSpeedByValueToYield})");
+													Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {sqrSpeed} by {vehicleState.ReduceSqrSpeedByValueToYield})");
 #endif
 
 												// vehicle has not yet reached yield speed
@@ -529,7 +529,7 @@ namespace TrafficManager.Custom.AI {
 										}
 										return true;
 								}
-							} else if (speed <= TrafficPriorityManager.MAX_STOP_VELOCITY) {
+							} else if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 								// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 								if (debug)

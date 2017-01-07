@@ -74,6 +74,7 @@ namespace TrafficManager.State {
 
 #if DEBUG
 		public ushort PathFindDebugNodeId = 0;
+		public ushort TTLDebugNodeId = 0;
 #endif
 
 		/// <summary>

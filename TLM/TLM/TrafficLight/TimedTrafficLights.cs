@@ -300,8 +300,17 @@ namespace TrafficManager.TrafficLight {
 			Log._Debug($"TTL SimStep: NodeId={NodeId} Setting lights (2)");
 #endif
 
+#if DEBUG
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+#endif
+
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			if (Steps[CurrentStep].NextStepRefIndex < 0) {
+#if DEBUG
+				if (debug) {
+					Log._Debug($"Step {CurrentStep} is done at timed light {NodeId}. Determining next step.");
+				}
+#endif
 				// next step has not yet identified yet. check for minTime=0 steps
 				int nextStepIndex = (CurrentStep + 1) % NumSteps();
 				if (Steps[nextStepIndex].minTime == 0) {
@@ -313,20 +322,28 @@ namespace TrafficManager.TrafficLight {
 						maxWaitFlowDiff = float.MinValue;
 					int bestNextStepIndex = prevStepIndex;
 
-					while (nextStepIndex != prevStepIndex) {
-						//Log._Debug($"Checking step {nextStepIndex} @ node {NodeId}.");
+#if DEBUG
+					if (debug) {
+						Log._Debug($"Next step {nextStepIndex} has minTime = 0 at timed light {NodeId}. Old step {CurrentStep} has waitFlowDiff={maxWaitFlowDiff} (flow={Steps[CurrentStep].minFlow}, wait={Steps[CurrentStep].maxWait}).");
+					}
+#endif
 
+					while (nextStepIndex != prevStepIndex) {
 						float wait;
 						float flow;
 						Steps[nextStepIndex].calcWaitFlow(false, nextStepIndex, out wait, out flow);
-
-						//Log._Debug($"Checking step {nextStepIndex} @ node {NodeId} with minTime=0: flow={flow} wait={wait}");
 
 						float flowWaitDiff = flow - wait;
 						if (flowWaitDiff > maxWaitFlowDiff) {
 							maxWaitFlowDiff = flowWaitDiff;
 							bestNextStepIndex = nextStepIndex;
 						}
+
+#if DEBUG
+						if (debug) {
+							Log._Debug($"Checking upcoming step {nextStepIndex} @ node {NodeId}: flow={flow} wait={wait} minTime={Steps[nextStepIndex].minTime}. bestWaitFlowDiff={bestNextStepIndex}, bestNextStepIndex={bestNextStepIndex}");
+						}
+#endif
 
 						if (Steps[nextStepIndex].minTime != 0) {
 							break;
@@ -336,7 +353,11 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					if (bestNextStepIndex == CurrentStep) {
-						//Log._Debug($"Best next step {bestNextStepIndex} (wait/flow diff = {maxWaitFlowDiff}) equals CurrentStep @ node {NodeId}.");
+#if DEBUG
+						if (debug) {
+							Log._Debug($"Best next step {bestNextStepIndex} (wait/flow diff = {maxWaitFlowDiff}) equals CurrentStep @ node {NodeId}.");
+						}
+#endif
 
 						// restart the current step
 						foreach (ushort slaveNodeId in NodeGroup) {
@@ -350,7 +371,11 @@ namespace TrafficManager.TrafficLight {
 						}
 						return;
 					} else {
-						//Log._Debug($"Best next step {bestNextStepIndex} (wait/flow diff = {maxWaitFlowDiff}) does not equal CurrentStep @ node {NodeId}.");
+#if DEBUG
+						if (debug) {
+							Log._Debug($"Best next step {bestNextStepIndex} (wait/flow diff = {maxWaitFlowDiff}) does not equal CurrentStep @ node {NodeId}.");
+						}
+#endif
 
 						// set next step reference index for assuring a correct end transition
 						foreach (ushort slaveNodeId in NodeGroup) {
@@ -494,6 +519,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void handleNewSegments() {
+			Log._Debug($"TimedTrafficLights.handleNewSegments: called for timed traffic light @ {NodeId}");
 			if (NumSteps() <= 0) {
 				// no steps defined, just create live traffic lights
 				/*for (int s = 0; s < 8; ++s) {
@@ -504,7 +530,7 @@ namespace TrafficManager.TrafficLight {
 						CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
 				}*/
 
-
+				Log._Debug($"TimedTrafficLights.handleNewSegments: no steps @ {NodeId}");
 				return;
 			}
 
@@ -517,13 +543,14 @@ namespace TrafficManager.TrafficLight {
 			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
 				if (end == null)
 					continue;
+				Log._Debug($"TimedTrafficLights.handleNewSegments: handling existing seg. {end.SegmentId} @ {NodeId}");
 
 				List<ushort> invalidSegmentIds = new List<ushort>();
 				bool isNewSegment = !Steps[0].segmentLights.ContainsKey(end.SegmentId);
 
 				if (isNewSegment) {
 					// segment was created
-					Log._Debug($"New segment detected: {end.SegmentId} @ {NodeId}");
+					Log._Debug($"TimedTrafficLights.handleNewSegments: New segment detected: {end.SegmentId} @ {NodeId}");
 
 					foreach (KeyValuePair<ushort, CustomSegmentLights> e in Steps[0].segmentLights) {
 						var fromSegmentId = e.Key;
@@ -555,7 +582,7 @@ namespace TrafficManager.TrafficLight {
 							Log._Debug($"Removing old segment {oldSegmentId} @ {NodeId} from step {i}");
 							Steps[i].segmentLights.Remove(oldSegmentId);
 							Log._Debug($"Setting new segment id {end.SegmentId} at custom light from step {i}");
-							customLights.SegmentId = end.SegmentId;
+							customLights.Relocate(end.SegmentId, end.StartNode);
 							Steps[i].segmentLights.Add(end.SegmentId, customLights);
 							Steps[i].calcMaxSegmentLength();
 							Log._Debug($"Getting live segment lights of new segment {end.SegmentId} @ {NodeId} and applying mode @ step {i}");
@@ -667,7 +694,7 @@ namespace TrafficManager.TrafficLight {
 			// build means
 			if (NumSteps() > 0) {
 				for (int i = 0; i < NumSteps(); ++i) {
-					minTimes[i] = Math.Max(1, minTimes[i] / newNodeGroup.Count);
+					minTimes[i] = Math.Max(0, minTimes[i] / newNodeGroup.Count);
 					maxTimes[i] = Math.Max(1, maxTimes[i] / newNodeGroup.Count);
 					waitFlowBalances[i] = Math.Max(0.001f, waitFlowBalances[i] / (float)newNodeGroup.Count);
 				}

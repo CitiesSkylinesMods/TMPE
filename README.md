@@ -4,6 +4,16 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.14, 01/07/2017
+- Bugfix: Wait/flow ratio at timed traffic lights is sometimes not correctly calculated
+- Bugfix: A deadlock situation can arise at junctions with priority signs such that no vehicle enters the junction 
+- Bugfix: When adding a junction to a timed traffic light, sometimes light states given by user input are not correctly stored
+- Bugfix: Joining two timed traffic lights sets the minimum time to "1" for steps with zero minimum time assigned
+- Bugfix: Modifications of timed traffic light states are sometimes not visible while editting the light (but they are applied nonetheless)
+- Bugfix: Button background is not always correctly changed after clicking on a button within the main menu 
+- Tram lanes can now be customized by using the lane connector tool
+- Minor performance optimizations for priority sign simulation
+
 1.8.13, 01/05/2017
 - Bugfix: Timed traffic ligt data can become corrupt when upgrading a road segment next to a traffic light, leading to faulty UI behavior (thanks to @Brain for reporting this issue)
 - Bugfix: The position of the main menu button resets after switching to the free camera mode (thanks to @Impact and @gravage for reporting this issue)

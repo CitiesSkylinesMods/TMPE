@@ -141,9 +141,9 @@ namespace TrafficManager.Traffic {
 			}
 			internal set {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[7]) {
+				/*if (GlobalConfig.Instance.DebugSwitches[7]) {
 					Log.Warning($"Changing PathMode for citizen instance {InstanceId}: {pathMode} -> {value}");
-				}
+				}*/
 #endif
 				pathMode = value;
 			}
@@ -207,9 +207,9 @@ namespace TrafficManager.Traffic {
 
 		internal void Reset() {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[7]) {
+			/*if (GlobalConfig.Instance.DebugSwitches[7]) {
 				Log.Warning($"Resetting PathMode for citizen instance {InstanceId}");
-			}
+			}*/
 #endif
 			//Flags = ExtFlags.None;
 			PathMode = ExtPathMode.None;

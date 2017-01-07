@@ -27,6 +27,10 @@ namespace TrafficManager.Geometry {
 			get; private set;
 		} = new SegmentEndGeometry[8];
 
+		public byte NumSegmentEnds { get; private set; } = 0;
+
+		public bool NeedsRecalculation { get; private set; } = false; // TODO actually use this flag
+
 		/// <summary>
 		/// Holds a list of observers which are being notified as soon as the managed node's geometry is updated (but not neccessarily modified)
 		/// </summary>
@@ -88,8 +92,14 @@ namespace TrafficManager.Geometry {
 				}
 			}
 
-			if (propagate)
-				RecalculateSegments(segmentId);
+			if (propagate) {
+				NeedsRecalculation = true;
+				try {
+					RecalculateSegments(segmentId);
+				} finally {
+					NeedsRecalculation = false;
+				}
+			}
 			Recalculate();
 		}
 
@@ -110,13 +120,20 @@ namespace TrafficManager.Geometry {
 				}
 			}
 
-			if (propagate)
-				RecalculateSegments(segmentId);
+			if (propagate) {
+				NeedsRecalculation = true;
+				try {
+					RecalculateSegments(segmentId);
+				} finally {
+					NeedsRecalculation = false;
+				}
+			}
 			Recalculate();
 		}
 
 		private void Cleanup() {
 			IsSimpleJunction = false;
+			NumSegmentEnds = 0;
 		}
 
 		internal void RecalculateSegments(ushort? ignoreSegmentId= null) {
@@ -159,6 +176,7 @@ namespace TrafficManager.Geometry {
 				for (int i = 0; i < 8; ++i) {
 					if (SegmentEndGeometries[i] == null)
 						continue;
+					++NumSegmentEnds;
 #if DEBUGGEO
 					if (GlobalConfig.Instance.DebugSwitches[5])
 						Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");

@@ -98,6 +98,9 @@
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="GameBridge\INetLaneBridge.cs" />
+    <Compile Include="GameBridge\INetNodeBridge.cs" />
+    <Compile Include="GameBridge\INetSegmentBridge.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
@@ -105,6 +108,7 @@
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\LaneArrowManager.cs" />
     <Compile Include="Manager\OptionsManager.cs" />
+    <Compile Include="Manager\TemplateManager.cs" />
     <Compile Include="Manager\TrafficLightManager.cs" />
     <Compile Include="Manager\TrafficMeasurementManager.cs" />
     <Compile Include="Manager\JunctionRestrictionsManager.cs" />
@@ -122,8 +126,8 @@
     <Compile Include="Geometry\SegmentEndGeometry.cs" />
     <Compile Include="Manager\VehicleStateManager.cs" />
     <Compile Include="Manager\VehicleRestrictionsManager.cs" />
-    <Compile Include="Traffic\Template\JunctionRestrictionsTemplate.cs" />
-    <Compile Include="Traffic\Template\JunctionTemplate.cs" />
+    <Compile Include="Traffic\Template\SegmentEndRestrictionsTemplate.cs" />
+    <Compile Include="Traffic\Template\NodeTemplate.cs" />
     <Compile Include="Traffic\Template\LaneConnectionTemplate.cs" />
     <Compile Include="Traffic\Template\LaneTemplate.cs" />
     <Compile Include="Traffic\Template\SegmentEndTemplate.cs" />

@@ -167,7 +167,7 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-					if (!includeStopped && vehState.GetLastFrameVelocity().magnitude < TrafficPriorityManager.MAX_STOP_VELOCITY) {
+					if (!includeStopped && vehState.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 #if DEBUGMETRIC2
 						if (debug)
 							Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");

@@ -45,7 +45,7 @@ namespace TrafficManager.Traffic {
 
 		private ushort VehicleId;
 		public int WaitTime = 0;
-		public float ReduceSpeedByValueToYield;
+		public float ReduceSqrSpeedByValueToYield;
 		private bool valid = false;
 
 		public bool Valid {
@@ -493,7 +493,7 @@ namespace TrafficManager.Traffic {
 			// enforce updating trailers (they are not always present at path-finding time)
 			ApplyVehicleTypeToTrailers();
 
-			ReduceSpeedByValueToYield = UnityEngine.Random.Range(16f, 28f);
+			ReduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
 			try {
 				TotalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].CalculateTotalLength(VehicleId);
 			} catch (Exception) {
@@ -537,6 +537,15 @@ namespace TrafficManager.Traffic {
 				otherState.VehicleType = VehicleType;
 				otherVehicleId = vehManager.m_vehicles.m_buffer[otherVehicleId].m_trailingVehicle;
 			}
+		}
+
+		/// <summary>
+		/// Determines if the junction transit state has been recently modified
+		/// </summary>
+		/// <returns></returns>
+		internal bool IsJunctionTransitStateNew() {
+			uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			return (LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) >= (frame >> VehicleState.STATE_UPDATE_SHIFT);
 		}
 	}
 }

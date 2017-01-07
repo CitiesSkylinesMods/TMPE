@@ -217,7 +217,11 @@ namespace TrafficManager.UI {
 			button.playAudioEvents = true;
 			button.text = text;
 			button.relativePosition = new Vector3(15f, y);
-			button.eventClick += eventClick;
+			button.eventClick += delegate (UIComponent component, UIMouseEventParameter eventParam) {
+				deactivateButtons();
+				eventClick(component, eventParam);
+				button.Invalidate();
+			};
 
 			return button;
 		}
@@ -362,71 +366,90 @@ namespace TrafficManager.UI {
 
 		private void clickSwitchTraffic(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.SwitchTrafficLight) {
-				_buttonSwitchTraffic.focusedBgSprite = "ButtonMenuFocused";
+				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.SwitchTrafficLight);
 			} else {
-				_buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
+				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam) {
-			Log._Debug("Priority Sign Clicked.");
 			if (TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns) {
-				_buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
+				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.AddPrioritySigns);
 			} else {
-				_buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
+				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickManualControl(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.ManualSwitch) {
-				_buttonManualControl.focusedBgSprite = "ButtonMenuFocused";
+				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.ManualSwitch);
 			} else {
-				_buttonManualControl.focusedBgSprite = "ButtonMenu";
+				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickTimedAdd(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsSelectNode && TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights) {
-				_buttonTimedMain.focusedBgSprite = "ButtonMenuFocused";
+				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 			} else {
-				_buttonTimedMain.focusedBgSprite = "ButtonMenu";
+				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickSpeedLimits(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.SpeedLimits) {
-				_buttonSpeedLimits.focusedBgSprite = "ButtonMenuFocused";
+				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.SpeedLimits);
 			} else {
-				_buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
+				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickVehicleRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions) {
-				_buttonVehicleRestrictions.focusedBgSprite = "ButtonMenuFocused";
+				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.VehicleRestrictions);
 			} else {
-				_buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
+				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickJunctionRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
 			if (TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions) {
-				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenuFocused";
+				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenuFocused";
 				TrafficManagerTool.SetToolMode(ToolMode.JunctionRestrictions);
 			} else {
-				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
+				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
+				TrafficManagerTool.SetToolMode(ToolMode.None);
+			}
+		}
+
+		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {
+			if (TrafficManagerTool.GetToolMode() != ToolMode.LaneChange) {
+				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
+				TrafficManagerTool.SetToolMode(ToolMode.LaneChange);
+			} else {
+				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenu";
+				TrafficManagerTool.SetToolMode(ToolMode.None);
+			}
+		}
+
+		private void clickLaneConnector(UIComponent component, UIMouseEventParameter eventParam) {
+			if (TrafficManagerTool.GetToolMode() != ToolMode.LaneConnector) {
+				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenuFocused";
+				TrafficManagerTool.SetToolMode(ToolMode.LaneConnector);
+			} else {
+				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenu";
 				TrafficManagerTool.SetToolMode(ToolMode.None);
 			}
 		}
@@ -436,28 +459,27 @@ namespace TrafficManager.UI {
 		/// </summary>
 		public static void deactivateButtons() {
 			if (_buttonSwitchTraffic != null)
-				_buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
+				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
 			if (_buttonPrioritySigns != null)
-				_buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
+				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
 			if (_buttonManualControl != null)
-				_buttonManualControl.focusedBgSprite = "ButtonMenu";
+				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenu";
 			if (_buttonTimedMain != null)
-				_buttonTimedMain.focusedBgSprite = "ButtonMenu";
+				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenu";
 			if (_buttonLaneChange != null)
-				_buttonLaneChange.focusedBgSprite = "ButtonMenu";
+				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenu";
 			if (_buttonLaneConnector != null)
-				_buttonLaneConnector.focusedBgSprite = "ButtonMenu";
-			//_buttonLaneRestrictions.focusedBgSprite = "ButtonMenu";
-			if (_buttonClearTraffic != null)
-				_buttonClearTraffic.focusedBgSprite = "ButtonMenu";
+				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenu";
 			if (_buttonSpeedLimits != null)
-				_buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
+				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
 			if (_buttonVehicleRestrictions != null)
-				_buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
+				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
 			if (_buttonJunctionRestrictions != null)
-				_buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
+				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
+			if (_buttonClearTraffic != null)
+				_buttonClearTraffic.normalBgSprite = _buttonClearTraffic.focusedBgSprite = "ButtonMenu";
 			if (_buttonToggleDespawn != null)
-				_buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
+				_buttonToggleDespawn.normalBgSprite = _buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
 		}
 
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
@@ -474,26 +496,6 @@ namespace TrafficManager.UI {
 			_buttonToggleDespawn.text = Options.enableDespawning
 				? Translation.GetString("Disable_despawning")
 				: Translation.GetString("Enable_despawning");
-		}
-
-		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.LaneChange) {
-				_buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
-				TrafficManagerTool.SetToolMode(ToolMode.LaneChange);
-			} else {
-				_buttonLaneChange.focusedBgSprite = "ButtonMenu";
-				TrafficManagerTool.SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickLaneConnector(UIComponent component, UIMouseEventParameter eventParam) {
-			if (TrafficManagerTool.GetToolMode() != ToolMode.LaneConnector) {
-				_buttonLaneConnector.focusedBgSprite = "ButtonMenuFocused";
-				TrafficManagerTool.SetToolMode(ToolMode.LaneConnector);
-			} else {
-				_buttonLaneConnector.focusedBgSprite = "ButtonMenu";
-				TrafficManagerTool.SetToolMode(ToolMode.None);
-			}
 		}
 
 		public override void Update() {

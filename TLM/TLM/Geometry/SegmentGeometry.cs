@@ -976,7 +976,7 @@ namespace TrafficManager.Geometry {
 		/// <param name="segmentId">segment to check</param>
 		/// <param name="nodeId">node the given segment shall be checked at</param>
 		/// <returns>true, if the given segment is an outgoing one-way road at the given node, false otherwise</returns>
-		internal static bool calculateIsOutgoingOneWay(ushort segmentId, ushort nodeId) {
+		internal static bool calculateIsOutgoingOneWay(ushort segmentId, ushort nodeId) { // TODO move to SegmentEnd
 			if (!IsValid(segmentId))
 				return false;
 
@@ -984,17 +984,13 @@ namespace TrafficManager.Geometry {
 
 			var info = instance.m_segments.m_buffer[segmentId].Info;
 
-			var dir = NetInfo.Direction.Forward;
-			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			NetInfo.Direction dir = NetUtil.GetSegmentEndDirection(segmentId, ref instance.m_segments.m_buffer[segmentId], instance.m_segments.m_buffer[segmentId].m_startNode == nodeId);
 
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == dir3)) {
+					((info.m_lanes[laneIndex].m_direction & dir) != NetInfo.Direction.None)) {
 					return false;
 				}
 

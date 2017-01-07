@@ -39,7 +39,6 @@ namespace TrafficManager.TrafficLight {
 
 		public ushort SegmentId {
 			get { return segmentId; }
-			set { segmentId = value; housekeeping(true, true); }
 		}
 
 		public uint LastChangeFrame;
@@ -115,6 +114,12 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 		private ICustomSegmentLightsManager lightsManager;
+
+		internal void Relocate(ushort segmentId, bool startNode) {
+			this.segmentId = segmentId;
+			this.startNode = startNode;
+			housekeeping(true, true);
+		}
 
 		public override string ToString() {
 			String ret = $"InvalidPedestrianLight={InvalidPedestrianLight} PedestrianLightState={PedestrianLightState} ManualPedestrianMode={ManualPedestrianMode}\n";
@@ -307,8 +312,9 @@ namespace TrafficManager.TrafficLight {
 		internal void SetLights(CustomSegmentLights otherLights) {
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in otherLights.CustomLights) {
 				CustomSegmentLight ourLight = null;
-				if (!CustomLights.TryGetValue(e.Key, out ourLight))
+				if (!CustomLights.TryGetValue(e.Key, out ourLight)) {
 					continue;
+				}
 
 				ourLight.SetStates(e.Value.LightMain, e.Value.LightLeft, e.Value.LightRight, false);
 				//ourLight.LightPedestrian = e.Value.LightPedestrian;

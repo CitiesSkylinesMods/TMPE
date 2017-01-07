@@ -39,20 +39,7 @@ namespace TrafficManager.TrafficLight {
 					return;
 
 				currentMode = value;
-				switch (currentMode) {
-					case Mode.Simple:
-						leftLight = LightMain;
-						rightLight = LightMain;
-						break;
-					case Mode.SingleLeft:
-						rightLight = LightMain;
-						break;
-					case Mode.SingleRight:
-						leftLight = LightMain;
-						break;
-				}
-
-				lights.OnChange();
+				EnsureModeLights();
 			}
 		}
 		internal Mode currentMode = Mode.Simple;
@@ -94,6 +81,38 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		CustomSegmentLights lights;
+
+		private void EnsureModeLights() {
+			bool changed = false;
+
+			switch (currentMode) {
+				case Mode.Simple:
+					if (leftLight != LightMain) {
+						leftLight = LightMain;
+						changed = true;
+					}
+					if (rightLight != LightMain) {
+						rightLight = LightMain;
+						changed = true;
+					}
+					break;
+				case Mode.SingleLeft:
+					if (rightLight != LightMain) {
+						rightLight = LightMain;
+						changed = true;
+					}
+					break;
+				case Mode.SingleRight:
+					if (leftLight != LightMain) {
+						leftLight = LightMain;
+						changed = true;
+					}
+					break;
+			}
+
+			if (changed)
+				lights.OnChange();
+		}
 
 		public override string ToString() {
 			return $"LightLeft={LightLeft} LightMain={LightMain} LightRight={LightRight} CurrentMode={CurrentMode}";

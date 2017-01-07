@@ -274,7 +274,6 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
-				Log._Debug($"Step {i}");
 				GUILayout.BeginHorizontal();
 
 				if (_timedEditStep != i) {
@@ -1077,7 +1076,7 @@ namespace TrafficManager.UI.SubTools {
 										 _hoveredNode == nodeId
 								? 0.92f
 								: 0.6f;
-
+							
 							GUI.color = guiColor;
 
 							var myRect1 = new Rect(offsetScreenPos.x - modeWidth / 2,

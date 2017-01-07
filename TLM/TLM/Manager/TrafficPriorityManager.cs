@@ -18,7 +18,8 @@ namespace TrafficManager.Manager {
 			Instance = new TrafficPriorityManager();
 		}
 
-		public const float MAX_STOP_VELOCITY = 0.1f;
+		public const float MAX_SQR_STOP_VELOCITY = 0.01f;
+		public const float MAX_SQR_YÌELD_VELOCITY = 0.09f;
 		public const float MAX_YÌELD_VELOCITY = 0.3f;
 
 		/// <summary>
@@ -404,9 +405,10 @@ namespace TrafficManager.Manager {
 							bool conflicting = false;
 							incomingState.ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref vehManager.m_vehicles.m_buffer[incomingVehicleId], ref curPos, ref nextPos, ref targetVehicleData, delegate (ref Vehicle incomingVehicleData, ref PathUnit.Position incomingCurPos, ref PathUnit.Position incomingNextPos, ref Vehicle targetVehData, ref PathUnit.Position targetCurPos, ref PathUnit.Position targetNextPos) {
 
+							bool incomingStateChangedRecently = incomingState.IsJunctionTransitStateNew();
 							if (
 								incomingState.JunctionTransitState == VehicleJunctionTransitState.Enter ||
-								(incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave && (incomingState.LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) >= (frame >> VehicleState.STATE_UPDATE_SHIFT))) {
+								(incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave && incomingStateChangedRecently)) {
 									// incoming vehicle is (1) entering the junction or (2) leaving but last state update ocurred very recently.
 									Vector3 incomingPos = incomingVehicleData.GetLastFramePosition();
 									Vector3 incomingVel = incomingVehicleData.GetLastFrameVelocity();
@@ -460,19 +462,30 @@ namespace TrafficManager.Manager {
 											Log._Debug($"HasIncomingVehicles: Target is stopped.");
 #endif
 									}
-								} else {
+								} else if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave) {
 #if DEBUG
 									if (debug)
-										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is LEAVING but state update occurred recently.");
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is LEAVING but state update did not occur recently.");
 #endif
+
+									float incomingSqrSpeed = incomingVehicleData.GetLastFrameVelocity().sqrMagnitude;
+									if (incomingSqrSpeed <= MAX_SQR_STOP_VELOCITY) {
+#if DEBUG
+										if (debug)
+											Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is LEAVING but not moving. -> BLOCKED");
+#endif
+										incomingState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+										incomingStateChangedRecently = true;
+									}
 								}
 
-								if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked &&
-									(incomingState.LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) < (frame >> VehicleState.STATE_UPDATE_SHIFT)
+								if (!incomingStateChangedRecently &&
+									(incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked ||
+									(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop && targetVehicleId < incomingVehicleId))
 								) {
 #if DEBUG
 									if (debug)
-										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is BLOCKED and has waited a bit. *IGNORING*");
+										Log._Debug($"HasIncomingVehicles: Incoming {incomingVehicleId} is BLOCKED and has waited a bit or is STOP and targetVehicleId {targetVehicleId} < incomingVehicleId {incomingVehicleId}. *IGNORING*");
 #endif
 
 									// incoming vehicle waits because the junction is blocked and we waited a little. Allow target vehicle to enter the junciton.

@@ -219,6 +219,10 @@ namespace TrafficManager.TrafficLight {
 				}
 #endif
 
+				if (PreviousStepRefIndex >= timedNode.NumSteps())
+					PreviousStepRefIndex = -1;
+				if (NextStepRefIndex >= timedNode.NumSteps())
+					NextStepRefIndex = -1;
 				TimedTrafficLightsStep previousStep = timedNode.Steps[PreviousStepRefIndex >= 0 ? PreviousStepRefIndex : ((timedNode.CurrentStep + timedNode.Steps.Count - 1) % timedNode.Steps.Count)];
 				TimedTrafficLightsStep nextStep = timedNode.Steps[NextStepRefIndex >= 0 ? NextStepRefIndex : ((timedNode.CurrentStep + 1) % timedNode.Steps.Count)];
 
@@ -313,6 +317,7 @@ namespace TrafficManager.TrafficLight {
 						CustomSegmentLight curStepSegmentLight = curStepSegmentLights.GetCustomLight(vehicleType);
 						CustomSegmentLight prevStepSegmentLight = prevStepSegmentLights.GetCustomLight(vehicleType);
 						CustomSegmentLight nextStepSegmentLight = nextStepSegmentLights.GetCustomLight(vehicleType);
+						
 #if DEBUG
 						if (curStepSegmentLight == null) {
 							Log.Error($"TimedTrafficLightsStep: curStepSegmentLight is null!");
@@ -331,6 +336,10 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 						liveSegmentLight.currentMode = curStepSegmentLight.CurrentMode;
+						/*curStepSegmentLight.EnsureModeLights();
+						prevStepSegmentLight.EnsureModeLights();
+						nextStepSegmentLight.EnsureModeLights();*/
+
 						RoadBaseAI.TrafficLightState mainLight = calcLightState(prevStepSegmentLight.LightMain, curStepSegmentLight.LightMain, nextStepSegmentLight.LightMain, atStartTransition, atEndTransition);
 						RoadBaseAI.TrafficLightState leftLight = calcLightState(prevStepSegmentLight.LightLeft, curStepSegmentLight.LightLeft, nextStepSegmentLight.LightLeft, atStartTransition, atEndTransition);
 						RoadBaseAI.TrafficLightState rightLight = calcLightState(prevStepSegmentLight.LightRight, curStepSegmentLight.LightRight, nextStepSegmentLight.LightRight, atStartTransition, atEndTransition);
@@ -383,10 +392,13 @@ namespace TrafficManager.TrafficLight {
 		/// Updates timed segment lights according to "real-world" traffic light states
 		/// </summary>
 		public void UpdateLights() {
+			Log._Debug($"TimedTrafficLightsStep.UpdateLights: Updating lights of timed traffic light step @ {timedNode.NodeId}");
 			foreach (KeyValuePair<ushort, CustomSegmentLights> e in segmentLights) {
 				var segmentId = e.Key;
 				var segLights = e.Value;
-				
+
+				Log._Debug($"TimedTrafficLightsStep.UpdateLights: Updating lights of timed traffic light step at seg. {e.Key} @ {timedNode.NodeId}");
+
 				//if (segment == 0) continue;
 				var liveSegLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, segLights.StartNode, false);
 				if (liveSegLights == null)
@@ -524,6 +536,7 @@ namespace TrafficManager.TrafficLight {
 			uint curMeanFlow = 0;
 			uint curMeanWait = 0;
 
+			// TODO checking agains getCurrentFrame() is only valid if this is the current step
 			if (onlyMoving && getCurrentFrame() <= startFrame + minTime + 1) { // during start phase all vehicles on "green" segments are counted as flowing
 				onlyMoving = false;
 			}
@@ -531,7 +544,6 @@ namespace TrafficManager.TrafficLight {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			// we are the master node. calculate traffic data
 			foreach (ushort timedNodeId in timedNode.NodeGroup) {
 				TrafficLightSimulation sim = tlsMan.GetNodeSimulation(timedNodeId);
 				if (sim == null || !sim.IsTimedLight())
@@ -548,6 +560,8 @@ namespace TrafficManager.TrafficLight {
 
 #if DEBUGMETRIC
 					bool debug = sourceSegmentId == 20857 && GlobalConfig.Instance.DebugSwitches[1];
+#elif DEBUG
+					bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNodeId;
 #else
 					bool debug = false;
 #endif
@@ -556,7 +570,11 @@ namespace TrafficManager.TrafficLight {
 					if (slaveStep.timedNode.Directions.ContainsKey(sourceSegmentId)) {
 						directions = slaveStep.timedNode.Directions[sourceSegmentId];
 					} else {
-						//Log._Debug($"calcWaitFlow: No arrow directions defined for segment {sourceSegmentId} @ {timedNodeId}");
+#if DEBUG
+						if (debug) {
+							Log._Debug($"calcWaitFlow: No arrow directions defined for segment {sourceSegmentId} @ {timedNodeId}");
+						}
+#endif
 						continue;
 					}
 
@@ -580,7 +598,7 @@ namespace TrafficManager.TrafficLight {
 							continue;
 						}
 
-#if DEBUGMETRIC
+#if DEBUG
 						if (debug)
 							Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Checking lane {laneIndex} @ seg. {sourceSegmentId}. Vehicle types: {vehicleType}");
 #endif
@@ -595,19 +613,19 @@ namespace TrafficManager.TrafficLight {
 
 						// calculate waiting/flowing traffic
 						foreach (KeyValuePair<ushort, uint> f in allCarsToSegmentMetric) {
-							ushort toSegmentId = f.Key;
+							ushort targetSegmentId = f.Key;
 							uint totalNumCars = f.Value;
 
 							if (evalFlowingVehicles) {
 								uint totalNumFlowingCars = onlyMoving ? carsFlowingToSegmentMetric[f.Key] : totalNumCars;
 
-#if DEBUGMETRIC
-								/*if (debug)
-									Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Total norm. car length of vehicles on seg. {fromSegmentId}, lane {laneIndex} going to seg. {toSegmentId}: {totalNormCarLength}");*/
+#if DEBUG
+								if (debug)
+									Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Total num of flowing cars on seg. {sourceSegmentId}, lane {laneIndex} going to seg. {targetSegmentId}: {totalNumFlowingCars}");
 #endif
 
 								bool addToFlow = false;
-								switch (directions[toSegmentId]) {
+								switch (directions[targetSegmentId]) {
 									case ArrowDirection.Turn:
 										addToFlow = TrafficPriorityManager.IsLeftHandDrive() ? segLight.IsRightGreen() : segLight.IsLeftGreen();
 										break;
@@ -635,9 +653,9 @@ namespace TrafficManager.TrafficLight {
 								++numWaits;
 							}
 
-#if DEBUGMETRIC
+#if DEBUG
 							if (debug)
-								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Vehicles on lane {laneIndex} on seg. {sourceSegmentId} going to seg. {toSegmentId} curMeanFlow={curMeanFlow}, curMeanWait={curMeanWait}, numFlows={numFlows}, numWaits={numWaits}");
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Vehicles on lane {laneIndex} on seg. {sourceSegmentId} going to seg. {targetSegmentId} curMeanFlow={curMeanFlow}, curMeanWait={curMeanWait}, numFlows={numFlows}, numWaits={numWaits}");
 #endif
 						}
 					}
@@ -648,9 +666,9 @@ namespace TrafficManager.TrafficLight {
 				curMeanFlow /= numFlows;
 			if (numWaits > 0)
 				curMeanWait /= numWaits;*/
-
-			float fCurMeanFlow = (float)curMeanFlow / (float)numFlows;
-			float fCurMeanWait = (float)curMeanWait / (float)numWaits;
+			
+			float fCurMeanFlow = numFlows > 0 ? (float)curMeanFlow / (float)numFlows : 0;
+			float fCurMeanWait = numWaits > 0 ? (float)curMeanWait / (float)numWaits : 0;
 			fCurMeanFlow /= waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
 
 			wait = (float)fCurMeanWait;
