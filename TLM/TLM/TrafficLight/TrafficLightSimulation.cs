@@ -41,6 +41,9 @@ namespace TrafficManager.TrafficLight {
 			if (IsTimedLight())
 				return;
 			manualTrafficLights = true;
+
+			TrafficPriorityManager.Instance.AddPriorityNode(NodeId);
+			CustomSegmentLightsManager.Instance.AddNodeLights(NodeId);
 		}
 
 		internal void DestroyManualTrafficLight() {
@@ -50,6 +53,7 @@ namespace TrafficManager.TrafficLight {
 				return;
 			manualTrafficLights = false;
 
+			CustomSegmentLightsManager.Instance.RemoveNodeLights(NodeId);
 			TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 		}
 

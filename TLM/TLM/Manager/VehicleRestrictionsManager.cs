@@ -93,23 +93,17 @@ namespace TrafficManager.Manager {
 		/// <param name="laneInfo"></param>
 		/// <returns></returns>
 		internal ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo) {
-			if (Flags.IsInitDone()) {
-				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
-				if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
-					return (ExtVehicleType)fastArray[laneIndex];
-				}
+			ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
+			if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
+				return (ExtVehicleType)fastArray[laneIndex];
 			}
 
 			return GetDefaultAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 		}
 
 		internal bool HasSegmentRestrictions(ushort segmentId) { // TODO clean up restrictions (currently we do not check if restrictions are equal with the base type)
-			if (Flags.IsInitDone()) {
-				ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
-				return fastArray != null;
-			}
-
-			return false;
+			ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
+			return fastArray != null;
 		}
 
 		/// <summary>

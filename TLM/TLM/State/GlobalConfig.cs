@@ -69,7 +69,8 @@ namespace TrafficManager.State {
 			false, // parking ai debug log (extended)
 			false, // geometry debug log
 			false, // debug pause
-			false // debug PathMode
+			false, // debug TTL
+			false
 		};
 
 #if DEBUG

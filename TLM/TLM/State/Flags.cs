@@ -53,7 +53,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// For each lane: Defines the currently set speed limit
 		/// </summary>
-		private static Dictionary<uint, ushort> laneSpeedLimit = new Dictionary<uint, ushort>();
+		private static Dictionary<uint, ushort> laneSpeedLimit = null;
 
 		internal static ushort?[][] laneSpeedLimitArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
@@ -65,7 +65,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// For each lane: Defines the allowed vehicle types
 		/// </summary>
-		private static Dictionary<uint, ExtVehicleType> laneAllowedVehicleTypes = new Dictionary<uint, ExtVehicleType>();
+		private static Dictionary<uint, ExtVehicleType> laneAllowedVehicleTypes = null;
 
 		internal static ExtVehicleType?[][] laneAllowedVehicleTypesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
@@ -76,12 +76,6 @@ namespace TrafficManager.State {
 
 		private static object laneSpeedLimitLock = new object();
 		private static object laneAllowedVehicleTypesLock = new object();
-
-		private static bool initDone = false;
-
-		public static bool IsInitDone() {
-			return initDone;
-		}
 
 		internal static void PrintDebugInfo() {
 			Log._Debug("------------------------------");
@@ -246,9 +240,6 @@ namespace TrafficManager.State {
 		/// <param name="startNode1"></param>
 		/// <returns></returns>
 		internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-			if (!IsInitDone())
-				return false;
-
 			bool lane1Valid = CheckLane(lane1Id);
 			bool lane2Valid = CheckLane(lane2Id);
 
@@ -287,9 +278,6 @@ namespace TrafficManager.State {
 		/// <param name="laneId"></param>
 		/// <param name="startNode"></param>
 		internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
-			if (!IsInitDone())
-				return;
-
 			if (laneConnections[laneId] == null)
 				return;
 
@@ -327,9 +315,6 @@ namespace TrafficManager.State {
 		/// <param name="startNode1"></param>
 		/// <returns></returns>
 		internal static bool AddLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-			if (!IsInitDone())
-				return false;
-
 			bool lane1Valid = CheckLane(lane1Id);
 			bool lane2Valid = CheckLane(lane2Id);
 
@@ -679,9 +664,6 @@ namespace TrafficManager.State {
 		}
 
 		public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags, bool check=true) {
-			if (!IsInitDone())
-				return;
-
 			if (check && !mayHaveLaneArrows(laneId)) {
 				removeLaneArrowFlags(laneId);
 				return;
@@ -813,16 +795,10 @@ namespace TrafficManager.State {
 		}
 
 		public static LaneArrows? getHighwayLaneArrowFlags(uint laneId) {
-			if (!IsInitDone())
-				return null;
-
 			return highwayLaneArrowFlags[laneId];
 		}
 
 		public static bool getUTurnAllowed(ushort segmentId, bool startNode) {
-			if (!IsInitDone())
-				return false;
-
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -847,9 +823,6 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
-			if (!IsInitDone())
-				return false;
-
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -874,9 +847,6 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getStraightLaneChangingAllowed(ushort segmentId, bool startNode) {
-			if (!IsInitDone())
-				return false;
-
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -900,9 +870,6 @@ namespace TrafficManager.State {
 		}
 
 		public static bool getEnterWhenBlockedAllowed(ushort segmentId, bool startNode) {
-			if (!IsInitDone())
-				return false;
-
 			int index = startNode ? 0 : 1;
 
 			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
@@ -1069,47 +1036,66 @@ namespace TrafficManager.State {
 		}
 		
 		internal static void OnLevelUnloading() {
-			initDone = false;
+			for (uint i = 0; i < nodeTrafficLightFlag.Length; ++i) {
+				nodeTrafficLightFlag[i] = null;
+			}
 
-			nodeTrafficLightFlag = null;
+			for (uint i = 0; i < laneConnections.Length; ++i) {
+				laneConnections[i] = null;
+			}
+
+			for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
+				laneSpeedLimitArray[i] = null;
+			}
 
 			try {
 				Monitor.Enter(laneSpeedLimitLock);
-				laneSpeedLimitArray = null;
 				laneSpeedLimit.Clear();
 			} finally {
 				Monitor.Exit(laneSpeedLimitLock);
 			}
 
+			for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+				laneAllowedVehicleTypesArray[i] = null;
+			}
+
 			try {
 				Monitor.Enter(laneAllowedVehicleTypesLock);
-				laneAllowedVehicleTypesArray = null;
 				laneAllowedVehicleTypes.Clear();
 			} finally {
 				Monitor.Exit(laneAllowedVehicleTypesLock);
 			}
 
-			laneArrowFlags = null;
-			highwayLaneArrowFlags = null;
-			segmentNodeFlags = null;
-			laneConnections = null;
+			for (uint i = 0; i < laneArrowFlags.Length; ++i) {
+				laneArrowFlags[i] = null;
+			}
+
+			for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
+				highwayLaneArrowFlags[i] = null;
+			}
+
+			for (uint i = 0; i < segmentNodeFlags.Length; ++i) {
+				segmentNodeFlags[i] = new Configuration.SegmentNodeFlags[2];
+			}
 		}
 
-		public static void OnBeforeLoadData() {
-			if (initDone)
-				return;
-
+		static Flags() {
+			nodeTrafficLightFlag = new bool?[NetManager.MAX_NODE_COUNT];
 			laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
 			laneSpeedLimitArray = new ushort?[NetManager.MAX_SEGMENT_COUNT][];
-			laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
+			laneSpeedLimit = new Dictionary<uint, ushort>();
 			laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
+			laneAllowedVehicleTypes = new Dictionary<uint, ExtVehicleType>();
+			laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
 			highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
-			nodeTrafficLightFlag = new bool?[NetManager.MAX_NODE_COUNT];
 			segmentNodeFlags = new Configuration.SegmentNodeFlags[NetManager.MAX_SEGMENT_COUNT][];
 			for (int i = 0; i < segmentNodeFlags.Length; ++i) {
 				segmentNodeFlags[i] = new Configuration.SegmentNodeFlags[2];
 			}
-			initDone = true;
+		}
+
+		public static void OnBeforeLoadData() {
+			
 		}
 	}
 }

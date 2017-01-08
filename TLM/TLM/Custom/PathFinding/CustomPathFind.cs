@@ -2318,7 +2318,7 @@ namespace TrafficManager.Custom.PathFinding {
 					if (debug)
 						logBuf.Add($"ProcessItemCosts: applying strict lane avoidance on deactivated advaned AI");
 #endif
-					prevCost *= 100f;
+					prevCost *= 10000f;
 				}
 
 				// add costs for u-turns

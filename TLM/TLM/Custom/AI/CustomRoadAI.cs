@@ -18,7 +18,11 @@ namespace TrafficManager.Custom.AI {
 		private static TrafficLightManager tlm = TrafficLightManager.Instance;
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
-			tlm.NodeSimulationStep(nodeId, ref data);
+			try {
+				tlm.NodeSimulationStep(nodeId, ref data);
+			} catch (Exception e) {
+				Log.Warning($"CustomNodeSimulationStep: An error occurred while calling TrafficLightManager.NodeSimulationStep: {e.ToString()}");
+			}
 
 			if (Options.timedLightsEnabled) {
 				try {

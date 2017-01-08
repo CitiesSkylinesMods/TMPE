@@ -92,6 +92,38 @@ namespace TrafficManager.Manager {
 		}
 
 		/// <summary>
+		/// Add custom traffic lights at the given node
+		/// </summary>
+		/// <param name="nodeId"></param>
+		public void AddNodeLights(ushort nodeId) {
+			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
+			if (!nodeGeo.IsValid())
+				return;
+			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
+				if (endGeo == null)
+					continue;
+
+				AddSegmentLights(endGeo.SegmentId, endGeo.StartNode);
+			}
+		}
+
+		/// <summary>
+		/// Removes custom traffic lights at the given node
+		/// </summary>
+		/// <param name="nodeId"></param>
+		public void RemoveNodeLights(ushort nodeId) {
+			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
+			if (!nodeGeo.IsValid())
+				return;
+			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
+				if (endGeo == null)
+					continue;
+
+				RemoveSegmentLight(endGeo.SegmentId, endGeo.StartNode);
+			}
+		}
+
+		/// <summary>
 		/// Removes all custom traffic lights at both ends of the given segment.
 		/// </summary>
 		/// <param name="segmentId"></param>

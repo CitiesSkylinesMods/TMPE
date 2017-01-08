@@ -391,7 +391,9 @@ namespace TrafficManager.Custom.AI {
 			state.PathRecalculationRequested = false;
 #endif
 #if DEBUG
-			//Log._Debug($"CustomCarAI.CustomStartPathFind called for vehicle {vehicleID}");
+			bool debug = GlobalConfig.Instance.DebugSwitches[8] && vehicleData.m_sourceBuilding == 23712;
+			if (debug)
+				Log._Debug($"CustomCarAI.CustomStartPathFind called for vehicle {vehicleID} which is a {VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType} (AI: {this.GetType().Name}). going from {vehicleData.m_sourceBuilding} to {vehicleData.m_targetBuilding}");
 #endif
 
 			VehicleInfo info = this.m_info;
@@ -433,7 +435,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[4])
+					if (debug || GlobalConfig.Instance.DebugSwitches[4])
 						Log._Debug($"Path-finding starts for car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
 #endif
 
@@ -446,6 +448,10 @@ namespace TrafficManager.Custom.AI {
 					return true;
 				}
 			}
+#if DEBUG
+			if (debug)
+				Log._Debug($"Path-finding failed for car {vehicleID} (path could not be created)");
+#endif
 			return false;
 		}
 	}

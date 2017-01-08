@@ -27,7 +27,7 @@ namespace TrafficManager.Manager {
 		/// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
 		/// <returns></returns>
 		public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-			if (targetLaneId == 0 || !Flags.IsInitDone() || Flags.laneConnections[sourceLaneId] == null) {
+			if (targetLaneId == 0 || Flags.laneConnections[sourceLaneId] == null) {
 				return false;
 			}
 			
@@ -54,9 +54,6 @@ namespace TrafficManager.Manager {
 		/// <param name="sourceLaneId"></param>
 		/// <returns></returns>
 		public bool HasConnections(uint sourceLaneId, bool startNode) {
-			if (!Flags.IsInitDone()) {
-				return false;
-			}
 			int nodeArrayIndex = startNode ? 0 : 1;
 
 			bool ret = Flags.laneConnections[sourceLaneId] != null && Flags.laneConnections[sourceLaneId][nodeArrayIndex] != null;
@@ -84,10 +81,6 @@ namespace TrafficManager.Manager {
 		}
 
 		internal int CountConnections(uint sourceLaneId, bool startNode) {
-			if (!Flags.IsInitDone()) {
-				return 0;
-			}
-
 			if (Flags.laneConnections[sourceLaneId] == null)
 				return 0;
 			int nodeArrayIndex = startNode ? 0 : 1;
@@ -103,10 +96,6 @@ namespace TrafficManager.Manager {
 		/// <param name="laneId"></param>
 		/// <returns></returns>
 		internal uint[] GetLaneConnections(uint laneId, bool startNode) {
-			if (!Flags.IsInitDone()) {
-				return null;
-			}
-
 			if (Flags.laneConnections[laneId] == null)
 				return null;
 
@@ -125,11 +114,7 @@ namespace TrafficManager.Manager {
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnection({laneId1}, {laneId2}, {startNode1}) called.");
 #endif
-			bool ret = false;
-
-			if (Flags.IsInitDone()) {
-				ret = Flags.RemoveLaneConnection(laneId1, laneId2, startNode1);
-			}
+			bool ret = Flags.RemoveLaneConnection(laneId1, laneId2, startNode1);
 
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnection({laneId1}, {laneId2}, {startNode1}): ret={ret}");
@@ -200,9 +185,6 @@ namespace TrafficManager.Manager {
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnections({laneId}, {startNode}) called.");
 #endif
 
-			if (!Flags.IsInitDone())
-				return;
-
 			if (Flags.laneConnections[laneId] == null)
 				return;
 
@@ -241,10 +223,7 @@ namespace TrafficManager.Manager {
 		/// <param name="startNode1"></param>
 		/// <returns></returns>
 		internal bool AddLaneConnection(uint laneId1, uint laneId2, bool startNode1) {
-			bool ret = false;
-			if (Flags.IsInitDone()) {
-				ret = Flags.AddLaneConnection(laneId1, laneId2, startNode1);
-			}
+			bool ret = Flags.AddLaneConnection(laneId1, laneId2, startNode1);
 
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.AddLaneConnection({laneId1}, {laneId2}, {startNode1}): ret={ret}");

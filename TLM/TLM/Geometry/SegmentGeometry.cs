@@ -1152,8 +1152,11 @@ namespace TrafficManager.Geometry {
 
 		// static methods
 
-		internal static void OnBeforeLoadData() {
+		static SegmentGeometry() {
 			segmentGeometries = new SegmentGeometry[NetManager.MAX_SEGMENT_COUNT];
+		}
+
+		internal static void OnBeforeLoadData() {
 			Log._Debug($"Building {segmentGeometries.Length} segment geometries...");
 			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i] = new SegmentGeometry(i);
