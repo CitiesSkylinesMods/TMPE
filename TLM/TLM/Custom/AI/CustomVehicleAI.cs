@@ -454,7 +454,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_YÌELD_VELOCITY || Options.simAccuracy <= 2) {
+											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY || Options.simAccuracy <= 2) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
@@ -482,7 +482,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 												// vehicle has not yet reached yield speed
-												maxSpeed = TrafficPriorityManager.MAX_YÌELD_VELOCITY;
+												maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
 												return false;
 											}
 										} else {
