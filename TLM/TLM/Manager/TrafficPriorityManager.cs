@@ -937,6 +937,13 @@ namespace TrafficManager.Manager {
 		protected override void HandleValidSegment(SegmentGeometry geometry) {
 			HousekeepNode(geometry.StartNodeId());
 			HousekeepNode(geometry.EndNodeId());
+
+			TrafficSegment trafficSegment = TrafficSegments[geometry.SegmentId];
+			if (trafficSegment == null) {
+				return;
+			}
+			trafficSegment.Instance1?.Reset();
+			trafficSegment.Instance2?.Reset();
 		}
 
 		protected void HousekeepNode(ushort nodeId) {
@@ -948,6 +955,7 @@ namespace TrafficManager.Manager {
 			if (! TrafficLightSimulationManager.Instance.HasSimulation(nodeId)) {
 				if (TrafficLightManager.Instance.HasTrafficLight(nodeId) || !IsPriorityNode(nodeId, true)) {
 					RemovePrioritySegments(nodeId);
+					return;
 				}
 			}
 		}

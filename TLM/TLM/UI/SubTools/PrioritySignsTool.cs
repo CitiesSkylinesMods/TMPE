@@ -316,8 +316,8 @@ namespace TrafficManager.UI.SubTools {
 
 			foreach (TrafficSegment trafficSegment in prioMan.TrafficSegments) {
 				try {
-					trafficSegment?.Instance1?.Housekeeping();
-					trafficSegment?.Instance2?.Housekeeping();
+					trafficSegment?.Instance1?.Reset();
+					trafficSegment?.Instance2?.Reset();
 				} catch (Exception e) {
 					Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
 				}

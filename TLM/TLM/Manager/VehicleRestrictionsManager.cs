@@ -74,8 +74,7 @@ namespace TrafficManager.Manager {
 
 				if (toNodeId == nodeId) {
 					ExtVehicleType vehicleTypes = GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
-					if (vehicleTypes != ExtVehicleType.None)
-						ret[(byte)laneIndex] = vehicleTypes;
+					ret[(byte)laneIndex] = vehicleTypes;
 				}
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				++laneIndex;

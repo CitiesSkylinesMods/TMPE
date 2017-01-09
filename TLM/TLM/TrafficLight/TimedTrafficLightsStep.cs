@@ -616,6 +616,11 @@ namespace TrafficManager.TrafficLight {
 							ushort targetSegmentId = f.Key;
 							uint totalNumCars = f.Value;
 
+							if (!directions.ContainsKey(targetSegmentId)) {
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Direction undefined for target segment {targetSegmentId} @ {timedNodeId}");
+								continue;
+							}
+
 							if (evalFlowingVehicles) {
 								uint totalNumFlowingCars = onlyMoving ? carsFlowingToSegmentMetric[f.Key] : totalNumCars;
 

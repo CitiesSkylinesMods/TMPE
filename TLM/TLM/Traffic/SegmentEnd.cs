@@ -72,7 +72,7 @@ namespace TrafficManager.Traffic {
 			SegmentId = segmentId;
 			Type = type;
 			FirstRegisteredVehicleId = 0;
-			Housekeeping();
+			Reset();
 		}
 
 		~SegmentEnd() {
@@ -124,16 +124,18 @@ namespace TrafficManager.Traffic {
 
 			Dictionary<ushort, uint> ret = includeStopped ? numVehiclesGoingToSegmentId : numVehiclesFlowingToSegmentId;
 
-			for (var s = 0; s < 8; s++) {
-				ushort segmentId = netManager.m_nodes.m_buffer[NodeId].GetSegment(s);
-
-				if (segmentId == 0)
+			foreach (SegmentEndGeometry endGeo in NodeGeometry.Get(NodeId).SegmentEndGeometries) {
+				if (endGeo == null)
 					continue;
 
-				if (!ret.ContainsKey(segmentId))
-					continue;
+				if (!endGeo.IncomingOneWay && !ret.ContainsKey(endGeo.SegmentId)) {
+#if DEBUG
+					Log._Debug($"SegmentEnd.GetVehicleMetricGoingToSegment: return dict does not contain entry for segment {endGeo.SegmentId}");
+#endif
+				}
+			
 
-				ret[segmentId] = 0;
+				ret[endGeo.SegmentId] = 0;
 			}
 
 #if DEBUGMETRIC
@@ -161,7 +163,7 @@ namespace TrafficManager.Traffic {
 
 					if (!ret.ContainsKey(nextPos.m_segment)) {
 #if DEBUGMETRIC2
-					if (debug)
+						if (debug)
 						Log._Debug($"  GetVehicleMetricGoingToSegment: ret does not contain key for target segment {nextPos.m_segment}");
 #endif
 						return;
@@ -250,7 +252,7 @@ namespace TrafficManager.Traffic {
 			}
 		}
 
-		internal void Housekeeping() {
+		internal void Reset() {
 			//Log._Debug($"SegmentEnd.Housekeeping: Housekeeping at segment {SegmentId} @ {NodeId}");
 
 			StartNode = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode == NodeId;
