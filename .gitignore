@@ -182,3 +182,6 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 /logo/
+
+# MSVS 2017 artifacts
+/.vs/slnx.sqlite
