@@ -61,6 +61,8 @@ namespace TrafficManager.Custom.AI {
 					vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
 					return true;
 				}
+			} else {
+				PathfindFailure(vehicleID, ref vehicleData);
 			}
 			return false;
 		}

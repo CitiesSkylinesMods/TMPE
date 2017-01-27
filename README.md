@@ -4,6 +4,9 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.15, 01/27/2017
+- Updated for game version 1.6.3-f1
+
 1.8.14, 01/07/2017
 - Bugfix: Wait/flow ratio at timed traffic lights is sometimes not correctly calculated
 - Bugfix: A deadlock situation can arise at junctions with priority signs such that no vehicle enters the junction 
