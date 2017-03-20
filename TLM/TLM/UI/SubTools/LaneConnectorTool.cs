@@ -166,7 +166,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}
 
-				bool deleteAll = Input.GetKeyDown(KeyCode.Delete);
+				bool deleteAll = Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace);
 				bool stayInLane = Input.GetKeyDown(KeyCode.S) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].CountSegments() == 2;
 				if (stayInLane)
 					deleteAll = true;

@@ -8,6 +8,7 @@ using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.Util;
 
 namespace TrafficManager.State {
 	public class Flags {
@@ -78,80 +79,88 @@ namespace TrafficManager.State {
 		private static object laneAllowedVehicleTypesLock = new object();
 
 		internal static void PrintDebugInfo() {
-			Log._Debug("------------------------------");
-			Log._Debug("--- TOGGLED TRAFFIC LIGHTS ---");
-			Log._Debug("------------------------------");
-			for (uint i = 0; i < nodeTrafficLightFlag.Length; ++i) {
+			Log.Info("------------------------------");
+			Log.Info("--- TOGGLED TRAFFIC LIGHTS ---");
+			Log.Info("------------------------------");
+			for (ushort i = 0; i < nodeTrafficLightFlag.Length; ++i) {
 				if (nodeTrafficLightFlag[i] == null)
 					continue;
-				Log._Debug($"Node {i}: {nodeTrafficLightFlag[i]}");
+				Log.Info($"Node {i}: {nodeTrafficLightFlag[i]} (valid? {NetUtil.IsNodeValid(i)})");
 			}
 
-			Log._Debug("------------------------");
-			Log._Debug("--- LANE ARROW FLAGS ---");
-			Log._Debug("------------------------");
+			Log.Info("------------------------");
+			Log.Info("--- LANE ARROW FLAGS ---");
+			Log.Info("------------------------");
 			for (uint i = 0; i < laneArrowFlags.Length; ++i) {
 				if (laneArrowFlags[i] == null)
 					continue;
-				Log._Debug($"Lane {i}: {laneArrowFlags[i]}");
+				Log.Info($"Lane {i}: {laneArrowFlags[i]} (valid? {NetUtil.IsLaneValid(i)})");
 			}
 
-			Log._Debug("------------------------");
-			Log._Debug("--- LANE CONNECTIONS ---");
-			Log._Debug("------------------------");
+			Log.Info("------------------------");
+			Log.Info("--- LANE CONNECTIONS ---");
+			Log.Info("------------------------");
 			for (uint i = 0; i < laneConnections.Length; ++i) {
 				if (laneConnections[i] == null)
 					continue;
 
+				ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
+				Log.Info($"Lane {i}: valid? {NetUtil.IsLaneValid(i)}, seg. valid? {NetUtil.IsSegmentValid(segmentId)}");
 				for (int x = 0; x < 2; ++x) {
 					if (laneConnections[i][x] == null)
 						continue;
+
+					ushort nodeId = x == 0 ? Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+					Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {NetUtil.IsNodeValid(nodeId)}");
 
 					for (int y = 0; y < laneConnections[i][x].Length; ++y) {
 						if (laneConnections[i][x][y] == 0)
 							continue;
 
-						Log._Debug($"Lane {i} / Node idx {x} / Entry {y}: {laneConnections[i][x][y]}");
+						Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {NetUtil.IsLaneValid(laneConnections[i][x][y])})");
 					}
 				}
 			}
 
-			Log._Debug("-------------------------");
-			Log._Debug("--- LANE SPEED LIMITS ---");
-			Log._Debug("-------------------------");
-			for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
+			Log.Info("-------------------------");
+			Log.Info("--- LANE SPEED LIMITS ---");
+			Log.Info("-------------------------");
+			for (ushort i = 0; i < laneSpeedLimitArray.Length; ++i) {
 				if (laneSpeedLimitArray[i] == null)
 					continue;
+				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
 				for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
 					if (laneSpeedLimitArray[i][x] == null)
 						continue;
-					Log._Debug($"Segment {i} / Lane idx {x}: {laneSpeedLimitArray[i][x]}");
+					Log.Info($"\tLane idx {x}: {laneSpeedLimitArray[i][x]}");
 				}
 			}
 
-			Log._Debug("---------------------------------");
-			Log._Debug("--- LANE VEHICLE RESTRICTIONS ---");
-			Log._Debug("---------------------------------");
-			for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+			Log.Info("---------------------------------");
+			Log.Info("--- LANE VEHICLE RESTRICTIONS ---");
+			Log.Info("---------------------------------");
+			for (ushort i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
 				if (laneAllowedVehicleTypesArray[i] == null)
 					continue;
+				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
 				for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
 					if (laneAllowedVehicleTypesArray[i][x] == null)
 						continue;
-					Log._Debug($"Segment {i} / Lane idx {x}: {laneAllowedVehicleTypesArray[i][x]}");
+					Log.Info($"\tLane idx {x}: {laneAllowedVehicleTypesArray[i][x]}");
 				}
 			}
 
-			Log._Debug("-----------------------------");
-			Log._Debug("--- JUNCTION RESTRICTIONS ---");
-			Log._Debug("-----------------------------");
-			for (uint i = 0; i < segmentNodeFlags.Length; ++i) {
+			Log.Info("-----------------------------");
+			Log.Info("--- JUNCTION RESTRICTIONS ---");
+			Log.Info("-----------------------------");
+			for (ushort i = 0; i < segmentNodeFlags.Length; ++i) {
 				if (segmentNodeFlags[i] == null)
 					continue;
+				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
 				for (int x = 0; x < segmentNodeFlags[i].Length; ++x) {
 					if (segmentNodeFlags[i][x] == null)
 						continue;
-					Log._Debug($"Segment {i} / Node idx {x}: {segmentNodeFlags[i][x]}");
+					Log.Info($"\tNode idx {x}: {segmentNodeFlags[i][x]}");
 				}
 			}
 		}
@@ -278,12 +287,13 @@ namespace TrafficManager.State {
 		/// <param name="laneId"></param>
 		/// <param name="startNode"></param>
 		internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
+			//Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
 			if (laneConnections[laneId] == null)
 				return;
 
 			bool laneValid = CheckLane(laneId);
-
 			bool clearBothSides = startNode == null || !laneValid;
+			//Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, clearBothSides={clearBothSides}");
 			int? nodeArrayIndex = null;
 			if (!clearBothSides) {
 				nodeArrayIndex = (bool)startNode ? 0 : 1;
@@ -293,16 +303,23 @@ namespace TrafficManager.State {
 				if (nodeArrayIndex != null && k != (int)nodeArrayIndex)
 					continue;
 
+				bool startNode1 = k == 0;
+
 				if (laneConnections[laneId][k] == null)
 					continue;
 
 				for (int i = 0; i < laneConnections[laneId][k].Length; ++i) {
-					CleanupLaneConnections(laneConnections[laneId][k][i], laneId, true);
-					CleanupLaneConnections(laneConnections[laneId][k][i], laneId, false);
+					uint otherLaneId = laneConnections[laneId][k][i];
+					ushort commonNodeId;
+					bool startNode2;
+					LaneConnectionManager.Instance.GetCommonNodeId(laneId, otherLaneId, startNode1, out commonNodeId, out startNode2); // TODO refactor
+					
+					CleanupLaneConnections(otherLaneId, laneId, startNode2);
 				}
+
 				laneConnections[laneId][k] = null;
 			}
-			
+
 			if (clearBothSides)
 				laneConnections[laneId] = null;
 		}
@@ -377,39 +394,42 @@ namespace TrafficManager.State {
 		/// <param name="startNode"></param>
 		/// <returns></returns>
 		private static bool CleanupLaneConnections(uint sourceLaneId, uint targetLaneId, bool startNode) {
+			Log._Debug($"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
 			int nodeArrayIndex = startNode ? 0 : 1;
 
 			if (laneConnections[sourceLaneId] == null || laneConnections[sourceLaneId][nodeArrayIndex] == null)
 				return false;
 
-			bool ret = false;
 			uint[] srcLaneConnections = laneConnections[sourceLaneId][nodeArrayIndex];
-			if (srcLaneConnections != null) {
-				int remainingConnections = 0;
+			if (srcLaneConnections == null) {
+				return false;
+			}
+
+			bool ret = false;
+			int remainingConnections = 0;
+			for (int i = 0; i < srcLaneConnections.Length; ++i) {
+				if (srcLaneConnections[i] != targetLaneId) {
+					++remainingConnections;
+				} else {
+					ret = true;
+					srcLaneConnections[i] = 0;
+				}
+			}
+
+			if (remainingConnections <= 0) {
+				laneConnections[sourceLaneId][nodeArrayIndex] = null;
+				if (laneConnections[sourceLaneId][1 - nodeArrayIndex] == null)
+					laneConnections[sourceLaneId] = null; // total cleanup
+				return ret;
+			}
+
+			if (remainingConnections != srcLaneConnections.Length) {
+				laneConnections[sourceLaneId][nodeArrayIndex] = new uint[remainingConnections];
+				int k = 0;
 				for (int i = 0; i < srcLaneConnections.Length; ++i) {
-					if (srcLaneConnections[i] != targetLaneId) {
-						++remainingConnections;
-					} else {
-						ret = true;
-						srcLaneConnections[i] = 0;
-					}
-				}
-
-				if (remainingConnections <= 0) {
-					laneConnections[sourceLaneId][nodeArrayIndex] = null;
-					if (laneConnections[sourceLaneId][1 - nodeArrayIndex] == null)
-						laneConnections[sourceLaneId] = null; // total cleanup
-					return ret;
-				}
-
-				if (remainingConnections != srcLaneConnections.Length) {
-					laneConnections[sourceLaneId][nodeArrayIndex] = new uint[remainingConnections];
-					int k = 0;
-					for (int i = 0; i < srcLaneConnections.Length; ++i) {
-						if (srcLaneConnections[i] == 0)
-							continue;
-						laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
-					}
+					if (srcLaneConnections[i] == 0)
+						continue;
+					laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
 				}
 			}
 			return ret;

@@ -162,14 +162,16 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="startNode"></param>
 		internal void RemoveLaneConnectionsFromSegment(ushort segmentId, bool startNode) {
-//#if DEBUGCONN
+#if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment({segmentId}, {startNode}) called.");
-//#endif
+#endif
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
 			while (curLaneId != 0) {
+#if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing lane connections from segment {segmentId}, lane {curLaneId}.");
+#endif
 				RemoveLaneConnections(curLaneId, startNode);
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
@@ -195,7 +197,7 @@ namespace TrafficManager.Manager {
 
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			for (int i = 0; i < Flags.laneConnections[laneId][nodeArrayIndex].Length; ++i) {
+			/*for (int i = 0; i < Flags.laneConnections[laneId][nodeArrayIndex].Length; ++i) {
 				uint otherLaneId = Flags.laneConnections[laneId][nodeArrayIndex][i];
 				if (Flags.laneConnections[otherLaneId] != null) {
 					if ((Flags.laneConnections[otherLaneId][0] != null && Flags.laneConnections[otherLaneId][0].Length == 1 && Flags.laneConnections[otherLaneId][0][0] == laneId && Flags.laneConnections[otherLaneId][1] == null) ||
@@ -205,7 +207,7 @@ namespace TrafficManager.Manager {
 						UnsubscribeFromSegmentGeometry(otherSegmentId);
 					}
 				}
-			}
+			}*/
 
 			Flags.RemoveLaneConnections(laneId, startNode);
 

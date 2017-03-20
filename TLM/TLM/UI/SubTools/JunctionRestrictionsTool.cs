@@ -108,6 +108,7 @@ namespace TrafficManager.UI.SubTools {
 				return;
 
 			SelectedNodeId = HoveredNodeId;
+			MainTool.CheckClicked(); // prevent accidential activation of signs on node selection (TODO improve this!)
 		}
 
 		public override void OnSecondaryClickOverlay() {

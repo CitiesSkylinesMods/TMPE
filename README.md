@@ -4,6 +4,13 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.8.16, 03/20/2017
+- Lane connections can now also be removed by pressing the backspace key
+- Improved lane selection for busses if the option "Busses may ignore lane arrows" is activated
+- Bugfix: The game sometimes freezes when using the timed traffic light tool
+- Bugfix: Lane connections are not correctly removed after modifying/removing a junction
+- Bugfix: Selecting a junction for setting up junction restrictions toggles the currently hovered junction restriction icon
+
 1.8.15, 01/27/2017
 - Updated for game version 1.6.3-f1
 

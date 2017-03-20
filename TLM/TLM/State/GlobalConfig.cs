@@ -116,7 +116,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// artifical lane distance for u-turns
 		/// </summary>
-		public int UturnLaneDistance = 8;
+		public int UturnLaneDistance = 2;
+
+		/// <summary>
+		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
+		/// </summary>
+		public byte IncompatibleLaneDistance = 1;
 
 		/// <summary>
 		/// lane density random interval

@@ -303,7 +303,13 @@ namespace TrafficManager.UI.SubTools {
 								else
 									labelLayout = layoutGreen;
 							} else {
-								labelLayout = timedNodeMain.GetStep(i).IsInEndTransition() ? layoutYellow : layoutGreen;
+								bool inEndTransition = false;
+								try {
+									inEndTransition = timedNodeMain.GetStep(i).IsInEndTransition();
+								} catch (Exception e) {
+									Log.Error("Error while determining if timed traffic light is in end transition: " + e.ToString());
+								}
+								labelLayout = inEndTransition ? layoutYellow : layoutGreen;
 							}
 							GUILayout.Label(labelStr, labelLayout);
 							GUILayout.Space(5);
