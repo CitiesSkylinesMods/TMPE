@@ -357,10 +357,6 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		public static bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			return FindParkingSpaceInVicinity(targetPos, vehicleInfo, homeId, out parkingSpaceLocation, out parkingSpaceLocationId, out parkPos, out parkRot, out parkOffset);
-		}
-
 		public static bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			Vector3 roadParkPos;
 			Quaternion roadParkRot;

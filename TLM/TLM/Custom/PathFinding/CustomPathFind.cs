@@ -1047,7 +1047,7 @@ namespace TrafficManager.Custom.PathFinding {
 					// a simple transition is (1) no junction, (2) no transition and (3) where lane count is equal
 					//bool nextIsSimpleTransition = !nextIsTransition && !nextIsRealJunction && nextSegmentInfo.m_lanes.Length == prevSegmentInfo.m_lanes.Length;
 
-					if (/*!isStrictLaneArrowPolicyEnabled || */nextIsUntouchable) {
+					if (_extVehicleType == null || (prevLane.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None || (_extVehicleType & ExtVehicleType.RoadVehicle) == ExtVehicleType.None || nextIsUntouchable) {
 						// coming from an untouchable segment. do not apply our AI
 
 #if DEBUGPF
@@ -2095,7 +2095,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		// 3
-		private bool ProcessItemCosts(bool allowAdvancedAI, bool obeyLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, bool debug, BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId, byte? forcedLaneDist, out bool foundForced) {
+		private bool ProcessItemCosts(bool allowAdvancedAI, bool obeyStockLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, bool debug, BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId, byte? forcedLaneDist, out bool foundForced) {
 
 #if DEBUGPF
 			/*if (_conf.DebugSwitches[0])
@@ -2630,7 +2630,7 @@ namespace TrafficManager.Custom.PathFinding {
 								if (!aiActivated) {
 									// NON-STOCK CODE END //
 
-									if (obeyLaneArrows) { // TODO check this
+									if (obeyStockLaneArrows) { // TODO check this
 										// this is CO's way of matching lanes between segments
 										int firstTarget = (int)netManager.m_lanes.m_buffer[curLaneId].m_firstTarget;
 										int lastTarget = (int)netManager.m_lanes.m_buffer[curLaneId].m_lastTarget;
