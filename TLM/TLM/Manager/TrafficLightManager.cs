@@ -4,18 +4,22 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.State;
+using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
+		public enum UnableReason {
+			None,
+			InvalidNode,
+			NoJunction,
+			HasTimedLight
+		}
+
 		public static TrafficLightManager Instance { get; private set; } = null;
 
 		static TrafficLightManager() {
 			Instance = new TrafficLightManager();
-		}
-
-		internal void NodeSimulationStep(ushort nodeId, ref NetNode data) {
-			Flags.applyNodeTrafficLightFlag(nodeId);
 		}
 
 		public void SetTrafficLight(ushort nodeId, bool flag) {
@@ -36,27 +40,48 @@ namespace TrafficManager.Manager {
 			SetTrafficLight(nodeId, !HasTrafficLight(nodeId));
 		}
 
+		public bool IsTrafficLightToggleable(ushort nodeId, out UnableReason reason) {
+			if (! NetUtil.IsNodeValid(nodeId)) {
+				reason = UnableReason.InvalidNode;
+				return false;
+			}
+			
+			if (! NetUtil.CheckNodeFlags(nodeId, NetNode.Flags.Junction)) {
+				reason = UnableReason.NoJunction;
+				return false;
+			}
+
+			TrafficLightSimulation sim = TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId);
+			if (sim != null && sim.IsTimedLight()) {
+				reason = UnableReason.HasTimedLight;
+				return false;
+			}
+
+			reason = UnableReason.None;
+			return true;
+		}
+
 		public bool HasTrafficLight(ushort nodeId) {
 			return Flags.isNodeTrafficLight(nodeId);
 		}
 
 		protected override void HandleInvalidNode(NodeGeometry geometry) {
-			Flags.resetTrafficLight(geometry.NodeId);
+			//Flags.resetTrafficLight(geometry.NodeId);
 		}
 
 		protected override void HandleValidNode(NodeGeometry geometry) {
-			Flags.applyNodeTrafficLightFlag(geometry.NodeId);
+			//Flags.applyNodeTrafficLightFlag(geometry.NodeId);
 		}
 
 		public void ApplyAllFlags() {
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			/*for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				Flags.applyNodeTrafficLightFlag(nodeId);
-			}
+			}*/
 		}
 
 		public override void OnBeforeSaveData() {
 			base.OnBeforeSaveData();
-			ApplyAllFlags();
+			//ApplyAllFlags();
 		}
 
 		public override void OnAfterLoadData() {
@@ -117,7 +142,9 @@ namespace TrafficManager.Manager {
 		}
 
 		List<Configuration.NodeTrafficLight> ICustomDataManager<List<Configuration.NodeTrafficLight>>.SaveData(ref bool success) {
-			List<Configuration.NodeTrafficLight> ret = new List<Configuration.NodeTrafficLight>();
+			return null;
+
+			/*List<Configuration.NodeTrafficLight> ret = new List<Configuration.NodeTrafficLight>();
 			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				try {
 					if (!Flags.mayHaveTrafficLight(nodeId))
@@ -139,7 +166,7 @@ namespace TrafficManager.Manager {
 					success = false;
 				}
 			}
-			return ret;
+			return ret;*/
 		}
 	}
 }
