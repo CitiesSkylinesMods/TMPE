@@ -101,8 +101,10 @@
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\VehicleBehaviorManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
+    <Compile Include="Manager\AdvancedParkingManager.cs" />
     <Compile Include="Manager\LaneArrowManager.cs" />
     <Compile Include="Manager\OptionsManager.cs" />
     <Compile Include="Manager\TrafficLightManager.cs" />
@@ -159,8 +161,11 @@
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\LogicUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
+    <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />

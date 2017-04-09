@@ -18,12 +18,6 @@ namespace TrafficManager.Custom.AI {
 		private static TrafficLightManager tlm = TrafficLightManager.Instance;
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
-			try {
-				tlm.NodeSimulationStep(nodeId, ref data);
-			} catch (Exception e) {
-				Log.Warning($"CustomNodeSimulationStep: An error occurred while calling TrafficLightManager.NodeSimulationStep: {e.ToString()}");
-			}
-
 			if (Options.timedLightsEnabled) {
 				try {
 					//tlsMan.SimulationStep();
@@ -35,8 +29,9 @@ namespace TrafficManager.Custom.AI {
 				} catch (Exception e) {
 					Log.Warning($"CustomNodeSimulationStep: An error occurred: {e.ToString()}");
 				}
-			} else
+			} else {
 				OriginalSimulationStep(nodeId, ref data);
+			}
 		}
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
@@ -85,7 +80,7 @@ namespace TrafficManager.Custom.AI {
 			try {
 				OriginalSimulationStep(segmentID, ref data);
 			} catch (Exception ex) {
-				Log.Error("Error in CustomRoadAI.SimulationStep: " + ex.ToString());
+				Log.Error($"Error in CustomRoadAI.SimulationStep for segment {segmentID}: " + ex.ToString());
 			}
 		}
 
@@ -206,104 +201,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {
-			OriginalUpdateLanes(segmentID, ref data, loading);
-
-			try {
-				NetManager netManager = Singleton<NetManager>.instance;
-
-				// update lane arrows
-				uint laneId = netManager.m_segments.m_buffer[segmentID].m_lanes;
-				while (laneId != 0) {
-					if (!Flags.applyLaneArrowFlags(laneId)) {
-						Flags.removeLaneArrowFlags(laneId);
-					}
-					laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
-				}
-			} catch (Exception e) {
-				Log.Error($"Error occured in CustomRoadAI.CustomUpdateLanes @ seg. {segmentID}: " + e.ToString());
-			}
-		}
-
-		public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
-			bool customSim = nodeSim != null && nodeSim.IsSimulationActive();
-
-			uint num = Singleton<SimulationManager>.instance.m_referenceFrameIndex - 15u;
-			uint num2 = (uint)(((int)nodeID << 8) / 32768);
-			uint num3 = num - num2 & 255u;
-			RoadBaseAI.TrafficLightState trafficLightState;
-			RoadBaseAI.TrafficLightState trafficLightState2;
-			RoadBaseAI.GetTrafficLightState(nodeID, ref segmentData, num - num2, out trafficLightState, out trafficLightState2);
-			color.a = 0.5f;
-			switch (trafficLightState) {
-				case RoadBaseAI.TrafficLightState.Green:
-					color.g = 1f;
-					break;
-				case RoadBaseAI.TrafficLightState.RedToGreen:
-					if (customSim) {
-						color.r = 1f;
-					} else {
-						if (num3 < 45u) {
-							color.g = 0f;
-						} else if (num3 < 60u) {
-							color.r = 1f;
-						} else {
-							color.g = 1f;
-						}
-					}
-					break;
-				case RoadBaseAI.TrafficLightState.Red:
-					color.g = 0f;
-					break;
-				case RoadBaseAI.TrafficLightState.GreenToRed:
-					if (customSim) {
-						color.r = 1f;
-					} else {
-						if (num3 < 45u) {
-							color.r = 1f;
-						} else {
-							color.g = 0f;
-						}
-					}
-					break;
-			}
-			switch (trafficLightState2) {
-				case RoadBaseAI.TrafficLightState.Green:
-					color.b = 1f;
-					break;
-				case RoadBaseAI.TrafficLightState.RedToGreen:
-					if (customSim) {
-						color.b = 0f;
-					} else {
-						if (num3 < 45u) {
-							color.b = 0f;
-						} else {
-							color.b = 1f;
-						}
-					}
-					break;
-				case RoadBaseAI.TrafficLightState.Red:
-					color.b = 0f;
-					break;
-				case RoadBaseAI.TrafficLightState.GreenToRed:
-					if (customSim) {
-						color.b = 0f;
-					} else {
-						if (num3 < 45u) {
-							if ((num3 / 8u & 1u) == 1u) {
-								color.b = 1f;
-							}
-						} else {
-							color.b = 0f;
-						}
-					}
-					break;
-			}
-		}
-
-		#region stock code
-
-		public void OriginalUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) { // pure stock code
+			// stock code start
 			NetManager instance = Singleton<NetManager>.instance;
 			bool flag = Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
 			Vector3 vector;
@@ -372,6 +270,12 @@ namespace TrafficManager.Custom.AI {
 			if (num12 != 0 && num9 == 0) {
 				flags |= (((data.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? NetLane.Flags.StartOneWayRight : NetLane.Flags.EndOneWayRight);
 			}
+			if ((data.m_flags & NetSegment.Flags.YieldStart) != NetSegment.Flags.None) {
+				flags |= (((data.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? NetLane.Flags.YieldStart : NetLane.Flags.YieldEnd);
+			}
+			if ((data.m_flags & NetSegment.Flags.YieldEnd) != NetSegment.Flags.None) {
+				flags |= (((data.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? NetLane.Flags.YieldEnd : NetLane.Flags.YieldStart);
+			}
 			float num13 = 0f;
 			float num14 = 0f;
 			uint num15 = 0u;
@@ -381,7 +285,11 @@ namespace TrafficManager.Custom.AI {
 					if (!Singleton<NetManager>.instance.CreateLanes(out num16, ref Singleton<SimulationManager>.instance.m_randomizer, segmentID, 1)) {
 						break;
 					}
-					instance.m_lanes.m_buffer[(int)((UIntPtr)num15)].m_nextLane = num16;
+					if (num15 != 0u) {
+						instance.m_lanes.m_buffer[(int)((UIntPtr)num15)].m_nextLane = num16;
+					} else {
+						data.m_lanes = num16;
+					}
 				}
 				NetInfo.Lane lane = this.m_info.m_lanes[i];
 				float num17 = lane.m_position / (this.m_info.m_halfWidth * 2f) + 0.5f;
@@ -397,9 +305,16 @@ namespace TrafficManager.Custom.AI {
 				Vector3 b3;
 				Vector3 c;
 				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
-				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right);
-				flags2 &= ~(NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
-				flags2 |= flags;
+				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags;
+				NetLane.Flags flags3 = flags;
+				flags2 &= ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right | NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd | NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
+				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 2) {
+					flags3 &= ~NetLane.Flags.YieldEnd;
+				}
+				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 1) {
+					flags3 &= ~NetLane.Flags.YieldStart;
+				}
+				flags2 |= flags3;
 				if (flag) {
 					flags2 |= NetLane.Flags.Inverted;
 				} else {
@@ -528,11 +443,11 @@ namespace TrafficManager.Custom.AI {
 			num16 = data.m_lanes;
 			int num37 = 0;
 			while (num37 < this.m_info.m_lanes.Length && num16 != 0u) {
-				NetLane.Flags flags3 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~NetLane.Flags.JoinedJunction;
+				NetLane.Flags flags4 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~NetLane.Flags.JoinedJunction;
 				if (flag7) {
-					flags3 |= NetLane.Flags.JoinedJunction;
+					flags4 |= NetLane.Flags.JoinedJunction;
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags3;
+				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags4;
 				num16 = instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_nextLane;
 				num37++;
 			}
@@ -564,7 +479,104 @@ namespace TrafficManager.Custom.AI {
 					this.CheckBuildings(segmentID, ref data);
 				}
 			}
+			// stock code end
+
+			// NON-STOCK CODE START
+			try {
+				NetManager netManager = Singleton<NetManager>.instance;
+
+				// update lane arrows
+				uint laneId = netManager.m_segments.m_buffer[segmentID].m_lanes;
+				while (laneId != 0) {
+					if (!Flags.applyLaneArrowFlags(laneId)) {
+						Flags.removeLaneArrowFlags(laneId);
+					}
+					laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;
+				}
+			} catch (Exception e) {
+				Log.Error($"Error occured in CustomRoadAI.CustomUpdateLanes @ seg. {segmentID}: " + e.ToString());
+			}
+			// NON-STOCK CODE END
 		}
+
+		public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
+			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
+			bool customSim = nodeSim != null && nodeSim.IsSimulationActive();
+
+			uint num = Singleton<SimulationManager>.instance.m_referenceFrameIndex - 15u;
+			uint num2 = (uint)(((int)nodeID << 8) / 32768);
+			uint num3 = num - num2 & 255u;
+			RoadBaseAI.TrafficLightState trafficLightState;
+			RoadBaseAI.TrafficLightState trafficLightState2;
+			RoadBaseAI.GetTrafficLightState(nodeID, ref segmentData, num - num2, out trafficLightState, out trafficLightState2);
+			color.a = 0.5f;
+			switch (trafficLightState) {
+				case RoadBaseAI.TrafficLightState.Green:
+					color.g = 1f;
+					break;
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+					if (customSim) {
+						color.r = 1f;
+					} else {
+						if (num3 < 45u) {
+							color.g = 0f;
+						} else if (num3 < 60u) {
+							color.r = 1f;
+						} else {
+							color.g = 1f;
+						}
+					}
+					break;
+				case RoadBaseAI.TrafficLightState.Red:
+					color.g = 0f;
+					break;
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					if (customSim) {
+						color.r = 1f;
+					} else {
+						if (num3 < 45u) {
+							color.r = 1f;
+						} else {
+							color.g = 0f;
+						}
+					}
+					break;
+			}
+			switch (trafficLightState2) {
+				case RoadBaseAI.TrafficLightState.Green:
+					color.b = 1f;
+					break;
+				case RoadBaseAI.TrafficLightState.RedToGreen:
+					if (customSim) {
+						color.b = 0f;
+					} else {
+						if (num3 < 45u) {
+							color.b = 0f;
+						} else {
+							color.b = 1f;
+						}
+					}
+					break;
+				case RoadBaseAI.TrafficLightState.Red:
+					color.b = 0f;
+					break;
+				case RoadBaseAI.TrafficLightState.GreenToRed:
+					if (customSim) {
+						color.b = 0f;
+					} else {
+						if (num3 < 45u) {
+							if ((num3 / 8u & 1u) == 1u) {
+								color.b = 1f;
+							}
+						} else {
+							color.b = 0f;
+						}
+					}
+					break;
+			}
+		}
+
+		#region stock code
 
 		protected void CheckBuildings(ushort segmentID, ref NetSegment data) {
 			Log.Error("CustomRoadAI.CheckBuildings called.");
@@ -601,35 +613,36 @@ namespace TrafficManager.Custom.AI {
 			if ((data.m_problems & Notification.Problem.RoadNotConnected) != Notification.Problem.None && (data.m_flags & NetNode.Flags.Original) != NetNode.Flags.None) {
 				GuideController properties = Singleton<GuideManager>.instance.m_properties;
 				if (properties != null) {
-					instance.m_outsideNodeNotConnected.Activate(properties.m_outsideNotConnected, nodeID, Notification.Problem.RoadNotConnected);
+					instance.m_outsideNodeNotConnected.Activate(properties.m_outsideNotConnected, nodeID, Notification.Problem.RoadNotConnected, false);
 				}
 			}
 		}
 
 		public void OriginalSimulationStep(ushort segmentID, ref NetSegment data) { // stock + custom code
 			// base.SimulationStep START
-			if ((data.m_flags & NetSegment.Flags.Original) == NetSegment.Flags.None) {
-				NetManager netManager = Singleton<NetManager>.instance;
-				Vector3 pos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
-				Vector3 pos2 = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
-				int n = this.GetMaintenanceCost(pos, pos2);
-				bool f = (ulong)(Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15));
-				if (n != 0) {
-					if (f) {
-						n = n * 16 / 100 - n / 100 * 15;
+			NetManager netManager = Singleton<NetManager>.instance;
+			Vector3 startNodePos = netManager.m_nodes.m_buffer[data.m_startNode].m_position;
+			Vector3 endNodePos = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
+
+			if (this.HasMaintenanceCost(segmentID, ref data)) {
+				int maintenanceCost = this.GetMaintenanceCost(startNodePos, endNodePos);
+				bool simulate = (ulong)(Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15));
+				if (maintenanceCost != 0) {
+					if (simulate) {
+						maintenanceCost = maintenanceCost * 16 / 100 - maintenanceCost / 100 * 15;
 					} else {
-						n /= 100;
+						maintenanceCost /= 100;
 					}
-					Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, n, this.m_info.m_class);
+					Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Maintenance, maintenanceCost, this.m_info.m_class);
 				}
-				if (f) {
-					float n2 = (float)netManager.m_nodes.m_buffer[(int)data.m_startNode].m_elevation;
-					float n3 = (float)netManager.m_nodes.m_buffer[(int)data.m_endNode].m_elevation;
+				if (simulate) {
+					float startNodeElevation = (float)netManager.m_nodes.m_buffer[data.m_startNode].m_elevation;
+					float endNodeElevation = (float)netManager.m_nodes.m_buffer[data.m_endNode].m_elevation;
 					if (this.IsUnderground()) {
-						n2 = -n2;
-						n3 = -n3;
+						startNodeElevation = -startNodeElevation;
+						endNodeElevation = -endNodeElevation;
 					}
-					int constructionCost = this.GetConstructionCost(pos, pos2, n2, n3);
+					int constructionCost = this.GetConstructionCost(startNodePos, endNodePos, startNodeElevation, endNodeElevation);
 					if (constructionCost != 0) {
 						StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt64>(StatisticType.CityValue);
 						if (statisticBase != null) {
@@ -640,53 +653,53 @@ namespace TrafficManager.Custom.AI {
 			}
 			// base.SimulationStep END
 
-			SimulationManager instance = Singleton<SimulationManager>.instance;
-			NetManager instance2 = Singleton<NetManager>.instance;
+			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			Notification.Problem problem = Notification.RemoveProblems(data.m_problems, Notification.Problem.Flood | Notification.Problem.Snow);
 			if ((data.m_flags & NetSegment.Flags.AccessFailed) != NetSegment.Flags.None && Singleton<SimulationManager>.instance.m_randomizer.Int32(16u) == 0) {
 				data.m_flags &= ~NetSegment.Flags.AccessFailed;
 			}
-			float num = 0f;
-			uint num2 = data.m_lanes;
-			int num3 = 0;
-			while (num3 < this.m_info.m_lanes.Length && num2 != 0u) {
-				NetInfo.Lane lane = this.m_info.m_lanes[num3];
+			float totalLength = 0f;
+			uint curLaneId = data.m_lanes;
+			int laneIndex = 0;
+			while (laneIndex < this.m_info.m_lanes.Length && curLaneId != 0u) {
+				NetInfo.Lane lane = this.m_info.m_lanes[laneIndex];
 				if ((byte)(lane.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && (lane.m_vehicleType & ~VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None) {
-					num += instance2.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_length;
+					totalLength += netManager.m_lanes.m_buffer[curLaneId].m_length;
 				}
-				num2 = instance2.m_lanes.m_buffer[(int)((UIntPtr)num2)].m_nextLane;
-				num3++;
+				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+				laneIndex++;
 			}
-			int num4 = 0;
+
+			int trafficDensity = 0;
 			if (data.m_trafficBuffer == 65535) {
 				if ((data.m_flags & NetSegment.Flags.Blocked) == NetSegment.Flags.None) {
 					data.m_flags |= NetSegment.Flags.Blocked;
-					data.m_modifiedIndex = instance.m_currentBuildIndex++;
+					data.m_modifiedIndex = simManager.m_currentBuildIndex++;
 				}
 			} else {
 				data.m_flags &= ~NetSegment.Flags.Blocked;
-				int num5 = Mathf.RoundToInt(num) << 4;
-				if (num5 != 0) {
-					num4 = (int)((byte)Mathf.Min((int)(data.m_trafficBuffer * 100) / num5, 100));
+				int lengthDenominator = Mathf.RoundToInt(totalLength) << 4;
+				if (lengthDenominator != 0) {
+					trafficDensity = (int)((byte)Mathf.Min((int)(data.m_trafficBuffer * 100) / lengthDenominator, 100));
 				}
 			}
 			data.m_trafficBuffer = 0;
-			if (num4 > (int)data.m_trafficDensity) {
-				data.m_trafficDensity = (byte)Mathf.Min((int)(data.m_trafficDensity + 5), num4);
-			} else if (num4 < (int)data.m_trafficDensity) {
-				data.m_trafficDensity = (byte)Mathf.Max((int)(data.m_trafficDensity - 5), num4);
+			if (trafficDensity > (int)data.m_trafficDensity) {
+				data.m_trafficDensity = (byte)Mathf.Min((int)(data.m_trafficDensity + 5), trafficDensity);
+			} else if (trafficDensity < (int)data.m_trafficDensity) {
+				data.m_trafficDensity = (byte)Mathf.Max((int)(data.m_trafficDensity - 5), trafficDensity);
 			}
-			Vector3 position = instance2.m_nodes.m_buffer[(int)data.m_startNode].m_position;
-			Vector3 position2 = instance2.m_nodes.m_buffer[(int)data.m_endNode].m_position;
-			Vector3 vector = (position + position2) * 0.5f;
-			bool flag = false;
+			//Vector3 startNodePos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
+			//Vector3 endNodePos = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
+			Vector3 middlePoint = (startNodePos + endNodePos) * 0.5f;
+			bool flooded = false;
 			if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
-				float num6 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector));
+				float waterLevelAtMiddlePoint = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(middlePoint));
 				// NON-STOCK CODE START
 				// Rainfall compatibility
 				float _roadwayFloodedTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodedTolerance", 100)/100f : 1f;
-				if (num6 > vector.y + _roadwayFloodedTolerance) {
-					flag = true;
+				if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodedTolerance) {
+					flooded = true;
 					data.m_flags |= NetSegment.Flags.Flooded;
 					problem = Notification.AddProblems(problem, Notification.Problem.Flood | Notification.Problem.MajorProblem);
 					Vector3 min = data.m_bounds.min;
@@ -695,106 +708,104 @@ namespace TrafficManager.Custom.AI {
 				} else {
 					data.m_flags &= ~NetSegment.Flags.Flooded;
 					float _roadwayFloodingTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodingTolerance", 50)/100f : 0f;
-					if (num6 > vector.y + _roadwayFloodingTolerance) {
-						flag = true;
+					if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodingTolerance) {
+						flooded = true;
 						problem = Notification.AddProblems(problem, Notification.Problem.Flood);
 					}
 				}
 				// NON-STOCK CODE END
 			}
-			DistrictManager instance3 = Singleton<DistrictManager>.instance;
-			byte district = instance3.GetDistrict(vector);
-			DistrictPolicies.CityPlanning cityPlanningPolicies = instance3.m_districts.m_buffer[(int)district].m_cityPlanningPolicies;
-			int num7 = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
+			DistrictManager districtManager = Singleton<DistrictManager>.instance;
+			byte districtId = districtManager.GetDistrict(middlePoint);
+			DistrictPolicies.CityPlanning cityPlanningPolicies = districtManager.m_districts.m_buffer[(int)districtId].m_cityPlanningPolicies;
+			int noisePollution = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
 			if ((this.m_info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
-					if (flag && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
+					if (flooded && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked)) == NetSegment.Flags.None && simManager.m_randomizer.Int32(10u) == 0) {
 						TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
 						offer.Priority = 4;
 						offer.NetSegment = segmentID;
-						offer.Position = vector;
+						offer.Position = middlePoint;
 						offer.Amount = 1;
 						Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.FloodWater, offer);
 					}
 
-					int num8 = (int)data.m_wetness;
-					if (!instance2.m_treatWetAsSnow) {
-						if (flag) {
-							num8 = 255;
+					int wetness = (int)data.m_wetness;
+					if (!netManager.m_treatWetAsSnow) {
+						if (flooded) {
+							wetness = 255;
 						} else {
-							int num9 = -(num8 + 63 >> 5);
-							float num10 = Singleton<WeatherManager>.instance.SampleRainIntensity(vector, false);
-							if (num10 != 0f) {
-								int num11 = Mathf.RoundToInt(Mathf.Min(num10 * 4000f, 1000f));
-								num9 += instance.m_randomizer.Int32(num11, num11 + 99) / 100;
+							int wetnessDelta = -(wetness + 63 >> 5);
+							float rainIntensity = Singleton<WeatherManager>.instance.SampleRainIntensity(middlePoint, false);
+							if (rainIntensity != 0f) {
+								int wetnessIncreaseDueToRain = Mathf.RoundToInt(Mathf.Min(rainIntensity * 4000f, 1000f));
+								wetnessDelta += simManager.m_randomizer.Int32(wetnessIncreaseDueToRain, wetnessIncreaseDueToRain + 99) / 100;
 							}
-							num8 = Mathf.Clamp(num8 + num9, 0, 255);
+							wetness = Mathf.Clamp(wetness + wetnessDelta, 0, 255);
 						}
 					} else if (this.m_accumulateSnow) {
-						if (flag) {
-							num8 = 128;
+						if (flooded) {
+							wetness = 128;
 						} else {
-							float num12 = Singleton<WeatherManager>.instance.SampleRainIntensity(vector, false);
-							if (num12 != 0f) {
-								int num13 = Mathf.RoundToInt(num12 * 400f);
-								int num14 = instance.m_randomizer.Int32(num13, num13 + 99) / 100;
+							float rainIntensity = Singleton<WeatherManager>.instance.SampleRainIntensity(middlePoint, false);
+							if (rainIntensity != 0f) {
+								int minWetnessDelta = Mathf.RoundToInt(rainIntensity * 400f);
+								int wetnessDelta = simManager.m_randomizer.Int32(minWetnessDelta, minWetnessDelta + 99) / 100;
 								if (Singleton<UnlockManager>.instance.Unlocked(UnlockManager.Feature.Snowplow)) {
-									num8 = Mathf.Min(num8 + num14, 255);
+									wetness = Mathf.Min(wetness + wetnessDelta, 255);
 								} else {
-									num8 = Mathf.Min(num8 + num14, 128);
+									wetness = Mathf.Min(wetness + wetnessDelta, 128);
 								}
 							} else if (Singleton<SimulationManager>.instance.m_randomizer.Int32(4u) == 0) {
-								num8 = Mathf.Max(num8 - 1, 0);
+								wetness = Mathf.Max(wetness - 1, 0);
 							}
-							if (num8 >= 64 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(10u) == 0) {
-								TransferManager.TransferOffer offer2 = default(TransferManager.TransferOffer);
-								offer2.Priority = num8 / 50;
-								offer2.NetSegment = segmentID;
-								offer2.Position = vector;
-								offer2.Amount = 1;
-								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer2);
+							if (wetness >= 64 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && simManager.m_randomizer.Int32(10u) == 0) {
+								TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
+								offer.Priority = wetness / 50;
+								offer.NetSegment = segmentID;
+								offer.Position = middlePoint;
+								offer.Amount = 1;
+								Singleton<TransferManager>.instance.AddOutgoingOffer(TransferManager.TransferReason.Snow, offer);
 							}
-							if (num8 >= 192) {
+							if (wetness >= 192) {
 								problem = Notification.AddProblems(problem, Notification.Problem.Snow);
 							}
-							District[] expr_4E2_cp_0_cp_0 = instance3.m_districts.m_buffer;
-							byte expr_4E2_cp_0_cp_1 = district;
-							expr_4E2_cp_0_cp_0[(int)expr_4E2_cp_0_cp_1].m_productionData.m_tempSnowCover = expr_4E2_cp_0_cp_0[(int)expr_4E2_cp_0_cp_1].m_productionData.m_tempSnowCover + (uint)num8;
+							districtManager.m_districts.m_buffer[districtId].m_productionData.m_tempSnowCover += (uint)wetness;
 						}
 					}
-					if (num8 != (int)data.m_wetness) {
-						if (Mathf.Abs((int)data.m_wetness - num8) > 10) {
-							data.m_wetness = (byte)num8;
+					if (wetness != (int)data.m_wetness) {
+						if (Mathf.Abs((int)data.m_wetness - wetness) > 10) {
+							data.m_wetness = (byte)wetness;
 							InstanceID empty = InstanceID.Empty;
 							empty.NetSegment = segmentID;
-							instance2.AddSmoothColor(empty);
+							netManager.AddSmoothColor(empty);
 							empty.NetNode = data.m_startNode;
-							instance2.AddSmoothColor(empty);
+							netManager.AddSmoothColor(empty);
 							empty.NetNode = data.m_endNode;
-							instance2.AddSmoothColor(empty);
+							netManager.AddSmoothColor(empty);
 						} else {
-							data.m_wetness = (byte)num8;
-							instance2.m_wetnessChanged = 256;
+							data.m_wetness = (byte)wetness;
+							netManager.m_wetnessChanged = 256;
 						}
 					}
 				}
-				int num15;
+				int minConditionDelta;
 				if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.StuddedTires) != DistrictPolicies.CityPlanning.None) {
-					num7 = num7 * 3 + 1 >> 1;
-					num15 = Mathf.Min(700, (int)(50 + data.m_trafficDensity * 6));
+					noisePollution = noisePollution * 3 + 1 >> 1;
+					minConditionDelta = Mathf.Min(700, (int)(50 + data.m_trafficDensity * 6));
 				} else {
-					num15 = Mathf.Min(500, (int)(50 + data.m_trafficDensity * 4));
+					minConditionDelta = Mathf.Min(500, (int)(50 + data.m_trafficDensity * 4));
 				}
 				if (!this.m_highwayRules) {
-					int num16 = instance.m_randomizer.Int32(num15, num15 + 99) / 100;
-					data.m_condition = (byte)Mathf.Max((int)data.m_condition - num16, 0);
-					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && instance.m_randomizer.Int32(20u) == 0) {
-						TransferManager.TransferOffer offer3 = default(TransferManager.TransferOffer);
-						offer3.Priority = (int)((255 - data.m_condition) / 50);
-						offer3.NetSegment = segmentID;
-						offer3.Position = vector;
-						offer3.Amount = 1;
-						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer3);
+					int conditionDelta = simManager.m_randomizer.Int32(minConditionDelta, minConditionDelta + 99) / 100;
+					data.m_condition = (byte)Mathf.Max((int)data.m_condition - conditionDelta, 0);
+					if (data.m_condition < 192 && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && simManager.m_randomizer.Int32(20u) == 0) {
+						TransferManager.TransferOffer offer = default(TransferManager.TransferOffer);
+						offer.Priority = (int)((255 - data.m_condition) / 50);
+						offer.NetSegment = segmentID;
+						offer.Position = middlePoint;
+						offer.Amount = 1;
+						Singleton<TransferManager>.instance.AddIncomingOffer(TransferManager.TransferReason.RoadMaintenance, offer);
 					}
 				}
 			}
@@ -815,28 +826,28 @@ namespace TrafficManager.Custom.AI {
 					data.m_flags &= ~NetSegment.Flags.CarBan;
 				}
 			}
-			int num17 = this.m_noiseAccumulation * num7 / 100;
-			if (num17 != 0) {
-				float num18 = Vector3.Distance(position, position2);
-				int num19 = Mathf.FloorToInt(num18 / this.m_noiseRadius);
-				for (int i = 0; i < num19; i++) {
-					Vector3 position3 = Vector3.Lerp(position, position2, (float)(i + 1) / (float)(num19 + 1));
-					Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.NoisePollution, num17, position3, this.m_noiseRadius);
+			int noisePollutionResource = this.m_noiseAccumulation * noisePollution / 100;
+			if (noisePollutionResource != 0) {
+				float distance = Vector3.Distance(startNodePos, endNodePos);
+				int relNoiseRadius = Mathf.FloorToInt(distance / this.m_noiseRadius);
+				for (int i = 0; i < relNoiseRadius; i++) {
+					Vector3 position3 = Vector3.Lerp(startNodePos, endNodePos, (float)(i + 1) / (float)(relNoiseRadius + 1));
+					Singleton<ImmaterialResourceManager>.instance.AddResource(ImmaterialResourceManager.Resource.NoisePollution, noisePollutionResource, position3, this.m_noiseRadius);
 				}
 			}
-			if (data.m_trafficDensity >= 50 && data.m_averageLength < 25f && (instance2.m_nodes.m_buffer[(int)data.m_startNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights && (instance2.m_nodes.m_buffer[(int)data.m_endNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights) {
-				GuideController properties = Singleton<GuideManager>.instance.m_properties;
-				if (properties != null) {
-					Singleton<NetManager>.instance.m_shortRoadTraffic.Activate(properties.m_shortRoadTraffic, segmentID);
+			if (data.m_trafficDensity >= 50 && data.m_averageLength < 25f && (netManager.m_nodes.m_buffer[(int)data.m_startNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights && (netManager.m_nodes.m_buffer[(int)data.m_endNode].m_flags & (NetNode.Flags.LevelCrossing | NetNode.Flags.TrafficLights)) == NetNode.Flags.TrafficLights) {
+				GuideController guideCtrl = Singleton<GuideManager>.instance.m_properties;
+				if (guideCtrl != null) {
+					Singleton<NetManager>.instance.m_shortRoadTraffic.Activate(guideCtrl.m_shortRoadTraffic, segmentID, false);
 				}
 			}
 			if ((data.m_flags & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
-				GuideController properties2 = Singleton<GuideManager>.instance.m_properties;
-				if (properties2 != null) {
-					Singleton<NetManager>.instance.m_roadDestroyed.Activate(properties2.m_roadDestroyed, segmentID);
-					Singleton<NetManager>.instance.m_roadDestroyed2.Activate(properties2.m_roadDestroyed2, this.m_info.m_class.m_service);
+				GuideController guideCtrl = Singleton<GuideManager>.instance.m_properties;
+				if (guideCtrl != null) {
+					Singleton<NetManager>.instance.m_roadDestroyed.Activate(guideCtrl.m_roadDestroyed, segmentID, false);
+					Singleton<NetManager>.instance.m_roadDestroyed2.Activate(guideCtrl.m_roadDestroyed2, this.m_info.m_class.m_service);
 				}
-				if ((ulong)(instance.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15))) {
+				if ((ulong)(simManager.m_currentFrameIndex >> 8 & 15u) == (ulong)((long)(segmentID & 15))) {
 					int delta = Mathf.RoundToInt(data.m_averageLength);
 					StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.DestroyedLength);
 					statisticBase.Add(delta);

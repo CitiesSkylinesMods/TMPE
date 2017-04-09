@@ -1,7 +1,6 @@
 #define USEPATHWAITCOUNTERx
 #define DEBUGVSTATEx
 #define PATHFORECASTx
-#define PATHRECALCx
 #define DEBUGREGx
 
 using System;
@@ -18,7 +17,7 @@ namespace TrafficManager.Traffic {
 #if DEBUGVSTATE
 		private static readonly ushort debugVehicleId = 6316;
 #endif
-		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro;
+		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public static readonly int STATE_UPDATE_SHIFT = 6;
 
 		private VehicleJunctionTransitState junctionTransitState;
@@ -61,11 +60,6 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-#if PATHRECALC
-		public uint LastPathRecalculation = 0;
-		public ushort LastPathRecalculationSegmentId = 0;
-		public bool PathRecalculationRequested { get; internal set; } = false;
-#endif
 		public ExtVehicleType VehicleType {
 			get; internal set;
 		}

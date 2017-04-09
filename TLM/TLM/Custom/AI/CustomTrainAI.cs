@@ -27,6 +27,13 @@ namespace TrafficManager.Custom.AI {
 
 				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					try {
+						// NON-STOCK CODE START
+						if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
+							if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+								VehicleStateManager.Instance.OnVehicleSpawned(vehicleId, ref vehicleData);
+							}
+						}
+						// NON-STOCK CODE END
 						this.PathFindReady(vehicleId, ref vehicleData);
 					} catch (Exception e) {
 						Log.Warning($"TrainAI.PathFindReady({vehicleId}) for vehicle {vehicleData.Info?.m_class?.name} threw an exception: {e.ToString()}");
@@ -140,7 +147,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 /*&& Options.enableDespawning*/)) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -177,10 +184,6 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE END
 
 			return true;
-		}
-
-		private static void InitializePath(ushort vehicleID, ref Vehicle vehicleData) {
-			Log.Error("CustomTrainAI.InitializePath called");
 		}
 
 		public void TmCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
@@ -244,8 +247,8 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endPosB;
 			float endSqrDistA;
 			float endSqrDistB;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
-				CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, info.m_vehicleType, allowUnderground2, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
+			if (CustomPathManager.FindPathPosition(startPos, this.m_transportInfo.m_netService, this.m_transportInfo.m_secondaryNetService, NetInfo.LaneType.Vehicle, info.m_vehicleType, VehicleInfo.VehicleType.None, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
+				CustomPathManager.FindPathPosition(endPos, this.m_transportInfo.m_netService, this.m_transportInfo.m_secondaryNetService, NetInfo.LaneType.Vehicle, info.m_vehicleType, VehicleInfo.VehicleType.None, allowUnderground2, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
 				if (!startBothWays || startSqrDistB > startSqrDistA * 1.2f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -313,6 +316,7 @@ namespace TrafficManager.Custom.AI {
 					maxSpeed = 0f;
 					return;
 				}
+				//if (this.m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) { // NON-STOCK CODE
 				ushort targetNodeId;
 				if (offset < position.m_offset) {
 					targetNodeId = instance.m_segments.m_buffer[(int)position.m_segment].m_startNode;
@@ -328,17 +332,19 @@ namespace TrafficManager.Custom.AI {
 				if (targetNodeId == prevTargetNodeId) {
 					float oldMaxSpeed = maxSpeed;
 #if DEBUG
-					bool debug = false;// targetNodeId == 14527 || targetNodeId == 15048;
+					bool debug = targetNodeId == 30132;
 					if (debug)
 						Log._Debug($"Train {vehicleID} wants to change segment. seg. {prevPos.m_segment} -> node {targetNodeId} -> seg. {position.m_segment}");
 #else
 					bool debug = false;
 #endif
-					bool mayChange = CustomVehicleAI.MayChangeSegment(vehicleID, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, out maxSpeed, debug);
-					if (! mayChange)
+					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleID, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, out maxSpeed, debug);
+					if (!mayChange) {
 						return;
+					}
 					maxSpeed = oldMaxSpeed;
 				}
+				//} // NON-STOCK CODE
 			}
 		}
 
@@ -350,6 +356,10 @@ namespace TrafficManager.Custom.AI {
 		protected static ushort CheckOverlap(ushort vehicleID, ref Vehicle vehicleData, Segment3 segment, ushort ignoreVehicle, ushort otherID, ref Vehicle otherData, ref bool overlap, Vector3 min, Vector3 max) {
 			Log.Error("CustomTrainAI.CheckOverlap (2) called.");
 			return 0;
+		}
+
+		private static void InitializePath(ushort vehicleID, ref Vehicle vehicleData) {
+			Log.Error("CustomTrainAI.InitializePath called");
 		}
 	}
 }

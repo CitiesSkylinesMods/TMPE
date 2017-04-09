@@ -108,6 +108,14 @@ namespace TrafficManager.Manager {
 			return GetNodeSimulation(nodeId) != null;
 		}
 
+		public bool HasTimedSimulation(ushort nodeId) {
+			return HasSimulation(nodeId) && GetNodeSimulation(nodeId).IsTimedLight();
+		}
+
+		public bool HasActiveTimedSimulation(ushort nodeId) {
+			return HasSimulation(nodeId) && GetNodeSimulation(nodeId).IsTimedLightActive();
+		}
+
 		private void RemoveNodeFromSimulation(ushort nodeId) {
 			TrafficLightSimulations[nodeId]?.Destroy();
 			TrafficLightSimulations[nodeId] = null;
@@ -221,7 +229,7 @@ namespace TrafficManager.Manager {
 
 							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 							CustomSegmentLights lights = null;
-							if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
+							if (!step.CustomSegmentLights.TryGetValue(e.Key, out lights)) {
 								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
 								continue;
 							}
@@ -306,7 +314,7 @@ namespace TrafficManager.Manager {
 						cnfTimedStep.maxTime = timedStep.maxTime;
 						cnfTimedStep.waitFlowBalance = timedStep.waitFlowBalance;
 						cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
-						foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.segmentLights) {
+						foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.CustomSegmentLights) {
 							Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
 
 							CustomSegmentLights segLights = e.Value;

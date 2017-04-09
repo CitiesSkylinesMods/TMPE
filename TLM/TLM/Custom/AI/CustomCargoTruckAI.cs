@@ -1,5 +1,3 @@
-#define PATHRECALCx
-
 using System;
 using ColossalFramework;
 using UnityEngine;

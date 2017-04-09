@@ -126,11 +126,15 @@ namespace TrafficManager.Util {
 			public uint laneId;
 			public byte laneIndex;
 			public float position;
+			public VehicleInfo.VehicleType vehicleType;
+			public NetInfo.LaneType laneType;
 
-			public LanePos(uint laneId, byte laneIndex, float position) {
+			public LanePos(uint laneId, byte laneIndex, float position, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType laneType) {
 				this.laneId = laneId;
 				this.laneIndex = laneIndex;
 				this.position = position;
+				this.vehicleType = vehicleType;
+				this.laneType = laneType;
 			}
 		}
 
@@ -173,7 +177,7 @@ namespace TrafficManager.Util {
 				if ((laneTypeFilter == null || (laneInfo.m_laneType & laneTypeFilter) != NetInfo.LaneType.None) &&
 					(vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None) &&
 					(filterDir == null || segmentInfo.m_lanes[laneIndex].m_finalDirection == filterDir)) {
-					laneList.Add(new LanePos(curLaneId, laneIndex, segmentInfo.m_lanes[laneIndex].m_position));
+					laneList.Add(new LanePos(curLaneId, laneIndex, segmentInfo.m_lanes[laneIndex].m_position, laneInfo.m_vehicleType, laneInfo.m_laneType));
 				}
 
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -181,11 +185,29 @@ namespace TrafficManager.Util {
 			}
 
 			laneList.Sort(delegate (LanePos x, LanePos y) {
+				bool fwd = sortDir == NetInfo.Direction.Forward;
 				if (x.position == y.position) {
-					return 0;
+					if (x.position > 0) {
+						// mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
+						fwd = !fwd;
+					}
+
+					if (x.laneType == y.laneType) {
+						if (x.vehicleType == y.vehicleType) {
+							return 0;
+						} else if ((x.vehicleType < y.vehicleType) == fwd) {
+							return -1;
+						} else {
+							return 1;
+						}
+					} else if ((x.laneType < y.laneType) == fwd) {
+						return -1;
+					} else {
+						return 1;
+					}
 				}
 
-				if ((x.position < y.position) == (sortDir == NetInfo.Direction.Forward)) {
+				if ((x.position < y.position) == fwd) {
 					return -1;
 				}
 				return 1;

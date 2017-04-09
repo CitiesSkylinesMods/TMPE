@@ -21,6 +21,9 @@ namespace TrafficManager.Traffic {
 		CargoShip = 1 << 12,
 		PassengerPlane = 1 << 13,
 		Helicopter = 1 << 14,
+		CableCar = 1 << 15,
+		PassengerFerry = 1 << 16,
+		PassengerBlimp = 1 << 17,
 		Plane = PassengerPlane,
 		Ship = PassengerShip | CargoShip,
 		CargoVehicle = CargoTruck | CargoTrain | CargoShip,
@@ -28,6 +31,8 @@ namespace TrafficManager.Traffic {
 		RoadPublicTransport = Bus | Taxi,
 		RoadVehicle = PassengerCar | Bus | Taxi | CargoTruck | Service | Emergency,
 		RailVehicle = PassengerTrain | CargoTrain,
-		NonTransportRoadVehicle = RoadVehicle & ~PublicTransport
+		NonTransportRoadVehicle = RoadVehicle & ~PublicTransport,
+		Ferry = PassengerFerry,
+		Blimp = PassengerBlimp
 	}
 }

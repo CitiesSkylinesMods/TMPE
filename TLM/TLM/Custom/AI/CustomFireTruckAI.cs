@@ -1,6 +1,4 @@
-﻿#define PATHRECALCx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,11 +15,6 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"CustomFireTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
-#if PATHRECALC
-			VehicleState state = VehicleStateManager._GetVehicleState(vehicleID);
-			bool recalcRequested = state.PathRecalculationRequested;
-			state.PathRecalculationRequested = false;
-#endif
 			ExtVehicleType vehicleType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service;
 			VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType = vehicleType;
 
@@ -45,9 +38,6 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				if (CustomPathManager._instance.CreatePath(
-#if PATHRECALC
-					recalcRequested,
-#endif
 					vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);

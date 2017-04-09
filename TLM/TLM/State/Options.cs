@@ -44,11 +44,9 @@ namespace TrafficManager.State {
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox prohibitPocketCarsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
-		private static UICheckBox dynamicPathRecalculationToggle = null;
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
 		private static UICheckBox showLanesToggle = null;
-		private static UIButton forgetTrafficLightsBtn = null;
 		private static UIButton resetStuckEntitiesBtn = null;
 
 		private static UICheckBox enablePrioritySignsToggle = null;
@@ -96,7 +94,6 @@ namespace TrafficManager.State {
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool advancedAI = false;
-		private static bool dynamicPathRecalculation = false;
 		public static bool highwayRules = false;
 #if DEBUG
 		public static bool showLanes = false;
@@ -192,10 +189,6 @@ namespace TrafficManager.State {
 
 			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
 			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
-#if DEBUG
-			//if (SystemInfo.processorCount >= DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
-			//dynamicPathRecalculationToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_dynamic_path_calculation"), dynamicPathRecalculation, onDynamicPathRecalculationChanged) as UICheckBox;
-#endif
 			highwayRulesToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
@@ -275,7 +268,6 @@ namespace TrafficManager.State {
 
 			panelHelper = new UIHelper(currentPanel);
 
-			forgetTrafficLightsBtn = panelHelper.AddButton(Translation.GetString("Forget_toggled_traffic_lights"), onClickForgetToggledLights) as UIButton;
 			resetStuckEntitiesBtn = panelHelper.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
 #if DEBUG
 			resetSpeedLimitsBtn = panelHelper.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
@@ -521,16 +513,6 @@ namespace TrafficManager.State {
 				setConnectedLanesOverlay(false);
 		}
 
-		private static void onDynamicPathRecalculationChanged(bool value) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"dynamicPathRecalculation changed to {value}");
-			dynamicPathRecalculation = value;
-			if (value)
-				setAdvancedAI(true);
-		}
-
 		private static void onEvacBussesMayIgnoreRulesChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -658,14 +640,6 @@ namespace TrafficManager.State {
 			Log._Debug($"{varName} changed to {newVal}");
 		}
 
-
-		private static void onClickForgetToggledLights() {
-			if (!checkGameLoaded())
-				return;
-
-			Flags.resetTrafficLights(false);
-		}
-
 		private static void onClickResetStuckEntities() {
 			if (!checkGameLoaded())
 				return;
@@ -755,26 +729,9 @@ namespace TrafficManager.State {
 				advancedAIToggle.isChecked = newAdvancedAI;
 
 			if (!newAdvancedAI) {
-				setDynamicPathRecalculation(false);
 				setHighwayRules(false);
 				setPreferOuterLane(false);
 			}
-		}
-
-		public static void setDynamicPathRecalculation(bool value) {
-#if DEBUG
-			/*if (SystemInfo.processorCount < DYNAMIC_RECALC_MIN_PROCESSOR_COUNT)
-				value = false;*/
-#endif
-
-			dynamicPathRecalculation = value;
-
-			if (dynamicPathRecalculationToggle != null)
-				dynamicPathRecalculationToggle.isChecked = value;
-		}
-
-		public static bool IsDynamicPathRecalculationActive() {
-			return Options.dynamicPathRecalculation;
 		}
 
 		public static void setEvacBussesMayIgnoreRules(bool value) {

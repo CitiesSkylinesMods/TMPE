@@ -9,6 +9,9 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
 	public class VehicleRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>> {
+		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train;
+
 		public static VehicleRestrictionsManager Instance { get; private set; } = null;
 
 		static VehicleRestrictionsManager() {
@@ -26,6 +29,7 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
+		[Obsolete]
 		internal ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, ushort nodeId) { // TODO optimize method (don't depend on collections!)
 			ExtVehicleType ret = ExtVehicleType.None;
 			foreach (ExtVehicleType vehicleType in GetAllowedVehicleTypesAsSet(segmentId, nodeId)) {
@@ -40,6 +44,7 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
+		[Obsolete]
 		internal HashSet<ExtVehicleType> GetAllowedVehicleTypesAsSet(ushort segmentId, ushort nodeId) {
 			HashSet<ExtVehicleType> ret = new HashSet<ExtVehicleType>(GetAllowedVehicleTypesAsDict(segmentId, nodeId).Values);
 			return ret;
@@ -51,8 +56,8 @@ namespace TrafficManager.Manager {
 		/// <param name="segmentId"></param>
 		/// <param name="nodeId"></param>
 		/// <returns></returns>
-		internal Dictionary<byte, ExtVehicleType> GetAllowedVehicleTypesAsDict(ushort segmentId, ushort nodeId) {
-			Dictionary<byte, ExtVehicleType> ret = new Dictionary<byte, ExtVehicleType>();
+		internal IDictionary<byte, ExtVehicleType> GetAllowedVehicleTypesAsDict(ushort segmentId, ushort nodeId) {
+			IDictionary<byte, ExtVehicleType> ret = new TinyDictionary<byte, ExtVehicleType>();
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			if (segmentId == 0 || (netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None ||
@@ -62,7 +67,6 @@ namespace TrafficManager.Manager {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
@@ -70,11 +74,13 @@ namespace TrafficManager.Manager {
 			uint laneIndex = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-				ushort toNodeId = (laneInfo.m_direction == dir3) ? netManager.m_segments.m_buffer[segmentId].m_endNode : netManager.m_segments.m_buffer[segmentId].m_startNode;
+				if (laneInfo.m_vehicleType != VehicleInfo.VehicleType.None) {
+					ushort toNodeId = (laneInfo.m_finalDirection == dir2) ? netManager.m_segments.m_buffer[segmentId].m_endNode : netManager.m_segments.m_buffer[segmentId].m_startNode;
 
-				if (toNodeId == nodeId) {
-					ExtVehicleType vehicleTypes = GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
-					ret[(byte)laneIndex] = vehicleTypes;
+					if (toNodeId == nodeId) {
+						ExtVehicleType vehicleTypes = GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
+						ret[(byte)laneIndex] = vehicleTypes;
+					}
 				}
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				++laneIndex;
@@ -88,7 +94,7 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="segmentId"></param>
 		/// <param name="laneIndex"></param>
-		/// <param name="segmetnInfo"></param>
+		/// <param name="segmentInfo"></param>
 		/// <param name="laneInfo"></param>
 		/// <returns></returns>
 		internal ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo) {
@@ -135,12 +141,18 @@ namespace TrafficManager.Manager {
 					ret |= ExtVehicleType.RoadPublicTransport | ExtVehicleType.Service | ExtVehicleType.Emergency;
 				else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
 					ret |= ExtVehicleType.RoadVehicle;
-				if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None)
+				if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
 					ret |= ExtVehicleType.RailVehicle;
 				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
 					ret |= ExtVehicleType.Ship;
 				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
 					ret |= ExtVehicleType.Plane;
+				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None)
+					ret |= ExtVehicleType.Ferry;
+				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None)
+					ret |= ExtVehicleType.Blimp;
+				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None)
+					ret |= ExtVehicleType.CableCar;
 				cachedDefaultTypes[laneIndex] = ret;
 				return ret;
 			} else {
@@ -336,6 +348,18 @@ namespace TrafficManager.Manager {
 			return IsAllowed(allowedTypes, ExtVehicleType.Tram);
 		}
 
+		public bool IsBlimpAllowed(ExtVehicleType? allowedTypes) {
+			return IsAllowed(allowedTypes, ExtVehicleType.Blimp);
+		}
+
+		public bool IsCableCarAllowed(ExtVehicleType? allowedTypes) {
+			return IsAllowed(allowedTypes, ExtVehicleType.CableCar);
+		}
+
+		public bool IsFerryAllowed(ExtVehicleType? allowedTypes) {
+			return IsAllowed(allowedTypes, ExtVehicleType.Ferry);
+		}
+
 		public bool IsRailVehicleAllowed(ExtVehicleType? allowedTypes) {
 			return IsAllowed(allowedTypes, ExtVehicleType.RailVehicle);
 		}
@@ -360,6 +384,11 @@ namespace TrafficManager.Manager {
 		public bool IsRoadSegment(NetInfo segmentInfo) {
 			ItemClass connectionClass = segmentInfo.GetConnectionClass();
 			return connectionClass.m_service == ItemClass.Service.Road;
+		}
+
+		public bool IsMonorailSegment(NetInfo segmentInfo) {
+			ItemClass connectionClass = segmentInfo.GetConnectionClass();
+			return connectionClass.m_service == ItemClass.Service.PublicTransport && connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail;
 		}
 
 		internal void ClearCache(ushort segmentId) {

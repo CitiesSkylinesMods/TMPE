@@ -78,7 +78,7 @@ namespace TrafficManager.Manager {
 			}
 
 			if (data.Length >= 17) {
-				Options.setDynamicPathRecalculation(data[16] == (byte)1);
+				//Options.setDynamicPathRecalculation(data[16] == (byte)1);
 			}
 
 			if (data.Length >= 18) {
@@ -150,7 +150,7 @@ namespace TrafficManager.Manager {
 						(byte)(Options.allowUTurns ? 1 : 0),
 						(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
 						(byte)(Options.enableDespawning ? 1 : 0),
-						(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
+						(byte)0,//Options.IsDynamicPathRecalculationActive()
 						(byte)(Options.connectedLanesOverlay ? 1 : 0),
 						(byte)(Options.prioritySignsEnabled ? 1 : 0),
 						(byte)(Options.timedLightsEnabled ? 1 : 0),

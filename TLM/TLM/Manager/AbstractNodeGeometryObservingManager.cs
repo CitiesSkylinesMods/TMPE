@@ -15,8 +15,9 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				if (nodeGeometryUnsubscribers.ContainsKey(nodeId)) {
-					nodeGeometryUnsubscribers[nodeId].Dispose();
+				IDisposable unsubscriber;
+				if (nodeGeometryUnsubscribers.TryGetValue(nodeId, out unsubscriber)) {
+					unsubscriber.Dispose();
 					nodeGeometryUnsubscribers.Remove(nodeId);
 				}
 			} finally {

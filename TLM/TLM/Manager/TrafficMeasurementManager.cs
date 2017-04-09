@@ -10,6 +10,8 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class TrafficMeasurementManager : AbstractCustomManager {
+		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+
 		public static TrafficMeasurementManager Instance { get; private set; } = null;
 
 		public const ushort MAX_SPEED = 10000;
@@ -120,7 +122,7 @@ namespace TrafficManager.Manager {
 
 			for (uint li = 0; li < numLanes; ++li) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
-				if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)
+				if ((laneInfo.m_laneType & LANE_TYPES) == NetInfo.LaneType.None)
 					continue;
 
 				int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
@@ -136,7 +138,7 @@ namespace TrafficManager.Manager {
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-				if ((laneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
+				if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None) {
 					int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
 					ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;

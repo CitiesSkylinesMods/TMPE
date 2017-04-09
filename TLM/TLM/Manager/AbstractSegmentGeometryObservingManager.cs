@@ -18,8 +18,9 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				if (segGeometryUnsubscribers.ContainsKey(segmentId)) {
-					segGeometryUnsubscribers[segmentId].Dispose();
+				IDisposable unsubscriber;
+				if (segGeometryUnsubscribers.TryGetValue(segmentId, out unsubscriber)) {
+					unsubscriber.Dispose();
 					segGeometryUnsubscribers.Remove(segmentId);
 				}
 #if DEBUGCONN

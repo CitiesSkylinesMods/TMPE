@@ -6,6 +6,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
+using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI
@@ -45,9 +46,9 @@ namespace TrafficManager.UI
 		public static readonly Texture2D ClockPlayTexture2D;
 		public static readonly Texture2D ClockPauseTexture2D;
 		public static readonly Texture2D ClockTestTexture2D;
-		public static readonly Dictionary<ushort, Texture2D> SpeedLimitTextures;
-		public static readonly Dictionary<ExtVehicleType, Dictionary<bool, Texture2D>> VehicleRestrictionTextures;
-		public static readonly Dictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+		public static readonly IDictionary<ushort, Texture2D> SpeedLimitTextures;
+		public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
+		public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 		public static readonly Texture2D LaneChangeForbiddenTexture2D;
 		public static readonly Texture2D LaneChangeAllowedTexture2D;
 		public static readonly Texture2D UturnAllowedTexture2D;
@@ -117,22 +118,22 @@ namespace TrafficManager.UI
 			ClockPauseTexture2D = LoadDllResource("clock_pause.png", 512, 512);
 			ClockTestTexture2D = LoadDllResource("clock_test.png", 512, 512);
 
-			SpeedLimitTextures = new Dictionary<ushort, Texture2D>();
+			SpeedLimitTextures = new TinyDictionary<ushort, Texture2D>();
 			foreach (ushort speedLimit in SpeedLimitManager.Instance.AvailableSpeedLimits) {
 				SpeedLimitTextures.Add(speedLimit, LoadDllResource(speedLimit.ToString() + ".png", 200, 200));
 			}
 
-			VehicleRestrictionTextures = new Dictionary<ExtVehicleType, Dictionary<bool, Texture2D>>();
-			VehicleRestrictionTextures[ExtVehicleType.Bus] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.CargoTrain] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.CargoTruck] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.Emergency] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.PassengerCar] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.Service] = new Dictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.Taxi] = new Dictionary<bool, Texture2D>();
+			VehicleRestrictionTextures = new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>>();
+			VehicleRestrictionTextures[ExtVehicleType.Bus] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.CargoTrain] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.CargoTruck] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.Emergency] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.PassengerCar] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.Service] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.Taxi] = new TinyDictionary<bool, Texture2D>();
 
-			foreach (KeyValuePair<ExtVehicleType, Dictionary<bool, Texture2D>> e in VehicleRestrictionTextures) {
+			foreach (KeyValuePair<ExtVehicleType, IDictionary<bool, Texture2D>> e in VehicleRestrictionTextures) {
 				foreach (bool b in new bool[]{false, true}) {
 					string suffix = b ? "allowed" : "forbidden";
 					e.Value[b] = LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200, 200);
@@ -151,7 +152,7 @@ namespace TrafficManager.UI
 			PedestrianCrossingAllowedTexture2D = LoadDllResource("crossing_allowed.png", 200, 200);
 			PedestrianCrossingForbiddenTexture2D = LoadDllResource("crossing_forbidden.png", 200, 200);
 
-			VehicleInfoSignTextures = new Dictionary<ExtVehicleType, Texture2D>();
+			VehicleInfoSignTextures = new TinyDictionary<ExtVehicleType, Texture2D>();
 			VehicleInfoSignTextures[ExtVehicleType.Bicycle] = LoadDllResource("bicycle_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Bus] = LoadDllResource("bus_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.CargoTrain] = LoadDllResource("cargotrain_infosign.png", 449, 411);
@@ -159,6 +160,7 @@ namespace TrafficManager.UI
 			VehicleInfoSignTextures[ExtVehicleType.Emergency] = LoadDllResource("emergency_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.PassengerCar] = LoadDllResource("passengercar_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.PassengerTrain] = LoadDllResource("passengertrain_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.RailVehicle] = VehicleInfoSignTextures[ExtVehicleType.PassengerTrain];
 			VehicleInfoSignTextures[ExtVehicleType.Service] = LoadDllResource("service_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("taxi_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("tram_infosign.png", 449, 411);

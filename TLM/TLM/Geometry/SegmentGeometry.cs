@@ -1,6 +1,4 @@
-﻿#define DEBUGLOCKSx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -164,21 +162,12 @@ namespace TrafficManager.Geometry {
 #endif
 
 			wasValid = true;
-
-#if DEBUGLOCKS
-				uint lockIter = 0;
-#endif
 			try {
 #if DEBUG
 				if (output)
 					Log.Warning($"Trying to get a lock for Recalculating geometries of segment {SegmentId}...");
 #endif
 				Monitor.Enter(Lock);
-#if DEBUGLOCKS
-					++lockIter;
-					if (lockIter % 100 == 0)
-						Log._Debug("SegmentGeometry.Recalculate lockIter: " + lockIter);
-#endif
 
 #if DEBUG
 				if (output)

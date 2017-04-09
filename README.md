@@ -4,6 +4,15 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.9.0-alpha1, 04/09/2017
+- Updated for game version 1.7.0-f1
+- Speed limits can be set up for individual lanes with the Control key
+- Added monorail support (timed traffic lights & speed limits)
+- Several performance improvements
+- Unified traffic light toggling feature with game code
+- Bugfix: Vehicle restriction and speed limit signs overlay is displayed on the wrong side on inverted road segments
+- Bugfix: Influx statistics value is zero
+
 1.8.16, 03/20/2017
 - Lane connections can now also be removed by pressing the backspace key
 - Improved lane selection for busses if the option "Busses may ignore lane arrows" is activated

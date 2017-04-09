@@ -1,6 +1,6 @@
 #define DEBUGFRONTVEHx
 #define DEBUGREGx
-#define DEBUGMETRICx
+#define DEBUGMETRIC
 #define DEBUGMETRIC2x
 
 using System;
@@ -62,10 +62,11 @@ namespace TrafficManager.Traffic {
 		//private ushort[] frontVehicleIds;
 
 		/// <summary>
-		/// Number of vehicles / vehicle length going to a certain segment
+		/// Number of vehicles / vehicle length going to a certain segment.
+		/// First key: source lane index, second key: target segment id, value: total normalized vehicle length
 		/// </summary>
-		private Dictionary<ushort, uint> numVehiclesFlowingToSegmentId; // minimum speed required
-		private Dictionary<ushort, uint> numVehiclesGoingToSegmentId; // no minimum speed required
+		private IDictionary<ushort, uint>[] numVehiclesMovingToSegmentId; // minimum speed required
+		private IDictionary<ushort, uint>[] numVehiclesGoingToSegmentId; // no minimum speed required
 
 		public SegmentEnd(ushort nodeId, ushort segmentId, PriorityType type) {
 			NodeId = nodeId;
@@ -117,30 +118,29 @@ namespace TrafficManager.Traffic {
 		/// Calculates for each segment the number of cars going to this segment.
 		/// We use integer arithmetic for better performance.
 		/// </summary>
-		public Dictionary<ushort, uint> GetVehicleMetricGoingToSegment(bool includeStopped=true, byte? laneIndex=null, bool debug = false) {
-			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-			NetManager netManager = Singleton<NetManager>.instance;
+		public IDictionary<ushort, uint>[] MeasureOutgoingVehicles(bool includeStopped=true, bool debug = false) {
+			//VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+			//NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
-			Dictionary<ushort, uint> ret = includeStopped ? numVehiclesGoingToSegmentId : numVehiclesFlowingToSegmentId;
+			uint avgSegLen = 0;
+			NetUtil.ProcessSegment(SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
+				avgSegLen = (uint)segment.m_averageLength;
+			});
 
-			foreach (SegmentEndGeometry endGeo in NodeGeometry.Get(NodeId).SegmentEndGeometries) {
-				if (endGeo == null)
-					continue;
+			IDictionary<ushort, uint>[] ret = includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
 
-				if (!endGeo.IncomingOneWay && !ret.ContainsKey(endGeo.SegmentId)) {
-#if DEBUG
-					Log._Debug($"SegmentEnd.GetVehicleMetricGoingToSegment: return dict does not contain entry for segment {endGeo.SegmentId}");
-#endif
+			// reset
+			for (byte laneIndex = 0; laneIndex < ret.Length; ++laneIndex) {
+				IDictionary<ushort, uint> laneMetrics = ret[laneIndex];
+				foreach (KeyValuePair<ushort, uint> e in laneMetrics) {
+					laneMetrics[e.Key] = 0;
 				}
-			
-
-				ret[endGeo.SegmentId] = 0;
 			}
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}. Target segments: {string.Join(", ", ret.Keys.Select(x => x.ToString()).ToArray())}");
+				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}.");
 #endif
 
 			ushort vehicleId = FirstRegisteredVehicleId;
@@ -156,21 +156,22 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-#if DEBUGMETRIC2
+#if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" GetVehicleMetricGoingToSegment: Checking vehicle {vehicleId}");
 #endif
 
-					if (!ret.ContainsKey(nextPos.m_segment)) {
-#if DEBUGMETRIC2
+					if (curPos.m_segment != SegmentId) {
+#if DEBUGMETRIC
 						if (debug)
-						Log._Debug($"  GetVehicleMetricGoingToSegment: ret does not contain key for target segment {nextPos.m_segment}");
+							Log._Debug($" GetVehicleMetricGoingToSegment: Vehicle {vehicleId} error: Segment mismatch! Vehicle is on seg. {curPos.m_segment} but should be on {SegmentId}");
 #endif
+						RequestCleanup();
 						return;
 					}
 
 					if (!includeStopped && vehState.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-#if DEBUGMETRIC2
+#if DEBUGMETRIC
 						if (debug)
 							Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: too slow");
 #endif
@@ -178,42 +179,32 @@ namespace TrafficManager.Traffic {
 						return;
 					}
 
-					if (laneIndex != null && curPos.m_lane != laneIndex) {
-#if DEBUGMETRIC2
-						if (debug)
-							Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: Lane index mismatch (expected: {laneIndex}, was: {curPos.m_lane})");
-#endif
-						return;
-					}
-
 					if (Options.simAccuracy <= 2) {
-						uint avgSegmentLength = (uint)netManager.m_segments.m_buffer[SegmentId].m_averageLength;
 						uint normLength = 100u;
-						if (avgSegmentLength > 0)
-							normLength = Math.Min(100u, (uint)(state.TotalLength * 100u) / avgSegmentLength);
+						if (avgSegLen > 0) {
+							normLength = Math.Min(100u, (uint)(state.TotalLength * 100u) / avgSegLen) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
+						}
 
 #if DEBUGMETRIC
 						if (debug)
-							Log._Debug($"  GetVehicleMetricGoingToSegment: NormLength of vehicle {vehicleId}: {avgSegmentLength} -> {normLength}");
+							Log._Debug($"  GetVehicleMetricGoingToSegment: NormLength of vehicle {vehicleId}: {avgSegLen} -> {normLength} (TotalLength={state.TotalLength})");
 #endif
 
-						ret[nextPos.m_segment] += normLength;
+						ret[curPos.m_lane][nextPos.m_segment] += normLength;
 					} else {
-						ret[nextPos.m_segment] += 10;
+						ret[curPos.m_lane][nextPos.m_segment] += 10;
 					}
-
-					++ret[nextPos.m_segment];
 					++numProcessed;
+
+#if DEBUGMETRIC
+					if (debug)
+						Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: *added*! Coming from segment {SegmentId}, lane {curPos.m_lane}. Going to segment {nextPos.m_segment}, lane {nextPos.m_lane}");
+#endif
 
 					if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
 						breakLoop = true;
 						return;
 					}
-
-#if DEBUGMETRIC2
-				if (debug)
-					Log._Debug($"  GetVehicleMetricGoingToSegment: Vehicle {vehicleId}: *added*! Coming from segment {SegmentId}, lane {laneIndex}. Going to segment {nextPos.m_segment}, lane {nextPos.m_lane}");
-#endif
 				});
 
 				if (breakLoop)
@@ -224,7 +215,7 @@ namespace TrafficManager.Traffic {
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"GetVehicleMetricGoingToSegment: Calculation completed. {string.Join(", ", ret.Select(x => x.Key.ToString() + "=" + x.Value.ToString()).ToArray())}");
+				Log._Debug($"GetVehicleMetricGoingToSegment: Calculation completed. {string.Join(", ", ret.Select(e => "[" + string.Join(", ", e.Select(x => x.Key.ToString() + "=" + x.Value.ToString()).ToArray()) + "]").ToArray())}");
 #endif
 			return ret;
 		}
@@ -253,19 +244,26 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal void Reset() {
-			//Log._Debug($"SegmentEnd.Housekeeping: Housekeeping at segment {SegmentId} @ {NodeId}");
-
 			StartNode = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode == NodeId;
 			numLanes = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].Info.m_lanes.Length;
-			numVehiclesFlowingToSegmentId = new Dictionary<ushort, uint>(8);
-			numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>(8);
 			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
-			foreach (ushort otherSegmentId in outgoingSegmentIds) {
-				numVehiclesFlowingToSegmentId[otherSegmentId] = 0;
-				numVehiclesGoingToSegmentId[otherSegmentId] = 0;
-			}
-			numVehiclesFlowingToSegmentId[SegmentId] = 0;
-			numVehiclesGoingToSegmentId[SegmentId] = 0;
+			numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
+			numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
+
+			NetUtil.IterateSegmentLanes(SegmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segmentId, ref NetSegment segment, byte laneIndex) {
+				IDictionary<ushort, uint> numVehicleMoving = new TinyDictionary<ushort, uint>();
+				IDictionary<ushort, uint> numVehicleGoing = new TinyDictionary<ushort, uint>();
+
+				numVehiclesMovingToSegmentId[laneIndex] = numVehicleMoving;
+				numVehiclesGoingToSegmentId[laneIndex] = numVehicleGoing;
+
+				foreach (ushort otherSegmentId in outgoingSegmentIds) {
+					numVehicleMoving[otherSegmentId] = 0;
+					numVehicleGoing[otherSegmentId] = 0;
+				}
+				numVehicleMoving[SegmentId] = 0;
+				numVehicleGoing[SegmentId] = 0;
+			});
 		}
 	}
 }

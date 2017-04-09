@@ -1,6 +1,4 @@
-﻿#define PATHRECALCx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -41,12 +39,6 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"CustomTaxiAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
-#if PATHRECALC
-			VehicleState state = VehicleStateManager._GetVehicleState(vehicleID);
-			bool recalcRequested = state.PathRecalculationRequested;
-			state.PathRecalculationRequested = false;
-#endif
-
 			CitizenManager instance = Singleton<CitizenManager>.instance;
 			ushort passengerInstanceId = CustomTaxiAI.GetPassengerInstance(vehicleID, ref vehicleData);
 			if (passengerInstanceId == 0 || (instance.m_instances.m_buffer[(int)passengerInstanceId].m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
@@ -79,9 +71,6 @@ namespace TrafficManager.Custom.AI {
 				SimulationManager instance2 = Singleton<SimulationManager>.instance;
 				uint path;
 				if (CustomPathManager._instance.CreatePath(
-#if PATHRECALC
-					recalcRequested,
-#endif
 					ExtVehicleType.Taxi, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);

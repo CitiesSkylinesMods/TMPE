@@ -8,7 +8,10 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
-	public class TrafficLightManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
+	/// <summary>
+	/// Manages traffic light toggling
+	/// </summary>
+	public class TrafficLightManager : AbstractCustomManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
 		public enum UnableReason {
 			None,
 			InvalidNode,
@@ -23,9 +26,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public void SetTrafficLight(ushort nodeId, bool flag) {
-			if (Flags.setNodeTrafficLight(nodeId, flag)) {
-				SubscribeToNodeGeometry(nodeId);
-			}
+			Flags.setNodeTrafficLight(nodeId, flag);
 		}
 
 		public void AddTrafficLight(ushort nodeId) {
@@ -63,30 +64,6 @@ namespace TrafficManager.Manager {
 
 		public bool HasTrafficLight(ushort nodeId) {
 			return Flags.isNodeTrafficLight(nodeId);
-		}
-
-		protected override void HandleInvalidNode(NodeGeometry geometry) {
-			//Flags.resetTrafficLight(geometry.NodeId);
-		}
-
-		protected override void HandleValidNode(NodeGeometry geometry) {
-			//Flags.applyNodeTrafficLightFlag(geometry.NodeId);
-		}
-
-		public void ApplyAllFlags() {
-			/*for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				Flags.applyNodeTrafficLightFlag(nodeId);
-			}*/
-		}
-
-		public override void OnBeforeSaveData() {
-			base.OnBeforeSaveData();
-			//ApplyAllFlags();
-		}
-
-		public override void OnAfterLoadData() {
-			base.OnAfterLoadData();
-			ApplyAllFlags();
 		}
 
 		[Obsolete]

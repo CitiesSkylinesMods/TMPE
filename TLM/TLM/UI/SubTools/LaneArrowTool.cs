@@ -10,6 +10,8 @@ using TrafficManager.Geometry;
 using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Manager;
+using static TrafficManager.Util.NetUtil;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
@@ -110,14 +112,14 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiLaneChangeWindow(int num) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
-			List<object[]> laneList = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, info, SelectedNodeId, VehicleInfo.VehicleType.Car);
+			IList<LanePos> laneList = NetUtil.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
 			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();
 
 			for (var i = 0; i < laneList.Count; i++) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)laneList[i][0]].m_flags;
+				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
 
 				var style1 = new GUIStyle("button");
 				var style2 = new GUIStyle("button") {
@@ -137,22 +139,22 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
-					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
+				if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
+					Flags.removeLaneArrowFlags(laneList[i].laneId);
 				}
 				Flags.LaneArrowChangeResult res = Flags.LaneArrowChangeResult.Invalid;
 				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Left, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Left, out res);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Forward, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Forward, out res);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Right, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Right, out res);
 				}
 
 				if (buttonClicked) {

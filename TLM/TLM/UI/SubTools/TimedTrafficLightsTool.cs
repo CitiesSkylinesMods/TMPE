@@ -631,11 +631,11 @@ namespace TrafficManager.UI.SubTools {
 				}
 				if (_waitFlowBalance < 0)
 					_waitFlowBalance = 0;
-				if (_waitFlowBalance > 5)
-					_waitFlowBalance = 5;
+				if (_waitFlowBalance > 10)
+					_waitFlowBalance = 10;
 				GUILayout.EndHorizontal();
 
-				_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 5f);
+				_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 10f);
 				GUILayout.BeginHorizontal();
 				GUIStyle style = new GUIStyle();
 				style.normal.textColor = Color.white;
@@ -880,6 +880,8 @@ namespace TrafficManager.UI.SubTools {
 			}*/
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+			var guiColor = GUI.color;
+			guiColor.a = 0.5f;
 
 			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 #if DEBUG
@@ -918,12 +920,11 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 					var size = 120f * zoom;
-					var guiColor = GUI.color;
-					guiColor.a = 0.5f;
+					
 					GUI.color = guiColor;
 					var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
 					//Log._Debug($"GUI Color: {guiColor} {GUI.color}");
-					GUI.DrawTexture(nodeDrawingBox, lightSim.IsTimedLightActive() ? (timedNode.IsInTestMode() ? TrafficLightToolTextureResources.ClockTestTexture2D : TrafficLightToolTextureResources.ClockPlayTexture2D) : TrafficLightToolTextureResources.ClockPauseTexture2D, ScaleMode.ScaleToFit, true);
+					GUI.DrawTexture(nodeDrawingBox, lightSim.IsTimedLightActive() ? (timedNode.IsInTestMode() ? TrafficLightToolTextureResources.ClockTestTexture2D : TrafficLightToolTextureResources.ClockPlayTexture2D) : TrafficLightToolTextureResources.ClockPauseTexture2D);
 				}
 			}
 		}
@@ -1065,9 +1066,9 @@ namespace TrafficManager.UI.SubTools {
 					int lightOffset = -1;
 					foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
 						HashSet<byte> laneIndices = new HashSet<byte>();
-						foreach (KeyValuePair<byte, ExtVehicleType> e in liveSegmentLights.VehicleTypeByLaneIndex) {
-							if (e.Value == vehicleType)
-								laneIndices.Add(e.Key);
+						for (byte laneIndex = 0; laneIndex < liveSegmentLights.VehicleTypeByLaneIndex.Length; ++laneIndex) {
+							if (liveSegmentLights.VehicleTypeByLaneIndex[laneIndex] == vehicleType)
+								laneIndices.Add(laneIndex);
 						}
 						//Log._Debug($"Traffic light @ seg. {srcSegmentId} node {nodeId}. Lane indices for vehicleType {vehicleType}: {string.Join(",", laneIndices.Select(x => x.ToString()).ToArray())}");
 
