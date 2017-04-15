@@ -11,13 +11,9 @@ using System.Linq;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>> {
-		public static TrafficLightSimulationManager Instance { get; private set; } = null;
+		public static readonly TrafficLightSimulationManager Instance = new TrafficLightSimulationManager();
 		public const int SIM_MOD = 64;
-
-		static TrafficLightSimulationManager() {
-			Instance = new TrafficLightSimulationManager();
-		}
-
+	
 		/// <summary>
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
@@ -26,6 +22,17 @@ namespace TrafficManager.Manager {
 
 		private TrafficLightSimulationManager() {
 			
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Traffic light simulations:");
+			for (int i = 0; i < TrafficLightSimulations.Length; ++i) {
+				if (TrafficLightSimulations[i] == null) {
+					continue;
+				}
+				Log._Debug($"Simulation {i}: {TrafficLightSimulations[i]}");
+			}
 		}
 
 		public void SimulationStep() {
@@ -138,7 +145,7 @@ namespace TrafficManager.Manager {
 		}
 
 		protected override void HandleValidNode(NodeGeometry geometry) {
-			TrafficPriorityManager.Instance.AddPriorityNode(geometry.NodeId, true);
+			
 		}
 
 		public bool LoadData(List<Configuration.TimedTrafficLights> data) {
@@ -168,7 +175,7 @@ namespace TrafficManager.Manager {
 					int foundMasterNodes = 0;
 					for (int i = 0; i < currentNodeGroup.Count;) {
 						ushort nodeId = currentNodeGroup[i];
-						if (!NetUtil.IsNodeValid(currentNodeGroup[i])) {
+						if (!Services.NetService.IsNodeValid(currentNodeGroup[i])) {
 							currentNodeGroup.RemoveAt(i);
 							continue;
 						} else if (nodeGroupByMasterNodeId.ContainsKey(nodeId)) {
@@ -224,7 +231,7 @@ namespace TrafficManager.Manager {
 						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
-							if (!NetUtil.IsSegmentValid(e.Key))
+							if (!Services.NetService.IsSegmentValid(e.Key))
 								continue;
 
 							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
@@ -294,7 +301,7 @@ namespace TrafficManager.Manager {
 					Log._Debug($"Going to save timed light at node {nodeId}.");
 
 					var timedNode = sim.TimedLight;
-					timedNode.handleNewSegments();
+					timedNode.OnGeometryUpdate();
 
 					Configuration.TimedTrafficLights cnfTimedLights = new Configuration.TimedTrafficLights();
 					ret.Add(cnfTimedLights);

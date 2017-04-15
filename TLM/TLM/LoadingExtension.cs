@@ -77,6 +77,7 @@ namespace TrafficManager {
 		}
 
 		public void initDetours() {
+			// TODO realize detouring with annotations
 			if (!DetourInited) {
 				Log.Info("Init detours");
 				bool detourFailed = false;
@@ -735,6 +736,16 @@ namespace TrafficManager {
 
 				// FORWARD REDIRECTION
 
+				Log.Info("Redirecting NetAI::AfterSplitOrMove");
+				try {
+					Detours.Add(new Detour(
+							typeof(NetAI).GetMethod("AfterSplitOrMove"),
+							typeof(CustomNetAI).GetMethod("CustomAfterSplitOrMove")));
+				} catch (Exception) {
+					Log.Error("Could not redirect NetAI::AfterSplitOrMove.");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirecting Vehicle AI Calculate Segment Calls (1)");
 				try {
 					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("CalculateSegmentPosition",
@@ -861,6 +872,16 @@ namespace TrafficManager {
 							typeof(CustomTramBaseAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
 				} catch (Exception) {
 					Log.Error("Could not redirect TramBaseAI::CalculateSegmentPosition (2).");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting RoadBaseAI::ClickNodeButton calls");
+				try {
+					Detours.Add(new Detour(
+							typeof(RoadBaseAI).GetMethod("ClickNodeButton"),
+							typeof(CustomRoadAI).GetMethod("CustomClickNodeButton")));
+				} catch (Exception) {
+					Log.Error("Could not redirect RoadBaseAI::ClickNodeButton");
 					detourFailed = true;
 				}
 
@@ -1750,6 +1771,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
 			RegisteredManagers.Add(OptionsManager.Instance);
+			RegisteredManagers.Add(SegmentEndManager.Instance);
 			RegisteredManagers.Add(SpeedLimitManager.Instance);
 			RegisteredManagers.Add(TrafficLightManager.Instance);
 			RegisteredManagers.Add(TrafficLightSimulationManager.Instance);

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using GenericGameBridge.Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
-using static TrafficManager.Util.NetUtil;
 using static TrafficManager.Util.SegmentTraverser;
 
 namespace TrafficManager.Util {
@@ -58,9 +58,9 @@ namespace TrafficManager.Util {
 				bool isInitialSeg = segData.initial;
 				bool reverse = !isInitialSeg && segData.viaStartNode == segData.viaInitialStartNode;
 				bool ret = false;
-				NetUtil.ProcessSegment(segData.curGeo.SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
+				Constants.ServiceFactory.NetService.ProcessSegment(segData.curGeo.SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
 					Log._Debug($"SegmentLaneTraverser: Reached segment {segmentId}: isInitialSeg={isInitialSeg} viaStartNode={segData.viaStartNode} viaInitialStartNode={segData.viaInitialStartNode} reverse={reverse}");
-					IList <LanePos> sortedLanes = NetUtil.GetSortedVehicleLanes(segmentId, ref segment, null, laneTypeFilter, vehicleTypeFilter, reverse);
+					IList <LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(segmentId, ref segment, null, laneTypeFilter, vehicleTypeFilter, reverse);
 
 					if (isInitialSeg) {
 						initialSortedLanes = sortedLanes;
@@ -68,17 +68,18 @@ namespace TrafficManager.Util {
 						throw new ApplicationException("Initial list of sorted lanes not set.");
 					} else if (sortedLanes.Count != initialSortedLanes.Count && (laneStopCrit & LaneStopCriterion.LaneCount) != LaneStopCriterion.None) {
 						Log._Debug($"SegmentLaneTraverser: Stop criterion reached @ {segmentId}: {sortedLanes.Count} current vs. {initialSortedLanes.Count} initial lanes");
-						return;
+						return false;
 					}
 
 					for (int i = 0; i < sortedLanes.Count; ++i) {
 						Log._Debug($"SegmentLaneTraverser: Traversing segment lane {sortedLanes[i].laneIndex} @ {segmentId} (id {sortedLanes[i].laneId}, pos {sortedLanes[i].position})");
 
 						if (!laneVisitor(new SegmentLaneVisitData(segData, i, sortedLanes[i], initialSortedLanes[i]))) {
-							return;
+							return false;
 						}
 					}
 					ret = true;
+					return true;
 				});
 				return ret;
 			});

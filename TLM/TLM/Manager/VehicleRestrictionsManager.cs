@@ -10,12 +10,19 @@ using TrafficManager.Util;
 namespace TrafficManager.Manager {
 	public class VehicleRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>> {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
-		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram;
+		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain | ExtVehicleType.PassengerCar | ExtVehicleType.Bus | ExtVehicleType.Taxi | ExtVehicleType.CargoTruck | ExtVehicleType.Service | ExtVehicleType.Emergency;
 
-		public static VehicleRestrictionsManager Instance { get; private set; } = null;
+		public static readonly VehicleRestrictionsManager Instance = new VehicleRestrictionsManager();
 
-		static VehicleRestrictionsManager() {
-			Instance = new VehicleRestrictionsManager();
+		private VehicleRestrictionsManager() {
+
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
 		/// <summary>
@@ -132,32 +139,35 @@ namespace TrafficManager.Manager {
 
 			ExtVehicleType? defaultVehicleType = cachedDefaultTypes[laneIndex];
 			if (defaultVehicleType == null) {
-				ExtVehicleType ret = ExtVehicleType.None;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Bicycle;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Tram;
-				if ((laneInfo.m_laneType & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None)
-					ret |= ExtVehicleType.RoadPublicTransport | ExtVehicleType.Service | ExtVehicleType.Emergency;
-				else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.RoadVehicle;
-				if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.RailVehicle;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Ship;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Plane;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Ferry;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.Blimp;
-				if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None)
-					ret |= ExtVehicleType.CableCar;
-				cachedDefaultTypes[laneIndex] = ret;
-				return ret;
-			} else {
-				return (ExtVehicleType)defaultVehicleType;
+				defaultVehicleType = GetDefaultAllowedVehicleTypes(laneInfo);
+				cachedDefaultTypes[laneIndex] = defaultVehicleType;
 			}
+			return (ExtVehicleType)defaultVehicleType;
+		}
+
+		public ExtVehicleType GetDefaultAllowedVehicleTypes(NetInfo.Lane laneInfo) {
+			ExtVehicleType ret = ExtVehicleType.None;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Bicycle;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Tram;
+			if ((laneInfo.m_laneType & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None)
+				ret |= ExtVehicleType.RoadPublicTransport | ExtVehicleType.Service | ExtVehicleType.Emergency;
+			else if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.RoadVehicle;
+			if ((laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.RailVehicle;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Ship;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Plane;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Ferry;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.Blimp;
+			if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None)
+				ret |= ExtVehicleType.CableCar;
+			return ret;
 		}
 
 		/// <summary>
@@ -269,12 +279,7 @@ namespace TrafficManager.Manager {
 		/// <param name="laneInfo"></param>
 		/// <returns></returns>
 		public ExtVehicleType GetBaseMask(NetInfo.Lane laneInfo) {
-			if (IsRoadLane(laneInfo))
-				return ExtVehicleType.RoadVehicle;
-			else if (IsRailLane(laneInfo))
-				return ExtVehicleType.RailVehicle;
-			else
-				return ExtVehicleType.None;
+			return GetDefaultAllowedVehicleTypes(laneInfo);
 		}
 
 		/// <summary>
@@ -376,6 +381,10 @@ namespace TrafficManager.Manager {
 			return (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None;
 		}
 
+		public bool IsTramLane(NetInfo.Lane laneInfo) {
+			return (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None;
+		}
+
 		public bool IsRailSegment(NetInfo segmentInfo) {
 			ItemClass connectionClass = segmentInfo.GetConnectionClass();
 			return connectionClass.m_service == ItemClass.Service.PublicTransport && connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain;
@@ -426,7 +435,7 @@ namespace TrafficManager.Manager {
 			Log.Info($"Loading lane vehicle restriction data. {data.Count} elements");
 			foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
 				try {
-					if (!NetUtil.IsLaneValid(laneVehicleTypes.laneId))
+					if (!Services.NetService.IsLaneValid(laneVehicleTypes.laneId))
 						continue;
 
 					ExtVehicleType baseMask = GetBaseMask(laneVehicleTypes.laneId);

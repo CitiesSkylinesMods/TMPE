@@ -11,6 +11,7 @@ using System.Linq;
 using TrafficManager.Util;
 using System.Threading;
 using TrafficManager.State;
+using Util;
 
 namespace TrafficManager.TrafficLight {
 	// TODO [version 1.9] define TimedTrafficLights per node group, not per individual nodes
@@ -38,23 +39,47 @@ namespace TrafficManager.TrafficLight {
 
 		public IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; private set; } = null;
 
+		/// <summary>
+		/// Segment ends that were set up for this timed traffic light
+		/// </summary>
+		private ICollection<SegmentEndId> segmentEndIds = new HashSet<SegmentEndId>();
+
+		public override string ToString() {
+			return $"[TimedTrafficLights\n" +
+				"\t" + $"NodeId = {NodeId}\n" +
+				"\t" + $"masterNodeId = {masterNodeId}\n" +
+				"\t" + $"Steps = {Steps.CollectionToString()}\n" +
+				"\t" + $"NodeGroup = {NodeGroup.CollectionToString()}\n" +
+				"\t" + $"testMode = {testMode}\n" +
+				"\t" + $"started = {started}\n" +
+				"\t" + $"Directions = {Directions.DictionaryToString()}\n" +
+				"\t" + $"segmentEndIds = {segmentEndIds.CollectionToString()}\n" +
+				"TimedTrafficLights]";
+		}
+
 		public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
 			this.NodeId = nodeId;
 			NodeGroup = new List<ushort>(nodeGroup);
 			masterNodeId = NodeGroup[0];
 
 			UpdateDirections(NodeGeometry.Get(nodeId));
+			UpdateSegmentEnds();
 			SubscribeToNodeGeometry();
-			SetupSegmentEnds();
 
 			started = false;
 		}
 
+		private TimedTrafficLights() {
+
+		}
+
 		private void UpdateDirections(NodeGeometry nodeGeo) {
+			Log.Warning($">>>>> TimedTrafficLights.UpdateDirections: called for node {NodeId}");
 			Directions = new TinyDictionary<ushort, IDictionary<ushort, ArrowDirection>>();
 			foreach (SegmentEndGeometry srcSegEndGeo in nodeGeo.SegmentEndGeometries) {
 				if (srcSegEndGeo == null)
 					continue;
+				Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {srcSegEndGeo.SegmentId}");
 
 				SegmentGeometry srcSegGeo = srcSegEndGeo.GetSegmentGeometry();
 				IDictionary<ushort, ArrowDirection> dirs = new TinyDictionary<ushort, ArrowDirection>();
@@ -63,9 +88,12 @@ namespace TrafficManager.TrafficLight {
 					if (trgSegEndGeo == null)
 						continue;
 
-					dirs.Add(trgSegEndGeo.SegmentId, srcSegGeo.GetDirection(trgSegEndGeo.SegmentId, srcSegEndGeo.StartNode));
+					ArrowDirection dir = srcSegGeo.GetDirection(trgSegEndGeo.SegmentId, srcSegEndGeo.StartNode);
+					dirs.Add(trgSegEndGeo.SegmentId, dir);
+					Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {srcSegEndGeo.SegmentId}, target segment {trgSegEndGeo.SegmentId}: adding dir {dir}");
 				}
 			}
+			Log._Debug($"<<<<< TimedTrafficLights.UpdateDirections: finished for node {NodeId}.");
 		}
 
 		private void UnsubscribeFromNodeGeometry() {
@@ -96,7 +124,8 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void OnUpdate(NodeGeometry geometry) {
-			UpdateDirections(geometry);
+			// not required since TrafficLightSimulation handles this for us: OnGeometryUpdate() is being called.
+			// TODO improve
 		}
 
 		public bool IsMasterNode() {
@@ -199,9 +228,6 @@ namespace TrafficManager.TrafficLight {
 				return false;
 			}
 
-			// check that live lights exist (TODO refactor?)
-			SetupSegmentEnds();
-
 			//Log.Warning($"Timed housekeeping: Setting master node to {NodeGroup[0]}");
 			masterNodeId = NodeGroup[0];
 
@@ -234,6 +260,10 @@ namespace TrafficManager.TrafficLight {
 
 			started = false;
 			ClearInvalidPedestrianLights();
+		}
+
+		~TimedTrafficLights() {
+			Destroy();
 		}
 
 		internal void Destroy() {
@@ -518,55 +548,46 @@ namespace TrafficManager.TrafficLight {
 			Steps.RemoveAt(id);
 		}
 
-		internal void handleNewSegments() {
-			Log._Debug($"TimedTrafficLights.handleNewSegments: called for timed traffic light @ {NodeId}");
-			if (NumSteps() <= 0) {
-				// no steps defined, just create live traffic lights
-				/*for (int s = 0; s < 8; ++s) {
-					ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-					if (segmentId <= 0)
-						continue;
-					if (! CustomTrafficLights.IsSegmentLight(NodeId, segmentId))
-						CustomTrafficLights.AddSegmentLights(NodeId, segmentId);
-				}*/
+		internal void OnGeometryUpdate() {
+			Log._Debug($"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}");
 
-				Log._Debug($"TimedTrafficLights.handleNewSegments: no steps @ {NodeId}");
+			NodeGeometry nodeGeometry = NodeGeometry.Get(NodeId);
+
+			UpdateDirections(nodeGeometry);
+			UpdateSegmentEnds();
+
+			if (NumSteps() <= 0) {
+				Log._Debug($"TimedTrafficLights.OnGeometryUpdate: no steps @ {NodeId}");
 				return;
 			}
 
 			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			NodeGeometry nodeGeometry = NodeGeometry.Get(NodeId);
-
 			//Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
 			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
 				if (end == null)
 					continue;
-				Log._Debug($"TimedTrafficLights.handleNewSegments: handling existing seg. {end.SegmentId} @ {NodeId}");
+				Log._Debug($"TimedTrafficLights.OnGeometryUpdate: handling existing seg. {end.SegmentId} @ {NodeId}");
 
 				List<ushort> invalidSegmentIds = new List<ushort>();
 				bool isNewSegment = !Steps[0].CustomSegmentLights.ContainsKey(end.SegmentId);
 
 				if (isNewSegment) {
 					// segment was created
-					Log._Debug($"TimedTrafficLights.handleNewSegments: New segment detected: {end.SegmentId} @ {NodeId}");
+					Log._Debug($"TimedTrafficLights.OnGeometryUpdate: New segment detected: {end.SegmentId} @ {NodeId}");
 
 					foreach (KeyValuePair<ushort, CustomSegmentLights> e in Steps[0].CustomSegmentLights) {
 						var fromSegmentId = e.Key;
 
-						if (!NetUtil.IsSegmentValid(fromSegmentId)) {
+						if (!Constants.ServiceFactory.NetService.IsSegmentValid(fromSegmentId)) {
 							Log._Debug($"Identified old segment {fromSegmentId} @ {NodeId}");
 							invalidSegmentIds.Add(fromSegmentId);
 						}
 					}
 
-					Log._Debug($"Setting up segment end for new segment {end.SegmentId} @ {NodeId}");
-					SetupSegmentEnd(end.SegmentId);
-
 					if (invalidSegmentIds.Count > 0) {
 						var oldSegmentId = invalidSegmentIds[0];
-						prioMan.RemovePrioritySegment(NodeId, oldSegmentId);
 						Log._Debug($"Replacing old segment {oldSegmentId} @ {NodeId} with new segment {end.SegmentId}");
 
 						// replace the old segment with the newly created one
@@ -574,7 +595,6 @@ namespace TrafficManager.TrafficLight {
 							if (!Steps[i].CustomSegmentLights.ContainsKey(oldSegmentId)) {
 								Log.Error($"Step {i} at node {NodeId} does not contain step lights for old segment {oldSegmentId}");
 								Steps[i].addSegment(end.SegmentId, end.StartNode, true);
-								Steps[i].calcMaxSegmentLength();
 								continue;
 							}
 
@@ -584,7 +604,6 @@ namespace TrafficManager.TrafficLight {
 							Log._Debug($"Setting new segment id {end.SegmentId} at custom light from step {i}");
 							customLights.Relocate(end.SegmentId, end.StartNode);
 							Steps[i].CustomSegmentLights.Add(end.SegmentId, customLights);
-							Steps[i].calcMaxSegmentLength();
 							Log._Debug($"Getting live segment lights of new segment {end.SegmentId} @ {NodeId} and applying mode @ step {i}");
 							CustomSegmentLights liveSegLights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode);
 
@@ -603,7 +622,6 @@ namespace TrafficManager.TrafficLight {
 						// create a new manual light
 						for (int i = 0; i < NumSteps(); ++i) {
 							Steps[i].addSegment(end.SegmentId, end.StartNode, true);
-							Steps[i].calcMaxSegmentLength();
 						}
 					}
 				}
@@ -716,38 +734,53 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		private void SetupSegmentEnds() {
-			for (int s = 0; s < 8; ++s) {
-				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-				if (segmentId == 0)
-					continue;
-				SetupSegmentEnd(segmentId);
+		private void UpdateSegmentEnds() {
+			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: called for node {NodeId}");
+
+			ICollection<SegmentEndId> segmentEndsToDelete = new HashSet<SegmentEndId>();
+			// update currently set segment ends
+			foreach (SegmentEndId endId in segmentEndIds) {
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: updating existing segment end {endId} for node {NodeId}");
+				if (! SegmentEndManager.Instance.UpdateSegmentEnd(endId)) {
+					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: segment end {endId} @ node {NodeId} is invalid");
+					segmentEndsToDelete.Add(endId);
+				}
 			}
+
+			// remove all invalid segment ends
+			foreach (SegmentEndId endId in segmentEndsToDelete) {
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing segment end {endId} @ node {NodeId}");
+				segmentEndIds.Remove(endId);
+			}
+
+			// set up new segment ends
+			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Setting up new segment ends @ node {NodeId}");
+			NodeGeometry nodeGeo = NodeGeometry.Get(NodeId);
+			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
+				if (endGeo == null) {
+					continue;
+				}
+
+				if (segmentEndIds.Contains(endGeo)) {
+					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Node {NodeId} already knows segment {endGeo.SegmentId}");
+					continue;
+				}
+
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Adding segment {endGeo.SegmentId} to node {NodeId}");
+				segmentEndIds.Add(SegmentEndManager.Instance.GetOrAddSegmentEnd(endGeo.SegmentId, endGeo.StartNode));
+			}
+			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: finished for node {NodeId}");
 		}
 
 		private void DestroySegmentEnds() {
-			for (int s = 0; s < 8; ++s) {
-				ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].GetSegment(s);
-				if (segmentId == 0)
-					continue;
-				DestroySegmentEnd(segmentId);
+			Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment ends @ node {NodeId}");
+			foreach (SegmentEndId endId in segmentEndIds) {
+				Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment end {endId} @ node {NodeId}");
+				// TODO only remove if no priority sign is located at the segment end (although this is currently not possible)
+				SegmentEndManager.Instance.RemoveSegmentEnd(endId);
 			}
-		}
-
-		private void SetupSegmentEnd(ushort segmentId) {
-			if (segmentId <= 0)
-				return;
-
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-
-			//if (!prioMan.IsPrioritySegment(NodeId, segmentId))
-				prioMan.AddPrioritySegment(NodeId, segmentId, SegmentEnd.PriorityType.None);
-		}
-
-		private void DestroySegmentEnd(ushort segmentId) {
-			if (segmentId <= 0)
-				return;
-			TrafficPriorityManager.Instance.RemovePrioritySegment(NodeId, segmentId);
+			segmentEndIds.Clear();
+			Log._Debug($"TimedTrafficLights.DestroySegmentEnds: finished for node {NodeId}");
 		}
 	}
 }

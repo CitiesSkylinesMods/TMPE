@@ -339,7 +339,7 @@ namespace TrafficManager.Custom.PathFinding {
 			this._extVehicleType = CustomPathManager._instance.pathUnitExtVehicleType[unit];
 			this._vehicleId = CustomPathManager._instance.pathUnitVehicleIds[unit];
 			this._extPathType = CustomPathManager._instance.pathUnitPathTypes[unit];
-			this._leftHandDrive = TrafficPriorityManager.IsLeftHandDrive();
+			this._leftHandDrive = Constants.ServiceFactory.SimulationService.LeftHandDrive;
 			//this._extPublicTransport = _extVehicleType != null && (_extVehicleType & ExtVehicleType.PublicTransport) != ExtVehicleType.None;
 #if DEBUGPF
 			//Log._Debug($"CustomPathFind.PathFindImplementation: path unit {unit}, type {_extVehicleType}");

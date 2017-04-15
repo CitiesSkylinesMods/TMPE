@@ -19,6 +19,12 @@ namespace TrafficManager.Manager {
 			Instance = new LaneConnectionManager();
 		}
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
+		}
+
 		/// <summary>
 		/// Checks if traffic may flow from source lane to target lane according to setup lane connections
 		/// </summary>
@@ -422,7 +428,7 @@ namespace TrafficManager.Manager {
 				// check if arrow has already been set for this direction
 				switch (dir) {
 					case ArrowDirection.Turn:
-						if (TrafficPriorityManager.IsLeftHandDrive()) {
+						if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
 							if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
 								continue;
 						} else {
@@ -474,7 +480,7 @@ namespace TrafficManager.Manager {
 				if (addArrow) {
 					switch (dir) {
 						case ArrowDirection.Turn:
-							if (TrafficPriorityManager.IsLeftHandDrive()) {
+							if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
 								arrows |= Flags.LaneArrows.Right;
 							} else {
 								arrows |= Flags.LaneArrows.Left;
@@ -511,9 +517,9 @@ namespace TrafficManager.Manager {
 			Log.Info($"Loading {data.Count} lane connections");
 			foreach (Configuration.LaneConnection conn in data) {
 				try {
-					if (!NetUtil.IsLaneValid(conn.lowerLaneId))
+					if (!Services.NetService.IsLaneValid(conn.lowerLaneId))
 						continue;
-					if (!NetUtil.IsLaneValid(conn.higherLaneId))
+					if (!Services.NetService.IsLaneValid(conn.higherLaneId))
 						continue;
 
 					Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
@@ -541,7 +547,7 @@ namespace TrafficManager.Manager {
 							foreach (uint otherHigherLaneId in connectedLaneIds) {
 								if (otherHigherLaneId <= i)
 									continue;
-								if (!NetUtil.IsLaneValid(otherHigherLaneId))
+								if (!Services.NetService.IsLaneValid(otherHigherLaneId))
 									continue;
 
 								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");

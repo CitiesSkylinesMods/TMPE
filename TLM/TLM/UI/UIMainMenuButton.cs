@@ -26,7 +26,7 @@ namespace TrafficManager.UI {
 			absolutePosition = pos;
 
 			// Set the atlas and background/foreground
-			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonAtlas", TrafficLightToolTextureResources.MainMenuButtonTexture2D, 6, new string[] {
+			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonAtlas", TextureResources.MainMenuButtonTexture2D, 6, new string[] {
 				MAIN_MENU_BUTTON_BG_BASE,
 				MAIN_MENU_BUTTON_BG_HOVERED,
 				MAIN_MENU_BUTTON_BG_ACTIVE,

@@ -84,7 +84,7 @@ namespace TrafficManager.UI.SubTools {
 				Vector3 nodePos = NetManager.instance.m_nodes.m_buffer[nodeId].m_position;
 
 				var diff = nodePos - camPos;
-				if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 					continue; // do not draw if too distant
 
 				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {

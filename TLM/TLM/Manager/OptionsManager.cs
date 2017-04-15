@@ -12,6 +12,12 @@ namespace TrafficManager.Manager {
 			Instance = new OptionsManager();
 		}
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
+		}
+
 		public bool LoadData(byte[] data) {
 			if (data.Length >= 1) {
 				Options.setSimAccuracy(data[0]);

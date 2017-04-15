@@ -32,6 +32,12 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
+		public bool StartNode {
+			get {
+				return lights.StartNode;
+			}
+		}
+
 		public Mode CurrentMode {
 			get { return currentMode; }
 			set {
@@ -82,6 +88,15 @@ namespace TrafficManager.TrafficLight {
 
 		CustomSegmentLights lights;
 
+		public override string ToString() {
+			return $"[CustomSegmentLight seg. {SegmentId} @ node {NodeId}\n" +
+			"\t" + $"CurrentMode: {CurrentMode}\n" +
+			"\t" + $"LightLeft: {LightLeft}\n" +
+			"\t" + $"LightMain: {LightMain}\n" +
+			"\t" + $"LightRight: {LightRight}\n" +
+			"CustomSegmentLight]";
+		}
+
 		private void EnsureModeLights() {
 			bool changed = false;
 
@@ -112,10 +127,6 @@ namespace TrafficManager.TrafficLight {
 
 			if (changed)
 				lights.OnChange();
-		}
-
-		public override string ToString() {
-			return $"LightLeft={LightLeft} LightMain={LightMain} LightRight={LightRight} CurrentMode={CurrentMode}";
 		}
 
 		public CustomSegmentLight(CustomSegmentLights lights, RoadBaseAI.TrafficLightState mainLight) {

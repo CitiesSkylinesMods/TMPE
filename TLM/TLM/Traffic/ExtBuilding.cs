@@ -16,9 +16,26 @@ namespace TrafficManager.Traffic {
 
         public byte OutgoingPublicTransportDemand { get; private set; }
 
-        public ExtBuilding(ushort buildingId) {
+		public override string ToString() {
+			return $"[ExtBuilding {base.ToString()}\n" +
+				"\t" + $"BuildingId = {BuildingId}\n" +
+				"\t" + $"ParkingSpaceDemand = {ParkingSpaceDemand}\n" +
+				"\t" + $"IncomingPublicTransportDemand = {IncomingPublicTransportDemand}\n" +
+				"\t" + $"OutgoingPublicTransportDemand = {OutgoingPublicTransportDemand}\n" +
+				"ExtBuilding]";
+		}
+
+		internal ExtBuilding(ushort buildingId) {
 			this.BuildingId = buildingId;
 			Reset();
+		}
+
+		private ExtBuilding() {
+
+		}
+
+		public bool IsValid() {
+			return Constants.ServiceFactory.BuildingService.IsBuildingValid(BuildingId);
 		}
 
 		internal void Reset() {

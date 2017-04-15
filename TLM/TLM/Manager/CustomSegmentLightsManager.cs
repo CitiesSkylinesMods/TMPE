@@ -23,6 +23,17 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		private CustomSegment[] CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Custom segments:");
+			for (int i = 0; i < CustomSegments.Length; ++i) {
+				if (CustomSegments[i] == null) {
+					continue;
+				}
+				Log._Debug($"Segment {i}: {CustomSegments[i]}");
+			}
+		}
+
 		/// <summary>
 		/// Adds custom traffic lights at the specified node and segment.
 		/// Light states (red, yellow, green) are taken from the "live" state, that is the traffic light's light state right before the custom light takes control.
@@ -212,8 +223,9 @@ namespace TrafficManager.Manager {
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId).GetEnd(nodeId);
-			if (endGeometry == null)
+			if (endGeometry == null) {
 				return null;
+			}
 			return GetSegmentLights(segmentId, endGeometry.StartNode, false);
 		}
 

@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class VehicleStateManager : AbstractCustomManager {
-		public static VehicleStateManager Instance { get; private set; } = null;
+		public static readonly VehicleStateManager Instance = new VehicleStateManager();
 
 		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
@@ -31,6 +31,18 @@ namespace TrafficManager.Manager {
 
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"ClearTrafficRequested = {ClearTrafficRequested}");
+			Log._Debug($"Vehicle states:");
+			for (int i = 0; i < VehicleStates.Length; ++i) {
+				if (VehicleStates[i] == null || !VehicleStates[i].Valid) {
+					continue;
+				}
+				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
+			}
 		}
 
 		/// <summary>

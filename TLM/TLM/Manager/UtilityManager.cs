@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.State;
+using TrafficManager.Geometry;
 
 namespace TrafficManager.Manager {
 	public class UtilityManager : AbstractCustomManager {
@@ -17,19 +19,79 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		private static bool ResetStuckEntitiesRequested = false;
 
+		/// <summary>
+		/// Determines if debug output should be printed
+		/// </summary>
+		private static bool PrintDebugInfoRequested = false;
+
 		public void RequestResetStuckEntities() {
 			ResetStuckEntitiesRequested = true;
 		}
 
+		public void RequestPrintDebugInfo() {
+			PrintDebugInfoRequested = true;
+		}
+
 		internal void SimulationStep() {
-			try {
-				if (ResetStuckEntitiesRequested) {
+			if (ResetStuckEntitiesRequested) {
+				try {
 					ResetStuckEntities();
+				} catch (Exception e) {
+					Log.Error($"Error occurred while resetting stuck entities: {e}");
+				} finally {
 					ResetStuckEntitiesRequested = false;
 				}
-			} finally { }
+			}
+#if DEBUG
+			if (PrintDebugInfoRequested) {
+				try {
+					PrintAllDebugInfo();
+				} catch (Exception e) {
+					Log.Error($"Error occurred while printing debug info: {e}");
+				} finally {
+					PrintDebugInfoRequested = false;
+				}
+			}
+#endif
 		}
 		
+		private void PrintAllDebugInfo() {
+			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
+			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+
+			Log._Debug("=== Flags.PrintDebugInfo() ===");
+			try {
+				Flags.PrintDebugInfo();
+			} catch (Exception e) {
+				Log.Error($"Error occurred while printing debug info for flags: {e}");
+			}
+
+			Log._Debug("=== SegmentGeometry.PrintDebugInfo() ===");
+			try {
+				SegmentGeometry.PrintDebugInfo();
+			} catch (Exception e) {
+				Log.Error($"Error occurred while printing debug info for segment geometries: {e}");
+			}
+
+			Log._Debug("=== NodeGeometry.PrintDebugInfo() ===");
+			try {
+				NodeGeometry.PrintDebugInfo();
+			} catch (Exception e) {
+				Log.Error($"Error occurred while printing debug info for node geometries: {e}");
+			}
+
+			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+				try {
+					manager.PrintDebugInfo();
+				} catch (Exception e) {
+					Log.Error($"Error occurred while printing debug info for manager {manager.GetType().Name}: {e}");
+				}
+			}
+
+			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Unpausing simulation.");
+			Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+		}
+
 		private void ResetStuckEntities() {
 			Log._Debug($"UtilityManager.RemoveStuckEntities() called.");
 

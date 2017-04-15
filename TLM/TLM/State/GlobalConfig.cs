@@ -70,6 +70,7 @@ namespace TrafficManager.State {
 			false, // geometry debug log
 			false, // debug pause
 			false, // debug TTL
+			false,
 			false
 		};
 

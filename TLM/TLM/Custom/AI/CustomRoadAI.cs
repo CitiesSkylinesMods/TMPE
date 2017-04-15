@@ -9,6 +9,7 @@ using System.Threading;
 using TrafficManager.UI;
 using TrafficManager.State;
 using TrafficManager.Manager;
+using TrafficManager.UI.SubTools;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomRoadAI : RoadBaseAI {
@@ -47,7 +48,7 @@ namespace TrafficManager.Custom.AI {
 					curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 				}
 
-				TrafficPriorityManager.Instance.SegmentSimulationStep(segmentID);
+				SegmentEndManager.Instance.SegmentSimulationStep(segmentID);
 			} catch (Exception e) {
 				Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
 			}
@@ -141,7 +142,7 @@ namespace TrafficManager.Custom.AI {
 
 			// get traffic light state from responsible traffic light
 			if (toSegmentId == fromSegmentId) {
-				vehicleLightState = TrafficPriorityManager.IsLeftHandDrive() ? light.LightRight : light.LightLeft;
+				vehicleLightState = Constants.ServiceFactory.SimulationService.LeftHandDrive ? light.LightRight : light.LightLeft;
 			} else if (geometry.IsLeftSegment(toSegmentId, isStartNode)) {
 				vehicleLightState = light.LightLeft;
 			} else if (geometry.IsRightSegment(toSegmentId, isStartNode)) {
@@ -198,6 +199,36 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			} // NON-STOCK CODE
+		}
+
+		public void CustomClickNodeButton(ushort nodeID, ref NetNode data, int index) {
+			if ((data.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+				Singleton<InfoManager>.instance.CurrentMode == InfoManager.InfoMode.TrafficRoutes &&
+				Singleton<InfoManager>.instance.CurrentSubMode == InfoManager.SubInfoMode.WaterPower) {
+				if (index == -1) {
+					/*data.m_flags ^= NetNode.Flags.TrafficLights;
+					data.m_flags |= NetNode.Flags.CustomTrafficLights;*/
+					// NON-STOCK CODE START
+					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)TrafficManagerTool.GetSubTool(ToolMode.SwitchTrafficLight);
+					toggleTool.ToggleTrafficLight(nodeID);
+					// NON-STOCK CODE END
+					this.UpdateNodeFlags(nodeID, ref data);
+					Singleton<NetManager>.instance.m_yieldLights.Disable();
+				} else if (index >= 1 && index <= 8 && (data.m_flags & (NetNode.Flags.TrafficLights | NetNode.Flags.OneWayIn)) == NetNode.Flags.None) {
+					ushort segmentId = data.GetSegment(index - 1);
+					if (segmentId != 0) {
+						NetManager netManager = Singleton<NetManager>.instance;
+						NetInfo info = netManager.m_segments.m_buffer[(int)segmentId].Info;
+						if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+							bool flag = netManager.m_segments.m_buffer[(int)segmentId].m_startNode == nodeID;
+							NetSegment.Flags flags = (!flag) ? NetSegment.Flags.YieldEnd : NetSegment.Flags.YieldStart;
+							netManager.m_segments.m_buffer[segmentId].m_flags ^= flags;
+							netManager.m_segments.m_buffer[(int)segmentId].UpdateLanes(segmentId, true);
+							Singleton<NetManager>.instance.m_yieldLights.Disable();
+						}
+					}
+				}
+			}
 		}
 
 		public void CustomUpdateLanes(ushort segmentID, ref NetSegment data, bool loading) {

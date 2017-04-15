@@ -13,6 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.State;
 using TrafficManager.Util;
 using System.Linq;
+using Util;
 
 namespace TrafficManager.TrafficLight {
 	// TODO class marked for complete rework in version 1.9
@@ -55,12 +56,24 @@ namespace TrafficManager.TrafficLight {
 
 		public IDictionary<ushort, CustomSegmentLights> CustomSegmentLights { get; private set; } = new TinyDictionary<ushort, CustomSegmentLights>();
 
-		/// <summary>
-		/// Maximum segment length
-		/// </summary>
-		float maxSegmentLength = 0f;
-
 		public float waitFlowBalance = 1f;
+
+		public override string ToString() {
+			return $"[TimedTrafficLightsStep\n" +
+				"\t" + $"minTime = {minTime}\n" +
+				"\t" + $"maxTime = {maxTime}\n" +
+				"\t" + $"startFrame = {startFrame}\n" +
+				"\t" + $"stepDone = {stepDone}\n" +
+				"\t" + $"endTransitionStart = {endTransitionStart}\n" +
+				"\t" + $"minFlow = {minFlow}\n" +
+				"\t" + $"maxWait = {maxWait}\n" +
+				"\t" + $"PreviousStepRefIndex = {PreviousStepRefIndex}\n" +
+				"\t" + $"NextStepRefIndex = {NextStepRefIndex}\n" +
+				"\t" + $"lastFlowWaitCalc = {lastFlowWaitCalc}\n" +
+				"\t" + $"CustomSegmentLights = {CustomSegmentLights}\n" +
+				"\t" + $"waitFlowBalance = {waitFlowBalance}\n" +
+				"TimedTrafficLightsStep]";
+		}
 
 		public TimedTrafficLightsStep(TimedTrafficLights timedNode, int minTime, int maxTime, float waitFlowBalance, bool makeRed=false) {
 			this.minTime = minTime;
@@ -82,21 +95,10 @@ namespace TrafficManager.TrafficLight {
 				
 				addSegment(end.SegmentId, end.StartNode, makeRed);
 			}
-			calcMaxSegmentLength();
 		}
 
-		internal void calcMaxSegmentLength() {
-			maxSegmentLength = 0;
-			for (var s = 0; s < 8; s++) {
-				var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[timedNode.NodeId].GetSegment(s);
-				
-				if (segmentId <= 0)
-					continue;
+		private TimedTrafficLightsStep() {
 
-				float segLength = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_averageLength;
-				if (segLength > maxSegmentLength)
-					maxSegmentLength = segLength;
-			}
 		}
 
 		/// <summary>
@@ -360,7 +362,7 @@ namespace TrafficManager.TrafficLight {
 					liveSegmentLights.UpdateVisuals();
 				}
 			} catch (Exception e) {
-				Log.Error($"Exception in TimedTrafficStep.SetLights for node {timedNode.NodeId}: {e.ToString()}");
+				Log.Error($"Exception in TimedTrafficStep.UpdateLiveLights for node {timedNode.NodeId}: {e.ToString()}");
 				//invalid = true;
 			}
 		}
@@ -551,7 +553,7 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+			SegmentEndManager endMan = SegmentEndManager.Instance;
 
 			// loop over all timed traffic lights within the node group
 			foreach (ushort timedNodeId in timedNode.NodeGroup) {
@@ -581,9 +583,9 @@ namespace TrafficManager.TrafficLight {
 					}
 
 					// one of the traffic lights at this segment is green: count minimum traffic flowing through
-					SegmentEnd sourceSegmentEnd = prioMan.GetPrioritySegment(timedNodeId, sourceSegmentId);
+					SegmentEnd sourceSegmentEnd = endMan.GetSegmentEnd(sourceSegmentId, segLights.StartNode);
 					if (sourceSegmentEnd == null) {
-						Log.Warning($"TimedTrafficLightsStep.calcWaitFlow: No priority segment @ seg. {sourceSegmentId} found!");
+						Log.Error($"TimedTrafficLightsStep.calcWaitFlow: No segment end @ seg. {sourceSegmentId} found!");
 						continue; // skip invalid segment
 					}
 
@@ -656,7 +658,7 @@ namespace TrafficManager.TrafficLight {
 							bool addToFlow = false;
 							switch (dir) {
 								case ArrowDirection.Turn:
-									addToFlow = TrafficPriorityManager.IsLeftHandDrive() ? segLight.IsRightGreen() : segLight.IsLeftGreen();
+									addToFlow = Constants.ServiceFactory.SimulationService.LeftHandDrive ? segLight.IsRightGreen() : segLight.IsLeftGreen();
 									break;
 								case ArrowDirection.Left:
 									addToFlow = segLight.IsLeftGreen();

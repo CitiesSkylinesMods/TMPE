@@ -39,7 +39,7 @@ namespace TrafficManager.UI {
 		private static bool mouseClickProcessed;
 
 		public static readonly float DebugCloseLod = 300f;
-		public static readonly float PriorityCloseLod = 450f;
+		public static readonly float MaxOverlayDistance = 450f;
 
 		private static SubTool[] subTools = new SubTool[13];
 		private static bool initDone = false;
@@ -68,6 +68,29 @@ namespace TrafficManager.UI {
 
 			//return new Rect(rectX, rectY, rect.width, rect.height);
 			return new Rect(85f + (float)Translation.getMenuWidth() + 25f + AdaptWidth(rect.x), 80f + 10f + rect.y, AdaptWidth(rect.width), rect.height);
+		}
+
+		internal bool IsNodeWithinViewDistance(ushort nodeId) {
+			bool ret = false;
+			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+				ret = IsPosWithinOverlayDistance(ref node.m_position);
+				return true;
+			});
+			return ret;
+		}
+
+		internal bool IsSegmentWithinViewDistance(ushort segmentId) {
+			bool ret = false;
+			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+				Vector3 centerPos = segment.m_bounds.center;
+				ret = IsPosWithinOverlayDistance(ref centerPos);
+				return true;
+			});
+			return ret;
+		}
+
+		internal bool IsPosWithinOverlayDistance(ref Vector3 position) {
+			return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position).magnitude <= TrafficManagerTool.MaxOverlayDistance;
 		}
 
 		internal static float AdaptWidth(float originalWidth) {
@@ -309,11 +332,11 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, bool warning=false, bool alpha=false) {
+		public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, bool warning=false, bool alpha=false) {
 			DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
 		}
 
-		internal void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, Color color, bool alpha = false) {
+		public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, Color color, bool alpha = false) {
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
 
 			Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
@@ -341,43 +364,91 @@ namespace TrafficManager.UI {
 			Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(cameraInfo, color, position, width, position.y - 100f, position.y + 100f, false, alpha);
 		}
 
-		/// <summary>
-		/// Draws a square texture as a (hoverable) GUI overlay within a 2D grid.
-		/// </summary>
-		/// <param name="viewOnly">if true, the texture does not act as a hoverable handle</param>
-		/// <param name="overlaySize">size of the overlay (width & height)</param>
-		/// <param name="cellSize">width & height of the grid cell that contains the overlay (should be larger than overlaySize)</param>
-		/// <param name="camPos">current camera position</param>
-		/// <param name="xu">unit vector in x-direction</param>
-		/// <param name="yu">unit vector in y-direction</param>
-		/// <param name="zero">grid center point</param>
-		/// <param name="x">grid column index</param>
-		/// <param name="y">grid row index</param>
-		/// <param name="guiColor">GUI color to use (for alpha blend)</param>
-		/// <param name="texture">texture to draw</param>
-		/// <returns>true if the mouse currently hovers the overlay</returns>
-		public bool DrawOverlayGridTexture(bool viewOnly, float overlaySize, float cellSize, Vector3 camPos, Vector3 xu, Vector3 yu, Vector3 zero, uint x, uint y, ref Color guiColor, Texture2D texture) {
-			Vector3 signCenter = zero + cellSize * (float)x * xu + cellSize * (float)y * yu; // in game coordinates
+		public void DrawStaticSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float size, float alpha) {
+			DrawGenericSquareOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, ref xu, ref yu, x, y, size, false, alpha);
+		}
 
-			Vector3 signScreenPos = Camera.main.WorldToScreenPoint(signCenter);
-			signScreenPos.y = Screen.height - signScreenPos.y;
+		public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float size, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericSquareOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, ref xu, ref yu, x, y, size, true, defaultAlpha, hoverAlpha);
+		}
 
-			float zoom = 1.0f / (signCenter - camPos).magnitude * 100f * GetBaseZoom();
-			float size = (viewOnly ? 0.8f : 1f) * overlaySize * zoom;
+		public bool DrawGenericSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float size, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
+			return DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, cellSize, ref xu, ref yu, x, y, size, size, canHover, defaultAlpha, hoverAlpha);
+		}
 
-			Rect boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
-			bool hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
-			if (hoveredHandle) {
-				// mouse hovering over sign
-				guiColor.a = 0.8f;
-			} else {
-				guiColor.a = 0.5f;
+		public void DrawStaticOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float width, float height, float alpha) {
+			DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellWidth, cellHeight, ref xu, ref yu, x, y, width, height, false, alpha);
+		}
+
+		public bool DrawHoverableOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float width, float height, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellWidth, cellHeight, ref xu, ref yu, x, y, width, height, true, defaultAlpha, hoverAlpha);
+		}
+
+		public bool DrawGenericOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+			float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
+			Vector3 worldPos = gridOrigin + cellWidth * (float)x * xu + cellHeight * (float)y * yu; // grid position in game coordinates
+			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, canHover, defaultAlpha, hoverAlpha);
+		}
+
+		public void DrawStaticSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, float alpha) {
+			DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, false, alpha);
+		}
+
+		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, true, defaultAlpha, hoverAlpha);
+		}
+
+		public bool DrawGenericSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, canHover, defaultAlpha, hoverAlpha);
+		}
+
+		public void DrawStaticOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, float alpha) {
+			DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, false, alpha);
+		}
+
+		public bool DrawHoverableOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, true, defaultAlpha, hoverAlpha);
+		}
+
+		public bool DrawGenericOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+			Vector3 screenPos;
+			if (! WorldToScreenPoint(ref worldPos, out screenPos)) {
+				return false;
+			}
+
+			float zoom = 1.0f / (worldPos - camPos).magnitude * 100f * GetBaseZoom();
+			width *= zoom;
+			height *= zoom;
+
+			Rect boundingBox = new Rect(screenPos.x - width / 2f, screenPos.y - height / 2f, width, height);
+
+			Color guiColor = GUI.color;
+			guiColor.a = defaultAlpha;
+
+			bool hovered = false;
+			if (canHover) {
+				hovered = IsMouseOver(boundingBox);
+				if (hovered && hoverAlpha != null) {
+					guiColor.a = (float)hoverAlpha;
+				}
 			}
 
 			GUI.color = guiColor;
 			GUI.DrawTexture(boundingBox, texture);
 
-			return hoveredHandle;
+			return hovered;
+		}
+
+		public bool WorldToScreenPoint(ref Vector3 worldPos, out Vector3 screenPos) {
+			screenPos = Camera.main.WorldToScreenPoint(worldPos);
+			screenPos.y = Screen.height - screenPos.y;
+
+			return screenPos.z >= 0;
 		}
 
 		public override void SimulationStep() {
@@ -603,7 +674,7 @@ namespace TrafficManager.UI {
 		/// </summary>
 		private void _guiSegments() {
 			GUIStyle _counterStyle = new GUIStyle();
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+			SegmentEndManager endMan = SegmentEndManager.Instance;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			for (int i = 1; i < segments.m_size; ++i) {
 				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
@@ -636,8 +707,8 @@ namespace TrafficManager.UI {
 				labelStr += ", flags: " + segments.m_buffer[i].m_flags.ToString(); // + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
-				SegmentEnd startEnd = prioMan.GetPrioritySegment(segments.m_buffer[i].m_startNode, (ushort)i);
-				SegmentEnd endEnd = prioMan.GetPrioritySegment(segments.m_buffer[i].m_endNode, (ushort)i);
+				SegmentEnd startEnd = endMan.GetSegmentEnd((ushort)i, true);
+				SegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
 				labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
 				labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
@@ -735,8 +806,9 @@ namespace TrafficManager.UI {
 
 				VehicleState vState = vehStateManager._GetVehicleState((ushort)i);
 				ExtCitizenInstance driverInst = vState.GetDriverExtInstance();
-				PathUnit.Position? curPos = vState?.GetCurrentPathPosition(ref vehicle);
-				PathUnit.Position? nextPos = vState?.GetNextPathPosition(ref vehicle);
+				/*PathUnit.Position curPos, nextPos;
+				bool hasCurPos = vState?.GetCurrentPathPosition(ref vehicle, out curPos);
+				bool hasNextPos = vState?.GetNextPathPosition(ref vehicle, out nextPos);*/
 				bool? startNode = vState?.CurrentSegmentEnd?.StartNode;
 				ushort? segmentId = vState?.CurrentSegmentEnd?.SegmentId;
 				ushort? transitNodeId = vState?.CurrentSegmentEnd?.NodeId;
@@ -943,26 +1015,6 @@ namespace TrafficManager.UI {
 			result.Apply();
 
 			return result;
-		}
-		
-		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-
-			var numMainRoads = 0;
-			for (var s = 0; s < 8; s++) {
-				var segmentId2 = node.GetSegment(s);
-
-				if (segmentId2 == 0 ||
-					!prioMan.IsPrioritySegment(nodeId, segmentId2))
-					continue;
-				var prioritySegment2 = prioMan.GetPrioritySegment(nodeId,
-					segmentId2);
-
-				if (prioritySegment2.Type == SegmentEnd.PriorityType.Main) {
-					numMainRoads++;
-				}
-			}
-			return numMainRoads;
 		}
 
 		internal static bool IsMouseOver(Rect boundingBox) {

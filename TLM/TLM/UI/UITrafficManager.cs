@@ -158,12 +158,12 @@ namespace TrafficManager.UI {
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
 			y += 40;
 			height += 40;
-			_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
+			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
 			y += 40;
 			height += 40;
 			_vehicleToNoneButton = _createButton("Vehicle -> None", y, clickVehicleToNone);
 			y += 40;
-			height += 40;
+			height += 40;*/
 #endif
 #if QUEUEDSTATS
 			_togglePathFindStatsButton = _createButton("Toggle PathFind stats", y, clickTogglePathFindStats);
@@ -257,7 +257,7 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
-			Flags.PrintDebugInfo();
+			UtilityManager.Instance.RequestPrintDebugInfo();
 		}
 
 		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();

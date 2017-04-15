@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GenericGameBridge.Factory;
 
 namespace TrafficManager.Manager {
 	/// <summary>
@@ -12,6 +13,12 @@ namespace TrafficManager.Manager {
 	/// OnBeforeSaveData -> (saving game data) -> OnAfterSaveData -> (releasing detours) -> OnLevelUnloading
 	/// </summary>
 	public abstract class AbstractCustomManager : ICustomManager {
+		public IServiceFactory Services {
+			get {
+				return Constants.ServiceFactory;
+			}
+		}
+
 		/// <summary>
 		/// Performs actions after game data has been loaded
 		/// </summary>
@@ -52,6 +59,19 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		public virtual void OnLevelUnloading() {
 			
+		}
+
+		/// <summary>
+		/// Prints information for debugging purposes
+		/// </summary>
+		protected virtual void InternalPrintDebugInfo() {
+
+		}
+
+		public void PrintDebugInfo() {
+			Log._Debug($"=== {this.GetType().Name}.PrintDebugInfo() *START* ===");
+			InternalPrintDebugInfo();
+			Log._Debug($"=== {this.GetType().Name}.PrintDebugInfo() *END* ===");
 		}
 	}
 }

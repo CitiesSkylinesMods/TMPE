@@ -15,6 +15,17 @@ namespace TrafficManager.Manager {
 	public class ExtCitizenInstanceManager : AbstractCustomManager {
 		public static ExtCitizenInstanceManager Instance { get; private set; } = null;
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Extended citizen instance data:");
+			for (int i = 0; i < ExtInstances.Length; ++i) {
+				if (ExtInstances[i] == null || !ExtInstances[i].IsValid()) {
+					continue;
+				}
+				Log._Debug($"Citizen instance {i}: {ExtInstances[i]}");
+			}
+		}
+
 		internal void OnReleaseInstance(ushort instanceId) {
 			GetExtInstance(instanceId).Reset();
 		}

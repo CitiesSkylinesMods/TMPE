@@ -22,10 +22,12 @@ namespace TrafficManager.Manager {
 
 		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 
-		public static SpeedLimitManager Instance { get; private set; } = null;
+		public static readonly SpeedLimitManager Instance = new SpeedLimitManager();
 
-		static SpeedLimitManager() {
-			Instance = new SpeedLimitManager();
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
 		public readonly List<ushort> AvailableSpeedLimits;
@@ -297,7 +299,7 @@ namespace TrafficManager.Manager {
 				return;
 
 			for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-				if (!NetUtil.IsLaneValid(laneId))
+				if (!Services.NetService.IsLaneValid(laneId))
 					continue;
 
 				ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
@@ -333,7 +335,7 @@ namespace TrafficManager.Manager {
 				return;
 
 			for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-				if (!NetUtil.IsLaneValid(laneId))
+				if (!Services.NetService.IsLaneValid(laneId))
 					continue;
 
 				NetInfo laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment].Info;
@@ -532,7 +534,7 @@ namespace TrafficManager.Manager {
 			if (!AvailableSpeedLimits.Contains(speedLimit)) {
 				return false;
 			}
-			if (!NetUtil.IsLaneValid(laneId)) {
+			if (!Services.NetService.IsLaneValid(laneId)) {
 				return false;
 			}
 
@@ -771,7 +773,7 @@ namespace TrafficManager.Manager {
 			Log.Info($"Loading lane speed limit data. {data.Count} elements");
 			foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
 				try {
-					if (!NetUtil.IsLaneValid(laneSpeedLimit.laneId)) {
+					if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
 						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
 						continue;
 					}

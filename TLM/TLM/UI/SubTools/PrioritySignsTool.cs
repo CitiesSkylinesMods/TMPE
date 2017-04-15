@@ -12,22 +12,32 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Util;
+using static TrafficManager.Traffic.PrioritySegment;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
-		private HashSet<ushort> currentPrioritySegmentIds;
-		SegmentEnd[] prioritySegments = new SegmentEnd[2];
+		private HashSet<ushort> currentPriorityNodeIds;
 
 		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
-			currentPrioritySegmentIds = new HashSet<ushort>();
+			currentPriorityNodeIds = new HashSet<ushort>();
 		}
 
 		public override void OnPrimaryClickOverlay() {
-			
+			if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+				return;
+			}
+
+			if (! MayNodeHavePrioritySigns(HoveredNodeId)) {
+				return;
+			}
+
+			SelectedNodeId = HoveredNodeId;
+			Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+			RefreshCurrentPriorityNodeIds();
 		}
 
 		public override void OnToolGUI(Event e) {
-			//ShowGUI(false);
+			
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -35,29 +45,44 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
-			// no highlight for existing priority node in sign mode
-			if (TrafficPriorityManager.Instance.IsPriorityNode(HoveredNodeId, false))
+			if (HoveredNodeId == SelectedNodeId) {
 				return;
+			}
 
-			if (HoveredNodeId == 0) return;
+			// no highlight for existing priority node in sign mode
+			if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+				//Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
+				return;
+			}
 
-			if (!Flags.mayHaveTrafficLight(HoveredNodeId)) return;
+			if (! TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
+				//Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
+				return;
+			}
 
 			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
 		}
 
-		private void RefreshCurrentPrioritySegmentIds() {
-			currentPrioritySegmentIds.Clear();
-			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				if (!NetUtil.IsSegmentValid(segmentId))
-					continue;
+		private void RefreshCurrentPriorityNodeIds() {
+			TrafficPriorityManager tpm = TrafficPriorityManager.Instance;
 
-				var trafficSegment = TrafficPriorityManager.Instance.TrafficSegments[segmentId];
-				if (trafficSegment == null)
+			currentPriorityNodeIds.Clear();
+			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if (!tpm.MayNodeHavePrioritySigns(nodeId)) {
 					continue;
+				}
 
-				currentPrioritySegmentIds.Add((ushort)segmentId);
+				if (!tpm.HasNodePrioritySign(nodeId) && nodeId != SelectedNodeId) {
+					continue;
+				}
+
+				if (! MainTool.IsNodeWithinViewDistance(nodeId)) {
+					continue;
+				}
+
+				currentPriorityNodeIds.Add((ushort)nodeId);
 			}
+			Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds: currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(x => x.ToString()).ToArray())}");
 		}
 
 		public override void ShowGUIOverlay(bool viewOnly) {
@@ -76,258 +101,164 @@ namespace TrafficManager.UI.SubTools {
 				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 				TrafficLightManager tlm = TrafficLightManager.Instance;
 
+				Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
+
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
-				var hoveredSegment = false;
-				//Log.Message("_guiPrioritySigns called. num of prio segments: " + TrafficPriority.PrioritySegments.Count);
+				var hoveredSign = false;
 
-				HashSet<ushort> nodeIdsWithSigns = new HashSet<ushort>();
-				foreach (ushort segmentId in currentPrioritySegmentIds) {
-					var trafficSegment = prioMan.TrafficSegments[segmentId];
-					if (trafficSegment == null)
-						continue;
-					SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
+				ushort removedNodeId = 0;
+				bool showRemoveButton = false;
+				foreach (ushort nodeId in currentPriorityNodeIds) {
+					NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
 
-					prioritySegments[0] = null;
-					prioritySegments[1] = null;
+					Vector3 nodePos = default(Vector3);
+					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+						nodePos = node.m_position;
+						return true;
+					});
 
-					if (tlsMan.GetNodeSimulation(trafficSegment.Node1) == null) {
-						SegmentEnd tmpSeg1 = prioMan.GetPrioritySegment(trafficSegment.Node1, segmentId);
-						bool startNode = geometry.StartNodeId() == trafficSegment.Node1;
-						if (tmpSeg1 != null && !geometry.IsOutgoingOneWay(startNode)) {
-							prioritySegments[0] = tmpSeg1;
-							nodeIdsWithSigns.Add(trafficSegment.Node1);
-							prioMan.AddPriorityNode(trafficSegment.Node1);
-						}
-					}
-					if (tlsMan.GetNodeSimulation(trafficSegment.Node2) == null) {
-						SegmentEnd tmpSeg2 = prioMan.GetPrioritySegment(trafficSegment.Node2, segmentId);
-						bool startNode = geometry.StartNodeId() == trafficSegment.Node2;
-						if (tmpSeg2 != null && !geometry.IsOutgoingOneWay(startNode)) {
-							prioritySegments[1] = tmpSeg2;
-							nodeIdsWithSigns.Add(trafficSegment.Node2);
-							prioMan.AddPriorityNode(trafficSegment.Node2);
-						}
-					}
-
-					//Log.Message("init ok");
-
-					foreach (var prioritySegment in prioritySegments) {
-						if (prioritySegment == null)
+					foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
+						if (endGeo == null) {
 							continue;
-
-						var nodeId = prioritySegment.NodeId;
-						//Log.Message("_guiPrioritySigns: nodeId=" + nodeId);
-
-						var nodePositionVector3 = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-						var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-						var diff = nodePositionVector3 - camPos;
-						if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
-							continue; // do not draw if too distant
-
-						if (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode == (ushort)nodeId) {
-							nodePositionVector3.x += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startDirection.x * 10f;
-							nodePositionVector3.y += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startDirection.y * 10f;
-							nodePositionVector3.z += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startDirection.z * 10f;
-						} else {
-							nodePositionVector3.x += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endDirection.x * 10f;
-							nodePositionVector3.y += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endDirection.y * 10f;
-							nodePositionVector3.z += Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endDirection.z * 10f;
 						}
-
-						var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
-						nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
-						if (nodeScreenPosition.z < 0)
+						if (endGeo.OutgoingOneWay) {
 							continue;
-						var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
-						var size = 110f * zoom;
-						var guiColor = GUI.color;
-						var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
-						hoveredSegment = !viewOnly && TrafficManagerTool.IsMouseOver(nodeBoundingBox);
-
-						if (hoveredSegment) {
-							// mouse hovering over sign
-							guiColor.a = 0.8f;
-						} else {
-							guiColor.a = 0.5f;
-							size = 90f * zoom;
 						}
-						var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
+						ushort segmentId = endGeo.SegmentId;
+						bool startNode = endGeo.StartNode;
 
-						GUI.color = guiColor;
+						// calculate sign position
+						Vector3 signPos = nodePos;
 
-						bool setUndefinedSignsToMainRoad = false;
-						switch (prioritySegment.Type) {
-							case SegmentEnd.PriorityType.Main:
-								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignPriorityTexture2D);
-								if (clicked && hoveredSegment) {
-									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (1)");
-									//Log.Message("PrioritySegment.Type = Yield");
-									prioritySegment.Type = SegmentEnd.PriorityType.Yield;
-									setUndefinedSignsToMainRoad = true;
-									clicked = false;
-								}
-								break;
-							case SegmentEnd.PriorityType.Yield:
-								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignYieldTexture2D);
-								if (clicked && hoveredSegment) {
-									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (2)");
-									prioritySegment.Type = SegmentEnd.PriorityType.Stop;
-									setUndefinedSignsToMainRoad = true;
-									clicked = false;
-								}
+						Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort sId, ref NetSegment segment) {
+							signPos += 10f * (startNode ? segment.m_startDirection : segment.m_endDirection);
+							return true;
+						});
 
-								break;
-							case SegmentEnd.PriorityType.Stop:
-								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignStopTexture2D);
-								if (clicked && hoveredSegment) {
-									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (3)");
-									prioritySegment.Type = SegmentEnd.PriorityType.Main;
-									clicked = false;
-								}
-								break;
-							case SegmentEnd.PriorityType.None:
-								if (viewOnly)
+						Vector3 signScreenPos;
+						if (! MainTool.WorldToScreenPoint(ref signPos, out signScreenPos)) {
+							continue;
+						}
+
+						// draw sign and handle input
+						PriorityType sign = prioMan.GetPrioritySign(segmentId, startNode);
+						if (!viewOnly && sign != PriorityType.None) {
+							showRemoveButton = true;
+						}
+
+						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], ref camPos, ref signPos, 90f, !viewOnly, 0.5f, 0.8f) && clicked) {
+							PriorityType? newSign = null;
+							switch (sign) {
+								case PriorityType.Main:
+									newSign = PriorityType.Yield;
 									break;
-								GUI.DrawTexture(nodeDrawingBox, TrafficLightToolTextureResources.SignNoneTexture2D);
-
-								if (clicked && hoveredSegment) {
-									//Log._Debug("Click on node " + nodeId + ", segment " + segmentId + " to change prio type (4)");
-									//Log.Message("PrioritySegment.Type = None");
-									prioritySegment.Type = GetNumberOfMainRoads(nodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]) >= 2
-										? SegmentEnd.PriorityType.Yield
-										: SegmentEnd.PriorityType.Main;
-									if (prioritySegment.Type == SegmentEnd.PriorityType.Yield)
-										setUndefinedSignsToMainRoad = true;
-									clicked = false;
-								}
-								break;
-						}
-
-						if (setUndefinedSignsToMainRoad) {
-							foreach (var otherPrioritySegment in prioMan.GetPrioritySegments(nodeId)) {
-								if (otherPrioritySegment.SegmentId == prioritySegment.SegmentId)
-									continue;
-								if (otherPrioritySegment.Type == SegmentEnd.PriorityType.None)
-									otherPrioritySegment.Type = SegmentEnd.PriorityType.Main;
+								case PriorityType.Yield:
+									newSign = PriorityType.Stop;
+									break;
+								case PriorityType.Stop:
+									newSign = PriorityType.Main;
+									break;
+								case PriorityType.None:
+								default:
+									newSign = prioMan.CountPrioritySignsAtNode(nodeId, PriorityType.Main) >= 2 ? PriorityType.Yield : PriorityType.Main;
+									break;
 							}
-						}
-					}
-				}
 
-				if (viewOnly)
-					return;
+							if (newSign != null) {
+								SetPrioritySign(segmentId, startNode, (PriorityType)newSign);
+							}
+						} // draw sign
+					} // foreach segment end
 
-				ushort hoveredExistingNodeId = 0;
-				foreach (ushort nodeId in nodeIdsWithSigns) {
-					var nodePositionVector3 = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-					var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-					var diff = nodePositionVector3 - camPos;
-					if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+					if (viewOnly) {
 						continue;
-
-					// draw deletion button
-					var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
-					nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
-					if (nodeScreenPosition.z < 0)
-						continue;
-					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
-					var size = 90f * zoom;
-					var nodeBoundingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
-
-					var guiColor = GUI.color;
-					var nodeCenterHovered = TrafficManagerTool.IsMouseOver(nodeBoundingBox);
-					if (nodeCenterHovered) {
-						hoveredExistingNodeId = nodeId;
-						guiColor.a = 0.8f;
-					} else {
-						guiColor.a = 0.5f;
-					}
-					GUI.color = guiColor;
-
-					GUI.DrawTexture(nodeBoundingBox, TrafficLightToolTextureResources.SignRemoveTexture2D);
-				}
-
-				// add a new or delete a priority segment node
-				if (HoveredNodeId != 0 || hoveredExistingNodeId != 0) {
-					bool delete = false;
-					if (hoveredExistingNodeId != 0) {
-						delete = true;
 					}
 
-					// determine if we may add new priority signs to this node
-					bool ok = false;
-					TrafficLightSimulation nodeSim = tlsMan.GetNodeSimulation(HoveredNodeId);
-					if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
-						// no traffic light set
-						ok = true;
-					} else if (nodeSim == null || !nodeSim.IsTimedLight()) {
-						ok = true;
+					// draw remove button and handle click
+					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, ref camPos, ref nodePos, 90f, 0.5f, 0.8f) && clicked) {
+						prioMan.RemovePrioritySignsFromNode(nodeId);
+						Log._Debug($"PrioritySignsTool.ShowGUI: Removed priority signs from node {nodeId}");
+						removedNodeId = nodeId;
 					}
+				} // foreach node
 
-					if (!Flags.mayHaveTrafficLight(HoveredNodeId))
-						ok = false;
-
-					if (clicked) {
-						Log._Debug("_guiPrioritySigns: hovered+clicked @ nodeId=" + HoveredNodeId + "/" + hoveredExistingNodeId + " ok=" + ok);
-
-						if (delete) {
-							prioMan.RemovePrioritySegments(hoveredExistingNodeId);
-							RefreshCurrentPrioritySegmentIds();
-						} else if (ok) {
-							//if (!prioMan.IsPriorityNode(HoveredNodeId)) {
-								Log._Debug("_guiPrioritySigns: adding prio segments @ nodeId=" + HoveredNodeId);
-								tlsMan.RemoveNodeFromSimulation(HoveredNodeId, false, true);
-								tlm.RemoveTrafficLight(HoveredNodeId);
-								prioMan.AddPriorityNode(HoveredNodeId);
-								RefreshCurrentPrioritySegmentIds();
-							//}
-						} else if (nodeSim != null && nodeSim.IsTimedLight()) {
-							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
-						}
-					}
+				if (removedNodeId != 0) {
+					currentPriorityNodeIds.Remove(removedNodeId);
+					SelectedNodeId = 0;
 				}
 			} catch (Exception e) {
 				Log.Error(e.ToString());
 			}
 		}
 
-		private static int GetNumberOfMainRoads(ushort nodeId, ref NetNode node) {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			ushort nodeId = segGeo.GetNodeId(startNode);
 
-			var numMainRoads = 0;
-			for (var s = 0; s < 8; s++) {
-				var segmentId2 = node.GetSegment(s);
+			// check for restrictions
+			if (!MayNodeHavePrioritySigns(nodeId)) {
+				Log._Debug($"PrioritySignsTool.SetPrioritySign: MayNodeHavePrioritySigns({nodeId})=false");
+				return false;
+			}
 
-				if (segmentId2 == 0 ||
-					!prioMan.IsPrioritySegment(nodeId, segmentId2))
-					continue;
-				var prioritySegment2 = prioMan.GetPrioritySegment(nodeId,
-					segmentId2);
+			bool success = TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, sign);
+			Log._Debug($"PrioritySignsTool.SetPrioritySign: SetPrioritySign({segmentId}, {startNode}, {sign})={success}");
+			if (success && (sign == PriorityType.Stop || sign == PriorityType.Yield)) {
+				// make all undefined segments a main road
+				Log._Debug($"PrioritySignsTool.SetPrioritySign: flagging remaining segments at node {nodeId} as main road.");
+				NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
+				foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
+					if (endGeo == null) {
+						continue;
+					}
 
-				if (prioritySegment2.Type == SegmentEnd.PriorityType.Main) {
-					numMainRoads++;
+					if (endGeo.SegmentId == segmentId) {
+						continue;
+					}
+
+					if (TrafficPriorityManager.Instance.GetPrioritySign(endGeo.SegmentId, endGeo.StartNode) == PriorityType.None) {
+						Log._Debug($"PrioritySignsTool.SetPrioritySign: setting main priority sign for segment {endGeo.SegmentId} @ {nodeId}");
+						TrafficPriorityManager.Instance.SetPrioritySign(endGeo.SegmentId, endGeo.StartNode, PriorityType.Main);
+					}
 				}
 			}
-			return numMainRoads;
+			return success;
 		}
 
 		public override void Cleanup() {
-			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+			//TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			foreach (TrafficSegment trafficSegment in prioMan.TrafficSegments) {
-				try {
-					trafficSegment?.Instance1?.Reset();
-					trafficSegment?.Instance2?.Reset();
-				} catch (Exception e) {
-					Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
-				}
-			}
+			//foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
+			//	try {
+			//		trafficSegment?.Instance1?.Reset();
+			//		trafficSegment?.Instance2?.Reset();
+			//	} catch (Exception e) {
+			//		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
+			//	}
+			//}
 
-			RefreshCurrentPrioritySegmentIds();
+			RefreshCurrentPriorityNodeIds();
 		}
 
 		public override void Initialize() {
 			Cleanup();
+		}
+
+		private bool MayNodeHavePrioritySigns(ushort nodeId) {
+			TrafficPriorityManager.UnableReason reason;
+			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId} may have priority signs.");
+			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
+				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
+				if (reason == TrafficPriorityManager.UnableReason.HasTimedLight) {
+					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
+						return true;
+					});
+				}
+				return false;
+			}
+			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
+			return true;
 		}
 	}
 }

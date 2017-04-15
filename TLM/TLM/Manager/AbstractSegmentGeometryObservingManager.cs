@@ -5,11 +5,17 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Util;
+using Util;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractSegmentGeometryObservingManager : AbstractCustomManager, IObserver<SegmentGeometry> {
 		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 		private object geoLock = new object();
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Subscribed segment geometries: {segGeometryUnsubscribers.Keys.CollectionToString()}");
+		}
 
 		protected void UnsubscribeFromSegmentGeometry(ushort segmentId) {
 #if DEBUGCONN

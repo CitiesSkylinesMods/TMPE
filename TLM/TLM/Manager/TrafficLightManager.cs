@@ -14,46 +14,77 @@ namespace TrafficManager.Manager {
 	public class TrafficLightManager : AbstractCustomManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
 		public enum UnableReason {
 			None,
-			InvalidNode,
 			NoJunction,
 			HasTimedLight
 		}
 
-		public static TrafficLightManager Instance { get; private set; } = null;
+		public static readonly TrafficLightManager Instance = new TrafficLightManager();
 
-		static TrafficLightManager() {
-			Instance = new TrafficLightManager();
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
-		public void SetTrafficLight(ushort nodeId, bool flag) {
-			Flags.setNodeTrafficLight(nodeId, flag);
+		public bool SetTrafficLight(ushort nodeId, bool flag) {
+			UnableReason reason;
+			return SetTrafficLight(nodeId, flag, out reason);
 		}
 
-		public void AddTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, true);
+		public bool SetTrafficLight(ushort nodeId, bool flag, out UnableReason reason) {
+			if (! IsTrafficLightToggleable(nodeId, out reason)) {
+				return false;
+			}
+
+			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+				NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
+				if ((bool)flag) {
+					//Log._Debug($"Adding traffic light @ node {nId}");
+					flags |= NetNode.Flags.TrafficLights;
+				} else {
+					//Log._Debug($"Removing traffic light @ node {nId}");
+					flags &= ~NetNode.Flags.TrafficLights;
+				}
+				node.m_flags = flags;
+				return true;
+			});
+			return true;
 		}
 
-		public void RemoveTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, false);
+		public bool AddTrafficLight(ushort nodeId) {
+			UnableReason reason;
+			return AddTrafficLight(nodeId, out reason);
 		}
 
-		public void ToggleTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, !HasTrafficLight(nodeId));
+		public bool AddTrafficLight(ushort nodeId, out UnableReason reason) {
+			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+			return SetTrafficLight(nodeId, true, out reason);
+		}
+
+		public bool RemoveTrafficLight(ushort nodeId) {
+			UnableReason reason;
+			return RemoveTrafficLight(nodeId, out reason);
+		}
+
+		public bool RemoveTrafficLight(ushort nodeId, out UnableReason reason) {
+			return SetTrafficLight(nodeId, false, out reason);
+		}
+
+		public bool ToggleTrafficLight(ushort nodeId) {
+			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId));
+		}
+
+		public bool ToggleTrafficLight(ushort nodeId, out UnableReason reason) {
+			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId), out reason);
 		}
 
 		public bool IsTrafficLightToggleable(ushort nodeId, out UnableReason reason) {
-			if (! NetUtil.IsNodeValid(nodeId)) {
-				reason = UnableReason.InvalidNode;
-				return false;
-			}
-			
-			if (! NetUtil.CheckNodeFlags(nodeId, NetNode.Flags.Junction)) {
+			if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
 				reason = UnableReason.NoJunction;
 				return false;
 			}
 
-			TrafficLightSimulation sim = TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId);
-			if (sim != null && sim.IsTimedLight()) {
+			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
 				reason = UnableReason.HasTimedLight;
 				return false;
 			}
@@ -63,7 +94,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool HasTrafficLight(ushort nodeId) {
-			return Flags.isNodeTrafficLight(nodeId);
+			return Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights, NetNode.Flags.Created | NetNode.Flags.TrafficLights);
 		}
 
 		[Obsolete]
@@ -79,7 +110,7 @@ namespace TrafficManager.Manager {
 					var nodeId = Convert.ToUInt16(split[0]);
 					uint flag = Convert.ToUInt16(split[1]);
 
-					if (!NetUtil.IsNodeValid(nodeId))
+					if (!Services.NetService.IsNodeValid(nodeId))
 						continue;
 
 					Flags.setNodeTrafficLight(nodeId, flag > 0);
@@ -103,7 +134,7 @@ namespace TrafficManager.Manager {
 
 			foreach (Configuration.NodeTrafficLight nodeLight in data) {
 				try {
-					if (!NetUtil.IsNodeValid(nodeLight.nodeId))
+					if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
 						continue;
 
 					Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");

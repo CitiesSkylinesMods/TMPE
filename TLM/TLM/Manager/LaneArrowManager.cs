@@ -19,6 +19,12 @@ namespace TrafficManager.Manager {
 			Instance = new LaneArrowManager();
 		}
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
+		}
+
 		public bool SetLaneArrows(uint laneId, LaneArrows flags, bool overrideHighwayArrows = false) {
 			if (Flags.setLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
 				SubscribeToSegmentGeometry(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
@@ -76,7 +82,7 @@ namespace TrafficManager.Manager {
 						var laneId = Convert.ToUInt32(split[0]);
 						uint flags = Convert.ToUInt32(split[1]);
 
-						if (!NetUtil.IsLaneValid(laneId))
+						if (!Services.NetService.IsLaneValid(laneId))
 							continue;
 
 						if (flags > ushort.MaxValue)
@@ -111,7 +117,7 @@ namespace TrafficManager.Manager {
 
 			foreach (var laneArrowData in data) {
 				try {
-					if (!NetUtil.IsLaneValid(laneArrowData.laneId))
+					if (!Services.NetService.IsLaneValid(laneArrowData.laneId))
 						continue;
 
 					uint laneArrowFlags = laneArrowData.arrows & Flags.lfr;

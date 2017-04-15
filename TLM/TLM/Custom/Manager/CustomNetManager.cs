@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TrafficManager.Geometry;
+using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {
@@ -35,10 +36,11 @@ namespace TrafficManager.Custom.Manager {
 
 			// NON-STOCK CODE START
 			try {
-#if DEBUG
-				//Log._Debug($"CustomNetManager: CustomFinalizeSegment {segment}");
+#if DEBUGGEO
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
 #endif
-				SegmentGeometry.Get(segment)?.Recalculate(true);
+				SegmentGeometry.Get(segment)?.Recalculate(GeometryCalculationMode.Propagate);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomFinalizeSegment @ seg. {segment}: " + e.ToString());
 			}
@@ -62,9 +64,10 @@ namespace TrafficManager.Custom.Manager {
 			// NON-STOCK CODE START
 			try {
 #if DEBUG
-				//Log._Debug($"CustomNetManager: CustomUpdateSegment {segment}");
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
 #endif
-				SegmentGeometry.Get(segment)?.Recalculate(true);
+				SegmentGeometry.Get(segment)?.Recalculate(GeometryCalculationMode.Propagate);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomUpdateSegment @ seg. {segment}: " + e.ToString());
 			}

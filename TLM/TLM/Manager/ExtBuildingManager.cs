@@ -31,6 +31,17 @@ namespace TrafficManager.Manager {
 			}
 		}
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Extended building data:");
+			for (int i = 0; i < ExtBuildings.Length; ++i) {
+				if (ExtBuildings[i] == null || ! ExtBuildings[i].IsValid()) {
+					continue;
+				}
+				Log._Debug($"Building {i}: {ExtBuildings[i]}");
+			}
+		}
+
 		/// <summary>
 		/// Retrieves the additional building data for the given building id.
 		/// </summary>

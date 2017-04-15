@@ -1,17 +1,17 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
-using TrafficManager.State;
 using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
 using TrafficManager.Manager;
-using static TrafficManager.Util.NetUtil;
+using TrafficManager.State;
+using TrafficManager.TrafficLight;
 using TrafficManager.Util;
+using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
@@ -84,7 +84,7 @@ namespace TrafficManager.UI.SubTools {
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = nodePos - camPos;
 
-			if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
 			int width = numLanes * 128;
@@ -112,7 +112,7 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiLaneChangeWindow(int num) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
-			IList<LanePos> laneList = NetUtil.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
+			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
 			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 

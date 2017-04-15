@@ -196,9 +196,31 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-		public ExtCitizenInstance(ushort instanceId) {
+		public override string ToString() {
+			return $"[ExtCitizenInstance\n" +
+				"\t" + $"InstanceId = {InstanceId}\n" +
+				"\t" + $"PathMode = {PathMode}\n" +
+				"\t" + $"FailedParkingAttempts = {FailedParkingAttempts}\n" +
+				"\t" + $"ParkingSpaceLocationId = {ParkingSpaceLocationId}\n" +
+				"\t" + $"ParkingSpaceLocation = {ParkingSpaceLocation}\n" +
+				"\t" + $"ParkingPathStartPosition = {ParkingPathStartPosition}\n" +
+				"\t" + $"ReturnPathId = {ReturnPathId}\n" +
+				"\t" + $"ReturnPathState = {ReturnPathState}\n" +
+				"\t" + $"LastDistanceToParkedCar = {LastDistanceToParkedCar}\n" +
+				"ExtCitizenInstance]";
+		}
+
+		internal ExtCitizenInstance(ushort instanceId) {
 			this.InstanceId = instanceId;
 			Reset();
+		}
+
+		private ExtCitizenInstance() {
+
+		}
+
+		internal bool IsValid() {
+			return Constants.ServiceFactory.CitizenService.IsCitizenInstanceValid(InstanceId);
 		}
 
 		public uint GetCitizenId() {

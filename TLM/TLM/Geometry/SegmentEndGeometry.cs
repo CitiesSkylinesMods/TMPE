@@ -1,20 +1,17 @@
 ﻿using ColossalFramework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TrafficManager.State;
+using TrafficManager.Util;
 using UnityEngine;
+using Util;
 
 namespace TrafficManager.Geometry {
-	public class SegmentEndGeometry {
-		public ushort SegmentId {
-			get; private set;
-		} = 0;
-
-		public bool StartNode { get; private set; }
-
+	public class SegmentEndGeometry : SegmentEndId {
 		public ushort NodeId() {
-			return StartNode ? Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_endNode;
+			return Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
 		}
 
 		/// <summary>
@@ -133,9 +130,41 @@ namespace TrafficManager.Geometry {
 			get; private set;
 		} = false;
 
-		public SegmentEndGeometry(ushort segmentId, bool startNode) {
-			SegmentId = segmentId;
-			StartNode = startNode;
+		public override string ToString() {
+			return $"[SegmentEndGeometry {base.ToString()}\n" +
+				"\t" + $"NodeId() = {NodeId()}\n" +
+				"\t" + $"IsValid() = {IsValid()}\n" +
+				"\t" + $"LastKnownNodeId = {LastKnownNodeId}\n" +
+				"\t" + $"ConnectedSegments = {ConnectedSegments.ArrayToString()}\n" +
+				"\t" + $"NumConnectedSegments = {NumConnectedSegments}\n" +
+				"\t" + $"LeftSegments = {LeftSegments.ArrayToString()}\n" +
+				"\t" + $"NumLeftSegments = {NumLeftSegments}\n" +
+				"\t" + $"IncomingLeftSegments = {IncomingLeftSegments.ArrayToString()}\n" +
+				"\t" + $"NumIncomingLeftSegments = {NumIncomingLeftSegments}\n" +
+				"\t" + $"OutgoingLeftSegments = {OutgoingLeftSegments.ArrayToString()}\n" +
+				"\t" + $"NumOutgoingLeftSegments = {NumOutgoingLeftSegments}\n" +
+				"\t" + $"RightSegments = {RightSegments.ArrayToString()}\n" +
+				"\t" + $"NumRightSegments = {NumRightSegments}\n" +
+				"\t" + $"NumIncomingSegments = {NumIncomingSegments}\n" +
+				"\t" + $"NumOutgoingSegments = {NumOutgoingSegments}\n" +
+				"\t" + $"IncomingRightSegments = {IncomingRightSegments.ArrayToString()}\n" +
+				"\t" + $"NumIncomingRightSegments = {NumIncomingRightSegments}\n" +
+				"\t" + $"OutgoingRightSegments = {OutgoingRightSegments.ArrayToString()}\n" +
+				"\t" + $"NumOutgoingRightSegments = {NumOutgoingRightSegments}\n" +
+				"\t" + $"StraightSegments = {StraightSegments.ArrayToString()}\n" +
+				"\t" + $"NumStraightSegments = {NumStraightSegments}\n" +
+				"\t" + $"IncomingStraightSegments = {IncomingStraightSegments.ArrayToString()}\n" +
+				"\t" + $"NumIncomingStraightSegments = {NumIncomingStraightSegments}\n" +
+				"\t" + $"OutgoingStraightSegments = {OutgoingStraightSegments.ArrayToString()}\n" +
+				"\t" + $"NumOutgoingStraightSegments = {NumOutgoingStraightSegments}\n" +
+				"\t" + $"OnlyHighways = {OnlyHighways}\n" +
+				"\t" + $"OutgoingOneWay = {OutgoingOneWay}\n" +
+				"\t" + $"IncomingOneWay = {IncomingOneWay}\n" +
+				"SegmentEndGeometry]";
+		}
+
+		public SegmentEndGeometry(ushort segmentId, bool startNode) : base(segmentId, startNode) {
+
 		}
 
 		internal void Cleanup() {
@@ -179,7 +208,7 @@ namespace TrafficManager.Geometry {
 		}
 
 		public bool IsValid() {
-			bool valid = GetSegmentGeometry() == null || GetSegmentGeometry().IsValid();
+			bool valid = GetSegmentGeometry() != null && GetSegmentGeometry().IsValid();
 			return valid && NodeId() != 0;
 		}
 
@@ -247,17 +276,23 @@ namespace TrafficManager.Geometry {
 			return SegmentGeometry.Get(SegmentId);
 		}
 
-		internal void Recalculate(bool propagate) {
-#if DEBUG
-			//Log._Debug($"SegmentEndGeometry: Recalculate seg. {SegmentId} @ node {NodeId()}, propagate={propagate}");
+		internal void Recalculate(GeometryCalculationMode calcMode) {
+#if DEBUGGEO
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($">>> SegmentEndGeometry.Recalculate({calcMode}): seg. {SegmentId} @ node {NodeId()}");
 #endif
 
 			ushort nodeIdBeforeRecalc = LastKnownNodeId;
 			Cleanup();
 
 			if (!IsValid()) {
-				if (nodeIdBeforeRecalc != 0)
-					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId, propagate);
+				if (calcMode == GeometryCalculationMode.Propagate && nodeIdBeforeRecalc != 0) {
+#if DEBUGGEO
+					if (GlobalConfig.Instance.DebugSwitches[5])
+						Log._Debug($"SegmentEndGeometry.Recalculate({calcMode}): seg. {SegmentId} is not valid. nodeIdBeforeRecalc={nodeIdBeforeRecalc}. Removing segment from node.");
+#endif
+					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegmentEnd(this, GeometryCalculationMode.Propagate);
+				}
 
 				return;
 			}
@@ -338,11 +373,12 @@ namespace TrafficManager.Geometry {
 				OnlyHighways = false;
 
 			// propagate information to other segments
-			if (nodeIdBeforeRecalc != nodeId) {
-				if (nodeIdBeforeRecalc != 0)
-					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegment(SegmentId, propagate);
+			if (calcMode == GeometryCalculationMode.Init || (calcMode == GeometryCalculationMode.Propagate && nodeIdBeforeRecalc != nodeId)) {
+				if (calcMode == GeometryCalculationMode.Propagate && nodeIdBeforeRecalc != 0) {
+					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegmentEnd(this, GeometryCalculationMode.Propagate);
+				}
 
-				NodeGeometry.Get(nodeId).AddSegment(SegmentId, StartNode, propagate);
+				NodeGeometry.Get(nodeId).AddSegmentEnd(this, calcMode);
 			}
 		}
 

@@ -12,7 +12,7 @@ namespace TrafficManager.Manager {
 	public class TrafficMeasurementManager : AbstractCustomManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
-		public static TrafficMeasurementManager Instance { get; private set; } = null;
+		public static readonly TrafficMeasurementManager Instance = new TrafficMeasurementManager();
 
 		public const ushort MAX_SPEED = 10000;
 
@@ -76,15 +76,17 @@ namespace TrafficManager.Manager {
 		private int[] meanSpeedLanes = { 0, 0 };
 #endif
 
-		static TrafficMeasurementManager() {
-			Instance = new TrafficMeasurementManager();
-		}
-
 		private TrafficMeasurementManager() {
 			laneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
 			segmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT][];
 			defaultSegmentDirTrafficData = new SegmentDirTrafficData();
 			ResetTrafficStats();
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
 		public void SimulationStep(ushort segmentId, ref NetSegment segmentData) {

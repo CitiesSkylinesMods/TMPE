@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Util;
 
 namespace TrafficManager.Util {
 	/// <summary>
@@ -43,6 +44,10 @@ namespace TrafficManager.Util {
 			}
 		}
 
+		public override string ToString() {
+			return this.DictionaryToString();
+		}
+
 		public TValue this[TKey key] {
 			get {
 				if (key == null) {
@@ -51,7 +56,7 @@ namespace TrafficManager.Util {
 
 				int keyIndex = IndexOfKey(key);
 				if (keyIndex < 0) {
-					throw new KeyNotFoundException($"Key '{key}' not found in dictionary: {string.Join(", ", keyValuePairs.Select(x => x.ToString()).ToArray())}");
+					throw new KeyNotFoundException($"Key '{key}' not found in dictionary: {string.Join(", ", keyValuePairs.Select(x => x.Key.ToString() + " => " + ToStringExt.ToString(x.Value)).ToArray())}");
 				}
 
 				return values[keyIndex];

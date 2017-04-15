@@ -12,16 +12,17 @@ using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;
 using static TrafficManager.Traffic.ExtCitizenInstance;
+using static TrafficManager.Traffic.PrioritySegment;
 
 namespace TrafficManager.Manager {
 	public class VehicleBehaviorManager : AbstractCustomManager {
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
 		public const int MAX_PRIORITY_WAIT_TIME = 50;
 
-		public static VehicleBehaviorManager Instance { get; private set; } = null;
+		public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
 
-		static VehicleBehaviorManager() {
-			Instance = new VehicleBehaviorManager();
+		private VehicleBehaviorManager() {
+
 		}
 
 		/// <summary>
@@ -99,6 +100,7 @@ namespace TrafficManager.Manager {
 			bool hasStockYieldSign = false;
 			float sqrSpeed = lastFrameData.m_velocity.sqrMagnitude;
 			bool checkTrafficLights = false;
+			bool isTargetStartNode = netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode == targetNodeId;
 			if (!isRailVehicle) {
 				// check if to check space
 
@@ -111,7 +113,7 @@ namespace TrafficManager.Manager {
 				var hasCrossing = (targetNodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 				var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
 				hasStockYieldSign = (prevLaneFlags & (NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd)) != NetLane.Flags.None && (targetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.TrafficLights | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction;
-				bool checkSpace = !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode == targetNodeId) && !isRecklessDriver;
+				bool checkSpace = !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, isTargetStartNode) && !isRecklessDriver;
 
 				//TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(destinationNodeId);
 				//if (timedNode != null && timedNode.vehiclesMayEnterBlockedJunctions) {
@@ -285,8 +287,8 @@ namespace TrafficManager.Manager {
 							Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
-						var prioritySegment = prioMan.GetPrioritySegment(targetNodeId, prevPos.m_segment);
-						if (prioritySegment != null) {
+						var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
+						if (sign != PrioritySegment.PriorityType.None) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
@@ -313,8 +315,8 @@ namespace TrafficManager.Manager {
 
 							if (vehicleState.JunctionTransitState != VehicleJunctionTransitState.Leave) {
 								bool hasIncomingCars;
-								switch (prioritySegment.Type) {
-									case SegmentEnd.PriorityType.Stop:
+								switch (sign) {
+									case PriorityType.Stop:
 #if DEBUG
 										if (debug)
 											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, sqrSpeed={sqrSpeed}");
@@ -335,7 +337,7 @@ namespace TrafficManager.Manager {
 													if (Options.simAccuracy >= 4) {
 														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 													} else {
-														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
 #if DEBUG
 														if (debug)
 															Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -368,7 +370,7 @@ namespace TrafficManager.Manager {
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 										}
 										break;
-									case SegmentEnd.PriorityType.Yield:
+									case PriorityType.Yield:
 #if DEBUG
 										if (debug)
 											Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={vehicleState.WaitTime}");
@@ -386,7 +388,7 @@ namespace TrafficManager.Manager {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
 #if DEBUG
 													if (debug)
 														Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
@@ -421,8 +423,8 @@ namespace TrafficManager.Manager {
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 										}
 										break;
-									case SegmentEnd.PriorityType.Main:
-									case SegmentEnd.PriorityType.None:
+									case PriorityType.Main:
+									default:
 #if DEBUG
 										if (debug)
 											Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={vehicleState.WaitTime}");
@@ -440,7 +442,7 @@ namespace TrafficManager.Manager {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevPos, ref position);
+											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
 #if DEBUG
 											if (debug)
 												Log._Debug($"hasIncomingCars: {hasIncomingCars}");

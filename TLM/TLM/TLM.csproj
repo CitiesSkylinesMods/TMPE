@@ -43,22 +43,26 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\DebugGeometry\</OutputPath>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>0</WarningLevel>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -68,25 +72,24 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.Networking">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.UI">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeProfiler.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomBusAI.cs" />
     <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
+    <Compile Include="Custom\AI\CustomNetAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
@@ -98,9 +101,11 @@
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Geometry\GeometryCalculationMode.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\SegmentEndManager.cs" />
     <Compile Include="Manager\VehicleBehaviorManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
@@ -124,6 +129,7 @@
     <Compile Include="Geometry\SegmentEndGeometry.cs" />
     <Compile Include="Manager\VehicleStateManager.cs" />
     <Compile Include="Manager\VehicleRestrictionsManager.cs" />
+    <Compile Include="Geometry\SegmentEndId.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
@@ -161,13 +167,11 @@
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
-    <Compile Include="Util\LogicUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="Util\VehicleUtil.cs" />
-    <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="Log.cs" />
@@ -180,12 +184,12 @@
     <Compile Include="TrafficLight\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TrafficLightToolTextureResources.cs" />
+    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\TrafficPriorityManager.cs" />
-    <Compile Include="Traffic\TrafficSegment.cs" />
+    <Compile Include="Traffic\PrioritySegment.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\UITrafficManager.cs" />
@@ -314,11 +318,28 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
+      <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
+      <Name>TMPE.CitiesGameBridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
+      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
+      <Name>TMPE.GenericGameBridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.Util\TMPE.Util.csproj">
+      <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
+      <Name>TMPE.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)$(TargetName).*" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TMPE.Util.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

@@ -77,7 +77,7 @@ namespace TrafficManager.State {
 			for (uint i = 0; i < laneArrowFlags.Length; ++i) {
 				if (laneArrowFlags[i] == null)
 					continue;
-				Log.Info($"Lane {i}: {laneArrowFlags[i]} (valid? {NetUtil.IsLaneValid(i)})");
+				Log.Info($"Lane {i}: {laneArrowFlags[i]} (valid? {Constants.ServiceFactory.NetService.IsLaneValid(i)})");
 			}
 
 			Log.Info("------------------------");
@@ -88,19 +88,19 @@ namespace TrafficManager.State {
 					continue;
 
 				ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-				Log.Info($"Lane {i}: valid? {NetUtil.IsLaneValid(i)}, seg. valid? {NetUtil.IsSegmentValid(segmentId)}");
+				Log.Info($"Lane {i}: valid? {Constants.ServiceFactory.NetService.IsLaneValid(i)}, seg. valid? {Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)}");
 				for (int x = 0; x < 2; ++x) {
 					if (laneConnections[i][x] == null)
 						continue;
 
 					ushort nodeId = x == 0 ? Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
-					Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {NetUtil.IsNodeValid(nodeId)}");
+					Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {Constants.ServiceFactory.NetService.IsNodeValid(nodeId)}");
 
 					for (int y = 0; y < laneConnections[i][x].Length; ++y) {
 						if (laneConnections[i][x][y] == 0)
 							continue;
 
-						Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {NetUtil.IsLaneValid(laneConnections[i][x][y])})");
+						Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {Constants.ServiceFactory.NetService.IsLaneValid(laneConnections[i][x][y])})");
 					}
 				}
 			}
@@ -111,7 +111,7 @@ namespace TrafficManager.State {
 			for (ushort i = 0; i < laneSpeedLimitArray.Length; ++i) {
 				if (laneSpeedLimitArray[i] == null)
 					continue;
-				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
+				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)}");
 				for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
 					if (laneSpeedLimitArray[i][x] == null)
 						continue;
@@ -125,7 +125,7 @@ namespace TrafficManager.State {
 			for (ushort i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
 				if (laneAllowedVehicleTypesArray[i] == null)
 					continue;
-				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
+				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)}");
 				for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
 					if (laneAllowedVehicleTypesArray[i][x] == null)
 						continue;
@@ -139,15 +139,15 @@ namespace TrafficManager.State {
 			for (ushort i = 0; i < segmentNodeFlags.Length; ++i) {
 				if (segmentNodeFlags[i] == null)
 					continue;
-				Log.Info($"Segment {i}: valid? {NetUtil.IsSegmentValid(i)}");
 				for (int x = 0; x < segmentNodeFlags[i].Length; ++x) {
 					if (segmentNodeFlags[i][x] == null)
 						continue;
-					Log.Info($"\tNode idx {x}: {segmentNodeFlags[i][x]}");
+					Log.Info($"\tSegment {i}, Node idx {x}: {segmentNodeFlags[i][x]} (valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)})");
 				}
 			}
 		}
 
+		[Obsolete]
 		public static bool mayHaveTrafficLight(ushort nodeId) {
 			if (nodeId <= 0) {
 				return false;
@@ -179,6 +179,7 @@ namespace TrafficManager.State {
 			return true;
 		}
 
+		[Obsolete]
 		public static bool setNodeTrafficLight(ushort nodeId, bool flag) {
 			if (nodeId <= 0)
 				return false;
@@ -192,7 +193,7 @@ namespace TrafficManager.State {
 				return false;
 			}
 
-			NetUtil.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 				NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
 				if ((bool)flag) {
 					Log._Debug($"Adding traffic light @ node {nId}");
@@ -202,10 +203,12 @@ namespace TrafficManager.State {
 					flags &= ~NetNode.Flags.TrafficLights;
 				}
 				node.m_flags = flags;
+				return true;
 			});
 			return true;
 		}
 
+		[Obsolete]
 		internal static bool isNodeTrafficLight(ushort nodeId) {
 			if (nodeId <= 0)
 				return false;
@@ -685,7 +688,7 @@ namespace TrafficManager.State {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection(dir2) : dir2;
+			var dir3 = Constants.ServiceFactory.SimulationService.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
@@ -748,32 +751,34 @@ namespace TrafficManager.State {
 			IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
 			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				NetUtil.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+				Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
 					if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
-						return;
+						return true;
 
 					ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segId];
 					if (allowedTypes == null) {
-						return;
+						return true;
 					}
 
-					NetUtil.IterateSegmentLanes(segmentId, ref segment, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort sId, ref NetSegment seg, byte laneIndex) {
+					Constants.ServiceFactory.NetService.IterateSegmentLanes(segmentId, ref segment, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort sId, ref NetSegment seg, byte laneIndex) {
 						if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
-							return;
+							return true;
 						}
 
 						if (laneIndex >= allowedTypes.Length) {
-							return;
+							return true;
 						}
 
 						ExtVehicleType? allowedType = allowedTypes[laneIndex];
 
 						if (allowedType == null) {
-							return;
+							return true;
 						}
 
 						ret.Add(laneId, (ExtVehicleType)allowedType);
+						return true;
 					});
+					return true;
 				});
 			}
 			

@@ -22,16 +22,20 @@ namespace TrafficManager.UI.SubTools {
 			if (HoveredNodeId == 0)
 				return;
 
+			ToggleTrafficLight(HoveredNodeId);
+		}
+
+		public void ToggleTrafficLight(ushort nodeId) {
 			TrafficLightManager.UnableReason reason;
-			if (! TrafficLightManager.Instance.IsTrafficLightToggleable(HoveredNodeId, out reason)) {
+			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, out reason)) {
 				if (reason == TrafficLightManager.UnableReason.HasTimedLight) {
-					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
+					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
 				}
 				return;
 			}
 
-			TrafficPriorityManager.Instance.RemovePrioritySegments(HoveredNodeId);
-			TrafficLightManager.Instance.ToggleTrafficLight(HoveredNodeId);
+			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+			TrafficLightManager.Instance.ToggleTrafficLight(nodeId);
 		}
 
 		public override void OnToolGUI(Event e) {
