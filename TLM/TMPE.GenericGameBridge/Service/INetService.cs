@@ -25,12 +25,18 @@ namespace GenericGameBridge.Service {
 		}
 	}
 
+	public enum ClockDirection {
+		None,
+		Clockwise,
+		CounterClockwise
+	}
+
 	public interface INetService {
 		bool CheckLaneFlags(uint laneId, NetLane.Flags flagMask, NetLane.Flags? expectedResult = default(NetLane.Flags?));
 		bool CheckNodeFlags(ushort nodeId, NetNode.Flags flagMask, NetNode.Flags? expectedResult = default(NetNode.Flags?));
 		bool CheckSegmentFlags(ushort segmentId, NetSegment.Flags flagMask, NetSegment.Flags? expectedResult = default(NetSegment.Flags?));
-		NetInfo.Direction GetSegmentEndDirection(ushort segmentId, bool startNode);
-		NetInfo.Direction GetSegmentEndDirection(ushort segmentId, ref NetSegment segment, bool startNode);
+		NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode);
+		NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, ref NetSegment segment, bool startNode);
 		ushort GetSegmentNodeId(ushort segmentId, bool startNode);
 		/// <summary>
 		/// Assembles a geometrically sorted list of lanes for the given segment.
@@ -48,6 +54,7 @@ namespace GenericGameBridge.Service {
 		bool IsNodeValid(ushort nodeId);
 		bool IsSegmentValid(ushort segmentId);
 		void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler);
+		void IterateNodeSegments(ushort nodeId, ClockDirection dir, NetSegmentHandler handler);
 		void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
 		void IterateSegmentLanes(ushort segmentId, ref NetSegment segment, NetSegmentLaneHandler handler);
 		void ProcessLane(uint laneId, NetLaneHandler handler);

@@ -29,7 +29,10 @@ namespace TrafficManager.UI.SubTools {
 			TrafficLightManager.UnableReason reason;
 			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, out reason)) {
 				if (reason == TrafficLightManager.UnableReason.HasTimedLight) {
-					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
+					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
+						return true;
+					});
 				}
 				return;
 			}

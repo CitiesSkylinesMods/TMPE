@@ -1760,8 +1760,9 @@ namespace TrafficManager.Custom.PathFinding {
 							totalOutgoingLanes += outgoingVehicleLanes;
 						}
 
-						if (explorePrevSegment && nextSegmentId == prevSegmentId)
+						if (explorePrevSegment && nextSegmentId == prevSegmentId) {
 							break;
+						}
 					} // foreach segment
 	#if DEBUGPF
 					if (debug)

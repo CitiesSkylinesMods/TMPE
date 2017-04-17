@@ -75,16 +75,42 @@ namespace CitiesGameBridge.Service {
 		}
 
 		public void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler) {
-			ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-				for (byte s = 0; s < 8; s++) {
-					ushort segmentId = node.GetSegment(s);
-					if (segmentId <= 0)
-						continue;
+			IterateNodeSegments(nodeId, ClockDirection.None, handler);
+		}
 
-					if (! handler(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
+		public void IterateNodeSegments(ushort nodeId, ClockDirection dir, NetSegmentHandler handler) {
+			NetManager netManager = Singleton<NetManager>.instance;
+
+			ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+				ushort segmentId = node.GetSegment(0);
+				ushort initSegId = segmentId;
+
+				byte index = 0;
+				while (segmentId != 0 && index < 8) {
+					if (! handler(segmentId, ref netManager.m_segments.m_buffer[segmentId])) {
+						break;
+					}
+
+					++index;
+
+					switch (dir) {
+						case ClockDirection.None:
+						default:
+							segmentId = node.GetSegment(index);
+							break;
+						case ClockDirection.Clockwise:
+							segmentId = netManager.m_segments.m_buffer[segmentId].GetLeftSegment(nodeId);
+							break;
+						case ClockDirection.CounterClockwise:
+							segmentId = netManager.m_segments.m_buffer[segmentId].GetRightSegment(nodeId);
+							break;
+					}
+
+					if (segmentId == initSegId) {
 						break;
 					}
 				}
+				
 				return true;
 			});
 		}
@@ -109,15 +135,15 @@ namespace CitiesGameBridge.Service {
 			}
 		}
 
-		public NetInfo.Direction GetSegmentEndDirection(ushort segmentId, bool startNode) {
-			return GetSegmentEndDirection(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId], startNode);
+		public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode) {
+			return GetFinalSegmentEndDirection(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId], startNode);
 		}
 
-		public NetInfo.Direction GetSegmentEndDirection(ushort segmentId, ref NetSegment segment, bool startNode) {
+		public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, ref NetSegment segment, bool startNode) {
 			NetInfo segmentInfo = segment.Info;
 
 			var dir = startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
-			if ((segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None ^ SimulationService.Instance.LeftHandDrive)
+			if ((segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None /*^ SimulationService.Instance.LeftHandDrive*/)
 				dir = NetInfo.InvertDirection(dir);
 
 			return dir;

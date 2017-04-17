@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>

@@ -249,8 +249,11 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal void Update() {
-			StartNode = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].m_startNode == NodeId;
-			numLanes = Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId].Info.m_lanes.Length;
+			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate(ushort segmentId, ref NetSegment segment) {
+				StartNode = segment.m_startNode == NodeId;
+				numLanes = segment.Info.m_lanes.Length;
+				return true;
+			});
 			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
 			numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 			numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];

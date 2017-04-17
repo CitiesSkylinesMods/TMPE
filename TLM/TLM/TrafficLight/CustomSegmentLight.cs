@@ -38,6 +38,12 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
+		public short ClockwiseIndex {
+			get {
+				return lights.ClockwiseIndex;
+			}
+		}
+
 		public Mode CurrentMode {
 			get { return currentMode; }
 			set {
@@ -56,34 +62,34 @@ namespace TrafficManager.TrafficLight {
 
 		public RoadBaseAI.TrafficLightState LightLeft {
 			get { return leftLight; }
-			set {
+			/*private set {
 				if (leftLight == value)
 					return;
 
 				leftLight = value;
 				lights.OnChange();
-			}
+			}*/
 		}
 
 		public RoadBaseAI.TrafficLightState LightMain {
 			get { return mainLight; }
-			set {
+			/*private set {
 				if (mainLight == value)
 					return;
 
 				mainLight = value;
 				lights.OnChange();
-			}
+			}*/
 		}
 		public RoadBaseAI.TrafficLightState LightRight {
 			get { return rightLight; }
-			set {
+			/*private set {
 				if (rightLight == value)
 					return;
 
 				rightLight = value;
 				lights.OnChange();
-			}
+			}*/
 		}
 
 		CustomSegmentLights lights;
@@ -144,7 +150,7 @@ namespace TrafficManager.TrafficLight {
 			UpdateVisuals();
 		}
 
-		public void ChangeMode() {
+		public void ToggleMode() {
 			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
 			bool startNode = lights.StartNode;
 			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
@@ -193,7 +199,8 @@ namespace TrafficManager.TrafficLight {
 			} else if (CurrentMode == Mode.SingleRight) {
 				SetStates(invertedLight, invertedLight, null);
 			} else {
-				LightMain = invertedLight;
+				//LightMain = invertedLight;
+				SetStates(invertedLight, null, null);
 			}
 
 			UpdateVisuals();
@@ -204,7 +211,8 @@ namespace TrafficManager.TrafficLight {
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
-			LightLeft = invertedLight;
+			//LightLeft = invertedLight;
+			SetStates(null, invertedLight, null);
 
 			UpdateVisuals();
 		}
@@ -214,7 +222,8 @@ namespace TrafficManager.TrafficLight {
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
-			LightRight = invertedLight;
+			//LightRight = invertedLight;
+			SetStates(null, null, invertedLight);
 
 			UpdateVisuals();
 		}
@@ -336,32 +345,6 @@ namespace TrafficManager.TrafficLight {
 			return MemberwiseClone();
 		}
 
-		/*public void invert() {
-			LightMain = InvertLight(LightMain);
-			LightLeft = InvertLight(LightLeft);
-			LightRight = InvertLight(LightRight);
-		}*/
-
-		/*public static RoadBaseAI.TrafficLightState GetPedestrianLightState(RoadBaseAI.TrafficLightState vehicleLightState) {
-			RoadBaseAI.TrafficLightState ret = RoadBaseAI.TrafficLightState.Green;
-			switch (vehicleLightState) {
-				case RoadBaseAI.TrafficLightState.Red:
-				default:
-					ret = RoadBaseAI.TrafficLightState.Green;
-					break;
-				case RoadBaseAI.TrafficLightState.Green:
-					ret = RoadBaseAI.TrafficLightState.Red;
-					break;
-				case RoadBaseAI.TrafficLightState.RedToGreen:
-					ret = RoadBaseAI.TrafficLightState.GreenToRed;
-					break;
-				case RoadBaseAI.TrafficLightState.GreenToRed:
-					ret = RoadBaseAI.TrafficLightState.RedToGreen;
-					break;
-			}
-			return ret;
-		}*/
-
 		internal void MakeRedOrGreen() {
 			RoadBaseAI.TrafficLightState mainState = RoadBaseAI.TrafficLightState.Green;
 			RoadBaseAI.TrafficLightState leftState = RoadBaseAI.TrafficLightState.Green;
@@ -379,10 +362,14 @@ namespace TrafficManager.TrafficLight {
 				rightState = RoadBaseAI.TrafficLightState.Red;
 			}
 
+			//Log._Debug($"CustomSegmentLight.MakeRedOrGreen: called for segment {SegmentId} @ {NodeId}");
+
 			SetStates(mainState, leftState, rightState);
 		}
 
 		internal void MakeRed() {
+			//Log._Debug($"CustomSegmentLight.MakeRed: called for segment {SegmentId} @ {NodeId}");
+
 			SetStates(RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState.Red);
 		}
 
@@ -399,7 +386,9 @@ namespace TrafficManager.TrafficLight {
 			if (rightLight != null)
 				this.rightLight = (RoadBaseAI.TrafficLightState)rightLight;
 
-			//Log._Debug($"SetStates for segment {SegmentId} @ {NodeId}: {this.mainLight} {this.leftLight} {this.rightLight}");
+#if DEBUG
+			//Log.Warning($"CustomSegmentLight.SetStates({mainLight}, {leftLight}, {rightLight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: {this.mainLight} {this.leftLight} {this.rightLight}");
+#endif
 
 			lights.OnChange(calcAutoPedLight);
 		}

@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -160,11 +161,20 @@ namespace TrafficManager.Geometry {
 				"\t" + $"OnlyHighways = {OnlyHighways}\n" +
 				"\t" + $"OutgoingOneWay = {OutgoingOneWay}\n" +
 				"\t" + $"IncomingOneWay = {IncomingOneWay}\n" +
+				"\t" + $"GetClockwiseIndex() = {GetClockwiseIndex()}\n" +
 				"SegmentEndGeometry]";
 		}
 
 		public SegmentEndGeometry(ushort segmentId, bool startNode) : base(segmentId, startNode) {
 
+		}
+
+		public static SegmentEndGeometry Get(SegmentEndId endId) {
+			return Get(endId.SegmentId, endId.StartNode);
+		}
+
+		public static SegmentEndGeometry Get(ushort segmentId, bool startNode) {
+			return SegmentGeometry.Get(segmentId).GetEnd(startNode);
 		}
 
 		internal void Cleanup() {
@@ -276,6 +286,22 @@ namespace TrafficManager.Geometry {
 			return SegmentGeometry.Get(SegmentId);
 		}
 
+		public short GetClockwiseIndex() {
+			// calculate clockwise index
+			short clockwiseIndex = -1;
+			Constants.ServiceFactory.NetService.IterateNodeSegments(NodeId(), ClockDirection.Clockwise, delegate (ushort sId, ref NetSegment segment) {
+				++clockwiseIndex;
+				//Log._Debug($"SegmentEndGeometry.Recalculate: Setting clockwise index of seg. {sId} to {clockwiseIndex} (we are @ seg. {SegmentId})");
+
+				if (sId == SegmentId) {
+					return false;
+				}
+				return true;
+			});
+
+			return clockwiseIndex;
+		}
+
 		internal void Recalculate(GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.DebugSwitches[5])
@@ -297,7 +323,7 @@ namespace TrafficManager.Geometry {
 				return;
 			}
 
-			NetManager netManager = Singleton<NetManager>.instance;
+			//NetManager netManager = Singleton<NetManager>.instance;
 
 			ushort nodeId = NodeId();
 			LastKnownNodeId = nodeId;
@@ -313,9 +339,17 @@ namespace TrafficManager.Geometry {
 
 			//ItemClass connectionClass = netManager.m_segments.m_buffer[SegmentId].Info.GetConnectionClass();
 
+			ushort firstClockwiseSegmentId = 0;
 			bool hasOtherSegments = false;
 			for (var s = 0; s < 8; s++) {
-				ushort otherSegmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(s);
+				ushort otherSegmentId = 0;
+				Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+					otherSegmentId = node.GetSegment(s);
+					if (s == 0) {
+						firstClockwiseSegmentId = otherSegmentId;
+					}
+					return true;
+				});
 				if (otherSegmentId == 0 || otherSegmentId == SegmentId || ! SegmentGeometry.IsValid(otherSegmentId))
 					continue;
 				/*ItemClass otherConnectionClass = Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId].Info.GetConnectionClass();

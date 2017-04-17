@@ -282,18 +282,18 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			NetManager instance = Singleton<NetManager>.instance;
+			NetManager netManager = Singleton<NetManager>.instance;
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
-			Vector3 a = lastFrameData.m_position;
-			Vector3 a2 = lastFrameData.m_position;
+			Vector3 lastPos = lastFrameData.m_position;
+			Vector3 lastPos2 = lastFrameData.m_position;
 			Vector3 b = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
-			a += b;
-			a2 -= b;
+			lastPos += b;
+			lastPos2 -= b;
 			float num = 0.5f * lastFrameData.m_velocity.sqrMagnitude / this.m_info.m_braking;
-			float a3 = Vector3.Distance(a, bezier.a);
-			float b2 = Vector3.Distance(a2, bezier.a);
+			float a3 = Vector3.Distance(lastPos, bezier.a);
+			float b2 = Vector3.Distance(lastPos2, bezier.a);
 			if (Mathf.Min(a3, b2) >= num - 5f) {
-				if (!instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(1000f, vehicleID)) {
+				if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(1000f, vehicleID)) {
 					maxSpeed = 0f;
 					return;
 				}
@@ -319,15 +319,15 @@ namespace TrafficManager.Custom.AI {
 				//if (this.m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) { // NON-STOCK CODE
 				ushort targetNodeId;
 				if (offset < position.m_offset) {
-					targetNodeId = instance.m_segments.m_buffer[(int)position.m_segment].m_startNode;
+					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
 				} else {
-					targetNodeId = instance.m_segments.m_buffer[(int)position.m_segment].m_endNode;
+					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
 				}
 				ushort prevTargetNodeId;
 				if (prevOffset == 0) {
-					prevTargetNodeId = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
+					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
 				} else {
-					prevTargetNodeId = instance.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
+					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
 				if (targetNodeId == prevTargetNodeId) {
 					float oldMaxSpeed = maxSpeed;

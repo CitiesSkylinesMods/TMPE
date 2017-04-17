@@ -276,7 +276,7 @@ namespace TrafficManager.UI.SubTools {
 
 			if (!MainTool.CheckClicked())
 				return true;
-			segmentDict.ChangeMode();
+			segmentDict.ToggleMode();
 			return true;
 		}
 

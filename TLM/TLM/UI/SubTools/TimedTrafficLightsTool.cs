@@ -35,6 +35,7 @@ namespace TrafficManager.UI.SubTools {
 		private int currentStep = -1;
 		private int numSteps = 0;
 		private bool inTestMode = false;
+		private ushort nodeIdToCopy = 0;
 		private HashSet<ushort> currentTimedNodeIds;
 
 		private GUIStyle layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
@@ -177,6 +178,45 @@ namespace TrafficManager.UI.SubTools {
 					RemoveSelectedNode(HoveredNodeId);
 					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 					break;
+				case ToolMode.TimedLightsCopyLights:
+					if (nodeIdToCopy == 0) {
+						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+						return;
+					}
+
+					// compare geometry
+					NodeGeometry sourceNodeGeo = NodeGeometry.Get(nodeIdToCopy);
+					NodeGeometry targetNodeGeo = NodeGeometry.Get(HoveredNodeId);
+
+					if (sourceNodeGeo.NumSegmentEnds != targetNodeGeo.NumSegmentEnds) {
+						Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
+							MainTool.ShowTooltip(Translation.GetString("The_chosen_traffic_light_program_is_incompatible_to_this_junction"), node.m_position);
+							return true;
+						});
+						return;
+					}
+
+					// check for existing simulation
+					if (tlsMan.HasTimedSimulation(HoveredNodeId)) {
+						Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
+							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
+							return true;
+						});
+						return;
+					}
+
+					TimedTrafficLights sourceTimedLights = tlsMan.GetNodeSimulation(nodeIdToCopy).TimedLight;
+
+					// copy `nodeIdToCopy` to `HoveredNodeId`
+					TrafficLightSimulation targetSim = tlsMan.AddNodeToSimulation(HoveredNodeId);
+					targetSim.SetupTimedTrafficLight(new List<ushort> { HoveredNodeId });
+
+					targetSim.TimedLight.PasteSteps(sourceTimedLights);
+
+					Cleanup();
+					AddSelectedNode(HoveredNodeId);
+					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					break;
 			}
 		}
 
@@ -191,6 +231,9 @@ namespace TrafficManager.UI.SubTools {
 				case ToolMode.TimedLightsAddNode:
 				case ToolMode.TimedLightsRemoveNode:
 					_guiTimedTrafficLights();
+					break;
+				case ToolMode.TimedLightsCopyLights:
+					_guiTimedTrafficLightsCopy();
 					break;
 			}
 		}
@@ -271,6 +314,13 @@ namespace TrafficManager.UI.SubTools {
 				currentStep = timedNodeMain.CurrentStep;
 				inTestMode = timedNodeMain.IsInTestMode();
 				numSteps = timedNodeMain.NumSteps();
+			}
+
+			if (numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 && _timedViewedStep < 0) {
+				_timedViewedStep = 0;
+				foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
+					sim.TimedLight.GetStep(_timedViewedStep).UpdateLiveLights(true);
+				}
 			}
 
 			for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
@@ -471,6 +521,7 @@ namespace TrafficManager.UI.SubTools {
 							sim.TimedLight.AddStep(_stepMinValue, _stepMaxValue, _waitFlowBalance);
 						}
 						_timedPanelAdd = false;
+						_timedViewedStep = timedNodeMain.NumSteps() - 1;
 					}
 					if (GUILayout.Button("X", GUILayout.Width(22))) {
 						_timedPanelAdd = false;
@@ -522,7 +573,7 @@ namespace TrafficManager.UI.SubTools {
 					foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 						sim.TimedLight.GetStep(curStep).waitFlowBalance = _waitFlowBalance;
 					}
-
+					
 					//var mayEnterIfBlocked = GUILayout.Toggle(timedNodeMain.vehiclesMayEnterBlockedJunctions, Translation.GetString("Vehicles_may_enter_blocked_junctions"), new GUILayoutOption[] { });
 					var testMode = GUILayout.Toggle(inTestMode, Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
 					foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
@@ -552,6 +603,29 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			if (!timedLightActive) {
+
+				GUILayout.Space(30);
+
+				if (SelectedNodeIndexes.Count == 1 && timedNodeMain.NumSteps() > 0) {
+					GUILayout.BeginHorizontal();
+
+					if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
+						_timedViewedStep = 0;
+						timedNodeMain.RotateLeft();
+					}
+
+					if (GUILayout.Button(Translation.GetString("Copy"))) {
+						nodeIdToCopy = SelectedNodeIndexes[0];
+						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsCopyLights);
+					}
+
+					if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
+						_timedViewedStep = 0;
+						timedNodeMain.RotateRight();
+					}
+
+					GUILayout.EndHorizontal();
+				}
 
 				GUILayout.Space(30);
 
@@ -589,6 +663,7 @@ namespace TrafficManager.UI.SubTools {
 			_timedShowNumbers = false;
 			_timedViewedStep = -1;
 			timedLightActive = false;
+			nodeIdToCopy = 0;
 			RefreshCurrentTimedNodeIds();
 		}
 
@@ -672,6 +747,18 @@ namespace TrafficManager.UI.SubTools {
 
 			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(1, 1, 1)); // revert scaling
 			ShowGUI();
+		}
+
+		private void _guiTimedTrafficLightsCopy() {
+			_cursorInSecondaryPanel = false;
+
+			_windowRect2 = GUILayout.Window(255, _windowRect2, _guiTimedTrafficLightsPasteWindow, Translation.GetString("Paste"));
+
+			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
+		}
+
+		private void _guiTimedTrafficLightsPasteWindow(int num) {
+			GUILayout.Label(Translation.GetString("Select_junction"));
 		}
 
 		private void _guiTimedTrafficLightsNodeWindow(int num) {
@@ -1098,7 +1185,7 @@ namespace TrafficManager.UI.SubTools {
 								hoveredSegment = true;
 
 								if (MainTool.CheckClicked()) {
-									liveSegmentLight.ChangeMode();
+									liveSegmentLight.ToggleMode();
 									timedNode.ChangeLightMode(srcSegmentId, vehicleType, liveSegmentLight.CurrentMode);
 								}
 							}
@@ -1119,6 +1206,18 @@ namespace TrafficManager.UI.SubTools {
 								++numInfos;
 							}
 						}
+
+						// Draw light index
+						/*if (!timedActive && _timedEditStep < 0 && lightOffset == 0) {
+							var indexSize = 20f * zoom;
+							var yOffset = indexSize + 77f * zoom - modeHeight * 2;
+							//var carNumRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset, counterSize, counterSize);
+							var segIndexRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset - indexSize - 2f, indexSize, indexSize);
+
+							_counterStyle.fontSize = (int)(15f * zoom);
+							_counterStyle.normal.textColor = new Color(0f, 0f, 1f);
+							GUI.Label(segIndexRect, $"#{liveSegmentLight.ClockwiseIndex+1}", _counterStyle);
+						}*/
 
 #if DEBUG
 						if (timedActive /*&& _timedShowNumbers*/) {
@@ -1178,7 +1277,8 @@ namespace TrafficManager.UI.SubTools {
 
 						SegmentGeometry geometry = SegmentGeometry.Get(srcSegmentId);
 						bool startNode = geometry.StartNodeId() == nodeId;
-						if (geometry.IsOutgoingOneWay(startNode)) continue;
+						if (geometry.IsOutgoingOneWay(startNode))
+							continue;
 
 						var hasOutgoingLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
 						var hasOutgoingForwardSegment = geometry.HasOutgoingStraightSegment(startNode);

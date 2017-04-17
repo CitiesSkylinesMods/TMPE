@@ -116,6 +116,7 @@ namespace TrafficManager.UI {
 				subTools[(int)ToolMode.TimedLightsRemoveNode] = timedLightsTool;
 				subTools[(int)ToolMode.TimedLightsSelectNode] = timedLightsTool;
 				subTools[(int)ToolMode.TimedLightsShowLights] = timedLightsTool;
+				subTools[(int)ToolMode.TimedLightsCopyLights] = timedLightsTool;
 				subTools[(int)ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this);
 				subTools[(int)ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
 				subTools[(int)ToolMode.LaneChange] = new LaneArrowTool(this);
@@ -165,16 +166,16 @@ namespace TrafficManager.UI {
 			activeSubTool = subTools[(int)_toolMode];
 
 			if (oldSubTool != null) {
-				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
-					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode)
+				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
+					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights)
 						oldSubTool.Cleanup();
 				} else
 					oldSubTool.Cleanup();
 			}
 
 			if (toolModeChanged && activeSubTool != null) {
-				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode)) { // TODO refactor to SubToolMode
-					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode)
+				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
+					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights)
 						activeSubTool.Cleanup();
 				} else
 					activeSubTool.Cleanup();

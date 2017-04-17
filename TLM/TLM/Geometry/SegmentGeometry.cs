@@ -1020,13 +1020,13 @@ namespace TrafficManager.Geometry {
 
 			var info = instance.m_segments.m_buffer[segmentId].Info;
 
-			NetInfo.Direction dir = Constants.ServiceFactory.NetService.GetSegmentEndDirection(segmentId, ref instance.m_segments.m_buffer[segmentId], instance.m_segments.m_buffer[segmentId].m_startNode == nodeId);
+			NetInfo.Direction dir = Constants.ServiceFactory.NetService.GetFinalSegmentEndDirection(segmentId, ref instance.m_segments.m_buffer[segmentId], instance.m_segments.m_buffer[segmentId].m_startNode == nodeId);
 
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					((info.m_lanes[laneIndex].m_direction & dir) != NetInfo.Direction.None)) {
+					((info.m_lanes[laneIndex].m_finalDirection & dir) != NetInfo.Direction.None)) {
 					return false;
 				}
 
@@ -1056,12 +1056,12 @@ namespace TrafficManager.Geometry {
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Forward)) {
+					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
 					hasForward = true;
 				}
 
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Backward)) {
+					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
 					hasBackward = true;
 				}
 
@@ -1113,7 +1113,6 @@ namespace TrafficManager.Geometry {
 			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
 				dir = NetInfo.Direction.Backward;
 			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = Constants.ServiceFactory.SimulationService.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
 			var hasForward = false;
 			var hasBackward = false;
@@ -1122,17 +1121,17 @@ namespace TrafficManager.Geometry {
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == dir3)) {
+					(info.m_lanes[laneIndex].m_finalDirection & dir2) != NetInfo.Direction.None) {
 					isOutgoingOneWay = false;
 				}
 
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Forward)) {
+					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
 					hasForward = true;
 				}
 
 				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction == NetInfo.Direction.Backward)) {
+					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
 					hasBackward = true;
 				}
 

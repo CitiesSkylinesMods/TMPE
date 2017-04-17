@@ -688,7 +688,6 @@ namespace TrafficManager.State {
 
 			var dir = NetInfo.Direction.Forward;
 			var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
-			var dir3 = Constants.ServiceFactory.SimulationService.LeftHandDrive ? NetInfo.InvertDirection(dir2) : dir2;
 
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
@@ -704,7 +703,7 @@ namespace TrafficManager.State {
 
 				if (curLaneId == laneId) {
 					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-					bool isStartNode = laneInfo.m_direction != dir3;
+					bool isStartNode = (laneInfo.m_finalDirection & dir2) == NetInfo.Direction.None;
 					if (startNode != null && isStartNode != startNode)
 						return false;
 					ushort nodeId = isStartNode ? netManager.m_segments.m_buffer[segmentId].m_startNode : netManager.m_segments.m_buffer[segmentId].m_endNode;
