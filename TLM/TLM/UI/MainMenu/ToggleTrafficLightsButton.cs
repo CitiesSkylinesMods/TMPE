@@ -24,5 +24,11 @@ namespace TrafficManager.UI.MainMenu {
 				return "Switch_traffic_lights";
 			}
 		}
+
+		public override bool Visible {
+			get {
+				return true;
+			}
+		}
 	}
 }

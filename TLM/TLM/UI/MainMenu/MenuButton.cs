@@ -44,6 +44,8 @@ namespace TrafficManager.UI.MainMenu {
 		public const string MENU_BUTTON_DEFAULT = "Default";
 		public const string MENU_BUTTON_ACTIVE = "Active";
 
+		public const int BUTTON_SIZE = 30;
+
 		protected static string GetButtonBackgroundTextureId(ButtonMouseState state, bool active) {
 			string ret = MENU_BUTTON + MENU_BUTTON_BACKGROUND;
 
@@ -89,11 +91,11 @@ namespace TrafficManager.UI.MainMenu {
 			// Set the atlases for background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonsAtlas", TextureResources.MainMenuButtonsTexture2D, textureIds.Length, textureIds);
 			
-			UpdateSprites();
+			UpdateProperties();
 
 			// Set the button dimensions.
-			width = 30;
-			height = 30;
+			width = BUTTON_SIZE;
+			height = BUTTON_SIZE;
 
 			// Enable button sounds.
 			playAudioEvents = true;
@@ -102,7 +104,7 @@ namespace TrafficManager.UI.MainMenu {
 		protected override void OnClick(UIMouseEventParameter p) {
 			OnClickInternal(p);
 			foreach (MenuButton button in LoadingExtension.BaseUI.MainMenu.Buttons) {
-				button.UpdateSprites();
+				button.UpdateProperties();
 			}
 		}
 
@@ -110,8 +112,9 @@ namespace TrafficManager.UI.MainMenu {
 		public abstract ButtonFunction Function { get; }
 		public abstract bool Active { get; }
 		public abstract string Tooltip { get; }
+		public abstract bool Visible { get; }
 
-		internal void UpdateSprites() {
+		internal void UpdateProperties() {
 			normalBgSprite = disabledBgSprite = focusedBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.Base, Active);
 			hoveredBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.Hovered, Active);
 			pressedBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.MouseDown, Active);
@@ -120,6 +123,7 @@ namespace TrafficManager.UI.MainMenu {
 			hoveredFgSprite = pressedFgSprite = GetButtonForegroundTextureId(Function, true);
 
 			tooltip = Translation.GetString(Tooltip);
+			isVisible = Visible;
 		}
 	}
 }

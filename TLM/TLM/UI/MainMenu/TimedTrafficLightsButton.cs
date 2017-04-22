@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ColossalFramework.UI;
 using TrafficManager.Manager;
+using TrafficManager.State;
 
 namespace TrafficManager.UI.MainMenu {
 	public class TimedTrafficLightsButton : MenuToolModeButton {
@@ -22,6 +23,12 @@ namespace TrafficManager.UI.MainMenu {
 		public override string Tooltip {
 			get {
 				return "Timed_traffic_lights";
+			}
+		}
+
+		public override bool Visible {
+			get {
+				return Options.timedLightsEnabled;
 			}
 		}
 	}

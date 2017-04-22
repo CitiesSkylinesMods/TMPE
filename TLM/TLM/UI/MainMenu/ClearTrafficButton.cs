@@ -25,6 +25,12 @@ namespace TrafficManager.UI.MainMenu {
 			}
 		}
 
+		public override bool Visible {
+			get {
+				return true;
+			}
+		}
+
 		public override void OnClickInternal(UIMouseEventParameter p) {
 			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
 			VehicleStateManager.Instance.RequestClearTraffic();

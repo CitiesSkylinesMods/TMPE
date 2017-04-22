@@ -72,7 +72,7 @@ namespace TrafficManager.UI {
 			}
 
 			foreach (MenuButton button in GetMenu().Buttons) {
-				button.UpdateSprites();
+				button.UpdateProperties();
 			}
 			GetMenu().Show();
 #if DEBUG
