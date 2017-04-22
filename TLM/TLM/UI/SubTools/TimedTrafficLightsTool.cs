@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnSecondaryClickOverlay() {
 			if (!IsCursorInPanel()) {
 				Cleanup();
-				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 			}
 		}
 
@@ -93,11 +93,11 @@ namespace TrafficManager.UI.SubTools {
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-			switch (TrafficManagerTool.GetToolMode()) {
+			switch (MainTool.GetToolMode()) {
 				case ToolMode.TimedLightsSelectNode:
 				case ToolMode.TimedLightsShowLights:
-					if (TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsShowLights) {
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+					if (MainTool.GetToolMode() == ToolMode.TimedLightsShowLights) {
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 						ClearSelectedNodes();
 					}
 
@@ -115,16 +115,16 @@ namespace TrafficManager.UI.SubTools {
 
 							if (timedLight != null) {
 								SelectedNodeIndexes = new List<ushort>(timedLight.NodeGroup);
-								TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+								LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 							}
 						} else {
-							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
+							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 						}
 					}
 					break;
 				case ToolMode.TimedLightsAddNode:
 					if (SelectedNodeIndexes.Count <= 0) {
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 						return;
 					}
 
@@ -162,12 +162,12 @@ namespace TrafficManager.UI.SubTools {
 					ClearSelectedNodes();
 					foreach (ushort nodeId in timedLight2.NodeGroup)
 						AddSelectedNode(nodeId);
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 					RefreshCurrentTimedNodeIds();
 					break;
 				case ToolMode.TimedLightsRemoveNode:
 					if (SelectedNodeIndexes.Count <= 0) {
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 						return;
 					}
 
@@ -176,11 +176,11 @@ namespace TrafficManager.UI.SubTools {
 						RefreshCurrentTimedNodeIds();
 					}
 					RemoveSelectedNode(HoveredNodeId);
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 					break;
 				case ToolMode.TimedLightsCopyLights:
 					if (nodeIdToCopy == 0) {
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 						return;
 					}
 
@@ -189,19 +189,13 @@ namespace TrafficManager.UI.SubTools {
 					NodeGeometry targetNodeGeo = NodeGeometry.Get(HoveredNodeId);
 
 					if (sourceNodeGeo.NumSegmentEnds != targetNodeGeo.NumSegmentEnds) {
-						Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
-							MainTool.ShowTooltip(Translation.GetString("The_chosen_traffic_light_program_is_incompatible_to_this_junction"), node.m_position);
-							return true;
-						});
+						MainTool.ShowTooltip(Translation.GetString("The_chosen_traffic_light_program_is_incompatible_to_this_junction"));
 						return;
 					}
 
 					// check for existing simulation
 					if (tlsMan.HasTimedSimulation(HoveredNodeId)) {
-						Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
-							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
-							return true;
-						});
+						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 						return;
 					}
 
@@ -215,7 +209,7 @@ namespace TrafficManager.UI.SubTools {
 
 					Cleanup();
 					AddSelectedNode(HoveredNodeId);
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 					break;
 			}
 		}
@@ -223,7 +217,7 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnToolGUI(Event e) {
 			base.OnToolGUI(e);
 
-			switch (TrafficManagerTool.GetToolMode()) {
+			switch (MainTool.GetToolMode()) {
 				case ToolMode.TimedLightsSelectNode:
 					_guiTimedTrafficLightsNode();
 					break;
@@ -239,7 +233,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-			bool onlySelected = TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsRemoveNode;
+			bool onlySelected = MainTool.GetToolMode() == ToolMode.TimedLightsRemoveNode;
 			//Log._Debug($"nodeSelLocked={nodeSelectionLocked} HoveredNodeId={HoveredNodeId} IsNodeSelected={IsNodeSelected(HoveredNodeId)} onlySelected={onlySelected} isinsideui={MainTool.GetToolController().IsInsideUI} cursorVis={Cursor.visible}");
             if (!nodeSelectionLocked &&
 				HoveredNodeId != 0 &&
@@ -289,10 +283,10 @@ namespace TrafficManager.UI.SubTools {
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-			if (TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsAddNode || TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsRemoveNode) {
+			if (MainTool.GetToolMode() == ToolMode.TimedLightsAddNode || MainTool.GetToolMode() == ToolMode.TimedLightsRemoveNode) {
 				GUILayout.Label(Translation.GetString("Select_junction"));
 				if (GUILayout.Button(Translation.GetString("Cancel"))) {
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 				} else {
 					DragWindow(ref _windowRect);
 					return;
@@ -303,7 +297,7 @@ namespace TrafficManager.UI.SubTools {
 			var timedNodeMain = nodeSimulation?.TimedLight;
 
 			if (nodeSimulation == null || timedNodeMain == null) {
-				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 				//Log._Debug("nodesim or timednodemain is null");
 				DragWindow(ref _windowRect);
 				return;
@@ -316,7 +310,7 @@ namespace TrafficManager.UI.SubTools {
 				numSteps = timedNodeMain.NumSteps();
 			}
 
-			if (numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 && _timedViewedStep < 0) {
+			if (!timedLightActive && numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 && _timedViewedStep < 0) {
 				_timedViewedStep = 0;
 				foreach (var sim in SelectedNodeIndexes.Select(tlsMan.GetNodeSimulation)) {
 					sim.TimedLight.GetStep(_timedViewedStep).UpdateLiveLights(true);
@@ -616,7 +610,7 @@ namespace TrafficManager.UI.SubTools {
 
 					if (GUILayout.Button(Translation.GetString("Copy"))) {
 						nodeIdToCopy = SelectedNodeIndexes[0];
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsCopyLights);
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsCopyLights);
 					}
 
 					if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
@@ -630,12 +624,12 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Space(30);
 
 				if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
-					TrafficManagerTool.SetToolMode(ToolMode.TimedLightsAddNode);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsAddNode);
 				}
 
 				if (SelectedNodeIndexes.Count > 1) {
 					if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
-						TrafficManagerTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
+						LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
 					}
 				}
 
@@ -644,7 +638,7 @@ namespace TrafficManager.UI.SubTools {
 				if (GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
 					DisableTimed();
 					ClearSelectedNodes();
-					TrafficManagerTool.SetToolMode(ToolMode.None);
+					LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
 				}
 			}
 
@@ -796,7 +790,7 @@ namespace TrafficManager.UI.SubTools {
 					}*/
 				}
 
-				TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
+				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsShowLights);
 			}
 
 			DragWindow(ref _windowRect2);

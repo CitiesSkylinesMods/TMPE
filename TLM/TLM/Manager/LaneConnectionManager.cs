@@ -139,6 +139,11 @@ namespace TrafficManager.Manager {
 				
 				UnsubscribeFromSegmentGeometry(segmentId1);
 				UnsubscribeFromSegmentGeometry(segmentId2);
+
+				if (Options.instantEffects) {
+					Services.NetService.PublishSegmentChanges(segmentId1);
+					Services.NetService.PublishSegmentChanges(segmentId2);
+				}
 			}
 
 			return ret;
@@ -152,13 +157,16 @@ namespace TrafficManager.Manager {
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
 #endif
-			NetManager netManager = Singleton<NetManager>.instance;
-			for (int i = 0; i < 8; ++i) {
-				ushort segmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(i);
-				if (segmentId == 0)
-					continue;
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				RemoveLaneConnectionsFromSegment(segmentId, segment.m_startNode == nodeId);
+				return true;
+			});
 
-				RemoveLaneConnectionsFromSegment(segmentId, netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId);
+			if (Options.instantEffects) {
+				Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+					Services.NetService.PublishSegmentChanges(segmentId);
+					return true;
+				});
 			}
 		}
 
@@ -180,6 +188,10 @@ namespace TrafficManager.Manager {
 #endif
 				RemoveLaneConnections(curLaneId, startNode);
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+			}
+
+			if (Options.instantEffects) {
+				Services.NetService.PublishSegmentChanges(segmentId);
 			}
 		}
 
@@ -218,8 +230,14 @@ namespace TrafficManager.Manager {
 			Flags.RemoveLaneConnections(laneId, startNode);
 
 			if (Flags.laneConnections[laneId] == null) {
-				ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
-				UnsubscribeFromSegmentGeometry(segmentId);
+				Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+					UnsubscribeFromSegmentGeometry(lane.m_segment);
+
+					if (Options.instantEffects) {
+						Services.NetService.PublishSegmentChanges(lane.m_segment);
+					}
+					return true;
+				});
 			}
 		}
 
@@ -254,6 +272,11 @@ namespace TrafficManager.Manager {
 
 				SubscribeToSegmentGeometry(segmentId1);
 				SubscribeToSegmentGeometry(segmentId2);
+
+				if (Options.instantEffects) {
+					Services.NetService.PublishSegmentChanges(segmentId1);
+					Services.NetService.PublishSegmentChanges(segmentId2);
+				}
 			}
 
 			return ret;

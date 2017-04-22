@@ -17,6 +17,16 @@ namespace CitiesGameBridge.Service {
 			}
 		}
 
+		public uint CurrentBuildIndex {
+			get {
+				return Singleton<SimulationManager>.instance.m_currentBuildIndex;
+			}
+
+			set {
+				Singleton<SimulationManager>.instance.m_currentBuildIndex = value;
+			}
+		}
+
 		public uint CurrentFrameIndex {
 			get {
 				return Singleton<SimulationManager>.instance.m_currentFrameIndex;

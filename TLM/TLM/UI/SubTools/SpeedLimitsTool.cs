@@ -134,7 +134,7 @@ namespace TrafficManager.UI.SubTools {
 				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
 				// draw speed limits
-				if (TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions || segmentId != SelectedSegmentId) { // no speed limit overlay on selected segment when in vehicle restrictions mode
+				if (MainTool.GetToolMode() != ToolMode.VehicleRestrictions || segmentId != SelectedSegmentId) { // no speed limit overlay on selected segment when in vehicle restrictions mode
 					if (drawSpeedLimitHandles((ushort)segmentId, ref netManager.m_segments.m_buffer[segmentId], viewOnly, ref camPos))
 						handleHovered = true;
 				}

@@ -260,7 +260,7 @@ namespace TrafficManager.UI.SubTools {
 		private bool drawVehicleRestrictionHandles(ushort segmentId, ref NetSegment segment, bool viewOnly, out bool stateUpdated) {
 			stateUpdated = false;
 
-			if (viewOnly && !Options.vehicleRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions)
+			if (viewOnly && !Options.vehicleRestrictionsOverlay && MainTool.GetToolMode() != ToolMode.VehicleRestrictions)
 				return false;
 
 			Vector3 center = segment.m_bounds.center;

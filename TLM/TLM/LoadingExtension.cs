@@ -1941,6 +1941,8 @@ namespace TrafficManager {
 				manager.OnLevelLoading();
 			}
 
+			InitTool();
+
 			Log.Info("OnLevelLoaded complete.");
 		}
 
@@ -2005,11 +2007,18 @@ namespace TrafficManager {
 			}
 		}
 
-		public static void EnableTool() {
+		public static void InitTool() {
+			Log.Info("Initializing traffic manager tool...");
 			if (TrafficManagerTool == null) {
 				TrafficManagerTool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
 								   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
 			}
+
+			TrafficManagerTool.Initialize();
+		}
+
+		public static void EnableTool() {
+			InitTool();
 
 			ToolsModifierControl.toolController.CurrentTool = TrafficManagerTool;
 			ToolsModifierControl.SetTool<TrafficManagerTool>();

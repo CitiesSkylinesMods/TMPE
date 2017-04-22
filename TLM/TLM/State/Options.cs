@@ -15,10 +15,12 @@ using TrafficManager.Manager;
 namespace TrafficManager.State {
 
 	public class Options : MonoBehaviour {
-		public static readonly int DYNAMIC_RECALC_MIN_PROCESSOR_COUNT = 8;
-
+		private static UIDropDown languageDropdown = null;
 		private static UIDropDown simAccuracyDropdown = null;
 		//private static UIDropDown laneChangingRandomizationDropdown = null;
+		private static UICheckBox instantEffectsToggle = null;
+		private static UICheckBox lockButtonToggle = null;
+		private static UICheckBox lockMenuToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -66,6 +68,7 @@ namespace TrafficManager.State {
 		private static UIButton reloadGlobalConfBtn = null;
 		private static UIButton resetGlobalConfBtn = null;
 
+		public static bool instantEffects = false;
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
 		public static bool realisticSpeeds = true;
@@ -155,7 +158,31 @@ namespace TrafficManager.State {
 
 			UIHelper panelHelper = new UIHelper(currentPanel);
 
-			simAccuracyDropdown = panelHelper.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+			var generalGroup = panelHelper.AddGroup(Translation.GetString("General"));
+
+			string[] languageLabels = new string[Translation.AVAILABLE_LANGUAGE_CODES.Count + 1];
+			languageLabels[0] = Translation.GetString("Game_language");
+			for (int i = 0; i < Translation.AVAILABLE_LANGUAGE_CODES.Count; ++i) {
+				languageLabels[i + 1] = Translation.LANGUAGE_LABELS[Translation.AVAILABLE_LANGUAGE_CODES[i]];
+			}
+			int languageIndex = 0;
+			string curLangCode = GlobalConfig.Instance.LanguageCode;
+			if (curLangCode != null) {
+				languageIndex = Translation.AVAILABLE_LANGUAGE_CODES.IndexOf(curLangCode);
+				if (languageIndex < 0) {
+					languageIndex = 0;
+				} else {
+					++languageIndex;
+				}
+			}
+
+			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + " (" + Translation.GetString("requires_game_restart") + "):", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
+			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
+			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
+
+			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
+			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
+			instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
 
 			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
 			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
@@ -380,6 +407,42 @@ namespace TrafficManager.State {
 
 			Log._Debug($"connectedLanesOverlay changed to {newValue}");
 			connectedLanesOverlay = newValue;
+		}
+
+		private static void onLanguageChanged(int newLanguageIndex) {
+			if (newLanguageIndex <= 0) {
+				GlobalConfig.Instance.LanguageCode = null;
+				GlobalConfig.WriteConfig();
+				MenuRebuildRequired = true;
+			} else if (newLanguageIndex - 1 < Translation.AVAILABLE_LANGUAGE_CODES.Count) {
+				GlobalConfig.Instance.LanguageCode = Translation.AVAILABLE_LANGUAGE_CODES[newLanguageIndex - 1];
+				GlobalConfig.WriteConfig();
+				MenuRebuildRequired = true;
+			} else {
+				Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
+			}
+		}
+
+		private static void onLockButtonChanged(bool newValue) {
+			Log._Debug($"Button lock changed to {newValue}");
+			LoadingExtension.BaseUI.MainMenuButton.SetPosLock(newValue);
+			GlobalConfig.Instance.MainMenuButtonPosLocked = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onLockMenuChanged(bool newValue) {
+			Log._Debug($"Menu lock changed to {newValue}");
+			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
+			GlobalConfig.Instance.MainMenuPosLocked = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onInstantEffectsChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Instant effects changed to {newValue}");
+			instantEffects = newValue;
 		}
 
 		private static void onSimAccuracyChanged(int newAccuracy) {

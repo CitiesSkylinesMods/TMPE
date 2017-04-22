@@ -3,15 +3,18 @@ using System;
 using System.Collections.Generic;
 using TrafficManager.State;
 using TrafficManager.TrafficLight;
+using TrafficManager.UI.MainMenu;
 using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI {
-#if !TAM
 	public class UIBase : UICustomControl {
 
-		private UIMainMenuButton button;
-		public static UITrafficManager menu { get; private set; }
+		public UIMainMenuButton MainMenuButton { get; private set; }
+		public MainMenuPanel MainMenu { get; private set; }
+#if DEBUG
+		public DebugMenuPanel DebugMenu { get; private set; }
+#endif
 		private bool _uiShown = false;
 
 		public UIBase() {
@@ -22,14 +25,17 @@ namespace TrafficManager.UI {
 			var uiView = UIView.GetAView();
 
 			// Add a new button to the view.
-			button = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
+			MainMenuButton = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
 
 			// add the menu
-			menu = (UITrafficManager)uiView.AddUIComponent(typeof(UITrafficManager));
+			MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+#if DEBUG
+			DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+#endif
 		}
 
 		~UIBase() {
-			UnityEngine.Object.Destroy(button);
+			UnityEngine.Object.Destroy(MainMenuButton);
 		}
 
 		public bool IsVisible() {
@@ -45,11 +51,17 @@ namespace TrafficManager.UI {
 
 		internal void RebuildMenu() {
 			Close();
-			if (menu != null) {
-				UnityEngine.Object.Destroy(menu);
+			if (MainMenu != null) {
+				UnityEngine.Object.Destroy(MainMenu);
+#if DEBUG
+				UnityEngine.Object.Destroy(DebugMenu);
+#endif
 			}
 			var uiView = UIView.GetAView();
-			menu = (UITrafficManager)uiView.AddUIComponent(typeof(UITrafficManager));
+			MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+#if DEBUG
+			DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+#endif
 		}
 
 		public void Show() {
@@ -59,26 +71,39 @@ namespace TrafficManager.UI {
 				Log.Error("Error on Show(): " + e.ToString());
 			}
 
+			foreach (MenuButton button in GetMenu().Buttons) {
+				button.UpdateSprites();
+			}
 			GetMenu().Show();
+#if DEBUG
+			GetDebugMenu().Show();
+#endif
 			LoadingExtension.SetToolMode(TrafficManagerMode.Activated);
 			_uiShown = true;
-			button.UpdateSprites();
+			MainMenuButton.UpdateSprites();
 		}
 
 		public void Close() {
 			var uiView = UIView.GetAView();
 			GetMenu().Hide();
-
-			UITrafficManager.deactivateButtons();
-			TrafficManagerTool.SetToolMode(ToolMode.None);
+#if DEBUG
+			GetDebugMenu().Hide();
+			DebugMenuPanel.deactivateButtons();
+#endif
+			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
 			LoadingExtension.SetToolMode(TrafficManagerMode.None);
 			_uiShown = false;
-			button.UpdateSprites();
+			MainMenuButton.UpdateSprites();
 		}
 
-		internal static UITrafficManager GetMenu() {
-			return menu;
+		internal MainMenuPanel GetMenu() {
+			return MainMenu;
 		}
-	}
+
+#if DEBUG
+		internal DebugMenuPanel GetDebugMenu() {
+			return DebugMenu;
+		}
 #endif
+	}
 }

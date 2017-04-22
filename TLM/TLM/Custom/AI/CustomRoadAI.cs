@@ -209,8 +209,8 @@ namespace TrafficManager.Custom.AI {
 					/*data.m_flags ^= NetNode.Flags.TrafficLights;
 					data.m_flags |= NetNode.Flags.CustomTrafficLights;*/
 					// NON-STOCK CODE START
-					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)TrafficManagerTool.GetSubTool(ToolMode.SwitchTrafficLight);
-					toggleTool.ToggleTrafficLight(nodeID);
+					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)LoadingExtension.TrafficManagerTool.GetSubTool(ToolMode.SwitchTrafficLight);
+					toggleTool.ToggleTrafficLight(nodeID, false);
 					// NON-STOCK CODE END
 					this.UpdateNodeFlags(nodeID, ref data);
 					Singleton<NetManager>.instance.m_yieldLights.Disable();
@@ -729,7 +729,7 @@ namespace TrafficManager.Custom.AI {
 				// NON-STOCK CODE START
 				// Rainfall compatibility
 				float _roadwayFloodedTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodedTolerance", 100)/100f : 1f;
-				if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodedTolerance) {
+				if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodedTolerance && waterLevelAtMiddlePoint > 0f) {
 					flooded = true;
 					data.m_flags |= NetSegment.Flags.Flooded;
 					problem = Notification.AddProblems(problem, Notification.Problem.Flood | Notification.Problem.MajorProblem);
@@ -739,7 +739,7 @@ namespace TrafficManager.Custom.AI {
 				} else {
 					data.m_flags &= ~NetSegment.Flags.Flooded;
 					float _roadwayFloodingTolerance = LoadingExtension.IsRainfallLoaded ? (float)PlayerPrefs.GetInt("RF_RoadwayFloodingTolerance", 50)/100f : 0f;
-					if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodingTolerance) {
+					if (waterLevelAtMiddlePoint > middlePoint.y + _roadwayFloodingTolerance && waterLevelAtMiddlePoint > 0f) {
 						flooded = true;
 						problem = Notification.AddProblems(problem, Notification.Problem.Flood);
 					}

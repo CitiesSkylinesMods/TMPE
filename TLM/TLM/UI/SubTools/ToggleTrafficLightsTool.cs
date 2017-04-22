@@ -25,14 +25,11 @@ namespace TrafficManager.UI.SubTools {
 			ToggleTrafficLight(HoveredNodeId);
 		}
 
-		public void ToggleTrafficLight(ushort nodeId) {
+		public void ToggleTrafficLight(ushort nodeId, bool showMessageOnError=true) {
 			TrafficLightManager.UnableReason reason;
 			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, out reason)) {
-				if (reason == TrafficLightManager.UnableReason.HasTimedLight) {
-					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
-						return true;
-					});
+				if (showMessageOnError && reason == TrafficLightManager.UnableReason.HasTimedLight) {
+					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return;
 			}

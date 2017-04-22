@@ -17,6 +17,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.UI.SubTools;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.Util;
+using TrafficManager.UI.MainMenu;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -31,7 +33,7 @@ namespace TrafficManager.UI {
 			}
 		}
 
-		private static ToolMode _toolMode;
+		private ToolMode _toolMode;
 
 		internal static ushort HoveredNodeId;
 		internal static ushort HoveredSegmentId;
@@ -41,8 +43,7 @@ namespace TrafficManager.UI {
 		public static readonly float DebugCloseLod = 300f;
 		public static readonly float MaxOverlayDistance = 450f;
 
-		private static SubTool[] subTools = new SubTool[13];
-		private static bool initDone = false;
+		private IDictionary<ToolMode, SubTool> subTools = new TinyDictionary<ToolMode, SubTool>();
 
 		public static ushort SelectedNodeId { get; internal set; }
 
@@ -63,11 +64,7 @@ namespace TrafficManager.UI {
 		}
 
 		internal static Rect MoveGUI(Rect rect) {
-			/*var rectX = (rect.x / 800f) * (float)Screen.currentResolution.width;
-			var rectY = (rect.y / 600f) * (float)Screen.currentResolution.height;*/
-
-			//return new Rect(rectX, rectY, rect.width, rect.height);
-			return new Rect(85f + (float)Translation.getMenuWidth() + 25f + AdaptWidth(rect.x), 80f + 10f + rect.y, AdaptWidth(rect.width), rect.height);
+			return new Rect(85f + 50f + MainMenuPanel.MENU_WIDTH + rect.x, 60f + 20f + rect.y, rect.width, rect.height);
 		}
 
 		internal bool IsNodeWithinViewDistance(ushort nodeId) {
@@ -102,68 +99,65 @@ namespace TrafficManager.UI {
 			return (float)Screen.currentResolution.height / 1200f;
 		}
 
+		internal void Initialize() {
+			Log.Info("TrafficManagerTool: Initialization running now.");
+			subTools.Clear();
+			subTools[ToolMode.SwitchTrafficLight] = new ToggleTrafficLightsTool(this);
+			subTools[ToolMode.AddPrioritySigns] = new PrioritySignsTool(this);
+			subTools[ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this);
+			SubTool timedLightsTool = new TimedTrafficLightsTool(this);
+			subTools[ToolMode.TimedLightsAddNode] = timedLightsTool;
+			subTools[ToolMode.TimedLightsRemoveNode] = timedLightsTool;
+			subTools[ToolMode.TimedLightsSelectNode] = timedLightsTool;
+			subTools[ToolMode.TimedLightsShowLights] = timedLightsTool;
+			subTools[ToolMode.TimedLightsCopyLights] = timedLightsTool;
+			subTools[ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this);
+			subTools[ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
+			subTools[ToolMode.LaneChange] = new LaneArrowTool(this);
+			subTools[ToolMode.LaneConnector] = new LaneConnectorTool(this);
+			subTools[ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this);
+
+			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
+				e.Value.Initialize();
+			}
+
+			Log.Info("TrafficManagerTool: Initialization completed.");
+		}
+
 		protected override void Awake() {
 			Log._Debug($"TrafficLightTool: Awake {this.GetHashCode()}");
 			base.Awake();
-
-			if (!initDone) {
-				Log.Info("TrafficManagerTool: Awake - Initialization running now.");
-				subTools[(int)ToolMode.SwitchTrafficLight] = new ToggleTrafficLightsTool(this);
-				subTools[(int)ToolMode.AddPrioritySigns] = new PrioritySignsTool(this);
-				subTools[(int)ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this);
-				SubTool timedLightsTool = new TimedTrafficLightsTool(this);
-				subTools[(int)ToolMode.TimedLightsAddNode] = timedLightsTool;
-				subTools[(int)ToolMode.TimedLightsRemoveNode] = timedLightsTool;
-				subTools[(int)ToolMode.TimedLightsSelectNode] = timedLightsTool;
-				subTools[(int)ToolMode.TimedLightsShowLights] = timedLightsTool;
-				subTools[(int)ToolMode.TimedLightsCopyLights] = timedLightsTool;
-				subTools[(int)ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this);
-				subTools[(int)ToolMode.SpeedLimits] = new SpeedLimitsTool(this);
-				subTools[(int)ToolMode.LaneChange] = new LaneArrowTool(this);
-				subTools[(int)ToolMode.LaneConnector] = new LaneConnectorTool(this);
-				subTools[(int)ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this);
-
-				for (int i = 0; i < subTools.Length; ++i) {
-					if (subTools[i] == null)
-						continue;
-					subTools[i].Initialize();
-				}
-
-				Log.Info("TrafficManagerTool: Awake - Initialization completed.");
-				initDone = true;
-			} else {
-				for (int i = 0; i < subTools.Length; ++i) {
-					if (subTools[i] == null)
-						continue;
-					subTools[i].MainTool = this;
-				}
-			}
 		}
 
-		public static SubTool GetSubTool(ToolMode mode) {
-			if (!initDone)
-				return null;
-			return subTools[(int)mode];
+		public SubTool GetSubTool(ToolMode mode) {
+			SubTool ret;
+			if (subTools.TryGetValue(mode, out ret)) {
+				return ret;
+			}
+			return null;
 		}
 		
-		public static ToolMode GetToolMode() {
+		public ToolMode GetToolMode() {
 			return _toolMode;
 		}
 
-		public static void SetToolMode(ToolMode mode) {
+		public void SetToolMode(ToolMode mode) {
 			//Log._Debug($"SetToolMode: {mode}");
 			
 			if (mode == ToolMode.None) {
-#if !TAM
-				UITrafficManager.deactivateButtons();
+#if DEBUG
+				DebugMenuPanel.deactivateButtons();
 #endif
 			}
 
 			bool toolModeChanged = (mode != _toolMode);
 			var oldToolMode = _toolMode;
-			var oldSubTool = subTools[(int)oldToolMode];
+			SubTool oldSubTool = null;
+			subTools.TryGetValue(oldToolMode, out oldSubTool);
 			_toolMode = mode;
-			activeSubTool = subTools[(int)_toolMode];
+			if (!subTools.TryGetValue(_toolMode, out activeSubTool)) {
+				activeSubTool = null;
+			}
 
 			if (oldSubTool != null) {
 				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
@@ -196,10 +190,8 @@ namespace TrafficManager.UI {
 		// Overridden to disable base class behavior
 		protected override void OnEnable() {
 			Log._Debug($"TrafficManagerTool.OnEnable");
-			for (int i = 0; i < subTools.Length; ++i) {
-				if (subTools[i] == null)
-					continue;
-				subTools[i].Cleanup();
+			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
+				e.Value.Cleanup();
 			}
 		}
 
@@ -226,12 +218,10 @@ namespace TrafficManager.UI {
 				activeSubTool.RenderOverlay(cameraInfo);
 			}
 
-			for (int i = 0; i < subTools.Length; ++i) {
-				if (subTools[i] == null)
+			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
+				if (e.Key == GetToolMode())
 					continue;
-				if (i == (int)GetToolMode())
-					continue;
-				subTools[i].RenderInfoOverlay(cameraInfo);
+				e.Value.RenderInfoOverlay(cameraInfo);
 			}
 		}
 
@@ -256,7 +246,11 @@ namespace TrafficManager.UI {
 				return;
 
 			// check if mouse is inside panel
-			if (UIBase.GetMenu().containsMouse) {
+			if (LoadingExtension.BaseUI.GetMenu().containsMouse
+#if DEBUG
+				|| LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+#endif
+				) {
 #if DEBUG
 				Log._Debug($"TrafficManagerTool: OnToolUpdate: Menu contains mouse. Ignoring click.");
 #endif
@@ -310,14 +304,10 @@ namespace TrafficManager.UI {
 				if (Options.buildingOverlay) {
 					_guiBuildings();
 				}
-//#endif
+				//#endif
 
-				for (int i = 0; i < subTools.Length; ++i) {
-					if (subTools[i] == null)
-						continue;
-					/*if (i == (int)GetToolMode())
-						continue;*/
-					subTools[i].ShowGUIOverlay(i != (int)GetToolMode());
+				foreach (KeyValuePair<ToolMode, SubTool> en in subTools) {
+					en.Value.ShowGUIOverlay(en.Key != GetToolMode());
 				}
 
 				var guiColor = GUI.color;
@@ -1030,7 +1020,7 @@ namespace TrafficManager.UI {
 			return false;
 		}
 
-		internal void ShowTooltip(String text, Vector3 position) {
+		public void ShowTooltip(String text) {
 			if (text == null)
 				return;
 

@@ -142,6 +142,22 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
+    <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
+    <Compile Include="UI\MainMenu\OptionsLabel.cs" />
+    <Compile Include="UI\MainMenu\VersionLabel.cs" />
+    <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
+    <Compile Include="UI\MainMenu\ToggleTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\TimedTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\SpeedLimitsButton.cs" />
+    <Compile Include="UI\MainMenu\PrioritySignsButton.cs" />
+    <Compile Include="UI\MainMenu\ManualTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\LaneArrowsButton.cs" />
+    <Compile Include="UI\MainMenu\MenuToolModeButton.cs" />
+    <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
+    <Compile Include="UI\MainMenu\DespawnButton.cs" />
+    <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
+    <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
@@ -192,7 +208,7 @@
     <Compile Include="Traffic\PrioritySegment.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
-    <Compile Include="UI\UITrafficManager.cs" />
+    <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -331,6 +347,9 @@
       <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
       <Name>TMPE.Util</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\mainmenu-btns.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

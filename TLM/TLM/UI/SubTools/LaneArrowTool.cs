@@ -164,10 +164,10 @@ namespace TrafficManager.UI.SubTools {
 						default:
 							break;
 						case Flags.LaneArrowChangeResult.HighwayArrows:
-							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
 							break;
 						case Flags.LaneArrowChangeResult.LaneConnection:
-							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
 							break;
 					}
 				}

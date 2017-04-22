@@ -786,7 +786,7 @@ namespace TrafficManager.TrafficLight {
 
 			float meanFlow = numFlows > 0 ? (float)curTotalFlow / (float)numFlows : 0;
 			float meanWait = numWaits > 0 ? (float)curTotalWait / (float)numWaits : 0;
-			meanFlow /= (waitFlowBalance / 2f); // a value smaller than 1 rewards steady traffic currents
+			meanFlow /= waitFlowBalance; // a value smaller than 1 rewards steady traffic currents
 
 			wait = (float)meanWait;
 			flow = meanFlow;

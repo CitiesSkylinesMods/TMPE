@@ -80,6 +80,11 @@ namespace TrafficManager.State {
 #endif
 
 		/// <summary>
+		/// Language to use (if null then the game's language is being used)
+		/// </summary>
+		public string LanguageCode = null;
+
+		/// <summary>
 		/// base lane changing cost factor on highways
 		/// </summary>
 		public float HighwayLaneChangingBaseCost = 1.25f;
@@ -149,6 +154,11 @@ namespace TrafficManager.State {
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
 		/// </summary>
 		public float HeavyVehicleMaxInnerLanePenalty = 40f;
+
+		/// <summary>
+		/// Path cost multiplier for vehicle restrictions
+		/// </summary>
+		public float VehicleRestrictionsPenalty = 2500f;
 
 
 		/// <summary>
@@ -292,6 +302,14 @@ namespace TrafficManager.State {
 		/// </summary>
 		public int MainMenuButtonX = 464;
 		public int MainMenuButtonY = 10;
+		public bool MainMenuButtonPosLocked = false;
+
+		/// <summary>
+		/// Main menu position
+		/// </summary>
+		public int MainMenuX = 85;
+		public int MainMenuY = 60;
+		public bool MainMenuPosLocked = false;
 
 		internal static void WriteConfig() {
 			ModifiedTime = WriteConfig(Instance);

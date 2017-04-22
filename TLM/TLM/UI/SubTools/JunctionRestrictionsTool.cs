@@ -146,7 +146,7 @@ namespace TrafficManager.UI.SubTools {
 			bool hovered = false;
 			stateUpdated = false;
 
-			if (viewOnly && !Options.junctionRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions)
+			if (viewOnly && !Options.junctionRestrictionsOverlay && MainTool.GetToolMode() != ToolMode.JunctionRestrictions)
 				return false;
 
 			NetManager netManager = Singleton<NetManager>.instance;

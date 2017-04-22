@@ -27,7 +27,7 @@ namespace TrafficManager.Manager {
 
 		public bool SetLaneArrows(uint laneId, LaneArrows flags, bool overrideHighwayArrows = false) {
 			if (Flags.setLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
-				SubscribeToSegmentGeometry(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+				OnLaneChange(laneId);
 				return true;
 			}
 			return false;
@@ -35,10 +35,20 @@ namespace TrafficManager.Manager {
 
 		public bool ToggleLaneArrows(uint laneId, bool startNode, LaneArrows flags, out LaneArrowChangeResult res) {
 			if (Flags.toggleLaneArrowFlags(laneId, startNode, flags, out res)) {
-				SubscribeToSegmentGeometry(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+				OnLaneChange(laneId);
 				return true;
 			}
 			return false;
+		}
+
+		protected void OnLaneChange(uint laneId) {
+			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+				SubscribeToSegmentGeometry(lane.m_segment);
+				if (Options.instantEffects) {
+					Services.NetService.PublishSegmentChanges(lane.m_segment);
+				}
+				return true;
+			});
 		}
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {

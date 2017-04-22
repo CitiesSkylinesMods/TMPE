@@ -209,7 +209,12 @@ namespace TrafficManager.Manager {
 		/// <param name="allowedTypes"></param>
 		/// <returns></returns>
 		internal bool SetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo, uint laneId, ExtVehicleType allowedTypes) {
-			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
+			if (! Services.NetService.IsLaneValid(laneId)) {
+				return false;
+			}
+
+			if (! Services.NetService.IsSegmentValid(segmentId)) {
+				// TODO we do not need the segmentId given here. Lane is enough
 				return false;
 			}
 
@@ -217,6 +222,10 @@ namespace TrafficManager.Manager {
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
+
+			if (Options.instantEffects) {
+				Services.NetService.PublishSegmentChanges(segmentId);
+			}
 
 			return true;
 		}
@@ -231,7 +240,12 @@ namespace TrafficManager.Manager {
 		/// <param name="road"></param>
 		/// <param name="vehicleType"></param>
 		public void AddAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType) {
-			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
+			if (!Services.NetService.IsLaneValid(laneId)) {
+				return;
+			}
+
+			if (!Services.NetService.IsSegmentValid(segmentId)) {
+				// TODO we do not need the segmentId given here. Lane is enough
 				return;
 			}
 
@@ -241,6 +255,10 @@ namespace TrafficManager.Manager {
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
+
+			if (Options.instantEffects) {
+				Services.NetService.PublishSegmentChanges(segmentId);
+			}
 		}
 
 		/// <summary>
@@ -253,7 +271,12 @@ namespace TrafficManager.Manager {
 		/// <param name="road"></param>
 		/// <param name="vehicleType"></param>
 		public void RemoveAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType) {
-			if (segmentId == 0 || (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None || ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & NetLane.Flags.Created) == NetLane.Flags.None) {
+			if (!Services.NetService.IsLaneValid(laneId)) {
+				return;
+			}
+
+			if (!Services.NetService.IsSegmentValid(segmentId)) {
+				// TODO we do not need the segmentId given here. Lane is enough
 				return;
 			}
 
@@ -263,6 +286,10 @@ namespace TrafficManager.Manager {
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
+
+			if (Options.instantEffects) {
+				Services.NetService.PublishSegmentChanges(segmentId);
+			}
 		}
 
 		public void ToggleAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType, bool add) {

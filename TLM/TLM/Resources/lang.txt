@@ -159,3 +159,10 @@ Policies_&_Restrictions Policies & Restrictions
 At_junctions At junctions
 In_case_of_emergency In case of emergency
 Show_lane-wise_speed_limits Show lane-wise speed limits
+Language Language
+Game_language Game language
+requires_game_restart requires game restart
+Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
+Options Options
+Lock_main_menu_button_position Lock main menu button position
+Lock_main_menu_position Lock main menu position

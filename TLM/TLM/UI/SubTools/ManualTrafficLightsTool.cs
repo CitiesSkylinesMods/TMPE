@@ -55,7 +55,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}*/
 			} else {
-				MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position);
+				MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 			}
 		}
 

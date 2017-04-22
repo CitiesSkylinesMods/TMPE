@@ -89,7 +89,7 @@ namespace TrafficManager.UI.SubTools {
 			if (viewOnly && !Options.prioritySignsOverlay)
 				return;
 
-			if (TrafficManagerTool.GetToolMode() == ToolMode.JunctionRestrictions)
+			if (LoadingExtension.TrafficManagerTool.GetToolMode() == ToolMode.JunctionRestrictions)
 				return;
 
 			ShowGUI(viewOnly);
@@ -250,10 +250,7 @@ namespace TrafficManager.UI.SubTools {
 			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
 				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
 				if (reason == TrafficPriorityManager.UnableReason.HasTimedLight) {
-					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-						MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"), node.m_position);
-						return true;
-					});
+					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return false;
 			}

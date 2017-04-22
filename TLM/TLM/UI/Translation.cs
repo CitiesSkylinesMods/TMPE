@@ -5,10 +5,48 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using TrafficManager.State;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI {
 	public class Translation {
-		const string RESOURCES_PREFIX = "TrafficManager.Resources.";
+		public static readonly IDictionary<string, string> LANGUAGE_LABELS = new TinyDictionary<string, string>();
+		public static readonly IList<string> AVAILABLE_LANGUAGE_CODES = new List<string>();
+		public const string DEFAULT_LANGUAGE_CODE = "en";
+
+		static Translation() {
+			AVAILABLE_LANGUAGE_CODES.Clear();
+			AVAILABLE_LANGUAGE_CODES.Add("de");
+			AVAILABLE_LANGUAGE_CODES.Add("en");
+			AVAILABLE_LANGUAGE_CODES.Add("es");
+			AVAILABLE_LANGUAGE_CODES.Add("fr");
+			AVAILABLE_LANGUAGE_CODES.Add("it");
+			AVAILABLE_LANGUAGE_CODES.Add("ja");
+			AVAILABLE_LANGUAGE_CODES.Add("kr");
+			AVAILABLE_LANGUAGE_CODES.Add("nl");
+			AVAILABLE_LANGUAGE_CODES.Add("pl");
+			AVAILABLE_LANGUAGE_CODES.Add("pt");
+			AVAILABLE_LANGUAGE_CODES.Add("ru");
+			AVAILABLE_LANGUAGE_CODES.Add("zh-tw");
+			AVAILABLE_LANGUAGE_CODES.Add("zh");
+
+			LANGUAGE_LABELS.Clear();
+			LANGUAGE_LABELS["de"] = "Deutsch";
+			LANGUAGE_LABELS["en"] = "English";
+			LANGUAGE_LABELS["es"] = "Español";
+			LANGUAGE_LABELS["fr"] = "Français";
+			LANGUAGE_LABELS["it"] = "Italiano";
+			LANGUAGE_LABELS["ja"] = "日本語";
+			LANGUAGE_LABELS["kr"] = "한국의";
+			LANGUAGE_LABELS["nl"] = "Nederlands";
+			LANGUAGE_LABELS["pl"] = "Polski";
+			LANGUAGE_LABELS["pt"] = "Português";
+			LANGUAGE_LABELS["ru"] = "русский язык";
+			LANGUAGE_LABELS["zh-tw"] = "中文 (繁體)";
+			LANGUAGE_LABELS["zh"] = "中文 (简体)";
+		}
+
+		private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 		private static readonly string DEFAULT_TRANSLATION_FILENAME = "lang.txt";
 
 		private static Dictionary<string, string> translations;
@@ -30,7 +68,7 @@ namespace TrafficManager.UI {
 		}
 
 		public static string GetTranslatedFileName(string filename) {
-			string language = LocaleManager.instance.language;
+			string language = GetCurrentLanguage();
 			switch (language) {
 				case "jaex":
 					language = "ja";
@@ -41,7 +79,7 @@ namespace TrafficManager.UI {
 			}
 
 			string translatedFilename = filename;
-			if (language != null) {
+			if (language != DEFAULT_LANGUAGE_CODE) {
 				int delimiterIndex = filename.Trim().LastIndexOf('.'); // file extension
 
 				translatedFilename = "";
@@ -56,17 +94,36 @@ namespace TrafficManager.UI {
 				Log._Debug($"Translated file {translatedFilename} found");
                 return translatedFilename;
 			} else {
-				if (language != null && !"en".Equals(language))
+				if (language != null && !DEFAULT_LANGUAGE_CODE.Equals(language))
 					Log.Warning($"Translated file {translatedFilename} not found!");
 				return filename;
 			}
 		}
 
+		public static string GetCurrentLanguage() {
+			string lang = GlobalConfig.Instance.LanguageCode;
+			if (lang != null) {
+				return lang;
+			}
+
+			return LocaleManager.instance.language;
+		}
+
+		public static void SetCurrentLanguage(string lang) {
+			if (lang != null && !LANGUAGE_LABELS.ContainsKey(lang)) {
+				Log.Warning($"Translation.SetCurrentLanguage: Invalid language code: {lang}");
+				return;
+			}
+
+			GlobalConfig.Instance.LanguageCode = lang;
+		}
+
 		private static void loadTranslations() {
-			if (translations == null || loadedLanguage == null || ! loadedLanguage.Equals(LocaleManager.instance.language)) {
+			string currentLang = GetCurrentLanguage();
+			if (translations == null || loadedLanguage == null || ! loadedLanguage.Equals(currentLang)) {
 				try {
 					string filename = RESOURCES_PREFIX + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME);
-					Log._Debug($"Loading translations from file '{filename}'. Language={LocaleManager.instance.language}");
+					Log._Debug($"Loading translations from file '{filename}'. Language={currentLang}");
 					string[] lines;
 					using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream(filename)) {
 						using (StreamReader sr = new StreamReader(st)) {
@@ -83,11 +140,11 @@ namespace TrafficManager.UI {
 							try {
 								translations.Add(line.Substring(0, delimiterIndex), line.Substring(delimiterIndex + 1).Trim().Replace("\\n", "\n"));
 							} catch (Exception) {
-								Log.Warning($"Failed to add translation for key {line.Substring(0, delimiterIndex)}, language {LocaleManager.instance.language}. Possible duplicate?");
+								Log.Warning($"Failed to add translation for key {line.Substring(0, delimiterIndex)}, language {currentLang}. Possible duplicate?");
 							}
 						}
 					}
-					loadedLanguage = LocaleManager.instance.language;
+					loadedLanguage = currentLang;
 				} catch (Exception e) {
 					Log.Error($"Error while loading translations: {e.ToString()}");
 				}
@@ -95,7 +152,7 @@ namespace TrafficManager.UI {
 		}
 
 		internal static int getMenuWidth() {
-			switch (LocaleManager.instance.language) {
+			switch (GetCurrentLanguage()) {
 				case null:
 				case "en":
 				case "de":

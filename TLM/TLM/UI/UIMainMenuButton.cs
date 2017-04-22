@@ -7,6 +7,7 @@ using System.Text;
 using TrafficManager.State;
 using TrafficManager.Util;
 using UnityEngine;
+using Util;
 
 namespace TrafficManager.UI {
 	public class UIMainMenuButton : UIButton {
@@ -17,12 +18,13 @@ namespace TrafficManager.UI {
 		public const string MAIN_MENU_BUTTON_FG_HOVERED = "TMPE_MainMenuButtonFgHovered";
 		public const string MAIN_MENU_BUTTON_FG_ACTIVE = "TMPE_MainMenuButtonFgActive";
 
+		public UIDragHandle Drag { get; private set; }
+
 		public override void Start() {
 			// Place the button.
 			GlobalConfig config = GlobalConfig.Instance;
-
 			Vector3 pos = new Vector3(config.MainMenuButtonX, config.MainMenuButtonY);
-			ClampPosToScreen(ref pos);
+			VectorUtil.ClampPosToScreen(ref pos);
 			absolutePosition = pos;
 
 			// Set the atlas and background/foreground
@@ -44,29 +46,23 @@ namespace TrafficManager.UI {
 			// Enable button sounds.
 			playAudioEvents = true;
 
-			var dragHandler = new GameObject("TMPE_DragHandler");
+			var dragHandler = new GameObject("TMPE_MainButton_DragHandler");
 			dragHandler.transform.parent = transform;
 			dragHandler.transform.localPosition = Vector3.zero;
-			var drag = dragHandler.AddComponent<UIDragHandle>();
+			Drag = dragHandler.AddComponent<UIDragHandle>();
 
-			drag.width = width;
-			drag.height = height;
+			Drag.width = width;
+			Drag.height = height;
+			Drag.enabled = !GlobalConfig.Instance.MainMenuButtonPosLocked;
+		}
+
+		internal void SetPosLock(bool lck) {
+			Drag.enabled = !lck;
 		}
 
 		protected override void OnClick(UIMouseEventParameter p) {
 			LoadingExtension.BaseUI.ToggleMainMenu();
 			UpdateSprites();
-		}
-
-		private void ClampPosToScreen(ref Vector3 pos) {
-			if (pos.x < 0)
-				pos.x = 0;
-			if (pos.y < 0)
-				pos.y = 0;
-			if (pos.x >= Screen.currentResolution.width)
-				pos.x = Screen.currentResolution.width - 1;
-			if (pos.y >= Screen.currentResolution.height)
-				pos.y = Screen.currentResolution.height - 1;
 		}
 
 		protected override void OnPositionChanged() {

@@ -252,5 +252,18 @@ namespace CitiesGameBridge.Service {
 			});
 			return laneList;
 		}
+
+		public void PublishSegmentChanges(ushort segmentId) {
+			ISimulationService simService = SimulationService.Instance;
+
+			ProcessSegment(segmentId, delegate (ushort sId, ref NetSegment segment) {
+				uint currentBuildIndex = simService.CurrentBuildIndex;
+				simService.CurrentBuildIndex = currentBuildIndex + 1;
+				segment.m_modifiedIndex = currentBuildIndex;
+
+				++segment.m_buildIndex;
+				return true;
+			});
+		}
 	}
 }
