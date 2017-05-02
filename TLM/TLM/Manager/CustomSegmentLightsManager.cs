@@ -43,7 +43,12 @@ namespace TrafficManager.Manager {
 		/// <param name="startNode"></param>
 		public CustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
 			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
-			SegmentEndGeometry endGeometry = startNode ? segGeometry.StartNodeGeometry : segGeometry.EndNodeGeometry;
+			if (segGeometry == null) {
+				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is invalid.");
+				return null;
+			}
+
+			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
 
 			if (! endGeometry.IsValid()) {
 				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node. startNode={startNode}");
@@ -104,7 +109,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool SetSegmentLights(ushort nodeId, ushort segmentId, CustomSegmentLights lights) {
-			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId).GetEnd(nodeId);
+			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
 			if (endGeo == null) {
 				return false;
 			}
@@ -266,7 +271,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId).GetEnd(nodeId);
+			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
 			if (endGeometry == null) {
 				return null;
 			}
@@ -287,7 +292,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public short ClockwiseIndexOfSegmentEnd(SegmentEndId endId) {
-			SegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId).GetEnd(endId.StartNode);
+			SegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId)?.GetEnd(endId.StartNode);
 			if (endGeo == null) {
 				return 0;
 			}

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
 	[XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
@@ -75,7 +76,8 @@ namespace TrafficManager.State {
 		};
 
 #if DEBUG
-		public ushort PathFindDebugNodeId = 0;
+		public int PathFindDebugNodeId = 0;
+		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
 		public ushort TTLDebugNodeId = 0;
 #endif
 

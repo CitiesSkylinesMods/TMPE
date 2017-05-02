@@ -37,6 +37,16 @@ namespace TrafficManager.Manager {
 			/// Current lane mean speed, per ten thousands
 			/// </summary>
 			public ushort meanSpeed;
+
+			public override string ToString() {
+				return $"[LaneTrafficData\n" +
+					"\t" + $"trafficBuffer = {trafficBuffer}\n" +
+					"\t" + $"accumulatedSpeeds = {accumulatedSpeeds}\n" +
+					"\t" + $"accumulatedDensities = {accumulatedDensities}\n" +
+					"\t" + $"relDensity = {relDensity}\n" +
+					"\t" + $"meanSpeed = {meanSpeed}\n" +
+					"LaneTrafficData]";
+			}
 		}
 
 		public class SegmentDirTrafficData {
@@ -54,6 +64,16 @@ namespace TrafficManager.Manager {
 
 			public SegmentDirTrafficData() {
 				minSpeed = MAX_SPEED;
+			}
+
+			public override string ToString() {
+				return $"[SegmentDirTrafficData\n" +
+					"\t" + $"accumulatedDensities = {accumulatedDensities}\n" +
+					"\t" + $"minSpeed = {minSpeed}\n" +
+#if DEBUG
+					"\t" + $"meanSpeed = {meanSpeed}\n" +
+#endif
+					"SegmentDirTrafficData]";
 			}
 		}
 
@@ -85,8 +105,35 @@ namespace TrafficManager.Manager {
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
-			Log._Debug($"- Not implemented -");
-			// TODO implement
+			Log._Debug($"Lane traffic data:");
+			if (laneTrafficData == null) {
+				Log._Debug($"\t<null>");
+			} else {
+				for (int i = 0; i < laneTrafficData.Length; ++i) {
+					if (laneTrafficData[i] == null) {
+						continue;
+					}
+					Log._Debug($"\tSegment {i}:");
+					for (int k = 0; k < laneTrafficData[i].Length; ++k) {
+						Log._Debug($"\t\tLane {k}: {laneTrafficData[i][k]}");
+					}
+				}
+			}
+
+			Log._Debug($"Segment direction traffic data:");
+			if (segmentDirTrafficData == null) {
+				Log._Debug($"\t<null>");
+			} else {
+				for (int i = 0; i < segmentDirTrafficData.Length; ++i) {
+					if (segmentDirTrafficData[i] == null) {
+						continue;
+					}
+					Log._Debug($"\tSegment {i}:");
+					for (int k = 0; k < segmentDirTrafficData[i].Length; ++k) {
+						Log._Debug($"\t\tDir {k}: {segmentDirTrafficData[i][k]}");
+					}
+				}
+			}
 		}
 
 		public void SimulationStep(ushort segmentId, ref NetSegment segmentData) {

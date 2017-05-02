@@ -152,6 +152,12 @@ namespace TrafficManager.TrafficLight {
 
 		public void ToggleMode() {
 			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
+
+			if (geometry == null) {
+				Log.Error($"CustomSegmentLight.ToggleMode: No geometry information available for segment {SegmentId}");
+				return;
+			}
+
 			bool startNode = lights.StartNode;
 			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
 			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);

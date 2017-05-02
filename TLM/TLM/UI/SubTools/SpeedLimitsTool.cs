@@ -276,7 +276,7 @@ namespace TrafficManager.UI.SubTools {
 				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
 			}
 			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(Translation.GetString("Save") + " & " + Translation.GetString("Apply"), GUILayout.Width(120))) {
+			if (GUILayout.Button(Translation.GetString("Save") + " & " + Translation.GetString("Apply"), GUILayout.Width(160))) {
 				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
 				SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
 			}
@@ -371,7 +371,7 @@ namespace TrafficManager.UI.SubTools {
 
 				uint x = 0;
 				var guiColor = GUI.color;
-				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(segmentId, ref segment, null, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES);
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES);
 				bool onlyMonorailLanes = sortedLanes.Count > 0;
 				if (!viewOnly) {
 					foreach (LanePos laneData in sortedLanes) {

@@ -108,7 +108,12 @@ namespace TrafficManager.TrafficLight {
 					ushort sourceSegmentId = clockSortedSourceSegmentIds[i];
 					ushort targetSegmentId = clockSortedTargetSegmentIds[i];
 
-					bool targetStartNode = SegmentGeometry.Get(targetSegmentId).StartNodeId() == NodeId;
+					SegmentGeometry segGeo = SegmentGeometry.Get(targetSegmentId);
+					if (segGeo == null) {
+						throw new Exception($"TimedTrafficLights.PasteSteps: No geometry information available for segment {targetSegmentId}");
+					}
+
+					bool targetStartNode = segGeo.StartNodeId() == NodeId;
 
 					CustomSegmentLights sourceLights = sourceStep.CustomSegmentLights[sourceSegmentId];
 					CustomSegmentLights targetLights = (CustomSegmentLights)sourceLights.Clone();
@@ -200,6 +205,9 @@ namespace TrafficManager.TrafficLight {
 				Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {srcSegEndGeo.SegmentId}");
 
 				SegmentGeometry srcSegGeo = srcSegEndGeo.GetSegmentGeometry();
+				if (srcSegGeo == null) {
+					continue;
+				}
 				IDictionary<ushort, ArrowDirection> dirs = new TinyDictionary<ushort, ArrowDirection>();
 				Directions.Add(srcSegEndGeo.SegmentId, dirs);
 				foreach (SegmentEndGeometry trgSegEndGeo in nodeGeo.SegmentEndGeometries) {
@@ -791,10 +799,16 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void ChangeLightMode(ushort segmentId, ExtVehicleType vehicleType, CustomSegmentLight.Mode mode) {
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log.Error($"TimedTrafficLights.ChangeLightMode: No geometry information available for segment {segmentId}");
+				return;
+			}
+
 			foreach (TimedTrafficLightsStep step in Steps) {
 				step.ChangeLightMode(segmentId, vehicleType, mode);
 			}
-			CustomSegmentLightsManager.Instance.SetLightMode(segmentId, SegmentGeometry.Get(segmentId).StartNodeId() == NodeId, vehicleType, mode);
+			CustomSegmentLightsManager.Instance.SetLightMode(segmentId, segGeo.StartNodeId() == NodeId, vehicleType, mode);
 		}
 
 		internal void Join(TimedTrafficLights otherTimedLight) {

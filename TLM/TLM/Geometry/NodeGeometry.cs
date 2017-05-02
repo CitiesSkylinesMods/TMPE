@@ -182,7 +182,7 @@ namespace TrafficManager.Geometry {
 				if (GlobalConfig.Instance.DebugSwitches[5])
 					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
-				SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(GeometryCalculationMode.NoPropagate);
+				SegmentEndGeometries[i].GetSegmentGeometry(true).StartRecalculation(GeometryCalculationMode.NoPropagate);
 			}
 		}
 
@@ -212,9 +212,9 @@ namespace TrafficManager.Geometry {
 #endif
 
 					bool startNode = SegmentEndGeometries[i].StartNode;
-					if (SegmentEndGeometries[i].GetSegmentGeometry().IsIncoming(startNode))
+					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsIncoming(startNode))
 						++incomingSegments;
-					if (SegmentEndGeometries[i].GetSegmentGeometry().IsOutgoing(startNode))
+					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsOutgoing(startNode))
 						++outgoingSegments;
 				}
 

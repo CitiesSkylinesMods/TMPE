@@ -70,7 +70,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
-			SegmentEndGeometry end = SegmentGeometry.Get(segmentId).GetEnd(startNode);
+			SegmentEndGeometry end = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
 			if (end == null) {
 				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing segment end {segmentId} @ {startNode}");
 				RemoveSegmentEnds(segmentId);

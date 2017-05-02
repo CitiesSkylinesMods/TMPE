@@ -120,6 +120,14 @@ namespace TrafficManager.Custom.AI {
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
 			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
+			if (geometry == null) {
+				pedestrianLightState = TrafficLightState.Green;
+				Log.Error($"GetTrafficLightState: No geometry information @ node {nodeId}, segment {fromSegmentId}.");
+				vehicleLightState = TrafficLightState.Green;
+				pedestrianLightState = TrafficLightState.Green;
+				return;
+			}
+
 			// determine node position at `fromSegment` (start/end)
 			bool isStartNode = geometry.StartNodeId() == nodeId;
 

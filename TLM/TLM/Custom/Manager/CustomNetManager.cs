@@ -40,7 +40,7 @@ namespace TrafficManager.Custom.Manager {
 				if (GlobalConfig.Instance.DebugSwitches[5])
 					Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
 #endif
-				SegmentGeometry.Get(segment)?.Recalculate(GeometryCalculationMode.Propagate);
+				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomFinalizeSegment @ seg. {segment}: " + e.ToString());
 			}
@@ -67,7 +67,7 @@ namespace TrafficManager.Custom.Manager {
 				if (GlobalConfig.Instance.DebugSwitches[5])
 					Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
 #endif
-				SegmentGeometry.Get(segment)?.Recalculate(GeometryCalculationMode.Propagate);
+				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
 			} catch (Exception e) {
 				Log.Error($"Error occured in CustomNetManager.CustomUpdateSegment @ seg. {segment}: " + e.ToString());
 			}

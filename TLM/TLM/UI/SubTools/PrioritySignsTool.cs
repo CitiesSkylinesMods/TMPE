@@ -193,6 +193,10 @@ namespace TrafficManager.UI.SubTools {
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log.Error($"PrioritySignsTool.SetPrioritySign: No geometry information available for segment {segmentId}");
+				return false;
+			}
 			ushort nodeId = segGeo.GetNodeId(startNode);
 
 			// check for restrictions

@@ -13,6 +13,10 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class LaneConnectionManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>> {
+		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro;
+		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle | ExtVehicleType.Tram | ExtVehicleType.RailVehicle;
+
 		public static LaneConnectionManager Instance { get; private set; } = null;
 		
 		static LaneConnectionManager() {
@@ -140,6 +144,9 @@ namespace TrafficManager.Manager {
 				UnsubscribeFromSegmentGeometry(segmentId1);
 				UnsubscribeFromSegmentGeometry(segmentId2);
 
+				SegmentGeometry.Get(segmentId1, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				SegmentGeometry.Get(segmentId2, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(segmentId1);
 					Services.NetService.PublishSegmentChanges(segmentId2);
@@ -161,13 +168,6 @@ namespace TrafficManager.Manager {
 				RemoveLaneConnectionsFromSegment(segmentId, segment.m_startNode == nodeId);
 				return true;
 			});
-
-			if (Options.instantEffects) {
-				Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
-					Services.NetService.PublishSegmentChanges(segmentId);
-					return true;
-				});
-			}
 		}
 
 		/// <summary>
@@ -175,23 +175,24 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="segmentId"></param>
 		/// <param name="startNode"></param>
-		internal void RemoveLaneConnectionsFromSegment(ushort segmentId, bool startNode) {
+		internal void RemoveLaneConnectionsFromSegment(ushort segmentId, bool startNode, bool recalcAndPublish=true) {
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment({segmentId}, {startNode}) called.");
 #endif
-			NetManager netManager = Singleton<NetManager>.instance;
 
-			uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
-			while (curLaneId != 0) {
+			Services.NetService.IterateSegmentLanes(segmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segId, ref NetSegment segment, byte laneIndex) {
 #if DEBUGCONN
-				Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing lane connections from segment {segmentId}, lane {curLaneId}.");
+				Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing lane connections from segment {segmentId}, lane {laneId}.");
 #endif
-				RemoveLaneConnections(curLaneId, startNode);
-				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-			}
+				RemoveLaneConnections(laneId, startNode, false);
+				return true;
+			});
 
-			if (Options.instantEffects) {
-				Services.NetService.PublishSegmentChanges(segmentId);
+			if (recalcAndPublish) {
+				SegmentGeometry.Get(segmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				if (Options.instantEffects) {
+					Services.NetService.PublishSegmentChanges(segmentId);
+				}
 			}
 		}
 
@@ -200,7 +201,7 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="laneId"></param>
 		/// <param name="startNode"></param>
-		internal void RemoveLaneConnections(uint laneId, bool startNode) {
+		internal void RemoveLaneConnections(uint laneId, bool startNode, bool recalcAndPublish=true) {
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnections({laneId}, {startNode}) called.");
 #endif
@@ -229,53 +230,60 @@ namespace TrafficManager.Manager {
 
 			Flags.RemoveLaneConnections(laneId, startNode);
 
-			if (Flags.laneConnections[laneId] == null) {
-				Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+				if (Flags.laneConnections[laneId] == null) {
 					UnsubscribeFromSegmentGeometry(lane.m_segment);
+				}
+
+				if (recalcAndPublish) {
+					SegmentGeometry.Get(lane.m_segment, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
 
 					if (Options.instantEffects) {
 						Services.NetService.PublishSegmentChanges(lane.m_segment);
 					}
-					return true;
-				});
-			}
+				}
+				return true;
+			});
 		}
 
 		/// <summary>
 		/// Adds a lane connection between two lanes
 		/// </summary>
-		/// <param name="laneId1"></param>
-		/// <param name="laneId2"></param>
-		/// <param name="startNode1"></param>
+		/// <param name="sourceLaneId"></param>
+		/// <param name="targetLaneId"></param>
+		/// <param name="sourceStartNode"></param>
 		/// <returns></returns>
-		internal bool AddLaneConnection(uint laneId1, uint laneId2, bool startNode1) {
-			bool ret = Flags.AddLaneConnection(laneId1, laneId2, startNode1);
+		internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+			bool ret = Flags.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
 
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.AddLaneConnection({laneId1}, {laneId2}, {startNode1}): ret={ret}");
 #endif
 			if (ret) {
 				ushort commonNodeId;
-				bool startNode2;
-				GetCommonNodeId(laneId1, laneId2, startNode1, out commonNodeId, out startNode2);
-				RecalculateLaneArrows(laneId1, commonNodeId, startNode1);
-				RecalculateLaneArrows(laneId2, commonNodeId, startNode2);
+				bool targetStartNode;
+				GetCommonNodeId(sourceLaneId, targetLaneId, sourceStartNode, out commonNodeId, out targetStartNode);
+				RecalculateLaneArrows(sourceLaneId, commonNodeId, sourceStartNode);
+				RecalculateLaneArrows(targetLaneId, commonNodeId, targetStartNode);
 
 				NetManager netManager = Singleton<NetManager>.instance;
 
-				ushort segmentId1 = netManager.m_lanes.m_buffer[laneId1].m_segment;
-				ushort segmentId2 = netManager.m_lanes.m_buffer[laneId2].m_segment;
+				ushort sourceSegmentId = netManager.m_lanes.m_buffer[sourceLaneId].m_segment;
+				ushort targetSegmentId = netManager.m_lanes.m_buffer[targetLaneId].m_segment;
 
-				if (segmentId1 == segmentId2) {
-					JunctionRestrictionsManager.Instance.SetUturnAllowed(segmentId1, startNode1, true);
+				if (sourceSegmentId == targetSegmentId) {
+					JunctionRestrictionsManager.Instance.SetUturnAllowed(sourceSegmentId, sourceStartNode, true);
 				}
 
-				SubscribeToSegmentGeometry(segmentId1);
-				SubscribeToSegmentGeometry(segmentId2);
+				SegmentGeometry.Get(sourceSegmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				SegmentGeometry.Get(targetSegmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+
+				SubscribeToSegmentGeometry(sourceSegmentId);
+				SubscribeToSegmentGeometry(targetSegmentId);
 
 				if (Options.instantEffects) {
-					Services.NetService.PublishSegmentChanges(segmentId1);
-					Services.NetService.PublishSegmentChanges(segmentId2);
+					Services.NetService.PublishSegmentChanges(sourceSegmentId);
+					Services.NetService.PublishSegmentChanges(targetSegmentId);
 				}
 			}
 
@@ -284,9 +292,9 @@ namespace TrafficManager.Manager {
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
 #if DEBUGCONN
-				Log._Debug($"LaneConnectionManager.OnUpdate({geometry.SegmentId}): Segment has become invalid. Removing lane connections.");
+			Log._Debug($"LaneConnectionManager.OnUpdate({geometry.SegmentId}): Segment has become invalid. Removing lane connections.");
 #endif
-			RemoveLaneConnectionsFromSegment(geometry.SegmentId, false);
+			RemoveLaneConnectionsFromSegment(geometry.SegmentId, false, false);
 			RemoveLaneConnectionsFromSegment(geometry.SegmentId, true);
 		}
 
@@ -424,7 +432,7 @@ namespace TrafficManager.Manager {
 			}
 
 			SegmentGeometry segmentGeo = SegmentGeometry.Get(segmentId);
-			if (!segmentGeo.IsValid()) {
+			if (segmentGeo == null) {
 #if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): invalid segment geometry");
 #endif

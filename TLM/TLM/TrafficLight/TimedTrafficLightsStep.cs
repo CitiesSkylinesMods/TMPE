@@ -827,7 +827,13 @@ namespace TrafficManager.TrafficLight {
 				return false;
 			}
 
-			bool startNode = SegmentGeometry.Get(segmentId).StartNodeId() == nodeId;
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: No geometry information available for segment {segmentId}");
+				return false;
+			}
+
+			bool startNode = segGeo.StartNodeId() == nodeId;
 			lights.Relocate(segmentId, startNode, this);
 
 			// TODO this method does currently not check if the segment belongs to the node

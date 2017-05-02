@@ -1270,6 +1270,10 @@ namespace TrafficManager.UI.SubTools {
 						}
 
 						SegmentGeometry geometry = SegmentGeometry.Get(srcSegmentId);
+						if (geometry == null) {
+							Log.Error($"TimedTrafficLightsTool.ShowGUI: No geometry information available for segment {srcSegmentId}");
+							continue;
+						}
 						bool startNode = geometry.StartNodeId() == nodeId;
 						if (geometry.IsOutgoingOneWay(startNode))
 							continue;

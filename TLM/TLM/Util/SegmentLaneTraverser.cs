@@ -60,7 +60,7 @@ namespace TrafficManager.Util {
 				bool ret = false;
 				Constants.ServiceFactory.NetService.ProcessSegment(segData.curGeo.SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
 					Log._Debug($"SegmentLaneTraverser: Reached segment {segmentId}: isInitialSeg={isInitialSeg} viaStartNode={segData.viaStartNode} viaInitialStartNode={segData.viaInitialStartNode} reverse={reverse}");
-					IList <LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(segmentId, ref segment, null, laneTypeFilter, vehicleTypeFilter, reverse);
+					IList <LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, laneTypeFilter, vehicleTypeFilter, reverse);
 
 					if (isInitialSeg) {
 						initialSortedLanes = sortedLanes;

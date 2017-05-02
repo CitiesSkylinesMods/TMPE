@@ -122,11 +122,11 @@ namespace TrafficManager.Util {
 				SegmentGeometry nextSegGeometry = SegmentGeometry.Get(nextSegmentId);
 				if (nextSegGeometry != null) {
 					Log._Debug($"SegmentTraverser: Traversing segment {nextSegGeometry.SegmentId}");
-				}
 
-				if (nextSegGeometry != null && visitor(new SegmentVisitData(prevSegGeometry, nextSegGeometry, viaInitialStartNode, prevNodeId == nextSegGeometry.StartNodeId(), false))) {
-					bool nextNodeIsStartNode = nextSegGeometry.StartNodeId() != prevNodeId;
-					TraverseRec(nextSegGeometry, nextNodeIsStartNode, viaInitialStartNode, direction, stopCrit, visitor, visitedSegmentIds);
+					if (visitor(new SegmentVisitData(prevSegGeometry, nextSegGeometry, viaInitialStartNode, prevNodeId == nextSegGeometry.StartNodeId(), false))) {
+						bool nextNodeIsStartNode = nextSegGeometry.StartNodeId() != prevNodeId;
+						TraverseRec(nextSegGeometry, nextNodeIsStartNode, viaInitialStartNode, direction, stopCrit, visitor, visitedSegmentIds);
+					}
 				}
 			}
 		}

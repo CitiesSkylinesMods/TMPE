@@ -112,8 +112,12 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiLaneChangeWindow(int num) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
-			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
+			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
+			if (geometry == null) {
+				Log.Error($"LaneArrowTool._guiLaneChangeWindow: No geometry information available for segment {SelectedSegmentId}");
+				return;
+			}
 			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();

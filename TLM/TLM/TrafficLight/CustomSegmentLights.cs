@@ -25,6 +25,12 @@ namespace TrafficManager.TrafficLight {
 		public ushort NodeId {
 			get {
 				SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
+
+				if (segGeo == null) {
+					Log.Error($"CustomSegmentLights.NodeId: No geometry information available for segment {SegmentId}");
+					return 0;
+				}
+
 				if (StartNode)
 					return segGeo.StartNodeId();
 				else
@@ -145,7 +151,7 @@ namespace TrafficManager.TrafficLight {
 
 		[Obsolete]
 		protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId).StartNodeId(), calculateAutoPedLight) {
+			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight) {
 
 		}
 
@@ -156,7 +162,7 @@ namespace TrafficManager.TrafficLight {
 
 		[Obsolete]
 		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId).StartNodeId(), calculateAutoPedLight, mainState) {
+			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight, mainState) {
 
 		}
 
@@ -167,7 +173,7 @@ namespace TrafficManager.TrafficLight {
 
 		[Obsolete]
 		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState, RoadBaseAI.TrafficLightState leftState, RoadBaseAI.TrafficLightState rightState, RoadBaseAI.TrafficLightState pedState)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId).StartNodeId(), calculateAutoPedLight, mainState, leftState, rightState, pedState)  {
+			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight, mainState, leftState, rightState, pedState)  {
 			
 		}
 
@@ -370,8 +376,7 @@ namespace TrafficManager.TrafficLight {
 
 		internal void CalculateAutoPedestrianLightState(bool propagate=true) {
 			//Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculating pedestrian light state of node {NodeId}");
-			SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
-			SegmentEndGeometry segmentEndGeometry = StartNode ? segGeo.StartNodeGeometry : segGeo.EndNodeGeometry;
+			SegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(SegmentId)?.GetEnd(StartNode);
 
 			if (segmentEndGeometry == null) {
 				Log._Debug($"Could not get SegmentEndGeometry for segment {SegmentId} @ {NodeId}.");

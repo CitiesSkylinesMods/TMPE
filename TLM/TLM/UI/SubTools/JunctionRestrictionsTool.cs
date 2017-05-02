@@ -160,6 +160,10 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 
 				SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
+				if (geometry == null) {
+					Log.Error($"JunctionRestrictionsTool.drawSignHandles: No geometry information available for segment {segmentId}");
+					continue;
+				}
 				bool startNode = geometry.StartNodeId() == nodeId;
 				bool incoming = geometry.IsIncoming(startNode);
 

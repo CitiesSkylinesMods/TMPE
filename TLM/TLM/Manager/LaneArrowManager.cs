@@ -7,11 +7,13 @@ using TrafficManager.State;
 using ColossalFramework;
 using TrafficManager.Geometry;
 using static TrafficManager.State.Flags;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.Manager {
 	public class LaneArrowManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string> {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
+		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle &~ ExtVehicleType.Emergency;
 
 		public static LaneArrowManager Instance { get; private set; } = null;
 
@@ -43,6 +45,7 @@ namespace TrafficManager.Manager {
 
 		protected void OnLaneChange(uint laneId) {
 			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+				SegmentGeometry.Get(lane.m_segment, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
 				SubscribeToSegmentGeometry(lane.m_segment);
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(lane.m_segment);

@@ -147,7 +147,7 @@ namespace TrafficManager.UI.SubTools {
 				// invert pattern
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (LanePos laneData in sortedLanes) {
 					uint laneId = laneData.laneId;
 					byte laneIndex = laneData.laneIndex;
@@ -170,7 +170,7 @@ namespace TrafficManager.UI.SubTools {
 				// allow all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (LanePos laneData in sortedLanes) {
 					uint laneId = laneData.laneId;
 					byte laneIndex = laneData.laneIndex;
@@ -190,7 +190,7 @@ namespace TrafficManager.UI.SubTools {
 				// ban all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
 				foreach (LanePos laneData in sortedLanes) {
 					uint laneId = laneData.laneId;
 					byte laneIndex = laneData.laneIndex;
@@ -298,7 +298,7 @@ namespace TrafficManager.UI.SubTools {
 
 			uint x = 0;
 			var guiColor = GUI.color;
-			IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedVehicleLanes(segmentId, ref segment, null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES);
+			IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES);
 			bool hovered = false;
 			HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
 			int sortedLaneIndex = -1;

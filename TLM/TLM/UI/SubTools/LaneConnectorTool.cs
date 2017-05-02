@@ -173,16 +173,7 @@ namespace TrafficManager.UI.SubTools {
 
 				if (deleteAll) {
 					// remove all connections at selected node
-
-					List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId);
-					if (nodeMarkers != null) {
-						selectedMarker = null;
-						foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
-							foreach (NodeLaneMarker targetLaneMarker in sourceLaneMarker.connectedMarkers) {
-								LaneConnectionManager.Instance.RemoveLaneConnection(sourceLaneMarker.laneId, targetLaneMarker.laneId, sourceLaneMarker.startNode);
-							}
-						}
-					}
+					LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(SelectedNodeId);
 					RefreshCurrentNodeMarkers();
 				}
 
@@ -425,8 +416,8 @@ namespace TrafficManager.UI.SubTools {
 				uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
 				for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++) {
 					NetInfo.Lane laneInfo = lanes[laneIndex];
-					if ((laneInfo.m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
-						(laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None) { // TODO refactor vehicle mask
+					if ((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None &&
+						(laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
 
 						Vector3? pos = null;
 						bool isSource = false;

@@ -254,6 +254,13 @@ namespace TrafficManager.Traffic {
 				numLanes = segment.Info.m_lanes.Length;
 				return true;
 			});
+			SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
+
+			if (segGeo == null) {
+				Log.Error($"SegmentEnd.Update: No geometry information available for segment {SegmentId}");
+				return;
+			}
+
 			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
 			numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 			numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];

@@ -174,7 +174,7 @@ namespace TrafficManager.Geometry {
 		}
 
 		public static SegmentEndGeometry Get(ushort segmentId, bool startNode) {
-			return SegmentGeometry.Get(segmentId).GetEnd(startNode);
+			return SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
 		}
 
 		internal void Cleanup() {
@@ -218,7 +218,8 @@ namespace TrafficManager.Geometry {
 		}
 
 		public bool IsValid() {
-			bool valid = GetSegmentGeometry() != null && GetSegmentGeometry().IsValid();
+			SegmentGeometry segGeo = GetSegmentGeometry();
+			bool valid = segGeo != null && segGeo.IsValid();
 			return valid && NodeId() != 0;
 		}
 
@@ -282,8 +283,8 @@ namespace TrafficManager.Geometry {
 			return ret;
 		}
 
-		public SegmentGeometry GetSegmentGeometry() {
-			return SegmentGeometry.Get(SegmentId);
+		public SegmentGeometry GetSegmentGeometry(bool ignoreInvalid=false) {
+			return SegmentGeometry.Get(SegmentId, ignoreInvalid);
 		}
 
 		public short GetClockwiseIndex() {

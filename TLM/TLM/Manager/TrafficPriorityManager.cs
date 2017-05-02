@@ -87,8 +87,7 @@ namespace TrafficManager.Manager {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			SegmentEndGeometry endGeo = startNode ? segGeo.StartNodeGeometry : segGeo.EndNodeGeometry;
+			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
 
 			if (endGeo.OutgoingOneWay) {
 				reason = UnableReason.NotIncoming;
@@ -160,6 +159,11 @@ namespace TrafficManager.Manager {
 			if (type != PriorityType.None) {
 				SubscribeToSegmentGeometry(segmentId);
 				SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+				if (segGeo == null) {
+					Log.Error($"TrafficPriorityManager.SetPrioritySign: No geometry information available for segment {segmentId}");
+					reason = UnableReason.InvalidSegment;
+					return false;
+				}
 				TrafficLightManager.Instance.RemoveTrafficLight(segGeo.GetNodeId(startNode));
 			}
 
@@ -549,7 +553,15 @@ namespace TrafficManager.Manager {
 				// We assume the target car is coming from BOTTOM.
 
 				SegmentGeometry targetGeometry = SegmentGeometry.Get(targetCurPos.m_segment);
+				if (targetGeometry == null) {
+					Log.Error($"TrafficPriorityManager.SetPrioritySign: No geometry information available for segment {targetCurPos.m_segment}");
+					return true;
+				}
 				SegmentGeometry incomingGeometry = SegmentGeometry.Get(incomingCurPos.m_segment);
+				if (incomingGeometry == null) {
+					Log.Error($"TrafficPriorityManager.SetPrioritySign: No geometry information available for segment {incomingCurPos.m_segment}");
+					return true;
+				}
 				bool isTargetStartNode = targetGeometry.StartNodeId() == nodeId;
 				ArrowDirection targetToDir = targetGeometry.GetDirection(targetNextPos.m_segment, isTargetStartNode); // target direction of target vehicle (relative to incoming direction of target vehicle)
 				ArrowDirection incomingFromRelDir = targetGeometry.GetDirection(incomingCurPos.m_segment, isTargetStartNode); // incoming direction of incoming vehicle (relative to incoming direction of target vehicle)
@@ -905,6 +917,10 @@ namespace TrafficManager.Manager {
 					}
 
 					SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+					if (segGeo == null) {
+						Log.Error($"TrafficPriorityManager.LoadData: No geometry information available for segment {segmentId}");
+						continue;
+					}
 					bool startNode = segGeo.StartNodeId() == nodeId;
 
 					SetPrioritySign(segmentId, startNode, sign);
@@ -938,6 +954,10 @@ namespace TrafficManager.Manager {
 					}
 
 					SegmentGeometry segGeo = SegmentGeometry.Get(prioSegData.segmentId);
+					if (segGeo == null) {
+						Log.Error($"TrafficPriorityManager.SaveData: No geometry information available for segment {prioSegData.segmentId}");
+						continue;
+					}
 					bool startNode = segGeo.StartNodeId() == prioSegData.nodeId;
 
 					SetPrioritySign(prioSegData.segmentId, startNode, (PriorityType)prioSegData.priorityType);
@@ -958,6 +978,10 @@ namespace TrafficManager.Manager {
 						continue;
 					}
 					SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+					if (segGeo == null) {
+						Log.Error($"TrafficPriorityManager.SaveData: No geometry information available for segment {segmentId}");
+						continue;
+					}
 
 					PriorityType startSign = GetPrioritySign(segmentId, true);
 					if (startSign != PriorityType.None) {

@@ -187,7 +187,7 @@ namespace CitiesGameBridge.Service {
 		/// <param name="vehicleTypeFilter">vehicle type filter, lanes must match this filter mask</param>
 		/// <param name="reverse">if true, lanes are ordered from right to left (relative to the segment's start node / the given node), otherwise from left to right</param>
 		/// <returns>sorted list of lanes for the given segment</returns>
-		public IList<LanePos> GetSortedVehicleLanes(ushort segmentId, ref NetSegment segment, bool? startNode, NetInfo.LaneType? laneTypeFilter = null, VehicleInfo.VehicleType? vehicleTypeFilter = null, bool reverse = false) { // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
+		public IList<LanePos> GetSortedLanes(ushort segmentId, ref NetSegment segment, bool? startNode, NetInfo.LaneType? laneTypeFilter = null, VehicleInfo.VehicleType? vehicleTypeFilter = null, bool reverse = false) { // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
 			NetManager netManager = Singleton<NetManager>.instance;
 			var laneList = new List<LanePos>();
 
