@@ -287,6 +287,9 @@ namespace TrafficManager.Geometry {
 		}
 
 		public static NodeGeometry Get(ushort nodeId) {
+			if (nodeGeometries == null) {
+				return null;
+			}
 			return nodeGeometries[nodeId];
 		}
 	}

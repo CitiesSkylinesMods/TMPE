@@ -354,7 +354,7 @@ namespace TrafficManager.State {
 		}
 
 		private static bool checkGameLoaded() {
-			if (!SerializableDataExtension.StateLoading && !LoadingExtension.IsGameLoaded()) {
+			if (!SerializableDataExtension.StateLoading && !LoadingExtension.IsGameLoaded) {
 				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Nope!", Translation.GetString("Settings_are_defined_for_each_savegame_separately") + ". https://www.viathinksoft.de/tmpe/#options", false);
 				return false;
 			}
@@ -497,10 +497,16 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
+			bool changed = newHighwayRules != highwayRules;
+			if (!changed) {
+				return;
+			}
+
 			Log._Debug($"Highway rules changed to {newHighwayRules}");
 			highwayRules = newHighwayRules;
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
+			RoutingManager.Instance.RecalculateAll();
 			if (newHighwayRules)
 				setAdvancedAI(true);
 		}
@@ -570,8 +576,14 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
+			bool changed = val != laneConnectorEnabled;
+			if (!changed) {
+				return;
+			}
+
 			MenuRebuildRequired = true;
 			laneConnectorEnabled = val;
+			RoutingManager.Instance.RecalculateAll();
 			if (!val)
 				setConnectedLanesOverlay(false);
 		}
@@ -804,6 +816,12 @@ namespace TrafficManager.State {
 			evacBussesMayIgnoreRules = value;
 			if (evacBussesMayIgnoreRulesToggle != null)
 				evacBussesMayIgnoreRulesToggle.isChecked = value;
+		}
+
+		public static void setInstantEffects(bool value) {
+			instantEffects = value;
+			if (instantEffectsToggle != null)
+				instantEffectsToggle.isChecked = value;
 		}
 
 		public static void setMayEnterBlockedJunctions(bool newMayEnterBlockedJunctions) {

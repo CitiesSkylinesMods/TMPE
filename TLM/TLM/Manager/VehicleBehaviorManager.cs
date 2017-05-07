@@ -545,13 +545,13 @@ namespace TrafficManager.Manager {
 
 			// NON-STOCK CODE START
 			if (Options.realisticSpeeds) {
-				float vehicleRand = Math.Min(1f, (float)(vehicleId % 101) * 0.01f); // we choose 101 because it's a prime number
+				float vehicleRand = Math.Min(1f, (float)(vehicleId % 100) * 0.01f);
 				if (state != null && state.HeavyVehicle)
 					maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.85 .. 1
 				else if (isRecklessDriver)
-					maxSpeed *= 1.2f + vehicleRand * 0.8f; // woohooo, 1.2 .. 2
+					maxSpeed *= 1.3f + vehicleRand * 0.7f; // woohooo, 1.3 .. 2
 				else
-					maxSpeed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
+					maxSpeed *= 0.7f + vehicleRand * 0.6f; // a little variance, 0.7 .. 1.3
 			} else {
 				if (isRecklessDriver)
 					maxSpeed *= 1.4f;

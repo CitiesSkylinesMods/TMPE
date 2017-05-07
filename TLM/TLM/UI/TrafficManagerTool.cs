@@ -121,6 +121,8 @@ namespace TrafficManager.UI {
 				e.Value.Initialize();
 			}
 
+			SetToolMode(ToolMode.None);
+
 			Log.Info("TrafficManagerTool: Initialization completed.");
 		}
 
@@ -636,7 +638,7 @@ namespace TrafficManager.UI {
 
 				labelStr += "Lane idx " + i + ", id " + curLaneId;
 #if DEBUG
-				labelStr += ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
+				labelStr += ", inner: " + RoutingManager.Instance.CalcInnerLaneSimilarIndex(segmentId, i) + ", outer: " + RoutingManager.Instance.CalcOuterLaneSimilarIndex(segmentId, i) + ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (laneTrafficDataLoaded) {
 					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "% ";
@@ -670,6 +672,19 @@ namespace TrafficManager.UI {
 			for (int i = 1; i < segments.m_size; ++i) {
 				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
 					continue;
+				ItemClass.Service service = segments.m_buffer[i].Info.GetService();
+				ItemClass.SubService subService = segments.m_buffer[i].Info.GetSubService();
+				if (service != ItemClass.Service.Road) {
+					if (service != ItemClass.Service.PublicTransport) {
+						continue;
+					} else {
+						if (subService != ItemClass.SubService.PublicTransportBus && subService != ItemClass.SubService.PublicTransportCableCar &&
+							subService != ItemClass.SubService.PublicTransportMetro && subService != ItemClass.SubService.PublicTransportMonorail &&
+							subService != ItemClass.SubService.PublicTransportTrain /*&& subService != ItemClass.SubService.PublicTransportTram*/) {
+							continue;
+						}
+					}
+				}
 //#if !DEBUG
 				if ((segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 					continue;
@@ -698,6 +713,7 @@ namespace TrafficManager.UI {
 				labelStr += ", flags: " + segments.m_buffer[i].m_flags.ToString(); // + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
+				labelStr += "\nsvc: " + service + ", sub: " + subService;
 				SegmentEnd startEnd = endMan.GetSegmentEnd((ushort)i, true);
 				SegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
 				labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();

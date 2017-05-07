@@ -42,9 +42,9 @@ namespace TrafficManager.Geometry {
 			Log.Info(buf);
 		}
 
-		public LaneGeometry[] LaneGeometries {
+		/*public LaneGeometry[] LaneGeometries {
 			get; private set;
-		} = null;
+		} = null;*/
 
 		/// <summary>
 		/// The id of the managed segment
@@ -137,7 +137,7 @@ namespace TrafficManager.Geometry {
 				"\t" + $"buslane = {buslane}\n" +
 				"\t" + $"StartNodeGeometry = {StartNodeGeometry}\n" +
 				"\t" + $"EndNodeGeometry = {EndNodeGeometry}\n" +
-				"\t" + $"LaneGeometries = {(LaneGeometries == null ? "<null>" : LaneGeometries.ArrayToString())}\n" +
+				//"\t" + $"LaneGeometries = {(LaneGeometries == null ? "<null>" : LaneGeometries.ArrayToString())}\n" +
 				"SegmentGeometry]";
 		}
 
@@ -164,7 +164,7 @@ namespace TrafficManager.Geometry {
 			return IsValid(SegmentId);
 		}
 
-		public LaneGeometry GetLane(int laneIndex, bool recalcIfNecessary=true) {
+		/*public LaneGeometry GetLane(int laneIndex, bool recalcIfNecessary=true) {
 			if (LaneGeometries == null || laneIndex >= LaneGeometries.Length) {
 				if (recalcIfNecessary) {
 					RecalculateLaneGeometries();
@@ -214,11 +214,11 @@ namespace TrafficManager.Geometry {
 					SegmentGeometry.Get(otherSegmentId, true).RecalculateLaneGeometries();
 				}
 			}
-		}
+		}*/
 
 		public void StartRecalculation(GeometryCalculationMode calcMode) {
 			Recalculate(calcMode);
-			RecalculateLaneGeometries(calcMode);
+			//RecalculateLaneGeometries(calcMode);
 		}
 
 		/// <summary>
@@ -1146,12 +1146,23 @@ namespace TrafficManager.Geometry {
 			if (!IsValid(segmentId))
 				return false;
 
-			var instance = Singleton<NetManager>.instance;
+			bool ret = false;
+			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+				ret = calculateHasBusLane(segment.Info);
+				return true;
+			});
+			return ret;
+		}
 
-			var info = instance.m_segments.m_buffer[segmentId].Info;
-
-			for (int laneIndex = 0; laneIndex < info.m_lanes.Length; ++laneIndex) {
-				if (info.m_lanes[laneIndex].m_laneType == NetInfo.LaneType.TransportVehicle && (info.m_lanes[laneIndex].m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+		/// <summary>
+		/// Calculates if the given segment info describes a segment having a bus lane
+		/// </summary>
+		/// <param name="segmentInfo"></param>
+		/// <returns></returns>
+		internal static bool calculateHasBusLane(NetInfo segmentInfo) {
+			for (int laneIndex = 0; laneIndex < segmentInfo.m_lanes.Length; ++laneIndex) {
+				if (segmentInfo.m_lanes[laneIndex].m_laneType == NetInfo.LaneType.TransportVehicle &&
+					(segmentInfo.m_lanes[laneIndex].m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 					return true;
 				}
 			}
@@ -1295,9 +1306,9 @@ namespace TrafficManager.Geometry {
 			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i].Recalculate(GeometryCalculationMode.Init);
 			}
-			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+			/*for (ushort i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i].RecalculateLaneGeometries(GeometryCalculationMode.Init);
-			}
+			}*/
 			Log._Debug($"Calculated segment geometries.");
 		}
 
@@ -1310,21 +1321,25 @@ namespace TrafficManager.Geometry {
 		}
 
 		public static SegmentGeometry Get(ushort segmentId, bool ignoreInvalid=false) {
+			if (segmentGeometries == null) {
+				return null;
+			}
+
 			SegmentGeometry segGeo = segmentGeometries[segmentId];
-			if (! ignoreInvalid && ! segGeo.valid) {
+			if (segGeo == null || (! ignoreInvalid && ! segGeo.valid)) {
 				return null;
 			}
 			return segGeo;
 		}
 
-		private void RecalculateLaneGeometries() {
+		/*private void RecalculateLaneGeometries() {
 			RebuildLaneGeometries();
 			foreach (LaneGeometry laneGeo in LaneGeometries) {
 				laneGeo.Recalculate();
 			}
-		}
+		}*/
 
-		private void RebuildLaneGeometries() {
+		/*private void RebuildLaneGeometries() {
 			LaneGeometry[] newLaneGeos = null;
 
 			if (IsValid()) {
@@ -1347,7 +1362,7 @@ namespace TrafficManager.Geometry {
 			}
 
 			LaneGeometries = newLaneGeos;
-		}
+		}*/
 
 		private void NotifyObservers() {
 			List<IObserver<SegmentGeometry>> myObservers = new List<IObserver<SegmentGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers

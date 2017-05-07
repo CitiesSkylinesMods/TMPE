@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using TrafficManager.Manager;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
@@ -356,10 +357,13 @@ namespace TrafficManager.State {
 					XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
+					if (LoadingExtension.IsGameLoaded) {
+						RoutingManager.Instance.RecalculateAll();
+					}
 					return conf;
 				}
-			} catch (Exception) {
-				Log.Warning("Could not load global config. Generating default config.");
+			} catch (Exception e) {
+				Log.Warning($"Could not load global config: {e} Generating default config.");
 				return WriteDefaultConfig(null, out modifiedTime);
 			}
 		}

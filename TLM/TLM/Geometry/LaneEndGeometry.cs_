@@ -452,7 +452,7 @@ namespace TrafficManager.Geometry {
 									maxNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
 								}
 
-								bool mayChangeLanes = isIncomingStraight && Flags.getStraightLaneChangingAllowed(nextSegmentId, nextIsStartNode);
+								bool mayChangeLanes = isIncomingStraight && Flags.getStraightLaneChangingAllowed(nextSegmentId, nextIsStartNodeOfNextSegment);
 
 								if (!mayChangeLanes) {
 									bool prevHasBusLane = prevSegGeo.HasBusLane();
@@ -602,6 +602,9 @@ namespace TrafficManager.Geometry {
 				if (nextSegmentId != prevSegmentId) {
 					totalIncomingLanes += incomingVehicleLanes;
 					totalOutgoingLanes += outgoingVehicleLanes;
+				} else {
+					// we reached the first segment again
+					nextSegmentId = 0;
 				}
 			} // foreach segment
 

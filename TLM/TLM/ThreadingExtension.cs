@@ -27,6 +27,12 @@ namespace TrafficManager {
 		}
 
 		public override void OnAfterSimulationFrame() {
+			try {
+				RoutingManager.Instance.SimulationStep();
+			} catch (Exception e) {
+				Log.Error($"Error occured while performing first update: " + e.ToString());
+			}
+
 			++ticksSinceLastMinuteUpdate;
 			if (ticksSinceLastMinuteUpdate > 60 * 60) {
 				ticksSinceLastMinuteUpdate = 0;

@@ -15,16 +15,16 @@ namespace TrafficManager.Manager {
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle &~ ExtVehicleType.Emergency;
 
-		public static LaneArrowManager Instance { get; private set; } = null;
-
-		static LaneArrowManager() {
-			Instance = new LaneArrowManager();
-		}
-
+		public static readonly LaneArrowManager Instance = new LaneArrowManager();
+		
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"- Not implemented -");
 			// TODO implement
+		}
+
+		public LaneArrows GetFinalLaneArrows(uint laneId) {
+			return Flags.getFinalLaneArrowFlags(laneId, true);
 		}
 
 		public bool SetLaneArrows(uint laneId, LaneArrows flags, bool overrideHighwayArrows = false) {
@@ -45,7 +45,7 @@ namespace TrafficManager.Manager {
 
 		protected void OnLaneChange(uint laneId) {
 			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
-				SegmentGeometry.Get(lane.m_segment, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				RoutingManager.Instance.RecalculateSegment(lane.m_segment);
 				SubscribeToSegmentGeometry(lane.m_segment);
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(lane.m_segment);

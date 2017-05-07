@@ -58,7 +58,7 @@ namespace TrafficManager {
 
 		public static List<ICustomManager> RegisteredManagers { get; private set; }
 
-		private static bool gameLoaded = false;
+		public static bool IsGameLoaded { get; private set; } = false;
 
 		public LoadingExtension() {
 		}
@@ -1744,10 +1744,6 @@ namespace TrafficManager {
 			}
 		}
 
-		internal static bool IsGameLoaded() {
-			return gameLoaded;
-		}
-
 		public override void OnCreated(ILoading loading) {
 			//SelfDestruct.DestructOldInstances(this);
 
@@ -1771,6 +1767,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
 			RegisteredManagers.Add(OptionsManager.Instance);
+			RegisteredManagers.Add(RoutingManager.Instance);
 			RegisteredManagers.Add(SegmentEndManager.Instance);
 			RegisteredManagers.Add(SpeedLimitManager.Instance);
 			RegisteredManagers.Add(TrafficLightManager.Instance);
@@ -1829,7 +1826,7 @@ namespace TrafficManager {
 			}
 
 			revertDetours();
-			gameLoaded = false;
+			IsGameLoaded = false;
 		}
 
 		public override void OnLevelLoaded(LoadMode mode) {
@@ -1839,7 +1836,7 @@ namespace TrafficManager {
 
 			Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
 
-			gameLoaded = false;
+			IsGameLoaded = false;
 			switch (updateMode) {
 				case SimulationManager.UpdateMode.NewGameFromMap:
 				case SimulationManager.UpdateMode.NewGameFromScenario:
@@ -1865,7 +1862,7 @@ namespace TrafficManager {
 							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.", false);
 						}
 					}
-					gameLoaded = true;
+					IsGameLoaded = true;
 					break;
 				default:
 					Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
@@ -1933,7 +1930,7 @@ namespace TrafficManager {
 			initDetours();
 
 			Log.Info("Fixing non-created nodes with problems...");
-			FixNonCreatedNodeProblems();
+			//FixNonCreatedNodeProblems();
 
 			Log.Info("Notifying managers...");
 			foreach (ICustomManager manager in RegisteredManagers) {
@@ -1942,18 +1939,19 @@ namespace TrafficManager {
 			}
 
 			InitTool();
+			Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
 
 			Log.Info("OnLevelLoaded complete.");
 		}
 
-		private void FixNonCreatedNodeProblems() {
+		/*private void FixNonCreatedNodeProblems() {
 			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				if ((NetManager.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 					NetManager.instance.m_nodes.m_buffer[nodeId].m_problems = Notification.Problem.None;
 					NetManager.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;
 				}
 			}
-		}
+		}*/
 
 		private bool CheckRainfallIsLoaded() {
 			return Check3rdPartyModLoaded("Rainfall");
@@ -2018,6 +2016,7 @@ namespace TrafficManager {
 		}
 
 		public static void EnableTool() {
+			Log._Debug("LoadingExtension.EnabledTool: called");
 			InitTool();
 
 			ToolsModifierControl.toolController.CurrentTool = TrafficManagerTool;
@@ -2025,6 +2024,7 @@ namespace TrafficManager {
 		}
 
 		public static void DisableTool() {
+			Log._Debug("LoadingExtension.DisableTool: called");
 			ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
 			ToolsModifierControl.SetTool<DefaultTool>();
 		}

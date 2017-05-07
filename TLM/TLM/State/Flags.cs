@@ -920,8 +920,6 @@ namespace TrafficManager.State {
 			if (laneId <= 0)
 				return true;
 
-			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
-
 			if (check && !mayHaveLaneArrows(laneId)) {
 				removeLaneArrowFlags(laneId);
 				return false;
@@ -929,6 +927,7 @@ namespace TrafficManager.State {
 
 			LaneArrows? hwArrows = highwayLaneArrowFlags[laneId];
 			LaneArrows? arrows = laneArrowFlags[laneId];
+			uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
 			if (hwArrows != null) {
 				laneFlags &= ~lfr; // remove all arrows
@@ -946,6 +945,34 @@ namespace TrafficManager.State {
 			//Log._Debug($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
 			Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 			return true;
+		}
+
+		public static LaneArrows getFinalLaneArrowFlags(uint laneId, bool check=true) {
+			if (! mayHaveLaneArrows(laneId)) {
+				Log._Debug($"Lane {laneId} may not have lane arrows");
+				return LaneArrows.None;
+			}
+
+			uint ret = 0;
+			LaneArrows? hwArrows = highwayLaneArrowFlags[laneId];
+			LaneArrows? arrows = laneArrowFlags[laneId];
+
+			if (hwArrows != null) {
+				ret &= ~lfr; // remove all arrows
+				ret |= (uint)hwArrows; // add highway arrows
+			} else if (arrows != null) {
+				LaneArrows flags = (LaneArrows)arrows;
+				ret &= ~lfr; // remove all arrows
+				ret |= (uint)flags; // add desired arrows
+			} else {
+				Constants.ServiceFactory.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+					ret = lane.m_flags;
+					ret &= (uint)LaneArrows.LeftForwardRight;
+					return true;
+				});
+			}
+
+			return (LaneArrows)ret;
 		}
 
 		public static void removeLaneArrowFlags(uint laneId) {

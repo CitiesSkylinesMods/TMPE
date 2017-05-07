@@ -135,6 +135,10 @@ namespace TrafficManager.Manager {
 				Options.setEvacBussesMayIgnoreRules(data[28] == (byte)1);
 			}
 
+			if (data.Length >= 30) {
+				Options.setInstantEffects(data[29] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -168,7 +172,8 @@ namespace TrafficManager.Manager {
 						(byte)(Options.prohibitPocketCars ? 1 : 0),
 						(byte)(Options.preferOuterLane ? 1 : 0),
 						(byte)(Options.realisticSpeeds ? 1 : 0),
-						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0)
+						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
+						(byte)(Options.instantEffects ? 1 : 0)
 				};
 		}
 	}

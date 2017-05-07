@@ -103,11 +103,10 @@
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Geometry\GeometryCalculationMode.cs" />
-    <Compile Include="Geometry\LaneEndTransition.cs" />
-    <Compile Include="Geometry\LaneEndGeometry.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\RoutingManager.cs" />
     <Compile Include="Manager\SegmentEndManager.cs" />
     <Compile Include="Manager\VehicleBehaviorManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
@@ -133,7 +132,6 @@
     <Compile Include="Manager\VehicleStateManager.cs" />
     <Compile Include="Manager\VehicleRestrictionsManager.cs" />
     <Compile Include="Geometry\SegmentEndId.cs" />
-    <Compile Include="Geometry\LaneGeometry.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />

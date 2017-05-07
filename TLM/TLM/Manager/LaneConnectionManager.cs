@@ -144,8 +144,8 @@ namespace TrafficManager.Manager {
 				UnsubscribeFromSegmentGeometry(segmentId1);
 				UnsubscribeFromSegmentGeometry(segmentId2);
 
-				SegmentGeometry.Get(segmentId1, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
-				SegmentGeometry.Get(segmentId2, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				RoutingManager.Instance.RecalculateSegment(segmentId1, false);
+				RoutingManager.Instance.RecalculateSegment(segmentId2, false);
 
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(segmentId1);
@@ -189,7 +189,7 @@ namespace TrafficManager.Manager {
 			});
 
 			if (recalcAndPublish) {
-				SegmentGeometry.Get(segmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				RoutingManager.Instance.RecalculateSegment(segmentId);
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(segmentId);
 				}
@@ -236,7 +236,7 @@ namespace TrafficManager.Manager {
 				}
 
 				if (recalcAndPublish) {
-					SegmentGeometry.Get(lane.m_segment, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+					RoutingManager.Instance.RecalculateSegment(lane.m_segment);
 
 					if (Options.instantEffects) {
 						Services.NetService.PublishSegmentChanges(lane.m_segment);
@@ -275,8 +275,8 @@ namespace TrafficManager.Manager {
 					JunctionRestrictionsManager.Instance.SetUturnAllowed(sourceSegmentId, sourceStartNode, true);
 				}
 
-				SegmentGeometry.Get(sourceSegmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
-				SegmentGeometry.Get(targetSegmentId, true).RecalculateLaneGeometries(GeometryCalculationMode.Propagate);
+				RoutingManager.Instance.RecalculateSegment(sourceSegmentId, false);
+				RoutingManager.Instance.RecalculateSegment(targetSegmentId, false);
 
 				SubscribeToSegmentGeometry(sourceSegmentId);
 				SubscribeToSegmentGeometry(targetSegmentId);
