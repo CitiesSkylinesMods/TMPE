@@ -68,7 +68,7 @@ namespace TrafficManager.State {
 		private static UIButton reloadGlobalConfBtn = null;
 		private static UIButton resetGlobalConfBtn = null;
 
-		public static bool instantEffects = false;
+		public static bool instantEffects = true;
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
 		public static bool realisticSpeeds = true;
@@ -506,7 +506,7 @@ namespace TrafficManager.State {
 			highwayRules = newHighwayRules;
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
-			RoutingManager.Instance.RecalculateAll();
+			RoutingManager.Instance.RequestFullRecalculation(true);
 			if (newHighwayRules)
 				setAdvancedAI(true);
 		}
@@ -583,7 +583,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			laneConnectorEnabled = val;
-			RoutingManager.Instance.RecalculateAll();
+			RoutingManager.Instance.RequestFullRecalculation(true);
 			if (!val)
 				setConnectedLanesOverlay(false);
 		}

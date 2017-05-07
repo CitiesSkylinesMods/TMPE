@@ -45,7 +45,7 @@ namespace TrafficManager.Manager {
 
 		protected void OnLaneChange(uint laneId) {
 			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
-				RoutingManager.Instance.RecalculateSegment(lane.m_segment);
+				RoutingManager.Instance.RequestRecalculation(lane.m_segment);
 				SubscribeToSegmentGeometry(lane.m_segment);
 				if (Options.instantEffects) {
 					Services.NetService.PublishSegmentChanges(lane.m_segment);

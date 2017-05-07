@@ -51,11 +51,9 @@ namespace TrafficManager.UI {
 		private static UIButton _togglePathFindStatsButton = null;
 #endif
 
-		public static TrafficManagerTool TrafficLightTool;
 		public static UILabel title;
 
 		public override void Start() {
-			TrafficLightTool = LoadingExtension.TrafficManagerTool;
 			isVisible = false;
 
 			backgroundSprite = "GenericPanel";
@@ -299,7 +297,7 @@ namespace TrafficManager.UI {
 #if DEBUG
 
 		private void clickRemoveStuckEntities(UIComponent component, UIMouseEventParameter eventParam) {
-			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 
 			UtilityManager.Instance.RequestResetStuckEntities();
 		}
@@ -365,92 +363,92 @@ namespace TrafficManager.UI {
 #endif
 
 		private void clickSwitchTraffic(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.SwitchTrafficLight) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.SwitchTrafficLight) {
 				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.SwitchTrafficLight);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.SwitchTrafficLight);
 			} else {
 				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.AddPrioritySigns) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.AddPrioritySigns) {
 				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.AddPrioritySigns);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.AddPrioritySigns);
 			} else {
 				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickManualControl(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.ManualSwitch) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.ManualSwitch) {
 				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.ManualSwitch);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.ManualSwitch);
 			} else {
 				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickTimedAdd(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsSelectNode && LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.TimedLightsSelectNode && UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.TimedLightsShowLights) {
 				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.TimedLightsSelectNode);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.TimedLightsSelectNode);
 			} else {
 				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickSpeedLimits(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.SpeedLimits) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.SpeedLimits) {
 				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.SpeedLimits);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.SpeedLimits);
 			} else {
 				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickVehicleRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.VehicleRestrictions) {
 				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.VehicleRestrictions);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.VehicleRestrictions);
 			} else {
 				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickJunctionRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.JunctionRestrictions) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.JunctionRestrictions) {
 				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.JunctionRestrictions);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.JunctionRestrictions);
 			} else {
 				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.LaneChange) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.LaneChange) {
 				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.LaneChange);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.LaneChange);
 			} else {
 				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
 		private void clickLaneConnector(UIComponent component, UIMouseEventParameter eventParam) {
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() != ToolMode.LaneConnector) {
+			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.LaneConnector) {
 				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenuFocused";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.LaneConnector);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.LaneConnector);
 			} else {
 				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenu";
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			}
 		}
 
@@ -483,13 +481,13 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
-			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 
 			VehicleStateManager.Instance.RequestClearTraffic();
 		}
 
 		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {
-			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 
 			Options.setEnableDespawning(!Options.enableDespawning);
 

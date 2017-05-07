@@ -6,6 +6,7 @@ using TrafficManager.Custom.AI;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.Manager;
+using TrafficManager.UI;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -59,7 +60,8 @@ namespace TrafficManager {
                 return;
             }
 
-            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.TrafficManagerTool && LoadingExtension.BaseUI.IsVisible()) {
+			TrafficManagerTool tmTool = UIBase.GetTrafficManagerTool(false);
+			if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool && LoadingExtension.BaseUI.IsVisible()) {
                 LoadingExtension.BaseUI.Close();
             }
 

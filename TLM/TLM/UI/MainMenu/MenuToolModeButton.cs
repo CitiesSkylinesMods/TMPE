@@ -11,15 +11,15 @@ namespace TrafficManager.UI.MainMenu {
 
 		public override bool Active {
 			get {
-				return this.ToolMode.Equals(LoadingExtension.TrafficManagerTool.GetToolMode());
+				return this.ToolMode.Equals(UIBase.GetTrafficManagerTool(false)?.GetToolMode());
 			}
 		}
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
 			if (Active) {
-				LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			} else {
-				LoadingExtension.TrafficManagerTool.SetToolMode(this.ToolMode);
+				UIBase.GetTrafficManagerTool(true).SetToolMode(this.ToolMode);
 			}
 		}
 	}

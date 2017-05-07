@@ -893,12 +893,13 @@ namespace TrafficManager.Custom.PathFinding {
 				// we are going to a non-pedestrian lane
 
 				bool allowPedestrian = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0; // allow pedestrian switching to vehicle?
-				bool isPedestrianSwitchingToBicycleAtBeautificationNode = false;
+				bool nextIsBeautificationNode = nextNode.Info.m_class.m_service == ItemClass.Service.Beautification;
+				bool allowPedestrians = false; // is true if cim is using a bike
 				byte parkingConnectOffset = 0;
 				if (allowPedestrian) {
 					if (prevIsBicycleLane) {
 						parkingConnectOffset = connectOffset;
-						isPedestrianSwitchingToBicycleAtBeautificationNode = (nextNode.Info.m_class.m_service == ItemClass.Service.Beautification);
+						allowPedestrians = nextIsBeautificationNode;
 					} else if (this._vehicleLane != 0u) {
 						// there is a parked vehicle position
 						if (this._vehicleLane != item.m_laneID) {
@@ -932,7 +933,7 @@ namespace TrafficManager.Custom.PathFinding {
 							continue;
 						}
 
-						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, isPedestrianSwitchingToBicycleAtBeautificationNode);
+						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, allowPedestrians);
 					}
 
 					if ((nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None &&
@@ -948,6 +949,7 @@ namespace TrafficManager.Custom.PathFinding {
 					SegmentEndGeometry prevEndGeometry = prevGeometry.GetEnd(nextIsStartNode);*/
 					bool prevIsOutgoingOneWay = nextIsStartNode ? prevSegmentRouting.startNodeOutgoingOneWay : prevSegmentRouting.endNodeOutgoingOneWay;
 					//bool nextIsRealJunction = prevEndGeometry.NumConnectedSegments > 1;
+					bool nextIsUntouchable = (nextNode.m_flags & (NetNode.Flags.Untouchable)) != NetNode.Flags.None;
 					bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
 					bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
 					bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
@@ -958,14 +960,15 @@ namespace TrafficManager.Custom.PathFinding {
 						nextIsEndOrOneWayOut || // stock u-turn points
 						(Options.junctionRestrictionsEnabled &&
 						isCustomUturnAllowed && // only do u-turns if allowed
-						!isPedestrianSwitchingToBicycleAtBeautificationNode && // no u-turn at beautification nodes
+						!nextIsBeautificationNode && // no u-turns at beautification nodes
 						_isRoadVehicle && // only road vehicles may perform u-turns
 						!_isHeavyVehicle && // only small vehicles may perform u-turns
 						(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes
 						!prevIsOutgoingOneWay); // do not u-turn on one-ways
 
 					bool isStrictLaneArrowPolicyEnabled =
-						!isPedestrianSwitchingToBicycleAtBeautificationNode && // do not obey lane arrows at beautification nodes
+						!nextIsBeautificationNode && // do not obey lane arrows at beautification nodes
+						!nextIsUntouchable &&
 						_isLaneArrowObeyingEntity && 
 						nextIsTransitionOrJunction && // follow lane arrows only at transitions and junctions
 						!(
@@ -973,6 +976,8 @@ namespace TrafficManager.Custom.PathFinding {
 						Options.allRelaxed || // debug option: all vehicle may ignore lane arrows
 #endif
 						(Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)); // option: busses may ignore lane arrows
+
+					bool useRouting = prevLaneEndRouting.routed && !nextIsBeautificationNode;
 
 					bool handleStockUturn = !explorePrevSegment;
 					bool stockUturn = false;
@@ -992,10 +997,12 @@ namespace TrafficManager.Custom.PathFinding {
 							"\t" + $"prevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
 							"\t" + $"prevLaneHasRouting={prevLaneEndRouting.routed}\n\n" +
 							"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
+							"\t" + $"isNextBeautificationNode={nextIsBeautificationNode}\n" + 
 							//"\t" + $"nextIsRealJunction={nextIsRealJunction}\n" +
 							"\t" + $"nextIsBend={nextIsBend}\n" +
+							"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
 							"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
-							"\t" + $"isPedestrianSwitchingToBicycleAtBeautificationNode={isPedestrianSwitchingToBicycleAtBeautificationNode}\n" +
+							"\t" + $"allowPedestrians={allowPedestrians}\n" +
 							"\t" + $"isCustomUturnAllowed={isCustomUturnAllowed}\n" +
 							"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
 							"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneArrowPolicyEnabled}\n" +
@@ -1003,7 +1010,7 @@ namespace TrafficManager.Custom.PathFinding {
 							);
 #endif
 
-					if (!prevLaneEndRouting.routed || isPedestrianSwitchingToBicycleAtBeautificationNode) {
+					if (allowPedestrians || !prevLaneEndRouting.routed) {
 						/* pedestrian to bicycle switch or no routing information available */
 
 #if DEBUGNEWPF
@@ -1025,13 +1032,15 @@ namespace TrafficManager.Custom.PathFinding {
 								break;
 							}
 
-							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevLaneEndRouting.routed, true)) {
+							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevLaneEndRouting.routed, allowPedestrians)) {
 								stockUturn = true;
 							}
 
 							nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
 						}
-					} else {
+					}
+
+					if (prevLaneEndRouting.routed) {
 						/* routed vehicle paths */
 
 #if DEBUGNEWPF

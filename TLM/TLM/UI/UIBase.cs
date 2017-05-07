@@ -15,6 +15,18 @@ namespace TrafficManager.UI {
 #if DEBUG
 		public DebugMenuPanel DebugMenu { get; private set; }
 #endif
+		public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired=true) {
+			if (tool == null && createIfRequired) {
+				Log.Info("Initializing traffic manager tool...");
+				tool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
+								   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
+			}
+
+			return tool;
+		}
+		private static TrafficManagerTool tool = null;
+		public static TrafficManagerMode ToolMode { get; set; }
+
 		private bool _uiShown = false;
 
 		public UIBase() {
@@ -32,6 +44,8 @@ namespace TrafficManager.UI {
 #if DEBUG
 			DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
+
+			ToolMode = TrafficManagerMode.None;
 		}
 
 		~UIBase() {
@@ -78,7 +92,7 @@ namespace TrafficManager.UI {
 #if DEBUG
 			GetDebugMenu().Show();
 #endif
-			LoadingExtension.SetToolMode(TrafficManagerMode.Activated);
+			SetToolMode(TrafficManagerMode.Activated);
 			_uiShown = true;
 			MainMenuButton.UpdateSprites();
 		}
@@ -90,8 +104,11 @@ namespace TrafficManager.UI {
 			GetDebugMenu().Hide();
 			DebugMenuPanel.deactivateButtons();
 #endif
-			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
-			LoadingExtension.SetToolMode(TrafficManagerMode.None);
+			TrafficManagerTool tmTool = GetTrafficManagerTool(false);
+			if (tmTool != null) {
+				tmTool.SetToolMode(UI.ToolMode.None);
+			}
+			SetToolMode(TrafficManagerMode.None);
 			_uiShown = false;
 			MainMenuButton.UpdateSprites();
 		}
@@ -105,5 +122,52 @@ namespace TrafficManager.UI {
 			return DebugMenu;
 		}
 #endif
+
+		public static void SetToolMode(TrafficManagerMode mode) {
+			if (mode == ToolMode) return;
+
+			ToolMode = mode;
+
+			if (mode != TrafficManagerMode.None) {
+				EnableTool();
+			} else {
+				DisableTool();
+			}
+		}
+
+		public static void EnableTool() {
+			Log._Debug("LoadingExtension.EnabledTool: called");
+			TrafficManagerTool tmTool = GetTrafficManagerTool(true);
+			tmTool.Initialize();
+
+			ToolsModifierControl.toolController.CurrentTool = tmTool;
+			ToolsModifierControl.SetTool<TrafficManagerTool>();
+		}
+
+		public static void DisableTool() {
+			Log._Debug("LoadingExtension.DisableTool: called");
+			ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
+			ToolsModifierControl.SetTool<DefaultTool>();
+		}
+
+		internal static void ReleaseTool() {
+			if (ToolMode != TrafficManagerMode.None) {
+				ToolMode = TrafficManagerMode.None;
+				DestroyTool();
+			}
+		}
+
+		private static void DestroyTool() {
+			if (ToolsModifierControl.toolController != null) {
+				ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
+				ToolsModifierControl.SetTool<DefaultTool>();
+
+				if (tool != null) {
+					UnityEngine.Object.Destroy(tool);
+					tool = null;
+				}
+			} else
+				Log.Warning("LoadingExtensions.DestroyTool: ToolsModifierControl.toolController is null!");
+		}
 	}
 }

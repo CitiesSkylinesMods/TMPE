@@ -358,7 +358,7 @@ namespace TrafficManager.State {
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
 					if (LoadingExtension.IsGameLoaded) {
-						RoutingManager.Instance.RecalculateAll();
+						RoutingManager.Instance.RequestFullRecalculation(true);
 					}
 					return conf;
 				}

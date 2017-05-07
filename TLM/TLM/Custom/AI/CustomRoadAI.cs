@@ -217,7 +217,7 @@ namespace TrafficManager.Custom.AI {
 					/*data.m_flags ^= NetNode.Flags.TrafficLights;
 					data.m_flags |= NetNode.Flags.CustomTrafficLights;*/
 					// NON-STOCK CODE START
-					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)LoadingExtension.TrafficManagerTool.GetSubTool(ToolMode.SwitchTrafficLight);
+					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)UIBase.GetTrafficManagerTool(true).GetSubTool(ToolMode.SwitchTrafficLight);
 					toggleTool.ToggleTrafficLight(nodeID, false);
 					// NON-STOCK CODE END
 					this.UpdateNodeFlags(nodeID, ref data);

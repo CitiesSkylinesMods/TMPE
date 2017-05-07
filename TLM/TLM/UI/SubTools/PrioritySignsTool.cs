@@ -89,7 +89,7 @@ namespace TrafficManager.UI.SubTools {
 			if (viewOnly && !Options.prioritySignsOverlay)
 				return;
 
-			if (LoadingExtension.TrafficManagerTool.GetToolMode() == ToolMode.JunctionRestrictions)
+			if (UIBase.GetTrafficManagerTool(false)?.GetToolMode() == ToolMode.JunctionRestrictions)
 				return;
 
 			ShowGUI(viewOnly);

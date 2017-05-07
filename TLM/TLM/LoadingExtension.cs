@@ -48,8 +48,8 @@ namespace TrafficManager {
 		public static CustomPathManager CustomPathManager { get; set; }
 		public static bool DetourInited { get; set; }
 		public static List<Detour> Detours { get; set; }
-		public static TrafficManagerMode ToolMode { get; set; }
-		public static TrafficManagerTool TrafficManagerTool { get; set; }
+		//public static TrafficManagerMode ToolMode { get; set; }
+		//public static TrafficManagerTool TrafficManagerTool { get; set; }
 #if !TAM
 		public static UIBase BaseUI { get; private set; }
 #endif
@@ -1749,7 +1749,6 @@ namespace TrafficManager {
 
 			base.OnCreated(loading);
 
-			ToolMode = TrafficManagerMode.None;
 			Detours = new List<Detour>();
 			RegisteredManagers = new List<ICustomManager>();
 			DetourInited = false;
@@ -1782,10 +1781,7 @@ namespace TrafficManager {
 		public override void OnReleased() {
 			base.OnReleased();
 
-			if (ToolMode != TrafficManagerMode.None) {
-				ToolMode = TrafficManagerMode.None;
-				DestroyTool();
-			}
+			UIBase.ReleaseTool();
 		}
 
 		public override void OnLevelUnloading() {
@@ -1938,8 +1934,8 @@ namespace TrafficManager {
 				manager.OnLevelLoading();
 			}
 
-			InitTool();
-			Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
+			//InitTool();
+			//Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
 
 			Log.Info("OnLevelLoaded complete.");
 		}
@@ -1991,55 +1987,6 @@ namespace TrafficManager {
 			}
 
 			return thirdPartyModLoaded;
-		}
-
-		public static void SetToolMode(TrafficManagerMode mode) {
-			if (mode == ToolMode) return;
-
-			ToolMode = mode;
-
-			if (mode != TrafficManagerMode.None) {
-				EnableTool();
-			} else {
-				DisableTool();
-			}
-		}
-
-		public static void InitTool() {
-			Log.Info("Initializing traffic manager tool...");
-			if (TrafficManagerTool == null) {
-				TrafficManagerTool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
-								   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
-			}
-
-			TrafficManagerTool.Initialize();
-		}
-
-		public static void EnableTool() {
-			Log._Debug("LoadingExtension.EnabledTool: called");
-			InitTool();
-
-			ToolsModifierControl.toolController.CurrentTool = TrafficManagerTool;
-			ToolsModifierControl.SetTool<TrafficManagerTool>();
-		}
-
-		public static void DisableTool() {
-			Log._Debug("LoadingExtension.DisableTool: called");
-			ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
-			ToolsModifierControl.SetTool<DefaultTool>();
-		}
-
-		private static void DestroyTool() {
-			if (ToolsModifierControl.toolController != null) {
-				ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
-				ToolsModifierControl.SetTool<DefaultTool>();
-
-				if (TrafficManagerTool != null) {
-					Object.Destroy(TrafficManagerTool);
-					TrafficManagerTool = null;
-				}
-			} else
-				Log.Warning("LoadingExtensions.DestroyTool: ToolsModifierControl.toolController is null!");
 		}
 	}
 }

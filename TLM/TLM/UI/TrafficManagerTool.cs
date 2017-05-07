@@ -215,6 +215,10 @@ namespace TrafficManager.UI {
 			//Log._Debug($"RenderOverlay");
 			//Log._Debug($"RenderOverlay: {_toolMode} {activeSubTool} {this.GetHashCode()}");
 
+			if (!this.isActiveAndEnabled) {
+				return;
+			}
+
 			if (activeSubTool != null) {
 				//Log._Debug($"Rendering overlay in {_toolMode}");
 				activeSubTool.RenderOverlay(cameraInfo);
@@ -674,21 +678,21 @@ namespace TrafficManager.UI {
 					continue;
 				ItemClass.Service service = segments.m_buffer[i].Info.GetService();
 				ItemClass.SubService subService = segments.m_buffer[i].Info.GetSubService();
-				if (service != ItemClass.Service.Road) {
+				/*if (service != ItemClass.Service.Road) {
 					if (service != ItemClass.Service.PublicTransport) {
 						continue;
 					} else {
 						if (subService != ItemClass.SubService.PublicTransportBus && subService != ItemClass.SubService.PublicTransportCableCar &&
 							subService != ItemClass.SubService.PublicTransportMetro && subService != ItemClass.SubService.PublicTransportMonorail &&
-							subService != ItemClass.SubService.PublicTransportTrain /*&& subService != ItemClass.SubService.PublicTransportTram*/) {
+							subService != ItemClass.SubService.PublicTransportTrain) {
 							continue;
 						}
 					}
-				}
-//#if !DEBUG
+				}*/
+#if !DEBUG
 				if ((segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 					continue;
-//#endif
+#endif
 				var segmentInfo = segments.m_buffer[i].Info;
 
 				Vector3 centerPos = segments.m_buffer[i].m_bounds.center;

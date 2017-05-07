@@ -33,7 +33,7 @@ namespace TrafficManager.UI.MainMenu {
 		}
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
-			LoadingExtension.TrafficManagerTool.SetToolMode(ToolMode.None);
+			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
 			Options.setEnableDespawning(!Options.enableDespawning);
 		}
 	}
