@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading;
 using UnityEngine;
 
-namespace TrafficManager {
+namespace CSUtil.Commons {
 
 	public static class Log {
 		private enum LogLevel {
@@ -17,11 +17,8 @@ namespace TrafficManager {
 
 		private static object logLock = new object();
 
-		const string Prefix = "TrafficLightManager: ";
-
-		private static string logFilename = Path.Combine(Application.dataPath, "TMPE.log");
+		private static string logFilename = Path.Combine(Application.dataPath, "TMPE.log"); // TODO refactor log filename to configuration
 		private static Stopwatch sw = Stopwatch.StartNew();
-		private static bool logToConsole = false;
 		private static bool logFileAccessible = true;
 
 
@@ -42,8 +39,6 @@ namespace TrafficManager {
 
 			try {
 				Monitor.Enter(logLock);
-				if (logToConsole)
-					UnityEngine.Debug.Log(Prefix + s);
 				LogToFile(s, LogLevel.Debug);
 			} catch (Exception) {
 				
@@ -58,10 +53,6 @@ namespace TrafficManager {
 			}
 
 			try {
-#if DEBUG
-				if (logToConsole)
-					UnityEngine.Debug.Log(Prefix + s);
-#endif
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Info);
 			} catch (Exception) {
@@ -77,10 +68,6 @@ namespace TrafficManager {
 			}
 
 			try {
-#if DEBUG
-				if (logToConsole)
-					UnityEngine.Debug.LogError(Prefix + s + " " + (new System.Diagnostics.StackTrace()).ToString());
-#endif
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Error);
 			} catch (Exception) {
@@ -96,10 +83,6 @@ namespace TrafficManager {
 			}
 
 			try {
-#if DEBUG
-				if (logToConsole)
-					UnityEngine.Debug.LogWarning(Prefix + s + ": " + (new System.Diagnostics.StackTrace()).ToString());
-#endif
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Warning);
 			} catch (Exception) {

@@ -11,8 +11,8 @@ using System.Linq;
 using TrafficManager.Util;
 using System.Threading;
 using TrafficManager.State;
-using Util;
 using GenericGameBridge.Service;
+using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
 	// TODO [version 1.10] define TimedTrafficLights per node group, not per individual nodes
@@ -215,6 +215,10 @@ namespace TrafficManager.TrafficLight {
 						continue;
 
 					ArrowDirection dir = srcSegGeo.GetDirection(trgSegEndGeo.SegmentId, srcSegEndGeo.StartNode);
+					if (dir == ArrowDirection.None) {
+						Log.Error($"TimedTrafficLights.UpdateDirections: Processing source segment {srcSegEndGeo.SegmentId}, target segment {trgSegEndGeo.SegmentId}: Invalid direction {dir}");
+						continue;
+					}
 					dirs.Add(trgSegEndGeo.SegmentId, dir);
 					Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {srcSegEndGeo.SegmentId}, target segment {trgSegEndGeo.SegmentId}: adding dir {dir}");
 				}
@@ -395,7 +399,7 @@ namespace TrafficManager.TrafficLight {
 		internal void Destroy() {
 			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
 
-			Stop();
+			started = false;
 			DestroySegmentEnds();
 			Steps = null;
 			NodeGroup = null;

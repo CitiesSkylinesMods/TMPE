@@ -1,6 +1,7 @@
 ﻿#define RUSHHOUR
 
 using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,19 +66,21 @@ namespace TrafficManager.State {
 
 		public bool[] DebugSwitches = {
 			false, // path-find debug log
-			false, 
+			false, // path-find costs debug log
 			false, // parking ai debug log (basic)
-			false, // emergency vehicles may not ignore traffic rules
+			false, // -unused-
 			false, // parking ai debug log (extended)
 			false, // geometry debug log
-			false, // debug pause
+			false, // debug parking AI distance issue
 			false, // debug TTL
-			false,
-			false
+			false, // debug routing
+			false, // debug vehicle to segment end linking
+			false // prevent routing recalculation on global configuration reload
 		};
 
 #if DEBUG
 		public int PathFindDebugNodeId = 0;
+		public int PathFindDebugStartSegmentId = 0;
 		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
 		public ushort TTLDebugNodeId = 0;
 #endif
@@ -118,14 +121,24 @@ namespace TrafficManager.State {
 		public float SpeedToDensityBalance = 0.75f;
 
 		/// <summary>
+		/// Relative factor for lane speed cost calculation
+		/// </summary>
+		public float SpeedCostFactor = 0.05f;
+
+		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
-		public int RandomizedLaneChangingModulo = 100;
+		public uint RandomizedLaneChangingModulo = 100;
+
+		/// <summary>
+		/// randomized modulo. vehicles hitting zero ignore traffic measurements
+		/// </summary>
+		public int RandomizedTrafficIgnoreModulo = 3;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
 		/// </summary>
-		public int UturnLaneDistance = 2;
+		public int UturnLaneDistance = 1;
 
 		/// <summary>
 		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
@@ -142,6 +155,25 @@ namespace TrafficManager.State {
 		/// </summary>
 		public float LaneSpeedRandInterval = 20f;
 
+		/// <summary>
+		/// Threshold for reducing traffic buffer
+		/// </summary>
+		public uint MaxTrafficBuffer = 100000;
+
+		/// <summary>
+		/// Threshold for reducing path-find traffic buffer
+		/// </summary>
+		public uint MaxPathFindTrafficBuffer = 100000;
+
+		/// <summary>
+		/// Threshold for restart segment direction congestion measurements
+		/// </summary>
+		public byte MaxNumCongestionMeasurements = 100;
+
+		/// <summary>
+		/// Minimum considered average segment length for path-find cost calculation
+		/// </summary>
+		public float SegmentMinAverageLength = 30f;
 
 		/// <summary>
 		/// penalty for busses not driving on bus lanes
@@ -225,19 +257,31 @@ namespace TrafficManager.State {
 		public float MaxSpeedUpdateFactor = 0.25f;
 
 		/// <summary>
+		/// Maximum density accumulation after which lane densities are reset
+		/// </summary>
+		public uint MaxAccumulatedLaneDensity = 100000;
+
+		/// <summary>
+		/// average speed (in %) threshold for a segment to be flagged as congested
+		/// </summary>
+		public uint CongestionSpeedThreshold = 60;
+
+		/// <summary>
 		/// %/100 of time a segment must be flagged as congested to count as permanently congested
 		/// </summary>
-		public float CongestionSpeedThreshold = 0.6f;
+		public uint CongestionFrequencyThreshold = 25;
 
 		/// <summary>
 		/// lower congestion threshold (per ten-thousands)
 		/// </summary>
-		public int LowerSpeedCongestionThreshold = 6000;
+		[Obsolete]
+		public int LowerSpeedCongestionThreshold = 0;
 
 		/// <summary>
 		/// upper congestion threshold (per ten-thousands)
 		/// </summary>
-		public int UpperSpeedCongestionThreshold = 7000;
+		[Obsolete]
+		public int UpperSpeedCongestionThreshold = 0;
 
 
 		/// <summary>
@@ -357,7 +401,7 @@ namespace TrafficManager.State {
 					XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
-					if (LoadingExtension.IsGameLoaded) {
+					if (LoadingExtension.IsGameLoaded && !conf.DebugSwitches[10]) {
 						RoutingManager.Instance.RequestFullRecalculation(true);
 					}
 					return conf;

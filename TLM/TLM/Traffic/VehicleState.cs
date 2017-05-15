@@ -12,6 +12,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
+using CSUtil.Commons;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {

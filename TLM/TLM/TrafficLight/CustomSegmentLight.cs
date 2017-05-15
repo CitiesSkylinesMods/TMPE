@@ -6,6 +6,7 @@ using ColossalFramework;
 using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Custom.AI;
+using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
 	/// <summary>

@@ -1,6 +1,7 @@
 ﻿#define DEBUGFLAGSx
 
 using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -75,9 +76,17 @@ namespace TrafficManager.State {
 			Log.Info("--- LANE ARROW FLAGS ---");
 			Log.Info("------------------------");
 			for (uint i = 0; i < laneArrowFlags.Length; ++i) {
-				if (laneArrowFlags[i] == null)
-					continue;
-				Log.Info($"Lane {i}: {laneArrowFlags[i]} (valid? {Constants.ServiceFactory.NetService.IsLaneValid(i)})");
+				if (highwayLaneArrowFlags[i] != null || laneArrowFlags[i] != null) {
+					Log.Info($"Lane {i}: valid? {Constants.ServiceFactory.NetService.IsLaneValid(i)}");
+				}
+
+				if (highwayLaneArrowFlags[i] != null) {
+					Log.Info($"\thighway arrows: {highwayLaneArrowFlags[i]}");
+				}
+
+				if (laneArrowFlags[i] != null) {
+					Log.Info($"\tcustom arrows: {laneArrowFlags[i]}");
+				}
 			}
 
 			Log.Info("------------------------");
@@ -638,6 +647,7 @@ namespace TrafficManager.State {
 			}
 			
 			highwayLaneArrowFlags[laneId] = flags;
+			Log._Debug($"Flags.setHighwayLaneArrowFlags: Setting highway arrows of lane {laneId} to {flags}");
 			applyLaneArrowFlags(laneId, false);
 		}
 
@@ -900,6 +910,7 @@ namespace TrafficManager.State {
 		}
 
 		public static void removeHighwayLaneArrowFlags(uint laneId) {
+			Log._Debug($"Flags.removeHighwayLaneArrowFlags: Removing highway arrows of lane {laneId}");
 			if (highwayLaneArrowFlags[laneId] != null) {
 				highwayLaneArrowFlags[laneId] = null;
 				applyLaneArrowFlags(laneId, false);
@@ -942,7 +953,7 @@ namespace TrafficManager.State {
 			Log._Debug($"Flags.applyLaneArrowFlags({laneId}, {check}): setting {laneFlags}");
 #endif
 
-			//Log._Debug($"Setting lane flags @ lane {laneId}, seg. {Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment} to {((NetLane.Flags)laneFlags).ToString()}");
+			Log._Debug($"Flags.applyLaneArrowFlags: Setting lane flags of lane {laneId} to {((NetLane.Flags)laneFlags).ToString()}");
 			Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 			return true;
 		}

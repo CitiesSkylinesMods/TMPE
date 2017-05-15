@@ -8,6 +8,7 @@ using TrafficManager.Util;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using System.Linq;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>> {

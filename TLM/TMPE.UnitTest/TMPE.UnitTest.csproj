@@ -77,10 +77,6 @@
       <Project>{7422AE58-8B0A-401C-9404-F4A438EFFE10}</Project>
       <Name>TLM</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TMPE.Util\TMPE.Util.csproj">
-      <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
-      <Name>TMPE.Util</Name>
-    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

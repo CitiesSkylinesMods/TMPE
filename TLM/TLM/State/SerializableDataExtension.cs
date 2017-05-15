@@ -18,6 +18,7 @@ using TrafficManager.Traffic;
 using ColossalFramework.UI;
 using TrafficManager.Util;
 using System.Linq;
+using CSUtil.Commons;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {

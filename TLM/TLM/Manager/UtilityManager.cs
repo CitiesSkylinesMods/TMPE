@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.State;
 using TrafficManager.Geometry;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class UtilityManager : AbstractCustomManager {

@@ -12,7 +12,7 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using System.Linq;
-using Util;
+using CSUtil.Commons;
 
 namespace TrafficManager.Geometry {
 	/// <summary>
@@ -1017,7 +1017,7 @@ namespace TrafficManager.Geometry {
 		/// <returns>relative direction of the other segment relatively to the managed segment at the given node</returns>
 		public ArrowDirection GetDirection(ushort otherSegmentId, bool startNode) {
 			if (!IsValid(otherSegmentId))
-				return ArrowDirection.Forward;
+				return ArrowDirection.None;
 
 			if (otherSegmentId == SegmentId)
 				return ArrowDirection.Turn;
@@ -1259,7 +1259,7 @@ namespace TrafficManager.Geometry {
 				endNodeGeometry.Cleanup();
 
 				// reset highway lane arrows
-				Flags.removeHighwayLaneArrowFlagsAtSegment(SegmentId); // TODO refactor
+				//Flags.removeHighwayLaneArrowFlagsAtSegment(SegmentId); // TODO refactor
 
 				// clear default vehicle type cache
 				VehicleRestrictionsManager.Instance.ClearCache(SegmentId);

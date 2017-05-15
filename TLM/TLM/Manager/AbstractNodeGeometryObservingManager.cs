@@ -1,11 +1,11 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Util;
-using Util;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractNodeGeometryObservingManager : AbstractCustomManager, IObserver<NodeGeometry> {

@@ -1,10 +1,10 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons;
 using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Util;
 
 namespace CitiesGameBridge.Service {
 	public class CitizenService : ICitizenService {

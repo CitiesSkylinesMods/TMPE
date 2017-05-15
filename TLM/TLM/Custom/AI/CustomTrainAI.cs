@@ -11,6 +11,7 @@ using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomTrainAI : TrainAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -210,8 +211,9 @@ namespace TrafficManager.Custom.AI {
 				Log.Warning($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
 #endif
 				vehicleType = ExtVehicleType.RailVehicle;
-			} else if (vehicleType == ExtVehicleType.CargoTrain)
+			} else if (vehicleType == ExtVehicleType.CargoTrain) {
 				vehicleType = ExtVehicleType.CargoVehicle;
+			}
 #if DEBUG
 			/*if (vehicleType == ExtVehicleType.CargoVehicle) {
 				bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;

@@ -21,6 +21,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class OldCustomPathFind : PathFind {
@@ -2247,6 +2248,7 @@ namespace TrafficManager.Custom.PathFinding {
 						prevCongestionFactor = 1f - prevMinSpeed;
 #endif
 
+#if MEASUREDENSITY
 						// calculate density sum
 						uint densitySum = prevDirTrafficData.accumulatedDensities;
 						uint currentDensity = prevLaneTrafficData[item.m_position.m_lane].accumulatedDensities;
@@ -2259,6 +2261,7 @@ namespace TrafficManager.Custom.PathFinding {
 							prevDensity += _pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (int)_conf.LaneDensityRandInterval / 2;
 
 						prevDensity = (float)Math.Min(1f, Math.Max(0.05f, Math.Round(prevDensity / 5f) / 20f)); // 0.05, 0.1, 0.15, ..., 1
+#endif
 
 						//prevSpeed = CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment] != null && item.m_position.m_lane < CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment].Length ? CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment][item.m_position.m_lane] : 10000f;
 						//prevSpeed *= 0.01f; // to %
@@ -2446,7 +2449,7 @@ namespace TrafficManager.Custom.PathFinding {
 				// NON-STOCK CODE END //
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[laneIndex];
 
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 				bool costDebug = debug;
 				//bool costDebug = _conf.DebugSwitches[0] && (nextSegmentId == 9649 || nextSegmentId == 1043);
 				if (costDebug) {
@@ -2540,7 +2543,7 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 						float transitionCost = Vector3.Distance(a, prevLanePosition); // This gives the distance of the previous to next lane endpoints.
 
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 						if (costDebug)
 							logBuf.Add($"ProcessItemCosts: costs from {nextSegmentId} (off {(byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255)}) to {item.m_position.m_segment} (off {item.m_position.m_offset}), connectOffset={connectOffset}: transitionCost={transitionCost}");
 #endif
@@ -2585,7 +2588,7 @@ namespace TrafficManager.Custom.PathFinding {
 									customDeltaCost *= 3f;
 								}
 
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 								if (costDebug) {
 									logBuf.Add($"ProcessItemCosts: Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): useAdvancedAI={useAdvancedAI}, addCustomTrafficCosts={addCustomTrafficCosts}, transitionCost={transitionCost} avoidLane={avoidLane}");
 								}
@@ -2802,7 +2805,7 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 #endif
 
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 								if (costDebug) {
 									logBuf.Add($"Path from {nextSegmentId} (lane {nextOuterSimilarLaneIndex} from outer, idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): nextMaxSpeed={nextMaxSpeed} prevMaxSpeed={prevMaxSpeed} nextMaxSpeed={nextMaxSpeed} divMetric={divMetric} nextDensity={nextDensity} multMetric={multMetric} laneDist={laneDist} laneMetric={laneMetric} metric={metric} metricBeforeLanes={metricBeforeLanes} isMiddle={isMiddle}");
 								}
@@ -2834,7 +2837,7 @@ namespace TrafficManager.Custom.PathFinding {
 									deltaCostOverMeanMaxSpeed = oldTransitionDistanceOverMaxSpeed;
 								}
 
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 								if (costDebug) {
 									logBuf.Add($"Path from {nextSegmentId} (lane {nextOuterSimilarLaneIndex} from outer, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}.");
 									//logBuf.Add($"distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed} oldDistanceOverMaxSpeed = {oldDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, prevSpeed={prevSpeed}, nextSpeed={nextSpeed}");
@@ -2843,7 +2846,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 								nextItem.m_comparisonValue += deltaCostOverMeanMaxSpeed;
-#if DEBUGCOSTS
+#if DEBUGCOSTSold
 								if (costDebug) {
 									logBuf.Add($"Total cost = {deltaCostOverMeanMaxSpeed}, comparison value = {nextItem.m_comparisonValue}");
 								}

@@ -1,3 +1,4 @@
+using CSUtil.Commons;
 using ICities;
 using TrafficManager.State;
 using UnityEngine;
@@ -5,13 +6,13 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.9.0-beta1";
+		public static readonly string Version = "1.9.0-rc1";
 
-		public static readonly uint GameVersion = 163701264u;
+		public static readonly uint GameVersion = 163701776u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 7u;
 		public static readonly uint GameVersionC = 0u;
-		public static readonly uint GameVersionBuild = 2u;
+		public static readonly uint GameVersionBuild = 4u;
 
 		public string Name => "Traffic Manager: President Edition [" + Version + "]";
 

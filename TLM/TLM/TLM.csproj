@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL;DEBUGNEWPF</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL;DEBUGNEWPF;DEBUGCOSTS;DEBUGROUTING</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -192,7 +192,6 @@
     <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="Log.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\CustomSegment.cs" />
     <Compile Include="TrafficLight\CustomSegmentLight.cs" />
@@ -337,6 +336,10 @@
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
+      <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
+      <Name>CSUtil.Commons</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
       <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
       <Name>TMPE.CitiesGameBridge</Name>
@@ -344,10 +347,6 @@
     <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
       <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
       <Name>TMPE.GenericGameBridge</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TMPE.Util\TMPE.Util.csproj">
-      <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
-      <Name>TMPE.Util</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -360,7 +359,8 @@ del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
 xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.Util.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

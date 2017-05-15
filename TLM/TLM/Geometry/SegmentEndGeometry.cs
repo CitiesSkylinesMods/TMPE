@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons;
 using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,6 @@ using System.Text;
 using TrafficManager.State;
 using TrafficManager.Util;
 using UnityEngine;
-using Util;
 
 namespace TrafficManager.Geometry {
 	public class SegmentEndGeometry : SegmentEndId {
@@ -396,7 +396,7 @@ namespace TrafficManager.Geometry {
 				}
 
 				// reset highway lane arrows
-				Flags.removeHighwayLaneArrowFlagsAtSegment(otherSegmentId); // TODO refactor
+				//Flags.removeHighwayLaneArrowFlagsAtSegment(otherSegmentId); // TODO refactor
 
 				ConnectedSegments[NumConnectedSegments++] = otherSegmentId;
 			}

@@ -11,6 +11,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.UI.SubTools {
 	public class TimedTrafficLightsTool : SubTool {
@@ -470,7 +471,7 @@ namespace TrafficManager.UI.SubTools {
 						}
 
 						_timedEditStep = -1;
-						_timedViewedStep = -1;
+						_timedViewedStep = _timedEditStep;
 						nodeSelectionLocked = false;
 					}
 
@@ -606,6 +607,7 @@ namespace TrafficManager.UI.SubTools {
 					if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
 						_timedViewedStep = 0;
 						timedNodeMain.RotateLeft();
+						timedNodeMain.SetLights();
 					}
 
 					if (GUILayout.Button(Translation.GetString("Copy"))) {
@@ -616,6 +618,7 @@ namespace TrafficManager.UI.SubTools {
 					if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
 						_timedViewedStep = 0;
 						timedNodeMain.RotateRight();
+						timedNodeMain.SetLights();
 					}
 
 					GUILayout.EndHorizontal();
@@ -638,7 +641,7 @@ namespace TrafficManager.UI.SubTools {
 				if (GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
 					DisableTimed();
 					ClearSelectedNodes();
-					MainTool.SetToolMode(ToolMode.None);
+					MainTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 				}
 			}
 

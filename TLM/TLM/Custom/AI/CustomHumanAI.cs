@@ -11,6 +11,7 @@ using static TrafficManager.Traffic.ExtCitizenInstance;
 using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {

@@ -10,6 +10,7 @@ using TrafficManager.Traffic;
 using TrafficManager.State;
 using TrafficManager.Util;
 using UnityEngine;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class LaneConnectionManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>> {

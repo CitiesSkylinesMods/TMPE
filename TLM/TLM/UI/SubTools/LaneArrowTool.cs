@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using CSUtil.Commons;
 using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
 			int numDirections;
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro); // TODO refactor vehicle mask
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, LaneArrowManager.VEHICLE_TYPES);
 			if (numLanes <= 0) {
 				SelectedNodeId = 0;
 				SelectedSegmentId = 0;

@@ -13,6 +13,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.UI.SubTools {
 	public class JunctionRestrictionsTool : SubTool {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Util {
+namespace CSUtil.Commons {
 	public static class ToStringExt {
 		public static string DictionaryToString<K, V>(this IDictionary<K, V> element) {
 			return string.Join(", ", element.Keys.Select(x => $"{ToString(x)}={ToString(element[x])}").ToArray());

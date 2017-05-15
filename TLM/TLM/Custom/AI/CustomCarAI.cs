@@ -14,6 +14,7 @@ using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using static TrafficManager.Traffic.ExtCitizenInstance;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)

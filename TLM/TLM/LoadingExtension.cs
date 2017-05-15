@@ -16,6 +16,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
 using TrafficManager.Custom.Manager;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {

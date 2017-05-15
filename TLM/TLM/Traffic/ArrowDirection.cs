@@ -4,6 +4,7 @@ using System.Text;
 
 namespace TrafficManager.Traffic {
 	public enum ArrowDirection {
+		None,
 		Left,
 		Forward,
 		Right,

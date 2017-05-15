@@ -8,6 +8,7 @@ using ColossalFramework;
 using TrafficManager.Geometry;
 using static TrafficManager.State.Flags;
 using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class LaneArrowManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string> {

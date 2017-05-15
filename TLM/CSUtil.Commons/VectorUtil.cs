@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Util {
+namespace CSUtil.Commons {
 	public static class VectorUtil {
 		public static void ClampPosToScreen(ref Vector3 pos) {
 			if (pos.x < 0)

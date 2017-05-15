@@ -10,6 +10,7 @@ using TrafficManager.Util;
 using TrafficManager.Traffic;
 using TrafficManager.Geometry;
 using static TrafficManager.Traffic.PrioritySegment;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class TrafficPriorityManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>> {
@@ -59,7 +60,7 @@ namespace TrafficManager.Manager {
 				return false;
 			}
 
-			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
+			if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
 				reason = UnableReason.HasTimedLight;
 				//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
 				return false;
@@ -571,6 +572,10 @@ namespace TrafficManager.Manager {
 					Log._Debug($"  HasVehiclePriority: targetToDir: {targetToDir.ToString()}, incomingRelDir: {incomingFromRelDir.ToString()}, incomingToDir: {incomingToDir.ToString()}");
                 }
 #endif
+
+				if (targetToDir == ArrowDirection.None || incomingFromRelDir == ArrowDirection.None || incomingToDir == ArrowDirection.None) {
+					return true;
+				}
 
 				if (Services.SimulationService.LeftHandDrive) {
 					// mirror situation for left-hand traffic systems

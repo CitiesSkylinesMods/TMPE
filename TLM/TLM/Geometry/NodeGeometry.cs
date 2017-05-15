@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,6 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
-using Util;
 
 namespace TrafficManager.Geometry {
 	public class NodeGeometry : IObservable<NodeGeometry>, IEquatable<NodeGeometry> {

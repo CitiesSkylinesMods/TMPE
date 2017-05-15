@@ -19,6 +19,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Util;
 using TrafficManager.UI.MainMenu;
+using CSUtil.Commons;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -635,6 +636,7 @@ namespace TrafficManager.UI {
 					break;
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
+
 				TrafficMeasurementManager.SegmentDirTrafficData dirTrafficData;
 				bool dirTrafficDataLoaded = TrafficMeasurementManager.Instance.GetTrafficData(segmentId, laneInfo.m_finalDirection, out dirTrafficData);
 
@@ -645,10 +647,19 @@ namespace TrafficManager.UI {
 				labelStr += ", inner: " + RoutingManager.Instance.CalcInnerLaneSimilarIndex(segmentId, i) + ", outer: " + RoutingManager.Instance.CalcOuterLaneSimilarIndex(segmentId, i) + ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (laneTrafficDataLoaded) {
-					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "% ";
+					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "%";
+#if DEBUG
+					labelStr += ", buf: " + laneTrafficData[i].trafficBuffer + ", acc: " + laneTrafficData[i].accumulatedSpeeds;
+					if (dirTrafficDataLoaded) {
+						labelStr += ", pfBuf: " + laneTrafficData[i].pathFindTrafficBuffer + "/" + laneTrafficData[i].lastPathFindTrafficBuffer + ", (" + (dirTrafficData.totalPathFindTrafficBuffer > 0 ? "" + ((laneTrafficData[i].lastPathFindTrafficBuffer * 100u) / dirTrafficData.totalPathFindTrafficBuffer) : "n/a") + " %)";
+					}
+#endif
+#if MEASUREDENSITY
 					if (dirTrafficDataLoaded) {
 						labelStr += ", rel. dens.: " + (dirTrafficData.accumulatedDensities > 0 ? "" + Math.Min(laneTrafficData[i].accumulatedDensities * 100 / dirTrafficData.accumulatedDensities, 100) : "?") + "%";
 					}
+					labelStr += ", acc: " + laneTrafficData[i].accumulatedDensities;
+#endif
 				}
 #if DEBUG
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
@@ -729,10 +740,17 @@ namespace TrafficManager.UI {
 				TrafficMeasurementManager.SegmentDirTrafficData backwardTrafficData;
 				if (TrafficMeasurementManager.Instance.GetTrafficData((ushort)i, NetInfo.Direction.Forward, out forwardTrafficData) &&
 					TrafficMeasurementManager.Instance.GetTrafficData((ushort)i, NetInfo.Direction.Backward, out backwardTrafficData)) {
+					float fwdCongestionRatio = forwardTrafficData.numCongestionMeasurements > 0 ? ((uint)forwardTrafficData.numCongested * 100u) / (uint)forwardTrafficData.numCongestionMeasurements : 0; // now in %
+					float backCongestionRatio = backwardTrafficData.numCongestionMeasurements > 0 ? ((uint)backwardTrafficData.numCongested * 100u) / (uint)backwardTrafficData.numCongestionMeasurements : 0; // now in %
+
 					labelStr += "\nmin speeds: ";
 					labelStr += " " + (forwardTrafficData.minSpeed / 100) + "%/" + (backwardTrafficData.minSpeed / 100) + "%";
 					labelStr += ", mean speeds: ";
 					labelStr += " " + (forwardTrafficData.meanSpeed / 100) + "%/" + (backwardTrafficData.meanSpeed / 100) + "%";
+					labelStr += "\npf bufs: ";
+					labelStr += " " + (forwardTrafficData.totalPathFindTrafficBuffer) + "/" + (backwardTrafficData.totalPathFindTrafficBuffer);
+					labelStr += ", cong: ";
+					labelStr += " " + fwdCongestionRatio + "% (" + forwardTrafficData.numCongested + "/" + forwardTrafficData.numCongestionMeasurements + ")/" + backCongestionRatio + "% (" + backwardTrafficData.numCongested + "/" + backwardTrafficData.numCongestionMeasurements + ")";
 				}
 				labelStr += "\nstart: " + segments.m_buffer[i].m_startNode + ", end: " + segments.m_buffer[i].m_endNode;
 #endif
@@ -775,6 +793,10 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(0f, 0f, 1f);
 
 				String labelStr = "Node " + i;
+#if DEBUG
+				labelStr += $"\nflags: {nodes.m_buffer[i].m_flags}";
+				labelStr += $"\nlane: {nodes.m_buffer[i].m_lane}";
+#endif
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 

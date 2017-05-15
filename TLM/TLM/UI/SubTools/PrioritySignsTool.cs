@@ -13,6 +13,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Util;
 using static TrafficManager.Traffic.PrioritySegment;
+using CSUtil.Commons;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -142,6 +143,9 @@ namespace TrafficManager.UI.SubTools {
 
 						// draw sign and handle input
 						PriorityType sign = prioMan.GetPrioritySign(segmentId, startNode);
+						if (viewOnly && sign == PriorityType.None) {
+							continue;
+						}
 						if (!viewOnly && sign != PriorityType.None) {
 							showRemoveButton = true;
 						}

@@ -6,6 +6,7 @@ using TrafficManager.State;
 using TrafficManager.Custom.AI;
 using TrafficManager.Util;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
 	public class TrafficLightSimulation : IObserver<NodeGeometry> {

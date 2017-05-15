@@ -11,6 +11,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using static TrafficManager.Traffic.ExtCitizenInstance;
 using static TrafficManager.Manager.AdvancedParkingManager;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager
@@ -50,7 +51,7 @@ namespace TrafficManager.Custom.AI {
 					case ExtPathMode.WalkingToTarget:
 					case ExtPathMode.PublicTransportToTarget:
 					case ExtPathMode.TaxiToTarget:
-					default:
+					//default:
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
 							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.PathMode}. Change to 'None'.");

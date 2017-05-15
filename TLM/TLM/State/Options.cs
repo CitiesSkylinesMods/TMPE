@@ -11,6 +11,7 @@ using TrafficManager.UI;
 using ColossalFramework.Plugins;
 using ColossalFramework.Globalization;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.State {
 
@@ -99,7 +100,7 @@ namespace TrafficManager.State {
 		public static bool advancedAI = false;
 		public static bool highwayRules = false;
 #if DEBUG
-		public static bool showLanes = false;
+		public static bool showLanes = true;
 #else
 		public static bool showLanes = false;
 #endif

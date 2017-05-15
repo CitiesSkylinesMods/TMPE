@@ -13,7 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.State;
 using TrafficManager.Util;
 using System.Linq;
-using Util;
+using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
 	// TODO class should be completely reworked, approx. in version 1.10

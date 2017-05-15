@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Util {
+namespace CSUtil.Commons {
 	public static class LogicUtil {
 		public static bool CheckFlags(uint flags, uint flagMask, uint? expectedResult=null) {
 			uint res = flags & flagMask;
