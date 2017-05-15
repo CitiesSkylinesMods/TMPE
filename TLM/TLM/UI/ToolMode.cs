@@ -15,6 +15,7 @@ namespace TrafficManager.UI
 		SpeedLimits = 10,
 		VehicleRestrictions = 11,
 		LaneConnector = 12,
-		JunctionRestrictions = 13
+		JunctionRestrictions = 13,
+		ParkingRestrictions = 14
 	}
 }

@@ -340,7 +340,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void RecalculateAll() {
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.RecalculateAll: called");
+#endif
 			Flags.clearHighwayLaneArrows();
 			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 				try {
@@ -352,7 +354,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void RecalculateSegment(ushort segmentId) {
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.RecalculateSegment: called for seg. {segmentId}");
+#endif
 			RecalculateSegmentRoutingData(segmentId);
 
 			Services.NetService.IterateSegmentLanes(segmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segId, ref NetSegment segment, byte laneIndex) {
@@ -361,29 +365,6 @@ namespace TrafficManager.Manager {
 
 				return true;
 			});
-
-			/*if (propagate) {
-				SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-				if (segGeo == null) {
-					return;
-				}
-
-				foreach (ushort otherSegmentId in segGeo.GetConnectedSegments(true)) {
-					if (otherSegmentId == 0) {
-						continue;
-					}
-
-					RecalculateSegment(otherSegmentId, false);
-				}
-
-				foreach (ushort otherSegmentId in segGeo.GetConnectedSegments(false)) {
-					if (otherSegmentId == 0) {
-						continue;
-					}
-
-					RecalculateSegment(otherSegmentId, false);
-				}
-			}*/
 		}
 
 		protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {
@@ -394,7 +375,9 @@ namespace TrafficManager.Manager {
 				return true;
 			});
 
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={nodeIds.ArrayToString()}");
+#endif
 
 			// reset highway lane arrows on all incoming lanes
 			foreach (ushort nodeId in nodeIds) {
@@ -419,13 +402,17 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void ResetRoutingData(ushort segmentId) {
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.ResetRoutingData: called for segment {segmentId}");
+#endif
 			segmentRoutings[segmentId].Reset();
 
 			ResetIncomingHighwayLaneArrows(segmentId);
 
 			Services.NetService.IterateSegmentLanes(segmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segId, ref NetSegment segment, byte laneIndex) {
+#if DEBUGROUTING
 				Log._Debug($"RoutingManager.HandleInvalidSegment: Resetting lane {laneId}, idx {laneIndex} @ seg. {segmentId}");
+#endif
 				uint index = GetLaneEndRoutingIndex(laneId, true);
 				laneEndRoutings[index].Reset();
 
@@ -437,7 +424,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void RecalculateSegmentRoutingData(ushort segmentId) {
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.RecalculateSegmentRoutingData: called for seg. {segmentId}");
+#endif
 
 			segmentRoutings[segmentId].Reset();
 
@@ -457,7 +446,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void RecalculateLaneEndRoutingData(ushort segmentId, int laneIndex, uint laneId, bool startNode) {
+#if DEBUGROUTING
 			Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData: called for seg. {segmentId}, lane {laneId}, idx {laneIndex}, start {startNode}");
+#endif
 
 			uint index = GetLaneEndRoutingIndex(laneId, startNode);
 			laneEndRoutings[index].Reset();

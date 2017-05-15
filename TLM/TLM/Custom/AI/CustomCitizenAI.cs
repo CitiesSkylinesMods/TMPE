@@ -105,6 +105,17 @@ namespace TrafficManager.Custom.AI {
 					carUsageMode = CarUsagePolicy.Allowed;
 				}
 			}
+
+			/*if (Options.parkingRestrictionsEnabled && carUsageMode == CarUsagePolicy.Allowed && parkedVehicleId != 0) {
+				// force removal of illegaly parked vehicle
+				PathUnit.Position parkedPathPos;
+				if (PathManager.FindPathPosition(Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position, ItemClass.Service.Road, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, false, false, 32f, out parkedPathPos)) {
+					if (! ParkingRestrictionsManager.Instance.IsParkingAllowed(parkedPathPos.m_segment, Singleton<NetManager>.instance.m_segments.m_buffer[parkedPathPos.m_segment].Info.m_lanes[parkedPathPos.m_lane].m_finalDirection)) {
+						carUsageMode = CarUsagePolicy.Forced;
+						vehicleInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+					}
+				}
+			}*/
 			// NON-STOCK CODE END
 
 			NetInfo.LaneType laneTypes = NetInfo.LaneType.Pedestrian;

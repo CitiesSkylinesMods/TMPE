@@ -117,6 +117,7 @@ namespace TrafficManager.UI {
 			subTools[ToolMode.LaneChange] = new LaneArrowTool(this);
 			subTools[ToolMode.LaneConnector] = new LaneConnectorTool(this);
 			subTools[ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this);
+			subTools[ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this);
 
 			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
 				e.Value.Initialize();
@@ -145,7 +146,7 @@ namespace TrafficManager.UI {
 		}
 
 		public void SetToolMode(ToolMode mode) {
-			//Log._Debug($"SetToolMode: {mode}");
+			Log._Debug($"SetToolMode: {mode}");
 			
 			if (mode == ToolMode.None) {
 #if DEBUG

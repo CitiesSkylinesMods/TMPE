@@ -30,6 +30,7 @@ namespace TrafficManager.UI.MainMenu {
 			typeof(JunctionRestrictionsButton),
 			typeof(SpeedLimitsButton),
 			typeof(VehicleRestrictionsButton),
+			typeof(ParkingRestrictionsButton),
 		};
 		private const int NUM_BUTTONS_PER_ROW = 6;
 		private const int NUM_ROWS = 2;

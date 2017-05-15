@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL;DEBUGNEWPF;DEBUGCOSTS;DEBUGROUTING</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL;DEBUGNEWPF;DEBUGCOSTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -106,6 +106,7 @@
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\RoutingManager.cs" />
     <Compile Include="Manager\SegmentEndManager.cs" />
     <Compile Include="Manager\VehicleBehaviorManager.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
     <Compile Include="UI\MainMenu\OptionsLabel.cs" />
+    <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\VersionLabel.cs" />
     <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\ToggleTrafficLightsButton.cs" />
@@ -160,6 +162,7 @@
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
+    <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
@@ -351,6 +354,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\mainmenu-btns.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\parking_allowed.png" />
+    <EmbeddedResource Include="Resources\parking_disallowed.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

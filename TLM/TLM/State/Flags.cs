@@ -205,10 +205,14 @@ namespace TrafficManager.State {
 			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 				NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
 				if ((bool)flag) {
+#if DEBUGFLAGS
 					Log._Debug($"Adding traffic light @ node {nId}");
+#endif
 					flags |= NetNode.Flags.TrafficLights;
 				} else {
+#if DEBUGFLAGS
 					Log._Debug($"Removing traffic light @ node {nId}");
+#endif
 					flags &= ~NetNode.Flags.TrafficLights;
 				}
 				node.m_flags = flags;
@@ -381,7 +385,9 @@ namespace TrafficManager.State {
 		/// <param name="startNode"></param>
 		/// <returns></returns>
 		private static bool CleanupLaneConnections(uint sourceLaneId, uint targetLaneId, bool startNode) {
+#if DEBUGFLAGS
 			Log._Debug($"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
+#endif
 			int nodeArrayIndex = startNode ? 0 : 1;
 
 			if (laneConnections[sourceLaneId] == null || laneConnections[sourceLaneId][nodeArrayIndex] == null)
@@ -583,14 +589,18 @@ namespace TrafficManager.State {
 		public static void resetSegmentVehicleRestrictions(ushort segmentId) {
 			if (segmentId <= 0)
 				return;
+#if DEBUGFLAGS
 			Log._Debug($"Flags.resetSegmentVehicleRestrictions: Resetting vehicle restrictions of segment {segmentId}.");
+#endif
 			laneAllowedVehicleTypesArray[segmentId] = null;
 		}
 
 		public static void resetSegmentArrowFlags(ushort segmentId) {
 			if (segmentId <= 0)
 				return;
+#if DEBUGFLAGS
 			Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}.");
+#endif
 			NetManager netManager = Singleton<NetManager>.instance;
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
@@ -598,7 +608,9 @@ namespace TrafficManager.State {
 			int numLanes = segmentInfo.m_lanes.Length;
 			int laneIndex = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
+#if DEBUGFLAGS
 				Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}: Resetting lane {curLaneId}.");
+#endif
 				laneArrowFlags[curLaneId] = null;
 
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -647,7 +659,9 @@ namespace TrafficManager.State {
 			}
 			
 			highwayLaneArrowFlags[laneId] = flags;
+#if DEBUGFLAGS
 			Log._Debug($"Flags.setHighwayLaneArrowFlags: Setting highway arrows of lane {laneId} to {flags}");
+#endif
 			applyLaneArrowFlags(laneId, false);
 		}
 
@@ -910,7 +924,9 @@ namespace TrafficManager.State {
 		}
 
 		public static void removeHighwayLaneArrowFlags(uint laneId) {
+#if DEBUGFLAGS
 			Log._Debug($"Flags.removeHighwayLaneArrowFlags: Removing highway arrows of lane {laneId}");
+#endif
 			if (highwayLaneArrowFlags[laneId] != null) {
 				highwayLaneArrowFlags[laneId] = null;
 				applyLaneArrowFlags(laneId, false);
@@ -950,17 +966,17 @@ namespace TrafficManager.State {
 			}
 
 #if DEBUGFLAGS
-			Log._Debug($"Flags.applyLaneArrowFlags({laneId}, {check}): setting {laneFlags}");
-#endif
-
 			Log._Debug($"Flags.applyLaneArrowFlags: Setting lane flags of lane {laneId} to {((NetLane.Flags)laneFlags).ToString()}");
+#endif
 			Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
 			return true;
 		}
 
 		public static LaneArrows getFinalLaneArrowFlags(uint laneId, bool check=true) {
 			if (! mayHaveLaneArrows(laneId)) {
+#if DEBUGFLAGS
 				Log._Debug($"Lane {laneId} may not have lane arrows");
+#endif
 				return LaneArrows.None;
 			}
 

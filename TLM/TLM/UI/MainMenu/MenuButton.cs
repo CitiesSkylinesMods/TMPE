@@ -29,7 +29,8 @@ namespace TrafficManager.UI.MainMenu {
 			SpeedLimits,
 			TimedTrafficLights,
 			ToggleTrafficLights,
-			VehicleRestrictions
+			VehicleRestrictions,
+			ParkingRestrictions
 		}
 
 		public const string MENU_BUTTON = "TMPE_MenuButton";

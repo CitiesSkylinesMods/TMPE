@@ -140,6 +140,14 @@ namespace TrafficManager.Manager {
 				Options.setInstantEffects(data[29] == (byte)1);
 			}
 
+			if (data.Length >= 31) {
+				Options.setParkingRestrictionsEnabled(data[30] == (byte)1);
+			}
+
+			if (data.Length >= 32) {
+				Options.setParkingRestrictionsOverlay(data[31] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -174,7 +182,9 @@ namespace TrafficManager.Manager {
 						(byte)(Options.preferOuterLane ? 1 : 0),
 						(byte)(Options.realisticSpeeds ? 1 : 0),
 						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
-						(byte)(Options.instantEffects ? 1 : 0)
+						(byte)(Options.instantEffects ? 1 : 0),
+						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
+						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0)
 				};
 		}
 	}

@@ -31,6 +31,7 @@ namespace TrafficManager.State {
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
 		private static UICheckBox vehicleRestrictionsOverlayToggle = null;
+		private static UICheckBox parkingRestrictionsOverlayToggle = null;
 		private static UICheckBox junctionRestrictionsOverlayToggle = null;
 		private static UICheckBox connectedLanesOverlayToggle = null;
 		private static UICheckBox nodesOverlayToggle = null;
@@ -56,6 +57,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableTimedLightsToggle = null;
 		private static UICheckBox enableCustomSpeedLimitsToggle = null;
 		private static UICheckBox enableVehicleRestrictionsToggle = null;
+		private static UICheckBox enableParkingRestrictionsToggle = null;
 		private static UICheckBox enableJunctionRestrictionsToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
@@ -81,6 +83,7 @@ namespace TrafficManager.State {
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
 		public static bool vehicleRestrictionsOverlay = false;
+		public static bool parkingRestrictionsOverlay = false;
 		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
 #if DEBUG
@@ -114,6 +117,7 @@ namespace TrafficManager.State {
 		public static bool timedLightsEnabled = true;
 		public static bool customSpeedLimitsEnabled = true;
 		public static bool vehicleRestrictionsEnabled = true;
+		public static bool parkingRestrictionsEnabled = true;
 		public static bool junctionRestrictionsEnabled = true;
 		public static bool laneConnectorEnabled = true;
 
@@ -190,6 +194,7 @@ namespace TrafficManager.State {
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
 			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
+			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions") + " (BETA feature)", parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
@@ -271,6 +276,7 @@ namespace TrafficManager.State {
 			timedLightsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsOverlay, onTimedLightsOverlayChanged) as UICheckBox;
 			speedLimitsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Speed_limits"), speedLimitsOverlay, onSpeedLimitsOverlayChanged) as UICheckBox;
 			vehicleRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsOverlay, onVehicleRestrictionsOverlayChanged) as UICheckBox;
+			parkingRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsOverlay, onParkingRestrictionsOverlayChanged) as UICheckBox;
 			junctionRestrictionsOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsOverlay, onJunctionRestrictionsOverlayChanged) as UICheckBox;
 			connectedLanesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
 			nodesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
@@ -392,6 +398,14 @@ namespace TrafficManager.State {
 
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
+		}
+
+		private static void onParkingRestrictionsOverlayChanged(bool newParkingRestrictionsOverlay) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"parkingRestrictionsOverlay changed to {newParkingRestrictionsOverlay}");
+			parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
 		}
 
 		private static void onJunctionRestrictionsOverlayChanged(bool newValue) {
@@ -561,6 +575,16 @@ namespace TrafficManager.State {
 			vehicleRestrictionsEnabled = val;
 			if (!val)
 				setVehicleRestrictionsOverlay(false);
+		}
+
+		private static void onParkingRestrictionsEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			MenuRebuildRequired = true;
+			parkingRestrictionsEnabled = val;
+			if (!val)
+				setParkingRestrictionsOverlay(false);
 		}
 
 		private static void onJunctionRestrictionsEnabledChanged(bool val) {
@@ -893,6 +917,12 @@ namespace TrafficManager.State {
 				vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
 		}
 
+		public static void setParkingRestrictionsOverlay(bool newParkingRestrictionsOverlay) {
+			parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
+			if (parkingRestrictionsOverlayToggle != null)
+				parkingRestrictionsOverlayToggle.isChecked = newParkingRestrictionsOverlay;
+		}
+
 		public static void setJunctionRestrictionsOverlay(bool newValue) {
 			junctionRestrictionsOverlay = newValue;
 			if (junctionRestrictionsOverlayToggle != null)
@@ -951,6 +981,15 @@ namespace TrafficManager.State {
 				enableVehicleRestrictionsToggle.isChecked = newValue;
 			if (!newValue)
 				setVehicleRestrictionsOverlay(false);
+		}
+
+		public static void setParkingRestrictionsEnabled(bool newValue) {
+			MenuRebuildRequired = true;
+			parkingRestrictionsEnabled = newValue;
+			if (enableParkingRestrictionsToggle != null)
+				enableParkingRestrictionsToggle.isChecked = newValue;
+			if (!newValue)
+				setParkingRestrictionsOverlay(false);
 		}
 
 		public static void setJunctionRestrictionsEnabled(bool newValue) {

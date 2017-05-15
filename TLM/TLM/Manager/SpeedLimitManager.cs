@@ -21,8 +21,6 @@ namespace TrafficManager.Manager {
 		internal Dictionary<string, int> CustomLaneSpeedLimitIndexByNetInfoName; // For each NetInfo (by name) and lane index: custom speed limit index
 		internal Dictionary<string, NetInfo> NetInfoByName; // For each name: NetInfo
 
-		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
-
 		public static readonly SpeedLimitManager Instance = new SpeedLimitManager();
 
 		protected override void InternalPrintDebugInfo() {

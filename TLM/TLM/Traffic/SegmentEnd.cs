@@ -197,8 +197,14 @@ namespace TrafficManager.Traffic {
 							ret[curPos.m_lane][targetSegmentId] += 10;
 						}
 						++numProcessed;
-					} catch (Exception e) {
-						Log.Info($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Could not add length of vehicle {vehicleId} (lane {curPos.m_lane}, target seg. {targetSegmentId}) to going/moving stats: {e}");
+					} catch (Exception
+#if DEBUGMETRIC
+					e
+#endif
+					) {
+#if DEBUGMETRIC
+						Log._Debug($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Could not add length of vehicle {vehicleId} (lane {curPos.m_lane}, target seg. {targetSegmentId}) to going/moving stats: {e}");
+#endif
 					}
 
 #if DEBUGMETRIC

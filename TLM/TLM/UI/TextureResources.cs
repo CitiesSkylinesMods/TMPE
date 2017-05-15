@@ -47,6 +47,7 @@ namespace TrafficManager.UI
 		public static readonly IDictionary<ushort, Texture2D> SpeedLimitTextures;
 		public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
 		public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+		public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 		public static readonly Texture2D LaneChangeForbiddenTexture2D;
 		public static readonly Texture2D LaneChangeAllowedTexture2D;
 		public static readonly Texture2D UturnAllowedTexture2D;
@@ -69,7 +70,7 @@ namespace TrafficManager.UI
 			MainMenuButtonTexture2D.name = "TMPE_MainMenuButtonIcon";
 
 			// main menu buttons
-			MainMenuButtonsTexture2D = LoadDllResource("mainmenu-btns.png", 840, 30);
+			MainMenuButtonsTexture2D = LoadDllResource("mainmenu-btns.png", 960, 30);
 			MainMenuButtonsTexture2D.name = "TMPE_MainMenuButtons";
 
 			// simple
@@ -144,6 +145,10 @@ namespace TrafficManager.UI
 					e.Value[b] = LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200, 200);
 				}
 			}
+
+			ParkingRestrictionTextures = new TinyDictionary<bool, Texture2D>();
+			ParkingRestrictionTextures[true] = LoadDllResource("parking_allowed.png", 200, 200);
+			ParkingRestrictionTextures[false] = LoadDllResource("parking_disallowed.png", 200, 200);
 
 			LaneChangeAllowedTexture2D = LoadDllResource("lanechange_allowed.png", 200, 200);
 			LaneChangeForbiddenTexture2D = LoadDllResource("lanechange_forbidden.png", 200, 200);

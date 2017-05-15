@@ -458,17 +458,19 @@ namespace TrafficManager.Manager {
 					Quaternion innerParkRot;
 					float innerParkOffset;
 					if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
-						if (CustomPassengerCarAI.FindParkingSpaceRoadSide(ignoreParked, segmentId, innerParkPos, width, length, out innerParkPos, out innerParkRot, out innerParkOffset)) {
+						if (!Options.parkingRestrictionsEnabled || ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, netManager.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_finalDirection)) {
+							if (CustomPassengerCarAI.FindParkingSpaceRoadSide(ignoreParked, segmentId, innerParkPos, width, length, out innerParkPos, out innerParkRot, out innerParkOffset)) {
 #if DEBUG
-							if (GlobalConfig.Instance.DebugSwitches[4])
-								Log._Debug($"FindParkingSpaceRoadSide: Found a parking space for refPos {refPos} @ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
+								if (GlobalConfig.Instance.DebugSwitches[4])
+									Log._Debug($"FindParkingSpaceRoadSide: Found a parking space for refPos {refPos} @ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 #endif
-							foundSegmentId = segmentId;
-							myParkPos = innerParkPos;
-							myParkRot = innerParkRot;
-							myParkOffset = innerParkOffset;
-							if (!randomize || rng.Int32(GlobalConfig.Instance.VicinityParkingSpaceSelectionRand) != 0)
-								return false;
+								foundSegmentId = segmentId;
+								myParkPos = innerParkPos;
+								myParkRot = innerParkRot;
+								myParkOffset = innerParkOffset;
+								if (!randomize || rng.Int32(GlobalConfig.Instance.VicinityParkingSpaceSelectionRand) != 0)
+									return false;
+							}
 						}
 					} else {
 						/*if (GlobalConfig.Instance.DebugSwitches[2])
@@ -755,15 +757,19 @@ namespace TrafficManager.Manager {
 			NetManager netManager = Singleton<NetManager>.instance;
 			if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
 				if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out parkPos, out laneId, out laneIndex, out parkOffset)) {
-					if (CustomPassengerCarAI.FindParkingSpaceRoadSide(ignoreParked, segmentId, parkPos, width, length, out parkPos, out parkRot, out parkOffset)) {
+					if (!Options.parkingRestrictionsEnabled || ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, netManager.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_finalDirection)) {
+						if (CustomPassengerCarAI.FindParkingSpaceRoadSide(ignoreParked, segmentId, parkPos, width, length, out parkPos, out parkRot, out parkOffset)) {
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[4])
-							Log._Debug($"FindParkingSpaceRoadSideForVehiclePos: Found a parking space for refPos {refPos} @ {parkPos}, laneId {laneId}, laneIndex {laneIndex}!");
+							if (GlobalConfig.Instance.DebugSwitches[4])
+								Log._Debug($"FindParkingSpaceRoadSideForVehiclePos: Found a parking space for refPos {refPos} @ {parkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 #endif
-						return true;
+							return true;
+						}
 					}
 				}
 			}
+
+			//
 
 			parkPos = default(Vector3);
 			parkRot = default(Quaternion);

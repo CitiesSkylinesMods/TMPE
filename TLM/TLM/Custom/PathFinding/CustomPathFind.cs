@@ -122,7 +122,7 @@ namespace TrafficManager.Custom.PathFinding {
 		//private float _speedRand;
 		//private bool _extPublicTransport;
 		private float _vehicleCosts;
-		private static ushort laneChangeRandCounter = 0;
+		//private static ushort laneChangeRandCounter = 0;
 #if DEBUG
 		public uint _failedPathFinds = 0;
 		public uint _succeededPathFinds = 0;
@@ -1352,7 +1352,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGNEWPF && DEBUG
 			debug = debug && _conf.DebugSwitches[1];
 #else
-			bool debug = false;
+			debug = false;
 #endif
 			//Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} Path finder: " + this._pathFindIndex + " vehicle types: " + this._vehicleTypes);
 #if DEBUGNEWPF && DEBUG

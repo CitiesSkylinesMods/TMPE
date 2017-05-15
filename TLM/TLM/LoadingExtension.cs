@@ -412,6 +412,43 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				/*Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpaceBuilding calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+							},
+							null),
+							typeof(PassengerCarAI).GetMethod("FindParkingSpaceBuilding",
+								BindingFlags.NonPublic | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (ushort),
+									typeof (Vector3),
+									typeof (float),
+									typeof (float),
+									typeof (float),
+									typeof (Vector3).MakeByRefType(),
+									typeof (Quaternion).MakeByRefType()
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect PassengerCarAI::FindParkingSpaceBuilding");
+					detourFailed = true;
+				}*/
+
 				Log.Info("Reverse-Redirection PassengerCarAI::FindParkingSpace calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomPassengerCarAI).GetMethod("FindParkingSpace",
@@ -1051,6 +1088,19 @@ namespace TrafficManager {
 							typeof(CustomPassengerCarAI).GetMethod("CustomSimulationStep")));
 				} catch (Exception) {
 					Log.Error("Could not redirect PassengerCarAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting PassengerCarAI UpdateParkedVehicle Calls");
+				try {
+					Detours.Add(new Detour(typeof(PassengerCarAI).GetMethod("UpdateParkedVehicle",
+								new[] {
+									typeof (ushort),
+									typeof (VehicleParked).MakeByRefType()
+								}),
+								typeof(CustomPassengerCarAI).GetMethod("CustomUpdateParkedVehicle")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PassengerCarAI::UpdateParkedVehicle.");
 					detourFailed = true;
 				}
 
@@ -1767,6 +1817,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
 			RegisteredManagers.Add(OptionsManager.Instance);
+			RegisteredManagers.Add(ParkingRestrictionsManager.Instance);
 			RegisteredManagers.Add(RoutingManager.Instance);
 			RegisteredManagers.Add(SegmentEndManager.Instance);
 			RegisteredManagers.Add(SpeedLimitManager.Instance);

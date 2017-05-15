@@ -280,6 +280,33 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
+		public void CustomUpdateParkedVehicle(ushort parkedId, ref VehicleParked data) {
+			float x = this.m_info.m_generatedInfo.m_size.x;
+			float z = this.m_info.m_generatedInfo.m_size.z;
+			float minSqrDist = 256f;
+			bool parkingSpotFound = false;
+			uint ownerCitizen = data.m_ownerCitizen;
+			ushort homeID = 0;
+			if (ownerCitizen != 0u) {
+				homeID = Singleton<CitizenManager>.instance.m_citizens.m_buffer[(int)((UIntPtr)ownerCitizen)].m_homeBuilding;
+			}
+
+			ExtParkingSpaceLocation parkingSpaceLocation;
+			ushort parkingSpaceLocationId;
+			Vector3 parkPos;
+			Quaternion parkRot;
+			float parkOffset;
+
+			if (AdvancedParkingManager.Instance.FindParkingSpaceInVicinity(data.m_position, data.Info, homeID, 0, out parkingSpaceLocation, out parkingSpaceLocationId, out parkPos, out parkRot, out parkOffset)) {
+				Singleton<VehicleManager>.instance.RemoveFromGrid(parkedId, ref data);
+				data.m_position = parkPos;
+				data.m_rotation = parkRot;
+				Singleton<VehicleManager>.instance.AddToGrid(parkedId, ref data);
+			} else {
+				Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedId);
+			}
+		}
+
 		internal static bool FindParkingSpaceRoadSide(ushort ignoreParked, ushort requireSegment, Vector3 refPos, float width, float length, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			Log.Error("FindParkingSpaceRoadSide is not overridden!");
 			parkPos = Vector3.zero;
@@ -595,7 +622,7 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
-		private static bool CustomFindParkingSpace(VehicleInfo vehicleInfo, ushort homeID, Vector3 refPos, Vector3 searchDir, ushort segment, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+		private static bool CustomFindParkingSpace(VehicleInfo vehicleInfo, ushort homeID, Vector3 refPos, Vector3 searchDir, ushort segmentId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			float searchRadius = Options.prohibitPocketCars ? 32f : 16f;
 			uint chanceOfParkingOffRoad = 3u;
 
@@ -624,22 +651,47 @@ namespace TrafficManager.Custom.AI {
 				float width = vehicleInfo.m_generatedInfo.m_size.x;
 				float length = vehicleInfo.m_generatedInfo.m_size.z;
 
-				if (FindParkingSpaceRoadSide(0, segment, refPos, width - 0.2f, length, out parkPos, out parkRot, out parkOffset)) {
-					return true;
+				if (FindParkingSpaceRoadSide(0, segmentId, refPos, width - 0.2f, length, out parkPos, out parkRot, out parkOffset)) {
+					if (Options.parkingRestrictionsEnabled) {
+						Vector3 innerParkPos;
+						uint laneId;
+						int laneIndex;
+						float laneOffset;
+						if (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
+							if (ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_finalDirection)) {
+								return true;
+							}
+						}
+					} else {
+						return true;
+					}
 				}
-				if (AdvancedParkingManager.Instance.FindParkingSpaceBuilding(vehicleInfo, homeID, 0, segment, refPos2, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, searchRadius, out parkPos, out parkRot, out parkOffset)) {
+
+				if (AdvancedParkingManager.Instance.FindParkingSpaceBuilding(vehicleInfo, homeID, 0, segmentId, refPos2, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, searchRadius, out parkPos, out parkRot, out parkOffset)) {
 					return true;
 				}
 			} else {
-				if (AdvancedParkingManager.Instance.FindParkingSpaceBuilding(vehicleInfo, homeID, 0, segment, refPos2, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, searchRadius, out parkPos, out parkRot, out parkOffset)) {
+				if (AdvancedParkingManager.Instance.FindParkingSpaceBuilding(vehicleInfo, homeID, 0, segmentId, refPos2, GlobalConfig.Instance.MaxBuildingToPedestrianLaneDistance, searchRadius, out parkPos, out parkRot, out parkOffset)) {
 					return true;
 				}
 
 				float width = vehicleInfo.m_generatedInfo.m_size.x;
 				float length = vehicleInfo.m_generatedInfo.m_size.z;
 
-				if (FindParkingSpaceRoadSide(0, segment, refPos, width - 0.2f, length, out parkPos, out parkRot, out parkOffset)) {
-					return true;
+				if (FindParkingSpaceRoadSide(0, segmentId, refPos, width - 0.2f, length, out parkPos, out parkRot, out parkOffset)) {
+					if (Options.parkingRestrictionsEnabled) {
+						Vector3 innerParkPos;
+						uint laneId;
+						int laneIndex;
+						float laneOffset;
+						if (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
+							if (ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_finalDirection)) {
+								return true;
+							}
+						}
+					} else {
+						return true;
+					}
 				}
 			}
 			return false;

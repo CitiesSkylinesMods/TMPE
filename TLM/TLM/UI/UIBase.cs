@@ -137,7 +137,7 @@ namespace TrafficManager.UI {
 		}
 
 		public static void EnableTool() {
-			Log._Debug("LoadingExtension.EnabledTool: called");
+			Log._Debug("LoadingExtension.EnableTool: called");
 			TrafficManagerTool tmTool = GetTrafficManagerTool(true);
 			tmTool.Initialize();
 
