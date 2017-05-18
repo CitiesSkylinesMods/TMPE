@@ -122,11 +122,21 @@ namespace TrafficManager.TrafficLight {
 				}
 				Steps.Add(targetStep);
 			}
+
+			if (sourceTimedLight.IsStarted()) {
+				Start();
+			}
 		}
 
 		private object rotateLock = new object();
 
 		private void Rotate(ArrowDirection dir) {
+			if (! IsMasterNode() || NodeGroup.Count != 1) {
+				return;
+			}
+
+			Stop();
+
 			try {
 				Monitor.Enter(rotateLock);
 
@@ -283,6 +293,12 @@ namespace TrafficManager.TrafficLight {
 			/*if (!housekeeping())
 				return;*/
 			
+			foreach (TimedTrafficLightsStep step in Steps) {
+				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.CustomSegmentLights) {
+					e.Value.housekeeping(true, true);
+				}
+			}
+
 			CheckInvalidPedestrianLights();
 
 			CurrentStep = 0;

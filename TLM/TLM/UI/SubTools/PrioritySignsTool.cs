@@ -77,9 +77,9 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				if (! MainTool.IsNodeWithinViewDistance(nodeId)) {
+				/*if (! MainTool.IsNodeWithinViewDistance(nodeId)) {
 					continue;
-				}
+				}*/
 
 				currentPriorityNodeIds.Add((ushort)nodeId);
 			}
@@ -110,6 +110,10 @@ namespace TrafficManager.UI.SubTools {
 				ushort removedNodeId = 0;
 				bool showRemoveButton = false;
 				foreach (ushort nodeId in currentPriorityNodeIds) {
+					if (!MainTool.IsNodeWithinViewDistance(nodeId)) {
+						continue;
+					}
+
 					NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
 
 					Vector3 nodePos = default(Vector3);

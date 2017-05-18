@@ -157,3 +157,16 @@ Vehicle_behavior Comportamento do veículo
 Policies_&_Restrictions Políticas e Restrições
 At_junctions Nas junções
 In_case_of_emergency Em caso de emergência
+Show_lane-wise_speed_limits Mostrar limites de velocidade por faixa.
+Language Linguagem
+Game_language Linguagem do Jogo
+requires_game_restart Requer reinicialização do jogo
+Customizations_come_into_effect_instantaneously Personalizações entram em vigor instantaneamente
+Options Opções
+Lock_main_menu_button_position Travar posição do botão de menu principal
+Lock_main_menu_position Travar posição do menu principal
+Recalculating_lane_routing Recalculando o roteamento de faixa
+Please_wait Por favor, aguarde
+Parking_restrictions Restrições de estacionamento
+Please_wait Please wait
+Parking_restrictions Parking restrictions

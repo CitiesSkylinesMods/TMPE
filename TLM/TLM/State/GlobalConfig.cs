@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 5;
+		private static int LATEST_VERSION = 6;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -68,7 +68,7 @@ namespace TrafficManager.State {
 			false, // path-find debug log
 			false, // path-find costs debug log
 			false, // parking ai debug log (basic)
-			false, // -unused-
+			false, // do not actually repair stuck vehicles/cims, just report
 			false, // parking ai debug log (extended)
 			false, // geometry debug log
 			false, // debug parking AI distance issue
@@ -118,27 +118,29 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// speed-to-density balance factor, 1 = only speed is considered, 0 = both speed and density are considered
 		/// </summary>
+		[Obsolete]
 		public float SpeedToDensityBalance = 0.75f;
 
 		/// <summary>
 		/// Relative factor for lane speed cost calculation
 		/// </summary>
-		public float SpeedCostFactor = 0.05f;
+		public float SpeedCostFactor = 0.25f;
 
 		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
-		public uint RandomizedLaneChangingModulo = 100;
+		public uint RandomizedLaneChangingModulo = 5;
 
 		/// <summary>
 		/// randomized modulo. vehicles hitting zero ignore traffic measurements
 		/// </summary>
+		[Obsolete]
 		public int RandomizedTrafficIgnoreModulo = 3;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
 		/// </summary>
-		public int UturnLaneDistance = 1;
+		public int UturnLaneDistance = 2;
 
 		/// <summary>
 		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
@@ -148,22 +150,23 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane density random interval
 		/// </summary>
-		public float LaneDensityRandInterval = 10f;
+		[Obsolete]
+		public float LaneDensityRandInterval = 2;
 
 		/// <summary>
 		/// lane speed random interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 20f;
+		public float LaneSpeedRandInterval = 25f;
 
 		/// <summary>
 		/// Threshold for reducing traffic buffer
 		/// </summary>
-		public uint MaxTrafficBuffer = 100000;
+		public uint MaxTrafficBuffer = 500;
 
 		/// <summary>
 		/// Threshold for reducing path-find traffic buffer
 		/// </summary>
-		public uint MaxPathFindTrafficBuffer = 100000;
+		public uint MaxPathFindTrafficBuffer = 5000;
 
 		/// <summary>
 		/// Threshold for restart segment direction congestion measurements
@@ -249,27 +252,30 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Minimum speed update factor
 		/// </summary>
-		public float MinSpeedUpdateFactor = 0.025f;
+		[Obsolete]
+		public float MinSpeedUpdateFactor = 0.05f;
 
 		/// <summary>
 		/// Maximum speed update factor
 		/// </summary>
-		public float MaxSpeedUpdateFactor = 0.25f;
+		[Obsolete]
+		public float MaxSpeedUpdateFactor = 0.1f;
 
 		/// <summary>
 		/// Maximum density accumulation after which lane densities are reset
 		/// </summary>
-		public uint MaxAccumulatedLaneDensity = 100000;
+		[Obsolete]
+		public uint MaxAccumulatedLaneDensity = 1000;
 
 		/// <summary>
 		/// average speed (in %) threshold for a segment to be flagged as congested
 		/// </summary>
-		public uint CongestionSpeedThreshold = 60;
+		public uint CongestionSpeedThreshold = 70;
 
 		/// <summary>
 		/// %/100 of time a segment must be flagged as congested to count as permanently congested
 		/// </summary>
-		public uint CongestionFrequencyThreshold = 25;
+		public uint CongestionFrequencyThreshold = 110;
 
 		/// <summary>
 		/// lower congestion threshold (per ten-thousands)
@@ -342,7 +348,8 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
 		/// </summary>
-		public uint MaxSpeedDifference = 950u;
+		[Obsolete]
+		public uint MaxSpeedDifference = 500u;
 
 		/// <summary>
 		/// Main menu button position
@@ -368,6 +375,9 @@ namespace TrafficManager.State {
 			if (oldConfig != null) {
 				conf.MainMenuButtonX = oldConfig.MainMenuButtonX;
 				conf.MainMenuButtonY = oldConfig.MainMenuButtonY;
+
+				conf.MainMenuX = oldConfig.MainMenuX;
+				conf.MainMenuY = oldConfig.MainMenuY;
 			}
 			modifiedTime = WriteConfig(conf);
 			return conf;

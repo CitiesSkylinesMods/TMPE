@@ -157,3 +157,14 @@ Vehicle_behavior
 Policies_&_Restrictions
 At_junctions
 In_case_of_emergency
+Show_lane-wise_speed_limits
+Language
+Game_language
+requires_game_restart
+Customizations_come_into_effect_instantaneously
+Options
+Lock_main_menu_button_position
+Lock_main_menu_position
+Recalculating_lane_routing
+Please_wait
+Parking_restrictions

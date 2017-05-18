@@ -31,7 +31,6 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
-		private Dictionary<ushort, IDisposable> nodeGeometryUnsubscribers;
 		private NodeLaneMarker selectedMarker = null;
 		private NodeLaneMarker hoveredMarker = null;
 		private Dictionary<ushort, List<NodeLaneMarker>> currentNodeMarkers;
@@ -57,7 +56,6 @@ namespace TrafficManager.UI.SubTools {
 
 		public LaneConnectorTool(TrafficManagerTool mainTool) : base(mainTool) {
 			//Log._Debug($"TppLaneConnectorTool: Constructor called");
-			nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 			currentNodeMarkers = new Dictionary<ushort, List<NodeLaneMarker>>();
 		}
 

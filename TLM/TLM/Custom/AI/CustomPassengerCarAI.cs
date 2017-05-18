@@ -165,8 +165,13 @@ namespace TrafficManager.Custom.AI {
 										driverExtInstance.Reset();
 
 										// pocket car fallback
-										vehicleData.m_flags |= Vehicle.Flags.Parking;
-										return true;
+										//vehicleData.m_flags |= Vehicle.Flags.Parking;
+										return false;
+									} else {
+#if DEBUG
+										if (GlobalConfig.Instance.DebugSwitches[4])
+											Log._Debug($"Increased number of parking attempts for vehicle {vehicleID}: {driverExtInstance.FailedParkingAttempts}/{GlobalConfig.Instance.MaxParkingAttempts}");
+#endif
 									}
 								} else {
 									driverExtInstance.PathMode = ExtPathMode.CalculatingCarPathToKnownParkPos;
@@ -448,9 +453,9 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				if (! foundParkingSpace) {
-					foundParkingSpace = prohibitPocketCars ?
-						CustomFindParkingSpace(this.m_info, homeID, refPos, searchDir, pathPos.m_segment, out parkPos, out parkRot, out parkOffset) :
-						FindParkingSpace(homeID, refPos, searchDir, pathPos.m_segment, this.m_info.m_generatedInfo.m_size.x, this.m_info.m_generatedInfo.m_size.z, out parkPos, out parkRot, out parkOffset);
+					foundParkingSpace = /*prohibitPocketCars ?*/
+						CustomFindParkingSpace(this.m_info, homeID, refPos, searchDir, pathPos.m_segment, out parkPos, out parkRot, out parkOffset) /*:
+						FindParkingSpace(homeID, refPos, searchDir, pathPos.m_segment, this.m_info.m_generatedInfo.m_size.x, this.m_info.m_generatedInfo.m_size.z, out parkPos, out parkRot, out parkOffset)*/;
 				}
 
 				// NON-STOCK CODE END
@@ -460,7 +465,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 					float sqrDist = (refPos - parkPos).sqrMagnitude;
 					if (GlobalConfig.Instance.DebugSwitches[4])
-						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance.PathMode} sqrDist={sqrDist}");
+						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance?.PathMode} sqrDist={sqrDist}");
 
 					if (GlobalConfig.Instance.DebugSwitches[6] && sqrDist >= 16000) {
 						Log._Debug($"CustomPassengerCarAI.CustomParkVehicle: FORCED PAUSE. Distance very large! Vehicle {vehicleID}. dist={sqrDist}");

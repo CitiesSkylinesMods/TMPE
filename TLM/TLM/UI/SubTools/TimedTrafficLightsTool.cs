@@ -597,33 +597,32 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
-			if (!timedLightActive) {
+			GUILayout.Space(30);
 
-				GUILayout.Space(30);
+			if (SelectedNodeIndexes.Count == 1 && timedNodeMain.NumSteps() > 0) {
+				GUILayout.BeginHorizontal();
 
-				if (SelectedNodeIndexes.Count == 1 && timedNodeMain.NumSteps() > 0) {
-					GUILayout.BeginHorizontal();
-
-					if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
-						_timedViewedStep = 0;
-						timedNodeMain.RotateLeft();
-						timedNodeMain.SetLights();
-					}
-
-					if (GUILayout.Button(Translation.GetString("Copy"))) {
-						nodeIdToCopy = SelectedNodeIndexes[0];
-						MainTool.SetToolMode(ToolMode.TimedLightsCopyLights);
-					}
-
-					if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
-						_timedViewedStep = 0;
-						timedNodeMain.RotateRight();
-						timedNodeMain.SetLights();
-					}
-
-					GUILayout.EndHorizontal();
+				if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
+					_timedViewedStep = 0;
+					timedNodeMain.RotateLeft();
+					timedNodeMain.SetLights();
 				}
 
+				if (GUILayout.Button(Translation.GetString("Copy"))) {
+					nodeIdToCopy = SelectedNodeIndexes[0];
+					MainTool.SetToolMode(ToolMode.TimedLightsCopyLights);
+				}
+
+				if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
+					_timedViewedStep = 0;
+					timedNodeMain.RotateRight();
+					timedNodeMain.SetLights();
+				}
+
+				GUILayout.EndHorizontal();
+			}
+
+			if (!timedLightActive) {
 				GUILayout.Space(30);
 
 				if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {

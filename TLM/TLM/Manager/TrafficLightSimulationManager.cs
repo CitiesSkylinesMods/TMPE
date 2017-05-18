@@ -234,6 +234,7 @@ namespace TrafficManager.Manager {
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
 							if (!Services.NetService.IsSegmentValid(e.Key))
 								continue;
+							e.Value.nodeId = cnfTimedLights.nodeId;
 
 							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 							CustomSegmentLights lights = null;

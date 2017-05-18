@@ -157,3 +157,14 @@ Vehicle_behavior Zachowanie pojazdu
 Policies_&_Restrictions Zasady i Ograniczenia
 At_junctions Na strzyżowaniach
 In_case_of_emergency W sytuacjach nadzwyczajnych
+Show_lane-wise_speed_limits Pokaz limity prêdkoœci dla pasów
+Language Jêzyk
+Game_language Jêzyk gry
+requires_game_restart wymagane ponowne uruchomienie gry
+Customizations_come_into_effect_instantaneously Modyfikacje ustawieñ maj¹ natychmiastowy efekt
+Options Opcje
+Lock_main_menu_button_position Zablokuj pozycjê przycisku menu g³ównego
+Lock_main_menu_position Zablokuj pozycjê menu g³ównego
+Recalculating_lane_routing Ponowne obliczanie tras
+Please_wait Proszê czekaæ
+Parking_restrictions Ograniczenia parkingowe

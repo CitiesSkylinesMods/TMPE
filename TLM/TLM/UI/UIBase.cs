@@ -21,6 +21,7 @@ namespace TrafficManager.UI {
 				Log.Info("Initializing traffic manager tool...");
 				tool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
 								   ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
+				tool.Initialize();
 			}
 
 			return tool;
@@ -139,7 +140,6 @@ namespace TrafficManager.UI {
 		public static void EnableTool() {
 			Log._Debug("LoadingExtension.EnableTool: called");
 			TrafficManagerTool tmTool = GetTrafficManagerTool(true);
-			tmTool.Initialize();
 
 			ToolsModifierControl.toolController.CurrentTool = tmTool;
 			ToolsModifierControl.SetTool<TrafficManagerTool>();

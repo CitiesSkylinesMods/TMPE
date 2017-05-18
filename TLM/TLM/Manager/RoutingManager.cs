@@ -1144,7 +1144,8 @@ namespace TrafficManager.Manager {
 			int ret = -1;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
 				NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIndex];
-				ret = (byte)(laneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0 ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1;
+				// note: m_direction is correct here
+				ret = (byte)(laneInfo.m_direction & NetInfo.Direction.Forward) != 0 ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1;
 				return true;
 			});
 
@@ -1155,7 +1156,8 @@ namespace TrafficManager.Manager {
 			int ret = -1;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
 				NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIndex];
-				ret = (byte)(laneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0 ? laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1 : laneInfo.m_similarLaneIndex;
+				// note: m_direction is correct here
+				ret = (byte)(laneInfo.m_direction & NetInfo.Direction.Forward) != 0 ? laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1 : laneInfo.m_similarLaneIndex;
 				return true;
 			});
 
