@@ -88,7 +88,7 @@ Add_junction_to_timed_light Kreuzung zur Ampel hinzufügen
 Remove_junction_from_timed_light Kreuzung von der Ampel entfernen
 Select_junction Wähle eine Kreuzung aus
 Cancel Abbrechen
-Speed_limits Geschwindigkeitsbeschr.
+Speed_limits Geschwindigkeitsbeschränkungen
 Persistently_visible_overlays Dauerhaft sichtbare Overlays
 Priority_signs Vorfahrtsschilder
 Vehicles_may_do_u-turns_at_junctions Fahrzeuge dürfen an Kreuzungen wenden
@@ -157,3 +157,14 @@ Vehicle_behavior Fahrzeugverhalten
 Policies_&_Restrictions Richtlinien & Einschränkungen
 At_junctions An Kreuzungen
 In_case_of_emergency Im Notfall
+Show_lane-wise_speed_limits Zeige spurweise Geschwindigkeitsbeschränkungen
+Language Sprache
+Game_language Spielsprache
+requires_game_restart erfordert einen Neustart des Spiels
+Customizations_come_into_effect_instantaneously Anpassungen treten sofort in Kraft
+Options Optionen
+Lock_main_menu_button_position Position der Hauptmenü-Schaltfläche sperren
+Lock_main_menu_position Position des Hauptmenüs sperren 
+Recalculating_lane_routing Berechne Routenführung neu
+Please_wait Bitte warten
+Parking_restrictions Parkverbote

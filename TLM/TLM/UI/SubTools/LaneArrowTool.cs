@@ -1,15 +1,18 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using CSUtil.Commons;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Custom.AI;
-using TrafficManager.State;
 using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
 using TrafficManager.Manager;
+using TrafficManager.State;
+using TrafficManager.TrafficLight;
+using TrafficManager.Util;
+using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
@@ -54,7 +57,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
 			int numDirections;
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro); // TODO refactor vehicle mask
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, LaneArrowManager.VEHICLE_TYPES);
 			if (numLanes <= 0) {
 				SelectedNodeId = 0;
 				SelectedSegmentId = 0;
@@ -82,7 +85,7 @@ namespace TrafficManager.UI.SubTools {
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = nodePos - camPos;
 
-			if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
 			int width = numLanes * 128;
@@ -110,14 +113,18 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiLaneChangeWindow(int num) {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
-			List<object[]> laneList = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, info, SelectedNodeId, VehicleInfo.VehicleType.Car);
+			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
 			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
+			if (geometry == null) {
+				Log.Error($"LaneArrowTool._guiLaneChangeWindow: No geometry information available for segment {SelectedSegmentId}");
+				return;
+			}
 			bool startNode = geometry.StartNodeId() == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();
 
 			for (var i = 0; i < laneList.Count; i++) {
-				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[(uint)laneList[i][0]].m_flags;
+				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
 
 				var style1 = new GUIStyle("button");
 				var style2 = new GUIStyle("button") {
@@ -137,22 +144,22 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				if (!Flags.applyLaneArrowFlags((uint)laneList[i][0])) {
-					Flags.removeLaneArrowFlags((uint)laneList[i][0]);
+				if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
+					Flags.removeLaneArrowFlags(laneList[i].laneId);
 				}
 				Flags.LaneArrowChangeResult res = Flags.LaneArrowChangeResult.Invalid;
 				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Left, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Left, out res);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Forward, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Forward, out res);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows((uint)laneList[i][0], startNode, Flags.LaneArrows.Right, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Right, out res);
 				}
 
 				if (buttonClicked) {
@@ -162,10 +169,10 @@ namespace TrafficManager.UI.SubTools {
 						default:
 							break;
 						case Flags.LaneArrowChangeResult.HighwayArrows:
-							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
 							break;
 						case Flags.LaneArrowChangeResult.LaneConnection:
-							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"), Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position);
+							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
 							break;
 					}
 				}

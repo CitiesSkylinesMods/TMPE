@@ -1,15 +1,19 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TrafficManager.State;
 using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
-using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.State;
+using TrafficManager.Traffic;
+using TrafficManager.TrafficLight;
+using TrafficManager.Util;
+using UnityEngine;
+using static TrafficManager.UI.TrafficManagerTool;
+using static TrafficManager.Util.SegmentLaneTraverser;
 
 namespace TrafficManager.UI.SubTools {
 	public class VehicleRestrictionsTool : SubTool {
@@ -107,22 +111,26 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void ShowSigns(bool viewOnly) {
+			Vector3 camPos = Camera.main.transform.position;
+			NetManager netManager = Singleton<NetManager>.instance;
 			bool stateUpdated = false;
 			bool handleHovered = false;
-			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
 			foreach (ushort segmentId in currentRestrictedSegmentIds) {
-				var segmentInfo = segments.m_buffer[segmentId].Info;
+				var segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
-				Vector3 centerPos = segments.m_buffer[segmentId].m_bounds.center;
+				Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
 				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
 				screenPos.y = Screen.height - screenPos.y;
 
 				if (screenPos.z < 0)
 					continue;
 
+				if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
+					continue; // do not draw if too distant
+
 				// draw vehicle restrictions
 				bool update;
-				if (drawVehicleRestrictionHandles((ushort)segmentId, viewOnly || segmentId != SelectedSegmentId, out update))
+				if (drawVehicleRestrictionHandles(segmentId, ref netManager.m_segments.m_buffer[segmentId], viewOnly || segmentId != SelectedSegmentId, out update))
 					handleHovered = true;
 
 				if (update)
@@ -139,11 +147,10 @@ namespace TrafficManager.UI.SubTools {
 				// invert pattern
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				// TODO refactor vehicle mask
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
-				foreach (object[] laneData in sortedLanes) {
-					uint laneId = (uint)laneData[0];
-					uint laneIndex = (uint)laneData[2];
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (LanePos laneData in sortedLanes) {
+					uint laneId = laneData.laneId;
+					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
 					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo);
@@ -152,7 +159,7 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 
 					ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo);
-					allowedTypes = ~allowedTypes & baseMask;
+					allowedTypes = ~(allowedTypes & VehicleRestrictionsManager.EXT_VEHICLE_TYPES) & baseMask;
 					VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, allowedTypes);
 				}
 				RefreshCurrentRestrictedSegmentIds();
@@ -163,11 +170,10 @@ namespace TrafficManager.UI.SubTools {
 				// allow all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				// TODO refactor vehicle mask
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
-				foreach (object[] laneData in sortedLanes) {
-					uint laneId = (uint)laneData[0];
-					uint laneIndex = (uint)laneData[2];
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (LanePos laneData in sortedLanes) {
+					uint laneId = laneData.laneId;
+					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
 					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo);
@@ -184,13 +190,18 @@ namespace TrafficManager.UI.SubTools {
 				// ban all vehicle types
 
 				NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-				List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train); // TODO does not need to be sorted, but every lane should be a vehicle lane
-				foreach (object[] laneData in sortedLanes) {
-					uint laneId = (uint)laneData[0];
-					uint laneIndex = (uint)laneData[2];
+				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES); // TODO does not need to be sorted, but every lane should be a vehicle lane
+				foreach (LanePos laneData in sortedLanes) {
+					uint laneId = laneData.laneId;
+					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, ExtVehicleType.None);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo);
+
+					if (baseMask == ExtVehicleType.None)
+						continue;
+
+					VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, ~VehicleRestrictionsManager.EXT_VEHICLE_TYPES & baseMask);
 				}
 				RefreshCurrentRestrictedSegmentIds();
 			}
@@ -205,87 +216,54 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex=null) {
-			NetInfo selectedSegmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
-			// TODO refactor vehicle mask
-			List<object[]> selectedSortedLanes = TrafficManagerTool.GetSortedVehicleLanes(SelectedSegmentId, selectedSegmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
+			NetManager netManager = Singleton<NetManager>.instance;
 
-			LinkedList<ushort> nodesToProcess = new LinkedList<ushort>();
-			HashSet<ushort> processedNodes = new HashSet<ushort>();
-			HashSet<ushort> processedSegments = new HashSet<ushort>();
-			processedSegments.Add(SelectedSegmentId);
+			NetInfo selectedSegmentInfo = netManager.m_segments.m_buffer[SelectedSegmentId].Info;
+			ushort selectedStartNodeId = netManager.m_segments.m_buffer[SelectedSegmentId].m_startNode;
+			ushort selectedEndNodeId = netManager.m_segments.m_buffer[SelectedSegmentId].m_endNode;
 
-			ushort selectedStartNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode;
-			ushort selectedEndNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_endNode;
-
-			if (selectedStartNodeId != 0)
-				nodesToProcess.AddFirst(selectedStartNodeId);
-			if (selectedEndNodeId != 0)
-				nodesToProcess.AddFirst(selectedEndNodeId);
-
-			while (nodesToProcess.First != null) {
-				ushort nodeId = nodesToProcess.First.Value;
-				nodesToProcess.RemoveFirst();
-				processedNodes.Add(nodeId);
-
-				if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2)
-					continue; // junction. stop.
-
-				// explore segments at node
-				for (var s = 0; s < 8; s++) {
-					var segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(s);
-
-					if (segmentId <= 0 || processedSegments.Contains(segmentId))
-						continue;
-					processedSegments.Add(segmentId);
-
-					NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-					// TODO refactor vehicle mask
-					List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
-
-					if (sortedLanes.Count == selectedSortedLanes.Count) {
-						// number of lanes matches selected segment
-						int sli = -1;
-						for (int i = 0; i < sortedLanes.Count; ++i) {
-							++sli;
-
-							if (sortedLaneIndex != null && sli != sortedLaneIndex)
-								continue;
-
-							object[] selectedLaneData = selectedSortedLanes[i];
-							object[] laneData = sortedLanes[i];
-
-							uint selectedLaneId = (uint)selectedLaneData[0];
-							uint selectedLaneIndex = (uint)selectedLaneData[2];
-							NetInfo.Lane selectedLaneInfo = segmentInfo.m_lanes[selectedLaneIndex];
-
-							uint laneId = (uint)laneData[0];
-							uint laneIndex = (uint)laneData[2];
-							NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-
-							// apply restrictions of selected segment & lane
-							VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo));
-						}
-
-						// add nodes to explore
-						ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
-						ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
-
-						if (startNodeId != 0 && !processedNodes.Contains(startNodeId))
-							nodesToProcess.AddFirst(startNodeId);
-						if (endNodeId != 0 && !processedNodes.Contains(endNodeId))
-							nodesToProcess.AddFirst(endNodeId);
-					}
+			SegmentLaneTraverser.Traverse(SelectedSegmentId, SegmentTraverser.TraverseDirection.Both, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
+				if (data.segVisitData.initial) {
+					return true;
 				}
-			}
+
+				if (sortedLaneIndex != null && data.sortedLaneIndex != sortedLaneIndex) {
+					return true;
+				}
+
+				ushort segmentId = data.segVisitData.curGeo.SegmentId;
+				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+
+				uint selectedLaneId = data.initLanePos.laneId;
+				byte selectedLaneIndex = data.initLanePos.laneIndex;
+				NetInfo.Lane selectedLaneInfo = selectedSegmentInfo.m_lanes[selectedLaneIndex];
+
+				uint laneId = data.curLanePos.laneId;
+				byte laneIndex = data.curLanePos.laneIndex;
+				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+				ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo);
+				if (baseMask == ExtVehicleType.None) {
+					return true;
+				}
+
+				// apply restrictions of selected segment & lane
+				ExtVehicleType mask = ~VehicleRestrictionsManager.EXT_VEHICLE_TYPES & baseMask; // ban all possible controllable vehicles
+				mask |= VehicleRestrictionsManager.EXT_VEHICLE_TYPES & VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo); // allow all enabled and controllable vehicles
+
+				VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, mask);
+
+				return true;
+			});
 		}
 
-		private bool drawVehicleRestrictionHandles(ushort segmentId, bool viewOnly, out bool stateUpdated) {
+		private bool drawVehicleRestrictionHandles(ushort segmentId, ref NetSegment segment, bool viewOnly, out bool stateUpdated) {
 			stateUpdated = false;
 
-			if (viewOnly && !Options.vehicleRestrictionsOverlay && TrafficManagerTool.GetToolMode() != ToolMode.VehicleRestrictions)
+			if (viewOnly && !Options.vehicleRestrictionsOverlay && MainTool.GetToolMode() != ToolMode.VehicleRestrictions)
 				return false;
 
-			Vector3 center = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center;
+			Vector3 center = segment.m_bounds.center;
 
 			var screenPos = Camera.main.WorldToScreenPoint(center);
 			screenPos.y = Screen.height - screenPos.y;
@@ -294,25 +272,23 @@ namespace TrafficManager.UI.SubTools {
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = center - camPos;
 
-			if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return false; // do not draw if too distant
 
 			int numDirections;
-			// TODO refactor vehicle mask
-			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
+			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, VehicleRestrictionsManager.VEHICLE_TYPES);
 
 			// draw vehicle restrictions over each lane
-			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-			Vector3 yu = (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endDirection - Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startDirection).normalized;
-			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
-				yu = -yu;
+			NetInfo segmentInfo = segment.Info;
+			Vector3 yu = (segment.m_endDirection - segment.m_startDirection).normalized;
+			/*if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
+				yu = -yu;*/
 			Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
 			float f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
-			ItemClass connectionClass = segmentInfo.GetConnectionClass();
 			int maxNumSigns = 0;
-			if (connectionClass.m_service == ItemClass.Service.Road)
+			if (VehicleRestrictionsManager.Instance.IsRoadSegment(segmentInfo))
 				maxNumSigns = roadVehicleTypes.Length;
-			else if (connectionClass.m_service == ItemClass.Service.PublicTransport && connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain)
+			else if (VehicleRestrictionsManager.Instance.IsRailSegment(segmentInfo))
 				maxNumSigns = railVehicleTypes.Length;
 			//Vector3 zero = center - 0.5f * (float)(numLanes + numDirections - 1) * f * (xu + yu); // "bottom left"
 			Vector3 zero = center - 0.5f * (float)(numLanes - 1 + numDirections - 1) * f * xu - 0.5f * (float)maxNumSigns * f * yu; // "bottom left"
@@ -322,21 +298,20 @@ namespace TrafficManager.UI.SubTools {
 
 			uint x = 0;
 			var guiColor = GUI.color;
-			// TODO refactor vehicle mask
-			List<object[]> sortedLanes = TrafficManagerTool.GetSortedVehicleLanes(segmentId, segmentInfo, null, VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train);
+			IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES);
 			bool hovered = false;
 			HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
 			int sortedLaneIndex = -1;
-			foreach (object[] laneData in sortedLanes) {
+			foreach (LanePos laneData in sortedLanes) {
 				++sortedLaneIndex;
-				uint laneId = (uint)laneData[0];
-				uint laneIndex = (uint)laneData[2];
+				uint laneId = laneData.laneId;
+				byte laneIndex = laneData.laneIndex;
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-				if (!directions.Contains(laneInfo.m_direction)) {
+				if (!directions.Contains(laneInfo.m_finalDirection)) {
 					if (directions.Count > 0)
 						++x; // space between different directions
-					directions.Add(laneInfo.m_direction);
+					directions.Add(laneInfo.m_finalDirection);
 				}
 
 				ExtVehicleType[] possibleVehicleTypes = null;
@@ -375,8 +350,7 @@ namespace TrafficManager.UI.SubTools {
 					if (allowed && viewOnly)
 						continue; // do not draw allowed vehicles in view-only mode
 
-					bool hoveredHandle;
-					DrawRestrictionsSign(viewOnly, camPos, out diff, xu, yu, f, zero, x, y, ref guiColor, TrafficLightToolTextureResources.VehicleRestrictionTextures[vehicleType][allowed], out hoveredHandle);
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.VehicleRestrictionTextures[vehicleType][allowed], ref camPos, ref zero, f, ref xu, ref yu, x, y, vehicleRestrictionsSignSize, !viewOnly, 0.5f, 0.8f);
 					if (hoveredHandle)
 						hovered = true;
 
@@ -402,29 +376,6 @@ namespace TrafficManager.UI.SubTools {
 			GUI.color = guiColor;
 
 			return hovered;
-		}
-
-		private void DrawRestrictionsSign(bool viewOnly, Vector3 camPos, out Vector3 diff, Vector3 xu, Vector3 yu, float f, Vector3 zero, uint x, uint y, ref Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
-			Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
-
-			var signScreenPos = Camera.main.WorldToScreenPoint(signCenter);
-			signScreenPos.y = Screen.height - signScreenPos.y;
-			diff = signCenter - camPos;
-
-			var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
-			var size = (viewOnly ? 0.8f : 1f) * vehicleRestrictionsSignSize * zoom;
-
-			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
-			hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
-			if (hoveredHandle) {
-				// mouse hovering over sign
-				guiColor.a = 0.8f;
-			} else {
-				guiColor.a = 0.5f;
-			}
-
-			GUI.color = guiColor;
-			GUI.DrawTexture(boundingBox, signTexture);
 		}
 	}
 }

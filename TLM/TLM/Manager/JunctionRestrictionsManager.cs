@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,12 @@ namespace TrafficManager.Manager {
 
 		static JunctionRestrictionsManager() {
 			Instance = new JunctionRestrictionsManager();
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
 		public bool HasJunctionRestrictions(ushort nodeId) {
@@ -63,7 +70,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, bool value) {
-			if (!NetUtil.IsSegmentValid(segmentId))
+			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setStraightLaneChangingAllowed(segmentId, startNode, value);
 			SubscribeToSegmentGeometry(segmentId);
@@ -75,7 +82,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool SetUturnAllowed(ushort segmentId, bool startNode, bool value) {
-			if (!NetUtil.IsSegmentValid(segmentId))
+			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			if (!value && LaneConnectionManager.Instance.HasUturnConnections(segmentId, startNode))
 				return false;
@@ -89,7 +96,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, bool value) {
-			if (!NetUtil.IsSegmentValid(segmentId))
+			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setEnterWhenBlockedAllowed(segmentId, startNode, value);
 			SubscribeToSegmentGeometry(segmentId);
@@ -101,7 +108,7 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool value) {
-			if (!NetUtil.IsSegmentValid(segmentId))
+			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setPedestrianCrossingAllowed(segmentId, startNode, !IsPedestrianCrossingAllowed(segmentId, startNode));
 			SubscribeToSegmentGeometry(segmentId);
@@ -113,7 +120,7 @@ namespace TrafficManager.Manager {
 			Log.Info($"Loading junction restrictions. {data.Count} elements");
 			foreach (Configuration.SegmentNodeConf segNodeConf in data) {
 				try {
-					if (!NetUtil.IsSegmentValid(segNodeConf.segmentId))
+					if (!Services.NetService.IsSegmentValid(segNodeConf.segmentId))
 						continue;
 
 					Flags.setSegmentNodeFlags(segNodeConf.segmentId, true, segNodeConf.startNodeFlags);
@@ -133,14 +140,14 @@ namespace TrafficManager.Manager {
 			NetManager netManager = Singleton<NetManager>.instance;
 			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
 				try {
-					if (!NetUtil.IsSegmentValid(segmentId))
+					if (!Services.NetService.IsSegmentValid(segmentId))
 						continue;
 
 					ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
 					ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
 
-					Configuration.SegmentNodeFlags startNodeFlags = NetUtil.IsNodeValid(startNodeId) ? Flags.getSegmentNodeFlags(segmentId, true) : null;
-					Configuration.SegmentNodeFlags endNodeFlags = NetUtil.IsNodeValid(endNodeId) ? Flags.getSegmentNodeFlags(segmentId, false) : null;
+					Configuration.SegmentNodeFlags startNodeFlags = Services.NetService.IsNodeValid(startNodeId) ? Flags.getSegmentNodeFlags(segmentId, true) : null;
+					Configuration.SegmentNodeFlags endNodeFlags = Services.NetService.IsNodeValid(endNodeId) ? Flags.getSegmentNodeFlags(segmentId, false) : null;
 
 					if (startNodeFlags == null && endNodeFlags == null)
 						continue;

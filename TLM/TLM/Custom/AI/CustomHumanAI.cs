@@ -11,12 +11,13 @@ using static TrafficManager.Traffic.ExtCitizenInstance;
 using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
 		public void CustomSimulationStep(ushort instanceID, ref CitizenInstance instanceData, Vector3 physicsLodRefPos) {
+			uint citizenId = instanceData.m_citizen;
 			if ((instanceData.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None && (instanceData.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None) {
-				uint citizenId = instanceData.m_citizen;
 				Singleton<CitizenManager>.instance.ReleaseCitizenInstance(instanceID);
 				if (citizenId != 0u) {
 					Singleton<CitizenManager>.instance.ReleaseCitizen(citizenId);
@@ -118,6 +119,12 @@ namespace TrafficManager.Custom.AI {
 					instanceData.m_pathPositionIndex = 255;
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+					// NON-STOCK CODE START (transferred from ResidentAI.PathfindSuccess)
+					if (citizenId != 0 && (Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags & (Citizen.Flags.Tourist | Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.MovingIn) {
+						StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
+						statisticBase.Add(1);
+					}
+					// NON-STOCK CODE END
 					this.PathfindSuccess(instanceID, ref instanceData);
 				} else if (pathFindFailed) { // NON-STOCK CODE
 #if DEBUG
@@ -328,9 +335,9 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].m_laneTypes;
-				byte vehicleTypes = CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].m_vehicleTypes;
+				ushort vehicleTypes = CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].m_vehicleTypes;
 				bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
-				bool usesCar = (laneTypes & (byte)(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && (vehicleTypes & (byte)(VehicleInfo.VehicleType.Car)) != 0;
+				bool usesCar = (laneTypes & (byte)(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && (vehicleTypes & (ushort)(VehicleInfo.VehicleType.Car)) != 0;
 
 				if (usesPublicTransport && usesCar && extInstance.PathMode == ExtPathMode.CalculatingCarPathToKnownParkPos) {
 					/*
@@ -453,7 +460,7 @@ namespace TrafficManager.Custom.AI {
 
 									// spawn a passenger car near the current position
 									Vector3 parkPos;
-									if (CustomCitizenAI.TrySpawnParkedPassengerCar(instanceData.m_citizen, homeId, currentPos, vehicleInfo, out parkPos)) {
+									if (AdvancedParkingManager.Instance.TrySpawnParkedPassengerCar(instanceData.m_citizen, homeId, currentPos, vehicleInfo, out parkPos)) {
 										parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 #if DEBUG
 										if (GlobalConfig.Instance.DebugSwitches[2] && sourceBuildingId != 0)

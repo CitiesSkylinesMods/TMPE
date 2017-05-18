@@ -56,7 +56,11 @@ namespace TrafficManager.UI {
 		public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
 		public virtual void ShowGUIOverlay(bool viewOnly) { }
 		public virtual bool IsCursorInPanel() {
-			return UIBase.GetMenu().containsMouse;
+			return LoadingExtension.BaseUI.GetMenu().containsMouse
+#if DEBUG
+				|| LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+#endif
+				;
 		}
 
 		protected void DragWindow(ref Rect window) {

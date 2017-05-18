@@ -13,6 +13,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneConnectorTool : SubTool {
@@ -30,7 +31,6 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
-		private Dictionary<ushort, IDisposable> nodeGeometryUnsubscribers;
 		private NodeLaneMarker selectedMarker = null;
 		private NodeLaneMarker hoveredMarker = null;
 		private Dictionary<ushort, List<NodeLaneMarker>> currentNodeMarkers;
@@ -56,7 +56,6 @@ namespace TrafficManager.UI.SubTools {
 
 		public LaneConnectorTool(TrafficManagerTool mainTool) : base(mainTool) {
 			//Log._Debug($"TppLaneConnectorTool: Constructor called");
-			nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 			currentNodeMarkers = new Dictionary<ushort, List<NodeLaneMarker>>();
 		}
 
@@ -84,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 				Vector3 nodePos = NetManager.instance.m_nodes.m_buffer[nodeId].m_position;
 
 				var diff = nodePos - camPos;
-				if (diff.magnitude > TrafficManagerTool.PriorityCloseLod)
+				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 					continue; // do not draw if too distant
 
 				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
@@ -173,16 +172,7 @@ namespace TrafficManager.UI.SubTools {
 
 				if (deleteAll) {
 					// remove all connections at selected node
-
-					List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId);
-					if (nodeMarkers != null) {
-						selectedMarker = null;
-						foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
-							foreach (NodeLaneMarker targetLaneMarker in sourceLaneMarker.connectedMarkers) {
-								LaneConnectionManager.Instance.RemoveLaneConnection(sourceLaneMarker.laneId, targetLaneMarker.laneId, sourceLaneMarker.startNode);
-							}
-						}
-					}
+					LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(SelectedNodeId);
 					RefreshCurrentNodeMarkers();
 				}
 
@@ -425,8 +415,8 @@ namespace TrafficManager.UI.SubTools {
 				uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
 				for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++) {
 					NetInfo.Lane laneInfo = lanes[laneIndex];
-					if ((laneInfo.m_laneType & (NetInfo.LaneType.TransportVehicle | NetInfo.LaneType.Vehicle)) != NetInfo.LaneType.None &&
-						(laneInfo.m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None) { // TODO refactor vehicle mask
+					if ((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None &&
+						(laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
 
 						Vector3? pos = null;
 						bool isSource = false;

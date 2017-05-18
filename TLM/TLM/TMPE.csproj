@@ -1,0 +1,342 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7422AE58-8B0A-401C-9404-F4A438EFFE10}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TrafficManager</RootNamespace>
+    <AssemblyName>TrafficManager</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;QUEUEDSTATS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>0</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QueuedStats|AnyCPU'">
+    <OutputPath>bin\QueuedStats\</OutputPath>
+    <DefineConstants>QUEUEDSTATS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ColossalManaged">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+    </Reference>
+    <Reference Include="ICities">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeProfiler.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Custom\AI\CustomBuildingAI.cs" />
+    <Compile Include="Custom\AI\CustomBusAI.cs" />
+    <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
+    <Compile Include="Custom\AI\CustomCitizenAI.cs" />
+    <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
+    <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
+    <Compile Include="Custom\AI\CustomNetAI.cs" />
+    <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
+    <Compile Include="Custom\AI\CustomResidentAI.cs" />
+    <Compile Include="Custom\AI\CustomShipAI.cs" />
+    <Compile Include="Custom\AI\CustomTaxiAI.cs" />
+    <Compile Include="Custom\AI\CustomTouristAI.cs" />
+    <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
+    <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
+    <Compile Include="Custom\AI\CustomVehicleAI.cs" />
+    <Compile Include="Custom\Manager\CustomNetManager.cs" />
+    <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
+    <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Manager\AbstractCustomManager.cs" />
+    <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
+    <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\IExtNetManager.cs" />
+    <Compile Include="Manager\SegmentEndManager.cs" />
+    <Compile Include="Manager\VehicleBehaviorManager.cs" />
+    <Compile Include="Manager\ExtBuildingManager.cs" />
+    <Compile Include="Manager\ICustomDataManager.cs" />
+    <Compile Include="Manager\AdvancedParkingManager.cs" />
+    <Compile Include="Manager\LaneArrowManager.cs" />
+    <Compile Include="Manager\OptionsManager.cs" />
+    <Compile Include="Manager\TrafficLightManager.cs" />
+    <Compile Include="Manager\TrafficMeasurementManager.cs" />
+    <Compile Include="Manager\JunctionRestrictionsManager.cs" />
+    <Compile Include="Manager\UtilityManager.cs" />
+    <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
+    <Compile Include="State\GlobalConfig.cs" />
+    <Compile Include="TrafficLight\CustomSegmentLights.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLightsManager.cs" />
+    <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
+    <Compile Include="Traffic\ExtBuilding.cs" />
+    <Compile Include="Traffic\ExtCitizenInstance.cs" />
+    <Compile Include="Traffic\ExtVehicleType.cs" />
+    <Compile Include="Manager\LaneConnectionManager.cs" />
+    <Compile Include="Geometry\NodeGeometry.cs" />
+    <Compile Include="Geometry\SegmentEndGeometry.cs" />
+    <Compile Include="Manager\VehicleStateManager.cs" />
+    <Compile Include="Manager\VehicleRestrictionsManager.cs" />
+    <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
+    <Compile Include="State\Configuration.cs" />
+    <Compile Include="Custom\AI\CustomCarAI.cs" />
+    <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
+    <Compile Include="Custom\AI\CustomHumanAI.cs" />
+    <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
+    <Compile Include="Custom\AI\CustomRoadAI.cs" />
+    <Compile Include="Custom\AI\CustomTrainAI.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
+    <Compile Include="Geometry\SegmentGeometry.cs" />
+    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\UIMainMenuButton.cs" />
+    <Compile Include="UI\SubTool.cs" />
+    <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
+    <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\LaneArrowTool.cs" />
+    <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
+    <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
+    <Compile Include="UI\Translation.cs" />
+    <Compile Include="State\Options.cs" />
+    <Compile Include="Traffic\ArrowDirection.cs" />
+    <Compile Include="Manager\SpeedLimitManager.cs" />
+    <Compile Include="Traffic\VehicleState.cs" />
+    <Compile Include="State\Flags.cs" />
+    <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="UI\TransportDemandViewMode.cs" />
+    <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\GenericUnsubscriber.cs" />
+    <Compile Include="Manager\ICustomManager.cs" />
+    <Compile Include="Util\IExtNetManager.cs" />
+    <Compile Include="Util\IObservable.cs" />
+    <Compile Include="Util\IObserver.cs" />
+    <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\SegmentLaneTraverser.cs" />
+    <Compile Include="Util\TextureUtil.cs" />
+    <Compile Include="Util\TinyDictionary.cs" />
+    <Compile Include="Util\VehicleUtil.cs" />
+    <Compile Include="Util\RedirectionHelper.cs" />
+    <Compile Include="State\SerializableDataExtension.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="ThreadingExtension.cs" />
+    <Compile Include="TrafficLight\CustomSegment.cs" />
+    <Compile Include="TrafficLight\CustomSegmentLight.cs" />
+    <Compile Include="UI\ToolMode.cs" />
+    <Compile Include="Manager\TrafficLightSimulationManager.cs" />
+    <Compile Include="Manager\CustomSegmentLightsManager.cs" />
+    <Compile Include="TrafficLight\TimedTrafficLights.cs" />
+    <Compile Include="UI\TrafficManagerTool.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\TrafficLightToolTextureResources.cs" />
+    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="TrafficManagerMode.cs" />
+    <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
+    <Compile Include="Manager\TrafficPriorityManager.cs" />
+    <Compile Include="Traffic\PrioritySegment.cs" />
+    <Compile Include="UI\CameraCtrl.cs" />
+    <Compile Include="UI\UIBase.cs" />
+    <Compile Include="UI\UITrafficManager.cs" />
+    <Compile Include="Util\SegmentTraverser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\light_1_1.png" />
+    <EmbeddedResource Include="Resources\light_1_2.png" />
+    <EmbeddedResource Include="Resources\light_1_3.png" />
+    <EmbeddedResource Include="Resources\light_2_1.png" />
+    <EmbeddedResource Include="Resources\light_2_2.png" />
+    <EmbeddedResource Include="Resources\light_2_3.png" />
+    <EmbeddedResource Include="Resources\light_3_1.png" />
+    <EmbeddedResource Include="Resources\light_3_2.png" />
+    <EmbeddedResource Include="Resources\light_3_3.png" />
+    <EmbeddedResource Include="Resources\light_4_1.png" />
+    <EmbeddedResource Include="Resources\light_4_2.png" />
+    <EmbeddedResource Include="Resources\light_4_3.png" />
+    <EmbeddedResource Include="Resources\light_5_1.png" />
+    <EmbeddedResource Include="Resources\light_5_2.png" />
+    <EmbeddedResource Include="Resources\light_5_3.png" />
+    <EmbeddedResource Include="Resources\light_6_1.png" />
+    <EmbeddedResource Include="Resources\light_6_2.png" />
+    <EmbeddedResource Include="Resources\light_6_3.png" />
+    <EmbeddedResource Include="Resources\light_counter.png" />
+    <EmbeddedResource Include="Resources\light_mode.png" />
+    <EmbeddedResource Include="Resources\light_yellow.png" />
+    <EmbeddedResource Include="Resources\pedestrian_light_1.png" />
+    <EmbeddedResource Include="Resources\pedestrian_light_2.png" />
+    <EmbeddedResource Include="Resources\pedestrian_mode_1.png" />
+    <EmbeddedResource Include="Resources\pedestrian_mode_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sign_none.png" />
+    <EmbeddedResource Include="Resources\sign_priority.png" />
+    <EmbeddedResource Include="Resources\sign_stop.png" />
+    <EmbeddedResource Include="Resources\sign_yield.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_zh-tw.txt" />
+    <EmbeddedResource Include="Resources\lang_es.txt" />
+    <EmbeddedResource Include="Resources\lanechange_allowed.png" />
+    <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
+    <EmbeddedResource Include="Resources\bicycle_infosign.png" />
+    <EmbeddedResource Include="Resources\bus_infosign.png" />
+    <EmbeddedResource Include="Resources\cargotrain_infosign.png" />
+    <EmbeddedResource Include="Resources\cargotruck_infosign.png" />
+    <EmbeddedResource Include="Resources\passengercar_infosign.png" />
+    <EmbeddedResource Include="Resources\passengertrain_infosign.png" />
+    <EmbeddedResource Include="Resources\emergency_infosign.png" />
+    <EmbeddedResource Include="Resources\service_infosign.png" />
+    <EmbeddedResource Include="Resources\taxi_infosign.png" />
+    <EmbeddedResource Include="Resources\tram_infosign.png" />
+    <EmbeddedResource Include="Resources\bus_allowed.png" />
+    <EmbeddedResource Include="Resources\bus_forbidden.png" />
+    <EmbeddedResource Include="Resources\cargotrain_allowed.png" />
+    <EmbeddedResource Include="Resources\cargotrain_forbidden.png" />
+    <EmbeddedResource Include="Resources\cargotruck_allowed.png" />
+    <EmbeddedResource Include="Resources\cargotruck_forbidden.png" />
+    <EmbeddedResource Include="Resources\emergency_allowed.png" />
+    <EmbeddedResource Include="Resources\emergency_forbidden.png" />
+    <EmbeddedResource Include="Resources\passengercar_allowed.png" />
+    <EmbeddedResource Include="Resources\passengercar_forbidden.png" />
+    <EmbeddedResource Include="Resources\passengertrain_allowed.png" />
+    <EmbeddedResource Include="Resources\passengertrain_forbidden.png" />
+    <EmbeddedResource Include="Resources\service_allowed.png" />
+    <EmbeddedResource Include="Resources\service_forbidden.png" />
+    <EmbeddedResource Include="Resources\taxi_allowed.png" />
+    <EmbeddedResource Include="Resources\taxi_forbidden.png" />
+    <EmbeddedResource Include="Resources\light_counter_pl.png" />
+    <EmbeddedResource Include="Resources\light_mode_pl.png" />
+    <EmbeddedResource Include="Resources\pedestrian_mode_2_pl.png" />
+    <EmbeddedResource Include="Resources\lang_fr.txt" />
+    <EmbeddedResource Include="Resources\lang_pl.txt" />
+    <EmbeddedResource Include="Resources\lang_ru.txt" />
+    <EmbeddedResource Include="Resources\lang_pt.txt" />
+    <EmbeddedResource Include="Resources\lang.txt" />
+    <EmbeddedResource Include="Resources\lang_de.txt" />
+    <EmbeddedResource Include="Resources\lang_ja.txt" />
+    <EmbeddedResource Include="Resources\light_counter_ja.png" />
+    <EmbeddedResource Include="Resources\light_mode_ja.png" />
+    <EmbeddedResource Include="Resources\0.png" />
+    <EmbeddedResource Include="Resources\10.png" />
+    <EmbeddedResource Include="Resources\100.png" />
+    <EmbeddedResource Include="Resources\120.png" />
+    <EmbeddedResource Include="Resources\130.png" />
+    <EmbeddedResource Include="Resources\20.png" />
+    <EmbeddedResource Include="Resources\30.png" />
+    <EmbeddedResource Include="Resources\40.png" />
+    <EmbeddedResource Include="Resources\50.png" />
+    <EmbeddedResource Include="Resources\60.png" />
+    <EmbeddedResource Include="Resources\70.png" />
+    <EmbeddedResource Include="Resources\80.png" />
+    <EmbeddedResource Include="Resources\90.png" />
+    <EmbeddedResource Include="Resources\clock_pause.png" />
+    <EmbeddedResource Include="Resources\clock_test.png" />
+    <EmbeddedResource Include="Resources\clock_play.png" />
+    <EmbeddedResource Include="Resources\remove_signs.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_nl.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\crossing_allowed.png" />
+    <EmbeddedResource Include="Resources\crossing_forbidden.png" />
+    <EmbeddedResource Include="Resources\enterblocked_allowed.png" />
+    <EmbeddedResource Include="Resources\enterblocked_forbidden.png" />
+    <EmbeddedResource Include="Resources\uturn_allowed.png" />
+    <EmbeddedResource Include="Resources\uturn_forbidden.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\110.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MenuButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_zh.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_kr.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_it.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\noimage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CitiesGameBridge\CitiesGameBridge.csproj">
+      <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
+      <Name>CitiesGameBridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GenericGameBridge\GenericGameBridge.csproj">
+      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
+      <Name>GenericGameBridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Util\Util.csproj">
+      <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
+      <Name>Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740"
+del /Q "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\*"
+xcopy /y "$(TargetDir)$(TargetName).*" "C:\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740"
+</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -78,6 +78,19 @@ namespace TrafficManager {
 		}
 
 		[Serializable]
+		public class ParkingRestriction {
+			public ushort segmentId;
+			public bool forwardParkingAllowed;
+			public bool backwardParkingAllowed;
+
+			public ParkingRestriction(ushort segmentId) {
+				this.segmentId = segmentId;
+				forwardParkingAllowed = true;
+				backwardParkingAllowed = true;
+			}
+		}
+		
+		[Serializable]
 		public class SegmentNodeFlags {
 			public bool? uturnAllowed = null;
 			public bool? straightLaneChangingAllowed = null;
@@ -192,6 +205,11 @@ namespace TrafficManager {
 		/// Priority segments
 		/// </summary>
 		public List<PrioritySegment> CustomPrioritySegments = new List<PrioritySegment>();
+
+		/// <summary>
+		/// Parking restrictions
+		/// </summary>
+		public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
 
 		[Obsolete]
 		public string NodeTrafficLights = "";

@@ -6,6 +6,8 @@ using TrafficManager.Util;
 using TrafficManager.TrafficLight;
 using TrafficManager.State;
 using System.Linq;
+using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	/// <summary>
@@ -23,6 +25,17 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		private CustomSegment[] CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
 
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Custom segments:");
+			for (int i = 0; i < CustomSegments.Length; ++i) {
+				if (CustomSegments[i] == null) {
+					continue;
+				}
+				Log._Debug($"Segment {i}: {CustomSegments[i]}");
+			}
+		}
+
 		/// <summary>
 		/// Adds custom traffic lights at the specified node and segment.
 		/// Light states (red, yellow, green) are taken from the "live" state, that is the traffic light's light state right before the custom light takes control.
@@ -31,7 +44,12 @@ namespace TrafficManager.Manager {
 		/// <param name="startNode"></param>
 		public CustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
 			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
-			SegmentEndGeometry endGeometry = startNode ? segGeometry.StartNodeGeometry : segGeometry.EndNodeGeometry;
+			if (segGeometry == null) {
+				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is invalid.");
+				return null;
+			}
+
+			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
 
 			if (! endGeometry.IsValid()) {
 				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node. startNode={startNode}");
@@ -89,6 +107,26 @@ namespace TrafficManager.Manager {
 				customSegment.EndNodeLights.CalculateAutoPedestrianLightState();
 				return customSegment.EndNodeLights;
 			}
+		}
+
+		public bool SetSegmentLights(ushort nodeId, ushort segmentId, CustomSegmentLights lights) {
+			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
+			if (endGeo == null) {
+				return false;
+			}
+
+			CustomSegment customSegment = CustomSegments[segmentId];
+			if (customSegment == null) {
+				customSegment = new CustomSegment();
+				CustomSegments[segmentId] = customSegment;
+			}
+
+			if (endGeo.StartNode) {
+				customSegment.StartNodeLights = lights;
+			} else {
+				customSegment.EndNodeLights = lights;
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -210,10 +248,34 @@ namespace TrafficManager.Manager {
 			}
 		}
 
+		internal void SetLightMode(ushort segmentId, bool startNode, ExtVehicleType vehicleType, CustomSegmentLight.Mode mode) {
+			CustomSegmentLights liveLights = GetSegmentLights(segmentId, startNode);
+			CustomSegmentLight liveLight = liveLights.GetCustomLight(vehicleType);
+			if (liveLight == null) {
+				Log.Error($"CustomSegmentLightsManager.SetLightMode: Cannot change light mode on seg. {segmentId} @ {startNode} for vehicle type {vehicleType} to {mode}: Vehicle light not found");
+				return;
+			}
+			liveLight.CurrentMode = mode;
+		}
+
+		internal void SetLightModes(ushort segmentId, bool startNode, CustomSegmentLights otherLights) {
+			CustomSegmentLights sourceLights = GetSegmentLights(segmentId, startNode);
+			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in sourceLights.CustomLights) {
+				ExtVehicleType vehicleType = e.Key;
+				CustomSegmentLight targetLight = e.Value;
+
+				CustomSegmentLight sourceLight;
+				if (otherLights.CustomLights.TryGetValue(vehicleType, out sourceLight)) {
+					targetLight.CurrentMode = sourceLight.CurrentMode;
+				}
+			}
+		}
+
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId).GetEnd(nodeId);
-			if (endGeometry == null)
+			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
+			if (endGeometry == null) {
 				return null;
+			}
 			return GetSegmentLights(segmentId, endGeometry.StartNode, false);
 		}
 
@@ -230,6 +292,12 @@ namespace TrafficManager.Manager {
 			CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
 		}
 
-		
+		public short ClockwiseIndexOfSegmentEnd(SegmentEndId endId) {
+			SegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId)?.GetEnd(endId.StartNode);
+			if (endGeo == null) {
+				return 0;
+			}
+			return endGeo.GetClockwiseIndex();
+		}
 	}
 }

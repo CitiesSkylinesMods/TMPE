@@ -3,7 +3,6 @@
 #define DEBUGPF3x
 #define DEBUGMERGEx
 #define DEBUGLOCKSx
-#define DEBUGCOSTSx
 #define MARKCONGESTEDSEGMENTS
 #define EXTRAPFx
 
@@ -21,6 +20,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using static TrafficManager.Manager.RoutingManager;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathFind : PathFind {
@@ -32,6 +33,7 @@ namespace TrafficManager.Custom.PathFinding {
 			public NetInfo.Direction m_direction;
 			public NetInfo.LaneType m_lanesUsed;
 			public VehicleInfo.VehicleType m_vehiclesUsed;
+			public float m_speedRand;
 		}
 
 		private enum LaneChangingCostCalculationMode {
@@ -39,6 +41,8 @@ namespace TrafficManager.Custom.PathFinding {
 			ByLaneDistance,
 			ByGivenDistance
 		}
+
+		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
 
 		//Expose the private fields
 		FieldInfo _fieldpathUnits;
@@ -111,13 +115,19 @@ namespace TrafficManager.Custom.PathFinding {
 		private ExtVehicleType? _extVehicleType;
 		private ushort? _vehicleId;
 		private ExtCitizenInstance.ExtPathType? _extPathType;
+		private bool _isRoadVehicle;
+		private bool _isLaneArrowObeyingEntity;
+		private bool _isLaneConnectionObeyingEntity;
 		private bool _leftHandDrive;
+		//private float _speedRand;
 		//private bool _extPublicTransport;
 		private float _vehicleCosts;
-		private static ushort laneChangeRandCounter = 0;
+		//private static ushort laneChangeRandCounter = 0;
 #if DEBUG
 		public uint _failedPathFinds = 0;
 		public uint _succeededPathFinds = 0;
+		private bool _debug = false;
+		private IDictionary<ushort, IList<ushort>> _debugPositions = null;
 #endif
 		public int pfId = 0;
 		private Randomizer _pathRandomizer;
@@ -125,25 +135,6 @@ namespace TrafficManager.Custom.PathFinding {
 		private NetInfo.LaneType _laneTypes;
 		private VehicleInfo.VehicleType _vehicleTypes;
 
-		// used in ProcessItemMain
-		// TODO pack them into one struct
-		private byte[] laneIndexes = new byte[16]; // index of NetSegment.Info.m_lanes
-		private uint[] laneIds = new uint[16]; // index of NetManager.m_lanes.m_buffer
-		private byte[] nextOuterLaneSimilarIndexes = new byte[16];
-		private byte[] nextInnerLaneSimilarIndexes = new byte[16];
-		private byte[] laneIndexByOuterSimilarIndex = new byte[16];
-		private byte[] numOutgoingConnections = new byte[16];
-		private bool[] nextIsConnectedWithPrevious = new bool[16];
-		/// <summary>
-		/// holds a bitmask that indicates which lanes in `laneIndexByOuterSimilarIndex` are considered as
-		/// compatible due to correct lane arrows / lane connections in the current run.
-		/// </summary>
-		private ushort compatibleOuterSimilarIndexesMask = (ushort)0;
-		/// <summary>
-		/// holds a bitmask that indicates which lanes in `laneIndexByOuterSimilarIndex` are valid for the current run
-		/// (even if they are not considered as compatible).
-		/// </summary>
-		private ushort possibleOuterSimilarIndexesMask = (ushort)0;
 		private GlobalConfig _conf = null;
 
 		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
@@ -154,6 +145,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance;
 		private static readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 		private static readonly TrafficMeasurementManager trafficMeasurementManager = TrafficMeasurementManager.Instance;
+		private static readonly RoutingManager routingManager = RoutingManager.Instance;
 
 		public bool IsMasterPathFind = false;
 #if EXTRAPF
@@ -336,13 +328,26 @@ namespace TrafficManager.Custom.PathFinding {
 			if ((this.PathUnits.m_buffer[unit].m_simulationFlags & 32) == 0) {
 				this._disableMask |= NetSegment.Flags.Flooded;
 			}
+			//this._speedRand = 0;
 			this._extVehicleType = CustomPathManager._instance.pathUnitExtVehicleType[unit];
 			this._vehicleId = CustomPathManager._instance.pathUnitVehicleIds[unit];
 			this._extPathType = CustomPathManager._instance.pathUnitPathTypes[unit];
-			this._leftHandDrive = TrafficPriorityManager.IsLeftHandDrive();
-			//this._extPublicTransport = _extVehicleType != null && (_extVehicleType & ExtVehicleType.PublicTransport) != ExtVehicleType.None;
-#if DEBUGPF
-			//Log._Debug($"CustomPathFind.PathFindImplementation: path unit {unit}, type {_extVehicleType}");
+			this._leftHandDrive = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+			this._isRoadVehicle = _extVehicleType != null && (_extVehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None;
+			this._isLaneArrowObeyingEntity = (_vehicleTypes & LaneArrowManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
+										_extVehicleType != null &&
+										(_extVehicleType & LaneArrowManager.EXT_VEHICLE_TYPES) != ExtVehicleType.None;
+			this._isLaneConnectionObeyingEntity = (_vehicleTypes & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
+													_extVehicleType != null && (_extVehicleType & LaneConnectionManager.EXT_VEHICLE_TYPES) != ExtVehicleType.None;
+#if DEBUGNEWPF && DEBUG
+			bool debug = this._debug = _conf.DebugSwitches[0] &&
+				((_conf.PathFindDebugExtVehicleType == ExtVehicleType.None && (_extVehicleType == null || _extVehicleType == ExtVehicleType.None)) || (_extVehicleType != null && (_extVehicleType & _conf.PathFindDebugExtVehicleType) != ExtVehicleType.None)) &&
+				(_conf.PathFindDebugStartSegmentId < 0 || data.m_position00.m_segment == _conf.PathFindDebugStartSegmentId || data.m_position02.m_segment == _conf.PathFindDebugStartSegmentId)
+				;
+			if (debug) {
+				Log._Debug($"CustomPathFind.PathFindImplementation: START calculating path unit {unit}, type {_extVehicleType}");
+				_debugPositions = new Dictionary<ushort, IList<ushort>>();
+			}
 #endif
 
 			if (! Options.isStockLaneChangerUsed()) {
@@ -394,6 +399,7 @@ namespace TrafficManager.Custom.PathFinding {
 				this.GetLaneDirection(data.m_position01, out bufferItemEndA.m_direction, out bufferItemEndA.m_lanesUsed, out bufferItemEndA.m_vehiclesUsed);
 				bufferItemEndA.m_methodDistance = 0.01f;
 				bufferItemEndA.m_comparisonValue = 0f;
+				bufferItemEndA.m_speedRand = 0;
 			} else {
 				this._endLaneA = 0u;
 				bufferItemEndA = default(BufferItem);
@@ -406,6 +412,7 @@ namespace TrafficManager.Custom.PathFinding {
 				this.GetLaneDirection(data.m_position03, out bufferItemEndB.m_direction, out bufferItemEndB.m_lanesUsed, out bufferItemEndB.m_vehiclesUsed);
 				bufferItemEndB.m_methodDistance = 0.01f;
 				bufferItemEndB.m_comparisonValue = 0f;
+				bufferItemEndB.m_speedRand = 0f;
 			} else {
 				this._endLaneB = 0u;
 				bufferItemEndB = default(BufferItem);
@@ -417,6 +424,16 @@ namespace TrafficManager.Custom.PathFinding {
 				this._vehicleLane = 0u;
 				this._vehicleOffset = 0;
 			}
+#if DEBUGNEWPF && DEBUG
+			if (debug) {
+				Log._Debug($"CustomPathFind.PathFindImplementation: Preparing calculating path unit {unit}, type {_extVehicleType}:\n" +
+					$"\tbufferItemStartA: segment={bufferItemStartA.m_position.m_segment} lane={bufferItemStartA.m_position.m_lane} off={bufferItemStartA.m_position.m_offset} laneId={bufferItemStartA.m_laneID}\n" +
+					$"\tbufferItemStartB: segment={bufferItemStartB.m_position.m_segment} lane={bufferItemStartB.m_position.m_lane} off={bufferItemStartB.m_position.m_offset} laneId={bufferItemStartB.m_laneID}\n" +
+					$"\tbufferItemEndA: segment={bufferItemEndA.m_position.m_segment} lane={bufferItemEndA.m_position.m_lane} off={bufferItemEndA.m_position.m_offset} laneId={bufferItemEndA.m_laneID}\n" +
+					$"\tbufferItemEndB: segment={bufferItemEndB.m_position.m_segment} lane={bufferItemEndB.m_position.m_lane} off={bufferItemEndB.m_position.m_offset} laneId={bufferItemEndB.m_laneID}\n"
+					);
+			}
+#endif
 			BufferItem finalBufferItem = default(BufferItem);
 			byte startOffset = 0;
 			this._bufferMinPos = 0;
@@ -491,12 +508,14 @@ namespace TrafficManager.Custom.PathFinding {
 					// explore the path
 					if ((byte)(candidateItem.m_direction & NetInfo.Direction.Forward) != 0) {
 						ushort startNode = instance.m_segments.m_buffer[candidateItem.m_position.m_segment].m_startNode;
-						this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], startNode, ref instance.m_nodes.m_buffer[startNode], 0, false);
+						uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, true);
+						this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], ref routingManager.segmentRoutings[candidateItem.m_position.m_segment], ref routingManager.laneEndRoutings[laneRoutingIndex], startNode, true, ref instance.m_nodes.m_buffer[startNode], 0, false);
 					}
 
 					if ((byte)(candidateItem.m_direction & NetInfo.Direction.Backward) != 0) {
 						ushort endNode = instance.m_segments.m_buffer[candidateItem.m_position.m_segment].m_endNode;
-						this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], endNode, ref instance.m_nodes.m_buffer[endNode], 255, false);
+						uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, false);
+						this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], ref routingManager.segmentRoutings[candidateItem.m_position.m_segment], ref routingManager.laneEndRoutings[laneRoutingIndex], endNode, false, ref instance.m_nodes.m_buffer[endNode], 255, false);
 					}
 
 					// handle special nodes (e.g. bus stops)
@@ -516,7 +535,9 @@ namespace TrafficManager.Custom.PathFinding {
 								direction |= NetInfo.Direction.Backward;
 							}
 							if ((byte)(candidateItem.m_direction & direction) != 0 && (!flag2 || (instance.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
-								this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], specialNodeId, ref instance.m_nodes.m_buffer[specialNodeId], laneOffset, true);
+								bool isStartNode = specialNodeId == startNode2;
+								uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, isStartNode);
+								this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], ref routingManager.segmentRoutings[candidateItem.m_position.m_segment], ref routingManager.laneEndRoutings[laneRoutingIndex], specialNodeId, isStartNode, ref instance.m_nodes.m_buffer[specialNodeId], laneOffset, true);
 							}
 							specialNodeId = instance.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
 							if (++num6 == 32768) {
@@ -540,7 +561,23 @@ namespace TrafficManager.Custom.PathFinding {
 				PathUnits.m_buffer[(int)unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 #if DEBUG
 				++_failedPathFinds;
-				//Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Cannot find path (pfCurrentState={pfCurrentState}) for unit {unit}");
+
+#if DEBUGNEWPF
+				if (debug) {
+					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {unit} -- path-finding failed during process");
+					string reachableBuf = "";
+					string unreachableBuf = "";
+					foreach (KeyValuePair<ushort, IList<ushort>> e in _debugPositions) {
+						string buf = $"{e.Key} -> {e.Value.CollectionToString()}\n";
+						if (e.Value.Count <= 0) {
+							unreachableBuf += buf;
+						} else {
+							reachableBuf += buf;
+						}
+					}
+					Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Reachability graph for unit {unit}:\n== REACHABLE ==\n" + reachableBuf + "\n== UNREACHABLE ==\n" + unreachableBuf);
+				}
+#endif
 #endif
 				CustomPathManager._instance.ResetPathUnit(unit);
 
@@ -551,10 +588,10 @@ namespace TrafficManager.Custom.PathFinding {
 			float totalPathLength = finalBufferItem.m_comparisonValue * this._maxLength;
 			this.PathUnits.m_buffer[unit].m_length = totalPathLength;
 			this.PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.m_lanesUsed; // NON-STOCK CODE
-			this.PathUnits.m_buffer[unit].m_vehicleTypes = (byte)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE
+			this.PathUnits.m_buffer[unit].m_vehicleTypes = (ushort)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE
 #if DEBUG
-			if (_conf.DebugSwitches[4])
-				Log._Debug($"Lane/Vehicle types of path unit {unit}: {finalBufferItem.m_lanesUsed} / {finalBufferItem.m_vehiclesUsed}");
+			/*if (_conf.DebugSwitches[4])
+				Log._Debug($"Lane/Vehicle types of path unit {unit}: {finalBufferItem.m_lanesUsed} / {finalBufferItem.m_vehiclesUsed}");*/
 #endif
 			uint currentPathUnitId = unit;
 			int currentItemPositionCount = 0;
@@ -612,6 +649,11 @@ namespace TrafficManager.Custom.PathFinding {
 					PathUnits.m_buffer[(int)unit].m_pathFindFlags |= PathUnit.FLAG_READY; // Path found
 #if DEBUG
 					++_succeededPathFinds;
+
+#if DEBUGNEWPF
+					if (debug)
+						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Path-find succeeded for unit {unit}");
+#endif
 #endif
 					CustomPathManager._instance.ResetPathUnit(unit);
 
@@ -629,7 +671,11 @@ namespace TrafficManager.Custom.PathFinding {
 							PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 #if DEBUG
 							++_failedPathFinds;
-							//Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Cannot find path (pfCurrentState={pfCurrentState}) for unit {unit}");
+
+#if DEBUGNEWPF
+							if (debug)
+								Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {unit} -- Could not create path unit");
+#endif
 #endif
 							CustomPathManager._instance.ResetPathUnit(unit);
 							return;
@@ -640,7 +686,7 @@ namespace TrafficManager.Custom.PathFinding {
 						this.PathUnits.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
 						this.PathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
 						this.PathUnits.m_buffer[currentPathUnitId].m_laneTypes = (byte)finalBufferItem.m_lanesUsed; // NON-STOCK CODE (this is not accurate!)
-						this.PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes = (byte)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE (this is not accurate!)
+						this.PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes = (ushort)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE (this is not accurate!)
 						sumOfPositionCounts += currentItemPositionCount;
 						Singleton<PathManager>.instance.m_pathUnitCount = (int)(this.PathUnits.ItemCount() - 1u);
 					} catch (Exception e) {
@@ -655,10 +701,18 @@ namespace TrafficManager.Custom.PathFinding {
 
 				uint laneID = PathManager.GetLaneID(currentPosition);
 				// NON-STOCK CODE START
+#if MEASUREDENSITY
 				if (!Options.isStockLaneChangerUsed()) {
 					NetInfo.Lane laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[currentPosition.m_segment].Info.m_lanes[currentPosition.m_lane];
 					if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
 						trafficMeasurementManager.AddTraffic(currentPosition.m_segment, currentPosition.m_lane, (ushort)(this._isHeavyVehicle || _extVehicleType == ExtVehicleType.Bus ? 75 : 25), null);
+				}
+#endif
+				if (!Options.isStockLaneChangerUsed()) {
+					NetInfo.Lane laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[currentPosition.m_segment].Info.m_lanes[currentPosition.m_lane];
+					if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+						trafficMeasurementManager.AddPathFindTraffic(currentPosition.m_segment, currentPosition.m_lane);
+					}
 				}
 				// NON-STOCK CODE END
 				currentPosition = this._laneTarget[laneID];
@@ -666,6 +720,11 @@ namespace TrafficManager.Custom.PathFinding {
 			PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 #if DEBUG
 			++_failedPathFinds;
+
+#if DEBUGNEWPF
+			if (debug)
+				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {unit} -- internal error: for loop break");
+#endif
 #endif
 			CustomPathManager._instance.ResetPathUnit(unit);
 #if DEBUG
@@ -678,21 +737,19 @@ namespace TrafficManager.Custom.PathFinding {
 		//   (2) when I use the term "lane index from outer" this means outer right lane for right-hand traffic systems and outer-left lane for left-hand traffic systems.
 
 		// 1
-		private void ProcessItemMain(uint unitId, BufferItem item, ref NetSegment prevSegment, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
-#if DEBUGPF && DEBUG
-			//bool debug = _conf.DebugSwitches[0] && item.m_position.m_segment == 1459 && nextNodeId == 19630;
-			//bool debug = _conf.DebugSwitches[0] && (item.m_position.m_segment == 3833 || item.m_position.m_segment == 9649);
-			bool debug = _conf.DebugSwitches[0] && nextNodeId == _conf.PathFindDebugNodeId;
-			//bool debug = _conf.DebugSwitches[0] && ((nextNodeId == 27237 && item.m_position.m_segment == 5699) || (nextNodeId == 16068 && item.m_position.m_segment == 24398) || (nextNodeId == 12825 && item.m_position.m_segment == 17008));
+		private void ProcessItemMain(uint unitId, BufferItem item, ref NetSegment prevSegment, ref SegmentRoutingData prevSegmentRouting, ref LaneEndRoutingData prevLaneEndRouting, ushort nextNodeId, bool nextIsStartNode, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
+#if DEBUGNEWPF && DEBUG
+			bool debug = this._debug && (_conf.PathFindDebugNodeId < 0 || nextNodeId == _conf.PathFindDebugNodeId);
+			if (debug) {
+				if (! _debugPositions.ContainsKey(item.m_position.m_segment)) {
+					_debugPositions[item.m_position.m_segment] = new List<ushort>();
+				}
+			}
 #else
 			bool debug = false;
 #endif
-#if DEBUGPF
-			/*if (m_queuedPathFindCount > 100 && _conf.DebugSwitches[0])
-				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: processItemMain RUNNING! item: {item.m_position.m_segment}, {item.m_position.m_lane} nextNodeId: {nextNodeId}");*/
-#endif
 			//Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} Path finder: " + this._pathFindIndex + " vehicle types: " + this._vehicleTypes);
-#if DEBUGPF
+#if DEBUGNEWPF && DEBUG
 			//bool debug = isTransportVehicle && isMiddle && item.m_position.m_segment == 13550;
 			List<String> logBuf = null;
 			if (debug)
@@ -710,6 +767,8 @@ namespace TrafficManager.Custom.PathFinding {
 			//bool prevIsBusLane = false; // non-stock
 			bool prevIsBicycleLane = false;
 			bool prevIsCenterPlatform = false;
+			bool prevIsElevated = false;
+			bool prevIsCarLane = false;
 			int prevSimilarLaneIndexFromInner = 0; // similar index, starting with 0 at leftmost lane
 			NetInfo prevSegmentInfo = prevSegment.Info;
 			byte prevSimilarLaneCount = 0;
@@ -717,8 +776,10 @@ namespace TrafficManager.Custom.PathFinding {
 				NetInfo.Lane prevLane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
 				prevIsPedestrianLane = (prevLane.m_laneType == NetInfo.LaneType.Pedestrian);
 				prevIsBicycleLane = (prevLane.m_laneType == NetInfo.LaneType.Vehicle && (prevLane.m_vehicleType & this._vehicleTypes) == VehicleInfo.VehicleType.Bicycle);
+				prevIsCarLane = (prevLane.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None && (prevLane.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None;
 				//prevIsBusLane = (prevLane.m_laneType == NetInfo.LaneType.TransportVehicle && (prevLane.m_vehicleType & this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None);
 				prevIsCenterPlatform = prevLane.m_centerPlatform;
+				prevIsElevated = prevLane.m_elevated;
 				prevSimilarLaneCount = (byte)prevLane.m_similarLaneCount;
 				if ((byte)(prevLane.m_finalDirection & NetInfo.Direction.Forward) != 0) {
 					prevSimilarLaneIndexFromInner = prevLane.m_similarLaneIndex;
@@ -734,1069 +795,432 @@ namespace TrafficManager.Custom.PathFinding {
 					if (nextSegmentId <= 0)
 						continue;
 
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug) {
 						FlushMainLog(logBuf, unitId);
 					}
 #endif
 
-					this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
+					this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
 				}
 			} else if (prevIsPedestrianLane) {
-				// explore pedestrian lanes
-				int prevLaneIndex = (int)item.m_position.m_lane;
-				if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
-					if ((byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0) { // NON-STOCK CODE
-						bool isEndBendOrJunction = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
-						bool isOnCenterPlatform = prevIsCenterPlatform && (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Junction)) == NetNode.Flags.None;
-						ushort nextLeftSegment = prevSegmentId;
-						ushort nextRightSegment = prevSegmentId;
-						int leftLaneIndex;
-						int rightLaneIndex;
-						uint leftLaneId;
-						uint rightLaneId;
-						prevSegment.GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, prevLaneIndex, isOnCenterPlatform, out leftLaneIndex, out rightLaneIndex, out leftLaneId, out rightLaneId);
-						if (leftLaneId == 0u || rightLaneId == 0u) {
-							ushort leftSegment;
-							ushort rightSegment;
-							prevSegment.GetLeftAndRightSegments(nextNodeId, out leftSegment, out rightSegment);
-							int numIter = 0;
-							while (leftSegment != 0 && leftSegment != prevSegmentId && leftLaneId == 0u) {
-								int someLeftLaneIndex;
-								int someRightLaneIndex;
-								uint someLeftLaneId;
-								uint someRightLaneId;
-								netManager.m_segments.m_buffer[(int)leftSegment].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
-								if (someRightLaneId != 0u) {
-									nextLeftSegment = leftSegment;
-									leftLaneIndex = someRightLaneIndex;
-									leftLaneId = someRightLaneId;
-								} else {
-									leftSegment = netManager.m_segments.m_buffer[(int)leftSegment].GetLeftSegment(nextNodeId);
+				bool allowPedSwitch = (this._laneTypes & NetInfo.LaneType.Pedestrian) != 0;
+				if (!prevIsElevated) {
+					// explore pedestrian lanes
+					int prevLaneIndex = (int)item.m_position.m_lane;
+					if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
+						if (allowPedSwitch) { // NON-STOCK CODE
+							bool isEndBendOrJunction = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
+							bool isOnCenterPlatform = prevIsCenterPlatform && (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Junction)) == NetNode.Flags.None;
+							ushort nextLeftSegment = prevSegmentId;
+							ushort nextRightSegment = prevSegmentId;
+							int leftLaneIndex;
+							int rightLaneIndex;
+							uint leftLaneId;
+							uint rightLaneId;
+							prevSegment.GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, prevLaneIndex, isOnCenterPlatform, out leftLaneIndex, out rightLaneIndex, out leftLaneId, out rightLaneId);
+							if (leftLaneId == 0u || rightLaneId == 0u) {
+								ushort leftSegment;
+								ushort rightSegment;
+								prevSegment.GetLeftAndRightSegments(nextNodeId, out leftSegment, out rightSegment);
+								int numIter = 0;
+								while (leftSegment != 0 && leftSegment != prevSegmentId && leftLaneId == 0u) {
+									int someLeftLaneIndex;
+									int someRightLaneIndex;
+									uint someLeftLaneId;
+									uint someRightLaneId;
+									netManager.m_segments.m_buffer[(int)leftSegment].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
+									if (someRightLaneId != 0u) {
+										nextLeftSegment = leftSegment;
+										leftLaneIndex = someRightLaneIndex;
+										leftLaneId = someRightLaneId;
+									} else {
+										leftSegment = netManager.m_segments.m_buffer[(int)leftSegment].GetLeftSegment(nextNodeId);
+									}
+									if (++numIter == 8) {
+										break;
+									}
 								}
-								if (++numIter == 8) {
-									break;
+								numIter = 0;
+								while (rightSegment != 0 && rightSegment != prevSegmentId && rightLaneId == 0u) {
+									int someLeftLaneIndex;
+									int someRightLaneIndex;
+									uint someLeftLaneId;
+									uint someRightLaneId;
+									netManager.m_segments.m_buffer[(int)rightSegment].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
+									if (someLeftLaneId != 0u) {
+										nextRightSegment = rightSegment;
+										rightLaneIndex = someLeftLaneIndex;
+										rightLaneId = someLeftLaneId;
+									} else {
+										rightSegment = netManager.m_segments.m_buffer[(int)rightSegment].GetRightSegment(nextNodeId);
+									}
+									if (++numIter == 8) {
+										break;
+									}
 								}
 							}
-							numIter = 0;
-							while (rightSegment != 0 && rightSegment != prevSegmentId && rightLaneId == 0u) {
-								int someLeftLaneIndex;
-								int someRightLaneIndex;
-								uint someLeftLaneId;
-								uint someRightLaneId;
-								netManager.m_segments.m_buffer[(int)rightSegment].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
-								if (someLeftLaneId != 0u) {
-									nextRightSegment = rightSegment;
-									rightLaneIndex = someLeftLaneIndex;
-									rightLaneId = someLeftLaneId;
-								} else {
-									rightSegment = netManager.m_segments.m_buffer[(int)rightSegment].GetRightSegment(nextNodeId);
-								}
-								if (++numIter == 8) {
-									break;
-								}
-							}
-						}
-						if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
-	#if DEBUGPF2
-							if (debug2)
-								logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going ped1, seg. {nextLeftSegment}, off {connectOffset}, lane idx {leftLaneIndex}, id {leftLaneId}");
-	#endif
-							this.ProcessItemPedBicycle(item, nextNodeId, nextLeftSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextLeftSegment], connectOffset, connectOffset, leftLaneIndex, leftLaneId); // ped
-						}
-						if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
-	#if DEBUGPF2
-							if (debug2)
-								logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going ped2, seg. {nextRightSegment}, off {connectOffset}, lane idx {rightLaneIndex}, id {rightLaneId}");
-	#endif
-							this.ProcessItemPedBicycle(item, nextNodeId, nextRightSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextRightSegment], connectOffset, connectOffset, rightLaneIndex, rightLaneId); // ped
-						}
-					} // NON-STOCK CODE
-
-					// switch from bicycle lane to pedestrian lane
-					int nextLaneIndex;
-					uint nextLaneId;
-					if ((this._vehicleTypes & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None &&
-						prevSegment.GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Bicycle, out nextLaneIndex, out nextLaneId)) {
+							if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
 #if DEBUGPF2
-						if (debug2)
-							logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going bike, seg. {prevSegmentId}, off {connectOffset}, lane idx {nextLaneIndex}, id {nextLaneId}");
+								if (debug2)
+									logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going ped1, seg. {nextLeftSegment}, off {connectOffset}, lane idx {leftLaneIndex}, id {leftLaneId}");
 #endif
-						this.ProcessItemPedBicycle(item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegment, connectOffset, connectOffset, nextLaneIndex, nextLaneId); // bicycle
-					}
-				} else {
-					//mCurrentState = 9;
-					for (int j = 0; j < 8; ++j) {
-						ushort nextSegmentId = nextNode.GetSegment(j);
-						if (nextSegmentId != 0 && nextSegmentId != prevSegmentId) {
+								this.ProcessItemPedBicycle(debug, item, nextNodeId, nextLeftSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextLeftSegment], connectOffset, connectOffset, leftLaneIndex, leftLaneId); // ped
+							}
+							if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
+#if DEBUGPF2
+								if (debug2)
+									logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going ped2, seg. {nextRightSegment}, off {connectOffset}, lane idx {rightLaneIndex}, id {rightLaneId}");
+#endif
+								this.ProcessItemPedBicycle(debug, item, nextNodeId, nextRightSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextRightSegment], connectOffset, connectOffset, rightLaneIndex, rightLaneId); // ped
+							}
+						}
+
+						// switch from bicycle lane to pedestrian lane
+						int nextLaneIndex;
+						uint nextLaneId;
+						if ((this._vehicleTypes & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None &&
+							prevSegment.GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Bicycle, out nextLaneIndex, out nextLaneId)) {
 #if DEBUGPF2
 							if (debug2)
-								logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: going beauty1, seg. {nextSegmentId}, off {connectOffset}");
+								logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} @ node {nextNodeId}: going bike, seg. {prevSegmentId}, off {connectOffset}, lane idx {nextLaneIndex}, id {nextLaneId}");
 #endif
-#if DEBUGPF
-							if (debug) {
-								FlushMainLog(logBuf, unitId);
-							}
+							this.ProcessItemPedBicycle(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegment, connectOffset, connectOffset, nextLaneIndex, nextLaneId); // bicycle
+						}
+					} else {
+						// we are going from pedestrian lane to a beautification node
+
+						for (int j = 0; j < 8; ++j) {
+							ushort nextSegmentId = nextNode.GetSegment(j);
+							if (nextSegmentId != 0 && nextSegmentId != prevSegmentId) {
+#if DEBUGPF2
+								if (debug2)
+									logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: going beauty1, seg. {nextSegmentId}, off {connectOffset}");
+#endif
+#if DEBUGNEWPF
+								if (debug) {
+									FlushMainLog(logBuf, unitId);
+								}
 #endif
 
-							this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, false, true);
+								this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, false, true);
+							}
 						}
 					}
-				}
 
-				// switch from vehicle to pedestrian lane (parking)
-				bool parkingAllowed = true;
-				if (Options.prohibitPocketCars) {
-					if (_extVehicleType == ExtVehicleType.PassengerCar) {
+					// NON-STOCK CODE START
+					// switch from vehicle to pedestrian lane (parking)
+					bool parkingAllowed = true;
+					if (Options.prohibitPocketCars) {
+						if (_extVehicleType == ExtVehicleType.PassengerCar) {
+							if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
+								// if pocket cars are prohibited, a citizen may only park their car once per path
+								parkingAllowed = false;
+							} else if ((byte)(item.m_lanesUsed & NetInfo.LaneType.PublicTransport) == 0) {
+								// if the citizen is walking to their target (= no public transport used), the passenger car must be parked in the very last moment
+								parkingAllowed = item.m_laneID == _endLaneA || item.m_laneID == _endLaneB;
+								/*if (_conf.DebugSwitches[4]) {
+									Log._Debug($"Path unit {unitId}: public transport has not been used. ");
+								}*/
+							}
+						}
+					}
+
+					if (parkingAllowed) {
+						// NON-STOCK CODE END
+						NetInfo.LaneType laneType = this._laneTypes & ~NetInfo.LaneType.Pedestrian;
+						VehicleInfo.VehicleType vehicleType = this._vehicleTypes & ~VehicleInfo.VehicleType.Bicycle;
 						if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
-							// if pocket cars are prohibited, a citizen may only park their car once per path
-							parkingAllowed = false;
-						} else if ((byte)(item.m_lanesUsed & NetInfo.LaneType.PublicTransport) == 0) {
-							// if the citizen is walking to their target (= no public transport used), the passenger car must be parked in the very last moment
-							parkingAllowed = item.m_laneID == _endLaneA || item.m_laneID == _endLaneB;
-							/*if (_conf.DebugSwitches[4]) {
-								Log._Debug($"Path unit {unitId}: public transport has not been used. ");
-							}*/
+							laneType &= ~(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 						}
-					}
-				}
-
-				if (parkingAllowed) {
-					NetInfo.LaneType laneType = this._laneTypes & ~NetInfo.LaneType.Pedestrian;
-					VehicleInfo.VehicleType vehicleType = this._vehicleTypes & ~VehicleInfo.VehicleType.Bicycle;
-					if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
-						laneType &= ~(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
-					}
-					int nextLaneIndex2;
-					uint nextlaneId2;
-					if (laneType != NetInfo.LaneType.None &&
-						vehicleType != VehicleInfo.VehicleType.None &&
-						prevSegment.GetClosestLane(prevLaneIndex, laneType, vehicleType, out nextLaneIndex2, out nextlaneId2)) {
-						NetInfo.Lane lane5 = prevSegmentInfo.m_lanes[nextLaneIndex2];
-						byte connectOffset2;
-						if ((prevSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None == ((byte)(lane5.m_finalDirection & NetInfo.Direction.Backward) != 0)) {
-							connectOffset2 = 1;
-						} else {
-							connectOffset2 = 254;
-						}
+						int nextLaneIndex2;
+						uint nextlaneId2;
+						if (laneType != NetInfo.LaneType.None &&
+							vehicleType != VehicleInfo.VehicleType.None &&
+							prevSegment.GetClosestLane(prevLaneIndex, laneType, vehicleType, out nextLaneIndex2, out nextlaneId2)) {
+							NetInfo.Lane lane5 = prevSegmentInfo.m_lanes[nextLaneIndex2];
+							byte connectOffset2;
+							if ((prevSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None == ((byte)(lane5.m_finalDirection & NetInfo.Direction.Backward) != 0)) {
+								connectOffset2 = 1;
+							} else {
+								connectOffset2 = 254;
+							}
 #if DEBUGPF2
-						if (debug2)
-							logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: going parking, seg. {prevSegmentId}, off {connectOffset}, lane idx {nextLaneIndex2}, id {nextlaneId2}");
+							if (debug2)
+								logBuf2.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: going parking, seg. {prevSegmentId}, off {connectOffset}, lane idx {nextLaneIndex2}, id {nextlaneId2}");
 #endif
-						CustomPathFind.BufferItem item2 = item;
-						if (this._randomParking) {
-							item2.m_comparisonValue += (float)this._pathRandomizer.Int32(300u) / this._maxLength;
+							CustomPathFind.BufferItem item2 = item;
+							if (this._randomParking) {
+								item2.m_comparisonValue += (float)this._pathRandomizer.Int32(300u) / this._maxLength;
+							}
+							this.ProcessItemPedBicycle(debug, item2, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegment, connectOffset2, 128, nextLaneIndex2, nextlaneId2); // ped
 						}
-						this.ProcessItemPedBicycle(item2, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegment, connectOffset2, 128, nextLaneIndex2, nextlaneId2); // ped
 					}
 				}
 			} else {
 				// we are going to a non-pedestrian lane
 
-				bool mayTurnAround = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-				bool allowPedSwitch = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0; // allow pedestrian switching to vehicle?
-				bool nextIsBeautificationNode = false;
-				byte nextConnectOffset = 0;
-				if (allowPedSwitch) {
+				bool allowPedestrian = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0; // allow pedestrian switching to vehicle?
+				bool nextIsBeautificationNode = nextNode.Info.m_class.m_service == ItemClass.Service.Beautification;
+				bool allowPedestrians = false; // is true if cim is using a bike
+				byte parkingConnectOffset = 0;
+				if (allowPedestrian) {
 					if (prevIsBicycleLane) {
-						nextConnectOffset = connectOffset;
-						nextIsBeautificationNode = (nextNode.Info.m_class.m_service == ItemClass.Service.Beautification);
+						parkingConnectOffset = connectOffset;
+						allowPedestrians = nextIsBeautificationNode;
 					} else if (this._vehicleLane != 0u) {
 						// there is a parked vehicle position
 						if (this._vehicleLane != item.m_laneID) {
 							// we have not reached the parked vehicle yet
-							allowPedSwitch = false;
+							allowPedestrian = false;
 						} else {
 							// pedestrian switches to parked vehicle
-							nextConnectOffset = this._vehicleOffset;
+							parkingConnectOffset = this._vehicleOffset;
 						}
 					} else if (this._stablePath) {
 						// enter a bus
-						nextConnectOffset = 128;
+						parkingConnectOffset = 128;
 					} else {
 						// pocket car spawning
 						if (Options.prohibitPocketCars &&
 								_extVehicleType == ExtVehicleType.PassengerCar &&
 								(_extPathType == ExtCitizenInstance.ExtPathType.WalkingOnly || (_extPathType == ExtCitizenInstance.ExtPathType.DrivingOnly && item.m_position.m_segment != _startSegmentA && item.m_position.m_segment != _startSegmentB))) {
-							allowPedSwitch = false;
+							allowPedestrian = false;
 						} else {
-							nextConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);
+							parkingConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);
 						}
 					}
 				}
 
-				// NON-STOCK CODE START //
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: Preparation started");
-#endif
+				if ((this._vehicleTypes & (VehicleInfo.VehicleType.Ferry | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None) {
+					// monorail / ferry
 
-				CustomPathManager pathManager = CustomPathManager._instance;
-				bool nextIsJunction = (nextNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
-				bool nextIsTransition = (nextNode.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
-				bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
+					for (int k = 0; k < 8; k++) {
+						ushort nextSegmentId = nextNode.GetSegment(k);
+						if (nextSegmentId == 0 || nextSegmentId == prevSegmentId) {
+							continue;
+						}
 
-				bool isStrictLaneArrowPolicyEnabled =
-					(_extVehicleType != ExtVehicleType.Emergency
-#if DEBUG
-					|| _conf.DebugSwitches[3]
-#endif
-					) &&
-					(nextIsJunction || nextIsTransition) &&
-					!(
-#if DEBUG
-					Options.allRelaxed ||
-#endif
-					(Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)) &&
-					(this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None;
-
-				// get segment geometry
-				SegmentGeometry prevGeometry = SegmentGeometry.Get(prevSegmentId);
-				bool nextIsRealJunction = prevGeometry.CountOtherSegments(nextIsStartNodeOfPrevSegment) > 1;
-				bool prevIsOutgoingOneWay = prevGeometry.IsOutgoingOneWay(nextIsStartNodeOfPrevSegment);
-				bool prevIsHighway = prevGeometry.IsHighway();
-				bool nextAreOnlyOneWayHighways = prevGeometry.HasOnlyHighways(nextIsStartNodeOfPrevSegment);
-
-				short prevOuterSimilarLaneIndex;
-				short prevInnerSimilarLaneIndex;
-				NetInfo.Lane prevLane = prevSegmentInfo.m_lanes[(int)item.m_position.m_lane];
-				if ((byte)(prevLane.m_direction & NetInfo.Direction.Forward) != 0) {
-					prevOuterSimilarLaneIndex = (short)(prevLane.m_similarLaneCount - prevLane.m_similarLaneIndex - 1);
-					prevInnerSimilarLaneIndex = (short)prevLane.m_similarLaneIndex;
-				} else {
-					prevOuterSimilarLaneIndex = (short)prevLane.m_similarLaneIndex;
-					prevInnerSimilarLaneIndex = (short)(prevLane.m_similarLaneCount - prevLane.m_similarLaneIndex - 1);
-				}
-
-				bool foundForced = false;
-				int totalIncomingLanes = 0; // running number of next incoming lanes (number is updated at each segment iteration)
-				int totalOutgoingLanes = 0; // running number of next outgoing lanes (number is updated at each segment iteration)
-
-				// determine incoming segment ids
-				ushort[] incomingStraightSegments = prevGeometry.GetIncomingStraightSegments(nextIsStartNodeOfPrevSegment); // ids of incoming straight segments
-				ushort[] incomingRightSegments = prevGeometry.GetIncomingRightSegments(nextIsStartNodeOfPrevSegment); // ids of incoming right segments
-				ushort[] incomingLeftSegments = prevGeometry.GetIncomingLeftSegments(nextIsStartNodeOfPrevSegment); // ids of incoming left segments
-
-				// determine if we should explore the previous segment (for u-turns)
-				bool explorePrevSegment = Flags.getUTurnAllowed(prevSegmentId, nextIsStartNodeOfPrevSegment) &&
-					!_isHeavyVehicle &&
-					//!Options.isStockLaneChangerUsed() &&
-					nextIsJunction &&
-					!prevIsHighway &&
-					!prevIsOutgoingOneWay &&
-					(_extVehicleType != null &&
-					(_extVehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None);
-
-				bool nextIsSimpleJunction = false;
-				if (Options.highwayRules && (nextNode.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
-					// determine if junction is a simple junction (highway rules only apply to simple junctions)
-					nextIsSimpleJunction = NodeGeometry.Get(nextNodeId).IsSimpleJunction;
-				}
-
-				// determine if highway rules should be applied
-				bool applyHighwayRules = Options.highwayRules && nextIsSimpleJunction && nextAreOnlyOneWayHighways && prevIsOutgoingOneWay && prevIsHighway;
-				bool applyHighwayRulesAtJunction = applyHighwayRules && nextIsRealJunction;
-
-				ushort nextSegmentId;
-				if (explorePrevSegment) {
-					nextSegmentId = prevSegmentId;
-				} else {
-					if (_leftHandDrive) {
-						nextSegmentId = prevSegment.GetLeftSegment(nextNodeId);
-					} else {
-						nextSegmentId = prevSegment.GetRightSegment(nextNodeId);
+						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, allowPedestrians);
 					}
-				}
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"Exploring path! Segment {item.m_position.m_segment} @ node {nextNodeId}: Preparation ended. nextIsSimpleJunction={nextIsSimpleJunction}");
-#endif
 
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"pathfind @ node {nextNodeId}: Path from {nextSegmentId} to {prevSegmentId}.");
+					if ((nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None &&
+						(this._vehicleTypes & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None) {
+						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
+					}
+				} else {
+					// road vehicles, trams, trains, metros, etc.
+
+					// get segment geometry
+					//bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
+					/*SegmentGeometry prevGeometry = SegmentGeometry.Get(prevSegmentId);
+					SegmentEndGeometry prevEndGeometry = prevGeometry.GetEnd(nextIsStartNode);*/
+					bool prevIsOutgoingOneWay = nextIsStartNode ? prevSegmentRouting.startNodeOutgoingOneWay : prevSegmentRouting.endNodeOutgoingOneWay;
+					//bool nextIsRealJunction = prevEndGeometry.NumConnectedSegments > 1;
+					bool nextIsUntouchable = (nextNode.m_flags & (NetNode.Flags.Untouchable)) != NetNode.Flags.None;
+					bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
+					bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
+					bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+					bool isCustomUturnAllowed = Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode);
+
+					// determine if the vehicle may u-turn at the target node
+					bool explorePrevSegment =
+						nextIsEndOrOneWayOut || // stock u-turn points
+						(Options.junctionRestrictionsEnabled &&
+						isCustomUturnAllowed && // only do u-turns if allowed
+						!nextIsBeautificationNode && // no u-turns at beautification nodes
+						prevIsCarLane && // u-turns for road vehicles only
+						_isRoadVehicle && // only road vehicles may perform u-turns
+						!_isHeavyVehicle && // only small vehicles may perform u-turns
+						(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes
+						!prevIsOutgoingOneWay); // do not u-turn on one-ways
+
+					bool isStrictLaneArrowPolicyEnabled =
+						!nextIsBeautificationNode && // do not obey lane arrows at beautification nodes
+						!nextIsUntouchable &&
+						_isLaneArrowObeyingEntity && 
+						nextIsTransitionOrJunction && // follow lane arrows only at transitions and junctions
+						!(
+#if DEBUG
+						Options.allRelaxed || // debug option: all vehicle may ignore lane arrows
 #endif
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Custom part started for vehicle type {_extVehicleType}");
-#endif
-				// NON-STOCK CODE END //
-				for (int k = 0; k < 8; ++k) {
-#if DEBUGPF
+						(Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)); // option: busses may ignore lane arrows
+
+					bool useRouting = prevLaneEndRouting.routed && !nextIsBeautificationNode;
+
+					bool handleStockUturn = !explorePrevSegment;
+					bool stockUturn = false;
+
+					//LaneEndGeometry prevLaneEndGeo = prevGeometry.GetLane(item.m_position.m_lane, false)?.GetEnd(!nextIsStartNode);
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Segment Iteration {k}. nextSegmentId={nextSegmentId}");
-#endif
-					// NON-STOCK CODE START //
-					int outgoingVehicleLanes = 0;
-					int incomingVehicleLanes = 0;
-#if DEBUGPF
-					bool couldFindCustomPath = false;
-#endif
-
-					if (nextSegmentId == 0) {
-						break;
-					}
-
-					bool uturn = nextSegmentId == prevSegmentId;
-					if (!explorePrevSegment && uturn) {
-						break;
-					}
-
-					NetInfo nextSegmentInfo = netManager.m_segments.m_buffer[nextSegmentId].Info;
-					bool nextIsUntouchable = (netManager.m_segments.m_buffer[nextSegmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None;
-					// a simple transition is (1) no junction, (2) no transition and (3) where lane count is equal
-					//bool nextIsSimpleTransition = !nextIsTransition && !nextIsRealJunction && nextSegmentInfo.m_lanes.Length == prevSegmentInfo.m_lanes.Length;
-
-					if (_extVehicleType == null || (prevLane.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None || (_extVehicleType & ExtVehicleType.RoadVehicle) == ExtVehicleType.None || nextIsUntouchable) {
-						// coming from an untouchable segment. do not apply our AI
-
-#if DEBUGPF
-						if (debug)
-							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: strict lane arrow policy disabled. ({nextIsJunction} || {nextIsTransition}) && !({Options.allRelaxed} || ({Options.relaxedBusses} && {_extVehicleType == ExtVehicleType.Bus})) && {(this._vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None}");
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"_extPathType={_extPathType}\n" +
+							"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
+							"\t" + $"_extVehicleType={_extVehicleType}\n" +
+							"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
+							"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+							"\t" + $"_stablePath={_stablePath}\n" +
+							"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
+							"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
+							"\t" + $"prevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
+							"\t" + $"prevLaneHasRouting={prevLaneEndRouting.routed}\n\n" +
+							"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
+							"\t" + $"isNextBeautificationNode={nextIsBeautificationNode}\n" + 
+							//"\t" + $"nextIsRealJunction={nextIsRealJunction}\n" +
+							"\t" + $"nextIsBend={nextIsBend}\n" +
+							"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
+							"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
+							"\t" + $"allowPedestrians={allowPedestrians}\n" +
+							"\t" + $"isCustomUturnAllowed={isCustomUturnAllowed}\n" +
+							"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
+							"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneArrowPolicyEnabled}\n" +
+							"\t" + $"handleStockUturn={handleStockUturn}\n"
+							);
 #endif
 
-#if DEBUGPF
+					if (allowPedestrians || !prevLaneEndRouting.routed) {
+						/* pedestrian to bicycle switch or no routing information available */
+
+#if DEBUGNEWPF
 						if (debug) {
+							logBuf.Add(
+								$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+								"\t" + $"-> using DEFAULT exploration mode\n"
+								);
 							FlushMainLog(logBuf, unitId);
 						}
 #endif
 
-						// NON-STOCK CODE END //
-						if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode)) {
-							mayTurnAround = true;
+						if (explorePrevSegment) {
+							stockUturn = true;
+							handleStockUturn = true;
 						}
-						// NON-STOCK CODE START //
-#if DEBUGPF
-						couldFindCustomPath = true; // not of interest
-#endif
-					} else if (!nextIsBeautificationNode) {
-						if ((_vehicleTypes & ~VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-							// handle non-car paths
-#if DEBUGPF
-							if (debug)
-								logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Handling everything that is not a car: {this._vehicleTypes}");
-#endif
 
-							_vehicleTypes &= ~VehicleInfo.VehicleType.Car;
-
-#if DEBUGPF
-							if (debug) {
-								FlushMainLog(logBuf, unitId);
+						ushort nextSegmentId = prevSegment.GetRightSegment(nextNodeId);
+						for (int k = 0; k < 8; ++k) {
+							if (nextSegmentId == 0 || nextSegmentId == prevSegmentId) {
+								break;
 							}
-#endif
 
-							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode)) {
-								mayTurnAround = true;
+							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevLaneEndRouting.routed, allowPedestrians)) {
+								stockUturn = true;
 							}
-							_vehicleTypes |= VehicleInfo.VehicleType.Car;
+
+							nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
 						}
-#if DEBUGPF
+					}
+
+					if (prevLaneEndRouting.routed) {
+						/* routed vehicle paths */
+
+#if DEBUGNEWPF
 						if (debug)
-							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: !enablePedestrian");
+							logBuf.Add(
+								$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+								"\t" + $"-> using CUSTOM exploration mode\n"
+								);
 #endif
 
-						bool isIncomingRight = false;
-						bool isIncomingStraight = false;
-						bool isIncomingLeft = false;
-						bool isIncomingTurn = false;
-						bool isValid = true;
-
-						SegmentGeometry nextGeometry = SegmentGeometry.Get(nextSegmentId);
-						bool nextIsHighway = nextGeometry.IsHighway();
-						bool nextIsStartNodeOfNextSegment = netManager.m_segments.m_buffer[nextSegmentId].m_startNode == nextNodeId;
-
-						// determine next segment direction by evaluating the geometry information
-						if (nextSegmentId != prevSegmentId) {
-							for (int j = 0; j < incomingStraightSegments.Length; ++j) {
-								if (incomingStraightSegments[j] == nextSegmentId)
-									isIncomingStraight = true;
+						for (int i = 0; i < 8; ++i) {
+							ushort nextSegmentId = nextNode.GetSegment(i);
+							if (nextSegmentId == 0) {
+								break;
 							}
 
-							if (!isIncomingStraight) {
-								for (int j = 0; j < incomingRightSegments.Length; ++j) {
-									if (incomingRightSegments[j] == nextSegmentId)
-										isIncomingRight = true;
-								}
-
-								if (!isIncomingRight) {
-									for (int j = 0; j < incomingLeftSegments.Length; ++j) {
-										if (incomingLeftSegments[j] == nextSegmentId)
-											isIncomingLeft = true;
-									}
-
-									if (!isIncomingLeft)
-										isValid = false;
-								}
-							}
-						} else {
-							isIncomingTurn = true;
-						}
-
-						// we need outgoing lanes too!
-						if (!isValid) {
-							if (!applyHighwayRulesAtJunction) {
-#if DEBUGPF
-								couldFindCustomPath = true; // not of interest
-#endif
-								goto nextIter;
-							} else {
-								// we do not stop here because we need the number of outgoing lanes in highway mode
-							}
-						}
-
-						NetInfo.LaneType drivingEnabledLaneTypes = this._laneTypes;
-						drivingEnabledLaneTypes &= ~NetInfo.LaneType.Pedestrian;
-						drivingEnabledLaneTypes &= ~NetInfo.LaneType.Parking;
-
-						NetInfo.Direction nextDir = nextIsStartNodeOfNextSegment ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
-						NetInfo.Direction nextDir2 = ((netManager.m_segments.m_buffer[nextSegmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
-
-						byte curLaneI = 0; // current array index
-						uint curLaneId = netManager.m_segments.m_buffer[nextSegmentId].m_lanes;
-						byte laneIndex = 0;
-						compatibleOuterSimilarIndexesMask = 0;
-						possibleOuterSimilarIndexesMask = 0;
-						bool hasLaneConnections = false; // true if any lanes are connected by the lane connection tool
-						byte nextCompatibleLaneCount = 0;
-
-						while (laneIndex < nextSegmentInfo.m_lanes.Length && curLaneId != 0u) {
-
-							// determine valid lanes based on lane arrows
-							NetInfo.Lane nextLane = nextSegmentInfo.m_lanes[laneIndex];
-#if DEBUGPF
-							if (debug)
-								logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Lane Iteration {laneIndex}. nextSegmentId={nextSegmentId}, curLaneId={curLaneId} nextIsIncomingLane={(byte)(nextLane.m_finalDirection & nextDir2) != 0} nextIsCompatibleLane={nextLane.CheckType(drivingEnabledLaneTypes, _vehicleTypes)}");
-#endif
-
-							if (nextLane.CheckType(drivingEnabledLaneTypes, _vehicleTypes)) { // is compatible lane
-								if ((byte)(nextLane.m_finalDirection & nextDir2) != 0) { // is incoming lane
-									++incomingVehicleLanes;
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Segment {nextSegmentId}, lane {curLaneId}, {laneIndex} is compatible (prevSegment: {prevSegmentId}). laneTypes: {_laneTypes.ToString()}, vehicleTypes: {_vehicleTypes.ToString()}, incomingLanes={incomingVehicleLanes}, isIncomingRight? {isIncomingRight}, isIncomingLeft? {isIncomingLeft}, isIncomingStraight? {isIncomingStraight}");
-#endif
-
-									// calculate current similar lane index starting from outer lane
-									byte nextOuterSimilarLaneIndex;
-									byte nextInnerSimilarLaneIndex;
-									if ((byte)(nextLane.m_direction & NetInfo.Direction.Forward) != 0) {
-										nextOuterSimilarLaneIndex = (byte)(nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1);
-										nextInnerSimilarLaneIndex = (byte)nextLane.m_similarLaneIndex;
-									} else {
-										nextOuterSimilarLaneIndex = (byte)nextLane.m_similarLaneIndex;
-										nextInnerSimilarLaneIndex = (byte)(nextLane.m_similarLaneCount - nextLane.m_similarLaneIndex - 1);
-									}
-
-									// check for drag&drop lane connections
-									bool nextHasOutgoingConnections = false;
-									byte nextNumOutgoingConnections = 0;
-									bool nextIsConnectedWithPrev = true;
-									if (Options.laneConnectorEnabled) {
-										nextNumOutgoingConnections = (byte)laneConnManager.CountConnections(curLaneId, nextIsStartNodeOfNextSegment);
-										nextHasOutgoingConnections = nextNumOutgoingConnections != 0;
-										if (nextHasOutgoingConnections) {
-											hasLaneConnections = true;
-											nextIsConnectedWithPrev = laneConnManager.AreLanesConnected(curLaneId, item.m_laneID, nextIsStartNodeOfNextSegment);
-										}
-#if DEBUGPF
-										if (debug) {
-											logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment} (lane {item.m_laneID}), lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Lane Iteration {laneIndex}. nextSegmentId={nextSegmentId}, curLaneId={curLaneId}, nextHasOutgoingConnections={nextHasOutgoingConnections}, nextIsConnectedWithPrev={nextIsConnectedWithPrev}");
-										}
-#endif
-									}
-
-									// check for lane arrows
-									bool hasLeftArrow = false;
-									bool hasRightArrow = false;
-									bool hasForwardArrow = false;
-									if (!nextHasOutgoingConnections) {
-										NetLane.Flags curLaneFlags = (NetLane.Flags)netManager.m_lanes.m_buffer[curLaneId].m_flags;
-										hasLeftArrow = (curLaneFlags & NetLane.Flags.Left) == NetLane.Flags.Left;
-										hasRightArrow = (curLaneFlags & NetLane.Flags.Right) == NetLane.Flags.Right;
-										hasForwardArrow = (curLaneFlags & NetLane.Flags.Forward) != NetLane.Flags.None || (curLaneFlags & NetLane.Flags.LeftForwardRight) == NetLane.Flags.None;
-									}
-#if DEBUGPF
-									if (debug) {
-										if (hasLeftArrow) {
-											logBuf.Add($"Segment {nextSegmentId}, lane {curLaneId}, {laneIndex} has LEFT arrow and was not touched by the lane connector. isIncomingRight? {isIncomingRight}, isIncomingLeft? {isIncomingLeft}, isIncomingStraight? {isIncomingStraight}");
-										}
-
-										if (hasRightArrow) {
-											logBuf.Add($"Segment {nextSegmentId}, lane {curLaneId}, {laneIndex} has RIGHT arrow and was not touched by the lane connector. isIncomingRight? {isIncomingRight}, isIncomingLeft? {isIncomingLeft}, isIncomingStraight? {isIncomingStraight}");
-										}
-
-										if (hasForwardArrow) {
-											logBuf.Add($"Segment {nextSegmentId}, lane {curLaneId}, {laneIndex} has FORWARD arrow and was not touched by the lane connector. isIncomingRight? {isIncomingRight}, isIncomingLeft? {isIncomingLeft}, isIncomingStraight? {isIncomingStraight}");
-										}
-									}
-#endif
-
-									// add valid next lanes
-									bool isCompatibleLane =
-											(nextHasOutgoingConnections && nextIsConnectedWithPrev) || // lanes are connected manually
-											(!nextHasOutgoingConnections && ( // lane does not have manual connections
-											applyHighwayRules || // highway rules enabled
-											(isIncomingRight && hasLeftArrow) || // valid incoming right
-											(isIncomingLeft && hasRightArrow) || // valid incoming left
-											(isIncomingStraight && hasForwardArrow) || // valid incoming straight
-											(isIncomingTurn && ((_leftHandDrive && hasRightArrow) || (!_leftHandDrive && hasLeftArrow))))); // valid turning lane
-
-									if (isCompatibleLane || !isStrictLaneArrowPolicyEnabled) {
-
-										laneIndexes[curLaneI] = laneIndex;
-										laneIds[curLaneI] = curLaneId;
-										nextOuterLaneSimilarIndexes[curLaneI] = nextOuterSimilarLaneIndex;
-										nextInnerLaneSimilarIndexes[curLaneI] = nextInnerSimilarLaneIndex;
-										laneIndexByOuterSimilarIndex[nextOuterSimilarLaneIndex] = curLaneI;
-										numOutgoingConnections[curLaneI] = nextNumOutgoingConnections;
-										nextIsConnectedWithPrevious[curLaneI] = nextIsConnectedWithPrev;
-										if (isCompatibleLane) {
-											compatibleOuterSimilarIndexesMask |= POW2MASKS[nextOuterSimilarLaneIndex];
-											++nextCompatibleLaneCount;
-										}
-										possibleOuterSimilarIndexesMask |= POW2MASKS[nextOuterSimilarLaneIndex];
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"Adding lane #{curLaneI} (id {curLaneId}, idx {laneIndex}), outer sim. idx: {nextOuterSimilarLaneIndex}, inner sim. idx.: {nextInnerSimilarLaneIndex}");
-#endif
-										++curLaneI;
-									}
+							if (nextSegmentId == prevSegmentId) {
+								if (explorePrevSegment) {
+									// prevent double exploration of previous segment during this method execution
+									handleStockUturn = false;
 								} else {
-									++outgoingVehicleLanes;
+									continue;
 								}
 							}
 
-							curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-							++laneIndex;
-						} // foreach lane
-
-						if (curLaneI > 0) {
-							// we found compatible lanes
-							LaneChangingCostCalculationMode laneChangingCostCalculationMode = (!uturn && !nextIsRealJunction && !nextIsTransition && nextSegmentInfo.m_lanes.Length == prevSegmentInfo.m_lanes.Length) ? LaneChangingCostCalculationMode.ByLaneDistance : LaneChangingCostCalculationMode.ByGivenDistance;
-							byte nextLaneIndex = 0;
-							uint nextLaneId = 0u;
-							short nextLaneI = -1;
-							byte nextTotalLaneCount = curLaneI;
-
-							// enable highway rules only at junctions or at simple lane merging/splitting points
-							short laneDiff = (short)((short)nextCompatibleLaneCount - (short)prevSimilarLaneCount);
-							bool applyHighwayRulesAtSegment = applyHighwayRules && (applyHighwayRulesAtJunction || Math.Abs(laneDiff) == 1);
-
-#if DEBUGPF
-							if (debug) {
-								logBuf.Add($"Compatible lanes found.");
-								logBuf.Add($"next segment: {nextSegmentId}, number of next lanes: {nextCompatibleLaneCount}, prev. segment: {prevSegmentId}, prev. lane ID: {item.m_laneID}, prev. lane idx: {item.m_position.m_lane}, prev. outer sim. idx: {prevOuterSimilarLaneIndex}, prev. inner sim. idx: {prevInnerSimilarLaneIndex}, laneTypes: {_laneTypes.ToString()}, vehicleTypes: {_vehicleTypes.ToString()}, incomingLanes={incomingVehicleLanes}, isIncomingRight? {isIncomingRight}, isIncomingLeft? {isIncomingLeft}, isIncomingStraight? {isIncomingStraight}");
-							}
-#endif
-
-							// mix of incoming/outgoing lanes on the right side of prev. segment is not allowed in highway mode
-							/*if (totalIncomingLanes > 0 && totalOutgoingLanes > 0) {
-								// TODO should never happen since `nextIsSimpleJunction` == true
-#if DEBUGPF
-								if (debug)
-									logBuf.Add($"{totalIncomingLanes} incoming lanes and {totalOutgoingLanes} outgoing lanes found. Disabling highway rules.");
-#endif
-								applyHighwayRulesAtSegment = false;
-							}*/
-
-							if (!hasLaneConnections && applyHighwayRulesAtSegment) {
-								// apply highway rules at transitions & junctions
-#if DEBUGPF
-								if (debug)
-									logBuf.Add($"Applying highway rules. lanes found: {totalIncomingLanes} incoming, {totalOutgoingLanes} outgoing.");
-#endif
-
-								if (applyHighwayRulesAtJunction) {
-									// we reached a highway junction where more than two segments are connected to each other
-
-									int numLanesSeen = Math.Max(totalIncomingLanes, totalOutgoingLanes); // number of lanes that were processed in earlier segment iterations (either all incoming or all outgoing)
-									int nextInnerSimilarIndex;
-
-									if (totalOutgoingLanes > 0) {
-										// lane splitting at junction
-										nextInnerSimilarIndex = prevInnerSimilarLaneIndex + numLanesSeen;
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"Performing lane split. nextInnerSimilarIndex={nextInnerSimilarIndex} = prevInnerSimilarLaneIndex({prevInnerSimilarLaneIndex}) + numLanesSeen({numLanesSeen})");
-#endif
-									} else {
-										// lane merging at junction
-										nextInnerSimilarIndex = prevInnerSimilarLaneIndex - numLanesSeen;
-									}
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Performing lane merge. nextInnerSimilarIndex={nextInnerSimilarIndex} = prevInnerSimilarLaneIndex({prevInnerSimilarLaneIndex}) - numLanesSeen({numLanesSeen})");
-#endif
-
-									if (nextInnerSimilarIndex >= 0 && nextInnerSimilarIndex < nextCompatibleLaneCount) {
-										// enough lanes available
-										nextLaneI = IndexOf(ref nextInnerLaneSimilarIndexes, nextInnerSimilarIndex, nextTotalLaneCount);// Convert.ToInt32(indexByInnerSimilarLaneIndex[nextInnerSimilarIndex]) - 1;
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Next lane within bounds. nextLaneI={nextLaneI}");
-#endif
-									} else {
-										// Highway lanes "failed". Too few lanes at prevSegment or nextSegment.
-										if (nextInnerSimilarIndex < 0) {
-											// lane merging failed (too many incoming lanes)
-											if (totalIncomingLanes >= prevSimilarLaneCount) {
-												// there have already been explored more incoming lanes than outgoing lanes on the previous segment. Allow the current segment to also join the big merging party. What a fun!
-												nextLaneI = IndexOf(ref nextOuterLaneSimilarIndexes, prevOuterSimilarLaneIndex, nextTotalLaneCount);
-											}
-										} else {
-											if (totalOutgoingLanes >= nextCompatibleLaneCount) {
-												// there have already been explored more outgoing lanes than incoming lanes on the previous segment. Also allow vehicles to go to the current segment.
-												nextLaneI = IndexOf(ref nextOuterLaneSimilarIndexes, 0, nextTotalLaneCount);
-											}
-										}
-
-										// If nextLaneI is still -1 here, then highways rules really cannot handle this situation (that's ok).
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Next lane out of bounds. nextLaneI={nextLaneI}, isIncomingLeft={isIncomingLeft}, prevOuterSimilarLaneIndex={prevOuterSimilarLaneIndex}, prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex}");
-#endif
-									}
-
-									if (nextLaneI < 0 || nextLaneI >= nextCompatibleLaneCount) {
-#if DEBUGPF
-										if (debug)
-											Log.Error($"(PFERR) Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer, {prevInnerSimilarLaneIndex} from inner: Highway lane selector cannot find suitable lane! isIncomingLeft={isIncomingLeft} isIncomingRight={isIncomingRight} totalIncomingLanes={totalIncomingLanes}");
-										couldFindCustomPath = true; // not of interest for us
-#endif
-										goto nextIter; // no path to this lane
-									}
-
-									// go to matched lane
-									nextLaneIndex = laneIndexes[nextLaneI];
-									nextLaneId = laneIds[nextLaneI];
-
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: nextLaneIndex={nextLaneIndex} nextLaneId={nextLaneId}");
-#endif
-
-									if (IsMasterPathFind) {
-										if (numOutgoingConnections[nextLaneI] != 0)
-											Flags.removeHighwayLaneArrowFlags(nextLaneId);
-										else if (applyHighwayRulesAtSegment) {
-											// update highway mode lane arrows
-
-#if DEBUGPF
-									/*if (_conf.DebugSwitches[0])
-										Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows @ lane {nextLaneId}: START");*/
-#endif
-											Flags.LaneArrows? prevHighwayArrows = Flags.getHighwayLaneArrowFlags(nextLaneId);
-											Flags.LaneArrows newHighwayArrows = Flags.LaneArrows.None;
-											if (prevHighwayArrows != null)
-												newHighwayArrows = (Flags.LaneArrows)prevHighwayArrows;
-											if (isIncomingRight)
-												newHighwayArrows |= Flags.LaneArrows.Left;
-											else if (isIncomingLeft)
-												newHighwayArrows |= Flags.LaneArrows.Right;
-											else if (isIncomingStraight)
-												newHighwayArrows |= Flags.LaneArrows.Forward;
-
-											if (newHighwayArrows != prevHighwayArrows && newHighwayArrows != Flags.LaneArrows.None)
-												Flags.setHighwayLaneArrowFlags(nextLaneId, newHighwayArrows, false);
-#if DEBUGPF
-									/*if (_conf.DebugSwitches[0])
-										Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Setting highway arrows @ lane {nextLaneId} to {newHighwayArrows.ToString()}: END");*/
-#endif
-										}
-									}
-
-#if DEBUGPF
-									if (debug) {
-										FlushMainLog(logBuf, unitId);
-									}
-#endif
-
-									if (ProcessItemCosts(true, false, LaneChangingCostCalculationMode.None, debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, 0, out foundForced)) {
-										mayTurnAround = true;
-									}
-								} else {
-									/* we reached a simple highway transition where lane splits or merges take place.
-										this is guaranteed to be a simple lane splitting/merging point: the number of lanes is guaranteed to differ by 1
-										due to:
-										applyHighwayRulesAtSegment := applyHighwayRules && (applyHighwayRulesAtJunction || Math.Abs(laneDiff) == 1) [see above],
-										applyHighwayRules == true,
-										applyHighwayRulesAtSegment == true,
-										applyHighwayRulesAtJunction == false
-										=>
-										true && (false || Math.Abs(laneDiff) == 1) == Math.Abs(laneDiff) == 1 */
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Simple lane splitting/merging point @ highway rules! laneDiff={laneDiff}");
-#endif
-
-									short minNextCompatibleOuterSimilarIndex = -1;
-									short maxNextCompatibleOuterSimilarIndex = -1;
-
-									if (laneDiff == 1) {
-										// simple lane merge
-										if (prevOuterSimilarLaneIndex == 0) {
-											// merge outer lane
-											minNextCompatibleOuterSimilarIndex = 0;
-											maxNextCompatibleOuterSimilarIndex = 1;
-
-#if DEBUGPF
-											if (debug)
-												logBuf.Add($"Simple lane splitting/merging point @ highway rules! Lane merge: Merging outer lane: {minNextOuterSimilarIndex} - {maxNextOuterSimilarIndex}");
-#endif
-										} else {
-											// other lanes stay + 1
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = (short)(prevOuterSimilarLaneIndex + 1);
-
-#if DEBUGPF
-											if (debug)
-												logBuf.Add($"Simple lane splitting/merging point @ highway rules! Lane merge: Other lanes stay + 1: {minNextOuterSimilarIndex} - {maxNextOuterSimilarIndex}");
-#endif
-										}
-									} else { // diff == -1
-										// simple lane split
-										if (prevOuterSimilarLaneIndex <= 1) {
-											// split outer lane
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = 0;
-
-#if DEBUGPF
-											if (debug)
-												logBuf.Add($"Simple lane splitting/merging point @ highway rules! Lane split: Outer lane splits: {minNextOuterSimilarIndex} - {maxNextOuterSimilarIndex}");
-#endif
-										} else {
-											// other lanes stay - 1
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = (short)(prevOuterSimilarLaneIndex - 1);
-#if DEBUGPF
-											if (debug)
-												logBuf.Add($"Simple lane splitting/merging point @ highway rules! Lane split: Other lanes stay - 1: {minNextOuterSimilarIndex} - {maxNextOuterSimilarIndex}");
-#endif
-										}
-									}
-
-									// explore lanes
-									//bool applyLaneChangingCosts = allowLaneChangingCosts && (maxNextCompatibleOuterSimilarIndex - minNextCompatibleOuterSimilarIndex + 1) > 1;
-									for (short nextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex; nextCompatibleOuterSimilarIndex <= maxNextCompatibleOuterSimilarIndex; ++nextCompatibleOuterSimilarIndex) {
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"current outer similar index = {nextOuterSimilarIndex}, min. {minNextOuterSimilarIndex} max. {maxNextOuterSimilarIndex}");
-#endif
-										nextLaneI = FindCompatibleLane(ref laneIndexByOuterSimilarIndex, compatibleOuterSimilarIndexesMask, nextCompatibleOuterSimilarIndex);
-
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"(*) nextLaneI = {nextLaneI}");
-#endif
-										if (nextLaneI < 0) {
-											continue;
-										}
-
-										// go to matched lane
-										nextLaneIndex = laneIndexes[nextLaneI];
-										nextLaneId = laneIds[nextLaneI];
-
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane idx {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer. There are {curLaneI} candidate lanes. We choose lane {nextLaneI} (index {nextLaneIndex}, {nextOuterSimilarIndex} compatible from outer). lhd: {_leftHandDrive}, ped: {allowPedSwitch}, magical flag4: {mayTurnAround}");
-#endif
-
-#if DEBUGPF
-										if (debug) {
-											FlushMainLog(logBuf, unitId);
-										}
-#endif
-										if (ProcessItemCosts(true, false, LaneChangingCostCalculationMode.None, debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, 0, out foundForced)) {
-											mayTurnAround = true;
-										}
-#if DEBUGPF
-										couldFindCustomPath = true;
-#endif
-									}
-
-									goto nextIter;
-								}
-							} else {
-								/* This is
-								 *   1. a highway junction or lane splitting/merging point with lane connections or
-								 *   2. a city or highway lane continuation point
-								 *   3. a city junction
-								 * 
-								 * with multiple or a single target lane: Perform lane matching
-								 */
-#if DEBUGPF
-								if (debug)
-									logBuf.Add($"Target lanes ({nextCompatibleLaneCount}) found. prevSimilarLaneCount={prevSimilarLaneCount}");
-#endif
-
-								// min/max compatible outer similar lane indices
-								short minNextCompatibleOuterSimilarIndex = -1;
-								short maxNextCompatibleOuterSimilarIndex = -1;
-								if (uturn) {
-									// force u-turns to happen on the innermost lane
-									minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = (short)((short)nextCompatibleLaneCount - 1);
-								} else if (nextIsRealJunction) {
-									// at junctions: try to match distinct lanes
-									if (nextCompatibleLaneCount > prevSimilarLaneCount && prevOuterSimilarLaneIndex == prevSimilarLaneCount-1) {
-										// merge inner lanes
-										minNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
-										maxNextCompatibleOuterSimilarIndex = (short)((short)nextCompatibleLaneCount - 1);
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"City rules: Merging inner lanes. minNextOuterSimilarLaneIndex={minNextOuterSimilarIndex} maxNextOuterSimilarLaneIndex={maxNextOuterSimilarIndex}");
-#endif
-									} else {
-										// 1-to-n (lane splitting is done by FindCompatibleLane), 1-to-1 (direct lane matching)
-										minNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
-										maxNextCompatibleOuterSimilarIndex = prevOuterSimilarLaneIndex;
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"City rules: 1-to-1/1-to-n. minNextOuterSimilarLaneIndex={minNextOuterSimilarIndex} maxNextOuterSimilarLaneIndex={maxNextOuterSimilarIndex}");
-#endif
-									}
-
-									bool mayChangeLanes = isIncomingStraight && Flags.getStraightLaneChangingAllowed(nextSegmentId, nextIsStartNodeOfPrevSegment);
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Next is real junction. minNextOuterSimilarIndex={minNextOuterSimilarIndex}, maxNextOuterSimilarIndex={maxNextOuterSimilarIndex} prevHasBusLane={prevGeometry.HasBusLane()} mayChangeLanes={mayChangeLanes}");
-#endif
-									if (!mayChangeLanes) {
-										bool prevHasBusLane = prevGeometry.HasBusLane();
-										bool nextHasBusLane = nextGeometry.HasBusLane();
-										if (nextHasBusLane && !prevHasBusLane) {
-											// allow vehicles on the bus lane AND on the next lane to merge on this lane
-											maxNextCompatibleOuterSimilarIndex = (short)Math.Min(nextCompatibleLaneCount - 1, maxNextCompatibleOuterSimilarIndex + 1);
-										} else if (!nextHasBusLane && prevHasBusLane) {
-											// allow vehicles to enter the bus lane
-											minNextCompatibleOuterSimilarIndex = (short)Math.Max(0, minNextCompatibleOuterSimilarIndex - 1);
-										}
-									} else {
-										// vehicles may change lanes when going straight
-										minNextCompatibleOuterSimilarIndex = (short)Math.Max(0, minNextCompatibleOuterSimilarIndex - 1);
-										maxNextCompatibleOuterSimilarIndex = (short)Math.Min(nextCompatibleLaneCount - 1, maxNextCompatibleOuterSimilarIndex + 1);
-#if DEBUGPF
-										if (debug)
-											logBuf.Add($"Next is incoming straight. Allowing lane changes! maxNextOuterSimilarIndex={minNextOuterSimilarIndex}, maxNextOuterSimilarIndex={maxNextOuterSimilarIndex}");
-#endif
-									}
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Next is junction with city rules. minNextOuterSimilarIndex={minNextOuterSimilarIndex}, maxNextOuterSimilarIndex={maxNextOuterSimilarIndex}");
-#endif
-								} else {
-									// lane merging/splitting
-									HandleLaneMergesAndSplits(ref item, nextSegmentId, prevOuterSimilarLaneIndex, nextCompatibleLaneCount, prevSimilarLaneCount, out minNextCompatibleOuterSimilarIndex, out maxNextCompatibleOuterSimilarIndex);
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Next is not a junction. nextOuterSimilarIndex=HandleLaneMergesAndSplits({prevOuterSimilarLaneIndex}, {nextCompatibleLaneCount}, {prevSimilarLaneCount})= min. {minNextOuterSimilarIndex} max. {maxNextOuterSimilarIndex}");
-#endif
-								}
-
-								// find best matching lane(s)
-								short minIndex = minNextCompatibleOuterSimilarIndex;
-								short maxIndex = maxNextCompatibleOuterSimilarIndex;
-								if (hasLaneConnections || !isStrictLaneArrowPolicyEnabled) {
-									minIndex = 0;
-									maxIndex = (short)((short)nextTotalLaneCount - 1);
-								}
-									
-								byte defaultCompatibleLaneDist = uturn ? (byte)_conf.UturnLaneDistance : (byte)0;
-								for (short nextCompatibleOuterSimilarIndex = minIndex; nextCompatibleOuterSimilarIndex <= maxIndex; ++nextCompatibleOuterSimilarIndex) {
-
-									nextLaneI = FindCompatibleLane(ref laneIndexByOuterSimilarIndex, isStrictLaneArrowPolicyEnabled ? compatibleOuterSimilarIndexesMask : possibleOuterSimilarIndexesMask, nextCompatibleOuterSimilarIndex);
-
-#if DEBUGPF
-									if (debug) {
-										logBuf.Add($"BEST MATCHING LANE LOOP ITERATION {nextOuterSimilarIndex}. nextLaneI={nextLaneI} hasLaneConnections={hasLaneConnections} minNextOuterSimilarIndex={minNextOuterSimilarIndex} nextCompatibleLaneCount={nextCompatibleLaneCount} minNextOuterSimilarIndex={minNextOuterSimilarIndex}");
-										logBuf.Add($"nextOuterSimilarIndex < minNextOuterSimilarIndex == {nextOuterSimilarIndex < minNextOuterSimilarIndex}, nextOuterSimilarIndex > maxNextOuterSimilarIndex == {nextOuterSimilarIndex > maxNextOuterSimilarIndex}, hasOutgoingConnections[nextLaneI]={hasOutgoingConnections[nextLaneI]}, nextIsConnectedWithPrevious[nextLaneI]={nextIsConnectedWithPrevious[nextLaneI]}");
-									}
-#endif
-
-									if (nextLaneI < 0) {
-										continue;
-									}
-
-									byte compatibleLaneDist = defaultCompatibleLaneDist; // lane distance
-									if (hasLaneConnections) {
-										if (nextCompatibleOuterSimilarIndex < minNextCompatibleOuterSimilarIndex || nextCompatibleOuterSimilarIndex > maxNextCompatibleOuterSimilarIndex) {
-											if (numOutgoingConnections[nextLaneI] == 0 || !nextIsConnectedWithPrevious[nextLaneI])
-												continue; // disregard lane since it is not connected to previous lane
-										} else {
-											if (numOutgoingConnections[nextLaneI] != 0 && !nextIsConnectedWithPrevious[nextLaneI])
-												continue; // disregard lane since it is not connected to previous lane but has outgoing connections
-										}
-									}
-
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"current outer similar index = {nextOuterSimilarIndex}, min. {minNextOuterSimilarIndex} max. {maxNextOuterSimilarIndex}");
-#endif
-
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"(*) nextLaneI = {nextLaneI}");
-#endif
-
-									// go to matched lane
-									nextLaneIndex = laneIndexes[nextLaneI];
-									nextLaneId = laneIds[nextLaneI];
-
-									if (!hasLaneConnections && !uturn && !isStrictLaneArrowPolicyEnabled) {
-										compatibleLaneDist = ((compatibleOuterSimilarIndexesMask & POW2MASKS[nextCompatibleOuterSimilarIndex]) != 0) ? (byte)0 : _conf.IncompatibleLaneDistance;
-
-										/*if (nextCompatibleOuterSimilarIndex < minNextCompatibleOuterSimilarIndex) {
-											compatibleLaneDist = (byte)(minNextCompatibleOuterSimilarIndex - nextCompatibleOuterSimilarIndex);
-										} else if (nextCompatibleOuterSimilarIndex > maxNextCompatibleOuterSimilarIndex) {
-											compatibleLaneDist = (byte)(nextCompatibleOuterSimilarIndex - maxNextCompatibleOuterSimilarIndex);
-										}*/
-									}
-
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane idx {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer. There are {curLaneI} candidate lanes. We choose lane {nextLaneI} (index {nextLaneIndex}, {nextOuterSimilarIndex} compatible from outer). lhd: {_leftHandDrive}, ped: {allowPedSwitch}, magical flag4: {mayTurnAround}");
-#endif
-#if DEBUGPF
-									if (debug) {
-										FlushMainLog(logBuf, unitId);
-									}
-#endif
-									if (ProcessItemCosts(true, isStrictLaneArrowPolicyEnabled, laneChangingCostCalculationMode, debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode, nextLaneIndex, nextLaneId, compatibleLaneDist, out foundForced)) {
-										mayTurnAround = true;
-									}
-#if DEBUGPF
-									couldFindCustomPath = true;
-#endif
-								}
-
-								goto nextIter;
+							LaneTransitionData[] laneTransitions = prevLaneEndRouting.GetTransitions(i);
+							if (laneTransitions == null) {
+								continue;
 							}
 
-#if DEBUGPF
-							if (foundForced) {
-								if (debug)
-									logBuf.Add($"Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: FORCED LANE FOUND!");
-								couldFindCustomPath = true;
+							for (int k = 0; k < laneTransitions.Length; ++k) {
+								if (laneTransitions[k].type == LaneEndTransitionType.Invalid ||
+									(isStrictLaneArrowPolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed)) {
+									continue;
+								}
+
+#if DEBUGNEWPF
+								if (debug) {
+									logBuf.Add(
+										$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+										"\t" + $"-> CUSTOM exploration iteration {i}\n" +
+										"\t" + $"next seg={nextSegmentId}, idx={laneTransitions[k].laneIndex}, id={laneTransitions[k].laneId}, type={laneTransitions[k].type}, dist={laneTransitions[k].distance}\n"
+									);
+									FlushMainLog(logBuf, unitId);
+								}
+#endif
+
+								bool foundForced = false;
+								int prevLaneIndexFromInner = prevSimilarLaneIndexFromInner;
+								if (ProcessItemCosts(debug, Options.advancedAI, false, LaneChangingCostCalculationMode.ByGivenDistance, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref routingManager.segmentRoutings[nextSegmentId], ref prevLaneIndexFromInner, connectOffset, true, false, laneTransitions[k].laneIndex, laneTransitions[k].laneId, laneTransitions[k].distance, out foundForced)) {
+									stockUturn = true;
+								}
 							}
-#endif
-						} else {
-							// no compatible lanes found
-#if DEBUGPF
-							if (debug)
-								Log.Error($"(PFERR) Exploring path from {nextSegmentId} ({nextDir}) to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: No lane arrows defined");
-#endif
-#if DEBUGPF
-							couldFindCustomPath = true; // the player did not set lane arrows. this is ok...
-														/*if (ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, enablePedestrian)) {
-															blocked = true;
-														}*/
-#endif
 						}
-						// NON-STOCK CODE END
-					} else {
-						// we were coming from a beautfication node; visiting a park building or a pedestrian/bicycle pathway
+					}
 
-#if DEBUGPF
+					if (handleStockUturn && stockUturn && (this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None) {
+#if DEBUGNEWPF
 						if (debug) {
+							logBuf.Add($"path unit {unitId}\n" +
+								$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+								"\t" + $"-> exploring DEFAULT u-turn\n"
+							);
 							FlushMainLog(logBuf, unitId);
 						}
 #endif
 
-						// stock code:
-						if (this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, nextIsBeautificationNode)) {
-							mayTurnAround = true;
-						}
-#if DEBUGPF
-						couldFindCustomPath = true; // not of interest for us
-#endif
+						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
 					}
-
-#if DEBUGPF
-					if (!couldFindCustomPath) {
-						if (debug)
-							logBuf.Add($"(PFERR) Could not find custom path from segment {nextSegmentId} to segment {prevSegmentId}, lane {item.m_position.m_lane}, off {item.m_position.m_offset} at node {nextNodeId}!");
-					}
-#endif
-							// stock code:
-							/*if (this.ProcessItem(debug, item, nextNodeId, nextSegmentId, ref instance.m_segments.m_buffer[(int)nextSegmentId], ref similarLaneIndexFromInner, connectOffset, true, enablePedestrian)) {
-								blocked = true;
-							}*/
-							//}
-
-					nextIter:
-					if (nextSegmentId == prevSegmentId)
-						prevSimilarLaneIndexFromInner = firstPrevSimilarLaneIndexFromInner; // u-turning does not "consume" a lane
-
-					if (_leftHandDrive) {
-						nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetLeftSegment(nextNodeId);
-					} else {
-						nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
-					}
-
-					if (nextSegmentId != prevSegmentId) {
-						totalIncomingLanes += incomingVehicleLanes;
-						totalOutgoingLanes += outgoingVehicleLanes;
-					}
-
-					if (explorePrevSegment && nextSegmentId == prevSegmentId)
-						break;
-				} // foreach segment
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Custom part finished");
-#endif
-				if (!explorePrevSegment && mayTurnAround && (this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None) {
-					// turn-around for vehicles (if street is blocked)
-#if DEBUGPF
-					if (debug)
-						logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Road may be blocked");
-#endif
-					// vehicles may turn around if the street is blocked
-					nextSegmentId = item.m_position.m_segment;
-
-#if DEBUGPF
-					if (debug) {
-						FlushMainLog(logBuf, unitId);
-					}
-#endif
-					this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
 				}
 
-				if (allowPedSwitch) {
+				if (allowPedestrian) {
 					// switch from walking to driving a car, bus, etc.
-
-					nextSegmentId = item.m_position.m_segment;
 					int nextLaneIndex;
 					uint nextLaneId;
-					if (netManager.m_segments.m_buffer[(int)nextSegmentId].GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Pedestrian, this._vehicleTypes, out nextLaneIndex, out nextLaneId)) {
+					if (prevSegment.GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Pedestrian, this._vehicleTypes, out nextLaneIndex, out nextLaneId)) {
 #if DEBUGPF
-						if (debug)
-							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Ped allowed u-turn");
+						/*if (debug)
+							logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane id {item.m_position.m_lane}, {prevOuterSimilarLaneIndex} from outer: Ped allowed u-turn");*/
 #endif
 #if DEBUGPF2
 						if (debug2)
 							logBuf2.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}: Ped allowed u-turn. nextConnectOffset={nextConnectOffset} nextLaneIndex={nextLaneIndex} nextLaneId={nextLaneId}");
 #endif
-						this.ProcessItemPedBicycle(item, nextNodeId, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], nextConnectOffset, nextConnectOffset, nextLaneIndex, nextLaneId); // ped
+						this.ProcessItemPedBicycle(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegment, parkingConnectOffset, parkingConnectOffset, nextLaneIndex, nextLaneId); // ped
 					}
 				} // allowPedSwitch
 			} // !prevIsPedestrianLane
 
-			if (nextNode.m_lane != 0u && (!Options.prohibitPocketCars || _extVehicleType != ExtVehicleType.PassengerCar || (item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)) {
+			if (nextNode.m_lane != 0u &&
+				(!Options.prohibitPocketCars || _extVehicleType != ExtVehicleType.PassengerCar || (item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)) {
 				// transport lines, cargo lines, etc.
 
-				bool targetDisabled = (nextNode.m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None;
+				bool targetDisabled = (nextNode.m_flags & (NetNode.Flags.Disabled | NetNode.Flags.DisableOnlyMiddle)) == NetNode.Flags.Disabled;
 				ushort nextSegmentId = netManager.m_lanes.m_buffer[nextNode.m_lane].m_segment;
 				if (nextSegmentId != 0 && nextSegmentId != item.m_position.m_segment) {
 #if DEBUGPF
-					if (debug)
-						logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane idx {item.m_position.m_lane}: handling special lanes");
+					/*if (debug)
+						logBuf.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane idx {item.m_position.m_lane}: handling special lanes");*/
 #endif
 #if DEBUGPF2
 					if (debug2)
 						logBuf2.Add($"Exploring path from {nextSegmentId} to {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}: handling special lanes");
 #endif
-					this.ProcessItemPublicTransport(item, nextNodeId, targetDisabled, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextSegmentId], nextNode.m_lane, nextNode.m_laneOffset, connectOffset);
+					this.ProcessItemPublicTransport(debug, item, nextNodeId, targetDisabled, nextSegmentId, ref prevSegment, ref netManager.m_segments.m_buffer[nextSegmentId], nextNode.m_lane, nextNode.m_laneOffset, connectOffset);
 				}
 			}
 
-#if DEBUGPF
+#if DEBUGNEWPF
 			if (debug) {
 				FlushMainLog(logBuf, unitId);
 			}
@@ -1811,190 +1235,8 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 		}
 
-		/// <summary>
-		/// Finds a value <paramref name="value"/> in the given <paramref name="values"/> array that contains <paramref name="length"/> valid elements.
-		/// </summary>
-		/// <param name="values">array to be queried</param>
-		/// <param name="value">value to be found</param>
-		/// <param name="length">valid length of array (array may be indeed bigger than this)</param>
-		/// <returns>Index of <paramref name="value" /> in <paramref name="values"/>, -1 if not found</returns>
-		private static short IndexOf(ref byte[] values, int value, short length) {
-			for (short i = 0; i < length; ++i) {
-				if (values[i] == value)
-					return i;
-			}
-			return -1;
-		}
-
-		/// <summary>
-		/// Finds the element in <paramref name="values"/> with the highest associated index <code>i</code> satisfying <code>i</code> ≤ <paramref name="n" />.
-		/// If no such element is found, the element with the highest index is returned.
-		/// </summary>
-		/// <param name="values">array to be queried</param>
-		/// <param name="validMask">a bitmask holding all valid indices of <paramref name="values" /></param>
-		/// <param name="n">query index</param>
-		/// <returns></returns>
-		private static short FindCompatibleLane(ref byte[] values, ushort validMask, short n) {
-			short nextLaneI = -1;
-			for (byte i = 0; i < POW2MASKS.Length; ++i) {
-				if ((validMask & POW2MASKS[i]) == 0)
-					continue;
-
-				nextLaneI = values[i];
-				if (n <= 0)
-					break; // found exact index
-				--n;
-			}
-			return nextLaneI;
-		}
-
-		/// <summary>
-		/// Calculates minimum and maximum outer similar lane indices for lane merging/splitting.
-		/// </summary>
-		/// <param name="prevSimilarLaneIndex">previous similar lane index</param>
-		/// <param name="nextCompatibleLaneCount">number of found compatible lanes at the next segment</param>
-		/// <param name="prevSimilarLaneCount">number of similar lanes at the previous segment</param>
-		/// <param name="minNextSimilarLaneIndex">output: minimum outer similar lane index</param>
-		/// <param name="maxNextSimilarLaneIndex">ouput: maximum outer similar lane index</param>
-		private void HandleLaneMergesAndSplits(ref BufferItem item, ushort nextSegmentId, short prevSimilarLaneIndex, short nextCompatibleLaneCount, short prevSimilarLaneCount, out short minNextSimilarLaneIndex, out short maxNextSimilarLaneIndex) {
-#if DEBUGMERGE
-			uint cp = 0;
-#endif
-
-			bool sym1 = (prevSimilarLaneCount & 1) == 0; // mod 2 == 0
-			bool sym2 = (nextCompatibleLaneCount & 1) == 0; // mod 2 == 0
-			if (prevSimilarLaneCount < nextCompatibleLaneCount) {
-#if DEBUGMERGE
-				cp |= 1u;
-#endif
-				// lane merging
-				if (sym1 == sym2) {
-#if DEBUGMERGE
-					cp |= 32u;
-#endif
-					// merge outer lanes
-					short a = (short)((byte)(nextCompatibleLaneCount - prevSimilarLaneCount) >> 1); // nextCompatibleLaneCount - prevSimilarLaneCount is always > 0
-					if (prevSimilarLaneCount == 1) {
-#if DEBUGMERGE
-						cp |= 512u;
-#endif
-						minNextSimilarLaneIndex = 0;
-						maxNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1); // always >=0
-					} else if (prevSimilarLaneIndex == 0) {
-#if DEBUGMERGE
-						cp |= 1024u;
-#endif
-						minNextSimilarLaneIndex = 0;
-						maxNextSimilarLaneIndex = a;
-					} else if (prevSimilarLaneIndex == prevSimilarLaneCount - 1) {
-#if DEBUGMERGE
-						cp |= 2048u;
-#endif
-						minNextSimilarLaneIndex = (short)(prevSimilarLaneIndex + a);
-						maxNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1); // always >=0
-					} else {
-#if DEBUGMERGE
-						cp |= 4096u;
-#endif
-						minNextSimilarLaneIndex = maxNextSimilarLaneIndex = (short)(prevSimilarLaneIndex + a);
-					}
-				} else {
-#if DEBUGMERGE
-					cp |= 64u;
-#endif
-					// criss-cross merge
-					short a = (short)((byte)(nextCompatibleLaneCount - prevSimilarLaneCount - 1) >> 1); // nextCompatibleLaneCount - prevSimilarLaneCount - 1 is always >= 0
-					short b = (short)((byte)(nextCompatibleLaneCount - prevSimilarLaneCount + 1) >> 1); // nextCompatibleLaneCount - prevSimilarLaneCount + 1 is always >= 2
-					if (prevSimilarLaneCount == 1) {
-#if DEBUGMERGE
-						cp |= 8192u;
-#endif
-						minNextSimilarLaneIndex = 0;
-						maxNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1); // always >=0
-					} else if (prevSimilarLaneIndex == 0) {
-#if DEBUGMERGE
-						cp |= 16384u;
-#endif
-						minNextSimilarLaneIndex = 0;
-						maxNextSimilarLaneIndex = b;
-					} else if (prevSimilarLaneIndex == prevSimilarLaneCount - 1) {
-#if DEBUGMERGE
-						cp |= 32768u;
-#endif
-						minNextSimilarLaneIndex = (short)(prevSimilarLaneIndex + a);
-						maxNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1); // always >=0
-					} else if (_pathRandomizer.Int32(0, 1) == 0) {
-#if DEBUGMERGE
-						cp |= 65536u;
-#endif
-						minNextSimilarLaneIndex = maxNextSimilarLaneIndex = (short)(prevSimilarLaneIndex + a);
-					} else {
-#if DEBUGMERGE
-						cp |= 131072u;
-#endif
-						minNextSimilarLaneIndex = maxNextSimilarLaneIndex = (short)(prevSimilarLaneIndex + b);
-					}
-				}
-			} else if (prevSimilarLaneCount == nextCompatibleLaneCount) {
-#if DEBUGMERGE
-				cp |= 2u;
-#endif
-				minNextSimilarLaneIndex = maxNextSimilarLaneIndex = prevSimilarLaneIndex;
-			} else {
-#if DEBUGMERGE
-				cp |= 4u;
-#endif
-				// at lane splits: distribute traffic evenly (1-to-n, n-to-n)										
-				// prevOuterSimilarIndex is always > nextCompatibleLaneCount
-				if (sym1 == sym2) {
-#if DEBUGMERGE
-					cp |= 128u;
-#endif
-					// split outer lanes
-					short a = (short)((byte)(prevSimilarLaneCount - nextCompatibleLaneCount) >> 1); // prevSimilarLaneCount - nextCompatibleLaneCount is always > 0
-					minNextSimilarLaneIndex = maxNextSimilarLaneIndex = (short)(prevSimilarLaneIndex - a); // a is always <= prevSimilarLaneCount
-				} else {
-#if DEBUGMERGE
-					cp |= 256u;
-#endif
-					// split outer lanes, criss-cross inner lanes 
-					short a = (short)((byte)(prevSimilarLaneCount - nextCompatibleLaneCount - 1) >> 1); // prevSimilarLaneCount - nextCompatibleLaneCount - 1 is always >= 0
-
-					minNextSimilarLaneIndex = (a - 1 >= prevSimilarLaneIndex) ? (short)0 : (short)(prevSimilarLaneIndex - a - 1);
-					maxNextSimilarLaneIndex = (a >= prevSimilarLaneIndex) ? (short)0 : (short)(prevSimilarLaneIndex - a);
-
-#if DEBUGPF
-					if (minNextSimilarLaneIndex > maxNextSimilarLaneIndex) {
-						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: HandleLaneMergesAndSplits: item: lane {item.m_position.m_lane} @ seg. {item.m_position.m_segment}, nextSegmentId={nextSegmentId} prevSimilarLaneCount={prevSimilarLaneCount} nextCompatibleLaneCount={nextCompatibleLaneCount} a={a} prevSimilarLaneIndex={prevSimilarLaneIndex} minNextSimilarLaneIndex={minNextSimilarLaneIndex} maxNextSimilarLaneIndex={maxNextSimilarLaneIndex}");
-
-					}
-#endif
-				}
-			}
-			if (minNextSimilarLaneIndex > nextCompatibleLaneCount - 1) {
-#if DEBUGMERGE
-				cp |= 8u;
-#endif
-				minNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1);
-			}
-			if (maxNextSimilarLaneIndex > nextCompatibleLaneCount - 1) {
-#if DEBUGMERGE
-				cp |= 16u;
-#endif
-				maxNextSimilarLaneIndex = (short)(nextCompatibleLaneCount - 1);
-			}
-
-			if (minNextSimilarLaneIndex > maxNextSimilarLaneIndex) {
-#if DEBUGPF && DEBUGMERGE
-				Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Erroneous calculation in HandleMergeAndSplits detected! cp={cp}");
-#endif
-				minNextSimilarLaneIndex = maxNextSimilarLaneIndex;
-			}
-		}
-
-#region stock code
 		// 2
-		private void ProcessItemPublicTransport(BufferItem item, ushort targetNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, uint nextLane, byte offset, byte connectOffset) {
+		private void ProcessItemPublicTransport(bool debug, BufferItem item, ushort targetNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, uint nextLane, byte offset, byte connectOffset) {
 			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 				return;
 			}
@@ -2020,10 +1262,10 @@ namespace TrafficManager.Custom.PathFinding {
 				prevSpeed = this.CalculateLaneSpeed(prevMaxSpeed, connectOffset, item.m_position.m_offset, ref prevSegment, lane2); // NON-STOCK CODE
 			}
 			float averageLength = prevSegment.m_averageLength;
-			float offsetLength = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * averageLength;
+			float offsetLength = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * averageLength;
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
-			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * 0.003921569f);
+			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			uint laneIndex = 0;
 #if DEBUG
 			int wIter = 0;
@@ -2040,7 +1282,7 @@ namespace TrafficManager.Custom.PathFinding {
 				if (nextLane == curLaneId) {
 					NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[laneIndex];
 					if (nextLaneInfo.CheckType(this._laneTypes, this._vehicleTypes)) {
-						Vector3 a = netManager.m_lanes.m_buffer[nextLane].CalculatePosition((float)offset * 0.003921569f);
+						Vector3 a = netManager.m_lanes.m_buffer[nextLane].CalculatePosition((float)offset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 						float distance = Vector3.Distance(a, b);
 						BufferItem nextItem;
 						nextItem.m_position.m_segment = nextSegmentId;
@@ -2064,7 +1306,7 @@ namespace TrafficManager.Custom.PathFinding {
 									return;
 								}
 								float nextSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-								float nextOffsetDistance = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
+								float nextOffsetDistance = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 								nextItem.m_comparisonValue += nextOffsetDistance * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 							}
 							if (nextLane == this._startLaneB) {
@@ -2072,12 +1314,18 @@ namespace TrafficManager.Custom.PathFinding {
 									return;
 								}
 								float nextSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-								float nextOffsetDistance = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
+								float nextOffsetDistance = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 								nextItem.m_comparisonValue += nextOffsetDistance * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 							}
 							nextItem.m_laneID = nextLane;
 							nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
 							nextItem.m_vehiclesUsed = (item.m_vehiclesUsed | nextLaneInfo.m_vehicleType);
+							nextItem.m_speedRand = 0;
+#if DEBUGNEWPF
+							if (debug) {
+								_debugPositions[item.m_position.m_segment].Add(nextItem.m_position.m_segment);
+							}
+#endif
 							this.AddBufferItem(nextItem, item.m_position);
 						}
 					}
@@ -2087,27 +1335,31 @@ namespace TrafficManager.Custom.PathFinding {
 				++laneIndex;
 			}
 		}
-#endregion
 
-		private bool ProcessItemCosts(bool debug, BufferItem item, ushort targetNode, ushort segmentID, ref NetSegment prevSegment, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
+		private bool ProcessItemCosts(bool debug, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
 			bool foundForced = false;
-			return ProcessItemCosts(false, true, LaneChangingCostCalculationMode.None, debug, item, targetNode, segmentID, ref prevSegment, ref nextSegment, ref laneIndexFromInner, connectOffset, enableVehicle, enablePedestrian, null, null, null, out foundForced);
+			return ProcessItemCosts(debug, false, true, LaneChangingCostCalculationMode.None, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref nextSegment, ref routingManager.segmentRoutings[nextSegmentId], ref laneIndexFromInner, connectOffset, enableVehicle, enablePedestrian, null, null, null, out foundForced);
 		}
 
 		// 3
-		private bool ProcessItemCosts(bool allowAdvancedAI, bool obeyStockLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, bool debug, BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forceLaneIndex, uint? forceLaneId, byte? forcedLaneDist, out bool foundForced) {
+		private bool ProcessItemCosts(bool debug, bool allowAdvancedAI, bool obeyStockLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, ref SegmentRoutingData nextSegmentRouting, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forcedLaneIndex, uint? forcedLaneId, byte? forcedLaneDist, out bool foundForced) {
 
 #if DEBUGPF
 			/*if (_conf.DebugSwitches[0])
 				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: ProcessItemSub item {item.m_position.m_segment} {item.m_position.m_lane}, targetNodeId {targetNodeId}");*/
 #endif
 
-#if DEBUGPF
+#if DEBUGNEWPF && DEBUG
+			debug = debug && _conf.DebugSwitches[1];
+#else
+			debug = false;
+#endif
+			//Log.Message($"THREAD #{Thread.CurrentThread.ManagedThreadId} Path finder: " + this._pathFindIndex + " vehicle types: " + this._vehicleTypes);
+#if DEBUGNEWPF && DEBUG
+			//bool debug = isTransportVehicle && isMiddle && item.m_position.m_segment == 13550;
 			List<String> logBuf = null;
-			if (debug) {
+			if (debug)
 				logBuf = new List<String>();
-				logBuf.Add($"ProcessItemCosts called. Exploring path from {nextSegmentId} to {item.m_position.m_segment} lane id {item.m_position.m_lane} @ {targetNodeId}. forceLaneIndex={forceLaneIndex}, forceLaneId={forceLaneId}");
-			}
 #endif
 
 			//bool emergencyLaneSelection = (_conf.DebugSwitches[2] && _extVehicleType == ExtVehicleType.Emergency);
@@ -2115,82 +1367,37 @@ namespace TrafficManager.Custom.PathFinding {
 			foundForced = false;
 			bool blocked = false;
 			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
-#if DEBUGPF
-				if (debug)
-					logBuf.Add($"ProcessItemCosts: Segment is PathFailed or Flooded: {nextSegment.m_flags}");
-#endif
-#if DEBUGPF
-				if (debug)
+#if DEBUGNEWPF
+				if (debug) {
+					logBuf.Add($"Segment is PathFailed or flooded: {nextSegment.m_flags}");
+					logBuf.Add("-- method returns --");
 					FlushCostLog(logBuf);
+				}
 #endif
 				return blocked;
 			}
 			NetManager netManager = Singleton<NetManager>.instance;
 
-			// NON-STOCK CODE START
-			/*if (!_allowEscapeTransport) {
-				ushort transportLineId = netManager.m_nodes.m_buffer[targetNodeId].m_transportLine;
-				if (transportLineId != 0 && Singleton<TransportManager>.instance.m_lines.m_buffer[transportLineId].Info.m_transportType == TransportInfo.TransportType.EvacuationBus)
-					return blocked;
-			}*/
-			// NON-STOCK CODE END
-
-			/*if (_extVehicleType == ExtVehicleType.Emergency
-#if DEBUG
-				&& !_conf.DebugSwitches[3]
-#endif
-			) {
-				// lane changing costs are not calculated for emergency vehicles
-				allowAdvancedAI = false;
-			}*/
-
 			NetInfo nextSegmentInfo = nextSegment.Info;
 			NetInfo prevSegmentInfo = prevSegment.Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
-			NetInfo.Direction nextDir = (targetNodeId != nextSegment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+			NetInfo.Direction nextDir = (nextNodeId != nextSegment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 			NetInfo.Direction nextFinalDir = ((nextSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? nextDir : NetInfo.InvertDirection(nextDir);
-			float turningAngle = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
-			if (turningAngle < 1f) {
-				Vector3 prevDirection;
-				if (targetNodeId == prevSegment.m_startNode) {
-					prevDirection = prevSegment.m_startDirection;
-				} else {
-					prevDirection = prevSegment.m_endDirection;
-				}
-				Vector3 nextDirection;
-				if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
-					nextDirection = nextSegment.m_endDirection;
-				} else {
-					nextDirection = nextSegment.m_startDirection;
-				}
-				float dirDotProd = prevDirection.x * nextDirection.x + prevDirection.z * nextDirection.z;
-				if (dirDotProd >= turningAngle) {
-#if DEBUGPF
-					if (debug)
-						logBuf.Add($"ProcessItemCosts: turningAngle < 1f! dirDotProd={dirDotProd} >= turningAngle{turningAngle}!");
-#endif
-#if DEBUGPF
-					if (debug)
-						FlushCostLog(logBuf);
-#endif
-					return blocked;
-				}
-			}
+			float turningAngle = 1f;
 
 			// determine if Advanced AI should be used here
-			bool aiActivated = !Options.isStockLaneChangerUsed();
-			bool useAdvancedAI = aiActivated && // Advanced AI has been enabled by the player
+			bool useAdvancedAI =
 				allowAdvancedAI && // traffic measurements may happen
 				//allowLaneChangingCosts &&
 				_extVehicleType != null && // we got a valid extended vehicle type
-				//((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None && // we are not a bus
-				//!_stablePath && // we do not need a stable path
+				((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None && // we are not a bus
+				!_stablePath && // we do not need a stable path
 				enableVehicle; // we may choose vehicle lanes
-			bool calculateTrafficStats = useAdvancedAI && !_stablePath;
+			bool calculateTrafficStats = useAdvancedAI;
 
-#if DEBUGPF
+#if DEBUGNEWPF
 			if (debug)
-				logBuf.Add($"ProcessItemCosts: useAdvancedAI={useAdvancedAI}, isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={_extVehicleType}, allowAdvancedAI={allowAdvancedAI}, nonBus={((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enableVehicle={enableVehicle}");
+				logBuf.Add($"useAdvancedAI={useAdvancedAI}, isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={_extVehicleType}, allowAdvancedAI={allowAdvancedAI}, nonBus={((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enableVehicle={enableVehicle}");
 #endif
 
 			float prevMaxSpeed = 1f;
@@ -2198,22 +1405,24 @@ namespace TrafficManager.Custom.PathFinding {
 			NetInfo.LaneType prevLaneType = NetInfo.LaneType.None;
 			VehicleInfo.VehicleType prevVehicleType = VehicleInfo.VehicleType.None;
 			// NON-STOCK CODE START //
-			bool prevIsHighway = false;
+			/*bool prevIsHighway = false;
 			if (prevSegmentInfo.m_netAI is RoadBaseAI)
-				prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules;
-			bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == targetNodeId;
+				prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules; */
+			bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
 			ushort sourceNodeId = nextIsStartNodeOfPrevSegment ? prevSegment.m_endNode : prevSegment.m_startNode;
 			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 			int prevOuterSimilarLaneIndex = -1;
-			int prevNumLanes = 1;
-			//float prevSpeed = 1f;
-			float prevDensity = 0.1f;
+			float prevSpeed = 1f;
+			//float prevDensity = 0.25f;
 			bool isMiddle = connectOffset != 0 && connectOffset != 255;
 			NetInfo.Lane prevLaneInfo = null;
+			float speedRand = item.m_speedRand;
 #if MARKCONGESTEDSEGMENTS
-			float prevCongestionFactor = 0f;
-			bool prevIsCongested = false;
+			float congestionCosts = 1f;
+			bool isCongested = false;
 #endif
+			// determines if a vehicles wants to change lanes here (pseudo-randomized). If true, costs for changing to an adjacent lane are not being calculated
+			bool wantToChangeLane = false;
 			bool avoidLane = false; // if true, avoidance policies are in effect (e.g. "Old Town" policy of "Ban Heavy Vehicles" policy)
 			bool strictlyAvoidLane = false; // if true, the player has setup a vehicle restriction
 
@@ -2226,8 +1435,8 @@ namespace TrafficManager.Custom.PathFinding {
 				prevLaneSpeed = this.CalculateLaneSpeed(prevMaxSpeed, connectOffset, item.m_position.m_offset, ref prevSegment, prevLaneInfo); // NON-STOCK CODE
 				
 				// NON-STOCK CODE START //
-				prevNumLanes = prevLaneInfo.m_similarLaneCount;
-				if ((byte)(prevLaneInfo.m_direction & NetInfo.Direction.Forward) != 0) {
+				int prevNumLanes = prevSegmentInfo.m_lanes.Length;
+				if ((byte)(prevLaneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0) {
 					prevOuterSimilarLaneIndex = prevLaneInfo.m_similarLaneCount - prevLaneInfo.m_similarLaneIndex - 1;
 				} else {
 					prevOuterSimilarLaneIndex = prevLaneInfo.m_similarLaneIndex;
@@ -2235,40 +1444,101 @@ namespace TrafficManager.Custom.PathFinding {
 
 				// check for vehicle restrictions
 				if (!CanUseLane(debug, item.m_position.m_segment, prevSegmentInfo, item.m_position.m_lane, prevLaneInfo)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug) {
-						logBuf.Add($"ProcessItemCosts: Vehicle {_extVehicleType} must not use lane {item.m_position.m_lane} @ seg. {item.m_position.m_segment}, null? {prevLaneInfo == null}");
+						logBuf.Add($"Vehicle {_extVehicleType} must not use lane {item.m_position.m_lane} @ seg. {item.m_position.m_segment}, null? {prevLaneInfo == null}");
 					}
 #endif
 					strictlyAvoidLane = true;
 					calculateTrafficStats = false;
 				} else if (calculateTrafficStats) {
-					TrafficMeasurementManager.LaneTrafficData[] prevLaneTrafficData;
+					NetInfo.Direction prevFinalDir = nextIsStartNodeOfPrevSegment ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
+					prevFinalDir = ((prevSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevFinalDir : NetInfo.InvertDirection(prevFinalDir);
+
+					TrafficMeasurementManager.LaneTrafficData[] prevLanesTrafficData;
 					TrafficMeasurementManager.SegmentDirTrafficData prevDirTrafficData;
-					if (trafficMeasurementManager.GetTrafficData(item.m_position.m_segment, prevSegmentInfo, out prevLaneTrafficData) &&
-						trafficMeasurementManager.GetTrafficData(item.m_position.m_segment, prevLaneInfo.m_finalDirection, out prevDirTrafficData)) {
+					TrafficMeasurementManager.SegmentDirTrafficData nextDirTrafficData;
+					if (trafficMeasurementManager.GetTrafficData(item.m_position.m_segment, prevSegmentInfo, out prevLanesTrafficData) &&
+						trafficMeasurementManager.GetTrafficData(item.m_position.m_segment, prevFinalDir, out prevDirTrafficData) &&
+						trafficMeasurementManager.GetTrafficData(nextSegmentId, nextFinalDir, out nextDirTrafficData)
+						) {
 
+						// get the direction-average minimum speed for the previous segment
 #if MARKCONGESTEDSEGMENTS
-						int dirIndex = prevLaneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
-						float prevMinSpeed = prevDirTrafficData.minSpeed / 100u;
-						prevMinSpeed = (float)Math.Min(1f, Math.Max(0.05f, Math.Round(prevDensity / 5f) / 20f)); // 0.05, 0.1, 0.15, ..., 1
-
-						prevIsCongested = prevMinSpeed < _conf.CongestionSpeedThreshold;
-						prevCongestionFactor = 1f - prevMinSpeed;
+						//int dirIndex = prevLaneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+						float prevCongestionRatio = prevDirTrafficData.numCongestionMeasurements > 0 ? ((uint)prevDirTrafficData.numCongested * 100u) / (uint)prevDirTrafficData.numCongestionMeasurements : 0; // now in %
+						float nextCongestionRatio = nextDirTrafficData.numCongestionMeasurements > 0 ? ((uint)nextDirTrafficData.numCongested * 100u) / (uint)nextDirTrafficData.numCongestionMeasurements : 0; // now in %
+						isCongested = prevCongestionRatio >= _conf.CongestionFrequencyThreshold || nextCongestionRatio >= _conf.CongestionFrequencyThreshold;
+						float maxCongestionRatio = Math.Max(prevCongestionRatio, nextCongestionRatio);
+						congestionCosts = 1f + maxCongestionRatio * 0.01f * _conf.CongestionLaneChangingBaseCost;
 #endif
 
+						// get the mean speed for the previous lane
+						uint totalBuf = prevDirTrafficData.totalPathFindTrafficBuffer;
+						if (totalBuf > 0) {
+							prevSpeed = Mathf.Clamp(100u - ((prevLanesTrafficData[item.m_position.m_lane].lastPathFindTrafficBuffer * 100u) / totalBuf), 0, 100);
+						} else {
+							prevSpeed = 100;
+						}
+
+						wantToChangeLane = _pathRandomizer.Int32((uint)maxCongestionRatio + _conf.RandomizedLaneChangingModulo) == 0;
+
+						// prevSpeed is now in %
+#if DEBUGNEWPF
+						float oldSpeedRand = speedRand;
+#endif
+						if (!_isHeavyVehicle && !isCongested) {
+							prevSpeed += speedRand;
+						}
+
+						if ((prevNumLanes != nextNumLanes || (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) && _conf.LaneSpeedRandInterval > 0) {
+							speedRand = (float)_pathRandomizer.Int32((uint)_conf.LaneSpeedRandInterval) - (float)_conf.LaneSpeedRandInterval / 2f;
+						}
+
+						prevSpeed = (float)Mathf.Clamp01((float)Math.Round(prevSpeed / 10f) / 10f); // 0, 0.25, 0.5, 0.75, 1
+
+#if DEBUGNEWPF
+						if (debug)
+							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+								"\t" + $"calculated traffic stats:\n" +
+								"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
+								"\t" + $"_extVehicleType={_extVehicleType}\n" +
+								"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
+								"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+								"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
+								"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
+								"\t" + $"prevCongestionRatio={prevCongestionRatio}\n" +
+								"\t" + $"nextCongestionRatio={nextCongestionRatio}\n" +
+								"\t" + $"isCongested={isCongested}\n" +
+								"\t" + $"congestionCosts={congestionCosts}\n\n" +
+								"\t" + $"prevSpeed={prevSpeed}\n" +
+								"\t" + $"oldSpeedRand={oldSpeedRand}\n" +
+								"\t" + $"speedRand={speedRand}\n\n" +
+								"\t" + $"prevNumLanes={prevNumLanes}\n" +
+								"\t" + $"nextNumLanes={nextNumLanes}\n" +
+								"\t" + $"nextSegmentId={nextSegmentId}\n\n" +
+								"\t" + $"forcedLaneId={forcedLaneId}\n" +
+								"\t" + $"forcedLaneIndex={forcedLaneIndex}\n" +
+								"\t" + $"forcedLaneDist={forcedLaneDist}\n" +
+								"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n"
+								);
+#endif
 						// calculate density sum
-						uint densitySum = prevDirTrafficData.accumulatedDensities;
+						/*uint densitySum = prevDirTrafficData.accumulatedDensities;
 						uint currentDensity = prevLaneTrafficData[item.m_position.m_lane].accumulatedDensities;
 						prevDensity = (ushort)(densitySum > 0 ? Math.Min(currentDensity * 100 / densitySum, 100) : 0);
-						
-						if (_isHeavyVehicle) {
-							if (Options.preferOuterLane && prevIsHighway && prevNumLanes > 1 && !prevIsJunction)
-								prevDensity += ((float)prevOuterSimilarLaneIndex / (float)(prevNumLanes-1)) * _conf.HeavyVehicleMaxInnerLanePenalty;
-						} else
-							prevDensity += _pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (int)_conf.LaneDensityRandInterval / 2;
 
-						prevDensity = (float)Math.Min(1f, Math.Max(0.05f, Math.Round(prevDensity / 5f) / 20f)); // 0.05, 0.1, 0.15, ..., 1
+						if (_isHeavyVehicle) {
+							if (Options.preferOuterLane && prevSegmentRouting.highway && prevNumLanes > 1 && !prevIsJunction)
+								prevDensity += ((float)prevOuterSimilarLaneIndex / (float)(prevNumLanes - 1)) * _conf.HeavyVehicleMaxInnerLanePenalty;
+						} else if (!prevIsCongested) {
+							prevDensity += _pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (int)_conf.LaneDensityRandInterval / 2;
+						}
+
+						prevDensity = (float)Math.Min(1f, Math.Max(0.25f, Math.Round(prevDensity / 25f) / 4f)); // 0.25, 0.5, 0.75, 1
+						if (_ignoresTrafficMeasurement) {
+							prevDensity = Math.Max(0.25f, 1f - prevDensity);
+						}*/
 
 						//prevSpeed = CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment] != null && item.m_position.m_lane < CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment].Length ? CustomRoadAI.laneMeanSpeeds[item.m_position.m_segment][item.m_position.m_lane] : 10000f;
 						//prevSpeed *= 0.01f; // to %
@@ -2278,27 +1548,56 @@ namespace TrafficManager.Custom.PathFinding {
 				// NON-STOCK CODE END //
 			}
 
+			if (prevLaneType == NetInfo.LaneType.Vehicle && (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
+				// check turning angle
+
+				turningAngle = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
+				if (turningAngle < 1f) {
+					Vector3 prevDirection;
+					if (nextNodeId == prevSegment.m_startNode) {
+						prevDirection = prevSegment.m_startDirection;
+					} else {
+						prevDirection = prevSegment.m_endDirection;
+					}
+					Vector3 nextDirection;
+					if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
+						nextDirection = nextSegment.m_endDirection;
+					} else {
+						nextDirection = nextSegment.m_startDirection;
+					}
+					float dirDotProd = prevDirection.x * nextDirection.x + prevDirection.z * nextDirection.z;
+					if (dirDotProd >= turningAngle) {
+#if DEBUGNEWPF
+						if (debug) {
+							logBuf.Add($"turningAngle < 1f! dirDotProd={dirDotProd} >= turningAngle{turningAngle}!");
+							logBuf.Add("-- method returns --");
+							FlushCostLog(logBuf);
+						}
+#endif
+						return blocked;
+					}
+				}
+			}
+
 			// determine if Advanced AI should be used here
 			if (useAdvancedAI) {
 				useAdvancedAI = ((prevVehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None/* || (prevVehicleType == VehicleInfo.VehicleType.None && emergencyLaneSelection)*/) &&
 					(prevLaneType & (NetInfo.LaneType.Pedestrian | NetInfo.LaneType.Parking)) == NetInfo.LaneType.None; // NON-STOCK CODE
 																														// advanced AI may only be active if the previous lane was a lane for driving vehicles
-			}
-			if (! aiActivated) {
+			} else {
 				laneChangingCostCalculationMode = LaneChangingCostCalculationMode.None;
 			}
 
-#if DEBUGPF
-			if (debug)
-				logBuf.Add($"ProcessItemCosts: useAdvancedAI(2)={useAdvancedAI}, prevCar={(prevVehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None}, prevPedParking={(prevLaneType & (NetInfo.LaneType.Pedestrian | NetInfo.LaneType.Parking)) == NetInfo.LaneType.None}");
-#endif
+			float prevCost = Mathf.Max(_conf.SegmentMinAverageLength, prevSegment.m_averageLength);
+			if (!this._stablePath) {
+				if (!useAdvancedAI) { // NON-STOCK CODE
+									  // CO randomization. Only randomizes over segments, not over lanes.
 
-			float prevCost = prevSegment.m_averageLength;
-			if (!useAdvancedAI && !this._stablePath) { // NON-STOCK CODE
-													   // CO randomization. Only randomizes over segments, not over lanes.
-
-				Randomizer randomizer = new Randomizer(this._pathFindIndex << 16 | (uint)item.m_position.m_segment);
-				prevCost *= (float)(randomizer.Int32(900, 1000 + (int)(prevSegment.m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
+					Randomizer randomizer = new Randomizer(this._pathFindIndex << 16 | (uint)item.m_position.m_segment);
+					prevCost *= (float)(randomizer.Int32(900, 1000 + (int)(prevSegment.m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
+				} else {
+					prevCost *= (1f - _conf.SpeedCostFactor) + _conf.SpeedCostFactor * (1f - prevSpeed);
+				}
 			}
 
 			if (!useAdvancedAI) {
@@ -2306,25 +1605,25 @@ namespace TrafficManager.Custom.PathFinding {
 
 				if (this._isHeavyVehicle && (prevSegment.m_flags & NetSegment.Flags.HeavyBan) != NetSegment.Flags.None) {
 					// heavy vehicle ban
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: applying heavy vehicle ban on deactivated advanced AI");
+						logBuf.Add($"applying heavy vehicle ban on deactivated advanced AI");
 #endif
 					prevCost *= 10f;
 				} else if (prevLaneType == NetInfo.LaneType.Vehicle && (prevVehicleType & _vehicleTypes) == VehicleInfo.VehicleType.Car && (prevSegment.m_flags & NetSegment.Flags.CarBan) != NetSegment.Flags.None) {
 					// car ban: used by "Old Town" policy
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: applying old town policy on deactivated advanced AI");
+						logBuf.Add($"applying old town policy on deactivated advanced AI");
 #endif
 					prevCost *= 5f;
 				}
 
 				if (this._transportVehicle && prevLaneType == NetInfo.LaneType.TransportVehicle) {
 					// public transport/emergency vehicles should stay on their designated lanes, if possible
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: applying public transport cost modifier on deactivated advaned AI");
+						logBuf.Add($"applying public transport cost modifier on deactivated advaned AI");
 #endif
 					prevCost *= 0.5f; // non-stock value
 				}
@@ -2334,20 +1633,20 @@ namespace TrafficManager.Custom.PathFinding {
 			if ((this._isHeavyVehicle && (nextSegment.m_flags & NetSegment.Flags.HeavyBan) != NetSegment.Flags.None) ||
 				(prevLaneType == NetInfo.LaneType.Vehicle && (prevVehicleType & _vehicleTypes) == VehicleInfo.VehicleType.Car &&
 				(prevSegment.m_flags & NetSegment.Flags.CarBan) != NetSegment.Flags.None)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 				if (debug) {
-					logBuf.Add($"ProcessItemCosts: Vehicle {_extVehicleType} should not use lane {item.m_position.m_lane} @ seg. {item.m_position.m_segment}, null? {prevLaneInfo == null}");
+					logBuf.Add($"Vehicle {_extVehicleType} should not use lane {item.m_position.m_lane} @ seg. {item.m_position.m_segment}, null? {prevLaneInfo == null}");
 				}
 #endif
 				avoidLane = true;
 			}
 
 			if (strictlyAvoidLane) {
-#if DEBUGPF
-					if (debug)
-						logBuf.Add($"ProcessItemCosts: applying strict lane avoidance on deactivated advaned AI");
+#if DEBUGNEWPF
+				if (debug)
+					logBuf.Add($"applying strict lane avoidance");
 #endif
-				prevCost *= 10000f;
+				prevCost *= _conf.VehicleRestrictionsPenalty;
 			}
 
 			if (!useAdvancedAI) {
@@ -2356,9 +1655,9 @@ namespace TrafficManager.Custom.PathFinding {
 
 				// add costs for u-turns
 				if (!isMiddle && nextSegmentId == item.m_position.m_segment && (prevLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: applying u-turn cost factor on deactivated advaned AI");
+						logBuf.Add($"applying u-turn cost factor on deactivated advaned AI");
 #endif
 					prevCost *= (float)_conf.UturnLaneDistance;
 				}
@@ -2367,12 +1666,12 @@ namespace TrafficManager.Custom.PathFinding {
 			if ((byte)(prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 				prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 			}
-			float prevOffsetCost = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * 0.003921569f * prevCost;
+			float prevOffsetCost = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevCost;
 			float prevMethodDist = item.m_methodDistance + prevOffsetCost;
 			float prevComparisonPlusOffsetCostOverSpeed = item.m_comparisonValue + prevOffsetCost / (prevLaneSpeed * this._maxLength);
-			Vector3 prevLanePosition = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * 0.003921569f);
+			Vector3 prevLanePosition = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			int newLaneIndexFromInner = laneIndexFromInner;
-			bool transitionNode = (netManager.m_nodes.m_buffer[targetNodeId].m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
+			bool transitionNode = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 			NetInfo.LaneType allowedLaneTypes = this._laneTypes;
 			VehicleInfo.VehicleType allowedVehicleTypes = this._vehicleTypes;
 
@@ -2386,60 +1685,47 @@ namespace TrafficManager.Custom.PathFinding {
 				allowedLaneTypes &= ~NetInfo.LaneType.Pedestrian;
 			}
 
+#if DEBUGNEWPF
+			if (debug)
+				logBuf.Add($"allowedVehicleTypes={allowedVehicleTypes} allowedLaneTypes={allowedLaneTypes}");
+#endif
+
 			// NON-STOCK CODE START //
 
-			bool nextIsStartNodeOfNextSegment = netManager.m_segments.m_buffer[nextSegmentId].m_startNode == targetNodeId;
-			bool nextIsHighway = SegmentGeometry.Get(nextSegmentId).IsHighway();
-			bool nextIsRealJunction = SegmentGeometry.Get(item.m_position.m_segment).CountOtherSegments(nextIsStartNodeOfPrevSegment) > 1;
+			bool nextIsStartNodeOfNextSegment = netManager.m_segments.m_buffer[nextSegmentId].m_startNode == nextNodeId;
 			bool uturn = !isMiddle && nextSegmentId == item.m_position.m_segment;
 
 			float laneChangeRoadBaseCost = 1f;
 			if (laneChangingCostCalculationMode != LaneChangingCostCalculationMode.None) {
-				laneChangeRoadBaseCost = nextIsHighway ? _conf.HighwayLaneChangingBaseCost : _conf.CityRoadLaneChangingBaseCost;
-			}
-			float congestionCosts = 1f;
-			if (calculateTrafficStats) {
-				congestionCosts = 1f + prevCongestionFactor * _conf.CongestionLaneChangingBaseCost;
+				laneChangeRoadBaseCost = nextSegmentRouting.highway ? _conf.HighwayLaneChangingBaseCost : _conf.CityRoadLaneChangingBaseCost;
 			}
 
-			// determines if a vehicles wants to change lanes here (pseudo-randomized). If true, costs for changing to an adjacent lane are not being calculated
-			bool wantToChangeLane = false;
-			if (laneChangingCostCalculationMode != LaneChangingCostCalculationMode.None /*&& !uturn*/ && !_stablePath) {
-				laneChangeRandCounter = (ushort)((laneChangeRandCounter + 1) % (int)_conf.RandomizedLaneChangingModulo);
-				wantToChangeLane = (laneChangeRandCounter == 0);
-			}
+			//TrafficMeasurementManager.LaneTrafficData[] nextLanesTrafficData = null;
+			//bool couldObtainNextTrafficData = trafficMeasurementManager.GetTrafficData(nextSegmentId, nextSegmentInfo, out nextLanesTrafficData);
 			// NON-STOCK CODE END //
 
-			uint laneIndex = forceLaneIndex != null ? (uint)forceLaneIndex : 0u; // NON-STOCK CODE, forcedLaneIndex is not null if the next node is a (real) junction
-			uint curLaneId = (uint)(forceLaneId != null ? forceLaneId : nextSegment.m_lanes); // NON-STOCK CODE, forceLaneId is not null if the next node is a (real) junction
+			uint laneIndex = forcedLaneIndex != null ? (uint)forcedLaneIndex : 0u; // NON-STOCK CODE, forcedLaneIndex is not null if the next node is a (real) junction
+			uint curLaneId = (uint)(forcedLaneId != null ? forcedLaneId : nextSegment.m_lanes); // NON-STOCK CODE, forceLaneId is not null if the next node is a (real) junction
 			while (laneIndex < nextNumLanes && curLaneId != 0u) {
 				// NON-STOCK CODE START //
-				if (forceLaneIndex != null && laneIndex != forceLaneIndex) {
-#if DEBUGPF
+				if (forcedLaneIndex != null && laneIndex != forcedLaneIndex) {
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: forceLaneIndex break! laneIndex={laneIndex}");
+						logBuf.Add($"forceLaneIndex break! laneIndex={laneIndex}");
 #endif
 					break;
 				}
 				// NON-STOCK CODE END //
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[laneIndex];
 
-#if DEBUGCOSTS
-				bool costDebug = debug;
-				//bool costDebug = _conf.DebugSwitches[0] && (nextSegmentId == 9649 || nextSegmentId == 1043);
-				if (costDebug) {
-					logBuf.Add($"Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): costDebug=TRUE, explore? {nextLane.CheckType(allowedLaneTypes, allowedVehicleTypes)} && {(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)} && {(byte)(nextLane.m_finalDirection & nextFinalDir) != 0}");
-				}
-#endif
-
-				if (forceLaneId == null && Options.laneConnectorEnabled) {
-#if DEBUGPF
+				if (forcedLaneId == null && Options.laneConnectorEnabled) {
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: forceLaneId == null. Checking if next lane idx {laneIndex}, id {curLaneId} has outgoing connections (startNode={nextIsStartNodeOfNextSegment})");
+						logBuf.Add($"forceLaneId == null. Checking if next lane idx {laneIndex}, id {curLaneId} has outgoing connections (startNode={nextIsStartNodeOfNextSegment})");
 #endif
 
 					if (laneConnManager.HasConnections(curLaneId, nextIsStartNodeOfNextSegment) && !laneConnManager.AreLanesConnected(curLaneId, item.m_laneID, nextIsStartNodeOfNextSegment)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 						if (debug) {
 							logBuf.Add($"Source lane {curLaneId} is NOT connected with target lane {item.m_laneID}, but source lane has outgoing connections! Skipping lane");
 						}
@@ -2447,25 +1733,25 @@ namespace TrafficManager.Custom.PathFinding {
 						goto CONTINUE_LANE_LOOP;
 					}
 
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: Check for outgoing connections passed!");
+						logBuf.Add($"Check for outgoing connections passed!");
 #endif
 				}
 
 				if ((byte)(nextLaneInfo.m_finalDirection & nextFinalDir) != 0) {
 					// lane direction is compatible
-#if DEBUGPF
+#if DEBUGNEWPF
 					if (debug)
-						logBuf.Add($"ProcessItemCosts: Lane direction check passed: {nextLaneInfo.m_finalDirection}");
+						logBuf.Add($"Lane direction check passed: {nextLaneInfo.m_finalDirection}");
 #endif
 					if ((nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes)/* || (emergencyLaneSelection && nextLane.m_vehicleType == VehicleInfo.VehicleType.None)*/) &&
 							(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)) {
 						// vehicle types match and no u-turn to the previous lane
 
-#if DEBUGPF
+#if DEBUGNEWPF
 						if (debug)
-							logBuf.Add($"ProcessItemCosts: vehicle type check passed: {nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes)} && {(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)}");
+							logBuf.Add($"vehicle type check passed: {nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes)} && {(nextSegmentId != item.m_position.m_segment || laneIndex != (int)item.m_position.m_lane)}");
 #endif
 
 						// NON-STOCK CODE START //
@@ -2489,38 +1775,37 @@ namespace TrafficManager.Custom.PathFinding {
 						}*/
 
 						float customDeltaCost = 0f;
-						float nextSpeed = 1f;
+						/*float nextSpeed = 1f;
 						if (calculateTrafficStatsForNextLane) {
 							// calculate current lane density & speed
-							TrafficMeasurementManager.LaneTrafficData[] nextLaneTrafficData;
-							if (trafficMeasurementManager.GetTrafficData(nextSegmentId, nextSegmentInfo, out nextLaneTrafficData)) {
-								nextSpeed = (float)nextLaneTrafficData[laneIndex].meanSpeed * 0.01f;
+							if (couldObtainNextTrafficData) {
+								nextSpeed = (float)nextLanesTrafficData[laneIndex].meanSpeed * 0.01f;
 							} else {
 								nextSpeed = 100f;
 							}
 
 							// nextSpeed is now in %
-							if (!_isHeavyVehicle) {
+							if (!_isHeavyVehicle && !prevIsCongested) {
 								nextSpeed += _pathRandomizer.Int32((uint)_conf.LaneSpeedRandInterval) - (int)_conf.LaneSpeedRandInterval / 2f;
 							}
-							nextSpeed = Mathf.Clamp01(nextSpeed * 0.01f);
-
-							/*nextSpeed = (float)Math.Max(0.1f, Math.Round(nextSpeed / 25f) / 4f); // 0.1, 0.25, 0.5, 0.75, 1
-							nextSpeed = Mathf.Pow(nextSpeed, 2f);*/
-						}
+							nextSpeed = (float)Math.Min(1f, Math.Max(0.25f, Math.Round(nextSpeed / 25f) / 4f)); // 0.25, 0.5, 0.75, 1
+							if (_ignoresTrafficMeasurement) {
+								nextSpeed = Math.Max(0.25f, 1f - nextSpeed);
+							}
+						}*/
 						// NON-STOCK CODE END //
 
-						Vector3 a;
+						Vector3 nextLaneEndPointPos;
 						if ((byte)(nextDir & NetInfo.Direction.Forward) != 0) {
-							a = netManager.m_lanes.m_buffer[curLaneId].m_bezier.d;
+							nextLaneEndPointPos = netManager.m_lanes.m_buffer[curLaneId].m_bezier.d;
 						} else {
-							a = netManager.m_lanes.m_buffer[curLaneId].m_bezier.a;
+							nextLaneEndPointPos = netManager.m_lanes.m_buffer[curLaneId].m_bezier.a;
 						}
-						float transitionCost = Vector3.Distance(a, prevLanePosition); // This gives the distance of the previous to next lane endpoints.
+						float transitionCost = Vector3.Distance(nextLaneEndPointPos, prevLanePosition); // This gives the distance of the previous to next lane endpoints.
 
-#if DEBUGCOSTS
-						if (costDebug)
-							logBuf.Add($"ProcessItemCosts: costs from {nextSegmentId} (off {(byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255)}) to {item.m_position.m_segment} (off {item.m_position.m_offset}), connectOffset={connectOffset}: transitionCost={transitionCost}");
+#if DEBUGNEWPF
+						if (debug)
+							logBuf.Add($"costs from {nextSegmentId} (off {(byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255)}) to {item.m_position.m_segment} (off {item.m_position.m_offset}), connectOffset={connectOffset}: transitionCost={transitionCost}");
 #endif
 
 						if (transitionNode) {
@@ -2538,9 +1823,9 @@ namespace TrafficManager.Custom.PathFinding {
 							nextItem.m_methodDistance = prevMethodDist + transitionCost;
 						}
 
-#if DEBUGPF
+#if DEBUGNEWPF
 						if (debug)
-							logBuf.Add($"ProcessItemCosts: checking if methodDistance is in range: {nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < 1000f} ({nextItem.m_methodDistance})");
+							logBuf.Add($"checking if methodDistance is in range: {nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < 1000f} ({nextItem.m_methodDistance})");
 #endif
 
 						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < 1000f) {
@@ -2554,18 +1839,18 @@ namespace TrafficManager.Custom.PathFinding {
 								customDeltaCost = transitionCost + prevOffsetCost; // customDeltaCost now holds the costs for driving on the segment + costs for changing the segment
 
 								if (avoidLane && (_extVehicleType == null || (_extVehicleType & (ExtVehicleType.CargoTruck | ExtVehicleType.PassengerCar)) != ExtVehicleType.None)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 									if (debug)
-										logBuf.Add($"ProcessItemCosts: applying lane avoidance on ACTIVATED advanced AI");
+										logBuf.Add($"applying lane avoidance on ACTIVATED advanced AI");
 #endif
 
 									// apply vanilla game restriction policies
 									customDeltaCost *= 3f;
 								}
 
-#if DEBUGCOSTS
-								if (costDebug) {
-									logBuf.Add($"ProcessItemCosts: Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): useAdvancedAI={useAdvancedAI}, addCustomTrafficCosts={addCustomTrafficCosts}, transitionCost={transitionCost} avoidLane={avoidLane}");
+#if DEBUGNEWPF
+								if (debug) {
+									logBuf.Add($"Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): useAdvancedAI={useAdvancedAI}, transitionCost={transitionCost}, avoidLane={avoidLane}");
 								}
 #endif
 							}
@@ -2574,43 +1859,43 @@ namespace TrafficManager.Custom.PathFinding {
 							nextItem.m_direction = nextDir;
 							if (curLaneId == this._startLaneA) {
 								if (((byte)(nextItem.m_direction & NetInfo.Direction.Forward) == 0 || nextItem.m_position.m_offset < this._startOffsetA) && ((byte)(nextItem.m_direction & NetInfo.Direction.Backward) == 0 || nextItem.m_position.m_offset > this._startOffsetA)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 									if (debug)
-										logBuf.Add($"ProcessItemCosts: Current lane is start lane A. goto next lane");
+										logBuf.Add($"Current lane is start lane A. goto next lane");
 #endif
 									goto CONTINUE_LANE_LOOP;
 								}
 								float nextLaneSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-								float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
-								nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextLaneSpeed * this._maxLength);
+								float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
+								nextItem.m_comparisonValue += nextOffset * Mathf.Max(_conf.SegmentMinAverageLength, nextSegment.m_averageLength) / (nextLaneSpeed * this._maxLength);
 							}
 
 							if (curLaneId == this._startLaneB) {
 								if (((byte)(nextItem.m_direction & NetInfo.Direction.Forward) == 0 || nextItem.m_position.m_offset < this._startOffsetB) && ((byte)(nextItem.m_direction & NetInfo.Direction.Backward) == 0 || nextItem.m_position.m_offset > this._startOffsetB)) {
-#if DEBUGPF
+#if DEBUGNEWPF
 									if (debug)
-										logBuf.Add($"ProcessItemCosts: Current lane is start lane B. goto next lane");
+										logBuf.Add($"Current lane is start lane B. goto next lane");
 #endif
 									goto CONTINUE_LANE_LOOP;
 								}
 								float nextLaneSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-								float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
-								nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextLaneSpeed * this._maxLength);
+								float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
+								nextItem.m_comparisonValue += nextOffset * Mathf.Max(_conf.SegmentMinAverageLength, nextSegment.m_averageLength) / (nextLaneSpeed * this._maxLength);
 							}
 
 							if (!this._ignoreBlocked && (nextSegment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && (byte)(nextLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 								// NON-STOCK CODE START //
 								if (useAdvancedAIforNextLane) {
-#if DEBUGPF
+#if DEBUGNEWPF
 									if (debug)
-										logBuf.Add($"ProcessItemCosts: Applying blocked road cost factor on ACTIVATED advanced AI");
+										logBuf.Add($"Applying blocked road cost factor on ACTIVATED advanced AI");
 #endif
 									customDeltaCost *= 10f;
 								} else {
 									// NON-STOCK CODE END //
-#if DEBUGPF
+#if DEBUGNEWPF
 									if (debug)
-										logBuf.Add($"ProcessItemCosts: Applying blocked road cost factor on disabled advanced AI");
+										logBuf.Add($"Applying blocked road cost factor on disabled advanced AI");
 #endif
 
 									nextItem.m_comparisonValue += 0.1f;
@@ -2618,16 +1903,14 @@ namespace TrafficManager.Custom.PathFinding {
 								blocked = true;
 							}
 
-
-
 							if ((byte)(nextLaneInfo.m_laneType & prevLaneType) != 0 && nextLaneInfo.m_vehicleType == prevVehicleType) {
-#if DEBUGPF
+#if DEBUGNEWPF
 								if (debug)
-									logBuf.Add($"ProcessItemCosts: Applying lane and transport vehicle costs");
+									logBuf.Add($"Applying lane and transport vehicle costs");
 #endif
 
 								// NON-STOCK CODE START //
-								if (!aiActivated) {
+								if (!useAdvancedAIforNextLane) {
 									// NON-STOCK CODE END //
 
 									if (obeyStockLaneArrows) { // TODO check this
@@ -2671,13 +1954,13 @@ namespace TrafficManager.Custom.PathFinding {
 							if (useAdvancedAIforNextLane) {
 								// Advanced AI cost calculation
 
-#if DEBUGPF
+#if DEBUGNEWPF
 								if (debug)
-									logBuf.Add($"ProcessItemCosts: Calculating advanced AI costs");
+									logBuf.Add($"Calculating advanced AI costs");
 #endif
 
 								int nextOuterSimilarLaneIndex;
-								if ((byte)(nextLaneInfo.m_direction & NetInfo.Direction.Forward) != 0) {
+								if ((byte)(nextLaneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0) {
 									nextOuterSimilarLaneIndex = nextLaneInfo.m_similarLaneCount - nextLaneInfo.m_similarLaneIndex - 1;
 								} else {
 									nextOuterSimilarLaneIndex = nextLaneInfo.m_similarLaneIndex;
@@ -2692,18 +1975,16 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 									
 
-								if (forceLaneIndex == null && prevIsHighway && nextIsHighway && laneDist > 1) {
+								if (forcedLaneIndex == null && prevSegmentRouting.highway && nextSegmentRouting.highway && laneDist > 1) {
 									// disable lane changing by more than one on highways
 									goto CONTINUE_LANE_LOOP;
 								}
 
 								float metric = 1f; // resulting cost multiplicator
-								if (calculateTrafficStatsForNextLane) {
-									float multMetric = 1f; // the multiplication part
-									float divMetric = nextMaxSpeed; // the division part
-#if DEBUG
-									float metricBeforeLanes = 1f; // metric before multiplying lane changing costs
+#if DEBUGNEWPF
+								float metricBeforeLanes = 1f; // metric before multiplying lane changing costs
 #endif
+								if (calculateTrafficStatsForNextLane) {
 
 									/* Vehicles should
 										- choose lanes with low traffic volume,
@@ -2714,31 +1995,31 @@ namespace TrafficManager.Custom.PathFinding {
 									*/
 
 									// calculate speed metric
-									divMetric = nextSpeed * nextMaxSpeed; // 0 .. nextMaxSpeed
+									float divMetric = /*prevSpeed **/ (prevMaxSpeed + nextMaxSpeed) * 0.5f; // the division part; 0 .. (nextMaxSpeed + nextMaxSpeed)/2
 
 									// calculate density metric
 									/*if (prevSpeed <= Options.someValue13)
 										prevDensity = 1f;*/
-									multMetric = _conf.SpeedToDensityBalance + (1f - _conf.SpeedToDensityBalance) * prevDensity;
+									float multMetric = 1f; // _conf.SpeedToDensityBalance + (1f - _conf.SpeedToDensityBalance) * prevDensity; // the multiplication part
 
 									// calculate density/speed metric
-									metric = Math.Max(0.01f, multMetric) / Math.Max(0.01f, divMetric);
-#if DEBUG
+									metric = /*Math.Max(0.01f, */multMetric/*)*/ / Math.Max(0.1f, divMetric);
+#if DEBUGNEWPF
 									metricBeforeLanes = metric;
 #endif
 								}
 
 								float laneMetric = 1f;
+#if DEBUGNEWPF
+								bool calculatedLaneCosts = false;
+								float laneChangeCostBase = 0f;
+#endif
 								if (
 									laneChangingCostCalculationMode != LaneChangingCostCalculationMode.None && // applying lane changing costs is allowed
 									//!nextIsRealJunction && // no lane changing at junctions
 									laneDist > 0 && // lane would be changed
-									(_extVehicleType != ExtVehicleType.Emergency
-#if DEBUG
-									|| _conf.DebugSwitches[3]
-#endif
-									) && // emergency vehicles may do everything
-									(!wantToChangeLane || laneDist > 1 || prevIsCongested)) { // randomized lane changing
+									_extVehicleType != ExtVehicleType.Emergency && // emergency vehicles may do everything
+									(!wantToChangeLane || laneDist > 1 || isCongested)) { // randomized lane changing
 
 #if MARKCONGESTEDSEGMENTS2
 									int nextDirIndex = nextLaneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
@@ -2749,8 +2030,12 @@ namespace TrafficManager.Custom.PathFinding {
 									float nextCongestionFactor = 1f - nextMinSpeed;
 #endif
 
+
 									// multiply with lane distance if distance > 1 or if vehicle does not like to change lanes
-									float laneChangeCostBase = 
+#if !DEBUGNEWPF
+									float
+#endif
+									laneChangeCostBase = 
 										laneChangeRoadBaseCost * // changing lanes on highways is more expensive than on city streets
 										_vehicleCosts * // changing lanes is more expensive for heavy vehicles
 										(laneDist > 1 ? _conf.MoreThanOneLaneChangingCostFactor : 1f) * // changing more than one lane at a time is expensive
@@ -2760,17 +2045,17 @@ namespace TrafficManager.Custom.PathFinding {
 									// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
 									laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
 									metric *= laneMetric;
+
+#if DEBUGNEWPF
+									calculatedLaneCosts = true;
+#endif
 								}
 
 								// avoid lane changing before junctions: multiply with inverted distance to next junction
 #if JUNCTIONLANECHANGEPENALTY
 								if (//allowLaneChangingCosts && //(!prevIsHighway || !nextIsHighway) &&
 									!nextIsRealJunction &&
-									(_extVehicleType != ExtVehicleType.Emergency
-#if DEBUG
-									|| _conf.DebugSwitches[3]
-#endif
-									) &&
+									_extVehicleType != ExtVehicleType.Emergency &&
 									laneDist > 0) {
 									uint dist = _pathRandomizer.UInt32(_conf.MinNumSegmentsAheadJunctionLaneChangePenalty, _conf.MaxNumSegmentsAheadJunctionLaneChangePenalty+1u);
 									if (nextItem.m_numSegmentsToJunction < dist) {
@@ -2780,24 +2065,13 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 #endif
 
-#if DEBUGCOSTS
-								if (costDebug) {
-									logBuf.Add($"Path from {nextSegmentId} (lane {nextOuterSimilarLaneIndex} from outer, idx {laneIndex}, id {curLaneId}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}): nextMaxSpeed={nextMaxSpeed} prevMaxSpeed={prevMaxSpeed} nextMaxSpeed={nextMaxSpeed} divMetric={divMetric} nextDensity={nextDensity} multMetric={multMetric} laneDist={laneDist} laneMetric={laneMetric} metric={metric} metricBeforeLanes={metricBeforeLanes} isMiddle={isMiddle}");
-								}
-#endif
-
 								float oldTransitionDistanceOverMaxSpeed = transitionCostOverMeanMaxSpeed;
 								float deltaCostOverMeanMaxSpeed = (metric * customDeltaCost) / this._maxLength;
-
-#if DEBUG
-								/*if ((segmentID == 25320 || segmentID == 31177) && _conf.DebugSwitches[0])
-									Log._Debug($"Costs for lane {curLaneId} @ {segmentID}: prevSpeed={prevSpeed} nextSpeed={nextSpeed} prevDensity={prevDensity} nextDensity={nextDensity} divMetric={divMetric}, multMetric={multMetric} laneDist={laneDist} metric={metric} distanceOnBezier={distanceOnBezier} prevCost={item2.m_comparisonValue} newCost={distanceOnBezier+item2.m_comparisonValue}");*/
-#endif
 
 								if (deltaCostOverMeanMaxSpeed < 0f) {
 									// should never happen
 #if DEBUG
-									Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: distanceOverMeanMaxSpeed < 0! seg. {nextSegmentId}, lane {laneIndex}, off {nextItem.m_position.m_offset} -> {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}. distanceOverMeanMaxSpeed={deltaCostOverMeanMaxSpeed}, nextSpeed={nextSpeed}"/* + ", prevSpeed={prevSpeed}"*/);
+									Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: distanceOverMeanMaxSpeed < 0! seg. {nextSegmentId}, lane {laneIndex}, off {nextItem.m_position.m_offset} -> {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}. distanceOverMeanMaxSpeed={deltaCostOverMeanMaxSpeed}, prevSpeed={prevSpeed}"/* + ", prevSpeed={prevSpeed}"*/);
 #endif
 									deltaCostOverMeanMaxSpeed = 0f;
 								} else if (Single.IsNaN(deltaCostOverMeanMaxSpeed) || Single.IsInfinity(deltaCostOverMeanMaxSpeed)) {
@@ -2806,54 +2080,47 @@ namespace TrafficManager.Custom.PathFinding {
 									//if (costDebug)
 									Log.Error($"Pathfinder ({this._pathFindIndex}): distanceOverMeanMaxSpeed is NaN or Infinity: seg. {nextSegmentId}, lane {laneIndex}, off {nextItem.m_position.m_offset} -> {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}. {deltaCostOverMeanMaxSpeed} // nextMaxSpeed={nextMaxSpeed} prevMaxSpeed={prevMaxSpeed} nextMaxSpeed={nextMaxSpeed} laneDist={laneDist} laneMetric={laneMetric} metric={metric}");
 #endif
-#if DEBUGPF
-									//Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: distanceOverMeanMaxSpeed is NaN! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
+#if DEBUGNEWPF
+									Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: deltaCostOverMeanMaxSpeed is NaN! deltaCostOverMeanMaxSpeed={deltaCostOverMeanMaxSpeed}");
 #endif
 									deltaCostOverMeanMaxSpeed = oldTransitionDistanceOverMaxSpeed;
 								}
 
-#if DEBUGCOSTS
-								if (costDebug) {
-									logBuf.Add($"Path from {nextSegmentId} (lane {nextOuterSimilarLaneIndex} from outer, idx {laneIndex}) to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} from outer, idx {item.m_position.m_lane}.");
-									//logBuf.Add($"distanceOverMeanMaxSpeed = {distanceOverMeanMaxSpeed} oldDistanceOverMaxSpeed = {oldDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, prevSpeed={prevSpeed}, nextSpeed={nextSpeed}");
-									logBuf.Add($"deltaCostOverMeanMaxSpeed = {deltaCostOverMeanMaxSpeed} oldTransitionDistanceOverMaxSpeed = {oldTransitionDistanceOverMaxSpeed}, prevMaxSpeed={prevMaxSpeed}, nextMaxSpeed={nextMaxSpeed}, nextSpeed={nextSpeed} nextDensity={nextDensity}");
-								}
-#endif
-
 								nextItem.m_comparisonValue += deltaCostOverMeanMaxSpeed;
-#if DEBUGCOSTS
-								if (costDebug) {
-									logBuf.Add($"Total cost = {deltaCostOverMeanMaxSpeed}, comparison value = {nextItem.m_comparisonValue}");
-								}
-#endif
 
 								if (nextItem.m_comparisonValue > 1f) {
 									// comparison value got too big. Do not add the lane to the buffer
-#if DEBUGPF
-									if (debug)
-										logBuf.Add($"Pathfinder ({this._pathFindIndex}): comparisonValue is >1, NaN or Infinity: {nextItem.m_comparisonValue}. seg. {nextSegmentId}, lane {laneIndex}, off {nextItem.m_position.m_offset} -> {item.m_position.m_segment}, lane {item.m_position.m_lane}, off {item.m_position.m_offset}.");
-#endif
-#if DEBUG
-									//Log.Error($"THREAD #{Thread.CurrentThread.ManagedThreadId}, PF {this._pathFindIndex}: Comparison value > 1, NaN or infinity! distanceOverMeanMaxSpeed={distanceOverMeanMaxSpeed}, nextSpeed={nextSpeed}, prevSpeed={prevSpeed}");
-#endif
 									addItem = false;
 								}
-#if DEBUGPF
-								if (debug) {
-									//logBuf.Add($">> PF {this._pathFindIndex} -- seg {item2.m_position.m_segment}, lane {item2.m_position.m_lane} (idx {item2.m_laneID}), off {item2.m_position.m_offset}, cost {item2.m_comparisonValue}, totalCost {totalCost} = traffic={trafficCost}, junction={junctionCost}, lane={laneChangeCost}");
-								}
-#endif
-
-#if DEBUGPF
-								if (debug) {
-									logBuf.Add($"addItem={addItem}");
-
-									FlushCostLog(logBuf);
-								}
+#if DEBUGNEWPF
+								if (debug)
+									logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+										$"-> TRANSIT to seg. {nextSegmentId}, lane {laneIndex}\n" +
+										"\t" + $"prevSpeed={prevSpeed}\n" +
+										"\t" + $"prevMaxSpeed={prevMaxSpeed}\n" +
+										"\t" + $"nextMaxSpeed={nextMaxSpeed}\n\n" +
+										"\t" + $"=> metric={metric}\n" +
+										"\t" + $"=> metricBeforeLanes={metricBeforeLanes}\n\n" +
+										"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n\n" +
+										"\t" + $"laneDist={laneDist}\n\n" +
+										"\t" + $"_extVehicleType={_extVehicleType}\n" +
+										"\t" + $"wantToChangeLane={wantToChangeLane}\n" +
+										"\t" + $"isCongested={isCongested}\n" +
+										"\t" + $"=> calculatedLaneCosts={calculatedLaneCosts}\n\n" +
+										"\t" + $"laneChangeRoadBaseCost={laneChangeRoadBaseCost}\n" +
+										"\t" + $"_vehicleCosts={_vehicleCosts}\n" +
+										"\t" + $"moreThanOneLaneCost={(laneDist > 1 ? _conf.MoreThanOneLaneChangingCostFactor : 1f)}\n" +
+										"\t" + $"congestionCosts={congestionCosts}\n" +
+										"\t" + $"=> laneChangeCostBase={laneChangeCostBase}\n" +
+										"\t" + $"=> laneMetric={laneMetric}\n\n" +
+										"\t" + $"deltaCostOverMeanMaxSpeed={deltaCostOverMeanMaxSpeed}\n" +
+										"\t" + $"nextItem.m_comparisonValue={nextItem.m_comparisonValue}\n\n" +
+										"\t" + $"=> addItem={addItem}\n"
+										);
 #endif
 							}
 
-							if (forceLaneIndex != null && laneIndex == forceLaneIndex && addItem) {
+							if (forcedLaneIndex != null && laneIndex == forcedLaneIndex && addItem) {
 								foundForced = true;
 							}
 
@@ -2863,17 +2130,22 @@ namespace TrafficManager.Custom.PathFinding {
 								nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
 								nextItem.m_vehiclesUsed = (item.m_vehiclesUsed | nextLaneInfo.m_vehicleType);
 								nextItem.m_laneID = curLaneId;
-#if DEBUGPF
-								if (debug)
-									logBuf.Add($">> PF {this._pathFindIndex} -- Adding item: seg {nextItem.m_position.m_segment}, lane {nextItem.m_position.m_lane} (idx {nextItem.m_laneID}), off {nextItem.m_position.m_offset} -> seg {item.m_position.m_segment}, lane {item.m_position.m_lane} (idx {item.m_laneID}), off {item.m_position.m_offset}, cost {nextItem.m_comparisonValue}, previous cost {item.m_comparisonValue}, methodDist {nextItem.m_methodDistance}");
+								nextItem.m_speedRand = speedRand;
+#if DEBUGNEWPF
+								if (debug) {
+									logBuf.Add($"adding item: seg {nextItem.m_position.m_segment}, lane {nextItem.m_position.m_lane} (idx {nextItem.m_laneID}), off {nextItem.m_position.m_offset} -> seg {item.m_position.m_segment}, lane {item.m_position.m_lane} (idx {item.m_laneID}), off {item.m_position.m_offset}, cost {nextItem.m_comparisonValue}, previous cost {item.m_comparisonValue}, methodDist {nextItem.m_methodDistance}");
+									_debugPositions[item.m_position.m_segment].Add(nextItem.m_position.m_segment);
+								}
 #endif
 
 								this.AddBufferItem(nextItem, item.m_position);
 								// NON-STOCK CODE START //
 							} else {
-#if DEBUGPF
+#if DEBUGNEWPF
 								if (debug)
-									logBuf.Add($">> PF {this._pathFindIndex} -- NOT adding item");
+									logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+										$"-> item seg. {nextSegmentId}, lane {laneIndex} NOT ADDED\n"
+										);
 #endif
 							}
 							// NON-STOCK CODE END //
@@ -2894,17 +2166,16 @@ namespace TrafficManager.Custom.PathFinding {
 			} // foreach lane
 			laneIndexFromInner = newLaneIndexFromInner;
 
-#if DEBUGPF
-			if (debug)
-				logBuf.Add($"ProcessItemCosts: method finished at end.");
-
-			if (debug)
+#if DEBUGNEWPF
+			if (debug) {
+				logBuf.Add("-- method returns --");
 				FlushCostLog(logBuf);
+			}
 #endif
 			return blocked;
 		}
 
-#if DEBUGPF
+#if DEBUGNEWPF
 		private void FlushCostLog(List<String> logBuf) {
 			if (logBuf == null)
 				return;
@@ -2927,7 +2198,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 		// 4
-		private void ProcessItemPedBicycle(BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, byte connectOffset, byte laneSwitchOffset, int laneIndex, uint lane) {
+		private void ProcessItemPedBicycle(bool debug, BufferItem item, ushort targetNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, byte connectOffset, byte laneSwitchOffset, int laneIndex, uint lane) {
 			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 				return;
 			}
@@ -2958,10 +2229,10 @@ namespace TrafficManager.Custom.PathFinding {
 			int num = nextSegmentInfo.m_lanes.Length;
 			float distance;
 			byte offset;
-			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)laneSwitchOffset * 0.003921569f);
+			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)laneSwitchOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			if (nextSegmentId == item.m_position.m_segment) {
 				// next segment is previous segment
-				Vector3 a = netManager.m_lanes.m_buffer[lane].CalculatePosition((float)connectOffset * 0.003921569f);
+				Vector3 a = netManager.m_lanes.m_buffer[lane].CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 				distance = Vector3.Distance(a, b);
 				offset = connectOffset;
 			} else {
@@ -3002,7 +2273,7 @@ namespace TrafficManager.Custom.PathFinding {
 			ushort sourceNodeId = (targetNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode; // no lane changing directly in front of a junction
 			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 			// NON-STOCK CODE END
-			float offsetLength = (float)Mathf.Abs((int)(laneSwitchOffset - item.m_position.m_offset)) * 0.003921569f * prevCost;
+			float offsetLength = (float)Mathf.Abs((int)(laneSwitchOffset - item.m_position.m_offset)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevCost;
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
 			if (laneIndex < num) {
@@ -3032,7 +2303,7 @@ namespace TrafficManager.Custom.PathFinding {
 							return;
 						}
 						float nextSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-						float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * 0.003921569f;
+						float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetA)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 						nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 					}
 					if (lane == this._startLaneB) {
@@ -3040,12 +2311,18 @@ namespace TrafficManager.Custom.PathFinding {
 							return;
 						}
 						float nextSpeed = this.CalculateLaneSpeed(nextMaxSpeed, this._startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo); // NON-STOCK CODE
-						float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * 0.003921569f;
+						float nextOffset = (float)Mathf.Abs((int)(nextItem.m_position.m_offset - this._startOffsetB)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 						nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 					}
 					nextItem.m_laneID = lane;
 					nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
 					nextItem.m_vehiclesUsed = (item.m_vehiclesUsed | nextLaneInfo.m_vehicleType);
+					nextItem.m_speedRand = 0;
+#if DEBUGNEWPF
+					if (debug) {
+						_debugPositions[item.m_position.m_segment].Add(nextItem.m_position.m_segment);
+					}
+#endif
 					this.AddBufferItem(nextItem, item.m_position);
 				}
 			}
@@ -3228,6 +2505,12 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if DEBUG
 					++_failedPathFinds;
+
+#if DEBUGNEWPF
+					bool debug = this._debug;
+					if (debug)
+						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {Calculating} -- exception occurred in PathFindImplementation");
+#endif
 #endif
 					CustomPathManager._instance.ResetPathUnit(Calculating);
 
@@ -3293,7 +2576,7 @@ namespace TrafficManager.Custom.PathFinding {
 			if (!Options.vehicleRestrictionsEnabled)
 				return true;
 
-			if (_extVehicleType == null || _extVehicleType == ExtVehicleType.None || _extVehicleType == ExtVehicleType.Tram)
+			if (_extVehicleType == null || _extVehicleType == ExtVehicleType.None /*|| _extVehicleType == ExtVehicleType.Tram*/)
 				return true;
 
 			/*if (laneInfo == null)

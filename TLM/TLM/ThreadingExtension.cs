@@ -6,6 +6,8 @@ using TrafficManager.Custom.AI;
 using UnityEngine;
 using TrafficManager.State;
 using TrafficManager.Manager;
+using TrafficManager.UI;
+using CSUtil.Commons;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -27,6 +29,12 @@ namespace TrafficManager {
 		}
 
 		public override void OnAfterSimulationFrame() {
+			try {
+				RoutingManager.Instance.SimulationStep();
+			} catch (Exception e) {
+				Log.Error($"Error occured while performing first update: " + e.ToString());
+			}
+
 			++ticksSinceLastMinuteUpdate;
 			if (ticksSinceLastMinuteUpdate > 60 * 60) {
 				ticksSinceLastMinuteUpdate = 0;
@@ -53,7 +61,8 @@ namespace TrafficManager {
                 return;
             }
 
-            if (ToolsModifierControl.toolController.CurrentTool != LoadingExtension.TrafficManagerTool && LoadingExtension.BaseUI.IsVisible()) {
+			TrafficManagerTool tmTool = UIBase.GetTrafficManagerTool(false);
+			if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool && LoadingExtension.BaseUI.IsVisible()) {
                 LoadingExtension.BaseUI.Close();
             }
 

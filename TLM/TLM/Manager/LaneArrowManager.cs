@@ -7,18 +7,30 @@ using TrafficManager.State;
 using ColossalFramework;
 using TrafficManager.Geometry;
 using static TrafficManager.State.Flags;
+using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class LaneArrowManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string> {
-		public static LaneArrowManager Instance { get; private set; } = null;
+		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
+		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle &~ ExtVehicleType.Emergency;
 
-		static LaneArrowManager() {
-			Instance = new LaneArrowManager();
+		public static readonly LaneArrowManager Instance = new LaneArrowManager();
+		
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
+		}
+
+		public LaneArrows GetFinalLaneArrows(uint laneId) {
+			return Flags.getFinalLaneArrowFlags(laneId, true);
 		}
 
 		public bool SetLaneArrows(uint laneId, LaneArrows flags, bool overrideHighwayArrows = false) {
 			if (Flags.setLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
-				SubscribeToSegmentGeometry(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+				OnLaneChange(laneId);
 				return true;
 			}
 			return false;
@@ -26,10 +38,21 @@ namespace TrafficManager.Manager {
 
 		public bool ToggleLaneArrows(uint laneId, bool startNode, LaneArrows flags, out LaneArrowChangeResult res) {
 			if (Flags.toggleLaneArrowFlags(laneId, startNode, flags, out res)) {
-				SubscribeToSegmentGeometry(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+				OnLaneChange(laneId);
 				return true;
 			}
 			return false;
+		}
+
+		protected void OnLaneChange(uint laneId) {
+			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
+				RoutingManager.Instance.RequestRecalculation(lane.m_segment);
+				SubscribeToSegmentGeometry(lane.m_segment);
+				if (Options.instantEffects) {
+					Services.NetService.PublishSegmentChanges(lane.m_segment);
+				}
+				return true;
+			});
 		}
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
@@ -73,7 +96,7 @@ namespace TrafficManager.Manager {
 						var laneId = Convert.ToUInt32(split[0]);
 						uint flags = Convert.ToUInt32(split[1]);
 
-						if (!NetUtil.IsLaneValid(laneId))
+						if (!Services.NetService.IsLaneValid(laneId))
 							continue;
 
 						if (flags > ushort.MaxValue)
@@ -108,7 +131,7 @@ namespace TrafficManager.Manager {
 
 			foreach (var laneArrowData in data) {
 				try {
-					if (!NetUtil.IsLaneValid(laneArrowData.laneId))
+					if (!Services.NetService.IsLaneValid(laneArrowData.laneId))
 						continue;
 
 					uint laneArrowFlags = laneArrowData.arrows & Flags.lfr;

@@ -6,6 +6,7 @@ using TrafficManager.State;
 using TrafficManager.Custom.AI;
 using TrafficManager.Util;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
 	public class TrafficLightSimulation : IObserver<NodeGeometry> {
@@ -26,6 +27,14 @@ namespace TrafficManager.TrafficLight {
 			get; private set;
 		} = null;
 
+		public override string ToString() {
+			return $"[TrafficLightSimulation\n" +
+				"\t" + $"NodeId = {NodeId}\n" +
+				"\t" + $"manualTrafficLights = {manualTrafficLights}\n" +
+				"\t" + $"TimedLight = {TimedLight}\n" +
+				"TrafficLightSimulation]";
+		}
+
 		public TrafficLightSimulation(ushort nodeId) {
 			Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
 			TrafficLightManager.Instance.AddTrafficLight(nodeId);
@@ -42,7 +51,6 @@ namespace TrafficManager.TrafficLight {
 				return;
 			manualTrafficLights = true;
 
-			TrafficPriorityManager.Instance.AddPriorityNode(NodeId);
 			CustomSegmentLightsManager.Instance.AddNodeLights(NodeId);
 		}
 
@@ -54,7 +62,6 @@ namespace TrafficManager.TrafficLight {
 			manualTrafficLights = false;
 
 			CustomSegmentLightsManager.Instance.RemoveNodeLights(NodeId);
-			TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 		}
 
 		public void SetupTimedTrafficLight(List<ushort> nodeGroup) {
@@ -73,8 +80,6 @@ namespace TrafficManager.TrafficLight {
 			if (timedLight != null) {
 				timedLight.Destroy();
 			}
-
-			TrafficPriorityManager.Instance.RemovePrioritySegments(NodeId);
 
 			/*if (!IsManualLight() && timedLight != null)
 				timedLight.Destroy();*/
@@ -143,7 +148,7 @@ namespace TrafficManager.TrafficLight {
 			// ensure there is a physical traffic light
 			TrafficLightManager.Instance.AddTrafficLight(NodeId);
 
-			TimedLight?.handleNewSegments();
+			TimedLight?.OnGeometryUpdate();
 			TimedLight?.housekeeping();
 		}
 

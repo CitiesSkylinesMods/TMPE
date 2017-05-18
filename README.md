@@ -4,6 +4,34 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
+1.9.0, 04/09/2017
+- Updated for game version 1.7.0-f5
+- New feature: Parking restrictions
+- New feature: Speed limits can be set up for individual lanes with the Control key
+- New feature: Added timed traffic light and speed limit support for monorails
+- New feature: Copy & paste for individual timed traffic lights
+- New feature: Rotate individual timed traffic lights
+- New feature: Lane customizations may come into effect instantaneously
+- Unified traffic light toggling feature with game code
+- Performance improvements
+- Reworked the way that traffic measurements are performed
+- Advanced Vehicle AI: Algorithm updated, performance improved - Possible routing decisions are now being precalculated
+- Path-finding cost multiplicator for vehicle restrictions is now configurable in TMPE_GlobalConfig.xml
+- UI: More compact, movable main menu UI
+- Added support for custom languages
+- Updated translations: German, Polish, Russian, Portuguese, Traditional Chinese 
+- Major code refactorings
+- AI: Tuned parameters
+- New option: Main button position can be locked
+- New option: Main menu position can be locked
+- New option: Added language selection in options dialog
+- New option: Customization of lane arrows, lane connections and vehicle restrictions can now come into effect instantaneously 
+- Bugfix: Cars sometimes get stuck forever when the Advanced Parking AI is activated (thanks to @cmfcmf for reporting this issue)
+- Bugfix: Busses do not perform u-turns even if the transport line show u-turns (thanks to @dymanoid for reporting this issue)
+- Bugfix: Timed traffic lights do not work as expected on single-direction train tracks (thanks to @DaEgi01 for reporting this issue)
+- Bugfix: Vehicle restriction and speed limit signs overlay is displayed on the wrong side of inverted road segments
+- Bugfix: Influx statistics value is zero (thanks to @hjo for reporting this issue) 
+
 1.8.16, 03/20/2017
 - Lane connections can now also be removed by pressing the backspace key
 - Improved lane selection for busses if the option "Busses may ignore lane arrows" is activated

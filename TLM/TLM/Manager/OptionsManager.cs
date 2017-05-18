@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,12 @@ namespace TrafficManager.Manager {
 
 		static OptionsManager() {
 			Instance = new OptionsManager();
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
 		public bool LoadData(byte[] data) {
@@ -78,7 +85,7 @@ namespace TrafficManager.Manager {
 			}
 
 			if (data.Length >= 17) {
-				Options.setDynamicPathRecalculation(data[16] == (byte)1);
+				//Options.setDynamicPathRecalculation(data[16] == (byte)1);
 			}
 
 			if (data.Length >= 18) {
@@ -129,6 +136,18 @@ namespace TrafficManager.Manager {
 				Options.setEvacBussesMayIgnoreRules(data[28] == (byte)1);
 			}
 
+			if (data.Length >= 30) {
+				Options.setInstantEffects(data[29] == (byte)1);
+			}
+
+			if (data.Length >= 31) {
+				Options.setParkingRestrictionsEnabled(data[30] == (byte)1);
+			}
+
+			if (data.Length >= 32) {
+				Options.setParkingRestrictionsOverlay(data[31] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -150,7 +169,7 @@ namespace TrafficManager.Manager {
 						(byte)(Options.allowUTurns ? 1 : 0),
 						(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
 						(byte)(Options.enableDespawning ? 1 : 0),
-						(byte)(Options.IsDynamicPathRecalculationActive() ? 1 : 0),
+						(byte)0,//Options.IsDynamicPathRecalculationActive()
 						(byte)(Options.connectedLanesOverlay ? 1 : 0),
 						(byte)(Options.prioritySignsEnabled ? 1 : 0),
 						(byte)(Options.timedLightsEnabled ? 1 : 0),
@@ -162,7 +181,10 @@ namespace TrafficManager.Manager {
 						(byte)(Options.prohibitPocketCars ? 1 : 0),
 						(byte)(Options.preferOuterLane ? 1 : 0),
 						(byte)(Options.realisticSpeeds ? 1 : 0),
-						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0)
+						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
+						(byte)(Options.instantEffects ? 1 : 0),
+						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
+						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0)
 				};
 		}
 	}

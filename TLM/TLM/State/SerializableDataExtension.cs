@@ -18,6 +18,7 @@ using TrafficManager.Traffic;
 using ColossalFramework.UI;
 using TrafficManager.Util;
 using System.Linq;
+using CSUtil.Commons;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
@@ -171,6 +172,15 @@ namespace TrafficManager.State {
 				Log.Info("Priority segments data structure (new) undefined!");
 			}
 
+			// load parking restrictions
+			if (_configuration.ParkingRestrictions != null) {
+				if (!ParkingRestrictionsManager.Instance.LoadData(_configuration.ParkingRestrictions)) {
+					error = true;
+				}
+			} else {
+				Log.Info("Parking restrctions structure undefined!");
+			}
+
 			// load vehicle restrictions (warning: has to be done before loading timed lights!)
 			if (_configuration.LaneAllowedVehicleTypes != null) {
 				if (! VehicleRestrictionsManager.Instance.LoadData(_configuration.LaneAllowedVehicleTypes)) {
@@ -295,8 +305,8 @@ namespace TrafficManager.State {
 
 				configuration.TimedLights = TrafficLightSimulationManager.Instance.SaveData(ref success);
 
-				configuration.NodeTrafficLights = ((ICustomDataManager<string>)TrafficLightManager.Instance).SaveData(ref success);
-				configuration.ToggledTrafficLights = ((ICustomDataManager<List<Configuration.NodeTrafficLight>>)TrafficLightManager.Instance).SaveData(ref success);
+				//configuration.NodeTrafficLights = ((ICustomDataManager<string>)TrafficLightManager.Instance).SaveData(ref success);
+				//configuration.ToggledTrafficLights = ((ICustomDataManager<List<Configuration.NodeTrafficLight>>)TrafficLightManager.Instance).SaveData(ref success);
 				
 				configuration.LaneFlags = ((ICustomDataManager<string>)LaneArrowManager.Instance).SaveData(ref success);
 				configuration.LaneArrows = ((ICustomDataManager<List<Configuration.LaneArrowData>>)LaneArrowManager.Instance).SaveData(ref success);
@@ -308,6 +318,7 @@ namespace TrafficManager.State {
 				configuration.CustomDefaultSpeedLimits = ((ICustomDataManager<Dictionary<string, float>>)SpeedLimitManager.Instance).SaveData(ref success);
 
 				configuration.LaneAllowedVehicleTypes = VehicleRestrictionsManager.Instance.SaveData(ref success);
+				configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
 
 				try {
 					// save options

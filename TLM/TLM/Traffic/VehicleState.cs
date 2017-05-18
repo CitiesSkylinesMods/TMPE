@@ -1,7 +1,6 @@
 #define USEPATHWAITCOUNTERx
 #define DEBUGVSTATEx
 #define PATHFORECASTx
-#define PATHRECALCx
 #define DEBUGREGx
 
 using System;
@@ -12,13 +11,12 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Custom.AI;
+using TrafficManager.State;
+using CSUtil.Commons;
 
 namespace TrafficManager.Traffic {
 	public class VehicleState {
-#if DEBUGVSTATE
-		private static readonly ushort debugVehicleId = 6316;
-#endif
-		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro;
+		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public static readonly int STATE_UPDATE_SHIFT = 6;
 
 		private VehicleJunctionTransitState junctionTransitState;
@@ -61,11 +59,6 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-#if PATHRECALC
-		public uint LastPathRecalculation = 0;
-		public ushort LastPathRecalculationSegmentId = 0;
-		public bool PathRecalculationRequested { get; internal set; } = false;
-#endif
 		public ExtVehicleType VehicleType {
 			get; internal set;
 		}
@@ -105,10 +98,34 @@ namespace TrafficManager.Traffic {
 		private ushort pathWaitCounter = 0;
 #endif
 
-		public VehicleState(ushort vehicleId) {
+		public override string ToString() {
+			return $"[VehicleState\n" +
+				"\t" + $"VehicleId = {VehicleId}\n" +
+				"\t" + $"JunctionTransitState = {JunctionTransitState}\n" +
+				"\t" + $"LastStateUpdate = {LastStateUpdate}\n" +
+				"\t" + $"LastPositionUpdate = {LastPositionUpdate}\n" +
+				"\t" + $"TotalLength = {TotalLength}\n" +
+				"\t" + $"WaitTime = {WaitTime}\n" +
+				"\t" + $"ReduceSqrSpeedByValueToYield = {ReduceSqrSpeedByValueToYield}\n" +
+				"\t" + $"Valid = {Valid}\n" +
+				"\t" + $"valid = {valid}\n" +
+				"\t" + $"Emergency = {Emergency}\n" +
+				"\t" + $"VehicleType = {VehicleType}\n" +
+				"\t" + $"HeavyVehicle = {HeavyVehicle}\n" +
+				"\t" + $"CurrentSegmentEnd = {CurrentSegmentEnd}\n" +
+				"\t" + $"PreviousVehicleIdOnSegment = {PreviousVehicleIdOnSegment}\n" +
+				"\t" + $"NextVehicleIdOnSegment = {NextVehicleIdOnSegment}\n" +
+				"VehicleState]";
+		}
+
+		internal VehicleState(ushort vehicleId) {
 			this.VehicleId = vehicleId;
 			VehicleType = ExtVehicleType.None;
 			Reset(false);
+		}
+
+		private VehicleState() {
+
 		}
 
 		private void Reset(bool unlink=true) { // TODO this is called in wrong places!
@@ -178,11 +195,21 @@ namespace TrafficManager.Traffic {
 		public delegate void QuadPathPositionProcessor(ref Vehicle firstVehicleData, ref PathUnit.Position firstVehicleFirstPos, ref PathUnit.Position firstVehicleSecondPos, ref Vehicle secondVehicleData, ref PathUnit.Position secondVehicleFirstPos, ref PathUnit.Position secondVehicleSecondPos);
 
 		public bool ProcessCurrentPathPosition(ref Vehicle vehicleData, PathPositionProcessor processor) {
-			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				return false;
+			}
+
+			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
 		}
 
 		public bool ProcessCurrentPathPosition(ref Vehicle vehicleData, byte index, PathPositionProcessor processor) {
-			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, processor);
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				return false;
+			}
+
+			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
 		}
 
 		public bool ProcessCurrentAndNextPathPosition(ref Vehicle vehicleData, DualPathPositionProcessor processor) {
@@ -194,17 +221,39 @@ namespace TrafficManager.Traffic {
 		}
 
 		public bool ProcessCurrentAndNextPathPosition(ref Vehicle vehicleData, byte index, DualPathPositionProcessor processor) {
-			if (index < 11)
-				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, processor);
-			else
-				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit], index, processor);
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				return false;
+			}
+
+			if (index < 11) {
+				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
+			} else {
+				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
+				if (nextPathUnitId == 0) {
+					return false;
+				}
+
+				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, processor);
+			}
 		}
 
 		public bool ProcessTrailerCurrentAndNextPathPosition(ref Vehicle vehicleData, ref Vehicle trailerData, byte index, DualPathPositionProcessor processor) {
-			if (index < 11)
-				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, processor);
-			else
-				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit], index, processor);
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				return false;
+			}
+
+			if (index < 11) {
+				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
+			} else {
+				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
+				if (nextPathUnitId == 0) {
+					return false;
+				}
+
+				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, processor);
+			}
 		}
 
 		public bool ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref Vehicle vehicleData, ref PathUnit.Position otherVehicleCurPos, ref PathUnit.Position otherVehicleNextPos, ref Vehicle otherVehicleData, QuadPathPositionProcessor processor) {
@@ -212,23 +261,55 @@ namespace TrafficManager.Traffic {
 		}
 
 		public bool ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref Vehicle vehicleData, byte index, ref PathUnit.Position otherVehicleCurPos, ref PathUnit.Position otherVehicleNextPos, ref Vehicle otherVehicleData, QuadPathPositionProcessor processor) {
-			if (index < 11)
-				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
-			else
-				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				return false;
+			}
+
+			if (index < 11) {
+				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
+			} else {
+				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
+				if (nextPathUnitId == 0) {
+					return false;
+				}
+
+				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
+			}
 		}
 
-		public PathUnit.Position GetCurrentPathPosition(ref Vehicle vehicleData) {
-			return Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition((byte)(vehicleData.m_pathPositionIndex >> 1));
+		/*public bool GetCurrentPathPosition(ref Vehicle vehicleData, out PathUnit.Position curPathPos) {
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				curPathPos = default(PathUnit.Position);
+				return false;
+			}
+
+			curPathPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].GetPosition((byte)(vehicleData.m_pathPositionIndex >> 1));
+			return true;
 		}
 
-		public PathUnit.Position GetNextPathPosition(ref Vehicle vehicleData) {
+		public bool GetNextPathPosition(ref Vehicle vehicleData, out PathUnit.Position nextPos) {
+			uint curPathUnitId = vehicleData.m_path;
+			if (curPathUnitId == 0) {
+				nextPos = default(PathUnit.Position);
+				return false;
+			}
+
 			byte index = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
-			if (index <= 11)
-				return Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(index);
-			else
-				return Singleton<PathManager>.instance.m_pathUnits.m_buffer[Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_nextPathUnit].GetPosition(0);
-		}
+			if (index <= 11) {
+				nextPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].GetPosition(index);
+				return true;
+			} else {
+				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
+				if (nextPathUnitId == 0) {
+					nextPos = default(PathUnit.Position);
+					return false;
+				}
+
+				return Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId].GetPosition(0, out nextPos);
+			}
+		}*/
 
 		private bool ProcessPathUnitPair(ref Vehicle vehicleData, ref PathUnit unit1, ref PathUnit unit2, byte index, DualPathPositionProcessor processor) {
 			if ((unit1.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
@@ -237,6 +318,20 @@ namespace TrafficManager.Traffic {
 
 			if ((unit2.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
 				return false;
+			}
+
+			if (index >= unit1.m_positionCount) {
+				return false;
+			}
+
+			if (index < 11) {
+				if (index + 1 >= unit1.m_positionCount) {
+					return false;
+				}
+			} else {
+				if (unit2.m_positionCount < 1) {
+					return false;
+				}
 			}
 
 			switch (index) {
@@ -292,6 +387,20 @@ namespace TrafficManager.Traffic {
 				return false;
 			}
 
+			if (index >= unit1.m_positionCount) {
+				return false;
+			}
+
+			if (index < 11) {
+				if (index + 1 >= unit1.m_positionCount) {
+					return false;
+				}
+			} else {
+				if (unit2.m_positionCount < 1) {
+					return false;
+				}
+			}
+
 			switch (index) {
 				case 0:
 					processor(ref firstVehicleData, ref unit1.m_position00, ref unit1.m_position01, ref secondVehicleData, ref secondPos1, ref secondPos2);
@@ -337,11 +446,16 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal bool HasPath(ref Vehicle vehicleData) {
-			return (Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags & PathUnit.FLAG_READY) != 0;
+			uint curPathUnitId = vehicleData.m_path;
+			return curPathUnitId != 0 && (Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_pathFindFlags & PathUnit.FLAG_READY) != 0;
 		}
 
 		private bool ProcessPathUnit(ref PathUnit unit, byte index, PathPositionProcessor processor) {
 			if ((unit.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
+				return false;
+			}
+
+			if (index >= unit.m_positionCount) {
 				return false;
 			}
 
@@ -395,7 +509,7 @@ namespace TrafficManager.Traffic {
 
 			LastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-			SegmentEnd end = TrafficPriorityManager.Instance.GetPrioritySegment(GetTransitNodeId(ref curPos, ref nextPos), curPos.m_segment);
+			SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, IsTransitNodeCurStartNode(ref curPos, ref nextPos));
 			
 			if (CurrentSegmentEnd != end) {
 				if (CurrentSegmentEnd != null) {
@@ -404,6 +518,10 @@ namespace TrafficManager.Traffic {
 
 				WaitTime = 0;
 				if (end != null) {
+#if DEBUGVSTATE
+					if (GlobalConfig.Instance.DebugSwitches[9])
+						Log.Warning($"VehicleState.UpdatePosition: Linking vehicle {VehicleId} with segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
+#endif
 					Link(end);
 					JunctionTransitState = VehicleJunctionTransitState.Enter;
 				} else {
@@ -463,19 +581,38 @@ namespace TrafficManager.Traffic {
 		}
 
 		internal static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-			// note: does not check if curPos and nextPos are successive path positions
-			NetManager netManager = Singleton<NetManager>.instance;
-			ushort transitNodeId;
-			if (curPos.m_offset == 0) {
-				transitNodeId = netManager.m_segments.m_buffer[curPos.m_segment].m_startNode;
-			} else if (curPos.m_offset == 255) {
-				transitNodeId = netManager.m_segments.m_buffer[curPos.m_segment].m_endNode;
-			} else if (nextPos.m_offset == 0) {
-				transitNodeId = netManager.m_segments.m_buffer[nextPos.m_segment].m_startNode;
-			} else {
-				transitNodeId = netManager.m_segments.m_buffer[nextPos.m_segment].m_endNode;
+			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
+			ushort transitNodeId1 = 0;
+			Constants.ServiceFactory.NetService.ProcessSegment(curPos.m_segment, delegate (ushort segmentId, ref NetSegment segment) {
+				transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
+				return true;
+			});
+
+			ushort transitNodeId2 = 0;
+			Constants.ServiceFactory.NetService.ProcessSegment(nextPos.m_segment, delegate (ushort segmentId, ref NetSegment segment) {
+				transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
+				return true;
+			});
+
+			if (transitNodeId1 != transitNodeId2) {
+				return 0;
 			}
-			return transitNodeId;
+			return transitNodeId1;
+		}
+
+		internal static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+			// note: does not check if curPos and nextPos are successive path positions
+			bool startNode;
+			if (curPos.m_offset == 0) {
+				startNode = true;
+			} else if (curPos.m_offset == 255) {
+				startNode = false;
+			} else if (nextPos.m_offset == 0) {
+				startNode = true;
+			} else {
+				startNode = false;
+			}
+			return startNode;
 		}
 
 		internal void OnVehicleSpawned(ref Vehicle vehicleData) {

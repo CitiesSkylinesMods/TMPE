@@ -43,22 +43,26 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\DebugGeometry\</OutputPath>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGTTL;DEBUGNEWPF;DEBUGCOSTS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>0</WarningLevel>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -68,25 +72,24 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.Networking">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.UI">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeProfiler.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomBusAI.cs" />
     <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
+    <Compile Include="Custom\AI\CustomNetAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
@@ -98,11 +101,18 @@
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Geometry\GeometryCalculationMode.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\ParkingRestrictionsManager.cs" />
+    <Compile Include="Manager\RoutingManager.cs" />
+    <Compile Include="Manager\SegmentEndManager.cs" />
+    <Compile Include="Manager\VehicleBehaviorManager.cs" />
     <Compile Include="Manager\ExtBuildingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
+    <Compile Include="Manager\AdvancedParkingManager.cs" />
     <Compile Include="Manager\LaneArrowManager.cs" />
     <Compile Include="Manager\OptionsManager.cs" />
     <Compile Include="Manager\TrafficLightManager.cs" />
@@ -122,6 +132,7 @@
     <Compile Include="Geometry\SegmentEndGeometry.cs" />
     <Compile Include="Manager\VehicleStateManager.cs" />
     <Compile Include="Manager\VehicleRestrictionsManager.cs" />
+    <Compile Include="Geometry\SegmentEndId.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
@@ -130,10 +141,28 @@
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Custom\PathFinding\OldCustomPathFind.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
+    <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
+    <Compile Include="UI\MainMenu\OptionsLabel.cs" />
+    <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
+    <Compile Include="UI\MainMenu\VersionLabel.cs" />
+    <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
+    <Compile Include="UI\MainMenu\ToggleTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\TimedTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\SpeedLimitsButton.cs" />
+    <Compile Include="UI\MainMenu\PrioritySignsButton.cs" />
+    <Compile Include="UI\MainMenu\ManualTrafficLightsButton.cs" />
+    <Compile Include="UI\MainMenu\LaneArrowsButton.cs" />
+    <Compile Include="UI\MainMenu\MenuToolModeButton.cs" />
+    <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
+    <Compile Include="UI\MainMenu\DespawnButton.cs" />
+    <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
+    <Compile Include="UI\MainMenu\MenuButton.cs" />
+    <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
@@ -160,12 +189,12 @@
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
+    <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="Util\VehicleUtil.cs" />
-    <Compile Include="Util\NetUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="Log.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\CustomSegment.cs" />
     <Compile Include="TrafficLight\CustomSegmentLight.cs" />
@@ -175,15 +204,15 @@
     <Compile Include="TrafficLight\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TrafficLightToolTextureResources.cs" />
+    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\TrafficPriorityManager.cs" />
-    <Compile Include="Traffic\TrafficSegment.cs" />
+    <Compile Include="Traffic\PrioritySegment.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
-    <Compile Include="UI\UITrafficManager.cs" />
+    <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -309,11 +338,36 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
+      <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
+      <Name>CSUtil.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
+      <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
+      <Name>TMPE.CitiesGameBridge</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
+      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
+      <Name>TMPE.GenericGameBridge</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\mainmenu-btns.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\parking_allowed.png" />
+    <EmbeddedResource Include="Resources\parking_disallowed.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)$(TargetName).*" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

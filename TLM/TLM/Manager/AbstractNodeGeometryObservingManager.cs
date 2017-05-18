@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,15 +9,21 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractNodeGeometryObservingManager : AbstractCustomManager, IObserver<NodeGeometry> {
-		private Dictionary<ushort, IDisposable> nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
+		private IDictionary<ushort, IDisposable> nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 		private object geoLock = new object();
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Subscribed node geometries: {nodeGeometryUnsubscribers.Keys.CollectionToString()}");
+		}
 
 		protected void UnsubscribeFromNodeGeometry(ushort nodeId) {
 			try {
 				Monitor.Enter(geoLock);
 
-				if (nodeGeometryUnsubscribers.ContainsKey(nodeId)) {
-					nodeGeometryUnsubscribers[nodeId].Dispose();
+				IDisposable unsubscriber;
+				if (nodeGeometryUnsubscribers.TryGetValue(nodeId, out unsubscriber)) {
+					unsubscriber.Dispose();
 					nodeGeometryUnsubscribers.Remove(nodeId);
 				}
 			} finally {

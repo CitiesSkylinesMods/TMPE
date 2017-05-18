@@ -11,6 +11,7 @@ using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -243,7 +244,7 @@ namespace TrafficManager.Custom.AI {
 					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
 				if (targetNodeId == prevTargetNodeId) {
-					if (!CustomVehicleAI.MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
 						return;
 				}
 			}

@@ -1,6 +1,7 @@
 ﻿#define RUSHHOUR
 
 using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,13 +9,15 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using TrafficManager.Manager;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.State {
 	[XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 5;
+		private static int LATEST_VERSION = 6;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -63,20 +66,29 @@ namespace TrafficManager.State {
 
 		public bool[] DebugSwitches = {
 			false, // path-find debug log
-			false, 
+			false, // path-find costs debug log
 			false, // parking ai debug log (basic)
-			false, // emergency vehicles may not ignore traffic rules
+			false, // do not actually repair stuck vehicles/cims, just report
 			false, // parking ai debug log (extended)
 			false, // geometry debug log
-			false, // debug pause
+			false, // debug parking AI distance issue
 			false, // debug TTL
-			false
+			false, // debug routing
+			false, // debug vehicle to segment end linking
+			false // prevent routing recalculation on global configuration reload
 		};
 
 #if DEBUG
-		public ushort PathFindDebugNodeId = 0;
+		public int PathFindDebugNodeId = 0;
+		public int PathFindDebugStartSegmentId = 0;
+		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
 		public ushort TTLDebugNodeId = 0;
 #endif
+
+		/// <summary>
+		/// Language to use (if null then the game's language is being used)
+		/// </summary>
+		public string LanguageCode = null;
 
 		/// <summary>
 		/// base lane changing cost factor on highways
@@ -106,12 +118,24 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// speed-to-density balance factor, 1 = only speed is considered, 0 = both speed and density are considered
 		/// </summary>
+		[Obsolete]
 		public float SpeedToDensityBalance = 0.75f;
+
+		/// <summary>
+		/// Relative factor for lane speed cost calculation
+		/// </summary>
+		public float SpeedCostFactor = 0.25f;
 
 		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
-		public int RandomizedLaneChangingModulo = 100;
+		public uint RandomizedLaneChangingModulo = 5;
+
+		/// <summary>
+		/// randomized modulo. vehicles hitting zero ignore traffic measurements
+		/// </summary>
+		[Obsolete]
+		public int RandomizedTrafficIgnoreModulo = 3;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
@@ -126,13 +150,33 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane density random interval
 		/// </summary>
-		public float LaneDensityRandInterval = 10f;
+		[Obsolete]
+		public float LaneDensityRandInterval = 2;
 
 		/// <summary>
 		/// lane speed random interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 20f;
+		public float LaneSpeedRandInterval = 25f;
 
+		/// <summary>
+		/// Threshold for reducing traffic buffer
+		/// </summary>
+		public uint MaxTrafficBuffer = 500;
+
+		/// <summary>
+		/// Threshold for reducing path-find traffic buffer
+		/// </summary>
+		public uint MaxPathFindTrafficBuffer = 5000;
+
+		/// <summary>
+		/// Threshold for restart segment direction congestion measurements
+		/// </summary>
+		public byte MaxNumCongestionMeasurements = 100;
+
+		/// <summary>
+		/// Minimum considered average segment length for path-find cost calculation
+		/// </summary>
+		public float SegmentMinAverageLength = 30f;
 
 		/// <summary>
 		/// penalty for busses not driving on bus lanes
@@ -148,6 +192,11 @@ namespace TrafficManager.State {
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
 		/// </summary>
 		public float HeavyVehicleMaxInnerLanePenalty = 40f;
+
+		/// <summary>
+		/// Path cost multiplier for vehicle restrictions
+		/// </summary>
+		public float VehicleRestrictionsPenalty = 2500f;
 
 
 		/// <summary>
@@ -203,27 +252,42 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Minimum speed update factor
 		/// </summary>
-		public float MinSpeedUpdateFactor = 0.025f;
+		[Obsolete]
+		public float MinSpeedUpdateFactor = 0.05f;
 
 		/// <summary>
 		/// Maximum speed update factor
 		/// </summary>
-		public float MaxSpeedUpdateFactor = 0.25f;
+		[Obsolete]
+		public float MaxSpeedUpdateFactor = 0.1f;
+
+		/// <summary>
+		/// Maximum density accumulation after which lane densities are reset
+		/// </summary>
+		[Obsolete]
+		public uint MaxAccumulatedLaneDensity = 1000;
+
+		/// <summary>
+		/// average speed (in %) threshold for a segment to be flagged as congested
+		/// </summary>
+		public uint CongestionSpeedThreshold = 70;
 
 		/// <summary>
 		/// %/100 of time a segment must be flagged as congested to count as permanently congested
 		/// </summary>
-		public float CongestionSpeedThreshold = 0.6f;
+		public uint CongestionFrequencyThreshold = 110;
 
 		/// <summary>
 		/// lower congestion threshold (per ten-thousands)
 		/// </summary>
-		public int LowerSpeedCongestionThreshold = 6000;
+		[Obsolete]
+		public int LowerSpeedCongestionThreshold = 0;
 
 		/// <summary>
 		/// upper congestion threshold (per ten-thousands)
 		/// </summary>
-		public int UpperSpeedCongestionThreshold = 7000;
+		[Obsolete]
+		public int UpperSpeedCongestionThreshold = 0;
 
 
 		/// <summary>
@@ -284,13 +348,22 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
 		/// </summary>
-		public uint MaxSpeedDifference = 950u;
+		[Obsolete]
+		public uint MaxSpeedDifference = 500u;
 
 		/// <summary>
 		/// Main menu button position
 		/// </summary>
 		public int MainMenuButtonX = 464;
 		public int MainMenuButtonY = 10;
+		public bool MainMenuButtonPosLocked = false;
+
+		/// <summary>
+		/// Main menu position
+		/// </summary>
+		public int MainMenuX = 85;
+		public int MainMenuY = 60;
+		public bool MainMenuPosLocked = false;
 
 		internal static void WriteConfig() {
 			ModifiedTime = WriteConfig(Instance);
@@ -302,6 +375,9 @@ namespace TrafficManager.State {
 			if (oldConfig != null) {
 				conf.MainMenuButtonX = oldConfig.MainMenuButtonX;
 				conf.MainMenuButtonY = oldConfig.MainMenuButtonY;
+
+				conf.MainMenuX = oldConfig.MainMenuX;
+				conf.MainMenuY = oldConfig.MainMenuY;
 			}
 			modifiedTime = WriteConfig(conf);
 			return conf;
@@ -335,10 +411,13 @@ namespace TrafficManager.State {
 					XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
+					if (LoadingExtension.IsGameLoaded && !conf.DebugSwitches[10]) {
+						RoutingManager.Instance.RequestFullRecalculation(true);
+					}
 					return conf;
 				}
-			} catch (Exception) {
-				Log.Warning("Could not load global config. Generating default config.");
+			} catch (Exception e) {
+				Log.Warning($"Could not load global config: {e} Generating default config.");
 				return WriteDefaultConfig(null, out modifiedTime);
 			}
 		}

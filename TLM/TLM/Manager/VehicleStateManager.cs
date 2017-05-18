@@ -1,6 +1,7 @@
 ﻿#define USEPATHWAITCOUNTERx
 
 using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,17 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class VehicleStateManager : AbstractCustomManager {
-		public static VehicleStateManager Instance { get; private set; } = null;
+		public static readonly VehicleStateManager Instance = new VehicleStateManager();
+
+		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
+
+		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
+		public const float ICY_ROADS_MIN_SPEED = 8f * 0.4f; // 20 km/h
+		public const float ICY_ROADS_STUDDED_MIN_SPEED = 8f * 0.8f; // 40 km/h
+		public const float WET_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
+		public const float WET_ROADS_FACTOR = 0.75f;
+		public const float BROKEN_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
+		public const float BROKEN_ROADS_FACTOR = 0.75f;
 
 		/// <summary>
 		/// Determines if vehicles should be cleared
@@ -21,6 +32,18 @@ namespace TrafficManager.Manager {
 
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"ClearTrafficRequested = {ClearTrafficRequested}");
+			Log._Debug($"Vehicle states:");
+			for (int i = 0; i < VehicleStates.Length; ++i) {
+				if (VehicleStates[i] == null || !VehicleStates[i].Valid) {
+					continue;
+				}
+				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
+			}
 		}
 
 		/// <summary>
@@ -33,6 +56,23 @@ namespace TrafficManager.Manager {
 			for (uint i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
 				VehicleStates[i] = new VehicleState((ushort)i);
 			}
+		}
+
+		/// <summary>
+		/// Determines if the given vehicle is driven by a reckless driver
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <param name="vehicleData"></param>
+		/// <returns></returns>
+		public bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0)
+				return true;
+			if (Options.evacBussesMayIgnoreRules && vehicleData.Info.GetService() == ItemClass.Service.Disaster)
+				return true;
+			if (Options.recklessDrivers == 3)
+				return false;
+
+			return ((vehicleData.Info.m_vehicleType & RECKLESS_VEHICLE_TYPES) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 
 		/// <summary>
@@ -190,6 +230,7 @@ namespace TrafficManager.Manager {
 					break;
 				case VehicleInfo.VehicleType.Metro:
 				case VehicleInfo.VehicleType.Train:
+				case VehicleInfo.VehicleType.Monorail:
 					if (ai is CargoTrainAI)
 						return ExtVehicleType.CargoTrain;
 					return ExtVehicleType.PassengerTrain;
@@ -208,7 +249,13 @@ namespace TrafficManager.Manager {
 				case VehicleInfo.VehicleType.Helicopter:
 					//if (ai is PassengerPlaneAI)
 					return ExtVehicleType.Helicopter;
-					//break;
+				//break;
+				case VehicleInfo.VehicleType.Ferry:
+					return ExtVehicleType.Ferry;
+				case VehicleInfo.VehicleType.Blimp:
+					return ExtVehicleType.Blimp;
+				case VehicleInfo.VehicleType.CableCar:
+					return ExtVehicleType.CableCar;
 			}
 #if DEBUGVSTATE
 			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");

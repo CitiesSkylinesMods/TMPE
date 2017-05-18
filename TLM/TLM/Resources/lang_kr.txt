@@ -158,3 +158,14 @@ Vehicle_behavior 차량 제한
 Policies_&_Restrictions 정책 및 제한
 At_junctions 교차로 설정
 In_case_of_emergency 긴급 상황 설정
+Show_lane-wise_speed_limits Show lane-wise speed limits
+Language Language
+Game_language Game language
+requires_game_restart requires game restart
+Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
+Options Options
+Lock_main_menu_button_position Lock main menu button position
+Lock_main_menu_position Lock main menu position
+Recalculating_lane_routing Recalculating lane routing
+Please_wait Please wait
+Parking_restrictions Parking restrictions

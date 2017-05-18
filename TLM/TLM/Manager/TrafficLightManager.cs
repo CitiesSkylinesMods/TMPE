@@ -1,67 +1,101 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.State;
+using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
-	public class TrafficLightManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
-		public static TrafficLightManager Instance { get; private set; } = null;
-
-		static TrafficLightManager() {
-			Instance = new TrafficLightManager();
+	/// <summary>
+	/// Manages traffic light toggling
+	/// </summary>
+	public class TrafficLightManager : AbstractCustomManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string> {
+		public enum UnableReason {
+			None,
+			NoJunction,
+			HasTimedLight
 		}
 
-		internal void NodeSimulationStep(ushort nodeId, ref NetNode data) {
-			Flags.applyNodeTrafficLightFlag(nodeId);
+		public static readonly TrafficLightManager Instance = new TrafficLightManager();
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"- Not implemented -");
+			// TODO implement
 		}
 
-		public void SetTrafficLight(ushort nodeId, bool flag) {
-			if (Flags.setNodeTrafficLight(nodeId, flag)) {
-				SubscribeToNodeGeometry(nodeId);
+		public bool SetTrafficLight(ushort nodeId, bool flag) {
+			UnableReason reason;
+			return SetTrafficLight(nodeId, flag, out reason);
+		}
+
+		public bool SetTrafficLight(ushort nodeId, bool flag, out UnableReason reason) {
+			if (! IsTrafficLightToggleable(nodeId, out reason)) {
+				return false;
 			}
+
+			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+				NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
+				if ((bool)flag) {
+					//Log._Debug($"Adding traffic light @ node {nId}");
+					flags |= NetNode.Flags.TrafficLights;
+				} else {
+					//Log._Debug($"Removing traffic light @ node {nId}");
+					flags &= ~NetNode.Flags.TrafficLights;
+				}
+				node.m_flags = flags;
+				return true;
+			});
+			return true;
 		}
 
-		public void AddTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, true);
+		public bool AddTrafficLight(ushort nodeId) {
+			UnableReason reason;
+			return AddTrafficLight(nodeId, out reason);
 		}
 
-		public void RemoveTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, false);
+		public bool AddTrafficLight(ushort nodeId, out UnableReason reason) {
+			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+			return SetTrafficLight(nodeId, true, out reason);
 		}
 
-		public void ToggleTrafficLight(ushort nodeId) {
-			SetTrafficLight(nodeId, !HasTrafficLight(nodeId));
+		public bool RemoveTrafficLight(ushort nodeId) {
+			UnableReason reason;
+			return RemoveTrafficLight(nodeId, out reason);
+		}
+
+		public bool RemoveTrafficLight(ushort nodeId, out UnableReason reason) {
+			return SetTrafficLight(nodeId, false, out reason);
+		}
+
+		public bool ToggleTrafficLight(ushort nodeId) {
+			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId));
+		}
+
+		public bool ToggleTrafficLight(ushort nodeId, out UnableReason reason) {
+			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId), out reason);
+		}
+
+		public bool IsTrafficLightToggleable(ushort nodeId, out UnableReason reason) {
+			if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
+				reason = UnableReason.NoJunction;
+				return false;
+			}
+
+			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
+				reason = UnableReason.HasTimedLight;
+				return false;
+			}
+
+			reason = UnableReason.None;
+			return true;
 		}
 
 		public bool HasTrafficLight(ushort nodeId) {
-			return Flags.isNodeTrafficLight(nodeId);
-		}
-
-		protected override void HandleInvalidNode(NodeGeometry geometry) {
-			Flags.resetTrafficLight(geometry.NodeId);
-		}
-
-		protected override void HandleValidNode(NodeGeometry geometry) {
-			Flags.applyNodeTrafficLightFlag(geometry.NodeId);
-		}
-
-		public void ApplyAllFlags() {
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				Flags.applyNodeTrafficLightFlag(nodeId);
-			}
-		}
-
-		public override void OnBeforeSaveData() {
-			base.OnBeforeSaveData();
-			ApplyAllFlags();
-		}
-
-		public override void OnAfterLoadData() {
-			base.OnAfterLoadData();
-			ApplyAllFlags();
+			return Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights, NetNode.Flags.Created | NetNode.Flags.TrafficLights);
 		}
 
 		[Obsolete]
@@ -77,7 +111,7 @@ namespace TrafficManager.Manager {
 					var nodeId = Convert.ToUInt16(split[0]);
 					uint flag = Convert.ToUInt16(split[1]);
 
-					if (!NetUtil.IsNodeValid(nodeId))
+					if (!Services.NetService.IsNodeValid(nodeId))
 						continue;
 
 					Flags.setNodeTrafficLight(nodeId, flag > 0);
@@ -101,7 +135,7 @@ namespace TrafficManager.Manager {
 
 			foreach (Configuration.NodeTrafficLight nodeLight in data) {
 				try {
-					if (!NetUtil.IsNodeValid(nodeLight.nodeId))
+					if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
 						continue;
 
 					Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
@@ -117,7 +151,9 @@ namespace TrafficManager.Manager {
 		}
 
 		List<Configuration.NodeTrafficLight> ICustomDataManager<List<Configuration.NodeTrafficLight>>.SaveData(ref bool success) {
-			List<Configuration.NodeTrafficLight> ret = new List<Configuration.NodeTrafficLight>();
+			return null;
+
+			/*List<Configuration.NodeTrafficLight> ret = new List<Configuration.NodeTrafficLight>();
 			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				try {
 					if (!Flags.mayHaveTrafficLight(nodeId))
@@ -139,7 +175,7 @@ namespace TrafficManager.Manager {
 					success = false;
 				}
 			}
-			return ret;
+			return ret;*/
 		}
 	}
 }

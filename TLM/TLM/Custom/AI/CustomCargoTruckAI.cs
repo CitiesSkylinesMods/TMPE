@@ -1,5 +1,3 @@
-#define PATHRECALCx
-
 using System;
 using ColossalFramework;
 using UnityEngine;
@@ -8,6 +6,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using CSUtil.Commons;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {

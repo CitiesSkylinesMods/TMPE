@@ -8,16 +8,13 @@ using TrafficManager.Util;
 using TrafficManager.TrafficLight;
 using TrafficManager.Traffic;
 using System.Linq;
+using CSUtil.Commons;
 
 namespace TrafficManager.Manager {
 	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>> {
-		public static TrafficLightSimulationManager Instance { get; private set; } = null;
+		public static readonly TrafficLightSimulationManager Instance = new TrafficLightSimulationManager();
 		public const int SIM_MOD = 64;
-
-		static TrafficLightSimulationManager() {
-			Instance = new TrafficLightSimulationManager();
-		}
-
+	
 		/// <summary>
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
@@ -26,6 +23,17 @@ namespace TrafficManager.Manager {
 
 		private TrafficLightSimulationManager() {
 			
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Traffic light simulations:");
+			for (int i = 0; i < TrafficLightSimulations.Length; ++i) {
+				if (TrafficLightSimulations[i] == null) {
+					continue;
+				}
+				Log._Debug($"Simulation {i}: {TrafficLightSimulations[i]}");
+			}
 		}
 
 		public void SimulationStep() {
@@ -108,6 +116,14 @@ namespace TrafficManager.Manager {
 			return GetNodeSimulation(nodeId) != null;
 		}
 
+		public bool HasTimedSimulation(ushort nodeId) {
+			return HasSimulation(nodeId) && GetNodeSimulation(nodeId).IsTimedLight();
+		}
+
+		public bool HasActiveTimedSimulation(ushort nodeId) {
+			return HasSimulation(nodeId) && GetNodeSimulation(nodeId).IsTimedLightActive();
+		}
+
 		private void RemoveNodeFromSimulation(ushort nodeId) {
 			TrafficLightSimulations[nodeId]?.Destroy();
 			TrafficLightSimulations[nodeId] = null;
@@ -130,7 +146,7 @@ namespace TrafficManager.Manager {
 		}
 
 		protected override void HandleValidNode(NodeGeometry geometry) {
-			TrafficPriorityManager.Instance.AddPriorityNode(geometry.NodeId, true);
+			
 		}
 
 		public bool LoadData(List<Configuration.TimedTrafficLights> data) {
@@ -160,7 +176,7 @@ namespace TrafficManager.Manager {
 					int foundMasterNodes = 0;
 					for (int i = 0; i < currentNodeGroup.Count;) {
 						ushort nodeId = currentNodeGroup[i];
-						if (!NetUtil.IsNodeValid(currentNodeGroup[i])) {
+						if (!Services.NetService.IsNodeValid(currentNodeGroup[i])) {
 							currentNodeGroup.RemoveAt(i);
 							continue;
 						} else if (nodeGroupByMasterNodeId.ContainsKey(nodeId)) {
@@ -216,12 +232,13 @@ namespace TrafficManager.Manager {
 						TimedTrafficLightsStep step = timedNode.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
-							if (!NetUtil.IsSegmentValid(e.Key))
+							if (!Services.NetService.IsSegmentValid(e.Key))
 								continue;
+							e.Value.nodeId = cnfTimedLights.nodeId;
 
 							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
 							CustomSegmentLights lights = null;
-							if (!step.segmentLights.TryGetValue(e.Key, out lights)) {
+							if (!step.CustomSegmentLights.TryGetValue(e.Key, out lights)) {
 								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
 								continue;
 							}
@@ -286,7 +303,7 @@ namespace TrafficManager.Manager {
 					Log._Debug($"Going to save timed light at node {nodeId}.");
 
 					var timedNode = sim.TimedLight;
-					timedNode.handleNewSegments();
+					timedNode.OnGeometryUpdate();
 
 					Configuration.TimedTrafficLights cnfTimedLights = new Configuration.TimedTrafficLights();
 					ret.Add(cnfTimedLights);
@@ -306,7 +323,7 @@ namespace TrafficManager.Manager {
 						cnfTimedStep.maxTime = timedStep.maxTime;
 						cnfTimedStep.waitFlowBalance = timedStep.waitFlowBalance;
 						cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
-						foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.segmentLights) {
+						foreach (KeyValuePair<ushort, CustomSegmentLights> e in timedStep.CustomSegmentLights) {
 							Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
 
 							CustomSegmentLights segLights = e.Value;

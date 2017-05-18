@@ -1,6 +1,7 @@
 ﻿#define USEPATHWAITCOUNTERx
 
 using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,6 +29,17 @@ namespace TrafficManager.Manager {
 			ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
 			for (uint i = 0; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
 				ExtBuildings[i] = new ExtBuilding((ushort)i);
+			}
+		}
+
+		protected override void InternalPrintDebugInfo() {
+			base.InternalPrintDebugInfo();
+			Log._Debug($"Extended building data:");
+			for (int i = 0; i < ExtBuildings.Length; ++i) {
+				if (ExtBuildings[i] == null || ! ExtBuildings[i].IsValid()) {
+					continue;
+				}
+				Log._Debug($"Building {i}: {ExtBuildings[i]}");
 			}
 		}
 

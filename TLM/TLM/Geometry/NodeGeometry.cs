@@ -1,6 +1,5 @@
-﻿#define DEBUGGEOx
-
-using ColossalFramework;
+﻿using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,8 +11,25 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Geometry {
-	public class NodeGeometry : IObservable<NodeGeometry> {
+	public class NodeGeometry : IObservable<NodeGeometry>, IEquatable<NodeGeometry> {
+		private const byte MAX_NUM_SEGMENTS = 8;
+
 		private static NodeGeometry[] nodeGeometries;
+
+		public static void PrintDebugInfo() {
+			string buf = 
+			"-----------------------\n" +
+			"--- NODE GEOMETRIES ---\n" +
+			"-----------------------";
+			buf += $"Total: {nodeGeometries.Length}\n";
+			foreach (NodeGeometry nodeGeo in nodeGeometries) {
+				if (nodeGeo.IsValid()) {
+					buf += nodeGeo.ToString() + "\n" +
+					"-------------------------\n";
+				}
+			}
+			Log.Info(buf);
+		}
 
 		public ushort NodeId {
 			get; private set;
@@ -23,13 +39,15 @@ namespace TrafficManager.Geometry {
 			get; private set;
 		} = false;
 
+		/// <summary>
+		/// Connected segment end geometries.
+		/// WARNING: Individual entries may be null
+		/// </summary>
 		public SegmentEndGeometry[] SegmentEndGeometries {
 			get; private set;
-		} = new SegmentEndGeometry[8];
+		} = new SegmentEndGeometry[MAX_NUM_SEGMENTS];
 
 		public byte NumSegmentEnds { get; private set; } = 0;
-
-		public bool NeedsRecalculation { get; private set; } = false; // TODO actually use this flag
 
 		/// <summary>
 		/// Holds a list of observers which are being notified as soon as the managed node's geometry is updated (but not neccessarily modified)
@@ -41,6 +59,15 @@ namespace TrafficManager.Geometry {
 		/// </summary>
 		public readonly object Lock = new object();
 
+		public override string ToString() {
+			return $"[NodeGeometry ({NodeId})\n" +
+				"\t" + $"IsValid() = {IsValid()}\n" +
+				"\t" + $"IsSimpleJunction = {IsSimpleJunction}\n" +
+				"\t" + $"SegmentEndGeometries = {SegmentEndGeometries.ArrayToString()}\n" +
+				"\t" + $"NumSegmentEnds = {NumSegmentEnds}\n" +
+				"NodeGeometry]";
+		}
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -50,7 +77,7 @@ namespace TrafficManager.Geometry {
 		}
 
 		public bool IsValid() {
-			return (Singleton<NetManager>.instance.m_nodes.m_buffer[NodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created;
+			return Constants.ServiceFactory.NetService.IsNodeValid(NodeId);
 		}
 
 		/// <summary>
@@ -68,65 +95,68 @@ namespace TrafficManager.Geometry {
 			return new GenericUnsubscriber<NodeGeometry>(observers, observer, Lock);
 		}
 		
-		internal void AddSegment(ushort segmentId, bool startNode, bool propagate) {
+		internal void AddSegmentEnd(SegmentEndGeometry segEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.DebugSwitches[5])
-				Log._Debug($"NodeGeometry: Add segment {segmentId}, start? {startNode} @ node {NodeId}");
+				Log._Debug($">>> NodeGeometry: Add segment end {segEndGeo.SegmentId}, start? {segEndGeo.StartNode} @ node {NodeId}");
 #endif
 			if (!IsValid()) {
 				//Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
-				Recalculate();
+				RemoveAllSegmentEnds();
 				return;
 			}
 
-			for (int i = 0; i < 8; ++i) {
-				if (SegmentEndGeometries[i]?.SegmentId == segmentId) {
-					SegmentEndGeometries[i] = null;
-				}
-			}
-
-			for (int i = 0; i < 8; ++i) {
-				if (SegmentEndGeometries[i] == null) {
-					SegmentEndGeometries[i] = startNode ? SegmentGeometry.Get(segmentId).StartNodeGeometry : SegmentGeometry.Get(segmentId).EndNodeGeometry;
+			bool found = false;
+			int freeIndex = -1;
+			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
+				SegmentEndGeometry storedEndGeo = SegmentEndGeometries[i];
+				if (segEndGeo.Equals(storedEndGeo)) {
+					SegmentEndGeometries[i] = segEndGeo;
+					found = true;
 					break;
+				} else if (storedEndGeo == null && freeIndex < 0) {
+					freeIndex = i;
 				}
 			}
 
-			if (propagate) {
-				NeedsRecalculation = true;
-				try {
-					RecalculateSegments(segmentId);
-				} finally {
-					NeedsRecalculation = false;
+			if (!found) {
+				if (freeIndex >= 0) {
+					SegmentEndGeometries[freeIndex] = segEndGeo;
+				} else {
+					Log.Error($"NodeGeometry.AddSegmentEnd: Detected inconsistency. Unable to add segment end {segEndGeo} to node {NodeId}. Maximum segment end capacity reached.");
 				}
+			}
+
+			if (calcMode == GeometryCalculationMode.Propagate) {
+				RecalculateSegments(segEndGeo.SegmentId);
 			}
 			Recalculate();
 		}
 
-		internal void RemoveSegment(ushort segmentId, bool propagate) {
+		internal void RemoveSegmentEnd(SegmentEndGeometry segmentEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.DebugSwitches[5])
-				Log._Debug($"NodeGeometry: Remove segment {segmentId} @ node {NodeId}, propagate? {propagate}");
+				Log._Debug($">>> NodeGeometry: Remove segment end {segmentEndGeo.SegmentId} @ {NodeId}, calcMode? {calcMode}");
 #endif
-			if (!IsValid()) {
-				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
-				Recalculate();
+
+			if (calcMode == GeometryCalculationMode.Init) {
 				return;
 			}
 
-			for (int i = 0; i < 8; ++i) {
-				if (SegmentEndGeometries[i]?.SegmentId == segmentId) {
+			if (!IsValid()) {
+				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
+				RemoveAllSegmentEnds();
+				return;
+			}
+
+			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
+				if (segmentEndGeo.Equals(SegmentEndGeometries[i])) {
 					SegmentEndGeometries[i] = null;
 				}
 			}
 
-			if (propagate) {
-				NeedsRecalculation = true;
-				try {
-					RecalculateSegments(segmentId);
-				} finally {
-					NeedsRecalculation = false;
-				}
+			if (calcMode == GeometryCalculationMode.Propagate) {
+				RecalculateSegments(segmentEndGeo.SegmentId);
 			}
 			Recalculate();
 		}
@@ -143,7 +173,7 @@ namespace TrafficManager.Geometry {
 #endif
 
 			// recalculate (other) segments
-			for (int i = 0; i < 8; ++i) {
+			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
 				if (SegmentEndGeometries[i] == null)
 					continue;
 				if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
@@ -152,28 +182,27 @@ namespace TrafficManager.Geometry {
 				if (GlobalConfig.Instance.DebugSwitches[5])
 					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
-				SegmentEndGeometries[i].GetSegmentGeometry().Recalculate(false);
+				SegmentEndGeometries[i].GetSegmentGeometry(true).StartRecalculation(GeometryCalculationMode.NoPropagate);
 			}
 		}
 
 		internal void Recalculate() {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.DebugSwitches[5])
-				Log._Debug($"NodeGeometry: Recalculate @ {NodeId}");
+				Log._Debug($">>> NodeGeometry: Recalculate @ {NodeId}");
 #endif
 
 			Cleanup();
 
 			// check if node is valid
 			if (!IsValid()) {
-				for (int i = 0; i < 8; ++i) {
-					SegmentEndGeometries[i] = null;
-				}
+				RemoveAllSegmentEnds();
+				return;
 			} else {
 				// calculate node properties
 				byte incomingSegments = 0;
 				byte outgoingSegments = 0;
-				for (int i = 0; i < 8; ++i) {
+				for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
 					if (SegmentEndGeometries[i] == null)
 						continue;
 					++NumSegmentEnds;
@@ -183,9 +212,9 @@ namespace TrafficManager.Geometry {
 #endif
 
 					bool startNode = SegmentEndGeometries[i].StartNode;
-					if (SegmentEndGeometries[i].GetSegmentGeometry().IsIncoming(startNode))
+					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsIncoming(startNode))
 						++incomingSegments;
-					if (SegmentEndGeometries[i].GetSegmentGeometry().IsOutgoing(startNode))
+					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsOutgoing(startNode))
 						++outgoingSegments;
 				}
 
@@ -194,9 +223,39 @@ namespace TrafficManager.Geometry {
 				if (GlobalConfig.Instance.DebugSwitches[5])
 					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
 #endif
+				NotifyObservers();
 			}
+		}
 
+		protected void RemoveAllSegmentEnds() {
+			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
+				SegmentEndGeometries[i] = null;
+			}
 			NotifyObservers();
+		}
+
+		public bool Equals(NodeGeometry otherNodeGeo) {
+			if (otherNodeGeo == null) {
+				return false;
+			}
+			return NodeId == otherNodeGeo.NodeId;
+		}
+
+		public override bool Equals(object other) {
+			if (other == null) {
+				return false;
+			}
+			if (!(other is NodeGeometry)) {
+				return false;
+			}
+			return Equals((NodeGeometry)other);
+		}
+
+		public override int GetHashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + NodeId.GetHashCode();
+			return result;
 		}
 
 		internal void NotifyObservers() {
@@ -228,6 +287,9 @@ namespace TrafficManager.Geometry {
 		}
 
 		public static NodeGeometry Get(ushort nodeId) {
+			if (nodeGeometries == null) {
+				return null;
+			}
 			return nodeGeometries[nodeId];
 		}
 	}

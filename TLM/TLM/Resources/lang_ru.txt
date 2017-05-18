@@ -158,3 +158,14 @@ Vehicle_behavior Поведение транспорта
 Policies_&_Restrictions Политики & Ограничения
 At_junctions На перекрёстках
 In_case_of_emergency В случае крайней необходимости
+Show_lane-wise_speed_limits Показ ограничения скорости по полосам
+Language Локализация
+Game_language Язык игры
+requires_game_restart требуется перезапуск игры
+Customizations_come_into_effect_instantaneously Настройки применяются сразу
+Options Свойства
+Lock_main_menu_button_position Блокировка позиции кнопки главного меню
+Lock_main_menu_position Блокировка позиции главного меню
+Recalculating_lane_routing Обновление маршрута
+Please_wait Подождите пожалуйста 
+Parking_restrictions Ограничения парковки

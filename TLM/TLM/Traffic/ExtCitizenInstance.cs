@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -196,9 +197,31 @@ namespace TrafficManager.Traffic {
 			get; internal set;
 		}
 
-		public ExtCitizenInstance(ushort instanceId) {
+		public override string ToString() {
+			return $"[ExtCitizenInstance\n" +
+				"\t" + $"InstanceId = {InstanceId}\n" +
+				"\t" + $"PathMode = {PathMode}\n" +
+				"\t" + $"FailedParkingAttempts = {FailedParkingAttempts}\n" +
+				"\t" + $"ParkingSpaceLocationId = {ParkingSpaceLocationId}\n" +
+				"\t" + $"ParkingSpaceLocation = {ParkingSpaceLocation}\n" +
+				"\t" + $"ParkingPathStartPosition = {ParkingPathStartPosition}\n" +
+				"\t" + $"ReturnPathId = {ReturnPathId}\n" +
+				"\t" + $"ReturnPathState = {ReturnPathState}\n" +
+				"\t" + $"LastDistanceToParkedCar = {LastDistanceToParkedCar}\n" +
+				"ExtCitizenInstance]";
+		}
+
+		internal ExtCitizenInstance(ushort instanceId) {
 			this.InstanceId = instanceId;
 			Reset();
+		}
+
+		private ExtCitizenInstance() {
+
+		}
+
+		internal bool IsValid() {
+			return Constants.ServiceFactory.CitizenService.IsCitizenInstanceValid(InstanceId);
 		}
 
 		public uint GetCitizenId() {
@@ -276,7 +299,7 @@ namespace TrafficManager.Traffic {
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
 
-				if (CustomPathManager._instance.CreatePath(false, ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false, false)) {
+				if (CustomPathManager._instance.CreatePath(ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false, false)) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");

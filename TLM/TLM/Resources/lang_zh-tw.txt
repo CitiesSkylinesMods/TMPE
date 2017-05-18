@@ -158,3 +158,14 @@ Vehicle_behavior 車輛行為
 Policies_&_Restrictions 政策與限制
 At_junctions 位在交岔路口
 In_case_of_emergency 在緊急狀況下
+Show_lane-wise_speed_limits 顯示車道速限
+Language 語言
+Game_language 遊戲顯示語言
+requires_game_restart 需要重新啟動遊戲
+Customizations_come_into_effect_instantaneously 自訂值即時生效
+Options 選項
+Lock_main_menu_button_position 鎖定主選單的選項位置
+Lock_main_menu_position 鎖定主選單的位置
+Recalculating_lane_routing 重新規劃行駛路線
+Please_wait 請稍候
+Parking_restrictions 停車限制
