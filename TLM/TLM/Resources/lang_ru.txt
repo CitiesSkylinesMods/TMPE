@@ -169,3 +169,4 @@ Lock_main_menu_position Блокировка позиции главного м�
 Recalculating_lane_routing Обновление маршрута
 Please_wait Подождите пожалуйста 
 Parking_restrictions Ограничения парковки
+Simulation Simulation

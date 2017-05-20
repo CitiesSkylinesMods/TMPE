@@ -168,3 +168,4 @@ Lock_main_menu_position Zablokuj pozycjê menu g³ównego
 Recalculating_lane_routing Ponowne obliczanie tras
 Please_wait Proszê czekaæ
 Parking_restrictions Ograniczenia parkingowe
+Simulation Simulation

@@ -170,3 +170,4 @@ Please_wait Por favor, aguarde
 Parking_restrictions Restrições de estacionamento
 Please_wait Please wait
 Parking_restrictions Parking restrictions
+Simulation Simulation

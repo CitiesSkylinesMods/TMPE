@@ -168,3 +168,4 @@ Lock_main_menu_position Position des Hauptmenüs sperren
 Recalculating_lane_routing Berechne Routenführung neu
 Please_wait Bitte warten
 Parking_restrictions Parkverbote
+Simulation Simulation

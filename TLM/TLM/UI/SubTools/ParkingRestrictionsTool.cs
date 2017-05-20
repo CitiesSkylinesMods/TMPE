@@ -72,8 +72,9 @@ namespace TrafficManager.UI.SubTools {
 				currentlyVisibleSegmentIds.Clear();
 
 				for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-					if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
 						continue;
+					}
 					/*if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 						continue;*/
 

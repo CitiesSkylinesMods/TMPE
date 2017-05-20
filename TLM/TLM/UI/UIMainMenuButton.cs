@@ -84,20 +84,21 @@ namespace TrafficManager.UI {
 
 		internal void UpdateSprites() {
 			if (! LoadingExtension.BaseUI.IsVisible()) {
-				normalBgSprite = disabledBgSprite = focusedBgSprite = MAIN_MENU_BUTTON_BG_BASE;
-				hoveredBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
-				pressedBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;
+				m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled = m_BackgroundSprites.m_Focused = MAIN_MENU_BUTTON_BG_BASE;
+				m_BackgroundSprites.m_Hovered = MAIN_MENU_BUTTON_BG_HOVERED;
+				m_PressedBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;
 
-				normalFgSprite = disabledFgSprite = focusedFgSprite = MAIN_MENU_BUTTON_FG_BASE;
-				hoveredFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
-				pressedFgSprite = MAIN_MENU_BUTTON_FG_ACTIVE;
+				m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = MAIN_MENU_BUTTON_FG_BASE;
+				m_ForegroundSprites.m_Hovered = MAIN_MENU_BUTTON_FG_HOVERED;
+				m_PressedFgSprite = MAIN_MENU_BUTTON_FG_ACTIVE;
 			} else {
-				normalBgSprite = disabledBgSprite = focusedBgSprite = hoveredBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;
-				pressedBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
+				m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled = m_BackgroundSprites.m_Focused = m_BackgroundSprites.m_Hovered = MAIN_MENU_BUTTON_BG_ACTIVE;
+				m_PressedBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
 
-				normalFgSprite = disabledFgSprite = focusedFgSprite = hoveredFgSprite = MAIN_MENU_BUTTON_FG_ACTIVE;
-				pressedFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
+				m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = m_ForegroundSprites.m_Hovered = MAIN_MENU_BUTTON_FG_ACTIVE;
+				m_PressedFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
 			}
+			this.Invalidate();
 		}
 	}
 }

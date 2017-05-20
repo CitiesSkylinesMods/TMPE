@@ -292,7 +292,9 @@ namespace TrafficManager.TrafficLight {
 
 			/*if (!housekeeping())
 				return;*/
-			
+
+			TrafficLightManager.Instance.AddTrafficLight(NodeId);
+
 			foreach (TimedTrafficLightsStep step in Steps) {
 				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.CustomSegmentLights) {
 					e.Value.housekeeping(true, true);

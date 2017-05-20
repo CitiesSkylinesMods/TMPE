@@ -59,7 +59,7 @@ All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道行驶方向
 Busses_may_ignore_lane_arrows 公交车可忽略车道行驶方向
 Reckless_driving 违规驾驶（功能测试中）
 TMPE_Title 交通管理:总统版(贴吧简体中文翻译）
-Settings_are_defined_for_each_savegame_separately 贴吧简体中文温馨提示: 设置项目自动跳出关闭就好，MOD设置说明文档地址：
+Settings_are_defined_for_each_savegame_separately 贴吧简体中文温馨提示: 设置项目自动跳出关闭就好，欢迎订阅“天吧简体中文”最接地气的中文，MOD设置说明文档地址：
 Simulation_accuracy 模拟真实度（高真实模拟会影响性能）
 Enable_highway_specific_lane_merging/splitting_rules 实行高速公路特定的车道合流/分离规则
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 司机习惯变换车道（仅适用于加强版AI启动时)
@@ -157,14 +157,15 @@ Vehicle_behavior 车辆行为
 Policies_&_Restrictions 政策和限制
 At_junctions 位于十字路口
 In_case_of_emergency 在紧急情况下
-Show_lane-wise_speed_limits Show lane-wise speed limits
-Language Language
-Game_language Game language
-requires_game_restart requires game restart
-Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
-Options Options
-Lock_main_menu_button_position Lock main menu button position
-Lock_main_menu_position Lock main menu position
-Recalculating_lane_routing Recalculating lane routing
-Please_wait Please wait
-Parking_restrictions Parking restrictions
+Show_lane-wise_speed_limits 开启道路各个车道限速设置
+Language 语言设置
+Game_language 自动识别游戏语言
+requires_game_restart 需重新启动方可生效，请订阅“天吧简体中文”
+Customizations_come_into_effect_instantaneously 订制模拟真实度开启选项则将会立即生效
+Options 选项
+Lock_main_menu_button_position 锁定主菜单按钮位置
+Lock_main_menu_position 主菜单位置
+Recalculating_lane_routing 重新计算车道路线
+Please_wait 请稍候
+Parking_restrictions 道路边停车控制管理
+Simulation 模拟

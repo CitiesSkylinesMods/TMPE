@@ -17,10 +17,18 @@ using UnityEngine;
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
 		private bool _cursorInSecondaryPanel;
-		private Texture2D SecondPanelTexture;
+		private Texture2D SecondPanelTexture {
+			get {
+				if (secondPanelTexture == null) {
+					secondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
+				}
+				return secondPanelTexture;
+			}
+		}
+		private Texture2D secondPanelTexture = null;
 
 		public LaneArrowTool(TrafficManagerTool mainTool) : base(mainTool) {
-			SecondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
+			
 		}
 
 		public override bool IsCursorInPanel() {

@@ -60,7 +60,7 @@ Busses_may_ignore_lane_arrows 버스가 도로 화살표를 무시 할 수 있�
 Reckless_driving 난폭 운전 (베타 기능)
 TMPE_Title 트래픽 매니저 : 대통령 에디션
 Settings_are_defined_for_each_savegame_separately 설정은 각 저장된 게임마다 별개로 작동합니다.
-Simulation_accuracy 시뮬레이션 정확도 (효과가 올라갈수록 성능은 감소합니다)
+Simulation_accuracy 시뮬레이션 정확도 (높을수록 더 많은 연산을 요구합니다)
 Enable_highway_specific_lane_merging/splitting_rules 고속도로 특정도로 병합/분할 기능 활성화
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 운전자가 차선을 변경합니다 (발전된 차량 AI를 사용 중일 때만 적용됩니다)
 Maintenance 유지보수 (추가정보)
@@ -70,7 +70,7 @@ Sometimes 가끔
 Rarely 드물게
 Very_rarely 매우 드물게
 Only_if_necessary 필요한 경우에만
-Nodes_and_segments 도로와 세그먼트(구간)
+Nodes_and_segments 도로와 세그먼트(노드)
 Lanes 차선
 Path_Of_Evil_(10_%) 악마의 도로 (10 %)
 Rush_Hour_(5_%) 출퇴근정도의 혼잡  (5 %)
@@ -158,14 +158,15 @@ Vehicle_behavior 차량 제한
 Policies_&_Restrictions 정책 및 제한
 At_junctions 교차로 설정
 In_case_of_emergency 긴급 상황 설정
-Show_lane-wise_speed_limits Show lane-wise speed limits
-Language Language
-Game_language Game language
-requires_game_restart requires game restart
-Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
-Options Options
-Lock_main_menu_button_position Lock main menu button position
-Lock_main_menu_position Lock main menu position
-Recalculating_lane_routing Recalculating lane routing
-Please_wait Please wait
-Parking_restrictions Parking restrictions
+Show_lane-wise_speed_limits 차선 속도제한 보기
+Language 언어
+Game_language 게임 언어
+requires_game_restart 게임 재시작후 적용됩니다
+Customizations_come_into_effect_instantaneously 커스텀 기능이 즉시 적용됩니다
+Options 설정
+Lock_main_menu_button_position TMPE 모드버튼 위치 잠금
+Lock_main_menu_position TMPE 모드매뉴 위치 잠금
+Recalculating_lane_routing 차선 경로 재 계산하기
+Please_wait 잠시만 기다려주십시오
+Parking_restrictions 주차 제한
+Simulation 시뮬레이션

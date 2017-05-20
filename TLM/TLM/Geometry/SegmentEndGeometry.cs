@@ -337,6 +337,10 @@ namespace TrafficManager.Geometry {
 				IncomingOneWay = true;
 			}
 			OnlyHighways = true;
+#if DEBUGGEO
+			if (GlobalConfig.Instance.DebugSwitches[5])
+				Log._Debug($"Checking if segment {SegmentId} is connected to highways only at node {NodeId()}. OnlyHighways={OnlyHighways}");
+#endif
 
 			//ItemClass connectionClass = netManager.m_segments.m_buffer[SegmentId].Info.GetConnectionClass();
 
@@ -362,8 +366,13 @@ namespace TrafficManager.Geometry {
 				bool otherIsOneWay;
 				bool otherIsOutgoingOneWay;
 				SegmentGeometry.calculateOneWayAtNode(otherSegmentId, nodeId, out otherIsOneWay, out otherIsOutgoingOneWay);
+				bool otherIsHighway = SegmentGeometry.calculateIsHighway(otherSegmentId);
 
-				if (!(SegmentGeometry.calculateIsHighway(otherSegmentId) && otherIsOneWay))
+#if DEBUGGEO
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log._Debug($"Segment {SegmentId} is connected to segment {otherSegmentId} at node {NodeId()}. otherIsOneWay={otherIsOneWay} otherIsOutgoingOneWay={otherIsOutgoingOneWay} otherIsHighway={otherIsHighway}");
+#endif
+				if (! otherIsHighway || ! otherIsOneWay)
 					OnlyHighways = false;
 
 				if (IsRightSegment(SegmentId, otherSegmentId, nodeId)) {
@@ -404,8 +413,13 @@ namespace TrafficManager.Geometry {
 			NumIncomingSegments = (byte)(NumIncomingLeftSegments + NumIncomingStraightSegments + NumIncomingRightSegments);
 			NumOutgoingSegments = (byte)(NumOutgoingLeftSegments + NumOutgoingStraightSegments + NumOutgoingRightSegments);
 
-			if (!hasOtherSegments)
+			if (!hasOtherSegments) {
+#if DEBUGGEO
+				if (GlobalConfig.Instance.DebugSwitches[5])
+					Log._Debug($"Segment {SegmentId} is not connected to any other segments at node {NodeId()}.");
+#endif
 				OnlyHighways = false;
+			}
 
 			// propagate information to other segments
 			if (calcMode == GeometryCalculationMode.Init || (calcMode == GeometryCalculationMode.Propagate && nodeIdBeforeRecalc != nodeId)) {

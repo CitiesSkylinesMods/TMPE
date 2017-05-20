@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class TrafficMeasurementManager : AbstractCustomManager {
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
 		public static readonly TrafficMeasurementManager Instance = new TrafficMeasurementManager();
@@ -210,6 +211,8 @@ namespace TrafficManager.Manager {
 			ushort maxBuffer = 0;
 			for (uint li = 0; li < numLanes; ++li) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
+				if ((laneInfo.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None)
+					continue;
 				if ((laneInfo.m_laneType & LANE_TYPES) == NetInfo.LaneType.None)
 					continue;
 

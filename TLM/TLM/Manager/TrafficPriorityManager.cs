@@ -496,7 +496,7 @@ namespace TrafficManager.Manager {
 #endif
 
 				if (targetEnd.NodeId != incomingEnd.NodeId) {
-					Log.Error($"HasVehiclePriority: Incompatible SegmentEnds!");
+					Log._Debug($"HasVehiclePriority: Incompatible SegmentEnds: targetEnd.NodeId={targetEnd.NodeId}, incomingEnd.NodeId={incomingEnd.NodeId}");
 					return true;
 				}
 

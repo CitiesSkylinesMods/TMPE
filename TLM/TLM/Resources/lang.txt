@@ -169,3 +169,4 @@ Lock_main_menu_position Lock main menu position
 Recalculating_lane_routing Recalculating lane routing
 Please_wait Please wait
 Parking_restrictions Parking restrictions
+Simulation Simulation

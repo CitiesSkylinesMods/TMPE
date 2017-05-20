@@ -119,13 +119,17 @@ namespace TrafficManager.UI {
 			subTools[ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this);
 			subTools[ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this);
 
-			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
-				e.Value.Initialize();
-			}
+			InitializeSubTools();
 
 			SetToolMode(ToolMode.None);
 
 			Log.Info("TrafficManagerTool: Initialization completed.");
+		}
+
+		internal void InitializeSubTools() {
+			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
+				e.Value.Initialize();
+			}
 		}
 
 		protected override void Awake() {

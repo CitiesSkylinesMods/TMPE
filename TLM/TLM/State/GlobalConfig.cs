@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 6;
+		private static int LATEST_VERSION = 7;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -124,7 +124,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Relative factor for lane speed cost calculation
 		/// </summary>
-		public float SpeedCostFactor = 0.25f;
+		public float SpeedCostFactor = 1f;
 
 		/// <summary>
 		/// lane changing cost reduction modulo

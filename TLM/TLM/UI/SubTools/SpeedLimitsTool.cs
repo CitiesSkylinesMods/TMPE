@@ -26,20 +26,34 @@ namespace TrafficManager.UI.SubTools {
 		private Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 		private readonly float speedLimitSignSize = 80f;
 		private readonly int guiSpeedSignSize = 100;
-		private Texture2D SecondPanelTexture;
+		private Texture2D SecondPanelTexture {
+			get {
+				if (secondPanelTexture == null) {
+					secondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
+				}
+				return secondPanelTexture;
+			}
+		}
+		private Texture2D secondPanelTexture = null;
 		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 225));
 		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 280, 400, 400));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
 		private int currentInfoIndex = -1;
 		private int currentSpeedLimitIndex = -1;
-		private Texture2D roadTex;
+		private Texture2D RoadTexture {
+			get {
+				if (roadTexture == null) {
+					roadTexture = new Texture2D(guiSpeedSignSize, guiSpeedSignSize);
+				}
+				return roadTexture;
+			}
+		}
+		private Texture2D roadTexture = null;
 		private bool showLimitsPerLane = false;
 
 		public SpeedLimitsTool(TrafficManagerTool mainTool) : base(mainTool) {
-			SecondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
 			currentlyVisibleSegmentIds = new HashSet<ushort>();
-			roadTex = new Texture2D(guiSpeedSignSize, guiSpeedSignSize);
 		}
 
 		public override bool IsCursorInPanel() {
@@ -103,8 +117,9 @@ namespace TrafficManager.UI.SubTools {
 				currentlyVisibleSegmentIds.Clear();
 
 				for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-					if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+					if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
 						continue;
+					}
 					/*if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 						continue;*/
 
@@ -201,7 +216,7 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 
 			// NetInfo thumbnail
-			GUILayout.Box(roadTex, GUILayout.Height(guiSpeedSignSize));
+			GUILayout.Box(RoadTexture, GUILayout.Height(guiSpeedSignSize));
 			GUILayout.FlexibleSpace();
 
 			GUILayout.EndVertical();
@@ -297,9 +312,9 @@ namespace TrafficManager.UI.SubTools {
 
 					if (spriteInfo != null && spriteInfo.texture != null && spriteInfo.texture.width > 0 && spriteInfo.texture.height > 0) {
 						try {
-							roadTex = new Texture2D((int)spriteInfo.texture.width, (int)spriteInfo.texture.height, TextureFormat.ARGB32, false);
-							roadTex.SetPixels(0, 0, roadTex.width, roadTex.height, mainTex.GetPixels((int)(spriteInfo.region.x * mainTex.width), (int)(spriteInfo.region.y * mainTex.height), (int)(spriteInfo.region.width * mainTex.width), (int)(spriteInfo.region.height * mainTex.height)));
-							roadTex.Apply();
+							roadTexture = new Texture2D((int)spriteInfo.texture.width, (int)spriteInfo.texture.height, TextureFormat.ARGB32, false);
+							roadTexture.SetPixels(0, 0, roadTexture.width, roadTexture.height, mainTex.GetPixels((int)(spriteInfo.region.x * mainTex.width), (int)(spriteInfo.region.y * mainTex.height), (int)(spriteInfo.region.width * mainTex.width), (int)(spriteInfo.region.height * mainTex.height)));
+							roadTexture.Apply();
 							return;
 						} catch (Exception e) {
 							Log.Warning($"Could not get texture from NetInfo {info.name}: {e.ToString()}");
@@ -309,7 +324,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			// fallback to "noimage" texture
-			roadTex = TextureResources.NoImageTexture2D;
+			roadTexture = TextureResources.NoImageTexture2D;
 		}
 
 		private void _guiSpeedLimitsWindow(int num) {

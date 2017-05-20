@@ -68,10 +68,14 @@ namespace TrafficManager.UI.SubTools {
 				currentRestrictedNodeIds.Add(SelectedNodeId);
 			}
 
-			bool stateUpdated = false;
+			ushort updatedNodeId = 0;
 			bool handleHovered = false;
 			bool cursorInPanel = this.IsCursorInPanel();
 			foreach (ushort nodeId in currentRestrictedNodeIds) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+					continue;
+				}
+
 				Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
 				var diff = nodePos - camPos;
 
@@ -93,13 +97,15 @@ namespace TrafficManager.UI.SubTools {
 				if (drawSignHandles(nodeId, viewOnlyNode, !cursorInPanel, ref camPos, out update))
 					handleHovered = true;
 
-				if (update)
-					stateUpdated = true;
+				if (update) {
+					updatedNodeId = nodeId;
+				}
 			}
 			overlayHandleHovered = handleHovered;
 
-			if (stateUpdated)
-				RefreshCurrentRestrictedNodeIds();
+			if (updatedNodeId != 0) {
+				RefreshCurrentRestrictedNodeIds(updatedNodeId);
+			}
 		}
 
 		public override void OnPrimaryClickOverlay() {
@@ -125,18 +131,29 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
-			RefreshCurrentRestrictedNodeIds();
+			
 		}
 
 		public override void Initialize() {
 			Cleanup();
+			if (Options.junctionRestrictionsOverlay) {
+				RefreshCurrentRestrictedNodeIds();
+			} else {
+				currentRestrictedNodeIds.Clear();
+			}
 		}
 
-		private void RefreshCurrentRestrictedNodeIds() {
-			currentRestrictedNodeIds.Clear();
-			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+		private void RefreshCurrentRestrictedNodeIds(ushort forceNodeId=0) {
+			if (forceNodeId == 0) {
+				currentRestrictedNodeIds.Clear();
+			} else {
+				currentRestrictedNodeIds.Remove(forceNodeId);
+			}
+
+			for (uint nodeId = (forceNodeId == 0 ? 1u : forceNodeId); nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId); ++nodeId) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
 					continue;
+				}
 
 				if (JunctionRestrictionsManager.Instance.HasJunctionRestrictions((ushort)nodeId))
 					currentRestrictedNodeIds.Add((ushort)nodeId);

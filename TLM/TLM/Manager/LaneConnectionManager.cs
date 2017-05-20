@@ -71,6 +71,29 @@ namespace TrafficManager.Manager {
 			return ret;
 		}
 
+		/// <summary>
+		/// Determines if there exist custom lane connections at the specified node
+		/// </summary>
+		/// <param name="nodeId"></param>
+		public bool HasNodeConnections(ushort nodeId) {
+#if DEBUGCONN
+			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
+#endif
+
+			bool ret = false;
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				Services.NetService.IterateSegmentLanes(segmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segId, ref NetSegment seg, byte laneIndex) {
+					if (HasConnections(laneId, seg.m_startNode == nodeId)) {
+						ret = true;
+						return false;
+					}
+					return true;
+				});
+				return !ret;
+			});
+			return ret;
+		}
+
 		public bool HasUturnConnections(ushort segmentId, bool startNode) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			int nodeArrayIndex = startNode ? 0 : 1;

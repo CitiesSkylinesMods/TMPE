@@ -116,15 +116,16 @@ namespace TrafficManager.UI.MainMenu {
 		public abstract bool Visible { get; }
 
 		internal void UpdateProperties() {
-			normalBgSprite = disabledBgSprite = focusedBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.Base, Active);
-			hoveredBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.Hovered, Active);
-			pressedBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.MouseDown, Active);
+			m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled = m_BackgroundSprites.m_Focused = GetButtonBackgroundTextureId(ButtonMouseState.Base, Active);
+			m_BackgroundSprites.m_Hovered = GetButtonBackgroundTextureId(ButtonMouseState.Hovered, Active);
+			m_PressedBgSprite = GetButtonBackgroundTextureId(ButtonMouseState.MouseDown, Active);
 
-			normalFgSprite = disabledFgSprite = focusedFgSprite = GetButtonForegroundTextureId(Function, Active);
-			hoveredFgSprite = pressedFgSprite = GetButtonForegroundTextureId(Function, true);
+			m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = GetButtonForegroundTextureId(Function, Active);
+			m_ForegroundSprites.m_Hovered = m_PressedFgSprite = GetButtonForegroundTextureId(Function, true);
 
 			tooltip = Translation.GetString(Tooltip);
 			isVisible = Visible;
+			this.Invalidate();
 		}
 	}
 }

@@ -169,3 +169,4 @@ Lock_main_menu_position 鎖定主選單的位置
 Recalculating_lane_routing 重新規劃行駛路線
 Please_wait 請稍候
 Parking_restrictions 停車限制
+Simulation Simulation

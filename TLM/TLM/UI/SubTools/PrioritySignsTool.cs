@@ -69,6 +69,10 @@ namespace TrafficManager.UI.SubTools {
 
 			currentPriorityNodeIds.Clear();
 			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+					continue;
+				}
+
 				if (!tpm.MayNodeHavePrioritySigns(nodeId)) {
 					continue;
 				}
@@ -110,6 +114,10 @@ namespace TrafficManager.UI.SubTools {
 				ushort removedNodeId = 0;
 				bool showRemoveButton = false;
 				foreach (ushort nodeId in currentPriorityNodeIds) {
+					if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+						continue;
+					}
+
 					if (!MainTool.IsNodeWithinViewDistance(nodeId)) {
 						continue;
 					}
@@ -249,11 +257,20 @@ namespace TrafficManager.UI.SubTools {
 			//	}
 			//}
 
+			
+		}
+
+		public override void OnActivate() {
 			RefreshCurrentPriorityNodeIds();
 		}
 
 		public override void Initialize() {
 			Cleanup();
+			if (Options.prioritySignsOverlay) {
+				RefreshCurrentPriorityNodeIds();
+			} else {
+				currentPriorityNodeIds.Clear();
+			}
 		}
 
 		private bool MayNodeHavePrioritySigns(ushort nodeId) {

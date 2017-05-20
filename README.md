@@ -4,7 +4,16 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog
-1.9.0, 04/09/2017
+1.9.2, 05/20/2017
+- UI: Main menu & UI tools performance improved
+- Bugfix: Traffic lights can be removed from junctions that are controlled by a timed traffic light program
+
+1.9.1, 05/19/2017
+- Updated French, Dutch and Korean translation
+- Bugfix: Using the vanilla traffic light toggling feature crashes the game if TMPE's main menu has not been opened at least once
+- Bugfix: AI: More car traffic and less public transportation present than in vanilla
+
+1.9.0, 05/18/2017
 - Updated for game version 1.7.0-f5
 - New feature: Parking restrictions
 - New feature: Speed limits can be set up for individual lanes with the Control key
@@ -19,9 +28,10 @@ User manual: http://www.viathinksoft.de/tmpe
 - Path-finding cost multiplicator for vehicle restrictions is now configurable in TMPE_GlobalConfig.xml
 - UI: More compact, movable main menu UI
 - Added support for custom languages
+- Added Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
 - Updated translations: German, Polish, Russian, Portuguese, Traditional Chinese 
 - Major code refactorings
-- AI: Tuned parameters
+- AI: Tuned path-finding parameters
 - New option: Main button position can be locked
 - New option: Main menu position can be locked
 - New option: Added language selection in options dialog

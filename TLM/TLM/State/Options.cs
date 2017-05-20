@@ -374,6 +374,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prioritySignsOverlay changed to {newPrioritySignsOverlay}");
 			prioritySignsOverlay = newPrioritySignsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onTimedLightsOverlayChanged(bool newTimedLightsOverlay) {
@@ -382,6 +384,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"timedLightsOverlay changed to {newTimedLightsOverlay}");
 			timedLightsOverlay = newTimedLightsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onSpeedLimitsOverlayChanged(bool newSpeedLimitsOverlay) {
@@ -390,6 +394,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"speedLimitsOverlay changed to {newSpeedLimitsOverlay}");
 			speedLimitsOverlay = newSpeedLimitsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onVehicleRestrictionsOverlayChanged(bool newVehicleRestrictionsOverlay) {
@@ -398,6 +404,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onParkingRestrictionsOverlayChanged(bool newParkingRestrictionsOverlay) {
@@ -406,6 +414,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"parkingRestrictionsOverlay changed to {newParkingRestrictionsOverlay}");
 			parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onJunctionRestrictionsOverlayChanged(bool newValue) {
@@ -414,6 +424,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"junctionRestrictionsOverlay changed to {newValue}");
 			junctionRestrictionsOverlay = newValue;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onConnectedLanesOverlayChanged(bool newValue) {
@@ -422,6 +434,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"connectedLanesOverlay changed to {newValue}");
 			connectedLanesOverlay = newValue;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		private static void onLanguageChanged(int newLanguageIndex) {

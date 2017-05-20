@@ -1596,7 +1596,7 @@ namespace TrafficManager.Custom.PathFinding {
 					Randomizer randomizer = new Randomizer(this._pathFindIndex << 16 | (uint)item.m_position.m_segment);
 					prevCost *= (float)(randomizer.Int32(900, 1000 + (int)(prevSegment.m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
 				} else {
-					prevCost *= (1f - _conf.SpeedCostFactor) + _conf.SpeedCostFactor * (1f - prevSpeed);
+					prevCost *= 1f + _conf.SpeedCostFactor * (1f - prevSpeed);
 				}
 			}
 

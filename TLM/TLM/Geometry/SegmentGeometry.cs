@@ -1036,6 +1036,7 @@ namespace TrafficManager.Geometry {
 		/// </summary>
 		/// <param name="startNode"></param>
 		/// <returns></returns>
+		[Obsolete]
 		public bool AreHighwayRulesEnabled(bool startNode) {
 			if (!Options.highwayRules)
 				return false;
@@ -1086,9 +1087,14 @@ namespace TrafficManager.Geometry {
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					((info.m_lanes[laneIndex].m_finalDirection & dir) != NetInfo.Direction.None)) {
-					return false;
+				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
+					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
+				// TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
+
+				if (validLane) {
+					if ((info.m_lanes[laneIndex].m_finalDirection & dir) != NetInfo.Direction.None) {
+						return false;
+					}
 				}
 
 				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
@@ -1116,18 +1122,22 @@ namespace TrafficManager.Geometry {
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-					hasForward = true;
-				}
+				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
+					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
+				// TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
 
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-					hasBackward = true;
-				}
+				if (validLane) {
+					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
+						hasForward = true;
+					}
 
-				if (hasForward && hasBackward) {
-					return false;
+					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
+						hasBackward = true;
+					}
+
+					if (hasForward && hasBackward) {
+						return false;
+					}
 				}
 
 				laneId = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_nextLane;
@@ -1192,19 +1202,22 @@ namespace TrafficManager.Geometry {
 			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
 			var laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_finalDirection & dir2) != NetInfo.Direction.None) {
-					isOutgoingOneWay = false;
-				}
+				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
+					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
+				// TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
 
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-					hasForward = true;
-				}
+				if (validLane) {
+					if ((info.m_lanes[laneIndex].m_finalDirection & dir2) != NetInfo.Direction.None) {
+						isOutgoingOneWay = false;
+					}
 
-				if (info.m_lanes[laneIndex].m_laneType != NetInfo.LaneType.Pedestrian &&
-					(info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-					hasBackward = true;
+					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
+						hasForward = true;
+					}
+
+					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
+						hasBackward = true;
+					}
 				}
 
 				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;

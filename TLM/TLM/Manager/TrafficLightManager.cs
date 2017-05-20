@@ -34,7 +34,9 @@ namespace TrafficManager.Manager {
 
 		public bool SetTrafficLight(ushort nodeId, bool flag, out UnableReason reason) {
 			if (! IsTrafficLightToggleable(nodeId, out reason)) {
-				return false;
+				if (reason != UnableReason.HasTimedLight || !flag) {
+					return false;
+				}
 			}
 
 			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
@@ -85,7 +87,7 @@ namespace TrafficManager.Manager {
 				return false;
 			}
 
-			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(nodeId)) {
+			if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
 				reason = UnableReason.HasTimedLight;
 				return false;
 			}
