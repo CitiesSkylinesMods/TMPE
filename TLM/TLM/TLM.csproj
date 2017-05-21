@@ -141,7 +141,6 @@
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
-    <Compile Include="Custom\PathFinding\OldCustomPathFind.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
