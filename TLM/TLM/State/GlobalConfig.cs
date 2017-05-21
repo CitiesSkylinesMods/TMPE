@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 7;
+		private static int LATEST_VERSION = 8;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -127,6 +127,11 @@ namespace TrafficManager.State {
 		public float SpeedCostFactor = 1f;
 
 		/// <summary>
+		/// Relative factor for lane traffic cost calculation
+		/// </summary>
+		public float TrafficCostFactor = 3f;
+
+		/// <summary>
 		/// lane changing cost reduction modulo
 		/// </summary>
 		public uint RandomizedLaneChangingModulo = 5;
@@ -150,11 +155,10 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane density random interval
 		/// </summary>
-		[Obsolete]
-		public float LaneDensityRandInterval = 2;
+		public float LaneDensityRandInterval = 50f;
 
 		/// <summary>
-		/// lane speed random interval
+		/// lane usage random interval
 		/// </summary>
 		public float LaneSpeedRandInterval = 25f;
 
@@ -181,12 +185,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// penalty for busses not driving on bus lanes
 		/// </summary>
-		public float PublicTransportLanePenalty = 1.5f;
+		public float PublicTransportLanePenalty = 4f;
 
 		/// <summary>
 		/// reward for public transport staying on transport lane
 		/// </summary>
-		public float PublicTransportLaneReward = 0.75f;
+		public float PublicTransportLaneReward = 0.25f;
 
 		/// <summary>
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
@@ -196,7 +200,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Path cost multiplier for vehicle restrictions
 		/// </summary>
-		public float VehicleRestrictionsPenalty = 2500f;
+		public float VehicleRestrictionsPenalty = 50f;
 
 
 		/// <summary>
@@ -378,6 +382,9 @@ namespace TrafficManager.State {
 
 				conf.MainMenuX = oldConfig.MainMenuX;
 				conf.MainMenuY = oldConfig.MainMenuY;
+
+				conf.MainMenuButtonPosLocked = oldConfig.MainMenuButtonPosLocked;
+				conf.MainMenuPosLocked = oldConfig.MainMenuPosLocked;
 			}
 			modifiedTime = WriteConfig(conf);
 			return conf;

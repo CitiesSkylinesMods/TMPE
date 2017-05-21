@@ -482,8 +482,8 @@ namespace TrafficManager.UI.SubTools {
 							sim.TimedLight.GetStep(_timedEditStep).UpdateLights();
 						}
 
-						_timedEditStep = -1;
 						_timedViewedStep = _timedEditStep;
+						_timedEditStep = -1;
 						nodeSelectionLocked = false;
 					}
 

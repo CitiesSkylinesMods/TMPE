@@ -416,7 +416,6 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], ref camPos, ref zero, f, ref xu, ref yu, x, 0, speedLimitSignSize, !viewOnly, 0.5f, 0.8f);
-					VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo);
 					if (!viewOnly && !onlyMonorailLanes && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
 						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], ref camPos, ref zero, f, ref xu, ref yu, x, 1, speedLimitSignSize, 0.5f);
 					}

@@ -53,6 +53,9 @@ namespace TrafficManager.Manager {
 		}
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
+#if DEBUG
+			Log.Warning($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
+#endif
 			DestroySegmentEnd(GetIndex(segmentId, startNode));
 		}
 
@@ -71,10 +74,17 @@ namespace TrafficManager.Manager {
 		}
 
 		public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
-			SegmentEndGeometry end = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
-			if (end == null) {
-				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing segment end {segmentId} @ {startNode}");
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing all segment ends.");
 				RemoveSegmentEnds(segmentId);
+				return false;
+			}
+
+			SegmentEndGeometry end = segGeo.GetEnd(startNode);
+			if (end == null) {
+				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment end {segmentId} @ {startNode} is invalid. Removing segment end.");
+				RemoveSegmentEnd(segmentId, startNode);
 				return false;
 			}
 
@@ -91,7 +101,7 @@ namespace TrafficManager.Manager {
 		}
 
 		private int GetIndex(ushort segmentId, bool startNode) {
-			return (int)segmentId + (startNode ? 0 : 1);
+			return (int)segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
 		}
 
 		/*protected override void HandleInvalidSegment(SegmentGeometry geometry) {
@@ -103,6 +113,9 @@ namespace TrafficManager.Manager {
 		}*/
 
 		protected void DestroySegmentEnd(int index) {
+#if DEBUG
+			Log.Warning($"SegmentEndManager.DestroySegmentEnd({index}) called");
+#endif
 			SegmentEnds[index]?.Destroy();
 			SegmentEnds[index] = null;
 		}

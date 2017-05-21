@@ -3,7 +3,17 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 
 User manual: http://www.viathinksoft.de/tmpe
 
-# Changelog
+# Changelog      
+1.9.3, 05/22/2017
+- Disabled notification of route recalculating because some players report crashes
+- Removed default vehicle restrictions from bus lanes
+- Modified junction restrictions come into effect instantaneously
+- UI: Saving a timed step does not reset the timed traffic light to the first state
+- Bugfix: AI: Segment traffic data is not taken into account 
+- Bugfix: Priority rules are not properly obeyed
+- Bugfix: Under certain circumstances priority signs cannot be removed 
+- Bugfix: Path-finding is unable to calculate certain paths
+
 1.9.2, 05/20/2017
 - UI: Main menu & UI tools performance improved
 - Bugfix: Traffic lights can be removed from junctions that are controlled by a timed traffic light program

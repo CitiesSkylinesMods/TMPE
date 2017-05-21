@@ -82,35 +82,41 @@ namespace CitiesGameBridge.Service {
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-				ushort segmentId = node.GetSegment(0);
-				ushort initSegId = segmentId;
-
-				byte index = 0;
-				while (segmentId != 0 && index < 8) {
-					if (! handler(segmentId, ref netManager.m_segments.m_buffer[segmentId])) {
-						break;
+				if (dir == ClockDirection.None) {
+					for (int i = 0; i < 8; ++i) {
+						ushort segmentId = node.GetSegment(i);
+						if (segmentId != 0) {
+							if (!handler(segmentId, ref netManager.m_segments.m_buffer[segmentId])) {
+								break;
+							}
+						}
 					}
+				} else {
+					ushort segmentId = node.GetSegment(0);
+					ushort initSegId = segmentId;
 
-					++index;
+					while (true) {
+						if (segmentId != 0) {
+							if (!handler(segmentId, ref netManager.m_segments.m_buffer[segmentId])) {
+								break;
+							}
+						}
 
-					switch (dir) {
-						case ClockDirection.None:
-						default:
-							segmentId = node.GetSegment(index);
-							break;
-						case ClockDirection.Clockwise:
-							segmentId = netManager.m_segments.m_buffer[segmentId].GetLeftSegment(nodeId);
-							break;
-						case ClockDirection.CounterClockwise:
-							segmentId = netManager.m_segments.m_buffer[segmentId].GetRightSegment(nodeId);
-							break;
-					}
+						switch (dir) {
+							case ClockDirection.Clockwise:
+							default:
+								segmentId = netManager.m_segments.m_buffer[segmentId].GetLeftSegment(nodeId);
+								break;
+							case ClockDirection.CounterClockwise:
+								segmentId = netManager.m_segments.m_buffer[segmentId].GetRightSegment(nodeId);
+								break;
+						}
 
-					if (segmentId == initSegId) {
-						break;
+						if (segmentId == initSegId || segmentId == 0) {
+							break;
+						}
 					}
 				}
-				
 				return true;
 			});
 		}

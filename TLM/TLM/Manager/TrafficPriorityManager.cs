@@ -311,7 +311,7 @@ namespace TrafficManager.Manager {
 				SegmentEnd otherEnd = SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
 				if (otherEnd == null) {
 #if DEBUG
-					Log.Warning($"HasIncomingVehicles: No segment end found for other segment {otherSegmentId} @ {otherStartNode}");
+					Log.Error($"HasIncomingVehicles: No segment end found for other segment {otherSegmentId} @ {otherStartNode}");
 #endif
 					continue;
 				}

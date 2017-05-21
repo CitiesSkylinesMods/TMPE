@@ -73,7 +73,7 @@ namespace TrafficManager.Manager {
 			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setStraightLaneChangingAllowed(segmentId, startNode, value);
-			SubscribeToSegmentGeometry(segmentId);
+			OnSegmentChange(segmentId);
 			return true;
 		}
 
@@ -87,7 +87,7 @@ namespace TrafficManager.Manager {
 			if (!value && LaneConnectionManager.Instance.HasUturnConnections(segmentId, startNode))
 				return false;
 			Flags.setUTurnAllowed(segmentId, startNode, value);
-			SubscribeToSegmentGeometry(segmentId);
+			OnSegmentChange(segmentId);
 			return true;
 		}
 
@@ -99,7 +99,7 @@ namespace TrafficManager.Manager {
 			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setEnterWhenBlockedAllowed(segmentId, startNode, value);
-			SubscribeToSegmentGeometry(segmentId);
+			OnSegmentChange(segmentId);
 			return true;
 		}
 
@@ -111,8 +111,16 @@ namespace TrafficManager.Manager {
 			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setPedestrianCrossingAllowed(segmentId, startNode, !IsPedestrianCrossingAllowed(segmentId, startNode));
-			SubscribeToSegmentGeometry(segmentId);
+			OnSegmentChange(segmentId);
 			return true;
+		}
+
+		protected void OnSegmentChange(ushort segmentId) {
+			RoutingManager.Instance.RequestRecalculation(segmentId);
+			SubscribeToSegmentGeometry(segmentId);
+			if (Options.instantEffects) {
+				Services.NetService.PublishSegmentChanges(segmentId);
+			}
 		}
 
 		public bool LoadData(List<Configuration.SegmentNodeConf> data) {

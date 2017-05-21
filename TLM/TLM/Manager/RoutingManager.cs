@@ -161,7 +161,7 @@ namespace TrafficManager.Manager {
 			public byte laneIndex;
 			public LaneEndTransitionType type;
 			public byte distance;
-#if DEBUGROUTING
+#if DEBUG
 			public ushort segmentId;
 #endif
 
@@ -169,7 +169,7 @@ namespace TrafficManager.Manager {
 				return $"[LaneTransitionData\n" +
 					"\t" + $"laneId = {laneId}\n" +
 					"\t" + $"laneIndex = {laneIndex}\n" +
-#if DEBUGROUTING
+#if DEBUG
 					"\t" + $"segmentId = {segmentId}\n" +
 #endif
 					"\t" + $"type = {type}\n" +
@@ -178,7 +178,7 @@ namespace TrafficManager.Manager {
 			}
 
 			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, byte distance
-#if DEBUGROUTING
+#if DEBUG
 				, ushort segmentId
 #endif
 				) {
@@ -186,18 +186,18 @@ namespace TrafficManager.Manager {
 				this.laneIndex = laneIndex;
 				this.type = type;
 				this.distance = distance;
-#if DEBUGROUTING
+#if DEBUG
 				this.segmentId = segmentId;
 #endif
 			}
 
 			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type
-#if DEBUGROUTING
+#if DEBUG
 				, ushort segmentId
 #endif
 				) {
 				Set(laneId, laneIndex, type, 0
-#if DEBUGROUTING
+#if DEBUG
 				, segmentId
 #endif
 				);
@@ -259,9 +259,9 @@ namespace TrafficManager.Manager {
 
 			try {
 				Monitor.Enter(updateLock);
-				if (updateNotificationRequired) {
+				/*if (updateNotificationRequired) {
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Please_wait") + "...", Translation.GetString("Recalculating_lane_routing") + "...", false);
-				}
+				}*/ // TODO seems to crash the game for some users
 				segmentsUpdated = false;
 
 				int len = updatedSegmentBuckets.Length;
@@ -278,9 +278,9 @@ namespace TrafficManager.Manager {
 					}
 				}
 
-				if (updateNotificationRequired) {
+				/*if (updateNotificationRequired) {
 					UIView.library.Hide("ExceptionPanel");
-				}
+				}*/
 				updateNotificationRequired = false;
 			} finally {
 				Monitor.Exit(updateLock);
@@ -532,16 +532,14 @@ namespace TrafficManager.Manager {
 						nextSegmentId = node.GetSegment(k);
 						return true;
 					});
+
+					if (nextSegmentId == 0) {
+						continue;
+					}
 				}
 
 				int outgoingVehicleLanes = 0;
 				int incomingVehicleLanes = 0;
-
-				laneEndRoutings[index].SetTransitions(k, null);
-
-				if (nextSegmentId == 0) {
-					break;
-				}
 
 				bool uturn = nextSegmentId == prevSegmentId;
 				bool isNextStartNodeOfNextSegment = false;
@@ -703,7 +701,7 @@ namespace TrafficManager.Manager {
 									transitionType = LaneEndTransitionType.Relaxed;
 									if (numNextRelaxedTransitionDatas < MAX_NUM_TRANSITIONS) {
 										nextRelaxedTransitionDatas[numNextRelaxedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, GlobalConfig.Instance.IncompatibleLaneDistance
-#if DEBUGROUTING
+#if DEBUG
 									, nextSegmentId
 #endif
 											);
@@ -722,7 +720,7 @@ namespace TrafficManager.Manager {
 									nextCompatibleOuterSimilarIndices[numNextCompatibleTransitionDatas] = nextOuterSimilarLaneIndex;
 									//compatibleLaneIndicesMask |= POW2MASKS[numNextCompatibleTransitionDatas];
 									nextCompatibleTransitionDatas[numNextCompatibleTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType
-#if DEBUGROUTING
+#if DEBUG
 									, nextSegmentId
 #endif
 									);
@@ -1075,9 +1073,9 @@ namespace TrafficManager.Manager {
 						return true;
 					});
 
-					if (nextSegmentId == prevSegmentId) {
+					if (nextSegmentId == prevSegmentId || nextSegmentId == 0) {
 						// we reached the first segment again
-						nextSegmentId = 0;
+						break;
 					}
 				}
 			} // foreach segment

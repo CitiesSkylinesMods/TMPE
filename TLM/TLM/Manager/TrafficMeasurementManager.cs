@@ -76,9 +76,7 @@ namespace TrafficManager.Manager {
 			/// Current minimum lane speed
 			/// </summary>
 			public ushort minSpeed;
-#if DEBUG
 			public ushort meanSpeed;
-#endif
 
 			/// <summary>
 			/// Number of times the segment had been marked as congested
@@ -104,9 +102,7 @@ namespace TrafficManager.Manager {
 					"\t" + $"accumulatedDensities = {accumulatedDensities}\n" +
 #endif
 					"\t" + $"minSpeed = {minSpeed}\n" +
-#if DEBUG
 					"\t" + $"meanSpeed = {meanSpeed}\n" +
-#endif
 					"\t" + $"totalPathFindTrafficBuffer = {totalPathFindTrafficBuffer}\n" +
 					"\t" + $"numCongested = {numCongested}\n" +
 					"\t" + $"numCongestionMeasurements = {numCongestionMeasurements}\n" +
@@ -129,10 +125,9 @@ namespace TrafficManager.Manager {
 		private ushort[] minSpeeds = { MAX_SPEED, MAX_SPEED };
 		private uint[] densities = { 0, 0 };
 		private uint[] totalPfBuf = { 0, 0 };
-#if DEBUG
+
 		private uint[] meanSpeeds = { 0, 0 };
 		private int[] meanSpeedLanes = { 0, 0 };
-#endif
 
 		private TrafficMeasurementManager() {
 			laneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
@@ -201,10 +196,10 @@ namespace TrafficManager.Manager {
 			for (int i = 0; i < 2; ++i) {
 				minSpeeds[i] = MAX_SPEED;
 				densities[i] = 0;
-#if DEBUG
+
 				meanSpeeds[i] = 0;
 				meanSpeedLanes[i] = 0;
-#endif
+
 				totalPfBuf[i] = 0;
 			}
 
@@ -282,10 +277,10 @@ namespace TrafficManager.Manager {
 							newSpeed = (ushort)maxTolerableSpeed;
 					}*/
 
-#if DEBUG
+
 					meanSpeeds[dirIndex] += newSpeed;
 					meanSpeedLanes[dirIndex]++;
-#endif
+
 					laneTrafficData[segmentId][laneIndex].meanSpeed = newSpeed;
 
 					// reset buffers
@@ -325,13 +320,12 @@ namespace TrafficManager.Manager {
 				segmentDirTrafficData[segmentId][i].accumulatedDensities = densities[i];
 #endif
 				segmentDirTrafficData[segmentId][i].totalPathFindTrafficBuffer = totalPfBuf[i];
-#if DEBUG
+
 				if (meanSpeedLanes[i] > 0) {
 					segmentDirTrafficData[segmentId][i].meanSpeed = (ushort)(meanSpeeds[i] / meanSpeedLanes[i]);
 				} else {
 					segmentDirTrafficData[segmentId][i].meanSpeed = MAX_SPEED;
 				}
-#endif
 			}
 		}
 
