@@ -83,7 +83,7 @@ Create_group 그룹 생성
 Delete_group 그룹 제거
 Add_zoning 지역설정 추가
 Remove_zoning 지역설정 제거
-Lane_Arrow_Changer_Disabled_Highway 고속도로 시스템 규칙으로 인해 이 도로 화살표는 변경 할 수 없습니다.
+Lane_Arrow_Changer_Disabled_Highway 고속도로 시스템 규칙으로 인해 이 도로 화살표는 변경 할 수 없습니다(발전된 차량 AI기능 참고)
 Add_junction_to_timed_light 교차로 신호등 추가
 Remove_junction_from_timed_light 교차로 신호등 제거
 Select_junction 교차로 선택
@@ -124,7 +124,7 @@ Default_speed_limit 기본 속도 제한
 Unit_system 유닛 시스템
 Metric 미터법
 Imperial 마일법
-Use_more_CPU_cores_for_route_calculation_if_available 경로 계산을 위한 더 많은 CPU코어 사용(가능할 경우)
+Use_more_CPU_cores_for_route_calculation_if_available 경로 계산을 위한 더 많은 CPU코어 사용(가능한 경우)
 Activated_features 기능 활성화
 Junction_restrictions 교차로 규칙
 Prohibit_spawning_of_pocket_cars 시민들의 포켓차량 소환 금지
@@ -142,7 +142,7 @@ Switch_view 보기 전환
 Outgoing_demand 나가는 수요
 Incoming_demand 들어오는 수요
 Advanced_Vehicle_AI 발전된 차량 AI
-Heavy_trucks_prefer_outer_lanes_on_highways 무거운(화물)차량은 고속도로 바깥차선을 선호
+Heavy_trucks_prefer_outer_lanes_on_highways 무거운(화물)차량은 고속도로 바깥 차선을 선호
 Parking_AI 주차 AI
 Enable_more_realistic_parking 좀 더 현실적인 주차 활성화
 Reset_custom_speed_limits 커스텀 속도 초기화
@@ -161,14 +161,14 @@ In_case_of_emergency 긴급 상황 설정
 Show_lane-wise_speed_limits 차선 속도제한 보기
 Language 언어
 Game_language 게임 언어
-requires_game_restart 게임 재시작후 적용됩니다
+requires_game_restart 게임 재시작 후 적용됩니다
 Customizations_come_into_effect_instantaneously 커스텀 기능이 즉시 적용됩니다
 Options 설정
 Lock_main_menu_button_position TMPE 모드버튼 위치 잠금
 Lock_main_menu_position TMPE 모드매뉴 위치 잠금
-Recalculating_lane_routing 차선 경로 재 계산하기
+Recalculating_lane_routing 모든 경로 재 계산중
 Please_wait 잠시만 기다려주십시오
 Parking_restrictions 주차 제한
 Simulation 시뮬레이션
-On_roads On roads
-Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
+On_roads 도로 설정
+Ban_private_cars_and_trucks_on_bus_lanes 버스전용 차선에 승용차 및 트럭 출입을 금지합니다
