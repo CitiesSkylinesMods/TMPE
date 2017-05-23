@@ -170,3 +170,5 @@ Recalculating_lane_routing 차선 경로 재 계산하기
 Please_wait 잠시만 기다려주십시오
 Parking_restrictions 주차 제한
 Simulation 시뮬레이션
+On_roads On roads
+Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes

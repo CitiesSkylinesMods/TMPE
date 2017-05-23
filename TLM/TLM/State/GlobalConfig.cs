@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 8;
+		private static int LATEST_VERSION = 9;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -81,6 +81,7 @@ namespace TrafficManager.State {
 #if DEBUG
 		public int PathFindDebugNodeId = 0;
 		public int PathFindDebugStartSegmentId = 0;
+		public int PathFindDebugVehicleId = 0;
 		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
 		public ushort TTLDebugNodeId = 0;
 #endif
@@ -185,12 +186,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// penalty for busses not driving on bus lanes
 		/// </summary>
-		public float PublicTransportLanePenalty = 4f;
+		public float PublicTransportLanePenalty = 10f;
 
 		/// <summary>
 		/// reward for public transport staying on transport lane
 		/// </summary>
-		public float PublicTransportLaneReward = 0.25f;
+		public float PublicTransportLaneReward = 0.1f;
 
 		/// <summary>
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
@@ -200,7 +201,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Path cost multiplier for vehicle restrictions
 		/// </summary>
-		public float VehicleRestrictionsPenalty = 50f;
+		public float VehicleRestrictionsPenalty = 100f;
 
 
 		/// <summary>

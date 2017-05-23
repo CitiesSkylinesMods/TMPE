@@ -169,3 +169,5 @@ Lock_main_menu_position Vergrendel positie van hoofdmenu
 Recalculating_lane_routing Rijstrookroutering wordt herberekend
 Please_wait Even geduld graag
 Parking_restrictions Parkeerbeperkingen
+On_roads On roads
+Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes

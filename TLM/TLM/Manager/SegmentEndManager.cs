@@ -114,7 +114,7 @@ namespace TrafficManager.Manager {
 
 		protected void DestroySegmentEnd(int index) {
 #if DEBUG
-			Log.Warning($"SegmentEndManager.DestroySegmentEnd({index}) called");
+			Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
 #endif
 			SegmentEnds[index]?.Destroy();
 			SegmentEnds[index] = null;

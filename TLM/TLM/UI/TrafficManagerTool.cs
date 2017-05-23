@@ -20,6 +20,8 @@ using TrafficManager.Manager;
 using TrafficManager.Util;
 using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
+using static TrafficManager.Manager.TrafficMeasurementManager;
+using static TrafficManager.Manager.VehicleRestrictionsManager;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -632,7 +634,7 @@ namespace TrafficManager.UI {
 			}*/
 
 			TrafficMeasurementManager.LaneTrafficData[] laneTrafficData;
-			bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetTrafficData(segmentId, segmentInfo, out laneTrafficData);
+			bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetLaneTrafficData(segmentId, segmentInfo, out laneTrafficData);
 
 			uint curLaneId = segment.m_lanes;
 			String labelStr = "";
@@ -642,22 +644,20 @@ namespace TrafficManager.UI {
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 
-				TrafficMeasurementManager.SegmentDirTrafficData dirTrafficData;
-				bool dirTrafficDataLoaded = TrafficMeasurementManager.Instance.GetTrafficData(segmentId, laneInfo.m_finalDirection, out dirTrafficData);
+				uint pfTrafficBuf = TrafficMeasurementManager.Instance.segmentDirTrafficData[TrafficMeasurementManager.Instance.GetDirIndex(segmentId, laneInfo.m_finalDirection)].totalPathFindTrafficBuffer;
+				//TrafficMeasurementManager.Instance.GetTrafficData(segmentId, laneInfo.m_finalDirection, out dirTrafficData);
 
 				//int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
 
 				labelStr += "Lane idx " + i + ", id " + curLaneId;
 #if DEBUG
-				labelStr += ", inner: " + RoutingManager.Instance.CalcInnerLaneSimilarIndex(segmentId, i) + ", outer: " + RoutingManager.Instance.CalcOuterLaneSimilarIndex(segmentId, i) + ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo, false) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
+				labelStr += ", inner: " + RoutingManager.Instance.CalcInnerLaneSimilarIndex(segmentId, i) + ", outer: " + RoutingManager.Instance.CalcOuterLaneSimilarIndex(segmentId, i) + ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo, RestrictionMode.Configured) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (laneTrafficDataLoaded) {
 					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "%";
 #if DEBUG
 					labelStr += ", buf: " + laneTrafficData[i].trafficBuffer + ", acc: " + laneTrafficData[i].accumulatedSpeeds;
-					if (dirTrafficDataLoaded) {
-						labelStr += ", pfBuf: " + laneTrafficData[i].pathFindTrafficBuffer + "/" + laneTrafficData[i].lastPathFindTrafficBuffer + ", (" + (dirTrafficData.totalPathFindTrafficBuffer > 0 ? "" + ((laneTrafficData[i].lastPathFindTrafficBuffer * 100u) / dirTrafficData.totalPathFindTrafficBuffer) : "n/a") + " %)";
-					}
+					labelStr += ", pfBuf: " + laneTrafficData[i].pathFindTrafficBuffer + "/" + laneTrafficData[i].lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData[i].lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
 #endif
 #if MEASUREDENSITY
 					if (dirTrafficDataLoaded) {
@@ -686,6 +686,8 @@ namespace TrafficManager.UI {
 		/// Displays segment ids over segments
 		/// </summary>
 		private void _guiSegments() {
+			TrafficMeasurementManager trafficMeasurementManager = TrafficMeasurementManager.Instance;
+
 			GUIStyle _counterStyle = new GUIStyle();
 			SegmentEndManager endMan = SegmentEndManager.Instance;
 			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
@@ -741,22 +743,22 @@ namespace TrafficManager.UI {
 				labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
 
 #if DEBUG
-				TrafficMeasurementManager.SegmentDirTrafficData forwardTrafficData;
-				TrafficMeasurementManager.SegmentDirTrafficData backwardTrafficData;
-				if (TrafficMeasurementManager.Instance.GetTrafficData((ushort)i, NetInfo.Direction.Forward, out forwardTrafficData) &&
-					TrafficMeasurementManager.Instance.GetTrafficData((ushort)i, NetInfo.Direction.Backward, out backwardTrafficData)) {
-					float fwdCongestionRatio = forwardTrafficData.numCongestionMeasurements > 0 ? ((uint)forwardTrafficData.numCongested * 100u) / (uint)forwardTrafficData.numCongestionMeasurements : 0; // now in %
-					float backCongestionRatio = backwardTrafficData.numCongestionMeasurements > 0 ? ((uint)backwardTrafficData.numCongested * 100u) / (uint)backwardTrafficData.numCongestionMeasurements : 0; // now in %
 
-					labelStr += "\nmin speeds: ";
-					labelStr += " " + (forwardTrafficData.minSpeed / 100) + "%/" + (backwardTrafficData.minSpeed / 100) + "%";
-					labelStr += ", mean speeds: ";
-					labelStr += " " + (forwardTrafficData.meanSpeed / 100) + "%/" + (backwardTrafficData.meanSpeed / 100) + "%";
-					labelStr += "\npf bufs: ";
-					labelStr += " " + (forwardTrafficData.totalPathFindTrafficBuffer) + "/" + (backwardTrafficData.totalPathFindTrafficBuffer);
-					labelStr += ", cong: ";
-					labelStr += " " + fwdCongestionRatio + "% (" + forwardTrafficData.numCongested + "/" + forwardTrafficData.numCongestionMeasurements + ")/" + backCongestionRatio + "% (" + backwardTrafficData.numCongested + "/" + backwardTrafficData.numCongestionMeasurements + ")";
-				}
+				int fwdSegIndex = trafficMeasurementManager.GetDirIndex((ushort)i, NetInfo.Direction.Forward);
+				int backSegIndex = trafficMeasurementManager.GetDirIndex((ushort)i, NetInfo.Direction.Backward);
+				
+				
+				float fwdCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongestionMeasurements : 0; // now in %
+				float backCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongestionMeasurements : 0; // now in %
+
+				labelStr += "\nmin speeds: ";
+				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].minSpeed / 100) + "%/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].minSpeed / 100) + "%";
+				labelStr += ", mean speeds: ";
+				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].meanSpeed / 100) + "%/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].meanSpeed / 100) + "%";
+				labelStr += "\npf bufs: ";
+				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].totalPathFindTrafficBuffer) + "/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].totalPathFindTrafficBuffer);
+				labelStr += ", cong: ";
+				labelStr += " " + fwdCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongestionMeasurements + ")/" + backCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongestionMeasurements + ")";
 				labelStr += "\nstart: " + segments.m_buffer[i].m_startNode + ", end: " + segments.m_buffer[i].m_endNode;
 #endif
 

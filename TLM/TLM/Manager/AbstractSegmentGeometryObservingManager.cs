@@ -77,13 +77,13 @@ namespace TrafficManager.Manager {
 
 		public void OnUpdate(SegmentGeometry geometry) {
 			if (!geometry.IsValid()) {
-				Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
+				//Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
 				HandleInvalidSegment(geometry);
 				if (!AllowInvalidSegments) {
 					UnsubscribeFromSegmentGeometry(geometry.SegmentId);
 				}
 			} else {
-				Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
+				//Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
 				HandleValidSegment(geometry);
 			}
 		}

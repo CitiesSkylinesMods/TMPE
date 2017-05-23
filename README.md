@@ -4,6 +4,14 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
+1.9.4, 05/23/2017
+- New option: Ban private cars and trucks on bus lanes
+- Updated Spanish and French translation 
+- Optimized path-finding
+- Increased path-finding cost for private cars driving on bus lanes
+- Increased path-finding cost for disregarding vehicle restrictions 
+- Bugfix: Path-finding is unable to calculate certain paths after modifying the road network
+
 1.9.3, 05/22/2017
 - Disabled notification of route recalculating because some players report crashes
 - Removed default vehicle restrictions from bus lanes

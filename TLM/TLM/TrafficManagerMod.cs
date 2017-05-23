@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.9.3";
+		public static readonly string Version = "1.9.4";
 
 		public static readonly uint GameVersion = 163702032u;
 		public static readonly uint GameVersionA = 1u;

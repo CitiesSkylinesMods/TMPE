@@ -169,3 +169,5 @@ Recalculating_lane_routing Berechne Routenführung neu
 Please_wait Bitte warten
 Parking_restrictions Parkverbote
 Simulation Simulation
+On_roads Auf Straßen
+Ban_private_cars_and_trucks_on_bus_lanes Verbiete private Fahrzeuge und Lieferwagen auf Busspuren

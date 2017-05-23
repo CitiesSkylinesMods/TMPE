@@ -170,3 +170,5 @@ Recalculating_lane_routing Обновление маршрута
 Please_wait Подождите пожалуйста 
 Parking_restrictions Ограничения парковки
 Simulation Simulation
+On_roads On roads
+Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes

@@ -161,46 +161,29 @@ namespace TrafficManager.Manager {
 			public byte laneIndex;
 			public LaneEndTransitionType type;
 			public byte distance;
-#if DEBUG
 			public ushort segmentId;
-#endif
 
 			public override string ToString() {
 				return $"[LaneTransitionData\n" +
 					"\t" + $"laneId = {laneId}\n" +
 					"\t" + $"laneIndex = {laneIndex}\n" +
-#if DEBUG
 					"\t" + $"segmentId = {segmentId}\n" +
-#endif
 					"\t" + $"type = {type}\n" +
 					"\t" + $"distance = {distance}\n" +
 					"LaneTransitionData]";
 			}
 
-			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, byte distance
-#if DEBUG
-				, ushort segmentId
-#endif
+			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, byte distance, ushort segmentId
 				) {
 				this.laneId = laneId;
 				this.laneIndex = laneIndex;
 				this.type = type;
 				this.distance = distance;
-#if DEBUG
 				this.segmentId = segmentId;
-#endif
 			}
 
-			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type
-#if DEBUG
-				, ushort segmentId
-#endif
-				) {
-				Set(laneId, laneIndex, type, 0
-#if DEBUG
-				, segmentId
-#endif
-				);
+			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId) {
+				Set(laneId, laneIndex, type, 0, segmentId);
 			}
 		}
 
@@ -700,11 +683,7 @@ namespace TrafficManager.Manager {
 									// lane can be used by all vehicles that may disregard lane arrows
 									transitionType = LaneEndTransitionType.Relaxed;
 									if (numNextRelaxedTransitionDatas < MAX_NUM_TRANSITIONS) {
-										nextRelaxedTransitionDatas[numNextRelaxedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, GlobalConfig.Instance.IncompatibleLaneDistance
-#if DEBUG
-									, nextSegmentId
-#endif
-											);
+										nextRelaxedTransitionDatas[numNextRelaxedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, GlobalConfig.Instance.IncompatibleLaneDistance, nextSegmentId);
 									} else {
 										Log.Warning($"nextTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 									}
@@ -719,11 +698,7 @@ namespace TrafficManager.Manager {
 								if (numNextCompatibleTransitionDatas < MAX_NUM_TRANSITIONS) {
 									nextCompatibleOuterSimilarIndices[numNextCompatibleTransitionDatas] = nextOuterSimilarLaneIndex;
 									//compatibleLaneIndicesMask |= POW2MASKS[numNextCompatibleTransitionDatas];
-									nextCompatibleTransitionDatas[numNextCompatibleTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType
-#if DEBUG
-									, nextSegmentId
-#endif
-									);
+									nextCompatibleTransitionDatas[numNextCompatibleTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId);
 								} else {
 									Log.Warning($"nextCompatibleTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 								}
@@ -1055,7 +1030,7 @@ namespace TrafficManager.Manager {
 						nextTransitionDatas[j++] = nextRelaxedTransitionDatas[i];
 					}
 
-					routing.SetTransitions(GetSegmentNodeIndex(nextNodeId, nextSegmentId), nextTransitionDatas);
+					routing.SetTransitions(k, nextTransitionDatas);
 				} // valid segment
 
 				if (nextSegmentId != prevSegmentId) {
@@ -1122,7 +1097,7 @@ namespace TrafficManager.Manager {
 			}
 		}
 
-		private int GetSegmentNodeIndex(ushort nodeId, ushort segmentId) {
+		/*private int GetSegmentNodeIndex(ushort nodeId, ushort segmentId) {
 			int i = -1;
 			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segId, ref NetSegment segment) {
 				++i;
@@ -1132,10 +1107,10 @@ namespace TrafficManager.Manager {
 				return true;
 			});
 			return i;
-		}
+		}*/
 
 		internal uint GetLaneEndRoutingIndex(uint laneId, bool startNode) {
-			return (uint)(laneId + (startNode ? 0 : NetManager.MAX_LANE_COUNT));
+			return (uint)(laneId + (startNode ? 0u : (uint)NetManager.MAX_LANE_COUNT));
 		}
 
 		public int CalcInnerLaneSimilarIndex(ushort segmentId, int laneIndex) {

@@ -170,3 +170,5 @@ Recalculating_lane_routing 重新規劃行駛路線
 Please_wait 請稍候
 Parking_restrictions 停車限制
 Simulation Simulation
+On_roads On roads
+Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes

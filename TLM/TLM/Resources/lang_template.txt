@@ -169,3 +169,5 @@ Recalculating_lane_routing
 Please_wait
 Parking_restrictions
 Simulation
+On_roads
+Ban_private_cars_and_trucks_on_bus_lanes

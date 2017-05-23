@@ -12,6 +12,7 @@ using TrafficManager.Manager;
 using System.Linq;
 using TrafficManager.Util;
 using CSUtil.Commons;
+using static TrafficManager.Manager.VehicleRestrictionsManager;
 
 namespace TrafficManager.TrafficLight {
 	/// <summary>
@@ -462,8 +463,8 @@ namespace TrafficManager.TrafficLight {
 
 			ushort nodeId = NodeId;
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>(); // TODO improve
-			IDictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypesAsDict(SegmentId, nodeId, true); // TODO improve
-			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SegmentId, nodeId, true);
+			IDictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypesAsDict(SegmentId, nodeId, RestrictionMode.Restricted); // TODO improve
+			ExtVehicleType allAllowedMask = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SegmentId, nodeId, RestrictionMode.Restricted);
 			SeparateVehicleTypes = ExtVehicleType.None;
 #if DEBUGHK
 			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {segmentId}, node {nodeId}, allAllowedTypes={string.Join(", ", allAllowedTypes.Select(x => x.ToString()).ToArray())}");

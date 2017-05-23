@@ -18,7 +18,7 @@ namespace TrafficManager.Manager {
 
 		public const ushort MAX_SPEED = 10000;
 
-		public class LaneTrafficData {
+		public struct LaneTrafficData {
 			/// <summary>
 			/// Number of seen vehicles since last speed measurement
 			/// </summary>
@@ -65,7 +65,7 @@ namespace TrafficManager.Manager {
 			}
 		}
 
-		public class SegmentDirTrafficData {
+		public struct SegmentDirTrafficData {
 #if MEASUREDENSITY
 			/// <summary>
 			/// Current accumulated densities
@@ -92,9 +92,9 @@ namespace TrafficManager.Manager {
 			/// </summary>
 			public uint totalPathFindTrafficBuffer;
 
-			public SegmentDirTrafficData() {
+			/*public SegmentDirTrafficData() {
 				minSpeed = MAX_SPEED;
-			}
+			}*/
 
 			public override string ToString() {
 				return $"[SegmentDirTrafficData\n" +
@@ -118,7 +118,7 @@ namespace TrafficManager.Manager {
 		/// <summary>
 		/// Traffic data per segment and traffic direction
 		/// </summary>
-		private SegmentDirTrafficData[][] segmentDirTrafficData;
+		internal SegmentDirTrafficData[] segmentDirTrafficData;
 
 		private SegmentDirTrafficData defaultSegmentDirTrafficData;
 
@@ -129,10 +129,18 @@ namespace TrafficManager.Manager {
 		private uint[] meanSpeeds = { 0, 0 };
 		private int[] meanSpeedLanes = { 0, 0 };
 
+		private int[] segDirIndices = { 0, 0 };
+
 		private TrafficMeasurementManager() {
 			laneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
-			segmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT][];
+			segmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT * 2];
 			defaultSegmentDirTrafficData = new SegmentDirTrafficData();
+			defaultSegmentDirTrafficData.minSpeed = MAX_SPEED;
+			defaultSegmentDirTrafficData.meanSpeed = MAX_SPEED;
+			for (int i = 0; i < segmentDirTrafficData.Length; ++i) {
+				segmentDirTrafficData[i].minSpeed = MAX_SPEED;
+				segmentDirTrafficData[i].meanSpeed = MAX_SPEED;
+			}
 			ResetTrafficStats();
 		}
 
@@ -158,13 +166,7 @@ namespace TrafficManager.Manager {
 				Log._Debug($"\t<null>");
 			} else {
 				for (int i = 0; i < segmentDirTrafficData.Length; ++i) {
-					if (segmentDirTrafficData[i] == null) {
-						continue;
-					}
-					Log._Debug($"\tSegment {i}:");
-					for (int k = 0; k < segmentDirTrafficData[i].Length; ++k) {
-						Log._Debug($"\t\tDir {k}: {segmentDirTrafficData[i][k]}");
-					}
+					Log._Debug($"\tIndex {i}: {segmentDirTrafficData[i]}");
 				}
 			}
 		}
@@ -177,17 +179,10 @@ namespace TrafficManager.Manager {
 			uint curLaneId = segmentData.m_lanes;
 			int numLanes = segmentInfo.m_lanes.Length;
 
-			// ensure valid array sizes
-			if (segmentDirTrafficData[segmentId] == null) {
-				segmentDirTrafficData[segmentId] = new SegmentDirTrafficData[2];
-				segmentDirTrafficData[segmentId][0] = new SegmentDirTrafficData();
-				segmentDirTrafficData[segmentId][1] = new SegmentDirTrafficData();
-			}
-
 			if (laneTrafficData[segmentId] == null || laneTrafficData[segmentId].Length < numLanes) {
 				laneTrafficData[segmentId] = new LaneTrafficData[numLanes];
 				for (int i = 0; i < numLanes; ++i) {
-					laneTrafficData[segmentId][i] = new LaneTrafficData();
+					//laneTrafficData[segmentId][i] = new LaneTrafficData();
 					laneTrafficData[segmentId][i].meanSpeed = MAX_SPEED;
 				}
 			}
@@ -199,6 +194,7 @@ namespace TrafficManager.Manager {
 
 				meanSpeeds[i] = 0;
 				meanSpeedLanes[i] = 0;
+				segDirIndices[i] = 0;
 
 				totalPfBuf[i] = 0;
 			}
@@ -305,31 +301,36 @@ namespace TrafficManager.Manager {
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
 
+			segDirIndices[0] = GetDirIndex(segmentId, NetInfo.Direction.Forward);
+			segDirIndices[1] = GetDirIndex(segmentId, NetInfo.Direction.Backward);
+
 			for (int i = 0; i < 2; ++i) {
-				if (segmentDirTrafficData[segmentId][i].numCongestionMeasurements > conf.MaxNumCongestionMeasurements) {
-					segmentDirTrafficData[segmentId][i].numCongestionMeasurements >>= 1;
-					segmentDirTrafficData[segmentId][i].numCongested >>= 1;
+				int segDirIndex = segDirIndices[i];
+
+				if (segmentDirTrafficData[segDirIndex].numCongestionMeasurements > conf.MaxNumCongestionMeasurements) {
+					segmentDirTrafficData[segDirIndex].numCongestionMeasurements >>= 1;
+					segmentDirTrafficData[segDirIndex].numCongested >>= 1;
 				}
 
-				segmentDirTrafficData[segmentId][i].minSpeed = minSpeeds[i];
-				++segmentDirTrafficData[segmentId][i].numCongestionMeasurements;
+				segmentDirTrafficData[segDirIndex].minSpeed = minSpeeds[i];
+				++segmentDirTrafficData[segDirIndex].numCongestionMeasurements;
 				if (minSpeeds[i] / 100u < conf.CongestionSpeedThreshold) {
-					++segmentDirTrafficData[segmentId][i].numCongested;
+					++segmentDirTrafficData[segDirIndex].numCongested;
 				}
 #if MEASUREDENSITY
 				segmentDirTrafficData[segmentId][i].accumulatedDensities = densities[i];
 #endif
-				segmentDirTrafficData[segmentId][i].totalPathFindTrafficBuffer = totalPfBuf[i];
+				segmentDirTrafficData[segDirIndex].totalPathFindTrafficBuffer = totalPfBuf[i];
 
 				if (meanSpeedLanes[i] > 0) {
-					segmentDirTrafficData[segmentId][i].meanSpeed = (ushort)(meanSpeeds[i] / meanSpeedLanes[i]);
+					segmentDirTrafficData[segDirIndex].meanSpeed = (ushort)(meanSpeeds[i] / meanSpeedLanes[i]);
 				} else {
-					segmentDirTrafficData[segmentId][i].meanSpeed = MAX_SPEED;
+					segmentDirTrafficData[segDirIndex].meanSpeed = MAX_SPEED;
 				}
 			}
 		}
 
-		public bool GetTrafficData(ushort segmentId, NetInfo segmentInfo, out LaneTrafficData[] trafficData) {
+		public bool GetLaneTrafficData(ushort segmentId, NetInfo segmentInfo, out LaneTrafficData[] trafficData) {
 			if (laneTrafficData[segmentId] == null || laneTrafficData[segmentId].Length != segmentInfo.m_lanes.Length) {
 				trafficData = null;
 				return false;
@@ -339,19 +340,19 @@ namespace TrafficManager.Manager {
 			}
 		}
 
-		public bool GetTrafficData(ushort segmentId, NetInfo.Direction dir, out SegmentDirTrafficData trafficData) {
-			if (segmentDirTrafficData[segmentId] == null) {
-				trafficData = defaultSegmentDirTrafficData;
-				return false;
-			} else {
-				trafficData = segmentDirTrafficData[segmentId][GetDirIndex(dir)];
-				return true;
-			}
-		}
-
 		public void DestroySegmentStats(ushort segmentId) {
 			laneTrafficData[segmentId] = null;
-			segmentDirTrafficData[segmentId] = null;
+
+			int fwdIndex = GetDirIndex(segmentId, NetInfo.Direction.Forward);
+			int backIndex = GetDirIndex(segmentId, NetInfo.Direction.Backward);
+
+			segmentDirTrafficData[fwdIndex] = default(SegmentDirTrafficData);
+			segmentDirTrafficData[fwdIndex].minSpeed = MAX_SPEED;
+			segmentDirTrafficData[fwdIndex].meanSpeed = MAX_SPEED;
+
+			segmentDirTrafficData[backIndex] = default(SegmentDirTrafficData);
+			segmentDirTrafficData[backIndex].minSpeed = MAX_SPEED;
+			segmentDirTrafficData[backIndex].meanSpeed = MAX_SPEED;
 		}
 
 		public void ResetTrafficStats() {
@@ -381,7 +382,11 @@ namespace TrafficManager.Manager {
 			lanesData[laneIndex].pathFindTrafficBuffer += (uint)(100u - lanesData[laneIndex].meanSpeed / 100);
 		}
 
-		protected int GetDirIndex(NetInfo.Direction dir) {
+		internal int GetDirIndex(ushort segmentId, NetInfo.Direction dir) {
+			return (int)segmentId + (dir == NetInfo.Direction.Backward ? NetManager.MAX_SEGMENT_COUNT : 0);
+		}
+
+		internal int GetDirIndex(NetInfo.Direction dir) {
 			return dir == NetInfo.Direction.Backward ? 1 : 0;
 		}
 

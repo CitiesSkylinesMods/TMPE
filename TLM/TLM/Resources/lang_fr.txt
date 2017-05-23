@@ -157,15 +157,17 @@ Vehicle_behavior Comportement des véhicules
 Policies_&_Restrictions Restrictions et politiques
 At_junctions Aux jonctions
 In_case_of_emergency En cas d'urgence
-Show_lane-wise_speed_limits Show lane-wise speed limits
-Language Language
-Game_language Game language
-requires_game_restart requires game restart
-Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
+Show_lane-wise_speed_limits Voir limites de vitesse par voie
+Language Langue
+Game_language Langue du jeu
+requires_game_restart nécessite le redémarrage du jeu
+Customizations_come_into_effect_instantaneously Les personnalisations prennent effet instantanément
 Options Options
-Lock_main_menu_button_position Lock main menu button position
-Lock_main_menu_position Lock main menu position
-Recalculating_lane_routing Recalculating lane routing
-Please_wait Please wait
-Parking_restrictions Parking restrictions
+Lock_main_menu_button_position Verrouiller la position du bouton du menu principal
+Lock_main_menu_position Verrouiller la position du menu principal
+Recalculating_lane_routing Recalcul en cours des routing des voies
+Please_wait Merci de patienter
+Parking_restrictions Restrictions de parking
 Simulation Simulation
+On_roads On roads
+Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes

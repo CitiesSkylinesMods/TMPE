@@ -148,6 +148,10 @@ namespace TrafficManager.Manager {
 				Options.setParkingRestrictionsOverlay(data[31] == (byte)1);
 			}
 
+			if (data.Length >= 33) {
+				Options.setBanRegularTrafficOnBusLanes(data[32] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -184,7 +188,8 @@ namespace TrafficManager.Manager {
 						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
 						(byte)(Options.instantEffects ? 1 : 0),
 						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
-						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0)
+						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0),
+						(byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0)
 				};
 		}
 	}

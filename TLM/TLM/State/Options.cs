@@ -43,6 +43,7 @@ namespace TrafficManager.State {
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
+		private static UICheckBox banRegularTrafficOnBusLanesToggle = null;
 		private static UICheckBox enableDespawningToggle = null;
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
@@ -100,6 +101,7 @@ namespace TrafficManager.State {
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
+		public static bool banRegularTrafficOnBusLanes = false;
 		public static bool advancedAI = false;
 		public static bool highwayRules = false;
 #if DEBUG
@@ -251,6 +253,9 @@ namespace TrafficManager.State {
 			allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
+
+			var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
+			banRegularTrafficOnBusLanesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Ban_private_cars_and_trucks_on_bus_lanes"), banRegularTrafficOnBusLanes, onBanRegularTrafficOnBusLanesChanged) as UICheckBox;
 
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
@@ -659,6 +664,16 @@ namespace TrafficManager.State {
 			allowLaneChangesWhileGoingStraight = newValue;
 		}
 
+		private static void onBanRegularTrafficOnBusLanesChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"banRegularTrafficOnBusLanes changed to {newValue}");
+			banRegularTrafficOnBusLanes = newValue;
+			VehicleRestrictionsManager.Instance.ClearCache();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+		}
+
 		private static void onStrongerRoadConditionEffectsChanged(bool newStrongerRoadConditionEffects) {
 			if (!checkGameLoaded())
 				return;
@@ -907,40 +922,61 @@ namespace TrafficManager.State {
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
 		}
 
+		public static void setBanRegularTrafficOnBusLanes(bool value) {
+			banRegularTrafficOnBusLanes = value;
+			if (banRegularTrafficOnBusLanesToggle != null)
+				banRegularTrafficOnBusLanesToggle.isChecked = value;
+
+			VehicleRestrictionsManager.Instance.ClearCache();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+		}
+
 		public static void setPrioritySignsOverlay(bool newPrioritySignsOverlay) {
 			prioritySignsOverlay = newPrioritySignsOverlay;
 			if (prioritySignsOverlayToggle != null)
 				prioritySignsOverlayToggle.isChecked = newPrioritySignsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setTimedLightsOverlay(bool newTimedLightsOverlay) {
 			timedLightsOverlay = newTimedLightsOverlay;
 			if (timedLightsOverlayToggle != null)
 				timedLightsOverlayToggle.isChecked = newTimedLightsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setSpeedLimitsOverlay(bool newSpeedLimitsOverlay) {
 			speedLimitsOverlay = newSpeedLimitsOverlay;
 			if (speedLimitsOverlayToggle != null)
 				speedLimitsOverlayToggle.isChecked = newSpeedLimitsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setVehicleRestrictionsOverlay(bool newVehicleRestrictionsOverlay) {
 			vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
 			if (vehicleRestrictionsOverlayToggle != null)
 				vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setParkingRestrictionsOverlay(bool newParkingRestrictionsOverlay) {
 			parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
 			if (parkingRestrictionsOverlayToggle != null)
 				parkingRestrictionsOverlayToggle.isChecked = newParkingRestrictionsOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setJunctionRestrictionsOverlay(bool newValue) {
 			junctionRestrictionsOverlay = newValue;
 			if (junctionRestrictionsOverlayToggle != null)
 				junctionRestrictionsOverlayToggle.isChecked = newValue;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setConnectedLanesOverlay(bool newValue) {
@@ -953,6 +989,8 @@ namespace TrafficManager.State {
 			nodesOverlay = newNodesOverlay;
 			if (nodesOverlayToggle != null)
 				nodesOverlayToggle.isChecked = newNodesOverlay;
+
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setVehicleOverlay(bool newVal) {
