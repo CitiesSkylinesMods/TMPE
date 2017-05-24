@@ -82,6 +82,14 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
+				ItemClass connectionClass = NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+				if (connectionClass == null ||
+					!(connectionClass.m_service == ItemClass.Service.Road || (connectionClass.m_service == ItemClass.Service.PublicTransport &&
+					(connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain ||
+					connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro)))) {
+					continue;
+				}
+
 				var diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
 				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 					continue; // do not draw if too distant
