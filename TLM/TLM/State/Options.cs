@@ -12,6 +12,7 @@ using ColossalFramework.Plugins;
 using ColossalFramework.Globalization;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using System.Reflection;
 
 namespace TrafficManager.State {
 
@@ -183,7 +184,7 @@ namespace TrafficManager.State {
 				}
 			}
 
-			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + " (" + Translation.GetString("requires_game_restart") + "):", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
+			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + ":", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
 			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
 
@@ -444,16 +445,27 @@ namespace TrafficManager.State {
 		}
 
 		private static void onLanguageChanged(int newLanguageIndex) {
+			bool localeChanged = false;
+
 			if (newLanguageIndex <= 0) {
 				GlobalConfig.Instance.LanguageCode = null;
 				GlobalConfig.WriteConfig();
 				MenuRebuildRequired = true;
+				localeChanged = true;
 			} else if (newLanguageIndex - 1 < Translation.AVAILABLE_LANGUAGE_CODES.Count) {
 				GlobalConfig.Instance.LanguageCode = Translation.AVAILABLE_LANGUAGE_CODES[newLanguageIndex - 1];
 				GlobalConfig.WriteConfig();
 				MenuRebuildRequired = true;
+				localeChanged = true;
 			} else {
 				Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
+			}
+
+			if (localeChanged) {
+				MethodInfo onChangedHandler = typeof(OptionsMainPanel).GetMethod("OnLocaleChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+				if (onChangedHandler != null) {
+					onChangedHandler.Invoke(UIView.library.Get<OptionsMainPanel>("OptionsPanel"), new object[0] { });
+				}
 			}
 		}
 

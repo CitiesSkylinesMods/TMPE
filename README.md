@@ -7,6 +7,7 @@ User manual: http://www.viathinksoft.de/tmpe
 1.9.5, 05/24/2017
 - Updated for game version 1.7.1-f1
 - Updated Polish, Korean and Italian translation
+- Language can now be switched without requiring a game restart
 - Bugfix: Routing calculation does not work as expected for one-way roads with tram tracks (thanks to @bigblade66, @Battelman2 and @AS_ for reporting and providing extensive information)
 - Bugfix: Copying timed traffic lights lead to inconsistent internal states which causes timed traffic lights to be omitted during the save process (thanks to @jakeroot and @t1a2l for reporting this issue)
 - Bugfix: In certain situations unnecessary vehicle-seperate traffic lights are being created
