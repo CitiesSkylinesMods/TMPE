@@ -258,7 +258,7 @@ namespace TrafficManager.Manager {
 			liveLight.CurrentMode = mode;
 		}
 
-		internal void SetLightModes(ushort segmentId, bool startNode, CustomSegmentLights otherLights) {
+		internal void ApplyLightModes(ushort segmentId, bool startNode, CustomSegmentLights otherLights) {
 			CustomSegmentLights sourceLights = GetSegmentLights(segmentId, startNode);
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in sourceLights.CustomLights) {
 				ExtVehicleType vehicleType = e.Key;

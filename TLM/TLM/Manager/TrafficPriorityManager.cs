@@ -165,7 +165,12 @@ namespace TrafficManager.Manager {
 					reason = UnableReason.InvalidSegment;
 					return false;
 				}
-				TrafficLightManager.Instance.RemoveTrafficLight(segGeo.GetNodeId(startNode));
+
+				ushort nodeId = segGeo.GetNodeId(startNode);
+				Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+					TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref node);
+					return true;
+				});
 			}
 
 			if (startNode) {

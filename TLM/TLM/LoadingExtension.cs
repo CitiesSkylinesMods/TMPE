@@ -1977,7 +1977,7 @@ namespace TrafficManager {
 
 			initDetours();
 
-			Log.Info("Fixing non-created nodes with problems...");
+			//Log.Info("Fixing non-created nodes with problems...");
 			//FixNonCreatedNodeProblems();
 
 			Log.Info("Notifying managers...");

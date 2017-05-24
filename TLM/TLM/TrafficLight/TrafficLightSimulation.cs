@@ -37,8 +37,11 @@ namespace TrafficManager.TrafficLight {
 
 		public TrafficLightSimulation(ushort nodeId) {
 			Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
-			TrafficLightManager.Instance.AddTrafficLight(nodeId);
 			this.NodeId = nodeId;
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
+				TrafficLightManager.Instance.AddTrafficLight(NodeId, ref node);
+				return true;
+			});
 			NodeGeoUnsubscriber = NodeGeometry.Get(nodeId).Subscribe(this);
 		}
 
@@ -146,7 +149,10 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			// ensure there is a physical traffic light
-			TrafficLightManager.Instance.AddTrafficLight(NodeId);
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nodeId, ref NetNode node) {
+				TrafficLightManager.Instance.AddTrafficLight(NodeId, ref node);
+				return true;
+			});
 
 			TimedLight?.OnGeometryUpdate();
 			TimedLight?.housekeeping();

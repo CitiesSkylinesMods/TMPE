@@ -1,4 +1,4 @@
-Switch_traffic_lights Włącznik sygnalizacji 
+Switch_traffic_lights Włącznik sygnalizacji
 Add_priority_signs Dodaj znaki pierwszeństwa
 Manual_traffic_lights Sygnalizacja Ręczna
 Timed_traffic_lights Sygnalizacja Czasowa
@@ -12,20 +12,20 @@ Select_nodes_windowTitle Wybór węzłów
 Select_nodes Wybierz węzły
 Node Węzeł
 Deselect_all_nodes Odznacz wszystkie węzły
-Setup_timed_traffic_light Ustaw czasową sygnalizację świetlną 
+Setup_timed_traffic_light Ustaw czasową sygnalizację świetlną
 State Stan
 Skip Pomiń
 up w górę
 down w dół
 View Wyświetl
-Edit Edytuj 
-Delete Skasuj 
+Edit Edytuj
+Delete Skasuj
 Timed_traffic_lights_manager Menedżer Sygnalizacji czasowej
 Add_step Dodaj krok
 Remove_timed_traffic_light Usuń sygnalizację czasową
 Min._Time: Min. Czas:
 Max._Time: Max. Czas:
-Save Zapisz 
+Save Zapisz
 Add Dodaj
 Sensitivity Czułość
 Very_Low Bardzo niska
@@ -51,7 +51,7 @@ min/max min/max
 Lane Pas
 Set_Speed Ustaw Prędkość {0}
 Max_speed Max Prędkość
-Segment Segment 
+Segment Segment
 incoming nadjeżdżające
 Enable_Advanced_Vehicle_AI Włącz Zaawansowaną Sztuczną Inteligencję Pojazdów
 Vehicles_may_enter_blocked_junctions Pojazdy mogą wjeżdżać na zablokowane skrzyżowania
@@ -59,16 +59,16 @@ All_vehicles_may_ignore_lane_arrows Wszystkie pojazdy mogą ignorować strzałki
 Busses_may_ignore_lane_arrows Autobusy mogą ignorować strzałki pasów
 Reckless_driving Lekkomyślna jazda (funkcja w wer. BETA)
 TMPE_Title Menedżer ruchu: Edycja Prezydencka
-Settings_are_defined_for_each_savegame_separately ustawienia są definiowane oddzielnie dla każdego zapisu 
+Settings_are_defined_for_each_savegame_separately ustawienia są definiowane oddzielnie dla każdego zapisu
 Simulation_accuracy Dokładność symulacji (większa dokładność zmiejsza wydajność gry)
 Enable_highway_specific_lane_merging/splitting_rules Aktywuj Zmienione zasady podziału/łączenia pasów dla autostrad
-Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Chęć kierowców do zmiany pasa (tylko gdy Zaawansowana SI jest włączona) 
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Chęć kierowców do zmiany pasa (tylko gdy Zaawansowana SI jest włączona)
 Maintenance Konserwacja (dodatkowe informacje)
 Very_often Bardzo często
 Often Często
 Sometimes Czasami
 Rarely Rzadko
-Very_rarely Bardzo Rzadko 
+Very_rarely Bardzo Rzadko
 Only_if_necessary Tylko jeśli konieczna
 Nodes_and_segments Pokaż węzły i segmenty
 Lanes Pasy
@@ -86,8 +86,8 @@ Remove_zoning Skasuj Strefy
 Lane_Arrow_Changer_Disabled_Highway Zmiana strzałek pasów została wyłączona dla tego pasa ponieważ aktywowałeś/łaś Zmienione zasady łączenia pasów dla Autostrad
 Add_junction_to_timed_light Dodaj skrzyżowanie do tego węzła sygnalizacji
 Remove_junction_from_timed_light Wyklucz skrzyżowanie z tego węzła sygnalizacji
-Select_junction Wybierz skrzyżowanie 
-Cancel Anuluj 
+Select_junction Wybierz skrzyżowanie
+Cancel Anuluj
 Speed_limits Ograniczenia prędkości
 Persistently_visible_overlays Trwale widoczne nakładki
 Priority_signs Znaki pierwszeństwa
@@ -102,7 +102,7 @@ Copy Kopiuj
 Paste Wklej
 Invert Odwróć
 Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Zastosuj ograniczenia ruchu pojazdów do wszystkich segmentów drogi pomiędzy dwoma skrzyżowaniami
-Allow_all_vehicles Zezwól dla wszystkich pojazdów 
+Allow_all_vehicles Zezwól dla wszystkich pojazdów
 Ban_all_vehicles Zablokuj dla wszystkich pojazdów
 Set_all_traffic_lights_to_red Ustaw wszystkie sygnalizatory na sygnał czerwony
 Rotate_left Obróć w lewo
@@ -157,17 +157,17 @@ Vehicle_behavior Zachowanie pojazdu
 Policies_&_Restrictions Zasady i Ograniczenia
 At_junctions Na strzyżowaniach
 In_case_of_emergency W sytuacjach nadzwyczajnych
-Show_lane-wise_speed_limits Pokaz limity prêdkoœci dla pasów
-Language Jêzyk
-Game_language Jêzyk gry
+Show_lane-wise_speed_limits Pokaz limity prędkości dla pasów
+Language Język
+Game_language Język gry
 requires_game_restart wymagane ponowne uruchomienie gry
-Customizations_come_into_effect_instantaneously Modyfikacje ustawieñ maj¹ natychmiastowy efekt
+Customizations_come_into_effect_instantaneously Modyfikacje ustawień mają natychmiastowy efekt
 Options Opcje
-Lock_main_menu_button_position Zablokuj pozycjê przycisku menu g³ównego
-Lock_main_menu_position Zablokuj pozycjê menu g³ównego
+Lock_main_menu_button_position Zablokuj pozycję przycisku menu głównego
+Lock_main_menu_position Zablokuj pozycję menu głównego
 Recalculating_lane_routing Ponowne obliczanie tras
-Please_wait Proszê czekaæ
+Please_wait Proszę czekać
 Parking_restrictions Ograniczenia parkingowe
-Simulation Simulation
-On_roads On roads
-Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
+Simulation Symulacja
+On_roads Na drogach
+Ban_private_cars_and_trucks_on_bus_lanes Zakaz jazdy buspasem dla samochodów osobowych i ciężarówek

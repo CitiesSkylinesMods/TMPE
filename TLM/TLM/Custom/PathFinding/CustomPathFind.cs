@@ -1044,9 +1044,10 @@ namespace TrafficManager.Custom.PathFinding {
 
 					// determine if the vehicle may u-turn at the target node
 					bool explorePrevSegment =
-						_isRoadVehicle && // only road vehicles may perform u-turns
+						(this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None &&
 						(nextIsEndOrOneWayOut || // stock u-turn points
 						(Options.junctionRestrictionsEnabled &&
+						_isRoadVehicle && // only road vehicles may perform u-turns
 						isCustomUturnAllowed && // only do u-turns if allowed
 						!nextIsBeautificationNode && // no u-turns at beautification nodes
 						prevIsCarLane && // u-turns for road vehicles only

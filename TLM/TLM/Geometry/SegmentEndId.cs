@@ -5,8 +5,8 @@ using System.Text;
 
 namespace TrafficManager.Geometry {
 	public class SegmentEndId : IEquatable<SegmentEndId> {
-		public virtual ushort SegmentId { get; set; } = 0;
-		public virtual bool StartNode { get; set; } = false;
+		public virtual ushort SegmentId { get; protected set; } = 0;
+		public virtual bool StartNode { get; protected set; } = false;
 
 		public SegmentEndId(ushort segmentId, bool startNode) {
 			SegmentId = segmentId;
@@ -15,6 +15,12 @@ namespace TrafficManager.Geometry {
 
 		private SegmentEndId() {
 
+		}
+
+		public virtual bool Relocate(ushort segmentId, bool startNode) {
+			SegmentId = segmentId;
+			StartNode = startNode;
+			return true;
 		}
 
 		public override bool Equals(object other) {

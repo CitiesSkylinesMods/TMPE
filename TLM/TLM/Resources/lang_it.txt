@@ -1,18 +1,18 @@
 Switch_traffic_lights Attiva/Disattiva semaforo
 Add_priority_signs Aggiungi segnale stradale
-Manual_traffic_lights Semaforo manuale
-Timed_traffic_lights Semaforo programmato
+Manual_traffic_lights Semaforo (manuale)
+Timed_traffic_lights Semaforo (temporizzato)
 Change_lane_arrows Modifica frecce di direzione
 Clear_Traffic Resetta traffico
 Disable_despawning Disabilita il despawn
 Enable_despawning Abilita il despawn
 NODE_IS_LIGHT In questo incrocio c'è un semaforo./nElimina il semaforo scegliendo "Attiva/Disattiva semaforo"
-NODE_IS_TIMED_LIGHT In questo incrocio c'è un semaforo programmato\nPrima seleziona "Semaforo programmato", clicca su questo nodo e poi "Rimuovi".
+NODE_IS_TIMED_LIGHT In questo incrocio c'è un semaforo temporizzato\nPrima seleziona "Semaforo (temporizzato)", clicca su questo nodo e poi "Rimuovi".
 Select_nodes_windowTitle Seleziona nodi
 Select_nodes Seleziona nodi
 Node Nodo
 Deselect_all_nodes Deseleziona tutti i nodi
-Setup_timed_traffic_light Configura semaforo programmato
+Setup_timed_traffic_light Configura semaforo temporizzato
 State Stato
 Skip Salta
 up Su
@@ -20,9 +20,9 @@ down Giù
 View Vedi
 Edit Modifica
 Delete Elimina
-Timed_traffic_lights_manager Gestore semafori programmati
+Timed_traffic_lights_manager Gestore semafori temporizzati
 Add_step Aggiungi step
-Remove_timed_traffic_light Rimuovi semaforo programmato
+Remove_timed_traffic_light Rimuovi semaforo temporizzato
 Min._Time: Min. Tempo:
 Max._Time: Max. Tempo:
 Save Salva
@@ -84,7 +84,8 @@ Delete_group Elimina gruppo
 Add_zoning Aggiungi zoning
 Remove_zoning Rimuovi zoning
 Lane_Arrow_Changer_Disabled_Highway La modifica delle frecce di direzione per questa corsia è disabilitata perchè è attivo il sistema di regole autostradali predefinito. Puoi disabilitarlo nelle opzioni alla voce "Abilita regolazione specifica per le corsie autostradali".
-Remove_junction_from_timed_light Rimuovi un incrocio da questo semaforo
+Add_junction_to_timed_light Aggiungi un incrocio a questo semaforo
+Remove_junction_from_timed_light Rimuovi un incrocio a questo semaforo
 Select_junction Seleziona un incrocio
 Cancel Annulla
 Speed_limits Limiti di velocità
@@ -100,7 +101,7 @@ Vehicle_restrictions Restrizioni veicoli
 Copy Copia
 Paste Incolla
 Invert Inverti
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Applica le restrizioni al segmento di strada compreso tra due incroci
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions Applica le restrizioni al tratto di strada compreso tra due incroci
 Allow_all_vehicles Permetti l'accesso a tutti i veicoli
 Ban_all_vehicles Banna tutti i veicoli
 Set_all_traffic_lights_to_red Imposta tutti i semafori sul Rosso
@@ -108,10 +109,10 @@ Rotate_left Ruota a sinistra
 Rotate_right Ruota a destra
 Name Nome
 Apply Applica
-Select_a_timed_traffic_light_program Seleziona pattern per il semaforo programmato
+Select_a_timed_traffic_light_program Seleziona pattern per il semaforo temporizzato
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Il pattern scelto è incompatibile con questo incrocio
 Advanced_AI_cannot_be_activated La IA Avanzata non può essere attivata
-The_Advanced_Vehicle_AI_cannot_be_activated La IA Avanzata non può essere attivata perche stai usando un'altra mod che modifica il comportamento dei veicoli (es. Improved AI o Traffic++).
+The_Advanced_Vehicle_AI_cannot_be_activated La IA Avanzata non può essere attivata perchè stai usando un'altra mod che modifica il comportamento dei veicoli (es. Improved AI o Traffic++).
 Enable_dynamic_path_calculation Abilita calcolo del percorso dinamico
 Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Le modifiche effettuate con questo tool avranno effetto dopo alcuni minuti.
 Lane_Arrow_Changer_Disabled_Connection La modifica delle frecce di direzione per questa corsia è disabilitata perchè hai creato la connessione della corsia a mano.
@@ -143,31 +144,31 @@ Incoming_demand Incoming demand
 Advanced_Vehicle_AI IA Avanzata
 Heavy_trucks_prefer_outer_lanes_on_highways I veicoli pesanti preferiscono corsie esterne sulle autostrade
 Parking_AI Parking AI
-Enable_more_realistic_parking Abilita l'utilizzo più realistico dei parcheggi
+Enable_more_realistic_parking Abilita utilizzo più realistico dei parcheggi
 Reset_custom_speed_limits Resetta i limiti di velocita personalizzati
 Reload_global_configuration Ricarica configurazione globale
 Reset_global_configuration Resetta configurazione globale
 General Generale
 Gameplay Gameplay
 Overlays Overlays
-Realistic_speeds Velocità dei veicoli realistica
+Realistic_speeds Velocità realistica dei veicoli
 Evacuation_busses_may_ignore_traffic_rules I bus di evacuazione possono ignorare le regole stradali
 Evacuation_busses_may_only_be_used_to_reach_a_shelter I bus di evacuazione possono essere usati solo per raggiungere un rifugio
 Vehicle_behavior Comportamente del veicolo
 Policies_&_Restrictions Policies & Restrizioni
 At_junctions Agli incroci
 In_case_of_emergency In caso di emergenza
-Show_lane-wise_speed_limits Show lane-wise speed limits
-Language Language
-Game_language Game language
-requires_game_restart requires game restart
-Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
-Options Options
-Lock_main_menu_button_position Lock main menu button position
-Lock_main_menu_position Lock main menu position
-Recalculating_lane_routing Recalculating lane routing
-Please_wait Please wait
-Parking_restrictions Parking restrictions
-Simulation Simulation
-On_roads On roads
-Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
+Show_lane-wise_speed_limits Mostra limite velocità per ogni corsia
+Language Lingua
+Game_language Lingua di gioco
+requires_game_restart Richiede il riavvio del gioco
+Customizations_come_into_effect_instantaneously Le modifiche avranno effetto immediatamente
+Options Opzioni
+Lock_main_menu_button_position Blocca posizione del bottone (menu)
+Lock_main_menu_position Blocca posizione del menu
+Recalculating_lane_routing Ricalcolo percorso corsia
+Please_wait Attendere prego
+Parking_restrictions Divieti di sosta
+Simulation Simulazione
+On_roads Su strade
+Ban_private_cars_and_trucks_on_bus_lanes Vieta alle auto e ai camion di utilizzare le corsie riservate ai bus

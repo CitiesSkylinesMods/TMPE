@@ -329,9 +329,6 @@
     <EmbeddedResource Include="Resources\lang_zh.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_kr.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\lang_it.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -357,6 +354,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\parking_allowed.png" />
     <EmbeddedResource Include="Resources\parking_disallowed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_ko.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

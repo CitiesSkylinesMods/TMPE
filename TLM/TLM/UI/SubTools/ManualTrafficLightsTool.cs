@@ -40,7 +40,7 @@ namespace TrafficManager.UI.SubTools {
 			if (sim == null || !sim.IsTimedLight()) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 					prioMan.RemovePrioritySignsFromNode(HoveredNodeId);
-					TrafficLightManager.Instance.AddTrafficLight(HoveredNodeId);
+					TrafficLightManager.Instance.AddTrafficLight(HoveredNodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId]);
 				}
 
 				SelectedNodeId = HoveredNodeId;

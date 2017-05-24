@@ -340,7 +340,7 @@ namespace TrafficManager.Custom.AI {
 #else
 					bool debug = false;
 #endif
-					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleID, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, out maxSpeed, debug);
+					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleID, ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed, debug);
 					if (!mayChange) {
 						return;
 					}

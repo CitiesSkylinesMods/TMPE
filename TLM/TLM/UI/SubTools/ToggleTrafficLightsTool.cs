@@ -21,13 +21,16 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			if (HoveredNodeId == 0)
 				return;
-
-			ToggleTrafficLight(HoveredNodeId);
+			
+			Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
+				TrafficLightManager.Instance.ToggleTrafficLight(HoveredNodeId, ref node);
+				return true;
+			});
 		}
 
-		public void ToggleTrafficLight(ushort nodeId, bool showMessageOnError=true) {
+		public void ToggleTrafficLight(ushort nodeId, ref NetNode node, bool showMessageOnError=true) {
 			TrafficLightManager.UnableReason reason;
-			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, out reason)) {
+			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, ref node, out reason)) {
 				if (showMessageOnError && reason == TrafficLightManager.UnableReason.HasTimedLight) {
 					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
@@ -35,7 +38,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
-			TrafficLightManager.Instance.ToggleTrafficLight(nodeId);
+			TrafficLightManager.Instance.ToggleTrafficLight(nodeId, ref node);
 		}
 
 		public override void OnToolGUI(Event e) {

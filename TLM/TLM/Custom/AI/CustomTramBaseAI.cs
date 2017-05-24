@@ -244,7 +244,7 @@ namespace TrafficManager.Custom.AI {
 					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
 				if (targetNodeId == prevTargetNodeId) {
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, false, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
 						return;
 				}
 			}

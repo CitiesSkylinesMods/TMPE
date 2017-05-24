@@ -42,8 +42,8 @@ namespace TrafficManager.Manager {
 		/// <param name="laneID">current lane</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, uint laneID, out float maxSpeed, bool debug = false) {
-			return MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, prevTargetNodeId, prevLaneID, ref position, targetNodeId, laneID, ref DUMMY_POS, 0, out maxSpeed, debug);
+		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed, bool debug = false) {
+			return MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed, debug);
 		}
 
 		/// <summary>
@@ -64,7 +64,7 @@ namespace TrafficManager.Manager {
 		/// <param name="nextTargetNodeId">next target node</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug = false) {
+		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug = false) {
 			debug = false;
 			if (prevTargetNodeId != targetNodeId) {
 				// method should only be called if targetNodeId == prevTargetNode
@@ -96,12 +96,17 @@ namespace TrafficManager.Manager {
 			bool isRailVehicle = (vehicleData.Info.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
 			bool isMonorail = vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Monorail;
 
-			NetNode.Flags targetNodeFlags = netManager.m_nodes.m_buffer[targetNodeId].m_flags;
-			bool hasTrafficLight = (targetNodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+			NetNode.Flags targetNodeFlags = targetNode.m_flags;
+			bool hasActiveTimedSimulation = (Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId));
+			bool hasTrafficLightFlag = (targetNodeFlags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+			bool hasTrafficLight = hasTrafficLightFlag || hasActiveTimedSimulation;
+			if (hasActiveTimedSimulation && ! hasTrafficLightFlag) {
+				TrafficLightManager.Instance.AddTrafficLight(targetNodeId, ref targetNode);
+			}
 			bool hasStockYieldSign = false;
 			float sqrSpeed = lastFrameData.m_velocity.sqrMagnitude;
-			bool checkTrafficLights = false;
-			bool isTargetStartNode = netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode == targetNodeId;
+			bool checkTrafficLights = hasActiveTimedSimulation;
+			bool isTargetStartNode = prevSegment.m_startNode == targetNodeId;
 			if (!isRailVehicle) {
 				// check if to check space
 
@@ -110,7 +115,7 @@ namespace TrafficManager.Manager {
 					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} is not a train.");
 #endif
 
-				var prevLaneFlags = (NetLane.Flags)netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].m_flags;
+				var prevLaneFlags = (NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags;
 				var hasCrossing = (targetNodeFlags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 				var isJoinedJunction = (prevLaneFlags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
 				hasStockYieldSign = (prevLaneFlags & (NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd)) != NetLane.Flags.None && (targetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.TrafficLights | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction;
@@ -130,17 +135,17 @@ namespace TrafficManager.Manager {
 				if (checkSpace) {
 					// check if there is enough space
 					if ((targetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction &&
-						netManager.m_nodes.m_buffer[targetNodeId].CountSegments() != 2) {
+						targetNode.CountSegments() != 2) {
 						var len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
-						if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(len)) {
+						if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
 							var sufficientSpace = false;
-							if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_length < 30f) {
+							if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
 								NetNode.Flags nextTargetNodeFlags = netManager.m_nodes.m_buffer[nextTargetNodeId].m_flags;
 								if ((nextTargetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
 									netManager.m_nodes.m_buffer[nextTargetNodeId].CountSegments() == 2) {
 									uint nextLaneId = PathManager.GetLaneID(nextPosition);
 									if (nextLaneId != 0u) {
-										sufficientSpace = netManager.m_lanes.m_buffer[(int)((UIntPtr)nextLaneId)].CheckSpace(len);
+										sufficientSpace = netManager.m_lanes.m_buffer[nextLaneId].CheckSpace(len);
 									}
 								}
 							}
@@ -164,16 +169,14 @@ namespace TrafficManager.Manager {
 					}
 				}
 
-				checkTrafficLights = (!isJoinedJunction || hasCrossing);
+				checkTrafficLights = checkTrafficLights || (!isJoinedJunction || hasCrossing);
 			} else {
 #if DEBUG
 				if (debug)
 					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} is a train/monorail.");
 #endif
 
-				if (isMonorail) {
-					checkTrafficLights = TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId);
-				} else {
+				if (!isMonorail) {
 					checkTrafficLights = true;
 				}
 			}
@@ -194,7 +197,7 @@ namespace TrafficManager.Manager {
 							Log._Debug($"CustomVehicleAI.MayChangeSegment: Node {targetNodeId} has a traffic light.");
 #endif
 
-						var destinationInfo = netManager.m_nodes.m_buffer[targetNodeId].Info;
+						var destinationInfo = targetNode.Info;
 
 						if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
@@ -208,7 +211,7 @@ namespace TrafficManager.Manager {
 						RoadBaseAI.TrafficLightState pedestrianLightState;
 						bool vehicles;
 						bool pedestrians;
-						CustomRoadAI.GetTrafficLightState(vehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref netManager.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+						CustomRoadAI.GetTrafficLightState(vehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
 							vehicleLightState = RoadBaseAI.TrafficLightState.Green;
@@ -221,7 +224,7 @@ namespace TrafficManager.Manager {
 
 						if (!vehicles && random >= 196u) {
 							vehicles = true;
-							RoadBaseAI.SetTrafficLightState(targetNodeId, ref netManager.m_segments.m_buffer[prevPos.m_segment], currentFrameIndex - prevTargetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
+							RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
 						}
 
 						var stopCar = false;
@@ -254,7 +257,7 @@ namespace TrafficManager.Manager {
 								break;
 						}
 
-						/*if ((vehicleLightState == RoadBaseAI.TrafficLightState.Green || vehicleLightState == RoadBaseAI.TrafficLightState.RedToGreen) && !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode == targetNodeId)) {
+						/*if ((vehicleLightState == RoadBaseAI.TrafficLightState.Green || vehicleLightState == RoadBaseAI.TrafficLightState.RedToGreen) && !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, prevSegment.m_startNode == targetNodeId)) {
 							var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
 
 							if (hasIncomingCars) {
@@ -338,7 +341,7 @@ namespace TrafficManager.Manager {
 													if (Options.simAccuracy >= 4) {
 														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 													} else {
-														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
+														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
 #if DEBUG
 														if (debug)
 															Log._Debug($"hasIncomingCars: {hasIncomingCars}");
@@ -389,7 +392,7 @@ namespace TrafficManager.Manager {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
+													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
 #if DEBUG
 													if (debug)
 														Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
@@ -443,7 +446,7 @@ namespace TrafficManager.Manager {
 #endif
 											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref netManager.m_segments.m_buffer[prevPos.m_segment], targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], ref prevPos, ref position);
+											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
 #if DEBUG
 											if (debug)
 												Log._Debug($"hasIncomingCars: {hasIncomingCars}");

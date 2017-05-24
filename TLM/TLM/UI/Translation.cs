@@ -23,7 +23,7 @@ namespace TrafficManager.UI {
 			AVAILABLE_LANGUAGE_CODES.Add("fr");
 			AVAILABLE_LANGUAGE_CODES.Add("it");
 			AVAILABLE_LANGUAGE_CODES.Add("ja");
-			AVAILABLE_LANGUAGE_CODES.Add("kr");
+			AVAILABLE_LANGUAGE_CODES.Add("ko");
 			AVAILABLE_LANGUAGE_CODES.Add("nl");
 			AVAILABLE_LANGUAGE_CODES.Add("pl");
 			AVAILABLE_LANGUAGE_CODES.Add("pt");
@@ -38,7 +38,7 @@ namespace TrafficManager.UI {
 			LANGUAGE_LABELS["fr"] = "Français";
 			LANGUAGE_LABELS["it"] = "Italiano";
 			LANGUAGE_LABELS["ja"] = "日本語";
-			LANGUAGE_LABELS["kr"] = "한국의";
+			LANGUAGE_LABELS["ko"] = "한국의";
 			LANGUAGE_LABELS["nl"] = "Nederlands";
 			LANGUAGE_LABELS["pl"] = "Polski";
 			LANGUAGE_LABELS["pt"] = "Português";
@@ -76,6 +76,9 @@ namespace TrafficManager.UI {
 					break;
 				case "zh-cn":
 					language = "zh";
+					break;
+				case "kr":
+					language = "ko";
 					break;
 			}
 

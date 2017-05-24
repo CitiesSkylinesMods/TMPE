@@ -19,7 +19,6 @@ namespace CSUtil.Commons {
 
 		private static string logFilename = Path.Combine(Application.dataPath, "TMPE.log"); // TODO refactor log filename to configuration
 		private static Stopwatch sw = Stopwatch.StartNew();
-		private static bool logFileAccessible = true;
 
 
 		static Log() {
@@ -27,16 +26,12 @@ namespace CSUtil.Commons {
 				if (File.Exists(logFilename))
 					File.Delete(logFilename);
 			} catch (Exception) {
-				logFileAccessible = false;
+				
 			}
 		}
 
 		[Conditional("DEBUG")]
 		public static void _Debug(string s) {
-			if (!logFileAccessible) {
-				return;
-			}
-
 			try {
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Debug);
@@ -48,10 +43,6 @@ namespace CSUtil.Commons {
 		}
 
 		public static void Info(string s) {
-			if (!logFileAccessible) {
-				return;
-			}
-
 			try {
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Info);
@@ -63,10 +54,6 @@ namespace CSUtil.Commons {
 		}
 
 		public static void Error(string s) {
-			if (!logFileAccessible) {
-				return;
-			}
-
 			try {
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Error);
@@ -78,10 +65,6 @@ namespace CSUtil.Commons {
 		}
 
 		public static void Warning(string s) {
-			if (!logFileAccessible) {
-				return;
-			}
-
 			try {
 				Monitor.Enter(logLock);
 				LogToFile(s, LogLevel.Warning);
@@ -93,10 +76,6 @@ namespace CSUtil.Commons {
 		}
 
 		private static void LogToFile(string log, LogLevel level) {
-			if (! logFileAccessible) {
-				return;
-			}
-
 			try {
 				using (StreamWriter w = File.AppendText(logFilename)) {
 					w.WriteLine($"[{level.ToString()}] @ {sw.ElapsedTicks} {log}");
@@ -106,7 +85,7 @@ namespace CSUtil.Commons {
 					}
                 }
 			} catch (Exception) {
-				logFileAccessible = false;
+				
 			}
 		}
 	}

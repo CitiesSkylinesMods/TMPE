@@ -219,7 +219,7 @@ namespace TrafficManager.Custom.AI {
 					data.m_flags |= NetNode.Flags.CustomTrafficLights;*/
 					// NON-STOCK CODE START
 					ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)UIBase.GetTrafficManagerTool(true).GetSubTool(ToolMode.SwitchTrafficLight);
-					toggleTool.ToggleTrafficLight(nodeID, false);
+					toggleTool.ToggleTrafficLight(nodeID, ref data, false);
 					// NON-STOCK CODE END
 					this.UpdateNodeFlags(nodeID, ref data);
 					Singleton<NetManager>.instance.m_yieldLights.Disable();

@@ -4,6 +4,15 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
+1.9.5, 05/24/2017
+- Updated for game version 1.7.1-f1
+- Updated Polish, Korean and Italian translation
+- Bugfix: Routing calculation does not work as expected for one-way roads with tram tracks (thanks to @bigblade66, @Battelman2 and @AS_ for reporting and providing extensive information)
+- Bugfix: Copying timed traffic lights lead to inconsistent internal states which causes timed traffic lights to be omitted during the save process (thanks to @jakeroot and @t1a2l for reporting this issue)
+- Bugfix: In certain situations unnecessary vehicle-seperate traffic lights are being created
+- Bugfix: Upgrading a train track segment next to a timed traffic light causes trains to ignore the traffic light
+- Hotfix: Cable cars despawn at end-of-line stations
+
 1.9.4, 05/23/2017
 - New option: Ban private cars and trucks on bus lanes
 - Updated Spanish and French translation 

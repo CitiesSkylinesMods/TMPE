@@ -173,8 +173,7 @@ namespace TrafficManager.Manager {
 					"LaneTransitionData]";
 			}
 
-			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, byte distance, ushort segmentId
-				) {
+			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId, byte distance) {
 				this.laneId = laneId;
 				this.laneIndex = laneIndex;
 				this.type = type;
@@ -183,7 +182,7 @@ namespace TrafficManager.Manager {
 			}
 
 			public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId) {
-				Set(laneId, laneIndex, type, 0, segmentId);
+				Set(laneId, laneIndex, type, segmentId, 0);
 			}
 		}
 
@@ -605,12 +604,15 @@ namespace TrafficManager.Manager {
 				LaneTransitionData[] nextCompatibleTransitionDatas = null;
 				int[] nextCompatibleOuterSimilarIndices = null;
 				byte numNextCompatibleTransitionDatas = 0;
+				LaneTransitionData[] nextForcedTransitionDatas = null;
+				byte numNextForcedTransitionDatas = 0;
 				int[] nextCompatibleTransitionDataIndices = null;
 				byte numNextCompatibleTransitionDataIndices = 0;
 
 				if (isNextValid) {
 					nextRelaxedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
 					nextCompatibleTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
+					nextForcedTransitionDatas = new LaneTransitionData[MAX_NUM_TRANSITIONS];
 					nextCompatibleOuterSimilarIndices = new int[MAX_NUM_TRANSITIONS];
 					nextCompatibleTransitionDataIndices = new int[MAX_NUM_TRANSITIONS];
 				}
@@ -683,15 +685,20 @@ namespace TrafficManager.Manager {
 									// lane can be used by all vehicles that may disregard lane arrows
 									transitionType = LaneEndTransitionType.Relaxed;
 									if (numNextRelaxedTransitionDatas < MAX_NUM_TRANSITIONS) {
-										nextRelaxedTransitionDatas[numNextRelaxedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, GlobalConfig.Instance.IncompatibleLaneDistance, nextSegmentId);
+										nextRelaxedTransitionDatas[numNextRelaxedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, GlobalConfig.Instance.IncompatibleLaneDistance);
 									} else {
 										Log.Warning($"nextTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 									}
 								}
 							} else {
-								// routed vehicle that does not follow lane arrows (e.g. trams, trains)
+								// routed vehicle that does not follow lane arrows (trains, trams, metros)
 								transitionType = LaneEndTransitionType.Default;
-								isCompatibleLane = true;
+
+								if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
+									nextForcedTransitionDatas[numNextForcedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId);
+								} else {
+									Log.Warning($"nextForcedTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
+								}
 							}
 
 							if (isCompatibleLane) {
@@ -1020,7 +1027,7 @@ namespace TrafficManager.Manager {
 					} // compatible lanes found
 
 					// build final array
-					LaneTransitionData[] nextTransitionDatas = new LaneTransitionData[numNextRelaxedTransitionDatas + numNextCompatibleTransitionDataIndices];
+					LaneTransitionData[] nextTransitionDatas = new LaneTransitionData[numNextRelaxedTransitionDatas + numNextCompatibleTransitionDataIndices + numNextForcedTransitionDatas];
 					int j = 0;
 					for (int i = 0; i < numNextCompatibleTransitionDataIndices; ++i) {
 						nextTransitionDatas[j++] = nextCompatibleTransitionDatas[nextCompatibleTransitionDataIndices[i]];
@@ -1028,6 +1035,10 @@ namespace TrafficManager.Manager {
 
 					for (int i = 0; i < numNextRelaxedTransitionDatas; ++i) {
 						nextTransitionDatas[j++] = nextRelaxedTransitionDatas[i];
+					}
+
+					for (int i = 0; i < numNextForcedTransitionDatas; ++i) {
+						nextTransitionDatas[j++] = nextForcedTransitionDatas[i];
 					}
 
 					routing.SetTransitions(k, nextTransitionDatas);

@@ -116,9 +116,9 @@ namespace TrafficManager.TrafficLight {
 					bool targetStartNode = segGeo.StartNodeId() == NodeId;
 
 					CustomSegmentLights sourceLights = sourceStep.CustomSegmentLights[sourceSegmentId];
-					CustomSegmentLights targetLights = (CustomSegmentLights)sourceLights.Clone();
-					targetStep.SetSegmentLights(NodeId, targetSegmentId, targetLights);
-					CustomSegmentLightsManager.Instance.SetLightModes(targetSegmentId, targetStartNode, targetLights);
+					CustomSegmentLights targetLights = (CustomSegmentLights)sourceLights.Clone(targetStep, false);
+					targetStep.SetSegmentLights(targetSegmentId, targetLights);
+					CustomSegmentLightsManager.Instance.ApplyLightModes(targetSegmentId, targetStartNode, targetLights);
 				}
 				Steps.Add(targetStep);
 			}
@@ -131,7 +131,7 @@ namespace TrafficManager.TrafficLight {
 		private object rotateLock = new object();
 
 		private void Rotate(ArrowDirection dir) {
-			if (! IsMasterNode() || NodeGroup.Count != 1) {
+			if (! IsMasterNode() || NodeGroup.Count != 1 || Steps.Count <= 0) {
 				return;
 			}
 
@@ -167,23 +167,21 @@ namespace TrafficManager.TrafficLight {
 						int targetIndex = (sourceIndex + 1) % clockSortedSegmentIds.Count;
 						ushort targetSegmentId = clockSortedSegmentIds[targetIndex];
 
+						SegmentGeometry targetSegGeo = SegmentGeometry.Get(targetSegmentId); // should never fail here
+
 						Log._Debug($"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Moving light @ seg. {sourceSegmentId} to seg. {targetSegmentId} @ step {stepIndex}");
 
-						CustomSegmentLights sourceLights = sourceIndex == 0 ? step.GetSegmentLights(NodeId, sourceSegmentId) : bufferedLights;
+						CustomSegmentLights sourceLights = sourceIndex == 0 ? step.RemoveSegmentLights(sourceSegmentId) : bufferedLights;
 						if (sourceLights == null) {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: sourceLights is null @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
-						bufferedLights = step.GetSegmentLights(NodeId, targetSegmentId);
-						if (bufferedLights == null) {
-							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: bufferedLights is null @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
-						}
-						if (!step.SetSegmentLights(NodeId, targetSegmentId, sourceLights)) {
+						bufferedLights = step.RemoveSegmentLights(targetSegmentId);
+						sourceLights.Relocate(targetSegmentId, targetSegGeo.StartNodeId() == NodeId);
+						if (!step.SetSegmentLights(targetSegmentId, sourceLights)) {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: could not set lights for target segment @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
 					}
 				}
-				CurrentStep = Steps.Count - 1;
-				SetLights();
 
 				switch (dir) {
 					case ArrowDirection.Left:
@@ -193,6 +191,9 @@ namespace TrafficManager.TrafficLight {
 						RotationOffset = (short)((RotationOffset + 1) % clockSortedSegmentIds.Count);
 						break;
 				}
+
+				CurrentStep = 0;
+				SetLights(true);
 			} finally {
 				Monitor.Exit(rotateLock);
 			}
@@ -293,7 +294,10 @@ namespace TrafficManager.TrafficLight {
 			/*if (!housekeeping())
 				return;*/
 
-			TrafficLightManager.Instance.AddTrafficLight(NodeId);
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nodeId, ref NetNode node) {
+				TrafficLightManager.Instance.AddTrafficLight(NodeId, ref node);
+				return true;
+			});
 
 			foreach (TimedTrafficLightsStep step in Steps) {
 				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.CustomSegmentLights) {
@@ -407,6 +411,9 @@ namespace TrafficManager.TrafficLight {
 			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
 
 			started = false;
+			foreach (TimedTrafficLightsStep step in Steps) {
+				step.Reset();
+			}
 			ClearInvalidPedestrianLights();
 		}
 
@@ -615,7 +622,7 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		public void SetLights() {
+		public void SetLights(bool noTransition=false) {
 			if (Steps.Count <= 0) {
 				return;
 			}
@@ -629,7 +636,7 @@ namespace TrafficManager.TrafficLight {
 					//TrafficLightSimulation.RemoveNodeFromSimulation(slaveNodeId, false); // we iterate over NodeGroup!!
 					continue;
 				}
-				slaveSim.TimedLight.Steps[CurrentStep].UpdateLiveLights();
+				slaveSim.TimedLight.Steps[CurrentStep].UpdateLiveLights(noTransition);
 			}
 		}
 
@@ -730,6 +737,8 @@ namespace TrafficManager.TrafficLight {
 		/// Moves all custom segment lights that are associated with an invalid segment to a special container for later reuse
 		/// </summary>
 		private void BackUpInvalidStepSegments(NodeGeometry nodeGeo) {
+			Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: called for timed traffic light @ {NodeId}");
+
 			ICollection<ushort> validSegments = new HashSet<ushort>();
 			foreach (SegmentEndGeometry end in nodeGeo.SegmentEndGeometries) {
 				if (end == null) {
@@ -739,18 +748,25 @@ namespace TrafficManager.TrafficLight {
 				validSegments.Add(end.SegmentId);
 			}
 
+			Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: valid segments @ {NodeId}: {validSegments.CollectionToString()}");
+
+			int i = 0;
 			foreach (TimedTrafficLightsStep step in Steps) {
 				ICollection<ushort> invalidSegmentIds = new HashSet<ushort>();
 				foreach (KeyValuePair<ushort, CustomSegmentLights> e in step.CustomSegmentLights) {
 					if (! validSegments.Contains(e.Key)) {
 						step.InvalidSegmentLights.AddLast(e.Value);
 						invalidSegmentIds.Add(e.Key);
+						Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Detected invalid segment @ step {i}, node {NodeId}: {e.Key}");
 					}
 				}
 
 				foreach (ushort invalidSegmentId in invalidSegmentIds) {
+					Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Remvoing invalid segment {invalidSegmentId} from step {i} @ node {NodeId}");
 					step.CustomSegmentLights.Remove(invalidSegmentId);
 				}
+
+				++i;
 			}
 		}
 
@@ -794,7 +810,8 @@ namespace TrafficManager.TrafficLight {
 						CustomSegmentLights lightsToReuse = lightsToReuseNode.Value;
 
 						Log._Debug($"Replacing old segment @ {NodeId} with new segment {end.SegmentId}");
-						step.SetSegmentLights(NodeId, end.SegmentId, lightsToReuse);
+						lightsToReuse.Relocate(end.SegmentId, end.StartNode);
+						step.SetSegmentLights(end.SegmentId, lightsToReuse);
 					}
 				}
 			}
@@ -928,7 +945,7 @@ namespace TrafficManager.TrafficLight {
 
 			// remove all invalid segment ends
 			foreach (SegmentEndId endId in segmentEndsToDelete) {
-				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing segment end {endId} @ node {NodeId}");
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing invalid segment end {endId} @ node {NodeId}");
 				segmentEndIds.Remove(endId);
 			}
 

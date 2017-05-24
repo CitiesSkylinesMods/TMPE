@@ -54,7 +54,7 @@ namespace TrafficManager.Manager {
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-			Log.Warning($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
+			Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
 #endif
 			DestroySegmentEnd(GetIndex(segmentId, startNode));
 		}
