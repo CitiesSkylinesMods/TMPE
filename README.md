@@ -4,6 +4,12 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
+1.9.6, 05/28/2017
+- Updated Simplified Chinese translation
+- Bugfix: Vehicles cannot perform u-turns at junctions with only one outgoing segment (thanks to @Sunbird for reporting this issue)
+- Bugfix: Path-finding costs for large distances exceed the maximum allowed value (thanks to @Huitsi for reporting this issue)
+- Bugfix: Under certain circumstances path-finding at railroad crossings allow switching from road to rail tracks. 
+
 1.9.5, 05/24/2017
 - Updated for game version 1.7.1-f1
 - Updated Polish, Korean and Italian translation

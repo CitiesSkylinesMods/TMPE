@@ -124,7 +124,9 @@ namespace TrafficManager.Manager {
 
 		private ushort[] minSpeeds = { MAX_SPEED, MAX_SPEED };
 		private uint[] densities = { 0, 0 };
+		private byte[] numDirLanes = { 0, 0 };
 		private uint[] totalPfBuf = { 0, 0 };
+		private uint[] minPfBuf = { 0, 0 };
 
 		private uint[] meanSpeeds = { 0, 0 };
 		private int[] meanSpeedLanes = { 0, 0 };
@@ -196,10 +198,13 @@ namespace TrafficManager.Manager {
 				meanSpeedLanes[i] = 0;
 				segDirIndices[i] = 0;
 
+				numDirLanes[i] = 0;
 				totalPfBuf[i] = 0;
+				minPfBuf[i] = uint.MaxValue;
 			}
 
 			ushort maxBuffer = 0;
+			
 			for (uint li = 0; li < numLanes; ++li) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
 				if ((laneInfo.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None)
@@ -209,9 +214,13 @@ namespace TrafficManager.Manager {
 
 				int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
+				++numDirLanes[dirIndex];
 				uint pfBuf = laneTrafficData[segmentId][li].pathFindTrafficBuffer;
 				totalPfBuf[dirIndex] += pfBuf;
-				laneTrafficData[segmentId][li].lastPathFindTrafficBuffer = pfBuf;
+				if (pfBuf < minPfBuf[dirIndex]) {
+					minPfBuf[dirIndex] = pfBuf;
+				}
+				//laneTrafficData[segmentId][li].lastPathFindTrafficBuffer = pfBuf;
 
 				ushort curSpeed = laneTrafficData[segmentId][li].meanSpeed;
 				if (curSpeed < minSpeeds[dirIndex]) {
@@ -223,15 +232,20 @@ namespace TrafficManager.Manager {
 				}
 			}
 
+			for (int i = 0; i < 2; ++i) {
+				totalPfBuf[i] -= numDirLanes[i] * minPfBuf[i];
+			}
+
 			curLaneId = segmentData.m_lanes;
 
 			uint laneIndex = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-				if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None) {
+				if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None && (laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
 					int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
+					laneTrafficData[segmentId][laneIndex].lastPathFindTrafficBuffer = laneTrafficData[segmentId][laneIndex].pathFindTrafficBuffer - minPfBuf[dirIndex];
 					uint laneVehicleSpeedLimit = (uint)(Math.Max(Math.Min(2f, SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, curLaneId, segmentData.Info.m_lanes[laneIndex])) * 8f, 1f));
 
 					ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;

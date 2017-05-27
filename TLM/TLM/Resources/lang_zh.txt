@@ -169,5 +169,5 @@ Recalculating_lane_routing 重新计算车道路线
 Please_wait 请稍候
 Parking_restrictions 道路边停车控制管理
 Simulation 模拟
-On_roads On roads
-Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
+On_roads 专用道路
+Ban_private_cars_and_trucks_on_bus_lanes 禁止私家车和卡车驶入公交车专用道

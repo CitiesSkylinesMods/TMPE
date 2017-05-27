@@ -81,6 +81,7 @@ namespace TrafficManager.State {
 #if DEBUG
 		public int PathFindDebugNodeId = 0;
 		public int PathFindDebugStartSegmentId = 0;
+		public int PathFindDebugEndSegmentId = 0;
 		public int PathFindDebugVehicleId = 0;
 		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
 		public ushort TTLDebugNodeId = 0;

@@ -346,6 +346,7 @@ namespace TrafficManager.Custom.PathFinding {
 			bool debug = this._debug = _conf.DebugSwitches[0] &&
 				((_conf.PathFindDebugExtVehicleType == ExtVehicleType.None && (_extVehicleType == null || _extVehicleType == ExtVehicleType.None)) || (_extVehicleType != null && (_extVehicleType & _conf.PathFindDebugExtVehicleType) != ExtVehicleType.None)) &&
 				(_conf.PathFindDebugStartSegmentId <= 0 || data.m_position00.m_segment == _conf.PathFindDebugStartSegmentId || data.m_position02.m_segment == _conf.PathFindDebugStartSegmentId) &&
+				(_conf.PathFindDebugEndSegmentId <= 0 || data.m_position01.m_segment == _conf.PathFindDebugEndSegmentId || data.m_position03.m_segment == _conf.PathFindDebugEndSegmentId) &&
 				(_conf.PathFindDebugVehicleId <= 0 || _vehicleId == _conf.PathFindDebugVehicleId)
 				;
 			if (debug) {
@@ -541,8 +542,6 @@ namespace TrafficManager.Custom.PathFinding {
 								direction |= NetInfo.Direction.Backward;
 							}
 							if ((byte)(candidateItem.m_direction & direction) != 0 && (!flag2 || (instance.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
-								bool isStartNode = specialNodeId == startNode2;
-								uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, isStartNode);
 #if DEBUGNEWPF && DEBUG
 								if (debug) {
 									Log._Debug($"CustomPathFind.PathFindImplementation: Handling special node for path unit {unit}, type {_extVehicleType}:\n" +
@@ -551,12 +550,11 @@ namespace TrafficManager.Custom.PathFinding {
 										$"\tcandidateItem.m_laneID={candidateItem.m_laneID}\n" +
 										$"\tspecialNodeId={specialNodeId}\n" +
 										$"\tstartNode2={startNode2}\n" +
-										$"\tendNode2={endNode2}\n" +
-										$"\tlaneRoutingIndex={laneRoutingIndex}\n"
+										$"\tendNode2={endNode2}\n"
 										);
 								}
 #endif
-								this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], ref routingManager.segmentRoutings[candidateItem.m_position.m_segment], ref routingManager.laneEndRoutings[laneRoutingIndex], specialNodeId, isStartNode, ref instance.m_nodes.m_buffer[specialNodeId], laneOffset, true);
+								this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], ref routingManager.segmentRoutings[candidateItem.m_position.m_segment], ref routingManager.laneEndRoutings[0], specialNodeId, false, ref instance.m_nodes.m_buffer[specialNodeId], laneOffset, true);
 							}
 							specialNodeId = instance.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
 							if (++num6 == 32768) {
@@ -1030,75 +1028,89 @@ namespace TrafficManager.Custom.PathFinding {
 				} else {
 					// road vehicles, trams, trains, metros, etc.
 
-					// get segment geometry
-					//bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
-					/*SegmentGeometry prevGeometry = SegmentGeometry.Get(prevSegmentId);
-					SegmentEndGeometry prevEndGeometry = prevGeometry.GetEnd(nextIsStartNode);*/
-					bool prevIsOutgoingOneWay = nextIsStartNode ? prevSegmentRouting.startNodeOutgoingOneWay : prevSegmentRouting.endNodeOutgoingOneWay;
-					//bool nextIsRealJunction = prevEndGeometry.NumConnectedSegments > 1;
-					bool nextIsUntouchable = (nextNode.m_flags & (NetNode.Flags.Untouchable)) != NetNode.Flags.None;
-					bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
-					bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
-					bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-					bool isCustomUturnAllowed = Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode);
 
-					// determine if the vehicle may u-turn at the target node
-					bool explorePrevSegment =
-						(this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None &&
-						(nextIsEndOrOneWayOut || // stock u-turn points
-						(Options.junctionRestrictionsEnabled &&
-						_isRoadVehicle && // only road vehicles may perform u-turns
-						isCustomUturnAllowed && // only do u-turns if allowed
-						!nextIsBeautificationNode && // no u-turns at beautification nodes
-						prevIsCarLane && // u-turns for road vehicles only
-						!_isHeavyVehicle && // only small vehicles may perform u-turns
-						(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes
-						!prevIsOutgoingOneWay)); // do not u-turn on one-ways
+					bool explorePrevSegment = false;
+					bool isStrictLaneArrowPolicyEnabled = false;
+					bool handleStockUturn = (this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None;
 
-					bool isStrictLaneArrowPolicyEnabled =
-						!nextIsBeautificationNode && // do not obey lane arrows at beautification nodes
-						!nextIsUntouchable &&
-						_isLaneArrowObeyingEntity && 
-						nextIsTransitionOrJunction && // follow lane arrows only at transitions and junctions
-						!(
+					if (prevLaneEndRouting.routed) {
+						bool prevIsOutgoingOneWay = nextIsStartNode ? prevSegmentRouting.startNodeOutgoingOneWay : prevSegmentRouting.endNodeOutgoingOneWay;
+						bool nextIsUntouchable = (nextNode.m_flags & (NetNode.Flags.Untouchable)) != NetNode.Flags.None;
+						bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
+						bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
+						bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+						bool isCustomUturnAllowed = Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode);
+
+						// determine if the vehicle may u-turn at the target node
+						explorePrevSegment =
+							(this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None &&
+							(nextIsEndOrOneWayOut || // stock u-turn points
+							(Options.junctionRestrictionsEnabled &&
+							_isRoadVehicle && // only road vehicles may perform u-turns
+							isCustomUturnAllowed && // only do u-turns if allowed
+							!nextIsBeautificationNode && // no u-turns at beautification nodes
+							prevIsCarLane && // u-turns for road vehicles only
+							!_isHeavyVehicle && // only small vehicles may perform u-turns
+							(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes
+							!prevIsOutgoingOneWay)); // do not u-turn on one-ways
+
+						isStrictLaneArrowPolicyEnabled =
+							!nextIsBeautificationNode && // do not obey lane arrows at beautification nodes
+							!nextIsUntouchable &&
+							_isLaneArrowObeyingEntity &&
+							nextIsTransitionOrJunction && // follow lane arrows only at transitions and junctions
+							!(
 #if DEBUG
-						Options.allRelaxed || // debug option: all vehicle may ignore lane arrows
+							Options.allRelaxed || // debug option: all vehicle may ignore lane arrows
 #endif
-						(Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)); // option: busses may ignore lane arrows
+							(Options.relaxedBusses && _extVehicleType == ExtVehicleType.Bus)); // option: busses may ignore lane arrows
 
-					//bool useRouting = prevLaneEndRouting.routed && !nextIsBeautificationNode;
+						handleStockUturn = !explorePrevSegment;
 
-					bool handleStockUturn = !explorePrevSegment &&
-						(this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None;
-					bool stockUturn = false;
-
-					//LaneEndGeometry prevLaneEndGeo = prevGeometry.GetLane(item.m_position.m_lane, false)?.GetEnd(!nextIsStartNode);
 #if DEBUGNEWPF
-					if (debug)
-						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}):\n" +
-							"\t" + $"_extPathType={_extPathType}\n" +
-							"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
-							"\t" + $"_extVehicleType={_extVehicleType}\n" +
-							"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
-							"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
-							"\t" + $"_stablePath={_stablePath}\n" +
-							"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
-							"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
-							"\t" + $"prevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
-							"\t" + $"prevLaneHasRouting={prevLaneEndRouting.routed}\n\n" +
-							"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
-							"\t" + $"isNextBeautificationNode={nextIsBeautificationNode}\n" + 
-							//"\t" + $"nextIsRealJunction={nextIsRealJunction}\n" +
-							"\t" + $"nextIsBend={nextIsBend}\n" +
-							"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
-							"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
-							"\t" + $"allowPedestrians={allowPedestrians}\n" +
-							"\t" + $"isCustomUturnAllowed={isCustomUturnAllowed}\n" +
-							"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
-							"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneArrowPolicyEnabled}\n" +
-							"\t" + $"handleStockUturn={handleStockUturn}\n"
+						if (debug)
+							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}):\n" +
+								"\t" + $"_extPathType={_extPathType}\n" +
+								"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
+								"\t" + $"_extVehicleType={_extVehicleType}\n" +
+								"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
+								"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+								"\t" + $"_stablePath={_stablePath}\n" +
+								"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
+								"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
+								"\t" + $"prevIsOutgoingOneWay={prevIsOutgoingOneWay}\n" +
+								"\t" + $"prevLaneHasRouting={prevLaneEndRouting.routed}\n\n" +
+								"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
+								"\t" + $"isNextBeautificationNode={nextIsBeautificationNode}\n" +
+								//"\t" + $"nextIsRealJunction={nextIsRealJunction}\n" +
+								"\t" + $"nextIsBend={nextIsBend}\n" +
+								"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
+								"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
+								"\t" + $"allowPedestrians={allowPedestrians}\n" +
+								"\t" + $"isCustomUturnAllowed={isCustomUturnAllowed}\n" +
+								"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
+								"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneArrowPolicyEnabled}\n" +
+								"\t" + $"handleStockUturn={handleStockUturn}\n"
+								);
+#endif
+					} else {
+#if DEBUGNEWPF
+						if (debug)
+							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}):\n" +
+								"\t" + $"_extPathType={_extPathType}\n" +
+								"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
+								"\t" + $"_extVehicleType={_extVehicleType}\n" +
+								"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
+								"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+								"\t" + $"_stablePath={_stablePath}\n" +
+								"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
+								"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
+								"\t" + $"prevLaneHasRouting={prevLaneEndRouting.routed}\n\n"
 							);
 #endif
+					}
+
+					bool stockUturn = false;
 
 					if (allowPedestrians || !prevLaneEndRouting.routed) {
 						/* pedestrian to bicycle switch or no routing information available */
@@ -1493,82 +1505,82 @@ namespace TrafficManager.Custom.PathFinding {
 					int prevDirIndex = trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir);
 					int nextDirIndex = trafficMeasurementManager.GetDirIndex(nextSegmentId, nextFinalDir);
 
-					TrafficMeasurementManager.LaneTrafficData[] prevLanesTrafficData;
-					if (trafficMeasurementManager.GetLaneTrafficData(item.m_position.m_segment, prevSegmentInfo, out prevLanesTrafficData)) {
-						float prevCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements : 0; // now in %
-						float nextCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements : 0; // now in %
+					bool fetchedPrevLaneTrafficData = false;
+					if (prevLaneInfo.m_similarLaneCount > 1) {
+						// determine path-finding lane utilization of the previous lane
 
-						// get the path-finding lane utilization for the previous lane
-						if (trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer > 0) {
-							prevUsage = Mathf.Clamp(((prevLanesTrafficData[item.m_position.m_lane].lastPathFindTrafficBuffer * 100u) / trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer), 0, 100);
-						} else {
-							prevUsage = 0;
+						TrafficMeasurementManager.LaneTrafficData[] prevLanesTrafficData = null;
+						if (trafficMeasurementManager.GetLaneTrafficData(item.m_position.m_segment, prevSegmentInfo, out prevLanesTrafficData)) {
+							if (trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer > 0) {
+								prevUsage = Mathf.Clamp(((prevLanesTrafficData[item.m_position.m_lane].lastPathFindTrafficBuffer * 100u) / trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer), 0, 100);
+							}
 						}
-
-						// get the min. speed for the previous segment
-						prevTraffic = Mathf.Clamp(100 - (int)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].meanSpeed / 100, 0, 100);
-						
-
-						
-						// get the direction-average minimum speed for the previous segment
-#if MARKCONGESTEDSEGMENTS
-						//int dirIndex = prevLaneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
-
-						isCongested = prevCongestionRatio >= _conf.CongestionFrequencyThreshold || nextCongestionRatio >= _conf.CongestionFrequencyThreshold;
-						float maxCongestionRatio = Math.Max(prevCongestionRatio, nextCongestionRatio);
-						congestionLaneChangingCosts = 1f + maxCongestionRatio * 0.01f * _conf.CongestionLaneChangingBaseCost;
-						wantToChangeLane = _pathRandomizer.Int32((uint)maxCongestionRatio + _conf.RandomizedLaneChangingModulo) == 0;
-#endif
-
-						// prevUsage, prevTraffic is now in %
-#if DEBUGNEWPF
-						float oldUsageRand = usageRand;
-						float oldTrafficRand = trafficRand;
-#endif
-
-						prevTraffic += trafficRand;
-						if (!_isHeavyVehicle && !isCongested) {
-							prevUsage += usageRand;
-						}
-
-						if ((prevNumLanes != nextNumLanes || (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) && _conf.LaneSpeedRandInterval > 0) {
-							usageRand = (float)_pathRandomizer.Int32((uint)_conf.LaneSpeedRandInterval) - (float)_conf.LaneSpeedRandInterval / 2f;
-							trafficRand = (float)_pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (float)_conf.LaneDensityRandInterval / 2f;
-						}
-
-						prevUsage = (float)Mathf.Clamp01((float)Math.Round(prevUsage / 10f) / 10f); // 0, 0.1, 0.2, ..., 1
-						prevTraffic = (float)Mathf.Clamp01((float)Math.Round(prevTraffic / 10f) / 10f); // 0, 0.1, 0.2, ..., 1
-
-#if DEBUGNEWPF
-						if (debug)
-							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
-								"\t" + $"calculated traffic stats:\n" +
-								"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
-								"\t" + $"_extVehicleType={_extVehicleType}\n" +
-								"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
-								"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
-								"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
-								"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
-								"\t" + $"prevCongestionRatio={prevCongestionRatio}\n" +
-								"\t" + $"nextCongestionRatio={nextCongestionRatio}\n" +
-								"\t" + $"isCongested={isCongested}\n" +
-								"\t" + $"congestionLaneChangingCosts={congestionLaneChangingCosts}\n\n" +
-								"\t" + $"prevUsage={prevUsage}\n\n" +
-								"\t" + $"prevTraffic={prevTraffic}\n\n" +
-								"\t" + $"oldUsageRand={oldUsageRand}\n" +
-								"\t" + $"trafficRand={trafficRand}\n" +
-								"\t" + $"oldTrafficRand={oldTrafficRand}\n" +
-								"\t" + $"usageRand={usageRand}\n\n" +
-								"\t" + $"prevNumLanes={prevNumLanes}\n" +
-								"\t" + $"nextNumLanes={nextNumLanes}\n" +
-								"\t" + $"nextSegmentId={nextSegmentId}\n\n" +
-								"\t" + $"forcedLaneId={forcedLaneId}\n" +
-								"\t" + $"forcedLaneIndex={forcedLaneIndex}\n" +
-								"\t" + $"forcedLaneDist={forcedLaneDist}\n" +
-								"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n"
-								);
-#endif
 					}
+
+					float prevCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements : 0; // now in %
+					float nextCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements : 0; // now in %
+
+					// get the min. speed for the previous segment
+					prevTraffic = Mathf.Clamp(100 - (int)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].meanSpeed / 100, 0, 100);
+						
+					// get the direction-average minimum speed for the previous segment
+#if MARKCONGESTEDSEGMENTS
+					//int dirIndex = prevLaneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+
+					isCongested = prevCongestionRatio >= _conf.CongestionFrequencyThreshold || nextCongestionRatio >= _conf.CongestionFrequencyThreshold;
+					float maxCongestionRatio = Math.Max(prevCongestionRatio, nextCongestionRatio);
+					congestionLaneChangingCosts = 1f + maxCongestionRatio * 0.01f * _conf.CongestionLaneChangingBaseCost;
+					wantToChangeLane = _pathRandomizer.Int32((uint)maxCongestionRatio + _conf.RandomizedLaneChangingModulo) == 0;
+#endif
+
+					// prevUsage, prevTraffic is now in %
+#if DEBUGNEWPF
+					float oldUsageRand = usageRand;
+					float oldTrafficRand = trafficRand;
+#endif
+
+					prevTraffic += trafficRand;
+					if (!_isHeavyVehicle && !isCongested) {
+						prevUsage += usageRand;
+					}
+
+					if ((prevNumLanes != nextNumLanes || (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None) && _conf.LaneSpeedRandInterval > 0) {
+						usageRand = (float)_pathRandomizer.Int32((uint)_conf.LaneSpeedRandInterval) - (float)_conf.LaneSpeedRandInterval / 2f;
+						trafficRand = (float)_pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval) - (float)_conf.LaneDensityRandInterval / 2f;
+					}
+
+					prevUsage = (float)Mathf.Clamp01((float)Math.Round(prevUsage / 10f) / 10f); // 0, 0.1, 0.2, ..., 1
+					prevTraffic = (float)Mathf.Clamp01((float)Math.Round(prevTraffic / 10f) / 10f); // 0, 0.1, 0.2, ..., 1
+
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"calculated traffic stats:\n" +
+							"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
+							"\t" + $"_extVehicleType={_extVehicleType}\n" +
+							"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
+							"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+							"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
+							"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
+							"\t" + $"prevCongestionRatio={prevCongestionRatio}\n" +
+							"\t" + $"nextCongestionRatio={nextCongestionRatio}\n" +
+							"\t" + $"isCongested={isCongested}\n" +
+							"\t" + $"congestionLaneChangingCosts={congestionLaneChangingCosts}\n\n" +
+							"\t" + $"prevUsage={prevUsage}\n\n" +
+							"\t" + $"prevTraffic={prevTraffic}\n\n" +
+							"\t" + $"oldUsageRand={oldUsageRand}\n" +
+							"\t" + $"trafficRand={trafficRand}\n" +
+							"\t" + $"oldTrafficRand={oldTrafficRand}\n" +
+							"\t" + $"usageRand={usageRand}\n\n" +
+							"\t" + $"prevNumLanes={prevNumLanes}\n" +
+							"\t" + $"nextNumLanes={nextNumLanes}\n" +
+							"\t" + $"nextSegmentId={nextSegmentId}\n\n" +
+							"\t" + $"forcedLaneId={forcedLaneId}\n" +
+							"\t" + $"forcedLaneIndex={forcedLaneIndex}\n" +
+							"\t" + $"forcedLaneDist={forcedLaneDist}\n" +
+							"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n"
+							);
+#endif
 				}
 				// NON-STOCK CODE END //
 			}
@@ -1621,8 +1633,22 @@ namespace TrafficManager.Custom.PathFinding {
 					prevCost *= (float)(randomizer.Int32(900, 1000 + (int)(prevSegment.m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
 				} else {
 					// NON-STOCK CODE
+
+#if DEBUGNEWPF
+					float oldPrevCost = prevCost;
+#endif
+
 					prevCost *= 1f + _conf.SpeedCostFactor * prevUsage;
 					prevCost *= 1f + _conf.TrafficCostFactor * prevTraffic;
+
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"applied traffic cost factors:\n" +
+							"\t" + $"oldPrevCost={oldPrevCost}\n" +
+							"\t" + $"=> prevCost={prevCost}\n"
+							);
+#endif
 				}
 			}
 
@@ -1632,26 +1658,50 @@ namespace TrafficManager.Custom.PathFinding {
 				if (this._isHeavyVehicle && (prevSegment.m_flags & NetSegment.Flags.HeavyBan) != NetSegment.Flags.None) {
 					// heavy vehicle ban
 #if DEBUGNEWPF
-					if (debug)
-						logBuf.Add($"applying heavy vehicle ban on deactivated advanced AI");
+					float oldPrevCost = prevCost;
 #endif
 					prevCost *= 10f;
+
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"applied heavy traffic ban on deactivated AI:\n" +
+							"\t" + $"oldPrevCost={oldPrevCost}\n" +
+							"\t" + $"=> prevCost={prevCost}\n"
+							);
+#endif
 				} else if (prevLaneType == NetInfo.LaneType.Vehicle && (prevVehicleType & _vehicleTypes) == VehicleInfo.VehicleType.Car && (prevSegment.m_flags & NetSegment.Flags.CarBan) != NetSegment.Flags.None) {
 					// car ban: used by "Old Town" policy
 #if DEBUGNEWPF
-					if (debug)
-						logBuf.Add($"applying old town policy on deactivated advanced AI");
+					float oldPrevCost = prevCost;
 #endif
 					prevCost *= 5f;
+
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"applied car ban on deactivated AI:\n" +
+							"\t" + $"oldPrevCost={oldPrevCost}\n" +
+							"\t" + $"=> prevCost={prevCost}\n"
+							);
+#endif
 				}
 
 				if (this._transportVehicle && prevLaneType == NetInfo.LaneType.TransportVehicle) {
 					// public transport/emergency vehicles should stay on their designated lanes, if possible
 #if DEBUGNEWPF
-					if (debug)
-						logBuf.Add($"applying public transport cost modifier on deactivated advaned AI");
+					float oldPrevCost = prevCost;
 #endif
 					prevCost *= 0.5f; // non-stock value
+
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"applied tranport lane reward on deactivated AI:\n" +
+							"\t" + $"oldPrevCost={oldPrevCost}\n" +
+							"\t" + $"=> prevCost={prevCost}\n"
+							);
+#endif
 				}
 			}
 
@@ -1669,10 +1719,17 @@ namespace TrafficManager.Custom.PathFinding {
 
 			if (strictlyAvoidLane) {
 #if DEBUGNEWPF
-				if (debug)
-					logBuf.Add($"applying strict lane avoidance");
+				float oldPrevCost = prevCost;
 #endif
 				prevCost *= _conf.VehicleRestrictionsPenalty;
+#if DEBUGNEWPF
+				if (debug)
+					logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+						"\t" + $"applied strict lane avoidance:\n" +
+						"\t" + $"oldPrevCost={oldPrevCost}\n" +
+						"\t" + $"=> prevCost={prevCost}\n"
+						);
+#endif
 			}
 
 			if (!useAdvancedAI) {
@@ -1682,10 +1739,17 @@ namespace TrafficManager.Custom.PathFinding {
 				// add costs for u-turns
 				if (!isMiddle && nextSegmentId == item.m_position.m_segment && (prevLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 #if DEBUGNEWPF
-					if (debug)
-						logBuf.Add($"applying u-turn cost factor on deactivated advaned AI");
+					float oldPrevCost = prevCost;
 #endif
 					prevCost *= (float)_conf.UturnLaneDistance;
+#if DEBUGNEWPF
+					if (debug)
+						logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+							"\t" + $"applied u-turn cost factor on deactivated AI:\n" +
+							"\t" + $"oldPrevCost={oldPrevCost}\n" +
+							"\t" + $"=> prevCost={prevCost}\n"
+							);
+#endif
 				}
 			}
 
@@ -1831,14 +1895,23 @@ namespace TrafficManager.Custom.PathFinding {
 								nextItem.m_comparisonValue = item.m_comparisonValue;
 								customDeltaCost = transitionCost + prevOffsetCost; // customDeltaCost now holds the costs for driving on the segment + costs for changing the segment
 
+								
+
+
 								if (avoidLane && (_extVehicleType == null || (_extVehicleType & (ExtVehicleType.CargoTruck | ExtVehicleType.PassengerCar)) != ExtVehicleType.None)) {
 #if DEBUGNEWPF
-									if (debug)
-										logBuf.Add($"applying lane avoidance on ACTIVATED advanced AI");
+									float oldCustomDeltaCost = customDeltaCost;
 #endif
-
 									// apply vanilla game restriction policies
 									customDeltaCost *= 3f;
+#if DEBUGNEWPF
+									if (debug)
+										logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+											"\t" + $"applied lane avoidance on activated AI:\n" +
+											"\t" + $"oldCustomDeltaCost={oldCustomDeltaCost}\n" +
+											"\t" + $"=> customDeltaCost={customDeltaCost}\n"
+											);
+#endif
 								}
 
 #if DEBUGNEWPF
@@ -1880,10 +1953,18 @@ namespace TrafficManager.Custom.PathFinding {
 								// NON-STOCK CODE START //
 								if (useAdvancedAIforNextLane) {
 #if DEBUGNEWPF
-									if (debug)
-										logBuf.Add($"Applying blocked road cost factor on ACTIVATED advanced AI");
+									float oldCustomDeltaCost = customDeltaCost;
 #endif
+									// apply vanilla game restriction policies
 									customDeltaCost *= 10f;
+#if DEBUGNEWPF
+									if (debug)
+										logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+											"\t" + $"applied blocked road cost factor on activated AI:\n" +
+											"\t" + $"oldCustomDeltaCost={oldCustomDeltaCost}\n" +
+											"\t" + $"=> customDeltaCost={customDeltaCost}\n"
+											);
+#endif
 								} else {
 									// NON-STOCK CODE END //
 #if DEBUGNEWPF
@@ -1914,9 +1995,31 @@ namespace TrafficManager.Custom.PathFinding {
 										if ((nextLaneInfo.m_laneType & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None) {
 											// next lane is a public transport lane
 											if ((_extVehicleType & ExtVehicleType.Bus) != ExtVehicleType.None) {
+#if DEBUGNEWPF
+												float oldCustomDeltaCost = customDeltaCost;
+#endif
 												customDeltaCost *= _conf.PublicTransportLaneReward; // (1)
+#if DEBUGNEWPF
+												if (debug)
+													logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+														"\t" + $"applied bus-on-transport lane reward on activated AI:\n" +
+														"\t" + $"oldCustomDeltaCost={oldCustomDeltaCost}\n" +
+														"\t" + $"=> customDeltaCost={customDeltaCost}\n"
+														);
+#endif
 											} else if ((_extVehicleType & (ExtVehicleType.RoadPublicTransport | ExtVehicleType.Emergency)) == ExtVehicleType.None) {
+#if DEBUGNEWPF
+												float oldCustomDeltaCost = customDeltaCost;
+#endif
 												customDeltaCost *= _conf.PublicTransportLanePenalty; // (2)
+#if DEBUGNEWPF
+												if (debug)
+													logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+														"\t" + $"applied car-on-transport lane penalty on activated AI:\n" +
+														"\t" + $"oldCustomDeltaCost={oldCustomDeltaCost}\n" +
+														"\t" + $"=> customDeltaCost={customDeltaCost}\n"
+														);
+#endif
 											} else {
 												// (3), do nothing
 											}
