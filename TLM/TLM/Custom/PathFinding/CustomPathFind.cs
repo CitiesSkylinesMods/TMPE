@@ -1032,6 +1032,7 @@ namespace TrafficManager.Custom.PathFinding {
 					bool explorePrevSegment = false;
 					bool isStrictLaneArrowPolicyEnabled = false;
 					bool handleStockUturn = (this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None;
+					bool stockUturn = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 
 					if (prevLaneEndRouting.routed) {
 						bool prevIsOutgoingOneWay = nextIsStartNode ? prevSegmentRouting.startNodeOutgoingOneWay : prevSegmentRouting.endNodeOutgoingOneWay;
@@ -1109,8 +1110,6 @@ namespace TrafficManager.Custom.PathFinding {
 							);
 #endif
 					}
-
-					bool stockUturn = false;
 
 					if (allowPedestrians || !prevLaneEndRouting.routed) {
 						/* pedestrian to bicycle switch or no routing information available */
