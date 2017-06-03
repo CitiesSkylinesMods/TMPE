@@ -44,13 +44,7 @@ namespace TrafficManager {
 			++ticksSinceLastSecondUpdate;
 			if (ticksSinceLastSecondUpdate > 60) {
 				ticksSinceLastSecondUpdate = 0;
-
-				try {
-					VehicleStateManager.Instance.SimulationStep();
-					UtilityManager.Instance.SimulationStep();
-				} catch (Exception e) {
-					Log.Error($"Error occured while performing second update: " + e.ToString());
-				}
+				UtilityManager.Instance.SimulationStep();
 			}
 		}
 

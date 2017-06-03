@@ -17,7 +17,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 9;
+		private static int LATEST_VERSION = 11;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -27,7 +27,6 @@ namespace TrafficManager.State {
 #if RUSHHOUR
 		private static DateTime? rushHourConfigModifiedTime = null;
 		private const string RUSHHOUR_CONFIG_FILENAME = "RushHourOptions.xml";
-		private static uint lastRushHourConfigCheck = 0;
 #endif
 
 		public static GlobalConfig Instance { get; private set; } = null;
@@ -39,7 +38,6 @@ namespace TrafficManager.State {
 		internal static void OnLevelUnloading() {
 #if RUSHHOUR
 			rushHourConfigModifiedTime = null;
-			lastRushHourConfigCheck = 0;
 			RushHourParkingSearchRadius = null;
 #endif
 		}
@@ -65,17 +63,19 @@ namespace TrafficManager.State {
 		public int Version = LATEST_VERSION;
 
 		public bool[] DebugSwitches = {
-			false, // path-find debug log
-			false, // path-find costs debug log
-			false, // parking ai debug log (basic)
-			false, // do not actually repair stuck vehicles/cims, just report
-			false, // parking ai debug log (extended)
-			false, // geometry debug log
-			false, // debug parking AI distance issue
-			false, // debug TTL
-			false, // debug routing
-			false, // debug vehicle to segment end linking
-			false // prevent routing recalculation on global configuration reload
+			false, // 0: path-find debug log
+			false, // 1: path-find costs debug log
+			false, // 2: parking ai debug log (basic)
+			false, // 3: do not actually repair stuck vehicles/cims, just report
+			false, // 4: parking ai debug log (extended)
+			false, // 5: geometry debug log
+			false, // 6: debug parking AI distance issue
+			false, // 7: debug TTL
+			false, // 8: debug routing
+			false, // 9: debug vehicle to segment end linking
+			false, // 10: prevent routing recalculation on global configuration reload
+			false, // 11: disable custom routing
+			false // 12: pedestrian path-find debug log
 		};
 
 #if DEBUG
@@ -95,7 +95,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// base lane changing cost factor on highways
 		/// </summary>
-		public float HighwayLaneChangingBaseCost = 1.25f;
+		public float HighwayLaneChangingBaseCost = 1.2f;
 
 		/// <summary>
 		/// base lane changing cost factor on city streets
@@ -115,34 +115,37 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// > 1 lane changing cost factor
 		/// </summary>
-		public float MoreThanOneLaneChangingCostFactor = 2.5f;
+		public float MoreThanOneLaneChangingCostFactor = 2f;
 
 		/// <summary>
-		/// speed-to-density balance factor, 1 = only speed is considered, 0 = both speed and density are considered
+		/// Lane changing base costs in front of highway junctions
 		/// </summary>
-		[Obsolete]
-		public float SpeedToDensityBalance = 0.75f;
+		public float HighwayJunctionLaneChangingBaseCost = 1.25f;
+
+		/// <summary>
+		/// Used for discretizing path-find usage values
+		/// </summary>
+		public float LaneUsageDiscretization = 25f;
+
+		/// <summary>
+		/// Used for discretizing lane traffic measurements
+		/// </summary>
+		public float LaneTrafficDiscretization = 25f;
 
 		/// <summary>
 		/// Relative factor for lane speed cost calculation
 		/// </summary>
-		public float SpeedCostFactor = 1f;
+		public float UsageCostFactor = 1f;
 
 		/// <summary>
 		/// Relative factor for lane traffic cost calculation
 		/// </summary>
-		public float TrafficCostFactor = 3f;
+		public float TrafficCostFactor = 2f;
 
 		/// <summary>
-		/// lane changing cost reduction modulo
+		/// lane changing cost reduction modulo. vehicles hitting zero want to change lanes
 		/// </summary>
 		public uint RandomizedLaneChangingModulo = 5;
-
-		/// <summary>
-		/// randomized modulo. vehicles hitting zero ignore traffic measurements
-		/// </summary>
-		[Obsolete]
-		public int RandomizedTrafficIgnoreModulo = 3;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
@@ -162,7 +165,17 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane usage random interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 25f;
+		public float LaneUsageRandInterval = 25f;
+
+		/// <summary>
+		/// lane usage random interval
+		/// </summary>
+		public uint MinHighwayJunctionSegments = 3;
+
+		/// <summary>
+		/// lane usage random interval
+		/// </summary>
+		public uint MaxHighwayJunctionSegments = 15;
 
 		/// <summary>
 		/// Threshold for reducing traffic buffer
@@ -197,18 +210,22 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
 		/// </summary>
-		public float HeavyVehicleMaxInnerLanePenalty = 40f;
+		public float HeavyVehicleMaxInnerLanePenalty = 1f;
 
 		/// <summary>
 		/// Path cost multiplier for vehicle restrictions
 		/// </summary>
 		public float VehicleRestrictionsPenalty = 100f;
 
+		/// <summary>
+		/// Maximum walking distance
+		/// </summary>
+		public float MaxWalkingDistance = 1000f;
 
 		/// <summary>
-		/// parking space search radius; used if pocket car spawning is disabled
+		/// Target position randomization to allow opposite road-side parking
 		/// </summary>
-		public float VicinityParkingSpaceSearchRadius = 256f;
+		public uint ParkingSpacePositionRand = 32;
 
 		/// <summary>
 		/// parking space search in vicinity is randomized. Cims do not always select the nearest parking space possible.
@@ -225,11 +242,6 @@ namespace TrafficManager.State {
 		public int MaxParkingAttempts = 10;
 
 		/// <summary>
-		/// minimum required distance between target building and parked car for using a car
-		/// </summary>
-		public float MinParkedCarToTargetBuildingDistance = 256f;
-
-		/// <summary>
 		/// maximum required squared distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
 		/// </summary>
 		public float MaxParkedCarInstanceSwitchSqrDistance = 6f;
@@ -237,12 +249,17 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// maximum distance between building and pedestrian lane
 		/// </summary>
-		public float MaxBuildingToPedestrianLaneDistance = 64f;
+		public float MaxBuildingToPedestrianLaneDistance = 96f;
 
 		/// <summary>
 		/// Maximum allowed distance between home and parked car when travelling home without forced to use the car
 		/// </summary>
-		public float MaxParkedCarDistanceToHome = 512f;
+		public float MaxParkedCarDistanceToHome = 256f;
+
+		/// <summary>
+		/// minimum required distance between target building and parked car for using a car
+		/// </summary>
+		public float MaxParkedCarDistanceToBuilding = 512f;
 
 		/// <summary>
 		/// maximum incoming vehicle square distance to junction for priority signs
@@ -254,47 +271,10 @@ namespace TrafficManager.State {
 		/// </summary>
 		public float MaxPriorityApproachTime = 10f;
 
-
-		/// <summary>
-		/// Minimum speed update factor
-		/// </summary>
-		[Obsolete]
-		public float MinSpeedUpdateFactor = 0.05f;
-
-		/// <summary>
-		/// Maximum speed update factor
-		/// </summary>
-		[Obsolete]
-		public float MaxSpeedUpdateFactor = 0.1f;
-
-		/// <summary>
-		/// Maximum density accumulation after which lane densities are reset
-		/// </summary>
-		[Obsolete]
-		public uint MaxAccumulatedLaneDensity = 1000;
-
 		/// <summary>
 		/// average speed (in %) threshold for a segment to be flagged as congested
 		/// </summary>
 		public uint CongestionSpeedThreshold = 70;
-
-		/// <summary>
-		/// %/100 of time a segment must be flagged as congested to count as permanently congested
-		/// </summary>
-		public uint CongestionFrequencyThreshold = 110;
-
-		/// <summary>
-		/// lower congestion threshold (per ten-thousands)
-		/// </summary>
-		[Obsolete]
-		public int LowerSpeedCongestionThreshold = 0;
-
-		/// <summary>
-		/// upper congestion threshold (per ten-thousands)
-		/// </summary>
-		[Obsolete]
-		public int UpperSpeedCongestionThreshold = 0;
-
 
 		/// <summary>
 		/// public transport demand increment on path-find failure
@@ -350,12 +330,6 @@ namespace TrafficManager.State {
 		/// parking space demand increment when no parking spot could be found while trying to spawn a parked vehicle
 		/// </summary>
 		public uint FailedSpawnParkingSpaceDemandIncrement = 10u;
-
-		/// <summary>
-		/// Maximum allowed reported speed difference among all lanes of one segment (in 10000ths)
-		/// </summary>
-		[Obsolete]
-		public uint MaxSpeedDifference = 500u;
 
 		/// <summary>
 		/// Main menu button position
@@ -505,11 +479,7 @@ namespace TrafficManager.State {
 		public void SimulationStep() {
 #if RUSHHOUR
 			if (LoadingExtension.IsRushHourLoaded) {
-				uint curFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 12;
-				if (lastRushHourConfigCheck < curFrame) {
-					lastRushHourConfigCheck = curFrame;
-					ReloadRushHourConfigIfNewer();
-				}
+				ReloadRushHourConfigIfNewer();
 			}
 #endif
 		}

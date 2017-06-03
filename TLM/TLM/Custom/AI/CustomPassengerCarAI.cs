@@ -181,7 +181,7 @@ namespace TrafficManager.Custom.AI {
 								bool calcEndPos;
 								Vector3 parkPos;
 
-								if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(endPos, vehicleData.Info, driverExtInstance, homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
+								if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(endPos, vehicleData.Info, driverExtInstance, homeId, targetBuildingId == homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
 									calculateEndPos = calcEndPos;
 									allowRandomParking = false;
 									movingToParkingPos = true;
@@ -302,7 +302,7 @@ namespace TrafficManager.Custom.AI {
 			Quaternion parkRot;
 			float parkOffset;
 
-			if (AdvancedParkingManager.Instance.FindParkingSpaceInVicinity(data.m_position, data.Info, homeID, 0, out parkingSpaceLocation, out parkingSpaceLocationId, out parkPos, out parkRot, out parkOffset)) {
+			if (AdvancedParkingManager.Instance.FindParkingSpaceInVicinity(data.m_position, data.Info, homeID, 0, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding, out parkingSpaceLocation, out parkingSpaceLocationId, out parkPos, out parkRot, out parkOffset)) {
 				Singleton<VehicleManager>.instance.RemoveFromGrid(parkedId, ref data);
 				data.m_position = parkPos;
 				data.m_rotation = parkRot;

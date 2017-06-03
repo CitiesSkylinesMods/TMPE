@@ -33,7 +33,7 @@ namespace TrafficManager.UI.MainMenu {
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
 			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			VehicleStateManager.Instance.RequestClearTraffic();
+			UtilityManager.Instance.RequestClearTraffic();
 		}
 	}
 }

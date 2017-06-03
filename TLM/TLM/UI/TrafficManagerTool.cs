@@ -154,12 +154,6 @@ namespace TrafficManager.UI {
 		public void SetToolMode(ToolMode mode) {
 			Log._Debug($"SetToolMode: {mode}");
 			
-			if (mode == ToolMode.None) {
-#if DEBUG
-				DebugMenuPanel.deactivateButtons();
-#endif
-			}
-
 			bool toolModeChanged = (mode != _toolMode);
 			var oldToolMode = _toolMode;
 			SubTool oldSubTool = null;
@@ -920,6 +914,16 @@ namespace TrafficManager.UI {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance((ushort)i);
 
 				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.PathMode.ToString();
+				if (citizenInstance.m_citizen != 0) {
+					Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenInstance.m_citizen];
+					if (citizen.m_parkedVehicle != 0) {
+						labelStr += "\nparked: " + citizen.m_parkedVehicle + " dist: " + (Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[citizen.m_parkedVehicle].m_position - pos).magnitude;
+					}
+					if (citizen.m_vehicle != 0) {
+						labelStr += "\nveh: " + citizen.m_vehicle + " dist: " + (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[citizen.m_vehicle].GetLastFramePosition() - pos).magnitude;
+					}
+				}
+
 				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

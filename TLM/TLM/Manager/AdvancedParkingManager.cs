@@ -163,13 +163,14 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleInfo">vehicle type that is being used</param>
 		/// <param name="extDriverInstance">cititzen instance that is driving the car</param>
 		/// <param name="homeId">Home building of the citizen (may be 0 for tourists/homeless cims)</param>
+		/// <param name="goingHome">Specifies if the citizen is going home</param>
 		/// <param name="vehicleId">Vehicle that is being used (used for logging)</param>
 		/// <param name="allowTourists">If true, method fails if given citizen is a tourist (TODO remove this parameter)</param>
 		/// <param name="parkPos">parking position (output)</param>
 		/// <param name="endPathPos">sidewalk path position near parking space (output). only valid if <paramref name="calculateEndPos"/> yields false.</param>
 		/// <param name="calculateEndPos">if false, a parking space path position could be calculated (TODO negate & rename parameter)</param>
 		/// <returns>true if a parking space could be found, false otherwise</returns>
-		public bool FindParkingSpaceForCitizen(Vector3 endPos, VehicleInfo vehicleInfo, ExtCitizenInstance extDriverInstance, ushort homeId, ushort vehicleId, bool allowTourists, out Vector3 parkPos, ref PathUnit.Position endPathPos, out bool calculateEndPos) {
+		public bool FindParkingSpaceForCitizen(Vector3 endPos, VehicleInfo vehicleInfo, ExtCitizenInstance extDriverInstance, ushort homeId, bool goingHome, ushort vehicleId, bool allowTourists, out Vector3 parkPos, ref PathUnit.Position endPathPos, out bool calculateEndPos) {
 			calculateEndPos = true;
 			parkPos = default(Vector3);
 
@@ -192,7 +193,7 @@ namespace TrafficManager.Manager {
 			float parkOffset;
 
 			// find a free parking space
-			bool success = FindParkingSpaceInVicinity(endPos, vehicleInfo, homeId, vehicleId, out knownParkingSpaceLocation, out knownParkingSpaceLocationId, out parkPos, out parkRot, out parkOffset);
+			bool success = FindParkingSpaceInVicinity(endPos, vehicleInfo, homeId, vehicleId, goingHome ? GlobalConfig.Instance.MaxParkedCarDistanceToHome : GlobalConfig.Instance.MaxParkedCarDistanceToBuilding, out knownParkingSpaceLocation, out knownParkingSpaceLocationId, out parkPos, out parkRot, out parkOffset);
 
 			extDriverInstance.ParkingSpaceLocation = knownParkingSpaceLocation;
 			extDriverInstance.ParkingSpaceLocationId = knownParkingSpaceLocationId;
@@ -290,7 +291,7 @@ namespace TrafficManager.Manager {
 			Quaternion parkRot = Quaternion.identity;
 			float parkOffset = 0f;
 
-			if (FindParkingSpaceRoadSide(0, refPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, out parkPos, out parkRot, out parkOffset)) {
+			if (FindParkingSpaceRoadSide(0, refPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding, out parkPos, out parkRot, out parkOffset)) {
 				// position found, spawn a parked vehicle
 				ushort parkedVehicleId;
 				if (Singleton<VehicleManager>.instance.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, citizenId)) {
@@ -328,7 +329,7 @@ namespace TrafficManager.Manager {
 			Quaternion parkRot = Quaternion.identity;
 			float parkOffset;
 
-			if (FindParkingSpaceBuilding(vehicleInfo, homeId, 0, 0, refPos, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, out parkPos, out parkRot, out parkOffset)) {
+			if (FindParkingSpaceBuilding(vehicleInfo, homeId, 0, 0, refPos, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding, out parkPos, out parkRot, out parkOffset)) {
 				// position found, spawn a parked vehicle
 				ushort parkedVehicleId;
 				if (Singleton<VehicleManager>.instance.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, citizenId)) {
@@ -348,7 +349,7 @@ namespace TrafficManager.Manager {
 			return false;
 		}
 
-		public bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+		public bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			Vector3 roadParkPos;
 			Quaternion roadParkRot;
 			float roadParkOffset;
@@ -356,8 +357,8 @@ namespace TrafficManager.Manager {
 			Quaternion buildingParkRot;
 			float buildingParkOffset;
 
-			ushort parkingSpaceSegmentId = FindParkingSpaceAtRoadSide(0, targetPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, true, out roadParkPos, out roadParkRot, out roadParkOffset);
-			ushort parkingBuildingId = FindParkingSpaceBuilding(vehicleInfo, homeId, 0, 0, targetPos, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, GlobalConfig.Instance.VicinityParkingSpaceSearchRadius, true, out buildingParkPos, out buildingParkRot, out buildingParkOffset);
+			ushort parkingSpaceSegmentId = FindParkingSpaceAtRoadSide(0, targetPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, maxDist, true, out roadParkPos, out roadParkRot, out roadParkOffset);
+			ushort parkingBuildingId = FindParkingSpaceBuilding(vehicleInfo, homeId, 0, 0, targetPos, maxDist, maxDist, true, out buildingParkPos, out buildingParkRot, out buildingParkOffset);
 
 			if (parkingSpaceSegmentId != 0) {
 				if (parkingBuildingId != 0) {
@@ -457,12 +458,19 @@ namespace TrafficManager.Manager {
 					Vector3 innerParkPos;
 					Quaternion innerParkRot;
 					float innerParkOffset;
-					if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(refPos, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
+
+					Vector3 segCenter = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
+
+					// randomize target position to allow for opposite road-side parking
+					segCenter.x += Singleton<SimulationManager>.instance.m_randomizer.Int32(GlobalConfig.Instance.ParkingSpacePositionRand) - GlobalConfig.Instance.ParkingSpacePositionRand / 2u;
+					segCenter.z += Singleton<SimulationManager>.instance.m_randomizer.Int32(GlobalConfig.Instance.ParkingSpacePositionRand) - GlobalConfig.Instance.ParkingSpacePositionRand / 2u;
+
+					if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(segCenter, NetInfo.LaneType.Parking, VehicleInfo.VehicleType.Car, out innerParkPos, out laneId, out laneIndex, out laneOffset)) {
 						if (!Options.parkingRestrictionsEnabled || ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, netManager.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex].m_finalDirection)) {
 							if (CustomPassengerCarAI.FindParkingSpaceRoadSide(ignoreParked, segmentId, innerParkPos, width, length, out innerParkPos, out innerParkRot, out innerParkOffset)) {
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[4])
-									Log._Debug($"FindParkingSpaceRoadSide: Found a parking space for refPos {refPos} @ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
+									Log._Debug($"FindParkingSpaceRoadSide: Found a parking space for refPos {refPos}, segment center {segCenter} @ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 #endif
 								foundSegmentId = segmentId;
 								myParkPos = innerParkPos;
@@ -791,7 +799,7 @@ namespace TrafficManager.Manager {
 			if (driverExtInstance != null) {
 				switch (driverExtInstance.PathMode) {
 					case ExtPathMode.DrivingToAltParkPos:
-						ret = Translation.GetString("Driving_to_another_parking_spot") + ", " + ret;
+						ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" + driverExtInstance.FailedParkingAttempts + "), " + ret;
 						break;
 					case ExtPathMode.CalculatingCarPathToKnownParkPos:
 					case ExtPathMode.DrivingToKnownParkPos:

@@ -7,6 +7,7 @@ using TrafficManager.State;
 using TrafficManager.Geometry;
 using CSUtil.Commons;
 using TrafficManager.Custom.AI;
+using System.Threading;
 
 namespace TrafficManager.Manager {
 	public class UtilityManager : AbstractCustomManager {
@@ -20,6 +21,11 @@ namespace TrafficManager.Manager {
 		/// Determines if stuck entities should be cleared
 		/// </summary>
 		private static bool ResetStuckEntitiesRequested = false;
+
+		/// <summary>
+		/// Determines if vehicles should be cleared
+		/// </summary>
+		private static bool ClearTrafficRequested = false;
 
 		/// <summary>
 		/// Determines if debug output should be printed
@@ -44,6 +50,14 @@ namespace TrafficManager.Manager {
 					ResetStuckEntitiesRequested = false;
 				}
 			}
+
+			if (ClearTrafficRequested) {
+				try {
+					ClearTraffic();
+				} finally {
+					ClearTrafficRequested = false;
+				}
+			}
 #if DEBUG
 			if (PrintDebugInfoRequested) {
 				try {
@@ -56,7 +70,29 @@ namespace TrafficManager.Manager {
 			}
 #endif
 		}
-		
+
+		private void ClearTraffic() {
+			try {
+				Monitor.Enter(Singleton<VehicleManager>.instance);
+
+				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
+					if (
+						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0)
+						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
+				}
+
+				TrafficMeasurementManager.Instance.ResetTrafficStats();
+			} catch (Exception ex) {
+				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
+			} finally {
+				Monitor.Exit(Singleton<VehicleManager>.instance);
+			}
+		}
+
+		internal void RequestClearTraffic() {
+			ClearTrafficRequested = true;
+		}
+
 		private void PrintAllDebugInfo() {
 			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
 			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;

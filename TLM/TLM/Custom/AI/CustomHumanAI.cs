@@ -143,7 +143,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				// check if the citizen has reached a parked car or target
-				if (CustomHumanAI.CheckReachedParkedCar(instanceID, ref instanceData)) {
+				if (CheckReachedParkedCar(instanceID, ref instanceData)) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Citizen instance {instanceID} arrives at parked car or parked car is too far way to enter. PathMode={extInstance.PathMode}");
@@ -250,6 +250,7 @@ namespace TrafficManager.Custom.AI {
 					case ExtPathMode.None:
 					case ExtPathMode.CalculatingWalkingPathToParkedCar:
 					case ExtPathMode.CalculatingWalkingPathToTarget:
+					case ExtPathMode.PublicTransportToTarget:
 					case ExtPathMode.TaxiToTarget:
 						if ((instanceData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 							if (instanceData.m_targetBuilding != 0) {
@@ -494,7 +495,8 @@ namespace TrafficManager.Custom.AI {
 								if (instanceData.m_targetBuilding != 0) {
 									// check distance between parked vehicle and target building. If it is too small then the cim is walking/using transport to get to their target
 									float parkedDistToTarget = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_targetBuilding].m_position - Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position).magnitude;
-									if (parkedDistToTarget < GlobalConfig.Instance.MinParkedCarToTargetBuildingDistance) {
+									if ((instanceData.m_targetBuilding != homeId && parkedDistToTarget < GlobalConfig.Instance.MaxParkedCarDistanceToBuilding) ||
+										(instanceData.m_targetBuilding == homeId && parkedDistToTarget <= GlobalConfig.Instance.MaxParkedCarDistanceToHome)) {
 										extInstance.PathMode = ExtCitizenInstance.ExtPathMode.CalculatingWalkingPathToTarget;
 										handleSoftPathFindFailure = true;
 
@@ -720,7 +722,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		internal static bool CheckReachedParkedCar(ushort instanceID, ref CitizenInstance instanceData) {
+		internal bool CheckReachedParkedCar(ushort instanceID, ref CitizenInstance instanceData) {
 			ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 
 			if (instanceData.m_citizen == 0) {
@@ -815,8 +817,13 @@ namespace TrafficManager.Custom.AI {
 							extInstance.Reset();
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log._Debug($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position but does not own a parked car. Illegal state! Setting CurrentDepartureMode={extInstance.PathMode}");
+								Log.Warning($"CustomHumanAI.NeedsCarPath: Citizen instance {instanceID} reached parking position but does not own a parked car. Illegal state! Setting PathMode={extInstance.PathMode} and invalidating current path");
 #endif
+
+							instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
+							instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+							this.InvalidPath(instanceID, ref instanceData);
+
 							return false;
 						}
 					} else {

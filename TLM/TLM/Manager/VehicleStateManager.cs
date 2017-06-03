@@ -25,18 +25,12 @@ namespace TrafficManager.Manager {
 		public const float BROKEN_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
 		public const float BROKEN_ROADS_FACTOR = 0.75f;
 
-		/// <summary>
-		/// Determines if vehicles should be cleared
-		/// </summary>
-		private static bool ClearTrafficRequested = false;
-
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
 		}
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
-			Log._Debug($"ClearTrafficRequested = {ClearTrafficRequested}");
 			Log._Debug($"Vehicle states:");
 			for (int i = 0; i < VehicleStates.Length; ++i) {
 				if (VehicleStates[i] == null || !VehicleStates[i].Valid) {
@@ -261,37 +255,6 @@ namespace TrafficManager.Manager {
 			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
 #endif
 			return null;
-		}
-
-		internal void SimulationStep() { // TODO refactor
-			try {
-				if (ClearTrafficRequested) {
-					ClearTraffic();
-					ClearTrafficRequested = false;
-				}
-			} finally { }
-		}
-
-		internal void ClearTraffic() {
-			try {
-				Monitor.Enter(Singleton<VehicleManager>.instance);
-
-				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
-					if (
-						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0)
-						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
-				}
-
-				TrafficMeasurementManager.Instance.ResetTrafficStats();
-			} catch (Exception ex) {
-				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
-			} finally {
-				Monitor.Exit(Singleton<VehicleManager>.instance);
-			}
-		}
-
-		internal void RequestClearTraffic() {
-			ClearTrafficRequested = true;
 		}
 
 		public override void OnLevelUnloading() {

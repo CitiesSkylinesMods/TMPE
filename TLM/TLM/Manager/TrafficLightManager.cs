@@ -59,6 +59,7 @@ namespace TrafficManager.Manager {
 					Log._Debug($"Adding traffic light @ node {nodeId}");
 #endif
 				flags |= NetNode.Flags.TrafficLights;
+				TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
 			} else {
 #if DEBUGTTL
 				if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == nodeId)

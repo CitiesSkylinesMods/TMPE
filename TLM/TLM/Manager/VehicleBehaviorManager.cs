@@ -181,304 +181,300 @@ namespace TrafficManager.Manager {
 				}
 			}
 
-			try {
-				if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
+			if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
+#if DEBUG
+				if (debug)
+					Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from BLOCKED to ENTER");
+#endif
+				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
+			}
+
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0) {
+				if (hasTrafficLight && checkTrafficLights) {
 #if DEBUG
 					if (debug)
-						Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from BLOCKED to ENTER");
+						Log._Debug($"CustomVehicleAI.MayChangeSegment: Node {targetNodeId} has a traffic light.");
 #endif
-					vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
-				}
 
-				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0) {
-					if (hasTrafficLight && checkTrafficLights) {
+					var destinationInfo = targetNode.Info;
+
+					if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
 						if (debug)
-							Log._Debug($"CustomVehicleAI.MayChangeSegment: Node {targetNodeId} has a traffic light.");
+							Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (1)");
+#endif
+						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
+					}
+
+					RoadBaseAI.TrafficLightState vehicleLightState;
+					RoadBaseAI.TrafficLightState pedestrianLightState;
+					bool vehicles;
+					bool pedestrians;
+					CustomRoadAI.GetTrafficLightState(vehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+
+					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
+						vehicleLightState = RoadBaseAI.TrafficLightState.Green;
+					}
+
+#if DEBUG
+					if (debug)
+						Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} has {vehicleLightState} at node {targetNodeId}");
 #endif
 
-						var destinationInfo = targetNode.Info;
+					if (!vehicles && random >= 196u) {
+						vehicles = true;
+						RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
+					}
 
-						if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
+					var stopCar = false;
+					switch (vehicleLightState) {
+						case RoadBaseAI.TrafficLightState.RedToGreen:
+							if (random < 60u) {
+								stopCar = true;
+							} else {
+#if DEBUG
+								if (debug)
+									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (RedToGreen)");
+#endif
+								if (vehicleState != null)
+									vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+							}
+							break;
+						case RoadBaseAI.TrafficLightState.Red:
+							stopCar = true;
+							break;
+						case RoadBaseAI.TrafficLightState.GreenToRed:
+							if (random >= 30u) {
+								stopCar = true;
+							} else if (vehicleState != null) {
+#if DEBUG
+								if (debug)
+									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (GreenToRed)");
+#endif
+								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+							}
+							break;
+					}
+
+					/*if ((vehicleLightState == RoadBaseAI.TrafficLightState.Green || vehicleLightState == RoadBaseAI.TrafficLightState.RedToGreen) && !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, prevSegment.m_startNode == targetNodeId)) {
+						var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
+
+						if (hasIncomingCars) {
+							// green light but other cars are incoming and they have priority: stop
+							stopCar = true;
+						}
+					}*/
+
+					if (stopCar) {
+						if (vehicleState != null) {
 #if DEBUG
 							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (1)");
+								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP");
+#endif
+							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
+						}
+						maxSpeed = 0f;
+						return false;
+					}
+				} else if (!isMonorail && vehicleState != null && Options.prioritySignsEnabled) {
+					TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+
+#if DEBUG
+					//bool debug = destinationNodeId == 10864;
+					//bool debug = destinationNodeId == 13531;
+					//bool debug = false;// targetNodeId == 5027;
+#endif
+					//bool debug = false;
+#if DEBUG
+					if (debug)
+						Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
+#endif
+
+					var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
+					if (sign != PrioritySegment.PriorityType.None) {
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
+#endif
+						//if (prioritySegment.HasVehicle(vehicleId)) {
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {vehicleId}: segment target position found");
+#endif
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {vehicleId}: global target position found. carState = {vehicleState.JunctionTransitState.ToString()}");
+#endif
+						var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+						var frame = currentFrameIndex2 >> 4;
+
+						if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (prio)");
 #endif
 							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
 						}
 
-						RoadBaseAI.TrafficLightState vehicleLightState;
-						RoadBaseAI.TrafficLightState pedestrianLightState;
-						bool vehicles;
-						bool pedestrians;
-						CustomRoadAI.GetTrafficLightState(vehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
-
-						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
-							vehicleLightState = RoadBaseAI.TrafficLightState.Green;
-						}
-
-#if DEBUG
-						if (debug)
-							Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} has {vehicleLightState} at node {targetNodeId}");
-#endif
-
-						if (!vehicles && random >= 196u) {
-							vehicles = true;
-							RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
-						}
-
-						var stopCar = false;
-						switch (vehicleLightState) {
-							case RoadBaseAI.TrafficLightState.RedToGreen:
-								if (random < 60u) {
-									stopCar = true;
-								} else {
+						if (vehicleState.JunctionTransitState != VehicleJunctionTransitState.Leave) {
+							bool hasIncomingCars;
+							switch (sign) {
+								case PriorityType.Stop:
 #if DEBUG
 									if (debug)
-										Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (RedToGreen)");
-#endif
-									if (vehicleState != null)
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-								}
-								break;
-							case RoadBaseAI.TrafficLightState.Red:
-								stopCar = true;
-								break;
-							case RoadBaseAI.TrafficLightState.GreenToRed:
-								if (random >= 30u) {
-									stopCar = true;
-								} else if (vehicleState != null) {
-#if DEBUG
-									if (debug)
-										Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (GreenToRed)");
-#endif
-									vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-								}
-								break;
-						}
-
-						/*if ((vehicleLightState == RoadBaseAI.TrafficLightState.Green || vehicleLightState == RoadBaseAI.TrafficLightState.RedToGreen) && !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, prevSegment.m_startNode == targetNodeId)) {
-							var hasIncomingCars = TrafficPriority.HasIncomingVehiclesWithHigherPriority(vehicleId, targetNodeId);
-
-							if (hasIncomingCars) {
-								// green light but other cars are incoming and they have priority: stop
-								stopCar = true;
-							}
-						}*/
-
-						if (stopCar) {
-							if (vehicleState != null) {
-#if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP");
-#endif
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-							}
-							maxSpeed = 0f;
-							return false;
-						}
-					} else if (!isMonorail && vehicleState != null && Options.prioritySignsEnabled) {
-						TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-
-#if DEBUG
-						//bool debug = destinationNodeId == 10864;
-						//bool debug = destinationNodeId == 13531;
-						//bool debug = false;// targetNodeId == 5027;
-#endif
-						//bool debug = false;
-#if DEBUG
-						if (debug)
-							Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
+										Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, sqrSpeed={sqrSpeed}");
 #endif
 
-						var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
-						if (sign != PrioritySegment.PriorityType.None) {
-#if DEBUG
-							if (debug)
-								Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
-#endif
-							//if (prioritySegment.HasVehicle(vehicleId)) {
-#if DEBUG
-							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: segment target position found");
-#endif
-#if DEBUG
-							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: global target position found. carState = {vehicleState.JunctionTransitState.ToString()}");
-#endif
-							var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-							var frame = currentFrameIndex2 >> 4;
-
-							if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
-#if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (prio)");
-#endif
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
-							}
-
-							if (vehicleState.JunctionTransitState != VehicleJunctionTransitState.Leave) {
-								bool hasIncomingCars;
-								switch (sign) {
-									case PriorityType.Stop:
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, sqrSpeed={sqrSpeed}");
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
-#endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-
-											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-												vehicleState.WaitTime++;
-
-												float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
-												if (vehicleState.WaitTime >= minStopWaitTime) {
-													if (Options.simAccuracy >= 4) {
-														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-													} else {
-														hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
-#if DEBUG
-														if (debug)
-															Log._Debug($"hasIncomingCars: {hasIncomingCars}");
-#endif
-
-														if (hasIncomingCars) {
-															maxSpeed = 0f;
-															return false;
-														}
-#if DEBUG
-														if (debug)
-															Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
-#endif
-														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-													}
-												} else {
-													maxSpeed = 0;
-													return false;
-												}
-											} else {
-												vehicleState.WaitTime = 0;
-												maxSpeed = 0f;
-												return false;
-											}
-										} else {
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
-#endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-										}
-										break;
-									case PriorityType.Yield:
-#if DEBUG
-										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={vehicleState.WaitTime}");
-#endif
-
-										if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
+										if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 											vehicleState.WaitTime++;
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
-#endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-											if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY || Options.simAccuracy <= 2) {
+											float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
+											if (vehicleState.WaitTime >= minStopWaitTime) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
 													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
 #if DEBUG
 													if (debug)
-														Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
+														Log._Debug($"hasIncomingCars: {hasIncomingCars}");
 #endif
 
 													if (hasIncomingCars) {
 														maxSpeed = 0f;
 														return false;
-													} else {
-#if DEBUG
-														if (debug)
-															Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
-#endif
-														vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 													}
+#if DEBUG
+													if (debug)
+														Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
+#endif
+													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												}
 											} else {
+												maxSpeed = 0;
+												return false;
+											}
+										} else {
+											vehicleState.WaitTime = 0;
+											maxSpeed = 0f;
+											return false;
+										}
+									} else {
 #if DEBUG
-												if (debug)
-													Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {sqrSpeed} by {vehicleState.ReduceSqrSpeedByValueToYield})");
+										if (debug)
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
+#endif
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+									}
+									break;
+								case PriorityType.Yield:
+#if DEBUG
+									if (debug)
+										Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={vehicleState.WaitTime}");
 #endif
 
-												// vehicle has not yet reached yield speed
-												maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
-												return false;
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
+										vehicleState.WaitTime++;
+#if DEBUG
+										if (debug)
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+#endif
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
+
+										if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY || Options.simAccuracy <= 2) {
+											if (Options.simAccuracy >= 4) {
+												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+											} else {
+												hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
+#if DEBUG
+												if (debug)
+													Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
+#endif
+
+												if (hasIncomingCars) {
+													maxSpeed = 0f;
+													return false;
+												} else {
+#if DEBUG
+													if (debug)
+														Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
+#endif
+													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+												}
 											}
 										} else {
 #if DEBUG
 											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
+												Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {sqrSpeed} by {vehicleState.ReduceSqrSpeedByValueToYield})");
 #endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+
+											// vehicle has not yet reached yield speed
+											maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
+											return false;
 										}
-										break;
-									case PriorityType.Main:
-									default:
+									} else {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={vehicleState.WaitTime}");
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
 #endif
-										maxSpeed = 0f;
-
-										if (Options.simAccuracy == 4)
-											return true;
-
-										if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
-											vehicleState.WaitTime++;
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+									}
+									break;
+								case PriorityType.Main:
+								default:
 #if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+									if (debug)
+										Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={vehicleState.WaitTime}");
 #endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
+									maxSpeed = 0f;
 
-											hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
-#if DEBUG
-											if (debug)
-												Log._Debug($"hasIncomingCars: {hasIncomingCars}");
-#endif
-
-											if (hasIncomingCars) {
-												return false;
-											}
-#if DEBUG
-											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no conflicting car)");
-#endif
-											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-										}
+									if (Options.simAccuracy == 4)
 										return true;
-								}
-							} else if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-								// vehicle is not moving. reset allowance to leave junction
-#if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
-#endif
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
 
-								maxSpeed = 0f;
-								return false;
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
+										vehicleState.WaitTime++;
+#if DEBUG
+										if (debug)
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+#endif
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
+
+										hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
+#if DEBUG
+										if (debug)
+											Log._Debug($"hasIncomingCars: {hasIncomingCars}");
+#endif
+
+										if (hasIncomingCars) {
+											return false;
+										}
+#if DEBUG
+										if (debug)
+											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no conflicting car)");
+#endif
+										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+									}
+									return true;
 							}
+						} else if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+							// vehicle is not moving. reset allowance to leave junction
+#if DEBUG
+							if (debug)
+								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
+#endif
+							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+
+							maxSpeed = 0f;
+							return false;
 						}
 					}
 				}
-			} catch (Exception e) {
-				Log.Error($"Error occured in MayChangeSegment: {e.ToString()}");
 			}
 			maxSpeed = 0f; // maxSpeed should be set by caller
 			return true;

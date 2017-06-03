@@ -91,7 +91,7 @@ namespace TrafficManager.Custom.AI {
 						// check distance between home and parked car. if too far away: force to take the car back home
 						float distHomeToParked = (Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position - Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position).magnitude;
 
-						if (distHomeToParked >= GlobalConfig.Instance.MinParkedCarToTargetBuildingDistance && distHomeToParked > GlobalConfig.Instance.MaxParkedCarDistanceToHome) {
+						if (distHomeToParked > GlobalConfig.Instance.MaxParkedCarDistanceToHome) {
 							// force to take car back home
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
@@ -194,7 +194,7 @@ namespace TrafficManager.Custom.AI {
 						// find a parking space in the vicinity of the target
 						bool calcEndPos;
 						Vector3 parkPos;
-						if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(endPos, vehicleInfo, extInstance, homeId, 0, false, out parkPos, ref endPosA, out calcEndPos) && extInstance.CalculateReturnPath(parkPos, endPos)) {
+						if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(endPos, vehicleInfo, extInstance, homeId, citizenData.m_targetBuilding == homeId, 0, false, out parkPos, ref endPosA, out calcEndPos) && extInstance.CalculateReturnPath(parkPos, endPos)) {
 							// success
 							extInstance.PathMode = ExtCitizenInstance.ExtPathMode.CalculatingCarPathToKnownParkPos;
 							calculateEndPos = calcEndPos; // if true, the end path position still needs to be calculated
@@ -218,7 +218,7 @@ namespace TrafficManager.Custom.AI {
 					// no known parking space found. calculate direct path to target
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.PathMode}. Setting it to CalculatingCarPath. parkedVehicleId={parkedVehicleId}");
+						Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.PathMode} (no parking space found?). Setting it to CalculatingCarPath. parkedVehicleId={parkedVehicleId}");
 #endif
 					extInstance.PathMode = ExtCitizenInstance.ExtPathMode.CalculatingCarPathToTarget;
 				}

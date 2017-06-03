@@ -104,7 +104,6 @@ namespace TrafficManager.UI {
 			GetMenu().Hide();
 #if DEBUG
 			GetDebugMenu().Hide();
-			DebugMenuPanel.deactivateButtons();
 #endif
 			TrafficManagerTool tmTool = GetTrafficManagerTool(false);
 			if (tmTool != null) {
