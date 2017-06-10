@@ -163,59 +163,7 @@ namespace TrafficManager.Geometry {
 		public bool IsValid() {
 			return IsValid(SegmentId);
 		}
-
-		/*public LaneGeometry GetLane(int laneIndex, bool recalcIfNecessary=true) {
-			if (LaneGeometries == null || laneIndex >= LaneGeometries.Length) {
-				if (recalcIfNecessary) {
-					RecalculateLaneGeometries();
-				} else {
-					return null;
-				}
-			}
-
-			return LaneGeometries[laneIndex];
-		}
-
-		public void RecalculateLaneGeometries(GeometryCalculationMode calcMode) {
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.DebugSwitches[5];
-
-			if (output)
-				Log._Debug($">>> SegmentGeometry.RecalculateLaneGeometries({calcMode}): called for segment {SegmentId}. IsValid()={IsValid()}, wasValid={valid}");
-#endif
-
-			if (!IsValid()) {
-				if (valid) {
-					valid = false;
-					LaneGeometries = null;
-
-					if (calcMode == GeometryCalculationMode.Propagate) {
-						PropagateLaneGeometryRebuild();
-					}
-
-					Cleanup();
-				}
-				return;
-			}
-
-			RecalculateLaneGeometries();
-			if (calcMode == GeometryCalculationMode.Propagate) {
-				PropagateLaneGeometryRebuild();
-			}
-		}
-
-		private void PropagateLaneGeometryRebuild() {
-			foreach (bool b in new bool[] { true, false }) {
-				foreach (ushort otherSegmentId in GetConnectedSegments(b)) {
-					if (otherSegmentId == 0) {
-						continue;
-					}
-
-					SegmentGeometry.Get(otherSegmentId, true).RecalculateLaneGeometries();
-				}
-			}
-		}*/
-
+		
 		public void StartRecalculation(GeometryCalculationMode calcMode) {
 			Recalculate(calcMode);
 			//RecalculateLaneGeometries(calcMode);
@@ -1380,7 +1328,11 @@ namespace TrafficManager.Geometry {
 		private void NotifyObservers() {
 			List<IObserver<SegmentGeometry>> myObservers = new List<IObserver<SegmentGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<SegmentGeometry> observer in myObservers) {
-				observer.OnUpdate(this);
+				try {
+					observer.OnUpdate(this);
+				} catch (Exception e) {
+					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of segment {SegmentId}: {e}");
+				}
 			}
 		}
 	}

@@ -12,6 +12,7 @@ using System.Linq;
 using TrafficManager.Util;
 using CSUtil.Commons;
 using static TrafficManager.Manager.VehicleRestrictionsManager;
+using TrafficManager.State;
 
 namespace TrafficManager.TrafficLight {
 	/// <summary>
@@ -383,7 +384,15 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void CalculateAutoPedestrianLightState(bool propagate=true) {
-			//Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculating pedestrian light state of node {NodeId}");
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+#endif
+
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculating pedestrian light state of seg. {SegmentId} @ node {NodeId}");
+#endif
+
 			SegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(SegmentId)?.GetEnd(StartNode);
 
 			if (segmentEndGeometry == null) {
@@ -391,7 +400,12 @@ namespace TrafficManager.TrafficLight {
 				AutoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
 				return;
 			}
+
 			ushort nodeId = segmentEndGeometry.NodeId();
+			if (nodeId != NodeId) {
+				Log.Warning($"CustomSegmentLights.CalculateAutoPedestrianLightState: Node id mismatch! segment end node is {nodeId} but we are node {NodeId}. segmentEndGeometry={segmentEndGeometry} this={this}");
+				return;
+			}
 
 			if (propagate) {
 				foreach (ushort otherSegmentId in segmentEndGeometry.ConnectedSegments) {
@@ -400,7 +414,10 @@ namespace TrafficManager.TrafficLight {
 
 					CustomSegmentLights otherLights = LightsManager.GetSegmentLights(nodeId, otherSegmentId);
 					if (otherLights == null) {
-						//Log._Debug($"Expected other (propagate) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (propagate) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#endif
 						continue;
 					}
 
@@ -409,12 +426,18 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (IsAnyGreen()) {
-				//Log._Debug($"Any green at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Any green at seg. {SegmentId} @ {NodeId}");
+#endif
 				AutoPedestrianLightState = RoadBaseAI.TrafficLightState.Red;
 				return;
 			}
 
-			//Log._Debug($"Querying incoming segments at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Querying incoming segments at seg. {SegmentId} @ {NodeId}");
+#endif
 			RoadBaseAI.TrafficLightState autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
 
 			if (!segmentEndGeometry.IncomingOneWay) {
@@ -422,16 +445,25 @@ namespace TrafficManager.TrafficLight {
 				foreach (ushort otherSegmentId in segmentEndGeometry.IncomingStraightSegments) {
 					if (otherSegmentId == 0)
 						continue;
-					//Log._Debug($"Checking incoming straight segment {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+					if (debug)
+						Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Checking incoming straight segment {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#endif
 
 					CustomSegmentLights otherLights = LightsManager.GetSegmentLights(nodeId, otherSegmentId);
 					if (otherLights == null) {
-						//Log._Debug($"Expected other (straight) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (straight) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#endif
 						continue;
 					}
 
 					if (!otherLights.IsAllMainRed()) {
-						//Log._Debug($"Not all main red at {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Not all main red at {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#endif
 						autoPedestrianLightState = RoadBaseAI.TrafficLightState.Red;
 						break;
 					}
@@ -444,16 +476,25 @@ namespace TrafficManager.TrafficLight {
 						if (otherSegmentId == 0)
 							continue;
 
-						//Log._Debug($"Checking left/right segment {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Checking left/right segment {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#endif
 
 						CustomSegmentLights otherLights = LightsManager.GetSegmentLights(nodeId, otherSegmentId);
 						if (otherLights == null) {
-							//Log._Debug($"Expected other (left/right) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#if DEBUGTTL
+							if (debug)
+								Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (left/right) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#endif
 							continue;
 						}
 
 						if ((lhd && !otherLights.IsAllRightRed()) || (!lhd && !otherLights.IsAllLeftRed())) {
-							//Log._Debug($"Not all left red at {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#if DEBUGTTL
+							if (debug)
+								Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Not all left red at {otherSegmentId} at seg. {SegmentId} @ {NodeId}");
+#endif
 							autoPedestrianLightState = RoadBaseAI.TrafficLightState.Red;
 							break;
 						}
@@ -462,7 +503,10 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			AutoPedestrianLightState = autoPedestrianLightState;
-			//Log.Warning($"Calculated AutoPedestrianLightState for segment {SegmentId} @ {NodeId}: {AutoPedestrianLightState}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculated AutoPedestrianLightState for segment {SegmentId} @ {NodeId}: {AutoPedestrianLightState}");
+#endif
 		}
 
 		internal void housekeeping(bool mayDelete, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState leftState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState rightState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Red) {

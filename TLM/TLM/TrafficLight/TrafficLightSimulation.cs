@@ -145,7 +145,12 @@ namespace TrafficManager.TrafficLight {
 				}*/
 
 				// housekeep timed light
-				customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode).housekeeping(true, true);
+				CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode);
+				if (lights == null) {
+					Log.Warning($"TrafficLightSimulation.OnUpdate() @ node {NodeId}: Could not retrieve live segment lights for segment {end.SegmentId} @ start {end.StartNode}.");
+					continue;
+				}
+				lights.housekeeping(true, true);
 			}
 
 			// ensure there is a physical traffic light

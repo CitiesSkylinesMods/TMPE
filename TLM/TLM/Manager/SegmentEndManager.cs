@@ -45,6 +45,18 @@ namespace TrafficManager.Manager {
 				return end;
 			}
 
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment.");
+				return null;
+			}
+
+			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			if (endGeo == null) {
+				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment end.");
+				return null;
+			}
+
 			return SegmentEnds[GetIndex(segmentId, startNode)] = new SegmentEnd(segmentId, startNode);
 		}
 
@@ -81,18 +93,26 @@ namespace TrafficManager.Manager {
 				return false;
 			}
 
-			SegmentEndGeometry end = segGeo.GetEnd(startNode);
-			if (end == null) {
+			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			if (endGeo == null) {
 				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment end {segmentId} @ {startNode} is invalid. Removing segment end.");
 				RemoveSegmentEnd(segmentId, startNode);
 				return false;
 			}
 
 			if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
-				TrafficLightSimulationManager.Instance.HasTimedSimulation(end.NodeId())) {
+				TrafficLightSimulationManager.Instance.HasTimedSimulation(endGeo.NodeId())) {
 				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");
-				GetOrAddSegmentEnd(segmentId, startNode).Update();
-				return true;
+				SegmentEnd end = GetOrAddSegmentEnd(segmentId, startNode);
+				if (end == null) {
+					Log.Warning($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Failed to add segment end.");
+					return false;
+				} else {
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Added segment end. Updating now.");
+					end.Update();
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Update of segment end finished.");
+					return true;
+				}
 			} else {
 				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} neither has timed light nor priority sign. Removing segment end {segmentId} @ {startNode}");
 				RemoveSegmentEnd(segmentId, startNode);
