@@ -75,7 +75,8 @@ namespace TrafficManager.State {
 			false, // 9: debug vehicle to segment end linking
 			false, // 10: prevent routing recalculation on global configuration reload
 			false, // 11: disable custom routing
-			false // 12: pedestrian path-find debug log
+			false, // 12: pedestrian path-find debug log
+			false // 13: priority rules debug
 		};
 
 #if DEBUG
@@ -270,6 +271,11 @@ namespace TrafficManager.State {
 		/// maximum junction approach time for priority signs
 		/// </summary>
 		public float MaxPriorityApproachTime = 10f;
+
+		/// <summary>
+		/// Frame resolution for priority update timestamps
+		/// </summary>
+		public int VehicleStateUpdateShift = 6;
 
 		/// <summary>
 		/// average speed (in %) threshold for a segment to be flagged as congested

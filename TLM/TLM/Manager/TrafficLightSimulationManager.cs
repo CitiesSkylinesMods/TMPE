@@ -141,6 +141,14 @@ namespace TrafficManager.Manager {
 			return sim.IsTimedLightActive();
 		}
 
+		public bool HasActiveSimulation(ushort nodeId) {
+			TrafficLightSimulation sim = TrafficLightSimulations[nodeId];
+			if (sim == null) {
+				return false;
+			}
+			return sim.IsManualLight() || sim.IsTimedLightActive();
+		}
+
 		private void RemoveNodeFromSimulation(ushort nodeId) {
 			TrafficLightSimulations[nodeId]?.Destroy();
 			TrafficLightSimulations[nodeId] = null;

@@ -683,7 +683,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 					return false;
 				}
-				
+
 				// change instances
 				InstanceID parkedVehInstance = InstanceID.Empty;
 				parkedVehInstance.ParkedVehicle = parkedVehicleId;
@@ -870,29 +870,34 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
-			var nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(node) : null;
+			var netManager = Singleton<NetManager>.instance;
 
-			var instance = Singleton<NetManager>.instance;
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
 			var num = (uint)((node << 8) / 32768);
 			var stepWaitTime = currentFrameIndex - num & 255u;
 
 			// NON-STOCK CODE START //
+			var nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(node) : null;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
-			bool startNode = instance.m_segments.m_buffer[segment].m_startNode == node;
-			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
+			bool startNode = netManager.m_segments.m_buffer[segment].m_startNode == node;
 
-			if (lights == null || nodeSimulation == null || !nodeSimulation.IsSimulationActive()) {
+			CustomSegmentLights lights = null;
+			if (nodeSimulation != null && nodeSimulation.IsSimulationActive()) {
+				lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
+			}
+
+			if (lights == null) {
+				// NON-STOCK CODE END //
 				RoadBaseAI.TrafficLightState vehicleLightState;
 				bool vehicles;
 				bool pedestrians;
 
-				RoadBaseAI.GetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+				RoadBaseAI.GetTrafficLightState(node, ref netManager.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 				if ((pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) && !pedestrians && stepWaitTime >= 196u) {
-					RoadBaseAI.SetTrafficLightState(node, ref instance.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
+					RoadBaseAI.SetTrafficLightState(node, ref netManager.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
 					return true;
 				}
+				// NON-STOCK CODE START //
 			} else {
 				if (lights.InvalidPedestrianLight) {
 					pedestrianLightState = RoadBaseAI.TrafficLightState.Green;

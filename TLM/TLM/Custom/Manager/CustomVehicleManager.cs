@@ -13,9 +13,36 @@ namespace TrafficManager.Custom.Manager {
 #if DEBUG
 			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
-			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId);
-			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[(int)vehicleId]);
+			VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
+			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 		}
+
+		public void CustomReleaseFromGrid(ushort vehicleId, ref Vehicle vehicleData, bool large) {
+			Vector3 lastPos = vehicleData.GetLastFramePosition();
+			if (large) {
+				int gridX = Mathf.Clamp((int)(lastPos.x / 320f + 27f), 0, 53);
+				int gridZ = Mathf.Clamp((int)(lastPos.z / 320f + 27f), 0, 53);
+				this.RemoveFromGrid(vehicleId, ref vehicleData, large, gridX, gridZ);
+			} else {
+				int gridX2 = Mathf.Clamp((int)(lastPos.x / 32f + 270f), 0, 539);
+				int gridZ2 = Mathf.Clamp((int)(lastPos.z / 32f + 270f), 0, 539);
+				this.RemoveFromGrid(vehicleId, ref vehicleData, large, gridX2, gridZ2);
+			}
+		}
+
+		public void CustomAddToGrid(ushort vehicle, ref Vehicle data, bool large) {
+			Vector3 lastPos = data.GetLastFramePosition();
+			if (large) {
+				int gridX = Mathf.Clamp((int)(lastPos.x / 320f + 27f), 0, 53);
+				int gridZ = Mathf.Clamp((int)(lastPos.z / 320f + 27f), 0, 53);
+				this.AddToGrid(vehicle, ref data, large, gridX, gridZ);
+			} else {
+				int gridX2 = Mathf.Clamp((int)(lastPos.x / 32f + 270f), 0, 539);
+				int gridZ2 = Mathf.Clamp((int)(lastPos.z / 32f + 270f), 0, 539);
+				this.AddToGrid(vehicle, ref data, large, gridX2, gridZ2);
+			}
+		}
+
 
 		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
 			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
@@ -81,7 +108,7 @@ namespace TrafficManager.Custom.Manager {
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);
 
-				VehicleStateManager.Instance.DetermineVehicleType(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
+				VehicleStateManager.Instance.OnCreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE)
 
 				return true;
 			}

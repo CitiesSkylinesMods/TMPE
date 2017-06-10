@@ -1,6 +1,5 @@
 #define USEPATHWAITCOUNTERx
 #define DEBUGVSTATEx
-#define PATHFORECASTx
 #define DEBUGREGx
 
 using System;
@@ -15,572 +14,318 @@ using TrafficManager.State;
 using CSUtil.Commons;
 
 namespace TrafficManager.Traffic {
-	public class VehicleState {
-		private static readonly VehicleInfo.VehicleType HANDLED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
-		public static readonly int STATE_UPDATE_SHIFT = 6;
+	public struct VehicleState {
+		//public static readonly int STATE_UPDATE_SHIFT = 4;
 
-		private VehicleJunctionTransitState junctionTransitState;
 		public VehicleJunctionTransitState JunctionTransitState {
 			get { return junctionTransitState; }
 			set {
-				if (value != junctionTransitState)
-					LastStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex >> VehicleState.STATE_UPDATE_SHIFT;
+				if (value != junctionTransitState) {
+					lastTransitStateUpdate = Now();
+				}
 				junctionTransitState = value;
 			}
 		}
 
-		public uint LastStateUpdate {
-			get; private set;
-		}
-
-		public uint LastPositionUpdate {
-			get; private set;
-		}
-
-		public float TotalLength {
-			get; private set;
-		}
-
-		private ushort VehicleId;
-		public int WaitTime = 0;
-		public float ReduceSqrSpeedByValueToYield;
-		private bool valid = false;
-
-		public bool Valid {
+		/*public bool Valid {
 			get {
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].m_flags & Vehicle.Flags.Created) == 0) {
+				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0) {
 					return false;
 				}
 				return valid;
 			}
 			internal set { valid = value; }
-		}
-		public bool Emergency {
-			get; internal set;
-		}
+		}*/
 
-		public ExtVehicleType VehicleType {
-			get; internal set;
-		}
-
-		public bool HeavyVehicle {
-			get; internal set;
-		}
-
-#if PATHFORECAST
-		private LinkedList<VehiclePosition> VehiclePositions; // the last element holds the current position
-		private LinkedListNode<VehiclePosition> CurrentPosition;
-		private int numRegisteredAhead = 0;
-#endif
-		public SegmentEnd CurrentSegmentEnd {
-			get; internal set;
-		}
-		public ushort PreviousVehicleIdOnSegment {
-			get; internal set;
-		}
-		public ushort NextVehicleIdOnSegment {
-			get; internal set;
-		}
-
-		//internal ushort DriverInstanceId = 0;
-
-#if USEPATHWAITCOUNTER
-		public ushort PathWaitCounter {
-			get { return pathWaitCounter; }
-			internal set {
-				pathWaitCounter = value;
-				if (pathWaitCounter >= 32767) {
-					Log.Warning($"Path wait counter hit maximum for vehicle {VehicleId}. Check path {Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].m_path}!");
-				}
-			}
-		}
-
-		private ushort pathWaitCounter = 0;
-#endif
+		public ushort vehicleId;
+		public uint lastTransitStateUpdate;
+		public uint lastPositionUpdate;
+		public float totalLength;
+		public float sqrVelocity;
+		public int waitTime;
+		public float reduceSqrSpeedByValueToYield;
+		public bool spawned;
+		public bool emergency;
+		public ExtVehicleType vehicleType;
+		public bool heavyVehicle;
+		public ushort currentSegmentId;
+		public bool currentStartNode;
+		public byte currentLaneIndex;
+		public ushort nextSegmentId;
+		public byte nextLaneIndex;
+		public ushort previousVehicleIdOnSegment;
+		public ushort nextVehicleIdOnSegment;
+		private VehicleJunctionTransitState junctionTransitState;
 
 		public override string ToString() {
 			return $"[VehicleState\n" +
-				"\t" + $"VehicleId = {VehicleId}\n" +
+				"\t" + $"vehicleId = {vehicleId}\n" +
 				"\t" + $"JunctionTransitState = {JunctionTransitState}\n" +
-				"\t" + $"LastStateUpdate = {LastStateUpdate}\n" +
-				"\t" + $"LastPositionUpdate = {LastPositionUpdate}\n" +
-				"\t" + $"TotalLength = {TotalLength}\n" +
-				"\t" + $"WaitTime = {WaitTime}\n" +
-				"\t" + $"ReduceSqrSpeedByValueToYield = {ReduceSqrSpeedByValueToYield}\n" +
-				"\t" + $"Valid = {Valid}\n" +
-				"\t" + $"valid = {valid}\n" +
-				"\t" + $"Emergency = {Emergency}\n" +
-				"\t" + $"VehicleType = {VehicleType}\n" +
-				"\t" + $"HeavyVehicle = {HeavyVehicle}\n" +
-				"\t" + $"CurrentSegmentEnd = {CurrentSegmentEnd}\n" +
-				"\t" + $"PreviousVehicleIdOnSegment = {PreviousVehicleIdOnSegment}\n" +
-				"\t" + $"NextVehicleIdOnSegment = {NextVehicleIdOnSegment}\n" +
+				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
+				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
+				"\t" + $"totalLength = {totalLength}\n" +
+				"\t" + $"sqrVelocity = {sqrVelocity}\n" +
+				"\t" + $"waitTime = {waitTime}\n" +
+				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
+				//"\t" + $"Valid = {Valid}\n" +
+				//"\t" + $"valid = {valid}\n" +
+				"\t" + $"spawned = {spawned}\n" +
+				"\t" + $"emergency = {emergency}\n" +
+				"\t" + $"vehicleType = {vehicleType}\n" +
+				"\t" + $"heavyVehicle = {heavyVehicle}\n" +
+				"\t" + $"currentSegmentId = {currentSegmentId}\n" +
+				"\t" + $"currentStartNode = {currentStartNode}\n" +
+				"\t" + $"currentLaneIndex = {currentLaneIndex}\n" +
+				"\t" + $"nextSegmentId = {nextSegmentId}\n" +
+				"\t" + $"nextLaneIndex = {nextLaneIndex}\n" +
+				"\t" + $"previousVehicleIdOnSegment = {previousVehicleIdOnSegment}\n" +
+				"\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
+				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
 				"VehicleState]";
 		}
 
 		internal VehicleState(ushort vehicleId) {
-			this.VehicleId = vehicleId;
-			VehicleType = ExtVehicleType.None;
-			Reset(false);
+			this.vehicleId = vehicleId;
+			lastTransitStateUpdate = Now();
+			lastPositionUpdate = Now();
+			totalLength = 0;
+			waitTime = 0;
+			reduceSqrSpeedByValueToYield = 0;
+			spawned = false;
+			emergency = false;
+			vehicleType = ExtVehicleType.None;
+			heavyVehicle = false;
+			currentSegmentId = 0;
+			currentStartNode = false;
+			currentLaneIndex = 0;
+			nextSegmentId = 0;
+			nextLaneIndex = 0;
+			previousVehicleIdOnSegment = 0;
+			nextVehicleIdOnSegment = 0;
+			sqrVelocity = 0;
+			junctionTransitState = VehicleJunctionTransitState.None;
 		}
 
-		private VehicleState() {
-
-		}
-
-		private void Reset(bool unlink=true) { // TODO this is called in wrong places!
+		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
 			if (unlink)
 				Unlink();
 
 			Valid = false;
-			TotalLength = 0f;
+			totalLength = 0f;
 			//VehicleType = ExtVehicleType.None;
-			WaitTime = 0;
+			waitTime = 0;
 			JunctionTransitState = VehicleJunctionTransitState.None;
-			LastStateUpdate = 0;
-		}
+			lastStateUpdate = 0;
+		}*/
 
-		public ExtCitizenInstance GetDriverExtInstance() {
-			/*if (DriverInstanceId == 0) {
-				DriverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
-			}
-#if DEBUG
-			else {
-				ushort liveDriverInstId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
-				if (liveDriverInstId != DriverInstanceId) {
-					Log.Error($"Driver citizen instance mismatch for vehicle {VehicleId}: True driver: {liveDriverInstId} Stored driver: {DriverInstanceId}");
-					DriverInstanceId = liveDriverInstId;
-				}
-			}
-#endif
-			*/
-
-			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(VehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId]);
+		/*public ExtCitizenInstance GetDriverExtInstance() {
+			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
 			if (driverInstanceId != 0) {
 				return ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
 			}
 			return null;
-		}
-
-		internal void Unlink() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
-
-			if (PreviousVehicleIdOnSegment != 0) {
-				vehStateManager._GetVehicleState(PreviousVehicleIdOnSegment).NextVehicleIdOnSegment = NextVehicleIdOnSegment;
-			} else if (CurrentSegmentEnd != null && CurrentSegmentEnd.FirstRegisteredVehicleId == VehicleId) {
-				CurrentSegmentEnd.FirstRegisteredVehicleId = NextVehicleIdOnSegment;
-			}
-
-			if (NextVehicleIdOnSegment != 0) {
-				vehStateManager._GetVehicleState(NextVehicleIdOnSegment).PreviousVehicleIdOnSegment = PreviousVehicleIdOnSegment;
-			}
-
-			NextVehicleIdOnSegment = 0;
-			PreviousVehicleIdOnSegment = 0;
-			CurrentSegmentEnd = null;
-		}
-
-		private void Link(SegmentEnd end) {
-			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
-			if (oldFirstRegVehicleId != 0) {
-				VehicleStateManager.Instance._GetVehicleState(oldFirstRegVehicleId).PreviousVehicleIdOnSegment = VehicleId;
-				NextVehicleIdOnSegment = oldFirstRegVehicleId;
-			}
-			end.FirstRegisteredVehicleId = VehicleId;
-			CurrentSegmentEnd = end;
-		}
-
-		public delegate void PathPositionProcessor(ref PathUnit.Position pos);
-		public delegate void DualPathPositionProcessor(ref Vehicle vehicleData, ref PathUnit.Position firstPos, ref PathUnit.Position secondPos);
-		public delegate void QuadPathPositionProcessor(ref Vehicle firstVehicleData, ref PathUnit.Position firstVehicleFirstPos, ref PathUnit.Position firstVehicleSecondPos, ref Vehicle secondVehicleData, ref PathUnit.Position secondVehicleFirstPos, ref PathUnit.Position secondVehicleSecondPos);
-
-		public bool ProcessCurrentPathPosition(ref Vehicle vehicleData, PathPositionProcessor processor) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				return false;
-			}
-
-			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
-		}
-
-		public bool ProcessCurrentPathPosition(ref Vehicle vehicleData, byte index, PathPositionProcessor processor) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				return false;
-			}
-
-			return ProcessPathUnit(ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
-		}
-
-		public bool ProcessCurrentAndNextPathPosition(ref Vehicle vehicleData, DualPathPositionProcessor processor) {
-			return ProcessCurrentAndNextPathPosition(ref vehicleData, (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
-		}
-
-		public bool ProcessTrailerCurrentAndNextPathPosition(ref Vehicle vehicleData, ref Vehicle trailerData, DualPathPositionProcessor processor) {
-			return ProcessTrailerCurrentAndNextPathPosition(ref vehicleData, ref trailerData, (byte)(vehicleData.m_pathPositionIndex >> 1), processor);
-		}
-
-		public bool ProcessCurrentAndNextPathPosition(ref Vehicle vehicleData, byte index, DualPathPositionProcessor processor) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				return false;
-			}
-
-			if (index < 11) {
-				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
-			} else {
-				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
-				if (nextPathUnitId == 0) {
-					return false;
-				}
-
-				return ProcessPathUnitPair(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, processor);
-			}
-		}
-
-		public bool ProcessTrailerCurrentAndNextPathPosition(ref Vehicle vehicleData, ref Vehicle trailerData, byte index, DualPathPositionProcessor processor) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				return false;
-			}
-
-			if (index < 11) {
-				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, processor);
-			} else {
-				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
-				if (nextPathUnitId == 0) {
-					return false;
-				}
-
-				return ProcessPathUnitPair(ref trailerData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, processor);
-			}
-		}
-
-		public bool ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref Vehicle vehicleData, ref PathUnit.Position otherVehicleCurPos, ref PathUnit.Position otherVehicleNextPos, ref Vehicle otherVehicleData, QuadPathPositionProcessor processor) {
-			return ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref vehicleData, (byte)(vehicleData.m_pathPositionIndex >> 1), ref otherVehicleCurPos, ref otherVehicleNextPos, ref otherVehicleData, processor);
-		}
-
-		public bool ProcessCurrentAndNextPathPositionAndOtherVehicleCurrentAndNextPathPosition(ref Vehicle vehicleData, byte index, ref PathUnit.Position otherVehicleCurPos, ref PathUnit.Position otherVehicleNextPos, ref Vehicle otherVehicleData, QuadPathPositionProcessor processor) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				return false;
-			}
-
-			if (index < 11) {
-				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
-			} else {
-				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
-				if (nextPathUnitId == 0) {
-					return false;
-				}
-
-				return ProcessPathUnitQuad(ref vehicleData, ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId], ref Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId], index, ref otherVehicleData, ref otherVehicleCurPos, ref otherVehicleNextPos, processor);
-			}
-		}
-
-		/*public bool GetCurrentPathPosition(ref Vehicle vehicleData, out PathUnit.Position curPathPos) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				curPathPos = default(PathUnit.Position);
-				return false;
-			}
-
-			curPathPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].GetPosition((byte)(vehicleData.m_pathPositionIndex >> 1));
-			return true;
-		}
-
-		public bool GetNextPathPosition(ref Vehicle vehicleData, out PathUnit.Position nextPos) {
-			uint curPathUnitId = vehicleData.m_path;
-			if (curPathUnitId == 0) {
-				nextPos = default(PathUnit.Position);
-				return false;
-			}
-
-			byte index = (byte)((vehicleData.m_pathPositionIndex >> 1) + 1);
-			if (index <= 11) {
-				nextPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].GetPosition(index);
-				return true;
-			} else {
-				uint nextPathUnitId = Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_nextPathUnit;
-				if (nextPathUnitId == 0) {
-					nextPos = default(PathUnit.Position);
-					return false;
-				}
-
-				return Singleton<PathManager>.instance.m_pathUnits.m_buffer[nextPathUnitId].GetPosition(0, out nextPos);
-			}
 		}*/
 
-		private bool ProcessPathUnitPair(ref Vehicle vehicleData, ref PathUnit unit1, ref PathUnit unit2, byte index, DualPathPositionProcessor processor) {
-			if ((unit1.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				return false;
-			}
+		internal void Unlink() {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.Unlink({vehicleId}) called: Unlinking vehicle from all segment ends\nstate:{this}");
+#endif
 
-			if ((unit2.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				return false;
-			}
+			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
-			if (index >= unit1.m_positionCount) {
-				return false;
-			}
+			lastPositionUpdate = Now();
 
-			if (index < 11) {
-				if (index + 1 >= unit1.m_positionCount) {
-					return false;
-				}
-			} else {
-				if (unit2.m_positionCount < 1) {
-					return false;
+			if (previousVehicleIdOnSegment != 0) {
+				vehStateManager.VehicleStates[previousVehicleIdOnSegment].nextVehicleIdOnSegment = nextVehicleIdOnSegment;
+			} else if (currentSegmentId != 0) {
+				SegmentEnd curEnd = SegmentEndManager.Instance.GetSegmentEnd(currentSegmentId, currentStartNode);
+				if (curEnd != null && curEnd.FirstRegisteredVehicleId == vehicleId) {
+					curEnd.FirstRegisteredVehicleId = nextVehicleIdOnSegment;
 				}
 			}
 
-			switch (index) {
-				case 0:
-					processor(ref vehicleData, ref unit1.m_position00, ref unit1.m_position01);
-					break;
-				case 1:
-					processor(ref vehicleData, ref unit1.m_position01, ref unit1.m_position02);
-					break;
-				case 2:
-					processor(ref vehicleData, ref unit1.m_position02, ref unit1.m_position03);
-					break;
-				case 3:
-					processor(ref vehicleData, ref unit1.m_position03, ref unit1.m_position04);
-					break;
-				case 4:
-					processor(ref vehicleData, ref unit1.m_position04, ref unit1.m_position05);
-					break;
-				case 5:
-					processor(ref vehicleData, ref unit1.m_position05, ref unit1.m_position06);
-					break;
-				case 6:
-					processor(ref vehicleData, ref unit1.m_position06, ref unit1.m_position07);
-					break;
-				case 7:
-					processor(ref vehicleData, ref unit1.m_position07, ref unit1.m_position08);
-					break;
-				case 8:
-					processor(ref vehicleData, ref unit1.m_position08, ref unit1.m_position09);
-					break;
-				case 9:
-					processor(ref vehicleData, ref unit1.m_position09, ref unit1.m_position10);
-					break;
-				case 10:
-					processor(ref vehicleData, ref unit1.m_position10, ref unit1.m_position11);
-					break;
-				case 11:
-					processor(ref vehicleData, ref unit1.m_position11, ref unit2.m_position00);
-					break;
-				default:
-					return false;
+			if (nextVehicleIdOnSegment != 0) {
+				vehStateManager.VehicleStates[nextVehicleIdOnSegment].previousVehicleIdOnSegment = previousVehicleIdOnSegment;
 			}
 
-			return true;
+			nextVehicleIdOnSegment = 0;
+			previousVehicleIdOnSegment = 0;
+
+			currentSegmentId = 0;
+			currentStartNode = false;
+			currentLaneIndex = 0;
+
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.Unlink({vehicleId}) finished: Unlinked vehicle from all segment ends\nstate:{this}");
+#endif
 		}
 
-		private bool ProcessPathUnitQuad(ref Vehicle firstVehicleData, ref PathUnit unit1, ref PathUnit unit2, byte index, ref Vehicle secondVehicleData, ref PathUnit.Position secondPos1, ref PathUnit.Position secondPos2, QuadPathPositionProcessor processor) {
-			if ((unit1.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				return false;
-			}
+		private void Link(SegmentEnd end, byte laneIndex) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.Link({vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
+#endif
 
-			if ((unit2.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				return false;
+			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
+			if (oldFirstRegVehicleId != 0) {
+				VehicleStateManager.Instance.VehicleStates[oldFirstRegVehicleId].previousVehicleIdOnSegment = vehicleId;
+				nextVehicleIdOnSegment = oldFirstRegVehicleId;
 			}
+			end.FirstRegisteredVehicleId = vehicleId;
 
-			if (index >= unit1.m_positionCount) {
-				return false;
-			}
+			currentSegmentId = end.SegmentId;
+			currentStartNode = end.StartNode;
+			currentLaneIndex = laneIndex;
 
-			if (index < 11) {
-				if (index + 1 >= unit1.m_positionCount) {
-					return false;
-				}
-			} else {
-				if (unit2.m_positionCount < 1) {
-					return false;
-				}
-			}
-
-			switch (index) {
-				case 0:
-					processor(ref firstVehicleData, ref unit1.m_position00, ref unit1.m_position01, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 1:
-					processor(ref firstVehicleData, ref unit1.m_position01, ref unit1.m_position02, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 2:
-					processor(ref firstVehicleData, ref unit1.m_position02, ref unit1.m_position03, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 3:
-					processor(ref firstVehicleData, ref unit1.m_position03, ref unit1.m_position04, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 4:
-					processor(ref firstVehicleData, ref unit1.m_position04, ref unit1.m_position05, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 5:
-					processor(ref firstVehicleData, ref unit1.m_position05, ref unit1.m_position06, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 6:
-					processor(ref firstVehicleData, ref unit1.m_position06, ref unit1.m_position07, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 7:
-					processor(ref firstVehicleData, ref unit1.m_position07, ref unit1.m_position08, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 8:
-					processor(ref firstVehicleData, ref unit1.m_position08, ref unit1.m_position09, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 9:
-					processor(ref firstVehicleData, ref unit1.m_position09, ref unit1.m_position10, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 10:
-					processor(ref firstVehicleData, ref unit1.m_position10, ref unit1.m_position11, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				case 11:
-					processor(ref firstVehicleData, ref unit1.m_position11, ref unit2.m_position00, ref secondVehicleData, ref secondPos1, ref secondPos2);
-					break;
-				default:
-					return false;
-			}
-
-			return true;
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.Link({vehicleId}) finished: Linked vehicle to segment end {end}\nstate:{this}");
+#endif
 		}
 
-		internal bool HasPath(ref Vehicle vehicleData) {
-			uint curPathUnitId = vehicleData.m_path;
-			return curPathUnitId != 0 && (Singleton<PathManager>.instance.m_pathUnits.m_buffer[curPathUnitId].m_pathFindFlags & PathUnit.FLAG_READY) != 0;
-		}
+		internal void UpdatePosition(ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck=false) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.UpdatePosition called for vehicle {vehicleId}: {this}");
+#endif
+			/*if (! skipCheck && ! CheckValidity(ref vehicleData)) {
+				return;
+			}*/
 
-		private bool ProcessPathUnit(ref PathUnit unit, byte index, PathPositionProcessor processor) {
-			if ((unit.m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				return false;
+			if (nextSegmentId != nextPos.m_segment || nextLaneIndex != nextPos.m_lane) {
+				nextSegmentId = nextPos.m_segment;
+				nextLaneIndex = nextPos.m_lane;
 			}
 
-			if (index >= unit.m_positionCount) {
-				return false;
-			}
+			SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, IsTransitNodeCurStartNode(ref curPos, ref nextPos));
 
-			switch (index) {
-				case 0:
-					processor(ref unit.m_position00);
-					break;
-				case 1:
-					processor(ref unit.m_position01);
-					break;
-				case 2:
-					processor(ref unit.m_position02);
-					break;
-				case 3:
-					processor(ref unit.m_position03);
-					break;
-				case 4:
-					processor(ref unit.m_position04);
-					break;
-				case 5:
-					processor(ref unit.m_position05);
-					break;
-				case 6:
-					processor(ref unit.m_position06);
-					break;
-				case 7:
-					processor(ref unit.m_position07);
-					break;
-				case 8:
-					processor(ref unit.m_position08);
-					break;
-				case 9:
-					processor(ref unit.m_position09);
-					break;
-				case 10:
-					processor(ref unit.m_position10);
-					break;
-				case 11:
-					processor(ref unit.m_position11);
-					break;
-				default:
-					return false;
-			}
-			return true;
-		}
-
-		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck=false) {
-			if (! skipCheck && ! CheckValidity(ref vehicleData)) {
+			if (end == null) {
+				Unlink();
+				JunctionTransitState = VehicleJunctionTransitState.None;
+				this.sqrVelocity = 0;
 				return;
 			}
 
-			LastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
-			SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, IsTransitNodeCurStartNode(ref curPos, ref nextPos));
-			
-			if (CurrentSegmentEnd != end) {
-				if (CurrentSegmentEnd != null) {
+			if (currentSegmentId != end.SegmentId || currentStartNode != end.StartNode || currentLaneIndex != curPos.m_lane) {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Current segment end changed. seg. {currentSegmentId}, start {currentStartNode}, lane {currentLaneIndex} -> seg. {end.SegmentId}, start {end.StartNode}, lane {curPos.m_lane}");
+#endif
+				if (currentSegmentId != 0) {
+#if DEBUG
+					if (GlobalConfig.Instance.DebugSwitches[9])
+						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Unlinking from current segment end");
+#endif
 					Unlink();
 				}
 
-				WaitTime = 0;
+				waitTime = 0;
 				if (end != null) {
 #if DEBUGVSTATE
 					if (GlobalConfig.Instance.DebugSwitches[9])
-						Log.Warning($"VehicleState.UpdatePosition: Linking vehicle {VehicleId} with segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
+						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
-					Link(end);
-					JunctionTransitState = VehicleJunctionTransitState.Enter;
+					Link(end, curPos.m_lane);
+					JunctionTransitState = VehicleJunctionTransitState.Approach;
 				} else {
 					JunctionTransitState = VehicleJunctionTransitState.None;
 				}
 			}
+
+			this.sqrVelocity = sqrVelocity;
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.UpdatePosition finshed for vehicle {vehicleId}: {this}");
+#endif
 		}
 
-		internal void UpdatePosition(ref Vehicle vehicleData) {
-			if (!CheckValidity(ref vehicleData)) {
+		internal void OnDespawn() {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnRelease called for vehicle {vehicleId}: {this}");
+#endif
+			ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
+			if (driverExtInstance != null) {
+				driverExtInstance.Reset();
+			}
+
+			Unlink();
+			lastTransitStateUpdate = Now();
+			lastPositionUpdate = Now();
+			totalLength = 0;
+			waitTime = 0;
+			reduceSqrSpeedByValueToYield = 0;
+			spawned = false;
+			emergency = false;
+			vehicleType = ExtVehicleType.None;
+			heavyVehicle = false;
+			currentSegmentId = 0;
+			currentLaneIndex = 0;
+			nextSegmentId = 0;
+			nextLaneIndex = 0;
+			previousVehicleIdOnSegment = 0;
+			nextVehicleIdOnSegment = 0;
+			sqrVelocity = 0;
+			junctionTransitState = VehicleJunctionTransitState.None;
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnRelease finished for vehicle {vehicleId}: {this}");
+#endif
+		}
+
+		internal void OnCreate(ref Vehicle vehicleData) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnCreate called for vehicle {vehicleId}: {this}");
+#endif
+			DetermineVehicleType(ref vehicleData);
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnCreate finished for vehicle {vehicleId}: {this}");
+#endif
+		}
+
+		internal void OnSpawn(ref Vehicle vehicleData) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnSpawn called for vehicle {vehicleId}: {this}");
+#endif
+			Unlink();
+			
+			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
+			emergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0;
+
+			try {
+				totalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].CalculateTotalLength(vehicleId);
+			} catch (Exception e) {
+				totalLength = 0;
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleState.OnSpawn: Error occurred while calculating total length of vehicle {vehicleId}: {e}\nstate: {this}");
+#endif
 				return;
 			}
-
-			ProcessCurrentAndNextPathPosition(ref vehicleData, delegate (ref Vehicle vehData, ref PathUnit.Position currentPosition, ref PathUnit.Position nextPosition) {
-				UpdatePosition(ref vehData, ref currentPosition, ref nextPosition);
-			});
-
-			// update position of trailers
-			ushort trailerId = vehicleData.m_trailingVehicle;
-			while (trailerId != 0) {
-				VehicleStateManager.Instance.UpdateTrailerPos(trailerId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId], VehicleId, ref vehicleData);
-				trailerId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
-			}
-		}
-
-		internal void UpdatePosition(ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
-			ProcessTrailerCurrentAndNextPathPosition(ref vehicleData, ref trailerData, delegate (ref Vehicle trailData, ref PathUnit.Position currentPosition, ref PathUnit.Position nextPosition) {
-				UpdatePosition(ref trailData, ref currentPosition, ref nextPosition, true);
-			});
-		}
-
-		internal bool CheckValidity(ref Vehicle vehicleData, bool skipCached=false) {
-#if DEBUG
-			//bool debug = skipCached;
-			//byte pfFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
-#endif
-
-#if DEBUG
-			//if (debug)
-			//Log._Debug($"VehicleState.CheckValidity({VehicleId}) called. created: {(vehicleData.m_flags & Vehicle.Flags.Created) != 0} ({vehicleData.m_flags}) handled: {(vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) != VehicleInfo.VehicleType.None} ({vehicleData.Info.m_vehicleType}) has path unit: {vehicleData.m_path != 0} path ready: {(pfFlags & PathUnit.FLAG_READY) != 0} ({pfFlags})");
-#endif
-
-			if (!skipCached && !Valid)
-				return false;
-
-			if ((vehicleData.m_flags & Vehicle.Flags.Created) == 0 || (vehicleData.Info.m_vehicleType & HANDLED_VEHICLE_TYPES) == VehicleInfo.VehicleType.None || vehicleData.m_path <= 0) {
-				Valid = false;
-				return false;
-			}
-
 			
-			if ((Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags & PathUnit.FLAG_READY) == 0) {
-				Valid = false;
-				return false;
-			}
-			return true;
+			spawned = true;
+
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnSpawn finished for vehicle {vehicleId}: {this}");
+#endif
 		}
 
-		internal static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+		/// <summary>
+		/// Determines if the junction transit state has been recently modified
+		/// </summary>
+		/// <returns></returns>
+		internal bool IsJunctionTransitStateNew() {
+			uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+			return (lastTransitStateUpdate >> GlobalConfig.Instance.VehicleStateUpdateShift) >= (frame >> GlobalConfig.Instance.VehicleStateUpdateShift);
+		}
+
+		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
 			ushort transitNodeId1 = 0;
 			Constants.ServiceFactory.NetService.ProcessSegment(curPos.m_segment, delegate (ushort segmentId, ref NetSegment segment) {
@@ -600,7 +345,7 @@ namespace TrafficManager.Traffic {
 			return transitNodeId1;
 		}
 
-		internal static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+		private static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 			// note: does not check if curPos and nextPos are successive path positions
 			bool startNode;
 			if (curPos.m_offset == 0) {
@@ -615,74 +360,91 @@ namespace TrafficManager.Traffic {
 			return startNode;
 		}
 
-		internal void OnVehicleSpawned(ref Vehicle vehicleData) {
-#if DEBUG
-			//Log._Debug($"VehicleState.OnPathFindReady called for vehicle {VehicleId} ({VehicleType}");
-#endif
-
-			Reset();
-			//DriverInstanceId = 0;
-
-			if (!CheckValidity(ref vehicleData, true)) {
-				return;
-			}
-
-			// enforce updating trailers (they are not always present at path-finding time)
-			ApplyVehicleTypeToTrailers();
-
-			ReduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
-			try {
-				TotalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[VehicleId].CalculateTotalLength(VehicleId);
-			} catch (Exception) {
-				TotalLength = 0;
-#if DEBUG
-				Log._Debug($"Error occurred while calculating total length of vehicle {VehicleId} ({VehicleType}).");
-#endif
-				return;
-			}
-			
-			Valid = true;
+		private static uint Now() {
+			return Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
 		}
 
-		private void ApplyVehicleTypeToTrailers() {
-			VehicleManager vehManager = Singleton<VehicleManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+		private void DetermineVehicleType(ref Vehicle vehicleData) {
+			VehicleAI ai = vehicleData.Info.m_vehicleAI;
 
-#if DEBUG
-			//Log._Debug($"Applying VehicleType to trailes of vehicle {VehicleId} to {VehicleType}.");
-#endif
-
-			// apply vehicle type to all leading/trailing vehicles
-			ushort otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_leadingVehicle;
-			while (otherVehicleId != 0) {
-#if DEBUG
-				//Log._Debug($"    Setting VehicleType of leader {otherVehicleId} to {VehicleType}.");
-#endif
-				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
-				otherState.Valid = true;
-				otherState.VehicleType = VehicleType;
-				otherVehicleId = vehManager.m_vehicles.m_buffer[otherVehicleId].m_leadingVehicle;
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+				vehicleType = ExtVehicleType.Emergency;
+			} else {
+				ExtVehicleType? type = DetermineVehicleTypeFromAIType(ai, false);
+				if (type != null) {
+					vehicleType = (ExtVehicleType)type;
+				} else {
+					vehicleType = ExtVehicleType.None;
+				}
 			}
 
-			otherVehicleId = vehManager.m_vehicles.m_buffer[VehicleId].m_trailingVehicle;
-			while (otherVehicleId != 0) {
-#if DEBUG
-				//Log._Debug($"    Setting VehicleType of trailer {otherVehicleId} to {VehicleType}.");
-#endif
-				VehicleState otherState = vehStateManager._GetVehicleState(otherVehicleId);
-				otherState.Valid = true;
-				otherState.VehicleType = VehicleType;
-				otherVehicleId = vehManager.m_vehicles.m_buffer[otherVehicleId].m_trailingVehicle;
+			if (vehicleType == ExtVehicleType.CargoTruck) {
+				heavyVehicle = ((CargoTruckAI)ai).m_isHeavyVehicle;
+			} else {
+				heavyVehicle = false;
 			}
+
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.DetermineVehicleType({vehicleId}): vehicleType={vehicleType}, heavyVehicle={heavyVehicle}. Info={vehicleData.Info?.name}");
+#endif
 		}
 
-		/// <summary>
-		/// Determines if the junction transit state has been recently modified
-		/// </summary>
-		/// <returns></returns>
-		internal bool IsJunctionTransitStateNew() {
-			uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			return (LastStateUpdate >> VehicleState.STATE_UPDATE_SHIFT) >= (frame >> VehicleState.STATE_UPDATE_SHIFT);
+		private ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
+			if (emergencyOnDuty)
+				return ExtVehicleType.Emergency;
+
+			switch (ai.m_info.m_vehicleType) {
+				case VehicleInfo.VehicleType.Bicycle:
+					return ExtVehicleType.Bicycle;
+				case VehicleInfo.VehicleType.Car:
+					if (ai is PassengerCarAI)
+						return ExtVehicleType.PassengerCar;
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI) {
+						return ExtVehicleType.Service;
+					}
+					if (ai is CarTrailerAI)
+						return ExtVehicleType.None;
+					if (ai is BusAI)
+						return ExtVehicleType.Bus;
+					if (ai is TaxiAI)
+						return ExtVehicleType.Taxi;
+					if (ai is CargoTruckAI)
+						return ExtVehicleType.CargoTruck;
+					break;
+				case VehicleInfo.VehicleType.Metro:
+				case VehicleInfo.VehicleType.Train:
+				case VehicleInfo.VehicleType.Monorail:
+					if (ai is CargoTrainAI)
+						return ExtVehicleType.CargoTrain;
+					return ExtVehicleType.PassengerTrain;
+				case VehicleInfo.VehicleType.Tram:
+					return ExtVehicleType.Tram;
+				case VehicleInfo.VehicleType.Ship:
+					if (ai is PassengerShipAI)
+						return ExtVehicleType.PassengerShip;
+					//if (ai is CargoShipAI)
+					return ExtVehicleType.CargoShip;
+				//break;
+				case VehicleInfo.VehicleType.Plane:
+					//if (ai is PassengerPlaneAI)
+					return ExtVehicleType.PassengerPlane;
+				//break;
+				case VehicleInfo.VehicleType.Helicopter:
+					//if (ai is PassengerPlaneAI)
+					return ExtVehicleType.Helicopter;
+				//break;
+				case VehicleInfo.VehicleType.Ferry:
+					return ExtVehicleType.Ferry;
+				case VehicleInfo.VehicleType.Blimp:
+					return ExtVehicleType.Blimp;
+				case VehicleInfo.VehicleType.CableCar:
+					return ExtVehicleType.CableCar;
+			}
+#if DEBUGVSTATE
+			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
+#endif
+			return null;
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
+using TrafficManager.Traffic;
 using TrafficManager.Util;
 using UnityEngine;
 
@@ -429,6 +430,55 @@ namespace TrafficManager.Geometry {
 
 				NodeGeometry.Get(nodeId).AddSegmentEnd(this, calcMode);
 			}
+		}
+
+		public bool IsRightSegment(ushort toSegmentId) {
+			bool contains = false;
+			foreach (ushort segId in RightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
+		}
+
+		public bool IsLeftSegment(ushort toSegmentId) {
+			bool contains = false;
+			foreach (ushort segId in LeftSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
+		}
+
+		public bool IsStraightSegment(ushort toSegmentId) {
+			bool contains = false;
+			foreach (ushort segId in StraightSegments)
+				if (segId == toSegmentId) {
+					contains = true;
+					break;
+				}
+			return contains;
+		}
+
+		public ArrowDirection GetDirection(ushort otherSegmentId) {
+			if (otherSegmentId == SegmentId) {
+				return ArrowDirection.Turn;
+			}
+
+			if (! IsConnectedTo(otherSegmentId)) {
+				return ArrowDirection.None;
+			}
+
+			if (otherSegmentId == SegmentId)
+				return ArrowDirection.Turn;
+			else if (IsRightSegment(otherSegmentId))
+				return ArrowDirection.Right;
+			else if (IsLeftSegment(otherSegmentId))
+				return ArrowDirection.Left;
+			else
+				return ArrowDirection.Forward;
 		}
 
 		// static methods

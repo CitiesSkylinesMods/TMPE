@@ -30,7 +30,7 @@ namespace TrafficManager.Manager {
 		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
 		/// Sets the maximum allowed speed <paramref name="maxSpeed"/> if segment change is not allowed (otherwise <paramref name="maxSpeed"/> has to be set by the calling method).
 		/// </summary>
-		/// <param name="vehicleId">vehicle id</param>
+		/// <param name="frontVehicleId">vehicle id</param>
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="lastFrameData">last frame data of vehicle</param>
 		/// <param name="isRecklessDriver">if true, this vehicle ignores red traffic lights and priority signs</param>
@@ -42,15 +42,15 @@ namespace TrafficManager.Manager {
 		/// <param name="laneID">current lane</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed, bool debug = false) {
-			return MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed, debug);
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed, bool debug = false) {
+			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed, debug);
 		}
 
 		/// <summary>
 		/// Checks for traffic lights and priority signs when changing segments (for road & rail vehicles).
 		/// Sets the maximum allowed speed <paramref name="maxSpeed"/> if segment change is not allowed (otherwise <paramref name="maxSpeed"/> has to be set by the calling method).
 		/// </summary>
-		/// <param name="vehicleId">vehicle id</param>
+		/// <param name="frontVehicleId">vehicle id</param>
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="lastFrameData">last frame data of vehicle</param>
 		/// <param name="isRecklessDriver">if true, this vehicle ignores red traffic lights and priority signs</param>
@@ -64,28 +64,16 @@ namespace TrafficManager.Manager {
 		/// <param name="nextTargetNodeId">next target node</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort vehicleId, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug = false) {
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug = false) {
 			debug = false;
 			if (prevTargetNodeId != targetNodeId) {
 				// method should only be called if targetNodeId == prevTargetNode
+				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 				maxSpeed = 0f;
 				return true;
 			}
 
-			VehicleState vehicleState = null;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
-
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				vehicleState = vehStateManager.GetVehicleState(vehicleId);
-			}
-
-			if (Options.simAccuracy >= 2 && (Options.prioritySignsEnabled || Options.timedLightsEnabled)) {
-				try {
-					vehStateManager.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
-				} catch (Exception e) {
-					Log.Error("VehicleAI MayChangeSegment Error: " + e.ToString());
-				}
-			}
 
 			var netManager = Singleton<NetManager>.instance;
 
@@ -112,7 +100,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 				if (debug)
-					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} is not a train.");
+					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is not a train.");
 #endif
 
 				var prevLaneFlags = (NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags;
@@ -128,6 +116,7 @@ namespace TrafficManager.Manager {
 
 				// stock priority signs
 				if (/*!Options.prioritySignsEnabled &&*/ hasStockYieldSign && sqrSpeed > 0.01f && (vehicleData.m_flags & Vehicle.Flags.Emergency2) == (Vehicle.Flags)0) {
+					vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 					maxSpeed = 0f;
 					return false;
 				}
@@ -136,7 +125,7 @@ namespace TrafficManager.Manager {
 					// check if there is enough space
 					if ((targetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction &&
 						targetNode.CountSegments() != 2) {
-						var len = vehicleData.CalculateTotalLength(vehicleId) + 2f;
+						var len = vehicleData.CalculateTotalLength(frontVehicleId) + 2f;
 						if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
 							var sufficientSpace = false;
 							if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
@@ -151,18 +140,12 @@ namespace TrafficManager.Manager {
 							}
 							if (!sufficientSpace) {
 								maxSpeed = 0f;
-								try {
-									if (vehicleState != null) {
 #if DEBUG
-										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to BLOCKED");
+								if (debug)
+									Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to BLOCKED");
 #endif
 
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
-									}
-								} catch (Exception e) {
-									Log.Error("VehicleAI MayChangeSegment error while setting junction state to BLOCKED: " + e.ToString());
-								}
+								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
 								return false;
 							}
 						}
@@ -173,7 +156,7 @@ namespace TrafficManager.Manager {
 			} else {
 #if DEBUG
 				if (debug)
-					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} is a train/monorail.");
+					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is a train/monorail.");
 #endif
 
 				if (!isMonorail) {
@@ -181,12 +164,12 @@ namespace TrafficManager.Manager {
 				}
 			}
 
-			if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
+			if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
 #if DEBUG
 				if (debug)
-					Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from BLOCKED to ENTER");
+					Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState from BLOCKED to APPROACH");
 #endif
-				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
+				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
 			}
 
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0) {
@@ -198,19 +181,19 @@ namespace TrafficManager.Manager {
 
 					var destinationInfo = targetNode.Info;
 
-					if (vehicleState != null && vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
-#if DEBUG
-						if (debug)
-							Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (1)");
-#endif
-						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
-					}
+//					if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
+//#if DEBUG
+//						if (debug)
+//							Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (1)");
+//#endif
+//						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
+//					}
 
 					RoadBaseAI.TrafficLightState vehicleLightState;
 					RoadBaseAI.TrafficLightState pedestrianLightState;
 					bool vehicles;
 					bool pedestrians;
-					CustomRoadAI.GetTrafficLightState(vehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+					CustomRoadAI.GetTrafficLightState(frontVehicleId, ref vehicleData, targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
 					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
 						vehicleLightState = RoadBaseAI.TrafficLightState.Green;
@@ -218,7 +201,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 					if (debug)
-						Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {vehicleId} has {vehicleLightState} at node {targetNodeId}");
+						Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} has {vehicleLightState} at node {targetNodeId}");
 #endif
 
 					if (!vehicles && random >= 196u) {
@@ -231,13 +214,6 @@ namespace TrafficManager.Manager {
 						case RoadBaseAI.TrafficLightState.RedToGreen:
 							if (random < 60u) {
 								stopCar = true;
-							} else {
-#if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (RedToGreen)");
-#endif
-								if (vehicleState != null)
-									vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 							}
 							break;
 						case RoadBaseAI.TrafficLightState.Red:
@@ -246,12 +222,6 @@ namespace TrafficManager.Manager {
 						case RoadBaseAI.TrafficLightState.GreenToRed:
 							if (random >= 30u) {
 								stopCar = true;
-							} else if (vehicleState != null) {
-#if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (GreenToRed)");
-#endif
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 							}
 							break;
 					}
@@ -266,17 +236,21 @@ namespace TrafficManager.Manager {
 					}*/
 
 					if (stopCar) {
-						if (vehicleState != null) {
 #if DEBUG
-							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP");
+						if (debug)
+							Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP");
 #endif
-							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-						}
+						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 						maxSpeed = 0f;
 						return false;
+					} else {
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE ({vehicleLightState})");
+#endif
+						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 					}
-				} else if (!isMonorail && vehicleState != null && Options.prioritySignsEnabled) {
+				} else if (!isMonorail && Options.prioritySignsEnabled) {
 					TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
 #if DEBUG
@@ -287,23 +261,23 @@ namespace TrafficManager.Manager {
 					//bool debug = false;
 #if DEBUG
 					if (debug)
-						Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
+						Log._Debug($"Vehicle {frontVehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
 					var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
 					if (sign != PrioritySegment.PriorityType.None) {
 #if DEBUG
 						if (debug)
-							Log._Debug($"Vehicle {vehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
+							Log._Debug($"Vehicle {frontVehicleId} is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
 #endif
 						//if (prioritySegment.HasVehicle(vehicleId)) {
 #if DEBUG
 						if (debug)
-							Log._Debug($"Vehicle {vehicleId}: segment target position found");
+							Log._Debug($"Vehicle {frontVehicleId}: segment target position found");
 #endif
 #if DEBUG
 						if (debug)
-							Log._Debug($"Vehicle {vehicleId}: global target position found. carState = {vehicleState.JunctionTransitState.ToString()}");
+							Log._Debug($"Vehicle {frontVehicleId}: global target position found. carState = {vehicleState.JunctionTransitState.ToString()}");
 #endif
 						var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 						var frame = currentFrameIndex2 >> 4;
@@ -311,48 +285,48 @@ namespace TrafficManager.Manager {
 						if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
 							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (prio)");
+								Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to ENTER (prio)");
 #endif
-							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Enter;
+							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
 						}
 
 						if (vehicleState.JunctionTransitState != VehicleJunctionTransitState.Leave) {
-							bool hasIncomingCars;
+							bool hasPriority;
 							switch (sign) {
 								case PriorityType.Stop:
 #if DEBUG
 									if (debug)
-										Log._Debug($"Vehicle {vehicleId}: STOP sign. waittime={vehicleState.WaitTime}, sqrSpeed={sqrSpeed}");
+										Log._Debug($"Vehicle {frontVehicleId}: STOP sign. waittime={vehicleState.waitTime}, sqrSpeed={sqrSpeed}");
 #endif
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
 										if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-											vehicleState.WaitTime++;
+											vehicleState.waitTime++;
 
-											float minStopWaitTime = UnityEngine.Random.Range(0f, 3f);
-											if (vehicleState.WaitTime >= minStopWaitTime) {
+											float minStopWaitTime = Singleton<SimulationManager>.instance.m_randomizer.UInt32(3);
+											if (vehicleState.waitTime >= minStopWaitTime) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
+													hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
 #if DEBUG
 													if (debug)
-														Log._Debug($"hasIncomingCars: {hasIncomingCars}");
+														Log._Debug($"hasPriority: {hasPriority}");
 #endif
 
-													if (hasIncomingCars) {
+													if (!hasPriority) {
 														maxSpeed = 0f;
 														return false;
 													}
 #if DEBUG
 													if (debug)
-														Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
+														Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE (min wait timeout)");
 #endif
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												}
@@ -361,14 +335,14 @@ namespace TrafficManager.Manager {
 												return false;
 											}
 										} else {
-											vehicleState.WaitTime = 0;
+											vehicleState.waitTime = 0;
 											maxSpeed = 0f;
 											return false;
 										}
 									} else {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 									}
@@ -376,14 +350,14 @@ namespace TrafficManager.Manager {
 								case PriorityType.Yield:
 #if DEBUG
 									if (debug)
-										Log._Debug($"Vehicle {vehicleId}: YIELD sign. waittime={vehicleState.WaitTime}");
+										Log._Debug($"Vehicle {frontVehicleId}: YIELD sign. waittime={vehicleState.waitTime}");
 #endif
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
-										vehicleState.WaitTime++;
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
+										vehicleState.waitTime++;
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
@@ -391,19 +365,19 @@ namespace TrafficManager.Manager {
 											if (Options.simAccuracy >= 4) {
 												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 											} else {
-												hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
+												hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
 #if DEBUG
 												if (debug)
-													Log._Debug($"Vehicle {vehicleId}: hasIncomingCars: {hasIncomingCars}");
+													Log._Debug($"Vehicle {frontVehicleId}: hasPriority: {hasPriority}");
 #endif
 
-												if (hasIncomingCars) {
+												if (!hasPriority) {
 													maxSpeed = 0f;
 													return false;
 												} else {
 #if DEBUG
 													if (debug)
-														Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
+														Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE (no incoming cars)");
 #endif
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												}
@@ -411,7 +385,7 @@ namespace TrafficManager.Manager {
 										} else {
 #if DEBUG
 											if (debug)
-												Log._Debug($"Vehicle {vehicleId}: Vehicle has not yet reached yield speed (reduce {sqrSpeed} by {vehicleState.ReduceSqrSpeedByValueToYield})");
+												Log._Debug($"Vehicle {frontVehicleId}: Vehicle has not yet reached yield speed (reduce {sqrSpeed} by {vehicleState.reduceSqrSpeedByValueToYield})");
 #endif
 
 											// vehicle has not yet reached yield speed
@@ -421,7 +395,7 @@ namespace TrafficManager.Manager {
 									} else {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE (max wait timeout)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 									}
@@ -430,33 +404,33 @@ namespace TrafficManager.Manager {
 								default:
 #if DEBUG
 									if (debug)
-										Log._Debug($"Vehicle {vehicleId}: MAIN sign. waittime={vehicleState.WaitTime}");
+										Log._Debug($"Vehicle {frontVehicleId}: MAIN sign. waittime={vehicleState.waitTime}");
 #endif
 									maxSpeed = 0f;
 
 									if (Options.simAccuracy == 4)
 										return true;
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.WaitTime < MAX_PRIORITY_WAIT_TIME)) {
-										vehicleState.WaitTime++;
+									if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
+										vehicleState.waitTime++;
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to STOP (wait)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP (wait)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										hasIncomingCars = prioMan.HasIncomingVehiclesWithHigherPriority(vehicleId, ref vehicleData, ref prevSegment, targetNodeId, ref targetNode, ref prevPos, ref position);
+										hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
 #if DEBUG
 										if (debug)
-											Log._Debug($"hasIncomingCars: {hasIncomingCars}");
+											Log._Debug($"hasPriority: {hasPriority}");
 #endif
 
-										if (hasIncomingCars) {
+										if (!hasPriority) {
 											return false;
 										}
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to LEAVE (no conflicting car)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to LEAVE (no conflicting car)");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 									}
@@ -466,7 +440,7 @@ namespace TrafficManager.Manager {
 							// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 							if (debug)
-								Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
+								Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
 #endif
 							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
 
@@ -484,7 +458,6 @@ namespace TrafficManager.Manager {
 			var netManager = Singleton<NetManager>.instance;
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
 			bool highwayRules = (segmentInfo.m_netAI is RoadBaseAI && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules);
-			VehicleState state = VehicleStateManager.Instance.GetVehicleState(vehicleId);
 
 			if (!highwayRules) {
 				if (netManager.m_treatWetAsSnow) {
@@ -546,7 +519,7 @@ namespace TrafficManager.Manager {
 			// NON-STOCK CODE START
 			if (Options.realisticSpeeds) {
 				float vehicleRand = Math.Min(1f, (float)(vehicleId % 100) * 0.01f);
-				if (state != null && state.HeavyVehicle)
+				if (vehicleData.Info.m_isLargeVehicle)
 					maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.85 .. 1
 				else if (isRecklessDriver)
 					maxSpeed *= 1.3f + vehicleRand * 0.7f; // woohooo, 1.3 .. 2

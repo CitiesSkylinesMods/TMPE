@@ -37,10 +37,10 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
-			try {
-				uint curLaneId = data.m_lanes;
+			//try {
+				/*uint curLaneId = data.m_lanes;
 				int numLanes = data.Info.m_lanes.Length;
-				uint laneIndex = 0;
+				uint laneIndex = 0;*/
 
 				/*while (laneIndex < numLanes && curLaneId != 0u) {
 					Flags.applyLaneArrowFlags(curLaneId);
@@ -50,9 +50,9 @@ namespace TrafficManager.Custom.AI {
 				}*/
 
 				SegmentEndManager.Instance.SegmentSimulationStep(segmentID);
-			} catch (Exception e) {
+			/*} catch (Exception e) {
 				Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
-			}
+			}*/
 
 			if (!Options.isStockLaneChangerUsed()) {
 				if (segmentID < lastSimulatedSegmentId) {
@@ -71,19 +71,15 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				if (doTrafficMeasurement) {
-					try {
+					//try {
 						TrafficMeasurementManager.Instance.SimulationStep(segmentID, ref data);
-					} catch (Exception e) {
+					/*} catch (Exception e) {
 						Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
-					}
+					}*/
 				}
 			}
 			
-			try {
-				OriginalSimulationStep(segmentID, ref data);
-			} catch (Exception ex) {
-				Log.Error($"Error in CustomRoadAI.SimulationStep for segment {segmentID}: " + ex.ToString());
-			}
+			OriginalSimulationStep(segmentID, ref data);
 		}
 
 		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {

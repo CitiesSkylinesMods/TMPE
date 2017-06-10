@@ -55,9 +55,10 @@ namespace TrafficManager.Custom.AI {
 
 			string ret = Locale.Get("VEHICLE_STATUS_GOINGTO");
 			if (Options.prohibitPocketCars) {
-				VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-				ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
-				ret = AdvancedParkingManager.Instance.EnrichLocalizedStatus(ret, driverExtInstance);
+				ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
+				if (driverExtInstance != null) {
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedStatus(ret, driverExtInstance);
+				}
 			}
 
 			return ret;
@@ -114,8 +115,7 @@ namespace TrafficManager.Custom.AI {
 			bool skipQueue = false;
 			ExtPathType extPathType = ExtPathType.None;
 			if (Options.prohibitPocketCars) {
-				VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleData.GetFirstVehicle(vehicleID));
-				ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
+				ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
 				if (driverExtInstance != null) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
@@ -368,14 +368,12 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			VehicleState state = null;
 			ExtCitizenInstance driverExtInstance = null;
 			bool prohibitPocketCars = false;
 			// NON-STOCK CODE END
 
 			if (driverCitizenId != 0u) {
 				if (Options.prohibitPocketCars) {
-					state = VehicleStateManager.Instance._GetVehicleState(vehicleData.GetFirstVehicle(vehicleID));
 					if (driverCitizenInstanceId != 0) {
 						driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(driverCitizenInstanceId);
 						prohibitPocketCars = true;

@@ -1199,7 +1199,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting TrainAI::TrySpawn Calls");
+				/*Log.Info("Redirecting TrainAI::TrySpawn Calls");
 				try {
 					Detours.Add(new Detour(typeof(TrainAI).GetMethod("TrySpawn",
 								new[] {
@@ -1210,7 +1210,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not redirect TrainAI::TrySpawn.");
 					detourFailed = true;
-				}
+				}*/
 
 				Log.Info("Redirection TramBaseAI::SimulationStep calls");
 				try {
@@ -1229,7 +1229,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting TramBaseAI::TrySpawn Calls");
+				/*Log.Info("Redirecting TramBaseAI::TrySpawn Calls");
 				try {
 					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("TrySpawn",
 								new[] {
@@ -1240,7 +1240,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not redirect TramBaseAI::TrySpawn.");
 					detourFailed = true;
-				}
+				}*/
 
 				Log.Info("Redirecting Car AI Calculate Segment Calls");
 				try {

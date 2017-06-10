@@ -78,15 +78,18 @@ namespace TrafficManager.Manager {
 				return mainPathState;
 			}
 
-			VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleData.GetFirstVehicle(vehicleId));
-			ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
+			ushort frontVehicleId = VehicleStateManager.Instance.GetFrontVehicleId(vehicleId, ref vehicleData);
+			ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
+			if (driverExtInstance != null) {
+				driverExtInstance.Reset();
+			}
 
 			if (driverExtInstance == null) {
 				// no driver
 				return mainPathState;
 			}
 
-			if (state.VehicleType != ExtVehicleType.PassengerCar) {
+			if (VehicleStateManager.Instance.VehicleStates[frontVehicleId].vehicleType != ExtVehicleType.PassengerCar) {
 				// non-passenger cars are not handled
 				driverExtInstance.Reset();
 				return mainPathState;

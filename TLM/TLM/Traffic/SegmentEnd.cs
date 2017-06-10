@@ -81,9 +81,9 @@ namespace TrafficManager.Traffic {
 				VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
 #if DEBUG
-				//Log._Debug($"Cleanup of SegmentEnd {SegmentId} @ {NodeId} requested. Performing cleanup now.");
+				Log._Debug($"Cleanup of SegmentEnd {SegmentId} @ {NodeId} requested. Performing cleanup now.");
 #endif
-				ushort vehicleId = FirstRegisteredVehicleId;
+				/*ushort vehicleId = FirstRegisteredVehicleId;
 				while (vehicleId != 0) {
 					VehicleState state = vehStateManager._GetVehicleState(vehicleId);
 
@@ -92,13 +92,13 @@ namespace TrafficManager.Traffic {
 						removeVehicle = true;
 					}
 					
-					ushort nextVehicleId = state.NextVehicleIdOnSegment;
+					ushort nextVehicleId = state.nextVehicleIdOnSegment;
 					if (removeVehicle) {
 						state.Unlink();
 					}
 					vehicleId = nextVehicleId;
 				}
-
+				*/
 				cleanupRequested = false;
 			}
 
@@ -114,6 +114,7 @@ namespace TrafficManager.Traffic {
 			//NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
+			// TODO pre-calculate this
 			uint avgSegLen = 0;
 			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
 				avgSegLen = (uint)segment.m_averageLength;
@@ -138,90 +139,13 @@ namespace TrafficManager.Traffic {
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int numProcessed = 0;
 			while (vehicleId != 0) {
-				VehicleState state = vehStateManager._GetVehicleState(vehicleId);
+				MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref vehStateManager.VehicleStates[vehicleId], ref numProcessed);
 
-				bool breakLoop = false;
-
-				state.ProcessCurrentAndNextPathPosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], delegate (ref Vehicle vehState, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-					if (!state.CheckValidity(ref vehState)) {
-						RequestCleanup();
-						return;
-					}
-
-#if DEBUGMETRIC
-				if (debug)
-					Log._Debug($" GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Checking vehicle {vehicleId}. Coming from seg. {curPos.m_segment}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
-#endif
-
-					if (curPos.m_segment != SegmentId) {
-#if DEBUGMETRIC
-						if (debug)
-							Log._Debug($" GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId} error: Segment mismatch! Vehicle is on seg. {curPos.m_segment} but should be on {SegmentId}");
-#endif
-						RequestCleanup();
-						return;
-					}
-
-					ushort targetSegmentId = nextPos.m_segment;
-					if (targetSegmentId == 0) {
-#if DEBUGMETRIC
-						if (debug)
-							Log._Debug($" GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId} is going from {curPos.m_segment} to {targetSegmentId}: Changing targetSegmentId to {curPos.m_segment}");
-#endif
-						targetSegmentId = curPos.m_segment;
-					}
-
-					if (!includeStopped && vehState.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-#if DEBUGMETRIC
-						if (debug)
-							Log._Debug($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow");
-#endif
-						++numProcessed;
-						return;
-					}
-
-					try {
-						if (Options.simAccuracy <= 2) {
-							uint normLength = 100u;
-							if (avgSegLen > 0) {
-								normLength = Math.Min(100u, (uint)(state.TotalLength * 100u) / avgSegLen) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
-							}
-
-#if DEBUGMETRIC
-							if (debug)
-								Log._Debug($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) NormLength of vehicle {vehicleId}: {avgSegLen} -> {normLength} (TotalLength={state.TotalLength})");
-#endif
-
-							ret[curPos.m_lane][targetSegmentId] += normLength;
-						} else {
-							ret[curPos.m_lane][targetSegmentId] += 10;
-						}
-						++numProcessed;
-					} catch (Exception
-#if DEBUGMETRIC
-					e
-#endif
-					) {
-#if DEBUGMETRIC
-						Log._Debug($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Could not add length of vehicle {vehicleId} (lane {curPos.m_lane}, target seg. {targetSegmentId}) to going/moving stats: {e}");
-#endif
-					}
-
-#if DEBUGMETRIC
-					if (debug)
-						Log._Debug($"  GetVehicleMetricGoingToSegment: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: *added*! Coming from segment {SegmentId}, lane {curPos.m_lane}. Going to segment {nextPos.m_segment}, lane {nextPos.m_lane}");
-#endif
-
-					if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
-						breakLoop = true;
-						return;
-					}
-				});
-
-				if (breakLoop)
+				if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
 					break;
+				}
 
-				vehicleId = state.NextVehicleIdOnSegment;
+				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
 			}
 
 #if DEBUGMETRIC
@@ -231,6 +155,76 @@ namespace TrafficManager.Traffic {
 			return ret;
 		}
 
+		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref VehicleState state, ref int numProcessed) {
+#if DEBUGMETRIC
+			if (debug)
+				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
+#endif
+
+			if (!state.spawned) {
+#if DEBUGMETRIC
+				if (debug)
+					Log._Debug($" MeasureOutgoingVehicle: Vehicle {vehicleId} is unspawned. Ignoring.");
+#endif
+				return;
+			}
+
+#if DEBUGMETRIC
+			if (state.currentSegmentId != SegmentId || state.currentStartNode != StartNode) {
+				if (debug)
+					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} error: Segment end mismatch!");
+				RequestCleanup();
+				return;
+			}
+#endif
+
+			if (state.nextSegmentId == 0) {
+#if DEBUGMETRIC
+				if (debug)
+					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId}: Ignoring vehicle");
+#endif
+				return;
+			}
+
+			if (state.currentLaneIndex >= ret.Length || !ret[state.currentLaneIndex].ContainsKey(state.nextSegmentId)) {
+#if DEBUGMETRIC
+				if (debug)
+					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} is on lane {state.currentLaneIndex} and wants to go to segment {state.nextSegmentId} but one or both are invalid: {ret.CollectionToString()}");
+#endif
+				return;
+			}
+
+			if (!includeStopped && state.sqrVelocity < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+#if DEBUGMETRIC
+				if (debug)
+					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({state.sqrVelocity})");
+#endif
+				++numProcessed;
+				return;
+			}
+
+			
+			uint normLength = 10u;
+			if (avgSegmentLength > 0) {
+				normLength = Math.Min(100u, (uint)(Math.Max(1u, state.totalLength) * 100u) / avgSegmentLength) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
+			}
+
+#if DEBUGMETRIC
+			if (debug)
+				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) NormLength of vehicle {vehicleId}: {state.totalLength} -> {normLength} (avgSegmentLength={avgSegmentLength})");
+#endif
+
+			ret[state.currentLaneIndex][state.nextSegmentId] += normLength;
+			++numProcessed;
+
+#if DEBUGMETRIC
+			if (debug)
+				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: *added*!");
+#endif
+
+			return;
+		}
+
 		internal int GetRegisteredVehicleCount() {
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 
@@ -238,7 +232,7 @@ namespace TrafficManager.Traffic {
 			int ret = 0;
 			while (vehicleId != 0) {
 				++ret;
-				vehicleId = vehStateManager._GetVehicleState(vehicleId).NextVehicleIdOnSegment;
+				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
 			}
 			return ret;
 		}
@@ -250,7 +244,7 @@ namespace TrafficManager.Traffic {
 		private void UnregisterAllVehicles() {
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
 			while (FirstRegisteredVehicleId != 0) {
-				vehStateManager._GetVehicleState(FirstRegisteredVehicleId).Unlink();
+				vehStateManager.VehicleStates[FirstRegisteredVehicleId].Unlink();
 			}
 		}
 

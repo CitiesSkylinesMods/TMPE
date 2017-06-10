@@ -15,6 +15,7 @@ namespace TrafficManager.Manager {
 	public class VehicleStateManager : AbstractCustomManager {
 		public static readonly VehicleStateManager Instance = new VehicleStateManager();
 
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
 		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
@@ -33,7 +34,7 @@ namespace TrafficManager.Manager {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Vehicle states:");
 			for (int i = 0; i < VehicleStates.Length; ++i) {
-				if (VehicleStates[i] == null || !VehicleStates[i].Valid) {
+				if (!VehicleStates[i].spawned) {
 					continue;
 				}
 				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
@@ -43,7 +44,7 @@ namespace TrafficManager.Manager {
 		/// <summary>
 		/// Known vehicles and their current known positions. Index: vehicle id
 		/// </summary>
-		private VehicleState[] VehicleStates = null;
+		internal VehicleState[] VehicleStates = null;
 
 		private VehicleStateManager() {
 			VehicleStates = new VehicleState[VehicleManager.MAX_VEHICLE_COUNT];
@@ -74,13 +75,13 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <returns>the vehicle state if the state is valid, null otherwise</returns>
-		public VehicleState GetVehicleState(ushort vehicleId) {
+		/*public VehicleState GetVehicleState(ushort vehicleId) {
 			VehicleState ret = VehicleStates[vehicleId];
 			if (ret.Valid) {
 				return ret;
 			}
 			return null;
-		}
+		}*/
 
 		/// <summary>
 		/// Determines the state of the given vehicle.
@@ -88,12 +89,12 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="vehicleId"></param>
 		/// <returns>the vehicle state</returns>
-		internal VehicleState _GetVehicleState(ushort vehicleId) {
+		/*internal VehicleState _GetVehicleState(ushort vehicleId) {
 			VehicleState ret = VehicleStates[vehicleId];
 			return ret;
-		}
+		}*/
 
-		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
+		/*internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData) {
 			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
 			if (reversed) {
 				ushort frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
@@ -101,59 +102,108 @@ namespace TrafficManager.Manager {
 			} else {
 				VehicleStates[vehicleId].UpdatePosition(ref vehicleData);
 			}
-		}
+		}*/
 
-		internal void UpdateTrailerPos(ushort trailerId, ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
+		/*internal void UpdateTrailerPos(ushort trailerId, ref Vehicle trailerData, ushort vehicleId, ref Vehicle vehicleData) {
 			VehicleStates[trailerId].UpdatePosition(ref trailerData, vehicleId, ref vehicleData);
-		}
+		}*/
 
-		internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-			if (reversed) {
-				ushort frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
-				VehicleStates[frontVehicleId].UpdatePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[frontVehicleId], ref curPos, ref nextPos);
-			} else {
-				VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref curPos, ref nextPos);
-			}
-		}
+		/*internal void UpdateVehiclePos(ushort vehicleId, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+			ushort frontVehicleId = GetFrontVehicleId(vehicleId, ref vehicleData);
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleStateManager.UpdateVehiclePos({vehicleId}): calling UpdatePosition for front vehicle {frontVehicleId}");
+#endif
+			VehicleStates[frontVehicleId].UpdatePosition(ref vehicleData, ref curPos, ref nextPos);
+		}*/
 
-		internal void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, bool logSpeed) {
-			VehicleState state = GetVehicleState(vehicleId);
-			if (state == null)
-				return;
-
-			ushort length = (ushort)state.TotalLength;
+		internal void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, ushort segmentId, byte laneIndex, bool logSpeed) {
+			ushort length = (ushort)VehicleStates[vehicleId].totalLength;
 			if (length == 0)
 				return;
 			ushort? speed = logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null;
 
-			state.ProcessCurrentPathPosition(ref vehicleData, delegate (ref PathUnit.Position pos) {
-				TrafficMeasurementManager.Instance.AddTraffic(pos.m_segment, pos.m_lane, length, speed);
-			});
+			TrafficMeasurementManager.Instance.AddTraffic(segmentId, laneIndex, length, speed);
 		}
 
-		internal void OnReleaseVehicle(ushort vehicleId) {
+		internal void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-			//Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): unhandled vehicle! type: {vehicleData.Info.m_vehicleType}");
 #endif
-			VehicleState state = _GetVehicleState(vehicleId);
-			state.VehicleType = ExtVehicleType.None;
-			ExtCitizenInstance driverExtInstance = state.GetDriverExtInstance();
-			if (driverExtInstance != null) {
-				//driverExtInstance.FailedParkingAttempts = 0;
-				driverExtInstance.Reset();
+				return;
 			}
-			//state.DriverInstanceId = 0;
-#if USEPATHWAITCOUNTER
-			state.PathWaitCounter = 0;
+
+			ushort connectedVehicleId = vehicleId;
+			while (connectedVehicleId != 0) {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): calling OnDespawn for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (leading)");
 #endif
-			state.Valid = false;
-			//VehicleStates[vehicleId].Reset();
+				VehicleStates[connectedVehicleId].OnDespawn();
+
+				connectedVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId].m_leadingVehicle;
+			}
+
+			connectedVehicleId = vehicleId;
+			while (true) {
+				connectedVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId].m_trailingVehicle;
+
+				if (connectedVehicleId == 0) {
+					break;
+				}
+
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): calling OnDespawn for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (trailing)");
+#endif
+				VehicleStates[connectedVehicleId].OnDespawn();
+			}
 		}
 
-		internal void OnVehicleSpawned(ushort vehicleId, ref Vehicle vehicleData) {
-			//Log._Debug($"VehicleStateManager: OnPathFindReady({vehicleId})");
-			VehicleStates[vehicleId].OnVehicleSpawned(ref vehicleData);
+		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != (Vehicle.Flags.Created) ||
+				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnCreateVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}");
+#endif
+				return;
+			}
+
+			ushort frontVehicleId = GetFrontVehicleId(vehicleId, ref vehicleData);
+			if (frontVehicleId != vehicleId) {
+				return;
+			} else {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnCreateVehicle({vehicleId}): calling OnCreate for vehicle {vehicleId}");
+#endif
+				VehicleStates[vehicleId].OnCreate(ref vehicleData);
+			}
+		}
+
+		internal void OnSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) != (Vehicle.Flags.Created | Vehicle.Flags.Spawned) ||
+				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None || vehicleData.m_path <= 0) {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnSpawnVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}, path: {vehicleData.m_path}");
+#endif
+				return;
+			}
+
+			ushort frontVehicleId = GetFrontVehicleId(vehicleId, ref vehicleData);
+			if (frontVehicleId != vehicleId) {
+				return;
+			} else {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleStateManager.OnSpawnVehicle({vehicleId}): calling OnSpawn for this vehicle");
+#endif
+				VehicleStates[vehicleId].OnSpawn(ref vehicleData);
+			}
 		}
 
 		internal void InitAllVehicles() {
@@ -161,106 +211,43 @@ namespace TrafficManager.Manager {
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-				for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
-					if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0)
-						continue;
+				for (ushort vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+					Services.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
+						if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
+							return true;
+						}
 
-					try {
-						DetermineVehicleType((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-						OnVehicleSpawned((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-					} catch (Exception e) {
-						Log.Error("VehicleStateManager: InitAllVehicles Error: " + e.ToString());
-					}
+						OnCreateVehicle(vehicleId, ref vehicle);
+
+						if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
+							return true;
+						}
+
+						OnSpawnVehicle(vehicleId, ref vehicle);
+
+						return true;
+					});
 				}
 			}
 		}
 
-		internal ExtVehicleType? DetermineVehicleType(ushort vehicleId, ref Vehicle vehicleData) {
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
-				VehicleStates[vehicleId].VehicleType = ExtVehicleType.Emergency;
-				return ExtVehicleType.Emergency;
-			}
-
-			VehicleAI ai = vehicleData.Info.m_vehicleAI;
-			ExtVehicleType? ret = DetermineVehicleTypeFromAIType(ai, false);
-
-			if (ret != null) {
-				VehicleStates[vehicleId].VehicleType = (ExtVehicleType)ret;
-				if ((ExtVehicleType)ret == ExtVehicleType.CargoTruck) {
-					VehicleStates[vehicleId].HeavyVehicle = ((CargoTruckAI)ai).m_isHeavyVehicle;
-				}
+		public ushort GetFrontVehicleId(ushort vehicleId, ref Vehicle vehicleData) {
+			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+			ushort frontVehicleId = vehicleId;
+			if (reversed) {
+				frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
 			} else {
-				VehicleStates[vehicleId].VehicleType = ExtVehicleType.None;
-				VehicleStates[vehicleId].HeavyVehicle = false;
-#if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[4])
-					Log._Debug($"Could not determine vehicle type of {vehicleId}. Info={vehicleData.Info?.name}");
-#endif
+				frontVehicleId = vehicleData.GetFirstVehicle(vehicleId);
 			}
-			return ret;
-		}
 
-		private ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
-			if (emergencyOnDuty)
-				return ExtVehicleType.Emergency;
-
-			switch (ai.m_info.m_vehicleType) {
-				case VehicleInfo.VehicleType.Bicycle:
-					return ExtVehicleType.Bicycle;
-				case VehicleInfo.VehicleType.Car:
-					if (ai is PassengerCarAI)
-						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI) {
-						return ExtVehicleType.Service;
-					}
-					if (ai is CarTrailerAI)
-						return ExtVehicleType.None;
-					if (ai is BusAI)
-						return ExtVehicleType.Bus;
-					if (ai is TaxiAI)
-						return ExtVehicleType.Taxi;
-					if (ai is CargoTruckAI)
-						return ExtVehicleType.CargoTruck;
-					break;
-				case VehicleInfo.VehicleType.Metro:
-				case VehicleInfo.VehicleType.Train:
-				case VehicleInfo.VehicleType.Monorail:
-					if (ai is CargoTrainAI)
-						return ExtVehicleType.CargoTrain;
-					return ExtVehicleType.PassengerTrain;
-				case VehicleInfo.VehicleType.Tram:
-					return ExtVehicleType.Tram;
-				case VehicleInfo.VehicleType.Ship:
-					if (ai is PassengerShipAI)
-						return ExtVehicleType.PassengerShip;
-					//if (ai is CargoShipAI)
-					return ExtVehicleType.CargoShip;
-				//break;
-				case VehicleInfo.VehicleType.Plane:
-					//if (ai is PassengerPlaneAI)
-					return ExtVehicleType.PassengerPlane;
-				//break;
-				case VehicleInfo.VehicleType.Helicopter:
-					//if (ai is PassengerPlaneAI)
-					return ExtVehicleType.Helicopter;
-				//break;
-				case VehicleInfo.VehicleType.Ferry:
-					return ExtVehicleType.Ferry;
-				case VehicleInfo.VehicleType.Blimp:
-					return ExtVehicleType.Blimp;
-				case VehicleInfo.VehicleType.CableCar:
-					return ExtVehicleType.CableCar;
-			}
-#if DEBUGVSTATE
-			Log._Debug($"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
-#endif
-			return null;
+			return frontVehicleId;
 		}
 
 		public override void OnLevelUnloading() {
 			base.OnLevelUnloading();
-			for (int i = 0; i < VehicleStates.Length; ++i)
-				VehicleStates[i].Valid = false;
+			for (int i = 0; i < VehicleStates.Length; ++i) {
+				VehicleStates[i].OnDespawn();
+			}
 		}
 
 		public override void OnAfterLoadData() {

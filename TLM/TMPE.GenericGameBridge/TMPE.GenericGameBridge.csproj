@@ -49,6 +49,7 @@
     <Compile Include="Factory\IServiceFactory.cs" />
     <Compile Include="Service\ICitizenService.cs" />
     <Compile Include="Service\IBuildingService.cs" />
+    <Compile Include="Service\IPathService.cs" />
     <Compile Include="Service\IVehicleService.cs" />
     <Compile Include="Service\INetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

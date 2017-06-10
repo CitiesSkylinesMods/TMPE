@@ -838,41 +838,14 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				VehicleState vState = vehStateManager._GetVehicleState((ushort)i);
-				ExtCitizenInstance driverInst = vState.GetDriverExtInstance();
-				/*PathUnit.Position curPos, nextPos;
-				bool hasCurPos = vState?.GetCurrentPathPosition(ref vehicle, out curPos);
-				bool hasNextPos = vState?.GetNextPathPosition(ref vehicle, out nextPos);*/
-				bool? startNode = vState?.CurrentSegmentEnd?.StartNode;
-				ushort? segmentId = vState?.CurrentSegmentEnd?.SegmentId;
-				ushort? transitNodeId = vState?.CurrentSegmentEnd?.NodeId;
-				/*float distanceToTransitNode = Single.NaN;
-				float timeToTransitNode = Single.NaN;*/
+				VehicleState vState = vehStateManager.VehicleStates[(ushort)i];
+				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i]));
+				bool startNode = vState.currentStartNode;
+				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
-				Vector3? targetPos = null;
-				if (transitNodeId != null)
-					targetPos = netManager.m_nodes.m_buffer[(ushort)transitNodeId].m_position;
-
-				/*if (transitNodeId != null && segmentId != null && startNode != null && curPos != null) {
-					bool outgoing = false;
-					connManager.GetLaneEndPoint((ushort)segmentId, (bool)startNode, ((PathUnit.Position)curPos).m_lane, null, null, out outgoing, out targetPos);
-				}*/
-
-				float distanceToTransitNode = Single.NaN;
-				if (targetPos != null) {
-					distanceToTransitNode = ((Vector3)targetPos - vehPos).magnitude;
-					/*if (vehSpeed > 0)
-						timeToTransitNode = distanceToTransitNode / vehSpeed;
-					else
-						timeToTransitNode = Single.PositiveInfinity;*/
-				}
-				String labelStr = "V #" + i + " is a " + (vState.Valid ? "valid" : "invalid") + " " + vState.VehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + " @ " + vState.CurrentSegmentEnd?.SegmentId + ")\nd: " + driverInst?.InstanceId + " m: " + driverInst?.PathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.ParkingSpaceLocation + " lid: " + driverInst?.ParkingSpaceLocationId;
-#if USEPATHWAITCOUNTER
-				labelStr += ", pwc: " + vState.PathWaitCounter + ", seg. " + vState.CurrentSegmentEnd?.SegmentId;
-#endif
-				//String labelStr = "Veh. " + i + " @ " + String.Format("{0:0.##}", vehSpeed) + "/" + (vState != null ? vState.CurrentMaxSpeed.ToString() : "-") + " (" + (vState != null ? vState.VehicleType.ToString() : "-") + ", valid? " + (vState != null ? vState.Valid.ToString() : "-") + ")" + ", len: " + (vState != null ? vState.TotalLength.ToString() : "-") + ", state: " + (vState != null ? vState.JunctionTransitState.ToString() : "-");
-				//labelStr += "\npos: " + curPos?.m_segment + "(" + curPos?.m_lane + ")->" + nextPos?.m_segment + "(" + nextPos?.m_lane + ")" /* + ", dist: " + distanceToTransitNode + ", time: " + timeToTransitNode*/ + ", last update: " + vState?.LastPositionUpdate;
+				String labelStr = "V #" + i + " is a " + (vState.spawned ? "spawned" : "DESPAWNED") + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
+					"d: " + driverInst?.InstanceId + " m: " + driverInst?.PathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.ParkingSpaceLocation + " lid: " + driverInst?.ParkingSpaceLocationId;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

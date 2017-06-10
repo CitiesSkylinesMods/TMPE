@@ -68,26 +68,6 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 
-			/// NON-STOCK CODE START ///
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				// update vehicle position for timed traffic lights and priority signs
-				try {
-					VehicleStateManager.Instance.UpdateVehiclePos(vehicleId, ref vehicleData);
-				} catch (Exception e) {
-					Log.Error("CarAI CustomSimulationStep Error: " + e.ToString());
-				}
-			}
-
-			if (!Options.isStockLaneChangerUsed()) {
-				// Advanced AI traffic measurement
-				try {
-					VehicleStateManager.Instance.LogTraffic(vehicleId, ref vehicleData, true);
-				} catch (Exception e) {
-					Log.Error("CarAI CustomSimulationStep Error: " + e.ToString());
-				}
-			}
-			/// NON-STOCK CODE END ///
-
 			Vector3 lastFramePosition = vehicleData.GetLastFramePosition();
 			int lodPhysics;
 			if (Vector3.SqrMagnitude(physicsLodRefPos - lastFramePosition) >= 1210000f) {
@@ -123,26 +103,24 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public override bool TrySpawn(ushort vehicleID, ref Vehicle vehicleData) {
+		public override bool TrySpawn(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != (Vehicle.Flags)0) {
-				// NON-STOCK CODE START
-				if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-					VehicleStateManager.Instance.OnVehicleSpawned(vehicleID, ref vehicleData);
-				}
-				// NON-STOCK CODE END
-
 				return true;
 			}
 			if (CustomCarAI.CheckOverlap(vehicleData.m_segment, 0, 1000f)) {
 				vehicleData.m_flags |= Vehicle.Flags.WaitingSpace;
 				return false;
 			}
-			vehicleData.Spawn(vehicleID);
+			vehicleData.Spawn(vehicleId);
 			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
 
 			// NON-STOCK CODE START
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleStateManager.Instance.OnVehicleSpawned(vehicleID, ref vehicleData);
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"CustomCarAI.TrySpawn({vehicleId}): calling OnSpawnVehicle in TrySpawn");
+#endif
+				VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
 			}
 			// NON-STOCK CODE END
 
@@ -152,36 +130,7 @@ namespace TrafficManager.Custom.AI {
 		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition,
 				PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID,
 				byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
-			// NON-STOCK CODE START
-			if ((Options.prioritySignsEnabled || Options.timedLightsEnabled) && Options.simAccuracy <= 1) {
-				// update vehicle position for timed traffic lights and priority signs
-				try {
-					VehicleStateManager.Instance.UpdateVehiclePos(vehicleId, ref vehicleData, ref prevPos, ref position);
-				} catch (Exception e) {
-					Log.Error("CarAI CustomCalculateSegmentPosition Error: " + e.ToString());
-				}
-			}
-			// NON-STOCK CODE END
-
 			var netManager = Singleton<NetManager>.instance;
-			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
-
-			float braking = this.m_info.m_braking;
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
-				braking *= 2f;
-			}
-
-			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
-			Vector3 lastFrameVehiclePos = lastFrameData.m_position;
-
-			var camPos = Camera.main.transform.position;
-
-			// I think this is supposed to be the lane position?
-			// [VN, 12/23/2015] It's the 3D car position on the Bezier curve of the lane.
-			// This crazy 0.003921569f equals to 1f/255 and prevOffset is the byte value (0..255) of the car position.
-			var vehiclePosOnBezier = netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].CalculatePosition(prevOffset * 0.003921569f);
-			//ushort currentSegmentId = netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].m_segment;
-
 			ushort targetNodeId;
 			ushort nextTargetNodeId;
 			if (offset < position.m_offset) {
@@ -193,16 +142,59 @@ namespace TrafficManager.Custom.AI {
 			}
 			var prevTargetNodeId = prevOffset == 0 ? netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode : netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
 
+			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
+			Vector3 lastFrameVehiclePos = lastFrameData.m_position;
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
+
+			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
+
+			float braking = this.m_info.m_braking;
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
+				braking *= 2f;
+			}
+
+			// car position on the Bezier curve of the lane
+			var vehiclePosOnBezier = netManager.m_lanes.m_buffer[prevLaneID].CalculatePosition(prevOffset * 0.003921569f);
+			//ushort currentSegmentId = netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].m_segment;
+
 			// this seems to be like the required braking force in order to stop the vehicle within its half length.
 			var crazyValue = 0.5f * sqrVelocity / braking + m_info.m_generatedInfo.m_size.z * 0.5f;
+			bool withinBrakingDistance = Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f;
+
+			// NON-STOCK CODE START
+			ushort frontVehicleId = VehicleStateManager.Instance.GetFrontVehicleId(vehicleId, ref vehicleData);
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}): processing front vehicle {frontVehicleId} @ PREV seg. {prevPos.m_segment}, lane {prevPos.m_lane}, off {prevPos.m_offset} -> CURRENT seg. {position.m_segment}, lane {position.m_lane}, off {position.m_offset} -> NEXT seg. {nextPosition.m_segment}, lane {nextPosition.m_lane}, off {nextPosition.m_offset} || prevOffset: {prevOffset}, offset: {offset} || prevTargetNodeId: {prevTargetNodeId}, targetNodeId: {targetNodeId}, nextTargetNodeId: {nextTargetNodeId} || pathPositionIndex: {vehicleData.m_pathPositionIndex}");
+#endif
+			if (vehicleId == frontVehicleId) {
+				if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
+					// update vehicle position for timed traffic lights and priority signs
+					int pathPosIndex = vehicleData.m_pathPositionIndex >> 1;
+					PathUnit.Position curPathPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(pathPosIndex);
+					PathUnit.Position nextPathPos;
+					Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(pathPosIndex, out nextPathPos);
+					VehicleStateManager.Instance.VehicleStates[frontVehicleId].UpdatePosition(ref vehicleData, sqrVelocity, ref curPathPos, ref nextPathPos);
+				}
+			} else {
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}): processing non-front vehicle! frontVehicleId={frontVehicleId}");
+#endif
+			}
+			// NON-STOCK CODE END
 
 			bool isRecklessDriver = VehicleStateManager.Instance.IsRecklessDriver(vehicleId, ref vehicleData); // NON-STOCK CODE
-			if (targetNodeId == prevTargetNodeId) {
-				if (Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f) {
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
-						return;
+			if (targetNodeId == prevTargetNodeId && withinBrakingDistance) {
+				// NON-STOCK CODE START
+				if (vehicleId == frontVehicleId && !Options.isStockLaneChangerUsed()) {
+					// Advanced AI traffic measurement
+					VehicleStateManager.Instance.LogTraffic(frontVehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
 				}
+				// NON-STOCK CODE END
+
+				if (!VehicleBehaviorManager.Instance.MayChangeSegment(frontVehicleId, ref VehicleStateManager.Instance.VehicleStates[frontVehicleId], ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
+					return;
 			}
 
 			var info2 = netManager.m_segments.m_buffer[position.m_segment].Info;
@@ -253,7 +245,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				// NON-STOCK CODE START
-				ExtVehicleType vehicleType = VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType;
+				ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[VehicleStateManager.Instance.GetFrontVehicleId(vehicleID, ref vehicleData)].vehicleType;
 				if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
 					Log.Warning($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");

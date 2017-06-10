@@ -156,6 +156,7 @@ namespace TrafficManager.Geometry {
 			return new GenericUnsubscriber<SegmentGeometry>(observers, observer, Lock);
 		}
 
+		[Obsolete]
 		public static bool IsValid(ushort segmentId) {
 			return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
 		}
@@ -761,14 +762,7 @@ namespace TrafficManager.Geometry {
 				return false;
 
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-
-			bool contains = false;
-			foreach (ushort segId in endGeometry.RightSegments)
-				if (segId == toSegmentId) {
-					contains = true;
-					break;
-				}
-			return contains;
+			return endGeometry.IsRightSegment(toSegmentId);
 		}
 
 		/// <summary>
@@ -964,17 +958,9 @@ namespace TrafficManager.Geometry {
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns>relative direction of the other segment relatively to the managed segment at the given node</returns>
 		public ArrowDirection GetDirection(ushort otherSegmentId, bool startNode) {
-			if (!IsValid(otherSegmentId))
-				return ArrowDirection.None;
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 
-			if (otherSegmentId == SegmentId)
-				return ArrowDirection.Turn;
-			else if (IsRightSegment(otherSegmentId, startNode))
-				return ArrowDirection.Right;
-			else if (IsLeftSegment(otherSegmentId, startNode))
-				return ArrowDirection.Left;
-			else
-				return ArrowDirection.Forward;
+			return endGeometry.GetDirection(otherSegmentId);
 		}
 
 		/// <summary>

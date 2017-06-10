@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
+using TrafficManager.State;
 using TrafficManager.Traffic;
 
 namespace TrafficManager.Manager {
@@ -77,6 +78,10 @@ namespace TrafficManager.Manager {
 		}
 
 		public void SegmentSimulationStep(ushort segmentId) {
+			if (!Options.prioritySignsEnabled && !Options.timedLightsEnabled) {
+				return;
+			}
+
 			GetSegmentEnd(segmentId, true)?.SimulationStep();
 			GetSegmentEnd(segmentId, false)?.SimulationStep();
 		}

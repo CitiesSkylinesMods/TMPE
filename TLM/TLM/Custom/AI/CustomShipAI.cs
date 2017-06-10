@@ -17,7 +17,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			/// NON-STOCK CODE START ///
-			ExtVehicleType vehicleType = VehicleStateManager.Instance._GetVehicleState(vehicleID).VehicleType;
+			ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[VehicleStateManager.Instance.GetFrontVehicleId(vehicleID, ref vehicleData)].vehicleType;
 			if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
 				Log.Warning($"CustomShipAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
