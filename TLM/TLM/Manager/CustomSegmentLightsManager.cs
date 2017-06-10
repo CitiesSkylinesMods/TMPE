@@ -50,9 +50,8 @@ namespace TrafficManager.Manager {
 			}
 
 			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
-
-			if (! endGeometry.IsValid()) {
-				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node. startNode={startNode}");
+			if (endGeometry == null) {
+				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
 				return null;
 			}
 
@@ -84,6 +83,19 @@ namespace TrafficManager.Manager {
 #if DEBUG
 			Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
+
+			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
+			if (segGeometry == null) {
+				Log.Error($"CustomTrafficLightsManager.AddSegmentLights: Segment {segmentId} is invalid.");
+				return null;
+			}
+
+			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
+			if (endGeometry == null) {
+				Log.Error($"CustomTrafficLightsManager.AddSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
+				return null;
+			}
+
 			CustomSegment customSegment = CustomSegments[segmentId];
 			if (customSegment == null) {
 				customSegment = new CustomSegment();
@@ -137,6 +149,7 @@ namespace TrafficManager.Manager {
 			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
 			if (!nodeGeo.IsValid())
 				return;
+
 			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
 				if (endGeo == null)
 					continue;
@@ -151,8 +164,9 @@ namespace TrafficManager.Manager {
 		/// <param name="nodeId"></param>
 		public void RemoveNodeLights(ushort nodeId) {
 			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			if (!nodeGeo.IsValid())
-				return;
+			/*if (!nodeGeo.IsValid())
+				return;*/
+
 			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
 				if (endGeo == null)
 					continue;
@@ -250,6 +264,10 @@ namespace TrafficManager.Manager {
 
 		internal void SetLightMode(ushort segmentId, bool startNode, ExtVehicleType vehicleType, CustomSegmentLight.Mode mode) {
 			CustomSegmentLights liveLights = GetSegmentLights(segmentId, startNode);
+			if (liveLights == null) {
+				Log.Warning($"CustomSegmentLightsManager.SetLightMode({segmentId}, {startNode}, {vehicleType}, {mode}): Could not retrieve segment lights.");
+				return;
+			}
 			CustomSegmentLight liveLight = liveLights.GetCustomLight(vehicleType);
 			if (liveLight == null) {
 				Log.Error($"CustomSegmentLightsManager.SetLightMode: Cannot change light mode on seg. {segmentId} @ {startNode} for vehicle type {vehicleType} to {mode}: Vehicle light not found");
@@ -258,8 +276,13 @@ namespace TrafficManager.Manager {
 			liveLight.CurrentMode = mode;
 		}
 
-		internal void ApplyLightModes(ushort segmentId, bool startNode, CustomSegmentLights otherLights) {
+		internal bool ApplyLightModes(ushort segmentId, bool startNode, CustomSegmentLights otherLights) {
 			CustomSegmentLights sourceLights = GetSegmentLights(segmentId, startNode);
+			if (sourceLights == null) {
+				Log.Warning($"CustomSegmentLightsManager.ApplyLightModes({segmentId}, {startNode}, {otherLights}): Could not retrieve segment lights.");
+				return false;
+			}
+
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in sourceLights.CustomLights) {
 				ExtVehicleType vehicleType = e.Key;
 				CustomSegmentLight targetLight = e.Value;
@@ -269,6 +292,7 @@ namespace TrafficManager.Manager {
 					targetLight.CurrentMode = sourceLight.CurrentMode;
 				}
 			}
+			return true;
 		}
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {

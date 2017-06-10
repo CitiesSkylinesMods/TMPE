@@ -281,7 +281,7 @@ namespace TrafficManager.Manager {
 			bool ret = Flags.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
 
 #if DEBUGCONN
-			Log._Debug($"LaneConnectionManager.AddLaneConnection({laneId1}, {laneId2}, {startNode1}): ret={ret}");
+			Log._Debug($"LaneConnectionManager.AddLaneConnection({sourceLaneId}, {targetLaneId}, {sourceStartNode}): ret={ret}");
 #endif
 			if (ret) {
 				ushort commonNodeId;

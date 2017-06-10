@@ -73,6 +73,10 @@
     <Compile Include="Util\LogicUtilUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
+      <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
+      <Name>CSUtil.Commons</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TLM\TLM.csproj">
       <Project>{7422AE58-8B0A-401C-9404-F4A438EFFE10}</Project>
       <Name>TLM</Name>

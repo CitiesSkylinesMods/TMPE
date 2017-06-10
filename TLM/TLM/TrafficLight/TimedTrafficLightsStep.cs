@@ -94,8 +94,10 @@ namespace TrafficManager.TrafficLight {
 			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
 				if (end == null)
 					continue;
-				
-				AddSegment(end.SegmentId, end.StartNode, makeRed);
+
+				if (! AddSegment(end.SegmentId, end.StartNode, makeRed)) {
+					Log.Warning($"TimedTrafficLightsStep.ctor: Failed to add segment {end.SegmentId} @ start {end.StartNode} to node {timedNode.NodeId}");
+				}
 			}
 		}
 
@@ -306,6 +308,7 @@ namespace TrafficManager.TrafficLight {
 
 					var liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, curStepSegmentLights.StartNode, false);
 					if (liveSegmentLights == null) {
+						Log.Warning($"TimedTrafficLightsStep.UpdateLights() @ node {timedNode.NodeId}: Could not retrieve live segment lights for segment {segmentId} @ start {curStepSegmentLights.StartNode}.");
 						continue;
 					}
 
@@ -387,21 +390,6 @@ namespace TrafficManager.TrafficLight {
 			}
 		}
 
-		/// <summary>
-		/// Adds a new segment to this step. It is cloned from the live custom traffic light.
-		/// </summary>
-		/// <param name="segmentId"></param>
-		internal void AddSegment(ushort segmentId, bool startNode, bool makeRed) {
-			CustomSegmentLights clonedLights = CustomSegmentLightsManager.Instance.GetOrLiveSegmentLights(segmentId, startNode).Clone(this);
-
-			CustomSegmentLights.Add(segmentId, clonedLights);
-			if (makeRed)
-				CustomSegmentLights[segmentId].MakeRed();
-			else
-				CustomSegmentLights[segmentId].MakeRedOrGreen();
-			CustomSegmentLightsManager.Instance.ApplyLightModes(segmentId, startNode, clonedLights);
-		}
-
 		private RoadBaseAI.TrafficLightState calcLightState(RoadBaseAI.TrafficLightState previousState, RoadBaseAI.TrafficLightState currentState, RoadBaseAI.TrafficLightState nextState, bool atStartTransition, bool atEndTransition) {
 			if (atStartTransition && currentState == RoadBaseAI.TrafficLightState.Green && previousState == RoadBaseAI.TrafficLightState.Red)
 				return RoadBaseAI.TrafficLightState.RedToGreen;
@@ -424,8 +412,10 @@ namespace TrafficManager.TrafficLight {
 
 				//if (segment == 0) continue;
 				var liveSegLights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, segLights.StartNode, false);
-				if (liveSegLights == null)
+				if (liveSegLights == null) {
+					Log.Warning($"TimedTrafficLightsStep.UpdateLights() @ node {timedNode.NodeId}: Could not retrieve live segment lights for segment {segmentId} @ start {segLights.StartNode}.");
 					continue;
+				}
 
 				segLights.SetLights(liveSegLights);
 				Log._Debug($"TimedTrafficLightsStep.UpdateLights: Segment {segmentId} AutoPedState={segLights.AutoPedestrianLightState} live={liveSegLights.AutoPedestrianLightState}");
@@ -811,6 +801,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public CustomSegmentLights RemoveSegmentLights(ushort segmentId) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.RemoveSegmentLights({segmentId}) called.");
+#endif
+
 			CustomSegmentLights ret = null;
 			if (CustomSegmentLights.TryGetValue(segmentId, out ret)) {
 				CustomSegmentLights.Remove(segmentId);
@@ -819,12 +814,22 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public CustomSegmentLights GetSegmentLights(ushort segmentId) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.GetSegmentLights({segmentId}) called.");
+#endif
+
 			return GetSegmentLights(timedNode.NodeId, segmentId);
 		}
 
 		public CustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.GetSegmentLights({nodeId}, {segmentId}) called.");
+#endif
+
 			if (nodeId != timedNode.NodeId) {
-				Log.Warning($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
+				Log.Warning($"TimedTrafficLightsStep.GetSegmentLights({nodeId}, {segmentId}): TTL @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
 				return null;
 			}
 
@@ -832,26 +837,31 @@ namespace TrafficManager.TrafficLight {
 			if (CustomSegmentLights.TryGetValue(segmentId, out customLights)) {
 				return customLights;
 			} else {
-				Log.Info($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not know segment {segmentId}");
+				Log.Info($"TimedTrafficLightsStep.GetSegmentLights({nodeId}, {segmentId}): TTL @ node {timedNode.NodeId} does not know segment {segmentId}");
 				return null;
 			}
 		}
 
 		public bool RelocateSegmentLights(ushort sourceSegmentId, ushort targetSegmentId) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}) called.");
+#endif
+
 			CustomSegmentLights sourceLights = null;
 			if (! CustomSegmentLights.TryGetValue(sourceSegmentId, out sourceLights)) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights: Timed traffic light does not know source segment {sourceSegmentId}. Cannot relocate to {targetSegmentId}.");
+				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Timed traffic light does not know source segment {sourceSegmentId}. Cannot relocate to {targetSegmentId}.");
 				return false;
 			}
 
 			SegmentGeometry segGeo = SegmentGeometry.Get(targetSegmentId);
 			if (segGeo == null) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights: No geometry information available for target segment {targetSegmentId}");
+				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): No geometry information available for target segment {targetSegmentId}");
 				return false;
 			}
 
 			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights: Target segment {targetSegmentId} is not connected to node {timedNode.NodeId}");
+				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Target segment {targetSegmentId} is not connected to node {timedNode.NodeId}");
 				return false;
 			}
 
@@ -860,13 +870,61 @@ namespace TrafficManager.TrafficLight {
 			sourceLights.Relocate(targetSegmentId, startNode, this);
 			CustomSegmentLights[targetSegmentId] = sourceLights;
 
-			Log._Debug($"TimedTrafficLightsStep.RelocateSegmentLights: Relocated lights: {sourceSegmentId} -> {targetSegmentId} @ node {timedNode.NodeId}");
+			Log._Debug($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Relocated lights: {sourceSegmentId} -> {targetSegmentId} @ node {timedNode.NodeId}");
 			return true;
 		}
 
+		/// <summary>
+		/// Adds a new segment to this step. It is cloned from the live custom traffic light.
+		/// </summary>
+		/// <param name="segmentId"></param>
+		internal bool AddSegment(ushort segmentId, bool startNode, bool makeRed) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}) called @ node {timedNode.NodeId}.");
+#endif
+
+			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+			if (segGeo == null) {
+				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): No geometry information available for segment {segmentId}");
+				return false;
+			}
+
+			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			if (endGeo == null) {
+				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): No end geometry information available for segment {segmentId} @ {startNode}");
+				return false;
+			}
+
+			if (endGeo.NodeId() != timedNode.NodeId) {
+				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Segment {segmentId} is not connected to node {timedNode.NodeId} @ start {startNode}");
+				return false;
+			}
+
+			CustomSegmentLights liveLights = CustomSegmentLightsManager.Instance.GetOrLiveSegmentLights(segmentId, startNode);
+			if (liveLights == null) {
+				Log.Warning($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Could not retrieve live segment lights for segment {segmentId} @ start {startNode}.");
+				return false;
+			}
+
+			CustomSegmentLights clonedLights = liveLights.Clone(this);
+
+			CustomSegmentLights.Add(segmentId, clonedLights);
+			if (makeRed)
+				CustomSegmentLights[segmentId].MakeRed();
+			else
+				CustomSegmentLights[segmentId].MakeRedOrGreen();
+			return CustomSegmentLightsManager.Instance.ApplyLightModes(segmentId, startNode, clonedLights);
+		}
+
 		public bool SetSegmentLights(ushort nodeId, ushort segmentId, CustomSegmentLights lights) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({nodeId}, {segmentId}, {lights}) called.");
+#endif
+
 			if (nodeId != timedNode.NodeId) {
-				Log.Warning($"TimedTrafficLightsStep @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
+				Log.Warning($"TimedTrafficLightsStep.SetSegmentLights({nodeId}, {segmentId}, {lights}): TTL @ node {timedNode.NodeId} does not handle custom traffic lights for node {nodeId}");
 				return false;
 			}
 
@@ -874,6 +932,11 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool SetSegmentLights(ushort segmentId, CustomSegmentLights lights) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({segmentId}, {lights}) called.");
+#endif
+
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
 			if (segGeo == null) {
 				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: No geometry information available for target segment {segmentId}");
@@ -881,7 +944,7 @@ namespace TrafficManager.TrafficLight {
 			}
 
 			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights: Segment {segmentId} is not connected to node {timedNode.NodeId}");
+				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not connected to node {timedNode.NodeId}");
 				return false;
 			}
 
@@ -892,6 +955,10 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public short ClockwiseIndexOfSegmentEnd(SegmentEndId endId) {
+#if DEBUGTTL
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == timedNode.NodeId)
+				Log._Debug($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd({endId}) called.");
+#endif
 			SegmentEndGeometry endGeo = SegmentEndGeometry.Get(endId);
 
 			if (endGeo == null) {

@@ -259,15 +259,13 @@ namespace TrafficManager.Geometry {
 		}
 
 		internal void NotifyObservers() {
-			try {
-				Monitor.Enter(Lock);
-				List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
-
-				foreach (IObserver<NodeGeometry> observer in myObservers) {
+			List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
+			foreach (IObserver<NodeGeometry> observer in myObservers) {
+				try {
 					observer.OnUpdate(this);
+				} catch (Exception e) {
+					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of node {NodeId}: {e}");
 				}
-			} finally {
-				Monitor.Exit(Lock);
 			}
 		}
 
