@@ -499,7 +499,7 @@ namespace TrafficManager.Manager {
 
 				if (!incomingStateChangedRecently &&
 					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked ||
-					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop && vehicleId < incomingVehicleId))
+					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop/* && vehicleId < incomingVehicleId*/))
 				) {
 #if DEBUG
 					if (debug)
@@ -759,7 +759,7 @@ namespace TrafficManager.Manager {
 									break;
 								case ArrowDirection.Turn: // (should not happen)
 								default: // (should not happen)
-									wouldCollide = vehicleId > incomingVehicleId;
+									wouldCollide = false;
 #if DEBUG
 									if (debug) {
 										Log.Warning($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir} and incoming is coming from {incomingFromDir} (SHOULD NOT HAPPEN). would collide? {wouldCollide}");
@@ -803,7 +803,7 @@ namespace TrafficManager.Manager {
 								wouldCollide = incomingToRelDir != ArrowDirection.Right && incomingToRelDir != ArrowDirection.Turn;
 								break;
 							default: // (should not happen)
-								wouldCollide = vehicleId > incomingVehicleId;
+								wouldCollide = false;
 #if DEBUG
 								if (debug) {
 									Log.Warning($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir}, incoming is coming from {incomingFromDir} and going {incomingToRelDir}. SHOULD NOT HAPPEN. would collide? {wouldCollide}");
@@ -824,7 +824,7 @@ namespace TrafficManager.Manager {
 								wouldCollide = true; // TODO allow u-turns?
 								break;
 							default: // (should not happen)
-								wouldCollide = vehicleId > incomingVehicleId;
+								wouldCollide = false;
 #if DEBUG
 								if (debug) {
 									Log.Warning($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir}, incoming is coming from {incomingFromDir} and going {incomingToRelDir}. SHOULD NOT HAPPEN. would collide? {wouldCollide}");

@@ -268,20 +268,13 @@ namespace TrafficManager.Custom.AI {
 				}
 				if (targetNodeId == prevTargetNodeId) {
 					float oldMaxSpeed = maxSpeed;
-#if DEBUG
-					bool debug = targetNodeId == 30132;
-					if (debug)
-						Log._Debug($"Train {vehicleId} wants to change segment. seg. {prevPos.m_segment} -> node {targetNodeId} -> seg. {position.m_segment}");
-#else
-					bool debug = false;
-#endif
 
 					if (!Options.isStockLaneChangerUsed()) {
 						// Advanced AI traffic measurement
 						VehicleStateManager.Instance.LogTraffic(vehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
 					}
 
-					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed, debug);
+					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed);
 					if (!mayChange) {
 						return;
 					}

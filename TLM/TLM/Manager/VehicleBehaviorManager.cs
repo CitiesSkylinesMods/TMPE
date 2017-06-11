@@ -18,7 +18,6 @@ using static TrafficManager.Traffic.PrioritySegment;
 namespace TrafficManager.Manager {
 	public class VehicleBehaviorManager : AbstractCustomManager {
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
-		public const int MAX_PRIORITY_WAIT_TIME = 50;
 
 		public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
 
@@ -42,8 +41,8 @@ namespace TrafficManager.Manager {
 		/// <param name="laneID">current lane</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed, bool debug = false) {
-			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed, debug);
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
+			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
 		}
 
 		/// <summary>
@@ -64,8 +63,12 @@ namespace TrafficManager.Manager {
 		/// <param name="nextTargetNodeId">next target node</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed, bool debug = false) {
-			debug = false;
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.TTLDebugNodeId <= 0 || targetNodeId == GlobalConfig.Instance.TTLDebugNodeId);
+#else
+			bool debug = false;
+#endif
 			if (prevTargetNodeId != targetNodeId) {
 				// method should only be called if targetNodeId == prevTargetNode
 				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
@@ -279,8 +282,6 @@ namespace TrafficManager.Manager {
 						if (debug)
 							Log._Debug($"Vehicle {frontVehicleId}: global target position found. carState = {vehicleState.JunctionTransitState.ToString()}");
 #endif
-						var currentFrameIndex2 = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-						var frame = currentFrameIndex2 >> 4;
 
 						if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
 #if DEBUG
@@ -299,18 +300,18 @@ namespace TrafficManager.Manager {
 										Log._Debug($"Vehicle {frontVehicleId}: STOP sign. waittime={vehicleState.waitTime}, sqrSpeed={sqrSpeed}");
 #endif
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
+									if (vehicleState.waitTime < GlobalConfig.Instance.MaxPriorityWaitTime) {
 #if DEBUG
 										if (debug)
-											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP (wait)");
+											Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to STOP (wait) waitTime={vehicleState.waitTime}");
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
 										if (sqrSpeed <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 											vehicleState.waitTime++;
 
-											float minStopWaitTime = Singleton<SimulationManager>.instance.m_randomizer.UInt32(3);
-											if (vehicleState.waitTime >= minStopWaitTime) {
+											//float minStopWaitTime = Singleton<SimulationManager>.instance.m_randomizer.UInt32(3);
+											if (vehicleState.waitTime >= 2) {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
@@ -353,7 +354,7 @@ namespace TrafficManager.Manager {
 										Log._Debug($"Vehicle {frontVehicleId}: YIELD sign. waittime={vehicleState.waitTime}");
 #endif
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy >= 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
+									if (vehicleState.waitTime < GlobalConfig.Instance.MaxPriorityWaitTime) {
 										vehicleState.waitTime++;
 #if DEBUG
 										if (debug)
@@ -411,7 +412,7 @@ namespace TrafficManager.Manager {
 									if (Options.simAccuracy == 4)
 										return true;
 
-									if (Options.simAccuracy <= 2 || (Options.simAccuracy == 3 && vehicleState.waitTime < MAX_PRIORITY_WAIT_TIME)) {
+									if (vehicleState.waitTime < GlobalConfig.Instance.MaxPriorityWaitTime) {
 										vehicleState.waitTime++;
 #if DEBUG
 										if (debug)

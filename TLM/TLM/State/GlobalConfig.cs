@@ -287,7 +287,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// maximum junction approach time for priority signs
 		/// </summary>
-		public float MaxPriorityApproachTime = 10f;
+		public float MaxPriorityApproachTime = 15f;
+
+		/// <summary>
+		/// maximum waiting time at priority signs
+		/// </summary>
+		public uint MaxPriorityWaitTime = 100;
 
 		/// <summary>
 		/// Frame resolution for priority update timestamps
