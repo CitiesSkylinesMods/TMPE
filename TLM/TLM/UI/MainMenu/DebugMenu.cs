@@ -44,6 +44,7 @@ namespace TrafficManager.UI {
 		private static UIButton _goToCitizenInstanceButton = null;
 		private static UIButton _goToPosButton = null;
 		private static UIButton _printDebugInfoButton = null;
+		private static UIButton _reloadConfigButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _removeStuckEntitiesButton = null;
@@ -158,6 +159,9 @@ namespace TrafficManager.UI {
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
 			y += 40;
 			height += 40;
+			_reloadConfigButton = _createButton("Reload configuration", y, clickReloadConfig);
+			y += 40;
+			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
 			y += 40;
 			height += 40;
@@ -250,6 +254,10 @@ namespace TrafficManager.UI {
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
 			UtilityManager.Instance.RequestPrintDebugInfo();
+		}
+
+		private void clickReloadConfig(UIComponent component, UIMouseEventParameter eventParam) {
+			GlobalConfig.Reload();
 		}
 
 		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();

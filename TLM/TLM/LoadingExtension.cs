@@ -17,6 +17,7 @@ using TrafficManager.Util;
 using TrafficManager.Custom.Manager;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Custom.Data;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {
@@ -1781,6 +1782,22 @@ namespace TrafficManager {
 							typeof(CustomNetManager).GetMethod("CustomUpdateSegment")));
 				} catch (Exception) {
 					Log.Error("Could not redirect NetManager::UpdateSegment");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection Vehicle::Spawn calls");
+				try {
+					Detours.Add(new Detour(typeof(Vehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Instance), typeof(CustomVehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Static)));
+				} catch (Exception e) {
+					Log.Error("Could not redirect Vehicle::Spawn");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection Vehicle::Unspawn calls");
+				try {
+					Detours.Add(new Detour(typeof(Vehicle).GetMethod("Unspawn", BindingFlags.Public | BindingFlags.Instance), typeof(CustomVehicle).GetMethod("Unspawn", BindingFlags.Public | BindingFlags.Static)));
+				} catch (Exception e) {
+					Log.Error("Could not redirect Vehicle::Unspawn");
 					detourFailed = true;
 				}
 

@@ -13,36 +13,9 @@ namespace TrafficManager.Custom.Manager {
 #if DEBUG
 			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
-			VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
+			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 		}
-
-		public void CustomReleaseFromGrid(ushort vehicleId, ref Vehicle vehicleData, bool large) {
-			Vector3 lastPos = vehicleData.GetLastFramePosition();
-			if (large) {
-				int gridX = Mathf.Clamp((int)(lastPos.x / 320f + 27f), 0, 53);
-				int gridZ = Mathf.Clamp((int)(lastPos.z / 320f + 27f), 0, 53);
-				this.RemoveFromGrid(vehicleId, ref vehicleData, large, gridX, gridZ);
-			} else {
-				int gridX2 = Mathf.Clamp((int)(lastPos.x / 32f + 270f), 0, 539);
-				int gridZ2 = Mathf.Clamp((int)(lastPos.z / 32f + 270f), 0, 539);
-				this.RemoveFromGrid(vehicleId, ref vehicleData, large, gridX2, gridZ2);
-			}
-		}
-
-		public void CustomAddToGrid(ushort vehicle, ref Vehicle data, bool large) {
-			Vector3 lastPos = data.GetLastFramePosition();
-			if (large) {
-				int gridX = Mathf.Clamp((int)(lastPos.x / 320f + 27f), 0, 53);
-				int gridZ = Mathf.Clamp((int)(lastPos.z / 320f + 27f), 0, 53);
-				this.AddToGrid(vehicle, ref data, large, gridX, gridZ);
-			} else {
-				int gridX2 = Mathf.Clamp((int)(lastPos.x / 32f + 270f), 0, 539);
-				int gridZ2 = Mathf.Clamp((int)(lastPos.z / 32f + 270f), 0, 539);
-				this.AddToGrid(vehicle, ref data, large, gridX2, gridZ2);
-			}
-		}
-
 
 		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
 			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");

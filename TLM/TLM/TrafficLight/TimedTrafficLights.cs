@@ -18,6 +18,17 @@ namespace TrafficManager.TrafficLight {
 	// TODO [version 1.10] define TimedTrafficLights per node group, not per individual nodes
 	// TODO class marked for complete rework in version 1.10
 	public class TimedTrafficLights: IObserver<NodeGeometry> {
+		public enum FlowWaitCalcMode {
+			/// <summary>
+			/// traffic measurements are averaged
+			/// </summary>
+			Mean,
+			/// <summary>
+			/// traffic measurements are summed up
+			/// </summary>
+			Total
+		}
+
 		public ushort NodeId {
 			get; private set;
 		}
@@ -466,7 +477,7 @@ namespace TrafficManager.TrafficLight {
 			// TODO [version 1.10] this method is currently called on each node, but should be called on the master node only
 
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[14] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
 #endif
 
 			if (!IsMasterNode() || !IsStarted()) {
@@ -548,7 +559,11 @@ namespace TrafficManager.TrafficLight {
 #endif
 
 						if (Steps[nextStepIndex].minTime != 0) {
-							bestNextStepIndex = (prevStepIndex + 1) % NumSteps();
+							int stepAfterPrev = (prevStepIndex + 1) % NumSteps();
+							if (nextStepIndex == stepAfterPrev) {
+								// always switch if the next step has a minimum time assigned
+								bestNextStepIndex = stepAfterPrev;
+							}
 							break;
 						}
 

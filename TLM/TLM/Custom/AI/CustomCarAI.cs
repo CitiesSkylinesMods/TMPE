@@ -30,8 +30,6 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="vehicleData"></param>
 		/// <param name="physicsLodRefPos"></param>
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			PathManager pathMan = Singleton<PathManager>.instance;
-
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				PathManager pathManager = Singleton<PathManager>.instance;
 				byte pathFindFlags = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
@@ -45,7 +43,7 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				if (Options.prohibitPocketCars) {
-					mainPathState = AdvancedParkingManager.Instance.UpdatePathState(vehicleId, ref vehicleData, mainPathState);
+					mainPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, mainPathState);
 				}
 				// NON-STOCK CODE END
 
@@ -67,6 +65,10 @@ namespace TrafficManager.Custom.AI {
 					this.TrySpawn(vehicleId, ref vehicleData);
 				}
 			}
+
+			// NON-STOCK CODE START
+			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+			// NON-STOCK CODE END
 
 			Vector3 lastFramePosition = vehicleData.GetLastFramePosition();
 			int lodPhysics;
@@ -100,6 +102,8 @@ namespace TrafficManager.Custom.AI {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			} else if ((int)vehicleData.m_blockCounter >= maxBlockCounter && Options.enableDespawning) { // NON-STOCK CODE
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+			} else if (!Options.enableDespawning) {
+				vehicleData.m_blockCounter = 0; // NON-STOCK CODE
 			}
 		}
 
@@ -113,17 +117,6 @@ namespace TrafficManager.Custom.AI {
 			}
 			vehicleData.Spawn(vehicleId);
 			vehicleData.m_flags &= ~Vehicle.Flags.WaitingSpace;
-
-			// NON-STOCK CODE START
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-#if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
-					Log._Debug($"CustomCarAI.TrySpawn({vehicleId}): calling OnSpawnVehicle in TrySpawn");
-#endif
-				VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
-			}
-			// NON-STOCK CODE END
-
 			return true;
 		}
 
@@ -162,45 +155,26 @@ namespace TrafficManager.Custom.AI {
 			bool withinBrakingDistance = Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f;
 
 			// NON-STOCK CODE START
-			ushort frontVehicleId = VehicleStateManager.Instance.GetFrontVehicleId(vehicleId, ref vehicleData);
-#if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}): processing front vehicle {frontVehicleId} @ PREV seg. {prevPos.m_segment}, lane {prevPos.m_lane}, off {prevPos.m_offset} -> CURRENT seg. {position.m_segment}, lane {position.m_lane}, off {position.m_offset} -> NEXT seg. {nextPosition.m_segment}, lane {nextPosition.m_lane}, off {nextPosition.m_offset} || prevOffset: {prevOffset}, offset: {offset} || prevTargetNodeId: {prevTargetNodeId}, targetNodeId: {targetNodeId}, nextTargetNodeId: {nextTargetNodeId} || pathPositionIndex: {vehicleData.m_pathPositionIndex}");
-#endif
-			if (vehicleId == frontVehicleId) {
-				if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-					// update vehicle position for timed traffic lights and priority signs
-					int pathPosIndex = vehicleData.m_pathPositionIndex >> 1;
-					PathUnit.Position curPathPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(pathPosIndex);
-					PathUnit.Position nextPathPos;
-					Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(pathPosIndex, out nextPathPos);
-					VehicleStateManager.Instance.VehicleStates[frontVehicleId].UpdatePosition(ref vehicleData, sqrVelocity, ref curPathPos, ref nextPathPos);
-				}
-			} else {
-#if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
-					Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}): processing non-front vehicle! frontVehicleId={frontVehicleId}");
-#endif
-			}
+			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, sqrVelocity);
 			// NON-STOCK CODE END
 
 			bool isRecklessDriver = VehicleStateManager.Instance.IsRecklessDriver(vehicleId, ref vehicleData); // NON-STOCK CODE
 			if (targetNodeId == prevTargetNodeId && withinBrakingDistance) {
 				// NON-STOCK CODE START
-				if (vehicleId == frontVehicleId && !Options.isStockLaneChangerUsed()) {
+				if (!Options.isStockLaneChangerUsed()) {
 					// Advanced AI traffic measurement
-					VehicleStateManager.Instance.LogTraffic(frontVehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
+					VehicleStateManager.Instance.LogTraffic(vehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
 				}
 				// NON-STOCK CODE END
 
-				if (!VehicleBehaviorManager.Instance.MayChangeSegment(frontVehicleId, ref VehicleStateManager.Instance.VehicleStates[frontVehicleId], ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
+				if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
 					return;
 			}
 
 			var info2 = netManager.m_segments.m_buffer[position.m_segment].Info;
 			if (info2.m_lanes != null && info2.m_lanes.Length > position.m_lane) {
 				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info2.m_lanes[position.m_lane]) : info2.m_lanes[position.m_lane].m_speedLimit; // info2.m_lanes[position.m_lane].m_speedLimit; // NON-STOCK CODE
-				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].m_curve);
+				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, netManager.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
@@ -245,7 +219,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				// NON-STOCK CODE START
-				ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[VehicleStateManager.Instance.GetFrontVehicleId(vehicleID, ref vehicleData)].vehicleType;
+				ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[vehicleID].vehicleType;
 				if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
 					Log.Warning($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");

@@ -31,6 +31,33 @@ namespace TrafficManager.Traffic {
 			Failed
 		}
 
+		public enum ExtSoftPathState {
+			/// <summary>
+			/// No path
+			/// </summary>
+			None,
+			/// <summary>
+			/// Path is currently being calculated
+			/// </summary>
+			Calculating,
+			/// <summary>
+			/// Path-finding has succeeded and must be handled appropriately
+			/// </summary>
+			Ready,
+			/// <summary>
+			/// Path-finding has failed and must be handled appropriately
+			/// </summary>
+			FailedHard,
+			/// <summary>
+			/// Path-finding must be retried (soft path-find failure)
+			/// </summary>
+			FailedSoft,
+			/// <summary>
+			/// Path-finding result must not be handled by the citizen because the path will be transferred to a vehicle
+			/// </summary>
+			Ignore
+		}
+
 		public enum ExtPathType {
 			/// <summary>
 			/// Mixed path
@@ -230,9 +257,9 @@ namespace TrafficManager.Traffic {
 
 		internal void Reset() {
 #if DEBUG
-			/*if (GlobalConfig.Instance.DebugSwitches[7]) {
-				Log.Warning($"Resetting PathMode for citizen instance {InstanceId}");
-			}*/
+			if (GlobalConfig.Instance.DebugSwitches[4]) {
+				Log.Warning($"Resetting ext. citizen instance {InstanceId}");
+			}
 #endif
 			//Flags = ExtFlags.None;
 			PathMode = ExtPathMode.None;
@@ -264,6 +291,10 @@ namespace TrafficManager.Traffic {
 		/// Checks the calculation state of the return path
 		/// </summary>
 		internal void UpdateReturnPathState() {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[4])
+				Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {InstanceId}");
+#endif
 			if (ReturnPathId != 0 && ReturnPathState == ExtPathState.Calculating) {
 				byte returnPathFlags = CustomPathManager._instance.m_pathUnits.m_buffer[ReturnPathId].m_pathFindFlags;
 				if ((returnPathFlags & PathUnit.FLAG_READY) != 0) {
@@ -323,7 +354,7 @@ namespace TrafficManager.Traffic {
 		/// Determines the path type through evaluating the current path mode.
 		/// </summary>
 		/// <returns></returns>
-		internal ExtPathType GetPathType() {
+		public ExtPathType GetPathType() {
 			switch (PathMode) {
 				case ExtPathMode.CalculatingCarPathToAltParkPos:
 				case ExtPathMode.CalculatingCarPathToKnownParkPos:
@@ -341,6 +372,15 @@ namespace TrafficManager.Traffic {
 				default:
 					return ExtPathType.None;
 			}
+		}
+
+		/// <summary>
+		/// Converts an ExtPathState to a ExtSoftPathState.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <returns></returns>
+		public static ExtSoftPathState ConvertPathStateToSoftPathState(ExtPathState state) {
+			return (ExtSoftPathState)((int)state);
 		}
 	}
 }

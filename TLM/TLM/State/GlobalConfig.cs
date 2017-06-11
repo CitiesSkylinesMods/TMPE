@@ -11,6 +11,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.TrafficLight;
+using static TrafficManager.TrafficLight.TimedTrafficLights;
 
 namespace TrafficManager.State {
 	[XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
@@ -92,6 +94,21 @@ namespace TrafficManager.State {
 		/// Language to use (if null then the game's language is being used)
 		/// </summary>
 		public string LanguageCode = null;
+
+		/// <summary>
+		/// TTL wait/flow calculation mode
+		/// </summary>
+		public FlowWaitCalcMode TTLFlowWaitCalcMode = FlowWaitCalcMode.Mean;
+
+		/// <summary>
+		/// Default TTL flow-to-wait ratio
+		/// </summary>
+		public float DefaultTTLFlowToWaitRatio = 0.8f;
+
+		/// <summary>
+		/// TTL smoothing factor for flowing/waiting vehicles
+		/// </summary>
+		public float TTLSmoothingFactor = 0.1f;
 
 		/// <summary>
 		/// base lane changing cost factor on highways

@@ -14,6 +14,7 @@ using TrafficManager.State;
 using TrafficManager.Util;
 using System.Linq;
 using CSUtil.Commons;
+using static TrafficManager.TrafficLight.TimedTrafficLights;
 
 namespace TrafficManager.TrafficLight {
 	// TODO class should be completely reworked, approx. in version 1.10
@@ -514,12 +515,12 @@ namespace TrafficManager.TrafficLight {
 				if (Single.IsNaN(newFlow))
 					newFlow = flow;
 				else
-					newFlow = 0.1f * newFlow + 0.9f * flow; // some smoothing
+					newFlow = GlobalConfig.Instance.TTLSmoothingFactor * newFlow + (1f - GlobalConfig.Instance.TTLSmoothingFactor) * flow; // some smoothing
 
 				if (Single.IsNaN(newWait))
 					newWait = 0;
 				else
-					newWait = 0.1f * newWait + 0.9f * wait; // some smoothing
+					newWait = GlobalConfig.Instance.TTLSmoothingFactor * newWait + (1f - GlobalConfig.Instance.TTLSmoothingFactor) * wait; // some smoothing
 #endif
 
 				// if more cars are waiting than flowing, we change the step
@@ -718,16 +719,34 @@ namespace TrafficManager.TrafficLight {
 
 						float meanLaneFlow = 0;
 						if (numLaneFlows > 0) {
-							++numSegFlows;
-							meanLaneFlow = (float)curTotalLaneFlow / (float)numLaneFlows;
-							curTotalSegFlow += meanLaneFlow;
+							switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+								case FlowWaitCalcMode.Mean:
+								default:
+									++numSegFlows;
+									meanLaneFlow = (float)curTotalLaneFlow / (float)numLaneFlows;
+									curTotalSegFlow += meanLaneFlow;
+									break;
+								case FlowWaitCalcMode.Total:
+									numSegFlows += numLaneFlows;
+									curTotalSegFlow += curTotalLaneFlow;
+									break;
+							}
 						}
 
 						float meanLaneWait = 0;
 						if (numLaneWaits > 0) {
-							++numSegWaits;
-							meanLaneWait = (float)curTotalLaneWait / (float)numLaneWaits;
-							curTotalSegWait += meanLaneWait;
+							switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+								case FlowWaitCalcMode.Mean:
+								default:
+									++numSegWaits;
+									meanLaneWait = (float)curTotalLaneWait / (float)numLaneWaits;
+									curTotalSegWait += meanLaneWait;
+									break;
+								case FlowWaitCalcMode.Total:
+									numSegWaits += numLaneWaits;
+									curTotalSegWait += curTotalLaneWait;
+									break;
+							}
 						}
 
 #if DEBUGTTL
@@ -739,16 +758,34 @@ namespace TrafficManager.TrafficLight {
 
 					float meanSegFlow = 0;
 					if (numSegFlows > 0) {
-						++numNodeFlows;
-						meanSegFlow = (float)curTotalSegFlow / (float)numSegFlows;
-						curTotalNodeFlow += meanSegFlow;
+						switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+							case FlowWaitCalcMode.Mean:
+							default:
+								++numNodeFlows;
+								meanSegFlow = (float)curTotalSegFlow / (float)numSegFlows;
+								curTotalNodeFlow += meanSegFlow;
+								break;
+							case FlowWaitCalcMode.Total:
+								numNodeFlows += numSegFlows;
+								curTotalNodeFlow += curTotalSegFlow;
+								break;
+						}
 					}
 
 					float meanSegWait = 0;
 					if (numSegWaits > 0) {
-						++numNodeWaits;
-						meanSegWait = (float)curTotalSegWait / (float)numSegWaits;
-						curTotalNodeWait += meanSegWait;
+						switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+							case FlowWaitCalcMode.Mean:
+							default:
+								++numNodeWaits;
+								meanSegWait = (float)curTotalSegWait / (float)numSegWaits;
+								curTotalNodeWait += meanSegWait;
+								break;
+							case FlowWaitCalcMode.Total:
+								numNodeWaits += numSegWaits;
+								curTotalNodeWait += curTotalSegWait;
+								break;
+						}
 					}
 
 #if DEBUGTTL
@@ -760,16 +797,34 @@ namespace TrafficManager.TrafficLight {
 
 				float meanNodeFlow = 0;
 				if (numNodeFlows > 0) {
-					++numFlows;
-					meanNodeFlow = (float)curTotalNodeFlow / (float)numNodeFlows;
-					curTotalFlow += meanNodeFlow;
+					switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+						case FlowWaitCalcMode.Mean:
+						default:
+							++numFlows;
+							meanNodeFlow = (float)curTotalNodeFlow / (float)numNodeFlows;
+							curTotalFlow += meanNodeFlow;
+							break;
+						case FlowWaitCalcMode.Total:
+							numFlows += numNodeFlows;
+							curTotalFlow += curTotalNodeFlow;
+							break;
+					}
 				}
 
 				float meanNodeWait = 0;
 				if (numNodeWaits > 0) {
-					++numWaits;
-					meanNodeWait = (float)curTotalNodeWait / (float)numNodeWaits;
-					curTotalWait += meanNodeWait;
+					switch (GlobalConfig.Instance.TTLFlowWaitCalcMode) {
+						case FlowWaitCalcMode.Mean:
+						default:
+							++numWaits;
+							meanNodeWait = (float)curTotalNodeWait / (float)numNodeWaits;
+							curTotalWait += meanNodeWait;
+							break;
+						case FlowWaitCalcMode.Total:
+							numWaits += numNodeWaits;
+							curTotalWait += curTotalNodeWait;
+							break;
+					}
 				}
 
 #if DEBUGTTL

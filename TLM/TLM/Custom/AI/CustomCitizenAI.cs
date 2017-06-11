@@ -97,7 +97,6 @@ namespace TrafficManager.Custom.AI {
 							if (GlobalConfig.Instance.DebugSwitches[2])
 								Log._Debug($"Citizen instance {instanceID} will try to move parkedVehicleId={parkedVehicleId} towards home. distHomeToParked={distHomeToParked}");
 #endif
-							vehicleInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 							carUsageMode = CarUsagePolicy.Forced;
 						}
 					}

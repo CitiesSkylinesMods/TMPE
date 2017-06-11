@@ -45,7 +45,6 @@ namespace TrafficManager.Traffic {
 		public int waitTime;
 		public float reduceSqrSpeedByValueToYield;
 		public bool spawned;
-		public bool emergency;
 		public ExtVehicleType vehicleType;
 		public bool heavyVehicle;
 		public ushort currentSegmentId;
@@ -70,7 +69,6 @@ namespace TrafficManager.Traffic {
 				//"\t" + $"Valid = {Valid}\n" +
 				//"\t" + $"valid = {valid}\n" +
 				"\t" + $"spawned = {spawned}\n" +
-				"\t" + $"emergency = {emergency}\n" +
 				"\t" + $"vehicleType = {vehicleType}\n" +
 				"\t" + $"heavyVehicle = {heavyVehicle}\n" +
 				"\t" + $"currentSegmentId = {currentSegmentId}\n" +
@@ -92,7 +90,6 @@ namespace TrafficManager.Traffic {
 			waitTime = 0;
 			reduceSqrSpeedByValueToYield = 0;
 			spawned = false;
-			emergency = false;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
 			currentSegmentId = 0;
@@ -185,7 +182,46 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal void UpdatePosition(ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck=false) {
+		internal void OnCreate(ref Vehicle vehicleData) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnCreate called for vehicle {vehicleId}: {this}");
+#endif
+			DetermineVehicleType(ref vehicleData);
+			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnCreate finished for vehicle {vehicleId}: {this}");
+#endif
+		}
+
+		internal void OnSpawn(ref Vehicle vehicleData) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnSpawn called for vehicle {vehicleId}: {this}");
+#endif
+			Unlink();
+
+			try {
+				totalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].CalculateTotalLength(vehicleId);
+			} catch (Exception e) {
+				totalLength = 0;
+#if DEBUG
+				if (GlobalConfig.Instance.DebugSwitches[9])
+					Log._Debug($"VehicleState.OnSpawn: Error occurred while calculating total length of vehicle {vehicleId}: {e}\nstate: {this}");
+#endif
+				return;
+			}
+
+			spawned = true;
+
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnSpawn finished for vehicle {vehicleId}: {this}");
+#endif
+		}
+
+		internal void UpdatePosition(ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.UpdatePosition called for vehicle {vehicleId}: {this}");
@@ -244,6 +280,27 @@ namespace TrafficManager.Traffic {
 		internal void OnDespawn() {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnDespawn called for vehicle {vehicleId}: {this}");
+#endif
+			ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
+			if (driverExtInstance != null) {
+				driverExtInstance.Reset();
+			}
+
+			Unlink();
+
+			totalLength = 0;
+			spawned = false;
+			
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
+				Log._Debug($"VehicleState.OnDespawn finished for vehicle {vehicleId}: {this}");
+#endif
+		}
+
+		internal void OnRelease(ref Vehicle vehicleData) {
+#if DEBUG
+			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.OnRelease called for vehicle {vehicleId}: {this}");
 #endif
 			ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
@@ -258,7 +315,6 @@ namespace TrafficManager.Traffic {
 			waitTime = 0;
 			reduceSqrSpeedByValueToYield = 0;
 			spawned = false;
-			emergency = false;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
 			currentSegmentId = 0;
@@ -272,47 +328,6 @@ namespace TrafficManager.Traffic {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.OnRelease finished for vehicle {vehicleId}: {this}");
-#endif
-		}
-
-		internal void OnCreate(ref Vehicle vehicleData) {
-#if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.OnCreate called for vehicle {vehicleId}: {this}");
-#endif
-			DetermineVehicleType(ref vehicleData);
-#if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.OnCreate finished for vehicle {vehicleId}: {this}");
-#endif
-		}
-
-		internal void OnSpawn(ref Vehicle vehicleData) {
-#if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.OnSpawn called for vehicle {vehicleId}: {this}");
-#endif
-			Unlink();
-			
-			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
-			emergency = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0;
-
-			try {
-				totalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].CalculateTotalLength(vehicleId);
-			} catch (Exception e) {
-				totalLength = 0;
-#if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
-					Log._Debug($"VehicleState.OnSpawn: Error occurred while calculating total length of vehicle {vehicleId}: {e}\nstate: {this}");
-#endif
-				return;
-			}
-			
-			spawned = true;
-
-#if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.OnSpawn finished for vehicle {vehicleId}: {this}");
 #endif
 		}
 

@@ -143,7 +143,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"Vehicle {vehicleID} shall move to an alternative parking position! CurrentPathMode={driverExtInstance.PathMode}");
+										Log._Debug($"Vehicle {vehicleID} shall move to an alternative parking position! CurrentPathMode={driverExtInstance.PathMode} FailedParkingAttempts={driverExtInstance.FailedParkingAttempts}");
 #endif
 
 									if (driverExtInstance.ParkingPathStartPosition != null) {
@@ -413,7 +413,7 @@ namespace TrafficManager.Custom.AI {
 				if (prohibitPocketCars) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Vehicle {vehicleID} tries to park on a parking position now (flags: {vehicleData.m_flags})! CurrentPathMode={driverExtInstance.PathMode} path={vehicleData.m_path} pathPositionIndex={vehicleData.m_pathPositionIndex} segmentId={pathPos.m_segment} laneIndex={pathPos.m_lane} offset={pathPos.m_offset} nextPath={nextPath} refPos={refPos} searchDir={searchDir} home={homeID}");
+						Log._Debug($"Vehicle {vehicleID} tries to park on a parking position now (flags: {vehicleData.m_flags})! CurrentPathMode={driverExtInstance.PathMode} path={vehicleData.m_path} pathPositionIndex={vehicleData.m_pathPositionIndex} segmentId={pathPos.m_segment} laneIndex={pathPos.m_lane} offset={pathPos.m_offset} nextPath={nextPath} refPos={refPos} searchDir={searchDir} home={homeID} driverCitizenId={driverCitizenId} driverCitizenInstanceId={driverCitizenInstanceId}");
 #endif
 
 					if (driverExtInstance.PathMode == ExtCitizenInstance.ExtPathMode.DrivingToAltParkPos || driverExtInstance.PathMode == ExtCitizenInstance.ExtPathMode.DrivingToKnownParkPos) {
