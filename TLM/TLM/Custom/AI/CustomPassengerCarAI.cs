@@ -57,7 +57,7 @@ namespace TrafficManager.Custom.AI {
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
 				if (driverExtInstance != null) {
-					ret = AdvancedParkingManager.Instance.EnrichLocalizedStatus(ret, driverExtInstance);
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedCarStatus(ret, driverExtInstance);
 				}
 			}
 
@@ -124,7 +124,7 @@ namespace TrafficManager.Custom.AI {
 
 					switch (driverExtInstance.PathMode) {
 						case ExtPathMode.None:
-						case ExtPathMode.ParkedCarReached:
+						case ExtPathMode.ParkedCarApproached:
 						case ExtPathMode.DrivingToTarget:
 						case ExtPathMode.DrivingToKnownParkPos:
 						case ExtPathMode.ParkingFailed:

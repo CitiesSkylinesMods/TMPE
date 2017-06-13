@@ -78,7 +78,7 @@ namespace TrafficManager.State {
 		//public static int laneChangingRandomization = 2;
 		public static bool realisticSpeeds = true;
 		public static int recklessDrivers = 3;
-		public static bool relaxedBusses = true;
+		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
 		public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;

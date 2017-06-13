@@ -1626,6 +1626,16 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirection CitizenAI::FindPathPosition calls");
+				try {
+					Detours.Add(new Detour(typeof(CitizenAI).GetMethod("FindPathPosition",
+							BindingFlags.Public | BindingFlags.Instance),
+							typeof(CustomCitizenAI).GetMethod("CustomFindPathPosition")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CitizenAI::FindPathPosition");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirection TransportLineAI::StartPathFind calls");
 				try {
 					Detours.Add(new Detour(typeof(TransportLineAI).GetMethod("StartPathFind",

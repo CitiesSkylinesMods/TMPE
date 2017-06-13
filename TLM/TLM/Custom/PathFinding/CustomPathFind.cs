@@ -1541,10 +1541,11 @@ namespace TrafficManager.Custom.PathFinding {
 				allowAdvancedAI && // traffic measurements may happen
 				//allowLaneChangingCosts &&
 				_extVehicleType != null && // we got a valid extended vehicle type
-				((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None && // we are not a bus
+				((ExtVehicleType)_extVehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None && // we are a road vehicle
 				!_stablePath && // we do not need a stable path
 				enableVehicle; // we may choose vehicle lanes
-			bool calculateTrafficStats = useAdvancedAI;
+			bool calculateTrafficStats = useAdvancedAI &&
+				((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None;
 
 #if DEBUGNEWPF
 			if (debug)

@@ -12,6 +12,7 @@ using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
 using CSUtil.Commons;
+using static TrafficManager.Manager.AdvancedParkingManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
@@ -117,7 +118,7 @@ namespace TrafficManager.Custom.AI {
 				// check if the citizen has reached a parked car or target
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 
-				if (extInstance.PathMode == ExtPathMode.WalkingToParkedCar || extInstance.PathMode == ExtPathMode.ReachingParkedCar) {
+				if (extInstance.PathMode == ExtPathMode.WalkingToParkedCar || extInstance.PathMode == ExtPathMode.ApproachingParkedCar) {
 					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 					if (parkedVehicleId == 0) {
 						// citizen is reaching their parked car but does not own a parked car
@@ -132,35 +133,50 @@ namespace TrafficManager.Custom.AI {
 						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
 						this.InvalidPath(instanceID, ref instanceData);
 						return;
-					} else if (AdvancedParkingManager.Instance.CheckCitizenReachedParkedCar(instanceID, ref instanceData, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId])) {
-						// citizen reached their parked car
+					} else {
+						ParkedCarApproachState approachState = AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(instanceID, ref instanceData, physicsLodRefPos, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
+						switch (approachState) {
+							case ParkedCarApproachState.None:
+							default:
+								break;
+							case ParkedCarApproachState.Approaching:
+								// citizen approaches their parked car
+								return;
+							case ParkedCarApproachState.Approached:
+								// citizen reached their parked car
 #if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrives at parked car. PathMode={extInstance.PathMode}");
+								if (GlobalConfig.Instance.DebugSwitches[4])
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrived at parked car. PathMode={extInstance.PathMode}");
 #endif
-						if (instanceData.m_path != 0) {
-							Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
-							instanceData.m_path = 0;
-						}
-						instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
-						if (!this.StartPathFind(instanceID, ref instanceData)) {
-							instanceData.Unspawn(instanceID);
-							extInstance.Reset();
-						}
+								if (instanceData.m_path != 0) {
+									Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
+									instanceData.m_path = 0;
+								}
+								instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
+								if (!this.StartPathFind(instanceID, ref instanceData)) {
+									instanceData.Unspawn(instanceID);
+									extInstance.Reset();
+								}
 
-						return;
-					}
+								return;
+							case ParkedCarApproachState.Failure:
+#if DEBUG
+								if (GlobalConfig.Instance.DebugSwitches[2])
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.PathMode}");
+#endif
+								// repeat path-finding
+								instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
+								instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+								this.InvalidPath(instanceID, ref instanceData);
+								return;
 
-					if (extInstance.PathMode == ExtPathMode.ReachingParkedCar) {
-						// citizen is currently reaching their parked car
-						ReachingParkedCarSimulationStep(instanceID, ref instanceData, physicsLodRefPos);
-						return;
+						}
 					}
 				} else if ((extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
 						extInstance.PathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget ||
 						extInstance.PathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget)
 				) {
-					AdvancedParkingManager.Instance.CheckCitizenReachedTarget(instanceID, ref instanceData);
+					AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData);
 				}
 			}
 			// NON-STOCK CODE END
@@ -185,44 +201,6 @@ namespace TrafficManager.Custom.AI {
 				this.ArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);
 			}
-		}
-
-		protected static void ReachingParkedCarSimulationStep(ushort instanceID, ref CitizenInstance instanceData, Vector3 physicsLodRefPos) {
-			if ((instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
-				CitizenInstance.Frame lastFrameData = instanceData.GetLastFrameData();
-				int oldGridX = Mathf.Clamp((int)(lastFrameData.m_position.x / (float)CitizenManager.CITIZENGRID_CELL_SIZE + (float)CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0, CitizenManager.CITIZENGRID_RESOLUTION-1);
-				int oldGridY = Mathf.Clamp((int)(lastFrameData.m_position.z / (float)CitizenManager.CITIZENGRID_CELL_SIZE + (float)CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0, CitizenManager.CITIZENGRID_RESOLUTION - 1);
-				bool lodPhysics = Vector3.SqrMagnitude(physicsLodRefPos - lastFrameData.m_position) >= 62500f;
-				ReachingParkedCarSimulationStep(instanceID, ref instanceData, ref lastFrameData, lodPhysics);
-				int newGridX = Mathf.Clamp((int)(lastFrameData.m_position.x / (float)CitizenManager.CITIZENGRID_CELL_SIZE + (float)CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0, CitizenManager.CITIZENGRID_RESOLUTION - 1);
-				int newGridY = Mathf.Clamp((int)(lastFrameData.m_position.z / (float)CitizenManager.CITIZENGRID_CELL_SIZE + (float)CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0, CitizenManager.CITIZENGRID_RESOLUTION - 1);
-				if ((newGridX != oldGridX || newGridY != oldGridY) && (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
-					Singleton<CitizenManager>.instance.RemoveFromGrid(instanceID, ref instanceData, oldGridX, oldGridY);
-					Singleton<CitizenManager>.instance.AddToGrid(instanceID, ref instanceData, newGridX, newGridY);
-				}
-				if (instanceData.m_flags != CitizenInstance.Flags.None) {
-					instanceData.SetFrameData(Singleton<SimulationManager>.instance.m_currentFrameIndex, lastFrameData);
-				}
-			}
-		}
-
-		protected static void ReachingParkedCarSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref CitizenInstance.Frame frameData, bool lodPhysics) {
-			/*uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			float sqrVelocity = frameData.m_velocity.sqrMagnitude;
-			float lodSqrVelocity = Mathf.Max(sqrVelocity * 3f, 3f);
-			if (lodPhysics && (currentFrameIndex >> 4 & 3) == (instanceID & 3)) {
-				lodSqrVelocity = lodSqrVelocity * 4f;
-			}*/
-
-			frameData.m_position = frameData.m_position + (frameData.m_velocity * 0.5f);
-
-			Vector3 targetDiff = (Vector3)instanceData.m_targetPos - frameData.m_position;
-			Vector3 targetVelDiff = targetDiff - frameData.m_velocity;
-			float targetVelDiffMag = targetVelDiff.magnitude;
-
-			targetVelDiff = targetVelDiff * (2f / Mathf.Max(targetVelDiffMag, 2f));
-			frameData.m_velocity = frameData.m_velocity + targetVelDiff;
-			frameData.m_velocity = frameData.m_velocity - (Mathf.Max(0f, Vector3.Dot((frameData.m_position + frameData.m_velocity) - (Vector3)instanceData.m_targetPos, frameData.m_velocity)) / Mathf.Max(0.01f, frameData.m_velocity.sqrMagnitude) * frameData.m_velocity);
 		}
 
 		/// <summary>
@@ -334,35 +312,6 @@ namespace TrafficManager.Custom.AI {
 #endif
 				return false;
 			}
-		}
-
-		internal static string EnrichLocalizedStatus(string ret, ExtCitizenInstance extInstance) {
-			if (extInstance != null) {
-				switch (extInstance.PathMode) {
-					case ExtPathMode.ReachingParkedCar:
-					case ExtPathMode.ParkedCarReached:
-						ret = Translation.GetString("Entering_vehicle") + ", " + ret;
-						break;
-					case ExtPathMode.RequiresWalkingPathToParkedCar:
-					case ExtPathMode.CalculatingWalkingPathToParkedCar:
-					case ExtPathMode.WalkingToParkedCar:
-						ret = Translation.GetString("Walking_to_car") + ", " + ret;
-						break;
-					case ExtPathMode.PublicTransportToTarget:
-					case ExtPathMode.TaxiToTarget:
-						ret = Translation.GetString("Using_public_transport") + ", " + ret;
-						break;
-					case ExtPathMode.CalculatingWalkingPathToTarget:
-					case ExtPathMode.WalkingToTarget:
-						ret = Translation.GetString("Walking") + ", " + ret;
-						break;
-					case ExtPathMode.CalculatingCarPathToTarget:
-					case ExtPathMode.CalculatingCarPathToKnownParkPos:
-						ret = Translation.GetString("Thinking_of_a_good_parking_spot") + ", " + ret;
-						break;
-				}
-			}
-			return ret;
 		}
 
 		public bool CustomCheckTrafficLights(ushort node, ushort segment) {

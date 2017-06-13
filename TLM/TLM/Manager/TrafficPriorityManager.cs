@@ -498,8 +498,8 @@ namespace TrafficManager.Manager {
 				}
 
 				if (!incomingStateChangedRecently &&
-					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked ||
-					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop/* && vehicleId < incomingVehicleId*/))
+					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked/* ||
+					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop && vehicleId < incomingVehicleId)*/)
 				) {
 #if DEBUG
 					if (debug)

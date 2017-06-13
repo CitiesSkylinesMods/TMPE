@@ -90,11 +90,11 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// Indicates that the citizen is close to their parked car
 			/// </summary>
-			ReachingParkedCar,
+			ApproachingParkedCar,
 			/// <summary>
 			/// Indicates that the citizen has reached their parked car
 			/// </summary>
-			ParkedCarReached,
+			ParkedCarApproached,
 			/// <summary>
 			/// Indicates that a direct car path to the target is being calculated
 			/// </summary>

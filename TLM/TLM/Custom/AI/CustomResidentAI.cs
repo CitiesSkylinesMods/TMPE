@@ -117,7 +117,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
-				ret = CustomHumanAI.EnrichLocalizedStatus(ret, extInstance);
+				ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, extInstance);
 			}
 			// NON-STOCK CODE END
 			return ret;
