@@ -299,7 +299,7 @@ namespace TrafficManager.Manager {
 
 				segmentDirTrafficData[segDirIndex].minSpeed = minRelSpeeds[i];
 				++segmentDirTrafficData[segDirIndex].numCongestionMeasurements;
-				if (minRelSpeeds[i] / 100u < conf.CongestionSpeedThreshold) {
+				if (minRelSpeeds[i] / 100u < conf.CongestionSqrSpeedThreshold) {
 					++segmentDirTrafficData[segDirIndex].numCongested;
 				}
 #if MEASUREDENSITY

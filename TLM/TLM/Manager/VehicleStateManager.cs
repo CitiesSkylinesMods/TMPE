@@ -180,6 +180,9 @@ namespace TrafficManager.Manager {
 				return;
 			}
 
+			state.lastPathId = vehicleData.m_path;
+			state.lastPathPositionIndex = vehicleData.m_pathPositionIndex;
+
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({vehicleId}) called");

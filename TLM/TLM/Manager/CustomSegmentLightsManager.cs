@@ -111,12 +111,12 @@ namespace TrafficManager.Manager {
 
 			SubscribeToSegmentGeometry(segmentId);
 			if (startNode) {
-				customSegment.StartNodeLights = new CustomSegmentLights(this, segmentId, startNode, false, lightState);
-				customSegment.StartNodeLights.CalculateAutoPedestrianLightState();
+				customSegment.StartNodeLights = new CustomSegmentLights(this, segmentId, startNode, false);
+				customSegment.StartNodeLights.SetLights(lightState);
 				return customSegment.StartNodeLights;
 			} else {
-				customSegment.EndNodeLights = new CustomSegmentLights(this, segmentId, startNode, false, lightState);
-				customSegment.EndNodeLights.CalculateAutoPedestrianLightState();
+				customSegment.EndNodeLights = new CustomSegmentLights(this, segmentId, startNode, false);
+				customSegment.EndNodeLights.SetLights(lightState);
 				return customSegment.EndNodeLights;
 			}
 		}

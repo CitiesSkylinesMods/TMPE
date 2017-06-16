@@ -165,7 +165,7 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		private void Link(SegmentEnd end, byte laneIndex) {
+		private void Link(SegmentEnd end) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.Link({vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
@@ -177,10 +177,6 @@ namespace TrafficManager.Traffic {
 				nextVehicleIdOnSegment = oldFirstRegVehicleId;
 			}
 			end.FirstRegisteredVehicleId = vehicleId;
-
-			currentSegmentId = end.SegmentId;
-			currentStartNode = end.StartNode;
-			currentLaneIndex = laneIndex;
 
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
@@ -245,10 +241,16 @@ namespace TrafficManager.Traffic {
 				nextLaneIndex = nextPos.m_lane;
 			}
 
-			SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, IsTransitNodeCurStartNode(ref curPos, ref nextPos));
+			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
+			SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, startNode);
 
 			if (end == null) {
 				Unlink();
+
+				currentSegmentId = curPos.m_segment;
+				currentStartNode = startNode;
+				currentLaneIndex = curPos.m_lane;
+
 				JunctionTransitState = VehicleJunctionTransitState.None;
 				this.sqrVelocity = 0;
 				return;
@@ -267,13 +269,17 @@ namespace TrafficManager.Traffic {
 					Unlink();
 				}
 
+				currentSegmentId = curPos.m_segment;
+				currentStartNode = startNode;
+				currentLaneIndex = curPos.m_lane;
+
 				waitTime = 0;
 				if (end != null) {
 #if DEBUGVSTATE
 					if (GlobalConfig.Instance.DebugSwitches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
-					Link(end, curPos.m_lane);
+					Link(end);
 					JunctionTransitState = VehicleJunctionTransitState.Approach;
 				} else {
 					JunctionTransitState = VehicleJunctionTransitState.None;
@@ -296,6 +302,13 @@ namespace TrafficManager.Traffic {
 			}
 
 			Unlink();
+
+			currentSegmentId = 0;
+			currentStartNode = false;
+			currentLaneIndex = 0;
+
+			nextSegmentId = 0;
+			nextLaneIndex = 0;
 
 			totalLength = 0;
 			spawned = false;

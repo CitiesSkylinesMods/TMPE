@@ -158,32 +158,9 @@ namespace TrafficManager.TrafficLight {
 
 		}
 
-		protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight) : base(segmentId, startNode) {
+		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight) : base(segmentId, startNode) {
 			this.lightsManager = lightsManager;
-			OnChange(calculateAutoPedLight);
-		}
-
-		[Obsolete]
-		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight, mainState) {
-
-		}
-
-		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState)
-			: this(lightsManager, segmentId, startNode, calculateAutoPedLight, mainState, mainState, mainState, mainState == RoadBaseAI.TrafficLightState.Green ? RoadBaseAI.TrafficLightState.Red	: RoadBaseAI.TrafficLightState.Green) {
-			
-		}
-
-		[Obsolete]
-		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState, RoadBaseAI.TrafficLightState leftState, RoadBaseAI.TrafficLightState rightState, RoadBaseAI.TrafficLightState pedState)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight, mainState, leftState, rightState, pedState)  {
-			
-		}
-
-		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState, RoadBaseAI.TrafficLightState leftState, RoadBaseAI.TrafficLightState rightState, RoadBaseAI.TrafficLightState pedState) : base(segmentId, startNode) {
-			this.lightsManager = lightsManager;
-
-			housekeeping(false, calculateAutoPedLight, mainState, leftState, rightState, pedState);
+			housekeeping(false, calculateAutoPedLight);
 		}
 
 		public bool IsAnyGreen() {
@@ -509,8 +486,11 @@ namespace TrafficManager.TrafficLight {
 #endif
 		}
 
-		internal void housekeeping(bool mayDelete, bool calculateAutoPedLight, RoadBaseAI.TrafficLightState mainState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState leftState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState rightState = RoadBaseAI.TrafficLightState.Red, RoadBaseAI.TrafficLightState pedState = RoadBaseAI.TrafficLightState.Red) {
+		internal void housekeeping(bool mayDelete, bool calculateAutoPedLight) {
 			// we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)
+
+			CustomSegmentLight mainLight = MainSegmentLight;
+			bool mainLightIsGreen = mainLight != null ? mainLight.IsMainGreen() : false;
 
 			ushort nodeId = NodeId;
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>(); // TODO improve
@@ -544,7 +524,11 @@ namespace TrafficManager.TrafficLight {
 
 						CustomSegmentLight segmentLight;
 						if (!CustomLights.TryGetValue(mask, out segmentLight)) {
-							segmentLight = new TrafficLight.CustomSegmentLight(this, mainState, leftState, rightState);
+							segmentLight = new TrafficLight.CustomSegmentLight(this, RoadBaseAI.TrafficLightState.Red);
+							if (mainLight != null) {
+								segmentLight.CurrentMode = mainLight.CurrentMode;
+								segmentLight.SetStates(mainLight.LightMain, mainLight.LightLeft, mainLight.LightRight, false);
+							}
 							CustomLights.Add(mask, segmentLight);
 							VehicleTypes.AddFirst(mask);
 						}
@@ -568,7 +552,11 @@ namespace TrafficManager.TrafficLight {
 				// traffic lights for cars
 				CustomSegmentLight defaultSegmentLight;
 				if (!CustomLights.TryGetValue(DEFAULT_MAIN_VEHICLETYPE, out defaultSegmentLight)) {
-					defaultSegmentLight = new TrafficLight.CustomSegmentLight(this, mainState, leftState, rightState);
+					defaultSegmentLight = new TrafficLight.CustomSegmentLight(this, RoadBaseAI.TrafficLightState.Red);
+					if (mainLight != null) {
+						defaultSegmentLight.CurrentMode = mainLight.CurrentMode;
+						defaultSegmentLight.SetStates(mainLight.LightMain, mainLight.LightLeft, mainLight.LightRight, false);
+					}
 					CustomLights.Add(DEFAULT_MAIN_VEHICLETYPE, defaultSegmentLight);
 					VehicleTypes.AddFirst(DEFAULT_MAIN_VEHICLETYPE);
 				}
@@ -610,8 +598,9 @@ namespace TrafficManager.TrafficLight {
 #if DEBUGHK
 				Log._Debug($"CustomSegmentLights: housekeeping @ seg. {SegmentId}, node {nodeId}: adding pedestrian light");
 #endif
-				if (pedestrianLightState == null)
-					pedestrianLightState = pedState;
+				if (pedestrianLightState == null) {
+					pedestrianLightState = RoadBaseAI.TrafficLightState.Red;
+				}
 			} else {
 				pedestrianLightState = null;
 			}

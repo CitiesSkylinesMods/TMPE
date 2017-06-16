@@ -300,9 +300,9 @@ namespace TrafficManager.State {
 		public int VehicleStateUpdateShift = 6;
 
 		/// <summary>
-		/// average speed (in %) threshold for a segment to be flagged as congested
+		/// average squared speed (in %) threshold for a segment to be flagged as congested
 		/// </summary>
-		public uint CongestionSpeedThreshold = 70;
+		public uint CongestionSqrSpeedThreshold = 60;
 
 		/// <summary>
 		/// public transport demand increment on path-find failure
