@@ -38,6 +38,8 @@ namespace TrafficManager.Traffic {
 		}*/
 
 		public ushort vehicleId;
+		public uint lastPathId;
+		public byte lastPathPositionIndex;
 		public uint lastTransitStateUpdate;
 		public uint lastPositionUpdate;
 		public float totalLength;
@@ -59,6 +61,8 @@ namespace TrafficManager.Traffic {
 		public override string ToString() {
 			return $"[VehicleState\n" +
 				"\t" + $"vehicleId = {vehicleId}\n" +
+				"\t" + $"lastPathId = {lastPathId}\n" +
+				"\t" + $"lastPathPositionIndex = {lastPathPositionIndex}\n" +
 				"\t" + $"JunctionTransitState = {JunctionTransitState}\n" +
 				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
 				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
@@ -84,6 +88,8 @@ namespace TrafficManager.Traffic {
 
 		internal VehicleState(ushort vehicleId) {
 			this.vehicleId = vehicleId;
+			lastPathId = 0;
+			lastPathPositionIndex = 0;
 			lastTransitStateUpdate = Now();
 			lastPositionUpdate = Now();
 			totalLength = 0;
@@ -204,7 +210,11 @@ namespace TrafficManager.Traffic {
 
 			try {
 				totalLength = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].CalculateTotalLength(vehicleId);
-			} catch (Exception e) {
+			} catch (Exception
+#if DEBUG
+			e
+#endif
+			) {
 				totalLength = 0;
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[9])
@@ -221,7 +231,7 @@ namespace TrafficManager.Traffic {
 #endif
 		}
 
-		internal void UpdatePosition(ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
+		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.UpdatePosition called for vehicle {vehicleId}: {this}");
@@ -269,8 +279,6 @@ namespace TrafficManager.Traffic {
 					JunctionTransitState = VehicleJunctionTransitState.None;
 				}
 			}
-
-			this.sqrVelocity = sqrVelocity;
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleState.UpdatePosition finshed for vehicle {vehicleId}: {this}");
@@ -309,6 +317,8 @@ namespace TrafficManager.Traffic {
 			}
 
 			Unlink();
+			lastPathId = 0;
+			lastPathPositionIndex = 0;
 			lastTransitStateUpdate = Now();
 			lastPositionUpdate = Now();
 			totalLength = 0;

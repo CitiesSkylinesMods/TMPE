@@ -70,13 +70,20 @@ namespace TrafficManager.Manager {
 			return ((vehicleData.Info.m_vehicleType & RECKLESS_VEHICLE_TYPES) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 
-		internal void LogTraffic(ushort vehicleId, ref Vehicle vehicleData, ushort segmentId, byte laneIndex, bool logSpeed) {
-			ushort length = (ushort)VehicleStates[vehicleId].totalLength;
-			if (length == 0)
-				return;
-			ushort? speed = logSpeed ? (ushort?)Mathf.RoundToInt(vehicleData.GetLastFrameData().m_velocity.magnitude) : null;
+		internal void LogTraffic(ushort vehicleId) {
+			LogTraffic(vehicleId, ref VehicleStates[vehicleId]);
+		}
 
-			TrafficMeasurementManager.Instance.AddTraffic(segmentId, laneIndex, length, speed);
+		protected void LogTraffic(ushort vehicleId, ref VehicleState state) {
+			if (state.currentSegmentId == 0) {
+				return;
+			}
+			ushort length = (ushort)state.totalLength;
+			if (length == 0) {
+				return;
+			}
+
+			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex, length, (ushort)state.sqrVelocity);
 		}
 
 		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
@@ -154,15 +161,7 @@ namespace TrafficManager.Manager {
 			VehicleStates[vehicleId].OnSpawn(ref vehicleData);
 		}
 
-		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData) {
-			if (!Options.prioritySignsEnabled && !Options.timedLightsEnabled) {
-				return;
-			}
-
-			UpdateVehiclePosition(vehicleId, ref vehicleData, vehicleData.GetLastFrameData().m_velocity.sqrMagnitude);
-		}
-
-		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData, float sqrVelocity) {
+		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData, float? sqrVelocity=null) {
 			if (!Options.prioritySignsEnabled && !Options.timedLightsEnabled) {
 				return;
 			}
@@ -171,19 +170,27 @@ namespace TrafficManager.Manager {
 				return;
 			}
 
+			UpdateVehiclePosition(vehicleId, ref vehicleData, ref VehicleStates[vehicleId], sqrVelocity);
+		}
+
+		protected void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState state, float? sqrVelocity) {
+			state.sqrVelocity = sqrVelocity != null ? (float)sqrVelocity : vehicleData.GetLastFrameVelocity().sqrMagnitude;
+
+			if (state.lastPathId == vehicleData.m_path && state.lastPathPositionIndex == vehicleData.m_pathPositionIndex) {
+				return;
+			}
+
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({vehicleId}) called");
 #endif
 
-			
 			// update vehicle position for timed traffic lights and priority signs
 			int pathPosIndex = vehicleData.m_pathPositionIndex >> 1;
 			PathUnit.Position curPathPos = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(pathPosIndex);
-			PathUnit.Position nextPathPos;
-			if (Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(pathPosIndex, out nextPathPos)) {
-				VehicleStateManager.Instance.VehicleStates[vehicleId].UpdatePosition(ref vehicleData, sqrVelocity, ref curPathPos, ref nextPathPos);
-			}
+			PathUnit.Position nextPathPos = default(PathUnit.Position);
+			Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(pathPosIndex, out nextPathPos);
+			VehicleStates[vehicleId].UpdatePosition(ref vehicleData, ref curPathPos, ref nextPathPos);
 		}
 
 		internal void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {

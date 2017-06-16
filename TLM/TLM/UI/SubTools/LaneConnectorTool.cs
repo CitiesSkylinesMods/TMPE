@@ -44,6 +44,7 @@ namespace TrafficManager.UI.SubTools {
 			internal Vector3 position;
 			internal Vector3 secondaryPosition;
 			internal bool isSource;
+			internal bool isTarget;
 			internal uint laneId;
 			internal int innerSimilarLaneIndex;
 			internal NetInfo.Direction finalDirection;
@@ -116,7 +117,7 @@ namespace TrafficManager.UI.SubTools {
 							// draw target marker (if segment turning angles are within bounds) and selected source marker in target selection mode
 							bool drawMarker = (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource && laneMarker.isSource) ||
 								(GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget && (
-								(!laneMarker.isSource &&
+								(laneMarker.isTarget &&
 								(laneMarker.vehicleType & selectedMarker.vehicleType) != VehicleInfo.VehicleType.None &&
 								CheckSegmentsTurningAngle(selectedMarker.segmentId, ref netManager.m_segments.m_buffer[selectedMarker.segmentId], selectedMarker.startNode, laneMarker.segmentId, ref netManager.m_segments.m_buffer[laneMarker.segmentId], laneMarker.startNode)
 								) || laneMarker == selectedMarker));
@@ -207,7 +208,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					if (stayInLaneMode != StayInLaneMode.None) {
-						List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId);
+						List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(SelectedNodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId]);
 						if (nodeMarkers != null) {
 							selectedMarker = null;
 							foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
@@ -221,7 +222,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 
 								foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
-									if (targetLaneMarker.isSource || targetLaneMarker.segmentId == sourceLaneMarker.segmentId)
+									if (!targetLaneMarker.isTarget || targetLaneMarker.segmentId == sourceLaneMarker.segmentId)
 										continue;
 
 									if (targetLaneMarker.innerSimilarLaneIndex == sourceLaneMarker.innerSimilarLaneIndex) {
@@ -273,7 +274,7 @@ namespace TrafficManager.UI.SubTools {
 #endif
 
 						// selected node has changed. create markers
-						List<NodeLaneMarker> markers = GetNodeMarkers(HoveredNodeId);
+						List<NodeLaneMarker> markers = GetNodeMarkers(HoveredNodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId]);
 						if (markers != null) {
 							SelectedNodeId = HoveredNodeId;
 							selectedMarker = null;
@@ -393,7 +394,7 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				List<NodeLaneMarker> nodeMarkers = GetNodeMarkers((ushort)nodeId);
+				List<NodeLaneMarker> nodeMarkers = GetNodeMarkers((ushort)nodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
 				if (nodeMarkers == null)
 					continue;
 				currentNodeMarkers[(ushort)nodeId] = nodeMarkers;
@@ -421,18 +422,18 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId) {
+		private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId, ref NetNode node) {
 			if (nodeId == 0)
 				return null;
-			if ((NetManager.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+			if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
 				return null;
 
 			List<NodeLaneMarker> nodeMarkers = new List<NodeLaneMarker>();
 			LaneConnectionManager connManager = LaneConnectionManager.Instance;
 
-			int offsetMultiplier = NetManager.instance.m_nodes.m_buffer[nodeId].CountSegments() <= 2 ? 3 : 1;
+			int offsetMultiplier = node.CountSegments() <= 2 ? 3 : 1;
 			for (int i = 0; i < 8; i++) {
-				ushort segmentId = NetManager.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
+				ushort segmentId = node.GetSegment(i);
 				if (segmentId == 0)
 					continue;
 
@@ -447,7 +448,8 @@ namespace TrafficManager.UI.SubTools {
 
 						Vector3? pos = null;
 						bool isSource = false;
-						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, laneInfo, out isSource, out pos)) {
+						bool isTarget = false;
+						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, laneInfo, out isSource, out isTarget, out pos)) {
 
 							pos = (Vector3)pos + offset;
 							float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(((Vector3)pos));
@@ -462,6 +464,7 @@ namespace TrafficManager.UI.SubTools {
 								secondaryPosition = (Vector3)pos,
 								color = colors[nodeMarkers.Count],
 								isSource = isSource,
+								isTarget = isTarget,
 								laneType = laneInfo.m_laneType,
 								vehicleType = laneInfo.m_vehicleType,
 								innerSimilarLaneIndex = ((byte)(laneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
@@ -486,7 +489,7 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 
 				foreach (NodeLaneMarker laneMarker2 in nodeMarkers) {
-					if (laneMarker2.isSource)
+					if (!laneMarker2.isTarget)
 						continue;
 
 					if (connections.Contains(laneMarker2.laneId))

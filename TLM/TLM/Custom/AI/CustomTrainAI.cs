@@ -58,6 +58,10 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+			if (!Options.isStockLaneChangerUsed()) {
+				// Advanced AI traffic measurement
+				VehicleStateManager.Instance.LogTraffic(vehicleId);
+			}
 			// NON-STOCK CODE END
 
 			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
@@ -268,12 +272,6 @@ namespace TrafficManager.Custom.AI {
 				}
 				if (targetNodeId == prevTargetNodeId) {
 					float oldMaxSpeed = maxSpeed;
-
-					if (!Options.isStockLaneChangerUsed()) {
-						// Advanced AI traffic measurement
-						VehicleStateManager.Instance.LogTraffic(vehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
-					}
-
 					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed);
 					if (!mayChange) {
 						return;

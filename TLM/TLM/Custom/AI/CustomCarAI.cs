@@ -68,6 +68,10 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+			if (!Options.isStockLaneChangerUsed()) {
+				// Advanced AI traffic measurement
+				VehicleStateManager.Instance.LogTraffic(vehicleId);
+			}
 			// NON-STOCK CODE END
 
 			Vector3 lastFramePosition = vehicleData.GetLastFramePosition();
@@ -160,13 +164,6 @@ namespace TrafficManager.Custom.AI {
 
 			bool isRecklessDriver = VehicleStateManager.Instance.IsRecklessDriver(vehicleId, ref vehicleData); // NON-STOCK CODE
 			if (targetNodeId == prevTargetNodeId && withinBrakingDistance) {
-				// NON-STOCK CODE START
-				if (!Options.isStockLaneChangerUsed()) {
-					// Advanced AI traffic measurement
-					VehicleStateManager.Instance.LogTraffic(vehicleId, ref vehicleData, position.m_segment, position.m_lane, true);
-				}
-				// NON-STOCK CODE END
-
 				if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
 					return;
 			}

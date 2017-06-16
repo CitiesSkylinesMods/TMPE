@@ -315,7 +315,7 @@ namespace TrafficManager.Manager {
 												if (Options.simAccuracy >= 4) {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												} else {
-													hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
+													hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
 #if DEBUG
 													if (debug)
 														Log._Debug($"hasPriority: {hasPriority}");
@@ -366,7 +366,7 @@ namespace TrafficManager.Manager {
 											if (Options.simAccuracy >= 4) {
 												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 											} else {
-												hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
+												hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
 #if DEBUG
 												if (debug)
 													Log._Debug($"Vehicle {frontVehicleId}: hasPriority: {hasPriority}");
@@ -420,7 +420,7 @@ namespace TrafficManager.Manager {
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref vehicleState, ref targetNode);
+										hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
 #if DEBUG
 										if (debug)
 											Log._Debug($"hasPriority: {hasPriority}");

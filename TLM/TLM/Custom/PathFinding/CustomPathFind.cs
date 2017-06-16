@@ -1542,10 +1542,10 @@ namespace TrafficManager.Custom.PathFinding {
 				//allowLaneChangingCosts &&
 				_extVehicleType != null && // we got a valid extended vehicle type
 				((ExtVehicleType)_extVehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None && // we are a road vehicle
-				!_stablePath && // we do not need a stable path
 				enableVehicle; // we may choose vehicle lanes
 			bool calculateTrafficStats = useAdvancedAI &&
-				((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None;
+				((ExtVehicleType)_extVehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None && // we are not a bus
+				!_stablePath; // we do not need a stable path
 
 #if DEBUGNEWPF
 			if (debug)
@@ -2219,15 +2219,10 @@ namespace TrafficManager.Custom.PathFinding {
 									*/
 
 									// calculate speed metric
-									float divMetric = /*prevSpeed **/ (prevMaxSpeed + nextMaxSpeed) * 0.5f; // the division part; 0 .. (nextMaxSpeed + nextMaxSpeed)/2
-
-									// calculate density metric
-									/*if (prevSpeed <= Options.someValue13)
-										prevDensity = 1f;*/
-									float multMetric = 1f; // _conf.SpeedToDensityBalance + (1f - _conf.SpeedToDensityBalance) * prevDensity; // the multiplication part
+									float divMetric = (prevMaxSpeed + nextMaxSpeed) * 0.5f; // the division part; 0 .. (nextMaxSpeed + nextMaxSpeed)/2
 
 									// calculate density/speed metric
-									metric = /*Math.Max(0.01f, */multMetric/*)*/ / Math.Max(0.1f, divMetric);
+									metric = 1f / Math.Max(0.1f, divMetric);
 #if DEBUGNEWPF
 									metricBeforeLanes = metric;
 #endif

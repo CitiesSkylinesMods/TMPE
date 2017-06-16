@@ -650,7 +650,7 @@ namespace TrafficManager.UI {
 				if (laneTrafficDataLoaded) {
 					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "%";
 #if DEBUG
-					labelStr += ", buf: " + laneTrafficData[i].trafficBuffer + ", acc: " + laneTrafficData[i].accumulatedSpeeds;
+					labelStr += ", buf: " + laneTrafficData[i].trafficBuffer + ", acc: " + laneTrafficData[i].accumulatedSqrSpeeds;
 					labelStr += ", pfBuf: " + laneTrafficData[i].pathFindTrafficBuffer + "/" + laneTrafficData[i].lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData[i].lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
 #endif
 #if MEASUREDENSITY

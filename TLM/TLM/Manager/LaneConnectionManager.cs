@@ -349,11 +349,12 @@ namespace TrafficManager.Manager {
 				commonNodeId = nodeId1;
 		}
 
-		internal bool GetLaneEndPoint(ushort segmentId, bool startNode, byte laneIndex, uint? laneId, NetInfo.Lane laneInfo, out bool outgoing, out Vector3? pos) {
+		internal bool GetLaneEndPoint(ushort segmentId, bool startNode, byte laneIndex, uint? laneId, NetInfo.Lane laneInfo, out bool outgoing, out bool incoming, out Vector3? pos) {
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			pos = null;
 			outgoing = false;
+			incoming = false;
 
 			if ((netManager.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
 				return false;
@@ -377,12 +378,16 @@ namespace TrafficManager.Manager {
 			NetInfo.Direction laneDir = ((NetManager.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? laneInfo.m_finalDirection : NetInfo.InvertDirection(laneInfo.m_finalDirection);
 
 			if (startNode) {
-				if ((laneDir & (NetInfo.Direction.Backward | NetInfo.Direction.Avoid)) == NetInfo.Direction.Backward)
+				if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None)
 					outgoing = true;
+				if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None)
+					incoming = true;
 				pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.a;
 			} else {
-				if ((laneDir & (NetInfo.Direction.Forward | NetInfo.Direction.Avoid)) == NetInfo.Direction.Forward)
+				if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None)
 					outgoing = true;
+				if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None)
+					incoming = true;
 				pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.d;
 			}
 

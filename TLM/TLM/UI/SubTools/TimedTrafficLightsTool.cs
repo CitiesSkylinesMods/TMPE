@@ -724,6 +724,20 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.EndHorizontal();
 
 				_waitFlowBalance = GUILayout.HorizontalSlider(_waitFlowBalance, 0.001f, 10f);
+
+				// step snapping
+				if (_waitFlowBalance < 0.001f) {
+					_waitFlowBalance = 0.001f;
+				} else if (_waitFlowBalance < 0.01f) {
+					_waitFlowBalance = Mathf.Round(_waitFlowBalance * 1000f) * 0.001f;
+				} else if (_waitFlowBalance < 0.1f) {
+					_waitFlowBalance = Mathf.Round(_waitFlowBalance * 100f) * 0.01f;
+				} else if (_waitFlowBalance < 10f) {
+					_waitFlowBalance = Mathf.Round(_waitFlowBalance * 10f) * 0.1f;
+				} else {
+					_waitFlowBalance = 10f;
+				}
+
 				GUILayout.BeginHorizontal();
 				GUIStyle style = new GUIStyle();
 				style.normal.textColor = Color.white;
