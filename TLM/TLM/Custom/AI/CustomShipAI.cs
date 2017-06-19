@@ -17,14 +17,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			/// NON-STOCK CODE START ///
-			ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[vehicleID].vehicleType;
-			if (vehicleType == ExtVehicleType.None) {
-#if DEBUG
-				Log.Warning($"CustomShipAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
-#endif
-				vehicleType = ExtVehicleType.Ship;
-			} else if (vehicleType == ExtVehicleType.CargoShip)
-				vehicleType = ExtVehicleType.CargoVehicle;
+			ExtVehicleType vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI ? ExtVehicleType.PassengerShip : ExtVehicleType.CargoVehicle;
 			/// NON-STOCK CODE END ///
 
 			VehicleInfo info = this.m_info;
@@ -45,7 +38,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
+				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

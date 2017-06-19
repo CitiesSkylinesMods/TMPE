@@ -844,7 +844,7 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
-				String labelStr = "V #" + i + " is a " + (vState.spawned ? "spawned" : "DESPAWNED") + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
+				String labelStr = "V #" + i + " is a " + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
 					"d: " + driverInst?.InstanceId + " m: " + driverInst?.PathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.ParkingSpaceLocation + " lid: " + driverInst?.ParkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
@@ -865,6 +865,11 @@ namespace TrafficManager.UI {
 					continue;
 				if ((citizenInstance.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None)
 					continue;
+				if (GlobalConfig.Instance.DebugSwitches[14]) {
+					if (citizenInstance.m_path != 0) {
+						continue;
+					}
+				}
 
 				Vector3 pos = citizenInstance.GetSmoothPosition((ushort)i);
 				var screenPos = Camera.main.WorldToScreenPoint(pos);

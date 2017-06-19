@@ -78,7 +78,8 @@ namespace TrafficManager.State {
 			false, // 10: prevent routing recalculation on global configuration reload
 			false, // 11: disable custom routing
 			false, // 12: pedestrian path-find debug log
-			false // 13: priority rules debug
+			false, // 13: priority rules debug
+			false // 14: disable GUI overlay of citizens having a valid path
 		};
 
 #if DEBUG

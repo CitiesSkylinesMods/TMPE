@@ -155,6 +155,15 @@ namespace TrafficManager.State {
 
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
+			// load ext. citizen instances
+			if (_configuration.ExtCitizenInstances != null) {
+				if (!ExtCitizenInstanceManager.Instance.LoadData(_configuration.ExtCitizenInstances)) {
+					error = true;
+				}
+			} else {
+				Log.Info("Ext. citizen instance data structure undefined!");
+			}
+
 			// load priority segments
 			if (_configuration.PrioritySegments != null) {
 				if (! TrafficPriorityManager.Instance.LoadData(_configuration.PrioritySegments)) {
@@ -297,6 +306,8 @@ namespace TrafficManager.State {
 				var configuration = new Configuration();
 
 				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+
+				configuration.ExtCitizenInstances = ExtCitizenInstanceManager.Instance.SaveData(ref success);
 
 				configuration.PrioritySegments = ((ICustomDataManager<List<int[]>>)TrafficPriorityManager.Instance).SaveData(ref success);
 				configuration.CustomPrioritySegments = ((ICustomDataManager<List<Configuration.PrioritySegment>>)TrafficPriorityManager.Instance).SaveData(ref success);

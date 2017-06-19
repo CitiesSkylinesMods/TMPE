@@ -38,16 +38,16 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
 			//try {
-				/*uint curLaneId = data.m_lanes;
+				uint curLaneId = data.m_lanes;
 				int numLanes = data.Info.m_lanes.Length;
-				uint laneIndex = 0;*/
+				uint laneIndex = 0;
 
-				/*while (laneIndex < numLanes && curLaneId != 0u) {
+				while (laneIndex < numLanes && curLaneId != 0u) {
 					Flags.applyLaneArrowFlags(curLaneId);
 
 					laneIndex++;
 					curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-				}*/
+				}
 
 				SegmentEndManager.Instance.SegmentSimulationStep(segmentID);
 			/*} catch (Exception e) {

@@ -8,6 +8,7 @@ using TrafficManager.Geometry;
 using CSUtil.Commons;
 using TrafficManager.Custom.AI;
 using System.Threading;
+using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public class UtilityManager : AbstractCustomManager {
@@ -158,6 +159,13 @@ namespace TrafficManager.Manager {
 #endif
 					}
 					Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags &= ~(CitizenInstance.Flags.WaitingTransport | CitizenInstance.Flags.EnteringVehicle | CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi | CitizenInstance.Flags.WaitingPath);
+				} else {
+#if DEBUG
+					if (Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path == 0 &&
+						(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
+						Log._Debug($"Found potential floating citizen instance: {citizenInstanceId} Source building: {Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_sourceBuilding} Target building: {Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_targetBuilding} Distance to target position: {(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].GetLastFramePosition() - (Vector3)Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_targetPos).magnitude}");
+					}
+#endif
 				}
 			}
 

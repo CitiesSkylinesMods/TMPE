@@ -161,7 +161,7 @@ namespace TrafficManager.Traffic {
 				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
 #endif
 
-			if (!state.spawned) {
+			if ((state.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: Vehicle {vehicleId} is unspawned. Ignoring.");

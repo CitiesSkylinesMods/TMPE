@@ -406,7 +406,7 @@ namespace TrafficManager.Manager {
 			}
 #endif
 
-			if (!incomingState.spawned) {
+			if ((incomingState.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
 #if DEBUG
 				if (debug)
 					Log.Warning($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming vehicle is not spawned.");

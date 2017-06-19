@@ -764,7 +764,12 @@ namespace TrafficManager.TrafficLight {
 		/// Moves all custom segment lights that are associated with an invalid segment to a special container for later reuse
 		/// </summary>
 		private void BackUpInvalidStepSegments(NodeGeometry nodeGeo) {
-			Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: called for timed traffic light @ {NodeId}");
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+
+			if (debug)
+				Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: called for timed traffic light @ {NodeId}");
+#endif
 
 			ICollection<ushort> validSegments = new HashSet<ushort>();
 			foreach (SegmentEndGeometry end in nodeGeo.SegmentEndGeometries) {
@@ -775,7 +780,10 @@ namespace TrafficManager.TrafficLight {
 				validSegments.Add(end.SegmentId);
 			}
 
-			Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: valid segments @ {NodeId}: {validSegments.CollectionToString()}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: valid segments @ {NodeId}: {validSegments.CollectionToString()}");
+#endif
 
 			int i = 0;
 			foreach (TimedTrafficLightsStep step in Steps) {
@@ -784,16 +792,25 @@ namespace TrafficManager.TrafficLight {
 					if (! validSegments.Contains(e.Key)) {
 						step.InvalidSegmentLights.AddLast(e.Value);
 						invalidSegmentIds.Add(e.Key);
-						Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Detected invalid segment @ step {i}, node {NodeId}: {e.Key}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Detected invalid segment @ step {i}, node {NodeId}: {e.Key}");
+#endif
 					}
 				}
 
 				foreach (ushort invalidSegmentId in invalidSegmentIds) {
-					Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Removing invalid segment {invalidSegmentId} from step {i} @ node {NodeId}");
+#if DEBUGTTL
+					if (debug)
+						Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: Removing invalid segment {invalidSegmentId} from step {i} @ node {NodeId}");
+#endif
 					step.CustomSegmentLights.Remove(invalidSegmentId);
 				}
 
-				Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments finished for TTL step {i} @ node {NodeId}: step.CustomSegmentLights={step.CustomSegmentLights.DictionaryToString()} step.InvalidSegmentLights={step.InvalidSegmentLights.CollectionToString()}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments finished for TTL step {i} @ node {NodeId}: step.CustomSegmentLights={step.CustomSegmentLights.DictionaryToString()} step.InvalidSegmentLights={step.InvalidSegmentLights.CollectionToString()}");
+#endif
 
 				++i;
 			}
@@ -805,6 +822,10 @@ namespace TrafficManager.TrafficLight {
 		/// </summary>
 		/// <param name="nodeGeo"></param>
 		private void HandleNewSegments(NodeGeometry nodeGeo) {
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+#endif
+
 			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
@@ -813,7 +834,11 @@ namespace TrafficManager.TrafficLight {
 				if (end == null) {
 					continue;
 				}
-				Log._Debug($"TimedTrafficLights.HandleNewSegments: handling existing seg. {end.SegmentId} @ {NodeId}");
+
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.HandleNewSegments: handling existing seg. {end.SegmentId} @ {NodeId}");
+#endif
 
 				if (Steps[0].CustomSegmentLights.ContainsKey(end.SegmentId)) {
 					continue;
@@ -821,7 +846,10 @@ namespace TrafficManager.TrafficLight {
 
 				// segment was created
 				RotationOffset = 0;
-				Log._Debug($"TimedTrafficLights.HandleNewSegments: New segment detected: {end.SegmentId} @ {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.HandleNewSegments: New segment detected: {end.SegmentId} @ {NodeId}");
+#endif
 
 				int stepIndex = -1;
 				foreach (TimedTrafficLightsStep step in Steps) {
@@ -830,16 +858,25 @@ namespace TrafficManager.TrafficLight {
 					LinkedListNode<CustomSegmentLights> lightsToReuseNode = step.InvalidSegmentLights.First;
 					if (lightsToReuseNode == null) {
 						// no old segment found: create a fresh custom light
-						Log._Debug($"TimedTrafficLights.HandleNewSegments: Adding new segment {end.SegmentId} to node {NodeId} without reusing old segment");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"TimedTrafficLights.HandleNewSegments: Adding new segment {end.SegmentId} to node {NodeId} without reusing old segment");
+#endif
 						if (! step.AddSegment(end.SegmentId, end.StartNode, true)) {
-							Log.Warning($"TimedTrafficLights.HandleNewSegments: Failed to add segment {end.SegmentId} @ start {end.StartNode} to node {NodeId}");
+#if DEBUGTTL
+							if (debug)
+								Log.Warning($"TimedTrafficLights.HandleNewSegments: Failed to add segment {end.SegmentId} @ start {end.StartNode} to node {NodeId}");
+#endif
 						}
 					} else {
 						// reuse old lights
 						step.InvalidSegmentLights.RemoveFirst();
 						CustomSegmentLights lightsToReuse = lightsToReuseNode.Value;
 
-						Log._Debug($"Replacing old segment @ {NodeId} with new segment {end.SegmentId}");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"Replacing old segment @ {NodeId} with new segment {end.SegmentId}");
+#endif
 						lightsToReuse.Relocate(end.SegmentId, end.StartNode);
 						step.SetSegmentLights(end.SegmentId, lightsToReuse);
 					}
@@ -868,9 +905,16 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void ChangeLightMode(ushort segmentId, ExtVehicleType vehicleType, CustomSegmentLight.Mode mode) {
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+#endif
+
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
 			if (segGeo == null) {
-				Log.Error($"TimedTrafficLights.ChangeLightMode: No geometry information available for segment {segmentId}");
+#if DEBUGTTL
+				if (debug)
+					Log.Error($"TimedTrafficLights.ChangeLightMode: No geometry information available for segment {segmentId}");
+#endif
 				return;
 			}
 
@@ -961,65 +1005,112 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		private void UpdateSegmentEnds() {
-			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: called for node {NodeId}");
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+
+			if (debug)
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: called for node {NodeId}");
+#endif
 
 			ICollection<SegmentEndId> segmentEndsToDelete = new HashSet<SegmentEndId>();
 			// update currently set segment ends
 			foreach (SegmentEndId endId in segmentEndIds) {
-				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: updating existing segment end {endId} for node {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: updating existing segment end {endId} for node {NodeId}");
+#endif
 				if (! SegmentEndManager.Instance.UpdateSegmentEnd(endId)) {
-					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: segment end {endId} @ node {NodeId} is invalid");
+#if DEBUGTTL
+					if (debug)
+						Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: segment end {endId} @ node {NodeId} is invalid");
+#endif
 					segmentEndsToDelete.Add(endId);
 				} else {
 					SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(endId);
 					if (end.NodeId != NodeId) {
-						Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Segment end {end} is valid and updated but does not belong to TTL node {NodeId} anymore.");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Segment end {end} is valid and updated but does not belong to TTL node {NodeId} anymore.");
+#endif
 						segmentEndsToDelete.Add(endId);
 					} else {
-						Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: segment end {endId} @ node {NodeId} is valid");
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: segment end {endId} @ node {NodeId} is valid");
+#endif
 					}
 				}
 			}
 
 			// remove all invalid segment ends
 			foreach (SegmentEndId endId in segmentEndsToDelete) {
-				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing invalid segment end {endId} @ node {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing invalid segment end {endId} @ node {NodeId}");
+#endif
 				segmentEndIds.Remove(endId);
 			}
 
 			// set up new segment ends
 			NodeGeometry nodeGeo = NodeGeometry.Get(NodeId);
-			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Setting up new segment ends @ node {NodeId}. nodeGeo={nodeGeo}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Setting up new segment ends @ node {NodeId}. nodeGeo={nodeGeo}");
+#endif
+
 			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
 				if (endGeo == null) {
 					continue;
 				}
 
 				if (segmentEndIds.Contains(endGeo)) {
-					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Node {NodeId} already knows segment {endGeo.SegmentId}");
+#if DEBUGTTL
+					if (debug)
+						Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Node {NodeId} already knows segment {endGeo.SegmentId}");
+#endif
 					continue;
 				}
 
-				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Adding segment {endGeo.SegmentId} to node {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Adding segment {endGeo.SegmentId} to node {NodeId}");
+#endif
 				SegmentEnd end = SegmentEndManager.Instance.GetOrAddSegmentEnd(endGeo.SegmentId, endGeo.StartNode);
 				if (end != null) {
 					segmentEndIds.Add(end);
 				} else {
-					Log.Warning($"TimedTrafficLights.UpdateSegmentEnds: Failed to add segment end {endGeo.SegmentId} @ {endGeo.StartNode} to node {NodeId}: GetOrAddSegmentEnd returned null.");
+#if DEBUGTTL
+					if (debug)
+						Log.Warning($"TimedTrafficLights.UpdateSegmentEnds: Failed to add segment end {endGeo.SegmentId} @ {endGeo.StartNode} to node {NodeId}: GetOrAddSegmentEnd returned null.");
+#endif
 				}
 			}
-			Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: finished for node {NodeId}: {segmentEndIds.CollectionToString()}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: finished for node {NodeId}: {segmentEndIds.CollectionToString()}");
+#endif
 		}
 
 		private void DestroySegmentEnds() {
-			Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment ends @ node {NodeId}");
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+
+			if (debug)
+				Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment ends @ node {NodeId}");
+#endif
 			foreach (SegmentEndId endId in segmentEndIds) {
-				Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment end {endId} @ node {NodeId}");
+#if DEBUGTTL
+				if (debug)
+					Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment end {endId} @ node {NodeId}");
+#endif
 				// TODO only remove if no priority sign is located at the segment end (although this is currently not possible)
 				SegmentEndManager.Instance.RemoveSegmentEnd(endId);
 			}
 			segmentEndIds.Clear();
-			Log._Debug($"TimedTrafficLights.DestroySegmentEnds: finished for node {NodeId}");
+#if DEBUGTTL
+			if (debug)
+				Log._Debug($"TimedTrafficLights.DestroySegmentEnds: finished for node {NodeId}");
+#endif
 		}
 	}
 }

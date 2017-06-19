@@ -65,16 +65,16 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE END
 
 			bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-			ushort frontVehicleId;
+			ushort connectedVehicleId;
 			if (reversed) {
-				frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+				connectedVehicleId = vehicleData.GetLastVehicle(vehicleId);
 			} else {
-				frontVehicleId = vehicleId;
+				connectedVehicleId = vehicleId;
 			}
 
 			VehicleManager instance = Singleton<VehicleManager>.instance;
-			VehicleInfo info = instance.m_vehicles.m_buffer[(int)frontVehicleId].Info;
-			info.m_vehicleAI.SimulationStep(frontVehicleId, ref instance.m_vehicles.m_buffer[(int)frontVehicleId], vehicleId, ref vehicleData, 0);
+			VehicleInfo info = instance.m_vehicles.m_buffer[(int)connectedVehicleId].Info;
+			info.m_vehicleAI.SimulationStep(connectedVehicleId, ref instance.m_vehicles.m_buffer[(int)connectedVehicleId], vehicleId, ref vehicleData, 0);
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 				return;
 			}
@@ -82,12 +82,12 @@ namespace TrafficManager.Custom.AI {
 			if (flag2 != reversed) {
 				reversed = flag2;
 				if (reversed) {
-					frontVehicleId = vehicleData.GetLastVehicle(vehicleId);
+					connectedVehicleId = vehicleData.GetLastVehicle(vehicleId);
 				} else {
-					frontVehicleId = vehicleId;
+					connectedVehicleId = vehicleId;
 				}
-				info = instance.m_vehicles.m_buffer[(int)frontVehicleId].Info;
-				info.m_vehicleAI.SimulationStep(frontVehicleId, ref instance.m_vehicles.m_buffer[(int)frontVehicleId], vehicleId, ref vehicleData, 0);
+				info = instance.m_vehicles.m_buffer[(int)connectedVehicleId].Info;
+				info.m_vehicleAI.SimulationStep(connectedVehicleId, ref instance.m_vehicles.m_buffer[(int)connectedVehicleId], vehicleId, ref vehicleData, 0);
 				if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 					return;
 				}
@@ -98,30 +98,30 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 			if (reversed) {
-				frontVehicleId = instance.m_vehicles.m_buffer[(int)frontVehicleId].m_leadingVehicle;
+				connectedVehicleId = instance.m_vehicles.m_buffer[(int)connectedVehicleId].m_leadingVehicle;
 				int num2 = 0;
-				while (frontVehicleId != 0) {
-					info = instance.m_vehicles.m_buffer[(int)frontVehicleId].Info;
-					info.m_vehicleAI.SimulationStep(frontVehicleId, ref instance.m_vehicles.m_buffer[(int)frontVehicleId], vehicleId, ref vehicleData, 0);
+				while (connectedVehicleId != 0) {
+					info = instance.m_vehicles.m_buffer[(int)connectedVehicleId].Info;
+					info.m_vehicleAI.SimulationStep(connectedVehicleId, ref instance.m_vehicles.m_buffer[(int)connectedVehicleId], vehicleId, ref vehicleData, 0);
 					if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 						return;
 					}
-					frontVehicleId = instance.m_vehicles.m_buffer[(int)frontVehicleId].m_leadingVehicle;
+					connectedVehicleId = instance.m_vehicles.m_buffer[(int)connectedVehicleId].m_leadingVehicle;
 					if (++num2 > 16384) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 						break;
 					}
 				}
 			} else {
-				frontVehicleId = instance.m_vehicles.m_buffer[(int)frontVehicleId].m_trailingVehicle;
+				connectedVehicleId = instance.m_vehicles.m_buffer[(int)connectedVehicleId].m_trailingVehicle;
 				int num3 = 0;
-				while (frontVehicleId != 0) {
-					info = instance.m_vehicles.m_buffer[(int)frontVehicleId].Info;
-					info.m_vehicleAI.SimulationStep(frontVehicleId, ref instance.m_vehicles.m_buffer[(int)frontVehicleId], vehicleId, ref vehicleData, 0);
+				while (connectedVehicleId != 0) {
+					info = instance.m_vehicles.m_buffer[(int)connectedVehicleId].Info;
+					info.m_vehicleAI.SimulationStep(connectedVehicleId, ref instance.m_vehicles.m_buffer[(int)connectedVehicleId], vehicleId, ref vehicleData, 0);
 					if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 						return;
 					}
-					frontVehicleId = instance.m_vehicles.m_buffer[(int)frontVehicleId].m_trailingVehicle;
+					connectedVehicleId = instance.m_vehicles.m_buffer[(int)connectedVehicleId].m_trailingVehicle;
 					if (++num3 > 16384) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 						break;
@@ -153,7 +153,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			/// NON-STOCK CODE START ///
-			ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[vehicleID].vehicleType;
+			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
 			if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
 				Log.Warning($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
@@ -194,7 +194,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
 #if USEPATHWAITCOUNTER
 					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
 					state.PathWaitCounter = 0;

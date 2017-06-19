@@ -14,9 +14,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			//Log._Debug($"CustomFireTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
-
-			ExtVehicleType vehicleType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service;
-			VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, vehicleType);
+			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
 
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;

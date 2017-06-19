@@ -4,6 +4,21 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
+1.9.7, 06/17/2017
+- Bugfix: Using the bulldozer tool might lead to inconsistent road geometry information
+- Bugfix: Citizens that fail to approach their parked car float towards their target building
+- Parking AI: Included an improved fallback logic for some edge cases
+- Parking AI: Citizens should now be more successful in returning their cars back home  
+- Parking AI: Tuned parking radius parameters 
+- Bugfix: Parking AI: Path-finding fails if cars are parked too far away from a road
+- Performance improvements
+- Enabling despawn now does not cause all vehicles to despawn instantly 
+- Vehicle AI: Re-introduced penalties for lane changes in front of highway junctions
+- Vehicle AI: Busses prefer lanes with correct lane though over incorrect ones
+- Bugfix: "Heavy vehicles prefer outer lanes on highways" does not work
+- Bugfix: The lane connector does not allow connecting all available lane end points at train stations and on bidirectional one-lane train tracks
+- Upgrading to a road with bus lanes now clones an already existing traffic light state 
+
 1.9.6, 05/28/2017
 - Updated Simplified Chinese translation
 - Bugfix: Vehicles cannot perform u-turns at junctions with only one outgoing segment (thanks to @Sunbird for reporting this issue)

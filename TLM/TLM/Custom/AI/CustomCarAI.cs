@@ -195,6 +195,14 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
+			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+			if (vehicleType == ExtVehicleType.None) {
+#if DEBUG
+				Log.Warning($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+#endif
+				vehicleType = ExtVehicleType.RoadVehicle;
+			}
+
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
@@ -216,14 +224,6 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				// NON-STOCK CODE START
-				ExtVehicleType vehicleType = VehicleStateManager.Instance.VehicleStates[vehicleID].vehicleType;
-				if (vehicleType == ExtVehicleType.None) {
-#if DEBUG
-					Log.Warning($"CustomCarAI.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
-#endif
-					vehicleType = ExtVehicleType.RoadVehicle;
-				}
-
 				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
 					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {

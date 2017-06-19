@@ -158,9 +158,15 @@ namespace TrafficManager.TrafficLight {
 
 		}
 
-		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight) : base(segmentId, startNode) {
+		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight) : this(lightsManager, segmentId, startNode, calculateAutoPedLight, true) {
+			
+		}
+
+		public CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort segmentId, bool startNode, bool calculateAutoPedLight, bool performHousekeeping) : base(segmentId, startNode) {
 			this.lightsManager = lightsManager;
-			housekeeping(false, calculateAutoPedLight);
+			if (performHousekeeping) {
+				housekeeping(false, calculateAutoPedLight);
+			}
 		}
 
 		public bool IsAnyGreen() {
@@ -239,7 +245,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public CustomSegmentLights Clone(ICustomSegmentLightsManager newLightsManager, bool performHousekeeping=true) {
-			CustomSegmentLights clone = new CustomSegmentLights(newLightsManager != null ? newLightsManager : LightsManager, SegmentId, StartNode, false);
+			CustomSegmentLights clone = new CustomSegmentLights(newLightsManager != null ? newLightsManager : LightsManager, SegmentId, StartNode, false, false);
 			foreach (KeyValuePair<ExtVehicleType, CustomSegmentLight> e in CustomLights) {
 				clone.CustomLights.Add(e.Key, (CustomSegmentLight)e.Value.Clone());
 			}
@@ -490,8 +496,6 @@ namespace TrafficManager.TrafficLight {
 			// we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)
 
 			CustomSegmentLight mainLight = MainSegmentLight;
-			bool mainLightIsGreen = mainLight != null ? mainLight.IsMainGreen() : false;
-
 			ushort nodeId = NodeId;
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>(); // TODO improve
 			IDictionary<byte, ExtVehicleType> allAllowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypesAsDict(SegmentId, nodeId, RestrictionMode.Restricted); // TODO improve
