@@ -7,6 +7,7 @@ using TrafficManager.State;
 
 namespace TrafficManager.Manager {
 	public class OptionsManager : AbstractCustomManager, ICustomDataManager<byte[]> {
+		// TODO I contain ugly code
 		public static OptionsManager Instance { get; private set; } = null;
 
 		static OptionsManager() {

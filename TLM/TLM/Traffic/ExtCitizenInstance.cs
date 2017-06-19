@@ -9,9 +9,7 @@ using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
-	public class ExtCitizenInstance {
-		public ushort InstanceId { get; private set; }
-
+	public struct ExtCitizenInstance {
 		public enum ExtPathState {
 			/// <summary>
 			/// No path
@@ -160,99 +158,80 @@ namespace TrafficManager.Traffic {
 			Building
 		}
 
+		public ushort instanceId;
+
 		/// <summary>
 		/// Citizen path mode (used for Parking AI)
 		/// </summary>
-		public ExtPathMode PathMode {
-			get {
-				return pathMode;
-			}
-			internal set {
-#if DEBUG
-				/*if (GlobalConfig.Instance.DebugSwitches[7]) {
-					Log.Warning($"Changing PathMode for citizen instance {InstanceId}: {pathMode} -> {value}");
-				}*/
-#endif
-				pathMode = value;
-			}
-		}
-		private ExtPathMode pathMode;
+		public ExtPathMode pathMode;
 
 		/// <summary>
 		/// Number of times a formerly found parking space is already occupied after reaching its position
 		/// </summary>
-		public int FailedParkingAttempts {
-			get; internal set;
-		}
+		public int failedParkingAttempts;
 
 		/// <summary>
 		/// Segment id / Building id where a parking space has been found
 		/// </summary>
-		public ushort ParkingSpaceLocationId {
-			get; internal set;
-		}
+		public ushort parkingSpaceLocationId;
 
 		/// <summary>
 		/// Type of object (segment/building) where a parking space has been found
 		/// </summary>
-		public ExtParkingSpaceLocation ParkingSpaceLocation {
-			get; internal set;
-		}
+		public ExtParkingSpaceLocation parkingSpaceLocation;
 
 		/// <summary>
 		/// Path position that is used as a start position when parking fails
 		/// </summary>
-		public PathUnit.Position? ParkingPathStartPosition {
-			get; internal set;
-		}
+		public PathUnit.Position? parkingPathStartPosition;
 
 		/// <summary>
 		/// Walking path from (alternative) parking spot to target (only used to check if there is a valid walking path, not actually used at the moment)
 		/// </summary>
-		public uint ReturnPathId {
-			get; internal set;
-		}
+		public uint returnPathId;
 
 		/// <summary>
 		/// State of the return path
 		/// </summary>
-		public ExtPathState ReturnPathState {
-			get; internal set;
-		}
+		public ExtPathState returnPathState;
 
-		public float LastDistanceToParkedCar {
-			get; internal set;
-		}
+		/// <summary>
+		/// Last known distance to the citizen's parked car
+		/// </summary>
+		public float lastDistanceToParkedCar;
 
 		public override string ToString() {
 			return $"[ExtCitizenInstance\n" +
-				"\t" + $"InstanceId = {InstanceId}\n" +
-				"\t" + $"PathMode = {PathMode}\n" +
-				"\t" + $"FailedParkingAttempts = {FailedParkingAttempts}\n" +
-				"\t" + $"ParkingSpaceLocationId = {ParkingSpaceLocationId}\n" +
-				"\t" + $"ParkingSpaceLocation = {ParkingSpaceLocation}\n" +
-				"\t" + $"ParkingPathStartPosition = {ParkingPathStartPosition}\n" +
-				"\t" + $"ReturnPathId = {ReturnPathId}\n" +
-				"\t" + $"ReturnPathState = {ReturnPathState}\n" +
-				"\t" + $"LastDistanceToParkedCar = {LastDistanceToParkedCar}\n" +
+				"\t" + $"instanceId = {instanceId}\n" +
+				"\t" + $"pathMode = {pathMode}\n" +
+				"\t" + $"failedParkingAttempts = {failedParkingAttempts}\n" +
+				"\t" + $"parkingSpaceLocationId = {parkingSpaceLocationId}\n" +
+				"\t" + $"parkingSpaceLocation = {parkingSpaceLocation}\n" +
+				"\t" + $"parkingPathStartPosition = {parkingPathStartPosition}\n" +
+				"\t" + $"returnPathId = {returnPathId}\n" +
+				"\t" + $"returnPathState = {returnPathState}\n" +
+				"\t" + $"lastDistanceToParkedCar = {lastDistanceToParkedCar}\n" +
 				"ExtCitizenInstance]";
 		}
 
 		internal ExtCitizenInstance(ushort instanceId) {
-			this.InstanceId = instanceId;
-			Reset();
-		}
-
-		private ExtCitizenInstance() {
-
-		}
+			this.instanceId = instanceId;
+			pathMode = ExtPathMode.None;
+			failedParkingAttempts = 0;
+			parkingSpaceLocationId = 0;
+			parkingSpaceLocation = ExtParkingSpaceLocation.None;
+			parkingPathStartPosition = null;
+			returnPathId = 0;
+			returnPathState = ExtPathState.None;
+			lastDistanceToParkedCar = 0;
+			}
 
 		internal bool IsValid() {
-			return Constants.ServiceFactory.CitizenService.IsCitizenInstanceValid(InstanceId);
+			return Constants.ServiceFactory.CitizenService.IsCitizenInstanceValid(instanceId);
 		}
 
 		public uint GetCitizenId() {
-			return Singleton<CitizenManager>.instance.m_instances.m_buffer[InstanceId].m_citizen;
+			return Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_citizen;
 		}
 
 		internal void Reset() {
@@ -262,11 +241,11 @@ namespace TrafficManager.Traffic {
 			}
 #endif
 			//Flags = ExtFlags.None;
-			PathMode = ExtPathMode.None;
-			FailedParkingAttempts = 0;
-			ParkingSpaceLocation = ExtParkingSpaceLocation.None;
-			ParkingSpaceLocationId = 0;
-			LastDistanceToParkedCar = float.MaxValue;
+			pathMode = ExtPathMode.None;
+			failedParkingAttempts = 0;
+			parkingSpaceLocation = ExtParkingSpaceLocation.None;
+			parkingSpaceLocationId = 0;
+			lastDistanceToParkedCar = float.MaxValue;
 			//ParkedVehiclePosition = default(Vector3);
 			ReleaseReturnPath();
 		}
@@ -275,16 +254,16 @@ namespace TrafficManager.Traffic {
 		/// Releases the return path
 		/// </summary>
 		internal void ReleaseReturnPath() {
-			if (ReturnPathId != 0) {
+			if (returnPathId != 0) {
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[2])
 					Log._Debug($"Releasing return path {ReturnPathId} of citizen instance {InstanceId}. ReturnPathState={ReturnPathState}");
 #endif
 
-				Singleton<PathManager>.instance.ReleasePath(ReturnPathId);
-				ReturnPathId = 0;
+				Singleton<PathManager>.instance.ReleasePath(returnPathId);
+				returnPathId = 0;
 			}
-			ReturnPathState = ExtPathState.None;
+			returnPathState = ExtPathState.None;
 		}
 
 		/// <summary>
@@ -295,16 +274,16 @@ namespace TrafficManager.Traffic {
 			if (GlobalConfig.Instance.DebugSwitches[4])
 				Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {InstanceId}");
 #endif
-			if (ReturnPathId != 0 && ReturnPathState == ExtPathState.Calculating) {
-				byte returnPathFlags = CustomPathManager._instance.m_pathUnits.m_buffer[ReturnPathId].m_pathFindFlags;
+			if (returnPathId != 0 && returnPathState == ExtPathState.Calculating) {
+				byte returnPathFlags = CustomPathManager._instance.m_pathUnits.m_buffer[returnPathId].m_pathFindFlags;
 				if ((returnPathFlags & PathUnit.FLAG_READY) != 0) {
-					ReturnPathState = ExtPathState.Ready;
+					returnPathState = ExtPathState.Ready;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[4])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} SUCCEEDED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
 #endif
 				} else if ((returnPathFlags & PathUnit.FLAG_FAILED) != 0) {
-					ReturnPathState = ExtPathState.Failed;
+					returnPathState = ExtPathState.Failed;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} FAILED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
@@ -336,8 +315,8 @@ namespace TrafficManager.Traffic {
 						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
 #endif
 
-					ReturnPathId = pathId;
-					ReturnPathState = ExtPathState.Calculating;
+					returnPathId = pathId;
+					returnPathState = ExtPathState.Calculating;
 					return true;
 				}
 			}
@@ -355,7 +334,7 @@ namespace TrafficManager.Traffic {
 		/// </summary>
 		/// <returns></returns>
 		public ExtPathType GetPathType() {
-			switch (PathMode) {
+			switch (pathMode) {
 				case ExtPathMode.CalculatingCarPathToAltParkPos:
 				case ExtPathMode.CalculatingCarPathToKnownParkPos:
 				case ExtPathMode.CalculatingCarPathToTarget:

@@ -839,13 +839,13 @@ namespace TrafficManager.UI {
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 				VehicleState vState = vehStateManager.VehicleStates[(ushort)i];
-				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i]));
+				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstance((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
 				String labelStr = "V #" + i + " is a " + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h (" + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
-					"d: " + driverInst?.InstanceId + " m: " + driverInst?.PathMode.ToString() + " f: " + driverInst?.FailedParkingAttempts + " l: " + driverInst?.ParkingSpaceLocation + " lid: " + driverInst?.ParkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate;
+					"d: " + driverInst.instanceId + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -889,9 +889,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance((ushort)i);
-
-				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + extInstance.PathMode.ToString();
+				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString();
 				if (citizenInstance.m_citizen != 0) {
 					Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenInstance.m_citizen];
 					if (citizen.m_parkedVehicle != 0) {
@@ -902,7 +900,6 @@ namespace TrafficManager.UI {
 					}
 				}
 
-				
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
 
@@ -936,9 +933,9 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(0f, 1f, 0f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				ExtBuilding extBuilding = ExtBuildingManager.Instance.GetExtBuilding((ushort)i);
+				ExtBuilding extBuilding = ExtBuildingManager.Instance.ExtBuildings[i];
 
-				String labelStr = "Building " + i + ", PDemand: " + extBuilding.ParkingSpaceDemand + ", IncTDem: " + extBuilding.IncomingPublicTransportDemand + ", OutTDem: " + extBuilding.OutgoingPublicTransportDemand;
+				String labelStr = "Building " + i + ", PDemand: " + extBuilding.parkingSpaceDemand + ", IncTDem: " + extBuilding.incomingPublicTransportDemand + ", OutTDem: " + extBuilding.outgoingPublicTransportDemand;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

@@ -7,8 +7,6 @@ using UnityEngine;
 namespace TrafficManager.UI {
 	class CameraCtrl {
 		public static void GoToPos(Vector3 pos) {
-			InstanceID id = default(InstanceID);
-
 			ToolsModifierControl.cameraController.ClearTarget();
 
 			ToolsModifierControl.cameraController.m_targetPosition.x = pos.x;

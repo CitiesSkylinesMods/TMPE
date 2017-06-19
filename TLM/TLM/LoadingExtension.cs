@@ -1832,7 +1832,7 @@ namespace TrafficManager {
 				Log.Info("Redirection Vehicle::Spawn calls");
 				try {
 					Detours.Add(new Detour(typeof(Vehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Instance), typeof(CustomVehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Static)));
-				} catch (Exception e) {
+				} catch (Exception) {
 					Log.Error("Could not redirect Vehicle::Spawn");
 					detourFailed = true;
 				}
@@ -1840,7 +1840,7 @@ namespace TrafficManager {
 				Log.Info("Redirection Vehicle::Unspawn calls");
 				try {
 					Detours.Add(new Detour(typeof(Vehicle).GetMethod("Unspawn", BindingFlags.Public | BindingFlags.Instance), typeof(CustomVehicle).GetMethod("Unspawn", BindingFlags.Public | BindingFlags.Static)));
-				} catch (Exception e) {
+				} catch (Exception) {
 					Log.Error("Could not redirect Vehicle::Unspawn");
 					detourFailed = true;
 				}

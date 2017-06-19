@@ -89,7 +89,6 @@
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
-    <Compile Include="Custom\AI\CustomNetAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
@@ -191,7 +190,6 @@
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="ThreadingExtension.cs" />

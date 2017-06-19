@@ -15,8 +15,7 @@ using GenericGameBridge.Service;
 using CSUtil.Commons;
 
 namespace TrafficManager.TrafficLight {
-	// TODO [version 1.10] define TimedTrafficLights per node group, not per individual nodes
-	// TODO class marked for complete rework in version 1.10
+	// TODO define TimedTrafficLights per node group, not per individual nodes
 	public class TimedTrafficLights: IObserver<NodeGeometry> {
 		public enum FlowWaitCalcMode {
 			/// <summary>
@@ -285,7 +284,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public TimedTrafficLightsStep AddStep(int minTime, int maxTime, float waitFlowBalance, bool makeRed = false) {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			if (minTime < 0)
 				minTime = 0;
@@ -300,7 +299,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Start() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			/*if (!housekeeping())
 				return;*/
@@ -385,7 +384,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void RemoveNodeFromGroup(ushort otherNodeId) {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			NodeGroup.Remove(otherNodeId);
 			if (NodeGroup.Count <= 0) {
@@ -396,7 +395,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal bool housekeeping() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 			//Log._Debug($"Housekeeping timed light @ {NodeId}");
 
 			if (NodeGroup == null || NodeGroup.Count <= 0) {
@@ -423,7 +422,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void MoveStep(int oldPos, int newPos) {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			var oldStep = Steps[oldPos];
 
@@ -432,7 +431,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public void Stop() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			started = false;
 			foreach (TimedTrafficLightsStep step in Steps) {
@@ -446,7 +445,7 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		internal void Destroy() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO  currently, this method must be called for each node in the node group individually
 
 			started = false;
 			DestroySegmentEnds();
@@ -456,25 +455,25 @@ namespace TrafficManager.TrafficLight {
 		}
 
 		public bool IsStarted() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			return started;
 		}
 
 		public int NumSteps() {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			return Steps.Count;
 		}
 
 		public TimedTrafficLightsStep GetStep(int stepId) {
-			// TODO [version 1.10] currently, this method must be called for each node in the node group individually
+			// TODO currently, this method must be called for each node in the node group individually
 
 			return Steps[stepId];
 		}
 
 		public void SimulationStep() {
-			// TODO [version 1.10] this method is currently called on each node, but should be called on the master node only
+			// TODO this method is currently called on each node, but should be called on the master node only
 
 #if DEBUGTTL
 			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;

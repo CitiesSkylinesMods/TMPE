@@ -120,7 +120,7 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		internal SegmentDirTrafficData[] segmentDirTrafficData;
 
-		private SegmentDirTrafficData defaultSegmentDirTrafficData;
+		//private SegmentDirTrafficData defaultSegmentDirTrafficData;
 
 		private ushort[] minRelSpeeds = { MAX_SPEED, MAX_SPEED };
 		private uint[] densities = { 0, 0 };
@@ -135,9 +135,9 @@ namespace TrafficManager.Manager {
 		private TrafficMeasurementManager() {
 			laneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
 			segmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT * 2];
-			defaultSegmentDirTrafficData = new SegmentDirTrafficData();
-			defaultSegmentDirTrafficData.minSpeed = MAX_SPEED;
-			defaultSegmentDirTrafficData.meanSpeed = MAX_SPEED;
+			//defaultSegmentDirTrafficData = new SegmentDirTrafficData();
+			//defaultSegmentDirTrafficData.minSpeed = MAX_SPEED;
+			//defaultSegmentDirTrafficData.meanSpeed = MAX_SPEED;
 			for (int i = 0; i < segmentDirTrafficData.Length; ++i) {
 				segmentDirTrafficData[i].minSpeed = MAX_SPEED;
 				segmentDirTrafficData[i].meanSpeed = MAX_SPEED;

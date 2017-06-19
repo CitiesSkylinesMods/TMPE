@@ -28,18 +28,22 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		private static bool ClearTrafficRequested = false;
 
+#if DEBUG
 		/// <summary>
 		/// Determines if debug output should be printed
 		/// </summary>
 		private static bool PrintDebugInfoRequested = false;
+#endif
 
 		public void RequestResetStuckEntities() {
 			ResetStuckEntitiesRequested = true;
 		}
 
+#if DEBUG
 		public void RequestPrintDebugInfo() {
 			PrintDebugInfoRequested = true;
 		}
+#endif
 
 		internal void SimulationStep() {
 			if (ResetStuckEntitiesRequested) {

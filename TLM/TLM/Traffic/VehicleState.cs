@@ -378,11 +378,8 @@ namespace TrafficManager.Traffic {
 				return;
 			}
 
-			ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
-			if (driverExtInstance != null) {
-				driverExtInstance.Reset();
-			}
-
+			ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId])].Reset();
+			
 			Unlink();
 
 			currentSegmentId = 0;

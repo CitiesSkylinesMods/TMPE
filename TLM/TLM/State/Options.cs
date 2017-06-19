@@ -197,7 +197,7 @@ namespace TrafficManager.State {
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
 			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
-			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions") + " (BETA feature)", parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
+			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
@@ -229,7 +229,7 @@ namespace TrafficManager.State {
 			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
-			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking") + " (BETA feature)", prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
 
 			// VEHICLE RESTRICTIONS
 			++tabIndex;

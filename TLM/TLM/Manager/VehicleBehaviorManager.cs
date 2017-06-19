@@ -74,8 +74,6 @@ namespace TrafficManager.Manager {
 		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, ref Vehicle.Frame lastFrameData, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.TTLDebugNodeId <= 0 || targetNodeId == GlobalConfig.Instance.TTLDebugNodeId);
-#else
-			bool debug = false;
 #endif
 			if (prevTargetNodeId != targetNodeId
 				|| (!Options.enableDespawning && vehicleData.m_blockCounter == 255) // NON-STOCK CODE

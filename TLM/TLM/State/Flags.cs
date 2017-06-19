@@ -12,6 +12,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Util;
 
 namespace TrafficManager.State {
+	[Obsolete]
 	public class Flags {
 		[Flags]
 		public enum LaneArrows { // compatible with NetLane.Flags

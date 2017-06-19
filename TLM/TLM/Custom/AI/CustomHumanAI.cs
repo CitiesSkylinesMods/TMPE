@@ -12,7 +12,6 @@ using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
 using CSUtil.Commons;
-using static TrafficManager.Manager.AdvancedParkingManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
@@ -45,7 +44,7 @@ namespace TrafficManager.Custom.AI {
 
 				ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 				if (Options.prohibitPocketCars) {
-					finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
+					finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID)}");
@@ -115,69 +114,7 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
-				// check if the citizen has reached a parked car or target
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
-
-				if (extInstance.PathMode == ExtPathMode.WalkingToParkedCar || extInstance.PathMode == ExtPathMode.ApproachingParkedCar) {
-					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
-					if (parkedVehicleId == 0) {
-						// citizen is reaching their parked car but does not own a parked car
-#if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log.Warning($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.PathMode}) but parked car has disappeared. RESET.");
-#endif
-
-						extInstance.Reset();
-
-						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
-						this.InvalidPath(instanceID, ref instanceData);
-						return;
-					} else {
-						ParkedCarApproachState approachState = AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(instanceID, ref instanceData, physicsLodRefPos, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
-						switch (approachState) {
-							case ParkedCarApproachState.None:
-							default:
-								break;
-							case ParkedCarApproachState.Approaching:
-								// citizen approaches their parked car
-								return;
-							case ParkedCarApproachState.Approached:
-								// citizen reached their parked car
-#if DEBUG
-								if (GlobalConfig.Instance.DebugSwitches[4])
-									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrived at parked car. PathMode={extInstance.PathMode}");
-#endif
-								if (instanceData.m_path != 0) {
-									Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
-									instanceData.m_path = 0;
-								}
-								instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
-								if (!this.StartPathFind(instanceID, ref instanceData)) {
-									instanceData.Unspawn(instanceID);
-									extInstance.Reset();
-								}
-
-								return;
-							case ParkedCarApproachState.Failure:
-#if DEBUG
-								if (GlobalConfig.Instance.DebugSwitches[2])
-									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.PathMode}");
-#endif
-								// repeat path-finding
-								instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-								instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
-								this.InvalidPath(instanceID, ref instanceData);
-								return;
-
-						}
-					}
-				} else if ((extInstance.PathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
-						extInstance.PathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget ||
-						extInstance.PathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget)
-				) {
-					AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData);
-				}
+				ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos);
 			}
 			// NON-STOCK CODE END
 
@@ -200,6 +137,70 @@ namespace TrafficManager.Custom.AI {
 				instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
 				this.ArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);
+			}
+		}
+
+		internal void ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
+			// check if the citizen has reached a parked car or target
+			if (extInstance.pathMode == ExtPathMode.WalkingToParkedCar || extInstance.pathMode == ExtPathMode.ApproachingParkedCar) {
+				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
+				if (parkedVehicleId == 0) {
+					// citizen is reaching their parked car but does not own a parked car
+#if DEBUG
+						if (GlobalConfig.Instance.DebugSwitches[2])
+							Log.Warning($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.PathMode}) but parked car has disappeared. RESET.");
+#endif
+
+					extInstance.Reset();
+
+					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
+					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+					this.InvalidPath(instanceID, ref instanceData);
+					return;
+				} else {
+					AdvancedParkingManager.ParkedCarApproachState approachState = AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(instanceID, ref instanceData, ref extInstance, physicsLodRefPos, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
+					switch (approachState) {
+						case AdvancedParkingManager.ParkedCarApproachState.None:
+						default:
+							break;
+						case AdvancedParkingManager.ParkedCarApproachState.Approaching:
+							// citizen approaches their parked car
+							return;
+						case AdvancedParkingManager.ParkedCarApproachState.Approached:
+							// citizen reached their parked car
+#if DEBUG
+								if (GlobalConfig.Instance.DebugSwitches[4])
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrived at parked car. PathMode={extInstance.PathMode}");
+#endif
+							if (instanceData.m_path != 0) {
+								Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
+								instanceData.m_path = 0;
+							}
+							instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
+							if (!this.StartPathFind(instanceID, ref instanceData)) {
+								instanceData.Unspawn(instanceID);
+								extInstance.Reset();
+							}
+
+							return;
+						case AdvancedParkingManager.ParkedCarApproachState.Failure:
+#if DEBUG
+								if (GlobalConfig.Instance.DebugSwitches[2])
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.PathMode}");
+#endif
+							// repeat path-finding
+							instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
+							instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+							this.InvalidPath(instanceID, ref instanceData);
+							return;
+
+					}
+				}
+			} else if ((extInstance.pathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
+					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget ||
+					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget)
+			) {
+				AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData, ref extInstance);
 			}
 		}
 

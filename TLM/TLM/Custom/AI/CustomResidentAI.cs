@@ -116,8 +116,7 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
-				ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, extInstance);
+				ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
 			}
 			// NON-STOCK CODE END
 			return ret;
@@ -131,8 +130,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			bool forceTaxi = false;
 			if (Options.prohibitPocketCars) {
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
-				if (extInstance.PathMode == ExtPathMode.TaxiToTarget) {
+				if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID].pathMode == ExtPathMode.TaxiToTarget) {
 					forceTaxi = true;
 				}
 			}
@@ -172,7 +170,6 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			VehicleInfo carInfo = null;
 			if (Options.prohibitPocketCars && useCar && !useTaxi) {
-				ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID);
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 				if (parkedVehicleId != 0) {
 #if DEBUG

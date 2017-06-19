@@ -109,7 +109,6 @@ namespace TrafficManager.UI.SubTools {
 				Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
 
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
-				var hoveredSign = false;
 
 				ushort removedNodeId = 0;
 				bool showRemoveButton = false;

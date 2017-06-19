@@ -23,6 +23,8 @@ using CSUtil.Commons;
 /// </summary>
 namespace TrafficManager.Traffic {
 	public class SegmentEnd : SegmentEndId {
+		// TODO convert to struct
+
 		[Obsolete]
 		public ushort NodeId {
 			get {

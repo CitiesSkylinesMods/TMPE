@@ -16,7 +16,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				Color? color;
-				if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, infoMode, out color)) {
+				if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID], infoMode, out color)) {
 					return (Color)color;
 				}
 			}

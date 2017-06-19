@@ -7,6 +7,8 @@ The term *segment end* represents the directional component of traffic at one se
 
 *Incoming* traffic at segment ends always flows to the node where *outgoing* traffic flows away from the node.
 ## Classes
+- **GeometryCalculationMode**: Controls propagation when performing geometry calculations.
 - **NodeGeometry**: Holds all connected segment end geometries.   
 - **SegmentEndGeometry**: Stores information about a segment at one connected node.
+- **SegmentEndId**: Abstract class to represent segment ends
 - **SegmentGeometry**: Stores general information about a segment and holds references to both segment ends.

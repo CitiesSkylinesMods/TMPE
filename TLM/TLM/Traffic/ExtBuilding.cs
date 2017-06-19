@@ -7,86 +7,96 @@ using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager.Traffic {
-	public class ExtBuilding {
-		private ushort BuildingId;
+	public struct ExtBuilding {
+		/// <summary>
+		/// Building id
+		/// </summary>
+		public ushort buildingId;
 
-		public byte ParkingSpaceDemand { get; private set; }
+		/// <summary>
+		/// Current parking space demand (0-100)
+		/// </summary>
+		public byte parkingSpaceDemand;
 
-		public byte IncomingPublicTransportDemand { get; private set; }
+		/// <summary>
+		/// Current incoming public transport demand (0-100)
+		/// </summary>
+		public byte incomingPublicTransportDemand;
 
-        public byte OutgoingPublicTransportDemand { get; private set; }
+		/// <summary>
+		/// Current outgoing public transport demand (0-100)
+		/// </summary>
+		public byte outgoingPublicTransportDemand;
 
 		public override string ToString() {
 			return $"[ExtBuilding {base.ToString()}\n" +
-				"\t" + $"BuildingId = {BuildingId}\n" +
-				"\t" + $"ParkingSpaceDemand = {ParkingSpaceDemand}\n" +
-				"\t" + $"IncomingPublicTransportDemand = {IncomingPublicTransportDemand}\n" +
-				"\t" + $"OutgoingPublicTransportDemand = {OutgoingPublicTransportDemand}\n" +
+				"\t" + $"buildingId = {buildingId}\n" +
+				"\t" + $"parkingSpaceDemand = {parkingSpaceDemand}\n" +
+				"\t" + $"incomingPublicTransportDemand = {incomingPublicTransportDemand}\n" +
+				"\t" + $"outgoingPublicTransportDemand = {outgoingPublicTransportDemand}\n" +
 				"ExtBuilding]";
 		}
 
 		internal ExtBuilding(ushort buildingId) {
-			this.BuildingId = buildingId;
-			Reset();
-		}
-
-		private ExtBuilding() {
-
+			this.buildingId = buildingId;
+			parkingSpaceDemand = 0;
+			incomingPublicTransportDemand = 0;
+			outgoingPublicTransportDemand = 0;
 		}
 
 		public bool IsValid() {
-			return Constants.ServiceFactory.BuildingService.IsBuildingValid(BuildingId);
+			return Constants.ServiceFactory.BuildingService.IsBuildingValid(buildingId);
 		}
 
 		internal void Reset() {
-			ParkingSpaceDemand = 0;
-            IncomingPublicTransportDemand = 0;
-            OutgoingPublicTransportDemand = 0;
+			parkingSpaceDemand = 0;
+            incomingPublicTransportDemand = 0;
+            outgoingPublicTransportDemand = 0;
 		}
 
 		internal void AddParkingSpaceDemand(uint delta) {
-			ParkingSpaceDemand = (byte)Math.Min(100, (int)ParkingSpaceDemand + delta);
+			parkingSpaceDemand = (byte)Math.Min(100, (int)parkingSpaceDemand + delta);
 			RequestColorUpdate();
 		}
 
 		internal void RemoveParkingSpaceDemand(uint delta) {
-			ParkingSpaceDemand = (byte)Math.Max(0, (int)ParkingSpaceDemand - delta);
+			parkingSpaceDemand = (byte)Math.Max(0, (int)parkingSpaceDemand - delta);
 			RequestColorUpdate();
 		}
 
 		internal void ModifyParkingSpaceDemand(Vector3 parkPos, int minDelta=-10, int maxDelta=10) {
-			Vector3 buildingPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[BuildingId].m_position;
+			Vector3 buildingPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId].m_position;
 			float distance = Mathf.Clamp((parkPos - buildingPos).magnitude, 0f, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding);
 
 			float delta = (float)(maxDelta - minDelta) * (distance / GlobalConfig.Instance.MaxParkedCarDistanceToBuilding) + (float)minDelta;
-			ParkingSpaceDemand = (byte)Mathf.Clamp((int)ParkingSpaceDemand + (int)Mathf.Round(delta), 0, 100);
+			parkingSpaceDemand = (byte)Mathf.Clamp((int)parkingSpaceDemand + (int)Mathf.Round(delta), 0, 100);
 			RequestColorUpdate();
 		}
 
 		internal void AddPublicTransportDemand(uint delta, bool outgoing) {
-            byte oldDemand = outgoing ? OutgoingPublicTransportDemand : IncomingPublicTransportDemand;
+            byte oldDemand = outgoing ? outgoingPublicTransportDemand : incomingPublicTransportDemand;
 			byte newDemand = (byte)Math.Min(100, (int)oldDemand + delta);
             if (outgoing)
-                OutgoingPublicTransportDemand = newDemand;
+                outgoingPublicTransportDemand = newDemand;
             else
-                IncomingPublicTransportDemand = newDemand;
+                incomingPublicTransportDemand = newDemand;
 
             RequestColorUpdate();
 		}
 
 		internal void RemovePublicTransportDemand(uint delta, bool outgoing) {
-            byte oldDemand = outgoing ? OutgoingPublicTransportDemand : IncomingPublicTransportDemand;
+            byte oldDemand = outgoing ? outgoingPublicTransportDemand : incomingPublicTransportDemand;
             byte newDemand = (byte)Math.Max(0, (int)oldDemand - delta);
             if (outgoing)
-                OutgoingPublicTransportDemand = newDemand;
+                outgoingPublicTransportDemand = newDemand;
             else
-                IncomingPublicTransportDemand = newDemand;
+                incomingPublicTransportDemand = newDemand;
 
 			RequestColorUpdate();
 		}
 
 		private void RequestColorUpdate() {
-			Singleton<BuildingManager>.instance.UpdateBuildingColors(BuildingId);
+			Singleton<BuildingManager>.instance.UpdateBuildingColors(buildingId);
 		}
 	}
 }

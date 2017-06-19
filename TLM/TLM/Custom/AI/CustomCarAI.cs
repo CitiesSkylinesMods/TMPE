@@ -43,7 +43,7 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				if (Options.prohibitPocketCars) {
-					mainPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, mainPathState);
+					mainPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstance(vehicleId, ref vehicleData)], mainPathState);
 				}
 				// NON-STOCK CODE END
 

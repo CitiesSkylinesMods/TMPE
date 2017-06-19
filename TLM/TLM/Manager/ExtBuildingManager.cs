@@ -23,7 +23,7 @@ namespace TrafficManager.Manager {
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>
-		private ExtBuilding[] ExtBuildings = null;
+		public ExtBuilding[] ExtBuildings = null;
 
 		private ExtBuildingManager() {
 			ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
@@ -36,20 +36,11 @@ namespace TrafficManager.Manager {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Extended building data:");
 			for (int i = 0; i < ExtBuildings.Length; ++i) {
-				if (ExtBuildings[i] == null || ! ExtBuildings[i].IsValid()) {
+				if (! ExtBuildings[i].IsValid()) {
 					continue;
 				}
 				Log._Debug($"Building {i}: {ExtBuildings[i]}");
 			}
-		}
-
-		/// <summary>
-		/// Retrieves the additional building data for the given building id.
-		/// </summary>
-		/// <param name="instanceId"></param>
-		/// <returns>the additional citizen instance data</returns>
-		public ExtBuilding GetExtBuilding(ushort buildingId) {
-			return ExtBuildings[buildingId];
 		}
 		
 		public override void OnLevelUnloading() {

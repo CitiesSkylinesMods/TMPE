@@ -18,6 +18,11 @@ namespace TrafficManager.Manager {
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
+		/// <summary>
+		/// Known vehicles and their current known positions. Index: vehicle id
+		/// </summary>
+		internal VehicleState[] VehicleStates = null;
+
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
 		}
@@ -32,11 +37,6 @@ namespace TrafficManager.Manager {
 				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
 			}
 		}
-
-		/// <summary>
-		/// Known vehicles and their current known positions. Index: vehicle id
-		/// </summary>
-		internal VehicleState[] VehicleStates = null;
 
 		private VehicleStateManager() {
 			VehicleStates = new VehicleState[VehicleManager.MAX_VEHICLE_COUNT];

@@ -17,7 +17,7 @@ User manual: http://www.viathinksoft.de/tmpe
 - Vehicle AI: Busses prefer lanes with correct lane though over incorrect ones
 - Bugfix: "Heavy vehicles prefer outer lanes on highways" does not work
 - Bugfix: The lane connector does not allow connecting all available lane end points at train stations and on bidirectional one-lane train tracks
-- Upgrading to a road with bus lanes now clones an already existing traffic light state 
+- Upgrading to a road with bus lanes now copies an already existing traffic light state to the new traffic light 
 
 1.9.6, 05/28/2017
 - Updated Simplified Chinese translation
