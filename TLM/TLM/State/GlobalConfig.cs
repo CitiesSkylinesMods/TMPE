@@ -114,7 +114,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// base lane changing cost factor on highways
 		/// </summary>
-		public float HighwayLaneChangingBaseCost = 1.2f;
+		public float HighwayLaneChangingBaseCost = 1.1f;
 
 		/// <summary>
 		/// base lane changing cost factor on city streets

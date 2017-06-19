@@ -106,8 +106,6 @@ namespace TrafficManager.Custom.AI {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			} else if ((int)vehicleData.m_blockCounter >= maxBlockCounter && Options.enableDespawning) { // NON-STOCK CODE
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if (!Options.enableDespawning) {
-				vehicleData.m_blockCounter = 0; // NON-STOCK CODE
 			}
 		}
 
@@ -237,9 +235,88 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
+		/*public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
+			// NON-STOCK CODE START
+			if (! Options.enableDespawning && vehicleData.m_blockCounter == 255) {
+				return;
+			}
+			// NON-STOCK CODE END
+
+			Vector3 targetPosDiff = (Vector3)vehicleData.m_targetPos3 - frameData.m_position;
+			Vector3 targetPosDir = frameData.m_position + Vector3.ClampMagnitude(targetPosDiff, maxDistance);
+			Vector3 min = Vector3.Min(vehicleData.m_segment.Min(), targetPosDir);
+			Vector3 max = Vector3.Max(vehicleData.m_segment.Max(), targetPosDir);
+			VehicleManager instance = Singleton<VehicleManager>.instance;
+			int gridMinJ = Mathf.Max((int)((min.x - 10f) / VehicleManager.VEHICLEGRID_CELL_SIZE + VehicleManager.VEHICLEGRID_RESOLUTION / 2f), 0);
+			int gridMinI = Mathf.Max((int)((min.z - 10f) / VehicleManager.VEHICLEGRID_CELL_SIZE + VehicleManager.VEHICLEGRID_RESOLUTION / 2f), 0);
+			int gridMaxJ = Mathf.Min((int)((max.x + 10f) / VehicleManager.VEHICLEGRID_CELL_SIZE + VehicleManager.VEHICLEGRID_RESOLUTION / 2f), VehicleManager.VEHICLEGRID_RESOLUTION - 1);
+			int gridMaxI = Mathf.Min((int)((max.z + 10f) / VehicleManager.VEHICLEGRID_CELL_SIZE + VehicleManager.VEHICLEGRID_RESOLUTION / 2f), VehicleManager.VEHICLEGRID_RESOLUTION - 1);
+			for (int i = gridMinI; i <= gridMaxI; i++) {
+				for (int j = gridMinJ; j <= gridMaxJ; j++) {
+					ushort otherVehicleId = instance.m_vehicleGrid[i * VehicleManager.VEHICLEGRID_RESOLUTION + j];
+					int numIters = 0;
+					while (otherVehicleId != 0) {
+						otherVehicleId = CheckOtherVehicle(vehicleID, ref vehicleData, ref frameData, ref maxSpeed, ref blocked, ref collisionPush, maxBraking, otherVehicleId, ref instance.m_vehicles.m_buffer[(int)otherVehicleId], min, max, lodPhysics);
+						if (++numIters > VehicleManager.MAX_VEHICLE_COUNT) {
+							CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+							break;
+						}
+					}
+				}
+			}
+			if (lodPhysics == 0) {
+				CitizenManager citMan = Singleton<CitizenManager>.instance;
+				float lenSum = 0f;
+				Vector3 b = vehicleData.m_segment.b;
+				Vector3 bSubA = vehicleData.m_segment.b - vehicleData.m_segment.a;
+				for (int k = 0; k < 4; k++) {
+					Vector3 otherTargetPos = vehicleData.GetTargetPos(k);
+					Vector3 otherTargetPosDiff = otherTargetPos - b;
+					if (Vector3.Dot(bSubA, otherTargetPosDiff) > 0f) {
+						float magnitude = otherTargetPosDiff.magnitude;
+						if (magnitude > 0.01f) {
+							Segment3 segment = new Segment3(b, otherTargetPos);
+							min = segment.Min();
+							max = segment.Max();
+							int gridMinM = Mathf.Max((int)((min.x - 3f) / CitizenManager.CITIZENGRID_CELL_SIZE + CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0);
+							int gridMinL = Mathf.Max((int)((min.z - 3f) / CitizenManager.CITIZENGRID_CELL_SIZE + CitizenManager.CITIZENGRID_RESOLUTION / 2f), 0);
+							int gridMaxM = Mathf.Min((int)((max.x + 3f) / CitizenManager.CITIZENGRID_CELL_SIZE + CitizenManager.CITIZENGRID_RESOLUTION / 2f), CitizenManager.CITIZENGRID_RESOLUTION - 1);
+							int gridMaxL = Mathf.Min((int)((max.z + 3f) / CitizenManager.CITIZENGRID_CELL_SIZE + CitizenManager.CITIZENGRID_RESOLUTION / 2f), CitizenManager.CITIZENGRID_RESOLUTION - 1);
+							for (int l = gridMinL; l <= gridMaxL; l++) {
+								for (int m = gridMinM; m <= gridMaxM; m++) {
+									ushort citizenInstanceId = citMan.m_citizenGrid[l * CitizenManager.CITIZENGRID_RESOLUTION + m];
+									int numIters = 0;
+									while (citizenInstanceId != 0) {
+										citizenInstanceId = CheckCitizen(vehicleID, ref vehicleData, segment, lenSum, magnitude, ref maxSpeed, ref blocked, maxBraking, citizenInstanceId, ref citMan.m_instances.m_buffer[(int)citizenInstanceId], min, max);
+										if (++numIters > CitizenManager.MAX_INSTANCE_COUNT) {
+											CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+											break;
+										}
+									}
+								}
+							}
+						}
+						bSubA = otherTargetPosDiff;
+						lenSum += magnitude;
+						b = otherTargetPos;
+					}
+				}
+			}
+		}*/
+
 		private static bool CheckOverlap(Segment3 segment, ushort ignoreVehicle, float maxVelocity) {
 			Log.Error("CustomCarAI.CheckOverlap called");
 			return false;
 		}
+
+		/*private static ushort CheckOtherVehicle(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxBraking, ushort otherID, ref Vehicle otherData, Vector3 min, Vector3 max, int lodPhysics) {
+			Log.Error("CustomCarAI.CheckOtherVehicle called");
+			return 0;
+		}
+
+		private static ushort CheckCitizen(ushort vehicleID, ref Vehicle vehicleData, Segment3 segment, float lastLen, float nextLen, ref float maxSpeed, ref bool blocked, float maxBraking, ushort otherID, ref CitizenInstance otherData, Vector3 min, Vector3 max) {
+			Log.Error("CustomCarAI.CheckCitizen called");
+			return 0;
+		}*/
 	}
 }

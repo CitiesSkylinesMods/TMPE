@@ -18,14 +18,6 @@ namespace TrafficManager.Manager {
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
-		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
-		public const float ICY_ROADS_MIN_SPEED = 8f * 0.4f; // 20 km/h
-		public const float ICY_ROADS_STUDDED_MIN_SPEED = 8f * 0.8f; // 40 km/h
-		public const float WET_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
-		public const float WET_ROADS_FACTOR = 0.75f;
-		public const float BROKEN_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
-		public const float BROKEN_ROADS_FACTOR = 0.75f;
-
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
 		}

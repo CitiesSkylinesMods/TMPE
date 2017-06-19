@@ -130,8 +130,6 @@ namespace TrafficManager.Custom.AI {
 			}
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if (!Options.enableDespawning) {
-				vehicleData.m_blockCounter = 0; // NON-STOCK CODE
 			}
 		}
 
@@ -230,33 +228,36 @@ namespace TrafficManager.Custom.AI {
 			Vector3 b = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
 			lastPos += b;
 			lastPos2 -= b;
-			float num = 0.5f * sqrVelocity / this.m_info.m_braking;
+			float breakingDist = 0.5f * sqrVelocity / this.m_info.m_braking;
 			float a3 = Vector3.Distance(lastPos, bezier.a);
 			float b2 = Vector3.Distance(lastPos2, bezier.a);
-			if (Mathf.Min(a3, b2) >= num - 5f) {
-				if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(1000f, vehicleId)) {
-					maxSpeed = 0f;
-					return;
-				}
-				Vector3 vector = bezier.Position(0.5f);
-				Segment3 segment;
-				if (Vector3.SqrMagnitude(vehicleData.m_segment.a - vector) < Vector3.SqrMagnitude(bezier.a - vector)) {
-					segment = new Segment3(vehicleData.m_segment.a, vector);
-				} else {
-					segment = new Segment3(bezier.a, vector);
-				}
-				if (segment.LengthSqr() >= 3f) {
-					segment.a += (segment.b - segment.a).normalized * 2.5f;
-					if (CustomTrainAI.CheckOverlap(vehicleId, ref vehicleData, segment, vehicleId)) {
+			if (Mathf.Min(a3, b2) >= breakingDist - 5f) {
+				if (Options.enableDespawning || vehicleData.m_blockCounter != 255) { // NON-STOCK CODE
+					if (!netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CheckSpace(1000f, vehicleId)) {
 						maxSpeed = 0f;
 						return;
 					}
-				}
-				segment = new Segment3(vector, bezier.d);
-				if (segment.LengthSqr() >= 1f && CustomTrainAI.CheckOverlap(vehicleId, ref vehicleData, segment, vehicleId)) {
-					maxSpeed = 0f;
-					return;
-				}
+					Vector3 vector = bezier.Position(0.5f);
+					Segment3 segment;
+					if (Vector3.SqrMagnitude(vehicleData.m_segment.a - vector) < Vector3.SqrMagnitude(bezier.a - vector)) {
+						segment = new Segment3(vehicleData.m_segment.a, vector);
+					} else {
+						segment = new Segment3(bezier.a, vector);
+					}
+					if (segment.LengthSqr() >= 3f) {
+						segment.a += (segment.b - segment.a).normalized * 2.5f;
+						if (CustomTrainAI.CheckOverlap(vehicleId, ref vehicleData, segment, vehicleId)) {
+							maxSpeed = 0f;
+							return;
+						}
+					}
+					segment = new Segment3(vector, bezier.d);
+					if (segment.LengthSqr() >= 1f && CustomTrainAI.CheckOverlap(vehicleId, ref vehicleData, segment, vehicleId)) {
+						maxSpeed = 0f;
+						return;
+					}
+				} // NON-STOCK CODE
+
 				//if (this.m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) { // NON-STOCK CODE
 				ushort targetNodeId;
 				if (offset < position.m_offset) {
@@ -270,6 +271,7 @@ namespace TrafficManager.Custom.AI {
 				} else {
 					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
+
 				if (targetNodeId == prevTargetNodeId) {
 					float oldMaxSpeed = maxSpeed;
 					bool mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed);

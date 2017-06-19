@@ -559,6 +559,28 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				/*Log.Info("Reverse-Redirection CarAI::CheckOtherVehicle calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCarAI).GetMethod("CheckOtherVehicle",
+							BindingFlags.NonPublic | BindingFlags.Static),
+							typeof(CarAI).GetMethod("CheckOtherVehicle",
+								BindingFlags.NonPublic | BindingFlags.Static)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CarAI::CheckOtherVehicle");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CarAI::CheckCitizen calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCarAI).GetMethod("CheckCitizen",
+							BindingFlags.NonPublic | BindingFlags.Static),
+							typeof(CarAI).GetMethod("CheckCitizen",
+								BindingFlags.NonPublic | BindingFlags.Static)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CarAI::CheckCitizen");
+					detourFailed = true;
+				}*/
+
 				Log.Info("Reverse-Redirection TrainAI::InitializePath calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("InitializePath",
@@ -1007,6 +1029,18 @@ namespace TrafficManager {
 					Log.Error("Could not redirect CarAI::SimulationStep.");
 					detourFailed = true;
 				}
+
+				/*Log.Info("Redirecting CarAI::CheckOtherVehicles Calls");
+				try {
+					Detours.Add(new Detour(typeof(CarAI).GetMethod("CheckOtherVehicles",
+								BindingFlags.Public | BindingFlags.Static),
+								typeof(CustomCarAI).GetMethod("CustomCheckOtherVehicles",
+								BindingFlags.Public | BindingFlags.Static
+								)));
+				} catch (Exception) {
+					Log.Error("Could not redirect CarAI::CheckOtherVehicles.");
+					detourFailed = true;
+				}*/
 
 				Log.Info("Redirecting CommonBuildingAI::SimulationStep Calls");
 				try {

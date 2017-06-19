@@ -91,8 +91,6 @@ namespace TrafficManager.Custom.AI {
 			}
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if (!Options.enableDespawning) {
-				vehicleData.m_blockCounter = 0; // NON-STOCK CODE
 			}
 		}
 

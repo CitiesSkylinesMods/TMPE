@@ -17,6 +17,14 @@ using static TrafficManager.Traffic.PrioritySegment;
 
 namespace TrafficManager.Manager {
 	public class VehicleBehaviorManager : AbstractCustomManager {
+		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
+		public const float ICY_ROADS_MIN_SPEED = 8f * 0.4f; // 20 km/h
+		public const float ICY_ROADS_STUDDED_MIN_SPEED = 8f * 0.8f; // 40 km/h
+		public const float WET_ROADS_MAX_SPEED = 8f * 2f; // 100 km/h
+		public const float WET_ROADS_FACTOR = 0.75f;
+		public const float BROKEN_ROADS_MAX_SPEED = 8f * 1.6f; // 80 km/h
+		public const float BROKEN_ROADS_FACTOR = 0.75f;
+
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
 
 		public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
@@ -69,7 +77,9 @@ namespace TrafficManager.Manager {
 #else
 			bool debug = false;
 #endif
-			if (prevTargetNodeId != targetNodeId) {
+			if (prevTargetNodeId != targetNodeId
+				|| (!Options.enableDespawning && vehicleData.m_blockCounter == 255) // NON-STOCK CODE
+			) {
 				// method should only be called if targetNodeId == prevTargetNode
 				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 				maxSpeed = 0f;
@@ -245,6 +255,7 @@ namespace TrafficManager.Manager {
 #endif
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 						maxSpeed = 0f;
+						vehicleData.m_blockCounter = 0;
 						return false;
 					} else {
 #if DEBUG
@@ -300,6 +311,8 @@ namespace TrafficManager.Manager {
 										Log._Debug($"Vehicle {frontVehicleId}: STOP sign. waittime={vehicleState.waitTime}, sqrSpeed={sqrSpeed}");
 #endif
 
+									maxSpeed = 0f;
+
 									if (vehicleState.waitTime < GlobalConfig.Instance.MaxPriorityWaitTime) {
 #if DEBUG
 										if (debug)
@@ -322,7 +335,7 @@ namespace TrafficManager.Manager {
 #endif
 
 													if (!hasPriority) {
-														maxSpeed = 0f;
+														vehicleData.m_blockCounter = 0;
 														return false;
 													}
 #if DEBUG
@@ -332,12 +345,10 @@ namespace TrafficManager.Manager {
 													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 												}
 											} else {
-												maxSpeed = 0;
 												return false;
 											}
 										} else {
 											vehicleState.waitTime = 0;
-											maxSpeed = 0f;
 											return false;
 										}
 									} else {
@@ -373,6 +384,7 @@ namespace TrafficManager.Manager {
 #endif
 
 												if (!hasPriority) {
+													vehicleData.m_blockCounter = 0;
 													maxSpeed = 0f;
 													return false;
 												} else {
@@ -427,6 +439,7 @@ namespace TrafficManager.Manager {
 #endif
 
 										if (!hasPriority) {
+											vehicleData.m_blockCounter = 0;
 											return false;
 										}
 #if DEBUG
@@ -458,9 +471,9 @@ namespace TrafficManager.Manager {
 		public float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, Vector3 pos, float maxSpeed, bool isRecklessDriver) {
 			var netManager = Singleton<NetManager>.instance;
 			NetInfo segmentInfo = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
-			bool highwayRules = (segmentInfo.m_netAI is RoadBaseAI && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules);
+			//bool highwayRules = (segmentInfo.m_netAI is RoadBaseAI && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules);
 
-			if (!highwayRules) {
+			/*if (!highwayRules) {*/
 				if (netManager.m_treatWetAsSnow) {
 					DistrictManager districtManager = Singleton<DistrictManager>.instance;
 					byte district = districtManager.GetDistrict(pos);
@@ -468,8 +481,8 @@ namespace TrafficManager.Manager {
 					if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.StuddedTires) != DistrictPolicies.CityPlanning.None) {
 						// NON-STOCK CODE START
 						if (Options.strongerRoadConditionEffects) {
-							if (maxSpeed > VehicleStateManager.ICY_ROADS_STUDDED_MIN_SPEED)
-								maxSpeed = VehicleStateManager.ICY_ROADS_STUDDED_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleStateManager.ICY_ROADS_STUDDED_MIN_SPEED);
+							if (maxSpeed > ICY_ROADS_STUDDED_MIN_SPEED)
+								maxSpeed = ICY_ROADS_STUDDED_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - ICY_ROADS_STUDDED_MIN_SPEED);
 						} else {
 							// NON-STOCK CODE END
 							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness * 0.0005882353f; // vanilla: -15% .. ±0%
@@ -480,8 +493,8 @@ namespace TrafficManager.Manager {
 					} else {
 						// NON-STOCK CODE START
 						if (Options.strongerRoadConditionEffects) {
-							if (maxSpeed > VehicleStateManager.ICY_ROADS_MIN_SPEED)
-								maxSpeed = VehicleStateManager.ICY_ROADS_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleStateManager.ICY_ROADS_MIN_SPEED);
+							if (maxSpeed > ICY_ROADS_MIN_SPEED)
+								maxSpeed = ICY_ROADS_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - ICY_ROADS_MIN_SPEED);
 						} else {
 							// NON-STOCK CODE END
 							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness * 0.00117647066f; // vanilla: -30% .. ±0%
@@ -492,7 +505,7 @@ namespace TrafficManager.Manager {
 				} else {
 					// NON-STOCK CODE START
 					if (Options.strongerRoadConditionEffects) {
-						float minSpeed = Math.Min(maxSpeed * VehicleStateManager.WET_ROADS_FACTOR, VehicleStateManager.WET_ROADS_MAX_SPEED);
+						float minSpeed = Math.Min(maxSpeed * WET_ROADS_FACTOR, WET_ROADS_MAX_SPEED);
 						if (maxSpeed > minSpeed)
 							maxSpeed = minSpeed + (float)(255 - netManager.m_segments.m_buffer[(int)position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - minSpeed);
 					} else {
@@ -505,7 +518,7 @@ namespace TrafficManager.Manager {
 
 				// NON-STOCK CODE START
 				if (Options.strongerRoadConditionEffects) {
-					float minSpeed = Math.Min(maxSpeed * VehicleStateManager.BROKEN_ROADS_FACTOR, VehicleStateManager.BROKEN_ROADS_MAX_SPEED);
+					float minSpeed = Math.Min(maxSpeed * BROKEN_ROADS_FACTOR, BROKEN_ROADS_MAX_SPEED);
 					if (maxSpeed > minSpeed) {
 						maxSpeed = minSpeed + (float)netManager.m_segments.m_buffer[(int)position.m_segment].m_condition * 0.0039215686f * (maxSpeed - minSpeed);
 					}
@@ -515,7 +528,7 @@ namespace TrafficManager.Manager {
 																																 // NON-STOCK CODE START
 				}
 				// NON-STOCK CODE END
-			}
+			//}
 
 			// NON-STOCK CODE START
 			if (Options.realisticSpeeds) {
@@ -531,7 +544,7 @@ namespace TrafficManager.Manager {
 					maxSpeed *= 1.4f;
 			}
 
-			maxSpeed = Math.Max(VehicleStateManager.MIN_SPEED, maxSpeed); // at least 10 km/h
+			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 																		  // NON-STOCK CODE END
 
 			return maxSpeed;

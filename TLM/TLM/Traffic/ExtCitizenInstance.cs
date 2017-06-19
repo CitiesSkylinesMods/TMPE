@@ -281,7 +281,7 @@ namespace TrafficManager.Traffic {
 					Log._Debug($"Releasing return path {ReturnPathId} of citizen instance {InstanceId}. ReturnPathState={ReturnPathState}");
 #endif
 
-				CustomPathManager._instance.ReleasePath(ReturnPathId);
+				Singleton<PathManager>.instance.ReleasePath(ReturnPathId);
 				ReturnPathId = 0;
 			}
 			ReturnPathState = ExtPathState.None;

@@ -32,8 +32,12 @@ namespace TrafficManager.UI.MainMenu {
 		}
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
-			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			UtilityManager.Instance.RequestClearTraffic();
+			ConfirmPanel.ShowModal(Translation.GetString("Clear_Traffic"), Translation.GetString("Clear_Traffic") + "?", delegate (UIComponent comp, int ret) {
+				if (ret == 1) {
+					UtilityManager.Instance.RequestClearTraffic();
+				}
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+			});
 		}
 	}
 }
