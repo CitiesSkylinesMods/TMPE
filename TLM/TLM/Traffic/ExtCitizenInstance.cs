@@ -237,7 +237,7 @@ namespace TrafficManager.Traffic {
 		internal void Reset() {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[4]) {
-				Log.Warning($"Resetting ext. citizen instance {InstanceId}");
+				Log.Warning($"Resetting ext. citizen instance {instanceId}");
 			}
 #endif
 			//Flags = ExtFlags.None;
@@ -257,7 +257,7 @@ namespace TrafficManager.Traffic {
 			if (returnPathId != 0) {
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[2])
-					Log._Debug($"Releasing return path {ReturnPathId} of citizen instance {InstanceId}. ReturnPathState={ReturnPathState}");
+					Log._Debug($"Releasing return path {returnPathId} of citizen instance {instanceId}. ReturnPathState={returnPathState}");
 #endif
 
 				Singleton<PathManager>.instance.ReleasePath(returnPathId);
@@ -272,7 +272,7 @@ namespace TrafficManager.Traffic {
 		internal void UpdateReturnPathState() {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[4])
-				Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {InstanceId}");
+				Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {instanceId}");
 #endif
 			if (returnPathId != 0 && returnPathState == ExtPathState.Calculating) {
 				byte returnPathFlags = CustomPathManager._instance.m_pathUnits.m_buffer[returnPathId].m_pathFindFlags;
@@ -280,13 +280,13 @@ namespace TrafficManager.Traffic {
 					returnPathState = ExtPathState.Ready;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[4])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} SUCCEEDED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
+						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {returnPathId} SUCCEEDED. Flags={returnPathFlags}. Setting ReturnPathState={returnPathState}");
 #endif
 				} else if ((returnPathFlags & PathUnit.FLAG_FAILED) != 0) {
 					returnPathState = ExtPathState.Failed;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {ReturnPathId} FAILED. Flags={returnPathFlags}. Setting ReturnPathState={ReturnPathState}");
+						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {returnPathId} FAILED. Flags={returnPathFlags}. Setting ReturnPathState={returnPathState}");
 #endif
 				}
 			}
@@ -312,7 +312,7 @@ namespace TrafficManager.Traffic {
 				if (CustomPathManager._instance.CreatePath(ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false, false)) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {InstanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
+						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {instanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
 #endif
 
 					returnPathId = pathId;
@@ -323,7 +323,7 @@ namespace TrafficManager.Traffic {
 
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
-				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {InstanceId}.");
+				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {instanceId}.");
 #endif
 
 			return false;

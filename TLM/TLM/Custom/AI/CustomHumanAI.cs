@@ -47,7 +47,7 @@ namespace TrafficManager.Custom.AI {
 					finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.GetExtInstance(instanceID)}");
+						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
 #endif
 				}
 
@@ -148,7 +148,7 @@ namespace TrafficManager.Custom.AI {
 					// citizen is reaching their parked car but does not own a parked car
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log.Warning($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.PathMode}) but parked car has disappeared. RESET.");
+							Log.Warning($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.pathMode}) but parked car has disappeared. RESET.");
 #endif
 
 					extInstance.Reset();
@@ -170,7 +170,7 @@ namespace TrafficManager.Custom.AI {
 							// citizen reached their parked car
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[4])
-									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrived at parked car. PathMode={extInstance.PathMode}");
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} arrived at parked car. PathMode={extInstance.pathMode}");
 #endif
 							if (instanceData.m_path != 0) {
 								Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
@@ -186,7 +186,7 @@ namespace TrafficManager.Custom.AI {
 						case AdvancedParkingManager.ParkedCarApproachState.Failure:
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[2])
-									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.PathMode}");
+									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.pathMode}");
 #endif
 							// repeat path-finding
 							instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;

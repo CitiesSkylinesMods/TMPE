@@ -39,14 +39,14 @@ namespace TrafficManager.Custom.AI {
 					case ExtPathMode.RequiresWalkingPathToParkedCar:
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.PathMode}. Switching to 'CalculatingWalkingPathToParkedCar'.");
+							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.pathMode}. Switching to 'CalculatingWalkingPathToParkedCar'.");
 #endif
 						extInstance.pathMode = ExtPathMode.CalculatingWalkingPathToParkedCar;
 						break;
 					case ExtPathMode.ParkingSucceeded:
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.PathMode}. Change to 'CalculatingWalkingPathToTarget'.");
+							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.pathMode}. Change to 'CalculatingWalkingPathToTarget'.");
 #endif
 						extInstance.pathMode = ExtPathMode.CalculatingWalkingPathToTarget;
 						break;
@@ -57,7 +57,7 @@ namespace TrafficManager.Custom.AI {
 					//default:
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.PathMode}. Change to 'None'.");
+							Log._Debug($"Citizen instance {instanceID} has CurrentPathMode={extInstance.pathMode}. Change to 'None'.");
 #endif
 						extInstance.Reset();
 						break;
@@ -73,7 +73,7 @@ namespace TrafficManager.Custom.AI {
 						if (parkedVehicleId == 0) {
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log._Debug($"CustomCitizenAI.CustomStartPathFind: Citizen instance {instanceID} should go to parked car (CurrentPathMode={extInstance.PathMode}) but parked vehicle could not be found. Setting CurrentPathMode='CalculatingWalkingPathToTarget'.");
+								Log._Debug($"CustomCitizenAI.CustomStartPathFind: Citizen instance {instanceID} should go to parked car (CurrentPathMode={extInstance.pathMode}) but parked vehicle could not be found. Setting CurrentPathMode='CalculatingWalkingPathToTarget'.");
 #endif
 							extInstance.pathMode = ExtPathMode.CalculatingWalkingPathToTarget;
 						} else {
@@ -182,7 +182,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Setting startLaneType={startLaneType}, startPos={startPos} for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode}");
+						Log._Debug($"CustomCitizenAI.CustomStartPathFind: Setting startLaneType={startLaneType}, startPos={startPos} for citizen instance {instanceID}. CurrentDepartureMode={extInstance.pathMode}");
 #endif
 
 					if (citizenData.m_targetBuilding == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[citizenData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) {
@@ -190,7 +190,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.PathMode} parkedVehicleId={parkedVehicleId}");
+							Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding parking space at target for citizen instance {instanceID}. CurrentDepartureMode={extInstance.pathMode} parkedVehicleId={parkedVehicleId}");
 #endif
 
 						// find a parking space in the vicinity of the target
@@ -203,7 +203,7 @@ namespace TrafficManager.Custom.AI {
 							allowRandomParking = false; // find a direct path to the calculated parking position
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding known parking space for citizen instance {instanceID}, parked vehicle {parkedVehicleId} succeeded and return path {extInstance.ReturnPathId} ({extInstance.ReturnPathState}) is calculating. PathMode={extInstance.PathMode}");
+								Log._Debug($"CustomCitizenAI.CustomStartPathFind: Finding known parking space for citizen instance {instanceID}, parked vehicle {parkedVehicleId} succeeded and return path {extInstance.returnPathId} ({extInstance.returnPathState}) is calculating. PathMode={extInstance.pathMode}");
 #endif
 								/*if (! extInstance.CalculateReturnPath(parkPos, endPos)) {
 									// TODO retry?
@@ -220,7 +220,7 @@ namespace TrafficManager.Custom.AI {
 					// no known parking space found. calculate direct path to target
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.PathMode} (no parking space found?). Setting it to CalculatingCarPath. parkedVehicleId={parkedVehicleId}");
+						Log._Debug($"Citizen instance {instanceID} is still at CurrentPathMode={extInstance.pathMode} (no parking space found?). Setting it to CalculatingCarPath. parkedVehicleId={parkedVehicleId}");
 #endif
 					extInstance.pathMode = ExtCitizenInstance.ExtPathMode.CalculatingCarPathToTarget;
 				}
@@ -309,7 +309,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			if (Options.prohibitPocketCars) {
 				if (GlobalConfig.Instance.DebugSwitches[2])
-					Log._Debug($"CustomCitizenAI.CustomStartPathFind: [PFFAIL] failed for citizen instance {instanceID} (CurrentPathMode={extInstance.PathMode}). startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, startPosA.offset={startPosA.m_offset}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, endPosA.offset={endPosA.m_offset}, foundStartPos={foundStartPos}, foundEndPos={foundEndPos}");
+					Log._Debug($"CustomCitizenAI.CustomStartPathFind: [PFFAIL] failed for citizen instance {instanceID} (CurrentPathMode={extInstance.pathMode}). startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, startPosA.offset={startPosA.m_offset}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, endPosA.offset={endPosA.m_offset}, foundStartPos={foundStartPos}, foundEndPos={foundEndPos}");
 			}
 #endif
 			return false;

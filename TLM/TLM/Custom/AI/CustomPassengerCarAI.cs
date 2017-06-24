@@ -121,7 +121,7 @@ namespace TrafficManager.Custom.AI {
 				//if (driverExtInstance != null) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log.Warning($"CustomPassengerCarAI.CustomStartPathFind: PathMode={driverExtInstance.PathMode} for vehicle {vehicleID}, driver citizen instance {driverExtInstance.InstanceId}!");
+						Log.Warning($"CustomPassengerCarAI.CustomStartPathFind: PathMode={driverExtInstance.pathMode} for vehicle {vehicleID}, driver citizen instance {driverExtInstance.instanceId}!");
 #endif
 
 					switch (driverExtInstance.pathMode) {
@@ -145,7 +145,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"Vehicle {vehicleID} shall move to an alternative parking position! CurrentPathMode={driverExtInstance.PathMode} FailedParkingAttempts={driverExtInstance.FailedParkingAttempts}");
+										Log._Debug($"Vehicle {vehicleID} shall move to an alternative parking position! CurrentPathMode={driverExtInstance.pathMode} FailedParkingAttempts={driverExtInstance.failedParkingAttempts}");
 #endif
 
 									if (driverExtInstance.parkingPathStartPosition != null) {
@@ -172,7 +172,7 @@ namespace TrafficManager.Custom.AI {
 									} else {
 #if DEBUG
 										if (GlobalConfig.Instance.DebugSwitches[4])
-											Log._Debug($"Increased number of parking attempts for vehicle {vehicleID}: {driverExtInstance.FailedParkingAttempts}/{GlobalConfig.Instance.MaxParkingAttempts}");
+											Log._Debug($"Increased number of parking attempts for vehicle {vehicleID}: {driverExtInstance.failedParkingAttempts}/{GlobalConfig.Instance.MaxParkingAttempts}");
 #endif
 									}
 								} else {
@@ -191,7 +191,7 @@ namespace TrafficManager.Custom.AI {
 									if (!driverExtInstance.CalculateReturnPath(parkPos, endPos)) {
 #if DEBUG
 										if (GlobalConfig.Instance.DebugSwitches[2])
-											Log._Debug($"Could not calculate return path for citizen instance {driverExtInstance.InstanceId}, vehicle {vehicleID}. Resetting instance.");
+											Log._Debug($"Could not calculate return path for citizen instance {driverExtInstance.instanceId}, vehicle {vehicleID}. Resetting instance.");
 #endif
 										driverExtInstance.Reset();
 										return false;
@@ -200,7 +200,7 @@ namespace TrafficManager.Custom.AI {
 									// no alternative parking spot found: abort
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.InstanceId} with CurrentPathMode={driverExtInstance.PathMode}! GIVING UP.");
+										Log._Debug($"No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.instanceId} with CurrentPathMode={driverExtInstance.pathMode}! GIVING UP.");
 #endif
 									driverExtInstance.Reset();
 									return false;
@@ -208,7 +208,7 @@ namespace TrafficManager.Custom.AI {
 									// calculate a direct path to target
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.InstanceId} with CurrentPathMode={driverExtInstance.PathMode}! Setting CurrentPathMode to 'CalculatingCarPath'.");
+										Log._Debug($"No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.instanceId} with CurrentPathMode={driverExtInstance.pathMode}! Setting CurrentPathMode to 'CalculatingCarPath'.");
 #endif
 									driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
 								}
@@ -415,14 +415,14 @@ namespace TrafficManager.Custom.AI {
 				if (prohibitPocketCars) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Vehicle {vehicleID} tries to park on a parking position now (flags: {vehicleData.m_flags})! CurrentPathMode={driverExtInstance.PathMode} path={vehicleData.m_path} pathPositionIndex={vehicleData.m_pathPositionIndex} segmentId={pathPos.m_segment} laneIndex={pathPos.m_lane} offset={pathPos.m_offset} nextPath={nextPath} refPos={refPos} searchDir={searchDir} home={homeID} driverCitizenId={driverCitizenId} driverCitizenInstanceId={driverCitizenInstanceId}");
+						Log._Debug($"Vehicle {vehicleID} tries to park on a parking position now (flags: {vehicleData.m_flags})! CurrentPathMode={driverExtInstance.pathMode} path={vehicleData.m_path} pathPositionIndex={vehicleData.m_pathPositionIndex} segmentId={pathPos.m_segment} laneIndex={pathPos.m_lane} offset={pathPos.m_offset} nextPath={nextPath} refPos={refPos} searchDir={searchDir} home={homeID} driverCitizenId={driverCitizenId} driverCitizenInstanceId={driverCitizenInstanceId}");
 #endif
 
 					if (driverExtInstance.pathMode == ExtCitizenInstance.ExtPathMode.DrivingToAltParkPos || driverExtInstance.pathMode == ExtCitizenInstance.ExtPathMode.DrivingToKnownParkPos) {
 						// try to use previously found parking space
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Vehicle {vehicleID} tries to park on an (alternative) parking position now! CurrentPathMode={driverExtInstance.PathMode} altParkingSpaceLocation={driverExtInstance.ParkingSpaceLocation} altParkingSpaceLocationId={driverExtInstance.ParkingSpaceLocationId}");
+							Log._Debug($"Vehicle {vehicleID} tries to park on an (alternative) parking position now! CurrentPathMode={driverExtInstance.pathMode} altParkingSpaceLocation={driverExtInstance.parkingSpaceLocation} altParkingSpaceLocationId={driverExtInstance.parkingSpaceLocationId}");
 #endif
 
 						switch (driverExtInstance.parkingSpaceLocation) {
@@ -430,7 +430,7 @@ namespace TrafficManager.Custom.AI {
 								uint parkLaneID; int parkLaneIndex;
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[2])
-									Log._Debug($"Vehicle {vehicleID} wants to park road-side @ segment {driverExtInstance.ParkingSpaceLocationId}");
+									Log._Debug($"Vehicle {vehicleID} wants to park road-side @ segment {driverExtInstance.parkingSpaceLocationId}");
 #endif
 								foundParkingSpace = AdvancedParkingManager.Instance.FindParkingSpaceRoadSideForVehiclePos(this.m_info, 0, driverExtInstance.parkingSpaceLocationId, refPos, out parkPos, out parkRot, out parkOffset, out parkLaneID, out parkLaneIndex);
 								break;
@@ -438,13 +438,13 @@ namespace TrafficManager.Custom.AI {
 								float maxDist = 9999f;
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[2])
-									Log._Debug($"Vehicle {vehicleID} wants to park @ building {driverExtInstance.ParkingSpaceLocationId}");
+									Log._Debug($"Vehicle {vehicleID} wants to park @ building {driverExtInstance.parkingSpaceLocationId}");
 #endif
 								foundParkingSpace = AdvancedParkingManager.Instance.FindParkingSpacePropAtBuilding(this.m_info, homeID, 0, driverExtInstance.parkingSpaceLocationId, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[driverExtInstance.parkingSpaceLocationId], pathPos.m_segment, refPos, ref maxDist, true, out parkPos, out parkRot, out parkOffset);
 								break;
 							default:
 #if DEBUG
-								Log.Error($"No alternative parking position stored for vehicle {vehicleID}! PathMode={driverExtInstance.PathMode}");
+								Log.Error($"No alternative parking position stored for vehicle {vehicleID}! PathMode={driverExtInstance.pathMode}");
 #endif
 								foundParkingSpace = CustomFindParkingSpace(this.m_info, homeID, refPos, searchDir, pathPos.m_segment, out parkPos, out parkRot, out parkOffset);
 								break;
@@ -465,7 +465,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 					float sqrDist = (refPos - parkPos).sqrMagnitude;
 					if (GlobalConfig.Instance.DebugSwitches[4])
-						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance?.PathMode} sqrDist={sqrDist}");
+						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance.pathMode} sqrDist={sqrDist}");
 
 					if (GlobalConfig.Instance.DebugSwitches[6] && sqrDist >= 16000) {
 						Log._Debug($"CustomPassengerCarAI.CustomParkVehicle: FORCED PAUSE. Distance very large! Vehicle {vehicleID}. dist={sqrDist}");
@@ -493,7 +493,7 @@ namespace TrafficManager.Custom.AI {
 							driverExtInstance.parkingSpaceLocationId = 0;
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log._Debug($"Vehicle {vehicleID} has reached an (alternative) parking position! CurrentPathMode={driverExtInstance.PathMode} position={parkPos}");
+								Log._Debug($"Vehicle {vehicleID} has reached an (alternative) parking position! CurrentPathMode={driverExtInstance.pathMode} position={parkPos}");
 #endif
 						//}
 					}
@@ -517,7 +517,7 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Parking failed for vehicle {vehicleID}! (flags: {vehicleData.m_flags}) pathPos segment={pathPos.m_segment}, lane={pathPos.m_lane}, offset={pathPos.m_offset}. Trying to find parking space in the vicinity. FailedParkingAttempts={driverExtInstance.FailedParkingAttempts}, CurrentPathMode={driverExtInstance.PathMode} foundParkingSpace={foundParkingSpace}");
+						Log._Debug($"Parking failed for vehicle {vehicleID}! (flags: {vehicleData.m_flags}) pathPos segment={pathPos.m_segment}, lane={pathPos.m_lane}, offset={pathPos.m_offset}. Trying to find parking space in the vicinity. FailedParkingAttempts={driverExtInstance.failedParkingAttempts}, CurrentPathMode={driverExtInstance.pathMode} foundParkingSpace={foundParkingSpace}");
 #endif
 
 					// invalidate paths of all passengers in order to force path recalculation

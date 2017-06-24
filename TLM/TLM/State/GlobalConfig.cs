@@ -79,7 +79,8 @@ namespace TrafficManager.State {
 			false, // 11: disable custom routing
 			false, // 12: pedestrian path-find debug log
 			false, // 13: priority rules debug
-			false // 14: disable GUI overlay of citizens having a valid path
+			false, // 14: disable GUI overlay of citizens having a valid path
+			false // 15: disable checking of other vehicles for trams
 		};
 
 #if DEBUG

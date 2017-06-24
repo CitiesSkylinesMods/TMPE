@@ -249,7 +249,7 @@ namespace TrafficManager.Manager {
 					// no walking path from parking position to target found. flag main path as 'failed'.
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Return path {driverExtInstance.ReturnPathId} FAILED. Forcing path-finding to fail.");
+						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Return path {driverExtInstance.returnPathId} FAILED. Forcing path-finding to fail.");
 #endif
 					driverExtInstance.Reset();
 					return ExtPathState.Failed;
@@ -258,7 +258,7 @@ namespace TrafficManager.Manager {
 					driverExtInstance.ReleaseReturnPath();
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[4])
-						Log._Debug($"CAdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.InstanceId}! CurrentPathMode={driverExtInstance.PathMode}");
+						Log._Debug($"CAdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.instanceId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[vehicleData.m_path].m_laneTypes;
 					bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
@@ -274,19 +274,19 @@ namespace TrafficManager.Manager {
 						driverExtInstance.parkingPathStartPosition = null;
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path to an alternative parking position is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.PathMode}");
+							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path to an alternative parking position is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					} else if (driverExtInstance.pathMode == ExtPathMode.CalculatingCarPathToTarget) {
 						driverExtInstance.pathMode = ExtPathMode.DrivingToTarget;
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Car path is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.PathMode}");
+							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Car path is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					} else if (driverExtInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos) {
 						driverExtInstance.pathMode = ExtPathMode.DrivingToKnownParkPos;
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Car path to known parking position is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.PathMode}");
+							Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Car path to known parking position is READY for vehicle {vehicleId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					}
 					return ExtPathState.Ready;
@@ -307,7 +307,7 @@ namespace TrafficManager.Manager {
 			if (extInstance.pathMode != ExtPathMode.ApproachingParkedCar && extInstance.pathMode != ExtPathMode.WalkingToParkedCar) {
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[4])
-					Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): citizen instance {instanceId} is not reaching a parked car ({extInstance.PathMode})");
+					Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): citizen instance {instanceId} is not reaching a parked car ({extInstance.pathMode})");
 #endif
 				return ParkedCarApproachState.None;
 			}
@@ -337,7 +337,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): citizen instance {instanceId} was walking to parked car and reached final path position. Switched PathMode to {extInstance.PathMode}.");
+						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): citizen instance {instanceId} was walking to parked car and reached final path position. Switched PathMode to {extInstance.pathMode}.");
 #endif
 				}
 			}
@@ -354,7 +354,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log.Warning($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} is currently reaching their parked car but distance increased! dist={sqrDist}, LastDistanceToParkedCar={extInstance.LastDistanceToParkedCar}.");
+							Log.Warning($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} is currently reaching their parked car but distance increased! dist={sqrDist}, LastDistanceToParkedCar={extInstance.lastDistanceToParkedCar}.");
 
 						if (GlobalConfig.Instance.DebugSwitches[6]) {
 							Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): FORCED PAUSE. Distance increased! Citizen instance {instanceId}. dist={sqrDist}");
@@ -369,7 +369,7 @@ namespace TrafficManager.Manager {
 					}
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[4])
-						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} is currently reaching their parked car (dist={sqrDist}, LastDistanceToParkedCar={extInstance.LastDistanceToParkedCar}). CurrentDepartureMode={extInstance.PathMode}");
+						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} is currently reaching their parked car (dist={sqrDist}, LastDistanceToParkedCar={extInstance.lastDistanceToParkedCar}). CurrentDepartureMode={extInstance.pathMode}");
 #endif
 
 					return ParkedCarApproachState.Approaching;
@@ -377,7 +377,7 @@ namespace TrafficManager.Manager {
 					extInstance.pathMode = ExtCitizenInstance.ExtPathMode.ParkedCarApproached;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} reached parking position (dist={sqrDist}). Set targetPos to parked vehicle position. Calculating remaining path now. CurrentDepartureMode={extInstance.PathMode}");
+						Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} reached parking position (dist={sqrDist}). Set targetPos to parked vehicle position. Calculating remaining path now. CurrentDepartureMode={extInstance.pathMode}");
 #endif
 					return ParkedCarApproachState.Approached;
 				}
@@ -433,7 +433,7 @@ namespace TrafficManager.Manager {
 				extInstance.pathMode != ExtCitizenInstance.ExtPathMode.TaxiToTarget) {
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[4])
-					Log._Debug($"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): citizen instance {instanceId} is not reaching target ({extInstance.PathMode})");
+					Log._Debug($"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): citizen instance {instanceId} is not reaching target ({extInstance.pathMode})");
 #endif
 				return false;
 			}
@@ -454,7 +454,7 @@ namespace TrafficManager.Manager {
 				extInstance.Reset();
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[2])
-					Log._Debug($"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): Citizen instance {instanceId} reached target. CurrentDepartureMode={extInstance.PathMode}");
+					Log._Debug($"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): Citizen instance {instanceId} reached target. CurrentDepartureMode={extInstance.pathMode}");
 #endif
 				return true;
 			}
@@ -540,7 +540,7 @@ namespace TrafficManager.Manager {
 						if (extInstance.pathMode != ExtPathMode.None) {
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log.Warning($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Unexpected path mode {extInstance.PathMode}! {extInstance}");
+								Log.Warning($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Unexpected path mode {extInstance.pathMode}! {extInstance}");
 #endif
 						}
 
@@ -585,7 +585,7 @@ namespace TrafficManager.Manager {
 								if (parkedVehicleId == 0) {
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}), source building {sourceBuildingId} does not have a parked vehicle! CurrentPathMode={extInstance.PathMode}");
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}), source building {sourceBuildingId} does not have a parked vehicle! CurrentPathMode={extInstance.pathMode}");
 #endif
 
 									// try to spawn parked vehicle in the vicinity of the starting point.
@@ -598,7 +598,7 @@ namespace TrafficManager.Manager {
 									if (vehicleInfo != null) {
 #if DEBUG
 										if (GlobalConfig.Instance.DebugSwitches[2])
-											Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}), source building {sourceBuildingId} is using their own passenger car. CurrentPathMode={extInstance.PathMode}");
+											Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}), source building {sourceBuildingId} is using their own passenger car. CurrentPathMode={extInstance.pathMode}");
 #endif
 
 										// determine current position vector
@@ -608,13 +608,13 @@ namespace TrafficManager.Manager {
 											currentPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_position;
 #if DEBUG
 											if (GlobalConfig.Instance.DebugSwitches[2])
-												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Taking current position from source building {sourceBuildingId} for citizen {instanceData.m_citizen} (citizen instance {instanceId}): {currentPos} CurrentPathMode={extInstance.PathMode}");
+												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Taking current position from source building {sourceBuildingId} for citizen {instanceData.m_citizen} (citizen instance {instanceId}): {currentPos} CurrentPathMode={extInstance.pathMode}");
 #endif
 										} else {
 											currentPos = instanceData.GetLastFramePosition();
 #if DEBUG
 											if (GlobalConfig.Instance.DebugSwitches[2])
-												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Taking current position from last frame position for citizen {instanceData.m_citizen} (citizen instance {instanceId}): {currentPos}. Home {homeId} pos: {Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position} CurrentPathMode={extInstance.PathMode}");
+												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Taking current position from last frame position for citizen {instanceData.m_citizen} (citizen instance {instanceId}): {currentPos}. Home {homeId} pos: {Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position} CurrentPathMode={extInstance.pathMode}");
 #endif
 										}
 
@@ -660,7 +660,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 											if (GlobalConfig.Instance.DebugSwitches[2])
-												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Parked vehicle {parkedVehicleId} of citizen instance {instanceId} is {parkedDistToTarget} units away from target building {instanceData.m_targetBuilding}. Forcing citizen to walk to target, the car should stay there. PathMode={extInstance.PathMode}");
+												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Parked vehicle {parkedVehicleId} of citizen instance {instanceId} is {parkedDistToTarget} units away from target building {instanceData.m_targetBuilding}. Forcing citizen to walk to target, the car should stay there. PathMode={extInstance.pathMode}");
 #endif
 
 											return ExtSoftPathState.FailedSoft;
@@ -694,7 +694,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[4])
-									Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}) is located at an outside connection: {sourceBuildingId} CurrentPathMode={extInstance.PathMode}");
+									Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}) is located at an outside connection: {sourceBuildingId} CurrentPathMode={extInstance.pathMode}");
 #endif
 
 								return ExtSoftPathState.Ready;
@@ -755,14 +755,14 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[4])
-										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} has entered their car and is now travelling by car (vehicleId={vehicleId}). CurrentDepartureMode={extInstance.PathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} has entered their car and is now travelling by car (vehicleId={vehicleId}). CurrentDepartureMode={extInstance.pathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
 #endif
 									return ExtSoftPathState.Ignore;
 								} else {
 									// error! parked car could not be entered (reached vehicle limit?): try to walk to target
 #if DEBUG
 									if (GlobalConfig.Instance.DebugSwitches[2])
-										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Entering parked vehicle {parkedVehicleId} failed for citizen instance {instanceId}. Trying to walk to target. CurrentDepartureMode={extInstance.PathMode}");
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Entering parked vehicle {parkedVehicleId} failed for citizen instance {instanceId}. Trying to walk to target. CurrentDepartureMode={extInstance.pathMode}");
 #endif
 
 									extInstance.Reset();
@@ -821,7 +821,7 @@ namespace TrafficManager.Manager {
 							extInstance.pathMode = ExtPathMode.WalkingToParkedCar;
 #if DEBUG
 							if (GlobalConfig.Instance.DebugSwitches[2])
-								Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} is now on their way to its parked vehicle. CurrentDepartureMode={extInstance.PathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
+								Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} is now on their way to its parked vehicle. CurrentDepartureMode={extInstance.pathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
 #endif
 							return ExtSoftPathState.Ready;
 						}
@@ -830,7 +830,7 @@ namespace TrafficManager.Manager {
 						extInstance.pathMode = ExtPathMode.WalkingToTarget;
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} is now travelling by foot to their final target. CurrentDepartureMode={extInstance.PathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
+							Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen instance {instanceId} is now travelling by foot to their final target. CurrentDepartureMode={extInstance.pathMode}, targetPos={instanceData.m_targetPos} lastFramePos={instanceData.GetLastFramePosition()}");
 #endif
 						return ExtSoftPathState.Ready;
 				}
@@ -856,7 +856,7 @@ namespace TrafficManager.Manager {
 		protected static ExtSoftPathState OnCitizenPathFindFailure(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
-				Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Path-finding failed for citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.PathMode}");
+				Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Path-finding failed for citizen instance {extInstance.instanceId}. CurrentPathMode={extInstance.pathMode}");
 #endif
 
 			// update demands
@@ -895,7 +895,7 @@ namespace TrafficManager.Manager {
 				if (parkedVehicleId != 0) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Releasing parked vehicle {parkedVehicleId} for citizen instance {extInstance.InstanceId}. CurrentPathMode={extInstance.PathMode}");
+						Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Releasing parked vehicle {parkedVehicleId} for citizen instance {extInstance.instanceId}. CurrentPathMode={extInstance.pathMode}");
 #endif
 					Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedVehicleId);
 				}
@@ -926,7 +926,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
-				Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Setting CurrentPathMode for citizen instance {extInstance.InstanceId} to {extInstance.PathMode}, ret={ret}");
+				Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceID}): Setting CurrentPathMode for citizen instance {extInstance.instanceId} to {extInstance.pathMode}, ret={ret}");
 #endif
 
 			return ret;
@@ -960,7 +960,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[4])
-				Log._Debug($"Citizen instance {extDriverInstance.InstanceId} (CurrentPathMode={extDriverInstance.PathMode}) can still use their passenger car and is either not a tourist or wants to find an alternative parking spot. Finding a parking space before starting path-finding.");
+				Log._Debug($"Citizen instance {extDriverInstance.instanceId} (CurrentPathMode={extDriverInstance.pathMode}) can still use their passenger car and is either not a tourist or wants to find an alternative parking spot. Finding a parking space before starting path-finding.");
 #endif
 
 			ExtParkingSpaceLocation knownParkingSpaceLocation;
@@ -977,7 +977,7 @@ namespace TrafficManager.Manager {
 			if (success) {
 #if DEBUG
 				if (GlobalConfig.Instance.DebugSwitches[4])
-					Log._Debug($"Found a parking spot for citizen instance {extDriverInstance.InstanceId} (CurrentPathMode={extDriverInstance.PathMode}) before starting car path: {knownParkingSpaceLocation} @ {knownParkingSpaceLocationId}");
+					Log._Debug($"Found a parking spot for citizen instance {extDriverInstance.instanceId} (CurrentPathMode={extDriverInstance.pathMode}) before starting car path: {knownParkingSpaceLocation} @ {knownParkingSpaceLocationId}");
 #endif
 
 				if (knownParkingSpaceLocation == ExtParkingSpaceLocation.RoadSide) {
@@ -989,7 +989,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Found segment {knownParkingSpaceLocationId} for road-side parking position for citizen instance {extDriverInstance.InstanceId}!");
+						Log._Debug($"Found segment {knownParkingSpaceLocationId} for road-side parking position for citizen instance {extDriverInstance.instanceId}!");
 #endif
 
 					// determine nearest sidewalk position for parking position at segment
@@ -1002,13 +1002,13 @@ namespace TrafficManager.Manager {
 						//extDriverInstance.CurrentPathMode = successMode;// ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Found an parking spot sidewalk position for citizen instance {extDriverInstance.InstanceId} @ segment {knownParkingSpaceLocationId}, laneId {laneId}, laneIndex {laneIndex}, offset={endPathPos.m_offset}! CurrentPathMode={extDriverInstance.PathMode}");
+							Log._Debug($"Found an parking spot sidewalk position for citizen instance {extDriverInstance.instanceId} @ segment {knownParkingSpaceLocationId}, laneId {laneId}, laneIndex {laneIndex}, offset={endPathPos.m_offset}! CurrentPathMode={extDriverInstance.pathMode}");
 #endif
 						return true;
 					} else {
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"Could not find an alternative parking spot sidewalk position for citizen instance {extDriverInstance.InstanceId}! CurrentPathMode={extDriverInstance.PathMode}");
+							Log._Debug($"Could not find an alternative parking spot sidewalk position for citizen instance {extDriverInstance.instanceId}! CurrentPathMode={extDriverInstance.pathMode}");
 #endif
 						return false;
 					}
@@ -1023,7 +1023,7 @@ namespace TrafficManager.Manager {
 					//extDriverInstance.CurrentPathMode = successMode;// ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"Navigating citizen instance {extDriverInstance.InstanceId} to parking building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. CurrentPathMode={extDriverInstance.PathMode} calculateEndPos={calculateEndPos}");
+						Log._Debug($"Navigating citizen instance {extDriverInstance.instanceId} to parking building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. CurrentPathMode={extDriverInstance.pathMode} calculateEndPos={calculateEndPos}");
 #endif
 					return true;
 				}
