@@ -13,6 +13,7 @@ using ColossalFramework.Globalization;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using System.Reflection;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.State {
 

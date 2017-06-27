@@ -13,6 +13,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Custom.AI {
 	class CustomVehicleAI : VehicleAI { // TODO inherit from PrefabAI (in order to keep the correct references to `base`)

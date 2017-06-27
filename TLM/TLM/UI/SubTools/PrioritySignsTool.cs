@@ -14,6 +14,8 @@ using TrafficManager.Manager;
 using TrafficManager.Util;
 using static TrafficManager.Traffic.PrioritySegment;
 using CSUtil.Commons;
+using TrafficManager.Geometry.Impl;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {

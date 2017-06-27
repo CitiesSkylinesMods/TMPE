@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Util;
 

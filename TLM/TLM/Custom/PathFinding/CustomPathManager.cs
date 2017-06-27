@@ -33,6 +33,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 		public static CustomPathManager _instance;
 
+		// TODO merge them into one struct
 		internal ExtVehicleType?[] pathUnitExtVehicleType = null;
 		internal ushort?[] pathUnitVehicleIds = null;
 		internal ExtCitizenInstance.ExtPathType?[] pathUnitPathTypes = null;

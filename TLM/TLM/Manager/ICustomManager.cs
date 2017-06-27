@@ -5,6 +5,7 @@ using System.Text;
 
 namespace TrafficManager.Manager {
 	public interface ICustomManager {
+		// TODO documentation
 		IServiceFactory Services { get; }
 		void OnBeforeLoadData();
 		void OnAfterLoadData();

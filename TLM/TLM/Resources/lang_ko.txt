@@ -172,3 +172,8 @@ Parking_restrictions 주차 제한
 Simulation 시뮬레이션
 On_roads 도로 설정
 Ban_private_cars_and_trucks_on_bus_lanes 버스전용 차선에 승용차 및 트럭 출입을 금지합니다
+default default
+flow_ratio flow ratio
+wait_ratio wait ratio
+After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
+Adaptive_step_switching Adaptive step switching

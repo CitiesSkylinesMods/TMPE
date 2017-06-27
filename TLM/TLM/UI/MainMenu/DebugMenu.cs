@@ -13,6 +13,7 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI {
 #if DEBUG

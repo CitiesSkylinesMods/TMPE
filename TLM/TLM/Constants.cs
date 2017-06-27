@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Manager;
 
 namespace TrafficManager {
 	public static class Constants {
@@ -13,6 +14,12 @@ namespace TrafficManager {
 #else
 				return CitiesGameBridge.Factory.ServiceFactory.Instance;
 #endif
+			}
+		}
+
+		public static IManagerFactory ManagerFactory {
+			get {
+				return Manager.Impl.ManagerFactory.Instance;
 			}
 		}
 	}

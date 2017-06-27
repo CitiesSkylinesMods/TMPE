@@ -12,7 +12,6 @@ using System.Xml.Serialization;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
-using static TrafficManager.TrafficLight.TimedTrafficLights;
 
 namespace TrafficManager.State {
 	[XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
@@ -80,7 +79,8 @@ namespace TrafficManager.State {
 			false, // 12: pedestrian path-find debug log
 			false, // 13: priority rules debug
 			false, // 14: disable GUI overlay of citizens having a valid path
-			false // 15: disable checking of other vehicles for trams
+			false, // 15: disable checking of other vehicles for trams
+			false // 16: debug TramBaseAI.SimulationStep (2)
 		};
 
 #if DEBUG
@@ -425,7 +425,7 @@ namespace TrafficManager.State {
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
 					if (LoadingExtension.IsGameLoaded && !conf.DebugSwitches[10]) {
-						RoutingManager.Instance.RequestFullRecalculation(true);
+						Constants.ManagerFactory.RoutingManager.RequestFullRecalculation(true);
 					}
 					return conf;
 				}

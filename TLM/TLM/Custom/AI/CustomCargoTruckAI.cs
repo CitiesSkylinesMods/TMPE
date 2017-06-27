@@ -7,6 +7,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {

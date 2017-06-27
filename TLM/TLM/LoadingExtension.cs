@@ -18,6 +18,7 @@ using TrafficManager.Custom.Manager;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Custom.Data;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {
@@ -559,7 +560,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				/*Log.Info("Reverse-Redirection CarAI::CheckOtherVehicle calls");
+				Log.Info("Reverse-Redirection CarAI::CheckOtherVehicle calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomCarAI).GetMethod("CheckOtherVehicle",
 							BindingFlags.NonPublic | BindingFlags.Static),
@@ -579,7 +580,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect CarAI::CheckCitizen");
 					detourFailed = true;
-				}*/
+				}
 
 				Log.Info("Reverse-Redirection TrainAI::InitializePath calls");
 				try {
@@ -628,6 +629,104 @@ namespace TrafficManager {
 								null)));
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect TramBaseAI::InitializePath");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection TramBaseAI::UpdatePathTargetPositions calls");
+				MethodInfo sourceMethod = null, targetMethod = null;
+				try {
+					sourceMethod = typeof(CustomTramBaseAI).GetMethod("InvokeUpdatePathTargetPositions",
+							BindingFlags.Public | BindingFlags.Static,
+								null,
+								new[]
+								{
+									typeof (TramBaseAI),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int).MakeByRefType(),
+									typeof (int),
+									typeof (int),
+									typeof (float),
+									typeof (float)
+								},
+								null);
+
+					targetMethod = typeof(TramBaseAI).GetMethod("UpdatePathTargetPositions",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int).MakeByRefType(),
+									typeof (int),
+									typeof (int),
+									typeof (float),
+									typeof (float)
+								},
+								null);
+
+					Detours.Add(new Detour(sourceMethod, targetMethod));
+				} catch (Exception e) {
+					Log.Error($"Could not reverse-redirect TramBaseAI::UpdatePathTargetPositions: {e} sourceMethod={sourceMethod} targetMethod={targetMethod}");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomTramBaseAI::GetMaxSpeed calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTramBaseAI).GetMethod("GetMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null), typeof(TramBaseAI).GetMethod("GetMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomTramBaseAI::GetMaxSpeed");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomTramBaseAI::CalculateMaxSpeed calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTramBaseAI).GetMethod("CalculateMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (float),
+									typeof (float),
+									typeof (float)
+							},
+							null), typeof(TramBaseAI).GetMethod("CalculateMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (float),
+									typeof (float),
+									typeof (float)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomTramBaseAI::CalculateMaxSpeed");
 					detourFailed = true;
 				}
 
@@ -719,7 +818,125 @@ namespace TrafficManager {
 							},
 							null)));
 				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomRoadBaseAI::CheckOverlap (2)");
+					Log.Error("Could not reverse-redirect CustomTrainAI::CheckOverlap (2)");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection TrainAI::UpdatePathTargetPositions calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("InvokeUpdatePathTargetPositions",
+							BindingFlags.Public | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (TrainAI),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int).MakeByRefType(),
+									typeof (int),
+									typeof (int),
+									typeof (float),
+									typeof (float)
+							},
+							null),
+							typeof(TrainAI).GetMethod("UpdatePathTargetPositions",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3),
+									typeof (Vector3),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int).MakeByRefType(),
+									typeof (int),
+									typeof (int),
+									typeof (float),
+									typeof (float)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect TrainAI::UpdatePathTargetPositions");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomTrainAI::Reverse calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("Reverse",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null), typeof(TrainAI).GetMethod("Reverse",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomTrainAI::Reverse");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomTrainAI::GetMaxSpeed calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("GetMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null), typeof(TrainAI).GetMethod("GetMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType()
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomTrainAI::GetMaxSpeed");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection CustomTrainAI::CalculateMaxSpeed calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("CalculateMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (float),
+									typeof (float),
+									typeof (float)
+							},
+							null), typeof(TrainAI).GetMethod("CalculateMaxSpeed",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (float),
+									typeof (float),
+									typeof (float)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomTrainAI::CalculateMaxSpeed");
 					detourFailed = true;
 				}
 
@@ -1030,7 +1247,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				/*Log.Info("Redirecting CarAI::CheckOtherVehicles Calls");
+				Log.Info("Redirecting CarAI::CheckOtherVehicles Calls");
 				try {
 					Detours.Add(new Detour(typeof(CarAI).GetMethod("CheckOtherVehicles",
 								BindingFlags.Public | BindingFlags.Static),
@@ -1040,7 +1257,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not redirect CarAI::CheckOtherVehicles.");
 					detourFailed = true;
-				}*/
+				}
 
 				Log.Info("Redirecting CommonBuildingAI::SimulationStep Calls");
 				try {
@@ -1210,7 +1427,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting CargoTruckAI Simulation Step Calls");
+				Log.Info("Redirecting CargoTruckAI::SimulationStep calls");
 				try {
 					Detours.Add(new Detour(typeof(CargoTruckAI).GetMethod("SimulationStep",
 								new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3) }),
@@ -1220,7 +1437,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting TrainAI Simulation Step Calls");
+				Log.Info("Redirecting TrainAI::SimulationStep calls");
 				try {
 					Detours.Add(new Detour(typeof(TrainAI).GetMethod("SimulationStep",
 								new[] {
@@ -1228,9 +1445,39 @@ namespace TrafficManager {
 									typeof (Vehicle).MakeByRefType(),
 									typeof (Vector3)
 								}),
-								typeof(CustomTrainAI).GetMethod("TrafficManagerSimulationStep")));
+								typeof(CustomTrainAI).GetMethod("CustomSimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vector3)
+								})));
 				} catch (Exception) {
 					Log.Error("Could not redirect TrainAI::SimulationStep.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting TrainAI::SimulationStep (2) calls");
+				try {
+					Detours.Add(new Detour(typeof(TrainAI).GetMethod("SimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vehicle.Frame).MakeByRefType(),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int)
+								}),
+								typeof(CustomTrainAI).GetMethod("CustomSimulationStep",
+								new[] {
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (Vehicle.Frame).MakeByRefType(),
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (int)
+								})));
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::SimulationStep (2).");
 					detourFailed = true;
 				}
 
@@ -1258,9 +1505,61 @@ namespace TrafficManager {
 								typeof (Vehicle).MakeByRefType(),
 								typeof (Vector3),
 							},
-							null), typeof(CustomTramBaseAI).GetMethod("CustomSimulationStep")));
+							null), typeof(CustomTramBaseAI).GetMethod("CustomSimulationStep",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+							},
+							null)));
 				} catch (Exception) {
 					Log.Error("Could not redirect TramBaseAI::SimulationStep");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection TramBaseAI::SimulationStep (2) calls");
+				try {
+					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("SimulationStep",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vehicle.Frame).MakeByRefType(),
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (int)
+							},
+							null), typeof(CustomTramBaseAI).GetMethod("CustomSimulationStep",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vehicle.Frame).MakeByRefType(),
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (int)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not redirect TramBaseAI::SimulationStep (2)");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection TramBaseAI::ResetTargets calls");
+				try {
+					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("ResetTargets",
+							BindingFlags.NonPublic | BindingFlags.Static),
+							typeof(CustomTramBaseAI).GetMethod("CustomResetTargets",
+							BindingFlags.NonPublic | BindingFlags.Static)));
+				} catch (Exception) {
+					Log.Error("Could not redirect TramBaseAI::ResetTargets");
 					detourFailed = true;
 				}
 
@@ -1772,6 +2071,33 @@ namespace TrafficManager {
 							},
 							null),
 							typeof(CustomTrainAI).GetMethod("CustomCheckNextLane")));
+				} catch (Exception) {
+					Log.Error("Could not redirect TrainAI::CheckNextLane");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection TrainAI::ForceTrafficLights calls");
+				try {
+					Detours.Add(new Detour(typeof(TrainAI).GetMethod("ForceTrafficLights",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (bool)
+							},
+							null),
+							typeof(CustomTrainAI).GetMethod("CustomForceTrafficLights",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (bool)
+							},
+							null)));
 				} catch (Exception) {
 					Log.Error("Could not redirect TrainAI::CheckNextLane");
 					detourFailed = true;

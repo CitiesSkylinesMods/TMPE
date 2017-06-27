@@ -20,8 +20,7 @@ using TrafficManager.Manager;
 using TrafficManager.Util;
 using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
-using static TrafficManager.Manager.TrafficMeasurementManager;
-using static TrafficManager.Manager.VehicleRestrictionsManager;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -730,8 +729,8 @@ namespace TrafficManager.UI {
 #endif
 #if DEBUG
 				labelStr += "\nsvc: " + service + ", sub: " + subService;
-				SegmentEnd startEnd = endMan.GetSegmentEnd((ushort)i, true);
-				SegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
+				ISegmentEnd startEnd = endMan.GetSegmentEnd((ushort)i, true);
+				ISegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
 				labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
 				labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";

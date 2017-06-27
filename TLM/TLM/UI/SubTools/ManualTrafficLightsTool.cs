@@ -11,6 +11,8 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.Manager.Impl;
+using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.UI.SubTools {
 	public class ManualTrafficLightsTool : SubTool {
@@ -36,7 +38,7 @@ namespace TrafficManager.UI.SubTools {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			TrafficLightSimulation sim = tlsMan.GetNodeSimulation(HoveredNodeId);
+			ITrafficLightSimulation sim = tlsMan.GetNodeSimulation(HoveredNodeId);
 			if (sim == null || !sim.IsTimedLight()) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 					prioMan.RemovePrioritySignsFromNode(HoveredNodeId);
@@ -69,7 +71,7 @@ namespace TrafficManager.UI.SubTools {
 				var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
 				if (nodeSimulation == null || !nodeSimulation.IsManualLight())
 					return;
-				nodeSimulation.housekeeping();
+				nodeSimulation.Housekeeping();
 
 				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
 					_guiManualTrafficLightsCrosswalk(ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode]);
@@ -136,7 +138,7 @@ namespace TrafficManager.UI.SubTools {
 					int lightOffset = -1;
 					foreach (ExtVehicleType vehicleType in segmentLights.VehicleTypes) {
 						++lightOffset;
-						CustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
+						ICustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
 
 						Vector3 offsetScreenPos = screenPos;
 						offsetScreenPos.y -= (lightHeight + 10f * zoom) * lightOffset;
@@ -175,13 +177,13 @@ namespace TrafficManager.UI.SubTools {
 						var hasRightSegment = end.NumRightSegments > 0;
 
 						switch (segmentLight.CurrentMode) {
-							case CustomSegmentLight.Mode.Simple:
+							case LightMode.Simple:
 								hoveredSegment = SimpleManualSegmentLightMode(end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment);
 								break;
-							case CustomSegmentLight.Mode.SingleLeft:
+							case LightMode.SingleLeft:
 								hoveredSegment = LeftForwardRManualSegmentLightMode(hasLeftSegment, end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, segmentLight, hoveredSegment, hasForwardSegment, hasRightSegment);
 								break;
-							case CustomSegmentLight.Mode.SingleRight:
+							case LightMode.SingleRight:
 								hoveredSegment = RightForwardLSegmentLightMode(end.SegmentId, offsetScreenPos, lightWidth, pedestrianWidth, zoom, lightHeight, hasForwardSegment, hasLeftSegment, segmentLight, hasRightSegment, hoveredSegment);
 								break;
 							default:
@@ -216,7 +218,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool RenderManualPedestrianLightSwitch(float zoom, int segmentId, Vector3 screenPos, float lightWidth,
-			CustomSegmentLights segmentLights, bool hoveredSegment) {
+			ICustomSegmentLights segmentLights, bool hoveredSegment) {
 			if (segmentLights.PedestrianLightState == null)
 				return false;
 
@@ -246,7 +248,7 @@ namespace TrafficManager.UI.SubTools {
 			return true;
 		}
 
-		private bool IsPedestrianLightHovered(Rect myRect3, int segmentId, bool hoveredSegment, CustomSegmentLights segmentLights) {
+		private bool IsPedestrianLightHovered(Rect myRect3, int segmentId, bool hoveredSegment, ICustomSegmentLights segmentLights) {
 			if (!myRect3.Contains(Event.current.mousePosition))
 				return hoveredSegment;
 			if (segmentLights.PedestrianLightState == null)
@@ -266,7 +268,7 @@ namespace TrafficManager.UI.SubTools {
 			return true;
 		}
 
-		private bool GetHoveredSegment(Rect myRect1, int segmentId, bool hoveredSegment, CustomSegmentLight segmentDict) {
+		private bool GetHoveredSegment(Rect myRect1, int segmentId, bool hoveredSegment, ICustomSegmentLight segmentDict) {
 			if (!myRect1.Contains(Event.current.mousePosition))
 				return hoveredSegment;
 
@@ -281,7 +283,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool RenderCounter(int segmentId, Vector3 screenPos, float modeWidth, float modeHeight, float zoom,
-			CustomSegmentLights segmentLights, bool hoveredSegment) {
+			ICustomSegmentLights segmentLights, bool hoveredSegment) {
 			SetAlpha(segmentId, 0);
 
 			var myRectCounter = new Rect(screenPos.x - modeWidth / 2, screenPos.y - modeHeight / 2 - 6f * zoom, modeWidth, modeHeight);
@@ -308,7 +310,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool SimpleManualSegmentLightMode(int segmentId, Vector3 screenPos, float lightWidth, float pedestrianWidth,
-			float zoom, float lightHeight, CustomSegmentLight segmentDict, bool hoveredSegment) {
+			float zoom, float lightHeight, ICustomSegmentLight segmentDict, bool hoveredSegment) {
 			SetAlpha(segmentId, 3);
 
 			var myRect4 =
@@ -336,7 +338,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool LeftForwardRManualSegmentLightMode(bool hasLeftSegment, int segmentId, Vector3 screenPos, float lightWidth,
-			float pedestrianWidth, float zoom, float lightHeight, CustomSegmentLight segmentDict, bool hoveredSegment,
+			float pedestrianWidth, float zoom, float lightHeight, ICustomSegmentLight segmentDict, bool hoveredSegment,
 			bool hasForwardSegment, bool hasRightSegment) {
 			if (hasLeftSegment) {
 				// left arrow light
@@ -414,7 +416,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool RightForwardLSegmentLightMode(int segmentId, Vector3 screenPos, float lightWidth, float pedestrianWidth,
-			float zoom, float lightHeight, bool hasForwardSegment, bool hasLeftSegment, CustomSegmentLight segmentDict,
+			float zoom, float lightHeight, bool hasForwardSegment, bool hasLeftSegment, ICustomSegmentLight segmentDict,
 			bool hasRightSegment, bool hoveredSegment) {
 			SetAlpha(segmentId, 3);
 
@@ -506,7 +508,7 @@ namespace TrafficManager.UI.SubTools {
 
 		private bool LeftArrowLightMode(int segmentId, float lightWidth, bool hasRightSegment,
 			bool hasForwardSegment, Vector3 screenPos, float pedestrianWidth, float zoom, float lightHeight,
-			CustomSegmentLight segmentDict, bool hoveredSegment) {
+			ICustomSegmentLight segmentDict, bool hoveredSegment) {
 			SetAlpha(segmentId, 3);
 
 			var offsetLight = lightWidth;
@@ -546,7 +548,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool ForwardArrowLightMode(int segmentId, float lightWidth, bool hasRightSegment,
-			Vector3 screenPos, float pedestrianWidth, float zoom, float lightHeight, CustomSegmentLight segmentDict,
+			Vector3 screenPos, float pedestrianWidth, float zoom, float lightHeight, ICustomSegmentLight segmentDict,
 			bool hoveredSegment) {
 			SetAlpha(segmentId, 4);
 
@@ -581,7 +583,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool RightArrowLightMode(int segmentId, Vector3 screenPos, float lightWidth,
-			float pedestrianWidth, float zoom, float lightHeight, CustomSegmentLight segmentDict, bool hoveredSegment) {
+			float pedestrianWidth, float zoom, float lightHeight, ICustomSegmentLight segmentDict, bool hoveredSegment) {
 			SetAlpha(segmentId, 5);
 
 			var myRect5 =

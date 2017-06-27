@@ -5,6 +5,7 @@ using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using UnityEngine;
 

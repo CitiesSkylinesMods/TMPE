@@ -19,10 +19,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
-using static TrafficManager.Manager.RoutingManager;
 using CSUtil.Commons;
-using static TrafficManager.Manager.TrafficMeasurementManager;
-using static TrafficManager.Manager.VehicleRestrictionsManager;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathFind : PathFind {
@@ -2459,7 +2457,7 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 
 				// check if pedestrian light won't change to green
-				CustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
+				ICustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(nextSegmentId, nextIsStartNode, false);
 				if (lights != null) {
 					if (lights.InvalidPedestrianLight) {
 #if DEBUGNEWPF

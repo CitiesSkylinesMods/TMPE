@@ -171,3 +171,8 @@ Parking_restrictions 道路边停车控制管理
 Simulation 模拟
 On_roads 专用道路
 Ban_private_cars_and_trucks_on_bus_lanes 禁止私家车和卡车驶入公交车专用道
+default default
+flow_ratio flow ratio
+wait_ratio wait ratio
+After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
+Adaptive_step_switching Adaptive step switching

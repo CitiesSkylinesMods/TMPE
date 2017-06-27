@@ -2,6 +2,7 @@
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Geometry;
@@ -105,15 +106,18 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static bool GetStopLane(ref PathUnit.Position pos, VehicleInfo.VehicleType vehicleType) {
 			Log.Error($"CustomTransportLineAI.GetStopLane called.");
 			return false;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void CheckSegmentProblems(ushort segmentID, ref NetSegment data) {
 			Log.Error($"CustomTransportLineAI.CheckSegmentProblems called.");
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal static void CheckNodeProblems(ushort nodeID, ref NetNode data) {
 			Log.Error($"CustomTransportLineAI.CheckNodeProblems called.");
 		}

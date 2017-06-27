@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {

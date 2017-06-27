@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Util;
 

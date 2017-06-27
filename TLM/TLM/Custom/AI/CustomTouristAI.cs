@@ -5,8 +5,10 @@ using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using static TrafficManager.Traffic.ExtCitizenInstance;
@@ -145,16 +147,19 @@ namespace TrafficManager.Custom.AI {
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetTaxiProbability() {
 			Log.Error("CustomTouristAI.GetTaxiProbability called!");
 			return 20;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetBikeProbability() {
 			Log.Error("CustomTouristAI.GetBikeProbability called!");
 			return 20;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetCarProbability() {
 			Log.Error("CustomTouristAI.GetCarProbability called!");
 			return 20;

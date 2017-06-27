@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ColossalFramework.UI;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI.MainMenu {
 	public class ClearTrafficButton : MenuButton {

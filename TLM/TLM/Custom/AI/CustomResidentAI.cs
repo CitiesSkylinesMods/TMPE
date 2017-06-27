@@ -5,8 +5,10 @@ using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
@@ -20,17 +22,17 @@ namespace TrafficManager.Custom.AI {
 				target = InstanceID.Empty;
 				return Locale.Get("CITIZEN_STATUS_CONFUSED");
 			}
-			CitizenManager instance = Singleton<CitizenManager>.instance;
+			CitizenManager citMan = Singleton<CitizenManager>.instance;
 			uint citizen = data.m_citizen;
 			bool isStudent = false;
 			ushort homeId = 0;
 			ushort workId = 0;
 			ushort vehicleId = 0;
 			if (citizen != 0u) {
-				homeId = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_homeBuilding;
-				workId = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_workBuilding;
-				vehicleId = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_vehicle;
-				isStudent = ((instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_flags & Citizen.Flags.Student) != Citizen.Flags.None);
+				homeId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_homeBuilding;
+				workId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_workBuilding;
+				vehicleId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_vehicle;
+				isStudent = ((citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_flags & Citizen.Flags.Student) != Citizen.Flags.None);
 			}
 			ushort targetBuilding = data.m_targetBuilding;
 			if (targetBuilding == 0) {
@@ -193,9 +195,11 @@ namespace TrafficManager.Custom.AI {
 			return null;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetTaxiProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetTaxiProbability called!");
-			switch (ageGroup) {
+			return 20;
+			/*switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
 					return 0;
 				case Citizen.AgeGroup.Teen:
@@ -208,12 +212,14 @@ namespace TrafficManager.Custom.AI {
 					return 6;
 				default:
 					return 0;
-			}
+			}*/
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetBikeProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetBikeProbability called!");
-			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+			return 20;
+			/*CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			uint citizenId = citizenData.m_citizen;
 			ushort homeId = citizenManager.m_citizens.m_buffer[(int)((UIntPtr)citizenId)].m_homeBuilding;
 			int bikeEncouragement = 0;
@@ -239,12 +245,14 @@ namespace TrafficManager.Custom.AI {
 					return ResidentAI.BIKE_PROBABILITY_SENIOR + bikeEncouragement;
 				default:
 					return 0;
-			}
+			}*/
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetCarProbability called!");
-			switch (ageGroup) {
+			return 20;
+			/*switch (ageGroup) {
 				case Citizen.AgeGroup.Child:
 					return 0;
 				case Citizen.AgeGroup.Teen:
@@ -257,7 +265,7 @@ namespace TrafficManager.Custom.AI {
 					return 10;
 				default:
 					return 0;
-			}
+			}*/
 		}
 	}
 }

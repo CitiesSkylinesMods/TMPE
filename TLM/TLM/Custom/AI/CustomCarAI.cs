@@ -15,6 +15,8 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using static TrafficManager.Traffic.ExtCitizenInstance;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
+using System.Runtime.CompilerServices;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -235,9 +237,9 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		/*public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
+		public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
 			// NON-STOCK CODE START
-			if (! Options.enableDespawning && vehicleData.m_blockCounter == 255) {
+			if (! Options.enableDespawning && vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram && GlobalConfig.Instance.DebugSwitches[15]) {
 				return;
 			}
 			// NON-STOCK CODE END
@@ -302,21 +304,24 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
-		}*/
+		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static bool CheckOverlap(Segment3 segment, ushort ignoreVehicle, float maxVelocity) {
 			Log.Error("CustomCarAI.CheckOverlap called");
 			return false;
 		}
 
-		/*private static ushort CheckOtherVehicle(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxBraking, ushort otherID, ref Vehicle otherData, Vector3 min, Vector3 max, int lodPhysics) {
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static ushort CheckOtherVehicle(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxBraking, ushort otherID, ref Vehicle otherData, Vector3 min, Vector3 max, int lodPhysics) {
 			Log.Error("CustomCarAI.CheckOtherVehicle called");
 			return 0;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static ushort CheckCitizen(ushort vehicleID, ref Vehicle vehicleData, Segment3 segment, float lastLen, float nextLen, ref float maxSpeed, ref bool blocked, float maxBraking, ushort otherID, ref CitizenInstance otherData, Vector3 min, Vector3 max) {
 			Log.Error("CustomCarAI.CheckCitizen called");
 			return 0;
-		}*/
+		}
 	}
 }

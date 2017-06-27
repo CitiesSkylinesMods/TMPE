@@ -12,6 +12,8 @@ using UnityEngine;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using CSUtil.Commons;
+using System.Runtime.CompilerServices;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -210,6 +212,571 @@ namespace TrafficManager.Custom.AI {
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
 			}
+		}
+
+		private static void CustomResetTargets(ushort vehicleID, ref Vehicle vehicleData, ushort leaderID, ref Vehicle leaderData, bool pushPathPos) {
+			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
+			VehicleInfo info = vehicleData.Info;
+			TramBaseAI tramBaseAI = info.m_vehicleAI as TramBaseAI;
+
+			Vector3 targetPos1 = lastFrameData.m_position;
+			Vector3 targetPos0 = lastFrameData.m_position;
+			Vector3 rotTargetDiff = lastFrameData.m_rotation * new Vector3(0f, 0f, info.m_generatedInfo.m_wheelBase * 0.5f);
+
+			if ((leaderData.m_flags & Vehicle.Flags.Reversed) != (Vehicle.Flags)0) {
+				targetPos1 -= rotTargetDiff;
+				//if (!GlobalConfig.Instance.DebugSwitches[15]) {
+					targetPos0 += rotTargetDiff;
+				//}
+			} else {
+				targetPos1 += rotTargetDiff;
+				//if (!GlobalConfig.Instance.DebugSwitches[15]) {
+					targetPos0 -= rotTargetDiff;
+				//}
+			}
+
+			vehicleData.m_targetPos0 = targetPos0;
+			vehicleData.m_targetPos0.w = 2f;
+			vehicleData.m_targetPos1 = targetPos1;
+			vehicleData.m_targetPos1.w = 2f;
+			vehicleData.m_targetPos2 = vehicleData.m_targetPos1;
+			vehicleData.m_targetPos3 = vehicleData.m_targetPos1;
+			if (vehicleData.m_path != 0u) {
+				PathManager pathMan = Singleton<PathManager>.instance;
+				int pathPosIndex = (vehicleData.m_pathPositionIndex >> 1) + 1;
+				uint pathUnitId = vehicleData.m_path;
+				if (pathPosIndex >= (int)pathMan.m_pathUnits.m_buffer[pathUnitId].m_positionCount) {
+					pathPosIndex = 0;
+					pathUnitId = pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathUnitId)].m_nextPathUnit;
+				}
+				PathUnit.Position pathPos;
+				if (pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].GetPosition(vehicleData.m_pathPositionIndex >> 1, out pathPos)) {
+					uint laneID = PathManager.GetLaneID(pathPos);
+					PathUnit.Position pathPos2;
+					if (pathUnitId != 0u && pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathUnitId)].GetPosition(pathPosIndex, out pathPos2)) {
+						uint laneID2 = PathManager.GetLaneID(pathPos2);
+						if (laneID2 == laneID) {
+							if (pathUnitId != vehicleData.m_path) {
+								pathMan.ReleaseFirstUnit(ref vehicleData.m_path);
+							}
+							vehicleData.m_pathPositionIndex = (byte)(pathPosIndex << 1);
+						}
+					}
+					PathUnit.CalculatePathPositionOffset(laneID, targetPos0, out vehicleData.m_lastPathOffset);
+				}
+			}
+
+			if (vehicleData.m_path != 0u) {
+				int index = 0;
+				InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, targetPos0, targetPos1, 0, ref leaderData, ref index, 1, 4, 4f, 1f);
+			}
+		}
+
+		public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.DebugSwitches[16] && GlobalConfig.Instance.TTLDebugNodeId == vehicleID;
+#endif
+
+			ushort leadingVehicle = vehicleData.m_leadingVehicle;
+			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			VehicleInfo leaderInfo;
+			if (leaderID != vehicleID) {
+				leaderInfo = leaderData.Info;
+			} else {
+				leaderInfo = this.m_info;
+			}
+			TramBaseAI tramBaseAI = leaderInfo.m_vehicleAI as TramBaseAI;
+
+			if (leadingVehicle != 0) {
+				frameData.m_position += frameData.m_velocity * 0.4f;
+			} else {
+				frameData.m_position += frameData.m_velocity * 0.5f;
+			}
+
+			frameData.m_swayPosition += frameData.m_swayVelocity * 0.5f;
+			Vector3 wheelBaseRot = frameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
+			Vector3 posAfterWheelRot = frameData.m_position + wheelBaseRot;
+			Vector3 posBeforeWheelRot = frameData.m_position - wheelBaseRot;
+
+			float acceleration = this.m_info.m_acceleration;
+			float braking = this.m_info.m_braking;
+			float curSpeed = frameData.m_velocity.magnitude;
+
+			Vector3 afterRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posAfterWheelRot;
+			float afterRotToTargetPos1DiffSqrMag = afterRotToTargetPos1Diff.sqrMagnitude;
+
+			Quaternion curInvRot = Quaternion.Inverse(frameData.m_rotation);
+			Vector3 curveTangent = curInvRot * frameData.m_velocity;
+
+#if DEBUG
+			if (debug) {
+				Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): ================================================");
+				Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): leadingVehicle={leadingVehicle} frameData.m_position={frameData.m_position} frameData.m_swayPosition={frameData.m_swayPosition} wheelBaseRot={wheelBaseRot} posAfterWheelRot={posAfterWheelRot} posBeforeWheelRot={posBeforeWheelRot} acceleration={acceleration} braking={braking} curSpeed={curSpeed} afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag} curInvRot={curInvRot} curveTangent={curveTangent} this.m_info.m_generatedInfo.m_wheelBase={this.m_info.m_generatedInfo.m_wheelBase}");
+			}
+#endif
+
+			Vector3 forward = Vector3.forward;
+			Vector3 targetMotion = Vector3.zero;
+			float targetSpeed = 0f;
+			float motionFactor = 0.5f;
+			float turnAngle = 0f;
+			if (leadingVehicle != 0) {
+				VehicleManager vehMan = Singleton<VehicleManager>.instance;
+				Vehicle.Frame leadingVehLastFrameData = vehMan.m_vehicles.m_buffer[(int)leadingVehicle].GetLastFrameData();
+				VehicleInfo leadingVehInfo = vehMan.m_vehicles.m_buffer[(int)leadingVehicle].Info;
+
+				float attachOffset;
+				if ((vehicleData.m_flags & Vehicle.Flags.Inverted) != (Vehicle.Flags)0) {
+					attachOffset = this.m_info.m_attachOffsetBack - this.m_info.m_generatedInfo.m_size.z * 0.5f;
+				} else {
+					attachOffset = this.m_info.m_attachOffsetFront - this.m_info.m_generatedInfo.m_size.z * 0.5f;
+				}
+
+				float leadingAttachOffset;
+				if ((vehMan.m_vehicles.m_buffer[(int)leadingVehicle].m_flags & Vehicle.Flags.Inverted) != (Vehicle.Flags)0) {
+					leadingAttachOffset = leadingVehInfo.m_attachOffsetFront - leadingVehInfo.m_generatedInfo.m_size.z * 0.5f;
+				} else {
+					leadingAttachOffset = leadingVehInfo.m_attachOffsetBack - leadingVehInfo.m_generatedInfo.m_size.z * 0.5f;
+				}
+
+				Vector3 curPosMinusRotAttachOffset = frameData.m_position - frameData.m_rotation * new Vector3(0f, 0f, attachOffset);
+				Vector3 leadingPosPlusRotAttachOffset = leadingVehLastFrameData.m_position + leadingVehLastFrameData.m_rotation * new Vector3(0f, 0f, leadingAttachOffset);
+
+				wheelBaseRot = leadingVehLastFrameData.m_rotation * new Vector3(0f, 0f, leadingVehInfo.m_generatedInfo.m_wheelBase * 0.5f);
+				Vector3 leadingPosBeforeWheelRot = leadingVehLastFrameData.m_position - wheelBaseRot;
+
+				if (Vector3.Dot(vehicleData.m_targetPos1 - vehicleData.m_targetPos0, (Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) < 0f && vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
+					int someIndex = -1;
+					InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, 0, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+					afterRotToTargetPos1DiffSqrMag = 0f;
+				}
+
+				float attachRotDist = Mathf.Max(Vector3.Distance(curPosMinusRotAttachOffset, leadingPosPlusRotAttachOffset), 2f);
+
+				float one = 1f;
+				float attachRotSqrDist = attachRotDist * attachRotDist;
+				float oneSqr = one * one;
+				int i = 0;
+				if (afterRotToTargetPos1DiffSqrMag < attachRotSqrDist) {
+					if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
+						InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, 0, ref leaderData, ref i, 1, 2, attachRotSqrDist, oneSqr);
+					}
+					while (i < 4) {
+						vehicleData.SetTargetPos(i, vehicleData.GetTargetPos(i - 1));
+						i++;
+					}
+					afterRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posAfterWheelRot;
+					afterRotToTargetPos1DiffSqrMag = afterRotToTargetPos1Diff.sqrMagnitude;
+				}
+				afterRotToTargetPos1Diff = curInvRot * afterRotToTargetPos1Diff;
+
+				float negTotalAttachLen = -((this.m_info.m_generatedInfo.m_wheelBase + leadingVehInfo.m_generatedInfo.m_wheelBase) * 0.5f + attachOffset + leadingAttachOffset);
+				bool hasPath = false;
+				if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
+					float u1;
+					float u2;
+					if (Line3.Intersect(posAfterWheelRot, vehicleData.m_targetPos1, leadingPosBeforeWheelRot, negTotalAttachLen, out u1, out u2)) {
+						targetMotion = afterRotToTargetPos1Diff * Mathf.Clamp(Mathf.Min(u1, u2) / 0.6f, 0f, 2f);
+					} else {
+						Line3.DistanceSqr(posAfterWheelRot, vehicleData.m_targetPos1, leadingPosBeforeWheelRot, out u1);
+						targetMotion = afterRotToTargetPos1Diff * Mathf.Clamp(u1 / 0.6f, 0f, 2f);
+					}
+					hasPath = true;
+				}
+
+				if (hasPath) {
+					if (Vector3.Dot(leadingPosBeforeWheelRot - posAfterWheelRot, posAfterWheelRot - posBeforeWheelRot) < 0f) {
+						motionFactor = 0f;
+					}
+				} else {
+					float leadingPosBeforeToAfterWheelRotDist = Vector3.Distance(leadingPosBeforeWheelRot, posAfterWheelRot);
+					motionFactor = 0f;
+					targetMotion = curInvRot * ((leadingPosBeforeWheelRot - posAfterWheelRot) * (Mathf.Max(0f, leadingPosBeforeToAfterWheelRotDist - negTotalAttachLen) / Mathf.Max(1f, leadingPosBeforeToAfterWheelRotDist * 0.6f)));
+				}
+			} else {
+				float estimatedFrameDist = (curSpeed + acceleration) * (0.5f + 0.5f * (curSpeed + acceleration) / braking) + (this.m_info.m_generatedInfo.m_size.z - this.m_info.m_generatedInfo.m_wheelBase) * 0.5f;
+				float maxSpeedAdd = Mathf.Max(curSpeed + acceleration, 2f);
+				float meanSpeedAdd = Mathf.Max((estimatedFrameDist - maxSpeedAdd) / 2f, 2f);
+				float maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
+				float meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
+				if (Vector3.Dot(vehicleData.m_targetPos1 - vehicleData.m_targetPos0, (Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) < 0f && vehicleData.m_path != 0u && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == (Vehicle.Flags)0) {
+					int someIndex = -1;
+					InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+					afterRotToTargetPos1DiffSqrMag = 0f;
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): dot < 0");
+					}
+#endif
+				}
+
+#if DEBUG
+				if (debug) {
+					Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Leading vehicle is 0. vehicleData.m_targetPos0={vehicleData.m_targetPos0} vehicleData.m_targetPos1={vehicleData.m_targetPos1} posBeforeWheelRot={posBeforeWheelRot} posBeforeWheelRot={posAfterWheelRot} estimatedFrameDist={estimatedFrameDist} maxSpeedAdd={maxSpeedAdd} meanSpeedAdd={meanSpeedAdd} maxSpeedAddSqr={maxSpeedAddSqr} meanSpeedAddSqr={meanSpeedAddSqr} afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag}");
+				}
+#endif
+
+				int posIndex = 0;
+				bool hasValidPathTargetPos = false;
+				if ((afterRotToTargetPos1DiffSqrMag < maxSpeedAddSqr || vehicleData.m_targetPos3.w < 0.01f) && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == (Vehicle.Flags)0) {
+					if (vehicleData.m_path != 0u) {
+						InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, leaderID, ref leaderData, ref posIndex, 1, 4, maxSpeedAddSqr, meanSpeedAddSqr);
+					}
+					if (posIndex < 4) {
+						hasValidPathTargetPos = true;
+						while (posIndex < 4) {
+							vehicleData.SetTargetPos(posIndex, vehicleData.GetTargetPos(posIndex - 1));
+							posIndex++;
+						}
+					}
+					afterRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posAfterWheelRot;
+					afterRotToTargetPos1DiffSqrMag = afterRotToTargetPos1Diff.sqrMagnitude;
+				}
+
+#if DEBUG
+				if (debug) {
+					Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): posIndex={posIndex} hasValidPathTargetPos={hasValidPathTargetPos}");
+				}
+#endif
+
+				if (leaderData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
+					NetManager netMan = Singleton<NetManager>.instance;
+					byte leaderPathPosIndex = leaderData.m_pathPositionIndex;
+					byte leaderLastPathOffset = leaderData.m_lastPathOffset;
+					if (leaderPathPosIndex == 255) {
+						leaderPathPosIndex = 0;
+					}
+					float leaderLen = 1f + leaderData.CalculateTotalLength(leaderID);
+
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): leaderPathPosIndex={leaderPathPosIndex} leaderLastPathOffset={leaderLastPathOffset} leaderPathPosIndex={leaderPathPosIndex} leaderLen={leaderLen}");
+					}
+#endif
+
+					// reserve space / add traffic
+					PathManager pathMan = Singleton<PathManager>.instance;
+					PathUnit.Position pathPos;
+					if (pathMan.m_pathUnits.m_buffer[leaderData.m_path].GetPosition(leaderPathPosIndex >> 1, out pathPos)) {
+						netMan.m_segments.m_buffer[(int)pathPos.m_segment].AddTraffic(Mathf.RoundToInt(leaderLen * 2.5f));
+						bool reservedSpaceOnCurrentLane = false;
+						if ((leaderPathPosIndex & 1) == 0 || leaderLastPathOffset == 0) {
+							uint laneId = PathManager.GetLaneID(pathPos);
+							if (laneId != 0u) {
+								Vector3 curPathOffsetPos = netMan.m_lanes.m_buffer[laneId].CalculatePosition((float)pathPos.m_offset * 0.003921569f);
+								float speedAdd = 0.5f * curSpeed * curSpeed / this.m_info.m_braking;
+								float afterWheelRotCurPathOffsetDist = Vector3.Distance(posAfterWheelRot, curPathOffsetPos);
+								float beforeWheelRotCurPathOffsetDist = Vector3.Distance(posBeforeWheelRot, curPathOffsetPos);
+								if (Mathf.Min(afterWheelRotCurPathOffsetDist, beforeWheelRotCurPathOffsetDist) >= speedAdd - 1f) {
+									netMan.m_lanes.m_buffer[laneId].ReserveSpace(leaderLen);
+									reservedSpaceOnCurrentLane = true;
+								}
+							}
+						}
+
+						if (!reservedSpaceOnCurrentLane && pathMan.m_pathUnits.m_buffer[leaderData.m_path].GetNextPosition(leaderPathPosIndex >> 1, out pathPos)) {
+							uint nextLaneId = PathManager.GetLaneID(pathPos);
+							if (nextLaneId != 0u) {
+								netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(leaderLen);
+							}
+						}
+					}
+
+					if ((ulong)(currentFrameIndex >> 4 & 15u) == (ulong)((long)(leaderID & 15))) {
+						// check if vehicle can proceed to next path position
+
+						bool canProceeed = false;
+						uint curLeaderPathId = leaderData.m_path;
+						int curLeaderPathPosIndex = leaderPathPosIndex >> 1;
+						int k = 0;
+						while (k < 5) {
+							bool invalidPos;
+							if (PathUnit.GetNextPosition(ref curLeaderPathId, ref curLeaderPathPosIndex, out pathPos, out invalidPos)) {
+								uint laneId = PathManager.GetLaneID(pathPos);
+								if (laneId != 0u && !netMan.m_lanes.m_buffer[laneId].CheckSpace(leaderLen)) {
+									k++;
+									continue;
+								}
+							}
+							if (invalidPos) {
+								this.InvalidPath(vehicleID, ref vehicleData, leaderID, ref leaderData);
+							}
+							canProceeed = true;
+							break;
+						}
+						if (!canProceeed) {
+							leaderData.m_flags |= Vehicle.Flags.Congestion;
+						}
+					}
+				}
+
+				float maxSpeed;
+				if ((leaderData.m_flags & Vehicle.Flags.Stopped) != (Vehicle.Flags)0) {
+					maxSpeed = 0f;
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Vehicle is stopped. maxSpeed={maxSpeed}");
+					}
+#endif
+				} else {
+					maxSpeed = Mathf.Min(vehicleData.m_targetPos1.w, GetMaxSpeed(leaderID, ref leaderData));
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Vehicle is not stopped. maxSpeed={maxSpeed}");
+					}
+#endif
+				}
+
+#if DEBUG
+				if (debug) {
+					Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Start of second part. curSpeed={curSpeed} curInvRot={curInvRot}");
+				}
+#endif
+
+				afterRotToTargetPos1Diff = curInvRot * afterRotToTargetPos1Diff;
+#if DEBUG
+				if (debug) {
+					Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} (old afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag})");
+				}
+#endif
+				Vector3 zero = Vector3.zero;
+				bool blocked = false;
+				float forwardLen = 0f;
+				if (afterRotToTargetPos1DiffSqrMag > 1f) { // TODO why is this not recalculated?
+					forward = VectorUtils.NormalizeXZ(afterRotToTargetPos1Diff, out forwardLen);
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1DiffSqrMag > 1f. forward={forward} forwardLen={forwardLen}");
+					}
+#endif
+					if (forwardLen > 1f) {
+						Vector3 fwd = afterRotToTargetPos1Diff;
+						maxSpeedAdd = Mathf.Max(curSpeed, 2f);
+						maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): forwardLen > 1f. fwd={fwd} maxSpeedAdd={maxSpeedAdd} maxSpeedAddSqr={maxSpeedAddSqr}");
+						}
+#endif
+						if (afterRotToTargetPos1DiffSqrMag > maxSpeedAddSqr) {
+							float fwdLimiter = maxSpeedAdd / Mathf.Sqrt(afterRotToTargetPos1DiffSqrMag);
+							fwd.x *= fwdLimiter;
+							fwd.y *= fwdLimiter;
+
+#if DEBUG
+							if (debug) {
+								Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1DiffSqrMag > maxSpeedAddSqr. afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag} maxSpeedAddSqr={maxSpeedAddSqr} fwdLimiter={fwdLimiter} fwd={fwd}");
+							}
+#endif
+						}
+
+						if (fwd.z < -1f) { // !!!
+#if DEBUG
+							if (debug) {
+								Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): fwd.z < -1f. fwd={fwd}");
+							}
+#endif
+
+							if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
+								Vector3 targetPos0TargetPos1Diff = vehicleData.m_targetPos1 - vehicleData.m_targetPos0;
+								if ((curInvRot * targetPos0TargetPos1Diff).z < -0.01f) { // !!!
+#if DEBUG
+									if (debug) {
+										Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): (curInvRot * targetPos0TargetPos1Diff).z < -0.01f. curInvRot={curInvRot} targetPos0TargetPos1Diff={targetPos0TargetPos1Diff}");
+									}
+#endif
+									if (afterRotToTargetPos1Diff.z < Mathf.Abs(afterRotToTargetPos1Diff.x) * -10f) { // !!!
+#if DEBUG
+										if (debug) {
+											Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1Diff.z < Mathf.Abs(afterRotToTargetPos1Diff.x) * -10f. fwd={fwd} targetPos0TargetPos1Diff={targetPos0TargetPos1Diff} afterRotToTargetPos1Diff={afterRotToTargetPos1Diff}");
+										}
+#endif
+
+										/*fwd.z = 0f;
+										afterRotToTargetPos1Diff = Vector3.zero;*/
+										maxSpeed = 0.5f;
+
+#if DEBUG
+										if (debug) {
+											Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): (1) set maxSpeed={maxSpeed}");
+										}
+#endif
+									} else {
+										posAfterWheelRot = posBeforeWheelRot + Vector3.Normalize(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) * this.m_info.m_generatedInfo.m_wheelBase;
+										posIndex = -1;
+										InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, vehicleData.m_targetPos1, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) + 1f, 1f);
+
+#if DEBUG
+										if (debug) {
+											Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1Diff.z >= Mathf.Abs(afterRotToTargetPos1Diff.x) * -10f. Invoked UpdatePathTargetPositions. posAfterWheelRot={posAfterWheelRot} posBeforeWheelRot={posBeforeWheelRot} this.m_info.m_generatedInfo.m_wheelBase={this.m_info.m_generatedInfo.m_wheelBase}");
+										}
+#endif
+									}
+								} else {
+									posIndex = -1;
+									InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+									vehicleData.m_targetPos1 = posAfterWheelRot;
+									fwd.z = 0f;
+									afterRotToTargetPos1Diff = Vector3.zero;
+									maxSpeed = 0f;
+
+#if DEBUG
+									if (debug) {
+										Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Vehicle is waiting for a path. posIndex={posIndex} vehicleData.m_targetPos1={vehicleData.m_targetPos1} fwd={fwd} afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} maxSpeed={maxSpeed}");
+									}
+#endif
+								}
+							}
+							motionFactor = 0f;
+#if DEBUG
+							if (debug) {
+								Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Reset motion factor. motionFactor={motionFactor}");
+							}
+#endif
+						}
+
+						forward = VectorUtils.NormalizeXZ(fwd, out forwardLen);
+						float curve = Mathf.PI/2f /* 1.57079637f*/ * (1f - forward.z); // <- constant: a bit inaccurate PI/2
+						if (forwardLen > 1f) {
+							curve /= forwardLen;
+						}
+						float targetDist = forwardLen;
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): targetDist={targetDist} fwd={fwd} curve={curve} maxSpeed={maxSpeed}");
+						}
+#endif
+
+						if (vehicleData.m_targetPos1.w < 0.1f) {
+							maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1000f, curve);
+							maxSpeed = Mathf.Min(maxSpeed, CalculateMaxSpeed(targetDist, vehicleData.m_targetPos1.w, braking * 0.9f));
+						} else {
+							maxSpeed = Mathf.Min(maxSpeed, this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1000f, curve));
+						}
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): [1] maxSpeed={maxSpeed}");
+						}
+#endif
+						maxSpeed = Mathf.Min(maxSpeed, CalculateMaxSpeed(targetDist, vehicleData.m_targetPos2.w, braking * 0.9f));
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): [2] maxSpeed={maxSpeed}");
+						}
+#endif
+						targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos2 - vehicleData.m_targetPos1);
+						maxSpeed = Mathf.Min(maxSpeed, CalculateMaxSpeed(targetDist, vehicleData.m_targetPos3.w, braking * 0.9f));
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): [3] maxSpeed={maxSpeed}");
+						}
+#endif
+						targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos3 - vehicleData.m_targetPos2);
+						if (vehicleData.m_targetPos3.w < 0.01f) {
+							targetDist = Mathf.Max(0f, targetDist + (this.m_info.m_generatedInfo.m_wheelBase - this.m_info.m_generatedInfo.m_size.z) * 0.5f);
+						}
+						maxSpeed = Mathf.Min(maxSpeed, CalculateMaxSpeed(targetDist, 0f, braking * 0.9f));
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): [4] maxSpeed={maxSpeed}");
+						}
+#endif
+						CarAI.CheckOtherVehicles(vehicleID, ref vehicleData, ref frameData, ref maxSpeed, ref blocked, ref zero, estimatedFrameDist, braking * 0.9f, lodPhysics);
+#if DEBUG
+						if (debug) {
+							Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): CheckOtherVehicles finished. blocked={blocked}");
+						}
+#endif
+						if (maxSpeed < curSpeed) {
+							float brake = Mathf.Max(acceleration, Mathf.Min(braking, curSpeed));
+							targetSpeed = Mathf.Max(maxSpeed, curSpeed - brake);
+#if DEBUG
+							if (debug) {
+								Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): maxSpeed < curSpeed. maxSpeed={maxSpeed} curSpeed={curSpeed} brake={brake} targetSpeed={targetSpeed}");
+							}
+#endif
+						} else {
+							float accel = Mathf.Max(acceleration, Mathf.Min(braking, -curSpeed));
+							targetSpeed = Mathf.Min(maxSpeed, curSpeed + accel);
+#if DEBUG
+							if (debug) {
+								Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): maxSpeed >= curSpeed. maxSpeed={maxSpeed} curSpeed={curSpeed} accel={accel} targetSpeed={targetSpeed}");
+							}
+#endif
+						}
+					}
+				} else if (curSpeed < 0.1f && hasValidPathTargetPos && leaderInfo.m_vehicleAI.ArriveAtDestination(leaderID, ref leaderData)) {
+					leaderData.Unspawn(leaderID);
+					return;
+				}
+				if ((leaderData.m_flags & Vehicle.Flags.Stopped) == (Vehicle.Flags)0 && maxSpeed < 0.1f) {
+#if DEBUG
+					if (debug) {
+						Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): Vehicle is not stopped but maxSpeed < 0.1. maxSpeed={maxSpeed}");
+					}
+#endif
+					blocked = true;
+				}
+				if (blocked) {
+					leaderData.m_blockCounter = (byte)Mathf.Min((int)(leaderData.m_blockCounter + 1), 255);
+				} else {
+					leaderData.m_blockCounter = 0;
+				}
+				if (forwardLen > 1f) {
+					turnAngle = Mathf.Asin(forward.x) * Mathf.Sign(targetSpeed);
+					targetMotion = forward * targetSpeed;
+				} else {
+					Vector3 vel = Vector3.ClampMagnitude(afterRotToTargetPos1Diff * 0.5f - curveTangent, braking);
+					targetMotion = curveTangent + vel;
+				}
+			}
+			bool mayBlink = (currentFrameIndex + (uint)leaderID & 16u) != 0u;
+			Vector3 springs = targetMotion - curveTangent;
+			Vector3 targetAfterWheelRotMotion = frameData.m_rotation * targetMotion;
+			Vector3 targetBeforeWheelRotMotion = Vector3.Normalize((Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) * (targetMotion.magnitude * motionFactor);
+			targetBeforeWheelRotMotion -= targetAfterWheelRotMotion * (Vector3.Dot(targetAfterWheelRotMotion, targetBeforeWheelRotMotion) / Mathf.Max(1f, targetAfterWheelRotMotion.sqrMagnitude));
+			posAfterWheelRot += targetAfterWheelRotMotion;
+			posBeforeWheelRot += targetBeforeWheelRotMotion;
+			frameData.m_rotation = Quaternion.LookRotation(posAfterWheelRot - posBeforeWheelRot);
+			Vector3 targetPos = posAfterWheelRot - frameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
+			frameData.m_velocity = targetPos - frameData.m_position;
+			if (leadingVehicle != 0) {
+				frameData.m_position += frameData.m_velocity * 0.6f;
+			} else {
+				frameData.m_position += frameData.m_velocity * 0.5f;
+			}
+			frameData.m_swayVelocity = frameData.m_swayVelocity * (1f - this.m_info.m_dampers) - springs * (1f - this.m_info.m_springs) - frameData.m_swayPosition * this.m_info.m_springs;
+			frameData.m_swayPosition += frameData.m_swayVelocity * 0.5f;
+			frameData.m_steerAngle = 0f;
+			frameData.m_travelDistance += targetMotion.z;
+			if (leadingVehicle != 0) {
+				frameData.m_lightIntensity = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[(int)leaderID].GetLastFrameData().m_lightIntensity;
+			} else {
+				frameData.m_lightIntensity.x = 5f;
+				frameData.m_lightIntensity.y = ((springs.z >= -0.1f) ? 0.5f : 5f);
+				frameData.m_lightIntensity.z = ((turnAngle >= -0.1f || !mayBlink) ? 0f : 5f);
+				frameData.m_lightIntensity.w = ((turnAngle <= 0.1f || !mayBlink) ? 0f : 5f);
+			}
+			frameData.m_underground = ((vehicleData.m_flags & Vehicle.Flags.Underground) != (Vehicle.Flags)0);
+			frameData.m_transition = ((vehicleData.m_flags & Vehicle.Flags.Transition) != (Vehicle.Flags)0);
+			//base.SimulationStep(vehicleID, ref vehicleData, ref frameData, leaderID, ref leaderData, lodPhysics);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public static void InvokeUpdatePathTargetPositions(TramBaseAI tramBaseAI, ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos1, Vector3 refPos2, ushort leaderID, ref Vehicle leaderData, ref int index, int max1, int max2, float minSqrDistanceA, float minSqrDistanceB) {
+			Log.Error($"CustomTramBaseAI.InvokeUpdatePathTargetPositions called! tramBaseAI={tramBaseAI}");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static float GetMaxSpeed(ushort leaderID, ref Vehicle leaderData) {
+			Log.Error("CustomTrainAI.GetMaxSpeed called");
+			return 0f;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static float CalculateMaxSpeed(float targetDist, float targetSpeed, float maxBraking) {
+			Log.Error("CustomTrainAI.CalculateMaxSpeed called");
+			return 0f;
 		}
 	}
 }

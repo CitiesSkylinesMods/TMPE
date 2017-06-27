@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using UnityEngine;
 

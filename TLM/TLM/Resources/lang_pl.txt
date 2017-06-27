@@ -171,3 +171,8 @@ Parking_restrictions Ograniczenia parkingowe
 Simulation Symulacja
 On_roads Na drogach
 Ban_private_cars_and_trucks_on_bus_lanes Zakaz jazdy buspasem dla samochodów osobowych i ciężarówek
+default default
+flow_ratio flow ratio
+wait_ratio wait ratio
+After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
+Adaptive_step_switching Adaptive step switching

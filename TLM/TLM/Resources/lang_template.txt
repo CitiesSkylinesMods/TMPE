@@ -171,3 +171,8 @@ Parking_restrictions
 Simulation
 On_roads
 Ban_private_cars_and_trucks_on_bus_lanes
+default
+flow_ratio
+wait_ratio
+After_min._time_has_elapsed_switch_to_next_step_if
+Adaptive_step_switching

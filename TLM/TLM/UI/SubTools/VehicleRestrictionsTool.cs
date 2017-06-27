@@ -7,12 +7,12 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Manager.VehicleRestrictionsManager;
 using static TrafficManager.UI.TrafficManagerTool;
 using static TrafficManager.Util.SegmentLaneTraverser;
 

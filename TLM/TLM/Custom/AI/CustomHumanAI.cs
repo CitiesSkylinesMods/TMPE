@@ -12,6 +12,8 @@ using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
+using System.Runtime.CompilerServices;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
@@ -47,14 +49,9 @@ namespace TrafficManager.Custom.AI {
 					finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
+						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
 #endif
 				}
-
-#if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[2])
-					Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Path-finding succeeded for citizen instance {instanceID}. Path: {instanceData.m_path} -- calling HumanAI.PathfindSuccess");
-#endif
 
 				switch (finalPathState) {
 					case ExtSoftPathState.Ready:
@@ -101,7 +98,7 @@ namespace TrafficManager.Custom.AI {
 					case ExtSoftPathState.FailedSoft:
 #if DEBUG
 						if (GlobalConfig.Instance.DebugSwitches[2])
-							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): SOFT path-finding failure for citizen instance {instanceID} (finalPathState={finalPathState}). Path: {instanceData.m_path} -- calling HumanAI.PathfindFailure");
+							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): SOFT path-finding failure for citizen instance {instanceID} (finalPathState={finalPathState}). Path: {instanceData.m_path} -- calling HumanAI.InvalidPath");
 #endif
 						// path mode has been updated, repeat path-finding
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
@@ -114,7 +111,9 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
-				ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos);
+				if (ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos)) {
+					return;
+				}
 			}
 			// NON-STOCK CODE END
 
@@ -140,7 +139,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		internal void ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
+		internal bool ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
 			// check if the citizen has reached a parked car or target
 			if (extInstance.pathMode == ExtPathMode.WalkingToParkedCar || extInstance.pathMode == ExtPathMode.ApproachingParkedCar) {
 				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
@@ -156,17 +155,17 @@ namespace TrafficManager.Custom.AI {
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
 					this.InvalidPath(instanceID, ref instanceData);
-					return;
+					return true;
 				} else {
-					AdvancedParkingManager.ParkedCarApproachState approachState = AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(instanceID, ref instanceData, ref extInstance, physicsLodRefPos, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
+					ParkedCarApproachState approachState = AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(instanceID, ref instanceData, ref extInstance, physicsLodRefPos, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
 					switch (approachState) {
-						case AdvancedParkingManager.ParkedCarApproachState.None:
+						case ParkedCarApproachState.None:
 						default:
 							break;
-						case AdvancedParkingManager.ParkedCarApproachState.Approaching:
+						case ParkedCarApproachState.Approaching:
 							// citizen approaches their parked car
-							return;
-						case AdvancedParkingManager.ParkedCarApproachState.Approached:
+							return true;
+						case ParkedCarApproachState.Approached:
 							// citizen reached their parked car
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[4])
@@ -182,8 +181,8 @@ namespace TrafficManager.Custom.AI {
 								extInstance.Reset();
 							}
 
-							return;
-						case AdvancedParkingManager.ParkedCarApproachState.Failure:
+							return true;
+						case ParkedCarApproachState.Failure:
 #if DEBUG
 								if (GlobalConfig.Instance.DebugSwitches[2])
 									Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Citizen instance {instanceID} failed to arrive at parked car. PathMode={extInstance.pathMode}");
@@ -192,7 +191,7 @@ namespace TrafficManager.Custom.AI {
 							instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 							instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
 							this.InvalidPath(instanceID, ref instanceData);
-							return;
+							return true;
 
 					}
 				}
@@ -202,6 +201,7 @@ namespace TrafficManager.Custom.AI {
 			) {
 				AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData, ref extInstance);
 			}
+			return false;
 		}
 
 		/// <summary>
@@ -327,7 +327,7 @@ namespace TrafficManager.Custom.AI {
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			bool startNode = netManager.m_segments.m_buffer[segment].m_startNode == node;
 
-			CustomSegmentLights lights = null;
+			ICustomSegmentLights lights = null;
 			if (nodeSimulation != null && nodeSimulation.IsSimulationActive()) {
 				lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
 			}
@@ -366,22 +366,27 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void ArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
 			Log.Error($"HumanAI.ArriveAtDestination is not overriden!");
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void PathfindFailure(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.PathfindFailure is not overriden!");
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void PathfindSuccess(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.PathfindSuccess is not overriden!");
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void Spawn(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.Spawn is not overriden!");
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void GetBuildingTargetPosition(ushort instanceID, ref CitizenInstance citizenData, float minSqrDistance) {
 			Log.Error($"HumanAI.GetBuildingTargetPosition is not overriden!");
 		}

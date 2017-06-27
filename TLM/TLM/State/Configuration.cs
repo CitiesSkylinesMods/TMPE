@@ -43,6 +43,7 @@ namespace TrafficManager {
 		public class TimedTrafficLightsStep {
 			public int minTime;
 			public int maxTime;
+			public int changeMetric;
 			public float waitFlowBalance;
 			public Dictionary<ushort, CustomSegmentLights> segmentLights;
 		}
