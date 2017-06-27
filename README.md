@@ -4,7 +4,9 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
-1.9.7, 06/17/2017
+1.9.7, XX/XX/2017
+- New feature: Adaptive step switching
+- Trains do not longer stop in front of green timed traffic lights
 - Bugfix: Using the bulldozer tool might lead to inconsistent road geometry information
 - Bugfix: Citizens that fail to approach their parked car float towards their target building
 - Parking AI: Included an improved fallback logic for some edge cases
