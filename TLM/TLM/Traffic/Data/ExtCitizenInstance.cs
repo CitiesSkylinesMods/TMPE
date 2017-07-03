@@ -14,148 +14,148 @@ namespace TrafficManager.Traffic {
 			/// <summary>
 			/// No path
 			/// </summary>
-			None,
+			None = 0,
 			/// <summary>
 			/// Path is currently being calculated
 			/// </summary>
-			Calculating,
+			Calculating = 1,
 			/// <summary>
 			/// Path-finding has succeeded
 			/// </summary>
-			Ready,
+			Ready = 2,
 			/// <summary>
 			/// Path-finding has failed
 			/// </summary>
-			Failed
+			Failed = 3
 		}
 
 		public enum ExtSoftPathState {
 			/// <summary>
 			/// No path
 			/// </summary>
-			None,
+			None = 0,
 			/// <summary>
 			/// Path is currently being calculated
 			/// </summary>
-			Calculating,
+			Calculating = 1,
 			/// <summary>
 			/// Path-finding has succeeded and must be handled appropriately
 			/// </summary>
-			Ready,
+			Ready = 2,
 			/// <summary>
 			/// Path-finding has failed and must be handled appropriately
 			/// </summary>
-			FailedHard,
+			FailedHard = 3,
 			/// <summary>
 			/// Path-finding must be retried (soft path-find failure)
 			/// </summary>
-			FailedSoft,
+			FailedSoft = 4,
 			/// <summary>
 			/// Path-finding result must not be handled by the citizen because the path will be transferred to a vehicle
 			/// </summary>
-			Ignore
+			Ignore = 5
 		}
 
 		public enum ExtPathType {
 			/// <summary>
 			/// Mixed path
 			/// </summary>
-			None,
+			None = 0,
 			/// <summary>
 			/// Walking path
 			/// </summary>
-			WalkingOnly,
+			WalkingOnly = 1,
 			/// <summary>
 			/// Driving path
 			/// </summary>
-			DrivingOnly
+			DrivingOnly = 2
 		}
 
 		public enum ExtPathMode {
-			None,
+			None = 0,
 			/// <summary>
 			/// Indicates that the citizen requires a walking path to their parked car
 			/// </summary>
-			RequiresWalkingPathToParkedCar,
+			RequiresWalkingPathToParkedCar = 1,
 			/// <summary>
 			/// Indicates that a walking path to the parked car is being calculated
 			/// </summary>
-			CalculatingWalkingPathToParkedCar,
+			CalculatingWalkingPathToParkedCar = 2,
 			/// <summary>
 			/// Indicates that the citizen is walking to their parked car
 			/// </summary>
-			WalkingToParkedCar,
+			WalkingToParkedCar = 3,
 			/// <summary>
 			/// Indicates that the citizen is close to their parked car
 			/// </summary>
-			ApproachingParkedCar,
+			ApproachingParkedCar = 4,
 			/// <summary>
 			/// Indicates that the citizen has reached their parked car and requires a car path now
 			/// </summary>
-			RequiresCarPath,
+			RequiresCarPath = 5,
 			/// <summary>
 			/// Indicates that a direct car path to the target is being calculated
 			/// </summary>
-			CalculatingCarPathToTarget,
+			CalculatingCarPathToTarget = 6,
 			/// <summary>
 			/// Indicates that a car path to a known parking spot near the target is being calculated
 			/// </summary>
-			CalculatingCarPathToKnownParkPos,
+			CalculatingCarPathToKnownParkPos = 7,
 			/// <summary>
 			/// Indicates that the citizen is currently driving on a direct path to target
 			/// </summary>
-			DrivingToTarget,
+			DrivingToTarget = 8,
 			/// <summary>
 			/// Indiciates that the citizen is currently driving to a known parking spot near the target
 			/// </summary>
-			DrivingToKnownParkPos,
+			DrivingToKnownParkPos = 9,
 			/// <summary>
 			/// Indicates that the vehicle is being parked on an alternative parking position
 			/// </summary>
-			RequiresWalkingPathToTarget,
+			RequiresWalkingPathToTarget = 10,
 			/// <summary>
 			/// Indicates that parking has failed
 			/// </summary>
-			ParkingFailed,
+			ParkingFailed = 11,
 			/// <summary>
 			/// Indicates that a path to an alternative parking position is being calculated
 			/// </summary>
-			CalculatingCarPathToAltParkPos,
+			CalculatingCarPathToAltParkPos = 12,
 			/// <summary>
 			/// Indicates that the vehicle is on a path to an alternative parking position
 			/// </summary>
-			DrivingToAltParkPos,
+			DrivingToAltParkPos = 13,
 			/// <summary>
 			/// Indicates that a walking path to target is being calculated
 			/// </summary>
-			CalculatingWalkingPathToTarget,
+			CalculatingWalkingPathToTarget = 14,
 			/// <summary>
 			/// Indicates that the citizen is currently walking to the target
 			/// </summary>
-			WalkingToTarget,
+			WalkingToTarget = 15,
 			/// <summary>
 			/// Indicates that the citizen is using public transport (bus/train/tram/subway) to reach the target
 			/// </summary>
-			PublicTransportToTarget,
+			PublicTransportToTarget = 16,
 			/// <summary>
 			/// Indicates that the citizen is using a taxi to reach the target
 			/// </summary>
-			TaxiToTarget
+			TaxiToTarget = 17
 		}
 
 		public enum ExtParkingSpaceLocation {
 			/// <summary>
 			/// No parking space location
 			/// </summary>
-			None,
+			None = 0,
 			/// <summary>
 			/// Road-side parking space
 			/// </summary>
-			RoadSide,
+			RoadSide = 1,
 			/// <summary>
 			/// Building parking space
 			/// </summary>
-			Building
+			Building = 2
 		}
 
 		public ushort instanceId;

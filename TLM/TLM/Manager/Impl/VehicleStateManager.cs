@@ -1,6 +1,4 @@
-﻿#define USEPATHWAITCOUNTERx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;

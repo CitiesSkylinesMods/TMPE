@@ -77,6 +77,10 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="nodeId"></param>
 		/// <param name="destroyGroup"></param>
 		public void RemoveNodeFromSimulation(ushort nodeId, bool destroyGroup, bool removeTrafficLight) {
+#if DEBUG
+			Log.Warning($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}, {destroyGroup}, {removeTrafficLight}) called.");
+#endif
+
 			TrafficLightSimulation sim = TrafficLightSimulations[nodeId];
 			if (sim == null) {
 				return;
@@ -152,6 +156,10 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		private void RemoveNodeFromSimulation(ushort nodeId) {
+#if DEBUG
+			Log.Warning($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}) called.");
+#endif
+
 			TrafficLightSimulations[nodeId]?.Destroy();
 			TrafficLightSimulations[nodeId] = null;
 			UnsubscribeFromNodeGeometry(nodeId);
@@ -159,30 +167,6 @@ namespace TrafficManager.Manager.Impl {
 
 		public ITrafficLightSimulation GetNodeSimulation(ushort nodeId) {
 			return TrafficLightSimulations[nodeId];
-		}
-
-		public bool IsSpaceReservationAllowed(ushort transitNodeId, PathUnit.Position sourcePos, PathUnit.Position targetPos) {
-			if (!Options.timedLightsEnabled) {
-				return true;
-			}
-
-			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(transitNodeId)) {
-				RoadBaseAI.TrafficLightState vehLightState;
-				RoadBaseAI.TrafficLightState pedLightState;
-#if DEBUG
-				Vehicle dummyVeh = default(Vehicle);
-#endif
-				CustomRoadAI.GetTrafficLightState(
-#if DEBUG
-					0, ref dummyVeh,
-#endif
-					transitNodeId, sourcePos.m_segment, sourcePos.m_lane, targetPos.m_segment, ref Singleton<NetManager>.instance.m_segments.m_buffer[sourcePos.m_segment], 0, out vehLightState, out pedLightState);
-
-				if (vehLightState == RoadBaseAI.TrafficLightState.Red) {
-					return false;
-				}
-			}
-			return true;
 		}
 
 		public override void OnLevelUnloading() {

@@ -106,7 +106,7 @@ namespace TrafficManager.Custom.AI {
 			int maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
 			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace)) == 0 && vehicleData.m_cargoParent == 0) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else if ((int)vehicleData.m_blockCounter >= maxBlockCounter && Options.enableDespawning) { // NON-STOCK CODE
+			} else if ((int)vehicleData.m_blockCounter >= maxBlockCounter && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) { // NON-STOCK CODE
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -238,12 +238,6 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
-			// NON-STOCK CODE START
-			if (! Options.enableDespawning && vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram && GlobalConfig.Instance.DebugSwitches[15]) {
-				return;
-			}
-			// NON-STOCK CODE END
-
 			Vector3 targetPosDiff = (Vector3)vehicleData.m_targetPos3 - frameData.m_position;
 			Vector3 targetPosDir = frameData.m_position + Vector3.ClampMagnitude(targetPosDiff, maxDistance);
 			Vector3 min = Vector3.Min(vehicleData.m_segment.Min(), targetPosDir);

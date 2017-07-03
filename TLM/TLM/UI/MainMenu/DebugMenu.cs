@@ -293,6 +293,7 @@ namespace TrafficManager.UI {
 
 #if QUEUEDSTATS
 		private void clickTogglePathFindStats(UIComponent component, UIMouseEventParameter eventParam) {
+			Update();
 			showPathFindStats = !showPathFindStats;
 		}
 #endif

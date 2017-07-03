@@ -220,13 +220,13 @@ namespace TrafficManager.State {
 			var vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
 
 			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
+			highwayRulesToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			enableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 
 			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
 			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
-			highwayRulesToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
@@ -316,6 +316,67 @@ namespace TrafficManager.State {
 			reloadGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
 			resetGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
 #if DEBUG
+
+			// GLOBAL CONFIG
+			/*
+			AddOptionTab(tabStrip, Translation.GetString("Global_configuration"));// tabStrip.AddTab(Translation.GetString("General"), tabTemplate, true);
+			tabStrip.selectedIndex = tabIndex;
+
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
+
+			panelHelper = new UIHelper(currentPanel);
+
+			GlobalConfig globalConf = GlobalConfig.Instance;
+
+			var aiTrafficMeasurementConfGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI") + ": " + Translation.GetString("General"));
+
+			aiTrafficMeasurementConfGroup.AddSlider(Translation.GetString("Live_traffic_buffer_size"), 0f, 10000f, 100f, globalConf.MaxTrafficBuffer, onMaxTrafficBufferChanged);
+			aiTrafficMeasurementConfGroup.AddSlider(Translation.GetString("Path-find_traffic_buffer_size"), 0f, 10000f, 100f, globalConf.MaxPathFindTrafficBuffer, onMaxPathFindTrafficBufferChanged);
+			aiTrafficMeasurementConfGroup.AddSlider(Translation.GetString("Max._congestion_measurements"), 0f, 1000f, 10f, globalConf.MaxNumCongestionMeasurements, onMaxNumCongestionMeasurementsChanged);
+
+			var aiLaneSelParamConfGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI") + ": " + Translation.GetString("Lane_selection_parameters"));
+
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Lane_density_randomization"), 0f, 100f, 1f, globalConf.LaneDensityRandInterval, onLaneDensityRandIntervalChanged);
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Lane_density_discretization"), 0f, 100f, 1f, globalConf.LaneDensityDiscretization, onLaneTrafficDiscretizationChanged);
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Lane_spread_randomization"), 0f, 100f, 1f, globalConf.LaneUsageRandInterval, onLaneUsageRandIntervalChanged);
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Lane_spread_discretization"), 0f, 100f, 1f, globalConf.LaneUsageDiscretization, onLaneUsageDiscretizationChanged);
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Congestion_rel._velocity_threshold"), 0f, 100f, 1f, globalConf.CongestionSqrSpeedThreshold, onCongestionSqrSpeedThresholdChanged);
+			aiLaneSelParamConfGroup.AddSlider(Translation.GetString("Max._walking_distance"), 0f, 10000f, 100f, globalConf.MaxWalkingDistance, onMaxWalkingDistanceChanged);
+
+			var aiLaneSelFactorConfGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI") + ": " + Translation.GetString("Lane_selection_factors"));
+
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Spread_randomization_factor"), 1f, 5f, 0.05f, globalConf.UsageCostFactor, onUsageCostFactorChanged);
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Traffic_avoidance_factor"), 1f, 5f, 0.05f, globalConf.TrafficCostFactor, onTrafficCostFactorChanged);
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Public_transport_lane_penalty"), 1f, 50f, 0.5f, globalConf.PublicTransportLanePenalty, onPublicTransportLanePenaltyChanged);
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Public_transport_lane_reward"), 0f, 1f, 0.05f, globalConf.PublicTransportLaneReward, onPublicTransportLaneRewardChanged);
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Heavy_vehicle_max._inner_lane_penalty"), 0f, 5f, 0.05f, globalConf.HeavyVehicleMaxInnerLanePenalty, onHeavyVehicleMaxInnerLanePenaltyChanged);
+			aiLaneSelFactorConfGroup.AddSlider(Translation.GetString("Vehicle_restrictions_penalty"), 0f, 1000f, 25f, globalConf.VehicleRestrictionsPenalty, onVehicleRestrictionsPenaltyChanged);
+
+			var aiLaneChangeParamConfGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI") + ": " + Translation.GetString("Lane_changing_parameters"));
+
+			aiLaneChangeParamConfGroup.AddSlider(Translation.GetString("U-turn_lane_distance"), 1f, 5f, 1f, globalConf.UturnLaneDistance, onUturnLaneDistanceChanged);
+			aiLaneChangeParamConfGroup.AddSlider(Translation.GetString("Incompatible_lane_distance"), 1f, 5f, 1f, globalConf.IncompatibleLaneDistance, onIncompatibleLaneDistanceChanged);
+			aiLaneChangeParamConfGroup.AddSlider(Translation.GetString("Lane_changing_randomization_modulo"), 1f, 100f, 1f, globalConf.RandomizedLaneChangingModulo, onRandomizedLaneChangingModuloChanged);
+			aiLaneChangeParamConfGroup.AddSlider(Translation.GetString("Min._controlled_segments_in_front_of_highway_interchanges"), 1f, 10f, 1f, globalConf.MinHighwayInterchangeSegments, onMinHighwayInterchangeSegmentsChanged);
+			aiLaneChangeParamConfGroup.AddSlider(Translation.GetString("Max._controlled_segments_in_front_of_highway_interchanges"), 1f, 30f, 1f, globalConf.MaxHighwayInterchangeSegments, onMaxHighwayInterchangeSegmentsChanged);
+
+			var aiLaneChangeFactorConfGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI") + ": " + Translation.GetString("Lane_changing_cost_factors"));
+
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("On_city_roads"), 1f, 5f, 0.05f, globalConf.CityRoadLaneChangingBaseCost, onCityRoadLaneChangingBaseCostChanged);
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("On_highways"), 1f, 5f, 0.05f, globalConf.HighwayLaneChangingBaseCost, onHighwayLaneChangingBaseCostChanged);
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("In_front_of_highway_interchanges"), 1f, 5f, 0.05f, globalConf.HighwayInterchangeLaneChangingBaseCost, onHighwayInterchangeLaneChangingBaseCostChanged);
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("For_heavy_vehicles"), 1f, 5f, 0.05f, globalConf.HeavyVehicleLaneChangingCostFactor, onHeavyVehicleLaneChangingCostFactorChanged);
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("On_congested_roads"), 1f, 5f, 0.05f, globalConf.CongestionLaneChangingCostFactor, onCongestionLaneChangingCostFactorChanged);
+			aiLaneChangeFactorConfGroup.AddSlider(Translation.GetString("When_changing_multiple_lanes_at_once"), 1f, 5f, 0.05f, globalConf.MoreThanOneLaneChangingCostFactor, onMoreThanOneLaneChangingCostFactorChanged);
+
+			var aiParkingLaneChangeFactorConfGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI") + ": " + Translation.GetString("General"));
+			*/
+
 			// DEBUG
 			/*++tabIndex;
 
@@ -554,8 +615,6 @@ namespace TrafficManager.State {
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
 			RoutingManager.Instance.RequestFullRecalculation(true);
-			if (newHighwayRules)
-				setAdvancedAI(true);
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
@@ -871,7 +930,6 @@ namespace TrafficManager.State {
 				advancedAIToggle.isChecked = newAdvancedAI;
 
 			if (!newAdvancedAI) {
-				setHighwayRules(false);
 				setPreferOuterLane(false);
 			}
 		}

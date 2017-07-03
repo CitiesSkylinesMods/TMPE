@@ -1,4 +1,3 @@
-#define USEPATHWAITCOUNTERx
 #define DEBUGVSTATEx
 #define DEBUGREGx
 
@@ -526,7 +525,7 @@ namespace TrafficManager.Traffic {
 				case VehicleInfo.VehicleType.Car:
 					if (ai is PassengerCarAI)
 						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI) {
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI) {
 						return ExtVehicleType.Service;
 					}
 					if (ai is CarTrailerAI)

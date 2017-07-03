@@ -1,6 +1,4 @@
-﻿#define USEPATHWAITCOUNTERx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
@@ -18,19 +16,9 @@ using TrafficManager.Manager.Impl;
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-#if USEPATHWAITCOUNTER
-			VehicleState state = VehicleStateManager._GetVehicleState(vehicleId);
-#endif
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
-
-#if USEPATHWAITCOUNTER
-				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
-					state.PathWaitCounter = 0; // NON-STOCK CODE
-				}
-#endif
 
 				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					try {
@@ -51,12 +39,6 @@ namespace TrafficManager.Custom.AI {
 					this.PathfindFailure(vehicleId, ref vehicleData);
 					return;
 				}
-#if USEPATHWAITCOUNTER
-				else {
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
-					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter+1); // NON-STOCK CODE
-				}
-#endif
 			} else {
 				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
@@ -91,7 +73,7 @@ namespace TrafficManager.Custom.AI {
 					break;
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData))) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -133,11 +115,6 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				if (CustomPathManager._instance.CreatePath(ExtVehicleType.Tram, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
-
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}
@@ -211,64 +188,6 @@ namespace TrafficManager.Custom.AI {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, speedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
-			}
-		}
-
-		private static void CustomResetTargets(ushort vehicleID, ref Vehicle vehicleData, ushort leaderID, ref Vehicle leaderData, bool pushPathPos) {
-			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
-			VehicleInfo info = vehicleData.Info;
-			TramBaseAI tramBaseAI = info.m_vehicleAI as TramBaseAI;
-
-			Vector3 targetPos1 = lastFrameData.m_position;
-			Vector3 targetPos0 = lastFrameData.m_position;
-			Vector3 rotTargetDiff = lastFrameData.m_rotation * new Vector3(0f, 0f, info.m_generatedInfo.m_wheelBase * 0.5f);
-
-			if ((leaderData.m_flags & Vehicle.Flags.Reversed) != (Vehicle.Flags)0) {
-				targetPos1 -= rotTargetDiff;
-				//if (!GlobalConfig.Instance.DebugSwitches[15]) {
-					targetPos0 += rotTargetDiff;
-				//}
-			} else {
-				targetPos1 += rotTargetDiff;
-				//if (!GlobalConfig.Instance.DebugSwitches[15]) {
-					targetPos0 -= rotTargetDiff;
-				//}
-			}
-
-			vehicleData.m_targetPos0 = targetPos0;
-			vehicleData.m_targetPos0.w = 2f;
-			vehicleData.m_targetPos1 = targetPos1;
-			vehicleData.m_targetPos1.w = 2f;
-			vehicleData.m_targetPos2 = vehicleData.m_targetPos1;
-			vehicleData.m_targetPos3 = vehicleData.m_targetPos1;
-			if (vehicleData.m_path != 0u) {
-				PathManager pathMan = Singleton<PathManager>.instance;
-				int pathPosIndex = (vehicleData.m_pathPositionIndex >> 1) + 1;
-				uint pathUnitId = vehicleData.m_path;
-				if (pathPosIndex >= (int)pathMan.m_pathUnits.m_buffer[pathUnitId].m_positionCount) {
-					pathPosIndex = 0;
-					pathUnitId = pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathUnitId)].m_nextPathUnit;
-				}
-				PathUnit.Position pathPos;
-				if (pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].GetPosition(vehicleData.m_pathPositionIndex >> 1, out pathPos)) {
-					uint laneID = PathManager.GetLaneID(pathPos);
-					PathUnit.Position pathPos2;
-					if (pathUnitId != 0u && pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathUnitId)].GetPosition(pathPosIndex, out pathPos2)) {
-						uint laneID2 = PathManager.GetLaneID(pathPos2);
-						if (laneID2 == laneID) {
-							if (pathUnitId != vehicleData.m_path) {
-								pathMan.ReleaseFirstUnit(ref vehicleData.m_path);
-							}
-							vehicleData.m_pathPositionIndex = (byte)(pathPosIndex << 1);
-						}
-					}
-					PathUnit.CalculatePathPositionOffset(laneID, targetPos0, out vehicleData.m_lastPathOffset);
-				}
-			}
-
-			if (vehicleData.m_path != 0u) {
-				int index = 0;
-				InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, targetPos0, targetPos1, 0, ref leaderData, ref index, 1, 4, 4f, 1f);
 			}
 		}
 
@@ -594,7 +513,7 @@ namespace TrafficManager.Custom.AI {
 
 										/*fwd.z = 0f;
 										afterRotToTargetPos1Diff = Vector3.zero;*/
-										maxSpeed = 0.5f;
+										maxSpeed = 0.5f; // NON-STOCK CODE
 
 #if DEBUG
 										if (debug) {

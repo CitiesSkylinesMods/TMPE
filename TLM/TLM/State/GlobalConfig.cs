@@ -125,7 +125,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// congestion lane changing base cost
 		/// </summary>
-		public float CongestionLaneChangingBaseCost = 1f;
+		public float CongestionLaneChangingCostFactor = 1f;
 
 		/// <summary>
 		/// heavy vehicle lane changing cost factor
@@ -140,7 +140,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Lane changing base costs in front of highway junctions
 		/// </summary>
-		public float HighwayJunctionLaneChangingBaseCost = 1.25f;
+		public float HighwayInterchangeLaneChangingBaseCost = 1.25f;
 
 		/// <summary>
 		/// Used for discretizing path-find usage values
@@ -150,7 +150,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Used for discretizing lane traffic measurements
 		/// </summary>
-		public float LaneTrafficDiscretization = 25f;
+		public float LaneDensityDiscretization = 25f;
 
 		/// <summary>
 		/// Relative factor for lane speed cost calculation
@@ -190,12 +190,12 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane usage random interval
 		/// </summary>
-		public uint MinHighwayJunctionSegments = 3;
+		public uint MinHighwayInterchangeSegments = 3;
 
 		/// <summary>
 		/// lane usage random interval
 		/// </summary>
-		public uint MaxHighwayJunctionSegments = 15;
+		public uint MaxHighwayInterchangeSegments = 15;
 
 		/// <summary>
 		/// Threshold for reducing traffic buffer
@@ -211,11 +211,6 @@ namespace TrafficManager.State {
 		/// Threshold for restart segment direction congestion measurements
 		/// </summary>
 		public byte MaxNumCongestionMeasurements = 100;
-
-		/// <summary>
-		/// Minimum considered average segment length for path-find cost calculation
-		/// </summary>
-		public float SegmentMinAverageLength = 30f;
 
 		/// <summary>
 		/// penalty for busses not driving on bus lanes

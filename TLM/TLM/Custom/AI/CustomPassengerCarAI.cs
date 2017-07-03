@@ -21,7 +21,7 @@ namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager
 	public class CustomPassengerCarAI : CarAI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && Options.enableDespawning) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			} else {
 				base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
@@ -259,11 +259,6 @@ namespace TrafficManager.Custom.AI {
 				PathUnit.Position def = default(PathUnit.Position);
 				if (CustomPathManager._instance.CreatePath(
 					ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, skipQueue, randomParking, false)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
-
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");

@@ -39,10 +39,6 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
 
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

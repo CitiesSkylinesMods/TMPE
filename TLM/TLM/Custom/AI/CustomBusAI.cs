@@ -37,10 +37,6 @@ namespace TrafficManager.Custom.AI {
 				// NON-STOCK CODE START
 				if (CustomPathManager._instance.CreatePath(
 					ExtVehicleType.Bus, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), true, false)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
 					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {

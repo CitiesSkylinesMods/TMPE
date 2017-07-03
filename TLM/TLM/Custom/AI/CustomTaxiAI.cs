@@ -72,10 +72,6 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				if (CustomPathManager._instance.CreatePath(
 					ExtVehicleType.Taxi, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
 
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

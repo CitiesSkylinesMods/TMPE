@@ -23,27 +23,83 @@ namespace TrafficManager.Manager.Impl {
 			// TODO implement
 		}
 
-		public bool HasJunctionRestrictions(ushort nodeId) {
-			NetManager netManager = Singleton<NetManager>.instance;
+		public bool MayHaveJunctionRestrictions(ushort nodeId) {
+			NetNode.Flags flags = NetNode.Flags.None;
+			Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+				flags = node.m_flags;
+				return true;
+			});
 
-			if ((netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+			if (LogicUtil.CheckFlags((uint)flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted), (uint)NetNode.Flags.Created)) {
 				return false;
-
-			for (int i = 0; i < 8; ++i) {
-				ushort segmentId = netManager.m_nodes.m_buffer[nodeId].GetSegment(i);
-				if (segmentId == 0)
-					continue;
-
-				Configuration.SegmentNodeFlags flags = Flags.getSegmentNodeFlags(segmentId, netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId);
-				if (flags != null && !flags.IsDefault())
-					return true;
 			}
-			return false;
+
+			return LogicUtil.CheckFlags((uint)flags, (uint)(NetNode.Flags.Junction | NetNode.Flags.Bend));
+		}
+
+		public bool HasJunctionRestrictions(ushort nodeId) {
+			if (! Services.NetService.IsNodeValid(nodeId)) {
+				return false;
+			}
+
+			bool ret = false;
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				if (segmentId == 0) {
+					return true;
+				}
+
+				Configuration.SegmentNodeFlags flags = Flags.getSegmentNodeFlags(segmentId, segment.m_startNode == nodeId);
+				if (flags != null && !flags.IsDefault()) {
+					ret = true;
+					return false;
+				}
+
+				return true;
+			});
+
+			return ret;
+		}
+
+		public void RemoveJunctionRestrictions(ushort nodeId) {
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				if (segmentId == 0) {
+					return true;
+				}
+
+				Flags.resetSegmentNodeFlags(segmentId, segment.m_startNode == nodeId);
+				return true;
+			});
 		}
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
 			Flags.resetSegmentNodeFlags(geometry.SegmentId, false);
 			Flags.resetSegmentNodeFlags(geometry.SegmentId, true);
+
+			ushort startNodeId = 0;
+			bool removeAllAtStartNode = false;
+			ushort endNodeId = 0;
+			bool removeAllAtEndNode = false;
+
+			Services.NetService.ProcessSegment(geometry.SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
+				if (segment.m_startNode != 0) {
+					startNodeId = segment.m_startNode;
+					removeAllAtStartNode = !MayHaveJunctionRestrictions(startNodeId);
+				}
+
+				if (segment.m_endNode != 0) {
+					endNodeId = segment.m_endNode;
+					removeAllAtEndNode = !MayHaveJunctionRestrictions(endNodeId);
+				}
+				return true;
+			});
+
+			if (removeAllAtStartNode) {
+				RemoveJunctionRestrictions(startNodeId);
+			}
+
+			if (removeAllAtEndNode) {
+				RemoveJunctionRestrictions(endNodeId);
+			}
 		}
 
 		protected override void HandleValidSegment(SegmentGeometry geometry) {

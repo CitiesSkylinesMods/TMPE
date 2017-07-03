@@ -1,6 +1,4 @@
-﻿#define USEPATHWAITCOUNTERx
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
@@ -21,13 +19,6 @@ namespace TrafficManager.Custom.AI {
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
 
-#if USEPATHWAITCOUNTER
-				if ((pathFindFlags & (PathUnit.FLAG_READY | PathUnit.FLAG_FAILED)) != 0) {
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
-					state.PathWaitCounter = 0; // NON-STOCK CODE
-				}
-#endif
-
 				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					try {
 						this.PathFindReady(vehicleId, ref vehicleData);
@@ -46,12 +37,6 @@ namespace TrafficManager.Custom.AI {
 					vehicleData.Unspawn(vehicleId);
 					return;
 				}
-#if USEPATHWAITCOUNTER
-				else {
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleId);
-					state.PathWaitCounter = (ushort)Math.Min(ushort.MaxValue, (int)state.PathWaitCounter+1); // NON-STOCK CODE
-				}
-#endif
 			} else {
 				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
@@ -130,7 +115,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && Options.enableDespawning)) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData))) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			}
 		}
@@ -269,7 +254,7 @@ namespace TrafficManager.Custom.AI {
 								transitNodeId = netMan.m_segments.m_buffer[curPathPos.m_segment].m_endNode;
 							}
 
-							if (TrafficLightSimulationManager.Instance.IsSpaceReservationAllowed(transitNodeId, curPathPos, nextPathPos)) {
+							if (VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(transitNodeId, curPathPos, nextPathPos)) {
 								// NON-STOCK CODE END
 
 								uint nextLaneId = PathManager.GetLaneID(nextPathPos);
@@ -365,7 +350,7 @@ namespace TrafficManager.Custom.AI {
 								transitNodeId = netMan.m_segments.m_buffer[curPathPos.m_segment].m_endNode;
 							}
 
-							if (TrafficLightSimulationManager.Instance.IsSpaceReservationAllowed(transitNodeId, curPathPos, nextPathPos)) {
+							if (VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(transitNodeId, curPathPos, nextPathPos)) {
 								// NON-STOCK CODE END
 
 								uint nextLaneId = PathManager.GetLaneID(nextPathPos);
@@ -582,11 +567,6 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
-
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}
@@ -649,7 +629,7 @@ namespace TrafficManager.Custom.AI {
 					Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Target position is within breaking distance. ({Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot)} >= {breakingDist - 5f}). targetNodeId={targetNodeId} prevTargetNodeId={prevTargetNodeId} targetHasPrio={TrafficPriorityManager.Instance.HasNodePrioritySign(targetNodeId)} targetHasActiveTimed={TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId)}");
 #endif
 
-				if (Options.enableDespawning || vehicleData.m_blockCounter != 255) { // NON-STOCK CODE
+				if (VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData) || vehicleData.m_blockCounter != 255) { // NON-STOCK CODE
 #if DEBUG
 					if (debug)
 						Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Checking for free space on lane {laneID}.");
@@ -753,7 +733,7 @@ namespace TrafficManager.Custom.AI {
 						// when a TTL is active only reserve space if it shows green
 						PathUnit.Position nextPos;
 						if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out nextPos)) {
-							if (!TrafficLightSimulationManager.Instance.IsSpaceReservationAllowed(transitNodeId, position, nextPos)) {
+							if (!VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(transitNodeId, position, nextPos)) {
 								stopLoop = true;
 							}
 						}

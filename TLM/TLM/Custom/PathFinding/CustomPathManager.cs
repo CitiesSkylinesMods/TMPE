@@ -14,13 +14,23 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Util;
 using CSUtil.Commons;
+using static TrafficManager.Traffic.ExtCitizenInstance;
 
 // ReSharper disable InconsistentNaming
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathManager : PathManager {
-		internal struct PathUnitQueueItem {
-			internal uint nextPathUnitId;
+		public struct PathUnitQueueItem {
+			public uint nextPathUnitId;
+			public ExtVehicleType vehicleType;
+			public ExtPathType pathType;
+			public ushort vehicleId;
+
+			public void Reset() {
+				vehicleType = ExtVehicleType.None;
+				pathType = ExtPathType.None;
+				vehicleId = 0;
+			}
 		}
 
 		/// <summary>
@@ -32,11 +42,6 @@ namespace TrafficManager.Custom.PathFinding {
 		internal CustomPathFind[] _replacementPathFinds;
 
 		public static CustomPathManager _instance;
-
-		// TODO merge them into one struct
-		internal ExtVehicleType?[] pathUnitExtVehicleType = null;
-		internal ushort?[] pathUnitVehicleIds = null;
-		internal ExtCitizenInstance.ExtPathType?[] pathUnitPathTypes = null;
 
 #if QUEUEDSTATS
 		public static uint TotalQueuedPathFinds {
@@ -57,10 +62,6 @@ namespace TrafficManager.Custom.PathFinding {
 		//On waking up, replace the stock pathfinders with the custom one
 		[UsedImplicitly]
 		public new virtual void Awake() {
-			pathUnitExtVehicleType = new ExtVehicleType?[PathManager.MAX_PATHUNIT_COUNT];
-			pathUnitVehicleIds = new ushort?[PathManager.MAX_PATHUNIT_COUNT];
-			pathUnitPathTypes = new ExtCitizenInstance.ExtPathType?[PathManager.MAX_PATHUNIT_COUNT];
-
 			_instance = this;
 		}
 
@@ -196,7 +197,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			unit = pathUnitId;
 
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 1;
+			this.m_pathUnits.m_buffer[unit].m_simulationFlags = 1;
 			if (isHeavyVehicle) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
 			}
@@ -210,18 +211,18 @@ namespace TrafficManager.Custom.PathFinding {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 128;
 			}
 			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_buildIndex = buildIndex;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position00 = startPosA;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position01 = endPosA;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position02 = startPosB;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position03 = endPosB;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_position11 = vehiclePosition;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit = 0u;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_laneTypes = (byte)laneTypes;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_vehicleTypes = (ushort)vehicleTypes;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_length = maxLength;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_positionCount = 20;
-			this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_referenceCount = 1;
+			this.m_pathUnits.m_buffer[unit].m_buildIndex = buildIndex;
+			this.m_pathUnits.m_buffer[unit].m_position00 = startPosA;
+			this.m_pathUnits.m_buffer[unit].m_position01 = endPosA;
+			this.m_pathUnits.m_buffer[unit].m_position02 = startPosB;
+			this.m_pathUnits.m_buffer[unit].m_position03 = endPosB;
+			this.m_pathUnits.m_buffer[unit].m_position11 = vehiclePosition;
+			this.m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
+			this.m_pathUnits.m_buffer[unit].m_laneTypes = (byte)laneTypes;
+			this.m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)vehicleTypes;
+			this.m_pathUnits.m_buffer[unit].m_length = maxLength;
+			this.m_pathUnits.m_buffer[unit].m_positionCount = 20;
+			this.m_pathUnits.m_buffer[unit].m_referenceCount = 1;
 			int minQueued = 10000000;
 			CustomPathFind pathFind = null;
 #if QUEUEDSTATS
@@ -249,9 +250,9 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			}
 
-			pathUnitExtVehicleType[unit] = vehicleType;
-			pathUnitVehicleIds[unit] = vehicleId == 0 ? (ushort?)null : vehicleId;
-			pathUnitPathTypes[unit] = pathType;
+			queueItems[unit].vehicleType = vehicleType;
+			queueItems[unit].vehicleId = vehicleId;
+			queueItems[unit].pathType = pathType;
 
 			if (pathFind != null && pathFind.ExtCalculatePath(unit, skipQueue)) {
 				return true;
@@ -396,9 +397,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		internal void ResetPathUnit(uint unit) {
-			pathUnitExtVehicleType[unit] = null;
-			pathUnitVehicleIds[unit] = null;
-			pathUnitPathTypes[unit] = ExtCitizenInstance.ExtPathType.None;
+			queueItems[unit].Reset();
 		}
 
 		private void StopPathFinds() {

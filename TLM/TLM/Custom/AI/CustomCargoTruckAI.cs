@@ -11,22 +11,22 @@ using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
-		public void CustomSimulationStep(ushort vehicleId, ref Vehicle data, Vector3 physicsLodRefPos) {
+		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			try {
-				if ((data.m_flags & Vehicle.Flags.Congestion) != 0 && Options.enableDespawning) {
+				if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} else {
-					if ((data.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (data.m_waitCounter += 1) > 20) {
-						RemoveOffers(vehicleId, ref data);
-						data.m_flags &= ~Vehicle.Flags.WaitingTarget;
-						data.m_flags |= Vehicle.Flags.GoingBack;
-						data.m_waitCounter = 0;
-						if (!StartPathFind(vehicleId, ref data)) {
-							data.Unspawn(vehicleId);
+					if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
+						RemoveOffers(vehicleId, ref vehicleData);
+						vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
+						vehicleData.m_flags |= Vehicle.Flags.GoingBack;
+						vehicleData.m_waitCounter = 0;
+						if (!StartPathFind(vehicleId, ref vehicleData)) {
+							vehicleData.Unspawn(vehicleId);
 						}
 					}
 
-					base.SimulationStep(vehicleId, ref data, physicsLodRefPos);
+					base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
 				}
 			} catch (Exception ex) {
 				Log.Error("Error in CargoTruckAI.SimulationStep: " + ex.ToString());
@@ -111,11 +111,6 @@ namespace TrafficManager.Custom.AI {
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
 				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
-#if USEPATHWAITCOUNTER
-					VehicleState state = VehicleStateManager.Instance._GetVehicleState(vehicleID);
-					state.PathWaitCounter = 0;
-#endif
-
 					if (vehicleData.m_path != 0u) {
 						instance.ReleasePath(vehicleData.m_path);
 					}

@@ -1,7 +1,4 @@
-﻿#define MARKCONGESTEDSEGMENTS
-#define USEPATHWAITCOUNTERx
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using ColossalFramework;

@@ -33,6 +33,30 @@ namespace TrafficManager.Manager.Impl {
 
 		}
 
+		public bool IsSpaceReservationAllowed(ushort transitNodeId, PathUnit.Position sourcePos, PathUnit.Position targetPos) {
+			if (!Options.timedLightsEnabled) {
+				return true;
+			}
+
+			if (TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(transitNodeId)) {
+				RoadBaseAI.TrafficLightState vehLightState;
+				RoadBaseAI.TrafficLightState pedLightState;
+#if DEBUG
+				Vehicle dummyVeh = default(Vehicle);
+#endif
+				CustomRoadAI.GetTrafficLightState(
+#if DEBUG
+					0, ref dummyVeh,
+#endif
+					transitNodeId, sourcePos.m_segment, sourcePos.m_lane, targetPos.m_segment, ref Singleton<NetManager>.instance.m_segments.m_buffer[sourcePos.m_segment], 0, out vehLightState, out pedLightState);
+
+				if (vehLightState == RoadBaseAI.TrafficLightState.Red) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		/// <summary>
 		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
 		/// Sets the maximum allowed speed <paramref name="maxSpeed"/> if segment change is not allowed (otherwise <paramref name="maxSpeed"/> has to be set by the calling method).
@@ -76,7 +100,7 @@ namespace TrafficManager.Manager.Impl {
 			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.TTLDebugNodeId <= 0 || targetNodeId == GlobalConfig.Instance.TTLDebugNodeId);
 #endif
 			if (prevTargetNodeId != targetNodeId
-				|| (!Options.enableDespawning && vehicleData.m_blockCounter == 255) // NON-STOCK CODE
+				|| (!VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData) && vehicleData.m_blockCounter == 255) // NON-STOCK CODE
 			) {
 				// method should only be called if targetNodeId == prevTargetNode
 				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
@@ -478,6 +502,10 @@ namespace TrafficManager.Manager.Impl {
 			}
 			maxSpeed = 0f; // maxSpeed should be set by caller
 			return true;
+		}
+
+		public bool MayDespawn(ref Vehicle vehicleData) {
+			return Options.enableDespawning || vehicleData.m_flags2 != 0;
 		}
 
 		public float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, Vector3 pos, float maxSpeed, bool isRecklessDriver) {

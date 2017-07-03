@@ -587,9 +587,11 @@ namespace TrafficManager.UI.SubTools {
 
 
 						var curStep = timedNodeMain.CurrentStep;
-
-						_stepMetric = timedNodeMain.GetStep(curStep).ChangeMetric;
-						BuildStepChangeMetricDisplay(false);
+						ITimedTrafficLightsStep currentStep = timedNodeMain.GetStep(curStep);
+						_stepMetric = currentStep.ChangeMetric;
+						if (currentStep.MaxTime > currentStep.MinTime) {
+							BuildStepChangeMetricDisplay(false);
+						}
 						
 						_waitFlowBalance = timedNodeMain.GetStep(curStep).WaitFlowBalance;
 						BuildFlowPolicyDisplay(inTestMode);
@@ -1131,7 +1133,7 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 					ushort srcSegmentId = end.SegmentId; // source segment
 
-					ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, end.StartNode);
+					ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, end.StartNode, false);
 					if (liveSegmentLights == null)
 						continue;
 					if (!nodeSimulation.IsTimedLightActive()) {
