@@ -1,5 +1,4 @@
 #define DEBUGVx
-#define USEPATHWAITCOUNTERx
 
 using System;
 using System.Collections.Generic;

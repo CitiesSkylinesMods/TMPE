@@ -1552,7 +1552,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirection TramBaseAI::ResetTargets calls");
+				/*Log.Info("Redirection TramBaseAI::ResetTargets calls");
 				try {
 					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("ResetTargets",
 							BindingFlags.NonPublic | BindingFlags.Static),
@@ -1561,7 +1561,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not redirect TramBaseAI::ResetTargets");
 					detourFailed = true;
-				}
+				}*/
 
 				/*Log.Info("Redirecting TramBaseAI::TrySpawn Calls");
 				try {
