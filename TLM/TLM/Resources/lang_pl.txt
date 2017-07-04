@@ -176,3 +176,4 @@ flow_ratio flow ratio
 wait_ratio wait ratio
 After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
 Adaptive_step_switching Adaptive step switching
+Show_path-find_stats Show path-find stats

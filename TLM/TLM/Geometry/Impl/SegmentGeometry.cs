@@ -1075,7 +1075,7 @@ namespace TrafficManager.Geometry.Impl {
 					}
 				}
 
-				laneId = instance.m_lanes.m_buffer[(int)((UIntPtr)laneId)].m_nextLane;
+				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
 				laneIndex++;
 			}
 

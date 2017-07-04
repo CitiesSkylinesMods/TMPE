@@ -175,7 +175,7 @@ namespace TrafficManager.Manager.Impl {
 		protected void OnSegmentChange(ushort segmentId) {
 			RoutingManager.Instance.RequestRecalculation(segmentId);
 			SubscribeToSegmentGeometry(segmentId);
-			if (Options.instantEffects) {
+			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 				Services.NetService.PublishSegmentChanges(segmentId);
 			}
 		}

@@ -16,36 +16,31 @@ using UnityEngine;
 using static TrafficManager.Traffic.ExtCitizenInstance;
 
 namespace TrafficManager.Manager.Impl {
-	public class AdvancedParkingManager : AbstractCustomManager, IAdvancedParkingManager {
+	public class AdvancedParkingManager : AbstractFeatureManager, IAdvancedParkingManager {
 		public static AdvancedParkingManager Instance { get; private set; } = null;
 
 		static AdvancedParkingManager() {
 			Instance = new AdvancedParkingManager();
 		}
 
-		/// <summary>
-		/// Determines the color the given building should be colorized with given the current info view mode.
-		/// </summary>
-		/// <param name="buildingId">building id</param>
-		/// <param name="buildingData">building data</param>
-		/// <param name="infoMode">current info view mode</param>
-		/// <param name="color">output color</param>
-		/// <returns>true if a custom color should be displayed, false otherwise</returns>
-		public bool GetBuildingInfoViewColor(ushort buildingId, ref Building buildingData, ref ExtBuilding extBuilding, InfoManager.InfoMode infoMode, out Color? color) {
-			color = null;
-
-			if (infoMode == InfoManager.InfoMode.Traffic) {
-				// parking space demand info view
-				color = Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Mathf.Clamp01((float)extBuilding.parkingSpaceDemand * 0.01f));
-				return true;
-			} else if (infoMode == InfoManager.InfoMode.Transport && !(buildingData.Info.m_buildingAI is DepotAI)) {
-				// public transport demand info view
-				// TODO should not depend on UI class "TrafficManagerTool"
-				color = Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_negativeColor, Mathf.Clamp01((float)(TrafficManagerTool.CurrentTransportDemandViewMode == TransportDemandViewMode.Outgoing ? extBuilding.outgoingPublicTransportDemand : extBuilding.incomingPublicTransportDemand) * 0.01f));
-				return true;
+		protected override void OnDisableFeatureInternal() {
+			for (ushort citizenInstanceId = 0; citizenInstanceId < ExtCitizenInstanceManager.Instance.ExtInstances.Length; ++citizenInstanceId) {
+				ExtPathMode pathMode = ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode;
+				switch (pathMode) {
+					case ExtPathMode.RequiresWalkingPathToParkedCar:
+					case ExtPathMode.CalculatingWalkingPathToParkedCar:
+					case ExtPathMode.WalkingToParkedCar:
+					case ExtPathMode.ApproachingParkedCar:
+						// citizen instances in precarious situations are released in order to prevent them from floating
+						Services.CitizenService.ReleaseCitizenInstance(citizenInstanceId);
+						break;
+				}
 			}
+			ExtCitizenInstanceManager.Instance.Reset();
+		}
 
-			return false;
+		protected override void OnEnableFeatureInternal() {
+			
 		}
 
 		public ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref Citizen citizen, ExtPathState mainPathState) {
@@ -594,7 +589,8 @@ namespace TrafficManager.Manager.Impl {
 
 										// spawn a passenger car near the current position
 										Vector3 parkPos;
-										if (AdvancedParkingManager.Instance.TrySpawnParkedPassengerCar(instanceData.m_citizen, homeId, currentPos, vehicleInfo, out parkPos)) {
+										ParkingUnableReason parkReason;
+										if (AdvancedParkingManager.Instance.TrySpawnParkedPassengerCar(instanceData.m_citizen, homeId, currentPos, vehicleInfo, out parkPos, out parkReason)) {
 											parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_parkedVehicle;
 #if DEBUG
 											if (GlobalConfig.Instance.DebugSwitches[2] && sourceBuildingId != 0)
@@ -607,11 +603,11 @@ namespace TrafficManager.Manager.Impl {
 										} else {
 #if DEBUG
 											if (GlobalConfig.Instance.DebugSwitches[2]) {
-												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): >> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} (citizen instance {instanceId}). homePos: {Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position}");
+												Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): >> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} (citizen instance {instanceId}). reason={parkReason}. homePos: {Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position}");
 											}
 #endif
 
-											if (sourceBuildingId != 0) {
+											if (parkReason == ParkingUnableReason.NoSpaceFound && sourceBuildingId != 0) {
 												ExtBuildingManager.Instance.ExtBuildings[sourceBuildingId].AddParkingSpaceDemand(GlobalConfig.Instance.FailedSpawnParkingSpaceDemandIncrement);
 											}
 										}
@@ -906,20 +902,6 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		/// <summary>
-		/// Finds a free parking space in the vicinity of the given target position <paramref name="endPos"/> for the given citizen instance <paramref name="extDriverInstance"/>.
-		/// </summary>
-		/// <param name="endPos">target position</param>
-		/// <param name="vehicleInfo">vehicle type that is being used</param>
-		/// <param name="extDriverInstance">cititzen instance that is driving the car</param>
-		/// <param name="homeId">Home building of the citizen (may be 0 for tourists/homeless cims)</param>
-		/// <param name="goingHome">Specifies if the citizen is going home</param>
-		/// <param name="vehicleId">Vehicle that is being used (used for logging)</param>
-		/// <param name="allowTourists">If true, method fails if given citizen is a tourist (TODO remove this parameter)</param>
-		/// <param name="parkPos">parking position (output)</param>
-		/// <param name="endPathPos">sidewalk path position near parking space (output). only valid if <paramref name="calculateEndPos"/> yields false.</param>
-		/// <param name="calculateEndPos">if false, a parking space path position could be calculated (TODO negate & rename parameter)</param>
-		/// <returns>true if a parking space could be found, false otherwise</returns>
 		public bool FindParkingSpaceForCitizen(Vector3 endPos, VehicleInfo vehicleInfo, ref ExtCitizenInstance extDriverInstance, ushort homeId, bool goingHome, ushort vehicleId, bool allowTourists, out Vector3 parkPos, ref PathUnit.Position endPathPos, out bool calculateEndPos) {
 			calculateEndPos = true;
 			parkPos = default(Vector3);
@@ -1005,34 +987,21 @@ namespace TrafficManager.Manager.Impl {
 			return false;
 		}
 
-		/// <summary>
-		/// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/> in the vicinity of the given position <paramref name="refPos"/>
-		/// </summary>
-		/// <param name="citizenId">Citizen that requires a parked car</param>
-		/// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
-		/// <param name="refPos">Reference position</param>
-		/// <param name="vehicleInfo">Vehicle type to spawn</param>
-		/// <param name="parkPos">Parked vehicle position (output)</param>
-		/// <returns>true if a passenger car could be spawned, false otherwise</returns>
-		internal bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
+		public bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[4] && homeId != 0)
 				Log._Debug($"Trying to spawn parked passenger car for citizen {citizenId}, home {homeId} @ {refPos}");
 #endif
-			if (TrySpawnParkedPassengerCarRoadSide(citizenId, refPos, vehicleInfo, out parkPos))
+			if (TrySpawnParkedPassengerCarRoadSide(citizenId, refPos, vehicleInfo, out parkPos, out reason)) {
 				return true;
-			return TrySpawnParkedPassengerCarBuilding(citizenId, homeId, refPos, vehicleInfo, out parkPos);
+			}
+			if (reason == ParkingUnableReason.LimitHit) {
+				return false;
+			}
+			return TrySpawnParkedPassengerCarBuilding(citizenId, homeId, refPos, vehicleInfo, out parkPos, out reason);
 		}
 
-		/// <summary>
-		/// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/> at a road segment in the vicinity of the given position <paramref name="refPos"/>
-		/// </summary>
-		/// <param name="citizenId">Citizen that requires a parked car</param>
-		/// <param name="refPos">Reference position</param>
-		/// <param name="vehicleInfo">Vehicle type to spawn</param>
-		/// <param name="parkPos">Parked vehicle position (output)</param>
-		/// <returns>true if a passenger car could be spawned, false otherwise</returns>
-		public bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
+		public bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
 				Log._Debug($"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
@@ -1051,8 +1020,13 @@ namespace TrafficManager.Manager.Impl {
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"[SUCCESS] Spawned parked passenger car at road side for citizen {citizenId}: {parkedVehicleId}");
 #endif
+					reason = ParkingUnableReason.None;
 					return true;
+				} else {
+					reason = ParkingUnableReason.LimitHit;
 				}
+			} else {
+				reason = ParkingUnableReason.NoSpaceFound;
 			}
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2])
@@ -1061,16 +1035,7 @@ namespace TrafficManager.Manager.Impl {
 			return false;
 		}
 
-		/// <summary>
-		/// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/> at a building in the vicinity of the given position <paramref name="refPos"/>
-		/// </summary>
-		/// <param name="citizenId">Citizen that requires a parked car</param>
-		/// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
-		/// <param name="refPos">Reference position</param>
-		/// <param name="vehicleInfo">Vehicle type to spawn</param>
-		/// <param name="parkPos">Parked vehicle position (output)</param>
-		/// <returns>true if a passenger car could be spawned, false otherwise</returns>
-		public bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos) {
+		public bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[4] && homeId != 0)
 				Log._Debug($"Trying to spawn parked passenger car next to building for citizen {citizenId} @ {refPos}");
@@ -1089,8 +1054,13 @@ namespace TrafficManager.Manager.Impl {
 					if (GlobalConfig.Instance.DebugSwitches[4] && homeId != 0)
 						Log._Debug($"[SUCCESS] Spawned parked passenger car next to building for citizen {citizenId}: {parkedVehicleId}");
 #endif
+					reason = ParkingUnableReason.None;
 					return true;
+				} else {
+					reason = ParkingUnableReason.LimitHit;
 				}
+			} else {
+				reason = ParkingUnableReason.NoSpaceFound;
 			}
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[2] && homeId != 0)
@@ -1178,7 +1148,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal ushort FindParkingSpaceAtRoadSide(ushort ignoreParked, Vector3 refPos, float width, float length, float maxDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+		protected ushort FindParkingSpaceAtRoadSide(ushort ignoreParked, Vector3 refPos, float width, float length, float maxDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			parkPos = Vector3.zero;
 			parkRot = Quaternion.identity;
 			parkOffset = 0f;
@@ -1260,7 +1230,7 @@ namespace TrafficManager.Manager.Impl {
 			return foundSegmentId;
 		}
 
-		public ushort FindParkingSpaceBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort segmentId, Vector3 refPos, float maxBuildingDistance, float maxParkingSpaceDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+		protected ushort FindParkingSpaceBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort segmentId, Vector3 refPos, float maxBuildingDistance, float maxParkingSpaceDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			parkPos = Vector3.zero;
 			parkRot = Quaternion.identity;
 			parkOffset = -1f;
@@ -1337,22 +1307,6 @@ namespace TrafficManager.Manager.Impl {
 			return foundBuildingId;
 		}
 
-		/// <summary>
-		/// Finds a parking space (prop) that belongs to a given building
-		/// </summary>
-		/// <param name="homeID"></param>
-		/// <param name="ignoreParked"></param>
-		/// <param name="buildingID"></param>
-		/// <param name="building"></param>
-		/// <param name="segmentId"></param>
-		/// <param name="refPos"></param>
-		/// <param name="width"></param>
-		/// <param name="length"></param>
-		/// <param name="maxDistance"></param>
-		/// <param name="parkPos"></param>
-		/// <param name="parkRot"></param>
-		/// <param name="parkOffset"></param>
-		/// <returns></returns>
 		public bool FindParkingSpacePropAtBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort buildingID, ref Building building, ushort segmentId, Vector3 refPos, ref float maxDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 			int buildingWidth = building.Width;
 			int buildingLength = building.Length;
@@ -1494,20 +1448,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		/// <summary>
-		/// Finds a free parking space for a given vehicle position on a given segment
-		/// </summary>
-		/// <param name="ignoreParked"></param>
-		/// <param name="segmentId"></param>
-		/// <param name="refPos"></param>
-		/// <param name="width"></param>
-		/// <param name="length"></param>
-		/// <param name="parkPos"></param>
-		/// <param name="parkRot"></param>
-		/// <param name="laneId"></param>
-		/// <param name="laneIndex"></param>
-		/// <param name="parkOffset"></param>
-		/// <returns></returns>
 		public bool FindParkingSpaceRoadSideForVehiclePos(VehicleInfo vehicleInfo, ushort ignoreParked, ushort segmentId, Vector3 refPos, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset, out uint laneId, out int laneIndex) {
 			float width = vehicleInfo.m_generatedInfo.m_size.x;
 			float length = vehicleInfo.m_generatedInfo.m_size.z;
@@ -1538,11 +1478,28 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool FindParkingSpaceRoadSide(ushort ignoreParked, Vector3 refPos, float width, float length, float maxDistance, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			return AdvancedParkingManager.Instance.FindParkingSpaceAtRoadSide(ignoreParked, refPos, width, length, maxDistance, false, out parkPos, out parkRot, out parkOffset) != 0;
+			return FindParkingSpaceAtRoadSide(ignoreParked, refPos, width, length, maxDistance, false, out parkPos, out parkRot, out parkOffset) != 0;
 		}
 
 		public bool FindParkingSpaceBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort segmentId, Vector3 refPos, float maxBuildingDistance, float maxParkingSpaceDistance, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			return AdvancedParkingManager.Instance.FindParkingSpaceBuilding(vehicleInfo, homeID, ignoreParked, segmentId, refPos, maxBuildingDistance, maxParkingSpaceDistance, false, out parkPos, out parkRot, out parkOffset) != 0;
+			return FindParkingSpaceBuilding(vehicleInfo, homeID, ignoreParked, segmentId, refPos, maxBuildingDistance, maxParkingSpaceDistance, false, out parkPos, out parkRot, out parkOffset) != 0;
+		}
+
+		public bool GetBuildingInfoViewColor(ushort buildingId, ref Building buildingData, ref ExtBuilding extBuilding, InfoManager.InfoMode infoMode, out Color? color) {
+			color = null;
+
+			if (infoMode == InfoManager.InfoMode.Traffic) {
+				// parking space demand info view
+				color = Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)infoMode].m_negativeColor, Mathf.Clamp01((float)extBuilding.parkingSpaceDemand * 0.01f));
+				return true;
+			} else if (infoMode == InfoManager.InfoMode.Transport && !(buildingData.Info.m_buildingAI is DepotAI)) {
+				// public transport demand info view
+				// TODO should not depend on UI class "TrafficManagerTool"
+				color = Color.Lerp(Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_targetColor, Singleton<InfoManager>.instance.m_properties.m_modeProperties[(int)InfoManager.InfoMode.Traffic].m_negativeColor, Mathf.Clamp01((float)(TrafficManagerTool.CurrentTransportDemandViewMode == TransportDemandViewMode.Outgoing ? extBuilding.outgoingPublicTransportDemand : extBuilding.incomingPublicTransportDemand) * 0.01f));
+				return true;
+			}
+
+			return false;
 		}
 
 		public string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance) {

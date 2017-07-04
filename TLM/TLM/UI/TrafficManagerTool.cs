@@ -623,14 +623,14 @@ namespace TrafficManager.UI {
 					totalDensity += CustomRoadAI.currentLaneDensities[segmentId][i];
 			}*/
 
-			TrafficMeasurementManager.LaneTrafficData[] laneTrafficData;
-			bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetLaneTrafficData(segmentId, segmentInfo, out laneTrafficData);
-
 			uint curLaneId = segment.m_lanes;
 			String labelStr = "";
 			for (int i = 0; i < segmentInfo.m_lanes.Length; ++i) {
 				if (curLaneId == 0)
 					break;
+
+				TrafficMeasurementManager.LaneTrafficData laneTrafficData;
+				bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetLaneTrafficData(segmentId, (byte)i, out laneTrafficData);
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
 
@@ -644,10 +644,10 @@ namespace TrafficManager.UI {
 				labelStr += ", inner: " + RoutingManager.Instance.CalcInnerLaneSimilarIndex(segmentId, i) + ", outer: " + RoutingManager.Instance.CalcOuterLaneSimilarIndex(segmentId, i) + ", flags: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", limit: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, restr: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo, RestrictionMode.Configured) + ", dir: " + laneInfo.m_direction + ", final: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim. idx: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (laneTrafficDataLoaded) {
-					labelStr += ", avg. speed: " + (laneTrafficData[i].meanSpeed / 100) + "%";
+					labelStr += ", avg. speed: " + (laneTrafficData.meanSpeed / 100) + "%";
 #if DEBUG
-					labelStr += ", buf: " + laneTrafficData[i].trafficBuffer + ", acc: " + laneTrafficData[i].accumulatedSqrSpeeds;
-					labelStr += ", pfBuf: " + laneTrafficData[i].pathFindTrafficBuffer + "/" + laneTrafficData[i].lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData[i].lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
+					labelStr += ", buf: " + laneTrafficData.trafficBuffer + ", acc: " + laneTrafficData.accumulatedSqrSpeeds;
+					labelStr += ", pfBuf: " + laneTrafficData.pathFindTrafficBuffer + "/" + laneTrafficData.lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData.lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
 #endif
 #if MEASUREDENSITY
 					if (dirTrafficDataLoaded) {
@@ -835,7 +835,7 @@ namespace TrafficManager.UI {
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 				VehicleState vState = vehStateManager.VehicleStates[(ushort)i];
-				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstance((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
+				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
@@ -978,7 +978,7 @@ namespace TrafficManager.UI {
 					numLanes++;
 				}
 
-				curLaneId = netManager.m_lanes.m_buffer[(int)((UIntPtr)curLaneId)].m_nextLane;
+				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				laneIndex++;
 			}
 

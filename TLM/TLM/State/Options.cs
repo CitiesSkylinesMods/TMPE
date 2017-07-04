@@ -54,6 +54,9 @@ namespace TrafficManager.State {
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
 		private static UICheckBox showLanesToggle = null;
+#if QUEUEDSTATS
+		private static UICheckBox showPathFindStatsToggle = null;
+#endif
 		private static UIButton resetStuckEntitiesBtn = null;
 
 		private static UICheckBox enablePrioritySignsToggle = null;
@@ -89,6 +92,15 @@ namespace TrafficManager.State {
 		public static bool parkingRestrictionsOverlay = false;
 		public static bool junctionRestrictionsOverlay = false;
 		public static bool connectedLanesOverlay = false;
+#if QUEUEDSTATS
+		public static bool showPathFindStats =
+#if DEBUG
+			true;
+#else
+			false;
+#endif
+
+#endif
 #if DEBUG
 		public static bool nodesOverlay = false;
 		public static bool vehicleOverlay = false;
@@ -220,13 +232,13 @@ namespace TrafficManager.State {
 			var vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
 
 			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			highwayRulesToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
 			strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			enableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
 
 			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
 			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
+			highwayRulesToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
 			preferOuterLaneToggle = vehAiGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
@@ -315,6 +327,11 @@ namespace TrafficManager.State {
 #endif
 			reloadGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
 			resetGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
+
+#if QUEUEDSTATS
+			showPathFindStatsToggle = panelHelper.AddCheckbox(Translation.GetString("Show_path-find_stats"), showPathFindStats, onShowPathFindStatsChanged) as UICheckBox;
+#endif
+
 #if DEBUG
 
 			// GLOBAL CONFIG
@@ -760,7 +777,12 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
 			prohibitPocketCars = newValue;
-			ExtCitizenInstanceManager.Instance.Reset();
+			if (prohibitPocketCars) {
+				AdvancedParkingManager.Instance.OnEnableFeature();
+			} else {
+				AdvancedParkingManager.Instance.OnDisableFeature();
+			}
+			//ExtCitizenInstanceManager.Instance.Reset();
 		}
 
 		private static void onRealisticSpeedsChanged(bool value) {
@@ -818,6 +840,16 @@ namespace TrafficManager.State {
 			Log._Debug($"Building overlay changed to {newVal}");
 			buildingOverlay = newVal;
 		}
+
+#if QUEUEDSTATS
+		private static void onShowPathFindStatsChanged(bool newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"Show path-find stats changed to {newVal}");
+			showPathFindStats = newVal;
+		}
+#endif
 
 		private static void onFloatValueChanged(string varName, string newValueStr, ref float var) {
 			if (!checkGameLoaded())
@@ -1132,6 +1164,14 @@ namespace TrafficManager.State {
 			if (!newValue)
 				setConnectedLanesOverlay(false);
 		}
+
+#if QUEUEDSTATS
+		public static void setShowPathFindStats(bool value) {
+			showPathFindStats = value;
+			if (showPathFindStatsToggle != null)
+				showPathFindStatsToggle.isChecked = value;
+		}
+#endif
 
 		/*internal static int getLaneChangingRandomizationTargetValue() {
 			int ret = 100;

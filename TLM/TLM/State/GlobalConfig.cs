@@ -143,16 +143,6 @@ namespace TrafficManager.State {
 		public float HighwayInterchangeLaneChangingBaseCost = 1.25f;
 
 		/// <summary>
-		/// Used for discretizing path-find usage values
-		/// </summary>
-		public float LaneUsageDiscretization = 25f;
-
-		/// <summary>
-		/// Used for discretizing lane traffic measurements
-		/// </summary>
-		public float LaneDensityDiscretization = 25f;
-
-		/// <summary>
 		/// Relative factor for lane speed cost calculation
 		/// </summary>
 		public float UsageCostFactor = 1f;

@@ -6,18 +6,18 @@ using System.Text;
 using TrafficManager.State;
 
 namespace TrafficManager.Manager.Impl {
-	public class OptionsManager : AbstractCustomManager, ICustomDataManager<byte[]>, IOptionsManager {
+	public class OptionsManager : AbstractCustomManager, IOptionsManager {
 		// TODO I contain ugly code
-		public static OptionsManager Instance { get; private set; } = null;
-
-		static OptionsManager() {
-			Instance = new OptionsManager();
-		}
+		public static OptionsManager Instance = new OptionsManager();
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"- Not implemented -");
 			// TODO implement
+		}
+
+		public bool MayPublishSegmentChanges() {
+			return Options.instantEffects && !SerializableDataExtension.StateLoading;
 		}
 
 		public bool LoadData(byte[] data) {
@@ -153,6 +153,10 @@ namespace TrafficManager.Manager.Impl {
 				Options.setBanRegularTrafficOnBusLanes(data[32] == (byte)1);
 			}
 
+			if (data.Length >= 34) {
+				Options.setShowPathFindStats(data[33] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -190,7 +194,8 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.instantEffects ? 1 : 0),
 						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
 						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0),
-						(byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0)
+						(byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0),
+						(byte)(Options.showPathFindStats ? 1 : 0)
 				};
 		}
 	}

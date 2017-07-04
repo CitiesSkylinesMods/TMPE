@@ -44,6 +44,7 @@ namespace TrafficManager.UI.MainMenu {
 
 		public MenuButton[] Buttons { get; private set; }
 		public UILabel VersionLabel { get; private set; }
+		public UILabel StatsLabel { get; private set; }
 
 		public UIDragHandle Drag { get; private set; }
 
@@ -58,7 +59,7 @@ namespace TrafficManager.UI.MainMenu {
 			height = MENU_HEIGHT;
 
 			VersionLabel = AddUIComponent<VersionLabel>();
-			//optionsLabel = AddUIComponent<OptionsLabel>();
+			StatsLabel = AddUIComponent<StatsLabel>();
 
 			Buttons = new MenuButton[MENU_BUTTON_TYPES.Length];
 

@@ -55,5 +55,9 @@ namespace CitiesGameBridge.Service {
 		public void ProcessCitizenInstance(ushort citizenInstanceId, ref CitizenInstance citizenInstance, CitizenInstanceHandler handler) {
 			handler(citizenInstanceId, ref citizenInstance);
 		}
+
+		public void ReleaseCitizenInstance(ushort citizenInstanceId) {
+			Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId);
+		}
 	}
 }

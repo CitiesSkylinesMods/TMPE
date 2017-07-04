@@ -72,6 +72,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			if (IsManualLight())
 				DestroyManualTrafficLight();
 
+			Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(NodeId);
 			TimedLight = new TimedTrafficLights(NodeId, nodeGroup);
 		}
 

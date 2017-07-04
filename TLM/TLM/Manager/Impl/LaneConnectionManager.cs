@@ -172,7 +172,7 @@ namespace TrafficManager.Manager.Impl {
 				RoutingManager.Instance.RequestRecalculation(segmentId1, false);
 				RoutingManager.Instance.RequestRecalculation(segmentId2, false);
 
-				if (Options.instantEffects) {
+				if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 					Services.NetService.PublishSegmentChanges(segmentId1);
 					Services.NetService.PublishSegmentChanges(segmentId2);
 				}
@@ -215,7 +215,8 @@ namespace TrafficManager.Manager.Impl {
 
 			if (recalcAndPublish) {
 				RoutingManager.Instance.RequestRecalculation(segmentId);
-				if (Options.instantEffects) {
+
+				if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 					Services.NetService.PublishSegmentChanges(segmentId);
 				}
 			}
@@ -263,7 +264,7 @@ namespace TrafficManager.Manager.Impl {
 				if (recalcAndPublish) {
 					RoutingManager.Instance.RequestRecalculation(lane.m_segment);
 
-					if (Options.instantEffects) {
+					if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 						Services.NetService.PublishSegmentChanges(lane.m_segment);
 					}
 				}
@@ -306,7 +307,7 @@ namespace TrafficManager.Manager.Impl {
 				SubscribeToSegmentGeometry(sourceSegmentId);
 				SubscribeToSegmentGeometry(targetSegmentId);
 
-				if (Options.instantEffects) {
+				if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 					Services.NetService.PublishSegmentChanges(sourceSegmentId);
 					Services.NetService.PublishSegmentChanges(targetSegmentId);
 				}

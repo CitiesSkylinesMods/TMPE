@@ -123,7 +123,7 @@ namespace TrafficManager.Custom.AI {
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			ushort vehicleId = 0;
 			if (instanceData.m_citizen != 0u) {
-				vehicleId = citizenManager.m_citizens.m_buffer[(int)((UIntPtr)instanceData.m_citizen)].m_vehicle;
+				vehicleId = citizenManager.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle;
 			}
 			if (vehicleId != 0) {
 				VehicleInfo vehicleInfo = vehicleManager.m_vehicles.m_buffer[(int)vehicleId].Info;

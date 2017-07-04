@@ -6,5 +6,8 @@ namespace GenericGameBridge.Service {
 		uint CurrentBuildIndex { get; set; }
 		uint CurrentFrameIndex { get; }
 		Vector3 CameraPosition { get; }
+		void AddAction(System.Action action);
+		void PauseSimulation(bool forced);
+		void ResumeSimulation(bool forced);
 	}
 }

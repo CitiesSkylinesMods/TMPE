@@ -82,10 +82,16 @@ namespace TrafficManager.Manager.Impl {
 			/// Number of times the segment had been marked as congested
 			/// </summary>
 			public byte numCongested;
+
 			/// <summary>
 			/// Total number of times congestion was measured
 			/// </summary>
 			public byte numCongestionMeasurements;
+
+			/// <summary>
+			/// Relative number of times congestion was detected
+			/// </summary>
+			public ushort congestionRatioInPercent;
 
 			/// <summary>
 			/// Total number of routed vehicles * (100 - mean speed in %) (stable value)
@@ -106,6 +112,7 @@ namespace TrafficManager.Manager.Impl {
 					"\t" + $"totalPathFindTrafficBuffer = {totalPathFindTrafficBuffer}\n" +
 					"\t" + $"numCongested = {numCongested}\n" +
 					"\t" + $"numCongestionMeasurements = {numCongestionMeasurements}\n" +
+					"\t" + $"congestionRatioInPercent = {congestionRatioInPercent}\n" +
 					"SegmentDirTrafficData]";
 			}
 		}
@@ -302,6 +309,7 @@ namespace TrafficManager.Manager.Impl {
 				if (minRelSpeeds[i] / 100u < conf.CongestionSqrSpeedThreshold) {
 					++segmentDirTrafficData[segDirIndex].numCongested;
 				}
+				segmentDirTrafficData[segDirIndex].congestionRatioInPercent = (ushort)(segmentDirTrafficData[segDirIndex].numCongestionMeasurements > 0 ? ((uint)segmentDirTrafficData[segDirIndex].numCongested * 100u) / (uint)segmentDirTrafficData[segDirIndex].numCongestionMeasurements : 0); // now in %
 #if MEASUREDENSITY
 				segmentDirTrafficData[segmentId][i].accumulatedDensities = densities[i];
 #endif
@@ -315,12 +323,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public bool GetLaneTrafficData(ushort segmentId, NetInfo segmentInfo, out LaneTrafficData[] trafficData) {
-			if (laneTrafficData[segmentId] == null || laneTrafficData[segmentId].Length != segmentInfo.m_lanes.Length) {
-				trafficData = null;
+		public bool GetLaneTrafficData(ushort segmentId, byte laneIndex, out LaneTrafficData trafficData) {
+			if (laneTrafficData[segmentId] == null || laneIndex >= laneTrafficData[segmentId].Length) {
+				trafficData = default(LaneTrafficData);
 				return false;
 			} else {
-				trafficData = laneTrafficData[segmentId];
+				trafficData = laneTrafficData[segmentId][laneIndex];
 				return true;
 			}
 		}

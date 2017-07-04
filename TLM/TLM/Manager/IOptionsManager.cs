@@ -4,7 +4,14 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.Manager {
-	public interface IOptionsManager {
-		// TODO define me!
+	/// <summary>
+	/// Manages mod options
+	/// </summary>
+	public interface IOptionsManager : ICustomDataManager<byte[]> {
+		/// <summary>
+		/// Determines if modifications to segments may be published in the current state.
+		/// </summary>
+		/// <returns>true if changes may be published, false otherwise</returns>
+		bool MayPublishSegmentChanges();
 	}
 }

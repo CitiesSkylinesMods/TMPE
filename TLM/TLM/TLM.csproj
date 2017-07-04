@@ -27,8 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>QUEUEDSTATS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -95,11 +94,13 @@
     <Compile Include="Geometry\GeometryCalculationMode.cs" />
     <Compile Include="Geometry\ISegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
+    <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
     <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
     <Compile Include="Manager\IExtBuildingManager.cs" />
     <Compile Include="Manager\IExtCitizenInstanceManager.cs" />
+    <Compile Include="Manager\IFeatureManager.cs" />
     <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
     <Compile Include="Manager\ILaneArrowManager.cs" />
     <Compile Include="Manager\ILaneConnectionManager.cs" />
@@ -167,7 +168,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
-    <Compile Include="UI\MainMenu\OptionsLabel.cs" />
+    <Compile Include="UI\MainMenu\StatsLabel.cs" />
     <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\VersionLabel.cs" />
     <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />

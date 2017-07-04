@@ -38,5 +38,25 @@ namespace CitiesGameBridge.Service {
 				return Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			}
 		}
+
+		public void AddAction(Action action) {
+			Singleton<SimulationManager>.instance.AddAction(action);
+		}
+
+		public void PauseSimulation(bool forced) {
+			if (forced) {
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			} else {
+				Singleton<SimulationManager>.instance.SimulationPaused = true;
+			}
+		}
+
+		public void ResumeSimulation(bool forced) {
+			if (forced) {
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			} else {
+				Singleton<SimulationManager>.instance.SimulationPaused = false;
+			}
+		}
 	}
 }

@@ -17,5 +17,11 @@ namespace GenericGameBridge.Service {
 		bool IsCitizenInstanceValid(ushort citizenInstanceId);
 		void ProcessCitizenInstance(ushort citizenInstanceId, CitizenInstanceHandler handler);
 		void ProcessCitizenInstance(ushort citizenInstanceId, ref CitizenInstance citizenInstance, CitizenInstanceHandler handler);
+
+		/// <summary>
+		/// Despawns and releases the given citizen instance.
+		/// </summary>
+		/// <param name="citizenInstanceId">Citizen instance id to release</param>
+		void ReleaseCitizenInstance(ushort citizenInstanceId);
 	}
 }

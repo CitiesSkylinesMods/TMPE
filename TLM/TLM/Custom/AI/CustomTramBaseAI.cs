@@ -18,7 +18,7 @@ namespace TrafficManager.Custom.AI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
-				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[(int)((UIntPtr)vehicleData.m_path)].m_pathFindFlags;
+				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
 
 				if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
 					try {
@@ -135,8 +135,8 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE END
 
 			NetManager netManager = Singleton<NetManager>.instance;
-			netManager.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
-			Vector3 b = netManager.m_lanes.m_buffer[(int)((UIntPtr)prevLaneID)].CalculatePosition((float)prevOffset * 0.003921569f);
+			netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
+			Vector3 b = netManager.m_lanes.m_buffer[prevLaneID].CalculatePosition((float)prevOffset * 0.003921569f);
 			Vector3 a = lastFrameData.m_position;
 			Vector3 a2 = lastFrameData.m_position;
 			Vector3 b2 = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
@@ -181,7 +181,7 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager instance = Singleton<NetManager>.instance;
-			instance.m_lanes.m_buffer[(int)((UIntPtr)laneID)].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
+			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
 				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;

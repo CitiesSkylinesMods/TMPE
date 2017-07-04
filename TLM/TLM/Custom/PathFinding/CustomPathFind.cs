@@ -45,6 +45,8 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		private const float SEGMENT_MIN_AVERAGE_LENGTH = 30f;
+		private const float LANE_DENSITY_DISCRETIZATION = 25f;
+		private const float LANE_USAGE_DISCRETIZATION = 25f;
 		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
 
 		//Expose the private fields
@@ -822,7 +824,7 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 #endif
 
-					this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
+					this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
 				}
 			} else if (prevIsPedestrianLane) {
 				bool allowPedSwitch = (this._laneTypes & NetInfo.LaneType.Pedestrian) != 0;
@@ -974,7 +976,7 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 #endif
 
-								this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, false, true);
+								this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref netManager.m_segments.m_buffer[(int)nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, false, true);
 							}
 						}
 					}
@@ -1091,12 +1093,12 @@ namespace TrafficManager.Custom.PathFinding {
 							continue;
 						}
 
-						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, allowPedestrians);
+						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, true, allowPedestrians);
 					}
 
 					if ((nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None &&
 						(this._vehicleTypes & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None) {
-						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
+						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
 					}
 				} else {
 					// road vehicles, trams, trains, metros, etc.
@@ -1213,7 +1215,7 @@ namespace TrafficManager.Custom.PathFinding {
 								break;
 							}
 
-							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsRouted, allowPedestrians)) {
+							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevSimilarLaneIndexFromInner, connectOffset, !prevIsRouted, allowPedestrians)) {
 								stockUturn = true;
 							}
 
@@ -1283,7 +1285,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 								bool foundForced = false;
 								int prevLaneIndexFromInner = prevSimilarLaneIndexFromInner;
-								if (ProcessItemCosts(debug, Options.advancedAI, false, LaneChangingCostCalculationMode.ByGivenDistance, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], ref routingManager.segmentRoutings[nextSegmentId], ref prevLaneIndexFromInner, connectOffset, true, false, laneTransitions[k].laneIndex, laneTransitions[k].laneId, laneTransitions[k].distance, out foundForced)) {
+								if (ProcessItemCosts(debug, Options.advancedAI, false, LaneChangingCostCalculationMode.ByGivenDistance, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref netManager.m_segments.m_buffer[nextSegmentId], routingManager.segmentRoutings[nextSegmentId], ref prevLaneIndexFromInner, connectOffset, true, false, laneTransitions[k].laneIndex, laneTransitions[k].laneId, laneTransitions[k].distance, out foundForced)) {
 									stockUturn = true;
 								}
 							}
@@ -1301,7 +1303,7 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 #endif
 
-						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, ref prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
+						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, prevSegmentRouting, ref prevSegment, ref prevSimilarLaneIndexFromInner, connectOffset, true, false);
 					}
 				}
 
@@ -1379,11 +1381,12 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 
 			bool nextIsRegularNode = nextNodeId == prevSegment.m_startNode || nextNodeId == prevSegment.m_endNode;
-			bool prevIsJunction = false;
+			bool prevIsRealJunction = false;
 			if (nextIsRegularNode) {
 				// no lane changing directly in front of a junction
 				ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
-				prevIsJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+					(netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 			}
 
 			NetInfo nextSegmentInfo = nextSegment.Info;
@@ -1427,7 +1430,7 @@ namespace TrafficManager.Custom.PathFinding {
 						float distance = Vector3.Distance(a, b);
 						BufferItem nextItem;
 						// NON-STOCK CODE START //
-						if (prevIsJunction) {
+						if (prevIsRealJunction) {
 							nextItem.m_numSegmentsToNextJunction = 0;
 						} else {
 							nextItem.m_numSegmentsToNextJunction = item.m_numSegmentsToNextJunction + 1;
@@ -1485,13 +1488,13 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
-		private bool ProcessItemCosts(bool debug, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
+		private bool ProcessItemCosts(bool debug, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
 			bool foundForced = false;
-			return ProcessItemCosts(debug, false, true, LaneChangingCostCalculationMode.None, item, nextNodeId, nextSegmentId, ref prevSegment, ref prevSegmentRouting, ref nextSegment, ref routingManager.segmentRoutings[nextSegmentId], ref laneIndexFromInner, connectOffset, enableVehicle, enablePedestrian, null, null, null, out foundForced);
+			return ProcessItemCosts(debug, false, true, LaneChangingCostCalculationMode.None, item, nextNodeId, nextSegmentId, ref prevSegment, prevSegmentRouting, ref nextSegment, routingManager.segmentRoutings[nextSegmentId], ref laneIndexFromInner, connectOffset, enableVehicle, enablePedestrian, null, null, null, out foundForced);
 		}
 
 		// 3
-		private bool ProcessItemCosts(bool debug, bool allowAdvancedAI, bool obeyStockLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, ref SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, ref SegmentRoutingData nextSegmentRouting, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forcedLaneIndex, uint? forcedLaneId, byte? forcedLaneDist, out bool foundForced) {
+		private bool ProcessItemCosts(bool debug, bool allowAdvancedAI, bool obeyStockLaneArrows, LaneChangingCostCalculationMode laneChangingCostCalculationMode, BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment prevSegment, SegmentRoutingData prevSegmentRouting, ref NetSegment nextSegment, SegmentRoutingData nextSegmentRouting, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian, int? forcedLaneIndex, uint? forcedLaneId, byte? forcedLaneDist, out bool foundForced) {
 
 #if DEBUGPF
 			/*if (_conf.DebugSwitches[0])
@@ -1559,12 +1562,14 @@ namespace TrafficManager.Custom.PathFinding {
 				prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules; */
 			bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
 			ushort sourceNodeId = nextIsStartNodeOfPrevSegment ? prevSegment.m_endNode : prevSegment.m_startNode;
-			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
-			bool nextIsJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+			bool prevIsRealJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+									  (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
+			bool nextIsRealJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+									  (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 			int prevOuterSimilarLaneIndex = -1;
 			float prevUsage = 0f;
-			float prevRandTraffic = 0f;
-			float prevRelOuterLane = 0;
+			float prevTraffic = 0f;
+			float prevRelOuterLane = 0f;
 			//float prevDensity = 0.25f;
 			bool isMiddle = connectOffset != 0 && connectOffset != 255;
 			NetInfo.Lane prevLaneInfo = null;
@@ -1602,10 +1607,12 @@ namespace TrafficManager.Custom.PathFinding {
 					strictlyAvoidLane = true;
 					calculateTrafficStats = false;
 				} else if (calculateTrafficStats) {
+					// retrieve live traffic stats
 					NetInfo.Direction prevFinalDir = nextIsStartNodeOfPrevSegment ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 					prevFinalDir = ((prevSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevFinalDir : NetInfo.InvertDirection(prevFinalDir);
-					int prevDirIndex = trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir);
-					int nextDirIndex = trafficMeasurementManager.GetDirIndex(nextSegmentId, nextFinalDir);
+
+					TrafficMeasurementManager.SegmentDirTrafficData prevDirTrafficData = trafficMeasurementManager.segmentDirTrafficData[trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)];
+					TrafficMeasurementManager.SegmentDirTrafficData nextDirTrafficData = trafficMeasurementManager.segmentDirTrafficData[trafficMeasurementManager.GetDirIndex(nextSegmentId, nextFinalDir)];
 
 #if DEBUGNEWPF
 					float oldUsageRand = usageRand;
@@ -1614,20 +1621,20 @@ namespace TrafficManager.Custom.PathFinding {
 
 					if (prevLaneInfo.m_similarLaneCount > 1) {
 						// determine if usage of inner lanes should be penalized
-						penalizeInnerLanes = _isHeavyVehicle && Options.preferOuterLane && prevSegmentRouting.highway && !prevIsJunction;
+						penalizeInnerLanes = _isHeavyVehicle && Options.preferOuterLane && prevSegmentRouting.highway && !prevIsRealJunction;
 
 						// determine path-finding lane utilization of the previous lane
-						if (prevIsJunction) {
-							TrafficMeasurementManager.LaneTrafficData[] prevLanesTrafficData = null;
-							if (trafficMeasurementManager.GetLaneTrafficData(item.m_position.m_segment, prevSegmentInfo, out prevLanesTrafficData)) {
-								if (trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer > 0) {
-									prevUsage = Mathf.Clamp(((prevLanesTrafficData[item.m_position.m_lane].lastPathFindTrafficBuffer * 100u) / trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].totalPathFindTrafficBuffer), 0, 100);
+						if (prevIsRealJunction) {
+							TrafficMeasurementManager.LaneTrafficData prevLaneTrafficData;
+							if (trafficMeasurementManager.GetLaneTrafficData(item.m_position.m_segment, item.m_position.m_lane, out prevLaneTrafficData)) {
+								if (prevDirTrafficData.totalPathFindTrafficBuffer > 0) {
+									prevUsage = Mathf.Clamp(((prevLaneTrafficData.lastPathFindTrafficBuffer * 100u) / prevDirTrafficData.totalPathFindTrafficBuffer), 0, 100);
 
 									if (!_isHeavyVehicle) {
 										prevUsage += usageRand;
 									}
 
-									prevUsage = (float)Mathf.Clamp01((float)Math.Round(prevUsage / _conf.LaneUsageDiscretization) / (100f / _conf.LaneUsageDiscretization)); // discretized usage, 0..1
+									prevUsage = (float)Mathf.Clamp01((float)Math.Round(prevUsage / LANE_USAGE_DISCRETIZATION) / (100f / LANE_USAGE_DISCRETIZATION)); // discretized usage, 0..1
 
 									if (_conf.LaneUsageRandInterval > 0) {
 										usageRand = (float)_pathRandomizer.Int32((uint)_conf.LaneUsageRandInterval + 1u) - _conf.LaneUsageRandInterval / 2f;
@@ -1637,13 +1644,10 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 					}
 
-					float prevCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].numCongestionMeasurements : 0; // now in %
-					float nextCongestionRatio = trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements > 0 ? ((uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongested * 100u) / (uint)trafficMeasurementManager.segmentDirTrafficData[nextDirIndex].numCongestionMeasurements : 0; // now in %
-
 					// get the mean speed for the previous segment
-					prevRandTraffic = Mathf.Clamp(100 - (int)trafficMeasurementManager.segmentDirTrafficData[prevDirIndex].meanSpeed / 100, 0, 100);
+					prevTraffic = Mathf.Clamp(100 - (int)prevDirTrafficData.meanSpeed / 100 + trafficRand, 0, 100);
 						
-					float maxCongestionRatio = Math.Max(prevCongestionRatio, nextCongestionRatio);
+					float maxCongestionRatio = Math.Max(prevDirTrafficData.congestionRatioInPercent, nextDirTrafficData.congestionRatioInPercent);
 					congestionLaneChangingCosts = 1f + maxCongestionRatio * 0.01f * _conf.CongestionLaneChangingCostFactor;
 					if (! penalizeInnerLanes) {
 						wantToChangeLane = _pathRandomizer.Int32((uint)maxCongestionRatio + _conf.RandomizedLaneChangingModulo) == 0;
@@ -1651,19 +1655,17 @@ namespace TrafficManager.Custom.PathFinding {
 
 					// prevTraffic is now in %
 
-					prevRandTraffic += trafficRand;
 					if (penalizeInnerLanes) {
 						prevRelOuterLane = ((float)prevOuterSimilarLaneIndex / (float)(prevLaneInfo.m_similarLaneCount - 1));
 					}
 
-					if (nextIsJunction) {
-						
+					if (nextIsRealJunction) {
 						if (_conf.LaneDensityRandInterval > 0) {
 							trafficRand = (float)_pathRandomizer.Int32((uint)_conf.LaneDensityRandInterval + 1u) - _conf.LaneDensityRandInterval / 2f;
 						}
 					}
 
-					prevRandTraffic = (float)Mathf.Clamp01((float)Math.Round(prevRandTraffic / _conf.LaneDensityDiscretization) / (100f / _conf.LaneDensityDiscretization)); // discretized traffic, 0..1
+					prevTraffic = (float)Mathf.Clamp01((float)Math.Round(prevTraffic / LANE_DENSITY_DISCRETIZATION) / (100f / LANE_DENSITY_DISCRETIZATION)); // discretized traffic, 0..1
 
 #if DEBUGNEWPF
 					if (debug)
@@ -1675,15 +1677,13 @@ namespace TrafficManager.Custom.PathFinding {
 							"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
 							"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
 							"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
-							"\t" + $"prevCongestionRatio={prevCongestionRatio}\n" +
-							"\t" + $"nextCongestionRatio={nextCongestionRatio}\n" +
 							"\t" + $"maxCongestionRatio={maxCongestionRatio}\n" +
 							"\t" + $"wantToChangeLane={wantToChangeLane}\n" +
 							"\t" + $"penalizeInnerLanes={penalizeInnerLanes}\n" +
 							"\t" + $"prevRelOuterLane={prevRelOuterLane}\n" +
 							"\t" + $"congestionLaneChangingCosts={congestionLaneChangingCosts}\n\n" +
 							"\t" + $"prevUsage={prevUsage}\n" +
-							"\t" + $"prevRandTraffic={prevRandTraffic}\n\n" +
+							"\t" + $"prevTraffic={prevTraffic}\n\n" +
 							"\t" + $"oldUsageRand={oldUsageRand}\n" +
 							"\t" + $"trafficRand={trafficRand}\n" +
 							"\t" + $"oldTrafficRand={oldTrafficRand}\n" +
@@ -1746,7 +1746,7 @@ namespace TrafficManager.Custom.PathFinding {
 				if (!useAdvancedAI) { // NON-STOCK CODE
 					Randomizer randomizer = new Randomizer(this._pathFindIndex << 16 | (uint)item.m_position.m_segment);
 					prevCost *= (float)(randomizer.Int32(900, 1000 + (int)(prevSegment.m_trafficDensity * 10)) + this._pathRandomizer.Int32(20u)) * 0.001f;
-				} else {
+				} else if (calculateTrafficStats) {
 					// NON-STOCK CODE
 
 #if DEBUGNEWPF
@@ -1756,8 +1756,8 @@ namespace TrafficManager.Custom.PathFinding {
 					if (prevUsage > 0) {
 						prevCost *= 1f + _conf.UsageCostFactor * prevUsage;
 					}
-					if (prevRandTraffic > 0) {
-						prevCost *= 1f + _conf.TrafficCostFactor * prevRandTraffic;
+					if (prevTraffic > 0) {
+						prevCost *= 1f + _conf.TrafficCostFactor * prevTraffic;
 					}
 					if (prevRelOuterLane > 0) {
 						prevCost *= 1f + _conf.HeavyVehicleMaxInnerLanePenalty * prevRelOuterLane;
@@ -1992,7 +1992,7 @@ namespace TrafficManager.Custom.PathFinding {
 						float transitionCostOverMeanMaxSpeed = transitionCost / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
 						BufferItem nextItem;
 						// NON-STOCK CODE START //
-						if (prevIsJunction) {
+						if (prevIsRealJunction) {
 							nextItem.m_numSegmentsToNextJunction = 0;
 						} else {
 							nextItem.m_numSegmentsToNextJunction = item.m_numSegmentsToNextJunction + 1;
@@ -2202,29 +2202,6 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 
 								float metric = 1f; // resulting cost multiplicator
-#if DEBUGNEWPF
-								float metricBeforeLanes = 1f; // metric before multiplying lane changing costs
-#endif
-								if (calculateTrafficStatsForNextLane) {
-
-									/* Vehicles should
-										- choose lanes with low traffic volume,
-										- choose lanes with high speeds,
-										- not change to lanes that with high distance to current lane,
-										- not change lanes too often and
-										- should not change lanes near junctions
-									*/
-
-									// calculate speed metric
-									float divMetric = (prevMaxSpeed + nextMaxSpeed) * 0.5f; // the division part; 0 .. (nextMaxSpeed + nextMaxSpeed)/2
-
-									// calculate density/speed metric
-									metric = 1f / Math.Max(0.1f, divMetric);
-#if DEBUGNEWPF
-									metricBeforeLanes = metric;
-#endif
-								}
-
 								float laneMetric = 1f;
 #if DEBUGNEWPF
 								bool calculatedLaneCosts = false;
@@ -2251,7 +2228,7 @@ namespace TrafficManager.Custom.PathFinding {
 										;
 
 									// we use the power operator here to express that lane changing one-by-one is preferred over changing multiple lanes at once
-									laneMetric = (float)Math.Pow(laneChangeCostBase, laneDist);
+									laneMetric = laneChangeCostBase * laneDist; //(float)Math.Pow(laneChangeCostBase, laneDist);
 									metric *= laneMetric;
 
 #if DEBUGNEWPF
@@ -2263,7 +2240,7 @@ namespace TrafficManager.Custom.PathFinding {
 								float junctionMetric = 1f;
 								if (laneChangingCostCalculationMode != LaneChangingCostCalculationMode.None && // applying lane changing costs is allowed
 									prevSegmentRouting.highway && nextSegmentRouting.highway && // we are on a highway road
-									!nextIsJunction && // next is not a junction
+									!nextIsRealJunction && // next is not a junction
 									queueItem.vehicleType != ExtVehicleType.Emergency &&
 									laneDist > 0) {
 									uint dist = _pathRandomizer.UInt32(_conf.MinHighwayInterchangeSegments, (_conf.MaxHighwayInterchangeSegments >= _conf.MinHighwayInterchangeSegments ? _conf.MaxHighwayInterchangeSegments : _conf.MinHighwayInterchangeSegments) + 1u);
@@ -2274,7 +2251,7 @@ namespace TrafficManager.Custom.PathFinding {
 								}
 
 								float oldTransitionDistanceOverMaxSpeed = transitionCostOverMeanMaxSpeed;
-								float finalDeltaCost = (metric * customDeltaCost) / this._maxLength;
+								float finalDeltaCost = (metric * customDeltaCost) / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength);
 
 								if (finalDeltaCost < 0f) {
 									// should never happen
@@ -2305,11 +2282,10 @@ namespace TrafficManager.Custom.PathFinding {
 									logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
 										$"-> TRANSIT to seg. {nextSegmentId}, lane {laneIndex}\n" +
 										"\t" + $"prevUsage={prevUsage}\n" +
-										"\t" + $"prevRandTraffic={prevRandTraffic}\n" +
+										"\t" + $"prevRandTraffic={prevTraffic}\n" +
 										"\t" + $"prevMaxSpeed={prevMaxSpeed}\n" +
 										"\t" + $"nextMaxSpeed={nextMaxSpeed}\n\n" +
 										"\t" + $"=> metric={metric}\n" +
-										"\t" + $"=> metricBeforeLanes={metricBeforeLanes}\n\n" +
 										"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n\n" +
 										"\t" + $"laneDist={laneDist}\n\n" +
 										"\t" + $"_extVehicleType={queueItem.vehicleType}\n" +
@@ -2438,11 +2414,12 @@ namespace TrafficManager.Custom.PathFinding {
 
 			// NON-STOCK CODE START
 			bool nextIsRegularNode = nextNodeId == nextSegment.m_startNode || nextNodeId == nextSegment.m_endNode;
-			bool prevIsJunction = false;
+			bool prevIsRealJunction = false;
 			if (nextIsRegularNode) {
 				bool nextIsStartNode = nextNodeId == nextSegment.m_startNode;
 				ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
-				prevIsJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+									 (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 
 				// check if pedestrians are not allowed to cross here
 				if (!junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, nextIsStartNode)) {
@@ -2523,7 +2500,7 @@ namespace TrafficManager.Custom.PathFinding {
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
 				BufferItem nextItem;
 				// NON-STOCK CODE START //
-				if (prevIsJunction) {
+				if (prevIsRealJunction) {
 					nextItem.m_numSegmentsToNextJunction = 0;
 				} else {
 					nextItem.m_numSegmentsToNextJunction = item.m_numSegmentsToNextJunction + 1;

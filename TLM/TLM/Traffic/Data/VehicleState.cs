@@ -377,7 +377,7 @@ namespace TrafficManager.Traffic {
 				return;
 			}
 
-			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
+			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
 			
 			Unlink();
 

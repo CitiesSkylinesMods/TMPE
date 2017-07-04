@@ -176,3 +176,4 @@ flow_ratio fahrende Fzg.
 wait_ratio wartende Fzg.
 After_min._time_has_elapsed_switch_to_next_step_if Wenn die min. Zeit abläuft, wechsle zum nächsten Schritt falls
 Adaptive_step_switching Adaptive Schrittumschaltung
+Show_path-find_stats Path-Find Statistik anzeigen

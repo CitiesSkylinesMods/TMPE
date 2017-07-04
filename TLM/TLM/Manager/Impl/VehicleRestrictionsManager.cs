@@ -253,7 +253,7 @@ namespace TrafficManager.Manager.Impl {
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
-			if (Options.instantEffects) {
+			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 				Services.NetService.PublishSegmentChanges(segmentId);
 			}
 
@@ -286,7 +286,7 @@ namespace TrafficManager.Manager.Impl {
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
-			if (Options.instantEffects) {
+			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 				Services.NetService.PublishSegmentChanges(segmentId);
 			}
 		}
@@ -317,7 +317,7 @@ namespace TrafficManager.Manager.Impl {
 			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
-			if (Options.instantEffects) {
+			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 				Services.NetService.PublishSegmentChanges(segmentId);
 			}
 		}

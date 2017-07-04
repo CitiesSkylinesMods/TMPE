@@ -23,16 +23,16 @@ namespace TrafficManager.Custom.AI {
 				return Locale.Get("CITIZEN_STATUS_CONFUSED");
 			}
 			CitizenManager citMan = Singleton<CitizenManager>.instance;
-			uint citizen = data.m_citizen;
+			uint citizenId = data.m_citizen;
 			bool isStudent = false;
 			ushort homeId = 0;
 			ushort workId = 0;
 			ushort vehicleId = 0;
-			if (citizen != 0u) {
-				homeId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_homeBuilding;
-				workId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_workBuilding;
-				vehicleId = citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_vehicle;
-				isStudent = ((citMan.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_flags & Citizen.Flags.Student) != Citizen.Flags.None);
+			if (citizenId != 0u) {
+				homeId = citMan.m_citizens.m_buffer[citizenId].m_homeBuilding;
+				workId = citMan.m_citizens.m_buffer[citizenId].m_workBuilding;
+				vehicleId = citMan.m_citizens.m_buffer[citizenId].m_vehicle;
+				isStudent = ((citMan.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) != Citizen.Flags.None);
 			}
 			ushort targetBuilding = data.m_targetBuilding;
 			if (targetBuilding == 0) {
@@ -46,7 +46,7 @@ namespace TrafficManager.Custom.AI {
 				VehicleManager instance2 = Singleton<VehicleManager>.instance;
 				VehicleInfo info = instance2.m_vehicles.m_buffer[(int)vehicleId].Info;
 				if (info.m_class.m_service == ItemClass.Service.Residential && info.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
-					if (info.m_vehicleAI.GetOwnerID(vehicleId, ref instance2.m_vehicles.m_buffer[(int)vehicleId]).Citizen == citizen) {
+					if (info.m_vehicleAI.GetOwnerID(vehicleId, ref instance2.m_vehicles.m_buffer[(int)vehicleId]).Citizen == citizenId) {
 						if (isOutsideConnection) {
 							target = InstanceID.Empty;
 							return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
@@ -221,7 +221,7 @@ namespace TrafficManager.Custom.AI {
 			return 20;
 			/*CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			uint citizenId = citizenData.m_citizen;
-			ushort homeId = citizenManager.m_citizens.m_buffer[(int)((UIntPtr)citizenId)].m_homeBuilding;
+			ushort homeId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
 			int bikeEncouragement = 0;
 			if (homeId != 0) {
 				Vector3 position = Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)homeId].m_position;

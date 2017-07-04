@@ -132,14 +132,14 @@ namespace TrafficManager.Custom.PathFinding {
 			Log.Warning($"CustomPathManager.ReleasePath({unit}) called.");
 #endif
 
-			if (this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags == 0) {
+			if (this.m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
 				return;
 			}
 			Monitor.Enter(m_bufferLock);
 			try {
 				int num = 0;
 				while (unit != 0u) {
-					if (this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_referenceCount > 1) {
+					if (this.m_pathUnits.m_buffer[unit].m_referenceCount > 1) {
 						--this.m_pathUnits.m_buffer[unit].m_referenceCount;
 						break;
 					}
@@ -148,11 +148,11 @@ namespace TrafficManager.Custom.PathFinding {
 						Log.Error($"Will release path unit {unit} which is CREATED!");
 					}*/
 
-					uint nextPathUnit = this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit;
-					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_simulationFlags = 0;
-					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_pathFindFlags = 0;
-					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_nextPathUnit = 0u;
-					this.m_pathUnits.m_buffer[(int)((UIntPtr)unit)].m_referenceCount = 0;
+					uint nextPathUnit = this.m_pathUnits.m_buffer[unit].m_nextPathUnit;
+					this.m_pathUnits.m_buffer[unit].m_simulationFlags = 0;
+					this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
+					this.m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
+					this.m_pathUnits.m_buffer[unit].m_referenceCount = 0;
 					this.m_pathUnits.ReleaseItem(unit);
 					ResetPathUnit(unit); // NON-STOCK CODE
 					unit = nextPathUnit;

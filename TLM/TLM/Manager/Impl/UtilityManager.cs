@@ -152,16 +152,10 @@ namespace TrafficManager.Manager.Impl {
 					CitizenAI ai = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI;
 
 					if (Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
-#if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[3]) {
-							Log._Debug($"Would reset citizen instance {citizenInstanceId} (waiting for path)");
-						} else {
-#endif
-							Singleton<PathManager>.instance.ReleasePath(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path);
-							Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
-#if DEBUG
-						}
-#endif
+						Log.Info($"Resetting stuck citizen instance {citizenInstanceId} (waiting for path)");
+
+						Singleton<PathManager>.instance.ReleasePath(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path);
+						Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
 					}
 					Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags &= ~(CitizenInstance.Flags.WaitingTransport | CitizenInstance.Flags.EnteringVehicle | CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi | CitizenInstance.Flags.WaitingPath);
 				} else {
@@ -179,16 +173,10 @@ namespace TrafficManager.Manager.Impl {
 				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
 					if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
-#if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[3]) {
-							Log._Debug($"Would reset vehicle {vehicleId} (waiting for path)");
-						} else {
-#endif
-							Singleton<PathManager>.instance.ReleasePath(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path);
+						Log.Info($"Resetting stuck vehicle {vehicleId} (waiting for path)");
+
+						Singleton<PathManager>.instance.ReleasePath(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path);
 							Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path = 0u;
-#if DEBUG
-						}
-#endif
 					}
 					Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.WaitingPath;
 				}
@@ -198,18 +186,12 @@ namespace TrafficManager.Manager.Impl {
 			for (uint vehicleId = 1; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
 				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0) {
-					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-					uint citizen = Singleton<CitizenManager>.instance.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
-					if (citizen != 0u && Singleton<CitizenManager>.instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_parkedVehicle == 0) {
-#if DEBUG
-						if (GlobalConfig.Instance.DebugSwitches[3]) {
-							Log._Debug($"Would reset vehicle {vehicleId} (parking without parked vehicle)");
-						} else {
-#endif
-							Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
-#if DEBUG
-						}
-#endif
+					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+					uint citizenId = Singleton<CitizenManager>.instance.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
+					if (citizenId != 0u && Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0) {
+
+						Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
+						Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
 					}
 				}
 			}

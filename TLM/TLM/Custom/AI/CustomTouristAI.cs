@@ -21,10 +21,10 @@ namespace TrafficManager.Custom.AI {
 				return Locale.Get("CITIZEN_STATUS_CONFUSED");
 			}
 			CitizenManager instance = Singleton<CitizenManager>.instance;
-			uint citizen = data.m_citizen;
+			uint citizenId = data.m_citizen;
 			ushort vehicleId = 0;
-			if (citizen != 0u) {
-				vehicleId = instance.m_citizens.m_buffer[(int)((UIntPtr)citizen)].m_vehicle;
+			if (citizenId != 0u) {
+				vehicleId = instance.m_citizens.m_buffer[citizenId].m_vehicle;
 			}
 			ushort targetBuilding = data.m_targetBuilding;
 			if (targetBuilding == 0) {
@@ -38,7 +38,7 @@ namespace TrafficManager.Custom.AI {
 				VehicleManager instance2 = Singleton<VehicleManager>.instance;
 				VehicleInfo info = instance2.m_vehicles.m_buffer[(int)vehicleId].Info;
 				if (info.m_class.m_service == ItemClass.Service.Residential && info.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
-					if (info.m_vehicleAI.GetOwnerID(vehicleId, ref instance2.m_vehicles.m_buffer[(int)vehicleId]).Citizen == citizen) {
+					if (info.m_vehicleAI.GetOwnerID(vehicleId, ref instance2.m_vehicles.m_buffer[(int)vehicleId]).Citizen == citizenId) {
 						if (flag) {
 							target = InstanceID.Empty;
 							return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");

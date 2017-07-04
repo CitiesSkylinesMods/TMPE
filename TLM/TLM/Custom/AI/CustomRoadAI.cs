@@ -347,7 +347,7 @@ namespace TrafficManager.Custom.AI {
 						break;
 					}
 					if (num15 != 0u) {
-						instance.m_lanes.m_buffer[(int)((UIntPtr)num15)].m_nextLane = num16;
+						instance.m_lanes.m_buffer[num15].m_nextLane = num16;
 					} else {
 						data.m_lanes = num16;
 					}
@@ -366,7 +366,7 @@ namespace TrafficManager.Custom.AI {
 				Vector3 b3;
 				Vector3 c;
 				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
-				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags;
+				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[num16].m_flags;
 				NetLane.Flags flags3 = flags;
 				flags2 &= ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right | NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd | NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
 				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 2) {
@@ -482,15 +482,15 @@ namespace TrafficManager.Custom.AI {
 						flags2 |= NetLane.Flags.Forward;
 					}
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b3, c, vector4);
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_segment = segmentID;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags2;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_firstTarget = (byte)num18;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_lastTarget = (byte)num19;
-				num13 += instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].UpdateLength();
+				instance.m_lanes.m_buffer[num16].m_bezier = new Bezier3(vector3, b3, c, vector4);
+				instance.m_lanes.m_buffer[num16].m_segment = segmentID;
+				instance.m_lanes.m_buffer[num16].m_flags = (ushort)flags2;
+				instance.m_lanes.m_buffer[num16].m_firstTarget = (byte)num18;
+				instance.m_lanes.m_buffer[num16].m_lastTarget = (byte)num19;
+				num13 += instance.m_lanes.m_buffer[num16].UpdateLength();
 				num14 += 1f;
 				num15 = num16;
-				num16 = instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_nextLane;
+				num16 = instance.m_lanes.m_buffer[num16].m_nextLane;
 			}
 			if (num14 != 0f) {
 				data.m_averageLength = num13 / num14;
@@ -504,12 +504,12 @@ namespace TrafficManager.Custom.AI {
 			num16 = data.m_lanes;
 			int num37 = 0;
 			while (num37 < this.m_info.m_lanes.Length && num16 != 0u) {
-				NetLane.Flags flags4 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~NetLane.Flags.JoinedJunction;
+				NetLane.Flags flags4 = (NetLane.Flags)instance.m_lanes.m_buffer[num16].m_flags & ~NetLane.Flags.JoinedJunction;
 				if (flag7) {
 					flags4 |= NetLane.Flags.JoinedJunction;
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags4;
-				num16 = instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_nextLane;
+				instance.m_lanes.m_buffer[num16].m_flags = (ushort)flags4;
+				num16 = instance.m_lanes.m_buffer[num16].m_nextLane;
 				num37++;
 			}
 			if (!loading) {

@@ -176,3 +176,4 @@ flow_ratio
 wait_ratio
 After_min._time_has_elapsed_switch_to_next_step_if
 Adaptive_step_switching
+Show_path-find_stats
