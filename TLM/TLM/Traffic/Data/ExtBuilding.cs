@@ -6,7 +6,7 @@ using System.Text;
 using TrafficManager.State;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic.Data {
 	public struct ExtBuilding {
 		/// <summary>
 		/// Building id

@@ -8,7 +8,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using UnityEngine;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic.Data {
 	public struct ExtCitizenInstance {
 		public enum ExtPathState {
 			/// <summary>

@@ -9,9 +9,10 @@ using System.Threading;
 using TrafficManager.Util;
 using TrafficManager.Traffic;
 using TrafficManager.Geometry;
-using static TrafficManager.Traffic.PrioritySegment;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
+using static TrafficManager.Traffic.Data.PrioritySegment;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class TrafficPriorityManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>>, ITrafficPriorityManager {

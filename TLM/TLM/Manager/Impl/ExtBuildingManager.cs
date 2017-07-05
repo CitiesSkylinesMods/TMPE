@@ -7,6 +7,7 @@ using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 using UnityEngine;
 

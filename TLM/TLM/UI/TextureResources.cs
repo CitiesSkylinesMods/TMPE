@@ -9,7 +9,7 @@ using TrafficManager.Traffic;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Traffic.PrioritySegment;
+using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.UI
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 
-namespace TrafficManager.TrafficLight {
+namespace TrafficManager.Traffic {
 	public interface ISegmentEnd : ISegmentEndId {
 		[Obsolete]
 		ushort NodeId { get; }

@@ -12,10 +12,11 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
-using static TrafficManager.Traffic.ExtCitizenInstance;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
+using TrafficManager.Traffic.Data;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -228,7 +229,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				// NON-STOCK CODE START
-				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
 #if DEBUG
 					if (GlobalConfig.Instance.DebugSwitches[2])
 						Log._Debug($"CustomCarAI.CustomStartPathFind({vehicleID}): Path-finding starts for vehicle {vehicleID}, path={path}, extVehicleType={vehicleType}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");

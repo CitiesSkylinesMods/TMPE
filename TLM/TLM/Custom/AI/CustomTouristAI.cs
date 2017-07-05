@@ -11,7 +11,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
-using static TrafficManager.Traffic.ExtCitizenInstance;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomTouristAI : TouristAI {

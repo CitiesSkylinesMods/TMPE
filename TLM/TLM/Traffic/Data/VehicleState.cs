@@ -12,7 +12,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using CSUtil.Commons;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		[Flags]
 		public enum Flags {
@@ -525,7 +525,7 @@ namespace TrafficManager.Traffic {
 				case VehicleInfo.VehicleType.Car:
 					if (ai is PassengerCarAI)
 						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI) {
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI || ai is DisasterResponseVehicleAI) {
 						return ExtVehicleType.Service;
 					}
 					if (ai is CarTrailerAI)

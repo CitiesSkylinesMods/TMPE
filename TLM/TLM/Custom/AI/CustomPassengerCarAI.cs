@@ -11,11 +11,12 @@ using TrafficManager.Util;
 using System.Reflection;
 using ColossalFramework.Globalization;
 using TrafficManager.UI;
-using static TrafficManager.Traffic.ExtCitizenInstance;
 using System.Xml;
 using System.IO;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager
@@ -118,7 +119,7 @@ namespace TrafficManager.Custom.AI {
 			bool allowRandomParking = true;
 			bool movingToParkingPos = false;
 			bool foundStartingPos = false;
-			bool skipQueue = false;
+			bool skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 			ExtPathType extPathType = ExtPathType.None;
 			if (Options.prohibitPocketCars) {
 				//if (driverExtInstance != null) {

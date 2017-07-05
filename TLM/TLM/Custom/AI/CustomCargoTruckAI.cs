@@ -8,6 +8,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
@@ -110,7 +111,7 @@ namespace TrafficManager.Custom.AI {
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, false)) {
+				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
 					if (vehicleData.m_path != 0u) {
 						instance.ReleasePath(vehicleData.m_path);
 					}

@@ -9,11 +9,11 @@ using TrafficManager.Custom.AI;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Traffic.ExtCitizenInstance;
-using static TrafficManager.Traffic.PrioritySegment;
+using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.Manager.Impl {
 	public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {

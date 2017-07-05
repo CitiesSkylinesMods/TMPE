@@ -18,6 +18,7 @@ using System.Linq;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
 
 /// <summary>
 /// A segment end describes a directional traffic segment connected to a controlled node

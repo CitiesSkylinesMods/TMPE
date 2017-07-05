@@ -1,6 +1,6 @@
 using System;
 
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic.Data {
 	/// <summary>
 	/// A priority segment specifies the priority signs that are present at each end of a certain segment.
 	/// </summary>

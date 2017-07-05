@@ -7,6 +7,7 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using UnityEngine;
 
 namespace TrafficManager.Custom.AI {

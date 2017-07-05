@@ -13,7 +13,7 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
-using static TrafficManager.Traffic.ExtCitizenInstance;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomResidentAI : ResidentAI {

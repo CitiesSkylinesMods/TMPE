@@ -7,6 +7,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCommonBuildingAI : BuildingAI {

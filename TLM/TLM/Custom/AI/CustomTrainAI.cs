@@ -12,6 +12,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomTrainAI : TrainAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -566,7 +567,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, false)) {
+				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, vehicleType == ExtVehicleType.PassengerTrain && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

@@ -7,9 +7,10 @@ using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Traffic.ExtCitizenInstance;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager.Impl {
 	public class ExtCitizenInstanceManager : AbstractCustomManager, ICustomDataManager<List<Configuration.ExtCitizenInstanceData>>, IExtCitizenInstanceManager {

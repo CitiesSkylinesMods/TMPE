@@ -12,10 +12,10 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Util;
-using static TrafficManager.Traffic.PrioritySegment;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
+using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {

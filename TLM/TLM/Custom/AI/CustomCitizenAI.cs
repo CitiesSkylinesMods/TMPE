@@ -9,9 +9,10 @@ using TrafficManager.Geometry;
 using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
-using static TrafficManager.Traffic.ExtCitizenInstance;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager

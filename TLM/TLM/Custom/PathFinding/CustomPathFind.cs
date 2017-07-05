@@ -22,6 +22,7 @@ using TrafficManager.Traffic;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathFind : PathFind {

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using UnityEngine;
-using static TrafficManager.Traffic.ExtCitizenInstance;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager {
 	/// <summary>

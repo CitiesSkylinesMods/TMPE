@@ -7,13 +7,14 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Custom.PathFinding;
 using System;
-using static TrafficManager.Traffic.ExtCitizenInstance;
 using TrafficManager.Util;
 using ColossalFramework.Math;
 using TrafficManager.UI;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
