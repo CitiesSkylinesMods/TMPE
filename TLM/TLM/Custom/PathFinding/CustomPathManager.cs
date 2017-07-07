@@ -15,6 +15,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Util;
 using CSUtil.Commons;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
+using TrafficManager.Traffic.Data;
 
 // ReSharper disable InconsistentNaming
 

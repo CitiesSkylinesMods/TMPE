@@ -1563,7 +1563,8 @@ namespace TrafficManager.Custom.PathFinding {
 				prevIsHighway = ((RoadBaseAI)prevSegmentInfo.m_netAI).m_highwayRules; */
 			bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
 			ushort sourceNodeId = nextIsStartNodeOfPrevSegment ? prevSegment.m_endNode : prevSegment.m_startNode;
-			bool prevIsRealJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+			bool prevIsRealJunction = prevIsJunction &&
 									  (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 			bool nextIsRealJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
 									  (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
@@ -1625,7 +1626,7 @@ namespace TrafficManager.Custom.PathFinding {
 						penalizeInnerLanes = _isHeavyVehicle && Options.preferOuterLane && prevSegmentRouting.highway && !prevIsRealJunction;
 
 						// determine path-finding lane utilization of the previous lane
-						if (prevIsRealJunction) {
+						//if (prevIsJunction) {
 							TrafficMeasurementManager.LaneTrafficData prevLaneTrafficData;
 							if (trafficMeasurementManager.GetLaneTrafficData(item.m_position.m_segment, item.m_position.m_lane, out prevLaneTrafficData)) {
 								if (prevDirTrafficData.totalPathFindTrafficBuffer > 0) {
@@ -1642,7 +1643,7 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 								}
 							}
-						}
+						//}
 					}
 
 					// get the mean speed for the previous segment

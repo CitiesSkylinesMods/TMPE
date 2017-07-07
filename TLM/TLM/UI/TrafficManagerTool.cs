@@ -18,6 +18,7 @@ using TrafficManager.Util;
 using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
