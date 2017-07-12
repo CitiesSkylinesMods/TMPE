@@ -46,91 +46,69 @@ namespace TrafficManager.Manager {
 
 	public struct LaneEndRoutingData {
 		public bool routed;
-
-		public LaneTransitionData[] segment0Transitions;
-		public LaneTransitionData[] segment1Transitions;
-		public LaneTransitionData[] segment2Transitions;
-		public LaneTransitionData[] segment3Transitions;
-		public LaneTransitionData[] segment4Transitions;
-		public LaneTransitionData[] segment5Transitions;
-		public LaneTransitionData[] segment6Transitions;
-		public LaneTransitionData[] segment7Transitions;
+		public LaneTransitionData[] transitions;
 
 		public override string ToString() {
 			return $"[LaneEndRoutingData\n" +
 				"\t" + $"routed = {routed}\n" +
-				"\t" + $"segment0Transitions = {(segment0Transitions == null ? "<null>" : segment0Transitions.ArrayToString())}\n" +
-				"\t" + $"segment1Transitions = {(segment1Transitions == null ? "<null>" : segment1Transitions.ArrayToString())}\n" +
-				"\t" + $"segment2Transitions = {(segment2Transitions == null ? "<null>" : segment2Transitions.ArrayToString())}\n" +
-				"\t" + $"segment3Transitions = {(segment3Transitions == null ? "<null>" : segment3Transitions.ArrayToString())}\n" +
-				"\t" + $"segment4Transitions = {(segment4Transitions == null ? "<null>" : segment4Transitions.ArrayToString())}\n" +
-				"\t" + $"segment5Transitions = {(segment5Transitions == null ? "<null>" : segment5Transitions.ArrayToString())}\n" +
-				"\t" + $"segment6Transitions = {(segment6Transitions == null ? "<null>" : segment6Transitions.ArrayToString())}\n" +
-				"\t" + $"segment7Transitions = {(segment7Transitions == null ? "<null>" : segment7Transitions.ArrayToString())}\n" +
+				"\t" + $"transitions = {(transitions == null ? "<null>" : transitions.ArrayToString())}\n" +
 				"LaneEndRoutingData]";
 		}
 
 		public void Reset() {
 			routed = false;
-			segment0Transitions = null;
-			segment1Transitions = null;
-			segment2Transitions = null;
-			segment3Transitions = null;
-			segment4Transitions = null;
-			segment5Transitions = null;
-			segment6Transitions = null;
-			segment7Transitions = null;
+			transitions = null;
 		}
 
-		public LaneTransitionData[] GetTransitions(int index) {
-			switch (index) {
-				case 0:
-					return segment0Transitions;
-				case 1:
-					return segment1Transitions;
-				case 2:
-					return segment2Transitions;
-				case 3:
-					return segment3Transitions;
-				case 4:
-					return segment4Transitions;
-				case 5:
-					return segment5Transitions;
-				case 6:
-					return segment6Transitions;
-				case 7:
-					return segment7Transitions;
+		public void RemoveTransition(uint laneId) {
+			if (transitions == null) {
+				return;
 			}
-			return null;
+
+			int index = -1;
+			for (int i = 0; i < transitions.Length; ++i) {
+				if (transitions[i].laneId == laneId) {
+					index = i;
+					break;
+				}
+			}
+
+			if (index < 0) {
+				return;
+			}
+
+			if (transitions.Length == 1) {
+				Reset();
+				return;
+			}
+
+			LaneTransitionData[] newTransitions = new LaneTransitionData[transitions.Length - 1];
+			if (index > 0) {
+				Array.Copy(transitions, 0, newTransitions, 0, index);
+			}
+			if (index < transitions.Length - 1) {
+				Array.Copy(transitions, index + 1, newTransitions, index, transitions.Length - index - 1);
+			}
+			transitions = newTransitions;
 		}
 
-		public void SetTransitions(int index, LaneTransitionData[] transitions) {
-			switch (index) {
-				case 0:
-					segment0Transitions = transitions;
-					return;
-				case 1:
-					segment1Transitions = transitions;
-					return;
-				case 2:
-					segment2Transitions = transitions;
-					return;
-				case 3:
-					segment3Transitions = transitions;
-					return;
-				case 4:
-					segment4Transitions = transitions;
-					return;
-				case 5:
-					segment5Transitions = transitions;
-					return;
-				case 6:
-					segment6Transitions = transitions;
-					return;
-				case 7:
-					segment7Transitions = transitions;
-					return;
+		public void AddTransitions(LaneTransitionData[] transitionsToAdd) {
+			if (transitions == null) {
+				transitions = transitionsToAdd;
+				routed = true;
+				return;
 			}
+
+			LaneTransitionData[] newTransitions = new LaneTransitionData[transitions.Length + transitionsToAdd.Length];
+			Array.Copy(transitions, newTransitions, transitions.Length);
+			Array.Copy(transitionsToAdd, 0, newTransitions, transitions.Length, transitionsToAdd.Length);
+			transitions = newTransitions;
+
+			routed = true;
+		}
+
+		public void AddTransition(LaneTransitionData transition) {
+			AddTransitions(new LaneTransitionData[1] { transition });
 		}
 	}
 
@@ -140,27 +118,30 @@ namespace TrafficManager.Manager {
 		public LaneEndTransitionType type;
 		public byte distance;
 		public ushort segmentId;
+		public bool startNode;
 
 		public override string ToString() {
 			return $"[LaneTransitionData\n" +
 				"\t" + $"laneId = {laneId}\n" +
 				"\t" + $"laneIndex = {laneIndex}\n" +
 				"\t" + $"segmentId = {segmentId}\n" +
+				"\t" + $"startNode = {startNode}\n" +
 				"\t" + $"type = {type}\n" +
 				"\t" + $"distance = {distance}\n" +
 				"LaneTransitionData]";
 		}
 
-		public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId, byte distance) {
+		public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId, bool startNode, byte distance) {
 			this.laneId = laneId;
 			this.laneIndex = laneIndex;
 			this.type = type;
 			this.distance = distance;
 			this.segmentId = segmentId;
+			this.startNode = startNode;
 		}
 
-		public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId) {
-			Set(laneId, laneIndex, type, segmentId, 0);
+		public void Set(uint laneId, byte laneIndex, LaneEndTransitionType type, ushort segmentId, bool startNode) {
+			Set(laneId, laneIndex, type, segmentId, startNode, 0);
 		}
 	}
 

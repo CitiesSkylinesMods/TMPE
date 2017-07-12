@@ -132,7 +132,7 @@ namespace TrafficManager.Custom.AI {
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, sqrVelocity);
+			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
 			// NON-STOCK CODE END
 
 			NetManager netManager = Singleton<NetManager>.instance;
@@ -194,7 +194,7 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.DebugSwitches[16] && GlobalConfig.Instance.TTLDebugNodeId == vehicleID;
+			bool debug = GlobalConfig.Instance.DebugSwitches[16] && GlobalConfig.Instance.DebugNodeId == vehicleID;
 #endif
 
 			ushort leadingVehicle = vehicleData.m_leadingVehicle;

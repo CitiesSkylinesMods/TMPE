@@ -1012,6 +1012,32 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Reverse-Redirection CustomVehicleAI::FindBestLane calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomVehicleAI).GetMethod("FindBestLane",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (PathUnit.Position)
+							},
+							null), typeof(VehicleAI).GetMethod("FindBestLane",
+							BindingFlags.NonPublic | BindingFlags.Static,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (Vehicle).MakeByRefType(),
+									typeof (PathUnit.Position)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomVehicleAI::FindBestLane");
+					detourFailed = true;
+				}
+
 				// FORWARD REDIRECTION
 
 				/*Log.Info("Redirecting NetAI::AfterSplitOrMove");
@@ -1073,6 +1099,41 @@ namespace TrafficManager {
 							typeof(CustomVehicleAI).GetMethod("CustomCalculateSegmentPositionPathFinder")));
 				} catch (Exception) {
 					Log.Error("Could not redirect VehicleAI::CalculateSegmentPosition (2).");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting VehicleAI::UpdatePathTargetPositions calls");
+				try {
+					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("UpdatePathTargetPositions",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (int).MakeByRefType(),
+								typeof (int),
+								typeof (float),
+								typeof (float)
+							},
+							null),
+							typeof(CustomVehicleAI).GetMethod("CustomUpdatePathTargetPositions",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (int).MakeByRefType(),
+								typeof (int),
+								typeof (float),
+								typeof (float)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not redirect VehicleAI::UpdatePathTargetPositions.");
 					detourFailed = true;
 				}
 

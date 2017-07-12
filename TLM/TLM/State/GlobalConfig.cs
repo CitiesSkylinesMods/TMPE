@@ -63,6 +63,7 @@ namespace TrafficManager.State {
 		/// </summary>
 		public int Version = LATEST_VERSION;
 
+#if DEBUG
 		public bool[] DebugSwitches = {
 			false, // 0: path-find debug log
 			false, // 1: path-find costs debug log
@@ -80,16 +81,17 @@ namespace TrafficManager.State {
 			false, // 13: priority rules debug
 			false, // 14: disable GUI overlay of citizens having a valid path
 			false, // 15: disable checking of other vehicles for trams
-			false // 16: debug TramBaseAI.SimulationStep (2)
+			false, // 16: debug TramBaseAI.SimulationStep (2)
+			false, // 17: debug alternative lane selection
+			false, // 18: -unused-
+			false  // 19: enable obligation to drive on the right hand side of the road
 		};
 
-#if DEBUG
-		public int PathFindDebugNodeId = 0;
-		public int PathFindDebugStartSegmentId = 0;
-		public int PathFindDebugEndSegmentId = 0;
-		public int PathFindDebugVehicleId = 0;
-		public ExtVehicleType PathFindDebugExtVehicleType = ExtVehicleType.None;
-		public ushort TTLDebugNodeId = 0;
+		public int DebugNodeId = 0;
+		public int DebugStartSegmentId = 0;
+		public int DebugEndSegmentId = 0;
+		public int DebugVehicleId = 0;
+		public ExtVehicleType DebugExtVehicleType = ExtVehicleType.None;
 #endif
 
 		/// <summary>
@@ -120,7 +122,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// base lane changing cost factor on city streets
 		/// </summary>
-		public float CityRoadLaneChangingBaseCost = 1.1f;
+		public float LaneChangingBaseCost = 1.5f;
 
 		/// <summary>
 		/// congestion lane changing base cost
@@ -150,7 +152,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Relative factor for lane traffic cost calculation
 		/// </summary>
-		public float TrafficCostFactor = 2f;
+		public float TrafficCostFactor = 4f;
 
 		/// <summary>
 		/// lane changing cost reduction modulo. vehicles hitting zero want to change lanes
@@ -160,7 +162,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// artifical lane distance for u-turns
 		/// </summary>
-		public int UturnLaneDistance = 2;
+		public int UturnPenalty = 2;
 
 		/// <summary>
 		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
@@ -175,7 +177,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// lane usage random interval
 		/// </summary>
-		public float LaneUsageRandInterval = 25f;
+		//public float LaneUsageRandInterval = 25f;
 
 		/// <summary>
 		/// lane usage random interval
@@ -226,6 +228,40 @@ namespace TrafficManager.State {
 		/// Maximum walking distance
 		/// </summary>
 		public float MaxWalkingDistance = 1000f;
+
+		/// <summary>
+		/// Randomized vehicle selection modulo for alternative lane selection
+		/// </summary>
+		public int AltLaneSelectionVehicleRand = 70;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float AltLaneSelectionMaxReservedSpace = 1f;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public float AltLaneSelectionMaxRecklessReservedSpace = 10f;
+
+		public float AltLaneSelectionMostOuterLaneSpeedFactor = 0.75f;
+
+		public float AltLaneSelectionMostInnerLaneSpeedFactor = 1.25f;
+
+		public float AltLaneSelectionLaneSpeedRandInterval = 10f;
+
+		public int AltLaneSelectionMaxOptLaneChanges = 1;
+
+		/// <summary>
+		/// Maximum allowed speed difference on safe lane changes
+		/// </summary>
+		public float AltLaneSelectionMaxUnsafeSpeedDiff = 0.2f;
+
+		public float AltLaneSelectionMinSafeSpeedImprovement = 10f;
+
+		public float AltLaneSelectionMinSafeTrafficImprovement = 10f;
+
+		public float AltLaneSelectionStayFactor = 0.9f;
 
 		/// <summary>
 		/// Target position randomization to allow opposite road-side parking
@@ -287,9 +323,9 @@ namespace TrafficManager.State {
 		public int VehicleStateUpdateShift = 6;
 
 		/// <summary>
-		/// average squared speed (in %) threshold for a segment to be flagged as congested
+		/// average speed (in %) threshold for a segment to be flagged as congested
 		/// </summary>
-		public uint CongestionSqrSpeedThreshold = 60;
+		public uint CongestionSpeedThreshold = 70;
 
 		/// <summary>
 		/// public transport demand increment on path-find failure
@@ -409,7 +445,11 @@ namespace TrafficManager.State {
 					XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
 					Log.Info($"Global config loaded.");
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
-					if (LoadingExtension.IsGameLoaded && !conf.DebugSwitches[10]) {
+					if (LoadingExtension.IsGameLoaded
+#if DEBUG
+						&& !conf.DebugSwitches[10]
+#endif
+						) {
 						Constants.ManagerFactory.RoutingManager.RequestFullRecalculation(true);
 					}
 					return conf;

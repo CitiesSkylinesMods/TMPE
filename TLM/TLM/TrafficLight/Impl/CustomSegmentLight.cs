@@ -349,7 +349,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void MakeRedOrGreen() {
 #if DEBUGTTL
-			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId)
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.MakeRedOrGreen: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -374,7 +374,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void MakeRed() {
 #if DEBUGTTL
-			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId)
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.MakeRed: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -395,7 +395,7 @@ namespace TrafficManager.TrafficLight.Impl {
 				this.rightLight = (RoadBaseAI.TrafficLightState)rightLight;
 
 #if DEBUGTTL
-			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId)
+			if (GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.SetStates({mainLight}, {leftLight}, {rightLight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: {this.mainLight} {this.leftLight} {this.rightLight}");
 #endif
 

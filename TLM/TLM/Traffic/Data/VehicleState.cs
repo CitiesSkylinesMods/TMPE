@@ -48,6 +48,7 @@ namespace TrafficManager.Traffic.Data {
 		public uint lastPositionUpdate;
 		public float totalLength;
 		public float sqrVelocity;
+		public float velocity;
 		public int waitTime;
 		public float reduceSqrSpeedByValueToYield;
 		public Flags flags;
@@ -60,6 +61,7 @@ namespace TrafficManager.Traffic.Data {
 		public byte nextLaneIndex;
 		public ushort previousVehicleIdOnSegment;
 		public ushort nextVehicleIdOnSegment;
+		public ushort lastAltLaneSelSegmentId;
 		private VehicleJunctionTransitState junctionTransitState;
 
 		public override string ToString() {
@@ -71,6 +73,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
 				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
 				"\t" + $"totalLength = {totalLength}\n" +
+				"\t" + $"velocity = {velocity}\n" +
 				"\t" + $"sqrVelocity = {sqrVelocity}\n" +
 				"\t" + $"waitTime = {waitTime}\n" +
 				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
@@ -84,6 +87,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"nextLaneIndex = {nextLaneIndex}\n" +
 				"\t" + $"previousVehicleIdOnSegment = {previousVehicleIdOnSegment}\n" +
 				"\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
+				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
 				"VehicleState]";
 		}
@@ -107,7 +111,9 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
+			velocity = 0;
 			sqrVelocity = 0;
+			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 		}
 
@@ -255,9 +261,11 @@ namespace TrafficManager.Traffic.Data {
 
 			Unlink();
 
+			velocity = 0;
 			sqrVelocity = 0;
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
+			lastAltLaneSelSegmentId = 0;
 
 			try {
 				totalLength = vehicleData.CalculateTotalLength(vehicleId);
@@ -282,10 +290,10 @@ namespace TrafficManager.Traffic.Data {
 #endif
 		}
 
-		internal void UpdateSqrVelocity(ref Vehicle vehicleData, float sqrVelocity) {
+		internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {sqrVelocity}) called: {this}");
+				Log._Debug($"VehicleState.UpdateVelocity({vehicleId}, {velocity}) called: {this}");
 #endif
 
 			if ((flags & Flags.Spawned) == Flags.None) {
@@ -296,11 +304,12 @@ namespace TrafficManager.Traffic.Data {
 				OnSpawn(ref vehicleData);
 			}
 
-			this.sqrVelocity = sqrVelocity;
+			this.velocity = velocity;
+			this.sqrVelocity = velocity * velocity;
 
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
-				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {sqrVelocity}) finished: {this}");
+				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {velocity}) finished: {this}");
 #endif
 		}
 
@@ -384,11 +393,13 @@ namespace TrafficManager.Traffic.Data {
 			currentSegmentId = 0;
 			currentStartNode = false;
 			currentLaneIndex = 0;
+			lastAltLaneSelSegmentId = 0;
 
 			nextSegmentId = 0;
 			nextLaneIndex = 0;
 
 			totalLength = 0;
+			velocity = 0;
 			sqrVelocity = 0;
 
 			flags &= ~Flags.Spawned;
@@ -432,7 +443,9 @@ namespace TrafficManager.Traffic.Data {
 			heavyVehicle = false;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
+			velocity = 0;
 			sqrVelocity = 0;
+			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 
 #if DEBUG

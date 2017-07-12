@@ -594,7 +594,7 @@ namespace TrafficManager.Custom.AI {
 				Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): processing vehicle {vehicleId} @ seg. {position.m_segment}, lane {position.m_lane}, off {position.m_offset} // given: laneID={laneID} offset={offset} prevPos=[seg. {prevPos.m_segment}, lane {prevPos.m_lane}, off {prevPos.m_offset}] prevLaneID={prevLaneID} prevOffset={prevOffset} bezier=[a={bezier.a} b={bezier.b} c={bezier.c} d={bezier.d}]");
 #endif
 
-			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, sqrVelocity);
+			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
 			// NON-STOCK CODE END
 
 			Vector3 lastPosPlusRot = lastFrameData.m_position;

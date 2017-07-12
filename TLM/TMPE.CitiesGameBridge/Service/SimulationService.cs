@@ -1,5 +1,6 @@
 ﻿using System;
 using ColossalFramework;
+using ColossalFramework.Math;
 using GenericGameBridge.Service;
 using UnityEngine;
 
@@ -36,6 +37,12 @@ namespace CitiesGameBridge.Service {
 		public Vector3 CameraPosition {
 			get {
 				return Singleton<SimulationManager>.instance.m_simulationView.m_position;
+			}
+		}
+
+		public Randomizer Randomizer {
+			get {
+				return Singleton<SimulationManager>.instance.m_randomizer;
 			}
 		}
 

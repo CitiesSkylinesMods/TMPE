@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ColossalFramework.Math;
+using UnityEngine;
 
 namespace GenericGameBridge.Service {
 	public interface ISimulationService {
@@ -6,6 +7,7 @@ namespace GenericGameBridge.Service {
 		uint CurrentBuildIndex { get; set; }
 		uint CurrentFrameIndex { get; }
 		Vector3 CameraPosition { get; }
+		Randomizer Randomizer { get; }
 		void AddAction(System.Action action);
 		void PauseSimulation(bool forced);
 		void ResumeSimulation(bool forced);

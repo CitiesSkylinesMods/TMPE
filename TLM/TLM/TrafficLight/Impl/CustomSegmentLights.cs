@@ -368,7 +368,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void CalculateAutoPedestrianLightState(bool propagate=true) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.TTLDebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
 #endif
 
 #if DEBUGTTL

@@ -74,7 +74,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex, length, (ushort)state.sqrVelocity);
+			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex, length, (ushort)state.velocity);
 		}
 
 		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
@@ -165,27 +165,27 @@ namespace TrafficManager.Manager.Impl {
 			VehicleStates[vehicleId].previousVehicleIdOnSegment = previousVehicleId;
 		}
 
-		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData, float? sqrVelocity=null) {
+		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData, float? velocity=null) {
 			if (!Options.prioritySignsEnabled && !Options.timedLightsEnabled) {
 				return;
 			}
 
-			float sqrVel = sqrVelocity != null ? (float)sqrVelocity : vehicleData.GetLastFrameVelocity().sqrMagnitude;
+			float vel = velocity != null ? (float)velocity : vehicleData.GetLastFrameVelocity().magnitude;
 
 			ushort connectedVehicleId = vehicleId;
 			while (connectedVehicleId != 0) {
-				UpdateVehiclePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], ref VehicleStates[connectedVehicleId], sqrVel);
+				UpdateVehiclePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], ref VehicleStates[connectedVehicleId], vel);
 				connectedVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId].m_trailingVehicle;
 			}
 		}
 
-		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state, float sqrVelocity) {
+		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state, float velocity) {
 #if DEBUG
 			if (GlobalConfig.Instance.DebugSwitches[9])
 				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({state.vehicleId}) called");
 #endif
 
-			state.UpdateSqrVelocity(ref vehicleData, sqrVelocity);
+			state.UpdateVelocity(ref vehicleData, velocity);
 
 			if (vehicleData.m_path == 0 || (vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0 ||
 				(state.lastPathId == vehicleData.m_path && state.lastPathPositionIndex == vehicleData.m_pathPositionIndex)

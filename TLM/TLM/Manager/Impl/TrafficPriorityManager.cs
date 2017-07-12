@@ -259,7 +259,7 @@ namespace TrafficManager.Manager.Impl {
 			ushort transitNodeId = end.NodeId;*/
 
 #if DEBUG
-			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.TTLDebugNodeId <= 0 || transitNodeId == GlobalConfig.Instance.TTLDebugNodeId);
+			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.DebugNodeId <= 0 || transitNodeId == GlobalConfig.Instance.DebugNodeId);
 			if (debug) {
 				Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): Checking vehicle {vehicleId} at node {transitNodeId}. Coming from seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
 			}
