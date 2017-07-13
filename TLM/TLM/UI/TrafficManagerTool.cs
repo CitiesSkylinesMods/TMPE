@@ -70,7 +70,7 @@ namespace TrafficManager.UI {
 		internal bool IsNodeWithinViewDistance(ushort nodeId) {
 			bool ret = false;
 			Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-				ret = IsPosWithinOverlayDistance(ref node.m_position);
+				ret = IsPosWithinOverlayDistance(node.m_position);
 				return true;
 			});
 			return ret;
@@ -80,13 +80,13 @@ namespace TrafficManager.UI {
 			bool ret = false;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
 				Vector3 centerPos = segment.m_bounds.center;
-				ret = IsPosWithinOverlayDistance(ref centerPos);
+				ret = IsPosWithinOverlayDistance(centerPos);
 				return true;
 			});
 			return ret;
 		}
 
-		internal bool IsPosWithinOverlayDistance(ref Vector3 position) {
+		internal bool IsPosWithinOverlayDistance(Vector3 position) {
 			return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position).magnitude <= TrafficManagerTool.MaxOverlayDistance;
 		}
 

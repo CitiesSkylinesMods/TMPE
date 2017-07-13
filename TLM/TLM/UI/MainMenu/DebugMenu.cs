@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI {
 #if DEBUG
@@ -46,6 +47,7 @@ namespace TrafficManager.UI {
 		private static UIButton _goToPosButton = null;
 		private static UIButton _printDebugInfoButton = null;
 		private static UIButton _reloadConfigButton = null;
+		private static UIButton _checkDetoursButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _removeStuckEntitiesButton = null;
@@ -163,6 +165,9 @@ namespace TrafficManager.UI {
 			_reloadConfigButton = _createButton("Reload configuration", y, clickReloadConfig);
 			y += 40;
 			height += 40;
+			_checkDetoursButton = _createButton("Check detours", y, clickCheckDetours);
+			y += 40;
+			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
 			y += 40;
 			height += 40;
@@ -259,6 +264,13 @@ namespace TrafficManager.UI {
 
 		private void clickReloadConfig(UIComponent component, UIMouseEventParameter eventParam) {
 			GlobalConfig.Reload();
+		}
+
+		private void clickCheckDetours(UIComponent component, UIMouseEventParameter eventParam) {
+			foreach (LoadingExtension.Detour detour in LoadingExtension.Detours) {
+				bool isRedirected = RedirectionHelper.IsRedirected(detour.OriginalMethod, detour.CustomMethod);
+				Log.Info($"Checking detour {detour.OriginalMethod.Name} -> {detour.CustomMethod.Name}: {(isRedirected ? "redirected" : "*NOT REDIRECTED*")}");
+			}
 		}
 
 		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();
