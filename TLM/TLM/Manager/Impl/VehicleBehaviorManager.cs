@@ -642,9 +642,13 @@ namespace TrafficManager.Manager.Impl {
 				byte bestOptNext1LaneIndex = next1PathPos.m_lane;
 
 				bool foundSafeLaneChange = false;
-				bool foundClearBackLane = false;
-				bool foundClearFwdLane = false;
+				//bool foundClearBackLane = false;
+				//bool foundClearFwdLane = false;
 
+				int maxNumNext2Next3Transitions = 0;
+				int maxNumNext3Next4Transitions = 0;
+
+				int numNext1Next2Transitions = 0;
 				for (int i = 0; i < currentFwdTransitions.Length; ++i) {
 					if (currentFwdTransitions[i].segmentId != next1PathPos.m_segment) {
 						continue;
@@ -668,8 +672,8 @@ namespace TrafficManager.Manager.Impl {
 
 					int minTotalLaneDist = int.MaxValue;
 
-					// next1 -> next2
 					if (next2PathPos.m_segment != 0) {
+						// next1 -> next2
 						uint next1FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentFwdTransitions[i].laneId, !currentFwdTransitions[i].startNode);
 #if DEBUG
 						if (next1FwdRoutingIndex < 0 || next1FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
@@ -691,7 +695,8 @@ namespace TrafficManager.Manager.Impl {
 							continue;
 						}
 
-						int trans3Index = -1;
+						bool foundNext1Next2 = false;
+						int numNext2Next3Transitions = 0;
 						for (int j = 0; j < next1FwdTransitions.Length; ++j) {
 							if (next1FwdTransitions[j].segmentId != next2PathPos.m_segment) {
 								continue;
@@ -735,6 +740,8 @@ namespace TrafficManager.Manager.Impl {
 									continue;
 								}
 
+								bool foundNext2Next3 = false;
+								int numNext3Next4Transitions = 0;
 								for (int k = 0; k < next2FwdTransitions.Length; ++k) {
 									if (next2FwdTransitions[k].segmentId != next3PathPos.m_segment) {
 										continue;
@@ -780,6 +787,7 @@ namespace TrafficManager.Manager.Impl {
 										}
 
 										// check if original next4 lane is accessible via the next3 lane
+										bool foundNext3Next4 = false;
 										for (int l = 0; l < next3FwdTransitions.Length; ++l) {
 											if (next3FwdTransitions[l].segmentId != next4PathPos.m_segment) {
 												continue;
@@ -802,29 +810,47 @@ namespace TrafficManager.Manager.Impl {
 											}
 
 											if (next3FwdTransitions[l].laneIndex == next4PathPos.m_lane) {
-												trans3Index = l;
+												// we found a valid routing from [current lane] (currentPathPos) to [next1 lane] (next1Pos), [next2 lane] (next2Pos), [next3 lane] (next3Pos), and [next4 lane] (next4Pos)
+
+												foundNext3Next4 = true;
 												int totalLaneDist = next1FwdTransitions[j].distance + next2FwdTransitions[k].distance + next3FwdTransitions[l].distance;
 												if (totalLaneDist < minTotalLaneDist) {
 													minTotalLaneDist = totalLaneDist;
 												}
+#if DEBUG
+												if (debug) {
+													Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Found candidate transition with totalLaneDist={totalLaneDist}: {currentLaneId} -> {currentFwdTransitions[i]} -> {next1FwdTransitions[j]} -> {next2FwdTransitions[k]} -> {next3FwdTransitions[l]}");
+												}
+#endif
 												break;
 											}
-										}
+										} // for l
 
-										if (trans3Index >= 0) {
-											// we found a valid routing from [current lane] (currentPathPos) to [next1 lane] (next1Pos), [next2 lane] (next2Pos), [next3 lane] (next3Pos), and [next4 lane] (next4Pos)
-#if DEBUG
-											if (debug) {
-												Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Found candidate transition: {currentLaneId} -> {currentFwdTransitions[i]} -> {next1FwdTransitions[j]} -> {next2FwdTransitions[k]} -> {next3FwdTransitions[trans3Index]}");
-											}
-#endif
+										if (foundNext3Next4) {
+											++numNext3Next4Transitions;
+											foundNext2Next3 = true;
 										}
 									}
+								} // for k
+
+								if (numNext3Next4Transitions > maxNumNext3Next4Transitions) { // ok?
+									maxNumNext3Next4Transitions = numNext3Next4Transitions;
+								}
+
+								if (foundNext2Next3) {
+									++numNext2Next3Transitions;
+									foundNext1Next2 = true;
 								}
 							}
+						} // for j
+
+						if (numNext2Next3Transitions > maxNumNext2Next3Transitions) {
+							maxNumNext2Next3Transitions = numNext2Next3Transitions;
 						}
 
-						if (trans3Index < 0) {
+						if (foundNext1Next2) {
+							++numNext1Next2Transitions;
+						} else if (next3PathPos.m_segment != 0) {
 							continue;
 						}
 					}
@@ -841,11 +867,9 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 					bool laneChange = currentFwdTransitions[i].distance != 0;
-					bool next1LaneClear = true;
+					/*bool next1LaneClear = true;
 					if (laneChange) {
-						/*
-						 * check for traffic on next1 lane
-						 */
+						// check for traffic on next1 lane
 						float reservedSpace = 0;
 						Services.NetService.ProcessLane(currentFwdTransitions[i].laneId, delegate (uint next1LaneId, ref NetLane next1Lane) {
 							reservedSpace = next1Lane.GetReservedSpace();
@@ -861,7 +885,7 @@ namespace TrafficManager.Manager.Impl {
 
 					if (foundClearFwdLane && !next1LaneClear) {
 						continue;
-					}
+					}*/
 
 					/*
 					 * Check traffic on the lanes in front of the candidate lane in order to prevent vehicles from backing up traffic
@@ -939,7 +963,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 #endif
 
-					if (foundClearBackLane && !prevLanesClear) {
+					if (/*foundClearBackLane*/foundSafeLaneChange && !prevLanesClear) {
 						continue;
 					}
 
@@ -983,52 +1007,54 @@ namespace TrafficManager.Manager.Impl {
 
 					float speedDiff = next1MeanSpeed - targetSpeed; // > 0: lane is faster than vehicle would go. < 0: vehicle could go faster than this lane allows
 
-					if (!laneChange &&
-						(float.IsInfinity(bestStaySpeedDiff) ||
-						(bestStaySpeedDiff < 0 && speedDiff > bestStaySpeedDiff) ||
-						(bestStaySpeedDiff > 0 && speedDiff < bestStaySpeedDiff && speedDiff >= 0))
-					) {
-						bestStaySpeedDiff = speedDiff;
-						bestStayNext1LaneIndex = currentFwdTransitions[i].laneIndex;
-						bestStayMeanSpeed = next1MeanSpeed;
-						bestStayTotalLaneDist = minTotalLaneDist;
-					}
 #if DEBUG
 					if (debug) {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Calculated metric for next1 lane {currentFwdTransitions[i].laneId}: next1MaxSpeed={next1MaxSpeed} next1MeanSpeed={next1MeanSpeed} targetSpeed={targetSpeed} speedDiff={speedDiff} bestSpeedDiff={bestOptSpeedDiff} bestStaySpeedDiff={bestStaySpeedDiff}");
 					}
 #endif
-					bool foundFirstClearFwdLane = laneChange && !foundClearFwdLane && next1LaneClear;
-					bool foundFirstClearBackLane = laneChange && !foundClearBackLane && prevLanesClear;
-					bool foundFirstSafeLaneChange = laneChange && !foundSafeLaneChange && next1LaneClear && prevLanesClear;
-					if ((foundFirstClearFwdLane && !foundClearBackLane) ||
-						(foundFirstClearBackLane && !foundClearFwdLane) ||
-						foundFirstSafeLaneChange ||
-						float.IsInfinity(bestOptSpeedDiff) ||
-						(bestOptSpeedDiff < 0 && speedDiff > bestOptSpeedDiff) ||
-						(bestOptSpeedDiff > 0 && speedDiff < bestOptSpeedDiff && speedDiff >= 0)) {
-						bestOptSpeedDiff = speedDiff;
-						bestOptNext1LaneIndex = currentFwdTransitions[i].laneIndex;
-						bestOptMeanSpeed = next1MeanSpeed;
-						bestOptTotalLaneDist = minTotalLaneDist;
-					}
+					if (!laneChange) {
+						if ((float.IsInfinity(bestStaySpeedDiff) ||
+							(bestStaySpeedDiff < 0 && speedDiff > bestStaySpeedDiff) ||
+							(bestStaySpeedDiff > 0 && speedDiff < bestStaySpeedDiff && speedDiff >= 0))
+						) {
+							bestStaySpeedDiff = speedDiff;
+							bestStayNext1LaneIndex = currentFwdTransitions[i].laneIndex;
+							bestStayMeanSpeed = next1MeanSpeed;
+							bestStayTotalLaneDist = minTotalLaneDist;
+						}
+					} else {
+						//bool foundFirstClearFwdLane = laneChange && !foundClearFwdLane && next1LaneClear;
+						//bool foundFirstClearBackLane = laneChange && !foundClearBackLane && prevLanesClear;
+						bool foundFirstSafeLaneChange = !foundSafeLaneChange && /*next1LaneClear &&*/ prevLanesClear;
+						if (/*(foundFirstClearFwdLane && !foundClearBackLane) ||
+							(foundFirstClearBackLane && !foundClearFwdLane) ||*/
+							foundFirstSafeLaneChange ||
+							float.IsInfinity(bestOptSpeedDiff) ||
+							(bestOptSpeedDiff < 0 && speedDiff > bestOptSpeedDiff) ||
+							(bestOptSpeedDiff > 0 && speedDiff < bestOptSpeedDiff && speedDiff >= 0)) {
+							bestOptSpeedDiff = speedDiff;
+							bestOptNext1LaneIndex = currentFwdTransitions[i].laneIndex;
+							bestOptMeanSpeed = next1MeanSpeed;
+							bestOptTotalLaneDist = minTotalLaneDist;
+						}
 
-					if (foundFirstClearBackLane) {
-						foundClearBackLane = true;
-					}
+						/*if (foundFirstClearBackLane) {
+							foundClearBackLane = true;
+						}
 
-					if (foundFirstClearFwdLane) {
-						foundClearFwdLane = true;
-					}
+						if (foundFirstClearFwdLane) {
+							foundClearFwdLane = true;
+						}*/
 
-					if (foundFirstSafeLaneChange) {
-						foundSafeLaneChange = true;
+						if (foundFirstSafeLaneChange) {
+							foundSafeLaneChange = true;
+						}
 					}
-				}
+				} // for i
 
 #if DEBUG
 				if (debug) {
-					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): best lane index: {bestOptNext1LaneIndex}, best stay lane index: {bestStayNext1LaneIndex}, path lane index: {next1PathPos.m_lane})\nbest speed diff: {bestOptSpeedDiff}, best stay speed diff: {bestStaySpeedDiff}\nfoundClearBackLane={foundClearBackLane}, foundClearFwdLane={foundClearFwdLane}, foundSafeLaneChange={foundSafeLaneChange}\nbestMeanSpeed={bestOptMeanSpeed}, bestStayMeanSpeed={bestStayMeanSpeed}");
+					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): best lane index: {bestOptNext1LaneIndex}, best stay lane index: {bestStayNext1LaneIndex}, path lane index: {next1PathPos.m_lane})\nbest speed diff: {bestOptSpeedDiff}, best stay speed diff: {bestStaySpeedDiff}\nfoundClearBackLane=XXfoundClearBackLaneXX, foundClearFwdLane=XXfoundClearFwdLaneXX, foundSafeLaneChange={foundSafeLaneChange}\nbestMeanSpeed={bestOptMeanSpeed}, bestStayMeanSpeed={bestStayMeanSpeed}");
 				}
 #endif
 
@@ -1053,6 +1079,42 @@ namespace TrafficManager.Manager.Impl {
 				}
 
 				// decide if vehicle should stay or change
+
+				// vanishing lane change opportunity detection
+				int vehSel = vehicleId % 7;
+#if DEBUG
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): vehMod4={vehSel} numNext1Next2Transitions ={numNext1Next2Transitions} maxNumNext2Next3Transitions={maxNumNext2Next3Transitions} maxNumNext3Next4Transitions={maxNumNext3Next4Transitions}");
+				}
+#endif
+				if ((maxNumNext3Next4Transitions == 1 && vehSel <= 1) || // 2/7 % of all vehicles will change lanes 3 segments in front
+					(maxNumNext2Next3Transitions == 1 && vehSel <= 3) || // 2/7 % of all vehicles will change lanes 2 segments in front
+					(numNext1Next2Transitions == 1 && vehSel <= 5) // 2/7 % of all vehicles will change lanes 1 segment in front, 1/7 will change at last opportunity
+				) {
+					// vehicle must reach a certain lane since lane changing opportunities will vanish
+
+#if DEBUG
+					if (debug) {
+						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): vanishing lane change opportunities detected: numNext1Next2Transitions={numNext1Next2Transitions}, maxNumNext2Next3Transitions={maxNumNext2Next3Transitions}, maxNumNext3Next4Transitions={maxNumNext3Next4Transitions}, vehSel={vehSel}, bestOptTotalLaneDist={bestOptTotalLaneDist}, bestStayTotalLaneDist={bestStayTotalLaneDist}");
+					}
+#endif
+
+					if (bestOptTotalLaneDist < bestStayTotalLaneDist) {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> vanishing lane change opportunities -- selecting bestOptTotalLaneDist={bestOptTotalLaneDist}");
+						}
+#endif
+						return bestOptNext1LaneIndex;
+					} else {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> vanishing lane change opportunities -- selecting bestStayTotalLaneDist={bestStayTotalLaneDist}");
+						}
+#endif
+						return bestStayNext1LaneIndex;
+					}
+				}
 
 				if (bestStaySpeedDiff == 0 || bestOptMeanSpeed < 0.1f) {
 					/*
@@ -1176,12 +1238,18 @@ namespace TrafficManager.Manager.Impl {
 							}
 #endif
 							return bestOptNext1LaneIndex;
+						} else {
+#if DEBUG
+							if (debug) {
+								Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): mean speed difference NOT within tolerance: meanSpeedDiff={meanSpeedDiff} -- selecting bestStayNext1LaneIndex={bestStayNext1LaneIndex}");
+							}
+#endif
 						}
 					}
 
 #if DEBUG
 					if (debug) {
-						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> mean speed difference NOT within tolerance: disallow lane change -- selecting bestStayNext1LaneIndex={bestStayNext1LaneIndex}");
+						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> disallowing unsafe lane change -- selecting bestStayNext1LaneIndex={bestStayNext1LaneIndex}");
 					}
 #endif
 					return bestStayNext1LaneIndex;

@@ -255,7 +255,7 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// Maximum allowed speed difference on safe lane changes
 		/// </summary>
-		public float AltLaneSelectionMaxUnsafeSpeedDiff = 0.2f;
+		public float AltLaneSelectionMaxUnsafeSpeedDiff = 0.5f;
 
 		public float AltLaneSelectionMinSafeSpeedImprovement = 10f;
 

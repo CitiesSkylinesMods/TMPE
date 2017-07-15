@@ -223,7 +223,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		public bool ExtCalculatePath(uint unit, bool skipQueue) {
-			if (Singleton<PathManager>.instance.AddPathReference(unit)) {
+			if (CustomPathManager._instance.AddPathReference(unit)) {
 				try {
 					Monitor.Enter(QueueLock);
 #if DEBUGPF3
@@ -242,12 +242,7 @@ namespace TrafficManager.Custom.PathFinding {
 							ppath |= 2;
 #endif
 						} else {
-							try {
-								Monitor.Enter(CustomPathManager._instance.QueueItemLock);
-								CustomPathManager._instance.queueItems[unit].nextPathUnitId = QueueFirst;
-							} finally {
-								Monitor.Exit(CustomPathManager._instance.QueueItemLock);
-							}
+							CustomPathManager._instance.queueItems[unit].nextPathUnitId = QueueFirst;
 							//this.PathUnits.m_buffer[unit].m_nextPathUnit = this.QueueFirst;
 #if DEBUGPF3
 							ppath |= 4;
@@ -267,12 +262,7 @@ namespace TrafficManager.Custom.PathFinding {
 							ppath |= 16;
 #endif
 						} else {
-							try {
-								Monitor.Enter(CustomPathManager._instance.QueueItemLock);
-								CustomPathManager._instance.queueItems[QueueLast].nextPathUnitId = unit;
-							} finally {
-								Monitor.Exit(CustomPathManager._instance.QueueItemLock);
-							}
+							CustomPathManager._instance.queueItems[QueueLast].nextPathUnitId = unit;
 							//this.PathUnits.m_buffer[this.QueueLast].m_nextPathUnit = unit;
 #if DEBUGPF3
 							ppath |= 32;
@@ -335,7 +325,6 @@ namespace TrafficManager.Custom.PathFinding {
 				this._disableMask |= NetSegment.Flags.Flooded;
 			}
 			//this._speedRand = 0;
-			this.queueItem = CustomPathManager._instance.queueItems[unit];
 			this._leftHandDrive = Constants.ServiceFactory.SimulationService.LeftHandDrive;
 			this._isRoadVehicle = (queueItem.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None;
 			this._isLaneArrowObeyingEntity = (_vehicleTypes & LaneArrowManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
@@ -598,7 +587,7 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 #endif
 #endif
-				CustomPathManager._instance.ResetPathUnit(unit);
+				//CustomPathManager._instance.ResetQueueItem(unit);
 
 				return;
 			}
@@ -674,7 +663,7 @@ namespace TrafficManager.Custom.PathFinding {
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Path-find succeeded for unit {unit}");
 #endif
 #endif
-					CustomPathManager._instance.ResetPathUnit(unit);
+					//CustomPathManager._instance.ResetQueueItem(unit);
 
 					return;
 				}
@@ -696,7 +685,7 @@ namespace TrafficManager.Custom.PathFinding {
 								Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {unit} -- Could not create path unit");
 #endif
 #endif
-							CustomPathManager._instance.ResetPathUnit(unit);
+							//CustomPathManager._instance.ResetQueueItem(unit);
 							return;
 						}
 						this.PathUnits.m_buffer[createdPathUnitId] = this.PathUnits.m_buffer[(int)currentPathUnitId];
@@ -745,7 +734,7 @@ namespace TrafficManager.Custom.PathFinding {
 				Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {unit} -- internal error: for loop break");
 #endif
 #endif
-			CustomPathManager._instance.ResetPathUnit(unit);
+			//CustomPathManager._instance.ResetQueueItem(unit);
 #if DEBUG
 			//Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Cannot find path (pfCurrentState={pfCurrentState}) for unit {unit}");
 #endif
@@ -1123,7 +1112,6 @@ namespace TrafficManager.Custom.PathFinding {
 						bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
 						bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
 						bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-						bool isCustomUturnAllowed = Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode);
 
 						// determine if the vehicle may u-turn at the target node
 						explorePrevSegment =
@@ -1131,7 +1119,7 @@ namespace TrafficManager.Custom.PathFinding {
 							(nextIsEndOrOneWayOut || // stock u-turn points
 							(Options.junctionRestrictionsEnabled &&
 							_isRoadVehicle && // only road vehicles may perform u-turns
-							isCustomUturnAllowed && // only do u-turns if allowed
+							Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode) && // only do u-turns if allowed
 							!nextIsBeautificationNode && // no u-turns at beautification nodes
 							prevIsCarLane && // u-turns for road vehicles only
 							!_isHeavyVehicle && // only small vehicles may perform u-turns
@@ -1171,7 +1159,7 @@ namespace TrafficManager.Custom.PathFinding {
 								"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
 								"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
 								"\t" + $"allowPedestrians={allowPedestrians}\n" +
-								"\t" + $"isCustomUturnAllowed={isCustomUturnAllowed}\n" +
+								"\t" + $"isCustomUturnAllowed={Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode)}\n" +
 								"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
 								"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneArrowPolicyEnabled}\n" +
 								"\t" + $"handleStockUturn={handleStockUturn}\n"
@@ -2633,21 +2621,17 @@ namespace TrafficManager.Custom.PathFinding {
 					/*if (m_queuedPathFindCount > 100 && _conf.DebugSwitches[0])
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PathFindThread: Starting pathfinder. Remaining queued pathfinders: {m_queuedPathFindCount}"); */
 #endif
-					try {
-						Monitor.Enter(CustomPathManager._instance.QueueItemLock);
-						CustomPathManager._instance.queueItems[Calculating].nextPathUnitId = 0u;
-					} finally {
-						Monitor.Exit(CustomPathManager._instance.QueueItemLock);
-					}
+					CustomPathManager._instance.queueItems[Calculating].nextPathUnitId = 0u;
 					//PathUnits.m_buffer[Calculating].m_nextPathUnit = 0u;
 
 					// check if path unit is created
-					if ((PathUnits.m_buffer[Calculating].m_pathFindFlags & PathUnit.FLAG_CREATED) == 0) {
+					/*if ((PathUnits.m_buffer[Calculating].m_pathFindFlags & PathUnit.FLAG_CREATED) == 0) {
 						Log.Warning($"CustomPathFind: Refusing to calculate path unit {Calculating} which is not created!");
 						continue;
-					}
+					}*/
 
 					PathUnits.m_buffer[Calculating].m_pathFindFlags = (byte)((PathUnits.m_buffer[Calculating].m_pathFindFlags & ~PathUnit.FLAG_CREATED) | PathUnit.FLAG_CALCULATING);
+					this.queueItem = CustomPathManager._instance.queueItems[Calculating];
 
 #if DEBUGPF3
 					Log._Debug($"(PF #{_pathFindIndex}, T#{Thread.CurrentThread.ManagedThreadId}, Id #{pfId}) CustomPathFind.PathFindThread iteration END. QueueFirst={QueueFirst} QueueLast={QueueLast} Calculating={Calculating} flags={PathUnits.m_buffer[Calculating].m_pathFindFlags}");
@@ -2681,7 +2665,7 @@ namespace TrafficManager.Custom.PathFinding {
 						Log._Debug($"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {this._pathFindIndex}: Could not find path for unit {Calculating} -- exception occurred in PathFindImplementation");
 #endif
 #endif
-					CustomPathManager._instance.ResetPathUnit(Calculating);
+					//CustomPathManager._instance.ResetQueueItem(Calculating);
 
 					PathUnits.m_buffer[Calculating].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 				} finally {
@@ -2721,7 +2705,17 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 					PathUnits.m_buffer[Calculating].m_pathFindFlags = (byte)(PathUnits.m_buffer[Calculating].m_pathFindFlags & ~PathUnit.FLAG_CALCULATING);
-					Singleton<PathManager>.instance.ReleasePath(Calculating);
+
+					// NON-STOCK CODE START
+					try {
+						Monitor.Enter(_bufferLock);
+						CustomPathManager._instance.queueItems[Calculating].queued = false;
+						CustomPathManager._instance.ReleasePath(Calculating);
+					} finally {
+						Monitor.Exit(this._bufferLock);
+					}
+					// NON-STOCK CODE END
+
 					Calculating = 0u;
 					Monitor.Pulse(QueueLock);
 				} catch (Exception e) {

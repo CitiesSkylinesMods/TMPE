@@ -22,23 +22,23 @@ using TrafficManager.Traffic.Data;
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathManager : PathManager {
 		public struct PathUnitQueueItem {
-			public uint nextPathUnitId;
-			public ExtVehicleType vehicleType;
-			public ExtPathType pathType;
-			public ushort vehicleId;
+			public uint nextPathUnitId; // access requires acquisition of CustomPathFind.QueueLock
+			public ExtVehicleType vehicleType; // access requires acquisition of m_bufferLock
+			public ExtPathType pathType; // access requires acquisition of m_bufferLock
+			public ushort vehicleId; // access requires acquisition of m_bufferLock
+			public bool queued; // access requires acquisition of m_bufferLock
 
-			public void Reset() {
-				vehicleType = ExtVehicleType.None;
-				pathType = ExtPathType.None;
-				vehicleId = 0;
-			}
+			//public void Reset() {
+			//	vehicleType = ExtVehicleType.None;
+			//	pathType = ExtPathType.None;
+			//	vehicleId = 0;
+			//}
 		}
 
 		/// <summary>
 		/// Holds a linked list of path units waiting to be calculated
 		/// </summary>
 		internal PathUnitQueueItem[] queueItems;
-		internal object QueueItemLock;
 
 		internal CustomPathFind[] _replacementPathFinds;
 
@@ -80,7 +80,6 @@ namespace TrafficManager.Custom.PathFinding {
 
 			Log._Debug("Waking up CustomPathManager.");
 
-			QueueItemLock = new object();
 			queueItems = new PathUnitQueueItem[PathManager.MAX_PATHUNIT_COUNT];
 
 			var stockPathFinds = GetComponents<PathFind>();
@@ -136,9 +135,10 @@ namespace TrafficManager.Custom.PathFinding {
 			if (this.m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
 				return;
 			}
-			Monitor.Enter(m_bufferLock);
 			try {
-				int num = 0;
+				Monitor.Enter(m_bufferLock);
+
+				int numIters = 0;
 				while (unit != 0u) {
 					if (this.m_pathUnits.m_buffer[unit].m_referenceCount > 1) {
 						--this.m_pathUnits.m_buffer[unit].m_referenceCount;
@@ -155,9 +155,9 @@ namespace TrafficManager.Custom.PathFinding {
 					this.m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
 					this.m_pathUnits.m_buffer[unit].m_referenceCount = 0;
 					this.m_pathUnits.ReleaseItem(unit);
-					ResetPathUnit(unit); // NON-STOCK CODE
+					//queueItems[unit].Reset(); // NON-STOCK CODE
 					unit = nextPathUnit;
-					if (++num >= 262144) {
+					if (++numIters >= 262144) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 						break;
 					}
@@ -187,18 +187,46 @@ namespace TrafficManager.Custom.PathFinding {
 			uint pathUnitId;
 			try {
 				Monitor.Enter(this.m_bufferLock);
-				if (!this.m_pathUnits.CreateItem(out pathUnitId, ref randomizer)) {
-					unit = 0u;
-					bool result = false;
-					return result;
+
+				int numIters = 0;
+				while (true) { // NON-STOCK CODE
+					++numIters;
+
+					if (!this.m_pathUnits.CreateItem(out pathUnitId, ref randomizer)) {
+						unit = 0u;
+						return false;
+					}
+
+					this.m_pathUnits.m_buffer[pathUnitId].m_simulationFlags = 1;
+					this.m_pathUnits.m_buffer[pathUnitId].m_referenceCount = 1;
+					this.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit = 0u;
+
+					// NON-STOCK CODE START
+					if (queueItems[pathUnitId].queued) {
+						ReleasePath(pathUnitId);
+
+						if (numIters > 10) {
+							unit = 0u;
+							return false;
+						}
+
+						continue;
+					}
+					break;
 				}
+
+				queueItems[pathUnitId].vehicleType = vehicleType;
+				queueItems[pathUnitId].vehicleId = vehicleId;
+				queueItems[pathUnitId].pathType = pathType;
+				queueItems[pathUnitId].queued = true;
+				// NON-STOCK CODE END
+
 				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
 			} finally {
 				Monitor.Exit(this.m_bufferLock);
 			}
 			unit = pathUnitId;
 
-			this.m_pathUnits.m_buffer[unit].m_simulationFlags = 1;
 			if (isHeavyVehicle) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
 			}
@@ -218,12 +246,10 @@ namespace TrafficManager.Custom.PathFinding {
 			this.m_pathUnits.m_buffer[unit].m_position02 = startPosB;
 			this.m_pathUnits.m_buffer[unit].m_position03 = endPosB;
 			this.m_pathUnits.m_buffer[unit].m_position11 = vehiclePosition;
-			this.m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
 			this.m_pathUnits.m_buffer[unit].m_laneTypes = (byte)laneTypes;
 			this.m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)vehicleTypes;
 			this.m_pathUnits.m_buffer[unit].m_length = maxLength;
 			this.m_pathUnits.m_buffer[unit].m_positionCount = 20;
-			this.m_pathUnits.m_buffer[unit].m_referenceCount = 1;
 			int minQueued = 10000000;
 			CustomPathFind pathFind = null;
 #if QUEUEDSTATS
@@ -251,14 +277,25 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			}
 
-			queueItems[unit].vehicleType = vehicleType;
-			queueItems[unit].vehicleId = vehicleId;
-			queueItems[unit].pathType = pathType;
-
 			if (pathFind != null && pathFind.ExtCalculatePath(unit, skipQueue)) {
 				return true;
 			}
-			this.ReleasePath(unit);
+
+
+			// NON-STOCK CODE START
+			try {
+				Monitor.Enter(this.m_bufferLock);
+				
+				queueItems[pathUnitId].queued = false;
+				// NON-STOCK CODE END
+				this.ReleasePath(unit);
+
+				// NON-STOCK CODE START
+				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
+			} finally {
+				Monitor.Exit(this.m_bufferLock);
+			}
+			// NON-STOCK CODE END
 			return false;
 		}
 
@@ -397,9 +434,9 @@ namespace TrafficManager.Custom.PathFinding {
 			return pathPosA.m_segment != 0;
 		}
 
-		internal void ResetPathUnit(uint unit) {
+		/*internal void ResetQueueItem(uint unit) {
 			queueItems[unit].Reset();
-		}
+		}*/
 
 		private void StopPathFinds() {
 			foreach (CustomPathFind pathFind in _replacementPathFinds) {

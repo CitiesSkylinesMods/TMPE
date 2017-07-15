@@ -101,7 +101,7 @@ namespace TrafficManager.Custom.AI {
 				endPosFound = true;
 			}
 			if (startPosFound && endPosFound) {
-				CustomPathManager instance = CustomPathManager._instance;
+				CustomPathManager pathMan = CustomPathManager._instance;
 				if (!startBothWays || startDistSqrA < 10f) {
 					startPosB = default(PathUnit.Position);
 				}
@@ -111,9 +111,9 @@ namespace TrafficManager.Custom.AI {
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (instance.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
+				if (pathMan.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
 					if (vehicleData.m_path != 0u) {
-						instance.ReleasePath(vehicleData.m_path);
+						pathMan.ReleasePath(vehicleData.m_path);
 					}
 					vehicleData.m_path = path;
 					vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
