@@ -23,7 +23,7 @@ namespace TrafficManager.Manager {
 
 		protected void UnsubscribeFromSegmentGeometry(ushort segmentId) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}) called.");
 #endif
 			try {
@@ -35,7 +35,7 @@ namespace TrafficManager.Manager {
 					segGeometryUnsubscribers.Remove(segmentId);
 				}
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 			} finally {
@@ -45,7 +45,7 @@ namespace TrafficManager.Manager {
 
 		protected void UnsubscribeFromAllSegmentGeometries() {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromAllSegmentGeometries() called.");
 #endif
 			List<ushort> segmentIds = new List<ushort>(segGeometryUnsubscribers.Keys);
@@ -55,7 +55,7 @@ namespace TrafficManager.Manager {
 
 		protected void SubscribeToSegmentGeometry(ushort segmentId) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}) called.");
 #endif
 			try {
@@ -67,7 +67,7 @@ namespace TrafficManager.Manager {
 						segGeometryUnsubscribers.Add(segmentId, geo.Subscribe(this));
 					} else {
 #if DEBUGGEO
-						if (GlobalConfig.Instance.DebugSwitches[5])
+						if (GlobalConfig.Instance.Debug.Switches[5])
 							Log.Warning($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}): geometry is null.");
 #endif
 					}
@@ -77,7 +77,7 @@ namespace TrafficManager.Manager {
 			}
 
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 		}
@@ -93,7 +93,7 @@ namespace TrafficManager.Manager {
 		public void OnUpdate(SegmentGeometry geometry) {
 			if (!geometry.IsValid()) {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
 #endif
 				HandleInvalidSegment(geometry);
@@ -102,7 +102,7 @@ namespace TrafficManager.Manager {
 				}
 			} else {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
 #endif
 				HandleValidSegment(geometry);
@@ -111,7 +111,7 @@ namespace TrafficManager.Manager {
 
 		~AbstractSegmentGeometryObservingManager() {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"~AbstractSegmentGeometryObservingManager() called.");
 #endif
 			UnsubscribeFromAllSegmentGeometries();

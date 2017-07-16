@@ -316,7 +316,7 @@ namespace TrafficManager.Manager.Impl {
 
 					timedNode.Housekeeping();
 					if (cnfTimedLights.started)
-						timedNode.Start();
+						timedNode.Start(cnfTimedLights.currentStep);
 				} catch (Exception e) {
 					Log.Warning($"Error starting timed light @ {cnfTimedLights.nodeId}: " + e.ToString());
 					success = false;
@@ -328,9 +328,9 @@ namespace TrafficManager.Manager.Impl {
 
 		public List<Configuration.TimedTrafficLights> SaveData(ref bool success) {
 			List<Configuration.TimedTrafficLights> ret = new List<Configuration.TimedTrafficLights>();
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				try {
-					ITrafficLightSimulation sim = GetNodeSimulation(nodeId);
+					ITrafficLightSimulation sim = GetNodeSimulation((ushort)nodeId);
 					if (sim == null || !sim.IsTimedLight()) {
 						continue;
 					}
@@ -346,6 +346,7 @@ namespace TrafficManager.Manager.Impl {
 					cnfTimedLights.nodeId = timedNode.NodeId;
 					cnfTimedLights.nodeGroup = new List<ushort>(timedNode.NodeGroup);
 					cnfTimedLights.started = timedNode.IsStarted();
+					cnfTimedLights.currentStep = timedNode.CurrentStep;
 					cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
 					for (var j = 0; j < timedNode.NumSteps(); j++) {

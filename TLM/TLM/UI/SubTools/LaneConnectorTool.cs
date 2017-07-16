@@ -79,8 +79,8 @@ namespace TrafficManager.UI.SubTools {
 			//Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
 			Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+			for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
 					continue;
 				}
 
@@ -97,10 +97,10 @@ namespace TrafficManager.UI.SubTools {
 					continue; // do not draw if too distant
 
 				List<NodeLaneMarker> nodeMarkers;
-				bool hasMarkers = currentNodeMarkers.TryGetValue(nodeId, out nodeMarkers);
+				bool hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
 
 				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
-					MainTool.DrawNodeCircle(cameraInfo, nodeId, DefaultNodeMarkerColor, true);
+					MainTool.DrawNodeCircle(cameraInfo, (ushort)nodeId, DefaultNodeMarkerColor, true);
 				}
 
 				if (hasMarkers) {

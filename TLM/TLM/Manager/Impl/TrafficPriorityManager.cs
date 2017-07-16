@@ -259,7 +259,7 @@ namespace TrafficManager.Manager.Impl {
 			ushort transitNodeId = end.NodeId;*/
 
 #if DEBUG
-			bool debug = GlobalConfig.Instance.DebugSwitches[13] && (GlobalConfig.Instance.DebugNodeId <= 0 || transitNodeId == GlobalConfig.Instance.DebugNodeId);
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || transitNodeId == GlobalConfig.Instance.Debug.NodeId);
 			if (debug) {
 				Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): Checking vehicle {vehicleId} at node {transitNodeId}. Coming from seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
 			}
@@ -467,7 +467,7 @@ namespace TrafficManager.Manager.Impl {
 					if (Options.simAccuracy <= 1 &&
 						!Single.IsInfinity(targetTimeToTransitNode) &&
 						!Single.IsNaN(targetTimeToTransitNode) &&
-						incomingToNode.sqrMagnitude > GlobalConfig.Instance.MaxPriorityCheckSqrDist
+						incomingToNode.sqrMagnitude > GlobalConfig.Instance.PriorityRules.MaxPriorityCheckSqrDist
 					) {
 
 						// check speeds
@@ -481,7 +481,7 @@ namespace TrafficManager.Manager.Impl {
 							incomingTimeToTransitNode = Single.PositiveInfinity;
 
 						float timeDiff = Mathf.Abs(incomingTimeToTransitNode - targetTimeToTransitNode);
-						if (timeDiff > GlobalConfig.Instance.MaxPriorityApproachTime) {
+						if (timeDiff > GlobalConfig.Instance.PriorityRules.MaxPriorityApproachTime) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming {incomingVehicleId} needs {incomingTimeToTransitNode} time units to get to the node where target needs {targetTimeToTransitNode} time units (diff = {timeDiff}). Difference to large. *IGNORING*");
@@ -1063,32 +1063,32 @@ namespace TrafficManager.Manager.Impl {
 
 		List<Configuration.PrioritySegment> ICustomDataManager<List<Configuration.PrioritySegment>>.SaveData(ref bool success) {
 			List<Configuration.PrioritySegment> ret = new List<Configuration.PrioritySegment>();
-			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
 				try {
-					if (! Services.NetService.IsSegmentValid(segmentId) || ! HasSegmentPrioritySign(segmentId)) {
+					if (! Services.NetService.IsSegmentValid((ushort)segmentId) || ! HasSegmentPrioritySign((ushort)segmentId)) {
 						continue;
 					}
-					SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+					SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
 					if (segGeo == null) {
 						Log.Error($"TrafficPriorityManager.SaveData: No geometry information available for segment {segmentId}");
 						continue;
 					}
 
-					PriorityType startSign = GetPrioritySign(segmentId, true);
+					PriorityType startSign = GetPrioritySign((ushort)segmentId, true);
 					if (startSign != PriorityType.None) {
 						ushort startNodeId = segGeo.StartNodeId();
 						if (Services.NetService.IsNodeValid(startNodeId)) {
 							Log._Debug($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
-							ret.Add(new Configuration.PrioritySegment(segmentId, startNodeId, (int)startSign));
+							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, startNodeId, (int)startSign));
 						}
 					}
 
-					PriorityType endSign = GetPrioritySign(segmentId, false);
+					PriorityType endSign = GetPrioritySign((ushort)segmentId, false);
 					if (endSign != PriorityType.None) {
 						ushort endNodeId = segGeo.EndNodeId();
 						if (Services.NetService.IsNodeValid(endNodeId)) {
 							Log._Debug($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
-							ret.Add(new Configuration.PrioritySegment(segmentId, endNodeId, (int)endSign));
+							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, endNodeId, (int)endSign));
 						}
 					}
 				} catch (Exception e) {

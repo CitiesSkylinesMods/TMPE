@@ -34,7 +34,7 @@ namespace TrafficManager.Manager {
 		/// <param name="next3PathPos">3rd next path position</param>
 		/// <param name="next4PathPos">4th next path position</param>
 		/// <returns>target position lane index</returns>
-		int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, PathUnit.Position next3PathPos, PathUnit.Position next4PathPos);
+		int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos);
 
 		/// <summary>
 		/// Determines if the given vehicle is allowed to find an alternative lane.

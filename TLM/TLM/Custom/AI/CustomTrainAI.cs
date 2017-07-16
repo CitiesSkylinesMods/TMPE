@@ -581,7 +581,7 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomCheckNextLane(ushort vehicleId, ref Vehicle vehicleData, ref float maxSpeed, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, Bezier3 bezier) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.DebugSwitches[13];
+			bool debug = GlobalConfig.Instance.Debug.Switches[13];
 #endif
 
 			NetManager netManager = Singleton<NetManager>.instance;

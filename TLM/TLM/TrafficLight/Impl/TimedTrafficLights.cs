@@ -291,7 +291,15 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void Start() {
+			Start(0);
+		}
+
+		public void Start(int stepIndex) {
 			// TODO currently, this method must be called for each node in the node group individually
+
+			if (stepIndex < 0 || stepIndex >= Steps.Count) {
+				stepIndex = 0;
+			}
 
 			/*if (!housekeeping())
 				return;*/
@@ -309,9 +317,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			CheckInvalidPedestrianLights();
 
-			CurrentStep = 0;
-			Steps[0].Start();
-			Steps[0].UpdateLiveLights();
+			CurrentStep = stepIndex;
+			Steps[stepIndex].Start();
+			Steps[stepIndex].UpdateLiveLights();
 
 			started = true;
 		}
@@ -469,7 +477,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			// TODO this method is currently called on each node, but should be called on the master node only
 
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
 			if (!IsMasterNode() || !IsStarted()) {
@@ -763,7 +771,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		/// </summary>
 		private void BackUpInvalidStepSegments(NodeGeometry nodeGeo) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
 			if (debug)
 				Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: called for timed traffic light @ {NodeId}");
@@ -821,7 +829,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		/// <param name="nodeGeo"></param>
 		private void HandleNewSegments(NodeGeometry nodeGeo) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
 			ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
@@ -904,7 +912,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void ChangeLightMode(ushort segmentId, ExtVehicleType vehicleType, LightMode mode) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
@@ -1016,7 +1024,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		private void UpdateSegmentEnds() {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
 			if (debug)
 				Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: called for node {NodeId}");
@@ -1105,7 +1113,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		private void DestroySegmentEnds() {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
 			if (debug)
 				Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment ends @ node {NodeId}");

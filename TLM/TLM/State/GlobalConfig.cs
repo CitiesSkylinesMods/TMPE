@@ -10,6 +10,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using TrafficManager.Manager;
+using TrafficManager.State.ConfigData;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 
@@ -43,19 +44,6 @@ namespace TrafficManager.State {
 #endif
 		}
 
-		//public static GlobalConfig Instance() {
-		//#if DEBUG
-		//			uint curDebugFrame = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 10;
-		//			if (lastModificationCheckFrame == 0) {
-		//				lastModificationCheckFrame = curDebugFrame;
-		//			} else if (lastModificationCheckFrame < curDebugFrame) {
-		//				lastModificationCheckFrame = curDebugFrame;
-		//				ReloadIfNewer();
-		//			}
-		//#endif
-		//return Instance;
-		//}
-
 		private static DateTime ModifiedTime = DateTime.MinValue;
 
 		/// <summary>
@@ -63,324 +51,26 @@ namespace TrafficManager.State {
 		/// </summary>
 		public int Version = LATEST_VERSION;
 
-#if DEBUG
-		public bool[] DebugSwitches = {
-			false, // 0: path-find debug log
-			false, // 1: path-find costs debug log
-			false, // 2: parking ai debug log (basic)
-			false, // 3: do not actually repair stuck vehicles/cims, just report
-			false, // 4: parking ai debug log (extended)
-			false, // 5: geometry debug log
-			false, // 6: debug parking AI distance issue
-			false, // 7: debug TTL
-			false, // 8: debug routing
-			false, // 9: debug vehicle to segment end linking
-			false, // 10: prevent routing recalculation on global configuration reload
-			false, // 11: disable custom routing
-			false, // 12: pedestrian path-find debug log
-			false, // 13: priority rules debug
-			false, // 14: disable GUI overlay of citizens having a valid path
-			false, // 15: disable checking of other vehicles for trams
-			false, // 16: debug TramBaseAI.SimulationStep (2)
-			false, // 17: debug alternative lane selection
-			false, // 18: -unused-
-			false  // 19: enable obligation to drive on the right hand side of the road
-		};
-
-		public int DebugNodeId = 0;
-		public int DebugStartSegmentId = 0;
-		public int DebugEndSegmentId = 0;
-		public int DebugVehicleId = 0;
-		public ExtVehicleType DebugExtVehicleType = ExtVehicleType.None;
-#endif
-
 		/// <summary>
 		/// Language to use (if null then the game's language is being used)
 		/// </summary>
 		public string LanguageCode = null;
 
-		/// <summary>
-		/// TTL wait/flow calculation mode
-		/// </summary>
-		public FlowWaitCalcMode TTLFlowWaitCalcMode = FlowWaitCalcMode.Mean;
+#if DEBUG
+		public Debug Debug = new Debug();
+#endif
 
-		/// <summary>
-		/// Default TTL flow-to-wait ratio
-		/// </summary>
-		public float DefaultTTLFlowToWaitRatio = 0.8f;
+		public AdvancedVehicleAI AdvancedVehicleAI = new AdvancedVehicleAI();
 
-		/// <summary>
-		/// TTL smoothing factor for flowing/waiting vehicles
-		/// </summary>
-		public float TTLSmoothingFactor = 0.1f;
+		public DynamicLaneSelection DynamicLaneSelection = new DynamicLaneSelection();
 
-		/// <summary>
-		/// base lane changing cost factor on highways
-		/// </summary>
-		public float HighwayLaneChangingBaseCost = 1.1f;
+		public ParkingAI ParkingAI = new ParkingAI();
 
-		/// <summary>
-		/// base lane changing cost factor on city streets
-		/// </summary>
-		public float LaneChangingBaseCost = 1.5f;
+		public PathFinding PathFinding = new PathFinding();
 
-		/// <summary>
-		/// congestion lane changing base cost
-		/// </summary>
-		public float CongestionLaneChangingCostFactor = 1f;
+		public PriorityRules PriorityRules = new PriorityRules();
 
-		/// <summary>
-		/// heavy vehicle lane changing cost factor
-		/// </summary>
-		public float HeavyVehicleLaneChangingCostFactor = 1.5f;
-
-		/// <summary>
-		/// > 1 lane changing cost factor
-		/// </summary>
-		public float MoreThanOneLaneChangingCostFactor = 2f;
-
-		/// <summary>
-		/// Lane changing base costs in front of highway junctions
-		/// </summary>
-		public float HighwayInterchangeLaneChangingBaseCost = 1.25f;
-
-		/// <summary>
-		/// Relative factor for lane speed cost calculation
-		/// </summary>
-		public float UsageCostFactor = 1f;
-
-		/// <summary>
-		/// Relative factor for lane traffic cost calculation
-		/// </summary>
-		public float TrafficCostFactor = 4f;
-
-		/// <summary>
-		/// lane changing cost reduction modulo. vehicles hitting zero want to change lanes
-		/// </summary>
-		public uint RandomizedLaneChangingModulo = 5;
-
-		/// <summary>
-		/// artifical lane distance for u-turns
-		/// </summary>
-		public int UturnPenalty = 2;
-
-		/// <summary>
-		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
-		/// </summary>
-		public byte IncompatibleLaneDistance = 1;
-
-		/// <summary>
-		/// lane density random interval
-		/// </summary>
-		public float LaneDensityRandInterval = 50f;
-
-		/// <summary>
-		/// lane usage random interval
-		/// </summary>
-		//public float LaneUsageRandInterval = 25f;
-
-		/// <summary>
-		/// lane usage random interval
-		/// </summary>
-		public uint MinHighwayInterchangeSegments = 3;
-
-		/// <summary>
-		/// lane usage random interval
-		/// </summary>
-		public uint MaxHighwayInterchangeSegments = 15;
-
-		/// <summary>
-		/// Threshold for reducing traffic buffer
-		/// </summary>
-		public uint MaxTrafficBuffer = 500;
-
-		/// <summary>
-		/// Threshold for reducing path-find traffic buffer
-		/// </summary>
-		public uint MaxPathFindTrafficBuffer = 5000;
-
-		/// <summary>
-		/// Threshold for restart segment direction congestion measurements
-		/// </summary>
-		public byte MaxNumCongestionMeasurements = 100;
-
-		/// <summary>
-		/// penalty for busses not driving on bus lanes
-		/// </summary>
-		public float PublicTransportLanePenalty = 10f;
-
-		/// <summary>
-		/// reward for public transport staying on transport lane
-		/// </summary>
-		public float PublicTransportLaneReward = 0.1f;
-
-		/// <summary>
-		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
-		/// </summary>
-		public float HeavyVehicleMaxInnerLanePenalty = 1f;
-
-		/// <summary>
-		/// Path cost multiplier for vehicle restrictions
-		/// </summary>
-		public float VehicleRestrictionsPenalty = 100f;
-
-		/// <summary>
-		/// Maximum walking distance
-		/// </summary>
-		public float MaxWalkingDistance = 1000f;
-
-		/// <summary>
-		/// Randomized vehicle selection modulo for alternative lane selection
-		/// </summary>
-		public int AltLaneSelectionVehicleRand = 70;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public float AltLaneSelectionMaxReservedSpace = 1f;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public float AltLaneSelectionMaxRecklessReservedSpace = 10f;
-
-		public float AltLaneSelectionMostOuterLaneSpeedFactor = 0.75f;
-
-		public float AltLaneSelectionMostInnerLaneSpeedFactor = 1.25f;
-
-		public float AltLaneSelectionLaneSpeedRandInterval = 10f;
-
-		public int AltLaneSelectionMaxOptLaneChanges = 1;
-
-		/// <summary>
-		/// Maximum allowed speed difference on safe lane changes
-		/// </summary>
-		public float AltLaneSelectionMaxUnsafeSpeedDiff = 0.5f;
-
-		public float AltLaneSelectionMinSafeSpeedImprovement = 10f;
-
-		public float AltLaneSelectionMinSafeTrafficImprovement = 10f;
-
-		public float AltLaneSelectionStayFactor = 0.9f;
-
-		/// <summary>
-		/// Target position randomization to allow opposite road-side parking
-		/// </summary>
-		public uint ParkingSpacePositionRand = 32;
-
-		/// <summary>
-		/// parking space search in vicinity is randomized. Cims do not always select the nearest parking space possible.
-		/// A value of 1u always selects the nearest parking space.
-		/// A value of 2u selects the nearest parking space with 50% chance, the next one with 25%, then 12.5% and so on.
-		/// A value of 4u selects the nearest parking space with 75% chance, the next one with 18.75%, then 4.6875% and so on.
-		/// A value of N selects the nearest parking space with (N-1)/N chance, the next one with (1-(N-1)/N)*(N-1)/N, then (1-(N-1)/N)^2*(N-1)/N and so on.
-		/// </summary>
-		public uint VicinityParkingSpaceSelectionRand = 4u;
-
-		/// <summary>
-		/// maximum number of parking attempts for passenger cars
-		/// </summary>
-		public int MaxParkingAttempts = 10;
-
-		/// <summary>
-		/// maximum required squared distance between citizen instance and parked vehicle before the parked car is turned into a vehicle
-		/// </summary>
-		public float MaxParkedCarInstanceSwitchSqrDistance = 6f;
-
-		/// <summary>
-		/// maximum distance between building and pedestrian lane
-		/// </summary>
-		public float MaxBuildingToPedestrianLaneDistance = 96f;
-
-		/// <summary>
-		/// Maximum allowed distance between home and parked car when travelling home without forced to use the car
-		/// </summary>
-		public float MaxParkedCarDistanceToHome = 256f;
-
-		/// <summary>
-		/// minimum required distance between target building and parked car for using a car
-		/// </summary>
-		public float MaxParkedCarDistanceToBuilding = 512f;
-
-		/// <summary>
-		/// maximum incoming vehicle square distance to junction for priority signs
-		/// </summary>
-		public float MaxPriorityCheckSqrDist = 225f;
-
-		/// <summary>
-		/// maximum junction approach time for priority signs
-		/// </summary>
-		public float MaxPriorityApproachTime = 15f;
-
-		/// <summary>
-		/// maximum waiting time at priority signs
-		/// </summary>
-		public uint MaxPriorityWaitTime = 100;
-
-		/// <summary>
-		/// Frame resolution for priority update timestamps
-		/// </summary>
-		public int VehicleStateUpdateShift = 6;
-
-		/// <summary>
-		/// average speed (in %) threshold for a segment to be flagged as congested
-		/// </summary>
-		public uint CongestionSpeedThreshold = 70;
-
-		/// <summary>
-		/// public transport demand increment on path-find failure
-		/// </summary>
-		public uint PublicTransportDemandIncrement = 10u;
-
-		/// <summary>
-		/// public transport demand increment if waiting time was exceeded
-		/// </summary>
-		public uint PublicTransportDemandWaitingIncrement = 3u;
-
-		/// <summary>
-		/// public transport demand decrement on simulation step
-		/// </summary>
-		public uint PublicTransportDemandDecrement = 1u;
-
-		/// <summary>
-		/// public transport demand decrement on path-find success
-		/// </summary>
-		public uint PublicTransportDemandUsageDecrement = 7u;
-
-		/// <summary>
-		/// parking space demand decrement on simulation step
-		/// </summary>
-		public uint ParkingSpaceDemandDecrement = 1u;
-
-		/// <summary>
-		/// minimum parking space demand delta when a passenger car could be spawned
-		/// </summary>
-		public int MinSpawnedCarParkingSpaceDemandDelta = -5;
-
-		/// <summary>
-		/// maximum parking space demand delta when a passenger car could be spawned
-		/// </summary>
-		public int MaxSpawnedCarParkingSpaceDemandDelta = 3;
-
-		/// <summary>
-		/// minimum parking space demand delta when a parking spot could be found
-		/// </summary>
-		public int MinFoundParkPosParkingSpaceDemandDelta = -5;
-
-		/// <summary>
-		/// maximum parking space demand delta when a parking spot could be found
-		/// </summary>
-		public int MaxFoundParkPosParkingSpaceDemandDelta = 3;
-
-		/// <summary>
-		/// parking space demand increment when no parking spot could be found while trying to park
-		/// </summary>
-		public uint FailedParkingSpaceDemandIncrement = 5u;
-
-		/// <summary>
-		/// parking space demand increment when no parking spot could be found while trying to spawn a parked vehicle
-		/// </summary>
-		public uint FailedSpawnParkingSpaceDemandIncrement = 10u;
+		public TimedTrafficLights TimedTrafficLights = new TimedTrafficLights();
 
 		/// <summary>
 		/// Main menu button position
@@ -447,11 +137,42 @@ namespace TrafficManager.State {
 					GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
 					if (LoadingExtension.IsGameLoaded
 #if DEBUG
-						&& !conf.DebugSwitches[10]
+						&& !conf.Debug.Switches[10]
 #endif
 						) {
 						Constants.ManagerFactory.RoutingManager.RequestFullRecalculation(true);
 					}
+
+#if DEBUG
+					if (conf.Debug == null) {
+						conf.Debug = new Debug();
+					}
+#endif
+
+					if (conf.AdvancedVehicleAI == null) {
+						conf.AdvancedVehicleAI = new AdvancedVehicleAI();
+					}
+
+					if (conf.DynamicLaneSelection == null) {
+						conf.DynamicLaneSelection = new DynamicLaneSelection();
+					}
+
+					if (conf.ParkingAI == null) {
+						conf.ParkingAI = new ParkingAI();
+					}
+
+					if (conf.PathFinding == null) {
+						conf.PathFinding = new PathFinding();
+					}
+
+					if (conf.PriorityRules == null) {
+						conf.PriorityRules = new PriorityRules();
+					}
+
+					if (conf.TimedTrafficLights == null) {
+						conf.TimedTrafficLights = new TimedTrafficLights();
+					}
+
 					return conf;
 				}
 			} catch (Exception e) {

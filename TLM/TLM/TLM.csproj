@@ -133,6 +133,13 @@
     <Compile Include="Manager\IVehicleBehaviorManager.cs" />
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
+    <Compile Include="State\ConfigData\Debug.cs" />
+    <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
+    <Compile Include="State\ConfigData\ParkingAI.cs" />
+    <Compile Include="State\ConfigData\PathFinding.cs" />
+    <Compile Include="State\ConfigData\PriorityRules.cs" />
+    <Compile Include="State\ConfigData\TimedTrafficLights.cs" />
+    <Compile Include="State\ConfigData\AdvancedVehicleAI.cs" />
     <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\FlowWaitCalcMode.cs" />
     <Compile Include="TrafficLight\ICustomSegmentLight.cs" />

@@ -2441,7 +2441,7 @@ namespace TrafficManager {
 		}
 
 		/*private void FixNonCreatedNodeProblems() {
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+			for (int nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
 				if ((NetManager.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
 					NetManager.instance.m_nodes.m_buffer[nodeId].m_problems = Notification.Problem.None;
 					NetManager.instance.m_nodes.m_buffer[nodeId].m_flags = NetNode.Flags.None;

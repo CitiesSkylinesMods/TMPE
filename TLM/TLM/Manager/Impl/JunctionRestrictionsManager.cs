@@ -203,16 +203,16 @@ namespace TrafficManager.Manager.Impl {
 			List<Configuration.SegmentNodeConf> ret = new List<Configuration.SegmentNodeConf>();
 
 			NetManager netManager = Singleton<NetManager>.instance;
-			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
 				try {
-					if (!Services.NetService.IsSegmentValid(segmentId))
+					if (!Services.NetService.IsSegmentValid((ushort)segmentId))
 						continue;
 
 					ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
 					ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
 
-					Configuration.SegmentNodeFlags startNodeFlags = Services.NetService.IsNodeValid(startNodeId) ? Flags.getSegmentNodeFlags(segmentId, true) : null;
-					Configuration.SegmentNodeFlags endNodeFlags = Services.NetService.IsNodeValid(endNodeId) ? Flags.getSegmentNodeFlags(segmentId, false) : null;
+					Configuration.SegmentNodeFlags startNodeFlags = Services.NetService.IsNodeValid(startNodeId) ? Flags.getSegmentNodeFlags((ushort)segmentId, true) : null;
+					Configuration.SegmentNodeFlags endNodeFlags = Services.NetService.IsNodeValid(endNodeId) ? Flags.getSegmentNodeFlags((ushort)segmentId, false) : null;
 
 					if (startNodeFlags == null && endNodeFlags == null)
 						continue;
@@ -231,7 +231,7 @@ namespace TrafficManager.Manager.Impl {
 					if (isDefaultConfiguration)
 						continue;
 
-					Configuration.SegmentNodeConf conf = new Configuration.SegmentNodeConf(segmentId);
+					Configuration.SegmentNodeConf conf = new Configuration.SegmentNodeConf((ushort)segmentId);
 
 					conf.startNodeFlags = startNodeFlags;
 					conf.endNodeFlags = endNodeFlags;

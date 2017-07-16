@@ -97,7 +97,7 @@ namespace TrafficManager.Geometry.Impl {
 		
 		internal void AddSegmentEnd(SegmentEndGeometry segEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Add segment end {segEndGeo.SegmentId}, start? {segEndGeo.StartNode} @ node {NodeId}");
 #endif
 			if (!IsValid()) {
@@ -135,7 +135,7 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal void RemoveSegmentEnd(SegmentEndGeometry segmentEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Remove segment end {segmentEndGeo.SegmentId} @ {NodeId}, calcMode? {calcMode}");
 #endif
 
@@ -168,7 +168,7 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal void RecalculateSegments(ushort? ignoreSegmentId= null) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"NodeGeometry: Propagate @ {NodeId}. ignoreSegmentId={ignoreSegmentId}");
 #endif
 
@@ -179,7 +179,7 @@ namespace TrafficManager.Geometry.Impl {
 				if (ignoreSegmentId != null && SegmentEndGeometries[i].SegmentId == ignoreSegmentId)
 					continue;
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
 				SegmentEndGeometries[i].GetSegmentGeometry(true).StartRecalculation(GeometryCalculationMode.NoPropagate);
@@ -188,7 +188,7 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal void Recalculate() {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Recalculate @ {NodeId}");
 #endif
 
@@ -207,7 +207,7 @@ namespace TrafficManager.Geometry.Impl {
 						continue;
 					++NumSegmentEnds;
 #if DEBUGGEO
-					if (GlobalConfig.Instance.DebugSwitches[5])
+					if (GlobalConfig.Instance.Debug.Switches[5])
 						Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");
 #endif
 
@@ -220,7 +220,7 @@ namespace TrafficManager.Geometry.Impl {
 
 				IsSimpleJunction = incomingSegments == 1 || outgoingSegments == 1;
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
 #endif
 				NotifyObservers();
@@ -276,8 +276,8 @@ namespace TrafficManager.Geometry.Impl {
 #if DEBUGGEO
 			Log._Debug($"Building {nodeGeometries.Length} node geometries...");
 #endif
-			for (ushort i = 0; i < nodeGeometries.Length; ++i) {
-				nodeGeometries[i] = new NodeGeometry(i);
+			for (int i = 0; i < nodeGeometries.Length; ++i) {
+				nodeGeometries[i] = new NodeGeometry((ushort)i);
 			}
 #if DEBUGGEO
 			Log._Debug($"Built node geometries.");

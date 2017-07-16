@@ -66,9 +66,9 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void ModifyParkingSpaceDemand(Vector3 parkPos, int minDelta=-10, int maxDelta=10) {
 			Vector3 buildingPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId].m_position;
-			float distance = Mathf.Clamp((parkPos - buildingPos).magnitude, 0f, GlobalConfig.Instance.MaxParkedCarDistanceToBuilding);
+			float distance = Mathf.Clamp((parkPos - buildingPos).magnitude, 0f, GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding);
 
-			float delta = (float)(maxDelta - minDelta) * (distance / GlobalConfig.Instance.MaxParkedCarDistanceToBuilding) + (float)minDelta;
+			float delta = (float)(maxDelta - minDelta) * (distance / GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding) + (float)minDelta;
 			parkingSpaceDemand = (byte)Mathf.Clamp((int)parkingSpaceDemand + (int)Mathf.Round(delta), 0, 100);
 			RequestColorUpdate();
 		}

@@ -31,9 +31,9 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		internal void ExtSimulationStep(ushort buildingID, ref Building data, ref ExtBuilding extBuilding) {
-			extBuilding.RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingSpaceDemandDecrement);
-			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, true);
-			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, false);
+			extBuilding.RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingAI.ParkingSpaceDemandDecrement);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, true);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, false);
 		}
 	}
 }

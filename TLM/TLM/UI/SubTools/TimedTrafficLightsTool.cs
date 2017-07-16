@@ -32,7 +32,7 @@ namespace TrafficManager.UI.SubTools {
 		private int _stepMinValue = 1;
 		private int _stepMaxValue = 1;
 		private StepChangeMetric _stepMetric = StepChangeMetric.Default;
-		private float _waitFlowBalance = GlobalConfig.Instance.DefaultTTLFlowToWaitRatio;
+		private float _waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 		private string _stepMinValueStr = "1";
 		private string _stepMaxValueStr = "1";
 		private bool timedLightActive = false;
@@ -479,7 +479,7 @@ namespace TrafficManager.UI.SubTools {
 								if (_stepMaxValue < _stepMinValue)
 									_stepMaxValue = _stepMinValue;
 								if (_waitFlowBalance <= 0)
-									_waitFlowBalance = GlobalConfig.Instance.DefaultTTLFlowToWaitRatio;
+									_waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 
 								sim.TimedLight.GetStep(_timedEditStep).MinTime = _stepMinValue;
 								sim.TimedLight.GetStep(_timedEditStep).MaxTime = _stepMaxValue;
@@ -869,7 +869,7 @@ namespace TrafficManager.UI.SubTools {
 				}
 				if (!GUILayout.Button(Translation.GetString("Setup_timed_traffic_light"))) return;
 
-				_waitFlowBalance = GlobalConfig.Instance.DefaultTTLFlowToWaitRatio;
+				_waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 				foreach (var nodeId in SelectedNodeIds) {
 					tlsMan.AddNodeToSimulation(nodeId);
 					var nodeSimulation = tlsMan.GetNodeSimulation(nodeId);

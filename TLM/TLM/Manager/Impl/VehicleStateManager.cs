@@ -81,14 +81,14 @@ namespace TrafficManager.Manager.Impl {
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnCreateVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}");
 #endif
 				return;
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.OnCreateVehicle({vehicleId}): calling OnCreate for vehicle {vehicleId}");
 #endif
 
@@ -99,7 +99,7 @@ namespace TrafficManager.Manager.Impl {
 			if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
 				(vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnStartPathFind({vehicleId}, {vehicleType}): unhandled vehicle! type: {vehicleData.Info.m_vehicleType}");
 #endif
 				return ExtVehicleType.None;
@@ -108,7 +108,7 @@ namespace TrafficManager.Manager.Impl {
 			/*ushort connectedVehicleId = vehicleId;
 			while (connectedVehicleId != 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnStartPathFind({vehicleId}, {vehicleType}): overriding vehicle type for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (leading)");
 #endif
 				VehicleStates[connectedVehicleId].vehicleType = type;
@@ -127,7 +127,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnStartPathFind({vehicleId}, {vehicleType}): overriding vehicle type for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (trailing)");
 #endif
 				VehicleStates[connectedVehicleId].OnStartPathFind(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], vehicleType);
@@ -140,13 +140,13 @@ namespace TrafficManager.Manager.Impl {
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) != (Vehicle.Flags.Created | Vehicle.Flags.Spawned) ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnSpawnVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}, path: {vehicleData.m_path}");
 #endif
 				return;
 			}
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.OnSpawnVehicle({vehicleId}): calling OnSpawn for vehicle {vehicleId}");
 #endif
 
@@ -181,7 +181,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state, float velocity) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({state.vehicleId}) called");
 #endif
 
@@ -206,7 +206,7 @@ namespace TrafficManager.Manager.Impl {
 			if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
 				(vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) == 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): unhandled vehicle! type: {vehicleData.Info.m_vehicleType}");
 #endif
 				return;
@@ -215,7 +215,7 @@ namespace TrafficManager.Manager.Impl {
 			ushort /*connectedVehicleId = vehicleId;
 			while (connectedVehicleId != 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): calling OnDespawn for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (leading)");
 #endif
 				VehicleStates[connectedVehicleId].OnDespawn();
@@ -226,7 +226,7 @@ namespace TrafficManager.Manager.Impl {
 			*/connectedVehicleId = vehicleId;
 			while (connectedVehicleId != 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnDespawnVehicle({vehicleId}): calling OnDespawn for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (trailing)");
 #endif
 				VehicleStates[connectedVehicleId].OnDespawn();
@@ -236,20 +236,20 @@ namespace TrafficManager.Manager.Impl {
 
 		internal void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");
 #endif
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}");
 #endif
 				return;
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}): calling OnRelease for vehicle {vehicleId}");
 #endif
 
@@ -261,23 +261,23 @@ namespace TrafficManager.Manager.Impl {
 			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
 				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-				for (ushort vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
-					Services.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
+				for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+					Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
 						if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
 							return true;
 						}
 
-						OnCreateVehicle(vehicleId, ref vehicle);
+						OnCreateVehicle(vId, ref vehicle);
 
 						if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
-							OnStartPathFind(vehicleId, ref vehicle, ExtVehicleType.Emergency);
+							OnStartPathFind(vId, ref vehicle, ExtVehicleType.Emergency);
 						}
 
 						if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
 							return true;
 						}
 
-						OnSpawnVehicle(vehicleId, ref vehicle);
+						OnSpawnVehicle(vId, ref vehicle);
 						
 						return true;
 					});

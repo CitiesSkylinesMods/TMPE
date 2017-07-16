@@ -194,7 +194,7 @@ namespace TrafficManager.Custom.AI {
 
 		public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.DebugSwitches[16] && GlobalConfig.Instance.DebugNodeId == vehicleID;
+			bool debug = GlobalConfig.Instance.Debug.Switches[16] && GlobalConfig.Instance.Debug.NodeId == vehicleID;
 #endif
 
 			ushort leadingVehicle = vehicleData.m_leadingVehicle;

@@ -177,4 +177,8 @@ flow_ratio flow ratio
 wait_ratio wait ratio
 After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
 Adaptive_step_switching Adaptive step switching
+Dynamic_lane_section Dynamic lane selection
+Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
+Vehicle_restrictions_aggression Vehicle restrictions aggression
+Strict Strict
 Show_path-find_stats Show path-find stats

@@ -21,7 +21,7 @@ namespace TrafficManager.Manager {
 
 		protected void UnsubscribeFromNodeGeometry(ushort nodeId) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromNodeGeometry({nodeId}) called.");
 #endif
 
@@ -34,7 +34,7 @@ namespace TrafficManager.Manager {
 					nodeGeometryUnsubscribers.Remove(nodeId);
 				}
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromNodeGeometry({nodeId}): watched nodes: {String.Join(",", nodeGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 			} finally {
@@ -44,7 +44,7 @@ namespace TrafficManager.Manager {
 
 		protected void UnsubscribeFromAllNodeGeometries() {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromAllNodeGeometries() called.");
 #endif
 
@@ -55,7 +55,7 @@ namespace TrafficManager.Manager {
 
 		protected void SubscribeToNodeGeometry(ushort nodeId) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractNodeGeometryObservingManager.SubscribeToNodeGeometry({nodeId}) called.");
 #endif
 
@@ -70,7 +70,7 @@ namespace TrafficManager.Manager {
 			}
 
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractNodeGeometryObservingManager.SubscribeToNodeGeometry({nodeId}): watched nodes: {String.Join(",", nodeGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 		}
@@ -85,14 +85,14 @@ namespace TrafficManager.Manager {
 		public void OnUpdate(NodeGeometry geometry) {
 			if (!geometry.IsValid()) {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"{this.GetType().Name}.HandleInvalidNode({geometry.NodeId})");
 #endif
 				HandleInvalidNode(geometry);
 				UnsubscribeFromNodeGeometry(geometry.NodeId);
 			} else {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"{this.GetType().Name}.HandleValidNode({geometry.NodeId})");
 #endif
 				HandleValidNode(geometry);
@@ -101,7 +101,7 @@ namespace TrafficManager.Manager {
 
 		~AbstractNodeGeometryObservingManager() {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"~AbstractNodeGeometryObservingManager() called.");
 #endif
 			UnsubscribeFromAllNodeGeometries();

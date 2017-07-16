@@ -306,7 +306,7 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal void Recalculate(GeometryCalculationMode calcMode) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> SegmentEndGeometry.Recalculate({calcMode}): seg. {SegmentId} @ node {NodeId()}");
 #endif
 
@@ -316,7 +316,7 @@ namespace TrafficManager.Geometry.Impl {
 			if (!IsValid()) {
 				if (calcMode == GeometryCalculationMode.Propagate && nodeIdBeforeRecalc != 0) {
 #if DEBUGGEO
-					if (GlobalConfig.Instance.DebugSwitches[5])
+					if (GlobalConfig.Instance.Debug.Switches[5])
 						Log._Debug($"SegmentEndGeometry.Recalculate({calcMode}): seg. {SegmentId} is not valid. nodeIdBeforeRecalc={nodeIdBeforeRecalc}. Removing segment from node.");
 #endif
 					NodeGeometry.Get(nodeIdBeforeRecalc).RemoveSegmentEnd(this, GeometryCalculationMode.Propagate);
@@ -339,7 +339,7 @@ namespace TrafficManager.Geometry.Impl {
 			}
 			OnlyHighways = true;
 #if DEBUGGEO
-			if (GlobalConfig.Instance.DebugSwitches[5])
+			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"Checking if segment {SegmentId} is connected to highways only at node {NodeId()}. OnlyHighways={OnlyHighways}");
 #endif
 
@@ -370,7 +370,7 @@ namespace TrafficManager.Geometry.Impl {
 				bool otherIsHighway = SegmentGeometry.calculateIsHighway(otherSegmentId);
 
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"Segment {SegmentId} is connected to segment {otherSegmentId} at node {NodeId()}. otherIsOneWay={otherIsOneWay} otherIsOutgoingOneWay={otherIsOutgoingOneWay} otherIsHighway={otherIsHighway}");
 #endif
 				if (! otherIsHighway || ! otherIsOneWay)
@@ -416,7 +416,7 @@ namespace TrafficManager.Geometry.Impl {
 
 			if (!hasOtherSegments) {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"Segment {SegmentId} is not connected to any other segments at node {NodeId()}.");
 #endif
 				OnlyHighways = false;

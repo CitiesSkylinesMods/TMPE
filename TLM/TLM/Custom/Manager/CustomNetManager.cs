@@ -39,7 +39,7 @@ namespace TrafficManager.Custom.Manager {
 			// NON-STOCK CODE START
 			try {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
 #endif
 				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
@@ -66,7 +66,7 @@ namespace TrafficManager.Custom.Manager {
 			// NON-STOCK CODE START
 			try {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
 #endif
 				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);

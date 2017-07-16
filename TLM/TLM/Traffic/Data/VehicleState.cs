@@ -14,6 +14,8 @@ using CSUtil.Commons;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
+		public const int STATE_UPDATE_SHIFT = 6;
+
 		[Flags]
 		public enum Flags {
 			None = 0,
@@ -139,7 +141,7 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void Unlink() {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.Unlink({vehicleId}) called: Unlinking vehicle from all segment ends\nstate:{this}");
 #endif
 
@@ -171,14 +173,14 @@ namespace TrafficManager.Traffic.Data {
 			lastPathPositionIndex = 0;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.Unlink({vehicleId}) finished: Unlinked vehicle from all segment ends\nstate:{this}");
 #endif
 		}
 
 		private void Link(ISegmentEnd end) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.Link({vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
 #endif
 
@@ -190,20 +192,20 @@ namespace TrafficManager.Traffic.Data {
 			end.FirstRegisteredVehicleId = vehicleId;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.Link({vehicleId}) finished: Linked vehicle to segment end {end}\nstate:{this}");
 #endif
 		}
 
 		internal void OnCreate(ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnCreate({vehicleId}) called: {this}");
 #endif
 			
 			if ((flags & Flags.Created) != Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnCreate({vehicleId}): Vehicle is already created.");
 #endif
 				OnRelease(ref vehicleData);
@@ -214,20 +216,20 @@ namespace TrafficManager.Traffic.Data {
 			flags = Flags.Created;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnCreate({vehicleId}) finished: {this}");
 #endif
 		}
 
 		internal ExtVehicleType OnStartPathFind(ref Vehicle vehicleData, ExtVehicleType? vehicleType) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}) called: {this}");
 #endif
 
 			if ((flags & Flags.Created) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}): Vehicle has not yet been created.");
 #endif
 				OnCreate(ref vehicleData);
@@ -238,7 +240,7 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}) finished: {this}");
 #endif
 
@@ -247,13 +249,13 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void OnSpawn(ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnSpawn({vehicleId}) called: {this}");
 #endif
 
 			if ((flags & Flags.Created) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnSpawn({vehicleId}): Vehicle has not yet been created.");
 #endif
 				OnCreate(ref vehicleData);
@@ -276,7 +278,7 @@ namespace TrafficManager.Traffic.Data {
 			) {
 				totalLength = 0;
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnSpawn({vehicleId}): Error occurred while calculating total length: {e}\nstate: {this}");
 #endif
 				return;
@@ -285,20 +287,20 @@ namespace TrafficManager.Traffic.Data {
 			flags |= Flags.Spawned;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnSpawn({vehicleId}) finished: {this}");
 #endif
 		}
 
 		internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateVelocity({vehicleId}, {velocity}) called: {this}");
 #endif
 
 			if ((flags & Flags.Spawned) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}): Vehicle is not yet spawned.");
 #endif
 				OnSpawn(ref vehicleData);
@@ -308,20 +310,20 @@ namespace TrafficManager.Traffic.Data {
 			this.sqrVelocity = velocity * velocity;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {velocity}) finished: {this}");
 #endif
 		}
 
 		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdatePosition({vehicleId}) called: {this}");
 #endif
 
 			if ((flags & Flags.Spawned) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Vehicle is not yet spawned.");
 #endif
 				OnSpawn(ref vehicleData);
@@ -337,12 +339,12 @@ namespace TrafficManager.Traffic.Data {
 
 			if (end == null || currentSegmentId != end.SegmentId || currentStartNode != end.StartNode || currentLaneIndex != curPos.m_lane) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Current segment end changed. seg. {currentSegmentId}, start {currentStartNode}, lane {currentLaneIndex} -> seg. {end?.SegmentId}, start {end?.StartNode}, lane {curPos.m_lane}");
 #endif
 				if (currentSegmentId != 0) {
 #if DEBUG
-					if (GlobalConfig.Instance.DebugSwitches[9])
+					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Unlinking from current segment end");
 #endif
 					Unlink();
@@ -358,7 +360,7 @@ namespace TrafficManager.Traffic.Data {
 				waitTime = 0;
 				if (end != null) {
 #if DEBUGVSTATE
-					if (GlobalConfig.Instance.DebugSwitches[9])
+					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
 					Link(end);
@@ -368,19 +370,19 @@ namespace TrafficManager.Traffic.Data {
 				}
 			}
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdatePosition({vehicleId}) finshed: {this}");
 #endif
 		}
 
 		internal void OnDespawn() {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnDespawn({vehicleId} called: {this}");
 #endif
 			if ((flags & Flags.Spawned) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnDespawn({vehicleId}): Vehicle is not spawned.");
 #endif
 				return;
@@ -405,20 +407,20 @@ namespace TrafficManager.Traffic.Data {
 			flags &= ~Flags.Spawned;
 			
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnDespawn({vehicleId}) finished: {this}");
 #endif
 		}
 
 		internal void OnRelease(ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnRelease({vehicleId}) called: {this}");
 #endif
 
 			if ((flags & Flags.Created) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is not created.");
 #endif
 				return;
@@ -426,7 +428,7 @@ namespace TrafficManager.Traffic.Data {
 
 			if ((flags & Flags.Spawned) != Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[9])
+				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is spawned.");
 #endif
 				OnDespawn();
@@ -449,7 +451,7 @@ namespace TrafficManager.Traffic.Data {
 			junctionTransitState = VehicleJunctionTransitState.None;
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnRelease({vehicleId}) finished: {this}");
 #endif
 		}
@@ -460,7 +462,7 @@ namespace TrafficManager.Traffic.Data {
 		/// <returns></returns>
 		internal bool IsJunctionTransitStateNew() {
 			uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
-			return (lastTransitStateUpdate >> GlobalConfig.Instance.VehicleStateUpdateShift) >= (frame >> GlobalConfig.Instance.VehicleStateUpdateShift);
+			return (lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
@@ -523,7 +525,7 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.DebugSwitches[9])
+			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.DetermineVehicleType({vehicleId}): vehicleType={vehicleType}, heavyVehicle={heavyVehicle}. Info={vehicleData.Info?.name}");
 #endif
 		}

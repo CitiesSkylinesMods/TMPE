@@ -36,6 +36,7 @@ namespace TrafficManager {
 			public ushort nodeId;
 			public List<ushort> nodeGroup;
 			public bool started;
+			public int currentStep;
 			public List<TimedTrafficLightsStep> timedSteps;
 		}
 

@@ -168,13 +168,19 @@ namespace TrafficManager.Custom.AI {
 					int next2PathPosIndex = nextPathPosIndex;
 					bool next2Invalid;
 					PathUnit.Position next2PathPos;
+					NetInfo next2SegmentInfo = null;
 					PathUnit.Position next3PathPos;
+					NetInfo next3SegmentInfo = null;
 					PathUnit.Position next4PathPos;
 					if (PathUnit.GetNextPosition(ref next2PathId, ref next2PathPosIndex, out next2PathPos, out next2Invalid)) {
+						next2SegmentInfo = netManager.m_segments.m_buffer[(int)next2PathPos.m_segment].Info;
+
 						uint next3PathId = next2PathId;
 						int next3PathPosIndex = next2PathPosIndex;
 						bool next3Invalid;
 						if (PathUnit.GetNextPosition(ref next3PathId, ref next3PathPosIndex, out next3PathPos, out next3Invalid)) {
+							next3SegmentInfo = netManager.m_segments.m_buffer[(int)next3PathPos.m_segment].Info;
+
 							uint next4PathId = next3PathId;
 							int next4PathPosIndex = next3PathPosIndex;
 							bool next4Invalid;
@@ -191,7 +197,7 @@ namespace TrafficManager.Custom.AI {
 						next4PathPos = default(PathUnit.Position);
 					}
 
-					bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next3PathPos, next4PathPos);
+					bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
 
 					if (bestLaneIndex != (int)nextPathPos.m_lane) {
 						nextPathPos.m_lane = (byte)bestLaneIndex;

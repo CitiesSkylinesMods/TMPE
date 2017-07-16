@@ -70,16 +70,16 @@ namespace TrafficManager.UI.SubTools {
 			TrafficPriorityManager tpm = TrafficPriorityManager.Instance;
 
 			currentPriorityNodeIds.Clear();
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
 					continue;
 				}
 
-				if (!tpm.MayNodeHavePrioritySigns(nodeId)) {
+				if (!tpm.MayNodeHavePrioritySigns((ushort)nodeId)) {
 					continue;
 				}
 
-				if (!tpm.HasNodePrioritySign(nodeId) && nodeId != SelectedNodeId) {
+				if (!tpm.HasNodePrioritySign((ushort)nodeId) && nodeId != SelectedNodeId) {
 					continue;
 				}
 

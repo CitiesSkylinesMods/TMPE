@@ -25,10 +25,12 @@ namespace TrafficManager.Manager.Impl {
 			/// Number of seen vehicles since last speed measurement
 			/// </summary>
 			public ushort trafficBuffer;
+
 			/// <summary>
 			/// Accumulated speeds since last traffic measurement
 			/// </summary>
 			public uint accumulatedSpeeds;
+#if PFTRAFFICSTATS
 			/// <summary>
 			/// Number of routed vehicles * (100 - mean speed in %) (current value)
 			/// </summary>
@@ -37,6 +39,7 @@ namespace TrafficManager.Manager.Impl {
 			/// Number of routed vehicles * (100 - mean speed in %) (stable value)
 			/// </summary>
 			public uint lastPathFindTrafficBuffer;
+#endif
 #if MEASUREDENSITY
 			/// <summary>
 			/// Accumulated densities since last traffic measurement
@@ -55,14 +58,16 @@ namespace TrafficManager.Manager.Impl {
 			public override string ToString() {
 				return $"[LaneTrafficData\n" +
 					"\t" + $"trafficBuffer = {trafficBuffer}\n" +
-					"\t" + $"accumulatedSqrSpeeds = {accumulatedSpeeds}\n" +
+					"\t" + $"accumulatedSpeeds = {accumulatedSpeeds}\n" +
 #if MEASUREDENSITY
 					"\t" + $"accumulatedDensities = {accumulatedDensities}\n" +
 					"\t" + $"relDensity = {relDensity}\n" +
 #endif
 					"\t" + $"meanSpeed = {meanSpeed}\n" +
+#if PFTRAFFICSTATS
 					"\t" + $"pathFindTrafficBuffer = {pathFindTrafficBuffer}\n" +
 					"\t" + $"lastPathFindTrafficBuffer = {lastPathFindTrafficBuffer}\n" +
+#endif
 					"LaneTrafficData]";
 			}
 		}
@@ -74,12 +79,15 @@ namespace TrafficManager.Manager.Impl {
 			/// </summary>
 			public uint accumulatedDensities;
 #endif
+#if MEASURECONGESTION
 			/// <summary>
 			/// Current minimum lane speed
 			/// </summary>
 			public ushort minSpeed;
+#endif
 			public ushort meanSpeed;
 
+#if MEASURECONGESTION
 			/// <summary>
 			/// Number of times the segment had been marked as congested
 			/// </summary>
@@ -94,11 +102,14 @@ namespace TrafficManager.Manager.Impl {
 			/// Relative number of times congestion was detected
 			/// </summary>
 			public ushort congestionRatioInPercent;
+#endif
 
+#if PFTRAFFICSTATS
 			/// <summary>
 			/// Total number of routed vehicles * (100 - mean speed in %) (stable value)
 			/// </summary>
 			public uint totalPathFindTrafficBuffer;
+#endif
 
 			/*public SegmentDirTrafficData() {
 				minSpeed = MAX_SPEED;
@@ -109,12 +120,18 @@ namespace TrafficManager.Manager.Impl {
 #if MEASUREDENSITY
 					"\t" + $"accumulatedDensities = {accumulatedDensities}\n" +
 #endif
+#if MEASURECONGESTION
 					"\t" + $"minSpeed = {minSpeed}\n" +
+#endif
 					"\t" + $"meanSpeed = {meanSpeed}\n" +
+#if PFTRAFFICSTATS
 					"\t" + $"totalPathFindTrafficBuffer = {totalPathFindTrafficBuffer}\n" +
+#endif
+#if MEASURECONGESTION
 					"\t" + $"numCongested = {numCongested}\n" +
 					"\t" + $"numCongestionMeasurements = {numCongestionMeasurements}\n" +
 					"\t" + $"congestionRatioInPercent = {congestionRatioInPercent}\n" +
+#endif
 					"SegmentDirTrafficData]";
 			}
 		}
@@ -131,15 +148,19 @@ namespace TrafficManager.Manager.Impl {
 
 		//private SegmentDirTrafficData defaultSegmentDirTrafficData;
 
+#if MEASURECONGESTION
 		private ushort[] minRelSpeeds = { REF_REL_SPEED, REF_REL_SPEED };
+#endif
+#if MEASUREDENSITY
 		private uint[] densities = { 0, 0 };
-		private byte[] numDirLanes = { 0, 0 };
+#endif
+		//private byte[] numDirLanes = { 0, 0 };
+#if EXTSTATS
 		private uint[] totalPfBuf = { 0, 0 };
+#endif
 
 		private uint[] meanSpeeds = { 0, 0 };
 		private int[] meanSpeedLanes = { 0, 0 };
-
-		private int[] segDirIndices = { 0, 0 };
 
 		private TrafficMeasurementManager() {
 			laneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
@@ -148,7 +169,9 @@ namespace TrafficManager.Manager.Impl {
 			//defaultSegmentDirTrafficData.minSpeed = MAX_SPEED;
 			//defaultSegmentDirTrafficData.meanSpeed = MAX_SPEED;
 			for (int i = 0; i < segmentDirTrafficData.Length; ++i) {
+#if MEASURECONGESTION
 				segmentDirTrafficData[i].minSpeed = REF_REL_SPEED;
+#endif
 				segmentDirTrafficData[i].meanSpeed = MAX_REL_SPEED;
 			}
 			ResetTrafficStats();
@@ -199,20 +222,25 @@ namespace TrafficManager.Manager.Impl {
 
 			// calculate max./min. lane speed
 			for (int i = 0; i < 2; ++i) {
+#if MEASURECONGESTION
 				minRelSpeeds[i] = REF_REL_SPEED;
+#endif
+#if MEASUREDENSITY
 				densities[i] = 0;
+#endif
 
 				meanSpeeds[i] = 0;
 				meanSpeedLanes[i] = 0;
-				segDirIndices[i] = 0;
 
-				numDirLanes[i] = 0;
+				//numDirLanes[i] = 0;
+#if EXTSTATS
 				totalPfBuf[i] = 0;
+#endif
 			}
 
-			ushort maxBuffer = 0;
-			
-			for (uint li = 0; li < numLanes; ++li) {
+			//ushort maxBuffer = 0;
+
+			/*for (uint li = 0; li < numLanes; ++li) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[li];
 				if ((laneInfo.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None)
 					continue;
@@ -222,19 +250,22 @@ namespace TrafficManager.Manager.Impl {
 				int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
 				++numDirLanes[dirIndex];
+#if PFTRAFFICSTATS
 				uint pfBuf = laneTrafficData[segmentId][li].pathFindTrafficBuffer;
 				totalPfBuf[dirIndex] += pfBuf;
 				laneTrafficData[segmentId][li].lastPathFindTrafficBuffer = pfBuf;
-
+#endif
+#if MEASURECONGESTION
 				ushort curSpeed = laneTrafficData[segmentId][li].meanSpeed;
 				if (curSpeed < minRelSpeeds[dirIndex]) {
 					minRelSpeeds[dirIndex] = curSpeed;
 				}
-				ushort buf = laneTrafficData[segmentId][li].trafficBuffer;
-				if (buf > maxBuffer) {
-					maxBuffer = buf;
-				}
-			}
+#endif
+				//ushort buf = laneTrafficData[segmentId][li].trafficBuffer;
+				//if (buf > maxBuffer) {
+				//	maxBuffer = buf;
+				//}
+			}*/
 
 			curLaneId = segmentData.m_lanes;
 
@@ -250,11 +281,11 @@ namespace TrafficManager.Manager.Impl {
 					ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;
 					ushort curRelSpeed = MAX_REL_SPEED;
 
-					if (currentBuf < maxBuffer) {
+					/*if (currentBuf < maxBuffer) {
 						// if the lane did not have traffic we assume max speeds
 						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds += laneVehicleSpeedLimit * (uint)(maxBuffer - currentBuf);
 						currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer = maxBuffer;
-					}
+					}*/
 
 					// we use integer division here because it's faster
 					if (currentBuf > 0) {
@@ -263,9 +294,11 @@ namespace TrafficManager.Manager.Impl {
 
 					// calculate reported mean speed
 					ushort newRelSpeed = curRelSpeed;// (ushort)Math.Min(Math.Max(curRelSpeed, 0u), REF_REL_SPEED);
+#if MEASURECONGESTION
 					if (newRelSpeed < minRelSpeeds[dirIndex]) {
 						minRelSpeeds[dirIndex] = newRelSpeed;
 					}
+#endif
 
 					meanSpeeds[dirIndex] += newRelSpeed;
 					++meanSpeedLanes[dirIndex];
@@ -276,14 +309,18 @@ namespace TrafficManager.Manager.Impl {
 #if MEASUREDENSITY
 					laneTrafficData[segmentId][laneIndex].accumulatedDensities /= 2;
 #endif
-					if (laneTrafficData[segmentId][laneIndex].trafficBuffer > conf.MaxTrafficBuffer) {
+					if (laneTrafficData[segmentId][laneIndex].trafficBuffer > conf.AdvancedVehicleAI.MaxTrafficBuffer) {
 						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds >>= 1;
 						laneTrafficData[segmentId][laneIndex].trafficBuffer >>= 1;
 					}
+					/*laneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
+					laneTrafficData[segmentId][laneIndex].trafficBuffer = 0;*/
 
+#if PFTRAFFICSTATS
 					if (laneTrafficData[segmentId][laneIndex].pathFindTrafficBuffer > conf.MaxPathFindTrafficBuffer) {
 						laneTrafficData[segmentId][laneIndex].pathFindTrafficBuffer >>= 1;
 					}
+#endif
 
 #if MEASUREDENSITY
 					densities[dirIndex] += laneTrafficData[segmentId][laneIndex].accumulatedDensities;
@@ -294,27 +331,29 @@ namespace TrafficManager.Manager.Impl {
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
 
-			segDirIndices[0] = GetDirIndex(segmentId, NetInfo.Direction.Forward);
-			segDirIndices[1] = GetDirIndex(segmentId, NetInfo.Direction.Backward);
-
 			for (int i = 0; i < 2; ++i) {
-				int segDirIndex = segDirIndices[i];
+				int segDirIndex = i == 0 ? GetDirIndex(segmentId, NetInfo.Direction.Forward) : GetDirIndex(segmentId, NetInfo.Direction.Backward);
 
+#if MEASURECONGESTION
 				if (segmentDirTrafficData[segDirIndex].numCongestionMeasurements > conf.MaxNumCongestionMeasurements) {
 					segmentDirTrafficData[segDirIndex].numCongestionMeasurements >>= 1;
 					segmentDirTrafficData[segDirIndex].numCongested >>= 1;
 				}
 
 				segmentDirTrafficData[segDirIndex].minSpeed = Math.Min(REF_REL_SPEED, minRelSpeeds[i]);
+
 				++segmentDirTrafficData[segDirIndex].numCongestionMeasurements;
 				if (segmentDirTrafficData[segDirIndex].minSpeed / 100u < conf.CongestionSpeedThreshold) {
 					++segmentDirTrafficData[segDirIndex].numCongested;
 				}
 				segmentDirTrafficData[segDirIndex].congestionRatioInPercent = (ushort)(segmentDirTrafficData[segDirIndex].numCongestionMeasurements > 0 ? ((uint)segmentDirTrafficData[segDirIndex].numCongested * 100u) / (uint)segmentDirTrafficData[segDirIndex].numCongestionMeasurements : 0); // now in %
+#endif
 #if MEASUREDENSITY
 				segmentDirTrafficData[segmentId][i].accumulatedDensities = densities[i];
 #endif
+#if PFTRAFFICSTATS
 				segmentDirTrafficData[segDirIndex].totalPathFindTrafficBuffer = totalPfBuf[i];
+#endif
 
 				if (meanSpeedLanes[i] > 0) {
 					segmentDirTrafficData[segDirIndex].meanSpeed = (ushort)Math.Min(REF_REL_SPEED, (meanSpeeds[i] / meanSpeedLanes[i]));
@@ -341,11 +380,15 @@ namespace TrafficManager.Manager.Impl {
 			int backIndex = GetDirIndex(segmentId, NetInfo.Direction.Backward);
 
 			segmentDirTrafficData[fwdIndex] = default(SegmentDirTrafficData);
+#if MEASURECONGESTION
 			segmentDirTrafficData[fwdIndex].minSpeed = REF_REL_SPEED;
+#endif
 			segmentDirTrafficData[fwdIndex].meanSpeed = MAX_REL_SPEED;
 
 			segmentDirTrafficData[backIndex] = default(SegmentDirTrafficData);
+#if MEASURECONGESTION
 			segmentDirTrafficData[backIndex].minSpeed = REF_REL_SPEED;
+#endif
 			segmentDirTrafficData[backIndex].meanSpeed = MAX_REL_SPEED;
 		}
 
@@ -366,6 +409,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 		}
 
+#if PFTRAFFICSTATS
 		public void AddPathFindTraffic(ushort segmentId, byte laneIndex) {
 			LaneTrafficData[] lanesData = laneTrafficData[segmentId];
 			if (lanesData == null || laneIndex >= lanesData.Length)
@@ -373,6 +417,7 @@ namespace TrafficManager.Manager.Impl {
 
 			lanesData[laneIndex].pathFindTrafficBuffer += (uint)((REF_REL_SPEED / REF_REL_SPEED_PERCENT_DENOMINATOR) - Math.Min(REF_REL_SPEED, lanesData[laneIndex].meanSpeed) / (REF_REL_SPEED / REF_REL_SPEED_PERCENT_DENOMINATOR));
 		}
+#endif
 
 		internal int GetDirIndex(ushort segmentId, NetInfo.Direction dir) {
 			return (int)segmentId + (dir == NetInfo.Direction.Backward ? NetManager.MAX_SEGMENT_COUNT : 0);

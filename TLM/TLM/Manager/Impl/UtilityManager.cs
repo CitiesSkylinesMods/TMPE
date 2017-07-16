@@ -81,10 +81,10 @@ namespace TrafficManager.Manager.Impl {
 			try {
 				Monitor.Enter(Singleton<VehicleManager>.instance);
 
-				for (ushort i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
+				for (uint i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
 					if (
 						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0)
-						Singleton<VehicleManager>.instance.ReleaseVehicle(i);
+						Singleton<VehicleManager>.instance.ReleaseVehicle((ushort)i);
 				}
 
 				TrafficMeasurementManager.Instance.ResetTrafficStats();

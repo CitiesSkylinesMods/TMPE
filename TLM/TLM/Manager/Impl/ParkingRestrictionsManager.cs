@@ -82,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
 			base.OnBeforeLoadData();
 
 			parkingAllowed = new bool[NetManager.MAX_SEGMENT_COUNT][];
-			for (ushort segmentId = 0; segmentId < parkingAllowed.Length; ++segmentId) {
+			for (uint segmentId = 0; segmentId < parkingAllowed.Length; ++segmentId) {
 				parkingAllowed[segmentId] = new bool[2];
 				for (int i = 0; i < 2; ++i) {
 					parkingAllowed[segmentId][i] = true;
@@ -108,13 +108,13 @@ namespace TrafficManager.Manager.Impl {
 
 		public List<Configuration.ParkingRestriction> SaveData(ref bool success) {
 			List<Configuration.ParkingRestriction> ret = new List<Configuration.ParkingRestriction>();
-			for (ushort segmentId = 0; segmentId < parkingAllowed.Length; ++segmentId) {
+			for (uint segmentId = 0; segmentId < parkingAllowed.Length; ++segmentId) {
 				try {
 					if (parkingAllowed[segmentId][0] && parkingAllowed[segmentId][1]) {
 						continue;
 					}
 
-					Configuration.ParkingRestriction restr = new Configuration.ParkingRestriction(segmentId);
+					Configuration.ParkingRestriction restr = new Configuration.ParkingRestriction((ushort)segmentId);
 					restr.forwardParkingAllowed = parkingAllowed[segmentId][0];
 					restr.backwardParkingAllowed = parkingAllowed[segmentId][1];
 					ret.Add(restr);

@@ -368,7 +368,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void CalculateAutoPedestrianLightState(bool propagate=true) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.DebugSwitches[7] && GlobalConfig.Instance.DebugNodeId == NodeId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
 #if DEBUGTTL
@@ -499,8 +499,8 @@ namespace TrafficManager.TrafficLight.Impl {
 			ICustomSegmentLight mainLight = MainSegmentLight;
 			ushort nodeId = NodeId;
 			HashSet<ExtVehicleType> setupLights = new HashSet<ExtVehicleType>(); // TODO improve
-			IDictionary<byte, ExtVehicleType> allAllowedTypes = Constants.ManagerFactory.VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict(SegmentId, nodeId, RestrictionMode.Restricted); // TODO improve
-			ExtVehicleType allAllowedMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetAllowedVehicleTypes(SegmentId, nodeId, RestrictionMode.Restricted);
+			IDictionary<byte, ExtVehicleType> allAllowedTypes = Constants.ManagerFactory.VehicleRestrictionsManager.GetAllowedVehicleTypesAsDict(SegmentId, nodeId, VehicleRestrictionsMode.Restricted); // TODO improve
+			ExtVehicleType allAllowedMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetAllowedVehicleTypes(SegmentId, nodeId, VehicleRestrictionsMode.Restricted);
 			SeparateVehicleTypes = ExtVehicleType.None;
 #if DEBUGHK
 			Log._Debug($"CustomSegmentLights: housekeeping @ seg. {SegmentId}, node {nodeId}, allAllowedTypes={string.Join(", ", allAllowedTypes.Select(x => x.ToString()).ToArray())}, allAllowedMask={allAllowedMask}");

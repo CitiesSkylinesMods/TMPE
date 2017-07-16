@@ -157,6 +157,18 @@ namespace TrafficManager.Manager.Impl {
 				Options.setShowPathFindStats(data[33] == (byte)1);
 			}
 
+			if (data.Length >= 35) {
+				Options.setAltLaneSelectionRatio(data[34]);
+			}
+
+			if (data.Length >= 36) {
+				try {
+					Options.setVehicleRestrictionsAggression((VehicleRestrictionsAggression)data[35]);
+				} catch (Exception e) {
+					Log.Warning($"Skipping invalid value {data[35]} for vehicle restrictions aggression");
+				}
+			}
+
 			return true;
 		}
 
@@ -195,7 +207,9 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),
 						(byte)(Options.parkingRestrictionsOverlay ? 1 : 0),
 						(byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0),
-						(byte)(Options.showPathFindStats ? 1 : 0)
+						(byte)(Options.showPathFindStats ? 1 : 0),
+						(byte)Options.altLaneSelectionRatio,
+						(byte)Options.vehicleRestrictionsAggression
 				};
 		}
 	}

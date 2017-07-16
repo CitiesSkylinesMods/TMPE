@@ -179,7 +179,7 @@ namespace TrafficManager.Geometry.Impl {
 		/// <param name="force">Specifies if recalculation should be enforced.</param>
 		public void Recalculate(GeometryCalculationMode calcMode) {
 #if DEBUGGEO
-			bool output = GlobalConfig.Instance.DebugSwitches[5];
+			bool output = GlobalConfig.Instance.Debug.Switches[5];
 
 			if (output)
 				Log._Debug($">>> SegmentGeometry.Recalculate({calcMode}): called for segment {SegmentId}. IsValid()={IsValid()}, wasValid={valid}");
@@ -1248,13 +1248,13 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal static void OnBeforeLoadData() {
 			Log._Debug($"Building {segmentGeometries.Length} segment geometries...");
-			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
-				segmentGeometries[i] = new SegmentGeometry(i);
+			for (int i = 0; i < segmentGeometries.Length; ++i) {
+				segmentGeometries[i] = new SegmentGeometry((ushort)i);
 			}
-			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+			for (int i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i].Recalculate(GeometryCalculationMode.Init);
 			}
-			/*for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+			/*for (int i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i].RecalculateLaneGeometries(GeometryCalculationMode.Init);
 			}*/
 			Log._Debug($"Calculated segment geometries.");
@@ -1262,7 +1262,7 @@ namespace TrafficManager.Geometry.Impl {
 
 		internal static void OnBeforeSaveData() {
 			/*Log._Debug($"Recalculating all segment geometries...");
-			for (ushort i = 0; i < segmentGeometries.Length; ++i) {
+			for (int i = 0; i < segmentGeometries.Length; ++i) {
 				segmentGeometries[i].Recalculate(false);
 			}
 			Log._Debug($"Calculated segment geometries.");*/

@@ -37,6 +37,7 @@ namespace TrafficManager.TrafficLight {
 		void SimulationStep();
 		void SkipStep(bool setLights = true, int prevStepRefIndex = -1);
 		void Start();
+		void Start(int step);
 		void Stop();
 		void OnGeometryUpdate();
 		void RemoveNodeFromGroup(ushort otherNodeId);
