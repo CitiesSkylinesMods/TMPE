@@ -25,7 +25,7 @@ namespace TrafficManager {
 			}
 		}
 
-		public static void Initialize() {
+		/*public void Initialize() {
 			GameObject gameObject = new GameObject(GameObjectName);
 		}
 
@@ -34,6 +34,6 @@ namespace TrafficManager {
 			if (gameObject != null) {
 				Destroy(gameObject);
 			}
-		}
+		}*/
 	}
 }

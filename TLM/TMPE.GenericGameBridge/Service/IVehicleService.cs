@@ -12,5 +12,7 @@ namespace GenericGameBridge.Service {
 		bool IsVehicleValid(ushort vehicleId);
 		void ProcessVehicle(ushort vehicleId, VehicleHandler handler);
 		void ProcessVehicle(ushort vehicleId, ref Vehicle vehicle, VehicleHandler handler);
+		void ReleaseVehicle(ushort vehicleId);
+		void ReleaseParkedVehicle(ushort parkedVehicleId);
 	}
 }

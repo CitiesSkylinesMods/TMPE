@@ -1314,6 +1314,15 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
+			if (vehicleState.heavyVehicle) {
+#if DEBUG
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.MayFindBestLane({vehicleId}): Skipping lane checking. Vehicle is heavy.");
+				}
+#endif
+				return false;
+			}
+
 			if ((vehicleState.vehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) == ExtVehicleType.None) {
 #if DEBUG
 				if (debug) {

@@ -182,3 +182,4 @@ Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles pe
 Vehicle_restrictions_aggression Vehicle restrictions aggression
 Strict Strict
 Show_path-find_stats Show path-find stats
+Remove_this_vehicle Remove this vehicle

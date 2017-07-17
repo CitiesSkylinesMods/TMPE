@@ -2301,18 +2301,15 @@ namespace TrafficManager {
 					Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
 					manager.OnLevelUnloading();
 				}
-
-				/*TrafficPriorityManager.Instance.OnLevelUnloading();
-				TrafficMeasurementManager.Instance.OnLevelUnloading();
-				CustomTrafficLightsManager.Instance.OnLevelUnloading();
-				TrafficLightSimulationManager.Instance.OnLevelUnloading();
-				VehicleRestrictionsManager.Instance.OnLevelUnloading();
-				ExtCitizenInstanceManager.Instance.OnLevelUnloading();
-				ExtBuildingManager.Instance.OnLevelUnloading();
-				LaneConnectionManager.Instance.OnLevelUnloading();*/
 				Flags.OnLevelUnloading();
 				Translation.OnLevelUnloading();
 				GlobalConfig.OnLevelUnloading();
+
+				// remove vehicle button
+				var removeVehicleButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveVehicleButtonExtender>();
+				if (removeVehicleButtonExtender != null) {
+					Object.Destroy(removeVehicleButtonExtender, 10f);
+				}
 #if TRACE
 				Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
@@ -2423,6 +2420,9 @@ namespace TrafficManager {
 				TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
 			}
 
+			// add "remove vehicle" button
+			UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
+			
 			initDetours();
 
 			//Log.Info("Fixing non-created nodes with problems...");

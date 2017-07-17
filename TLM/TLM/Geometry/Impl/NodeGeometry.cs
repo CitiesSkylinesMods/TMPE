@@ -36,8 +36,13 @@ namespace TrafficManager.Geometry.Impl {
 		} = 0;
 
 		public bool IsSimpleJunction {
-			get; private set;
-		} = false;
+			get {
+				return IncomingSegments == 1 || OutgoingSegments == 1;
+			}
+		}
+
+		public int IncomingSegments { get; private set; } = 0;
+		public int OutgoingSegments { get; private set; } = 0;
 
 		/// <summary>
 		/// Connected segment end geometries.
@@ -63,6 +68,8 @@ namespace TrafficManager.Geometry.Impl {
 			return $"[NodeGeometry ({NodeId})\n" +
 				"\t" + $"IsValid() = {IsValid()}\n" +
 				"\t" + $"IsSimpleJunction = {IsSimpleJunction}\n" +
+				"\t" + $"IncomingSegments = {IncomingSegments}\n" +
+				"\t" + $"OutgoingSegments = {OutgoingSegments}\n" +
 				"\t" + $"SegmentEndGeometries = {SegmentEndGeometries.ArrayToString()}\n" +
 				"\t" + $"NumSegmentEnds = {NumSegmentEnds}\n" +
 				"NodeGeometry]";
@@ -162,7 +169,8 @@ namespace TrafficManager.Geometry.Impl {
 		}
 
 		private void Cleanup() {
-			IsSimpleJunction = false;
+			IncomingSegments = 0;
+			OutgoingSegments = 0;
 			NumSegmentEnds = 0;
 		}
 
@@ -218,7 +226,8 @@ namespace TrafficManager.Geometry.Impl {
 						++outgoingSegments;
 				}
 
-				IsSimpleJunction = incomingSegments == 1 || outgoingSegments == 1;
+				IncomingSegments = incomingSegments;
+				OutgoingSegments = outgoingSegments;
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");

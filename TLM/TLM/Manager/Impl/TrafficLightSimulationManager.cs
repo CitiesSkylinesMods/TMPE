@@ -346,7 +346,12 @@ namespace TrafficManager.Manager.Impl {
 					cnfTimedLights.nodeId = timedNode.NodeId;
 					cnfTimedLights.nodeGroup = new List<ushort>(timedNode.NodeGroup);
 					cnfTimedLights.started = timedNode.IsStarted();
-					cnfTimedLights.currentStep = timedNode.CurrentStep;
+					int stepIndex = timedNode.CurrentStep;
+					if (timedNode.IsStarted() && timedNode.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
+						// if in end transition save the next step
+						stepIndex = (stepIndex + 1) % timedNode.NumSteps();
+					}
+					cnfTimedLights.currentStep = stepIndex;
 					cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
 					for (var j = 0; j < timedNode.NumSteps(); j++) {
