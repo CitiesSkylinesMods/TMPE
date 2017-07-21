@@ -1004,10 +1004,9 @@ namespace TrafficManager.Manager.Impl {
 					float next1MaxSpeed = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
 					float targetSpeed = Math.Min(vehicleMaxSpeed, ApplyRealisticSpeeds(next1MaxSpeed, vehicleId, vehicleInfo, recklessDriver));
 
-					TrafficMeasurementManager.LaneTrafficData next1LaneTrafficData;
-					TrafficMeasurementManager.Instance.GetLaneTrafficData(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, out next1LaneTrafficData);
+					ushort meanSpeed = TrafficMeasurementManager.Instance.CalcLaneRelMeanSpeed(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
 
-					float relMeanSpeedInPercent = next1LaneTrafficData.meanSpeed / (TrafficMeasurementManager.REF_REL_SPEED / TrafficMeasurementManager.REF_REL_SPEED_PERCENT_DENOMINATOR);
+					float relMeanSpeedInPercent = meanSpeed / (TrafficMeasurementManager.REF_REL_SPEED / TrafficMeasurementManager.REF_REL_SPEED_PERCENT_DENOMINATOR);
 					float randSpeed = 0f;
 					if (conf.DynamicLaneSelection.LaneSpeedRandInterval > 0) {
 						randSpeed = Services.SimulationService.Randomizer.Int32((uint)conf.DynamicLaneSelection.LaneSpeedRandInterval + 1u) - conf.DynamicLaneSelection.LaneSpeedRandInterval / 2f;

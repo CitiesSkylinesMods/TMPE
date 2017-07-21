@@ -12,9 +12,9 @@ namespace TrafficManager.UI.MainMenu {
 		public override void Start() {
 			size = new Vector2(MainMenuPanel.MENU_WIDTH / 2, MainMenuPanel.TOP_BORDER);
 			text = "";
-			relativePosition = new Vector3(MainMenuPanel.MENU_WIDTH / 2, 5f);
-			textAlignment = UIHorizontalAlignment.Right;
-			anchor = UIAnchorStyle.Top | UIAnchorStyle.Right;
+			relativePosition = new Vector3(5f, -20f);
+			textAlignment = UIHorizontalAlignment.Left;
+			anchor = UIAnchorStyle.Top | UIAnchorStyle.Left;
 		}
 
 #if QUEUEDSTATS

@@ -204,12 +204,24 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void SimulationStep(ushort segmentId, ref NetSegment segmentData) {
+		public ushort CalcLaneRelMeanSpeed(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+			ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;
+			ushort curRelSpeed = MAX_REL_SPEED;
+
+			// we use integer division here because it's faster
+			if (currentBuf > 0) {
+				uint laneVehicleSpeedLimit = (uint)((Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, laneId, laneInfo) : laneInfo.m_speedLimit) * 8f);
+				curRelSpeed = (ushort)Math.Min((uint)MAX_REL_SPEED, ((laneTrafficData[segmentId][laneIndex].accumulatedSpeeds * (uint)REF_REL_SPEED) / currentBuf) / laneVehicleSpeedLimit); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+			}
+			return curRelSpeed;
+		}
+
+		public void SimulationStep(ushort segmentId, ref NetSegment segment) {
 			GlobalConfig conf = GlobalConfig.Instance;
 
 			// calculate traffic density
-			NetInfo segmentInfo = segmentData.Info;
-			uint curLaneId = segmentData.m_lanes;
+			NetInfo segmentInfo = segment.Info;
+			uint curLaneId = segment.m_lanes;
 			int numLanes = segmentInfo.m_lanes.Length;
 
 			if (laneTrafficData[segmentId] == null || laneTrafficData[segmentId].Length < numLanes) {
@@ -267,33 +279,17 @@ namespace TrafficManager.Manager.Impl {
 				//}
 			}*/
 
-			curLaneId = segmentData.m_lanes;
+			curLaneId = segment.m_lanes;
 
-			uint laneIndex = 0;
+			byte laneIndex = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
 				if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None && (laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
 					int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
-					uint laneVehicleSpeedLimit = (uint)((Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, curLaneId, segmentData.Info.m_lanes[laneIndex]) : segmentData.Info.m_lanes[laneIndex].m_speedLimit) * 8f);
-
-					ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;
-					ushort curRelSpeed = MAX_REL_SPEED;
-
-					/*if (currentBuf < maxBuffer) {
-						// if the lane did not have traffic we assume max speeds
-						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds += laneVehicleSpeedLimit * (uint)(maxBuffer - currentBuf);
-						currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer = maxBuffer;
-					}*/
-
-					// we use integer division here because it's faster
-					if (currentBuf > 0) {
-						curRelSpeed = (ushort)Math.Min((uint)MAX_REL_SPEED, ((laneTrafficData[segmentId][laneIndex].accumulatedSpeeds * (uint)REF_REL_SPEED) / currentBuf) / laneVehicleSpeedLimit); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
-					}
-
 					// calculate reported mean speed
-					ushort newRelSpeed = curRelSpeed;// (ushort)Math.Min(Math.Max(curRelSpeed, 0u), REF_REL_SPEED);
+					ushort newRelSpeed = CalcLaneRelMeanSpeed(segmentId, laneIndex, curLaneId, segment.Info.m_lanes[laneIndex]);
 #if MEASURECONGESTION
 					if (newRelSpeed < minRelSpeeds[dirIndex]) {
 						minRelSpeeds[dirIndex] = newRelSpeed;
@@ -310,8 +306,8 @@ namespace TrafficManager.Manager.Impl {
 					laneTrafficData[segmentId][laneIndex].accumulatedDensities /= 2;
 #endif
 					if (laneTrafficData[segmentId][laneIndex].trafficBuffer > conf.AdvancedVehicleAI.MaxTrafficBuffer) {
-						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds >>= 1;
-						laneTrafficData[segmentId][laneIndex].trafficBuffer >>= 1;
+						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
+						laneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
 					}
 					/*laneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
 					laneTrafficData[segmentId][laneIndex].trafficBuffer = 0;*/

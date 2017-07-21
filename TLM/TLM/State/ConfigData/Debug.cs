@@ -31,6 +31,7 @@ namespace TrafficManager.State.ConfigData {
 			};
 
 		public int NodeId = 0;
+		public int SegmentId = 0;
 		public int StartSegmentId = 0;
 		public int EndSegmentId = 0;
 		public int VehicleId = 0;
