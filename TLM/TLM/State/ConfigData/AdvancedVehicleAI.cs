@@ -38,6 +38,6 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Threshold for resetting traffic buffer
 		/// </summary>
-		public uint MaxTrafficBuffer = 500;
+		public uint MaxTrafficBuffer = 10;
 	}
 }

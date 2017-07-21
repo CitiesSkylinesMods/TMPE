@@ -305,7 +305,10 @@ namespace TrafficManager.Manager.Impl {
 #if MEASUREDENSITY
 					laneTrafficData[segmentId][laneIndex].accumulatedDensities /= 2;
 #endif
-					if (laneTrafficData[segmentId][laneIndex].trafficBuffer > conf.AdvancedVehicleAI.MaxTrafficBuffer) {
+					if (laneTrafficData[segmentId][laneIndex].trafficBuffer >= conf.AdvancedVehicleAI.MaxTrafficBuffer) {
+						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds /= laneTrafficData[segmentId][laneIndex].trafficBuffer;
+						laneTrafficData[segmentId][laneIndex].trafficBuffer = 1;
+					} else if (laneTrafficData[segmentId][laneIndex].trafficBuffer == 1) {
 						laneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
 						laneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
 					}

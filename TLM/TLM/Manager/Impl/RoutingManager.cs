@@ -348,10 +348,12 @@ namespace TrafficManager.Manager.Impl {
 			bool prevHasBusLane = prevSegGeo.HasBusLane();
 
 			bool nextIsJunction = false;
+			bool nextIsTransition = false;
 			bool nextIsEndOrOneWayOut = false;
 			bool nextHasTrafficLights = false;
 			Constants.ServiceFactory.NetService.ProcessNode(nextNodeId, delegate (ushort nodeId, ref NetNode node) {
 				nextIsJunction = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+				nextIsTransition = (node.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 				nextHasTrafficLights = (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 				nextIsEndOrOneWayOut = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 				return true;
@@ -1177,11 +1179,9 @@ namespace TrafficManager.Manager.Impl {
 									byte compatibleLaneDist = 0;
 									if (nextIncomingDir == ArrowDirection.Turn) {
 										compatibleLaneDist = (byte)GlobalConfig.Instance.PathFinding.UturnLaneDistance;
-									} else if (!isNextRealJunction) {
-										if (nextCompatibleLaneCount == prevSimilarLaneCount) {
-											int relLaneDist = nextCompatibleOuterSimilarIndices[nextTransitionIndex] - prevOuterSimilarLaneIndex; // relative lane distance (positive: change to more outer lane, negative: change to more inner lane)
-											compatibleLaneDist = (byte)Math.Abs(relLaneDist);
-										}
+									} else if (!isNextRealJunction && ((!nextIsJunction && !nextIsTransition) || nextCompatibleLaneCount == prevSimilarLaneCount)) {
+										int relLaneDist = nextCompatibleOuterSimilarIndices[nextTransitionIndex] - prevOuterSimilarLaneIndex; // relative lane distance (positive: change to more outer lane, negative: change to more inner lane)
+										compatibleLaneDist = (byte)Math.Abs(relLaneDist);
 									}
 
 #if DEBUGROUTING
