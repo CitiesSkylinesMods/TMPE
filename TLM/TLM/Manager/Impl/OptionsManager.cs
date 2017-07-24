@@ -169,6 +169,10 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
+			if (data.Length >= 37) {
+				Options.setTrafficLightPriorityRules(data[36] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -209,7 +213,8 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.banRegularTrafficOnBusLanes ? 1 : 0),
 						(byte)(Options.showPathFindStats ? 1 : 0),
 						(byte)Options.altLaneSelectionRatio,
-						(byte)Options.vehicleRestrictionsAggression
+						(byte)Options.vehicleRestrictionsAggression,
+						(byte)(Options.trafficLightPriorityRules ? 1 : 0),
 				};
 		}
 	}

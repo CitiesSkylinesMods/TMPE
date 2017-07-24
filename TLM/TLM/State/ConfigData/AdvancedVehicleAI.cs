@@ -8,7 +8,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Junction randomization for randomized lane selection
 		/// </summary>
-		public uint LaneSelectionJunctionRandomization = 5;
+		public uint LaneSelectionJunctionRandomization = 3;
 
 		/// <summary>
 		/// base lane changing cost factor on city streets
@@ -33,7 +33,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// lane density random interval
 		/// </summary>
-		public float LaneDensityRandInterval = 50f;
+		public float LaneDensityRandInterval = 20f;
 
 		/// <summary>
 		/// Threshold for resetting traffic buffer

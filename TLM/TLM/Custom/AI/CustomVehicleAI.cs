@@ -202,6 +202,12 @@ namespace TrafficManager.Custom.AI {
 					if (bestLaneIndex != (int)nextPathPos.m_lane) {
 						nextPathPos.m_lane = (byte)bestLaneIndex;
 						pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextPathPosIndex, nextPathPos);
+						// prevent multiple lane changes to the same lane from happening at the same time
+						TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
+#if MEASUREDENSITY
+							, VehicleStateManager.Instance.VehicleStates[vehicleID].totalLength
+#endif
+							, 0);
 					}
 				}
 				// NON-STOCK CODE END

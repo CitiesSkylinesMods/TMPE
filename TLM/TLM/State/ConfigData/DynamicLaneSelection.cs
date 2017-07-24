@@ -8,7 +8,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Maximum allowed reserved space on previous vehicle lane
 		/// </summary>
-		public float MaxReservedSpace = 1f;
+		public float MaxReservedSpace = 0.5f;
 
 		/// <summary>
 		/// Maximum allowed reserved space on previous vehicle lane (for reckless drivers)
@@ -18,26 +18,26 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Lane speed randomization interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 10f;
+		public float LaneSpeedRandInterval = 0f;
 
 		/// <summary>
 		/// Maximum number of considered lane changes
 		/// </summary>
-		public int MaxOptLaneChanges = 1;
+		public int MaxOptLaneChanges = 2;
 
 		/// <summary>
 		/// Maximum allowed speed difference for safe lane changes
 		/// </summary>
-		public float MaxUnsafeSpeedDiff = 0.5f;
+		public float MaxUnsafeSpeedDiff = 0.4f;
 
 		/// <summary>
 		/// Minimum required speed improvement for safe lane changes
 		/// </summary>
-		public float MinSafeSpeedImprovement = 10f;
+		public float MinSafeSpeedImprovement = 25f;
 
 		/// <summary>
 		/// Minimum required traffic flow improvement for safe lane changes
 		/// </summary>
-		public float MinSafeTrafficImprovement = 10f;
+		public float MinSafeTrafficImprovement = 20f;
 	}
 }

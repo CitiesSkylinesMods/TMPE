@@ -26,7 +26,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 15: disable checking of other vehicles for trams
 				false, // 16: debug TramBaseAI.SimulationStep (2)
 				false, // 17: debug alternative lane selection
-				false, // 18: -unused-
+				false, // 18: transport line path-find debugging
 				false  // 19: enable obligation to drive on the right hand side of the road
 			};
 

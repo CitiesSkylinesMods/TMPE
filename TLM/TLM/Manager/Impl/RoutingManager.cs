@@ -22,11 +22,10 @@ namespace TrafficManager.Manager.Impl {
 		public const NetInfo.LaneType ROUTED_LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram;
 		public const VehicleInfo.VehicleType ARROW_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
-
+		
 		private const byte MAX_NUM_TRANSITIONS = 64;
 
 		private static readonly Randomizer RNG = new Randomizer();
-		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
 
 		protected override bool AllowInvalidSegments {
 			get {
@@ -705,211 +704,110 @@ namespace TrafficManager.Manager.Impl {
 								Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): found compatible lanes! compatibleLaneIndicesSortedByOuterSimilarIndex={compatibleLaneIndicesSortedByOuterSimilarIndex.ArrayToString()}, laneDiff={laneDiff}, applyHighwayRulesAtSegment={applyHighwayRulesAtSegment}");
 #endif
 
-							if (!hasLaneConnections && applyHighwayRulesAtSegment) {
-								// apply highway rules at transitions & junctions
-
+							if (!hasLaneConnections && applyHighwayRulesAtJunction) {
+								// we reached a highway junction where more than two segments are connected to each other
 #if DEBUGROUTING
 								if (debug)
-									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): applying highway rules at segment");
+									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): applying highway rules at junction");
 #endif
 
-								if (applyHighwayRulesAtJunction) {
-									// we reached a highway junction where more than two segments are connected to each other
-#if DEBUGROUTING
-									if (debug)
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): applying highway rules at junction");
+								// number of lanes that were processed in earlier segment iterations (either all incoming or all outgoing)
+								int numLanesSeen = Math.Max(totalIncomingLanes, totalOutgoingLanes);
+
+								int minNextInnerSimilarIndex = -1;
+								int maxNextInnerSimilarIndex = -1;
+								int refNextInnerSimilarIndex = -1; // this lane will be referred as the "stay" lane with zero distance
+
+#if DEBUGHWJUNCTIONROUTING
+								if (debug) {
+									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): applying highway rules at junction");
+									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): totalIncomingLanes={totalIncomingLanes}, totalOutgoingLanes={totalOutgoingLanes}, numLanesSeen={numLanesSeen}");
+									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex}, prevSimilarLaneCount={prevSimilarLaneCount}, nextCompatibleLaneCount={nextCompatibleLaneCount}");
+								}
 #endif
 
-									// number of lanes that were processed in earlier segment iterations (either all incoming or all outgoing)
-									int numLanesSeen = Math.Max(totalIncomingLanes, totalOutgoingLanes);
+								if (nextIsSplitJunction) {
+									// lane splitting at junction
+									minNextInnerSimilarIndex = prevInnerSimilarLaneIndex + numLanesSeen;
 
-									int minNextInnerSimilarIndex = -1;
-									int maxNextInnerSimilarIndex = -1;
-									int refNextInnerSimilarIndex = -1; // this lane will be referred as the "stay" lane with zero distance
+									if (minNextInnerSimilarIndex >= nextCompatibleLaneCount) {
+										// there have already been explored more outgoing lanes than incoming lanes on the previous segment. Also allow vehicles to go to the current segment.
+										minNextInnerSimilarIndex = maxNextInnerSimilarIndex = refNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
+									} else {
+										// allow lane changes at highway junctions
+										maxNextInnerSimilarIndex = refNextInnerSimilarIndex = minNextInnerSimilarIndex;
+										if (minNextInnerSimilarIndex > 0 && prevInnerSimilarLaneIndex > 0) {
+											--minNextInnerSimilarIndex;
+										}
+									}
 
 #if DEBUGHWJUNCTIONROUTING
 									if (debug) {
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): applying highway rules at junction");
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): totalIncomingLanes={totalIncomingLanes}, totalOutgoingLanes={totalOutgoingLanes}, numLanesSeen={numLanesSeen}");
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex}, prevSimilarLaneCount={prevSimilarLaneCount}, nextCompatibleLaneCount={nextCompatibleLaneCount}");
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway rules at junction: lane splitting junction. minNextInnerSimilarIndex={minNextInnerSimilarIndex}, maxNextInnerSimilarIndex={maxNextInnerSimilarIndex}");
 									}
 #endif
-
-									if (nextIsSplitJunction) {
-										// lane splitting at junction
-										minNextInnerSimilarIndex = prevInnerSimilarLaneIndex + numLanesSeen;
-
-										if (minNextInnerSimilarIndex >= nextCompatibleLaneCount) {
-											// there have already been explored more outgoing lanes than incoming lanes on the previous segment. Also allow vehicles to go to the current segment.
-											minNextInnerSimilarIndex = maxNextInnerSimilarIndex = refNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
-										} else {
-											// allow lane changes at highway junctions
-											maxNextInnerSimilarIndex = refNextInnerSimilarIndex = minNextInnerSimilarIndex;
-											if (minNextInnerSimilarIndex > 0 && prevInnerSimilarLaneIndex > 0) {
-												--minNextInnerSimilarIndex;
-											}
-										}
-
-#if DEBUGHWJUNCTIONROUTING
-										if (debug) {
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway rules at junction: lane splitting junction. minNextInnerSimilarIndex={minNextInnerSimilarIndex}, maxNextInnerSimilarIndex={maxNextInnerSimilarIndex}");
-										}
-#endif
-									} else {
-										// lane merging at junction
-										minNextInnerSimilarIndex = prevInnerSimilarLaneIndex - numLanesSeen;
-
-										if (minNextInnerSimilarIndex < 0) {
-											if (prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1) {
-												// there have already been explored more incoming lanes than outgoing lanes on the previous segment. Allow the current segment to also join the big merging party. What a fun!
-												minNextInnerSimilarIndex = 0;
-												maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
-											} else {
-												// lanes do not connect (min/max = -1)
-											}
-										} else {
-											// allow lane changes at highway junctions
-											refNextInnerSimilarIndex = minNextInnerSimilarIndex;
-											maxNextInnerSimilarIndex = Math.Min(nextCompatibleLaneCount - 1, minNextInnerSimilarIndex + 1);
-											if (minNextInnerSimilarIndex > 0) {
-												--minNextInnerSimilarIndex;
-											}
-
-											if (totalIncomingLanes > 0 && prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1 && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1) {
-												// we reached the outermost lane on the previous segment but there are still lanes to go on the next segment: allow merging
-												maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
-											}
-										}
-
-#if DEBUGHWJUNCTIONROUTING
-										if (debug) {
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway rules at junction: lane merging/unknown junction. minNextInnerSimilarIndex={minNextInnerSimilarIndex}, maxNextInnerSimilarIndex={maxNextInnerSimilarIndex}");
-										}
-#endif
-									}
-
-									if (minNextInnerSimilarIndex >= 0) {
-#if DEBUGHWJUNCTIONROUTING
-										if (debug) {
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): minNextInnerSimilarIndex >= 0. nextCompatibleTransitionDatas={nextCompatibleTransitionDatas.ArrayToString()}");
-										}
-#endif
-
-										// explore lanes
-										for (int nextInnerSimilarIndex = minNextInnerSimilarIndex; nextInnerSimilarIndex <= maxNextInnerSimilarIndex; ++nextInnerSimilarIndex) {
-											int nextTransitionIndex = FindLaneByInnerIndex(nextCompatibleTransitionDatas, numNextCompatibleTransitionDatas, nextSegmentId, nextInnerSimilarIndex);
-
-#if DEBUGHWJUNCTIONROUTING
-											if (debug) {
-												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iteration: nextInnerSimilarIndex={nextInnerSimilarIndex}, nextTransitionIndex={nextTransitionIndex}");
-											}
-#endif
-
-											if (nextTransitionIndex < 0) {
-												continue;
-											}
-
-											if (refNextInnerSimilarIndex >= 0) {
-												byte compatibleLaneDist = (byte)Math.Abs(refNextInnerSimilarIndex - nextInnerSimilarIndex);
-												nextCompatibleTransitionDatas[nextTransitionIndex].distance = compatibleLaneDist;
-#if DEBUGHWJUNCTIONROUTING
-												if (debug) {
-													Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iteration: compatibleLaneDist={compatibleLaneDist}");
-												}
-#endif
-											}
-
-											UpdateHighwayLaneArrows(nextCompatibleTransitionDatas[nextTransitionIndex].laneId, isNextStartNodeOfNextSegment, nextIncomingDir);
-
-											if (numNextCompatibleTransitionDataIndices < MAX_NUM_TRANSITIONS) {
-												nextCompatibleTransitionDataIndices[numNextCompatibleTransitionDataIndices++] = nextTransitionIndex;
-											} else {
-												Log.Warning($"nextCompatibleTransitionDataIndices overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
-											}
-										}
-
-#if DEBUGHWJUNCTIONROUTING
-										if (debug) {
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iterations finished: nextCompatibleTransitionDataIndices={nextCompatibleTransitionDataIndices.ArrayToString()}");
-										}
-#endif
-									}
 								} else {
-									/* we reached a simple highway transition where lane splits or merges take place.
-										this is guaranteed to be a simple lane splitting/merging point: the number of lanes is guaranteed to differ by 1
-										due to:
-										applyHighwayRulesAtSegment := applyHighwayRules && (applyHighwayRulesAtJunction || Math.Abs(laneDiff) == 1) [see above],
-										applyHighwayRules == true,
-										applyHighwayRulesAtSegment == true,
-										applyHighwayRulesAtJunction == false
-										=>
-										true && (false || Math.Abs(laneDiff) == 1) == Math.Abs(laneDiff) == 1
-									*/
+									// lane merging at junction
+									minNextInnerSimilarIndex = prevInnerSimilarLaneIndex - numLanesSeen;
 
-#if DEBUGROUTING
-									if (debug)
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): NOT applying highway rules at junction");
-#endif
-
-									int minNextCompatibleOuterSimilarIndex = -1;
-									int maxNextCompatibleOuterSimilarIndex = -1;
-
-									if (laneDiff == 1) {
-#if DEBUGROUTING
-										if (debug)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): simple lane merge");
-#endif
-										// simple lane merge
-										if (prevOuterSimilarLaneIndex == 0) {
-											// merge outer lane
-											minNextCompatibleOuterSimilarIndex = 0;
-											maxNextCompatibleOuterSimilarIndex = 1;
-#if DEBUGROUTING
-											if (debug)
-												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): merge outer lane: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
-#endif
+									if (minNextInnerSimilarIndex < 0) {
+										if (prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1) {
+											// there have already been explored more incoming lanes than outgoing lanes on the previous segment. Allow the current segment to also join the big merging party. What a fun!
+											minNextInnerSimilarIndex = 0;
+											maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
 										} else {
-											// other lanes stay + 1
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = (short)(prevOuterSimilarLaneIndex + 1);
-#if DEBUGROUTING
-											if (debug)
-												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): other lanes stay + 1: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
-#endif
+											// lanes do not connect (min/max = -1)
 										}
-									} else { // diff == -1
-#if DEBUGROUTING
-										if (debug)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): simple lane split");
-#endif
-										// simple lane split
-										if (prevOuterSimilarLaneIndex <= 1) {
-											// split outer lane
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = 0;
-#if DEBUGROUTING
-											if (debug)
-												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): split outer lane: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
-#endif
-										} else {
-											// other lanes stay - 1
-											minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = (short)(prevOuterSimilarLaneIndex - 1);
-#if DEBUGROUTING
-											if (debug)
-												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): other lanes stay - 1: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
-#endif
+									} else {
+										// allow lane changes at highway junctions
+										refNextInnerSimilarIndex = minNextInnerSimilarIndex;
+										maxNextInnerSimilarIndex = Math.Min(nextCompatibleLaneCount - 1, minNextInnerSimilarIndex + 1);
+										if (minNextInnerSimilarIndex > 0) {
+											--minNextInnerSimilarIndex;
+										}
+
+										if (totalIncomingLanes > 0 && prevInnerSimilarLaneIndex == prevSimilarLaneCount - 1 && maxNextInnerSimilarIndex < nextCompatibleLaneCount - 1) {
+											// we reached the outermost lane on the previous segment but there are still lanes to go on the next segment: allow merging
+											maxNextInnerSimilarIndex = nextCompatibleLaneCount - 1;
 										}
 									}
+
+#if DEBUGHWJUNCTIONROUTING
+									if (debug) {
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway rules at junction: lane merging/unknown junction. minNextInnerSimilarIndex={minNextInnerSimilarIndex}, maxNextInnerSimilarIndex={maxNextInnerSimilarIndex}");
+									}
+#endif
+								}
+
+								if (minNextInnerSimilarIndex >= 0) {
+#if DEBUGHWJUNCTIONROUTING
+									if (debug) {
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): minNextInnerSimilarIndex >= 0. nextCompatibleTransitionDatas={nextCompatibleTransitionDatas.ArrayToString()}");
+									}
+#endif
 
 									// explore lanes
-									for (int nextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex; nextCompatibleOuterSimilarIndex <= maxNextCompatibleOuterSimilarIndex; ++nextCompatibleOuterSimilarIndex) {
-										int nextTransitionIndex = FindLaneWithMaxOuterIndex(compatibleLaneIndicesSortedByOuterSimilarIndex, nextCompatibleOuterSimilarIndex);
+									for (int nextInnerSimilarIndex = minNextInnerSimilarIndex; nextInnerSimilarIndex <= maxNextInnerSimilarIndex; ++nextInnerSimilarIndex) {
+										int nextTransitionIndex = FindLaneByInnerIndex(nextCompatibleTransitionDatas, numNextCompatibleTransitionDatas, nextSegmentId, nextInnerSimilarIndex);
 
-#if DEBUGROUTING
-										if (debug)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): compatible lane exploration -- nextCompatibleOuterSimilarIndex={nextCompatibleOuterSimilarIndex} => nextTransitionIndex={nextTransitionIndex}");
+#if DEBUGHWJUNCTIONROUTING
+										if (debug) {
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iteration: nextInnerSimilarIndex={nextInnerSimilarIndex}, nextTransitionIndex={nextTransitionIndex}");
+										}
 #endif
 
 										if (nextTransitionIndex < 0) {
 											continue;
+										}
+
+										if (refNextInnerSimilarIndex >= 0) {
+											byte compatibleLaneDist = (byte)Math.Abs(refNextInnerSimilarIndex - nextInnerSimilarIndex);
+											nextCompatibleTransitionDatas[nextTransitionIndex].distance = compatibleLaneDist;
+#if DEBUGHWJUNCTIONROUTING
+											if (debug) {
+												Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iteration: compatibleLaneDist={compatibleLaneDist}");
+											}
+#endif
 										}
 
 										UpdateHighwayLaneArrows(nextCompatibleTransitionDatas[nextTransitionIndex].laneId, isNextStartNodeOfNextSegment, nextIncomingDir);
@@ -920,12 +818,19 @@ namespace TrafficManager.Manager.Impl {
 											Log.Warning($"nextCompatibleTransitionDataIndices overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 										}
 									}
+
+#if DEBUGHWJUNCTIONROUTING
+									if (debug) {
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): highway junction iterations finished: nextCompatibleTransitionDataIndices={nextCompatibleTransitionDataIndices.ArrayToString()}");
+									}
+#endif
 								}
 							} else {
 								/*
 								 * This is
-								 *    1. a highway junction or lane splitting/merging point with lane connections or
-								 *    2. a city or highway lane continuation point (simple transition with equal number of lanes or flagged city transition)
+								 *    1. a highway junction with lane connections,
+								 *    2. a highway lane splitting/merging point,
+								 *    2. a city or highway lane continuation point (simple transition with equal number of lanes or flagged city transition) or
 								 *    3. a city junction
 								 *  with multiple or a single target lane: Perform lane matching
 								 */
@@ -938,7 +843,7 @@ namespace TrafficManager.Manager.Impl {
 								// min/max compatible outer similar lane indices
 								int minNextCompatibleOuterSimilarIndex = -1;
 								int maxNextCompatibleOuterSimilarIndex = -1;
-								if (hasLaneConnections) {
+								/*if (hasLaneConnections) {
 									// consider all available lanes
 									minNextCompatibleOuterSimilarIndex = 0;
 									maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
@@ -946,7 +851,7 @@ namespace TrafficManager.Manager.Impl {
 									if (debug)
 										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): lane connections detected: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
 #endif
-								} else if (nextIncomingDir == ArrowDirection.Turn) {
+								} else*/ if (nextIncomingDir == ArrowDirection.Turn) {
 									// force u-turns to happen on the innermost lane
 									minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
 #if DEBUGROUTING
@@ -1158,13 +1063,16 @@ namespace TrafficManager.Manager.Impl {
 									minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex;
 								}
 
+								int minIndex = hasLaneConnections ? 0 : minNextCompatibleOuterSimilarIndex;
+								int maxIndex = hasLaneConnections ? nextCompatibleLaneCount - 1 : maxNextCompatibleOuterSimilarIndex;
+
 #if DEBUGROUTING
 								if (debug)
 									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): final bounds: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
 #endif
 
 								// find best matching lane(s)
-								for (int nextCompatibleOuterSimilarIndex = minNextCompatibleOuterSimilarIndex; nextCompatibleOuterSimilarIndex <= maxNextCompatibleOuterSimilarIndex; ++nextCompatibleOuterSimilarIndex) {
+								for (int nextCompatibleOuterSimilarIndex = minIndex; nextCompatibleOuterSimilarIndex <= maxIndex; ++nextCompatibleOuterSimilarIndex) {
 									int nextTransitionIndex = FindLaneWithMaxOuterIndex(compatibleLaneIndicesSortedByOuterSimilarIndex, nextCompatibleOuterSimilarIndex);
 
 #if DEBUGROUTING
@@ -1174,6 +1082,18 @@ namespace TrafficManager.Manager.Impl {
 
 									if (nextTransitionIndex < 0) {
 										continue;
+									}
+
+									if (nextCompatibleOuterSimilarIndex < minNextCompatibleOuterSimilarIndex || nextCompatibleOuterSimilarIndex > maxNextCompatibleOuterSimilarIndex) {
+										// check for lane connections
+										int nextNumConnections = LaneConnectionManager.Instance.CountConnections(nextCompatibleTransitionDatas[nextTransitionIndex].laneId, isNextStartNodeOfNextSegment);
+										bool nextIsConnectedWithPrev = LaneConnectionManager.Instance.AreLanesConnected(prevLaneId, nextCompatibleTransitionDatas[nextTransitionIndex].laneId, startNode);
+										
+										if (nextNumConnections == 0) {
+											continue; // disregard lane since next lane does not have outgoing connections
+										} else if (nextNumConnections != 0 && !nextIsConnectedWithPrev) {
+											continue; // disregard lane since next lane has outgoing connections but it is not connected to previous lane
+										}
 									}
 
 									byte compatibleLaneDist = 0;
@@ -1197,6 +1117,8 @@ namespace TrafficManager.Manager.Impl {
 										if (debug)
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): -> under normal circumstances vehicles should not change more than one lane on highways at one time: setting type to Relaxed");
 #endif
+									} else if (applyHighwayRulesAtSegment && !hasLaneConnections) {
+										UpdateHighwayLaneArrows(nextCompatibleTransitionDatas[nextTransitionIndex].laneId, isNextStartNodeOfNextSegment, nextIncomingDir);
 									}
 
 									if (numNextCompatibleTransitionDataIndices < MAX_NUM_TRANSITIONS) {

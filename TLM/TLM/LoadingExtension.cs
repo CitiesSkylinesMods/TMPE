@@ -112,6 +112,84 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				// TODO remove
+				Log.Info("Reverse-Redirection CustomNetManager::FinalizeNode calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("FinalizeNode",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+							},
+							null),
+							typeof(NetManager).GetMethod("FinalizeNode",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomNetManager::FinalizeNode");
+					detourFailed = true;
+				}
+
+				// TODO remove
+				Log.Info("Reverse-Redirection CustomNetManager::InitializeNode calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("InitializeNode",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+							},
+							null),
+							typeof(NetManager).GetMethod("InitializeNode",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomNetManager::InitializeNode");
+					detourFailed = true;
+				}
+
+				// TODO remove
+				Log.Info("Reverse-Redirection CustomNetManager::InitializeSegment calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("InitializeSegment",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+							},
+							null),
+							typeof(NetManager).GetMethod("InitializeSegment",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (NetSegment).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomNetManager::InitializeSegment");
+					detourFailed = true;
+				}
+
 				Log.Info("Reverse-Redirection CustomCitizenManager::ReleaseCitizenInstanceImplementation calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomCitizenManager).GetMethod("ReleaseCitizenInstanceImplementation",
@@ -2195,6 +2273,34 @@ namespace TrafficManager {
 							typeof(CustomNetManager).GetMethod("CustomFinalizeSegment")));
 				} catch (Exception) {
 					Log.Error("Could not redirect NetManager::FinalizeSegment");
+					detourFailed = true;
+				}
+
+				// TODO remove
+				Log.Info("Redirection NetManager::MoveNode calls");
+				try {
+					Detours.Add(new Detour(typeof(NetManager).GetMethod("MoveNode",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+									typeof (Vector3)
+							},
+							null),
+							typeof(CustomNetManager).GetMethod("CustomMoveNode",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (NetNode).MakeByRefType(),
+									typeof (Vector3)
+							},
+							null)));
+				} catch (Exception) {
+					Log.Error("Could not redirect NetManager::MoveNode");
 					detourFailed = true;
 				}
 

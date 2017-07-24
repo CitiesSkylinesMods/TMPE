@@ -41,6 +41,9 @@ namespace TrafficManager {
 			if (ticksSinceLastMinuteUpdate > 60 * 60) {
 				ticksSinceLastMinuteUpdate = 0;
 				GlobalConfig.Instance.SimulationStep();
+#if DEBUG
+				DebugMenuPanel.PrintTransportStats();
+#endif
 			}
 
 			++ticksSinceLastSecondUpdate;

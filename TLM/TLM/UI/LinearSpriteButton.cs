@@ -80,8 +80,6 @@ namespace TrafficManager.UI.MainMenu {
 				textureIds[i++] = GetButtonForegroundTextureId(ButtonName, function, true);
 			}
 
-			Log._Debug($"Texture ids: {textureIds.ArrayToString()}");
-
 			// Set the atlases for background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_" + ButtonName + "Atlas", AtlasTexture, textureIds.Length, textureIds);
 			

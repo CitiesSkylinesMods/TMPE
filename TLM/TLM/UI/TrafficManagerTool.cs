@@ -647,7 +647,7 @@ namespace TrafficManager.UI {
 				labelStr += ", in: " + RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i) + ", out: " + RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i) + ", f: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", l: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, rst: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo, VehicleRestrictionsMode.Configured) + ", dir: " + laneInfo.m_direction + ", fnl: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
 #endif
 				if (laneTrafficDataLoaded) {
-					labelStr += ", sp: " + (TrafficMeasurementManager.Instance.CalcLaneRelMeanSpeed(segmentId, (byte)i, curLaneId, laneInfo) / 100) + "%";
+					labelStr += ", sp: " + (TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(segmentId, (byte)i, curLaneId, laneInfo) / 100) + "%";
 #if DEBUG
 					labelStr += ", buf: " + laneTrafficData.trafficBuffer + ", acc: " + laneTrafficData.accumulatedSpeeds;
 #if PFTRAFFICSTATS

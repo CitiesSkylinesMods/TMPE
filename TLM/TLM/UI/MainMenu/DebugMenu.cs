@@ -47,6 +47,7 @@ namespace TrafficManager.UI {
 		private static UIButton _goToPosButton = null;
 		private static UIButton _printDebugInfoButton = null;
 		private static UIButton _reloadConfigButton = null;
+		private static UIButton _recalcLinesButton = null;
 		private static UIButton _checkDetoursButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
@@ -165,7 +166,10 @@ namespace TrafficManager.UI {
 			_reloadConfigButton = _createButton("Reload configuration", y, clickReloadConfig);
 			y += 40;
 			height += 40;
-			_checkDetoursButton = _createButton("Check detours", y, clickCheckDetours);
+			_recalcLinesButton = _createButton("Recalculate transport lines", y, clickRecalcLines);
+			y += 40;
+			height += 40;
+			_checkDetoursButton = _createButton("Check transport lines", y, clickCheckDetours);
 			y += 40;
 			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
@@ -266,10 +270,66 @@ namespace TrafficManager.UI {
 			GlobalConfig.Reload();
 		}
 
+		private void clickRecalcLines(UIComponent component, UIMouseEventParameter eventParam) {
+			SimulationManager.instance.AddAction(() => {
+				for (int i = 0; i < TransportManager.MAX_LINE_COUNT; ++i) {
+					if (TransportManager.instance.m_lines.m_buffer[i].m_flags == TransportLine.Flags.None) {
+						continue;
+						//Log.Message("\tTransport line is not created.");
+					}
+					Log.Info($"Recalculating transport line {i} now.");
+					if (TransportManager.instance.m_lines.m_buffer[i].UpdatePaths((ushort)i) &&
+						TransportManager.instance.m_lines.m_buffer[i].UpdateMeshData((ushort)i)
+					) {
+						Log.Info($"Transport line {i} recalculated.");
+					}
+				}
+			});
+		}
+
 		private void clickCheckDetours(UIComponent component, UIMouseEventParameter eventParam) {
-			foreach (LoadingExtension.Detour detour in LoadingExtension.Detours) {
-				bool isRedirected = RedirectionHelper.IsRedirected(detour.OriginalMethod, detour.CustomMethod);
-				Log.Info($"Checking detour {detour.OriginalMethod.Name} -> {detour.CustomMethod.Name}: {(isRedirected ? "redirected" : "*NOT REDIRECTED*")}");
+			SimulationManager.instance.AddAction(() => {
+				PrintTransportStats();
+			});
+		}
+
+		public static void PrintTransportStats() {
+			for (int i = 0; i < TransportManager.MAX_LINE_COUNT; ++i) {
+				Log.Info("Transport line " + i + ":");
+				if ((TransportManager.instance.m_lines.m_buffer[i].m_flags & TransportLine.Flags.Created) == TransportLine.Flags.None) {
+					Log.Info("\tTransport line is not created.");
+					continue;
+				}
+				Log.Info("\tFlags: " + TransportManager.instance.m_lines.m_buffer[i].m_flags + ", cat: " + TransportManager.instance.m_lines.m_buffer[i].Info.category + ", type: " + TransportManager.instance.m_lines.m_buffer[i].Info.m_transportType + ", name: " + TransportManager.instance.GetLineName((ushort)i));
+				ushort firstStopNodeId = TransportManager.instance.m_lines.m_buffer[i].m_stops;
+				ushort stopNodeId = firstStopNodeId;
+				Vector3 lastNodePos = Vector3.zero;
+				int index = 1;
+				while (stopNodeId != 0) {
+					Vector3 pos = NetManager.instance.m_nodes.m_buffer[stopNodeId].m_position;
+					Log.Info("\tStop node #" + index + " -- " + stopNodeId + ": Flags: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_flags + ", Transport line: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_transportLine + ", Problems: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_problems + " Pos: " + pos + ", Dist. to lat pos: " + (lastNodePos - pos).magnitude);
+					if (NetManager.instance.m_nodes.m_buffer[stopNodeId].m_problems != Notification.Problem.None) {
+						Log.Warning("\t*** PROBLEMS DETECTED ***");
+					}
+					lastNodePos = pos;
+
+					ushort nextSegment = TransportLine.GetNextSegment(stopNodeId);
+					if (nextSegment != 0) {
+						stopNodeId = NetManager.instance.m_segments.m_buffer[(int)nextSegment].m_endNode;
+					} else {
+						break;
+					}
+					++index;
+
+					if (stopNodeId == firstStopNodeId) {
+						break;
+					}
+
+					if (index > 10000) {
+						Log.Error("Too many iterations!");
+						break;
+					}
+				}
 			}
 		}
 

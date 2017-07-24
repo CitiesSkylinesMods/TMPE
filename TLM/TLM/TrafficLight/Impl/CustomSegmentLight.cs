@@ -230,6 +230,33 @@ namespace TrafficManager.TrafficLight.Impl {
 			UpdateVisuals();
 		}
 
+		public RoadBaseAI.TrafficLightState GetLightState(ArrowDirection dir) {
+			switch (dir) {
+				case ArrowDirection.Left:
+					return LightLeft;
+				case ArrowDirection.Forward:
+				default:
+					return LightMain;
+				case ArrowDirection.Right:
+					return LightRight;
+				case ArrowDirection.Turn:
+					return Constants.ServiceFactory.SimulationService.LeftHandDrive ? LightRight : LightLeft;
+			}
+		}
+
+		public bool IsGreen(ArrowDirection dir) {
+			return GetLightState(dir) == RoadBaseAI.TrafficLightState.Green;
+		}
+
+		public bool IsInTransition(ArrowDirection dir) {
+			RoadBaseAI.TrafficLightState state = GetLightState(dir);
+			return state == RoadBaseAI.TrafficLightState.GreenToRed || state == RoadBaseAI.TrafficLightState.RedToGreen;
+		}
+
+		public bool IsRed(ArrowDirection dir) {
+			return GetLightState(dir) == RoadBaseAI.TrafficLightState.Red;
+		}
+
 		public bool IsAnyGreen() {
 			return LightMain == RoadBaseAI.TrafficLightState.Green ||
 				LightLeft == RoadBaseAI.TrafficLightState.Green ||

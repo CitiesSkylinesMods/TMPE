@@ -204,7 +204,11 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public ushort CalcLaneRelMeanSpeed(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+		public ushort CalcLaneRelativeMeanSpeed(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+			if (laneTrafficData[segmentId] == null || laneIndex >= laneTrafficData[segmentId].Length) {
+				return MAX_REL_SPEED;
+			}
+
 			ushort currentBuf = laneTrafficData[segmentId][laneIndex].trafficBuffer;
 			ushort curRelSpeed = MAX_REL_SPEED;
 
@@ -289,7 +293,7 @@ namespace TrafficManager.Manager.Impl {
 					int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
 					// calculate reported mean speed
-					ushort newRelSpeed = CalcLaneRelMeanSpeed(segmentId, laneIndex, curLaneId, segment.Info.m_lanes[laneIndex]);
+					ushort newRelSpeed = CalcLaneRelativeMeanSpeed(segmentId, laneIndex, curLaneId, segment.Info.m_lanes[laneIndex]);
 #if MEASURECONGESTION
 					if (newRelSpeed < minRelSpeeds[dirIndex]) {
 						minRelSpeeds[dirIndex] = newRelSpeed;
@@ -397,7 +401,11 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void AddTraffic(ushort segmentId, byte laneIndex, ushort vehicleLength, ushort speed) {
+		public void AddTraffic(ushort segmentId, byte laneIndex
+#if MEASUREDENSITY
+			, ushort vehicleLength
+#endif
+			, ushort speed) {
 			if (laneTrafficData[segmentId] == null || laneIndex >= laneTrafficData[segmentId].Length)
 				return;
 

@@ -580,11 +580,17 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomCheckNextLane(ushort vehicleId, ref Vehicle vehicleData, ref float maxSpeed, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, Bezier3 bezier) {
+			NetManager netManager = Singleton<NetManager>.instance;
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[13];
+			ushort nextNodeId;
+			if (offset < position.m_offset) {
+				nextNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
+			} else {
+				nextNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
+			}
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nextNodeId == GlobalConfig.Instance.Debug.NodeId);
 #endif
 
-			NetManager netManager = Singleton<NetManager>.instance;
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
@@ -613,11 +619,15 @@ namespace TrafficManager.Custom.AI {
 
 			if (Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot) >= breakingDist - 5f) {
 				ushort targetNodeId;
+#if DEBUG
+				targetNodeId = nextNodeId;
+#else
 				if (offset < position.m_offset) {
 					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
 				} else {
 					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
 				}
+#endif
 				ushort prevTargetNodeId;
 				if (prevOffset == 0) {
 					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;

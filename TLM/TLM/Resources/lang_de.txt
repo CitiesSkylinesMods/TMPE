@@ -176,4 +176,10 @@ flow_ratio fahrende Fzg.
 wait_ratio wartende Fzg.
 After_min._time_has_elapsed_switch_to_next_step_if Wenn die min. Zeit abläuft, wechsle zum nächsten Schritt falls
 Adaptive_step_switching Adaptive Schrittumschaltung
+Dynamic_lane_section Dynamische Fahrspurwahl
+Percentage_of_vehicles_performing_dynamic_lane_section Prozentsatz der Fahrzeuge mit dynamischer Fahrspurwahl
+Vehicle_restrictions_aggression Auslegung der Fahrzeugbeschränkungen
+Strict Strict
 Show_path-find_stats Path-Find Statistik anzeigen
+Remove_this_vehicle Dieses Fahrzeug entfernen
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Fahrzeuge befolgen an zeitgesteuerten Ampeln die Vorrangsregelung

@@ -32,8 +32,18 @@ namespace TrafficManager.Manager.Impl {
 					case ExtPathMode.CalculatingWalkingPathToParkedCar:
 					case ExtPathMode.WalkingToParkedCar:
 					case ExtPathMode.ApproachingParkedCar:
-						// citizen instances in precarious situations are released in order to prevent them from floating
+						// citizen requires a path to their parked car: release instance to prevent it from floating
 						Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
+						break;
+					case ExtPathMode.RequiresCarPath:
+					case ExtPathMode.CalculatingCarPathToKnownParkPos:
+					case ExtPathMode.CalculatingCarPathToTarget:
+					case ExtPathMode.DrivingToKnownParkPos:
+					case ExtPathMode.DrivingToTarget:
+						if (Services.CitizenService.CheckCitizenInstanceFlags((ushort)citizenInstanceId, CitizenInstance.Flags.Character)) {
+							// citizen instance requires a car but is walking: release instance to prevent it from floating
+							Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
+						}
 						break;
 				}
 			}

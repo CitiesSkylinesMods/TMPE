@@ -45,6 +45,7 @@ namespace TrafficManager.State {
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
+		private static UICheckBox trafficLightPriorityRulesToggle = null;
 		private static UIDropDown vehicleRestrictionsAggressionDropdown = null;
 		private static UICheckBox banRegularTrafficOnBusLanesToggle = null;
 		private static UICheckBox enableDespawningToggle = null;
@@ -117,6 +118,7 @@ namespace TrafficManager.State {
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
+		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
 		public static bool advancedAI = false;
 		public static byte altLaneSelectionRatio = 25;
@@ -272,6 +274,7 @@ namespace TrafficManager.State {
 			allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
+			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
 
 			var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
 			vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
@@ -777,6 +780,14 @@ namespace TrafficManager.State {
 			allowLaneChangesWhileGoingStraight = newValue;
 		}
 
+		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"trafficLightPriorityRules changed to {newValue}");
+			trafficLightPriorityRules = newValue;
+		}
+
 		private static void onBanRegularTrafficOnBusLanesChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
@@ -800,13 +811,12 @@ namespace TrafficManager.State {
 				return;
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
-			prohibitPocketCars = newValue;
+			
 			if (prohibitPocketCars) {
 				AdvancedParkingManager.Instance.OnEnableFeature();
 			} else {
 				AdvancedParkingManager.Instance.OnDisableFeature();
 			}
-			//ExtCitizenInstanceManager.Instance.Reset();
 		}
 
 		private static void onRealisticSpeedsChanged(bool value) {
@@ -1028,10 +1038,10 @@ namespace TrafficManager.State {
 		}
 
 		public static void setProhibitPocketCars(bool newValue) {
+			bool valueChanged = newValue != prohibitPocketCars;
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
-			ExtCitizenInstanceManager.Instance.Reset();
 		}
 
 		public static void setRealisticSpeeds(bool newValue) {
@@ -1057,6 +1067,12 @@ namespace TrafficManager.State {
 			allowLaneChangesWhileGoingStraight = value;
 			if (allowLaneChangesWhileGoingStraightToggle != null)
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
+		}
+
+		public static void setTrafficLightPriorityRules(bool value) {
+			trafficLightPriorityRules = value;
+			if (trafficLightPriorityRulesToggle != null)
+				trafficLightPriorityRulesToggle.isChecked = value;
 		}
 
 		public static void setBanRegularTrafficOnBusLanes(bool value) {

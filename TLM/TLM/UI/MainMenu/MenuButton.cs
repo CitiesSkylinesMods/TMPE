@@ -64,7 +64,6 @@ namespace TrafficManager.UI.MainMenu {
 				for (int i = 0; i < functions.Length; ++i) {
 					ret[i] = functions.GetValue(i).ToString();
 				}
-				Log._Debug($"FunctionNames: {ret.ArrayToString()}");
 				return ret;
 			}
 		}

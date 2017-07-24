@@ -69,12 +69,18 @@ namespace TrafficManager.Manager.Impl {
 			if (state.currentSegmentId == 0) {
 				return;
 			}
+#if MEASUREDENSITY
 			ushort length = (ushort)state.totalLength;
 			if (length == 0) {
 				return;
 			}
+#endif
 
-			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex, length, (ushort)state.velocity);
+			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex
+#if MEASUREDENSITY
+				, length
+#endif
+				, (ushort)state.velocity);
 		}
 
 		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {

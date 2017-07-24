@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,14 +17,18 @@ namespace TrafficManager.TrafficLight {
 		RoadBaseAI.TrafficLightState LightMain { get; }
 		RoadBaseAI.TrafficLightState LightRight { get; }
 
+		RoadBaseAI.TrafficLightState GetLightState(ArrowDirection dir);
 		bool IsAnyGreen();
+		bool IsGreen(ArrowDirection dir);
 		bool IsAnyInTransition();
+		bool IsInTransition(ArrowDirection dir);
 		bool IsLeftGreen();
 		bool IsMainGreen();
 		bool IsRightGreen();
 		bool IsLeftRed();
 		bool IsMainRed();
 		bool IsRightRed();
+		bool IsRed(ArrowDirection dir);
 		void UpdateVisuals();
 		void MakeRed();
 		void MakeRedOrGreen();

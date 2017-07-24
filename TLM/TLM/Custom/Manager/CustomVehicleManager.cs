@@ -2,6 +2,7 @@
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
@@ -16,10 +17,6 @@ namespace TrafficManager.Custom.Manager {
 #endif
 			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
-		}
-
-		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
-			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
 		}
 
 		public bool CustomCreateVehicle(out ushort vehicleId, ref Randomizer r, VehicleInfo info, Vector3 position, TransferManager.TransferReason type, bool transferToSource, bool transferToTarget) {
@@ -88,6 +85,11 @@ namespace TrafficManager.Custom.Manager {
 			}
 			vehicleId = 0;
 			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
+			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
 		}
 	}
 }

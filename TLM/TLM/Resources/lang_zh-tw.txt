@@ -178,3 +178,4 @@ wait_ratio wait ratio
 After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
 Adaptive_step_switching Adaptive step switching
 Show_path-find_stats Show path-find stats
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights

@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSUtil.Redirection", "CSUti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSUtil.Commons", "CSUtil.Commons\CSUtil.Commons.csproj", "{D3ADE06E-F493-4819-865A-3BB44FEEDF01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptionsFramework", "OptionsFramework\OptionsFramework.csproj", "{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +96,12 @@ Global
 		{D3ADE06E-F493-4819-865A-3BB44FEEDF01}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{D3ADE06E-F493-4819-865A-3BB44FEEDF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3ADE06E-F493-4819-865A-3BB44FEEDF01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
