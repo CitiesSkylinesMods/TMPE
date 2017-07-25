@@ -78,7 +78,7 @@ namespace TrafficManager.Custom.Manager {
 		}
 
 		// TODO remove
-		private void CustomMoveNode(ushort node, ref NetNode data, Vector3 position) {
+		/*private void CustomMoveNode(ushort node, ref NetNode data, Vector3 position) {
 #if DEBUG
 			Log.Warning($"CustomNetManager.CustomMoveNode({node}, ..., {position}): old position: {data.m_position} -- flags: {data.m_flags}, problems: {data.m_problems}, transport line: {data.m_transportLine}");
 #endif
@@ -99,10 +99,10 @@ namespace TrafficManager.Custom.Manager {
 				}
 			}
 			this.UpdateNode(node);
-		}
+		}*/
 
 		// TODO remove
-		[MethodImpl(MethodImplOptions.NoInlining)]
+		/*[MethodImpl(MethodImplOptions.NoInlining)]
 		private void FinalizeNode(ushort node, ref NetNode data) {
 			Log.Error($"CustomNetManager.FinalizeNode called");
 		}
@@ -117,6 +117,6 @@ namespace TrafficManager.Custom.Manager {
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void InitializeSegment(ushort segmentId, ref NetSegment data) {
 			Log.Error($"CustomNetManager.InitializeNode called");
-		}
+		}*/
 	}
 }
