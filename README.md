@@ -4,21 +4,42 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
-1.9.7, XX/XX/2017
+1.10.0, 07/30/2017
+- New feature: Dynamic Lane Selection
 - New feature: Adaptive step switching
+- New feature: Individual vehicles may be removed from the game 
+- New option: Vehicle restrictions aggression
+- New option: Vehicles follow priority rules at junctions with timed traffic lights
+- Improved path-finding performance
+- Improved performance traffic measurement engine performance 
+- Improved vehicle state tracking
+- Reorganized global configuration file (sorry, your main menu and main button positions are reset)
+- The option "Road condition has a bigger impact on vehicle speed" is only shown if the Snowfall DLC is owned
+- The flow/wait calculation mode to be used is now configurable via the global configuration file
+- Added path-find statistics label
+- Added confirmation dialog for "Clear Traffic" button
+- Currently active timed traffic light step is remembered
+- Trains do not wait for each other anymore near timed traffic lights
+- It is now possible to connect train station tracks and outside connections with the lane connector
+- Disabling the Parking AI triggers graceful clean up procedure
+- Relocated some options
+- Workaround for a base game issue that causes trams to get stuck
 - Trains do not longer stop in front of green timed traffic lights
-- Bugfix: Using the bulldozer tool might lead to inconsistent road geometry information
-- Bugfix: Citizens that fail to approach their parked car float towards their target building
+- Vehicles use queue skipping to prioritize path-finding runs that are caused by road modifications
+- Adding a vehicle separate light to a timed traffic lights applies the main light configuration
+- Parking AI: Vehicles can now find parking spaces at the opposite road side
 - Parking AI: Included an improved fallback logic for some edge cases
 - Parking AI: Citizens should now be more successful in returning their cars back home  
 - Parking AI: Tuned parking radius parameters 
+- Parking AI: If the limit for parked vehicles is reached and parking fails due to it, no alternative parking space is queried
+- Vehicle AI: Busses prefer lanes with correct lane arrow over incorrect ones
+- Bugfix: Using the bulldozer tool might lead to inconsistent road geometry information
+- Bugfix: Citizens that fail to approach their parked car fly towards their target building 
 - Bugfix: Parking AI: Path-finding fails if cars are parked too far away from a road
-- Performance improvements
-- Enabling despawn now does not cause all vehicles to despawn instantly 
-- Vehicle AI: Re-introduced penalties for lane changes in front of highway junctions
-- Vehicle AI: Busses prefer lanes with correct lane though over incorrect ones
+- Bugfix: Parking AI: Citizens approaching a car start to float away
 - Bugfix: "Heavy vehicles prefer outer lanes on highways" does not work
 - Bugfix: The lane connector does not allow connecting all available lane end points at train stations and on bidirectional one-lane train tracks
+- Bugfix: Vehicles may get stuck in several situations
 - Upgrading to a road with bus lanes now copies an already existing traffic light state to the new traffic light 
 
 1.9.6, 05/28/2017
