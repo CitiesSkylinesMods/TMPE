@@ -4,11 +4,12 @@ using System.IO;
 using System.Reflection;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Traffic.PrioritySegment;
+using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.UI
 {
@@ -59,6 +60,7 @@ namespace TrafficManager.UI
 		public static readonly Texture2D MainMenuButtonTexture2D;
 		public static readonly Texture2D MainMenuButtonsTexture2D;
 		public static readonly Texture2D NoImageTexture2D;
+		public static readonly Texture2D RemoveVehicleButtonTexture2D;
 
 		static TextureResources()
         {
@@ -174,6 +176,8 @@ namespace TrafficManager.UI
 			VehicleInfoSignTextures[ExtVehicleType.Service] = LoadDllResource("service_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("taxi_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("tram_infosign.png", 449, 411);
+
+			RemoveVehicleButtonTexture2D = LoadDllResource("remove-vehicle-btn.png", 150, 30);
 		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)

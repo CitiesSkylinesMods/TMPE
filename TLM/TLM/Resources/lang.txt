@@ -92,7 +92,7 @@ Speed_limits Speed limits
 Persistently_visible_overlays Persistently visible overlays
 Priority_signs Priority signs
 Vehicles_may_do_u-turns_at_junctions Vehicles may do u-turns at junctions
-Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight may change lanes at junctions
+Vehicles_going_straight_may_change_lanes_at_junctions Vehicles going straight on may change lanes at junctions
 Allow_u-turns Allow u-turns
 Allow_lane_changing_for_vehicles_going_straight Allow lane changing for vehicles going straight
 Allow_vehicles_to_enter_a_blocked_junction Allow vehicles to enter a blocked junction
@@ -172,3 +172,15 @@ Parking_restrictions Parking restrictions
 Simulation Simulation
 On_roads On roads
 Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
+default default
+flow_ratio flow ratio
+wait_ratio wait ratio
+After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
+Adaptive_step_switching Adaptive step switching
+Dynamic_lane_section Dynamic lane selection
+Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
+Vehicle_restrictions_aggression Vehicle restrictions aggression
+Strict Strict
+Show_path-find_stats Show path-find stats
+Remove_this_vehicle Remove this vehicle
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights

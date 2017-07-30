@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ColossalFramework.UI;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI.MainMenu {
 	public class ClearTrafficButton : MenuButton {
@@ -32,8 +33,12 @@ namespace TrafficManager.UI.MainMenu {
 		}
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
-			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			VehicleStateManager.Instance.RequestClearTraffic();
+			ConfirmPanel.ShowModal(Translation.GetString("Clear_Traffic"), Translation.GetString("Clear_Traffic") + "?", delegate (UIComponent comp, int ret) {
+				if (ret == 1) {
+					UtilityManager.Instance.RequestClearTraffic();
+				}
+				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+			});
 		}
 	}
 }

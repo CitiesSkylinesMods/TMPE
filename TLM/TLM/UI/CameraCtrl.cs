@@ -7,7 +7,10 @@ using UnityEngine;
 namespace TrafficManager.UI {
 	class CameraCtrl {
 		public static void GoToPos(Vector3 pos) {
-			ToolsModifierControl.cameraController.SetOverrideModeOn(pos, Vector2.zero, 10.0f);
+			ToolsModifierControl.cameraController.ClearTarget();
+
+			ToolsModifierControl.cameraController.m_targetPosition.x = pos.x;
+			ToolsModifierControl.cameraController.m_targetPosition.z = pos.z;
 		}
 
 		public static void ClearPos() {
@@ -24,6 +27,13 @@ namespace TrafficManager.UI {
 		public static void GoToVehicle(ushort vehicleId, Vector3 pos) {
 			InstanceID id = default(InstanceID);
 			id.Vehicle = vehicleId;
+
+			ToolsModifierControl.cameraController.SetTarget(id, pos, true);
+		}
+
+		public static void GoToParkedVehicle(ushort parkedVehicleId, Vector3 pos) {
+			InstanceID id = default(InstanceID);
+			id.ParkedVehicle = parkedVehicleId;
 
 			ToolsModifierControl.cameraController.SetTarget(id, pos, true);
 		}

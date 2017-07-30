@@ -61,7 +61,7 @@ Reckless_driving Rücksichtsloses Fahren
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Einstellungen werden pro Spielstand gespeichert
 Simulation_accuracy Genauigkeit der Simulation (höhere Genauigkeit reduziert Performance)
-Enable_highway_specific_lane_merging/splitting_rules Aktiviere spezielle Verkehrsregeln auf der Autobahn
+Enable_highway_specific_lane_merging/splitting_rules Aktiviere spezifische Einordnungsregeln auf der Autobahn
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Autofahrer wechseln ihre Spur (wird nur angewendet wenn die KI eingeschaltet ist)
 Maintenance Wartung
 Very_often Sehr häufig
@@ -171,3 +171,15 @@ Parking_restrictions Parkverbote
 Simulation Simulation
 On_roads Auf Straßen
 Ban_private_cars_and_trucks_on_bus_lanes Verbiete private Fahrzeuge und Lieferwagen auf Busspuren
+default Standard
+flow_ratio fahrende Fzg.
+wait_ratio wartende Fzg.
+After_min._time_has_elapsed_switch_to_next_step_if Wenn die min. Zeit abläuft, wechsle zum nächsten Schritt falls
+Adaptive_step_switching Adaptive Schrittumschaltung
+Dynamic_lane_section Dynamische Fahrspurwahl
+Percentage_of_vehicles_performing_dynamic_lane_section Prozentsatz der Fahrzeuge mit dynamischer Fahrspurwahl
+Vehicle_restrictions_aggression Auslegung der Fahrzeugbeschränkungen
+Strict Strict
+Show_path-find_stats Path-Find Statistik anzeigen
+Remove_this_vehicle Dieses Fahrzeug entfernen
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Fahrzeuge befolgen an zeitgesteuerten Ampeln die Vorrangsregelung

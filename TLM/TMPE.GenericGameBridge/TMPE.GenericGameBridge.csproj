@@ -34,6 +34,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +53,7 @@
     <Compile Include="Factory\IServiceFactory.cs" />
     <Compile Include="Service\ICitizenService.cs" />
     <Compile Include="Service\IBuildingService.cs" />
+    <Compile Include="Service\IPathService.cs" />
     <Compile Include="Service\IVehicleService.cs" />
     <Compile Include="Service\INetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

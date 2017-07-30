@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Util;
+using CSUtil.Commons;
 
 namespace TMUnitTest.Util {
 	[TestClass]

@@ -28,6 +28,12 @@ namespace CitiesGameBridge.Factory {
 			}
 		}
 
+		public IPathService PathService {
+			get {
+				return Service.PathService.Instance;
+			}
+		}
+
 		public ISimulationService SimulationService {
 			get {
 				return Service.SimulationService.Instance;

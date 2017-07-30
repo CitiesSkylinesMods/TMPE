@@ -27,26 +27,15 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>QUEUEDSTATS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QueuedStats|AnyCPU'">
-    <OutputPath>bin\QueuedStats\</OutputPath>
-    <DefineConstants>QUEUEDSTATS</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugGeometry|AnyCPU'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -89,7 +78,6 @@
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
-    <Compile Include="Custom\AI\CustomNetAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
@@ -98,41 +86,84 @@
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
+    <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Geometry\GeometryCalculationMode.cs" />
+    <Compile Include="Geometry\ISegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
+    <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
     <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
-    <Compile Include="Manager\ParkingRestrictionsManager.cs" />
-    <Compile Include="Manager\RoutingManager.cs" />
-    <Compile Include="Manager\SegmentEndManager.cs" />
-    <Compile Include="Manager\VehicleBehaviorManager.cs" />
-    <Compile Include="Manager\ExtBuildingManager.cs" />
+    <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IExtBuildingManager.cs" />
+    <Compile Include="Manager\IExtCitizenInstanceManager.cs" />
+    <Compile Include="Manager\IFeatureManager.cs" />
+    <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
+    <Compile Include="Manager\ILaneArrowManager.cs" />
+    <Compile Include="Manager\ILaneConnectionManager.cs" />
+    <Compile Include="Manager\Impl\ManagerFactory.cs" />
+    <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
+    <Compile Include="Manager\Impl\RoutingManager.cs" />
+    <Compile Include="Manager\Impl\SegmentEndManager.cs" />
+    <Compile Include="Manager\Impl\VehicleBehaviorManager.cs" />
+    <Compile Include="Manager\Impl\ExtBuildingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
-    <Compile Include="Manager\AdvancedParkingManager.cs" />
-    <Compile Include="Manager\LaneArrowManager.cs" />
-    <Compile Include="Manager\OptionsManager.cs" />
-    <Compile Include="Manager\TrafficLightManager.cs" />
-    <Compile Include="Manager\TrafficMeasurementManager.cs" />
-    <Compile Include="Manager\JunctionRestrictionsManager.cs" />
-    <Compile Include="Manager\UtilityManager.cs" />
-    <Compile Include="Manager\ExtCitizenInstanceManager.cs" />
+    <Compile Include="Manager\Impl\AdvancedParkingManager.cs" />
+    <Compile Include="Manager\Impl\LaneArrowManager.cs" />
+    <Compile Include="Manager\Impl\OptionsManager.cs" />
+    <Compile Include="Manager\Impl\TrafficLightManager.cs" />
+    <Compile Include="Manager\Impl\TrafficMeasurementManager.cs" />
+    <Compile Include="Manager\Impl\JunctionRestrictionsManager.cs" />
+    <Compile Include="Manager\Impl\UtilityManager.cs" />
+    <Compile Include="Manager\Impl\ExtCitizenInstanceManager.cs" />
+    <Compile Include="Manager\IAdvancedParkingManager.cs" />
+    <Compile Include="Manager\IOptionsManager.cs" />
+    <Compile Include="Manager\IParkingRestrictionsManager.cs" />
+    <Compile Include="Manager\IRoutingManager.cs" />
+    <Compile Include="Manager\ISegmentEndManager.cs" />
+    <Compile Include="Manager\ISpeedLimitManager.cs" />
+    <Compile Include="Manager\ITrafficLightManager.cs" />
+    <Compile Include="Manager\ITrafficLightSimulationManager.cs" />
+    <Compile Include="Manager\ITrafficMeasurementManager.cs" />
+    <Compile Include="Manager\ITrafficPriorityManager.cs" />
+    <Compile Include="Manager\IUtilityManager.cs" />
+    <Compile Include="Manager\IVehicleBehaviorManager.cs" />
+    <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
+    <Compile Include="Manager\IVehicleStateManager.cs" />
+    <Compile Include="PrintTransportLines.cs" />
+    <Compile Include="State\ConfigData\Debug.cs" />
+    <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
+    <Compile Include="State\ConfigData\Main.cs" />
+    <Compile Include="State\ConfigData\ParkingAI.cs" />
+    <Compile Include="State\ConfigData\PathFinding.cs" />
+    <Compile Include="State\ConfigData\PriorityRules.cs" />
+    <Compile Include="State\ConfigData\TimedTrafficLights.cs" />
+    <Compile Include="State\ConfigData\AdvancedVehicleAI.cs" />
     <Compile Include="State\GlobalConfig.cs" />
-    <Compile Include="TrafficLight\CustomSegmentLights.cs" />
-    <Compile Include="TrafficLight\ICustomSegmentLightsManager.cs" />
-    <Compile Include="TrafficLight\TrafficLightSimulation.cs" />
-    <Compile Include="Traffic\ExtBuilding.cs" />
-    <Compile Include="Traffic\ExtCitizenInstance.cs" />
+    <Compile Include="TrafficLight\FlowWaitCalcMode.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLight.cs" />
+    <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
+    <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
+    <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
+    <Compile Include="TrafficLight\ITrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
+    <Compile Include="TrafficLight\LightMode.cs" />
+    <Compile Include="TrafficLight\StepChangeMetric.cs" />
+    <Compile Include="Traffic\ISegmentEnd.cs" />
+    <Compile Include="TrafficManager.cs" />
+    <Compile Include="Traffic\Data\ExtBuilding.cs" />
+    <Compile Include="Traffic\Data\ExtCitizenInstance.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
-    <Compile Include="Manager\LaneConnectionManager.cs" />
-    <Compile Include="Geometry\NodeGeometry.cs" />
-    <Compile Include="Geometry\SegmentEndGeometry.cs" />
-    <Compile Include="Manager\VehicleStateManager.cs" />
-    <Compile Include="Manager\VehicleRestrictionsManager.cs" />
-    <Compile Include="Geometry\SegmentEndId.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
+    <Compile Include="Geometry\Impl\NodeGeometry.cs" />
+    <Compile Include="Geometry\Impl\SegmentEndGeometry.cs" />
+    <Compile Include="Manager\Impl\VehicleStateManager.cs" />
+    <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
+    <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Traffic\VehicleJunctionTransitState.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
@@ -142,11 +173,12 @@
     <Compile Include="Custom\AI\CustomRoadAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="Geometry\SegmentGeometry.cs" />
+    <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
-    <Compile Include="UI\MainMenu\OptionsLabel.cs" />
+    <Compile Include="UI\MainMenu\StatsLabel.cs" />
     <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\VersionLabel.cs" />
     <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
@@ -161,6 +193,7 @@
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
+    <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
@@ -175,40 +208,39 @@
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
     <Compile Include="UI\Translation.cs" />
     <Compile Include="State\Options.cs" />
-    <Compile Include="Traffic\ArrowDirection.cs" />
-    <Compile Include="Manager\SpeedLimitManager.cs" />
-    <Compile Include="Traffic\VehicleState.cs" />
+    <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
+    <Compile Include="Traffic\Data\VehicleState.cs" />
     <Compile Include="State\Flags.cs" />
-    <Compile Include="Traffic\SegmentEnd.cs" />
+    <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
+    <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="Util\VehicleUtil.cs" />
     <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="ThreadingExtension.cs" />
-    <Compile Include="TrafficLight\CustomSegment.cs" />
-    <Compile Include="TrafficLight\CustomSegmentLight.cs" />
+    <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
+    <Compile Include="TrafficLight\Impl\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
-    <Compile Include="Manager\TrafficLightSimulationManager.cs" />
-    <Compile Include="Manager\CustomSegmentLightsManager.cs" />
-    <Compile Include="TrafficLight\TimedTrafficLights.cs" />
+    <Compile Include="Manager\Impl\TrafficLightSimulationManager.cs" />
+    <Compile Include="Manager\Impl\CustomSegmentLightsManager.cs" />
+    <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
-    <Compile Include="TrafficLight\TimedTrafficLightsStep.cs" />
-    <Compile Include="Manager\TrafficPriorityManager.cs" />
-    <Compile Include="Traffic\PrioritySegment.cs" />
+    <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
+    <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
+    <Compile Include="Traffic\Data\PrioritySegment.cs" />
     <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
@@ -357,6 +389,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\lang_ko.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\remove-vehicle-btn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
+using TrafficManager.State;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
@@ -20,8 +22,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void UnsubscribeFromSegmentGeometry(ushort segmentId) {
-#if DEBUGCONN
-			Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}) called.");
+#if DEBUGGEO
+			if (GlobalConfig.Instance.Debug.Switches[5])
+				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}) called.");
 #endif
 			try {
 				Monitor.Enter(geoLock);
@@ -31,8 +34,9 @@ namespace TrafficManager.Manager {
 					unsubscriber.Dispose();
 					segGeometryUnsubscribers.Remove(segmentId);
 				}
-#if DEBUGCONN
-				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
+#if DEBUGGEO
+				if (GlobalConfig.Instance.Debug.Switches[5])
+					Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
 #endif
 			} finally {
 				Monitor.Exit(geoLock);
@@ -40,8 +44,9 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void UnsubscribeFromAllSegmentGeometries() {
-#if DEBUGCONN
-			Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromAllSegmentGeometries() called.");
+#if DEBUGGEO
+			if (GlobalConfig.Instance.Debug.Switches[5])
+				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromAllSegmentGeometries() called.");
 #endif
 			List<ushort> segmentIds = new List<ushort>(segGeometryUnsubscribers.Keys);
 			foreach (ushort segmentId in segmentIds)
@@ -49,22 +54,32 @@ namespace TrafficManager.Manager {
 		}
 
 		protected void SubscribeToSegmentGeometry(ushort segmentId) {
-#if DEBUGCONN
-			Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}) called.");
+#if DEBUGGEO
+			if (GlobalConfig.Instance.Debug.Switches[5])
+				Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}) called.");
 #endif
 			try {
 				Monitor.Enter(geoLock);
 
 				if (!segGeometryUnsubscribers.ContainsKey(segmentId)) {
-					segGeometryUnsubscribers.Add(segmentId, SegmentGeometry.Get(segmentId, AllowInvalidSegments).Subscribe(this));
-				}
-
-#if DEBUGCONN
-				Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
+					SegmentGeometry geo = SegmentGeometry.Get(segmentId, AllowInvalidSegments);
+					if (geo != null) {
+						segGeometryUnsubscribers.Add(segmentId, geo.Subscribe(this));
+					} else {
+#if DEBUGGEO
+						if (GlobalConfig.Instance.Debug.Switches[5])
+							Log.Warning($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}): geometry is null.");
 #endif
+					}
+				}
 			} finally {
 				Monitor.Exit(geoLock);
 			}
+
+#if DEBUGGEO
+			if (GlobalConfig.Instance.Debug.Switches[5])
+				Log._Debug($"AbstractSegmentGeometryObservingManager.SubscribeToSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
+#endif
 		}
 
 		public override void OnLevelUnloading() {
@@ -77,20 +92,27 @@ namespace TrafficManager.Manager {
 
 		public void OnUpdate(SegmentGeometry geometry) {
 			if (!geometry.IsValid()) {
-				//Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
+#if DEBUGGEO
+				if (GlobalConfig.Instance.Debug.Switches[5])
+					Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
+#endif
 				HandleInvalidSegment(geometry);
 				if (!AllowInvalidSegments) {
 					UnsubscribeFromSegmentGeometry(geometry.SegmentId);
 				}
 			} else {
-				//Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
+#if DEBUGGEO
+				if (GlobalConfig.Instance.Debug.Switches[5])
+					Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
+#endif
 				HandleValidSegment(geometry);
 			}
 		}
 
 		~AbstractSegmentGeometryObservingManager() {
-#if DEBUGCONN
-			Log._Debug($"~AbstractSegmentGeometryObservingManager() called.");
+#if DEBUGGEO
+			if (GlobalConfig.Instance.Debug.Switches[5])
+				Log._Debug($"~AbstractSegmentGeometryObservingManager() called.");
 #endif
 			UnsubscribeFromAllSegmentGeometries();
 		}

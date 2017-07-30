@@ -36,6 +36,7 @@ namespace TrafficManager {
 			public ushort nodeId;
 			public List<ushort> nodeGroup;
 			public bool started;
+			public int currentStep;
 			public List<TimedTrafficLightsStep> timedSteps;
 		}
 
@@ -43,6 +44,7 @@ namespace TrafficManager {
 		public class TimedTrafficLightsStep {
 			public int minTime;
 			public int maxTime;
+			public int changeMetric;
 			public float waitFlowBalance;
 			public Dictionary<ushort, CustomSegmentLights> segmentLights;
 		}
@@ -160,6 +162,40 @@ namespace TrafficManager {
 				this.trafficLight = trafficLight;
 			}
 		}
+
+		[Serializable]
+		public class ExtCitizenInstanceData {
+			public uint instanceId;
+			public int pathMode;
+			public int failedParkingAttempts;
+			public ushort parkingSpaceLocationId;
+			public int parkingSpaceLocation;
+			public ushort parkingPathStartPositionSegment;
+			public byte parkingPathStartPositionLane;
+			public byte parkingPathStartPositionOffset;
+			public uint returnPathId;
+			public int returnPathState;
+			public float lastDistanceToParkedCar;
+
+			public ExtCitizenInstanceData(uint instanceId) {
+				this.instanceId = instanceId;
+				pathMode = 0;
+				failedParkingAttempts = 0;
+				parkingSpaceLocationId = 0;
+				parkingSpaceLocation = 0;
+				parkingPathStartPositionSegment = 0;
+				parkingPathStartPositionLane = 0;
+				parkingPathStartPositionOffset = 0;
+				returnPathId = 0;
+				returnPathState = 0;
+				lastDistanceToParkedCar = 0;
+			}
+		}
+
+		/// <summary>
+		/// Stored ext. citizen instance data
+		/// </summary>
+		public List<ExtCitizenInstanceData> ExtCitizenInstances = new List<ExtCitizenInstanceData>();
 
 		/// <summary>
 		/// Stored toggled traffic lights

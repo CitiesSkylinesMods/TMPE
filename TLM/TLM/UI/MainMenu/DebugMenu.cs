@@ -13,6 +13,8 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI {
 #if DEBUG
@@ -23,7 +25,7 @@ namespace TrafficManager.UI {
 		private static bool showPathFindStats = false;
 #endif
 
-		private static UIButton _buttonSwitchTraffic;
+		/*private static UIButton _buttonSwitchTraffic;
 		private static UIButton _buttonPrioritySigns;
 		private static UIButton _buttonManualControl;
 		private static UIButton _buttonTimedMain;
@@ -33,16 +35,20 @@ namespace TrafficManager.UI {
 		private static UIButton _buttonJunctionRestrictions;
 		private static UIButton _buttonSpeedLimits;
 		private static UIButton _buttonClearTraffic;
-		private static UIButton _buttonToggleDespawn;
+		private static UIButton _buttonToggleDespawn;*/
 #if DEBUG
 		private static UITextField _goToField = null;
 		private static UIButton _goToSegmentButton = null;
 		private static UIButton _goToNodeButton = null;
 		private static UIButton _goToVehicleButton = null;
+		private static UIButton _goToParkedVehicleButton = null;
 		private static UIButton _goToBuildingButton = null;
 		private static UIButton _goToCitizenInstanceButton = null;
 		private static UIButton _goToPosButton = null;
 		private static UIButton _printDebugInfoButton = null;
+		private static UIButton _reloadConfigButton = null;
+		private static UIButton _recalcLinesButton = null;
+		private static UIButton _checkDetoursButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _removeStuckEntitiesButton = null;
@@ -71,7 +77,7 @@ namespace TrafficManager.UI {
 
 			int y = 30;
 
-			_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), y, clickSwitchTraffic);
+			/*_buttonSwitchTraffic = _createButton(Translation.GetString("Switch_traffic_lights"), y, clickSwitchTraffic);
 			y += 40;
 			height += 40;
 
@@ -127,16 +133,13 @@ namespace TrafficManager.UI {
 			
 			_buttonToggleDespawn = _createButton(Options.enableDespawning ? Translation.GetString("Disable_despawning") : Translation.GetString("Enable_despawning"), y, ClickToggleDespawn);
 			y += 40;
-			height += 40;
+			height += 40;*/
 
 #if DEBUG
 			_goToField = CreateTextField("", y);
 			y += 40;
 			height += 40;
 			_goToPosButton = _createButton("Goto position", y, clickGoToPos);
-			y += 40;
-			height += 40;
-			_goToPosButton = _createButton("Clear position", y, clickClearPos);
 			y += 40;
 			height += 40;
 			_goToSegmentButton = _createButton("Goto segment", y, clickGoToSegment);
@@ -148,6 +151,9 @@ namespace TrafficManager.UI {
 			_goToVehicleButton = _createButton("Goto vehicle", y, clickGoToVehicle);
 			y += 40;
 			height += 40;
+			_goToParkedVehicleButton = _createButton("Goto parked vehicle", y, clickGoToParkedVehicle);
+			y += 40;
+			height += 40;
 			_goToBuildingButton = _createButton("Goto building", y, clickGoToBuilding);
 			y += 40;
 			height += 40;
@@ -155,6 +161,15 @@ namespace TrafficManager.UI {
 			y += 40;
 			height += 40;
 			_printDebugInfoButton = _createButton("Print debug info", y, clickPrintDebugInfo);
+			y += 40;
+			height += 40;
+			_reloadConfigButton = _createButton("Reload configuration", y, clickReloadConfig);
+			y += 40;
+			height += 40;
+			_recalcLinesButton = _createButton("Recalculate transport lines", y, clickRecalcLines);
+			y += 40;
+			height += 40;
+			_checkDetoursButton = _createButton("Check transport lines", y, clickCheckDetours);
 			y += 40;
 			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
@@ -217,7 +232,6 @@ namespace TrafficManager.UI {
 			button.text = text;
 			button.relativePosition = new Vector3(15f, y);
 			button.eventClick += delegate (UIComponent component, UIMouseEventParameter eventParam) {
-				deactivateButtons();
 				eventClick(component, eventParam);
 				button.Invalidate();
 			};
@@ -231,14 +245,7 @@ namespace TrafficManager.UI {
 			if (vectorElms.Length < 2)
 				return;
 
-			ushort segmentId = Convert.ToUInt16(_goToField.text);
-			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
-				CameraCtrl.GoToPos(new Vector3(float.Parse(vectorElms[0]), Camera.main.transform.position.y, float.Parse(vectorElms[1])));
-			}
-		}
-
-		private void clickClearPos(UIComponent component, UIMouseEventParameter eventParam) {
-			CameraCtrl.ClearPos();
+			CameraCtrl.GoToPos(new Vector3(float.Parse(vectorElms[0]), Camera.main.transform.position.y, float.Parse(vectorElms[1])));
 		}
 
 		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
@@ -257,6 +264,73 @@ namespace TrafficManager.UI {
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
 			UtilityManager.Instance.RequestPrintDebugInfo();
+		}
+
+		private void clickReloadConfig(UIComponent component, UIMouseEventParameter eventParam) {
+			GlobalConfig.Reload();
+		}
+
+		private void clickRecalcLines(UIComponent component, UIMouseEventParameter eventParam) {
+			SimulationManager.instance.AddAction(() => {
+				for (int i = 0; i < TransportManager.MAX_LINE_COUNT; ++i) {
+					if (TransportManager.instance.m_lines.m_buffer[i].m_flags == TransportLine.Flags.None) {
+						continue;
+						//Log.Message("\tTransport line is not created.");
+					}
+					Log.Info($"Recalculating transport line {i} now.");
+					if (TransportManager.instance.m_lines.m_buffer[i].UpdatePaths((ushort)i) &&
+						TransportManager.instance.m_lines.m_buffer[i].UpdateMeshData((ushort)i)
+					) {
+						Log.Info($"Transport line {i} recalculated.");
+					}
+				}
+			});
+		}
+
+		private void clickCheckDetours(UIComponent component, UIMouseEventParameter eventParam) {
+			SimulationManager.instance.AddAction(() => {
+				PrintTransportStats();
+			});
+		}
+
+		public static void PrintTransportStats() {
+			for (int i = 0; i < TransportManager.MAX_LINE_COUNT; ++i) {
+				Log.Info("Transport line " + i + ":");
+				if ((TransportManager.instance.m_lines.m_buffer[i].m_flags & TransportLine.Flags.Created) == TransportLine.Flags.None) {
+					Log.Info("\tTransport line is not created.");
+					continue;
+				}
+				Log.Info("\tFlags: " + TransportManager.instance.m_lines.m_buffer[i].m_flags + ", cat: " + TransportManager.instance.m_lines.m_buffer[i].Info.category + ", type: " + TransportManager.instance.m_lines.m_buffer[i].Info.m_transportType + ", name: " + TransportManager.instance.GetLineName((ushort)i));
+				ushort firstStopNodeId = TransportManager.instance.m_lines.m_buffer[i].m_stops;
+				ushort stopNodeId = firstStopNodeId;
+				Vector3 lastNodePos = Vector3.zero;
+				int index = 1;
+				while (stopNodeId != 0) {
+					Vector3 pos = NetManager.instance.m_nodes.m_buffer[stopNodeId].m_position;
+					Log.Info("\tStop node #" + index + " -- " + stopNodeId + ": Flags: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_flags + ", Transport line: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_transportLine + ", Problems: " + NetManager.instance.m_nodes.m_buffer[stopNodeId].m_problems + " Pos: " + pos + ", Dist. to lat pos: " + (lastNodePos - pos).magnitude);
+					if (NetManager.instance.m_nodes.m_buffer[stopNodeId].m_problems != Notification.Problem.None) {
+						Log.Warning("\t*** PROBLEMS DETECTED ***");
+					}
+					lastNodePos = pos;
+
+					ushort nextSegment = TransportLine.GetNextSegment(stopNodeId);
+					if (nextSegment != 0) {
+						stopNodeId = NetManager.instance.m_segments.m_buffer[(int)nextSegment].m_endNode;
+					} else {
+						break;
+					}
+					++index;
+
+					if (stopNodeId == firstStopNodeId) {
+						break;
+					}
+
+					if (index > 10000) {
+						Log.Error("Too many iterations!");
+						break;
+					}
+				}
+			}
 		}
 
 		private static Dictionary<string, List<byte>> customEmergencyLanes = new Dictionary<string, List<byte>>();
@@ -291,6 +365,7 @@ namespace TrafficManager.UI {
 
 #if QUEUEDSTATS
 		private void clickTogglePathFindStats(UIComponent component, UIMouseEventParameter eventParam) {
+			Update();
 			showPathFindStats = !showPathFindStats;
 		}
 #endif
@@ -334,6 +409,14 @@ namespace TrafficManager.UI {
 			}
 		}
 
+		private void clickGoToParkedVehicle(UIComponent component, UIMouseEventParameter eventParam) {
+			ushort parkedVehicleId = Convert.ToUInt16(_goToField.text);
+			VehicleParked parkedVehicle = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
+			if ((parkedVehicle.m_flags & (ushort)VehicleParked.Flags.Created) != 0) {
+				CameraCtrl.GoToParkedVehicle(parkedVehicleId, new Vector3(parkedVehicle.m_position.x, Camera.main.transform.position.y, parkedVehicle.m_position.z));
+			}
+		}
+
 		private void clickGoToBuilding(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort buildingId = Convert.ToUInt16(_goToField.text);
 			Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
@@ -362,140 +445,6 @@ namespace TrafficManager.UI {
 			}
 		}
 #endif
-
-		private void clickSwitchTraffic(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.SwitchTrafficLight) {
-				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.SwitchTrafficLight);
-			} else {
-				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickAddPrioritySigns(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.AddPrioritySigns) {
-				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.AddPrioritySigns);
-			} else {
-				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickManualControl(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.ManualSwitch) {
-				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.ManualSwitch);
-			} else {
-				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickTimedAdd(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.TimedLightsSelectNode && UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.TimedLightsShowLights) {
-				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.TimedLightsSelectNode);
-			} else {
-				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickSpeedLimits(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.SpeedLimits) {
-				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.SpeedLimits);
-			} else {
-				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickVehicleRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.VehicleRestrictions) {
-				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.VehicleRestrictions);
-			} else {
-				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickJunctionRestrictions(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.JunctionRestrictions) {
-				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.JunctionRestrictions);
-			} else {
-				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickChangeLanes(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.LaneChange) {
-				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.LaneChange);
-			} else {
-				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		private void clickLaneConnector(UIComponent component, UIMouseEventParameter eventParam) {
-			if (UIBase.GetTrafficManagerTool(true).GetToolMode() != ToolMode.LaneConnector) {
-				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenuFocused";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.LaneConnector);
-			} else {
-				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenu";
-				UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			}
-		}
-
-		/// <summary>
-		/// Removes the focused sprite from all menu buttons
-		/// </summary>
-		public static void deactivateButtons() {
-			if (_buttonSwitchTraffic != null)
-				_buttonSwitchTraffic.normalBgSprite = _buttonSwitchTraffic.focusedBgSprite = "ButtonMenu";
-			if (_buttonPrioritySigns != null)
-				_buttonPrioritySigns.normalBgSprite = _buttonPrioritySigns.focusedBgSprite = "ButtonMenu";
-			if (_buttonManualControl != null)
-				_buttonManualControl.normalBgSprite = _buttonManualControl.focusedBgSprite = "ButtonMenu";
-			if (_buttonTimedMain != null)
-				_buttonTimedMain.normalBgSprite = _buttonTimedMain.focusedBgSprite = "ButtonMenu";
-			if (_buttonLaneChange != null)
-				_buttonLaneChange.normalBgSprite = _buttonLaneChange.focusedBgSprite = "ButtonMenu";
-			if (_buttonLaneConnector != null)
-				_buttonLaneConnector.normalBgSprite = _buttonLaneConnector.focusedBgSprite = "ButtonMenu";
-			if (_buttonSpeedLimits != null)
-				_buttonSpeedLimits.normalBgSprite = _buttonSpeedLimits.focusedBgSprite = "ButtonMenu";
-			if (_buttonVehicleRestrictions != null)
-				_buttonVehicleRestrictions.normalBgSprite = _buttonVehicleRestrictions.focusedBgSprite = "ButtonMenu";
-			if (_buttonJunctionRestrictions != null)
-				_buttonJunctionRestrictions.normalBgSprite = _buttonJunctionRestrictions.focusedBgSprite = "ButtonMenu";
-			if (_buttonClearTraffic != null)
-				_buttonClearTraffic.normalBgSprite = _buttonClearTraffic.focusedBgSprite = "ButtonMenu";
-			if (_buttonToggleDespawn != null)
-				_buttonToggleDespawn.normalBgSprite = _buttonToggleDespawn.focusedBgSprite = "ButtonMenu";
-		}
-
-		private void clickClearTraffic(UIComponent component, UIMouseEventParameter eventParam) {
-			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-
-			VehicleStateManager.Instance.RequestClearTraffic();
-		}
-
-		private static void ClickToggleDespawn(UIComponent component, UIMouseEventParameter eventParam) {
-			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-
-			Options.setEnableDespawning(!Options.enableDespawning);
-
-			_buttonToggleDespawn.text = Options.enableDespawning
-				? Translation.GetString("Disable_despawning")
-				: Translation.GetString("Enable_despawning");
-		}
 
 		public override void Update() {
 #if QUEUEDSTATS

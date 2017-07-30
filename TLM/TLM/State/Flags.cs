@@ -8,10 +8,12 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Util;
 
 namespace TrafficManager.State {
+	[Obsolete]
 	public class Flags {
 		[Flags]
 		public enum LaneArrows { // compatible with NetLane.Flags
@@ -117,10 +119,10 @@ namespace TrafficManager.State {
 			Log.Info("-------------------------");
 			Log.Info("--- LANE SPEED LIMITS ---");
 			Log.Info("-------------------------");
-			for (ushort i = 0; i < laneSpeedLimitArray.Length; ++i) {
+			for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
 				if (laneSpeedLimitArray[i] == null)
 					continue;
-				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)}");
+				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)}");
 				for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
 					if (laneSpeedLimitArray[i][x] == null)
 						continue;
@@ -131,10 +133,10 @@ namespace TrafficManager.State {
 			Log.Info("---------------------------------");
 			Log.Info("--- LANE VEHICLE RESTRICTIONS ---");
 			Log.Info("---------------------------------");
-			for (ushort i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+			for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
 				if (laneAllowedVehicleTypesArray[i] == null)
 					continue;
-				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)}");
+				Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)}");
 				for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
 					if (laneAllowedVehicleTypesArray[i][x] == null)
 						continue;
@@ -145,13 +147,13 @@ namespace TrafficManager.State {
 			Log.Info("-----------------------------");
 			Log.Info("--- JUNCTION RESTRICTIONS ---");
 			Log.Info("-----------------------------");
-			for (ushort i = 0; i < segmentNodeFlags.Length; ++i) {
+			for (uint i = 0; i < segmentNodeFlags.Length; ++i) {
 				if (segmentNodeFlags[i] == null)
 					continue;
 				for (int x = 0; x < segmentNodeFlags[i].Length; ++x) {
 					if (segmentNodeFlags[i][x] == null)
 						continue;
-					Log.Info($"\tSegment {i}, Node idx {x}: {segmentNodeFlags[i][x]} (valid? {Constants.ServiceFactory.NetService.IsSegmentValid(i)})");
+					Log.Info($"\tSegment {i}, Node idx {x}: {segmentNodeFlags[i][x]} (valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)})");
 				}
 			}
 		}
@@ -773,8 +775,8 @@ namespace TrafficManager.State {
 		internal static IDictionary<uint, ExtVehicleType> getAllLaneAllowedVehicleTypes() {
 			IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
-			for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				Constants.ServiceFactory.NetService.ProcessSegment((ushort)segmentId, delegate (ushort segId, ref NetSegment segment) {
 					if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
 						return true;
 
@@ -783,7 +785,7 @@ namespace TrafficManager.State {
 						return true;
 					}
 
-					Constants.ServiceFactory.NetService.IterateSegmentLanes(segmentId, ref segment, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort sId, ref NetSegment seg, byte laneIndex) {
+					Constants.ServiceFactory.NetService.IterateSegmentLanes(segId, ref segment, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort sId, ref NetSegment seg, byte laneIndex) {
 						if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
 							return true;
 						}

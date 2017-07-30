@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
@@ -16,7 +17,7 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE START
 			if (Options.prohibitPocketCars) {
 				Color? color;
-				if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, infoMode, out color)) {
+				if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID], infoMode, out color)) {
 					return (Color)color;
 				}
 			}

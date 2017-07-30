@@ -14,6 +14,8 @@ using TrafficManager.Util;
 using UnityEngine;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
+using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.UI.SubTools {
 	public class JunctionRestrictionsTool : SubTool {

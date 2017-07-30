@@ -2,9 +2,11 @@
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {
@@ -13,12 +15,8 @@ namespace TrafficManager.Custom.Manager {
 #if DEBUG
 			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
-			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId);
-			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[(int)vehicleId]);
-		}
-
-		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
-			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
+			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
+			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 		}
 
 		public bool CustomCreateVehicle(out ushort vehicleId, ref Randomizer r, VehicleInfo info, Vector3 position, TransferManager.TransferReason type, bool transferToSource, bool transferToTarget) {
@@ -81,12 +79,17 @@ namespace TrafficManager.Custom.Manager {
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);
 
-				VehicleStateManager.Instance.DetermineVehicleType(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
+				VehicleStateManager.Instance.OnCreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
 
 				return true;
 			}
 			vehicleId = 0;
 			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
+			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
 		}
 	}
 }

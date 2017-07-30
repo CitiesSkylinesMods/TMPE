@@ -2,8 +2,10 @@
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using UnityEngine;
 
@@ -38,7 +40,7 @@ namespace TrafficManager.Custom.Manager {
 			// NON-STOCK CODE START
 			try {
 #if DEBUGGEO
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
 #endif
 				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
@@ -65,7 +67,7 @@ namespace TrafficManager.Custom.Manager {
 			// NON-STOCK CODE START
 			try {
 #if DEBUG
-				if (GlobalConfig.Instance.DebugSwitches[5])
+				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
 #endif
 				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
@@ -74,5 +76,47 @@ namespace TrafficManager.Custom.Manager {
 			}
 			// NON-STOCK CODE END
 		}
+
+		// TODO remove
+		/*private void CustomMoveNode(ushort node, ref NetNode data, Vector3 position) {
+#if DEBUG
+			Log.Warning($"CustomNetManager.CustomMoveNode({node}, ..., {position}): old position: {data.m_position} -- flags: {data.m_flags}, problems: {data.m_problems}, transport line: {data.m_transportLine}");
+#endif
+
+			for (int i = 0; i < 8; i++) {
+				ushort segment = data.GetSegment(i);
+				if (segment != 0) {
+					CustomFinalizeSegment(segment, ref this.m_segments.m_buffer[(int)segment]);
+				}
+			}
+			this.FinalizeNode(node, ref data);
+			data.m_position = position;
+			this.InitializeNode(node, ref data);
+			for (int j = 0; j < 8; j++) {
+				ushort segment2 = data.GetSegment(j);
+				if (segment2 != 0) {
+					InitializeSegment(segment2, ref this.m_segments.m_buffer[(int)segment2]);
+				}
+			}
+			this.UpdateNode(node);
+		}*/
+
+		// TODO remove
+		/*[MethodImpl(MethodImplOptions.NoInlining)]
+		private void FinalizeNode(ushort node, ref NetNode data) {
+			Log.Error($"CustomNetManager.FinalizeNode called");
+		}
+
+		// TODO remove
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void InitializeNode(ushort node, ref NetNode data) {
+			Log.Error($"CustomNetManager.InitializeNode called");
+		}
+
+		// TODO remove
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void InitializeSegment(ushort segmentId, ref NetSegment data) {
+			Log.Error($"CustomNetManager.InitializeNode called");
+		}*/
 	}
 }

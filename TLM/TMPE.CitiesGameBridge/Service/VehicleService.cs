@@ -1,4 +1,5 @@
-﻿using ColossalFramework;
+﻿using System;
+using ColossalFramework;
 using CSUtil.Commons;
 using GenericGameBridge.Service;
 
@@ -38,6 +39,14 @@ namespace CitiesGameBridge.Service {
 
 		public void ProcessVehicle(ushort vehicleId, ref Vehicle vehicle, VehicleHandler handler) {
 			handler(vehicleId, ref vehicle);
+		}
+
+		public void ReleaseParkedVehicle(ushort parkedVehicleId) {
+			Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedVehicleId);
+		}
+
+		public void ReleaseVehicle(ushort vehicleId) {
+			Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 		}
 	}
 }

@@ -11,6 +11,8 @@ using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.UI.SubTools;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
+using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomRoadAI : RoadBaseAI {
@@ -37,22 +39,23 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomSegmentSimulationStep(ushort segmentID, ref NetSegment data) {
-			try {
+			//try {
+			// TODO check if this is required
 				uint curLaneId = data.m_lanes;
 				int numLanes = data.Info.m_lanes.Length;
 				uint laneIndex = 0;
 
-				/*while (laneIndex < numLanes && curLaneId != 0u) {
+				while (laneIndex < numLanes && curLaneId != 0u) {
 					Flags.applyLaneArrowFlags(curLaneId);
 
 					laneIndex++;
 					curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-				}*/
+				}
 
-				SegmentEndManager.Instance.SegmentSimulationStep(segmentID);
-			} catch (Exception e) {
+				//SegmentEndManager.Instance.SegmentSimulationStep(segmentID);
+			/*} catch (Exception e) {
 				Log.Error($"Error occured while housekeeping segment {segmentID}: " + e.ToString());
-			}
+			}*/
 
 			if (!Options.isStockLaneChangerUsed()) {
 				if (segmentID < lastSimulatedSegmentId) {
@@ -71,46 +74,65 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				if (doTrafficMeasurement) {
-					try {
+					//try {
 						TrafficMeasurementManager.Instance.SimulationStep(segmentID, ref data);
-					} catch (Exception e) {
+					/*} catch (Exception e) {
 						Log.Error("Error occured while calculating lane traffic density: " + e.ToString());
-					}
+					}*/
 				}
 			}
 			
-			try {
-				OriginalSimulationStep(segmentID, ref data);
-			} catch (Exception ex) {
-				Log.Error($"Error in CustomRoadAI.SimulationStep for segment {segmentID}: " + ex.ToString());
-			}
+			OriginalSimulationStep(segmentID, ref data);
 		}
 
-		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
+		public static void GetTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
+			ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState);
 			} else {
-				GetCustomTrafficLightState(vehicleId, ref vehicleData, nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
+				GetCustomTrafficLightState(
+#if DEBUG
+					vehicleId, ref vehicleData,
+#endif
+					nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
 			}
 		}
 
-		public static void GetTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
+		public static void GetTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
+			ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive()) {
 				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 			} else {
-				GetCustomTrafficLightState(vehicleId, ref vehicleData, nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
+				GetCustomTrafficLightState(
+#if DEBUG
+					vehicleId, ref vehicleData,
+#endif
+					nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
 				vehicles = false;
 				pedestrians = false;
 			}
 		}
 
-		private static void GetCustomTrafficLightState(ushort vehicleId, ref Vehicle vehicleData, ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, TrafficLightSimulation nodeSim = null) {
+		// TODO refactor to manager
+		private static void GetCustomTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, ITrafficLightSimulation nodeSim = null) {
 			if (nodeSim == null) {
 				nodeSim = TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId);
 				if (nodeSim == null) {
+#if DEBUG
 					Log.Error($"GetCustomTrafficLightState: node traffic light simulation not found at node {nodeId}! Vehicle {vehicleId} comes from segment {fromSegmentId} and goes to node {nodeId}");
+#endif
 					vehicleLightState = TrafficLightState.Green;
 					pedestrianLightState = TrafficLightState.Green;
 					return;
@@ -122,7 +144,6 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
 			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
 			if (geometry == null) {
-				pedestrianLightState = TrafficLightState.Green;
 				Log.Error($"GetTrafficLightState: No geometry information @ node {nodeId}, segment {fromSegmentId}.");
 				vehicleLightState = TrafficLightState.Green;
 				pedestrianLightState = TrafficLightState.Green;
@@ -132,7 +153,7 @@ namespace TrafficManager.Custom.AI {
 			// determine node position at `fromSegment` (start/end)
 			bool isStartNode = geometry.StartNodeId() == nodeId;
 
-			CustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode, false);
+			ICustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode, false);
 
 			if (lights != null) {
 				// get traffic lights state for pedestrians
@@ -142,7 +163,7 @@ namespace TrafficManager.Custom.AI {
 				Log._Debug($"GetTrafficLightState: No pedestrian light @ node {nodeId}, segment {fromSegmentId} found.");
 			}
 
-			CustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
+			ICustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
 			if (lights == null || light == null) {
 				//Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null? {lights == null} light null? {light == null}");
 				vehicleLightState = RoadBaseAI.TrafficLightState.Green;
@@ -170,7 +191,7 @@ namespace TrafficManager.Custom.AI {
 
 		public static void OriginalSetTrafficLightState(bool customCall, ushort nodeID, ref NetSegment segmentData, uint frame, RoadBaseAI.TrafficLightState vehicleLightState, RoadBaseAI.TrafficLightState pedestrianLightState, bool vehicles, bool pedestrians) {
 			/// NON-STOCK CODE START ///
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
+			ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
 			if (nodeSim == null || !nodeSim.IsSimulationActive() || customCall) {
 				/// NON-STOCK CODE END ///
 				int num = (int)pedestrianLightState << 2 | (int)vehicleLightState;
@@ -326,7 +347,7 @@ namespace TrafficManager.Custom.AI {
 						break;
 					}
 					if (num15 != 0u) {
-						instance.m_lanes.m_buffer[(int)((UIntPtr)num15)].m_nextLane = num16;
+						instance.m_lanes.m_buffer[num15].m_nextLane = num16;
 					} else {
 						data.m_lanes = num16;
 					}
@@ -345,7 +366,7 @@ namespace TrafficManager.Custom.AI {
 				Vector3 b3;
 				Vector3 c;
 				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
-				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags;
+				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[num16].m_flags;
 				NetLane.Flags flags3 = flags;
 				flags2 &= ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right | NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd | NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
 				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 2) {
@@ -461,15 +482,15 @@ namespace TrafficManager.Custom.AI {
 						flags2 |= NetLane.Flags.Forward;
 					}
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_bezier = new Bezier3(vector3, b3, c, vector4);
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_segment = segmentID;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags2;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_firstTarget = (byte)num18;
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_lastTarget = (byte)num19;
-				num13 += instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].UpdateLength();
+				instance.m_lanes.m_buffer[num16].m_bezier = new Bezier3(vector3, b3, c, vector4);
+				instance.m_lanes.m_buffer[num16].m_segment = segmentID;
+				instance.m_lanes.m_buffer[num16].m_flags = (ushort)flags2;
+				instance.m_lanes.m_buffer[num16].m_firstTarget = (byte)num18;
+				instance.m_lanes.m_buffer[num16].m_lastTarget = (byte)num19;
+				num13 += instance.m_lanes.m_buffer[num16].UpdateLength();
 				num14 += 1f;
 				num15 = num16;
-				num16 = instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_nextLane;
+				num16 = instance.m_lanes.m_buffer[num16].m_nextLane;
 			}
 			if (num14 != 0f) {
 				data.m_averageLength = num13 / num14;
@@ -483,12 +504,12 @@ namespace TrafficManager.Custom.AI {
 			num16 = data.m_lanes;
 			int num37 = 0;
 			while (num37 < this.m_info.m_lanes.Length && num16 != 0u) {
-				NetLane.Flags flags4 = (NetLane.Flags)instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags & ~NetLane.Flags.JoinedJunction;
+				NetLane.Flags flags4 = (NetLane.Flags)instance.m_lanes.m_buffer[num16].m_flags & ~NetLane.Flags.JoinedJunction;
 				if (flag7) {
 					flags4 |= NetLane.Flags.JoinedJunction;
 				}
-				instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_flags = (ushort)flags4;
-				num16 = instance.m_lanes.m_buffer[(int)((UIntPtr)num16)].m_nextLane;
+				instance.m_lanes.m_buffer[num16].m_flags = (ushort)flags4;
+				num16 = instance.m_lanes.m_buffer[num16].m_nextLane;
 				num37++;
 			}
 			if (!loading) {
@@ -540,7 +561,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public static void CustomGetTrafficLightNodeState(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
-			TrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
+			ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
 			bool customSim = nodeSim != null && nodeSim.IsSimulationActive();
 
 			uint num = Singleton<SimulationManager>.instance.m_referenceFrameIndex - 15u;
@@ -616,7 +637,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		#region stock code
+#region stock code
 
 		protected void CheckBuildings(ushort segmentID, ref NetSegment data) {
 			Log.Error("CustomRoadAI.CheckBuildings called.");

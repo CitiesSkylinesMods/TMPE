@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
+using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCommonBuildingAI : BuildingAI {
@@ -13,9 +16,7 @@ namespace TrafficManager.Custom.AI {
 			// slowly decrease parking space demand / public transport demand
 			uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
 			if ((frameIndex & 1u) == 0u) {
-				ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingSpaceDemandDecrement);
-				ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, true);
-                ExtBuildingManager.Instance.GetExtBuilding(buildingID).RemovePublicTransportDemand(GlobalConfig.Instance.PublicTransportDemandDecrement, false);
+				ExtSimulationStep(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID]);
             }
 			// NON-STOCK CODE END
 
@@ -29,5 +30,10 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+		internal void ExtSimulationStep(ushort buildingID, ref Building data, ref ExtBuilding extBuilding) {
+			extBuilding.RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingAI.ParkingSpaceDemandDecrement);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, true);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, false);
+		}
 	}
 }

@@ -23,7 +23,7 @@ namespace TrafficManager.UI {
 		public override void Start() {
 			// Place the button.
 			GlobalConfig config = GlobalConfig.Instance;
-			Vector3 pos = new Vector3(config.MainMenuButtonX, config.MainMenuButtonY);
+			Vector3 pos = new Vector3(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY);
 			VectorUtil.ClampPosToScreen(ref pos);
 			absolutePosition = pos;
 
@@ -53,7 +53,7 @@ namespace TrafficManager.UI {
 
 			Drag.width = width;
 			Drag.height = height;
-			Drag.enabled = !GlobalConfig.Instance.MainMenuButtonPosLocked;
+			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
 		}
 
 		internal void SetPosLock(bool lck) {
@@ -69,13 +69,13 @@ namespace TrafficManager.UI {
 		protected override void OnPositionChanged() {
 			GlobalConfig config = GlobalConfig.Instance;
 
-			bool posChanged = (config.MainMenuButtonX != (int)absolutePosition.x || config.MainMenuButtonY != (int)absolutePosition.y);
+			bool posChanged = (config.Main.MainMenuButtonX != (int)absolutePosition.x || config.Main.MainMenuButtonY != (int)absolutePosition.y);
 
 			if (posChanged) {
 				Log._Debug($"Button position changed to {absolutePosition.x}|{absolutePosition.y}");
 
-				config.MainMenuButtonX = (int)absolutePosition.x;
-				config.MainMenuButtonY = (int)absolutePosition.y;
+				config.Main.MainMenuButtonX = (int)absolutePosition.x;
+				config.Main.MainMenuButtonY = (int)absolutePosition.y;
 
 				GlobalConfig.WriteConfig();
 			}

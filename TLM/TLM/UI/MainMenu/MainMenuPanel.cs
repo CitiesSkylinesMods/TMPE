@@ -44,6 +44,7 @@ namespace TrafficManager.UI.MainMenu {
 
 		public MenuButton[] Buttons { get; private set; }
 		public UILabel VersionLabel { get; private set; }
+		public UILabel StatsLabel { get; private set; }
 
 		public UIDragHandle Drag { get; private set; }
 
@@ -58,7 +59,7 @@ namespace TrafficManager.UI.MainMenu {
 			height = MENU_HEIGHT;
 
 			VersionLabel = AddUIComponent<VersionLabel>();
-			//optionsLabel = AddUIComponent<OptionsLabel>();
+			StatsLabel = AddUIComponent<StatsLabel>();
 
 			Buttons = new MenuButton[MENU_BUTTON_TYPES.Length];
 
@@ -80,7 +81,7 @@ namespace TrafficManager.UI.MainMenu {
 			}
 
 			GlobalConfig config = GlobalConfig.Instance;
-			Vector3 pos = new Vector3(config.MainMenuX, config.MainMenuY);
+			Vector3 pos = new Vector3(config.Main.MainMenuX, config.Main.MainMenuY);
 			VectorUtil.ClampPosToScreen(ref pos);
 			absolutePosition = pos;
 
@@ -91,7 +92,7 @@ namespace TrafficManager.UI.MainMenu {
 
 			Drag.width = width;
 			Drag.height = TOP_BORDER;
-			Drag.enabled = !GlobalConfig.Instance.MainMenuPosLocked;
+			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 		}
 
 		internal void SetPosLock(bool lck) {
@@ -101,13 +102,13 @@ namespace TrafficManager.UI.MainMenu {
 		protected override void OnPositionChanged() {
 			GlobalConfig config = GlobalConfig.Instance;
 
-			bool posChanged = (config.MainMenuX != (int)absolutePosition.x || config.MainMenuY != (int)absolutePosition.y);
+			bool posChanged = (config.Main.MainMenuX != (int)absolutePosition.x || config.Main.MainMenuY != (int)absolutePosition.y);
 
 			if (posChanged) {
 				Log._Debug($"Menu position changed to {absolutePosition.x}|{absolutePosition.y}");
 
-				config.MainMenuX = (int)absolutePosition.x;
-				config.MainMenuY = (int)absolutePosition.y;
+				config.Main.MainMenuX = (int)absolutePosition.x;
+				config.Main.MainMenuY = (int)absolutePosition.y;
 
 				GlobalConfig.WriteConfig();
 			}

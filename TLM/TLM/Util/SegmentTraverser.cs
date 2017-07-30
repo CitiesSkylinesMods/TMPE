@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.Util {
 	public class SegmentTraverser {

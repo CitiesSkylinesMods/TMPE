@@ -7,12 +7,12 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
-using static TrafficManager.Manager.VehicleRestrictionsManager;
 using static TrafficManager.UI.TrafficManagerTool;
 using static TrafficManager.Util.SegmentLaneTraverser;
 
@@ -169,12 +169,12 @@ namespace TrafficManager.UI.SubTools {
 					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, RestrictionMode.Configured);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, VehicleRestrictionsMode.Configured);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
 
-					ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, RestrictionMode.Configured);
+					ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, VehicleRestrictionsMode.Configured);
 					allowedTypes = ~(allowedTypes & VehicleRestrictionsManager.EXT_VEHICLE_TYPES) & baseMask;
 					VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, laneIndex, laneInfo, laneId, allowedTypes);
 				}
@@ -192,7 +192,7 @@ namespace TrafficManager.UI.SubTools {
 					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, RestrictionMode.Configured);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, VehicleRestrictionsMode.Configured);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
@@ -212,7 +212,7 @@ namespace TrafficManager.UI.SubTools {
 					byte laneIndex = laneData.laneIndex;
 					NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
 
-					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, RestrictionMode.Configured);
+					ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, VehicleRestrictionsMode.Configured);
 
 					if (baseMask == ExtVehicleType.None)
 						continue;
@@ -257,14 +257,14 @@ namespace TrafficManager.UI.SubTools {
 				byte laneIndex = data.curLanePos.laneIndex;
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-				ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, RestrictionMode.Configured);
+				ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(laneInfo, VehicleRestrictionsMode.Configured);
 				if (baseMask == ExtVehicleType.None) {
 					return true;
 				}
 
 				// apply restrictions of selected segment & lane
 				ExtVehicleType mask = ~VehicleRestrictionsManager.EXT_VEHICLE_TYPES & baseMask; // ban all possible controllable vehicles
-				mask |= VehicleRestrictionsManager.EXT_VEHICLE_TYPES & VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo, RestrictionMode.Configured); // allow all enabled and controllable vehicles
+				mask |= VehicleRestrictionsManager.EXT_VEHICLE_TYPES & VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(SelectedSegmentId, selectedSegmentInfo, selectedLaneIndex, selectedLaneInfo, VehicleRestrictionsMode.Configured); // allow all enabled and controllable vehicles
 
 				VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, laneId, mask);
 
@@ -341,7 +341,7 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, RestrictionMode.Configured);
+				ExtVehicleType allowedTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, VehicleRestrictionsMode.Configured);
 
 				uint y = 0;
 #if DEBUGx

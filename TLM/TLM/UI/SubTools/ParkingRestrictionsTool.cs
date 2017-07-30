@@ -10,6 +10,7 @@ using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
+using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;

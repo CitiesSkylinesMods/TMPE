@@ -1,5 +1,6 @@
 ﻿using System;
 using ColossalFramework;
+using ColossalFramework.Math;
 using GenericGameBridge.Service;
 using UnityEngine;
 
@@ -36,6 +37,32 @@ namespace CitiesGameBridge.Service {
 		public Vector3 CameraPosition {
 			get {
 				return Singleton<SimulationManager>.instance.m_simulationView.m_position;
+			}
+		}
+
+		public Randomizer Randomizer {
+			get {
+				return Singleton<SimulationManager>.instance.m_randomizer;
+			}
+		}
+
+		public void AddAction(Action action) {
+			Singleton<SimulationManager>.instance.AddAction(action);
+		}
+
+		public void PauseSimulation(bool forced) {
+			if (forced) {
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			} else {
+				Singleton<SimulationManager>.instance.SimulationPaused = true;
+			}
+		}
+
+		public void ResumeSimulation(bool forced) {
+			if (forced) {
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			} else {
+				Singleton<SimulationManager>.instance.SimulationPaused = false;
 			}
 		}
 	}

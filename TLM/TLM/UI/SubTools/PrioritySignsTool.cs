@@ -12,8 +12,10 @@ using UnityEngine;
 using TrafficManager.Traffic;
 using TrafficManager.Manager;
 using TrafficManager.Util;
-using static TrafficManager.Traffic.PrioritySegment;
 using CSUtil.Commons;
+using TrafficManager.Geometry.Impl;
+using TrafficManager.Manager.Impl;
+using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -68,16 +70,16 @@ namespace TrafficManager.UI.SubTools {
 			TrafficPriorityManager tpm = TrafficPriorityManager.Instance;
 
 			currentPriorityNodeIds.Clear();
-			for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
 					continue;
 				}
 
-				if (!tpm.MayNodeHavePrioritySigns(nodeId)) {
+				if (!tpm.MayNodeHavePrioritySigns((ushort)nodeId)) {
 					continue;
 				}
 
-				if (!tpm.HasNodePrioritySign(nodeId) && nodeId != SelectedNodeId) {
+				if (!tpm.HasNodePrioritySign((ushort)nodeId) && nodeId != SelectedNodeId) {
 					continue;
 				}
 
@@ -109,7 +111,6 @@ namespace TrafficManager.UI.SubTools {
 				Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
 
 				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
-				var hoveredSign = false;
 
 				ushort removedNodeId = 0;
 				bool showRemoveButton = false;

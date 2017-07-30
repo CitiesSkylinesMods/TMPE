@@ -14,7 +14,9 @@ namespace TrafficManager {
 		int ticksSinceLastMinuteUpdate = 0;
 		int ticksSinceLastSecondUpdate = 0;
 
-		TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+		ITrafficLightSimulationManager tlsMan = Constants.ManagerFactory.TrafficLightSimulationManager;
+		IRoutingManager routeMan = Constants.ManagerFactory.RoutingManager;
+		IUtilityManager utilMan = Constants.ManagerFactory.UtilityManager;
 
 		public override void OnCreated(IThreading threading) {
 			base.OnCreated(threading);
@@ -30,7 +32,7 @@ namespace TrafficManager {
 
 		public override void OnAfterSimulationFrame() {
 			try {
-				RoutingManager.Instance.SimulationStep();
+				routeMan.SimulationStep();
 			} catch (Exception e) {
 				Log.Error($"Error occured while performing first update: " + e.ToString());
 			}
@@ -39,18 +41,15 @@ namespace TrafficManager {
 			if (ticksSinceLastMinuteUpdate > 60 * 60) {
 				ticksSinceLastMinuteUpdate = 0;
 				GlobalConfig.Instance.SimulationStep();
+#if DEBUG
+				DebugMenuPanel.PrintTransportStats();
+#endif
 			}
 
 			++ticksSinceLastSecondUpdate;
 			if (ticksSinceLastSecondUpdate > 60) {
 				ticksSinceLastSecondUpdate = 0;
-
-				try {
-					VehicleStateManager.Instance.SimulationStep();
-					UtilityManager.Instance.SimulationStep();
-				} catch (Exception e) {
-					Log.Error($"Error occured while performing second update: " + e.ToString());
-				}
+				utilMan.SimulationStep();
 			}
 		}
 
