@@ -156,7 +156,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!Services.NetService.IsSegmentValid(segmentId))
 				return false;
 			Flags.setEnterWhenBlockedAllowed(segmentId, startNode, value);
-			OnSegmentChange(segmentId);
+			//OnSegmentChange(segmentId);
 			return true;
 		}
 

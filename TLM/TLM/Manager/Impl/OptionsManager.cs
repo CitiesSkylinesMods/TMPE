@@ -82,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (data.Length >= 16) {
-				Options.setEnableDespawning(data[15] == (byte)1);
+				Options.setDisableDespawning(data[15] != (byte)1);
 			}
 
 			if (data.Length >= 17) {
@@ -193,7 +193,7 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.strongerRoadConditionEffects ? 1 : 0),
 						(byte)(Options.allowUTurns ? 1 : 0),
 						(byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
-						(byte)(Options.enableDespawning ? 1 : 0),
+						(byte)(Options.disableDespawning ? 0 : 1),
 						(byte)0,//Options.IsDynamicPathRecalculationActive()
 						(byte)(Options.connectedLanesOverlay ? 1 : 0),
 						(byte)(Options.prioritySignsEnabled ? 1 : 0),

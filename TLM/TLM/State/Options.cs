@@ -48,7 +48,7 @@ namespace TrafficManager.State {
 		private static UICheckBox trafficLightPriorityRulesToggle = null;
 		private static UIDropDown vehicleRestrictionsAggressionDropdown = null;
 		private static UICheckBox banRegularTrafficOnBusLanesToggle = null;
-		private static UICheckBox enableDespawningToggle = null;
+		private static UICheckBox disableDespawningToggle = null;
 
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox prohibitPocketCarsToggle = null;
@@ -121,7 +121,7 @@ namespace TrafficManager.State {
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
 		public static bool advancedAI = false;
-		public static byte altLaneSelectionRatio = 25;
+		public static byte altLaneSelectionRatio = 0;
 		public static bool highwayRules = false;
 #if DEBUG
 		public static bool showLanes = true;
@@ -130,7 +130,7 @@ namespace TrafficManager.State {
 #endif
 		public static bool strongerRoadConditionEffects = false;
 		public static bool prohibitPocketCars = false;
-		public static bool enableDespawning = true;
+		public static bool disableDespawning = false;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
 
@@ -205,8 +205,8 @@ namespace TrafficManager.State {
 			}
 
 			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + ":", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
-			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
-			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
+			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.Main.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
+			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -240,9 +240,10 @@ namespace TrafficManager.State {
 
 			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
-			strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
-			enableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Enable_despawning"), enableDespawning, onEnableDespawningChanged) as UICheckBox;
-			preferOuterLaneToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
+			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
+				strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
+			}
+			disableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Disable_despawning"), disableDespawning, onDisableDespawningChanged) as UICheckBox;
 
 			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
 			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
@@ -280,6 +281,7 @@ namespace TrafficManager.State {
 			vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
 			banRegularTrafficOnBusLanesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Ban_private_cars_and_trucks_on_bus_lanes"), banRegularTrafficOnBusLanes, onBanRegularTrafficOnBusLanesChanged) as UICheckBox;
 			highwayRulesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
+			preferOuterLaneToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
@@ -467,8 +469,9 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-			altLaneSelectionRatio = (byte)Mathf.RoundToInt(newVal);
+			setAltLaneSelectionRatio((byte)Mathf.RoundToInt(newVal));
 			altLaneSelectionRatioSlider.tooltip = Translation.GetString("Percentage_of_vehicles_performing_dynamic_lane_section") + ": " + altLaneSelectionRatio + " %";
+
 			Log._Debug($"altLaneSelectionRatio changed to {altLaneSelectionRatio}");
 		}
 
@@ -570,14 +573,14 @@ namespace TrafficManager.State {
 		private static void onLockButtonChanged(bool newValue) {
 			Log._Debug($"Button lock changed to {newValue}");
 			LoadingExtension.BaseUI.MainMenuButton.SetPosLock(newValue);
-			GlobalConfig.Instance.MainMenuButtonPosLocked = newValue;
+			GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
 			GlobalConfig.WriteConfig();
 		}
 
 		private static void onLockMenuChanged(bool newValue) {
 			Log._Debug($"Menu lock changed to {newValue}");
 			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
-			GlobalConfig.Instance.MainMenuPosLocked = newValue;
+			GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
 			GlobalConfig.WriteConfig();
 		}
 
@@ -602,7 +605,7 @@ namespace TrafficManager.State {
 				return;
 
 			Log._Debug($"vehicleRestrictionsAggression changed to {newValue}");
-			vehicleRestrictionsAggression = (VehicleRestrictionsAggression)newValue;
+			setVehicleRestrictionsAggression((VehicleRestrictionsAggression)newValue);
 		}
 
 		/*private static void onLaneChangingRandomizationChanged(int newLaneChangingRandomization) {
@@ -827,12 +830,12 @@ namespace TrafficManager.State {
 			realisticSpeeds = value;
 		}
 
-		private static void onEnableDespawningChanged(bool value) {
+		private static void onDisableDespawningChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
 
-			Log._Debug($"enableDespawning changed to {value}");
-			enableDespawning = value;
+			Log._Debug($"disableDespawning changed to {value}");
+			disableDespawning = value;
 		}
 
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
@@ -942,9 +945,11 @@ namespace TrafficManager.State {
 		}
 
 		public static void setVehicleRestrictionsAggression(VehicleRestrictionsAggression val) {
+			bool changed = vehicleRestrictionsAggression != val;
 			vehicleRestrictionsAggression = val;
-			if (vehicleRestrictionsAggressionDropdown != null)
+			if (changed && vehicleRestrictionsAggressionDropdown != null) {
 				vehicleRestrictionsAggressionDropdown.selectedIndex = (int)val;
+			}
 		}
 
 		/*public static void setLaneChangingRandomization(int newLaneChangingRandomization) {
@@ -996,17 +1001,28 @@ namespace TrafficManager.State {
 		}
 
 		public static void setAdvancedAI(bool newAdvancedAI) {
+			bool changed = newAdvancedAI != advancedAI;
 			advancedAI = newAdvancedAI;
 
-			if (advancedAIToggle != null)
+			if (changed && advancedAIToggle != null) {
 				advancedAIToggle.isChecked = newAdvancedAI;
+			}
+
+			if (changed && !newAdvancedAI) {
+				setAltLaneSelectionRatio(0);
+			}
 		}
 
 		public static void setAltLaneSelectionRatio(byte val) {
+			bool changed = val != altLaneSelectionRatio;
 			altLaneSelectionRatio = val;
 
-			if (altLaneSelectionRatioSlider != null) {
+			if (changed && altLaneSelectionRatioSlider != null) {
 				altLaneSelectionRatioSlider.value = val;
+			}
+
+			if (changed && altLaneSelectionRatio > 0) {
+				setAdvancedAI(true);
 			}
 		}
 
@@ -1032,6 +1048,10 @@ namespace TrafficManager.State {
 		}
 
 		public static void setStrongerRoadConditionEffects(bool newStrongerRoadConditionEffects) {
+			if (!SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
+				newStrongerRoadConditionEffects = false;
+			}
+
 			strongerRoadConditionEffects = newStrongerRoadConditionEffects;
 			if (strongerRoadConditionEffectsToggle != null)
 				strongerRoadConditionEffectsToggle.isChecked = newStrongerRoadConditionEffects;
@@ -1050,11 +1070,11 @@ namespace TrafficManager.State {
 				realisticSpeedsToggle.isChecked = newValue;
 		}
 
-		public static void setEnableDespawning(bool value) {
-			enableDespawning = value;
+		public static void setDisableDespawning(bool value) {
+			disableDespawning = value;
 
-			if (enableDespawningToggle != null)
-				enableDespawningToggle.isChecked = value;
+			if (disableDespawningToggle != null)
+				disableDespawningToggle.isChecked = value;
 		}
 
 		public static void setAllowUTurns(bool value) {

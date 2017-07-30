@@ -64,6 +64,8 @@ namespace TrafficManager.State {
 
 		public DynamicLaneSelection DynamicLaneSelection = new DynamicLaneSelection();
 
+		public Main Main = new Main();
+
 		public ParkingAI ParkingAI = new ParkingAI();
 
 		public PathFinding PathFinding = new PathFinding();
@@ -71,20 +73,6 @@ namespace TrafficManager.State {
 		public PriorityRules PriorityRules = new PriorityRules();
 
 		public TimedTrafficLights TimedTrafficLights = new TimedTrafficLights();
-
-		/// <summary>
-		/// Main menu button position
-		/// </summary>
-		public int MainMenuButtonX = 464;
-		public int MainMenuButtonY = 10;
-		public bool MainMenuButtonPosLocked = false;
-
-		/// <summary>
-		/// Main menu position
-		/// </summary>
-		public int MainMenuX = 85;
-		public int MainMenuY = 60;
-		public bool MainMenuPosLocked = false;
 
 		internal static void WriteConfig() {
 			ModifiedTime = WriteConfig(Instance);
@@ -94,14 +82,14 @@ namespace TrafficManager.State {
 			Log._Debug($"Writing default config...");
 			GlobalConfig conf = new GlobalConfig();
 			if (oldConfig != null) {
-				conf.MainMenuButtonX = oldConfig.MainMenuButtonX;
-				conf.MainMenuButtonY = oldConfig.MainMenuButtonY;
+				conf.Main.MainMenuButtonX = oldConfig.Main.MainMenuButtonX;
+				conf.Main.MainMenuButtonY = oldConfig.Main.MainMenuButtonY;
 
-				conf.MainMenuX = oldConfig.MainMenuX;
-				conf.MainMenuY = oldConfig.MainMenuY;
+				conf.Main.MainMenuX = oldConfig.Main.MainMenuX;
+				conf.Main.MainMenuY = oldConfig.Main.MainMenuY;
 
-				conf.MainMenuButtonPosLocked = oldConfig.MainMenuButtonPosLocked;
-				conf.MainMenuPosLocked = oldConfig.MainMenuPosLocked;
+				conf.Main.MainMenuButtonPosLocked = oldConfig.Main.MainMenuButtonPosLocked;
+				conf.Main.MainMenuPosLocked = oldConfig.Main.MainMenuPosLocked;
 			}
 			modifiedTime = WriteConfig(conf);
 			return conf;

@@ -154,63 +154,64 @@ namespace TrafficManager.Custom.AI {
 					return;
 				}
 
-				/*if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
+				int bestLaneIndex = nextPathPos.m_lane;
+				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
 					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPathPos);
-				}*/
-				// NON-STOCK CODE START
-				if (firstIter &&
-					this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
-					!this.m_info.m_isLargeVehicle &&
-					VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID])
-				) {
-					int bestLaneIndex = nextPathPos.m_lane;
-					uint next2PathId = nextPathId;
-					int next2PathPosIndex = nextPathPosIndex;
-					bool next2Invalid;
-					PathUnit.Position next2PathPos;
-					NetInfo next2SegmentInfo = null;
-					PathUnit.Position next3PathPos;
-					NetInfo next3SegmentInfo = null;
-					PathUnit.Position next4PathPos;
-					if (PathUnit.GetNextPosition(ref next2PathId, ref next2PathPosIndex, out next2PathPos, out next2Invalid)) {
-						next2SegmentInfo = netManager.m_segments.m_buffer[(int)next2PathPos.m_segment].Info;
+				} else {
+					// NON-STOCK CODE START
+					if (firstIter &&
+						this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
+						!this.m_info.m_isLargeVehicle &&
+						VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID])
+					) {
+						uint next2PathId = nextPathId;
+						int next2PathPosIndex = nextPathPosIndex;
+						bool next2Invalid;
+						PathUnit.Position next2PathPos;
+						NetInfo next2SegmentInfo = null;
+						PathUnit.Position next3PathPos;
+						NetInfo next3SegmentInfo = null;
+						PathUnit.Position next4PathPos;
+						if (PathUnit.GetNextPosition(ref next2PathId, ref next2PathPosIndex, out next2PathPos, out next2Invalid)) {
+							next2SegmentInfo = netManager.m_segments.m_buffer[(int)next2PathPos.m_segment].Info;
 
-						uint next3PathId = next2PathId;
-						int next3PathPosIndex = next2PathPosIndex;
-						bool next3Invalid;
-						if (PathUnit.GetNextPosition(ref next3PathId, ref next3PathPosIndex, out next3PathPos, out next3Invalid)) {
-							next3SegmentInfo = netManager.m_segments.m_buffer[(int)next3PathPos.m_segment].Info;
+							uint next3PathId = next2PathId;
+							int next3PathPosIndex = next2PathPosIndex;
+							bool next3Invalid;
+							if (PathUnit.GetNextPosition(ref next3PathId, ref next3PathPosIndex, out next3PathPos, out next3Invalid)) {
+								next3SegmentInfo = netManager.m_segments.m_buffer[(int)next3PathPos.m_segment].Info;
 
-							uint next4PathId = next3PathId;
-							int next4PathPosIndex = next3PathPosIndex;
-							bool next4Invalid;
-							if (! PathUnit.GetNextPosition(ref next4PathId, ref next4PathPosIndex, out next4PathPos, out next4Invalid)) {
+								uint next4PathId = next3PathId;
+								int next4PathPosIndex = next3PathPosIndex;
+								bool next4Invalid;
+								if (!PathUnit.GetNextPosition(ref next4PathId, ref next4PathPosIndex, out next4PathPos, out next4Invalid)) {
+									next4PathPos = default(PathUnit.Position);
+								}
+							} else {
+								next3PathPos = default(PathUnit.Position);
 								next4PathPos = default(PathUnit.Position);
 							}
 						} else {
+							next2PathPos = default(PathUnit.Position);
 							next3PathPos = default(PathUnit.Position);
 							next4PathPos = default(PathUnit.Position);
 						}
-					} else {
-						next2PathPos = default(PathUnit.Position);
-						next3PathPos = default(PathUnit.Position);
-						next4PathPos = default(PathUnit.Position);
-					}
 
-					bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
-
-					if (bestLaneIndex != (int)nextPathPos.m_lane) {
-						nextPathPos.m_lane = (byte)bestLaneIndex;
-						pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextPathPosIndex, nextPathPos);
-						// prevent multiple lane changes to the same lane from happening at the same time
-						TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
-#if MEASUREDENSITY
-							, VehicleStateManager.Instance.VehicleStates[vehicleID].totalLength
-#endif
-							, 0);
+						bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
 					}
+					// NON-STOCK CODE END
 				}
-				// NON-STOCK CODE END
+
+				if (bestLaneIndex != (int)nextPathPos.m_lane) {
+					nextPathPos.m_lane = (byte)bestLaneIndex;
+					pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextPathPosIndex, nextPathPos);
+					// prevent multiple lane changes to the same lane from happening at the same time
+					TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
+#if MEASUREDENSITY
+								, VehicleStateManager.Instance.VehicleStates[vehicleID].totalLength
+#endif
+								, 0); // NON-STOCK CODE
+				}
 
 				uint nextLaneId = PathManager.GetLaneID(nextPathPos);
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[(int)nextPathPos.m_lane];

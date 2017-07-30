@@ -16,13 +16,13 @@ namespace TrafficManager.UI.MainMenu {
 
 		public override ButtonFunction Function {
 			get {
-				return Options.enableDespawning ? ButtonFunction.DespawnEnabled : ButtonFunction.DespawnDisabled;
+				return Options.disableDespawning ? ButtonFunction.DespawnDisabled : ButtonFunction.DespawnEnabled;
 			}
 		}
 
 		public override string Tooltip {
 			get {
-				return Options.enableDespawning ? "Disable_despawning" : "Enable_despawning";
+				return Options.disableDespawning ? "Enable_despawning" : "Disable_despawning";
 			}
 		}
 
@@ -34,7 +34,7 @@ namespace TrafficManager.UI.MainMenu {
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
 			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-			Options.setEnableDespawning(!Options.enableDespawning);
+			Options.setDisableDespawning(!Options.disableDespawning);
 		}
 	}
 }

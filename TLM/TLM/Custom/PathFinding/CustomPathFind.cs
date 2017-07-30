@@ -543,7 +543,7 @@ namespace TrafficManager.Custom.PathFinding {
 							}
 							if ((byte)(candidateItem.m_direction & direction) != 0 && (!nodesDisabled || (instance.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
 #if DEBUGNEWPF && DEBUG
-								if (debug) {
+								if (debug && (_conf.Debug.NodeId <= 0 || specialNodeId == _conf.Debug.NodeId)) {
 									Log._Debug($"CustomPathFind.PathFindImplementation: Handling special node for path unit {unit}, type {queueItem.vehicleType}:\n" +
 										$"\tcandidateItem.m_position.m_segment={candidateItem.m_position.m_segment}\n" +
 										$"\tcandidateItem.m_position.m_lane={candidateItem.m_position.m_lane}\n" +
@@ -1385,56 +1385,58 @@ namespace TrafficManager.Custom.PathFinding {
 								 * =======================================================================================================
 								 */
 
-								bool nextIsRealJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None && (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
+								bool nextIsJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+								bool nextIsRealJunction = nextIsJunction && (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 								ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
 								//bool prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None && (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
-								if (_isHeavyVehicle &&
-									Options.preferOuterLane &&
-									prevSegmentRouting.highway &&
-									prevLaneInfo.m_similarLaneCount > 1 &&
-									(netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None
-								) {
-									// penalize large vehicles for using inner lanes
-									if (laneSelectionCost == null) {
-										laneSelectionCost = 1f;
+								if (prevLaneInfo.m_similarLaneCount > 1) {
+									if (_isHeavyVehicle &&
+										Options.preferOuterLane &&
+										prevSegmentRouting.highway &&
+										(netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None
+									) {
+										// penalize large vehicles for using inner lanes
+										if (laneSelectionCost == null) {
+											laneSelectionCost = 1f;
+										}
+#if DEBUGNEWPF
+										float? oldLaneSelectionCost = laneSelectionCost;
+#endif
+										float prevRelOuterLane = ((float)prevOuterSimilarLaneIndex / (float)(prevLaneInfo.m_similarLaneCount - 1));
+										laneSelectionCost *= 1f + _conf.PathFinding.HeavyVehicleMaxInnerLanePenalty * prevRelOuterLane;
+#if DEBUGNEWPF
+										if (debug)
+											logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+												"\t" + $"applied inner lane penalty:\n" +
+												"\t" + $"oldLaneSelectionCost={oldLaneSelectionCost}\n" +
+												"\t" + $"=> laneSelectionCost={laneSelectionCost}\n"
+												);
+#endif
 									}
-#if DEBUGNEWPF
-									float? oldLaneSelectionCost = laneSelectionCost;
-#endif
-									float prevRelOuterLane = ((float)prevOuterSimilarLaneIndex / (float)(prevLaneInfo.m_similarLaneCount - 1));
-									laneSelectionCost *= 1f + _conf.PathFinding.HeavyVehicleMaxInnerLanePenalty * prevRelOuterLane;
-#if DEBUGNEWPF
-									if (debug)
-										logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
-											"\t" + $"applied inner lane penalty:\n" +
-											"\t" + $"oldLaneSelectionCost={oldLaneSelectionCost}\n" +
-											"\t" + $"=> laneSelectionCost={laneSelectionCost}\n"
-											);
-#endif
-								}
 
-								/*
-								 * =======================================================================================================
-								 * (5) Apply costs for randomized lane selection in front of junctions
-								 * =======================================================================================================
-								 */
-								else if (Options.advancedAI && !_stablePath && nextIsRealJunction && _pathRandomizer.Int32(_conf.AdvancedVehicleAI.LaneSelectionJunctionRandomization) == 0) {
-									// randomized lane selection at junctions
-									if (laneSelectionCost == null) {
-										laneSelectionCost = 1f;
+									/*
+									 * =======================================================================================================
+									 * (5) Apply costs for randomized lane selection in front of junctions and highway transitions
+									 * =======================================================================================================
+									 */
+									else if (Options.advancedAI && !_stablePath && nextIsJunction && _pathRandomizer.Int32(_conf.AdvancedVehicleAI.LaneRandomizationJunctionSel) == 0) {
+										// randomized lane selection at junctions
+										if (laneSelectionCost == null) {
+											laneSelectionCost = 1f;
+										}
+#if DEBUGNEWPF
+										float? oldLaneSelectionCost = laneSelectionCost;
+#endif
+										laneSelectionCost *= 1f + _pathRandomizer.Int32(2) * _conf.AdvancedVehicleAI.LaneRandomizationCostFactor;
+#if DEBUGNEWPF
+										if (debug)
+											logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+												"\t" + $"applied lane randomizations at junctions:\n" +
+												"\t" + $"oldLaneSelectionCost={oldLaneSelectionCost}\n" +
+												"\t" + $"=> laneSelectionCost={laneSelectionCost}\n"
+												);
+#endif
 									}
-#if DEBUGNEWPF
-									float? oldLaneSelectionCost = laneSelectionCost;
-#endif
-									laneSelectionCost *= 1f + _pathRandomizer.Int32(2);
-#if DEBUGNEWPF
-									if (debug)
-										logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
-											"\t" + $"applied lane randomizations at junctions:\n" +
-											"\t" + $"oldLaneSelectionCost={oldLaneSelectionCost}\n" +
-											"\t" + $"=> laneSelectionCost={laneSelectionCost}\n"
-											);
-#endif
 								}
 
 								/*

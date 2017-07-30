@@ -513,7 +513,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MayDespawn(ref Vehicle vehicleData) {
-			return Options.enableDespawning || vehicleData.m_flags2 != 0 || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
+			return !Options.disableDespawning || vehicleData.m_flags2 != 0 || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
 		public float CalcMaxSpeed(ushort vehicleId, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool isRecklessDriver) {
@@ -539,7 +539,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 			} else {
 				if (Options.strongerRoadConditionEffects) {
-					float minSpeed = Math.Min(maxSpeed * WET_ROADS_FACTOR, WET_ROADS_MAX_SPEED);
+					float minSpeed = Math.Min(maxSpeed * WET_ROADS_FACTOR, WET_ROADS_MAX_SPEED); // custom: -25% .. 0
 					if (maxSpeed > minSpeed)
 						maxSpeed = minSpeed + (float)(255 - segment.m_wetness) * 0.0039215686f * (maxSpeed - minSpeed);
 				} else {
@@ -569,15 +569,15 @@ namespace TrafficManager.Manager.Impl {
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, VehicleInfo vehicleInfo, bool isRecklessDriver) {
 			if (Options.realisticSpeeds) {
 				float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
-				if (vehicleInfo.m_isLargeVehicle)
+				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.9 .. 1
-				else if (isRecklessDriver)
+				} else if (isRecklessDriver) {
 					speed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
-				else
+				} else {
 					speed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
-			} else {
-				if (isRecklessDriver)
-					speed *= 1.5f;
+				}
+			} else if (isRecklessDriver) {
+				speed *= 1.5f;
 			}
 			return speed;
 		}
@@ -1144,14 +1144,14 @@ namespace TrafficManager.Manager.Impl {
 				// decide if vehicle should stay or change
 
 				// vanishing lane change opportunity detection
-				int vehSel = vehicleId % 5;
+				int vehSel = vehicleId % 6;
 #if DEBUG
 				if (debug) {
 					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): vehMod4={vehSel} numReachableNext2Lanes={numReachableNext2Lanes} numReachableNext3Lanes={numReachableNext3Lanes}");
 				}
 #endif
-				if ((numReachableNext3Lanes == 1 && vehSel <= 1) || // 2/5 % of all vehicles will change lanes 3 segments in front
-					(numReachableNext2Lanes == 1 && vehSel <= 3) // 2/5 % of all vehicles will change lanes 2 segments in front, 1/5 will change at the last opportunity
+				if ((numReachableNext3Lanes == 1 && vehSel <= 2) || // 3/6 % of all vehicles will change lanes 3 segments in front
+					(numReachableNext2Lanes == 1 && vehSel <= 4) // 2/6 % of all vehicles will change lanes 2 segments in front, 1/5 will change at the last opportunity
 				) {
 					// vehicle must reach a certain lane since lane changing opportunities will vanish
 
@@ -1247,7 +1247,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 #endif
 					return bestStayNext1LaneIndex;
-				} else if (foundSafeLaneChange && bestStaySpeedDiff > 0 && bestOptSpeedDiff < bestStaySpeedDiff && bestOptSpeedDiff >= 0) {
+				} else if (! recklessDriver && foundSafeLaneChange && bestStaySpeedDiff > 0 && bestOptSpeedDiff < bestStaySpeedDiff && bestOptSpeedDiff >= 0) {
 					// found a lane change that allows faster vehicles to overtake
 					float optimization = 100f * ((bestStaySpeedDiff - bestOptSpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
 #if DEBUG
@@ -1295,15 +1295,6 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"VehicleBehaviorManager.MayFindBestLane({vehicleId}) called.");
 			}
 #endif
-
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"VehicleBehaviorManager.MayFindBestLane({vehicleId}): Allowing lane checking. Vehicle is on emergency.");
-				}
-#endif
-				return true;
-			}
 
 			if (! Options.advancedAI) {
 #if DEBUG

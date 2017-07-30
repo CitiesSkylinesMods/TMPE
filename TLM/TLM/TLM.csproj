@@ -136,6 +136,7 @@
     <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
+    <Compile Include="State\ConfigData\Main.cs" />
     <Compile Include="State\ConfigData\ParkingAI.cs" />
     <Compile Include="State\ConfigData\PathFinding.cs" />
     <Compile Include="State\ConfigData\PriorityRules.cs" />

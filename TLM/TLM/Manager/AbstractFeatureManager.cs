@@ -9,15 +9,15 @@ namespace TrafficManager.Manager {
 	/// </summary>
 	public abstract class AbstractFeatureManager : AbstractCustomManager, IFeatureManager {
 		public void OnDisableFeature() {
-			Services.SimulationService.PauseSimulation(true);
-			OnDisableFeatureInternal();
-			Services.SimulationService.ResumeSimulation(true);
+			Services.SimulationService.AddAction(() => {
+				OnDisableFeatureInternal();
+			});
 		}
 
 		public void OnEnableFeature() {
-			Services.SimulationService.PauseSimulation(true);
-			OnEnableFeatureInternal();
-			Services.SimulationService.ResumeSimulation(true);
+			Services.SimulationService.AddAction(() => {
+				OnEnableFeatureInternal();
+			});
 		}
 
 		/// <summary>

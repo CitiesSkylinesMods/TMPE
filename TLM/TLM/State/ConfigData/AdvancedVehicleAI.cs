@@ -8,7 +8,12 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Junction randomization for randomized lane selection
 		/// </summary>
-		public uint LaneSelectionJunctionRandomization = 3;
+		public uint LaneRandomizationJunctionSel = 3;
+
+		/// <summary>
+		/// Cost factor for lane randomization
+		/// </summary>
+		public float LaneRandomizationCostFactor = 1f;
 
 		/// <summary>
 		/// base lane changing cost factor on city streets
