@@ -11,8 +11,7 @@ User manual: http://www.viathinksoft.de/tmpe
 - New option: Vehicle restrictions aggression
 - New option: Vehicles follow priority rules at junctions with timed traffic lights
 - Improved path-finding performance
-- Improved performance traffic measurement engine performance 
-- Improved vehicle state tracking
+- Improved traffic measurement engine performance 
 - Reorganized global configuration file (sorry, your main menu and main button positions are reset)
 - The option "Road condition has a bigger impact on vehicle speed" is only shown if the Snowfall DLC is owned
 - The flow/wait calculation mode to be used is now configurable via the global configuration file
@@ -23,6 +22,7 @@ User manual: http://www.viathinksoft.de/tmpe
 - It is now possible to connect train station tracks and outside connections with the lane connector
 - Disabling the Parking AI triggers graceful clean up procedure
 - Relocated some options
+- Improved vehicle state tracking
 - Workaround for a base game issue that causes trams to get stuck
 - Trains do not longer stop in front of green timed traffic lights
 - Vehicles use queue skipping to prioritize path-finding runs that are caused by road modifications
