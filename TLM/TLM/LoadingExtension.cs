@@ -1386,7 +1386,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Redirecting CarAI::CheckOtherVehicles Calls");
+				/*Log.Info("Redirecting CarAI::CheckOtherVehicles Calls");
 				try {
 					Detours.Add(new Detour(typeof(CarAI).GetMethod("CheckOtherVehicles",
 								BindingFlags.Public | BindingFlags.Static),
@@ -1396,7 +1396,7 @@ namespace TrafficManager {
 				} catch (Exception) {
 					Log.Error("Could not redirect CarAI::CheckOtherVehicles.");
 					detourFailed = true;
-				}
+				}*/
 
 				Log.Info("Redirecting CommonBuildingAI::SimulationStep Calls");
 				try {

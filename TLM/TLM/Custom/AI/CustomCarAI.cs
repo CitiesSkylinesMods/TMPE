@@ -246,7 +246,7 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
+		/*public static void CustomCheckOtherVehicles(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxDistance, float maxBraking, int lodPhysics) {
 			Vector3 targetPosDiff = (Vector3)vehicleData.m_targetPos3 - frameData.m_position;
 			Vector3 targetPosDir = frameData.m_position + Vector3.ClampMagnitude(targetPosDiff, maxDistance);
 			Vector3 min = Vector3.Min(vehicleData.m_segment.Min(), targetPosDir);
@@ -307,7 +307,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
-		}
+		}*/
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static bool CheckOverlap(Segment3 segment, ushort ignoreVehicle, float maxVelocity) {
