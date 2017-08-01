@@ -78,7 +78,7 @@ Minor_Complaints_(2_%) 사소한 불평들 (2 %)
 Holy_City_(0_%) 평온한 도시 (0 %)
 Forget_toggled_traffic_lights 선택된 신호등 잊기
 Road_is_already_in_a_group! 도로에 이미 완성된 그룹이 있습니다!
-All_selected_roads_must_be_of_the_same_type! 같은 유형이 도로에 선택되어 있습니다!
+All_selected_roads_must_be_of_the_same_type! 같은 유형의 도로가 선택되어 있습니다!
 Create_group 그룹 생성
 Delete_group 그룹 제거
 Add_zoning 지역설정 추가
@@ -101,7 +101,7 @@ Vehicle_restrictions 차량 제한
 Copy 복사
 Paste 붙이기
 Invert 반전
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 두 교차로 사이 도로에 차량 제한 적용
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 두 교차로 구간에 동일한 차량 제한 적용
 Allow_all_vehicles 모든 차량 허가
 Ban_all_vehicles 모든 차량 금지
 Set_all_traffic_lights_to_red 모든 신호등을 빨간불로 설정
@@ -172,15 +172,15 @@ Parking_restrictions 주차 제한
 Simulation 시뮬레이션
 On_roads 도로 설정
 Ban_private_cars_and_trucks_on_bus_lanes 버스전용 차선에 승용차 및 트럭 출입을 금지합니다
-default default
-flow_ratio flow ratio
-wait_ratio wait ratio
-After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
-Adaptive_step_switching Adaptive step switching
-Dynamic_lane_section Dynamic lane selection
-Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
-Vehicle_restrictions_aggression Vehicle restrictions aggression
-Strict Strict
-Show_path-find_stats Show path-find stats
-Remove_this_vehicle Remove this vehicle
-Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights
+default 기본값
+flow_ratio 차량 이동량
+wait_ratio 차량 대기량
+After_min._time_has_elapsed_switch_to_next_step_if 최소시간 경과후 다음단계로 넘어갑니다 :
+Adaptive_step_switching 적응형 신호 변경
+Dynamic_lane_section 유동적 차량 차선변경 빈도
+Percentage_of_vehicles_performing_dynamic_lane_section 유동적 차량 차선변경 빈도 백분율
+Vehicle_restrictions_aggression 진입불가 도로 회피 빈도
+Strict 엄격하게 제어함
+Show_path-find_stats 현재 경로를 찾는 차량수를 PFs 수치로 표기합니다
+Remove_this_vehicle 해당 차량을 제거합니다
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 차량이 신호등 시간표가 구성된 교차로에서 교통 표지판 규칙을 준수합니다
