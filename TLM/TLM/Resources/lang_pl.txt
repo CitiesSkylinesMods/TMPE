@@ -76,7 +76,7 @@ Path_Of_Evil_(10_%) Diabelska Ścieżka (10 %)
 Rush_Hour_(5_%) Godziny Szczytu (5 %)
 Minor_Complaints_(2_%) Drobne Skargi (2 %)
 Holy_City_(0_%) Święte Miasto (0 %)
-Forget_toggled_traffic_lights Zapomnij ustawione sygnalizacje
+Forget_toggled_traffic_lights Unuń ustawione sygnalizacje czasowe
 Road_is_already_in_a_group! Droga jest już w grupie
 All_selected_roads_must_be_of_the_same_type! Wszystkie zaznaczone drogi muszą być tego samego typu
 Create_group Stwórz grupę
@@ -116,7 +116,7 @@ The_Advanced_Vehicle_AI_cannot_be_activated Zaawansowana SI nie może zostać w�
 Enable_dynamic_path_calculation Aktywuj dynamiczne wyznaczanie ścieżki
 Lane_Arrow_Changer_Disabled_Connection Zmiana strzałek pasów ruchu jest niedostępna, ponieważ pasy ruchu zostały połączone ręcznie.
 Lane_connector Połącz pasy ruchu
-Connected_lanes Connected lanes
+Connected_lanes Połączenia pasów ruchu
 Use_alternative_view_mode Użyj alternatywnego widoku
 Road_type Typ drogi
 Default_speed_limit Domyślny limit prędkości
@@ -157,7 +157,7 @@ Vehicle_behavior Zachowanie pojazdu
 Policies_&_Restrictions Zasady i Ograniczenia
 At_junctions Na strzyżowaniach
 In_case_of_emergency W sytuacjach nadzwyczajnych
-Show_lane-wise_speed_limits Pokaz limity prędkości dla pasów
+Show_lane-wise_speed_limits Pokaż limity prędkości dla pasów
 Language Język
 Game_language Język gry
 requires_game_restart wymagane ponowne uruchomienie gry
@@ -176,10 +176,10 @@ flow_ratio wskaźnik przepływu
 wait_ratio wskaźnik oczekiwania
 After_min._time_has_elapsed_switch_to_next_step_if Po upływie min. czasu, przejdź do następnego kroku
 Adaptive_step_switching Adaptacyjna zmiana kroku
-Dynamic_lane_section Obszar dynamicznej zmiany pasa
-Percentage_of_vehicles_performing_dynamic_lane_section Procent pojazdów zmieniajacych pas w obszarze dynamicznej zmiany pasa
+Dynamic_lane_section Obszar dynamicznej zmiany pasa ruchu
+Percentage_of_vehicles_performing_dynamic_lane_section Procent pojazdów zmieniajacych pas w obszarze dynamicznej zmiany pasa ruchu
 Vehicle_restrictions_aggression Agrasywność ograniczeń ruchu pojazdów
-Strict Restrykcyjny
-Show_path-find_stats Pokaż statystyki znajdowania trasy
+Strict Ścisła
+Show_path-find_stats Pokaż statystyki znajdowania tras
 Remove_this_vehicle Usuń ten pojazd
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Pojazdy poruszają się zgodnie z regułami pierwszeństwa na skrzyżowaniach z sygnalizacją czasową
