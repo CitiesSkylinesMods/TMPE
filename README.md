@@ -4,6 +4,11 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
+1.10.1, 08/05/2017
+- Bugfix: Default routing is disabled if the lane connector is used on a subset of all available lanes only
+- Bugfix: Parking AI cannot be enabled/disabled
+- Bugfix: Lane connection points can connected to themselves
+
 1.10.0, 07/30/2017
 - New feature: Dynamic Lane Selection
 - New feature: Adaptive step switching
