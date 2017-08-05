@@ -66,9 +66,9 @@ namespace TrafficManager.Custom.AI {
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 				return;
 			}
-			bool flag2 = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-			if (flag2 != reversed) {
-				reversed = flag2;
+			bool newReversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+			if (newReversed != reversed) {
+				reversed = newReversed;
 				if (reversed) {
 					connectedVehicleId = vehicleData.GetLastVehicle(vehicleId);
 				} else {
@@ -79,8 +79,8 @@ namespace TrafficManager.Custom.AI {
 				if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 					return;
 				}
-				flag2 = ((vehicleData.m_flags & Vehicle.Flags.Reversed) != 0);
-				if (flag2 != reversed) {
+				newReversed = ((vehicleData.m_flags & Vehicle.Flags.Reversed) != 0);
+				if (newReversed != reversed) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 					return;
 				}
@@ -640,7 +640,9 @@ namespace TrafficManager.Custom.AI {
 					Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Target position is within breaking distance. ({Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot)} >= {breakingDist - 5f}). targetNodeId={targetNodeId} prevTargetNodeId={prevTargetNodeId} targetHasPrio={TrafficPriorityManager.Instance.HasNodePrioritySign(targetNodeId)} targetHasActiveTimed={TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId)}");
 #endif
 
-				if (VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData) || vehicleData.m_blockCounter != 255) { // NON-STOCK CODE
+				/*VehicleManager vehMan = Singleton<VehicleManager>.instance;
+				ushort firstVehicleId = vehicleData.GetFirstVehicle(vehicleId);
+				if (VehicleBehaviorManager.Instance.MayDespawn(ref vehMan.m_vehicles.m_buffer[firstVehicleId]) || vehMan.m_vehicles.m_buffer[firstVehicleId].m_blockCounter < 100) {*/ // NON-STOCK CODE
 #if DEBUG
 					if (debug)
 						Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Checking for free space on lane {laneID}.");
@@ -692,7 +694,7 @@ namespace TrafficManager.Custom.AI {
 						maxSpeed = 0f;
 						return;
 					}
-				} // NON-STOCK CODE
+				//} // NON-STOCK CODE
 
 				//if (this.m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) { // NON-STOCK CODE
 				if (targetNodeId == prevTargetNodeId) {

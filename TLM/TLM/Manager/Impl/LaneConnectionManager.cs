@@ -280,6 +280,10 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="sourceStartNode"></param>
 		/// <returns></returns>
 		internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+			if (sourceLaneId == targetLaneId) {
+				return false;
+			}
+
 			bool ret = Flags.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
 
 #if DEBUGCONN
@@ -583,6 +587,9 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					if (!Services.NetService.IsLaneValid(conn.higherLaneId))
 						continue;
+					if (conn.lowerLaneId == conn.higherLaneId) {
+						continue;
+					}
 
 					Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
 					AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);

@@ -105,8 +105,15 @@ namespace TrafficManager.UI.SubTools {
 
 				if (hasMarkers) {
 					foreach (NodeLaneMarker laneMarker in nodeMarkers) {
+						if (!Constants.ServiceFactory.NetService.IsLaneValid(laneMarker.laneId)) {
+							continue;
+						}
+
 						foreach (NodeLaneMarker targetLaneMarker in laneMarker.connectedMarkers) {
 							// render lane connection from laneMarker to targetLaneMarker
+							if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.laneId)) {
+								continue;
+							}
 							RenderLane(cameraInfo, laneMarker.position, targetLaneMarker.position, NetManager.instance.m_nodes.m_buffer[nodeId].m_position, laneMarker.color);
 						}
 

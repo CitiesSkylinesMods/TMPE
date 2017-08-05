@@ -51,7 +51,7 @@ namespace TrafficManager.UI {
 		private static UIButton _checkDetoursButton = null;
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
-		private static UIButton _removeStuckEntitiesButton = null;
+		private static UIButton _printFlagsDebugInfoButton = null;
 #endif
 
 #if QUEUEDSTATS
@@ -185,7 +185,7 @@ namespace TrafficManager.UI {
 			height += 40;
 #endif
 #if DEBUG
-			_removeStuckEntitiesButton = _createButton("Remove stuck entities", y, clickRemoveStuckEntities);
+			_printFlagsDebugInfoButton = _createButton("Print flags debug info", y, clickPrintFlagsDebugInfo);
 			y += 40;
 			height += 40;
 #endif
@@ -372,10 +372,8 @@ namespace TrafficManager.UI {
 
 #if DEBUG
 
-		private void clickRemoveStuckEntities(UIComponent component, UIMouseEventParameter eventParam) {
-			UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
-
-			UtilityManager.Instance.RequestResetStuckEntities();
+		private void clickPrintFlagsDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
+			Flags.PrintDebugInfo();
 		}
 
 		private void clickVehicleToNone(UIComponent component, UIMouseEventParameter eventParam) {

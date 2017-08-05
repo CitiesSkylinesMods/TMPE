@@ -814,7 +814,8 @@ namespace TrafficManager.State {
 				return;
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
-			
+
+			prohibitPocketCars = newValue;
 			if (prohibitPocketCars) {
 				AdvancedParkingManager.Instance.OnEnableFeature();
 			} else {
