@@ -171,15 +171,15 @@ Parking_restrictions 道路边停车控制管理
 Simulation 模拟
 On_roads 专用道路
 Ban_private_cars_and_trucks_on_bus_lanes 禁止私家车和卡车驶入公交车专用道
-default default
-flow_ratio flow ratio
-wait_ratio wait ratio
-After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
-Adaptive_step_switching Adaptive step switching
-Dynamic_lane_section Dynamic lane selection
-Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
-Vehicle_restrictions_aggression Vehicle restrictions aggression
-Strict Strict
-Show_path-find_stats Show path-find stats
-Remove_this_vehicle Remove this vehicle
-Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights
+default 默认
+flow_ratio 通行比例
+wait_ratio 等候比例
+After_min._time_has_elapsed_switch_to_next_step_if 在设定最短时间过后，跳转至下一步骤，如果
+Adaptive_step_switching 适应性步骤切换
+Dynamic_lane_section Dynamic lane selection智能车道选择
+Percentage_of_vehicles_performing_dynamic_lane_section 进行智能车道选择的车辆百分比
+Vehicle_restrictions_aggression 车辆交规违反率
+Strict Strict 严苛
+Show_path-find_stats 显示车辆寻找车道数据
+Remove_this_vehicle 移除此车辆
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 让行规则适用于带自定义交通灯计时的路口

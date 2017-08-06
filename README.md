@@ -5,6 +5,7 @@ User manual: http://www.viathinksoft.de/tmpe
 
 # Changelog      
 1.10.1, 08/05/2017
+- Updated Polish, Korean, and Simplified Chinese translations
 - Bugfix: Default routing is disabled if the lane connector is used on a subset of all available lanes only
 - Bugfix: Parking AI cannot be enabled/disabled
 - Bugfix: Lane connection points can connected to themselves
