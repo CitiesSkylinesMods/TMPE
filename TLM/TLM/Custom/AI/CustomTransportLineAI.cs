@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -78,7 +79,10 @@ namespace TrafficManager.Custom.AI {
 			}
 			
 			ExtVehicleType extVehicleType = ExtVehicleType.Bus;
-			if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "extVehicleType")) {
+#endif
+				if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
 				extVehicleType = ExtVehicleType.PassengerTrain;
 			if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None)
 				extVehicleType = ExtVehicleType.Tram;
@@ -92,6 +96,9 @@ namespace TrafficManager.Custom.AI {
 				extVehicleType = ExtVehicleType.Blimp;
 			if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None)
 				extVehicleType = ExtVehicleType.CableCar;
+#if BENCHMARK
+			}
+#endif
 			//Log._Debug($"Transport line. extVehicleType={extVehicleType}");
 			uint path;
 			if (CustomPathManager._instance.CreatePath(extVehicleType, 0, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, 20000f, false, true, true, skipQueue)) {

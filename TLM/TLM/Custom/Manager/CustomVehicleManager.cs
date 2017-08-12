@@ -1,5 +1,6 @@
 ﻿using ColossalFramework.Math;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -15,20 +16,32 @@ namespace TrafficManager.Custom.Manager {
 #if DEBUG
 			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
 #endif
-			VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnReleaseVehicle")) {
+#endif
+				VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
+#if BENCHMARK
+			}
+#endif
 			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 		}
 
 		public bool CustomCreateVehicle(out ushort vehicleId, ref Randomizer r, VehicleInfo info, Vector3 position, TransferManager.TransferReason type, bool transferToSource, bool transferToTarget) {
 			// NON-STOCK CODE START
-			if (this.m_vehicleCount > VehicleManager.MAX_VEHICLE_COUNT - 5) {
-				// prioritize service vehicles and public transport when hitting the vehicle limit
-				ItemClass.Service service = info.GetService();
-				if (service == ItemClass.Service.Residential || service == ItemClass.Service.Industrial || service == ItemClass.Service.Commercial || service == ItemClass.Service.Office) {
-					vehicleId = 0;
-					return false;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "keep-spare-vehicles")) {
+#endif
+				if (this.m_vehicleCount > VehicleManager.MAX_VEHICLE_COUNT - 5) {
+					// prioritize service vehicles and public transport when hitting the vehicle limit
+					ItemClass.Service service = info.GetService();
+					if (service == ItemClass.Service.Residential || service == ItemClass.Service.Industrial || service == ItemClass.Service.Commercial || service == ItemClass.Service.Office) {
+						vehicleId = 0;
+						return false;
+					}
 				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 
 			ushort vehId;
@@ -79,7 +92,15 @@ namespace TrafficManager.Custom.Manager {
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);
 
-				VehicleStateManager.Instance.OnCreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
+				// NON-STOCK CODE START
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "OnCreateVehicle")) {
+#endif
+					VehicleStateManager.Instance.OnCreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]); // NON-STOCK CODE
+#if BENCHMARK
+				}
+#endif
+				// NON-STOCK CODE END
 
 				return true;
 			}

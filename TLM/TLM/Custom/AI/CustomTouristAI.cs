@@ -2,6 +2,7 @@
 using ColossalFramework.Globalization;
 using ColossalFramework.Math;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,9 +73,15 @@ namespace TrafficManager.Custom.AI {
 			ret = Locale.Get("CITIZEN_STATUS_GOINGTO");
 
 			// NON-STOCK CODE START
-			if (Options.prohibitPocketCars) {
-				ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "EnrichLocalizedCitizenStatus")) {
+#endif
+				if (Options.prohibitPocketCars) {
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 			return ret;
 		}
@@ -86,11 +93,17 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			bool forceTaxi = false;
-			if (Options.prohibitPocketCars) {
-				if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID].pathMode == ExtPathMode.TaxiToTarget) {
-					forceTaxi = true;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "forceTaxi")) {
+#endif
+				if (Options.prohibitPocketCars) {
+					if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID].pathMode == ExtPathMode.TaxiToTarget) {
+						forceTaxi = true;
+					}
 				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 
 			int carProb;
@@ -124,16 +137,22 @@ namespace TrafficManager.Custom.AI {
 			}
 			// NON-STOCK CODE START
 			VehicleInfo carInfo = null;
-			if (Options.prohibitPocketCars && useCar && !useTaxi) {
-				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
-				if (parkedVehicleId != 0) {
-#if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
-						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "find-parked-vehicle")) {
 #endif
-					carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+				if (Options.prohibitPocketCars && useCar && !useTaxi) {
+					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+					if (parkedVehicleId != 0) {
+#if DEBUG
+						if (GlobalConfig.Instance.Debug.Switches[2])
+							Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#endif
+						carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+					}
 				}
+#if BENCHMARK
 			}
+#endif
 			if (carInfo == null && (useCar || useTaxi))
 			// NON-STOCK CODE END
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);

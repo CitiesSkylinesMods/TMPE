@@ -677,10 +677,12 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			prioritySignsEnabled = val;
-			if (val)
+			if (val) {
 				VehicleStateManager.Instance.InitAllVehicles();
-			else
+			} else {
 				setPrioritySignsOverlay(false);
+				setTrafficLightPriorityRules(false);
+			}
 		}
 
 		private static void onTimedLightsEnabledChanged(bool val) {
@@ -689,10 +691,12 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			timedLightsEnabled = val;
-			if (val)
+			if (val) {
 				VehicleStateManager.Instance.InitAllVehicles();
-			else
+			} else {
 				setTimedLightsOverlay(false);
+				setTrafficLightPriorityRules(false);
+			}
 		}
 
 		private static void onCustomSpeedLimitsEnabledChanged(bool val) {
@@ -789,6 +793,10 @@ namespace TrafficManager.State {
 
 			Log._Debug($"trafficLightPriorityRules changed to {newValue}");
 			trafficLightPriorityRules = newValue;
+			if (newValue) {
+				setPrioritySignsEnabled(true);
+				setTimedLightsEnabled(true);
+			}
 		}
 
 		private static void onBanRegularTrafficOnBusLanesChanged(bool newValue) {
@@ -915,7 +923,9 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 
-			UtilityManager.Instance.RequestResetStuckEntities();
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				UtilityManager.Instance.ResetStuckEntities();
+			});
 		}
 
 		private static void onClickResetSpeedLimits() {

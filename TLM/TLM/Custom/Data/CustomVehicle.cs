@@ -1,6 +1,7 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,13 @@ namespace TrafficManager.Custom.Data {
 			}
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnSpawnVehicle")) {
+#endif
+				VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
+#if BENCHMARK
+			}
+#endif
 			// NON-STOCK CODE END
 		}
 
@@ -68,7 +75,13 @@ namespace TrafficManager.Custom.Data {
 			//Log._Debug($"CustomVehicle.Unspawn({vehicleId}) called.");
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnDespawnVehicle")) {
+#endif
+				VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
+#if BENCHMARK
+			}
+#endif
 			// NON-STOCK CODE END
 
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;

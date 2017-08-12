@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,8 +17,14 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			//Log._Debug($"CustomFireTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
-			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
-
+			ExtVehicleType vehicleType = ExtVehicleType.None;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnStartPathFind")) {
+#endif
+				vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
+#if BENCHMARK
+			}
+#endif
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;

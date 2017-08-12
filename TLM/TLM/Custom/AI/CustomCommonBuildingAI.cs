@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,17 @@ namespace TrafficManager.Custom.AI {
 	public class CustomCommonBuildingAI : BuildingAI {
 		public void CustomSimulationStep(ushort buildingID, ref Building data) {
 			// NON-STOCK CODE START
-			// slowly decrease parking space demand / public transport demand
-			uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
-			if ((frameIndex & 1u) == 0u) {
-				ExtSimulationStep(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID]);
-            }
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "ExtSimulationStep")) {
+#endif
+				// slowly decrease parking space demand / public transport demand
+				uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
+				if ((frameIndex & 1u) == 0u) {
+					ExtSimulationStep(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID]);
+				}
+#if BENCHMARK
+			}
+#endif
 			// NON-STOCK CODE END
 
 			base.SimulationStep(buildingID, ref data);

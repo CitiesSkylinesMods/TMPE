@@ -9,12 +9,24 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 			try {
-				if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
+				// NON-STOCK CODE START
+				bool mayDespawn = true;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "MayDespawn")) {
+#endif
+					mayDespawn = (vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
+#if BENCHMARK
+				}
+#endif
+				// NON-STOCK CODE END
+
+				if (mayDespawn) {
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} else {
 					if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {

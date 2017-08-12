@@ -13,6 +13,7 @@ using CSUtil.Commons;
 using System.Runtime.CompilerServices;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -47,10 +48,22 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
+#endif
+				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+#if BENCHMARK
+			}
+#endif
 			if (!Options.isStockLaneChangerUsed()) {
-				// Advanced AI traffic measurement
-				VehicleStateManager.Instance.LogTraffic(vehicleId);
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "LogTraffic")) {
+#endif
+					// Advanced AI traffic measurement
+					VehicleStateManager.Instance.LogTraffic(vehicleId);
+#if BENCHMARK
+				}
+#endif
 			}
 			// NON-STOCK CODE END
 
@@ -74,8 +87,23 @@ namespace TrafficManager.Custom.AI {
 					break;
 				}
 			}
-			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0 || (vehicleData.m_blockCounter == 255 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData))) {
+			if ((vehicleData.m_flags & (Vehicle.Flags.Spawned | Vehicle.Flags.WaitingPath | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo)) == 0) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+			} else if (vehicleData.m_blockCounter == 255) {
+				// NON-STOCK CODE START
+				bool mayDespawn = true;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "MayDespawn")) {
+#endif
+					mayDespawn = VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
+#if BENCHMARK
+				}
+#endif
+
+				if (mayDespawn) {
+					// NON-STOCK CODE END
+					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+				} // NON-STOCK CODE
 			}
 		}
 
@@ -132,7 +160,13 @@ namespace TrafficManager.Custom.AI {
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
+#endif
+				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
+#if BENCHMARK
+			}
+#endif
 			// NON-STOCK CODE END
 
 			NetManager netManager = Singleton<NetManager>.instance;
@@ -167,13 +201,27 @@ namespace TrafficManager.Custom.AI {
 					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
 				}
 				if (targetNodeId == prevTargetNodeId) {
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, ref lastFrameData, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
-						return;
+#if BENCHMARK
+					using (var bm = new Benchmark(null, "MayChangeSegment")) {
+#endif
+						if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
+							return;
+#if BENCHMARK
+					}
+#endif
 				}
 			}
+
 			NetInfo info = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				float speedLimit = 1;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
+#endif
+					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+#if BENCHMARK
+				}
+#endif
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, speedLimit, netManager.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
@@ -185,7 +233,14 @@ namespace TrafficManager.Custom.AI {
 			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				float speedLimit = 1;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
+#endif
+					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+#if BENCHMARK
+				}
+#endif
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, speedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);

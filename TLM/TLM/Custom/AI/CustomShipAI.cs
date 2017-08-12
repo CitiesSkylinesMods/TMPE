@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +19,14 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			/// NON-STOCK CODE START ///
-			ExtVehicleType vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI ? ExtVehicleType.PassengerShip : ExtVehicleType.CargoVehicle;
+			ExtVehicleType vehicleType = ExtVehicleType.None;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "vehicleType")) {
+#endif
+				vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI ? ExtVehicleType.PassengerShip : ExtVehicleType.CargoVehicle;
+#if BENCHMARK
+			}
+#endif
 			/// NON-STOCK CODE END ///
 
 			VehicleInfo info = this.m_info;

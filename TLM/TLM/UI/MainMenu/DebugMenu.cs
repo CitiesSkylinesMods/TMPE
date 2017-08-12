@@ -15,6 +15,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Util;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.UI {
 #if DEBUG
@@ -52,6 +53,8 @@ namespace TrafficManager.UI {
 		private static UIButton _noneToVehicleButton = null;
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _printFlagsDebugInfoButton = null;
+		private static UIButton _printBenchmarkReportButton = null;
+		private static UIButton _resetBenchmarksButton = null;
 #endif
 
 #if QUEUEDSTATS
@@ -188,6 +191,12 @@ namespace TrafficManager.UI {
 			_printFlagsDebugInfoButton = _createButton("Print flags debug info", y, clickPrintFlagsDebugInfo);
 			y += 40;
 			height += 40;
+			_printBenchmarkReportButton = _createButton("Print benchmark report", y, clickPrintBenchmarkReport);
+			y += 40;
+			height += 40;
+			_resetBenchmarksButton = _createButton("Reset benchmarks", y, clickResetBenchmarks);
+			y += 40;
+			height += 40;
 #endif
 		}
 
@@ -263,7 +272,9 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
-			UtilityManager.Instance.RequestPrintDebugInfo();
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				UtilityManager.Instance.PrintDebugInfo();
+			});
 		}
 
 		private void clickReloadConfig(UIComponent component, UIMouseEventParameter eventParam) {
@@ -374,6 +385,18 @@ namespace TrafficManager.UI {
 
 		private void clickPrintFlagsDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
 			Flags.PrintDebugInfo();
+		}
+
+		private void clickPrintBenchmarkReport(UIComponent component, UIMouseEventParameter eventParam) {
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				Log.Info(BenchmarkProfileProvider.Instance.CreateReport());
+			});
+		}
+
+		private void clickResetBenchmarks(UIComponent component, UIMouseEventParameter eventParam) {
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				BenchmarkProfileProvider.Instance.ClearProfiles();
+			});
 		}
 
 		private void clickVehicleToNone(UIComponent component, UIMouseEventParameter eventParam) {

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +15,22 @@ using UnityEngine;
 namespace TrafficManager.Custom.AI {
 	public class CustomBuildingAI : BuildingAI {
 		public Color CustomGetColor(ushort buildingID, ref Building data, InfoManager.InfoMode infoMode) {
-			// NON-STOCK CODE START
-			if (Options.prohibitPocketCars) {
-				Color? color;
-				if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID], infoMode, out color)) {
-					return (Color)color;
-				}
-			}
-			// NON-STOCK CODE END
-
 			if (infoMode != InfoManager.InfoMode.None) {
+				// NON-STOCK CODE START
+#if BENCHMARK
+				using (var bm = new Benchmark()) {
+#endif
+					if (Options.prohibitPocketCars) {
+						Color? color;
+						if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(buildingID, ref data, ref ExtBuildingManager.Instance.ExtBuildings[buildingID], infoMode, out color)) {
+							return (Color)color;
+						}
+					}
+#if BENCHMARK
+				}
+#endif
+				// NON-STOCK CODE END
+
 				return Singleton<InfoManager>.instance.m_properties.m_neutralColor;
 			}
 			if (!this.m_info.m_useColorVariations) {

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -38,15 +39,21 @@ namespace TrafficManager.Custom.Manager {
 			data.m_nextGridSegment = 0;
 
 			// NON-STOCK CODE START
-			try {
-#if DEBUGGEO
-				if (GlobalConfig.Instance.Debug.Switches[5])
-					Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "StartRecalculation")) {
 #endif
-				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
-			} catch (Exception e) {
-				Log.Error($"Error occured in CustomNetManager.CustomFinalizeSegment @ seg. {segment}: " + e.ToString());
+				try {
+#if DEBUGGEO
+					if (GlobalConfig.Instance.Debug.Switches[5])
+						Log.Warning($"CustomNetManager: CustomFinalizeSegment {segment}");
+#endif
+					SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
+				} catch (Exception e) {
+					Log.Error($"Error occured in CustomNetManager.CustomFinalizeSegment @ seg. {segment}: " + e.ToString());
+				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 		}
 
@@ -65,15 +72,21 @@ namespace TrafficManager.Custom.Manager {
 			}
 
 			// NON-STOCK CODE START
-			try {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[5])
-					Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "StartRecalculation")) {
 #endif
-				SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
-			} catch (Exception e) {
-				Log.Error($"Error occured in CustomNetManager.CustomUpdateSegment @ seg. {segment}: " + e.ToString());
+				try {
+#if DEBUG
+					if (GlobalConfig.Instance.Debug.Switches[5])
+						Log.Warning($"CustomNetManager: CustomUpdateSegment {segment}");
+#endif
+					SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
+				} catch (Exception e) {
+					Log.Error($"Error occured in CustomNetManager.CustomUpdateSegment @ seg. {segment}: " + e.ToString());
+				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 		}
 

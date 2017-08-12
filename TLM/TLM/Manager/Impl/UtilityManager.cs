@@ -19,65 +19,7 @@ namespace TrafficManager.Manager.Impl {
 			Instance = new UtilityManager();
 		}
 
-		/// <summary>
-		/// Determines if stuck entities should be cleared
-		/// </summary>
-		private static bool ResetStuckEntitiesRequested = false;
-
-		/// <summary>
-		/// Determines if vehicles should be cleared
-		/// </summary>
-		private static bool ClearTrafficRequested = false;
-
-#if DEBUG
-		/// <summary>
-		/// Determines if debug output should be printed
-		/// </summary>
-		private static bool PrintDebugInfoRequested = false;
-#endif
-
-		public void RequestResetStuckEntities() {
-			ResetStuckEntitiesRequested = true;
-		}
-
-#if DEBUG
-		public void RequestPrintDebugInfo() {
-			PrintDebugInfoRequested = true;
-		}
-#endif
-
-		public void SimulationStep() {
-			if (ResetStuckEntitiesRequested) {
-				try {
-					ResetStuckEntities();
-				} catch (Exception e) {
-					Log.Error($"Error occurred while resetting stuck entities: {e}");
-				} finally {
-					ResetStuckEntitiesRequested = false;
-				}
-			}
-
-			if (ClearTrafficRequested) {
-				try {
-					ClearTraffic();
-				} finally {
-					ClearTrafficRequested = false;
-				}
-			}
-#if DEBUG
-			if (PrintDebugInfoRequested) {
-				try {
-					PrintAllDebugInfo();
-				} catch (Exception e) {
-					Log.Error($"Error occurred while printing debug info: {e}");
-				} finally {
-					PrintDebugInfoRequested = false;
-				}
-			}
-#endif
-		}
-
-		private void ClearTraffic() {
+		public void ClearTraffic() {
 			try {
 				Monitor.Enter(Singleton<VehicleManager>.instance);
 
@@ -95,11 +37,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal void RequestClearTraffic() {
-			ClearTrafficRequested = true;
-		}
-
-		private void PrintAllDebugInfo() {
+		public void PrintAllDebugInfo() {
 			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
 			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
 
@@ -136,7 +74,7 @@ namespace TrafficManager.Manager.Impl {
 			Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
 		}
 
-		private void ResetStuckEntities() {
+		public void ResetStuckEntities() {
 			Log.Info($"UtilityManager.RemoveStuckEntities() called.");
 
 			Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");

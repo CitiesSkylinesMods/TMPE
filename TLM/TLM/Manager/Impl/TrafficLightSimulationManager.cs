@@ -39,21 +39,21 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void SimulationStep() {
-			int frame = (int)(Singleton<SimulationManager>.instance.m_currentFrameIndex & (SIM_MOD - 1));
+			int frame = (int)(Services.SimulationService.CurrentFrameIndex & (SIM_MOD - 1));
 			int minIndex = frame * (NetManager.MAX_NODE_COUNT / SIM_MOD);
 			int maxIndex = (frame + 1) * (NetManager.MAX_NODE_COUNT / SIM_MOD) - 1;
 
 			for (int nodeId = minIndex; nodeId <= maxIndex; ++nodeId) {
-				try {
-					TrafficLightSimulation nodeSim = TrafficLightSimulations[nodeId];
+				//try {
+				TrafficLightSimulation nodeSim = TrafficLightSimulations[nodeId];
 
-					if (nodeSim != null && nodeSim.IsTimedLightActive()) {
-						//Flags.applyNodeTrafficLightFlag((ushort)nodeId);
-						nodeSim.TimedLight.SimulationStep();
-					}
-				} catch (Exception ex) {
-					Log.Warning($"Error occured while simulating traffic light @ node {nodeId}: {ex.ToString()}");
+				if (nodeSim != null && nodeSim.IsTimedLightActive()) {
+					//Flags.applyNodeTrafficLightFlag((ushort)nodeId);
+					nodeSim.TimedLight.SimulationStep();
 				}
+				/*} catch (Exception ex) {
+					Log.Warning($"Error occured while simulating traffic light @ node {nodeId}: {ex.ToString()}");
+				}*/
 			}
 		}
 

@@ -1,7 +1,7 @@
 # Cities: Skylines - Traffic Manager: *President Edition*
 A work-in-progress modification for **Cities: Skylines** to add additional traffic control.
 
-User manual: http://www.viathinksoft.de/tmpe
+User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog      
 1.10.1, 08/05/2017

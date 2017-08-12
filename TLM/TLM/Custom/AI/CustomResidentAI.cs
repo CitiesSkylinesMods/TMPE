@@ -2,6 +2,7 @@
 using ColossalFramework.Globalization;
 using ColossalFramework.Math;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,9 +118,15 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			if (Options.prohibitPocketCars) {
-				ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "EnrichLocalizedCitizenStatus")) {
+#endif
+				if (Options.prohibitPocketCars) {
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 			return ret;
 		}
@@ -131,11 +138,17 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			bool forceTaxi = false;
-			if (Options.prohibitPocketCars) {
-				if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID].pathMode == ExtPathMode.TaxiToTarget) {
-					forceTaxi = true;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "forceTaxi")) {
+#endif
+				if (Options.prohibitPocketCars) {
+					if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID].pathMode == ExtPathMode.TaxiToTarget) {
+						forceTaxi = true;
+					}
 				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 
 			Citizen.AgeGroup ageGroup = CustomCitizenAI.GetAgeGroup(citizenData.Info.m_agePhase);
@@ -171,19 +184,27 @@ namespace TrafficManager.Custom.AI {
 			}
 			// NON-STOCK CODE START
 			VehicleInfo carInfo = null;
-			if (Options.prohibitPocketCars && useCar && !useTaxi) {
-				ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
-				if (parkedVehicleId != 0) {
-#if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
-						Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "find-parked-vehicle")) {
 #endif
-					carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+				if (Options.prohibitPocketCars && useCar && !useTaxi) {
+					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+					if (parkedVehicleId != 0) {
+#if DEBUG
+						if (GlobalConfig.Instance.Debug.Switches[2])
+							Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+#endif
+						carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+					}
 				}
+#if BENCHMARK
 			}
-			if (carInfo == null && (useCar || useTaxi))
-			// NON-STOCK CODE END
+#endif
+
+			if (carInfo == null && (useCar || useTaxi)) {
+				// NON-STOCK CODE END
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
+			}
 
 			VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, (ageGroup != Citizen.AgeGroup.Child) ? ItemClass.Level.Level2 : ItemClass.Level.Level1);
 			if (useBike && bikeInfo != null) {
@@ -199,73 +220,18 @@ namespace TrafficManager.Custom.AI {
 		private int GetTaxiProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetTaxiProbability called!");
 			return 20;
-			/*switch (ageGroup) {
-				case Citizen.AgeGroup.Child:
-					return 0;
-				case Citizen.AgeGroup.Teen:
-					return 2;
-				case Citizen.AgeGroup.Young:
-					return 2;
-				case Citizen.AgeGroup.Adult:
-					return 4;
-				case Citizen.AgeGroup.Senior:
-					return 6;
-				default:
-					return 0;
-			}*/
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetBikeProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetBikeProbability called!");
 			return 20;
-			/*CitizenManager citizenManager = Singleton<CitizenManager>.instance;
-			uint citizenId = citizenData.m_citizen;
-			ushort homeId = citizenManager.m_citizens.m_buffer[citizenId].m_homeBuilding;
-			int bikeEncouragement = 0;
-			if (homeId != 0) {
-				Vector3 position = Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)homeId].m_position;
-				DistrictManager districtManager = Singleton<DistrictManager>.instance;
-				byte district = districtManager.GetDistrict(position);
-				DistrictPolicies.CityPlanning cityPlanningPolicies = districtManager.m_districts.m_buffer[(int)district].m_cityPlanningPolicies;
-				if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.EncourageBiking) != DistrictPolicies.CityPlanning.None) {
-					bikeEncouragement = 10;
-				}
-			}
-			switch (ageGroup) {
-				case Citizen.AgeGroup.Child:
-					return ResidentAI.BIKE_PROBABILITY_CHILD + bikeEncouragement;
-				case Citizen.AgeGroup.Teen:
-					return ResidentAI.BIKE_PROBABILITY_TEEN + bikeEncouragement;
-				case Citizen.AgeGroup.Young:
-					return ResidentAI.BIKE_PROBABILITY_YOUNG + bikeEncouragement;
-				case Citizen.AgeGroup.Adult:
-					return ResidentAI.BIKE_PROBABILITY_ADULT + bikeEncouragement;
-				case Citizen.AgeGroup.Senior:
-					return ResidentAI.BIKE_PROBABILITY_SENIOR + bikeEncouragement;
-				default:
-					return 0;
-			}*/
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetCarProbability called!");
 			return 20;
-			/*switch (ageGroup) {
-				case Citizen.AgeGroup.Child:
-					return 0;
-				case Citizen.AgeGroup.Teen:
-					return 5;
-				case Citizen.AgeGroup.Young:
-					return 15;
-				case Citizen.AgeGroup.Adult:
-					return 20;
-				case Citizen.AgeGroup.Senior:
-					return 10;
-				default:
-					return 0;
-			}*/
 		}
 	}
 }

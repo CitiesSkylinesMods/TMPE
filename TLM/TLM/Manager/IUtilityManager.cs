@@ -6,6 +6,5 @@ using System.Text;
 namespace TrafficManager.Manager {
 	public interface IUtilityManager {
 		// TODO define me!
-		void SimulationStep();
 	}
 }

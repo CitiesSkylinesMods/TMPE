@@ -15,6 +15,7 @@ using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using TrafficManager.Traffic.Data;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
@@ -45,14 +46,21 @@ namespace TrafficManager.Custom.AI {
 					Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Path: {instanceData.m_path}, mainPathState={mainPathState}");
 #endif
 
-				ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
-				if (Options.prohibitPocketCars) {
-					finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
-#if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
-						Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
+				ExtSoftPathState finalPathState = ExtSoftPathState.None;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
 #endif
+					finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+					if (Options.prohibitPocketCars) {
+						finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
+#if DEBUG
+						if (GlobalConfig.Instance.Debug.Switches[2])
+							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
+#endif
+					}
+#if BENCHMARK
 				}
+#endif
 
 				switch (finalPathState) {
 					case ExtSoftPathState.Ready:
@@ -111,11 +119,17 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			if (Options.prohibitPocketCars) {
-				if (ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos)) {
-					return;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "ExtSimulationStep")) {
+#endif
+				if (Options.prohibitPocketCars) {
+					if (ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos)) {
+						return;
+					}
 				}
+#if BENCHMARK
 			}
+#endif
 			// NON-STOCK CODE END
 
 			base.SimulationStep(instanceID, ref instanceData, physicsLodRefPos);
@@ -324,14 +338,28 @@ namespace TrafficManager.Custom.AI {
 			var stepWaitTime = currentFrameIndex - num & 255u;
 
 			// NON-STOCK CODE START //
-			var nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(node) : null;
+
+			ITrafficLightSimulation nodeSimulation = null;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "GetNodeSimulation")) {
+#endif
+				nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(node) : null;
+#if BENCHMARK
+			}
+#endif
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			bool startNode = netManager.m_segments.m_buffer[segment].m_startNode == node;
 
 			ICustomSegmentLights lights = null;
-			if (nodeSimulation != null && nodeSimulation.IsSimulationActive()) {
-				lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "GetSegmentLights")) {
+#endif
+				if (nodeSimulation != null && nodeSimulation.IsSimulationActive()) {
+					lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
+				}
+#if BENCHMARK
 			}
+#endif
 
 			if (lights == null) {
 				// NON-STOCK CODE END //

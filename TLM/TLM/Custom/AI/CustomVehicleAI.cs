@@ -16,6 +16,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.Custom.AI {
 	class CustomVehicleAI : VehicleAI { // TODO inherit from PrefabAI (in order to keep the correct references to `base`)
@@ -34,7 +35,14 @@ namespace TrafficManager.Custom.AI {
 			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				var laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+				float laneSpeedLimit;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
+#endif
+					laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+#if BENCHMARK
+				}
+#endif
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
@@ -161,56 +169,78 @@ namespace TrafficManager.Custom.AI {
 					// NON-STOCK CODE START
 					if (firstIter &&
 						this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
-						!this.m_info.m_isLargeVehicle &&
-						VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID])
+						!this.m_info.m_isLargeVehicle
 					) {
-						uint next2PathId = nextPathId;
-						int next2PathPosIndex = nextPathPosIndex;
-						bool next2Invalid;
-						PathUnit.Position next2PathPos;
-						NetInfo next2SegmentInfo = null;
-						PathUnit.Position next3PathPos;
-						NetInfo next3SegmentInfo = null;
-						PathUnit.Position next4PathPos;
-						if (PathUnit.GetNextPosition(ref next2PathId, ref next2PathPosIndex, out next2PathPos, out next2Invalid)) {
-							next2SegmentInfo = netManager.m_segments.m_buffer[(int)next2PathPos.m_segment].Info;
+						bool mayFindBestLane = false;
+#if BENCHMARK
+						using (var bm = new Benchmark(null, "MayFindBestLane")) {
+#endif
+							mayFindBestLane = VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID]);
+#if BENCHMARK
+						}
+#endif
 
-							uint next3PathId = next2PathId;
-							int next3PathPosIndex = next2PathPosIndex;
-							bool next3Invalid;
-							if (PathUnit.GetNextPosition(ref next3PathId, ref next3PathPosIndex, out next3PathPos, out next3Invalid)) {
-								next3SegmentInfo = netManager.m_segments.m_buffer[(int)next3PathPos.m_segment].Info;
+						if (mayFindBestLane) {
+							uint next2PathId = nextPathId;
+							int next2PathPosIndex = nextPathPosIndex;
+							bool next2Invalid;
+							PathUnit.Position next2PathPos;
+							NetInfo next2SegmentInfo = null;
+							PathUnit.Position next3PathPos;
+							NetInfo next3SegmentInfo = null;
+							PathUnit.Position next4PathPos;
+							if (PathUnit.GetNextPosition(ref next2PathId, ref next2PathPosIndex, out next2PathPos, out next2Invalid)) {
+								next2SegmentInfo = netManager.m_segments.m_buffer[(int)next2PathPos.m_segment].Info;
 
-								uint next4PathId = next3PathId;
-								int next4PathPosIndex = next3PathPosIndex;
-								bool next4Invalid;
-								if (!PathUnit.GetNextPosition(ref next4PathId, ref next4PathPosIndex, out next4PathPos, out next4Invalid)) {
+								uint next3PathId = next2PathId;
+								int next3PathPosIndex = next2PathPosIndex;
+								bool next3Invalid;
+								if (PathUnit.GetNextPosition(ref next3PathId, ref next3PathPosIndex, out next3PathPos, out next3Invalid)) {
+									next3SegmentInfo = netManager.m_segments.m_buffer[(int)next3PathPos.m_segment].Info;
+
+									uint next4PathId = next3PathId;
+									int next4PathPosIndex = next3PathPosIndex;
+									bool next4Invalid;
+									if (!PathUnit.GetNextPosition(ref next4PathId, ref next4PathPosIndex, out next4PathPos, out next4Invalid)) {
+										next4PathPos = default(PathUnit.Position);
+									}
+								} else {
+									next3PathPos = default(PathUnit.Position);
 									next4PathPos = default(PathUnit.Position);
 								}
 							} else {
+								next2PathPos = default(PathUnit.Position);
 								next3PathPos = default(PathUnit.Position);
 								next4PathPos = default(PathUnit.Position);
 							}
-						} else {
-							next2PathPos = default(PathUnit.Position);
-							next3PathPos = default(PathUnit.Position);
-							next4PathPos = default(PathUnit.Position);
-						}
 
-						bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
+#if BENCHMARK
+							using (var bm = new Benchmark(null, "FindBestLane")) {
+#endif
+								bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
+#if BENCHMARK
+							}
+#endif
+						}
+						// NON-STOCK CODE END
 					}
-					// NON-STOCK CODE END
 				}
 
 				if (bestLaneIndex != (int)nextPathPos.m_lane) {
 					nextPathPos.m_lane = (byte)bestLaneIndex;
 					pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextPathPosIndex, nextPathPos);
-					// prevent multiple lane changes to the same lane from happening at the same time
-					TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
+#if BENCHMARK
+					using (var bm = new Benchmark(null, "AddTraffic")) {
+#endif
+						// prevent multiple lane changes to the same lane from happening at the same time
+						TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
 #if MEASUREDENSITY
 								, VehicleStateManager.Instance.VehicleStates[vehicleID].totalLength
 #endif
 								, 0); // NON-STOCK CODE
+#if BENCHMARK
+					}
+#endif
 				}
 
 				uint nextLaneId = PathManager.GetLaneID(nextPathPos);

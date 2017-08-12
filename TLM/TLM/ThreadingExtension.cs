@@ -8,11 +8,11 @@ using TrafficManager.State;
 using TrafficManager.Manager;
 using TrafficManager.UI;
 using CSUtil.Commons;
+using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
-		int ticksSinceLastMinuteUpdate = 0;
-		int ticksSinceLastSecondUpdate = 0;
+		//int ticksSinceLastMinuteUpdate = 0;
 
 		ITrafficLightSimulationManager tlsMan = Constants.ManagerFactory.TrafficLightSimulationManager;
 		IRoutingManager routeMan = Constants.ManagerFactory.RoutingManager;
@@ -21,21 +21,30 @@ namespace TrafficManager {
 		public override void OnCreated(IThreading threading) {
 			base.OnCreated(threading);
 
-			ticksSinceLastMinuteUpdate = 0;
-			ticksSinceLastSecondUpdate = 0;
+			//ticksSinceLastMinuteUpdate = 0;
 		}
 
 		public override void OnBeforeSimulationFrame() {
 			base.OnBeforeSimulationFrame();
-			tlsMan.SimulationStep();
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "TrafficLightSimulationManager.SimulationStep")) {
+#endif
+				if (Options.timedLightsEnabled) {
+					try {
+						tlsMan.SimulationStep();
+					} catch (Exception ex) {
+						Log.Warning($"Error occured while simulating traffic lights: {ex.ToString()}");
+					}
+				}
+#if BENCHMARK
+			}
+#endif
 		}
 
-		public override void OnAfterSimulationFrame() {
-			try {
-				routeMan.SimulationStep();
-			} catch (Exception e) {
-				Log.Error($"Error occured while performing first update: " + e.ToString());
-			}
+		/*public override void OnAfterSimulationFrame() {
+			base.OnAfterSimulationFrame();
+
+			routeMan.SimulationStep();
 
 			++ticksSinceLastMinuteUpdate;
 			if (ticksSinceLastMinuteUpdate > 60 * 60) {
@@ -45,30 +54,32 @@ namespace TrafficManager {
 				DebugMenuPanel.PrintTransportStats();
 #endif
 			}
-
-			++ticksSinceLastSecondUpdate;
-			if (ticksSinceLastSecondUpdate > 60) {
-				ticksSinceLastSecondUpdate = 0;
-				utilMan.SimulationStep();
-			}
-		}
+		}*/
 
 		public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
+
 #if !TAM
-			if (ToolsModifierControl.toolController == null || LoadingExtension.BaseUI == null) {
-                return;
-            }
+#if BENCHMARK
+			using (var bm = new Benchmark()) {
+#endif
 
-			TrafficManagerTool tmTool = UIBase.GetTrafficManagerTool(false);
-			if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool && LoadingExtension.BaseUI.IsVisible()) {
-                LoadingExtension.BaseUI.Close();
-            }
+				if (ToolsModifierControl.toolController == null || LoadingExtension.BaseUI == null) {
+					return;
+				}
 
-            if (Input.GetKeyDown(KeyCode.Escape)) {
-                LoadingExtension.BaseUI.Close();
-            }
+				TrafficManagerTool tmTool = UIBase.GetTrafficManagerTool(false);
+				if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool && LoadingExtension.BaseUI.IsVisible()) {
+					LoadingExtension.BaseUI.Close();
+				}
+
+				if (Input.GetKeyDown(KeyCode.Escape)) {
+					LoadingExtension.BaseUI.Close();
+				}
+#if BENCHMARK
+			}
+#endif
 #endif
 		}
-    }
+	}
 }
