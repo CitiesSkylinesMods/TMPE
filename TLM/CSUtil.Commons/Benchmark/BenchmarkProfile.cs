@@ -20,8 +20,10 @@ namespace CSUtil.Commons.Benchmark {
 		}
 
 		public void Stop() {
-			timer.Stop();
-			++NumBenchmarks;
+			if (timer.IsRunning) {
+				timer.Stop();
+				++NumBenchmarks;
+			}
 		}
 
 		public TimeSpan GetElapsedTime() {

@@ -38,17 +38,15 @@ namespace TrafficManager.UI.SubTools {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			ITrafficLightSimulation sim = tlsMan.GetNodeSimulation(HoveredNodeId);
-			if (sim == null || !sim.IsTimedLight()) {
+			if (!tlsMan.TrafficLightSimulations[HoveredNodeId].IsTimedLight()) {
 				if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
 					prioMan.RemovePrioritySignsFromNode(HoveredNodeId);
 					TrafficLightManager.Instance.AddTrafficLight(HoveredNodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId]);
 				}
 
-				SelectedNodeId = HoveredNodeId;
-
-				sim = tlsMan.AddNodeToSimulation(SelectedNodeId);
-				sim.SetupManualTrafficLight();
+				if (tlsMan.SetUpManualTrafficLight(HoveredNodeId)) {
+					SelectedNodeId = HoveredNodeId;
+				}
 
 				/*for (var s = 0; s < 8; s++) {
 					var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(s);
@@ -68,10 +66,10 @@ namespace TrafficManager.UI.SubTools {
 				CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-				var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
-				if (nodeSimulation == null || !nodeSimulation.IsManualLight())
+				if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
 					return;
-				nodeSimulation.Housekeeping();
+				}
+				tlsMan.TrafficLightSimulations[SelectedNodeId].Housekeeping();
 
 				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
 					_guiManualTrafficLightsCrosswalk(ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode]);
@@ -154,7 +152,7 @@ namespace TrafficManager.UI.SubTools {
 						// COUNTER
 						hoveredSegment = RenderCounter(end.SegmentId, offsetScreenPos, modeWidth, modeHeight, zoom, segmentLights, hoveredSegment);
 
-						if (lightOffset > 0) {
+						if (vehicleType != ExtVehicleType.None) {
 							// Info sign
 							var infoWidth = 56.125f * zoom;
 							var infoHeight = 51.375f * zoom;
@@ -672,35 +670,20 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
-			var nodeSimulation = TrafficLightSimulationManager.Instance.GetNodeSimulation(SelectedNodeId);
-			if (nodeSimulation == null || !nodeSimulation.IsManualLight())
+			if (!TrafficLightSimulationManager.Instance.HasManualSimulation(SelectedNodeId)) {
 				return;
-
+			}
+			
 			MainTool.DrawNodeCircle(cameraInfo, SelectedNodeId, true, false);
-
-			/*CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
-
-			NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
-			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
-				if (end == null)
-					continue;
-
-				var colorGray = new Color(0.25f, 0.25f, 0.25f, 0.25f);
-
-				var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], end.SegmentId);
-
-				var width = _hoveredButton[0] == end.SegmentId ? 11.25f : 10f;
-				MainTool.DrawOverlayCircle(cameraInfo, colorGray, position, width, end.SegmentId != _hoveredButton[0]);
-			}*/
 		}
 
 		public override void Cleanup() {
 			if (SelectedNodeId == 0) return;
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-			var nodeSimulation = tlsMan.GetNodeSimulation(SelectedNodeId);
-
-			if (nodeSimulation == null || !nodeSimulation.IsManualLight()) return;
+			if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
+				return;
+			}
 
 			tlsMan.RemoveNodeFromSimulation(SelectedNodeId, true, false);
 		}

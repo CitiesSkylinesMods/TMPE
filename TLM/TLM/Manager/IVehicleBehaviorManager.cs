@@ -20,6 +20,15 @@ namespace TrafficManager.Manager {
 		bool IsSpaceReservationAllowed(ushort transitNodeId, PathUnit.Position sourcePos, PathUnit.Position targetPos);
 
 		/// <summary>
+		/// Determines if the given vehicle is driven by a reckless driver.
+		/// Note that the result is cached in VehicleState for individual vehicles.
+		/// </summary>
+		/// <param name="vehicleId"></param>
+		/// <param name="vehicleData"></param>
+		/// <returns></returns>
+		bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData);
+
+		/// <summary>
 		/// Identifies the best lane on the next segment.
 		/// </summary>
 		/// <param name="vehicleId">queried vehicle</param>

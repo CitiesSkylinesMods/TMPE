@@ -51,7 +51,7 @@ namespace TrafficManager.UI {
 
         public static TransportDemandViewMode CurrentTransportDemandViewMode { get; internal set; } = TransportDemandViewMode.Outgoing;
 
-        internal static ExtVehicleType[] InfoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service, ExtVehicleType.RailVehicle };
+        internal static ExtVehicleType[] InfoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.PassengerCar, ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service, ExtVehicleType.RailVehicle };
 
 		private static SubTool activeSubTool = null;
 
@@ -859,7 +859,7 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
-				String labelStr = "V #" + i + " is a " + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.sqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
+				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.sqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
 					"d: " + driverInst.instanceId + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));

@@ -3,7 +3,13 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
-# Changelog      
+# Changelog    
+1.10.2, 08/17/2017
+- Updated for game version 1.8.0-f3
+- Improved performance
+- Bugfix: Pedestrians sometimes ignore red traffic light signals (thanks to @(c)RIKUPI™ for reporting this issue)
+- Bugfix: Timed traffic lights do not correctly recognize set vehicle restrictions (thanks to @alborzka for reporting this issue)
+  
 1.10.1, 08/05/2017
 - Updated Polish, Korean, and Simplified Chinese translations
 - Bugfix: Default routing is disabled if the lane connector is used on a subset of all available lanes only

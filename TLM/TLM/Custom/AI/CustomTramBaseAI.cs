@@ -116,6 +116,14 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"CustomTramBaseAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnStartPathFind")) {
+#endif
+			VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+#if BENCHMARK
+			}
+#endif
+
 			VehicleInfo info = this.m_info;
 			bool allowUnderground;
 			bool allowUnderground2;
@@ -204,7 +212,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "MayChangeSegment")) {
 #endif
-						if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
+						if (!VehicleBehaviorManager.MayChangeSegmentFull(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
 							return;
 #if BENCHMARK
 					}

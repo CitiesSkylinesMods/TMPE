@@ -11,10 +11,12 @@ using TrafficManager.Manager;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using CSUtil.Commons;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		public const int STATE_UPDATE_SHIFT = 6;
+		public const int JUNCTION_RECHECK_SHIFT = 4;
 
 		[Flags]
 		public enum Flags {
@@ -56,6 +58,7 @@ namespace TrafficManager.Traffic.Data {
 		public Flags flags;
 		public ExtVehicleType vehicleType;
 		public bool heavyVehicle;
+		public bool recklessDriver;
 		public ushort currentSegmentId;
 		public bool currentStartNode;
 		public byte currentLaneIndex;
@@ -82,6 +85,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"flags = {flags}\n" +
 				"\t" + $"vehicleType = {vehicleType}\n" +
 				"\t" + $"heavyVehicle = {heavyVehicle}\n" +
+				"\t" + $"recklessDriver = {recklessDriver}\n" +
 				"\t" + $"currentSegmentId = {currentSegmentId}\n" +
 				"\t" + $"currentStartNode = {currentStartNode}\n" +
 				"\t" + $"currentLaneIndex = {currentLaneIndex}\n" +
@@ -106,6 +110,7 @@ namespace TrafficManager.Traffic.Data {
 			flags = Flags.None;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
+			recklessDriver = false;
 			currentSegmentId = 0;
 			currentStartNode = false;
 			currentLaneIndex = 0;
@@ -213,6 +218,7 @@ namespace TrafficManager.Traffic.Data {
 
 			DetermineVehicleType(ref vehicleData);
 			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
+			recklessDriver = false;
 			flags = Flags.Created;
 
 #if DEBUG
@@ -238,6 +244,8 @@ namespace TrafficManager.Traffic.Data {
 			if (vehicleType != null) {
 				this.vehicleType = (ExtVehicleType)vehicleType;
 			}
+
+			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -268,6 +276,7 @@ namespace TrafficManager.Traffic.Data {
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
 			lastAltLaneSelSegmentId = 0;
+			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
 
 			try {
 				totalLength = vehicleData.CalculateTotalLength(vehicleId);
@@ -396,6 +405,7 @@ namespace TrafficManager.Traffic.Data {
 			currentStartNode = false;
 			currentLaneIndex = 0;
 			lastAltLaneSelSegmentId = 0;
+			recklessDriver = false;
 
 			nextSegmentId = 0;
 			nextLaneIndex = 0;
@@ -449,6 +459,7 @@ namespace TrafficManager.Traffic.Data {
 			sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
+			recklessDriver = false;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])

@@ -112,7 +112,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-#if DEBUG
+#if DEBUGBUSBUG
 				// TODO remove
 				Log.Info("Reverse-Redirection CustomNetManager::FinalizeNode calls");
 				try {
@@ -2279,7 +2279,7 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-#if DEBUG
+#if DEBUGBUSBUG
 				// TODO remove
 				Log.Info("Redirection NetManager::MoveNode calls");
 				try {

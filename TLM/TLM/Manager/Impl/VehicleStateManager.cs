@@ -15,7 +15,6 @@ namespace TrafficManager.Manager.Impl {
 		public static readonly VehicleStateManager Instance = new VehicleStateManager();
 
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
-		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
 		/// <summary>
 		/// Known vehicles and their current known positions. Index: vehicle id
@@ -42,23 +41,6 @@ namespace TrafficManager.Manager.Impl {
 			for (uint i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
 				VehicleStates[i] = new VehicleState((ushort)i);
 			}
-		}
-
-		/// <summary>
-		/// Determines if the given vehicle is driven by a reckless driver
-		/// </summary>
-		/// <param name="vehicleId"></param>
-		/// <param name="vehicleData"></param>
-		/// <returns></returns>
-		public bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0)
-				return true;
-			if (Options.evacBussesMayIgnoreRules && vehicleData.Info.GetService() == ItemClass.Service.Disaster)
-				return true;
-			if (Options.recklessDrivers == 3)
-				return false;
-
-			return ((vehicleData.Info.m_vehicleType & RECKLESS_VEHICLE_TYPES) != VehicleInfo.VehicleType.None) && (uint)vehicleId % (Options.getRecklessDriverModulo()) == 0;
 		}
 
 		internal void LogTraffic(ushort vehicleId) {

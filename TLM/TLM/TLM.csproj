@@ -35,6 +35,17 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>0</WarningLevel>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Benchmark\</OutputPath>
     <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
@@ -148,11 +159,11 @@
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
-    <Compile Include="TrafficLight\ITrafficLightSimulation.cs" />
-    <Compile Include="TrafficLight\Impl\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\Data\TrafficLightSimulation.cs" />
     <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
     <Compile Include="TrafficLight\LightMode.cs" />
     <Compile Include="TrafficLight\StepChangeMetric.cs" />
+    <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="TrafficManager.cs" />
     <Compile Include="Traffic\Data\ExtBuilding.cs" />

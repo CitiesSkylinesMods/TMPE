@@ -48,8 +48,8 @@ namespace CSUtil.Commons.Benchmark {
 				} else if (xProfile.NumBenchmarks <= 0 && yProfile.NumBenchmarks > 0) {
 					return 1;
 				} else {
-					float xAvg = (float)xProfile.GetElapsedTime().Milliseconds / (float)xProfile.NumBenchmarks;
-					float yAvg = (float)yProfile.GetElapsedTime().Milliseconds / (float)yProfile.NumBenchmarks;
+					float xAvg = (float)xProfile.GetElapsedTime().TotalMilliseconds / (float)xProfile.NumBenchmarks;
+					float yAvg = (float)yProfile.GetElapsedTime().TotalMilliseconds / (float)yProfile.NumBenchmarks;
 					return yAvg.CompareTo(xAvg);
 				}
 			});
@@ -61,7 +61,7 @@ namespace CSUtil.Commons.Benchmark {
 		private string CreateReport(string ret, List<string> orderedKeys) {
 			foreach (string key in orderedKeys) {
 				BenchmarkProfile profile = Profiles[key];
-				ret += $"\t{key}: {profile.GetElapsedTime()} ({profile.NumBenchmarks} benchmarks, avg. {(profile.NumBenchmarks <= 0 ? 0f : (float)profile.GetElapsedTime().Milliseconds / (float)profile.NumBenchmarks)})\n";
+				ret += $"\t{key}: {profile.GetElapsedTime()} ({profile.NumBenchmarks} benchmarks, avg. {(profile.NumBenchmarks <= 0 ? 0f : (float)profile.GetElapsedTime().TotalMilliseconds / (float)profile.NumBenchmarks)})\n";
 			}
 
 			return ret;

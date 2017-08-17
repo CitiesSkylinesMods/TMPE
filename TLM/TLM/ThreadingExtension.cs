@@ -9,6 +9,7 @@ using TrafficManager.Manager;
 using TrafficManager.UI;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.UI.MainMenu;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -27,14 +28,23 @@ namespace TrafficManager {
 		public override void OnBeforeSimulationFrame() {
 			base.OnBeforeSimulationFrame();
 #if BENCHMARK
+			using (var bm = new Benchmark(null, "RoutingManager.SimulationStep")) {
+#endif
+				routeMan.SimulationStep();
+#if BENCHMARK
+			}
+#endif
+
+#if BENCHMARK
 			using (var bm = new Benchmark(null, "TrafficLightSimulationManager.SimulationStep")) {
 #endif
+
 				if (Options.timedLightsEnabled) {
-					try {
+					//try {
 						tlsMan.SimulationStep();
-					} catch (Exception ex) {
+					/*} catch (Exception ex) {
 						Log.Warning($"Error occured while simulating traffic lights: {ex.ToString()}");
-					}
+					}*/
 				}
 #if BENCHMARK
 			}

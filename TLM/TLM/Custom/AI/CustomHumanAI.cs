@@ -330,32 +330,36 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		public bool CustomCheckTrafficLights(ushort node, ushort segment) {
+		public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
+#if DEBUGTTL
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId;
+#endif
+
 			var netManager = Singleton<NetManager>.instance;
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			var num = (uint)((node << 8) / 32768);
+			var num = (uint)(((int)nodeId << 8) / 32768);
 			var stepWaitTime = currentFrameIndex - num & 255u;
 
 			// NON-STOCK CODE START //
 
-			ITrafficLightSimulation nodeSimulation = null;
+			bool customSim = false;
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "GetNodeSimulation")) {
 #endif
-				nodeSimulation = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(node) : null;
+				customSim = Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.HasActiveSimulation(nodeId);
 #if BENCHMARK
 			}
 #endif
 			RoadBaseAI.TrafficLightState pedestrianLightState;
-			bool startNode = netManager.m_segments.m_buffer[segment].m_startNode == node;
+			bool startNode = netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId;
 
 			ICustomSegmentLights lights = null;
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "GetSegmentLights")) {
 #endif
-				if (nodeSimulation != null && nodeSimulation.IsSimulationActive()) {
-					lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segment, startNode, false);
+				if (customSim) {
+					lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, startNode, false);
 				}
 #if BENCHMARK
 			}
@@ -367,18 +371,34 @@ namespace TrafficManager.Custom.AI {
 				bool vehicles;
 				bool pedestrians;
 
-				RoadBaseAI.GetTrafficLightState(node, ref netManager.m_segments.m_buffer[segment], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
-				if ((pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) && !pedestrians && stepWaitTime >= 196u) {
-					RoadBaseAI.SetTrafficLightState(node, ref netManager.m_segments.m_buffer[segment], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
-					return true;
+#if DEBUGTTL
+				if (debug) {
+					Log._Debug($"CustomHumanAI.CustomCheckTrafficLights({nodeId}, {segmentId}): No custom simulation!");
+				}
+#endif
+
+				RoadBaseAI.GetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+				if (pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) {
+					if (!pedestrians && stepWaitTime >= 196u) {
+						RoadBaseAI.SetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
+					}
+					return false;
 				}
 				// NON-STOCK CODE START //
 			} else {
+
+
 				if (lights.InvalidPedestrianLight) {
 					pedestrianLightState = RoadBaseAI.TrafficLightState.Green;
 				} else {
 					pedestrianLightState = (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
 				}
+
+#if DEBUGTTL
+				if (debug) {
+					Log._Debug($"CustomHumanAI.CustomCheckTrafficLights({nodeId}, {segmentId}): Custom simulation! pedestrianLightState={pedestrianLightState}, lights.InvalidPedestrianLight={lights.InvalidPedestrianLight}");
+				}
+#endif
 			}
 			// NON-STOCK CODE END //
 

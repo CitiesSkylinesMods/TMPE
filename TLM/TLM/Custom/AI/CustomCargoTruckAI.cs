@@ -64,12 +64,18 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"CustomCargoTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
-			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-			if (vehicleType == ExtVehicleType.None) {
-#if DEBUG
-				Log.Warning($"CustomCargoTruck.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "OnStartPathFind")) {
 #endif
+				ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+				if (vehicleType == ExtVehicleType.None) {
+#if DEBUG
+					Log.Warning($"CustomCargoTruck.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+#endif
+				}
+#if BENCHMARK
 			}
+#endif
 
 			if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource | Vehicle.Flags.GoingBack)) != 0) {
 				return base.StartPathFind(vehicleID, ref vehicleData, startPos, endPos, startBothWays, endBothWays, undergroundTarget);

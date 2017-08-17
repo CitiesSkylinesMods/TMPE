@@ -15,6 +15,8 @@ using TrafficManager.Util;
 using System.Linq;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
+using CSUtil.Commons.Benchmark;
+using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.TrafficLight.Impl {
 	// TODO class should be completely reworked, approx. in version 1.10
@@ -126,11 +128,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsEndTransitionDone();
 			}
 
-			bool isStepDone = StepDone(false);
-			bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && isStepDone;
+			bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={isStepDone} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={StepDone(false)} ret={ret}");
 #endif
 			return ret;
 		}
@@ -145,11 +146,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsInEndTransition();
 			}
 
-			bool isStepDone = StepDone(false);
-			bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && isStepDone;
+			bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isInEndTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={isStepDone} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isInEndTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={StepDone(false)} ret={ret}");
 #endif
 			return ret;
 		}
@@ -160,11 +160,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsInStartTransition();
 			}
 
-			bool isStepDone = StepDone(false);
-			bool ret = getCurrentFrame() == startFrame && !isStepDone;
+			bool ret = getCurrentFrame() == startFrame && !StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isInStartTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} startFrame={startFrame} isStepDone={isStepDone} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isInStartTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} startFrame={startFrame} isStepDone={StepDone(false)} ret={ret}");
 #endif
 
 			return ret;
@@ -493,7 +492,13 @@ namespace TrafficManager.TrafficLight.Impl {
 				//Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
 				if (lastFlowWaitCalc < curFrame) {
 					//Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
-					CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
+#if BENCHMARK
+					using (var bm = new Benchmark(null, "CalcWaitFlow")) {
+#endif
+						CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
+#if BENCHMARK
+					}
+#endif
 					if (updateValues) {
 						lastFlowWaitCalc = curFrame;
 						//Log._Debug($"TTL @ {timedNode.NodeId}: updated lastFlowWaitCalc=curFrame={curFrame}");
@@ -597,17 +602,18 @@ namespace TrafficManager.TrafficLight.Impl {
 				countOnlyMovingIfGreen = false;
 			}
 
-			ITrafficLightSimulationManager tlsMan = Constants.ManagerFactory.TrafficLightSimulationManager;
+			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			ISegmentEndManager endMan = Constants.ManagerFactory.SegmentEndManager;
 			IVehicleRestrictionsManager restrMan = Constants.ManagerFactory.VehicleRestrictionsManager;
 
 			// loop over all timed traffic lights within the node group
 			foreach (ushort timedNodeId in timedNode.NodeGroup) {
-				ITrafficLightSimulation sim = tlsMan.GetNodeSimulation(timedNodeId);
-				if (sim == null || !sim.IsTimedLight())
+				if (!tlsMan.TrafficLightSimulations[timedNodeId].IsTimedLight()) {
 					continue;
-				ITimedTrafficLights slaveTimedNode = sim.TimedLight;
-				ITimedTrafficLightsStep slaveStep = slaveTimedNode.GetStep(stepRefIndex);
+				}
+
+				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[timedNodeId].TimedLight;
+				ITimedTrafficLightsStep slaveStep = slaveTTL.GetStep(stepRefIndex);
 
 				// minimum time reached. check traffic! loop over source segments
 				uint numNodeFlows = 0;
@@ -619,7 +625,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					var segLights = e.Value;
 
 					IDictionary<ushort, ArrowDirection> directions = null;
-					if (!slaveTimedNode.Directions.TryGetValue(sourceSegmentId, out directions)) {
+					if (!slaveTTL.Directions.TryGetValue(sourceSegmentId, out directions)) {
 #if DEBUGTTL
 						if (debug) {
 							Log._Debug($"calcWaitFlow: No arrow directions defined for segment {sourceSegmentId} @ {timedNodeId}");
@@ -949,6 +955,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
 			CustomSegmentLights.Remove(sourceSegmentId);
+			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(targetSegmentId, startNode).Housekeeping(true, true);
 			sourceLights.Relocate(targetSegmentId, startNode, this);
 			CustomSegmentLights[targetSegmentId] = sourceLights;
 
@@ -986,10 +993,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			ICustomSegmentLightsManager customSegLightsMan = Constants.ManagerFactory.CustomSegmentLightsManager;
 
 			ICustomSegmentLights liveLights = customSegLightsMan.GetOrLiveSegmentLights(segmentId, startNode);
-			if (liveLights == null) {
-				Log.Warning($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Could not retrieve live segment lights for segment {segmentId} @ start {startNode}.");
-				return false;
-			}
+			liveLights.Housekeeping(true, true);
 
 			ICustomSegmentLights clonedLights = liveLights.Clone(this);
 
@@ -1032,7 +1036,9 @@ namespace TrafficManager.TrafficLight.Impl {
 				return false;
 			}
 
-			lights.Relocate(segmentId, segGeo.StartNodeId() == timedNode.NodeId, this);
+			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
+			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(segmentId, startNode).Housekeeping(true, true);
+			lights.Relocate(segmentId, startNode, this);
 			CustomSegmentLights[segmentId] = lights;
 			Log._Debug($"TimedTrafficLightsStep.SetSegmentLights: Set lights @ seg. {segmentId}, node {timedNode.NodeId}");
 			return true;

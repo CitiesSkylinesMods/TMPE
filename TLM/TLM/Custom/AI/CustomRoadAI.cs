@@ -14,13 +14,12 @@ using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.TrafficLight.Data;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomRoadAI : RoadBaseAI {
 		private static ushort lastSimulatedSegmentId = 0;
 		private static byte trafficMeasurementMod = 0;
-		private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-		private static TrafficLightManager tlm = TrafficLightManager.Instance;
 
 		public void CustomNodeSimulationStep(ushort nodeId, ref NetNode data) {
 			if (Options.timedLightsEnabled) {
@@ -32,8 +31,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "callStockSimStep")) {
 #endif
-						var nodeSim = tlsMan.GetNodeSimulation(nodeId);
-						callStockSimStep = nodeSim == null || !nodeSim.IsSimulationActive();
+						callStockSimStep = !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 #if BENCHMARK
 					}
 #endif
@@ -108,13 +106,11 @@ namespace TrafficManager.Custom.AI {
 #endif
 			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
 
-			ITrafficLightSimulation nodeSim = null;
 			bool callStockMethod = true;
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "callStockMethod")) {
 #endif
-				nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
-				callStockMethod = nodeSim == null || !nodeSim.IsSimulationActive();
+				callStockMethod = !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 #if BENCHMARK
 			}
 #endif
@@ -129,7 +125,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 						vehicleId, ref vehicleData,
 #endif
-						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
+						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, ref TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId]);
 #if BENCHMARK
 				}
 #endif
@@ -143,14 +139,12 @@ namespace TrafficManager.Custom.AI {
 			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
 
 
-			ITrafficLightSimulation nodeSim = null;
 			bool callStockMethod = true;
 			
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "callStockMethod")) {
 #endif
-				nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId) : null;
-				callStockMethod = nodeSim == null || !nodeSim.IsSimulationActive();
+				callStockMethod = !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 #if BENCHMARK
 			}
 #endif
@@ -165,7 +159,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 						vehicleId, ref vehicleData,
 #endif
-						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, nodeSim);
+						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, ref TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId]);
 #if BENCHMARK
 				}
 #endif
@@ -179,19 +173,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			ushort vehicleId, ref Vehicle vehicleData,
 #endif
-			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, ITrafficLightSimulation nodeSim = null) {
-			if (nodeSim == null) {
-				nodeSim = TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeId);
-				if (nodeSim == null) {
-#if DEBUG
-					Log.Error($"GetCustomTrafficLightState: node traffic light simulation not found at node {nodeId}! Vehicle {vehicleId} comes from segment {fromSegmentId} and goes to node {nodeId}");
-#endif
-					vehicleLightState = TrafficLightState.Green;
-					pedestrianLightState = TrafficLightState.Green;
-					return;
-					//throw new ApplicationException($"GetCustomTrafficLightState: node traffic light simulation not found at node {nodeId}! Vehicle {vehicleId} comes from segment {fromSegmentId} and goes to node {nodeId}");
-				}
-			}
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, ref TrafficLightSimulation nodeSim) {
 
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
@@ -248,8 +230,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "callStockCode")) {
 #endif
-				ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
-				callStockCode = nodeSim == null || !nodeSim.IsSimulationActive() || customCall;
+				callStockCode = customCall || !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeID].IsSimulationRunning();
 #if BENCHMARK
 			}
 #endif
@@ -633,8 +614,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "customSim")) {
 #endif
-				ITrafficLightSimulation nodeSim = Options.timedLightsEnabled ? TrafficLightSimulationManager.Instance.GetNodeSimulation(nodeID) : null;
-				customSim = nodeSim != null && nodeSim.IsSimulationActive();
+				customSim = Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeID].IsSimulationRunning();
 #if BENCHMARK
 			}
 #endif
