@@ -4,6 +4,10 @@ A work-in-progress modification for **Cities: Skylines** to add additional traff
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.3, 08/18/2017
+- Bugfix: Setting unlimited speed limit causes vehicles to crawl at low speed (thanks to @sethisuwan for reporting this issue)
+- Bugfix: Vehicle-separated traffic lights do not show up for trams & monorails (thanks to @thecitiesdork for reporting this issue)
+
 1.10.2, 08/17/2017
 - Updated for game version 1.8.0-f3
 - Improved performance

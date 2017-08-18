@@ -534,15 +534,16 @@ namespace TrafficManager.TrafficLight.Impl {
 			if (separateLightsRequired) {
 				foreach (KeyValuePair<byte, ExtVehicleType> e in allAllowedTypes) {
 					byte laneIndex = e.Key;
+					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 					ExtVehicleType allowedTypes = e.Value;
-					ExtVehicleType defaultMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes(SegmentId, segmentInfo, laneIndex, segmentInfo.m_lanes[laneIndex], VehicleRestrictionsMode.Restricted);
+					ExtVehicleType defaultMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes(SegmentId, segmentInfo, laneIndex, laneInfo, VehicleRestrictionsMode.Restricted);
 
 #if DEBUGHK
 					if (debug)
 						Log._Debug($"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): housekeeping @ seg. {SegmentId}, node {nodeId}: Processing lane {laneIndex} with allowedTypes={allowedTypes}, defaultMask={defaultMask}");
 #endif
 
-					if (allowedTypes == defaultMask) {
+					if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.Car && allowedTypes == defaultMask) {
 #if DEBUGHK
 						if (debug)
 							Log._Debug($"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): housekeeping @ seg. {SegmentId}, node {nodeId}, lane {laneIndex}: Allowed types equal default mask. Ignoring lane.");

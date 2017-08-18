@@ -234,8 +234,9 @@ namespace TrafficManager.Custom.AI {
 						laneSpeedLimit = (float)fastArray[position.m_lane];
 						if (laneSpeedLimit == 0) {
 							laneSpeedLimit = SpeedLimitManager.MAX_SPEED;
+						} else {
+							laneSpeedLimit = laneSpeedLimit / 50f;
 						}
-						laneSpeedLimit = laneSpeedLimit / 50f;
 						// === END INLINED VERSION OF SpeedLimitManager.ToGameSpeedLimit ===
 						// laneSpeedLimit = ToGameSpeedLimit((ushort)fastArray[position.m_lane]);
 					} else {
@@ -345,8 +346,9 @@ namespace TrafficManager.Custom.AI {
 						laneSpeedLimit = (float)fastArray[position.m_lane];
 						if (laneSpeedLimit == 0) {
 							laneSpeedLimit = SpeedLimitManager.MAX_SPEED;
+						} else {
+							laneSpeedLimit = laneSpeedLimit / 50f;
 						}
-						laneSpeedLimit = laneSpeedLimit / 50f;
 						// === END INLINED VERSION OF SpeedLimitManager.ToGameSpeedLimit ===
 						// laneSpeedLimit = ToGameSpeedLimit((ushort)fastArray[position.m_lane]);
 					} else {
