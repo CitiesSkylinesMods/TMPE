@@ -625,7 +625,7 @@ namespace TrafficManager.Manager.Impl {
 											Log.Warning($"nextTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 										}
 									}
-								} else if (nextIsConnectedWithPrev) {
+								} else if (!nextHasOutgoingConnections) {
 #if DEBUGROUTING
 									if (debug)
 										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is used by vehicles that do not follow lane arrows. adding as default.");

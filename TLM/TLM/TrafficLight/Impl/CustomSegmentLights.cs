@@ -536,7 +536,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					byte laneIndex = e.Key;
 					NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 					ExtVehicleType allowedTypes = e.Value;
-					ExtVehicleType defaultMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes(SegmentId, segmentInfo, laneIndex, laneInfo, VehicleRestrictionsMode.Restricted);
+					ExtVehicleType defaultMask = Constants.ManagerFactory.VehicleRestrictionsManager.GetDefaultAllowedVehicleTypes(SegmentId, segmentInfo, laneIndex, laneInfo, VehicleRestrictionsMode.Unrestricted);
 
 #if DEBUGHK
 					if (debug)
