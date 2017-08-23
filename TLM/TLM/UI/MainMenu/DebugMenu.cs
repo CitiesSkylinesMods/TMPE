@@ -254,20 +254,20 @@ namespace TrafficManager.UI {
 			if (vectorElms.Length < 2)
 				return;
 
-			CameraCtrl.GoToPos(new Vector3(float.Parse(vectorElms[0]), Camera.main.transform.position.y, float.Parse(vectorElms[1])));
+			CSUtil.CameraControl.CameraController.Instance.GoToPos(new Vector3(float.Parse(vectorElms[0]), Camera.main.transform.position.y, float.Parse(vectorElms[1])));
 		}
 
 		private void clickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort segmentId = Convert.ToUInt16(_goToField.text);
 			if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None) {
-				CameraCtrl.GoToSegment(segmentId, new Vector3(Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.x, Camera.main.transform.position.y, Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_bounds.center.z));
+				CSUtil.CameraControl.CameraController.Instance.GoToSegment(segmentId);
 			}
 		}
 
 		private void clickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
 			ushort nodeId = Convert.ToUInt16(_goToField.text);
 			if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
-				CameraCtrl.GoToNode(nodeId, new Vector3(Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position.x, Camera.main.transform.position.y, Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position.z));
+				CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
 			}
 		}
 
@@ -426,7 +426,7 @@ namespace TrafficManager.UI {
 			ushort vehicleId = Convert.ToUInt16(_goToField.text);
 			Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
 			if ((vehicle.m_flags & Vehicle.Flags.Created) != 0) {
-				CameraCtrl.GoToVehicle(vehicleId, new Vector3(vehicle.GetLastFramePosition().x, Camera.main.transform.position.y, vehicle.GetLastFramePosition().z));
+				CSUtil.CameraControl.CameraController.Instance.GoToVehicle(vehicleId);
 			}
 		}
 
@@ -434,7 +434,7 @@ namespace TrafficManager.UI {
 			ushort parkedVehicleId = Convert.ToUInt16(_goToField.text);
 			VehicleParked parkedVehicle = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
 			if ((parkedVehicle.m_flags & (ushort)VehicleParked.Flags.Created) != 0) {
-				CameraCtrl.GoToParkedVehicle(parkedVehicleId, new Vector3(parkedVehicle.m_position.x, Camera.main.transform.position.y, parkedVehicle.m_position.z));
+				CSUtil.CameraControl.CameraController.Instance.GoToParkedVehicle(parkedVehicleId);
 			}
 		}
 
@@ -442,9 +442,9 @@ namespace TrafficManager.UI {
 			ushort buildingId = Convert.ToUInt16(_goToField.text);
 			Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
 			if ((building.m_flags & Building.Flags.Created) != 0) {
-				CameraCtrl.GoToBuilding(buildingId, new Vector3(building.m_position.x, Camera.main.transform.position.y, building.m_position.z));
+				CSUtil.CameraControl.CameraController.Instance.GoToBuilding(buildingId);
 
-				for (int index = 0; index < BuildingManager.BUILDINGGRID_RESOLUTION * BuildingManager.BUILDINGGRID_RESOLUTION; ++index) {
+				/*for (int index = 0; index < BuildingManager.BUILDINGGRID_RESOLUTION * BuildingManager.BUILDINGGRID_RESOLUTION; ++index) {
 					ushort bid = Singleton<BuildingManager>.instance.m_buildingGrid[index];
 					while (bid != 0) {
 						if (bid == buildingId) {
@@ -454,7 +454,7 @@ namespace TrafficManager.UI {
 						}
 						bid = Singleton<BuildingManager>.instance.m_buildings.m_buffer[bid].m_nextGridBuilding;
 					}
-				}
+				}*/
 			}
 		}
 
@@ -462,7 +462,7 @@ namespace TrafficManager.UI {
 			ushort citizenInstanceId = Convert.ToUInt16(_goToField.text);
 			CitizenInstance citizenInstance = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId];
 			if ((citizenInstance.m_flags & CitizenInstance.Flags.Created) != 0) {
-				CameraCtrl.GoToCitizenInstance(citizenInstanceId, new Vector3(citizenInstance.GetLastFramePosition().x, Camera.main.transform.position.y, citizenInstance.GetLastFramePosition().z));
+				CSUtil.CameraControl.CameraController.Instance.GoToCitizenInstance(citizenInstanceId);
 			}
 		}
 #endif

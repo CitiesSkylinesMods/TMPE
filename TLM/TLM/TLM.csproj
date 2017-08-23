@@ -252,7 +252,6 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="Traffic\Data\PrioritySegment.cs" />
-    <Compile Include="UI\CameraCtrl.cs" />
     <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
@@ -378,6 +377,10 @@
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
+      <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
+      <Name>CSUtil.CameraControl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
       <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
       <Name>CSUtil.Commons</Name>
