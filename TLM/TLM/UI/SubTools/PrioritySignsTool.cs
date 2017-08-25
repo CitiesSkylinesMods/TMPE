@@ -89,7 +89,7 @@ namespace TrafficManager.UI.SubTools {
 
 				currentPriorityNodeIds.Add((ushort)nodeId);
 			}
-			Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds: currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(x => x.ToString()).ToArray())}");
+			//Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds: currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(x => x.ToString()).ToArray())}");
 		}
 
 		public override void ShowGUIOverlay(bool viewOnly) {

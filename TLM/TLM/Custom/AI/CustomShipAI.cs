@@ -10,6 +10,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using UnityEngine;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomShipAI : ShipAI {
@@ -47,7 +48,30 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f)) {
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = vehicleType;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = NetInfo.LaneType.Vehicle;
+				args.vehicleTypes = info.m_vehicleType;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = false;
+				args.hasCombustionEngine = false;
+				args.ignoreBlocked = false;
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = false;
+
+				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

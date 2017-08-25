@@ -7,6 +7,7 @@ using System.Text;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.State;
 using UnityEngine;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Traffic.Data {
 	public struct ExtCitizenInstance {
@@ -308,8 +309,28 @@ namespace TrafficManager.Traffic.Data {
 
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.WalkingOnly;
+				args.extVehicleType = ExtVehicleType.None;
+				args.vehicleId = 0;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = parkPathPos;
+				args.startPosB = dummyPathPos;
+				args.endPosA = targetPathPos;
+				args.endPosB = dummyPathPos;
+				args.vehiclePosition = dummyPathPos;
+				args.laneTypes = NetInfo.LaneType.Pedestrian;
+				args.vehicleTypes = VehicleInfo.VehicleType.None;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = false;
+				args.hasCombustionEngine = false;
+				args.ignoreBlocked = false;
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = false;
 
-				if (CustomPathManager._instance.CreatePath(ExtVehicleType.None, 0, ExtCitizenInstance.ExtPathType.WalkingOnly, out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, parkPathPos, dummyPathPos, targetPathPos, dummyPathPos, dummyPathPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, 20000f, false, false, false, false, false, false)) {
+				if (CustomPathManager._instance.CreatePath(out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 #if DEBUG
 					if (GlobalConfig.Instance.Debug.Switches[2])
 						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {instanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");

@@ -146,7 +146,7 @@ namespace TrafficManager.Manager.Impl {
 				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == (Vehicle.Flags)0 &&
 					((NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags & (NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd)) != NetLane.Flags.None &&
 					(targetNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.TrafficLights | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction) {
-					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram) {
+					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
 						if ((vehicleData.m_flags2 & Vehicle.Flags2.Yielding) == (Vehicle.Flags2)0) {
 							if (sqrVelocity < 0.01f) {
 								vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
@@ -155,6 +155,14 @@ namespace TrafficManager.Manager.Impl {
 							}
 							maxSpeed = 0f;
 							return false;
+						} else {
+							vehicleData.m_waitCounter = (byte)Mathf.Min((int)(vehicleData.m_waitCounter + 1), 4);
+							if (vehicleData.m_waitCounter < 4) {
+								maxSpeed = 0f;
+								return false;
+							}
+							vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
+							vehicleData.m_waitCounter = 0;
 						}
 					} else if (sqrVelocity > 0.01f) {
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
@@ -319,8 +327,9 @@ namespace TrafficManager.Manager.Impl {
 							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP");
 #endif
 
-						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram) {
+						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
 							vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
+							vehicleData.m_waitCounter = 0;
 						}
 
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
@@ -333,6 +342,10 @@ namespace TrafficManager.Manager.Impl {
 							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 #endif
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
+							vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
+							vehicleData.m_waitCounter = 0;
+						}
 					}
 				} else if (Options.prioritySignsEnabled && vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Monorail) {
 #if BENCHMARK

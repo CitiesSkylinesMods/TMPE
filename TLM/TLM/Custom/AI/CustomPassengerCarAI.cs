@@ -18,6 +18,8 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using CSUtil.Commons.Benchmark;
+using System.Runtime.CompilerServices;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager
@@ -254,9 +256,10 @@ namespace TrafficManager.Custom.AI {
 			}
 			// NON-STOCK CODE END
 
-			VehicleInfo.VehicleType vehicleType = this.m_info.m_vehicleType;
+			VehicleInfo.VehicleType vehicleTypes = this.m_info.m_vehicleType;
 			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
 			bool randomParking = false;
+			bool combustionEngine = this.m_info.m_class.m_subService == ItemClass.SubService.ResidentialLow;
 			if (allowRandomParking && // NON-STOCK CODE
 				!movingToParkingPos &&
 				targetBuildingId != 0 &&
@@ -271,10 +274,10 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			if (!foundStartingPos) {
-				foundStartingPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out sqrDistA, out sqrDistB);
+				foundStartingPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleTypes, allowUnderground, false, 32f, out startPosA, out startPosB, out sqrDistA, out sqrDistB);
 			}
 
-			bool foundEndPos = !calculateEndPos || citizenManager.m_instances.m_buffer[(int)driverInstanceId].Info.m_citizenAI.FindPathPosition(driverInstanceId, ref citizenManager.m_instances.m_buffer[(int)driverInstanceId], endPos, Options.prohibitPocketCars && (targetBuildingId == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleType, undergroundTarget, out endPosA);
+			bool foundEndPos = !calculateEndPos || citizenManager.m_instances.m_buffer[(int)driverInstanceId].Info.m_citizenAI.FindPathPosition(driverInstanceId, ref citizenManager.m_instances.m_buffer[(int)driverInstanceId], endPos, Options.prohibitPocketCars && (targetBuildingId == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleTypes, undergroundTarget, out endPosA);
 			// NON-STOCK CODE END
 
 			if (foundStartingPos &&
@@ -284,15 +287,37 @@ namespace TrafficManager.Custom.AI {
 					startPosB = default(PathUnit.Position);
 				}
 				PathUnit.Position endPosB = default(PathUnit.Position);
-				SimulationManager instance2 = Singleton<SimulationManager>.instance;
+				SimulationManager simMan = Singleton<SimulationManager>.instance;
 				uint path;
-				PathUnit.Position def = default(PathUnit.Position);
-				if (CustomPathManager._instance.CreatePath(
-					ExtVehicleType.PassengerCar, vehicleID, extPathType, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleType, 20000f, false, false, false, skipQueue, randomParking, false)) {
+				PathUnit.Position dummyPathPos = default(PathUnit.Position);
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = extPathType;
+				args.extVehicleType = ExtVehicleType.PassengerCar;
+				args.vehicleId = vehicleID;
+				args.buildIndex = simMan.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = dummyPathPos;
+				args.laneTypes = laneTypes;
+				args.vehicleTypes = vehicleTypes;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = this.IsHeavyVehicle();
+				args.hasCombustionEngine = this.CombustionEngine();
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+
+				if (CustomPathManager._instance.CreatePath(out path, ref simMan.m_randomizer, args)) {
 #if DEBUG
 					if (GlobalConfig.Instance.Debug.Switches[2])
-						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleTypes}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
 #endif
+					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
@@ -336,27 +361,6 @@ namespace TrafficManager.Custom.AI {
 			} else {
 				Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedId);
 			}
-		}
-
-		internal static bool FindParkingSpaceRoadSide(ushort ignoreParked, ushort requireSegment, Vector3 refPos, float width, float length, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			Log.Error("FindParkingSpaceRoadSide is not overridden!");
-			parkPos = Vector3.zero;
-			parkRot = Quaternion.identity;
-			parkOffset = 0f;
-			return false;
-		}
-
-		internal static bool FindParkingSpace(ushort homeID, Vector3 refPos, Vector3 searchDir, ushort segment, float width, float length, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
-			Log.Error("FindParkingSpace is not overridden!");
-			parkPos = Vector3.zero;
-			parkRot = Quaternion.identity;
-			parkOffset = 0f;
-			return false;
-		}
-
-		internal static bool FindParkingSpaceProp(ushort ignoreParked, PropInfo info, Vector3 position, float angle, bool fixedHeight, Vector3 refPos, float width, float length, ref float maxDistance, ref Vector3 parkPos, ref Quaternion parkRot) {
-			Log.Error("FindParkingSpaceProp is not overridden!");
-			return false;
 		}
 
 		public bool CustomParkVehicle(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
@@ -763,6 +767,30 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 			}
+			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		internal static bool FindParkingSpaceRoadSide(ushort ignoreParked, ushort requireSegment, Vector3 refPos, float width, float length, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+			Log.Error("FindParkingSpaceRoadSide is not overridden!");
+			parkPos = Vector3.zero;
+			parkRot = Quaternion.identity;
+			parkOffset = 0f;
+			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		internal static bool FindParkingSpace(bool isElectric, ushort homeID, Vector3 refPos, Vector3 searchDir, ushort segment, float width, float length, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+			Log.Error("FindParkingSpace is not overridden!");
+			parkPos = Vector3.zero;
+			parkRot = Quaternion.identity;
+			parkOffset = 0f;
+			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		internal static bool FindParkingSpaceProp(bool isElectric, ushort ignoreParked, PropInfo info, Vector3 position, float angle, bool fixedHeight, Vector3 refPos, float width, float length, ref float maxDistance, ref Vector3 parkPos, ref Quaternion parkRot) {
+			Log.Error("FindParkingSpaceProp is not overridden!");
 			return false;
 		}
 	}

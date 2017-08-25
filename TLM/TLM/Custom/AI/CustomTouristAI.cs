@@ -127,11 +127,17 @@ namespace TrafficManager.Custom.AI {
 			}
 			Randomizer randomizer = new Randomizer(citizenData.m_citizen);
 			bool useCar = randomizer.Int32(100u) < carProb;
-			bool useBike = randomizer.Int32(100u) < bikeProb;
-			bool useTaxi = randomizer.Int32(100u) < taxiProb;
+			bool useBike = !useCar && randomizer.Int32(100u) < bikeProb;
+			bool useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
+			bool useElectricCar = false;
+			if (useCar) {
+				int electricProb = GetElectricCarProbability(Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel);
+				useElectricCar = randomizer.Int32(100u) < electricProb;
+			}
+
 			ItemClass.Service service = ItemClass.Service.Residential;
-			ItemClass.SubService subService = ItemClass.SubService.ResidentialLow;
-			if (!useCar && useTaxi) {
+			ItemClass.SubService subService = useElectricCar ? ItemClass.SubService.ResidentialLowEco : ItemClass.SubService.ResidentialLow;
+			if (useTaxi) {
 				service = ItemClass.Service.PublicTransport;
 				subService = ItemClass.SubService.PublicTransportTaxi;
 			}
@@ -153,12 +159,16 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			}
 #endif
-			if (carInfo == null && (useCar || useTaxi))
-			// NON-STOCK CODE END
+			if (carInfo == null && (useCar || useTaxi)) {
+				// NON-STOCK CODE END
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
-			VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, ItemClass.Level.Level2);
-			if (useBike && bikeInfo != null) {
-				return bikeInfo;
+			}
+
+			if (useBike) {
+				VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, ItemClass.Level.Level2);
+				if (bikeInfo != null) {
+					return bikeInfo;
+				}
 			}
 			if ((useCar || useTaxi) && carInfo != null) {
 				return carInfo;
@@ -181,6 +191,12 @@ namespace TrafficManager.Custom.AI {
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetCarProbability() {
 			Log.Error("CustomTouristAI.GetCarProbability called!");
+			return 20;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private int GetElectricCarProbability(Citizen.Wealth wealth) {
+			Log.Error("CustomTouristAI.GetElectricCarProbability called!");
 			return 20;
 		}
 	}

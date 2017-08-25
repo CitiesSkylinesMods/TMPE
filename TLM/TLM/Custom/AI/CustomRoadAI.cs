@@ -418,6 +418,9 @@ namespace TrafficManager.Custom.AI {
 				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 1) {
 					flags3 &= ~NetLane.Flags.YieldStart;
 				}
+				if ((lane.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
+					flags3 &= ~(NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd);
+				}
 				flags2 |= flags3;
 				if (flag) {
 					flags2 |= NetLane.Flags.Inverted;
@@ -713,7 +716,7 @@ namespace TrafficManager.Custom.AI {
 				for (int i = 0; i < 8; i++) {
 					ushort segment = data.GetSegment(i);
 					if (segment != 0) {
-						num += (int)instance.m_segments.m_buffer[(int)segment].m_trafficDensity;
+						num += (int)instance.m_segments.m_buffer[(int)segment].m_noiseDensity;
 						num2++;
 					}
 				}

@@ -1081,6 +1081,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
+			// TODO check isElectric
 			Vector3 roadParkPos;
 			Quaternion roadParkRot;
 			float roadParkOffset;
@@ -1370,6 +1371,7 @@ namespace TrafficManager.Manager.Impl {
 
 			Randomizer rng = Singleton<SimulationManager>.instance.m_randomizer; // NON-STOCK CODE
 
+			bool isElectric = vehicleInfo.m_class.m_subService != ItemClass.SubService.ResidentialLow;
 			BuildingInfo buildingInfo = building.Info;
 			Matrix4x4 transformMatrix = default(Matrix4x4);
 			bool transformMatrixCalculated = false;
@@ -1383,7 +1385,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			float propMinDistance = 9999f; // NON-STOCK CODE
-
 			if (buildingInfo.m_props != null && (buildingInfo.m_hasParkingSpaces & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				for (int i = 0; i < buildingInfo.m_props.Length; i++) {
 					BuildingInfo.Prop prop = buildingInfo.m_props[i];
@@ -1400,7 +1401,7 @@ namespace TrafficManager.Manager.Impl {
 									transformMatrix.SetTRS(pos, q, Vector3.one);
 								}
 								Vector3 position = transformMatrix.MultiplyPoint(prop.m_position);
-								if (CustomPassengerCarAI.FindParkingSpaceProp(ignoreParked, propInfo, position, building.m_angle + prop.m_radAngle, prop.m_fixedHeight, refPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, ref propMinDistance, ref parkPos, ref parkRot)) { // NON-STOCK CODE
+								if (CustomPassengerCarAI.FindParkingSpaceProp(isElectric, ignoreParked, propInfo, position, building.m_angle + prop.m_radAngle, prop.m_fixedHeight, refPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, ref propMinDistance, ref parkPos, ref parkRot)) { // NON-STOCK CODE
 									result = true;
 									if (randomize && propMinDistance <= maxDistance && rng.Int32(GlobalConfig.Instance.ParkingAI.VicinityParkingSpaceSelectionRand) == 0)
 										break;

@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using TrafficManager.Traffic.Data;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using CSUtil.Commons.Benchmark;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCarAI : CarAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -481,7 +482,28 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 
 				// NON-STOCK CODE START
-				if (CustomPathManager._instance.CreatePath((ExtVehicleType)vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = vehicleType;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+				args.vehicleTypes = info.m_vehicleType;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = this.IsHeavyVehicle();
+				args.hasCombustionEngine = this.CombustionEngine();
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+
+				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 #if DEBUG
 					if (GlobalConfig.Instance.Debug.Switches[2])
 						Log._Debug($"CustomCarAI.CustomStartPathFind({vehicleID}): Path-finding starts for vehicle {vehicleID}, path={path}, extVehicleType={vehicleType}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");

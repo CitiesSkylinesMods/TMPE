@@ -14,6 +14,7 @@ using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomTrainAI : TrainAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -267,7 +268,7 @@ namespace TrafficManager.Custom.AI {
 					PathManager pathMan = Singleton<PathManager>.instance;
 					PathUnit.Position curPathPos;
 					if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(pathPosIndex >> 1, out curPathPos)) {
-						netMan.m_segments.m_buffer[(int)curPathPos.m_segment].AddTraffic(Mathf.RoundToInt(this.m_info.m_generatedInfo.m_size.z * 3f));
+						netMan.m_segments.m_buffer[(int)curPathPos.m_segment].AddTraffic(Mathf.RoundToInt(this.m_info.m_generatedInfo.m_size.z * 3f), this.GetNoiseLevel());
 						PathUnit.Position nextPathPos; // NON-STOCK CODE
 						if ((pathPosIndex & 1) == 0 || lastPathOffset == 0 || (leaderData.m_flags & Vehicle.Flags.WaitingPath) != (Vehicle.Flags)0) {
 							uint laneId = PathManager.GetLaneID(curPathPos);
@@ -371,7 +372,7 @@ namespace TrafficManager.Custom.AI {
 					PathManager pathMan = Singleton<PathManager>.instance;
 					PathUnit.Position curPathPos;
 					if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(pathPosIndex >> 1, out curPathPos)) {
-						netMan.m_segments.m_buffer[curPathPos.m_segment].AddTraffic(Mathf.RoundToInt(this.m_info.m_generatedInfo.m_size.z * 3f));
+						netMan.m_segments.m_buffer[curPathPos.m_segment].AddTraffic(Mathf.RoundToInt(this.m_info.m_generatedInfo.m_size.z * 3f), this.GetNoiseLevel());
 						PathUnit.Position nextPathPos;
 						if ((pathPosIndex & 1) == 0 || lastPathOffset == 0 || (leaderData.m_flags & Vehicle.Flags.WaitingPath) != (Vehicle.Flags)0) {
 							uint laneId = PathManager.GetLaneID(curPathPos);
@@ -625,7 +626,29 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath(vehicleType, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, vehicleType == ExtVehicleType.PassengerTrain && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = vehicleType;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = NetInfo.LaneType.Vehicle;
+				args.vehicleTypes = info.m_vehicleType;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = false;
+				args.hasCombustionEngine = false;
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = true;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}
@@ -717,6 +740,8 @@ namespace TrafficManager.Custom.AI {
 						if (debug)
 							Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): No space available on lane {laneID}. ABORT.");
 #endif
+						vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
+						vehicleData.m_waitCounter = 0;
 						maxSpeed = 0f;
 						return;
 					}
@@ -740,6 +765,8 @@ namespace TrafficManager.Custom.AI {
 							if (debug)
 								Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Overlap detected (1). segment.LengthSqr()={segment.LengthSqr()} segment.a={segment.a} ABORT.");
 #endif
+							vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
+							vehicleData.m_waitCounter = 0;
 							maxSpeed = 0f;
 							return;
 						}
@@ -755,6 +782,8 @@ namespace TrafficManager.Custom.AI {
 						if (debug)
 							Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Overlap detected (2). ABORT.");
 #endif
+						vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
+						vehicleData.m_waitCounter = 0;
 						maxSpeed = 0f;
 						return;
 					}

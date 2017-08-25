@@ -174,11 +174,17 @@ namespace TrafficManager.Custom.AI {
 			}
 			Randomizer randomizer = new Randomizer(citizenData.m_citizen);
 			bool useCar = randomizer.Int32(100u) < carProb;
-			bool useBike = randomizer.Int32(100u) < bikeProb;
-			bool useTaxi = randomizer.Int32(100u) < taxiProb;
+			bool useBike = !useCar && randomizer.Int32(100u) < bikeProb;
+			bool useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
+			bool useElectricCar = false;
+			if (useCar) {
+				int electricProb = GetElectricCarProbability(instanceID, ref citizenData, this.m_info.m_agePhase);
+				useElectricCar = randomizer.Int32(100u) < electricProb;
+			}
+
 			ItemClass.Service service = ItemClass.Service.Residential;
-			ItemClass.SubService subService = ItemClass.SubService.ResidentialLow;
-			if (!useCar && useTaxi) {
+			ItemClass.SubService subService = useElectricCar ? ItemClass.SubService.ResidentialLowEco : ItemClass.SubService.ResidentialLow;
+			if (useTaxi) {
 				service = ItemClass.Service.PublicTransport;
 				subService = ItemClass.SubService.PublicTransportTaxi;
 			}
@@ -187,7 +193,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "find-parked-vehicle")) {
 #endif
-				if (Options.prohibitPocketCars && useCar && !useTaxi) {
+				if (Options.prohibitPocketCars && useCar) {
 					ushort parkedVehicleId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
 					if (parkedVehicleId != 0) {
 #if DEBUG
@@ -206,10 +212,13 @@ namespace TrafficManager.Custom.AI {
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
 			}
 
-			VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, (ageGroup != Citizen.AgeGroup.Child) ? ItemClass.Level.Level2 : ItemClass.Level.Level1);
-			if (useBike && bikeInfo != null) {
-				return bikeInfo;
+			if (useBike) {
+				VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, ItemClass.Service.Residential, ItemClass.SubService.ResidentialHigh, (ageGroup != Citizen.AgeGroup.Child) ? ItemClass.Level.Level2 : ItemClass.Level.Level1);
+				if (bikeInfo != null) {
+					return bikeInfo;
+				}
 			}
+			
 			if ((useCar || useTaxi) && carInfo != null) {
 				return carInfo;
 			}
@@ -231,6 +240,12 @@ namespace TrafficManager.Custom.AI {
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private int GetCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
 			Log.Error("CustomResidentAI.GetCarProbability called!");
+			return 20;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private int GetElectricCarProbability(ushort instanceID, ref CitizenInstance citizenData, Citizen.AgePhase agePhase) {
+			Log.Error("CustomResidentAI.GetElectricCarProbability called!");
 			return 20;
 		}
 	}

@@ -21,6 +21,103 @@ using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Custom.PathFinding {
 	public class CustomPathManager : PathManager {
+		public struct PathCreationArgs {
+			/// <summary>
+			/// Extended path type
+			/// </summary>
+			public ExtCitizenInstance.ExtPathType extPathType;
+
+			/// <summary>
+			/// Extended vehicle type
+			/// </summary>
+			public ExtVehicleType extVehicleType;
+
+			/// <summary>
+			/// (optional) vehicle id
+			/// </summary>
+			public ushort vehicleId;
+
+			/// <summary>
+			/// Current build index
+			/// </summary>
+			public uint buildIndex;
+
+			/// <summary>
+			/// Start position (first alternative)
+			/// </summary>
+			public PathUnit.Position startPosA;
+
+			/// <summary>
+			/// Start position (second alternative, opposite road side)
+			/// </summary>
+			public PathUnit.Position startPosB;
+
+			/// <summary>
+			/// End position (first alternative)
+			/// </summary>
+			public PathUnit.Position endPosA;
+
+			/// <summary>
+			/// End position (second alternative, opposite road side)
+			/// </summary>
+			public PathUnit.Position endPosB;
+
+			/// <summary>
+			/// (optional) position of the parked vehicle
+			/// </summary>
+			public PathUnit.Position vehiclePosition;
+
+			/// <summary>
+			/// Allowed set of lane types
+			/// </summary>
+			public NetInfo.LaneType laneTypes;
+
+			/// <summary>
+			/// Allowed set of vehicle types
+			/// </summary>
+			public VehicleInfo.VehicleType vehicleTypes;
+
+			/// <summary>
+			/// Maximum allowed path length
+			/// </summary>
+			public float maxLength;
+
+			/// <summary>
+			/// Is the path calculated for a heavy vehicle?
+			/// </summary>
+			public bool isHeavyVehicle;
+
+			/// <summary>
+			/// Is the path calculated for a vehicle with a combustion engine?
+			/// </summary>
+			public bool hasCombustionEngine;
+
+			/// <summary>
+			/// Should blocked segments be ignored?
+			/// </summary>
+			public bool ignoreBlocked;
+
+			/// <summary>
+			/// Should flooded segments be ignored?
+			/// </summary>
+			public bool ignoreFlooded;
+
+			/// <summary>
+			/// Should random parking apply?
+			/// </summary>
+			public bool randomParking;
+
+			/// <summary>
+			/// Should the path be stable (and not randomized)?
+			/// </summary>
+			public bool stablePath;
+
+			/// <summary>
+			/// Is this a high priority path?
+			/// </summary>
+			public bool skipQueue;
+		}
+
 		public struct PathUnitQueueItem {
 			public uint nextPathUnitId; // access requires acquisition of CustomPathFind.QueueLock
 			public ExtVehicleType vehicleType; // access requires acquisition of m_bufferLock
@@ -168,22 +265,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
-		public bool CreatePath(ExtVehicleType vehicleType, ushort vehicleId, ExtCitizenInstance.ExtPathType pathType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPos, PathUnit.Position endPos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
-			PathUnit.Position position = default(PathUnit.Position);
-			return this.CreatePath(vehicleType, vehicleId, pathType, out unit, ref randomizer, buildIndex, startPos, position, endPos, position, position, laneTypes, vehicleTypes, maxLength, false, false, false, false, false, false);
-		}
-
-		public bool CreatePath(ExtVehicleType vehicleType, ushort vehicleId, ExtCitizenInstance.ExtPathType pathType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength) {
-			PathUnit.Position def = default(PathUnit.Position);
-			return this.CreatePath(vehicleType, vehicleId, pathType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleTypes, maxLength, false, false, false, false, false, false);
-		}
-
-		public bool CreatePath(ExtVehicleType vehicleType, ushort vehicleId, ExtCitizenInstance.ExtPathType pathType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue) {
-			PathUnit.Position def = default(PathUnit.Position);
-			return this.CreatePath(vehicleType, vehicleId, pathType, out unit, ref randomizer, buildIndex, startPosA, startPosB, endPosA, endPosB, def, laneTypes, vehicleTypes, maxLength, isHeavyVehicle, ignoreBlocked, stablePath, skipQueue, false, false);
-		}
-
-		public bool CreatePath(ExtVehicleType vehicleType, ushort vehicleId, ExtCitizenInstance.ExtPathType pathType, out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded) {
+		public bool CreatePath(out uint unit, ref Randomizer randomizer, PathCreationArgs args) {
 			uint pathUnitId;
 			try {
 				Monitor.Enter(this.m_bufferLock);
@@ -215,9 +297,9 @@ namespace TrafficManager.Custom.PathFinding {
 					break;
 				}
 
-				queueItems[pathUnitId].vehicleType = vehicleType;
-				queueItems[pathUnitId].vehicleId = vehicleId;
-				queueItems[pathUnitId].pathType = pathType;
+				queueItems[pathUnitId].vehicleType = args.extVehicleType;
+				queueItems[pathUnitId].vehicleId = args.vehicleId;
+				queueItems[pathUnitId].pathType = args.extPathType;
 				queueItems[pathUnitId].queued = true;
 				// NON-STOCK CODE END
 
@@ -227,28 +309,31 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			unit = pathUnitId;
 
-			if (isHeavyVehicle) {
+			if (args.isHeavyVehicle) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
 			}
-			if (ignoreBlocked || ignoreFlooded) {
+			if (args.ignoreBlocked || args.ignoreFlooded) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 32;
 			}
-			if (stablePath) {
+			if (args.stablePath) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 64;
 			}
-			if (randomParking) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 128;
+			if (args.randomParking) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 2;
+			}
+			if (args.hasCombustionEngine) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 4;
 			}
 			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
-			this.m_pathUnits.m_buffer[unit].m_buildIndex = buildIndex;
-			this.m_pathUnits.m_buffer[unit].m_position00 = startPosA;
-			this.m_pathUnits.m_buffer[unit].m_position01 = endPosA;
-			this.m_pathUnits.m_buffer[unit].m_position02 = startPosB;
-			this.m_pathUnits.m_buffer[unit].m_position03 = endPosB;
-			this.m_pathUnits.m_buffer[unit].m_position11 = vehiclePosition;
-			this.m_pathUnits.m_buffer[unit].m_laneTypes = (byte)laneTypes;
-			this.m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)vehicleTypes;
-			this.m_pathUnits.m_buffer[unit].m_length = maxLength;
+			this.m_pathUnits.m_buffer[unit].m_buildIndex = args.buildIndex;
+			this.m_pathUnits.m_buffer[unit].m_position00 = args.startPosA;
+			this.m_pathUnits.m_buffer[unit].m_position01 = args.endPosA;
+			this.m_pathUnits.m_buffer[unit].m_position02 = args.startPosB;
+			this.m_pathUnits.m_buffer[unit].m_position03 = args.endPosB;
+			this.m_pathUnits.m_buffer[unit].m_position11 = args.vehiclePosition;
+			this.m_pathUnits.m_buffer[unit].m_laneTypes = (byte)args.laneTypes;
+			this.m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)args.vehicleTypes;
+			this.m_pathUnits.m_buffer[unit].m_length = args.maxLength;
 			this.m_pathUnits.m_buffer[unit].m_positionCount = 20;
 			int minQueued = 10000000;
 			CustomPathFind pathFind = null;
@@ -277,7 +362,7 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			}
 
-			if (pathFind != null && pathFind.ExtCalculatePath(unit, skipQueue)) {
+			if (pathFind != null && pathFind.ExtCalculatePath(unit, args.skipQueue)) {
 				return true;
 			}
 

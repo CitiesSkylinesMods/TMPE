@@ -298,6 +298,33 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Reverse-Redirection ResidentAI::GetElectricCarProbability calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomResidentAI).GetMethod("GetElectricCarProbability",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Citizen.AgePhase)
+							},
+							null),
+							typeof(ResidentAI).GetMethod("GetElectricCarProbability",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (Citizen.AgePhase)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect ResidentAI::GetElectricCarProbability");
+					detourFailed = true;
+				}
+
 				Log.Info("Reverse-Redirection TouristAI::GetTaxiProbability calls");
 				try {
 					Detours.Add(new Detour(
@@ -325,6 +352,16 @@ namespace TrafficManager {
 							typeof(TouristAI).GetMethod("GetCarProbability", BindingFlags.NonPublic | BindingFlags.Instance)));
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect TouristAI::GetCarProbability");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection TouristAI::GetElectricCarProbability calls");
+				try {
+					Detours.Add(new Detour(
+							typeof(CustomTouristAI).GetMethod("GetElectricCarProbability", BindingFlags.NonPublic | BindingFlags.Instance),
+							typeof(TouristAI).GetMethod("GetElectricCarProbability", BindingFlags.NonPublic | BindingFlags.Instance)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect TouristAI::GetElectricCarProbability");
 					detourFailed = true;
 				}
 
@@ -538,6 +575,7 @@ namespace TrafficManager {
 							null,
 							new[]
 							{
+									typeof (bool),
 									typeof (ushort),
 									typeof (Vector3),
 									typeof (Vector3),
@@ -554,6 +592,7 @@ namespace TrafficManager {
 								null,
 								new[]
 								{
+									typeof (bool),
 									typeof (ushort),
 									typeof (Vector3),
 									typeof (Vector3),
@@ -577,6 +616,7 @@ namespace TrafficManager {
 							null,
 							new[]
 							{
+									typeof (bool),
 									typeof (ushort),
 									typeof (PropInfo),
 									typeof (Vector3),
@@ -595,6 +635,7 @@ namespace TrafficManager {
 								null,
 								new[]
 								{
+									typeof (bool),
 									typeof (ushort),
 									typeof (PropInfo),
 									typeof (Vector3),
@@ -2345,7 +2386,7 @@ namespace TrafficManager {
 
 				if (detourFailed) {
 					Log.Info("Detours failed");
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
 				} else {
 					Log.Info("Detours successful");
 				}

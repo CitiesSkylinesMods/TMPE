@@ -6,7 +6,9 @@ using TrafficManager.Custom.PathFinding;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using UnityEngine;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTaxiAI : CarAI {
@@ -47,7 +49,7 @@ namespace TrafficManager.Custom.AI {
 			VehicleInfo info = this.m_info;
 			CitizenInfo info2 = instance.m_instances.m_buffer[(int)passengerInstanceId].Info;
 			NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.Pedestrian | NetInfo.LaneType.TransportVehicle;
-			VehicleInfo.VehicleType vehicleType = this.m_info.m_vehicleType;
+			VehicleInfo.VehicleType vehicleTypes = this.m_info.m_vehicleType;
 			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
 			PathUnit.Position startPosA;
 			PathUnit.Position startPosB;
@@ -55,7 +57,7 @@ namespace TrafficManager.Custom.AI {
 			float startSqrDistB;
 			PathUnit.Position endPosA;
 			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
-				info2.m_citizenAI.FindPathPosition(passengerInstanceId, ref instance.m_instances.m_buffer[(int)passengerInstanceId], endPos, laneTypes, vehicleType, undergroundTarget, out endPosA)) {
+				info2.m_citizenAI.FindPathPosition(passengerInstanceId, ref instance.m_instances.m_buffer[(int)passengerInstanceId], endPos, laneTypes, vehicleTypes, undergroundTarget, out endPosA)) {
 				if ((instance.m_instances.m_buffer[(int)passengerInstanceId].m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 					laneTypes |= NetInfo.LaneType.PublicTransport;
 
@@ -68,11 +70,32 @@ namespace TrafficManager.Custom.AI {
 					startPosB = default(PathUnit.Position);
 				}
 				PathUnit.Position endPosB = default(PathUnit.Position);
-				SimulationManager instance2 = Singleton<SimulationManager>.instance;
+				SimulationManager simMan = Singleton<SimulationManager>.instance;
 				uint path;
-				if (CustomPathManager._instance.CreatePath(
-					ExtVehicleType.Taxi, vehicleID, 0, out path, ref instance2.m_randomizer, instance2.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleType, 20000f, IsHeavyVehicle(), IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = ExtVehicleType.Taxi;
+				args.vehicleId = vehicleID;
+				args.buildIndex = simMan.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = laneTypes;
+				args.vehicleTypes = vehicleTypes;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = this.IsHeavyVehicle();
+				args.hasCombustionEngine = this.CombustionEngine();
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
+				if (CustomPathManager._instance.CreatePath(out path, ref simMan.m_randomizer, args)) {
+					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}

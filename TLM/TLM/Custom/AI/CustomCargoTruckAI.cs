@@ -10,6 +10,7 @@ using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
@@ -129,7 +130,30 @@ namespace TrafficManager.Custom.AI {
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
 				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
 				uint path;
-				if (pathMan.CreatePath(ExtVehicleType.CargoVehicle, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, laneTypes, vehicleTypes, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), false, (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)) {
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = ExtVehicleType.CargoVehicle;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = laneTypes;
+				args.vehicleTypes = vehicleTypes;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = this.IsHeavyVehicle();
+				args.hasCombustionEngine = this.CombustionEngine();
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = false;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+
+				if (pathMan.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						pathMan.ReleasePath(vehicleData.m_path);
 					}

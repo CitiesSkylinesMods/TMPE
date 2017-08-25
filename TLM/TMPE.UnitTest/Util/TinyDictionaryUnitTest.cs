@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TrafficManager.Util;
 using TrafficManager.Traffic;
+using CSUtil.Commons;
 
 namespace TMUnitTest.Util {
 	[TestClass]

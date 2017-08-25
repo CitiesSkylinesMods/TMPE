@@ -8,6 +8,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using UnityEngine;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomBusAI : CarAI {
@@ -36,8 +37,28 @@ namespace TrafficManager.Custom.AI {
 				}
 				uint path;
 				// NON-STOCK CODE START
-				if (CustomPathManager._instance.CreatePath(
-					ExtVehicleType.Bus, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f, this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData), true, true)) {
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = ExtVehicleType.Bus;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+				args.vehicleTypes = info.m_vehicleType;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = this.IsHeavyVehicle();
+				args.hasCombustionEngine = this.CombustionEngine();
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = true;
+				args.skipQueue = true;
+
+				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {

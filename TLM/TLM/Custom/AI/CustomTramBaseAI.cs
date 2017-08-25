@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -151,7 +152,30 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				uint path;
-				if (CustomPathManager._instance.CreatePath(ExtVehicleType.Tram, vehicleID, ExtCitizenInstance.ExtPathType.None, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, startPosB, endPosA, endPosB, NetInfo.LaneType.Vehicle, info.m_vehicleType, 20000f, false, false, true, true)) {
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extVehicleType = ExtVehicleType.Tram;
+				args.vehicleId = vehicleID;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = default(PathUnit.Position);
+				args.laneTypes = NetInfo.LaneType.Vehicle;
+				args.vehicleTypes = info.m_vehicleType;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = false;
+				args.hasCombustionEngine = false;
+				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
+				args.ignoreFlooded = false;
+				args.randomParking = false;
+				args.stablePath = true;
+				args.skipQueue = true;
+
+				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 					}
@@ -429,7 +453,8 @@ namespace TrafficManager.Custom.AI {
 					if (leaderPathPosIndex == 255) {
 						leaderPathPosIndex = 0;
 					}
-					float leaderLen = 1f + leaderData.CalculateTotalLength(leaderID);
+					int noise;
+					float leaderLen = 1f + leaderData.CalculateTotalLength(leaderID, out noise);
 
 #if DEBUG
 					if (debug) {
@@ -441,7 +466,7 @@ namespace TrafficManager.Custom.AI {
 					PathManager pathMan = Singleton<PathManager>.instance;
 					PathUnit.Position pathPos;
 					if (pathMan.m_pathUnits.m_buffer[leaderData.m_path].GetPosition(leaderPathPosIndex >> 1, out pathPos)) {
-						netMan.m_segments.m_buffer[(int)pathPos.m_segment].AddTraffic(Mathf.RoundToInt(leaderLen * 2.5f));
+						netMan.m_segments.m_buffer[(int)pathPos.m_segment].AddTraffic(Mathf.RoundToInt(leaderLen * 2.5f), noise);
 						bool reservedSpaceOnCurrentLane = false;
 						if ((leaderPathPosIndex & 1) == 0 || leaderLastPathOffset == 0) {
 							uint laneId = PathManager.GetLaneID(pathPos);

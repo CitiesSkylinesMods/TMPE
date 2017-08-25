@@ -14,6 +14,7 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using CSUtil.Commons.Benchmark;
+using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
 	// TODO move Parking AI features from here to a distinct manager
@@ -145,15 +146,16 @@ namespace TrafficManager.Custom.AI {
 			// NON-STOCK CODE END
 
 			NetInfo.LaneType laneTypes = NetInfo.LaneType.Pedestrian;
-			VehicleInfo.VehicleType vehicleType = VehicleInfo.VehicleType.None;
+			VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.None;
 			bool randomParking = false;
+			bool combustionEngine = false;
 			if (vehicleInfo != null) {
 				if (vehicleInfo.m_class.m_subService == ItemClass.SubService.PublicTransportTaxi) {
 					if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTaxi) == CitizenInstance.Flags.None && Singleton<DistrictManager>.instance.m_districts.m_buffer[0].m_productionData.m_finalTaxiCapacity != 0u) {
 						SimulationManager instance = Singleton<SimulationManager>.instance;
 						if (instance.m_isNightTime || instance.m_randomizer.Int32(2u) == 0) {
 							laneTypes |= (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
-							vehicleType |= vehicleInfo.m_vehicleType;
+							vehicleTypes |= vehicleInfo.m_vehicleType;
 							extVehicleType = ExtVehicleType.Taxi; // NON-STOCK CODE
 							// NON-STOCK CODE START
 							if (Options.prohibitPocketCars) {
@@ -168,13 +170,14 @@ namespace TrafficManager.Custom.AI {
 						if (carUsageMode == CarUsagePolicy.Allowed || carUsageMode == CarUsagePolicy.Forced) {
 							extVehicleType = ExtVehicleType.PassengerCar;
 							laneTypes |= NetInfo.LaneType.Vehicle;
-							vehicleType |= vehicleInfo.m_vehicleType;
+							vehicleTypes |= vehicleInfo.m_vehicleType;
+							combustionEngine = vehicleInfo.m_class.m_subService == ItemClass.SubService.ResidentialLow;
 							canUseOwnPassengerCar = true;
 						}
 					} else if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
 						extVehicleType = ExtVehicleType.Bicycle;
 						laneTypes |= NetInfo.LaneType.Vehicle;
-						vehicleType |= vehicleInfo.m_vehicleType;
+						vehicleTypes |= vehicleInfo.m_vehicleType;
 						if (citizenData.m_targetBuilding != 0 && Singleton<BuildingManager>.instance.m_buildings.m_buffer[citizenData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office) {
 							randomParking = true;
 						}
@@ -289,14 +292,14 @@ namespace TrafficManager.Custom.AI {
 				Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Requesting path-finding for citizen instance {instanceID}, citizen {citizenData.m_citizen}, extVehicleType={extVehicleType}, extPathType={extPathType}, startPos={startPos}, endPos={endPos}, sourceBuilding={citizenData.m_sourceBuilding}, targetBuilding={citizenData.m_targetBuilding} pathMode={extInstance.pathMode}");
 #endif
 
-			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, Options.prohibitPocketCars && (citizenData.m_targetBuilding == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[citizenData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleType, false, out endPosA); // NON-STOCK CODE: with Parking AI enabled, the end position must be a pedestrian position
+			bool foundEndPos = !calculateEndPos || FindPathPosition(instanceID, ref citizenData, endPos, Options.prohibitPocketCars && (citizenData.m_targetBuilding == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[citizenData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleTypes, false, out endPosA); // NON-STOCK CODE: with Parking AI enabled, the end position must be a pedestrian position
 			bool foundStartPos = false;
 			PathUnit.Position startPosA;
 
 			if (Options.prohibitPocketCars && (extInstance.pathMode == ExtPathMode.CalculatingCarPathToTarget || extInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos)) {
-				foundStartPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, laneTypes & ~NetInfo.LaneType.Pedestrian, vehicleType, allowUnderground, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out startPosA);
+				foundStartPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, laneTypes & ~NetInfo.LaneType.Pedestrian, vehicleTypes, allowUnderground, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out startPosA);
 			} else {
-				foundStartPos = FindPathPosition(instanceID, ref citizenData, startPos, startLaneType, vehicleType, allowUnderground, out startPosA);
+				foundStartPos = FindPathPosition(instanceID, ref citizenData, startPos, startLaneType, vehicleTypes, allowUnderground, out startPosA);
 			}
 
 			if (foundStartPos && // TODO probably fails if vehicle is parked too far away from road
@@ -327,12 +330,35 @@ namespace TrafficManager.Custom.AI {
 
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint path;
-				bool res = CustomPathManager._instance.CreatePath(extVehicleType, 0, extPathType, out path, ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex, startPosA, dummyPathPos, endPosA, dummyPathPos, vehiclePosition, laneTypes, vehicleType, 20000f, false, false, false, false, randomParking, false);
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = extPathType;
+				args.extVehicleType = extVehicleType;
+				args.vehicleId = 0;
+				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = dummyPathPos;
+				args.endPosA = endPosA;
+				args.endPosB = dummyPathPos;
+				args.vehiclePosition = vehiclePosition;
+				args.laneTypes = laneTypes;
+				args.vehicleTypes = vehicleTypes;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = false;
+				args.hasCombustionEngine = combustionEngine;
+				args.ignoreBlocked = false;
+				args.ignoreFlooded = false;
+				args.randomParking = randomParking;
+				args.stablePath = false;
+				args.skipQueue = false;
+
+				bool res = CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args);
+				// NON-STOCK CODE END
 
 				if (res) {
 #if DEBUG
 					if (GlobalConfig.Instance.Debug.Switches[2])
-						Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Path-finding starts for citizen instance {instanceID}, path={path}, extVehicleType={extVehicleType}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, vehiclePos.m_segment={vehiclePosition.m_segment}, vehiclePos.m_lane={vehiclePosition.m_lane}, vehiclePos.m_offset={vehiclePosition.m_offset}");
+						Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Path-finding starts for citizen instance {instanceID}, path={path}, extVehicleType={extVehicleType}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleTypes}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, vehiclePos.m_segment={vehiclePosition.m_segment}, vehiclePos.m_lane={vehiclePosition.m_lane}, vehiclePos.m_offset={vehiclePosition.m_offset}");
 #endif
 
 					if (citizenData.m_path != 0u) {
