@@ -52,10 +52,10 @@ namespace TrafficManager.Util {
 			}
 		}
 
-		public static void Traverse(ushort initialSegmentId, TraverseDirection direction, LaneStopCriterion laneStopCrit, SegmentStopCriterion segStopCrit, NetInfo.LaneType? laneTypeFilter, VehicleInfo.VehicleType? vehicleTypeFilter, SegmentLaneVisitor laneVisitor) {
+		public static void Traverse(ushort initialSegmentId, TraverseDirection direction, TraverseSide side, LaneStopCriterion laneStopCrit, SegmentStopCriterion segStopCrit, NetInfo.LaneType? laneTypeFilter, VehicleInfo.VehicleType? vehicleTypeFilter, SegmentLaneVisitor laneVisitor) {
 			IList<LanePos> initialSortedLanes = null;
 
-			SegmentTraverser.Traverse(initialSegmentId, direction, segStopCrit, delegate(SegmentVisitData segData) {
+			SegmentTraverser.Traverse(initialSegmentId, direction, side, segStopCrit, delegate(SegmentVisitData segData) {
 				bool isInitialSeg = segData.initial;
 				bool reverse = !isInitialSeg && segData.viaStartNode == segData.viaInitialStartNode;
 				bool ret = false;

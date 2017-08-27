@@ -237,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
 			ushort selectedStartNodeId = netManager.m_segments.m_buffer[SelectedSegmentId].m_startNode;
 			ushort selectedEndNodeId = netManager.m_segments.m_buffer[SelectedSegmentId].m_endNode;
 
-			SegmentLaneTraverser.Traverse(SelectedSegmentId, SegmentTraverser.TraverseDirection.Both, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
+			SegmentLaneTraverser.Traverse(SelectedSegmentId, SegmentTraverser.TraverseDirection.AnyDirection, SegmentTraverser.TraverseSide.AnySide, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
 				if (data.segVisitData.initial) {
 					return true;
 				}

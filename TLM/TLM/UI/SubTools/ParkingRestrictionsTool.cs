@@ -173,7 +173,7 @@ namespace TrafficManager.UI.SubTools {
 								normDir = NetInfo.InvertDirection(normDir);
 							}
 
-							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.Both, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, ParkingRestrictionsManager.LANE_TYPES, ParkingRestrictionsManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
+							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.AnyDirection, SegmentTraverser.TraverseSide.AnySide, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, ParkingRestrictionsManager.LANE_TYPES, ParkingRestrictionsManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
 								if (data.segVisitData.initial) {
 									return true;
 								}

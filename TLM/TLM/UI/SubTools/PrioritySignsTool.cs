@@ -16,16 +16,82 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
+using static TrafficManager.Util.SegmentTraverser;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
+		public enum PrioritySignsMassEditMode {
+			MainYield = 0,
+			MainStop = 1,
+			YieldMain = 2,
+			StopMain = 3,
+			Delete = 4
+		}
+
 		private HashSet<ushort> currentPriorityNodeIds;
+		private static readonly bool[] ALL_BOOL = new bool[] { false, true };
+		private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
 
 		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			currentPriorityNodeIds = new HashSet<ushort>();
 		}
 
 		public override void OnPrimaryClickOverlay() {
+			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+				if (HoveredSegmentId != 0) {
+					SelectedNodeId = 0;
+
+					PriorityType primaryPrioType = PriorityType.None;
+					PriorityType secondaryPrioType = PriorityType.None;
+					switch (massEditMode) {
+						case PrioritySignsMassEditMode.MainYield:
+							primaryPrioType = PriorityType.Main;
+							secondaryPrioType = PriorityType.Yield;
+							break;
+						case PrioritySignsMassEditMode.MainStop:
+							primaryPrioType = PriorityType.Main;
+							secondaryPrioType = PriorityType.Stop;
+							break;
+						case PrioritySignsMassEditMode.YieldMain:
+							primaryPrioType = PriorityType.Yield;
+							secondaryPrioType = PriorityType.Main;
+							break;
+						case PrioritySignsMassEditMode.StopMain:
+							primaryPrioType = PriorityType.Stop;
+							secondaryPrioType = PriorityType.Main;
+							break;
+						case PrioritySignsMassEditMode.Delete:
+						default:
+							break;
+					}
+
+					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
+						foreach (bool startNode in ALL_BOOL) {
+							TrafficPriorityManager.Instance.SetPrioritySign(data.curGeo.SegmentId, startNode, primaryPrioType);
+
+							foreach (ushort otherSegmentId in data.curGeo.GetConnectedSegments(startNode)) {
+								if (!data.curGeo.IsStraightSegment(otherSegmentId, startNode)) {
+									SegmentGeometry otherGeo = SegmentGeometry.Get(otherSegmentId);
+									if (otherGeo == null) {
+										continue;
+									}
+									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherGeo.StartNodeId() == data.curGeo.GetNodeId(startNode), secondaryPrioType);
+								}
+							}
+						}
+						
+						return true;
+					});
+
+					// cycle mass edit mode
+					massEditMode = (PrioritySignsMassEditMode)(((int)massEditMode + 1) % Enum.GetValues(typeof(PrioritySignsMassEditMode)).GetLength(0));
+
+					// update priority node cache
+					RefreshCurrentPriorityNodeIds();
+				}
+				return;
+			}
+
 			if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
 				return;
 			}
@@ -36,6 +102,7 @@ namespace TrafficManager.UI.SubTools {
 
 			SelectedNodeId = HoveredNodeId;
 			Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+			// update priority node cache
 			RefreshCurrentPriorityNodeIds();
 		}
 
@@ -47,6 +114,21 @@ namespace TrafficManager.UI.SubTools {
 			if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
 				return;
 			}
+
+			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+				// draw hovered segments
+				if (HoveredSegmentId != 0) {
+					Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
+						NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[data.curGeo.SegmentId], color, color);
+						return true;
+					});
+				} else {
+					massEditMode = PrioritySignsMassEditMode.MainYield;
+				}
+				return;
+			}
+			massEditMode = PrioritySignsMassEditMode.MainYield;
 
 			if (HoveredNodeId == SelectedNodeId) {
 				return;

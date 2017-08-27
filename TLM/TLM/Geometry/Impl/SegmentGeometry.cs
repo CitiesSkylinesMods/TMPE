@@ -383,21 +383,51 @@ namespace TrafficManager.Geometry.Impl {
 		/// </summary>
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
 		/// <returns></returns>
-		public ushort[] GetConnectedSegments(bool startNode) {
+		public ushort GetNodeId(bool startNode) {
+			if (!IsValid())
+				return 0;
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.ConnectedSegments;
+			return endGeometry.NodeId();
 		}
 
 		/// <summary>
 		/// Determines all connected segments at the given node.
 		/// </summary>
 		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
-		/// <returns></returns>
-		public ushort GetNodeId(bool startNode) {
-			if (!IsValid())
-				return 0;
+		/// <returns></returns>		
+		public ushort[] GetConnectedSegments(bool startNode) {
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
-			return endGeometry.NodeId();
+			return endGeometry.ConnectedSegments;
+		}
+
+		/// <summary>
+		/// Determines all connected right segments at the given node.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns></returns>		
+		public ushort[] GetRightSegments(bool startNode) {
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.RightSegments;
+		}
+
+		/// <summary>
+		/// Determines all connected left segments at the given node.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns></returns>		
+		public ushort[] GetLeftSegments(bool startNode) {
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.LeftSegments;
+		}
+
+		/// <summary>
+		/// Determines all connected straight segments at the given node.
+		/// </summary>
+		/// <param name="startNode">defines if the segment should be checked at the start node (true) or end node (false)</param>
+		/// <returns></returns>		
+		public ushort[] GetStraightSegments(bool startNode) {
+			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
+			return endGeometry.StraightSegments;
 		}
 
 		/// <summary>

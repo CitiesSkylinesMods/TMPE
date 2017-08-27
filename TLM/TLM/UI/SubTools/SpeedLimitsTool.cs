@@ -427,7 +427,7 @@ namespace TrafficManager.UI.SubTools {
 						SpeedLimitManager.Instance.SetSpeedLimit(segmentId, laneIndex, laneInfo, laneId, speedLimitToSet);
 
 						if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.Both, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
+							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.AnyDirection, SegmentTraverser.TraverseSide.AnySide, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
 								if (data.segVisitData.initial) {
 									return true;
 								}
@@ -491,7 +491,7 @@ namespace TrafficManager.UI.SubTools {
 								normDir = NetInfo.InvertDirection(normDir);
 							}
 
-							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.Both, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
+							SegmentLaneTraverser.Traverse(segmentId, SegmentTraverser.TraverseDirection.AnyDirection, SegmentTraverser.TraverseSide.AnySide, SegmentLaneTraverser.LaneStopCriterion.LaneCount, SegmentTraverser.SegmentStopCriterion.Junction, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES, delegate (SegmentLaneVisitData data) {
 								if (data.segVisitData.initial) {
 									return true;
 								}
