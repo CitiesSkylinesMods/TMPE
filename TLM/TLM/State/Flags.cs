@@ -66,11 +66,6 @@ namespace TrafficManager.State {
 		/// </summary>
 		internal static ExtVehicleType?[][] laneAllowedVehicleTypesArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
 
-		/// <summary>
-		/// For each segment and node: Defines additional flags for segments at a node
-		/// </summary>
-		private static Configuration.SegmentNodeFlags[][] segmentNodeFlags = null;
-
 		private static object laneSpeedLimitLock = new object();
 
 		internal static void PrintDebugInfo() {
@@ -141,19 +136,6 @@ namespace TrafficManager.State {
 					if (laneAllowedVehicleTypesArray[i][x] == null)
 						continue;
 					Log.Info($"\tLane idx {x}: {laneAllowedVehicleTypesArray[i][x]}");
-				}
-			}
-
-			Log.Info("-----------------------------");
-			Log.Info("--- JUNCTION RESTRICTIONS ---");
-			Log.Info("-----------------------------");
-			for (uint i = 0; i < segmentNodeFlags.Length; ++i) {
-				if (segmentNodeFlags[i] == null)
-					continue;
-				for (int x = 0; x < segmentNodeFlags[i].Length; ++x) {
-					if (segmentNodeFlags[i][x] == null)
-						continue;
-					Log.Info($"\tSegment {i}, Node idx {x}: {segmentNodeFlags[i][x]} (valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)})");
 				}
 			}
 		}
@@ -818,113 +800,6 @@ namespace TrafficManager.State {
 			return highwayLaneArrowFlags[laneId];
 		}
 
-		public static bool getUTurnAllowed(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-
-			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
-			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].uturnAllowed == null)
-				return Options.allowUTurns;
-			return (bool)nodeFlags[index].uturnAllowed;
-		}
-
-		public static void setUTurnAllowed(ushort segmentId, bool startNode, bool value) {
-			bool? valueToSet = value;
-			if (value == Options.allowUTurns)
-				valueToSet = null;
-			
-			int index = startNode ? 0 : 1;
-			if (segmentNodeFlags[segmentId][index] == null) {
-				if (valueToSet == null)
-					return;
-
-				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
-			}
-			segmentNodeFlags[segmentId][index].uturnAllowed = valueToSet;
-		}
-
-		public static bool getPedestrianCrossingAllowed(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-
-			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
-			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].pedestrianCrossingAllowed == null)
-				return true;
-			return (bool)nodeFlags[index].pedestrianCrossingAllowed;
-		}
-
-		public static void setPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool value) {
-			bool? valueToSet = value;
-			if (value)
-				valueToSet = null;
-
-			int index = startNode ? 0 : 1;
-			if (segmentNodeFlags[segmentId][index] == null) {
-				if (valueToSet == null)
-					return;
-
-				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
-			}
-			segmentNodeFlags[segmentId][index].pedestrianCrossingAllowed = valueToSet;
-		}
-
-		public static bool getStraightLaneChangingAllowed(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-
-			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
-			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].straightLaneChangingAllowed == null)
-				return Options.allowLaneChangesWhileGoingStraight;
-			return (bool)nodeFlags[index].straightLaneChangingAllowed;
-		}
-
-		public static void setStraightLaneChangingAllowed(ushort segmentId, bool startNode, bool value) {
-			bool? valueToSet = value;
-			if (value == Options.allowLaneChangesWhileGoingStraight)
-				valueToSet = null;
-
-			int index = startNode ? 0 : 1;
-			if (segmentNodeFlags[segmentId][index] == null) {
-				if (valueToSet == null)
-					return;
-				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
-			}
-			segmentNodeFlags[segmentId][index].straightLaneChangingAllowed = valueToSet;
-		}
-
-		public static bool getEnterWhenBlockedAllowed(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-
-			Configuration.SegmentNodeFlags[] nodeFlags = segmentNodeFlags[segmentId];
-			if (nodeFlags == null || nodeFlags[index] == null || nodeFlags[index].enterWhenBlockedAllowed == null)
-				return Options.allowEnterBlockedJunctions;
-			return (bool)nodeFlags[index].enterWhenBlockedAllowed;
-		}
-
-		public static void setEnterWhenBlockedAllowed(ushort segmentId, bool startNode, bool value) {
-			bool? valueToSet = value;
-			if (value == Options.allowEnterBlockedJunctions)
-				valueToSet = null;
-
-			int index = startNode ? 0 : 1;
-			if (segmentNodeFlags[segmentId][index] == null) {
-				if (valueToSet == null)
-					return;
-				segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
-			}
-			segmentNodeFlags[segmentId][index].enterWhenBlockedAllowed = valueToSet;
-		}
-
-		internal static void setSegmentNodeFlags(ushort segmentId, bool startNode, Configuration.SegmentNodeFlags flags) {
-			if (flags == null)
-				return;
-
-			int index = startNode ? 0 : 1;
-			segmentNodeFlags[segmentId][index] = flags;
-		}
-
-		internal static Configuration.SegmentNodeFlags getSegmentNodeFlags(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-			return segmentNodeFlags[segmentId][index];
-		}
-
 		public static void removeHighwayLaneArrowFlags(uint laneId) {
 #if DEBUGFLAGS
 			Log._Debug($"Flags.removeHighwayLaneArrowFlags: Removing highway arrows of lane {laneId}");
@@ -1050,11 +925,6 @@ namespace TrafficManager.State {
 				Monitor.Exit(laneSpeedLimitLock);
 			}
 		}
-
-		public static void resetSegmentNodeFlags(ushort segmentId, bool startNode) {
-			int index = startNode ? 0 : 1;
-			segmentNodeFlags[segmentId][index] = new Configuration.SegmentNodeFlags();
-		}
 		
 		internal static void OnLevelUnloading() {
 			for (uint i = 0; i < laneConnections.Length; ++i) {
@@ -1083,10 +953,6 @@ namespace TrafficManager.State {
 			for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
 				highwayLaneArrowFlags[i] = null;
 			}
-
-			for (uint i = 0; i < segmentNodeFlags.Length; ++i) {
-				segmentNodeFlags[i] = new Configuration.SegmentNodeFlags[2];
-			}
 		}
 
 		static Flags() {
@@ -1096,10 +962,6 @@ namespace TrafficManager.State {
 			laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
 			laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
 			highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
-			segmentNodeFlags = new Configuration.SegmentNodeFlags[NetManager.MAX_SEGMENT_COUNT][];
-			for (int i = 0; i < segmentNodeFlags.Length; ++i) {
-				segmentNodeFlags[i] = new Configuration.SegmentNodeFlags[2];
-			}
 		}
 
 		public static void OnBeforeLoadData() {

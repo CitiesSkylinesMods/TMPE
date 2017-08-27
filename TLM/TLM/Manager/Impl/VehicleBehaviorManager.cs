@@ -135,7 +135,7 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is not a train.");
 #endif
 
-				bool checkSpace = !Flags.getEnterWhenBlockedAllowed(prevPos.m_segment, isTargetStartNode) && !isRecklessDriver;
+				bool checkSpace = !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(prevPos.m_segment, isTargetStartNode) && !isRecklessDriver;
 
 				//TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(destinationNodeId);
 				//if (timedNode != null && timedNode.vehiclesMayEnterBlockedJunctions) {

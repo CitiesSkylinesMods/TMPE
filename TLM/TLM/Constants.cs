@@ -7,6 +7,8 @@ using TrafficManager.Manager;
 
 namespace TrafficManager {
 	public static class Constants {
+		public static readonly bool[] ALL_BOOL = new bool[] { false, true };
+
 		public static IServiceFactory ServiceFactory {
 			get {
 #if UNITTEST

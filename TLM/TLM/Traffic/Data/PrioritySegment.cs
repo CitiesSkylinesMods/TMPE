@@ -4,7 +4,6 @@ namespace TrafficManager.Traffic.Data {
 	/// <summary>
 	/// A priority segment specifies the priority signs that are present at each end of a certain segment.
 	/// </summary>
-	/// 
 	public struct PrioritySegment {
 		public enum PriorityType {
 			None = 0,

@@ -164,6 +164,8 @@
     <Compile Include="TrafficLight\LightMode.cs" />
     <Compile Include="TrafficLight\StepChangeMetric.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
+    <Compile Include="Traffic\Data\SegmentFlags.cs" />
+    <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="TrafficManager.cs" />
     <Compile Include="Traffic\Data\ExtBuilding.cs" />

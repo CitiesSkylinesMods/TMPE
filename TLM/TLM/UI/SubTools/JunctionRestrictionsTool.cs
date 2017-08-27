@@ -133,7 +133,10 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Cleanup() {
-			
+			foreach (ushort nodeId in currentRestrictedNodeIds) {
+				JunctionRestrictionsManager.Instance.RemoveJunctionRestrictionsIfNecessary(nodeId);
+			}
+			RefreshCurrentRestrictedNodeIds();
 		}
 
 		public override void Initialize() {
@@ -157,8 +160,9 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				if (JunctionRestrictionsManager.Instance.HasJunctionRestrictions((ushort)nodeId))
+				if (JunctionRestrictionsManager.Instance.HasJunctionRestrictions((ushort)nodeId)) {
 					currentRestrictedNodeIds.Add((ushort)nodeId);
+				}
 			}
 		}
 

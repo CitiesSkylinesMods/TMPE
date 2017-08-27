@@ -60,6 +60,8 @@
     <Compile Include="Benchmark\Benchmark.cs" />
     <Compile Include="Benchmark\BenchmarkProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TernaryBool.cs" />
+    <Compile Include="TernaryBoolUtil.cs" />
     <Compile Include="ToStringExt.cs" />
     <Compile Include="VectorUtil.cs" />
   </ItemGroup>

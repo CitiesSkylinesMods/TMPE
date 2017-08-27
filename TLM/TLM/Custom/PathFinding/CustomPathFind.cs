@@ -1143,7 +1143,7 @@ namespace TrafficManager.Custom.PathFinding {
 							(nextIsEndOrOneWayOut || // stock u-turn points
 							(Options.junctionRestrictionsEnabled &&
 							_isRoadVehicle && // only road vehicles may perform u-turns
-							Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode) && // only do u-turns if allowed
+							junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode) && // only do u-turns if allowed
 							!nextIsBeautificationNode && // no u-turns at beautification nodes
 							prevIsCarLane && // u-turns for road vehicles only
 							!_isHeavyVehicle && // only small vehicles may perform u-turns
@@ -1184,7 +1184,7 @@ namespace TrafficManager.Custom.PathFinding {
 								"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
 								"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
 								"\t" + $"allowPedestrians={allowPedestrians}\n" +
-								"\t" + $"isCustomUturnAllowed={Flags.getUTurnAllowed(prevSegmentId, nextIsStartNode)}\n" +
+								"\t" + $"isCustomUturnAllowed={junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode)}\n" +
 								"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
 								"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneChangePolicyEnabled}\n" +
 								"\t" + $"handleStockUturn={handleStockUturn}\n"

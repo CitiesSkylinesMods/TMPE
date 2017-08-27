@@ -29,7 +29,6 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private HashSet<ushort> currentPriorityNodeIds;
-		private static readonly bool[] ALL_BOOL = new bool[] { false, true };
 		private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
 
 		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
@@ -66,7 +65,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
-						foreach (bool startNode in ALL_BOOL) {
+						foreach (bool startNode in Constants.ALL_BOOL) {
 							TrafficPriorityManager.Instance.SetPrioritySign(data.curGeo.SegmentId, startNode, primaryPrioType);
 
 							foreach (ushort otherSegmentId in data.curGeo.GetConnectedSegments(startNode)) {

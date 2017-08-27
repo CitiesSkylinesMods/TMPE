@@ -12,6 +12,18 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Geometry.Impl {
 	public class NodeGeometry : IObservable<NodeGeometry>, IEquatable<NodeGeometry> {
+		public struct SegmentEndReplacement {
+			public ISegmentEndId oldSegmentEndId;
+			public ISegmentEndId newSegmentEndId;
+
+			public override string ToString() {
+				return $"[SegmentEndReplacement\n" +
+					"\t" + $"oldSegmentEndId = {oldSegmentEndId}\n" +
+					"\t" + $"newSegmentEndId = {newSegmentEndId}\n" +
+					"SegmentEndReplacement]";
+			}
+		}
+
 		private const byte MAX_NUM_SEGMENTS = 8;
 
 		private static NodeGeometry[] nodeGeometries;
@@ -41,8 +53,12 @@ namespace TrafficManager.Geometry.Impl {
 			}
 		}
 
+		private ISegmentEndId lastRemovedSegmentEndId = null;
+
 		public int IncomingSegments { get; private set; } = 0;
 		public int OutgoingSegments { get; private set; } = 0;
+
+		public SegmentEndReplacement CurrentSegmentReplacement = default(SegmentEndReplacement);
 
 		/// <summary>
 		/// Connected segment end geometries.
@@ -109,7 +125,7 @@ namespace TrafficManager.Geometry.Impl {
 #endif
 			if (!IsValid()) {
 				//Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
-				RemoveAllSegmentEnds();
+				Invalidate();
 				return;
 			}
 
@@ -137,6 +153,12 @@ namespace TrafficManager.Geometry.Impl {
 			if (calcMode == GeometryCalculationMode.Propagate) {
 				RecalculateSegments(segEndGeo.SegmentId);
 			}
+
+			if (!found && lastRemovedSegmentEndId != null) {
+				CurrentSegmentReplacement.oldSegmentEndId = lastRemovedSegmentEndId;
+				CurrentSegmentReplacement.newSegmentEndId = segEndGeo;
+				lastRemovedSegmentEndId = null;
+			}
 			Recalculate();
 		}
 
@@ -152,13 +174,14 @@ namespace TrafficManager.Geometry.Impl {
 
 			if (!IsValid()) {
 				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
-				RemoveAllSegmentEnds();
+				Invalidate();
 				return;
 			}
 
 			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
 				if (segmentEndGeo.Equals(SegmentEndGeometries[i])) {
 					SegmentEndGeometries[i] = null;
+					lastRemovedSegmentEndId = segmentEndGeo;
 				}
 			}
 
@@ -204,7 +227,7 @@ namespace TrafficManager.Geometry.Impl {
 
 			// check if node is valid
 			if (!IsValid()) {
-				RemoveAllSegmentEnds();
+				Invalidate();
 				return;
 			} else {
 				// calculate node properties
@@ -236,10 +259,12 @@ namespace TrafficManager.Geometry.Impl {
 			}
 		}
 
-		protected void RemoveAllSegmentEnds() {
+		protected void Invalidate() {
 			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
 				SegmentEndGeometries[i] = null;
 			}
+			lastRemovedSegmentEndId = null;
+			CurrentSegmentReplacement = default(SegmentEndReplacement);
 			NotifyObservers();
 		}
 
@@ -268,6 +293,8 @@ namespace TrafficManager.Geometry.Impl {
 		}
 
 		internal void NotifyObservers() {
+			Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
+
 			List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<NodeGeometry> observer in myObservers) {
 				try {
@@ -276,6 +303,9 @@ namespace TrafficManager.Geometry.Impl {
 					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of node {NodeId}: {e}");
 				}
 			}
+
+			CurrentSegmentReplacement.oldSegmentEndId = null;
+			CurrentSegmentReplacement.newSegmentEndId = null;
 		}
 
 		// static methods
