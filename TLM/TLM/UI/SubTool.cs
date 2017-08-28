@@ -62,6 +62,9 @@ namespace TrafficManager.UI {
 #endif
 				;
 		}
+		public virtual string GetTutorialKey() {
+			return this.GetType().Name;
+		}
 
 		protected void DragWindow(ref Rect window) {
 			window.x = Mathf.Clamp(window.x, 0, Screen.width - window.width);

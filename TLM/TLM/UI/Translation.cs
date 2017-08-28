@@ -1,4 +1,5 @@
-﻿using ColossalFramework.Globalization;
+﻿using ColossalFramework;
+using ColossalFramework.Globalization;
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,10 @@ namespace TrafficManager.UI {
 		public static readonly IDictionary<string, string> LANGUAGE_LABELS = new TinyDictionary<string, string>();
 		public static readonly IList<string> AVAILABLE_LANGUAGE_CODES = new List<string>();
 		public const string DEFAULT_LANGUAGE_CODE = "en";
+
+		public const string TUTORIAL_KEY_PREFIX = "TMPE_TUTORIAL_";
+		public const string TUTORIAL_HEAD_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "HEAD_";
+		public const string TUTORIAL_BODY_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "BODY_";
 
 		static Translation() {
 			AVAILABLE_LANGUAGE_CODES.Clear();
@@ -54,18 +59,18 @@ namespace TrafficManager.UI {
 		private static string loadedLanguage = null;
 
 		public static string GetString(string key) {
-			loadTranslations();
+			LoadTranslations();
 
 			string ret = null;
-			try {
-				translations.TryGetValue(key, out ret);
-			} catch (Exception e) {
-				Log.Error($"Error fetching the key {key} from the translation dictionary: {e.ToString()}");
-                return key;
+			if (translations.TryGetValue(key, out ret)) {
+				return ret;
 			}
-			if (ret == null)
-				return key;
-			return ret;
+			return key;
+		}
+
+		public static bool HasString(string key) {
+			LoadTranslations();
+			return translations.ContainsKey(key);
 		}
 
 		public static string GetTranslatedFileName(string filename) {
@@ -122,7 +127,7 @@ namespace TrafficManager.UI {
 			GlobalConfig.Instance.LanguageCode = lang;
 		}
 
-		private static void loadTranslations() {
+		private static void LoadTranslations() {
 			string currentLang = GetCurrentLanguage();
 			if (translations == null || loadedLanguage == null || ! loadedLanguage.Equals(currentLang)) {
 				try {
@@ -142,7 +147,9 @@ namespace TrafficManager.UI {
 						int delimiterIndex = line.Trim().IndexOf(' ');
 						if (delimiterIndex > 0) {
 							try {
-								translations.Add(line.Substring(0, delimiterIndex), line.Substring(delimiterIndex + 1).Trim().Replace("\\n", "\n"));
+								string translationKey = line.Substring(0, delimiterIndex);
+								string translationValue = line.Substring(delimiterIndex + 1).Trim().Replace("\\n", "\n");
+								translations.Add(translationKey, translationValue);
 							} catch (Exception) {
 								Log.Warning($"Failed to add translation for key {line.Substring(0, delimiterIndex)}, language {currentLang}. Possible duplicate?");
 							}
@@ -151,6 +158,37 @@ namespace TrafficManager.UI {
 					loadedLanguage = currentLang;
 				} catch (Exception e) {
 					Log.Error($"Error while loading translations: {e.ToString()}");
+				}
+			}
+		}
+
+		public static void ReloadTutorialTranslations() {
+			Locale locale = (Locale)typeof(LocaleManager).GetField("m_Locale", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(SingletonLite<LocaleManager>.instance);
+			foreach (KeyValuePair<string, string> entry in translations) {
+				if (!entry.Key.StartsWith(TUTORIAL_KEY_PREFIX)) {
+					continue;
+				}
+
+				string identifier;
+				string tutorialKey;
+				if (entry.Key.StartsWith(TUTORIAL_HEAD_KEY_PREFIX)) {
+					identifier = "TUTORIAL_ADVISER_TITLE";
+					tutorialKey = TUTORIAL_KEY_PREFIX + entry.Key.Substring(TUTORIAL_HEAD_KEY_PREFIX.Length);
+				} else if (entry.Key.StartsWith(TUTORIAL_BODY_KEY_PREFIX)) {
+					identifier = "TUTORIAL_ADVISER";
+					tutorialKey = TUTORIAL_KEY_PREFIX + entry.Key.Substring(TUTORIAL_BODY_KEY_PREFIX.Length);
+				} else {
+					continue;
+				}
+				
+				Log._Debug($"Adding tutorial translation for id {identifier}, key={tutorialKey} value={entry.Value}");
+				Locale.Key key = new Locale.Key() {
+					m_Identifier = identifier,
+					m_Key = tutorialKey
+				};
+
+				if (!locale.Exists(key)) {
+					locale.AddLocalizedString(key, entry.Value);
 				}
 			}
 		}

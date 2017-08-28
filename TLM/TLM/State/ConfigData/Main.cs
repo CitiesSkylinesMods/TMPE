@@ -18,5 +18,21 @@ namespace TrafficManager.State.ConfigData {
 		public int MainMenuX = 85;
 		public int MainMenuY = 60;
 		public bool MainMenuPosLocked = false;
+
+		/// <summary>
+		/// Already displayed tutorial messages
+		/// </summary>
+		public string[] DisplayedTutorialMessages = new string[0];
+
+		/// <summary>
+		/// Determines if tutorial messages shall show up
+		/// </summary>
+		public bool EnableTutorial = true;
+
+		public void AddDisplayedTutorialMessage(string messageKey) {
+			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
+			newMessages.Add(messageKey);
+			DisplayedTutorialMessages = newMessages.ToArray();
+		}
 	}
 }

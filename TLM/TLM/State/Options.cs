@@ -24,6 +24,7 @@ namespace TrafficManager.State {
 		private static UICheckBox instantEffectsToggle = null;
 		private static UICheckBox lockButtonToggle = null;
 		private static UICheckBox lockMenuToggle = null;
+		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -207,6 +208,7 @@ namespace TrafficManager.State {
 			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + ":", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
 			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.Main.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
+			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -581,6 +583,12 @@ namespace TrafficManager.State {
 			Log._Debug($"Menu lock changed to {newValue}");
 			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
 			GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onEnableTutorialsChanged(bool newValue) {
+			Log._Debug($"Enable tutorial messages changed to {newValue}");
+			GlobalConfig.Instance.Main.EnableTutorial = newValue;
 			GlobalConfig.WriteConfig();
 		}
 

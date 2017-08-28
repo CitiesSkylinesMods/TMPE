@@ -377,7 +377,6 @@ namespace TrafficManager.UI.SubTools {
 						VehicleRestrictionsManager.Instance.ToggleAllowedType(segmentId, segmentInfo, laneIndex, laneId, laneInfo, vehicleType, !allowed);
 						stateUpdated = true;
 
-						// TODO use SegmentTraverser
 						if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
 							ApplyRestrictionsToAllSegments(sortedLaneIndex);
 						}

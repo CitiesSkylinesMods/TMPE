@@ -91,6 +91,8 @@ namespace TrafficManager.UI {
 				button.UpdateProperties();
 			}
 			GetMenu().Show();
+			Translation.ReloadTutorialTranslations();
+			TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
 			GetDebugMenu().Show();
 #endif

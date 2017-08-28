@@ -159,33 +159,45 @@ namespace TrafficManager.UI {
 			if (!subTools.TryGetValue(_toolMode, out activeSubTool)) {
 				activeSubTool = null;
 			}
+			bool realToolChange = toolModeChanged;
 
 			if (oldSubTool != null) {
 				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
-					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights)
+					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights) {
 						oldSubTool.Cleanup();
-				} else
+					}
+				} else {
 					oldSubTool.Cleanup();
+				}
 			}
 
 			if (toolModeChanged && activeSubTool != null) {
 				if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
-					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights)
+
+					if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights) {
 						activeSubTool.Cleanup();
-				} else
+					} else {
+						realToolChange = false;
+					}
+				} else {
 					activeSubTool.Cleanup();
+				}
 			}
 
 			SelectedNodeId = 0;
 			SelectedSegmentId = 0;
 
 			//Log._Debug($"Getting activeSubTool for mode {_toolMode} {subTools.Count}");
-			
+
 			//subTools.TryGetValue((int)_toolMode, out activeSubTool);
 			//Log._Debug($"activeSubTool is now {activeSubTool}");
 
-			if (toolModeChanged && activeSubTool != null)
+			if (toolModeChanged && activeSubTool != null) {
 				activeSubTool.OnActivate();
+				if (realToolChange) {
+					ShowAdvisor(activeSubTool.GetTutorialKey());
+				}
+			}
 		}
 
 		// Overridden to disable base class behavior
@@ -445,6 +457,27 @@ namespace TrafficManager.UI {
 			screenPos.y = Screen.height - screenPos.y;
 
 			return screenPos.z >= 0;
+		}
+
+		/// <summary>
+		/// Shows a tutorial message. Must be called by a Unity thread.
+		/// </summary>
+		/// <param name="localeKey"></param>
+		public static void ShowAdvisor(string localeKey) {
+			if (! Translation.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
+				return;
+			}
+
+			Log._Debug($"TrafficManagerTool.ShowAdvisor({localeKey}) called.");
+			TutorialAdvisorPanel tutorialPanel = ToolsModifierControl.advisorPanel;
+			string key = Translation.TUTORIAL_KEY_PREFIX + localeKey;
+			if (GlobalConfig.Instance.Main.DisplayedTutorialMessages.Contains(localeKey)) {
+				tutorialPanel.Refresh(key, "ToolbarIconZoomOutGlobe", string.Empty);
+			} else {
+				tutorialPanel.Show(key, "ToolbarIconZoomOutGlobe", string.Empty, 0f);
+				GlobalConfig.Instance.Main.AddDisplayedTutorialMessage(localeKey);
+				GlobalConfig.WriteConfig();
+			}
 		}
 
 		public override void SimulationStep() {

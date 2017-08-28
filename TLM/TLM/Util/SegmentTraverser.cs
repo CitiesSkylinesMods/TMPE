@@ -99,6 +99,8 @@ namespace TrafficManager.Util {
 		}
 
 		private static void TraverseRec(SegmentGeometry prevSegGeometry, bool exploreStartNode, bool viaInitialStartNode, TraverseDirection direction, TraverseSide side, SegmentStopCriterion stopCrit, SegmentVisitor visitor, HashSet<ushort> visitedSegmentIds) {
+			Log._Debug($"SegmentTraverser: Traversing segment {prevSegGeometry.SegmentId}");
+
 			// collect next segment ids to traverse
 
 			if (direction == TraverseDirection.None) {
@@ -164,6 +166,9 @@ namespace TrafficManager.Util {
 					}
 					break;
 			}
+			nextSegmentIds.Remove(0);
+
+			Log._Debug($"SegmentTraverser: Fetched next segments to traverse: {nextSegmentIds.CollectionToString()}");
 
 			if (nextSegmentIds.Count >= 2 && (stopCrit & SegmentStopCriterion.Junction) != SegmentStopCriterion.None) {
 				Log._Debug($"SegmentTraverser: Stop criterion reached @ {prevSegGeometry.SegmentId}: {nextSegmentIds.Count} connected segments");

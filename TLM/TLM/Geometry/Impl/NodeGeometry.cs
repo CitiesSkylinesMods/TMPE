@@ -293,7 +293,7 @@ namespace TrafficManager.Geometry.Impl {
 		}
 
 		internal void NotifyObservers() {
-			Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
+			//Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
 
 			List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<NodeGeometry> observer in myObservers) {

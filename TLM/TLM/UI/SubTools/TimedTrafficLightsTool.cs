@@ -513,6 +513,7 @@ namespace TrafficManager.UI.SubTools {
 							_stepMaxValue = oldStepMaxValue;
 
 						if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
+							TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
 							if (_stepMinValue < 0)
 								_stepMinValue = 0;
 							if (_stepMaxValue <= 0)
@@ -542,6 +543,7 @@ namespace TrafficManager.UI.SubTools {
 					} else {
 						if (_timedEditStep < 0) {
 							if (GUILayout.Button(Translation.GetString("Add_step"))) {
+								TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
 								_timedPanelAdd = true;
 								nodeSelectionLocked = true;
 								_timedViewedStep = -1;
@@ -628,6 +630,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					if (GUILayout.Button(Translation.GetString("Copy"))) {
+						TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
 						nodeIdToCopy = SelectedNodeIds[0];
 						MainTool.SetToolMode(ToolMode.TimedLightsCopyLights);
 					}
@@ -644,11 +647,13 @@ namespace TrafficManager.UI.SubTools {
 					GUILayout.Space(30);
 
 					if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
+						TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
 						MainTool.SetToolMode(ToolMode.TimedLightsAddNode);
 					}
 
 					if (SelectedNodeIds.Count > 1) {
 						if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
+							TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
 							MainTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
 						}
 					}
