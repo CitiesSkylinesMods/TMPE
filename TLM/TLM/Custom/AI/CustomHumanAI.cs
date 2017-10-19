@@ -71,7 +71,7 @@ namespace TrafficManager.Custom.AI {
 						this.Spawn(instanceID, ref instanceData);
 						instanceData.m_pathPositionIndex = 255;
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 						// NON-STOCK CODE START (transferred from ResidentAI.PathfindSuccess)
 						if (citizenId != 0 && (Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags & (Citizen.Flags.Tourist | Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.MovingIn) {
 							StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
@@ -99,7 +99,7 @@ namespace TrafficManager.Custom.AI {
 							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): HARD path-finding failure for citizen instance {instanceID} (finalPathState={finalPathState}). Path: {instanceData.m_path} -- calling HumanAI.PathfindFailure");
 #endif
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 						Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
 						instanceData.m_path = 0u;
 						this.PathfindFailure(instanceID, ref instanceData);
@@ -111,7 +111,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 						// path mode has been updated, repeat path-finding
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 						this.InvalidPath(instanceID, ref instanceData);
 						return;
 				}
@@ -168,7 +168,7 @@ namespace TrafficManager.Custom.AI {
 					extInstance.Reset();
 
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 					this.InvalidPath(instanceID, ref instanceData);
 					return true;
 				} else {
@@ -190,7 +190,7 @@ namespace TrafficManager.Custom.AI {
 								Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
 								instanceData.m_path = 0;
 							}
-							instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
+							instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Cheering | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
 							if (!this.StartPathFind(instanceID, ref instanceData)) {
 								instanceData.Unspawn(instanceID);
 								extInstance.Reset();
@@ -204,7 +204,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 							// repeat path-finding
 							instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-							instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
+							instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 							this.InvalidPath(instanceID, ref instanceData);
 							return true;
 

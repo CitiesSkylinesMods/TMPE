@@ -1,9 +1,14 @@
 # Cities: Skylines - Traffic Manager: *President Edition*
-A work-in-progress modification for **Cities: Skylines** to add additional traffic control.
+A modification for **Cities: Skylines** to add additional traffic control.
 
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.4, 10/19/2017
+- Updated for game version 1.9.0-f5
+- Added possibility to add priority signs at multiple junctions at once (press Shift)
+- Added tutorials (can be disabled in the options window globally)
+
 1.10.3, 08/18/2017
 - Bugfix: Setting unlimited speed limit causes vehicles to crawl at low speed (thanks to @sethisuwan for reporting this issue)
 - Bugfix: Vehicle-separated traffic lights do not show up for trams & monorails (thanks to @thecitiesdork for reporting this issue)

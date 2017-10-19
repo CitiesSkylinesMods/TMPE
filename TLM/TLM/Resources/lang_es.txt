@@ -183,3 +183,36 @@ Strict Strict
 Show_path-find_stats Show path-find stats
 Remove_this_vehicle Remove this vehicle
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights
+Enable_tutorial_messages Enable tutorial messages
+TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
+TMPE_TUTORIAL_BODY_MainMenu Welcome to TM:PE!\n\nUser manual: http://www.viathinksoft.de/tmpe
+TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Junction restrictions
+TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Control how vehicles and pedestrians shall behave at junctions.\n\n1. Click on the junction you want to manage\n2. Click on the appropriate icon to toggle restrictions.\n\nAvailable restrictions:\n- Allow/Disallow lane changing for vehicle going straight on\n- Allow/Disallow u-turns\n- Allow/Disallow vehicles to enter a blocked junction\n- Allow/disallow pedestrians to cross the street
+TMPE_TUTORIAL_HEAD_LaneArrowTool Lane arrows
+TMPE_TUTORIAL_BODY_LaneArrowTool Restrict the set of directions that vehicles are allowed to take.\n\n1. Click on a road segment next to a junction\n2. Select the allowed directions.
+TMPE_TUTORIAL_HEAD_LaneConnectorTool Lane connector
+TMPE_TUTORIAL_BODY_LaneConnectorTool Connect two or more lanes with each other in order to tell which lanes vehicles may use.\n\n1. Click on a lane changing point (grey circles).\n2. Click on a source marker.\n3. Click on a target marker to connect it with the source marker.\n4. Click anywhere with your secondary mouse button to return back to source marker selection.\n\nAvailable hotkeys:\n\n- Delete or Backspace: Remove all lane connections\n- Shift + S: Cycle through all available "stay on lane" patterns
+TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Manual traffic lights
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Try out custom traffic lights.\n\n1. Click on a junction\n2. Use the tool to control traffic lights.
+TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parking restrictions
+TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Control where parking is allowed.\n\nClick on the "P" icons.\n\nAvailable hotkeys:\n\n- Shift: Hold while clicking to apply parking restrictions to multiple road segments at once
+TMPE_TUTORIAL_HEAD_PrioritySignsTool Priority signs
+TMPE_TUTORIAL_BODY_PrioritySignsTool Define priority rules at junctions.\n\n1. Click on a junction.\n2. Click on the blank spots to cycle through the available priority signs (priority road, yield, stop).\n\nAvailable hotkeys:\n\n- Shift: Hold Shift to add priority signs to multiple road segments at once. Click again while holding Shift to cycle through all available patterns.
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool Speed limits
+TMPE_TUTORIAL_BODY_SpeedLimitsTool Set up speed restrictions.\n\n1. In the window, click on the speed limit you want to set.\n2. Click on a road segment to change the speed limit.\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply speed limits to multiple road segments at once.\n- Ctrl: Hold Ctrl to control speed limits per individual lane.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Timed traffic lights
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Set up timed traffic lights.\n\n1. Click on a junction.\n2. In the window, click on "Add step".\n3. Click on the overlay elements to set desired traffic lights states.\n4. Click on "Add".\n5. Repeat as desired.
+TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Toggle traffic lights
+TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Add or remove traffic lights to/from junctions.\n\nClick on a junction to toggle traffic lights.
+TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
+TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
