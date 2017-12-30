@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using ColossalFramework.UI;
 using CSUtil.Commons;
 using GenericGameBridge.Service;
 using System;
@@ -61,7 +62,6 @@ namespace TrafficManager.UI.SubTools {
 
 		public override void OnToolGUI(Event e) {
 			//base.OnToolGUI(e);
-
 			_cursorInSecondaryPanel = false;
 
 			if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
@@ -87,11 +87,13 @@ namespace TrafficManager.UI.SubTools {
 			};
 
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
-			var screenPos = Camera.main.WorldToScreenPoint(nodePos);
-			screenPos.y = Screen.height - screenPos.y;
-			//Log._Debug($"node pos of {SelectedNodeId}: {nodePos.ToString()} {screenPos.ToString()}");
-			if (screenPos.z < 0)
+
+			Vector3 screenPos;
+			bool visible = MainTool.WorldToScreenPoint(nodePos, out screenPos);
+
+			if (!visible)
 				return;
+
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = nodePos - camPos;
 

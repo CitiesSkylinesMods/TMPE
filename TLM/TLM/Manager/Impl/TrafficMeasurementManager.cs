@@ -214,13 +214,12 @@ namespace TrafficManager.Manager.Impl {
 
 			// we use integer division here because it's faster
 			if (currentBuf > 0) {
-                uint laneVehicleSpeedLimit = (uint)((Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, laneId, laneInfo) : laneInfo.m_speedLimit) * 8f);
-
-                if (laneVehicleSpeedLimit == 0) // DivideByZeroException hotfix if custom speed limit is lower than 6.25km/h => 0.125(ingame speed limit)
-                {
-                    laneVehicleSpeedLimit = 1;
-                }
-                curRelSpeed = (ushort)Math.Min((uint)MAX_REL_SPEED, ((laneTrafficData[segmentId][laneIndex].accumulatedSpeeds * (uint)REF_REL_SPEED) / currentBuf) / laneVehicleSpeedLimit); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+				uint laneVehicleSpeedLimit = (uint)((Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, laneId, laneInfo) : laneInfo.m_speedLimit) * 8f);
+				if (laneVehicleSpeedLimit <= 0) {
+					// fallback: custom lanes may not have valid values set for speed limit
+					laneVehicleSpeedLimit = 1;
+				}
+				curRelSpeed = (ushort)Math.Min((uint)MAX_REL_SPEED, ((laneTrafficData[segmentId][laneIndex].accumulatedSpeeds * (uint)REF_REL_SPEED) / currentBuf) / laneVehicleSpeedLimit); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
 			}
 			return curRelSpeed;
 		}

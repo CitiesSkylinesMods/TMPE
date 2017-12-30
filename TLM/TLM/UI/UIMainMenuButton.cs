@@ -24,7 +24,8 @@ namespace TrafficManager.UI {
 			// Place the button.
 			GlobalConfig config = GlobalConfig.Instance;
 			Vector3 pos = new Vector3(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY);
-			VectorUtil.ClampPosToScreen(ref pos);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			VectorUtil.ClampPosToScreen(ref pos, resolution);
 			absolutePosition = pos;
 
 			// Set the atlas and background/foreground

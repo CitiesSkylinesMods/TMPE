@@ -82,8 +82,10 @@ namespace TrafficManager.UI.SubTools {
 					if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
 						continue; // do not draw if too distant
 
-					Vector3 screenPos = Camera.main.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center);
-					if (screenPos.z < 0)
+					Vector3 screenPos;
+					bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+
+					if (!visible)
 						continue;
 
 					if (!parkingManager.MayHaveParkingRestriction((ushort)segmentId))
@@ -99,9 +101,10 @@ namespace TrafficManager.UI.SubTools {
 			bool handleHovered = false;
 			bool clicked = !viewOnly && MainTool.CheckClicked();
 			foreach (ushort segmentId in currentlyVisibleSegmentIds) {
-				Vector3 screenPos = Camera.main.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center);
-				screenPos.y = Screen.height - screenPos.y;
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+
+				if (!visible)
 					continue;
 
 				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
@@ -139,8 +142,11 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
-				var screenPos = Camera.main.WorldToScreenPoint(e.Value);
-				screenPos.y = Screen.height - screenPos.y;
+				Vector3 screenPos;
+				bool visible = MainTool.WorldToScreenPoint(e.Value, out screenPos);
+
+				if (!visible)
+					continue;
 
 				float zoom = 1.0f / (e.Value - camPos).magnitude * 100f * MainTool.GetBaseZoom();
 				float size = (viewOnly ? 0.8f : 1f) * signSize * zoom;

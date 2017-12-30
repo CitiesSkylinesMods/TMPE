@@ -127,8 +127,10 @@ namespace TrafficManager.UI.SubTools {
 					if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
 						continue; // do not draw if too distant
 
-					Vector3 screenPos = Camera.main.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center);
-					if (screenPos.z < 0)
+					Vector3 screenPos;
+					bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+					
+					if (! visible)
 						continue;
 
 					if (!speedLimitManager.MayHaveCustomSpeedLimits((ushort)segmentId, ref netManager.m_segments.m_buffer[segmentId]))
@@ -143,9 +145,10 @@ namespace TrafficManager.UI.SubTools {
 
 			bool handleHovered = false;
 			foreach (ushort segmentId in currentlyVisibleSegmentIds) {
-				Vector3 screenPos = Camera.main.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center);
-				screenPos.y = Screen.height - screenPos.y;
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+
+				if (!visible)
 					continue;
 
 				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
@@ -417,9 +420,9 @@ namespace TrafficManager.UI.SubTools {
 						directions.Add(laneInfo.m_finalDirection);
 					}
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], ref camPos, ref zero, f, ref xu, ref yu, x, 0, speedLimitSignSize, !viewOnly, 0.5f, 0.8f);
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly, 0.5f, 0.8f);
 					if (!viewOnly && !onlyMonorailLanes && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
-						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], ref camPos, ref zero, f, ref xu, ref yu, x, 1, speedLimitSignSize, 0.5f);
+						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], camPos, zero, f, xu, yu, x, 1, speedLimitSignSize, 0.5f);
 					}
 					if (hoveredHandle)
 						hovered = true;
@@ -460,8 +463,11 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
-					var screenPos = Camera.main.WorldToScreenPoint(e.Value);
-					screenPos.y = Screen.height - screenPos.y;
+					Vector3 screenPos;
+					bool visible = MainTool.WorldToScreenPoint(e.Value, out screenPos);
+
+					if (!visible)
+						continue;
 
 					float zoom = 1.0f / (e.Value - camPos).magnitude * 100f * MainTool.GetBaseZoom();
 					float size = (viewOnly ? 0.8f : 1f) * speedLimitSignSize * zoom;

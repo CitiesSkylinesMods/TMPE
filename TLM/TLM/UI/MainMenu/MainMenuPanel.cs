@@ -39,6 +39,10 @@ namespace TrafficManager.UI.MainMenu {
 		public const int HSPACING = 5;
 		public const int TOP_BORDER = 25;
 		public const int BUTTON_SIZE = 30;
+
+		public const int DEFAULT_MENU_X = 85;
+		public const int DEFAULT_MENU_Y = 60;
+
 		public const int MENU_WIDTH = 215;
 		public const int MENU_HEIGHT = 95;
 
@@ -82,7 +86,8 @@ namespace TrafficManager.UI.MainMenu {
 
 			GlobalConfig config = GlobalConfig.Instance;
 			Vector3 pos = new Vector3(config.Main.MainMenuX, config.Main.MainMenuY);
-			VectorUtil.ClampPosToScreen(ref pos);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			VectorUtil.ClampPosToScreen(ref pos, resolution);
 			absolutePosition = pos;
 
 			var dragHandler = new GameObject("TMPE_Menu_DragHandler");

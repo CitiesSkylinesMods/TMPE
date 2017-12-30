@@ -72,7 +72,8 @@ namespace TrafficManager.UI {
 			height = 30;
 
 			//height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
-			relativePosition = new Vector3(1450f, 65f);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			relativePosition = new Vector3(resolution.x - Translation.getMenuWidth() - 30f, 65f);
 
 			title = AddUIComponent<UILabel>();
 			title.text = "Version " + TrafficManagerMod.Version;
@@ -172,7 +173,7 @@ namespace TrafficManager.UI {
 			_recalcLinesButton = _createButton("Recalculate transport lines", y, clickRecalcLines);
 			y += 40;
 			height += 40;
-			_checkDetoursButton = _createButton("Check transport lines", y, clickCheckDetours);
+			_checkDetoursButton = _createButton("Print screen resolution", y, clickCheckDetours);
 			y += 40;
 			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
@@ -299,9 +300,14 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickCheckDetours(UIComponent component, UIMouseEventParameter eventParam) {
-			SimulationManager.instance.AddAction(() => {
+			Log.Info($"Screen.width: {Screen.width} Screen.height: {Screen.height}");
+			Log.Info($"Screen.currentResolution.width: {Screen.currentResolution.width} Screen.currentResolution.height: {Screen.currentResolution.height}");
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			Log.Info($"UIView.screenResolution.width: {resolution.x} UIView.screenResolution.height: {resolution.y}");
+
+			/*SimulationManager.instance.AddAction(() => {
 				PrintTransportStats();
-			});
+			});*/
 		}
 
 		public static void PrintTransportStats() {

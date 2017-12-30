@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -45,9 +46,10 @@ namespace TrafficManager.UI {
 		public virtual void OnSecondaryClickOverlay() { }
 		public virtual void OnToolGUI(Event e) {
 			//set up scaling
-			float rx = Screen.width / nativeWidth;
-			float ry = Screen.height / nativeHeight;
-			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));
+			/*Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			float rx = resolution.x / nativeWidth;
+			float ry = resolution.y / nativeHeight;
+			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));*/
 		}
 		public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
 		public virtual void Initialize() { }
@@ -67,8 +69,9 @@ namespace TrafficManager.UI {
 		}
 
 		protected void DragWindow(ref Rect window) {
-			window.x = Mathf.Clamp(window.x, 0, Screen.width - window.width);
-			window.y = Mathf.Clamp(window.y, 0, Screen.height - window.height);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			window.x = Mathf.Clamp(window.x, 0, resolution.x - window.width);
+			window.y = Mathf.Clamp(window.y, 0, resolution.y - window.height);
 
 			bool primaryMouseDown = Input.GetMouseButton(0);
 			if (primaryMouseDown) {

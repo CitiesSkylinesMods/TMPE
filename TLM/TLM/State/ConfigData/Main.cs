@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.UI.MainMenu;
 
 namespace TrafficManager.State.ConfigData {
 	public class Main {
@@ -15,8 +16,8 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Main menu position
 		/// </summary>
-		public int MainMenuX = 85;
-		public int MainMenuY = 60;
+		public int MainMenuX = MainMenuPanel.DEFAULT_MENU_X;
+		public int MainMenuY = MainMenuPanel.DEFAULT_MENU_Y;
 		public bool MainMenuPosLocked = false;
 
 		/// <summary>

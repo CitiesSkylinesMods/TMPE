@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
+using ColossalFramework.UI;
 using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
@@ -133,10 +134,10 @@ namespace TrafficManager.UI.SubTools {
 				var segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
 				Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
-				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
-				screenPos.y = Screen.height - screenPos.y;
+				Vector3 screenPos;
+				bool visible = MainTool.WorldToScreenPoint(centerPos, out screenPos);
 
-				if (screenPos.z < 0)
+				if (!visible)
 					continue;
 
 				if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
@@ -282,10 +283,12 @@ namespace TrafficManager.UI.SubTools {
 
 			Vector3 center = segment.m_bounds.center;
 
-			var screenPos = Camera.main.WorldToScreenPoint(center);
-			screenPos.y = Screen.height - screenPos.y;
-			if (screenPos.z < 0)
+			Vector3 screenPos;
+			bool visible = MainTool.WorldToScreenPoint(center, out screenPos);
+
+			if (!visible)
 				return false;
+
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = center - camPos;
 
@@ -347,7 +350,8 @@ namespace TrafficManager.UI.SubTools {
 #if DEBUGx
 				Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
-				var labelScreenPos = Camera.main.WorldToScreenPoint(labelCenter);
+				Vector3 labelScreenPos;
+				bool visible = MainTool.WorldToScreenPoint(labelCenter, out labelScreenPos);
 				labelScreenPos.y = Screen.height - labelScreenPos.y;
 				diff = labelCenter - camPos;
 
@@ -367,7 +371,7 @@ namespace TrafficManager.UI.SubTools {
 					if (allowed && viewOnly)
 						continue; // do not draw allowed vehicles in view-only mode
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.VehicleRestrictionTextures[vehicleType][allowed], ref camPos, ref zero, f, ref xu, ref yu, x, y, vehicleRestrictionsSignSize, !viewOnly, 0.5f, 0.8f);
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.VehicleRestrictionTextures[vehicleType][allowed], camPos, zero, f, xu, yu, x, y, vehicleRestrictionsSignSize, !viewOnly, 0.5f, 0.8f);
 					if (hoveredHandle)
 						hovered = true;
 
