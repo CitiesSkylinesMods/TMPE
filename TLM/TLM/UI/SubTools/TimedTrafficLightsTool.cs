@@ -14,6 +14,7 @@ using TrafficManager.Traffic;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
+using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
 	public class TimedTrafficLightsTool : SubTool {
@@ -1067,10 +1068,12 @@ namespace TrafficManager.UI.SubTools {
 					if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 						continue; // do not draw if too distant
 
-					var nodeScreenPosition = Camera.main.WorldToScreenPoint(nodePositionVector3);
-					nodeScreenPosition.y = Screen.height - nodeScreenPosition.y;
-					if (nodeScreenPosition.z < 0)
+					Vector3 nodeScreenPosition;
+					bool visible = MainTool.WorldToScreenPoint(nodePositionVector3, out nodeScreenPosition);
+
+					if (!visible)
 						continue;
+					
 					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 					var size = 120f * zoom;
 
@@ -1098,10 +1101,10 @@ namespace TrafficManager.UI.SubTools {
 
 				var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-				var nodeScreenPos = Camera.main.WorldToScreenPoint(nodePos);
-				nodeScreenPos.y = Screen.height - nodeScreenPos.y;
+				Vector3 nodeScreenPos;
+				bool nodeVisible = MainTool.WorldToScreenPoint(nodePos, out nodeScreenPos);
 
-				if (nodeScreenPos.z < 0)
+				if (!nodeVisible)
 					continue;
 
 				var diff = nodePos - Camera.main.transform.position;
@@ -1135,8 +1138,11 @@ namespace TrafficManager.UI.SubTools {
 						segmentLightPos.z += Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_endDirection.z * offset;
 					}
 
-					var screenPos = Camera.main.WorldToScreenPoint(segmentLightPos);
-					screenPos.y = Screen.height - screenPos.y;
+					Vector3 screenPos;
+					bool segmentLightVisible = MainTool.WorldToScreenPoint(segmentLightPos, out screenPos);
+
+					if (!segmentLightVisible)
+						continue;
 
 					var guiColor = GUI.color;
 

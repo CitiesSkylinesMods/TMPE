@@ -16,6 +16,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
+using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
 	public class JunctionRestrictionsTool : SubTool {
@@ -84,10 +85,10 @@ namespace TrafficManager.UI.SubTools {
 				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 					continue; // do not draw if too distant
 
-				Vector3 screenPos = Camera.main.WorldToScreenPoint(nodePos);
-				screenPos.y = Screen.height - screenPos.y;
+				Vector3 screenPos;
+				bool visible = MainTool.WorldToScreenPoint(nodePos, out screenPos);
 
-				if (screenPos.z < 0)
+				if (! visible)
 					continue;
 
 				bool viewOnlyNode = true;
@@ -299,8 +300,14 @@ namespace TrafficManager.UI.SubTools {
 		private void DrawSign(bool viewOnly, ref Vector3 camPos, ref Vector3 xu, ref Vector3 yu, float f, ref Vector3 zero, int x, int y, ref Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
 			Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
-			var signScreenPos = Camera.main.WorldToScreenPoint(signCenter);
-			signScreenPos.y = Screen.height - signScreenPos.y;
+			Vector3 signScreenPos;
+			bool visible = MainTool.WorldToScreenPoint(signCenter, out signScreenPos);
+
+			if (!visible) {
+				hoveredHandle = false;
+				return;
+			}
+
 			Vector3 diff = signCenter - camPos;
 
 			var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();

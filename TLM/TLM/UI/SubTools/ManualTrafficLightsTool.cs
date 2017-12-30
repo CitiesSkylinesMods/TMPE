@@ -13,6 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
+using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
 	public class ManualTrafficLightsTool : SubTool {
@@ -86,10 +87,10 @@ namespace TrafficManager.UI.SubTools {
 					if (segmentLights == null)
 						continue;
 
-					var screenPos = Camera.main.WorldToScreenPoint(position);
-					screenPos.y = Screen.height - screenPos.y;
+					Vector3 screenPos;
+					bool visible = MainTool.WorldToScreenPoint(position, out screenPos);
 
-					if (screenPos.z < 0)
+					if (!visible)
 						continue;
 
 					var diff = position - Camera.main.transform.position;

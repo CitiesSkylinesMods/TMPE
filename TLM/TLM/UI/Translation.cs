@@ -181,7 +181,7 @@ namespace TrafficManager.UI {
 					continue;
 				}
 				
-				Log._Debug($"Adding tutorial translation for id {identifier}, key={tutorialKey} value={entry.Value}");
+				//Log._Debug($"Adding tutorial translation for id {identifier}, key={tutorialKey} value={entry.Value}");
 				Locale.Key key = new Locale.Key() {
 					m_Identifier = identifier,
 					m_Key = tutorialKey

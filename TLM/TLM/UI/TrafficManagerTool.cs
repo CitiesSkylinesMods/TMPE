@@ -64,7 +64,9 @@ namespace TrafficManager.UI {
 		}
 
 		internal static Rect MoveGUI(Rect rect) {
-			return new Rect(85f + 50f + MainMenuPanel.MENU_WIDTH + rect.x, 60f + 20f + rect.y, rect.width, rect.height);
+			// x := main menu x + rect.x
+			// y := main menu y + main menu height + rect.y
+			return new Rect(MainMenuPanel.DEFAULT_MENU_X + rect.x, MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.MENU_HEIGHT + rect.y, rect.width, rect.height);
 		}
 
 		internal bool IsNodeWithinViewDistance(ushort nodeId) {
@@ -92,11 +94,11 @@ namespace TrafficManager.UI {
 
 		internal static float AdaptWidth(float originalWidth) {
 			return originalWidth;
-			//return originalWidth * ((float)Screen.currentResolution.width / 1920f);
+			//return originalWidth * ((float)Screen.width / 1920f);
 		}
 
 		internal float GetBaseZoom() {
-			return (float)Screen.currentResolution.height / 1200f;
+			return (float)Screen.height / 1200f;
 		}
 
 		internal void Initialize() {
@@ -372,60 +374,60 @@ namespace TrafficManager.UI {
 			Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(cameraInfo, color, position, width, position.y - 100f, position.y + 100f, false, alpha);
 		}
 
-		public void DrawStaticSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public void DrawStaticSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
 			float size, float alpha) {
-			DrawGenericSquareOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, ref xu, ref yu, x, y, size, false, alpha);
+			DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, false, alpha);
 		}
 
-		public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
 			float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericSquareOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, ref xu, ref yu, x, y, size, true, defaultAlpha, hoverAlpha);
+			return DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, true, defaultAlpha, hoverAlpha);
 		}
 
-		public bool DrawGenericSquareOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellSize, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public bool DrawGenericSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
 			float size, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
-			return DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellSize, cellSize, ref xu, ref yu, x, y, size, size, canHover, defaultAlpha, hoverAlpha);
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellSize, cellSize, xu, yu, x, y, size, size, canHover, defaultAlpha, hoverAlpha);
 		}
 
-		public void DrawStaticOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public void DrawStaticOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
 			float width, float height, float alpha) {
-			DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellWidth, cellHeight, ref xu, ref yu, x, y, width, height, false, alpha);
+			DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, false, alpha);
 		}
 
-		public bool DrawHoverableOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public bool DrawHoverableOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
 			float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayGridTexture(texture, ref camPos, ref gridOrigin, cellWidth, cellHeight, ref xu, ref yu, x, y, width, height, true, defaultAlpha, hoverAlpha);
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, true, defaultAlpha, hoverAlpha);
 		}
 
-		public bool DrawGenericOverlayGridTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 gridOrigin, float cellWidth, float cellHeight, ref Vector3 xu, ref Vector3 yu, uint x, uint y,
+		public bool DrawGenericOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
 			float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
 			Vector3 worldPos = gridOrigin + cellWidth * (float)x * xu + cellHeight * (float)y * yu; // grid position in game coordinates
-			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, canHover, defaultAlpha, hoverAlpha);
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover, defaultAlpha, hoverAlpha);
 		}
 
-		public void DrawStaticSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, float alpha) {
-			DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, false, alpha);
+		public void DrawStaticSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float alpha) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false, alpha);
 		}
 
-		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true, defaultAlpha, hoverAlpha);
 		}
 
-		public bool DrawGenericSquareOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float size, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
-			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, size, size, canHover, defaultAlpha, hoverAlpha);
+		public bool DrawGenericSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover, defaultAlpha, hoverAlpha);
 		}
 
-		public void DrawStaticOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, float alpha) {
-			DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, false, alpha);
+		public void DrawStaticOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float alpha) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false, alpha);
 		}
 
-		public bool DrawHoverableOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, ref camPos, ref worldPos, width, height, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float defaultAlpha, float hoverAlpha) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true, defaultAlpha, hoverAlpha);
 		}
 
-		public bool DrawGenericOverlayTexture(Texture2D texture, ref Vector3 camPos, ref Vector3 worldPos, float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+		public bool DrawGenericOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
 			Vector3 screenPos;
-			if (! WorldToScreenPoint(ref worldPos, out screenPos)) {
+			if (! WorldToScreenPoint(worldPos, out screenPos)) {
 				return false;
 			}
 
@@ -452,7 +454,13 @@ namespace TrafficManager.UI {
 			return hovered;
 		}
 
-		public bool WorldToScreenPoint(ref Vector3 worldPos, out Vector3 screenPos) {
+		/// <summary>
+		/// Transforms a world point into a screen point
+		/// </summary>
+		/// <param name="worldPos"></param>
+		/// <param name="screenPos"></param>
+		/// <returns></returns>
+		public bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
 			screenPos = Camera.main.WorldToScreenPoint(worldPos);
 			screenPos.y = Screen.height - screenPos.y;
 
@@ -635,8 +643,14 @@ namespace TrafficManager.UI {
 		private void _guiLanes(ushort segmentId, ref NetSegment segment, ref NetInfo segmentInfo) {
 			GUIStyle _counterStyle = new GUIStyle();
 			Vector3 centerPos = segment.m_bounds.center;
-			var screenPos = Camera.main.WorldToScreenPoint(centerPos);
-			screenPos.y = Screen.height - screenPos.y - 200;
+			Vector3 screenPos;
+			bool visible = WorldToScreenPoint(centerPos, out screenPos);
+			
+			if (! visible) {
+				return;
+			}
+
+			screenPos.y -= 200;
 
 			if (screenPos.z < 0)
 				return;
@@ -742,10 +756,10 @@ namespace TrafficManager.UI {
 				var segmentInfo = segments.m_buffer[i].Info;
 
 				Vector3 centerPos = segments.m_buffer[i].m_bounds.center;
-				var screenPos = Camera.main.WorldToScreenPoint(centerPos);
-				screenPos.y = Screen.height - screenPos.y;
+				Vector3 screenPos;
+				bool visible = WorldToScreenPoint(centerPos, out screenPos);
 
-				if (screenPos.z < 0)
+				if (! visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -820,15 +834,16 @@ namespace TrafficManager.UI {
 		private void _guiNodes() {
 			GUIStyle _counterStyle = new GUIStyle();
 			Array16<NetNode> nodes = Singleton<NetManager>.instance.m_nodes;
+			
 			for (int i = 1; i < nodes.m_size; ++i) {
 				if ((nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
 					continue;
 
 				Vector3 pos = nodes.m_buffer[i].m_position;
-				var screenPos = Camera.main.WorldToScreenPoint(pos);
-				screenPos.y = Screen.height - screenPos.y;
-
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = WorldToScreenPoint(pos, out screenPos);
+				
+				if (! visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -863,16 +878,17 @@ namespace TrafficManager.UI {
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			
 			for (int i = 1; i < vehicles.m_size; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
 					continue;
 
 				Vector3 vehPos = vehicle.GetSmoothPosition((ushort)i);
-				var screenPos = Camera.main.WorldToScreenPoint(vehPos);
-				screenPos.y = Screen.height - screenPos.y;
-
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = WorldToScreenPoint(vehPos, out screenPos);
+				
+				if (! visible)
 					continue;
 
 				var camPos = simManager.m_simulationView.m_position;
@@ -924,10 +940,10 @@ namespace TrafficManager.UI {
 #endif
 
 				Vector3 pos = citizenInstance.GetSmoothPosition((ushort)i);
-				var screenPos = Camera.main.WorldToScreenPoint(pos);
-				screenPos.y = Screen.height - screenPos.y;
-
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = WorldToScreenPoint(pos, out screenPos);
+				
+				if (! visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -968,10 +984,10 @@ namespace TrafficManager.UI {
 					continue;
 
 				Vector3 pos = building.m_position;
-				var screenPos = Camera.main.WorldToScreenPoint(pos);
-				screenPos.y = Screen.height - screenPos.y;
-
-				if (screenPos.z < 0)
+				Vector3 screenPos;
+				bool visible = WorldToScreenPoint(pos, out screenPos);
+				
+				if (! visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;

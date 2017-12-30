@@ -17,6 +17,7 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 using static TrafficManager.Util.SegmentTraverser;
+using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -231,7 +232,7 @@ namespace TrafficManager.UI.SubTools {
 						});
 
 						Vector3 signScreenPos;
-						if (! MainTool.WorldToScreenPoint(ref signPos, out signScreenPos)) {
+						if (! MainTool.WorldToScreenPoint(signPos, out signScreenPos)) {
 							continue;
 						}
 
@@ -244,7 +245,7 @@ namespace TrafficManager.UI.SubTools {
 							showRemoveButton = true;
 						}
 
-						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], ref camPos, ref signPos, 90f, !viewOnly, 0.5f, 0.8f) && clicked) {
+						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], camPos, signPos, 90f, !viewOnly, 0.5f, 0.8f) && clicked) {
 							PriorityType? newSign = null;
 							switch (sign) {
 								case PriorityType.Main:
@@ -273,7 +274,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					// draw remove button and handle click
-					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, ref camPos, ref nodePos, 90f, 0.5f, 0.8f) && clicked) {
+					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, camPos, nodePos, 90f, 0.5f, 0.8f) && clicked) {
 						prioMan.RemovePrioritySignsFromNode(nodeId);
 						Log._Debug($"PrioritySignsTool.ShowGUI: Removed priority signs from node {nodeId}");
 						removedNodeId = nodeId;
