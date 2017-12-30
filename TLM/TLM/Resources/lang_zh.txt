@@ -57,9 +57,9 @@ Enable_Advanced_Vehicle_AI 启用加强版车辆AI
 Vehicles_may_enter_blocked_junctions 堵车时车辆可以进入路口加塞
 All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道行驶方向
 Busses_may_ignore_lane_arrows 公交车可忽略车道行驶方向
-Reckless_driving 违规驾驶（功能测试中）
-TMPE_Title 交通管理:总统版(都市天际线中文网翻译）
-Settings_are_defined_for_each_savegame_separately 都市天际线中文网温馨提示: 设置项目自动跳出关闭就好，欢迎订阅“天吧简体中文”最接地气的中文，MOD设置说明文档地址：
+Reckless_driving 违规驾驶
+TMPE_Title 交通管理:总统版(贴吧简体中文翻译）
+Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置存档,以后就不用再重复设置)
 Simulation_accuracy 模拟真实度（高真实模拟会影响性能）
 Enable_highway_specific_lane_merging/splitting_rules 实行高速公路特定的车道合流/分离规则
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 司机习惯变换车道（仅适用于加强版AI启动时)
@@ -83,7 +83,7 @@ Create_group 创建连锁群组
 Delete_group 删除连锁群组
 Add_zoning 添加分区
 Remove_zoning 删除分区
-Lane_Arrow_Changer_Disabled 因为使用了高速道路规则系统，所以不能改变这条车道的箭头。
+Lane_Arrow_Changer_Disabled_Highway 因为使用了高速道路规则系统，所以不能改变这条车道的箭头。
 Add_junction_to_timed_light 添加一路口纳入定时
 Remove_junction_from_timed_light 删除一路口定时连锁
 Select_junction 选择一道路路口
@@ -114,6 +114,7 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction 所选择的�
 Advanced_AI_cannot_be_activated 高级车辆AI无法启动
 The_Advanced_Vehicle_AI_cannot_be_activated 高级车辆AI无法启动，是因为您所使用了其他车辆控制模组正使用中（例如 Improved AI 或 Traffic++）
 Enable_dynamic_path_calculation 启用动态路径计算
+Changes_made_with_this_tool_will_take_full_effect_after_some_minutes 此工具所做更改需要几分钟生效
 Lane_Arrow_Changer_Disabled_Connection 贴吧简体中文汉化温馨提示:因为你已经使用手动创建道路连接该车道方向，在使用车道箭头功能是禁止的，使用车道连接器后请不要重复使用车道箭头修改功能.
 Lane_connector 车道连接工具
 Connected_lanes 已连接车道
@@ -149,7 +150,7 @@ Reload_global_configuration 重新加载所有设定
 Reset_global_configuration 重置所有设定
 General 常规
 Gameplay 游戏
-Overlays 显示选项
+Overlays 重叠
 Realistic_speeds 真实的速度
 Evacuation_busses_may_ignore_traffic_rules 应急疏散巴士可忽略交通规则
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 应急疏散巴士仅可用于到达避难所
@@ -160,7 +161,7 @@ In_case_of_emergency 在紧急情况下
 Show_lane-wise_speed_limits 开启道路各个车道限速设置
 Language 语言设置
 Game_language 自动识别游戏语言
-requires_game_restart 需重新启动方可生效，请订阅“天吧简体中文”
+requires_game_restart 需重新启动方可生效
 Customizations_come_into_effect_instantaneously 订制模拟真实度开启选项则将会立即生效
 Options 选项
 Lock_main_menu_button_position 锁定主菜单按钮位置
