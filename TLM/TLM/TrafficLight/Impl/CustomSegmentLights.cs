@@ -423,6 +423,12 @@ namespace TrafficManager.TrafficLight.Impl {
 #endif
 			RoadBaseAI.TrafficLightState autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
 
+			ItemClass prevConnectionClass = null;
+			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate (ushort prevSegId, ref NetSegment segment) {
+				prevConnectionClass = segment.Info.GetConnectionClass();
+				return true;
+			});
+
 			if (!segmentEndGeometry.IncomingOneWay) {
 				// query straight segments
 				foreach (ushort otherSegmentId in segmentEndGeometry.IncomingStraightSegments) {
@@ -438,6 +444,29 @@ namespace TrafficManager.TrafficLight.Impl {
 #if DEBUGTTL
 						if (debug)
 							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (straight) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#endif
+						continue;
+					}
+
+					SegmentGeometry otherGeo = SegmentGeometry.Get(otherSegmentId);
+					if (otherGeo == null) {
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (straight) segment geometry at segment {otherSegmentId} @ {NodeId} (startNode={otherLights.StartNode}) but there was none. Original segment id: {SegmentId}");
+#endif
+						continue;
+					}
+
+					ItemClass nextConnectionClass = null;
+					Constants.ServiceFactory.NetService.ProcessSegment(otherSegmentId, delegate (ushort otherSegId, ref NetSegment segment) {
+						nextConnectionClass = segment.Info.GetConnectionClass();
+						return true;
+					});
+
+					if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
+#if DEBUGTTL
+						if (debug)
+							Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Other (straight) segment {otherSegmentId} @ {NodeId} has different connection service than segment {SegmentId} ({nextConnectionClass.m_service} vs. {prevConnectionClass.m_service}). Ignoring traffic light state.");
 #endif
 						continue;
 					}
@@ -469,6 +498,20 @@ namespace TrafficManager.TrafficLight.Impl {
 #if DEBUGTTL
 							if (debug)
 								Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Expected other (left/right) CustomSegmentLights at segment {otherSegmentId} @ {NodeId} but there was none. Original segment id: {SegmentId}");
+#endif
+							continue;
+						}
+
+						ItemClass nextConnectionClass = null;
+						Constants.ServiceFactory.NetService.ProcessSegment(otherSegmentId, delegate (ushort otherSegId, ref NetSegment segment) {
+							nextConnectionClass = segment.Info.GetConnectionClass();
+							return true;
+						});
+
+						if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
+#if DEBUGTTL
+							if (debug)
+								Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Other (left/right) segment {otherSegmentId} @ {NodeId} has different connection service than segment {SegmentId} ({nextConnectionClass.m_service} vs. {prevConnectionClass.m_service}). Ignoring traffic light state.");
 #endif
 							continue;
 						}
