@@ -58,8 +58,9 @@ namespace TrafficManager.State {
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
 		private static UICheckBox showLanesToggle = null;
+        private static UICheckBox showExperimentalFeatureControlsToggle = null;
 #if QUEUEDSTATS
-		private static UICheckBox showPathFindStatsToggle = null;
+        private static UICheckBox showPathFindStatsToggle = null;
 #endif
 		private static UIButton resetStuckEntitiesBtn = null;
 
@@ -126,10 +127,12 @@ namespace TrafficManager.State {
 		public static bool highwayRules = false;
 #if DEBUG
 		public static bool showLanes = true;
+        public static bool showExperimentalFeatureControls = true;
 #else
+        public static bool showExperimentalFeatureControls = false;
 		public static bool showLanes = false;
 #endif
-		public static bool strongerRoadConditionEffects = false;
+        public static bool strongerRoadConditionEffects = false;
 		public static bool prohibitPocketCars = false;
 		public static bool disableDespawning = false;
 		public static bool preferOuterLane = false;
@@ -314,6 +317,7 @@ namespace TrafficManager.State {
 			connectedLanesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Connected_lanes"), connectedLanesOverlay, onConnectedLanesOverlayChanged) as UICheckBox;
 			nodesOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Nodes_and_segments"), nodesOverlay, onNodesOverlayChanged) as UICheckBox;
 			showLanesToggle = panelHelper.AddCheckbox(Translation.GetString("Lanes"), showLanes, onShowLanesChanged) as UICheckBox;
+            showExperimentalFeatureControlsToggle = panelHelper.AddCheckbox(Translation.GetString("Experimental TL Feauture"), showExperimentalFeatureControls, onShowExperimentalFeatureControlsChanged) as UICheckBox;            
 #if DEBUG
 			vehicleOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Vehicles"), vehicleOverlay, onVehicleOverlayChanged) as UICheckBox;
 			citizenOverlayToggle = panelHelper.AddCheckbox(Translation.GetString("Citizens"), citizenOverlay, onCitizenOverlayChanged) as UICheckBox;
@@ -871,7 +875,14 @@ namespace TrafficManager.State {
 			showLanes = newShowLanes;
 		}
 
-		private static void onVehicleOverlayChanged(bool newVal) {
+        private static void onShowExperimentalFeatureControlsChanged(bool newShowExperFeature) {
+            if (!checkGameLoaded())
+                return;
+            Log._Debug($"Show experimetal feature controls changed to {newShowExperFeature}");
+            showExperimentalFeatureControls = newShowExperFeature;
+        }
+
+        private static void onVehicleOverlayChanged(bool newVal) {
 			if (!checkGameLoaded())
 				return;
 
@@ -1018,6 +1029,13 @@ namespace TrafficManager.State {
 			if (showLanesToggle != null)
 				showLanesToggle.isChecked = newShowLanes;
 		}
+
+        public static void setShowExperimentalFeatureControls(bool newShowExperControls)
+        {
+            showExperimentalFeatureControls = newShowExperControls;
+            if (showExperimentalFeatureControlsToggle != null)
+                showExperimentalFeatureControlsToggle.isChecked = newShowExperControls;
+        }
 
 		public static void setAdvancedAI(bool newAdvancedAI) {
 			bool changed = newAdvancedAI != advancedAI;
