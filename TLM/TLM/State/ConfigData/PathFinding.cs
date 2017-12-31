@@ -34,5 +34,15 @@ namespace TrafficManager.State.ConfigData {
 		/// Maximum walking distance
 		/// </summary>
 		public float MaxWalkingDistance = 1000f;
+
+		/// <summary>
+		/// Minimum penalty for entering public transport vehicles
+		/// </summary>
+		public float PublicTransportTransitionMinPenalty = 250f;
+
+		/// <summary>
+		/// Maximum penalty for entering public transport vehicles
+		/// </summary>
+		public float PublicTransportTransitionMaxPenalty = 500f;
 	}
 }
