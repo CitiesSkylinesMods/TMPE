@@ -115,6 +115,7 @@
     <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
     <Compile Include="Manager\ILaneArrowManager.cs" />
     <Compile Include="Manager\ILaneConnectionManager.cs" />
+    <Compile Include="Manager\Impl\JunctionDataExportService.cs" />
     <Compile Include="Manager\Impl\ManagerFactory.cs" />
     <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\RoutingManager.cs" />
@@ -188,6 +189,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\MainMenu\ExperimentalFeatureMenu.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
