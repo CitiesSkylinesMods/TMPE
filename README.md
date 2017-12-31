@@ -4,6 +4,14 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.5, 01/06/2018
+- **work in progress**
+- UI scaling removed
+- Simplified Chinese translation updated (...)
+- Added path-finding costs for public transport transitions
+- Bugfix: Division by zero occurs for low speed roads
+- Bugfix: Automatic pedestrian lights at railroad do not work as expected
+
 1.10.4, 10/19/2017
 - Updated for game version 1.9.0-f5
 - Added possibility to add priority signs at multiple junctions at once (press Shift)
