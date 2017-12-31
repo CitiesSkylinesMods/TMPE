@@ -13,17 +13,28 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.UI.MainMenu;
+using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
 	public class ManualTrafficLightsTool : SubTool {
 		private readonly int[] _hoveredButton = new int[2];
 		private readonly GUIStyle _counterStyle = new GUIStyle();
+        private ExperimentalFeatureMenu experimentalFeatureMenu;
+        private static readonly JunctionDataExportService tLStepDataService = JunctionDataExportService.Instance;
 
 		public ManualTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			
 		}
 
-		public override void OnSecondaryClickOverlay() {
+        public override void Initialize()
+        {
+            base.Initialize();
+            var uiView = UIView.GetAView();
+            experimentalFeatureMenu = (ExperimentalFeatureMenu)uiView.AddUIComponent(typeof(ExperimentalFeatureMenu));
+        }
+
+        public override void OnSecondaryClickOverlay() {
 			if (IsCursorInPanel())
 				return;
 			Cleanup();
@@ -47,14 +58,13 @@ namespace TrafficManager.UI.SubTools {
 				if (tlsMan.SetUpManualTrafficLight(HoveredNodeId)) {
 					SelectedNodeId = HoveredNodeId;
 				}
-
-				/*for (var s = 0; s < 8; s++) {
+                /*for (var s = 0; s < 8; s++) {
 					var segment = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(s);
 					if (segment != 0 && !TrafficPriority.IsPrioritySegment(SelectedNodeId, segment)) {
 						TrafficPriority.AddPrioritySegment(SelectedNodeId, segment, SegmentEnd.PriorityType.None);
 					}
 				}*/
-			} else {
+            } else {
 				MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 			}
 		}
@@ -65,18 +75,24 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId != 0) {
 				CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-
+                
 				if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
 					return;
 				}
 				tlsMan.TrafficLightSimulations[SelectedNodeId].Housekeeping();
 
-				/*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
+                /*if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
 					_guiManualTrafficLightsCrosswalk(ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode]);
 					return;
 				}*/ // TODO check
-
-				NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
+                
+                // experimental
+                tLStepDataService.SelectedNodeId = SelectedNodeId;
+                //
+                if (Options.showExperimentalFeatureControls) {
+                    experimentalFeatureMenu.Show();
+                }
+                NodeGeometry nodeGeometry = NodeGeometry.Get(SelectedNodeId);
 				foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
 					if (end == null)
 						continue;
@@ -684,7 +700,7 @@ namespace TrafficManager.UI.SubTools {
 			if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
 				return;
 			}
-
+            experimentalFeatureMenu.Hide();
 			tlsMan.RemoveNodeFromSimulation(SelectedNodeId, true, false);
 		}
 	}
