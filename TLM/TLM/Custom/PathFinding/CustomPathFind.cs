@@ -129,7 +129,6 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _leftHandDrive;
 		//private float _speedRand;
 		//private bool _extPublicTransport;
-		private float _vehicleCosts;
 		//private static ushort laneChangeRandCounter = 0;
 #if DEBUG
 		public uint _failedPathFinds = 0;
@@ -304,12 +303,6 @@ namespace TrafficManager.Custom.PathFinding {
 				_debugPositions = new Dictionary<ushort, IList<ushort>>();
 			}
 #endif
-
-			if (! Options.isStockLaneChangerUsed()) {
-				_vehicleCosts = _isHeavyVehicle ? _conf.AdvancedVehicleAI.HeavyVehicleLaneChangingCostFactor : 1f;
-			} else {
-				_vehicleCosts = 1f;
-			}
 
 			if ((byte)(this._laneTypes & NetInfo.LaneType.Vehicle) != 0) {
 				this._laneTypes |= NetInfo.LaneType.TransportVehicle;
@@ -1305,7 +1298,7 @@ namespace TrafficManager.Custom.PathFinding {
 								 * =======================================================================================================
 								 */
 
-								bool nextIsJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+								bool nextIsJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) == NetNode.Flags.Junction;
 								bool nextIsRealJunction = nextIsJunction && (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 								ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
 								//bool prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None && (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
@@ -1313,7 +1306,8 @@ namespace TrafficManager.Custom.PathFinding {
 									if (_isHeavyVehicle &&
 										Options.preferOuterLane &&
 										prevSegmentRouting.highway &&
-										(netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None
+										_pathRandomizer.Int32(_conf.PathFinding.HeavyVehicleInnerLanePenaltySegmentSel) == 0
+										/* && (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None */
 									) {
 										// penalize large vehicles for using inner lanes
 										if (laneSelectionCost == null) {
@@ -1339,7 +1333,11 @@ namespace TrafficManager.Custom.PathFinding {
 									 * (5) Apply costs for randomized lane selection in front of junctions and highway transitions
 									 * =======================================================================================================
 									 */
-									else if (Options.advancedAI && !_stablePath && nextIsJunction && _pathRandomizer.Int32(_conf.AdvancedVehicleAI.LaneRandomizationJunctionSel) == 0) {
+									if (Options.advancedAI &&
+												!_stablePath &&
+												!_isHeavyVehicle &&
+												nextIsJunction &&
+												_pathRandomizer.Int32(_conf.AdvancedVehicleAI.LaneRandomizationJunctionSel) == 0) {
 										// randomized lane selection at junctions
 										if (laneSelectionCost == null) {
 											laneSelectionCost = 1f;
@@ -1361,7 +1359,20 @@ namespace TrafficManager.Custom.PathFinding {
 
 								/*
 								 * =======================================================================================================
-								 * (6) Apply traffic measurement costs for segment selection
+								 * (6) Apply junction costs
+								 * =======================================================================================================
+								 */
+								 if (Options.advancedAI && (queueItem.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None && nextIsJunction && prevSegmentRouting.highway) {
+									if (segmentSelectionCost == null) {
+										segmentSelectionCost = 1f;
+									}
+
+									segmentSelectionCost *= 1f + _conf.AdvancedVehicleAI.JunctionBaseCost;
+								}
+
+								/*
+								 * =======================================================================================================
+								 * (7) Apply traffic measurement costs for segment selection
 								 * =======================================================================================================
 								 */
 
@@ -1372,7 +1383,12 @@ namespace TrafficManager.Custom.PathFinding {
 									TrafficMeasurementManager.SegmentDirTrafficData prevDirTrafficData = trafficMeasurementManager.segmentDirTrafficData[trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)];
 
 									float segmentTraffic = Mathf.Clamp(1f - (float)prevDirTrafficData.meanSpeed / (float)TrafficMeasurementManager.REF_REL_SPEED + item.m_trafficRand, 0, 1f);
-									segmentSelectionCost = 1f +
+
+									if (segmentSelectionCost == null) {
+										segmentSelectionCost = 1f;
+									}
+
+									segmentSelectionCost *= 1f +
 										_conf.AdvancedVehicleAI.TrafficCostFactor *
 										segmentTraffic;
 
@@ -1450,7 +1466,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 								/*
 								 * =======================================================================================================
-								 * (7) Apply u-turn costs
+								 * (8) Apply u-turn costs
 								 * =======================================================================================================
 								 */
 
@@ -1573,14 +1589,16 @@ namespace TrafficManager.Custom.PathFinding {
 				return;
 			}
 
+#if COUNTSEGMENTSTONEXTJUNCTION
 			bool nextIsRegularNode = nextNodeId == prevSegment.m_startNode || nextNodeId == prevSegment.m_endNode;
 			bool prevIsRealJunction = false;
 			if (nextIsRegularNode) {
 				// no lane changing directly in front of a junction
 				ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
-				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) == NetNode.Flags.Junction &&
 					(netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
 			}
+#endif
 
 			NetInfo nextSegmentInfo = nextSegment.Info;
 			NetInfo prevSegmentInfo = prevSegment.Info;
@@ -1743,10 +1761,13 @@ namespace TrafficManager.Custom.PathFinding {
 			// NON-STOCK CODE START //
 			bool nextIsStartNodeOfPrevSegment = prevSegment.m_startNode == nextNodeId;
 			ushort sourceNodeId = nextIsStartNodeOfPrevSegment ? prevSegment.m_endNode : prevSegment.m_startNode;
-			bool prevIsRealJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+			bool prevIsJunction = (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) == NetNode.Flags.Junction;
+#if COUNTSEGMENTSTONEXTJUNCTION
+			bool prevIsRealJunction = prevIsJunction &&
 									  (netManager.m_nodes.m_buffer[sourceNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
-			bool nextIsRealJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
-									  (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
+#endif
+			/*bool nextIsRealJunction = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) == NetNode.Flags.Junction &&
+									  (netManager.m_nodes.m_buffer[nextNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);*/
 			int prevOuterSimilarLaneIndex = -1;
 			NetInfo.Lane prevLaneInfo = null;
 			// NON-STOCK CODE END //
@@ -1870,9 +1891,14 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 			// NON-STOCK CODE START //
-			float laneChangeRoadBaseCosts = 1f;
+			float laneChangeBaseCosts = 1f;
+			float junctionBaseCosts = 1f;
 			if (laneChangingCostCalculationMode != LaneChangingCostCalculationMode.None) {
-				laneChangeRoadBaseCosts = /*nextSegmentRouting.highway ? _conf.HighwayLaneChangingBaseCost :*/ _conf.AdvancedVehicleAI.LaneChangingBaseCost;
+				float rand = (float)this._pathRandomizer.Int32(101u) / 100f;
+				laneChangeBaseCosts = _conf.AdvancedVehicleAI.LaneChangingBaseMinCost + rand * (_conf.AdvancedVehicleAI.LaneChangingBaseMaxCost - _conf.AdvancedVehicleAI.LaneChangingBaseMinCost);
+				if (prevIsJunction) {
+					junctionBaseCosts = _conf.AdvancedVehicleAI.LaneChangingJunctionBaseCost;
+				}
 			}
 
 			// NON-STOCK CODE END //
@@ -2092,10 +2118,10 @@ namespace TrafficManager.Custom.PathFinding {
 
 								// apply lane changing costs
 								float laneMetric = 1f;
-								if (laneDist > 0) {
+								if (laneDist > 0 && curLaneId != this._startLaneA && curLaneId != this._startLaneB) {
 									laneMetric = 1f + laneDist *
-										laneChangeRoadBaseCosts * // road type based lane changing cost factor
-										_vehicleCosts * // vehicle type based lane changing cost factor
+										junctionBaseCosts *
+										laneChangeBaseCosts * // road type based lane changing cost factor
 										(laneDist > 1 ? _conf.AdvancedVehicleAI.MoreThanOneLaneChangingCostFactor : 1f); // additional costs for changing multiple lanes at once
 								}
 
@@ -2270,12 +2296,16 @@ namespace TrafficManager.Custom.PathFinding {
 
 			// NON-STOCK CODE START
 			bool nextIsRegularNode = nextNodeId == nextSegment.m_startNode || nextNodeId == nextSegment.m_endNode;
+#if COUNTSEGMENTSTONEXTJUNCTION
 			bool prevIsRealJunction = false;
+#endif
 			if (nextIsRegularNode) {
 				bool nextIsStartNode = nextNodeId == nextSegment.m_startNode;
 				ushort prevNodeId = (nextNodeId == prevSegment.m_startNode) ? prevSegment.m_endNode : prevSegment.m_startNode;
-				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
+#if COUNTSEGMENTSTONEXTJUNCTION
+				prevIsRealJunction = (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.Junction &&
 									 (netManager.m_nodes.m_buffer[prevNodeId].m_flags & (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut)) != (NetNode.Flags.OneWayIn | NetNode.Flags.OneWayOut);
+#endif
 
 				// check if pedestrians are not allowed to cross here
 				if (!junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, nextIsStartNode)) {

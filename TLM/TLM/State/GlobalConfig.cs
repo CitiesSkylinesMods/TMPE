@@ -19,7 +19,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 11;
+		private static int LATEST_VERSION = 12;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif

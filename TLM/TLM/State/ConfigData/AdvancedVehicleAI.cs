@@ -16,14 +16,24 @@ namespace TrafficManager.State.ConfigData {
 		public float LaneRandomizationCostFactor = 1f;
 
 		/// <summary>
-		/// base lane changing cost factor on city streets
+		/// minimum base lane changing cost
 		/// </summary>
-		public float LaneChangingBaseCost = 1.5f;
+		public float LaneChangingBaseMinCost = 1f;
 
 		/// <summary>
-		/// heavy vehicle lane changing cost factor
+		/// maximum base lane changing cost
 		/// </summary>
-		public float HeavyVehicleLaneChangingCostFactor = 1.5f;
+		public float LaneChangingBaseMaxCost = 1.1f;
+
+		/// <summary>
+		/// base cost for changing lanes in front of junctions
+		/// </summary>
+		public float LaneChangingJunctionBaseCost = 1.5f;
+
+		/// <summary>
+		/// base cost for traversing junctions
+		/// </summary>
+		public float JunctionBaseCost = 0.1f;
 
 		/// <summary>
 		/// > 1 lane changing cost factor

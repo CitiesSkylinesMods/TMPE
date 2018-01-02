@@ -85,7 +85,7 @@ namespace TrafficManager.Manager.Impl {
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 				if (laneInfo.m_laneType == NetInfo.LaneType.Vehicle || laneInfo.m_laneType == NetInfo.LaneType.TransportVehicle) {
-					if (laneInfo.m_vehicleType != VehicleInfo.VehicleType.None) {
+					if ((laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
 						ushort toNodeId = (laneInfo.m_finalDirection & dir2) != NetInfo.Direction.None ? netManager.m_segments.m_buffer[segmentId].m_endNode : netManager.m_segments.m_buffer[segmentId].m_startNode;
 						if ((laneInfo.m_finalDirection & NetInfo.Direction.Both) == NetInfo.Direction.Both || toNodeId == nodeId) {
 							ExtVehicleType vehicleTypes = GetAllowedVehicleTypes(segmentId, segmentInfo, laneIndex, laneInfo, busLaneMode);

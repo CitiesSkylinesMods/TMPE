@@ -8,9 +8,14 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - **work in progress**
 - UI scaling removed
 - Simplified Chinese translation updated (...)
+- Polish translation updated (...)
+- Introduced randomization for lane changing costs
+- Introduced randomization for "trucks prefer innermost lanes on highways" costs
+- Removed unnecessary calculations in path-finding
 - Added path-finding costs for public transport transitions
 - Bugfix: Division by zero occurs for low speed roads
 - Bugfix: Automatic pedestrian lights at railroad do not work as expected
+- Bugfix: Timed traffic lights show up for bicycles (they should not)
 
 1.10.4, 10/19/2017
 - Updated for game version 1.9.0-f5

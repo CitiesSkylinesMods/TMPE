@@ -16,9 +16,14 @@ namespace TrafficManager.State.ConfigData {
 		public float PublicTransportLaneReward = 0.1f;
 
 		/// <summary>
-		/// maximum penalty for heavy vehicles driving on an inner lane (in %)
+		/// maximum penalty for heavy vehicles driving on an inner lane
 		/// </summary>
-		public float HeavyVehicleMaxInnerLanePenalty = 1f;
+		public float HeavyVehicleMaxInnerLanePenalty = 0.5f;
+
+		/// <summary>
+		/// Junction randomization for randomized lane selection
+		/// </summary>
+		public uint HeavyVehicleInnerLanePenaltySegmentSel = 3;
 
 		/// <summary>
 		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
