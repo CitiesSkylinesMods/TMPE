@@ -1089,6 +1089,7 @@ namespace TrafficManager.UI.SubTools {
 		private void ShowGUI() {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
+			JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
 
 			var hoveredSegment = false;
 
@@ -1119,6 +1120,8 @@ namespace TrafficManager.UI.SubTools {
 					ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, end.StartNode, false);
 					if (liveSegmentLights == null)
 						continue;
+
+					bool showPedLight = liveSegmentLights.PedestrianLightState != null && junctionRestrictionsManager.IsPedestrianCrossingAllowed(liveSegmentLights.SegmentId, liveSegmentLights.StartNode);
 
 					var timedActive = timedNode.IsStarted();
 					if (! timedActive) {
@@ -1160,7 +1163,7 @@ namespace TrafficManager.UI.SubTools {
 					var modeWidth = 41f * zoom;
 					var modeHeight = 38f * zoom;
 
-					if (liveSegmentLights.PedestrianLightState != null) {
+					if (showPedLight) {
 						// pedestrian light
 
 						// SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
@@ -1317,7 +1320,7 @@ namespace TrafficManager.UI.SubTools {
 						}
 #endif
 
-						if (lightOffset == 0 && liveSegmentLights.PedestrianLightState != null) {
+						if (lightOffset == 0 && showPedLight) {
 							// PEDESTRIAN COUNTER
 							if (timedActive && _timedShowNumbers) {
 								var counterSize = 20f * zoom;

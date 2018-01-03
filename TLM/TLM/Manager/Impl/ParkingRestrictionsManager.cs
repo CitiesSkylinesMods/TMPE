@@ -50,10 +50,12 @@ namespace TrafficManager.Manager.Impl {
 				UnsubscribeFromSegmentGeometry(segmentId);
 			} else {
 				if (! flag) {
-					// force relocation of illegaly parked vehicles
-					Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
-						segment.UpdateSegment(segmentId);
-						return true;
+					Services.SimulationService.AddAction(() => {
+						// force relocation of illegaly parked vehicles
+						Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+							segment.UpdateSegment(segmentId);
+							return true;
+						});
 					});
 				}
 
