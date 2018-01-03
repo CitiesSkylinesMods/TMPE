@@ -6,15 +6,17 @@ using UnityEngine;
 
 namespace CSUtil.Commons {
 	public static class VectorUtil {
-		public static void ClampPosToScreen(ref Vector3 pos, Vector2 resolution) {
-			if (pos.x < 0)
-				pos.x = 0;
-			if (pos.y < 0)
-				pos.y = 0;
-			if (pos.x >= Screen.width)
-				pos.x = Screen.width - 1;
-			if (pos.y >= Screen.height)
-				pos.y = Screen.height - 1;
+		public static void ClampRectToScreen(ref Rect rect, Vector2 resolution) {
+			Log._Debug($"ClampPosToScreen([{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}], [{resolution.x}, {resolution.y}]) called");
+			if (rect.x < 0)
+				rect.x = 0;
+			if (rect.y < 0)
+				rect.y = 0;
+			if (rect.xMax >= resolution.x)
+				rect.x = resolution.x - rect.width;
+			if (rect.yMax >= resolution.y)
+				rect.y = resolution.y - rect.height;
+			Log._Debug($"ClampPosToScreen() -> [{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}]");
 		}
 	}
 }

@@ -14,6 +14,8 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Removed unnecessary calculations in path-finding
 - Added path-finding costs for public transport transitions
 - Pedestrian traffic lights do not show up if crossing the street is prohibited
+- Busses are allowed to switch multiple lanes after leaving a bus stop
+- Bugfix: Main menu button might be out of view
 - Bugfix: Division by zero occurs for low speed roads
 - Bugfix: Automatic pedestrian lights at railroad do not work as expected
 - Bugfix: Timed traffic lights show up for bicycles (they should not)

@@ -18,15 +18,18 @@ namespace TrafficManager.UI {
 		public const string MAIN_MENU_BUTTON_FG_HOVERED = "TMPE_MainMenuButtonFgHovered";
 		public const string MAIN_MENU_BUTTON_FG_ACTIVE = "TMPE_MainMenuButtonFgActive";
 
+		public const int BUTTON_WIDTH = 50;
+		public const int BUTTON_HEIGHT = 50;
+
 		public UIDragHandle Drag { get; private set; }
 
 		public override void Start() {
 			// Place the button.
 			GlobalConfig config = GlobalConfig.Instance;
-			Vector3 pos = new Vector3(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY);
+			Rect rect = new Rect(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY, BUTTON_WIDTH, BUTTON_HEIGHT);
 			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			VectorUtil.ClampPosToScreen(ref pos, resolution);
-			absolutePosition = pos;
+			VectorUtil.ClampRectToScreen(ref rect, resolution);
+			absolutePosition = rect.position;
 
 			// Set the atlas and background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonAtlas", TextureResources.MainMenuButtonTexture2D, 6, new string[] {
@@ -41,8 +44,8 @@ namespace TrafficManager.UI {
 			UpdateSprites();
 
 			// Set the button dimensions.
-			width = 50;
-			height = 50;
+			width = BUTTON_WIDTH;
+			height = BUTTON_HEIGHT;
 
 			// Enable button sounds.
 			playAudioEvents = true;

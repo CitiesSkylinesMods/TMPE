@@ -85,10 +85,10 @@ namespace TrafficManager.UI.MainMenu {
 			}
 
 			GlobalConfig config = GlobalConfig.Instance;
-			Vector3 pos = new Vector3(config.Main.MainMenuX, config.Main.MainMenuY);
+			Rect rect = new Rect(config.Main.MainMenuX, config.Main.MainMenuY, MENU_WIDTH, MENU_HEIGHT);
 			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			VectorUtil.ClampPosToScreen(ref pos, resolution);
-			absolutePosition = pos;
+			VectorUtil.ClampRectToScreen(ref rect, resolution);
+			absolutePosition = rect.position;
 
 			var dragHandler = new GameObject("TMPE_Menu_DragHandler");
 			dragHandler.transform.parent = transform;
