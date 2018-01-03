@@ -66,6 +66,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedNodeId != 0) {
 				CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+				JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
 
 				if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
 					return;
@@ -86,6 +87,8 @@ namespace TrafficManager.UI.SubTools {
 					var segmentLights = customTrafficLightsManager.GetSegmentLights(end.SegmentId, end.StartNode, false);
 					if (segmentLights == null)
 						continue;
+
+					bool showPedLight = segmentLights.PedestrianLightState != null && junctionRestrictionsManager.IsPedestrianCrossingAllowed(segmentLights.SegmentId, segmentLights.StartNode);
 
 					Vector3 screenPos;
 					bool visible = MainTool.WorldToScreenPoint(position, out screenPos);
@@ -109,7 +112,7 @@ namespace TrafficManager.UI.SubTools {
 
 					var guiColor = GUI.color;
 
-					if (segmentLights.PedestrianLightState != null) {
+					if (showPedLight) {
 						// pedestrian light
 
 						// SWITCH MANUAL PEDESTRIAN LIGHT BUTTON

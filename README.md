@@ -13,9 +13,11 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Introduced randomization for "trucks prefer innermost lanes on highways" costs
 - Removed unnecessary calculations in path-finding
 - Added path-finding costs for public transport transitions
+- Pedestrian traffic lights do not show up if crossing the street is prohibited
 - Bugfix: Division by zero occurs for low speed roads
 - Bugfix: Automatic pedestrian lights at railroad do not work as expected
 - Bugfix: Timed traffic lights show up for bicycles (they should not)
+- Bugfix: Due to a multi-threading issue junction restrictions may cause the game state to become inconsistent
 
 1.10.4, 10/19/2017
 - Updated for game version 1.9.0-f5
