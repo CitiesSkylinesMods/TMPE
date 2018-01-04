@@ -5,10 +5,9 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
 1.10.5, 01/06/2018
-- **work in progress**
 - UI scaling removed
-- Simplified Chinese translation updated (...)
-- Polish translation updated (...)
+- Simplified Chinese translation updated (thanks to Emphasia for translating)
+- Polish translation updated (thanks to @Krzychu1245 for translating)
 - Introduced randomization for lane changing costs
 - Introduced randomization for "trucks prefer innermost lanes on highways" costs
 - Removed unnecessary calculations in path-finding
