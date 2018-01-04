@@ -872,8 +872,8 @@ namespace TrafficManager.Manager.Impl {
 								int minNextCompatibleOuterSimilarIndex = -1;
 								int maxNextCompatibleOuterSimilarIndex = -1;
 								if (nextIncomingDir == ArrowDirection.Turn) {
-									// force u-turns to happen on the innermost lane
-									minNextCompatibleOuterSimilarIndex = maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
+									minNextCompatibleOuterSimilarIndex = 0;
+									maxNextCompatibleOuterSimilarIndex = nextCompatibleLaneCount - 1;
 #if DEBUGROUTING
 									if (debug)
 										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): u-turn: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
@@ -1124,6 +1124,17 @@ namespace TrafficManager.Manager.Impl {
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) has outgoing lane connections. Skip for now but set compatibleLaneDist={compatibleLaneDist} if laneConnectionTransIndex={laneConnectionTransIndex} >= 0.");
 #endif
 										continue; // disregard lane since it has outgoing connections
+									}
+
+									if (nextIncomingDir == ArrowDirection.Turn) {
+										// force u-turns to happen on the innermost lane
+										if (nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
+											++compatibleLaneDist;
+#if DEBUGROUTING
+										if (debug)
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
+#endif
+										}
 									}
 
 #if DEBUGROUTING

@@ -1447,8 +1447,9 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 								}
 
-								if (laneTransitions[k].type == LaneEndTransitionType.Invalid ||
-									(isStrictLaneChangePolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed)) {
+								if (laneTransitions[k].laneId != _startLaneA && laneTransitions[k].laneId != _startLaneB &&
+									(laneTransitions[k].type == LaneEndTransitionType.Invalid ||
+									(isStrictLaneChangePolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed))) {
 									continue;
 								}
 

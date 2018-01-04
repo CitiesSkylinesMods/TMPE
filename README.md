@@ -20,6 +20,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Bugfix: Automatic pedestrian lights at railroad do not work as expected
 - Bugfix: Timed traffic lights show up for bicycles (they should not)
 - Bugfix: Due to a multi-threading issue junction restrictions may cause the game state to become inconsistent
+- Bugfix: Routing rules prevents vehicles from spawning when starting building lies too close to an intersection/road end
 
 1.10.4, 10/19/2017
 - Updated for game version 1.9.0-f5
