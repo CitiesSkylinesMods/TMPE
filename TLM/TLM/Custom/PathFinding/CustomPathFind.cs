@@ -1447,7 +1447,8 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 								}
 
-								if (laneTransitions[k].laneId != _startLaneA && laneTransitions[k].laneId != _startLaneB &&
+								bool relaxedLaneChanging = (queueItem.vehicleType & (ExtVehicleType.Service | ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None && queueItem.vehicleId == 0 && (laneTransitions[k].laneId == _startLaneA || laneTransitions[k].laneId == _startLaneB);
+								if (! relaxedLaneChanging &&
 									(laneTransitions[k].type == LaneEndTransitionType.Invalid ||
 									(isStrictLaneChangePolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed))) {
 									continue;
@@ -2119,7 +2120,8 @@ namespace TrafficManager.Custom.PathFinding {
 
 								// apply lane changing costs
 								float laneMetric = 1f;
-								if (laneDist > 0 && curLaneId != this._startLaneA && curLaneId != this._startLaneB) {
+								bool relaxedLaneChanging = queueItem.vehicleId == 0 && (curLaneId == _startLaneA || curLaneId == _startLaneB);
+								if (laneDist > 0 && !relaxedLaneChanging) {
 									laneMetric = 1f + laneDist *
 										junctionBaseCosts *
 										laneChangeBaseCosts * // road type based lane changing cost factor

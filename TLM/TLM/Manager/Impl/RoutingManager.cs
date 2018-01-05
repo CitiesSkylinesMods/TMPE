@@ -1130,6 +1130,7 @@ namespace TrafficManager.Manager.Impl {
 										// force u-turns to happen on the innermost lane
 										if (nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
 											++compatibleLaneDist;
+											nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
 #if DEBUGROUTING
 										if (debug)
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
