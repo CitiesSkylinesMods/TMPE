@@ -48,7 +48,7 @@ namespace TrafficManager.UI.SubTools {
 			internal bool isTarget;
 			internal uint laneId;
 			internal int innerSimilarLaneIndex;
-			internal NetInfo.Direction finalDirection;
+			internal int segmentIndex;
 			internal float radius = 1f;
 			internal Color color;
 			internal List<NodeLaneMarker> connectedMarkers = new List<NodeLaneMarker>();
@@ -224,7 +224,7 @@ namespace TrafficManager.UI.SubTools {
 									continue;
 
 								if (stayInLaneMode == StayInLaneMode.Forward || stayInLaneMode == StayInLaneMode.Backward) {
-									if (sourceLaneMarker.finalDirection == NetInfo.Direction.Backward ^ stayInLaneMode == StayInLaneMode.Backward) {
+									if (sourceLaneMarker.segmentIndex == 0 ^ stayInLaneMode == StayInLaneMode.Backward) {
 										continue;
 									}
 								}
@@ -475,8 +475,8 @@ namespace TrafficManager.UI.SubTools {
 								isTarget = isTarget,
 								laneType = laneInfo.m_laneType,
 								vehicleType = laneInfo.m_vehicleType,
-								innerSimilarLaneIndex = ((byte)(laneInfo.m_finalDirection & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
-								finalDirection = laneInfo.m_finalDirection
+								innerSimilarLaneIndex = ((byte)(laneInfo.m_direction & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
+								segmentIndex = i
 							});
 						}
 					}

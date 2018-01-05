@@ -21,6 +21,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Bugfix: Due to a multi-threading issue junction restrictions may cause the game state to become inconsistent
 - Bugfix: Routing rules prevents vehicles from spawning when starting building lies too close to an intersection/road end
 - Bugfix: Disabling tutorial message has no effect
+- Bugfix: "Stay on lane" feature does not work as intended for certain nodes
 
 1.10.4, 10/19/2017
 - Updated for game version 1.9.0-f5

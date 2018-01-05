@@ -2178,8 +2178,7 @@ namespace TrafficManager.Custom.PathFinding {
 										"\t" + $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}\n\n" +
 										"\t" + $"laneDist={laneDist}\n\n" +
 										"\t" + $"_extVehicleType={queueItem.vehicleType}\n" +
-										"\t" + $"laneChangeRoadBaseCost={laneChangeRoadBaseCosts}\n" +
-										"\t" + $"_vehicleCosts={_vehicleCosts}\n" +
+										"\t" + $"laneChangeRoadBaseCost={laneChangeBaseCosts}\n" +
 										"\t" + $"moreThanOneLaneCost={(laneDist > 1 ? _conf.AdvancedVehicleAI.MoreThanOneLaneChangingCostFactor : 1f)}\n" +
 										"\t" + $"=> laneMetric={laneMetric}\n" +
 										//"\t" + $"=> junctionMetric={junctionMetric}\n\n" +
