@@ -472,6 +472,10 @@ namespace TrafficManager.UI {
 		/// </summary>
 		/// <param name="localeKey"></param>
 		public static void ShowAdvisor(string localeKey) {
+			if (! GlobalConfig.Instance.Main.EnableTutorial) {
+				return;
+			}
+
 			if (! Translation.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
 				return;
 			}
