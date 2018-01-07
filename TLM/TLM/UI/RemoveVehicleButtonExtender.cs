@@ -46,7 +46,7 @@ namespace TrafficManager.UI {
 			UIButton button = UIView.GetAView().AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
 			
 			button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-			button.relativePosition += new Vector3(- button.width - 40f, 50f);
+			button.relativePosition += new Vector3(- button.width - 80f, 50f);
 
 			return button;
 		}

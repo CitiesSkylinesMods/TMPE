@@ -12,7 +12,7 @@ using TrafficManager.Util;
 namespace TrafficManager.Manager.Impl {
 	public class VehicleRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>>, IVehicleRestrictionsManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
-		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail;
 		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain | ExtVehicleType.PassengerCar | ExtVehicleType.Bus | ExtVehicleType.Taxi | ExtVehicleType.CargoTruck | ExtVehicleType.Service | ExtVehicleType.Emergency;
 		public static readonly float[] PATHFIND_PENALTIES = new float[] { 10f, 100f, 1000f };
 

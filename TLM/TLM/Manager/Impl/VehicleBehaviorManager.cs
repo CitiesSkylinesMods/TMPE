@@ -80,8 +80,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="nextTargetNodeId">next target node</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public delegate bool MayChangeSegmentFullDelegate(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed);
-		public static MayChangeSegmentFullDelegate MayChangeSegmentFull = delegate (ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 			//public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || targetNodeId == GlobalConfig.Instance.Debug.NodeId);
@@ -564,7 +563,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 			maxSpeed = 0f; // maxSpeed should be set by caller
 			return true;
-		};
+		}
 
 		/// <summary>
 		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
@@ -582,11 +581,9 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="laneID">current lane</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public delegate bool MayChangeSegmentShortDelegate(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed);
-		public static MayChangeSegmentShortDelegate MayChangeSegmentShort = delegate (ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
-			//public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
-			return MayChangeSegmentFull.Invoke(frontVehicleId, ref vehicleState, ref vehicleData, sqrVelocity, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
-		};
+		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
+			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, sqrVelocity, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
+		}
 
 		public bool MayDespawn(ref Vehicle vehicleData) {
 			return !Options.disableDespawning || vehicleData.m_flags2 != 0 || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
