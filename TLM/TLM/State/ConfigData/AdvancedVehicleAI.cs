@@ -18,17 +18,17 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// minimum base lane changing cost
 		/// </summary>
-		public float LaneChangingBaseMinCost = 1f;
+		public float LaneChangingBaseMinCost = 1.25f;
 
 		/// <summary>
 		/// maximum base lane changing cost
 		/// </summary>
-		public float LaneChangingBaseMaxCost = 1.1f;
+		public float LaneChangingBaseMaxCost = 1.5f;
 
 		/// <summary>
 		/// base cost for changing lanes in front of junctions
 		/// </summary>
-		public float LaneChangingJunctionBaseCost = 1.5f;
+		public float LaneChangingJunctionBaseCost = 2f;
 
 		/// <summary>
 		/// base cost for traversing junctions

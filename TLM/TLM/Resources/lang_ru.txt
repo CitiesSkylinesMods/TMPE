@@ -114,7 +114,6 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction Выбранн
 Advanced_AI_cannot_be_activated Продвинутый AI не может быть активирован по причине используемого вами другого мода, который изменяет поведение транспорта (например Improved AI, Traffic++).
 The_Advanced_Vehicle_AI_cannot_be_activated Продвинутый AI не активирован, потому что вами уже используется иной мод, что меняет поведение транспорта (например Improved AI, Traffic++).
 Enable_dynamic_path_calculation Вкл. динамическое вычисление пути
-Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Changes made with this tool will take full effect after some minutes
 Lane_Arrow_Changer_Disabled_Connection Переключатель стрелки движения для этого перекрёстка отключён, потому что вы создали соединение перекрёстка вручную.
 Lane_connector Соединение перекрёстка
 Connected_lanes Связанные маршруты
@@ -217,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the time
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+Public_transport Public transport
+Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations

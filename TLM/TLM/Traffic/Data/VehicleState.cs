@@ -35,6 +35,17 @@ namespace TrafficManager.Traffic.Data {
 			}
 		}
 
+		public float SqrVelocity {
+			get {
+				float ret = 0;
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
+					ret = veh.GetLastFrameVelocity().sqrMagnitude;
+					return true;
+				});
+				return ret;
+			}
+		}
+
 		/*public bool Valid {
 			get {
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0) {
@@ -51,8 +62,8 @@ namespace TrafficManager.Traffic.Data {
 		public uint lastTransitStateUpdate;
 		public uint lastPositionUpdate;
 		public float totalLength;
-		public float sqrVelocity;
-		public float velocity;
+		//public float sqrVelocity;
+		//public float velocity;
 		public int waitTime;
 		public float reduceSqrSpeedByValueToYield;
 		public Flags flags;
@@ -78,8 +89,8 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
 				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
 				"\t" + $"totalLength = {totalLength}\n" +
-				"\t" + $"velocity = {velocity}\n" +
-				"\t" + $"sqrVelocity = {sqrVelocity}\n" +
+				//"\t" + $"velocity = {velocity}\n" +
+				//"\t" + $"sqrVelocity = {sqrVelocity}\n" +
 				"\t" + $"waitTime = {waitTime}\n" +
 				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
 				"\t" + $"flags = {flags}\n" +
@@ -118,8 +129,8 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 		}
@@ -271,8 +282,8 @@ namespace TrafficManager.Traffic.Data {
 
 			Unlink();
 
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
 			lastAltLaneSelSegmentId = 0;
@@ -301,7 +312,7 @@ namespace TrafficManager.Traffic.Data {
 #endif
 		}
 
-		internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
+		/*internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateVelocity({vehicleId}, {velocity}) called: {this}");
@@ -322,7 +333,7 @@ namespace TrafficManager.Traffic.Data {
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {velocity}) finished: {this}");
 #endif
-		}
+		}*/
 
 		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
@@ -411,8 +422,8 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 
 			totalLength = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 
 			flags &= ~Flags.Spawned;
 			
@@ -455,8 +466,8 @@ namespace TrafficManager.Traffic.Data {
 			heavyVehicle = false;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			recklessDriver = false;

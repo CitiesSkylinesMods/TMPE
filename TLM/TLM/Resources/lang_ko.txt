@@ -114,7 +114,6 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction 선택한 교�
 Advanced_AI_cannot_be_activated 발전된 AI 활성화 불가
 The_Advanced_Vehicle_AI_cannot_be_activated 이미 다른 모드로 차량 AI 향상을 사용 중이므로 발전된 차량 AI를 사용 할 수 없습니다.(예 : 향상된 AI, 트래픽 C++)
 Enable_dynamic_path_calculation 동적인 경로 계산 활성화
-Changes_made_with_this_tool_will_take_full_effect_after_some_minutes 이 기능을 완벽히 적용하려면 몇 분정도 시간이 필요합니다
 Lane_Arrow_Changer_Disabled_Connection 차선 연결로 이미 수정된 교차로이므로 차선변경을 할 수 없습니다.
 Lane_connector 차선 연결
 Connected_lanes 연결된 차선
@@ -217,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the time
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+Public_transport Public transport
+Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations

@@ -216,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Dodaj skrzyżowanie do cza
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Kliknij na innym skrzyżowaniu, aby je dodać. Obydwa skrzyżowania zostaną połączone, ustawienia czasowej sygnalizacji będą działać na nich jednocześnie.\n\nKliknij gdziekolwiek prawym klawiszem myszy, aby anulować operację.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Usuń skrzyżowanie spod kontroli czasowej sygnalizacji
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Kliknij na jednym ze skrzyżować kontrolowanych przez czasową sygnalizację. Wybrane skrzyżowanie zostanie usunięte spod kontroli programu czasowej sygnalizacji.\n\nKliknij gdziekolwiek prawym klawiszem myszy, aby anulować operację.
+Public_transport Public transport
+Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations

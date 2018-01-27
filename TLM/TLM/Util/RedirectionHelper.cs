@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+using CSUtil.Commons;
 using System;
 using System.Reflection;
 
@@ -44,11 +45,22 @@ namespace TrafficManager.Util
         /// <param name="to"></param>
         public static RedirectCallsState RedirectCalls(MethodInfo from, MethodInfo to)
         {
-            // GetFunctionPointer enforces compilation of the method.
-            var fptr1 = from.MethodHandle.GetFunctionPointer();
+			// GetFunctionPointer enforces compilation of the method.
+			var fptr1 = from.MethodHandle.GetFunctionPointer();
             var fptr2 = to.MethodHandle.GetFunctionPointer();
-            return PatchJumpTo(fptr1, fptr2);
-        }
+
+			Log._Debug($"RedirectionHeler.RedirectCalls({from.Name}, {to.Name}) called. IsRedirected1={IsRedirected(fptr1, fptr2)} IsRedirected2={IsRedirected(from.MethodHandle.GetFunctionPointer(), to.MethodHandle.GetFunctionPointer())}");
+
+			Log._Debug($"RedirectionHeler.RedirectCalls({from.Name}, {to.Name}): before redir. fptr1_fnc={GetRedir(fptr1).ArrayToString()} fptr1={(ulong)fptr1.ToInt64()} fptr2={(ulong)fptr2.ToInt64()}");
+
+			RedirectCallsState ret = PatchJumpTo(fptr1, fptr2);
+
+			Log._Debug($"RedirectionHeler.RedirectCalls({from.Name}, {to.Name}): after redir. fptr1_fnc={GetRedir(fptr1).ArrayToString()} fptr1={(ulong)fptr1.ToInt64()} fptr2={(ulong)fptr2.ToInt64()}");
+
+			Log._Debug($"RedirectionHeler.RedirectCalls({from.Name}, {to.Name}) finished. IsRedirected1={IsRedirected(fptr1, fptr2)} IsRedirected2={IsRedirected(from.MethodHandle.GetFunctionPointer(), to.MethodHandle.GetFunctionPointer())}");
+
+			return ret;
+		}
 
         public static void RevertRedirect(MethodInfo from, RedirectCallsState state)
         {
@@ -62,12 +74,24 @@ namespace TrafficManager.Util
 			return IsRedirected(fptr1, fptr2);
 		}
 
+		private static byte[] GetRedir(IntPtr ptr) {
+			byte[] ret = new byte[13];
+			unsafe
+			{
+				byte* pointer = (byte*)ptr.ToPointer();
+				for (int i = 0; i < 13; ++i) {
+					ret[i] = *(pointer + i);
+				}
+			}
+			return ret;
+		}
+
 		private static bool IsRedirected(IntPtr site, IntPtr target) {
 			unsafe {
 				byte* sitePtr = (byte*)site.ToPointer();
 				return *sitePtr == 0x49 &&
-					* (sitePtr + 1) == 0xBB &&
-					*(sitePtr + 2) == (ulong)target.ToInt64() &&
+					*(sitePtr + 1) == 0xBB &&
+					*((ulong*)(sitePtr + 2)) == (ulong)target.ToInt64() &&
 					*(sitePtr + 10) == 0x41 &&
 					*(sitePtr + 11) == 0xFF &&
 					*(sitePtr + 12) == 0xE3;
@@ -82,7 +106,7 @@ namespace TrafficManager.Util
 		/// <param name="target"></param>
 		private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
         {
-            RedirectCallsState state = new RedirectCallsState();
+			RedirectCallsState state = new RedirectCallsState();
 
             // R11 is volatile.
             unsafe

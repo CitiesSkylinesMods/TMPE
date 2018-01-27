@@ -158,25 +158,47 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition,
-				PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID,
-				byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+				PathUnit.Position prevPosition, uint prevLaneId, byte prevOffset, PathUnit.Position refPosition, uint refLaneId,
+				byte refOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			var netManager = Singleton<NetManager>.instance;
-			ushort targetNodeId;
-			ushort nextTargetNodeId;
-			if (offset < position.m_offset) {
-				targetNodeId = netManager.m_segments.m_buffer[position.m_segment].m_startNode;
-				nextTargetNodeId = netManager.m_segments.m_buffer[position.m_segment].m_endNode;
+			ushort prevSourceNodeId;
+			ushort prevTargetNodeId;
+			if (prevOffset < prevPosition.m_offset) {
+				prevSourceNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_startNode;
+				prevTargetNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_endNode;
 			} else {
-				targetNodeId = netManager.m_segments.m_buffer[position.m_segment].m_endNode;
-				nextTargetNodeId = netManager.m_segments.m_buffer[position.m_segment].m_startNode;
+				prevSourceNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_endNode;
+				prevTargetNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_startNode;
 			}
-			var prevTargetNodeId = prevOffset == 0 ? netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode : netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
+
+			ushort refTargetNodeId;
+			if (refOffset == 0) {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_startNode;
+			} else {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_endNode;
+			}
+
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[21] && (GlobalConfig.Instance.Debug.NodeId <= 0 || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId) && (GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.None || GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.RoadVehicle) && (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+
+			if (debug) {
+				Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
+					$"\trefPosition.m_segment={refPosition.m_segment}, refPosition.m_offset={refPosition.m_offset}\n" +
+					$"\tprevPosition.m_segment={prevPosition.m_segment}, prevPosition.m_offset={prevPosition.m_offset}\n" +
+					$"\tnextPosition.m_segment={nextPosition.m_segment}, nextPosition.m_offset={nextPosition.m_offset}\n" +
+					$"\trefLaneId={refLaneId}, refOffset={refOffset}\n" +
+					$"\tprevLaneId={prevLaneId}, prevOffset={prevOffset}\n" +
+					$"\tprevSourceNodeId={prevSourceNodeId}, prevTargetNodeId={prevTargetNodeId}\n" +
+					$"\trefTargetNodeId={refTargetNodeId}, refTargetNodeId={refTargetNodeId}\n" +
+					$"\tindex={index}");
+			}
+#endif
 
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
 			Vector3 lastFrameVehiclePos = lastFrameData.m_position;
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-			netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection(offset * 0.003921569f, out pos, out dir);
+			netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection(prevOffset * 0.003921569f, out pos, out dir);
 
 			float braking = this.m_info.m_braking;
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
@@ -184,41 +206,40 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// car position on the Bezier curve of the lane
-			var vehiclePosOnBezier = netManager.m_lanes.m_buffer[prevLaneID].CalculatePosition(prevOffset * 0.003921569f);
+			var refVehiclePosOnBezier = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition(refOffset * 0.003921569f);
 			//ushort currentSegmentId = netManager.m_lanes.m_buffer[prevLaneID].m_segment;
 
 			// this seems to be like the required braking force in order to stop the vehicle within its half length.
 			var crazyValue = 0.5f * sqrVelocity / braking + m_info.m_generatedInfo.m_size.z * 0.5f;
-			bool withinBrakingDistance = Vector3.Distance(lastFrameVehiclePos, vehiclePosOnBezier) >= crazyValue - 1f;
-
-			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
-#endif
-				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
-#if BENCHMARK
-			}
-#endif
-			// NON-STOCK CODE END
+			bool withinBrakingDistance = Vector3.Distance(lastFrameVehiclePos, refVehiclePosOnBezier) >= crazyValue - 1f;
 
 			bool isRecklessDriver = VehicleStateManager.Instance.VehicleStates[vehicleId].recklessDriver;
-			if (targetNodeId == prevTargetNodeId && withinBrakingDistance) {
+			if (prevSourceNodeId == refTargetNodeId && withinBrakingDistance) {
 				// NON-STOCK CODE START (stock code replaced)
 #if BENCHMARK
 				using (var bm = new Benchmark(null, "MayChangeSegment")) {
 #endif
-					//bool isRecklessDriver = VehicleStateManager.Instance.IsRecklessDriver(vehicleId, ref vehicleData); // NON-STOCK CODE
+				//bool isRecklessDriver = VehicleStateManager.Instance.IsRecklessDriver(vehicleId, ref vehicleData); // NON-STOCK CODE
 
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, isRecklessDriver, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed)) // NON-STOCK CODE
-						return;
+				if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, isRecklessDriver, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) { // NON-STOCK CODE
+					return;
+				} else {
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
+#endif
+					VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
+#if BENCHMARK
+				}
+#endif
+				}
 #if BENCHMARK
 				}
 #endif
 				// NON-STOCK CODE END
 			}
 
-			var segmentInfo = netManager.m_segments.m_buffer[position.m_segment].Info;
-			if (segmentInfo.m_lanes != null && segmentInfo.m_lanes.Length > position.m_lane) {
+			var segmentInfo = netManager.m_segments.m_buffer[prevPosition.m_segment].Info;
+			if (segmentInfo.m_lanes != null && segmentInfo.m_lanes.Length > prevPosition.m_lane) {
 				// NON-STOCK CODE START
 				// NON-STOCK CODE START
 				float laneSpeedLimit = 1f;
@@ -226,13 +247,13 @@ namespace TrafficManager.Custom.AI {
 				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
 #endif
 				if (!Options.customSpeedLimitsEnabled) {
-					laneSpeedLimit = segmentInfo.m_lanes[position.m_lane].m_speedLimit;
+					laneSpeedLimit = segmentInfo.m_lanes[prevPosition.m_lane].m_speedLimit;
 				} else {
 					// === START INLINED VERSION OF SpeedLimitManager.GetLockFreeGameSpeedLimit ===
-					ushort?[] fastArray = Flags.laneSpeedLimitArray[position.m_segment];
-					if (fastArray != null && fastArray.Length > position.m_lane && fastArray[position.m_lane] != null) {
+					ushort?[] fastArray = Flags.laneSpeedLimitArray[prevPosition.m_segment];
+					if (fastArray != null && fastArray.Length > prevPosition.m_lane && fastArray[prevPosition.m_lane] != null) {
 						// === START INLINED VERSION OF SpeedLimitManager.ToGameSpeedLimit ===
-						laneSpeedLimit = (float)fastArray[position.m_lane];
+						laneSpeedLimit = (float)fastArray[prevPosition.m_lane];
 						if (laneSpeedLimit == 0) {
 							laneSpeedLimit = SpeedLimitManager.MAX_SPEED;
 						} else {
@@ -241,7 +262,7 @@ namespace TrafficManager.Custom.AI {
 						// === END INLINED VERSION OF SpeedLimitManager.ToGameSpeedLimit ===
 						// laneSpeedLimit = ToGameSpeedLimit((ushort)fastArray[position.m_lane]);
 					} else {
-						laneSpeedLimit = segmentInfo.m_lanes[position.m_lane].m_speedLimit;
+						laneSpeedLimit = segmentInfo.m_lanes[prevPosition.m_lane].m_speedLimit;
 					}
 					// === END INLINED VERSION OF SpeedLimitManager.GetLockFreeGameSpeedLimit ===
 					//laneSpeedLimit = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, segmentInfo.m_lanes[position.m_lane]); // info2.m_lanes[position.m_lane].m_speedLimit; // NON-STOCK CODE
@@ -250,7 +271,7 @@ namespace TrafficManager.Custom.AI {
 				}
 #endif
 				// NON-STOCK CODE END
-				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, netManager.m_lanes.m_buffer[laneID].m_curve);
+				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, laneSpeedLimit, netManager.m_lanes.m_buffer[prevLaneId].m_curve);
 			} else {
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
@@ -267,36 +288,36 @@ namespace TrafficManager.Custom.AI {
 					if ((cityPlanningPolicies & DistrictPolicies.CityPlanning.StuddedTires) != DistrictPolicies.CityPlanning.None) {
 						if (Options.strongerRoadConditionEffects) {
 							if (maxSpeed > VehicleBehaviorManager.ICY_ROADS_STUDDED_MIN_SPEED)
-								maxSpeed = VehicleBehaviorManager.ICY_ROADS_STUDDED_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleBehaviorManager.ICY_ROADS_STUDDED_MIN_SPEED);
+								maxSpeed = VehicleBehaviorManager.ICY_ROADS_STUDDED_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleBehaviorManager.ICY_ROADS_STUDDED_MIN_SPEED);
 						} else {
-							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[position.m_segment].m_wetness * 0.0005882353f; // vanilla: -15% .. ±0%
+							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness * 0.0005882353f; // vanilla: -15% .. ±0%
 						}
 						districtManager.m_districts.m_buffer[(int)district].m_cityPlanningPoliciesEffect |= DistrictPolicies.CityPlanning.StuddedTires;
 					} else {
 						if (Options.strongerRoadConditionEffects) {
 							if (maxSpeed > VehicleBehaviorManager.ICY_ROADS_MIN_SPEED)
-								maxSpeed = VehicleBehaviorManager.ICY_ROADS_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleBehaviorManager.ICY_ROADS_MIN_SPEED);
+								maxSpeed = VehicleBehaviorManager.ICY_ROADS_MIN_SPEED + (float)(255 - netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - VehicleBehaviorManager.ICY_ROADS_MIN_SPEED);
 						} else {
-							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[position.m_segment].m_wetness * 0.00117647066f; // vanilla: -30% .. ±0%
+							maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness * 0.00117647066f; // vanilla: -30% .. ±0%
 						}
 					}
 				} else {
 					if (Options.strongerRoadConditionEffects) {
 						float minSpeed = Math.Min(maxSpeed * VehicleBehaviorManager.WET_ROADS_FACTOR, VehicleBehaviorManager.WET_ROADS_MAX_SPEED); // custom: -25% .. 0
 						if (maxSpeed > minSpeed)
-							maxSpeed = minSpeed + (float)(255 - netManager.m_segments.m_buffer[position.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - minSpeed);
+							maxSpeed = minSpeed + (float)(255 - netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness) * 0.0039215686f * (maxSpeed - minSpeed);
 					} else {
-						maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[position.m_segment].m_wetness * 0.0005882353f; // vanilla: -15% .. ±0%
+						maxSpeed *= 1f - (float)netManager.m_segments.m_buffer[prevPosition.m_segment].m_wetness * 0.0005882353f; // vanilla: -15% .. ±0%
 					}
 				}
 
 				if (Options.strongerRoadConditionEffects) {
 					float minSpeed = Math.Min(maxSpeed * VehicleBehaviorManager.BROKEN_ROADS_FACTOR, VehicleBehaviorManager.BROKEN_ROADS_MAX_SPEED);
 					if (maxSpeed > minSpeed) {
-						maxSpeed = minSpeed + (float)netManager.m_segments.m_buffer[position.m_segment].m_condition * 0.0039215686f * (maxSpeed - minSpeed);
+						maxSpeed = minSpeed + (float)netManager.m_segments.m_buffer[prevPosition.m_segment].m_condition * 0.0039215686f * (maxSpeed - minSpeed);
 					}
 				} else {
-					maxSpeed *= 1f + (float)netManager.m_segments.m_buffer[position.m_segment].m_condition * 0.0005882353f; // vanilla: ±0% .. +15 %
+					maxSpeed *= 1f + (float)netManager.m_segments.m_buffer[prevPosition.m_segment].m_condition * 0.0005882353f; // vanilla: ±0% .. +15 %
 				}
 
 				// === START INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===

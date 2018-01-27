@@ -187,23 +187,48 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position prevPosition, uint prevLaneId, byte prevOffset, PathUnit.Position refPosition, uint refLaneId, byte refOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+			NetManager netManager = Singleton<NetManager>.instance;
+			ushort prevSourceNodeId;
+			ushort prevTargetNodeId;
+			if (prevOffset < prevPosition.m_offset) {
+				prevSourceNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_startNode;
+				prevTargetNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_endNode;
+			} else {
+				prevSourceNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_endNode;
+				prevTargetNodeId = netManager.m_segments.m_buffer[prevPosition.m_segment].m_startNode;
+			}
+
+			ushort refTargetNodeId;
+			if (refOffset == 0) {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_startNode;
+			} else {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_endNode;
+			}
+
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[21] && (GlobalConfig.Instance.Debug.NodeId <= 0 || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId) && (GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.None || GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.Tram) && (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+
+			if (debug) {
+				Log._Debug($"CustomTramBaseAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
+					$"\trefPosition.m_segment={refPosition.m_segment}, refPosition.m_offset={refPosition.m_offset}\n" +
+					$"\tprevPosition.m_segment={prevPosition.m_segment}, prevPosition.m_offset={prevPosition.m_offset}\n" +
+					$"\tnextPosition.m_segment={nextPosition.m_segment}, nextPosition.m_offset={nextPosition.m_offset}\n" +
+					$"\trefLaneId={refLaneId}, refOffset={refOffset}\n" +
+					$"\tprevLaneId={prevLaneId}, prevOffset={prevOffset}\n" +
+					$"\tprevSourceNodeId={prevSourceNodeId}, prevTargetNodeId={prevTargetNodeId}\n" +
+					$"\trefTargetNodeId={refTargetNodeId}, refTargetNodeId={refTargetNodeId}\n" +
+					$"\tindex={index}");
+			}
+
+
+#endif
+
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
-#endif
-				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
-#if BENCHMARK
-			}
-#endif
-			// NON-STOCK CODE END
-
-			NetManager netManager = Singleton<NetManager>.instance;
-			netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
-			Vector3 b = netManager.m_lanes.m_buffer[prevLaneID].CalculatePosition((float)prevOffset * 0.003921569f);
+			netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection((float)prevOffset * 0.003921569f, out pos, out dir);
+			Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition((float)refOffset * 0.003921569f);
 			Vector3 a = lastFrameData.m_position;
 			Vector3 a2 = lastFrameData.m_position;
 			Vector3 b2 = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
@@ -213,48 +238,46 @@ namespace TrafficManager.Custom.AI {
 			float a3 = Vector3.Distance(a, b);
 			float b3 = Vector3.Distance(a2, b);
 			if (Mathf.Min(a3, b3) >= crazyValue - 1f) {
-				Segment3 segment;
+				// dead stock code
+				/*Segment3 segment;
 				segment.a = pos;
-				ushort targetNodeId;
-				ushort nextTargetNodeId;
-				if (offset < position.m_offset) {
+				if (prevOffset < prevPosition.m_offset) {
 					segment.b = pos + dir.normalized * this.m_info.m_generatedInfo.m_size.z;
-					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
-					nextTargetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
 				} else {
 					segment.b = pos - dir.normalized * this.m_info.m_generatedInfo.m_size.z;
-					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
-					nextTargetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
-				}
-				ushort prevTargetNodeId;
-				if (prevOffset == 0) {
-					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
-				} else {
-					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
-				}
-				if (targetNodeId == prevTargetNodeId) {
+				}*/
+				if (prevSourceNodeId == refTargetNodeId) {
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "MayChangeSegment")) {
 #endif
-						if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, ref nextPosition, nextTargetNodeId, out maxSpeed))
-							return;
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) {
+						return;
+					} else {
+#if BENCHMARK	
+						using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
+#endif
+						VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
+#if BENCHMARK
+						}
+#endif
+					}
 #if BENCHMARK
 					}
 #endif
 				}
 			}
 
-			NetInfo info = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
-			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
+			NetInfo info = netManager.m_segments.m_buffer[(int)prevPosition.m_segment].Info;
+			if (info.m_lanes != null && info.m_lanes.Length > (int)prevPosition.m_lane) {
 				float speedLimit = 1;
 #if BENCHMARK
 				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
 #endif
-					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
+					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(prevPosition.m_segment, prevPosition.m_lane, prevLaneId, info.m_lanes[prevPosition.m_lane]) : info.m_lanes[prevPosition.m_lane].m_speedLimit;
 #if BENCHMARK
 				}
 #endif
-				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, speedLimit, netManager.m_lanes.m_buffer[laneID].m_curve);
+				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, speedLimit, netManager.m_lanes.m_buffer[prevLaneId].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}

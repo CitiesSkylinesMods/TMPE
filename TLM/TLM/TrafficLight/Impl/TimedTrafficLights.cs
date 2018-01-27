@@ -268,7 +268,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			}
 		}
 
-		public void OnUpdate(NodeGeometry geometry) {
+		public void OnUpdate(IObservable<NodeGeometry> observable) {
 			// not required since TrafficLightSimulation handles this for us: OnGeometryUpdate() is being called.
 			// TODO improve
 		}

@@ -84,11 +84,13 @@ namespace TrafficManager.UI.SubTools {
 					continue;
 				}
 
+				// TODO refactor connection class check
 				ItemClass connectionClass = NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
 				if (connectionClass == null ||
 					!(connectionClass.m_service == ItemClass.Service.Road || (connectionClass.m_service == ItemClass.Service.PublicTransport &&
 					(connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain ||
-					connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro)))) {
+					connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro ||
+					connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail)))) {
 					continue;
 				}
 
@@ -470,7 +472,7 @@ namespace TrafficManager.UI.SubTools {
 								startNode = !isEndNode,
 								position = finalPos,
 								secondaryPosition = (Vector3)pos,
-								color = colors[nodeMarkers.Count],
+								color = colors[nodeMarkers.Count % colors.Length],
 								isSource = isSource,
 								isTarget = isTarget,
 								laneType = laneInfo.m_laneType,

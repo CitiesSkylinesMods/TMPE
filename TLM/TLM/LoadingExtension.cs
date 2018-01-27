@@ -2386,7 +2386,9 @@ namespace TrafficManager {
 
 				if (detourFailed) {
 					Log.Info("Detours failed");
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+					Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+					});
 				} else {
 					Log.Info("Detours successful");
 				}
@@ -2493,6 +2495,8 @@ namespace TrafficManager {
 						uint versionB = Convert.ToUInt32(versionElms[1]);
 						uint versionC = Convert.ToUInt32(versionElms[2]);
 
+						Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+
 						bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
 							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB)/* ||
 							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC < versionC)*/;
@@ -2502,9 +2506,17 @@ namespace TrafficManager {
 							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC > versionC)*/;
 
 						if (isModTooOld) {
-							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.", false);
+							string msg = $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.";
+							Log.Error(msg);
+							Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+								UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", msg, false);
+							});
 						} else if (isModNewer) {
-							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.", false);
+							string msg = $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.";
+							Log.Error(msg);
+							Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+								UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", msg, false);
+							});
 						}
 					}
 					IsGameLoaded = true;
@@ -2555,8 +2567,12 @@ namespace TrafficManager {
 
 					IsPathManagerReplaced = true;
 				} catch (Exception ex) {
+					string error = "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.";
+					Log.Error(error);
 					Log.Error($"Path manager replacement error: {ex.ToString()}");
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.", true);
+					Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", error, true);
+					});
 				}
 			}
 
@@ -2617,7 +2633,7 @@ namespace TrafficManager {
 			if (loadingWrapperLoadingExtensionsField != null) {
 				loadingExtensions = (List<ILoadingExtension>)loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
 			} else {
-				Log._Debug("Could not get loading extensions field");
+				Log.Warning("Could not get loading extensions field");
 			}
 
 			if (loadingExtensions != null) {

@@ -56,7 +56,7 @@ incoming incoming
 Enable_Advanced_Vehicle_AI Enable Advanced Vehicle AI
 Vehicles_may_enter_blocked_junctions Vehicles may enter blocked junctions
 All_vehicles_may_ignore_lane_arrows All vehicles may ignore lane arrows
-Busses_may_ignore_lane_arrows Busses may ignore lane arrows
+Busses_may_ignore_lane_arrows Buses may ignore lane arrows
 Reckless_driving Reckless driving
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Settings are defined for each savegame separately
@@ -114,7 +114,6 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction The chosen tra
 Advanced_AI_cannot_be_activated Advanced AI cannot be activated
 The_Advanced_Vehicle_AI_cannot_be_activated The Advanced Vehicle AI cannot be activated because you are already using another mod that modifies vehicle behavior (e.g. Improved AI or Traffic++).
 Enable_dynamic_path_calculation Enable dynamic path calculation
-Changes_made_with_this_tool_will_take_full_effect_after_some_minutes Changes made with this tool will take full effect after some minutes
 Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
 Lane_connector Lane connector
 Connected_lanes Connected lanes
@@ -152,8 +151,8 @@ General General
 Gameplay Gameplay
 Overlays Overlays
 Realistic_speeds Realistic speeds
-Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
-Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
+Evacuation_busses_may_ignore_traffic_rules Evacuation buses may ignore traffic rules
+Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation buses may only be used to reach a shelter
 Vehicle_behavior Vehicle behavior
 Policies_&_Restrictions Policies & Restrictions
 At_junctions At junctions
@@ -206,7 +205,7 @@ TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Set up timed traffic lights.\n\n1. Cli
 TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Toggle traffic lights
 TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Add or remove traffic lights to/from junctions.\n\nClick on a junction to toggle traffic lights.
 TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
-TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, buses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
@@ -217,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the time
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+Public_transport Public transport
+Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations

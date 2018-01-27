@@ -114,7 +114,6 @@ The_chosen_traffic_light_program_is_incompatible_to_this_junction 所選的號�
 Advanced_AI_cannot_be_activated 加強版 AI 無法啟動
 The_Advanced_Vehicle_AI_cannot_be_activated 加強版車輛AI無法啟動，因為您所使用的其它車輛行控模組正作動中（例如 Improved AI 或 Traffic++）
 Enable_dynamic_path_calculation 啟用動態的路線運算
-Changes_made_with_this_tool_will_take_full_effect_after_some_minutes 請注意，此工具造成的改變需要幾分鐘才能完全發揮效果。
 Lane_Arrow_Changer_Disabled_Connection 因為您已手動創建了車道的連接，故在此車道上無法使用改變遵行方向的功能
 Lane_connector 車道連接工具
 Connected_lanes 已連接車道
@@ -177,7 +176,12 @@ flow_ratio flow ratio
 wait_ratio wait ratio
 After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
 Adaptive_step_switching Adaptive step switching
+Dynamic_lane_section Dynamic lane selection
+Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
+Vehicle_restrictions_aggression Vehicle restrictions aggression
+Strict Strict
 Show_path-find_stats Show path-find stats
+Remove_this_vehicle Remove this vehicle
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights
 Enable_tutorial_messages Enable tutorial messages
 TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
@@ -212,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the time
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+Public_transport Public transport
+Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations

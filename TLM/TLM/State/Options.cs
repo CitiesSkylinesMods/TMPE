@@ -54,6 +54,7 @@ namespace TrafficManager.State {
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox prohibitPocketCarsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
+		private static UICheckBox realisticPublicTransportToggle = null;
 		private static UISlider altLaneSelectionRatioSlider = null;
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
@@ -122,6 +123,7 @@ namespace TrafficManager.State {
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
 		public static bool advancedAI = false;
+		public static bool realisticPublicTransport = false;
 		public static byte altLaneSelectionRatio = 0;
 		public static bool highwayRules = false;
 #if DEBUG
@@ -253,6 +255,9 @@ namespace TrafficManager.State {
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
 			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+
+			var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
+			realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
 
 			// VEHICLE RESTRICTIONS
 			++tabIndex;
@@ -839,6 +844,14 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onRealisticPublicTransportChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"realisticPublicTransport changed to {newValue}");
+			realisticPublicTransport = newValue;
+		}
+
 		private static void onRealisticSpeedsChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -944,17 +957,11 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickReloadGlobalConf() {
-			if (!checkGameLoaded())
-				return;
-
 			GlobalConfig.Reload();
 		}
 
 		private static void onClickResetGlobalConf() {
-			if (!checkGameLoaded())
-				return;
-
-			GlobalConfig.Reset(null);
+			GlobalConfig.Reset(null, true);
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {
@@ -1081,6 +1088,13 @@ namespace TrafficManager.State {
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
+		}
+
+		public static void setRealisticPublicTransport(bool newValue) {
+			bool valueChanged = newValue != realisticPublicTransport;
+			realisticPublicTransport = newValue;
+			if (realisticPublicTransportToggle != null)
+				realisticPublicTransportToggle.isChecked = newValue;
 		}
 
 		public static void setRealisticSpeeds(bool newValue) {

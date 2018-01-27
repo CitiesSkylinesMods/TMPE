@@ -1,12 +1,13 @@
 using CSUtil.Commons;
 using ICities;
+using System.Reflection;
 using TrafficManager.State;
 using UnityEngine;
 
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.10.5";
+		public static readonly string Version = "1.10.6";
 
 		public static readonly uint GameVersion = 172221200u;
 		public static readonly uint GameVersionA = 1u;
@@ -19,11 +20,11 @@ namespace TrafficManager {
 		public string Description => "Manage your city's traffic";
 
 		public void OnEnabled() {
-			Log._Debug("TrafficManagerMod Enabled");
+			Log.Info($"Traffic Manager: President Edition enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
 		}
 
 		public void OnDisabled() {
-			Log._Debug("TrafficManagerMod Disabled");
+			Log.Info("Traffic Manager: President Edition disabled.");
 		}
 
 		public void OnSettingsUI(UIHelperBase helper) {

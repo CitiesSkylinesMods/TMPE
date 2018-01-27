@@ -30,7 +30,16 @@ namespace TrafficManager.Manager.Impl {
 		public const VehicleInfo.VehicleType RECKLESS_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
 		private static PathUnit.Position DUMMY_POS = default(PathUnit.Position);
-		private static readonly ushort[] POW2MASKS = new ushort[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+		private static readonly uint[] POW2MASKS = new uint[] {
+			1u, 2u, 4u, 8u,
+			16u, 32u, 64u, 128u,
+			256u, 512u, 1024u, 2048u,
+			4096u, 8192u, 16384u, 32768u,
+			65536u, 131072u, 262144u, 524288u,
+			1048576u, 2097152u, 4194304u, 8388608u,
+			16777216u, 33554432u, 67108864u, 134217728u,
+			268435456u, 536870912u, 1073741824u, 2147483648u
+		};
 
 		public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
 
@@ -254,7 +263,7 @@ namespace TrafficManager.Manager.Impl {
 					//					}
 
 					uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-					uint prevTargetNodeLower8Bits = (uint)((prevTargetNodeId << 8) / 32768);
+					uint targetNodeLower8Bits = (uint)((targetNodeId << 8) / 32768);
 
 					RoadBaseAI.TrafficLightState pedestrianLightState;
 					bool vehicles;
@@ -263,7 +272,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 							frontVehicleId, ref vehicleData,
 #endif
-							targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+							targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - targetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
 					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
 						vehicleLightState = RoadBaseAI.TrafficLightState.Green;
@@ -274,10 +283,10 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle {frontVehicleId} has TL state {vehicleLightState} at node {targetNodeId}");
 #endif
 
-					uint random = currentFrameIndex - prevTargetNodeLower8Bits & 255u;
+					uint random = currentFrameIndex - targetNodeLower8Bits & 255u;
 					if (!vehicles && random >= 196u) {
 						vehicles = true;
-						RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - prevTargetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
+						RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - targetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
 					}
 
 					switch (vehicleLightState) {
@@ -586,7 +595,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MayDespawn(ref Vehicle vehicleData) {
-			return !Options.disableDespawning || vehicleData.m_flags2 != 0 || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
+			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
 		public float CalcMaxSpeed(ushort vehicleId, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool isRecklessDriver) {
@@ -738,7 +747,7 @@ namespace TrafficManager.Manager.Impl {
 
 				VehicleInfo vehicleInfo = vehicleData.Info;
 				float vehicleMaxSpeed = vehicleInfo.m_maxSpeed / 8f;
-				float vehicleCurSpeed = vehicleState.velocity / 8f;
+				float vehicleCurSpeed = vehicleData.GetLastFrameVelocity().magnitude / 8f;
 
 				float bestStayMeanSpeed = 0f;
 				float bestStaySpeedDiff = float.PositiveInfinity; // best speed difference on next continuous lane
@@ -755,8 +764,8 @@ namespace TrafficManager.Manager.Impl {
 				//bool foundClearFwdLane = false;
 
 				//ushort reachableNext1LanesMask = 0;
-				ushort reachableNext2LanesMask = 0;
-				ushort reachableNext3LanesMask = 0;
+				uint reachableNext2LanesMask = 0;
+				uint reachableNext3LanesMask = 0;
 
 				//int numReachableNext1Lanes = 0;
 				int numReachableNext2Lanes = 0;
@@ -768,7 +777,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 #endif
 
-				ushort mask;
+				uint mask;
 				for (int i = 0; i < currentFwdTransitions.Length; ++i) {
 					if (currentFwdTransitions[i].segmentId != next1PathPos.m_segment) {
 						continue;

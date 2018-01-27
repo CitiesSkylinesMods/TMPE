@@ -104,7 +104,7 @@ namespace TrafficManager.Traffic.Impl {
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}.");
+				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}, includeStopped={includeStopped}.");
 #endif
 
 			ushort vehicleId = FirstRegisteredVehicleId;
@@ -143,7 +143,7 @@ namespace TrafficManager.Traffic.Impl {
 #if DEBUGMETRIC
 			if (state.currentSegmentId != SegmentId || state.currentStartNode != StartNode) {
 				if (debug)
-					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} error: Segment end mismatch!");
+					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} error: Segment end mismatch! {state.ToString()}");
 				//RequestCleanup();
 				return;
 			}
@@ -165,10 +165,10 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			if (!includeStopped && state.sqrVelocity < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+			if (!includeStopped && state.SqrVelocity < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 #if DEBUGMETRIC
 				if (debug)
-					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({state.sqrVelocity})");
+					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({state.SqrVelocity})");
 #endif
 				++numProcessed;
 				return;
@@ -190,7 +190,7 @@ namespace TrafficManager.Traffic.Impl {
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: *added*!");
+				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: ***ADDED*** ({state.currentSegmentId}@{state.currentLaneIndex} -> {state.nextSegmentId}@{state.nextLaneIndex})!");
 #endif
 
 			return;

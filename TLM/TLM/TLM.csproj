@@ -227,6 +227,7 @@
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Util\IObservable.cs" />

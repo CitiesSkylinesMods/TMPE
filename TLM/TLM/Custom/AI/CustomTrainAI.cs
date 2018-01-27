@@ -660,35 +660,39 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
-		public void CustomCheckNextLane(ushort vehicleId, ref Vehicle vehicleData, ref float maxSpeed, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, Bezier3 bezier) {
+		public void CustomCheckNextLane(ushort vehicleId, ref Vehicle vehicleData, ref float maxSpeed, PathUnit.Position nextPosition, uint nextLaneId, byte nextOffset, PathUnit.Position refPosition, uint refLaneId, byte refOffset, Bezier3 bezier) {
 			NetManager netManager = Singleton<NetManager>.instance;
-#if DEBUG
-			ushort nextNodeId;
-			if (offset < position.m_offset) {
-				nextNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
+
+			ushort nextSourceNodeId;
+			if (nextOffset < nextPosition.m_offset) {
+				nextSourceNodeId = netManager.m_segments.m_buffer[(int)nextPosition.m_segment].m_startNode;
 			} else {
-				nextNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
+				nextSourceNodeId = netManager.m_segments.m_buffer[(int)nextPosition.m_segment].m_endNode;
 			}
-			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nextNodeId == GlobalConfig.Instance.Debug.NodeId);
+
+			ushort refTargetNodeId;
+			if (refOffset == 0) {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_startNode;
+			} else {
+				refTargetNodeId = netManager.m_segments.m_buffer[(int)refPosition.m_segment].m_endNode;
+			}
+
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[21] && (GlobalConfig.Instance.Debug.NodeId <= 0 || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId) && (GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.None || GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.RailVehicle) && (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+
+			if (debug) {
+				Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}) called.\n" +
+					$"\trefPosition.m_segment={refPosition.m_segment}, refPosition.m_offset={refPosition.m_offset}\n" +
+					$"\tnextPosition.m_segment={nextPosition.m_segment}, nextPosition.m_offset={nextPosition.m_offset}\n" +
+					$"\trefLaneId={refLaneId}, refOffset={refOffset}\n" +
+					$"\tprevLaneId={nextLaneId}, prevOffset={nextOffset}\n" +
+					$"\tnextSourceNodeId={nextSourceNodeId}\n" +
+					$"\trefTargetNodeId={refTargetNodeId}, refTargetNodeId={refTargetNodeId}");
+			}
 #endif
 
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
-
-			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
-#endif
-#if DEBUG
-				if (debug)
-				Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): processing vehicle {vehicleId} @ seg. {position.m_segment}, lane {position.m_lane}, off {position.m_offset} // given: laneID={laneID} offset={offset} prevPos=[seg. {prevPos.m_segment}, lane {prevPos.m_lane}, off {prevPos.m_offset}] prevLaneID={prevLaneID} prevOffset={prevOffset} bezier=[a={bezier.a} b={bezier.b} c={bezier.c} d={bezier.d}]");
-#endif
-
-				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData, lastFrameData.m_velocity.magnitude);
-#if BENCHMARK
-			}
-#endif
-			// NON-STOCK CODE END
 
 			Vector3 lastPosPlusRot = lastFrameData.m_position;
 			Vector3 lastPosMinusRot = lastFrameData.m_position;
@@ -705,40 +709,18 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 			if (Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot) >= breakingDist - 5f) {
-				ushort targetNodeId;
-#if DEBUG
-				targetNodeId = nextNodeId;
-#else
-				if (offset < position.m_offset) {
-					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
-				} else {
-					targetNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
-				}
-#endif
-				ushort prevTargetNodeId;
-				if (prevOffset == 0) {
-					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_startNode;
-				} else {
-					prevTargetNodeId = netManager.m_segments.m_buffer[(int)prevPos.m_segment].m_endNode;
-				}
-
-#if DEBUG
-				if (debug)
-					Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Target position is within breaking distance. ({Mathf.Min(distToTargetAfterRot, distToTargetBeforeRot)} >= {breakingDist - 5f}). targetNodeId={targetNodeId} prevTargetNodeId={prevTargetNodeId} targetHasPrio={TrafficPriorityManager.Instance.HasNodePrioritySign(targetNodeId)} targetHasActiveTimed={TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId)}");
-#endif
-
 				/*VehicleManager vehMan = Singleton<VehicleManager>.instance;
 				ushort firstVehicleId = vehicleData.GetFirstVehicle(vehicleId);
 				if (VehicleBehaviorManager.Instance.MayDespawn(ref vehMan.m_vehicles.m_buffer[firstVehicleId]) || vehMan.m_vehicles.m_buffer[firstVehicleId].m_blockCounter < 100) {*/ // NON-STOCK CODE
 #if DEBUG
 					if (debug)
-						Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Checking for free space on lane {laneID}.");
+						Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Checking for free space on lane {nextLaneId}.");
 #endif
 
-					if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(1000f, vehicleId)) {
+					if (!netManager.m_lanes.m_buffer[nextLaneId].CheckSpace(1000f, vehicleId)) {
 #if DEBUG
 						if (debug)
-							Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): No space available on lane {laneID}. ABORT.");
+							Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): No space available on lane {nextLaneId}. ABORT.");
 #endif
 						vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
 						vehicleData.m_waitCounter = 0;
@@ -790,7 +772,7 @@ namespace TrafficManager.Custom.AI {
 				//} // NON-STOCK CODE
 
 				//if (this.m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) { // NON-STOCK CODE
-				if (targetNodeId == prevTargetNodeId) {
+				if (nextSourceNodeId == refTargetNodeId) {
 #if DEBUG
 					if (debug)
 						Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Checking if vehicle is allowed to change segment.");
@@ -800,7 +782,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "MayChangeSegment")) {
 #endif
-						mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref prevPos, ref netManager.m_segments.m_buffer[prevPos.m_segment], prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref netManager.m_nodes.m_buffer[targetNodeId], laneID, out maxSpeed);
+						mayChange = VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref nextPosition, refTargetNodeId, ref netManager.m_nodes.m_buffer[refTargetNodeId], nextLaneId, out maxSpeed);
 #if BENCHMARK
 					}
 #endif
@@ -810,6 +792,14 @@ namespace TrafficManager.Custom.AI {
 							Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): Vehicle is NOT allowed to change segment. ABORT.");
 #endif
 						return;
+					} else {
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
+#endif
+						VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
+#if BENCHMARK
+				}
+#endif
 					}
 					maxSpeed = oldMaxSpeed;
 				}

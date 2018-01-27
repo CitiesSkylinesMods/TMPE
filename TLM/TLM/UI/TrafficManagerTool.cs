@@ -623,9 +623,9 @@ namespace TrafficManager.UI {
 
 					float startDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[startNodeId].m_position).magnitude;
 					float endDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[endNodeId].m_position).magnitude;
-					if (startDist < endDist && startDist < 25f)
+					if (startDist < endDist && startDist < 75f)
 						HoveredNodeId = startNodeId;
-					else if (endDist < startDist && endDist < 25f)
+					else if (endDist < startDist && endDist < 75f)
 						HoveredNodeId = endNodeId;
 				}
 
@@ -882,8 +882,17 @@ namespace TrafficManager.UI {
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
-			
-			for (int i = 1; i < vehicles.m_size; ++i) {
+
+
+			int startVehicleId = 1;
+			int endVehicleId = (int)(vehicles.m_size - 1);
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.VehicleId != 0) {
+				startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;
+			}
+#endif
+
+			for (int i = startVehicleId; i <= endVehicleId; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
 					continue;
@@ -912,7 +921,7 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.sqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
+				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
 					"d: " + driverInst.instanceId + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));

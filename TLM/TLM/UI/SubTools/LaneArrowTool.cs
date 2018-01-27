@@ -107,11 +107,12 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+			NetManager netManager = Singleton<NetManager>.instance;
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
 			if (!_cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
-				var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
-
-				if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
+				var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
+				
+				if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId) && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId], MainTool.GetToolColor(false, false),
 						MainTool.GetToolColor(false, false));
 				}

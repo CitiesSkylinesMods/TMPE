@@ -130,6 +130,16 @@ namespace TrafficManager.Custom.PathFinding {
 			//	pathType = ExtPathType.None;
 			//	vehicleId = 0;
 			//}
+
+			public override string ToString() {
+				return $"[PathUnitQueueItem\n" +
+				"\t" + $"nextPathUnitId={nextPathUnitId}\n" +
+				"\t" + $"vehicleType={vehicleType}\n" +
+				"\t" + $"pathType={pathType}\n" +
+				"\t" + $"vehicleId={vehicleId}\n" +
+				"\t" + $"queued={queued}\n" +
+				"PathUnitQueueItem]";
+			}
 		}
 
 		/// <summary>

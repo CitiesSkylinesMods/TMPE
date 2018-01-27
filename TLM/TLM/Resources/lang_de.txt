@@ -216,3 +216,5 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Füge der Ampelschaltung e
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Klicke auf eine andere Kreuzung, um sie der Schaltung hinzuzufügen. Die Ampelschaltung wird danach beide Kreuzungen gleichzeitig steuern.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Entferne eine Kreuzung von der Ampelschaltung.
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Klicke auf eine der Kreuzungen, die momentan von der Ampelschaltungen kontrolliert werden. Die selektierte Ampel wird entfernt, so dass die Ampelschaltung die Kreuzung nicht mehr kontrolliert.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.
+Public_transport Öffentlicher Personennahverkehr
+Prevent_excessive_transfers_at_public_transport_stations Verhindere übertriebenes Umsteigen an Haltestellen

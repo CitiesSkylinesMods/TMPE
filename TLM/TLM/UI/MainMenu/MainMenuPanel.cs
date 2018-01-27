@@ -13,9 +13,10 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI.MainMenu {
-	public class MainMenuPanel : UIPanel {
+	public class MainMenuPanel : UIPanel, IObserver<GlobalConfig> {
 		private static readonly Type[] MENU_BUTTON_TYPES = new Type[] {
 			// first row
 			typeof(ToggleTrafficLightsButton),
@@ -52,9 +53,15 @@ namespace TrafficManager.UI.MainMenu {
 
 		public UIDragHandle Drag { get; private set; }
 
+		IDisposable confDisposable;
+
 		//private UILabel optionsLabel;
 
 		public override void Start() {
+			OnUpdate(GlobalConfig.Instance);
+
+			confDisposable = GlobalConfig.Instance.Subscribe(this);
+
 			isVisible = false;
 
 			backgroundSprite = "GenericPanel";
@@ -84,12 +91,6 @@ namespace TrafficManager.UI.MainMenu {
 				y += BUTTON_SIZE + VSPACING;
 			}
 
-			GlobalConfig config = GlobalConfig.Instance;
-			Rect rect = new Rect(config.Main.MainMenuX, config.Main.MainMenuY, MENU_WIDTH, MENU_HEIGHT);
-			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			VectorUtil.ClampRectToScreen(ref rect, resolution);
-			absolutePosition = rect.position;
-
 			var dragHandler = new GameObject("TMPE_Menu_DragHandler");
 			dragHandler.transform.parent = transform;
 			dragHandler.transform.localPosition = Vector3.zero;
@@ -98,6 +99,12 @@ namespace TrafficManager.UI.MainMenu {
 			Drag.width = width;
 			Drag.height = TOP_BORDER;
 			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+		}
+
+		public override void OnDestroy() {
+			if (confDisposable != null) {
+				confDisposable.Dispose();
+			}
 		}
 
 		internal void SetPosLock(bool lck) {
@@ -118,6 +125,20 @@ namespace TrafficManager.UI.MainMenu {
 				GlobalConfig.WriteConfig();
 			}
 			base.OnPositionChanged();
+		}
+
+		public void OnUpdate(IObservable<GlobalConfig> observable) {
+			GlobalConfig config = (GlobalConfig)observable;
+			UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
+		}
+
+		public void UpdatePosition(Vector2 pos) {
+			Rect rect = new Rect(pos.x, pos.y, MENU_WIDTH, MENU_HEIGHT);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			VectorUtil.ClampRectToScreen(ref rect, resolution);
+			Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
+			absolutePosition = rect.position;
+			Invalidate();
 		}
 	}
 }

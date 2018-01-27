@@ -173,6 +173,10 @@ namespace TrafficManager.Manager.Impl {
 				Options.setTrafficLightPriorityRules(data[36] == (byte)1);
 			}
 
+			if (data.Length >= 38) {
+				Options.setRealisticPublicTransport(data[37] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -215,6 +219,7 @@ namespace TrafficManager.Manager.Impl {
 						(byte)Options.altLaneSelectionRatio,
 						(byte)Options.vehicleRestrictionsAggression,
 						(byte)(Options.trafficLightPriorityRules ? 1 : 0),
+						(byte)(Options.realisticPublicTransport ? 1 : 0),
 				};
 		}
 	}

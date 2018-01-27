@@ -82,7 +82,8 @@ namespace TrafficManager.Manager {
 		protected abstract void HandleInvalidNode(NodeGeometry geometry);
 		protected abstract void HandleValidNode(NodeGeometry geometry);
 
-		public void OnUpdate(NodeGeometry geometry) {
+		public void OnUpdate(IObservable<NodeGeometry> observable) {
+			NodeGeometry geometry = (NodeGeometry)observable;
 			if (!geometry.IsValid()) {
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])

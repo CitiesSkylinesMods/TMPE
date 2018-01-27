@@ -90,7 +90,8 @@ namespace TrafficManager.Manager {
 		protected abstract void HandleInvalidSegment(SegmentGeometry geometry);
 		protected abstract void HandleValidSegment(SegmentGeometry geometry);
 
-		public void OnUpdate(SegmentGeometry geometry) {
+		public void OnUpdate(IObservable<SegmentGeometry> observable) {
+			SegmentGeometry geometry = (SegmentGeometry)observable;
 			if (!geometry.IsValid()) {
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])

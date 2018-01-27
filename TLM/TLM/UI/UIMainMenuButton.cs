@@ -10,7 +10,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI {
-	public class UIMainMenuButton : UIButton {
+	public class UIMainMenuButton : UIButton, IObserver<GlobalConfig> {
 		public const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
 		public const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
 		public const string MAIN_MENU_BUTTON_BG_ACTIVE = "TMPE_MainMenuButtonBgActive";
@@ -23,13 +23,13 @@ namespace TrafficManager.UI {
 
 		public UIDragHandle Drag { get; private set; }
 
+		IDisposable confDisposable;
+
 		public override void Start() {
 			// Place the button.
-			GlobalConfig config = GlobalConfig.Instance;
-			Rect rect = new Rect(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY, BUTTON_WIDTH, BUTTON_HEIGHT);
-			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			VectorUtil.ClampRectToScreen(ref rect, resolution);
-			absolutePosition = rect.position;
+			OnUpdate(GlobalConfig.Instance);
+
+			confDisposable = GlobalConfig.Instance.Subscribe(this);
 
 			// Set the atlas and background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_MainMenuButtonAtlas", TextureResources.MainMenuButtonTexture2D, 6, new string[] {
@@ -58,6 +58,12 @@ namespace TrafficManager.UI {
 			Drag.width = width;
 			Drag.height = height;
 			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
+		}
+
+		public override void OnDestroy() {
+			if (confDisposable != null) {
+				confDisposable.Dispose();
+			}
 		}
 
 		internal void SetPosLock(bool lck) {
@@ -103,6 +109,20 @@ namespace TrafficManager.UI {
 				m_PressedFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
 			}
 			this.Invalidate();
+		}
+
+		public void OnUpdate(IObservable<GlobalConfig> observable) {
+			GlobalConfig config = (GlobalConfig)observable;
+			UpdatePosition(new Vector2(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY));
+		}
+
+		public void UpdatePosition(Vector2 pos) {
+			Rect rect = new Rect(pos.x, pos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			VectorUtil.ClampRectToScreen(ref rect, resolution);
+			Log.Info($"Setting main menu button position to [{pos.x},{pos.y}]");
+			absolutePosition = rect.position;
+			Invalidate();
 		}
 	}
 }
