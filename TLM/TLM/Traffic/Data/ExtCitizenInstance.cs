@@ -232,13 +232,18 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public uint GetCitizenId() {
-			return Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_citizen;
+			uint ret = 0;
+			Constants.ServiceFactory.CitizenService.ProcessCitizenInstance(instanceId, delegate (ushort citInstId, ref CitizenInstance citizenInst) {
+				ret = citizenInst.m_citizen;
+				return true;
+			});
+			return ret;
 		}
 
 		internal void Reset() {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[4]) {
-				Log.Warning($"Resetting ext. citizen instance {instanceId}");
+				Log.Warning($"ExtCitizenInstance.Reset({instanceId}): Resetting ext. citizen instance {instanceId}");
 			}
 #endif
 			//Flags = ExtFlags.None;
