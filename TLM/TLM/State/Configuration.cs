@@ -192,6 +192,22 @@ namespace TrafficManager {
 			}
 		}
 
+		[Serializable]
+		public class ExtCitizenData {
+			public uint citizenId;
+			public int lastTransportMode;
+
+			public ExtCitizenData(uint citizenId) {
+				this.citizenId = citizenId;
+				lastTransportMode = 0;
+			}
+		}
+
+		/// <summary>
+		/// Stored ext. citizen data
+		/// </summary>
+		public List<ExtCitizenData> ExtCitizens = new List<ExtCitizenData>();
+
 		/// <summary>
 		/// Stored ext. citizen instance data
 		/// </summary>

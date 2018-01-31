@@ -217,6 +217,31 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Reverse-Redirection CustomCitizenManager::ReleaseCitizenImplementation calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomCitizenManager).GetMethod("ReleaseCitizenImplementation",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (uint),
+									typeof (Citizen).MakeByRefType(),
+							},
+							null),
+							typeof(CitizenManager).GetMethod("ReleaseCitizenImplementation",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (uint),
+									typeof (Citizen).MakeByRefType(),
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect CustomCitizenManager::ReleaseCitizenImplementation");
+					detourFailed = true;
+				}
+
 				Log.Info("Reverse-Redirection ResidentAI::GetTaxiProbability calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomResidentAI).GetMethod("GetTaxiProbability",
@@ -1271,6 +1296,22 @@ namespace TrafficManager {
 							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizenInstance")));
 				} catch (Exception) {
 					Log.Error("Could not redirect CitizenManager::ReleaseCitizenInstance");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirection CitizenManager::ReleaseCitizen calls");
+				try {
+					Detours.Add(new Detour(typeof(CitizenManager).GetMethod("ReleaseCitizen",
+							BindingFlags.Public | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (uint)
+							},
+							null),
+							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizen")));
+				} catch (Exception) {
+					Log.Error("Could not redirect CitizenManager::ReleaseCitizen");
 					detourFailed = true;
 				}
 
@@ -2413,6 +2454,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
 			RegisteredManagers.Add(ExtCitizenInstanceManager.Instance);
+			RegisteredManagers.Add(ExtCitizenManager.Instance);
 			RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);

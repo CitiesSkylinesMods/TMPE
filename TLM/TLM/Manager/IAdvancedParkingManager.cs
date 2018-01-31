@@ -103,6 +103,7 @@ namespace TrafficManager.Manager {
 		/// <param name="citizenInstanceId">citizen instance that shall be processed</param>
 		/// <param name="citizenInstance">citizen instance data</param>
 		/// <param name="extInstance">extended citizen instance data</param>
+		/// <param name="extCitizen">extended citizen data</param>
 		/// <param name="citizen">citizen data</param>
 		/// <param name="mainPathState">current state of the citizen instance's main path</param>
 		/// <returns>
@@ -113,7 +114,7 @@ namespace TrafficManager.Manager {
 		///		<code>FailedSoft</code>: Path-finding must be repeated.
 		///		<code>Ignore</code>: Default citizen behavior must be skipped. 
 		///	</returns>
-		ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref Citizen citizen, ExtPathState mainPathState);
+		ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen, ref Citizen citizen, ExtPathState mainPathState);
 
 		/// <summary>
 		/// Merges the current calculation states of the citizen's main path and return path (while driving a passenger car).

@@ -136,6 +136,7 @@ namespace TrafficManager.Custom.AI {
 
 			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			ushort targetBuildingId = citizenManager.m_instances.m_buffer[(int)driverInstanceId].m_targetBuilding;
+			uint driverCitizenId = citizenManager.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
 
 			// NON-STOCK CODE START
 			bool calculateEndPos = true;
@@ -203,7 +204,7 @@ namespace TrafficManager.Custom.AI {
 							driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToKnownParkPos;
 						}
 
-						ushort homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[driverExtInstance.GetCitizenId()].m_homeBuilding;
+						ushort homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[driverCitizenId].m_homeBuilding;
 						bool calcEndPos;
 						Vector3 parkPos;
 

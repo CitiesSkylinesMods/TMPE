@@ -151,7 +151,7 @@ namespace TrafficManager.Custom.AI {
 					if (parkedVehicleId != 0) {
 #if DEBUG
 						if (GlobalConfig.Instance.Debug.Switches[2])
-							Log._Debug($"CustomResidentAI.GetVehicleInfo: Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
+							Log._Debug($"CustomTouristAI.CustomGetVehicleInfo({instanceID}): Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. Reusing vehicle info.");
 #endif
 						carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 					}
@@ -159,6 +159,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			}
 #endif
+
 			if (carInfo == null && (useCar || useTaxi)) {
 				// NON-STOCK CODE END
 				carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(ref randomizer, service, subService, ItemClass.Level.Level1);
@@ -170,6 +171,7 @@ namespace TrafficManager.Custom.AI {
 					return bikeInfo;
 				}
 			}
+
 			if ((useCar || useTaxi) && carInfo != null) {
 				return carInfo;
 			}

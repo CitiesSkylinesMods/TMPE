@@ -32,6 +32,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public IExtCitizenManager ExtCitizenManager {
+			get {
+				return Impl.ExtCitizenManager.Instance;
+			}
+		}
+
 		public IJunctionRestrictionsManager JunctionRestrictionsManager {
 			get {
 				return Impl.JunctionRestrictionsManager.Instance;
