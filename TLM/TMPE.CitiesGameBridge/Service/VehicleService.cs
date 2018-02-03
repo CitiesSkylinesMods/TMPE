@@ -33,6 +33,14 @@ namespace CitiesGameBridge.Service {
 			return CheckVehicleFlags(vehicleId, Vehicle.Flags.Created | Vehicle.Flags.Deleted, Vehicle.Flags.Created);
 		}
 
+		public void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler) {
+			ProcessParkedVehicle(parkedVehicleId, ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId], handler);
+		}
+
+		public void ProcessParkedVehicle(ushort parkedVehicleId, ref VehicleParked parkedVehicle, ParkedVehicleHandler handler) {
+			handler(parkedVehicleId, ref parkedVehicle);
+		}
+
 		public void ProcessVehicle(ushort vehicleId, VehicleHandler handler) {
 			ProcessVehicle(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId], handler);
 		}

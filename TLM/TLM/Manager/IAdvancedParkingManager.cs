@@ -180,6 +180,18 @@ namespace TrafficManager.Manager {
 		bool FindParkingSpaceForCitizen(Vector3 endPos, VehicleInfo vehicleInfo, ref ExtCitizenInstance extDriverInstance, ushort homeId, bool goingHome, ushort vehicleId, bool allowTourists, out Vector3 parkPos, ref PathUnit.Position endPathPos, out bool calculateEndPos);
 
 		/// <summary>
+		/// Tries to relocate the given parked car (<paramref name="parkedVehicleId"/>, <paramref name="parkedVehicle"/>)
+		/// within the vicinity of the given reference position <paramref name="refPos"/>.
+		/// </summary>
+		/// <param name="parkedVehicleId">parked vehicle id</param>
+		/// <param name="parkedVehicle">parked vehicle data</param>
+		/// <param name="refPos">reference position</param>
+		/// <param name="maxDistance">maximum allowed distance between reference position and parking space location</param>
+		/// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
+		/// <returns><code>true</code> if the parked vehicle was relocated, <code>false</code> otherwise</returns>
+		bool TryMoveParkedVehicle(ushort parkedVehicleId, ref VehicleParked parkedVehicle, Vector3 refPos, float maxDistance, ushort homeId);
+
+		/// <summary>
 		/// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>
 		/// in the vicinity of the given position <paramref name="refPos"/>.
 		/// </summary>
