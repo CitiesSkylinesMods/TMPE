@@ -21,7 +21,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig : GenericObservable<GlobalConfig> {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 12;
+		private static int LATEST_VERSION = 13;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif

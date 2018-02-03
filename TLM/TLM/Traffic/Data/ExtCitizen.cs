@@ -35,11 +35,17 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		public ExtTransportMode lastTransportMode;
 
+		/// <summary>
+		/// Previous building location
+		/// </summary>
+		public Citizen.Location lastLocation;
+
 		public override string ToString() {
 			return $"[ExtCitizen\n" +
 				"\t" + $"citizenId = {citizenId}\n" +
 				"\t" + $"transportMode = {transportMode}\n" +
 				"\t" + $"lastTransportMode = {transportMode}\n" +
+				"\t" + $"lastLocation = {lastLocation}\n" +
 				"ExtCitizen]";
 		}
 
@@ -47,6 +53,8 @@ namespace TrafficManager.Traffic.Data {
 			this.citizenId = citizenId;
 			transportMode = ExtTransportMode.None;
 			lastTransportMode = ExtTransportMode.None;
+			lastLocation = Citizen.Location.Moving;
+			ResetLastLocation();
 		}
 
 		internal bool IsValid() {
@@ -61,6 +69,16 @@ namespace TrafficManager.Traffic.Data {
 #endif
 			transportMode = ExtTransportMode.None;
 			lastTransportMode = ExtTransportMode.None;
+			ResetLastLocation();
+		}
+
+		private void ResetLastLocation() {
+			Citizen.Location loc = Citizen.Location.Moving;
+			Constants.ServiceFactory.CitizenService.ProcessCitizen(citizenId, delegate (uint citId, ref Citizen citizen) {
+				loc = citizen.CurrentLocation;
+				return true;
+			});
+			lastLocation = loc;
 		}
 	}
 }

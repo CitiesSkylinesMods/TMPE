@@ -37,9 +37,19 @@ namespace TrafficManager.Manager.Impl {
 			ExtCitizens[citizenId].Reset();
 		}
 
-		public void OnArriveAtDestination(uint citizenId) {
-			ExtCitizens[citizenId].lastTransportMode = ExtCitizens[citizenId].transportMode;
+		public void OnArriveAtDestination(uint citizenId, ref Citizen citizen) {
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.Switches[22])
+				Log.Warning($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called. switching transportMode={ExtCitizens[citizenId].transportMode} to lastTransportMode={ExtCitizens[citizenId].lastTransportMode}");
+#endif
+			if (ExtCitizens[citizenId].lastLocation == Citizen.Location.Home) {
+				ExtCitizens[citizenId].lastTransportMode = ExtCitizens[citizenId].transportMode;
+			}
 			ExtCitizens[citizenId].transportMode = ExtTransportMode.None;
+
+			if (citizen.CurrentLocation != Citizen.Location.Moving) {
+				ExtCitizens[citizenId].lastLocation = citizen.CurrentLocation;
+			}
 		}
 
 		public void ResetCitizen(uint citizenId) {

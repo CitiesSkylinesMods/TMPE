@@ -30,6 +30,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 19: enable obligation to drive on the right hand side of the road
 				false, // 20: debug realistic public transport
 				false, // 21: debug "CalculateSegmentPosition"
+				false // 22: debug "OnArriveAtDestination"
 			};
 
 		public int NodeId = 0;

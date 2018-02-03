@@ -149,7 +149,7 @@ namespace TrafficManager.Custom.AI {
 			}
 			if (vehicleId == 0 && (instanceData.m_flags & (CitizenInstance.Flags.Character | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) == CitizenInstance.Flags.None) {
 				instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
-				this.ArriveAtDestination(instanceID, ref instanceData, false);
+				CustomArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);
 			}
 		}
@@ -422,6 +422,9 @@ namespace TrafficManager.Custom.AI {
 				citizenMan.m_citizens.m_buffer[citizenId].SetVehicle(citizenId, 0, 0u);
 				if (success) {
 					citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
+					// NON-STOCK CODE START
+					Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
+					// NON-STOCK CODE END
 				}
 
 				if (citizenData.m_targetBuilding != 0 && citizenMan.m_citizens.m_buffer[citizenId].CurrentLocation == Citizen.Location.Visit) {
@@ -442,10 +445,6 @@ namespace TrafficManager.Custom.AI {
 						info2.m_eventAI.VisitorEnter(eventIndex, ref instance4.m_events.m_buffer[eventIndex], citizenData.m_targetBuilding, citizenId);
 					}
 				}
-
-				// NON-STOCK CODE START
-				Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId);
-				// NON-STOCK CODE END
 			}
 			if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
 				return;
@@ -453,11 +452,6 @@ namespace TrafficManager.Custom.AI {
 			((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
 			((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
 			citizenData.Unspawn(instanceID);
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private void ArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
-			Log.Error($"HumanAI.ArriveAtDestination is not overriden!");
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]

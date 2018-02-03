@@ -12,6 +12,7 @@ namespace TrafficManager.Manager {
 		/// Called whenever a citizen reaches their destination building.
 		/// </summary>
 		/// <param name="citizenId">citizen id</param>
-		void OnArriveAtDestination(uint citizenId);
+		/// <param name="citizen">citizen data</param>
+		void OnArriveAtDestination(uint citizenId, ref Citizen citizen);
 	}
 }

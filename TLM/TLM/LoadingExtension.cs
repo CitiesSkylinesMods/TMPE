@@ -390,33 +390,6 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Reverse-Redirection HumanAI::ArriveAtDestination calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("ArriveAtDestination",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (bool)
-							},
-							null),
-							typeof(HumanAI).GetMethod("ArriveAtDestination",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-									typeof (bool)
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect HumanAI::ArriveAtDestination");
-					detourFailed = true;
-				}
-
 				Log.Info("Reverse-Redirection HumanAI::GetBuildingTargetPosition calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("GetBuildingTargetPosition",
@@ -1519,6 +1492,32 @@ namespace TrafficManager {
 							typeof(CustomHumanAI).GetMethod("CustomCheckTrafficLights")));
 				} catch (Exception) {
 					Log.Error("Could not redirect HumanAI::CheckTrafficLights.");
+					detourFailed = true;
+				}
+
+				Log.Info("Redirecting HumanAI::ArriveAtDestination Calls");
+				try {
+					Detours.Add(new Detour(typeof(HumanAI).GetMethod("ArriveAtDestination",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[] {
+								typeof (ushort),
+								typeof (CitizenInstance).MakeByRefType(),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomHumanAI).GetMethod("CustomArriveAtDestination",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (bool)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not redirect HumanAI::ArriveAtDestination.");
 					detourFailed = true;
 				}
 
