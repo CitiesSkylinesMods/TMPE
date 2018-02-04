@@ -413,7 +413,6 @@ namespace TrafficManager.Manager.Impl {
 			//ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceId);
 
 			if (extInstance.pathMode != ExtCitizenInstance.ExtPathMode.WalkingToTarget &&
-				extInstance.pathMode != ExtCitizenInstance.ExtPathMode.PublicTransportToTarget &&
 				extInstance.pathMode != ExtCitizenInstance.ExtPathMode.TaxiToTarget) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[4])
@@ -472,7 +471,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (citizenData.m_vehicle == 0) {
-				// citizen already has not already a vehicle assigned
+				// citizen does not already have a vehicle assigned
 
 				if (extInstance.pathMode == ExtPathMode.TaxiToTarget) {
 #if DEBUG
@@ -702,12 +701,10 @@ namespace TrafficManager.Manager.Impl {
 								if (instanceData.m_targetBuilding != 0) {
 									ExtBuildingManager.Instance.ExtBuildings[instanceData.m_targetBuilding].RemovePublicTransportDemand((uint)GlobalConfig.Instance.ParkingAI.PublicTransportDemandUsageDecrement, false);
 								}
-								extInstance.pathMode = ExtPathMode.PublicTransportToTarget;
 								extCitizen.transportMode |= ExtCitizen.ExtTransportMode.PublicTransport;
-							} else {
-								extInstance.pathMode = ExtPathMode.WalkingToTarget;
 							}
 
+							extInstance.pathMode = ExtPathMode.WalkingToTarget;
 							return ExtSoftPathState.Ready;
 						}
 					case ExtPathMode.CalculatingCarPathToTarget: // citizen has not yet entered their car (but is close to do so) and tries to reach the target directly
@@ -781,12 +778,10 @@ namespace TrafficManager.Manager.Impl {
 										if (instanceData.m_targetBuilding != 0) {
 											ExtBuildingManager.Instance.ExtBuildings[instanceData.m_targetBuilding].RemovePublicTransportDemand((uint)GlobalConfig.Instance.ParkingAI.PublicTransportDemandUsageDecrement, false);
 										}
-										extInstance.pathMode = ExtPathMode.PublicTransportToTarget;
 										extCitizen.transportMode |= ExtCitizen.ExtTransportMode.PublicTransport;
-									} else {
-										extInstance.pathMode = ExtPathMode.WalkingToTarget;
 									}
 
+									extInstance.pathMode = ExtPathMode.WalkingToTarget;
 									return ExtSoftPathState.Ready;
 								case ExtPathMode.CalculatingCarPathToKnownParkPos:
 								case ExtPathMode.CalculatingCarPathToAltParkPos:
@@ -860,7 +855,6 @@ namespace TrafficManager.Manager.Impl {
 				switch (extInstance.pathMode) {
 					case ExtPathMode.None:
 					case ExtPathMode.CalculatingWalkingPathToTarget:
-					case ExtPathMode.PublicTransportToTarget:
 					case ExtPathMode.TaxiToTarget:
 						// could not reach target building by walking/driving/public transport: increase public transport demand
 						if ((instanceData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
@@ -1629,7 +1623,7 @@ namespace TrafficManager.Manager.Impl {
 			return false;
 		}
 
-		public string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance) {
+		public string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen) {
 			if (extInstance.IsValid()) {
 				switch (extInstance.pathMode) {
 					case ExtPathMode.ApproachingParkedCar:
@@ -1641,13 +1635,14 @@ namespace TrafficManager.Manager.Impl {
 					case ExtPathMode.WalkingToParkedCar:
 						ret = Translation.GetString("Walking_to_car") + ", " + ret;
 						break;
-					case ExtPathMode.PublicTransportToTarget:
-					case ExtPathMode.TaxiToTarget:
-						ret = Translation.GetString("Using_public_transport") + ", " + ret;
-						break;
 					case ExtPathMode.CalculatingWalkingPathToTarget:
+					case ExtPathMode.TaxiToTarget:
 					case ExtPathMode.WalkingToTarget:
-						ret = Translation.GetString("Walking") + ", " + ret;
+						if ((extCitizen.transportMode & ExtCitizen.ExtTransportMode.PublicTransport) != ExtCitizen.ExtTransportMode.None) {
+							ret = Translation.GetString("Using_public_transport") + ", " + ret;
+						} else {
+							ret = Translation.GetString("Walking") + ", " + ret;
+						}
 						break;
 					case ExtPathMode.CalculatingCarPathToTarget:
 					case ExtPathMode.CalculatingCarPathToKnownParkPos:

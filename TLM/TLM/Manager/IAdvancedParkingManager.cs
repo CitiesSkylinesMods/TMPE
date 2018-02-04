@@ -84,8 +84,9 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="ret">status text to enrich</param>
 		/// <param name="extInstance">extended citizen instance data</param>
+		/// <param name="extCitizen">extended citizen data</param>
 		/// <returns></returns>
-		string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance);
+		string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen);
 
 		/// <summary>
 		/// Adds Parking AI related information to the given passenger car status text.

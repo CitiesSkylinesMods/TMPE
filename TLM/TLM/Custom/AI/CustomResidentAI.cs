@@ -14,6 +14,7 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
 using UnityEngine;
+using static TrafficManager.Traffic.Data.ExtCitizen;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
@@ -122,7 +123,7 @@ namespace TrafficManager.Custom.AI {
 			using (var bm = new Benchmark(null, "EnrichLocalizedCitizenStatus")) {
 #endif
 				if (Options.prohibitPocketCars) {
-					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref ExtCitizenManager.Instance.ExtCitizens[data.m_citizen]);
 				}
 #if BENCHMARK
 			}

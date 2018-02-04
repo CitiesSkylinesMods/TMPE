@@ -77,7 +77,7 @@ namespace TrafficManager.Custom.AI {
 			using (var bm = new Benchmark(null, "EnrichLocalizedCitizenStatus")) {
 #endif
 				if (Options.prohibitPocketCars) {
-					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]);
+					ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(ret, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref ExtCitizenManager.Instance.ExtCitizens[data.m_citizen]);
 				}
 #if BENCHMARK
 			}

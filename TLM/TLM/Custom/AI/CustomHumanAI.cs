@@ -210,9 +210,8 @@ namespace TrafficManager.Custom.AI {
 
 					}
 				}
-			} else if ((extInstance.pathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
-					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.PublicTransportToTarget ||
-					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget)
+			} else if (extInstance.pathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
+					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget
 			) {
 				AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData, ref extInstance);
 			}

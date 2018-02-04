@@ -135,9 +135,9 @@ namespace TrafficManager.Traffic.Data {
 			/// </summary>
 			WalkingToTarget = 15,
 			/// <summary>
-			/// Indicates that the citizen is using public transport (bus/train/tram/subway) to reach the target
+			/// (DEPRECATED) Indicates that the citizen is using public transport (bus/train/tram/subway) to reach the target
 			/// </summary>
-			PublicTransportToTarget = 16,
+			__Deprecated__PublicTransportToTarget = 16,
 			/// <summary>
 			/// Indicates that the citizen is using a taxi to reach the target
 			/// </summary>
@@ -377,8 +377,6 @@ namespace TrafficManager.Traffic.Data {
 				case ExtPathMode.ApproachingParkedCar:
 				case ExtPathMode.WalkingToParkedCar:
 				case ExtPathMode.WalkingToTarget:
-				case ExtPathMode.PublicTransportToTarget:
-				case ExtPathMode.TaxiToTarget:
 					return ExtPathType.WalkingOnly;
 				default:
 					return ExtPathType.None;
