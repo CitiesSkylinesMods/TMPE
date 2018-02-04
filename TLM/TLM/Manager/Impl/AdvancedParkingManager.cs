@@ -396,6 +396,9 @@ namespace TrafficManager.Manager.Impl {
 			targetVelDiff = targetVelDiff * (2f / Mathf.Max(targetVelDiffMag, 2f));
 			frameData.m_velocity = frameData.m_velocity + targetVelDiff;
 			frameData.m_velocity = frameData.m_velocity - (Mathf.Max(0f, Vector3.Dot((frameData.m_position + frameData.m_velocity) - (Vector3)instanceData.m_targetPos, frameData.m_velocity)) / Mathf.Max(0.01f, frameData.m_velocity.sqrMagnitude) * frameData.m_velocity);
+			if (frameData.m_velocity.sqrMagnitude > 0.01f) {
+				frameData.m_rotation = Quaternion.LookRotation(frameData.m_velocity);
+			}
 		}
 
 		public bool CitizenApproachingTargetSimulationStep(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance) {
