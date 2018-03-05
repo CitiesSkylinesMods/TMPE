@@ -218,3 +218,4 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Entferne eine Kreuzung 
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Klicke auf eine der Kreuzungen, die momentan von der Ampelschaltungen kontrolliert werden. Die selektierte Ampel wird entfernt, so dass die Ampelschaltung die Kreuzung nicht mehr kontrolliert.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.
 Public_transport Öffentlicher Personennahverkehr
 Prevent_excessive_transfers_at_public_transport_stations Verhindere übertriebenes Umsteigen an Haltestellen
+Compact_main_menu Kompaktes Hauptmenü

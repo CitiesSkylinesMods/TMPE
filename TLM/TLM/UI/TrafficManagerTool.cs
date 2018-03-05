@@ -66,7 +66,7 @@ namespace TrafficManager.UI {
 		internal static Rect MoveGUI(Rect rect) {
 			// x := main menu x + rect.x
 			// y := main menu y + main menu height + rect.y
-			return new Rect(MainMenuPanel.DEFAULT_MENU_X + rect.x, MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.MENU_HEIGHT + rect.y, rect.width, rect.height);
+			return new Rect(MainMenuPanel.DEFAULT_MENU_X + rect.x, MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y, rect.width, rect.height); // TODO use current size profile
 		}
 
 		internal bool IsNodeWithinViewDistance(ushort nodeId) {

@@ -124,7 +124,7 @@ namespace TrafficManager.Custom.AI {
 						 * citizen travels back home
 						 * -> check if their car should be returned
 						 */
-						if ((extCitizen.lastTransportMode | ExtCitizen.ExtTransportMode.Car) != ExtCitizen.ExtTransportMode.None) {
+						if ((extCitizen.lastTransportMode & ExtCitizen.ExtTransportMode.Car) != ExtCitizen.ExtTransportMode.None) {
 							/*
 							 * citizen travelled by car
 							 * -> return car back home

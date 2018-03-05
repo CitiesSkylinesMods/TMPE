@@ -767,7 +767,7 @@ namespace TrafficManager.Custom.PathFinding {
 					int prevLaneIndex = (int)item.m_position.m_lane;
 					if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
 						if (allowPedSwitch) { // NON-STOCK CODE
-							bool isEndBendOrJunction = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
+							bool canCrossStreet = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
 							bool isOnCenterPlatform = prevIsCenterPlatform && (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Junction)) == NetNode.Flags.None;
 							ushort nextLeftSegment = prevSegmentId;
 							ushort nextRightSegment = prevSegmentId;
@@ -817,7 +817,7 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 								}
 							}
-							if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
+							if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
 #if DEBUGNEWPF
 								if (debugPed) {
 										logBuf.Add($"*PED* item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}): Exploring left segment\n" +
@@ -832,7 +832,7 @@ namespace TrafficManager.Custom.PathFinding {
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 											"\t" + $"nextLeftSegment={nextLeftSegment}\n" +
 											"\t" + $"leftLaneId={leftLaneId}\n" +
-											"\t" + $"isEndBendOrJunction={isEndBendOrJunction}\n" +
+											"\t" + $"mayCrossStreet={canCrossStreet}\n" +
 											"\t" + $"isOnCenterPlatform={isOnCenterPlatform}\n" +
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n"
@@ -842,7 +842,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 								this.ProcessItemPedBicycle(debugPed, item, nextNodeId, nextLeftSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextLeftSegment], connectOffset, connectOffset, leftLaneIndex, leftLaneId); // ped
 							}
-							if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
+							if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
 #if DEBUGNEWPF
 								if (debugPed) {
 									logBuf.Add($"*PED* item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}): Exploring right segment\n" +
@@ -857,7 +857,7 @@ namespace TrafficManager.Custom.PathFinding {
 										"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 										"\t" + $"nextRightSegment={nextRightSegment}\n" +
 										"\t" + $"rightLaneId={rightLaneId}\n" +
-										"\t" + $"isEndBendOrJunction={isEndBendOrJunction}\n" +
+										"\t" + $"mayCrossStreet={canCrossStreet}\n" +
 										"\t" + $"isOnCenterPlatform={isOnCenterPlatform}\n" +
 										"\t" + $"nextIsStartNode={nextIsStartNode}\n"
 										);
@@ -1485,8 +1485,6 @@ namespace TrafficManager.Custom.PathFinding {
 											"\t" + $"CUSTOM exploration\n" +
 											"\t" + $"transition iteration {k}:\n" +
 											"\t" + $"{laneTransitions[k].ToString()}\n" +
-											"\t" + $"relaxedLaneChanging={relaxedLaneChanging}\n" +
-											"\t" + $"isStrictLaneChangePolicyEnabled={relaxedLaneChanging}\n" +
 											"\t" + $"*** SKIPPING *** (invalid transition)\n"
 											);
 										FlushMainLog(logBuf, unitId);

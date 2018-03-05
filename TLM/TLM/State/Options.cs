@@ -24,6 +24,7 @@ namespace TrafficManager.State {
 		private static UICheckBox instantEffectsToggle = null;
 		private static UICheckBox lockButtonToggle = null;
 		private static UICheckBox lockMenuToggle = null;
+		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
@@ -210,6 +211,7 @@ namespace TrafficManager.State {
 			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + ":", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
 			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.Main.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
+			tinyMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Compact_main_menu"), GlobalConfig.Instance.Main.TinyMainMenu, onTinyMenuChanged) as UICheckBox;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
@@ -588,6 +590,13 @@ namespace TrafficManager.State {
 			Log._Debug($"Menu lock changed to {newValue}");
 			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
 			GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onTinyMenuChanged(bool newValue) {
+			Log._Debug($"Menu tiny changed to {newValue}");
+			GlobalConfig.Instance.Main.TinyMainMenu = newValue;
+			GlobalConfig.Instance.NotifyObservers();
 			GlobalConfig.WriteConfig();
 		}
 

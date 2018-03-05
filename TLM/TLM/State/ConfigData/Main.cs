@@ -30,6 +30,11 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public bool EnableTutorial = true;
 
+		/// <summary>
+		/// Determines if the main menu shall be displayed in a tiny format
+		/// </summary>
+		public bool TinyMainMenu = true;
+
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
 			newMessages.Add(messageKey);
