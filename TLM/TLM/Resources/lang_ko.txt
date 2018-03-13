@@ -105,8 +105,8 @@ Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 두 교차
 Allow_all_vehicles 모든 차량 허가
 Ban_all_vehicles 모든 차량 금지
 Set_all_traffic_lights_to_red 모든 신호등을 빨간불로 설정
-Rotate_left 좌회전
-Rotate_right 우회전
+Rotate_left 반시계방향 신호회전
+Rotate_right 시계방향 신호회전
 Name 이름
 Apply 적용
 Select_a_timed_traffic_light_program 선택된 신호등 프로그램
@@ -184,36 +184,36 @@ Strict 엄격하게 제어함
 Show_path-find_stats 현재 경로를 찾는 차량수를 PFs 수치로 표기합니다
 Remove_this_vehicle 해당 차량을 제거합니다
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 차량이 신호등 시간표가 구성된 교차로에서 교통 표지판 규칙을 준수합니다
-Enable_tutorial_messages Enable tutorial messages
+Enable_tutorial_messages 튜토리얼 메세지 활성화
 TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
-TMPE_TUTORIAL_BODY_MainMenu Welcome to TM:PE!\n\nUser manual: http://www.viathinksoft.de/tmpe
-TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Junction restrictions
-TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Control how vehicles and pedestrians shall behave at junctions.\n\n1. Click on the junction you want to manage\n2. Click on the appropriate icon to toggle restrictions.\n\nAvailable restrictions:\n- Allow/Disallow lane changing for vehicle going straight on\n- Allow/Disallow u-turns\n- Allow/Disallow vehicles to enter a blocked junction\n- Allow/disallow pedestrians to cross the street
-TMPE_TUTORIAL_HEAD_LaneArrowTool Lane arrows
-TMPE_TUTORIAL_BODY_LaneArrowTool Restrict the set of directions that vehicles are allowed to take.\n\n1. Click on a road segment next to a junction\n2. Select the allowed directions.
-TMPE_TUTORIAL_HEAD_LaneConnectorTool Lane connector
-TMPE_TUTORIAL_BODY_LaneConnectorTool Connect two or more lanes with each other in order to tell which lanes vehicles may use.\n\n1. Click on a lane changing point (grey circles).\n2. Click on a source marker.\n3. Click on a target marker to connect it with the source marker.\n4. Click anywhere with your secondary mouse button to return back to source marker selection.\n\nAvailable hotkeys:\n\n- Delete or Backspace: Remove all lane connections\n- Shift + S: Cycle through all available "stay on lane" patterns
-TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Manual traffic lights
-TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Try out custom traffic lights.\n\n1. Click on a junction\n2. Use the tool to control traffic lights.
-TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parking restrictions
-TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Control where parking is allowed.\n\nClick on the "P" icons.\n\nAvailable hotkeys:\n\n- Shift: Hold while clicking to apply parking restrictions to multiple road segments at once
-TMPE_TUTORIAL_HEAD_PrioritySignsTool Priority signs
-TMPE_TUTORIAL_BODY_PrioritySignsTool Define priority rules at junctions.\n\n1. Click on a junction.\n2. Click on the blank spots to cycle through the available priority signs (priority road, yield, stop).\n\nAvailable hotkeys:\n\n- Shift: Hold Shift to add priority signs to multiple road segments at once. Click again while holding Shift to cycle through all available patterns.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool Speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool Set up speed restrictions.\n\n1. In the window, click on the speed limit you want to set.\n2. Click on a road segment to change the speed limit.\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply speed limits to multiple road segments at once.\n- Ctrl: Hold Ctrl to control speed limits per individual lane.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Timed traffic lights
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Set up timed traffic lights.\n\n1. Click on a junction.\n2. In the window, click on "Add step".\n3. Click on the overlay elements to set desired traffic lights states.\n4. Click on "Add".\n5. Repeat as desired.
-TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Toggle traffic lights
-TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Add or remove traffic lights to/from junctions.\n\nClick on a junction to toggle traffic lights.
-TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
-TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
+TMPE_TUTORIAL_BODY_MainMenu TM:PE에 오신것을 환영합니다!\n\n영문 가이드: http://www.viathinksoft.de/tmpe
+TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool 교차로 규칙 도움말
+TMPE_TUTORIAL_BODY_JunctionRestrictionsTool 차량과 보행자가 교차로에서 어떠한 규칙을 따라야하는지 통제할 수 있습니다\n\n1. 규칙을 설정하고 싶은 교차로를 클릭합니다\n2. 통제하고 싶은 구역 아이콘을 클릭합니다\n\n적용할 수 있는 규칙 :\n- 직진하면서 차선 변경 허용/비허용\n- 유턴 허용/비허용\n- 꼬리물기 허용/비허용\n- 보행자의 횡단보도 허용/비허용
+TMPE_TUTORIAL_HEAD_LaneArrowTool 도로 화살표 변경 도움말
+TMPE_TUTORIAL_BODY_LaneArrowTool 차량이 회전할 수 있는 방향을 통제할 수 있습니다.\n\n1. 변경하고 싶은 교차로 도로구간을 클릭합니다\n2. 화살표를 클릭하여 방향을 지정합니다.
+TMPE_TUTORIAL_HEAD_LaneConnectorTool 차선 연결 도움말
+TMPE_TUTORIAL_BODY_LaneConnectorTool 두개 이상의 차선을 연결하여 차량이 해당 차선으로 이동하도록 명령할 수 있습니다.\n\n1. 차선을 변경할 포인트를 클릭합니다(회색 원)\n2. 시작할 차선을 클릭합니다\n3. 연결하고 싶은 차선 원을 클릭하여 연결합니다\n4. 빈공간을 우클릭하면 다시 전 단계로 돌아갈 수 있습니다\n\n사용할 수 있는 단축키 :\n\n- Delete , Backspace : 모든 연결된 차선들을 삭제합니다\n- Shift + S : 직진차선 교차점에서 원을 돌며 패턴을 적용 할 수 있습니다
+TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool 신호등 직접 통제 도움말
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool 신호등을 직접 통제해 볼 수 있습니다\n\n1. 교차로를 클릭합니다\n2. 신호등 통제툴을 통해 신호를 통제할 수 있습니다
+TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool 주차 제한 도움말
+TMPE_TUTORIAL_BODY_ParkingRestrictionsTool 어디에 주차를 허용할 것인지 통제 할 수 있습니다.\n\n"P"아이콘을 클릭합니다.\n\n사용가능한 단축키 :\n\n- Shift : 쉬프트키를 누른상태로 클릭하면 교차로내의 모든 도로구간에 해당 규칙을 적용합니다
+TMPE_TUTORIAL_HEAD_PrioritySignsTool 교통 표지판 추가 도움말
+TMPE_TUTORIAL_BODY_PrioritySignsTool 교차로에서 교통 표지판 규칙을 준수하게 만들 수 있습니다.\n\n1. 교차로를 클릭합니다.\n2. 검정색 원을 클릭하여 사용 가능한 교통표지판을 규정합니다(우선도로, 양보, 정지).\n\n사용할 수 있는 단축키 :\n\n- Shift : 쉬프트키를 누른 상태로 해당 도로구간에서 추가하고 싶은 표지판을 클릭합니다. 다시 클릭하면 원을 돌면서 사용 가능한 패턴으로 교통 표지판 규칙이 설정됩니다
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool 속도 제한 도움말
+TMPE_TUTORIAL_BODY_SpeedLimitsTool 속도를 준수하도록 제한 할 수 있습니다.\n\n1. 속도 제한 패널창에서, 제한하고 싶은 속도를 클릭합니다.\n 해당 도로구간을 클릭하여 속도 제한을 변경합니다\n\n사용할 수 있는 단축키 :\n\n- Shift : 쉬프트키를 누른 상태로 도로구간을 클릭하면 한번에 적용 됩니다.\n- Ctrl : 컨트롤키를 누른 상태로 각 차선마다 속도를 제한 할 수 있습니다
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool 신호등 시간표 설정 도움말
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool 신호등 시간표를 구성 할 수 있습니다.\n\n1. 교차로를 클릭합니다.\n2. 선택된 교차로 목록 패널에서 "신호등 시간 설정"을 클릭합니다.\n3. 신호등 시간표 관리자 패널에서 현재 구성된 단계들을 볼 수 있습니다.\n4. "단계 추가"를 클릭합니다.\n5. 원하는 만큼 계속 반복합니다.
+TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool 신호등 추가/제거 도움말
+TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool 교차로에 있는 신호등을 추가/제거 할 수 있습니다.\n\n교차로를 클릭하여 신호등을 추가/제거 하십시오.
+TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool 차량 제한 도움말
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool 특정 도로구간에 차량접근을 통제 할 수 있습니다.\n\n1. 도로구간을 클릭하십시오.\n2. 아이콘을 클릭하여 접근을 통제하십시오.\n\n 유형별 차량 종류 :\n\n- 도로 차량 : 승용차, 버스, 택시, 화물차, 서비스차량, 긴급차량\n- 철도 차량 : 여객기차, 화물기차\n\n사용할 수 있는 단축키 :\n\n- Shift : 쉬프트키를 누른 상태로 도로구간을 클릭하면 한번에 해당차량 접근을 통제할 수 있습니다.
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults 기본 속도 제한 도움말
+TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. 화살표를 통해 도로 유형을 정합니다.\n2. 아래에 위치한 화살표를 통해 제한할 속도를 정합니다.\n3. "저장"을 클릭하면 앞으로 설치되는 해당 도로유형이 설정된 속도 제한값으로 설정됩니다.\n4. "저장 & 적용"을 클릭하면 모든 이전에 설치되어 있던 해당 도로도 해당 속도제한 규칙이 적용됩니다.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep 시간 구성하는 방법
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. 신호등 변경 툴에서, 신호등을 클릭하여 신호를 변경할 수 있습니다. "Change mode"를 클릭하면 신호등 방향을 구체적으로 설정 할 수 있습니다\n2. 최소시간과 최대시간은 분으로 구성되어 있습니다. 시간이 경과되면 접근하는 차량 수를 신호등이 비교를 합니다.\n3. 설정을 통해 다음단계로 어떻게 넘어갈 것인지 구성하십시오. 기본적으로는 운전하는 차량 수보다 대기 중인 차량수가 많으면 다음 단계로 변경됩니다.\n4. 신호등 주기 설정을 조절할 수 있습니다. 예를 들어,  슬라이드를 왼쪽으로 움직이게 하면 대기중인 차가 신호가 변경된 후 덜 혼잡하게 지나갈 수 있습니다.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy 신호등 시간표 복제 방법
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy 클릭을 통해 다른 교차로에 같은 신호등 시간표를 적용할 수 있습니다.\n\n원하는 곳을 클릭하여 복제한 후 마우스 우클릭을 통해 복제를 종료할 수 있습니다.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 교차로에 신호등 시간표 추가하는 방법
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 다른 교차로를 클릭하여 추가하십시오. 선택된 교차로의 신호등들은 구성된 시간표와 신호에 맞게 같이 작동되게 됩니다.\n\n교차로에서 신호등 시간표를 추가하는 것을 중단하려면 마우스 우클릭을 클릭하십시오.
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 교차로에 신호등 시간표 제거하는 방법
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction 신호등 시간표가 구성되어 있는 교차로를 클릭하십시오. 클릭된 신호등은 더 이상 해당 시간표 통제를 받지않게 됩니다.\n\n교차로에서 신호등 시간표를 제거하는 것을 중단하려면 마우스 우클릭을 클릭하십시오.
