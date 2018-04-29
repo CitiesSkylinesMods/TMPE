@@ -899,31 +899,6 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				Log.Info("Reverse-Redirection CustomRoadAI::CheckBuildings calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomRoadAI).GetMethod("CheckBuildings",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType(),
-							},
-							null),
-							typeof(RoadBaseAI).GetMethod("CheckBuildings",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomRoadAI::CheckBuildings");
-					detourFailed = true;
-				}
-
 				Log.Info("Reverse-Redirection CustomTrainAI::CheckOverlap calls (1)");
 				try {
 					Detours.Add(new Detour(typeof(CustomTrainAI).GetMethod("CheckOverlap",
@@ -2224,7 +2199,9 @@ namespace TrafficManager {
 								typeof (CitizenInstance).MakeByRefType(),
 								typeof (Vector3),
 								typeof (Vector3),
-								typeof (VehicleInfo)
+								typeof (VehicleInfo),
+								typeof (bool),
+								typeof (bool)
 							},
 							null),
 							typeof(CustomCitizenAI).GetMethod("CustomStartPathFind")));

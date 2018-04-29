@@ -98,7 +98,7 @@ namespace TrafficManager.Custom.AI {
 
 			bool isOutsideConnection = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuilding].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;
 			bool hangsAround = data.m_path == 0u && (data.m_flags & CitizenInstance.Flags.HangAround) != CitizenInstance.Flags.None;
-			String ret = "";
+			
 			if (vehicleId != 0) {
 				VehicleManager vehManager = Singleton<VehicleManager>.instance;
 				VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[(int)vehicleId].Info;

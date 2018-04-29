@@ -583,7 +583,7 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 				if (this.m_info.m_hasPedestrianLanes && (this.m_info.m_hasForwardVehicleLanes || this.m_info.m_hasBackwardVehicleLanes)) {
-					this.CheckBuildings(segmentID, ref data);
+					CheckBuildings(segmentID, ref data);
 				}
 			}
 			// stock code end
@@ -696,10 +696,6 @@ namespace TrafficManager.Custom.AI {
 		}
 
 #region stock code
-
-		protected void CheckBuildings(ushort segmentID, ref NetSegment data) {
-			Log.Error("CustomRoadAI.CheckBuildings called.");
-		}
 
 		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) { // pure stock code
 			if ((data.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
