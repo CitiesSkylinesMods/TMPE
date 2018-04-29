@@ -116,6 +116,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _stablePath;
 		private bool _randomParking;
 		private bool _transportVehicle;
+		private bool _ignoreCost;
 		private PathUnitQueueItem queueItem;
 		private NetSegment.Flags _disableMask;
 		/*private ExtVehicleType? _extVehicleType;
@@ -275,6 +276,7 @@ namespace TrafficManager.Custom.PathFinding {
 			this._stablePath = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 64) != 0);
 			this._randomParking = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 128) != 0);
 			this._transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
+			this._ignoreCost = (this._stablePath || (this.PathUnits.m_buffer[unit].m_simulationFlags & 8) != 0);
 			this._disableMask = (NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed);
 			if ((this.PathUnits.m_buffer[unit].m_simulationFlags & 2) == 0) {
 				this._disableMask |= NetSegment.Flags.Flooded;
@@ -539,7 +541,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			// we could calculate a valid path
 
-			float duration = finalBufferItem.m_duration;
+			float duration = (this._laneTypes != NetInfo.LaneType.Pedestrian) ? finalBufferItem.m_duration : finalBufferItem.m_methodDistance;
 			this.PathUnits.m_buffer[unit].m_length = duration;
 			this.PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.m_lanesUsed; // NON-STOCK CODE
 			this.PathUnits.m_buffer[unit].m_vehicleTypes = (ushort)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE
@@ -1229,7 +1231,7 @@ namespace TrafficManager.Custom.PathFinding {
 								 */
 
 								// Apply costs for traffic ban policies
-								if ((prevLaneInfo.m_laneType & NetInfo.LaneType.Vehicle) == NetInfo.LaneType.Vehicle &&
+								if ((prevLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
 										(prevLaneInfo.m_vehicleType & this._vehicleTypes) == VehicleInfo.VehicleType.Car &&
 										(netManager.m_segments.m_buffer[item.m_position.m_segment].m_flags & this._carBanMask) != NetSegment.Flags.None) {
 									// heavy vehicle ban / car ban ("Old Town" policy)
@@ -1670,6 +1672,14 @@ namespace TrafficManager.Custom.PathFinding {
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed; 
 			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					comparisonValue += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			uint laneIndex = 0;
 #if DEBUG
 			int wIter = 0;
@@ -1706,8 +1716,9 @@ namespace TrafficManager.Custom.PathFinding {
 						} else {
 							nextItem.m_methodDistance = methodDistance + distance;
 						}
+
 						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, laneIndex, curLaneId, nextLaneInfo); // SpeedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, laneIndex, curLaneId, ref lane3); // NON-STOCK CODE
-						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 							nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength); // NON-STOCK CODE
 							nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
 							if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
@@ -1895,6 +1906,15 @@ namespace TrafficManager.Custom.PathFinding {
 			// stock code check for vehicle ban policies removed
 			// stock code for transport lane usage control removed
 
+			// calculate ticket costs
+			float ticketCosts = 0f;
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					ticketCosts += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			if ((byte)(prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 				prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 			}
@@ -2007,7 +2027,7 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 						// NON-STOCK CODE END //
 #endif
-						nextItem.m_comparisonValue = 0;
+						nextItem.m_comparisonValue = ticketCosts;
 						nextItem.m_position.m_segment = nextSegmentId;
 						nextItem.m_position.m_lane = (byte)laneIndex;
 						nextItem.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255);
@@ -2033,7 +2053,7 @@ namespace TrafficManager.Custom.PathFinding {
 							logBuf.Add($"checking if methodDistance is in range: {nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance} ({nextItem.m_methodDistance})");
 #endif
 
-						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 
 							// NON-STOCK CODE START //
 							if (laneChangingCostCalculationMode == LaneChangingCostCalculationMode.None) {
@@ -2448,6 +2468,14 @@ namespace TrafficManager.Custom.PathFinding {
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed;
+
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					comparisonValue += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			if (nextLaneIndex < numLanes) {
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
 				BufferItem nextItem;
@@ -2473,8 +2501,9 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 					nextItem.m_methodDistance = methodDistance + distance;
 				}
+
 				float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (uint)nextLaneIndex, nextLaneId, nextLaneInfo); // NON-STOCK CODE
-				if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+				if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 					nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.25f * this._maxLength);
 					nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
 					if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {

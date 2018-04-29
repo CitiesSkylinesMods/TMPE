@@ -20,11 +20,13 @@ using CSUtil.Commons.Benchmark;
 namespace TrafficManager.Custom.AI {
 	class CustomHumanAI : CitizenAI {
 		public void CustomSimulationStep(ushort instanceID, ref CitizenInstance instanceData, Vector3 physicsLodRefPos) {
+			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+
 			uint citizenId = instanceData.m_citizen;
 			if ((instanceData.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None && (instanceData.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None) {
-				Singleton<CitizenManager>.instance.ReleaseCitizenInstance(instanceID);
+				citizenManager.ReleaseCitizenInstance(instanceID);
 				if (citizenId != 0u) {
-					Singleton<CitizenManager>.instance.ReleaseCitizen(citizenId);
+					citizenManager.ReleaseCitizen(citizenId);
 				}
 				return;
 			}
@@ -52,7 +54,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 					finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 					if (Options.prohibitPocketCars) {
-						finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref ExtCitizenManager.Instance.ExtCitizens[citizenId], ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
+						finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref ExtCitizenManager.Instance.ExtCitizens[citizenId], ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
 #if DEBUG
 						if (GlobalConfig.Instance.Debug.Switches[2])
 							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Applied Parking AI logic. Path: {instanceData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}, extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]}");
@@ -68,12 +70,14 @@ namespace TrafficManager.Custom.AI {
 						if (GlobalConfig.Instance.Debug.Switches[2])
 							Log._Debug($"CustomHumanAI.CustomSimulationStep({instanceID}): Path-finding succeeded for citizen instance {instanceID} (finalPathState={finalPathState}). Path: {instanceData.m_path} -- calling HumanAI.PathfindSuccess");
 #endif
-						this.Spawn(instanceID, ref instanceData);
+						if (citizenId == 0 || citizenManager.m_citizens.m_buffer[instanceData.m_citizen].m_vehicle == 0) {
+							this.Spawn(instanceID, ref instanceData);
+						}
 						instanceData.m_pathPositionIndex = 255;
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 						// NON-STOCK CODE START (transferred from ResidentAI.PathfindSuccess)
-						if (citizenId != 0 && (Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags & (Citizen.Flags.Tourist | Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.MovingIn) {
+						if (citizenId != 0 && (citizenManager.m_citizens.m_buffer[citizenId].m_flags & (Citizen.Flags.Tourist | Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.MovingIn) {
 							StatisticBase statisticBase = Singleton<StatisticsManager>.instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
 							statisticBase.Add(1);
 						}
@@ -134,7 +138,6 @@ namespace TrafficManager.Custom.AI {
 
 			base.SimulationStep(instanceID, ref instanceData, physicsLodRefPos);
 
-			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			ushort vehicleId = 0;
 			if (instanceData.m_citizen != 0u) {
@@ -419,29 +422,40 @@ namespace TrafficManager.Custom.AI {
 			if (citizenId != 0) {
 				CitizenManager citizenMan = Singleton<CitizenManager>.instance;
 				citizenMan.m_citizens.m_buffer[citizenId].SetVehicle(citizenId, 0, 0u);
-				if (success) {
-					citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
-					// NON-STOCK CODE START
-					Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
-					// NON-STOCK CODE END
-				}
 
-				if (citizenData.m_targetBuilding != 0 && citizenMan.m_citizens.m_buffer[citizenId].CurrentLocation == Citizen.Location.Visit) {
-					BuildingManager buildingMan = Singleton<BuildingManager>.instance;
-					BuildingInfo info = buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding].Info;
-					int amount = -100;
-					info.m_buildingAI.ModifyMaterialBuffer(citizenData.m_targetBuilding, ref buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding], TransferManager.TransferReason.Shopping, ref amount);
-					if (info.m_class.m_service == ItemClass.Service.Beautification) {
-						StatisticsManager statsMan = Singleton<StatisticsManager>.instance;
-						StatisticBase stats = statsMan.Acquire<StatisticInt32>(StatisticType.ParkVisitCount);
-						stats.Add(1);
+				if ((citizenData.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
+					if (success) {
+						ushort targetBuildingId = citizenData.m_targetBuilding;
+						if (targetBuildingId != 0) {
+							ushort transportLineId = Singleton<NetManager>.instance.m_nodes.m_buffer[targetBuildingId].m_transportLine;
+							if (transportLineId != 0) {
+								TransportInfo info = Singleton<TransportManager>.instance.m_lines.m_buffer[transportLineId].Info;
+								if (info.m_vehicleType == VehicleInfo.VehicleType.None) {
+									targetBuildingId = (((instanceID & 1) != 0) ? TransportLine.GetPrevStop(targetBuildingId) : TransportLine.GetNextStop(targetBuildingId));
+									if (targetBuildingId != 0) {
+										citizenData.m_flags |= CitizenInstance.Flags.OnTour;
+										((CitizenAI)this).SetTarget(instanceID, ref citizenData, targetBuildingId, true);
+										return;
+									}
+								}
+								citizenData.m_flags |= CitizenInstance.Flags.OnTour;
+								this.WaitTouristVehicle(instanceID, ref citizenData, targetBuildingId);
+								return;
+							}
+						}
+					}
+				} else {
+					if (success) {
+						citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
+						// NON-STOCK CODE START
+						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
+						// NON-STOCK CODE END
 					}
 
-					ushort eventIndex = buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding].m_eventIndex;
-					if (eventIndex != 0) {
-						EventManager instance4 = Singleton<EventManager>.instance;
-						EventInfo info2 = instance4.m_events.m_buffer[eventIndex].Info;
-						info2.m_eventAI.VisitorEnter(eventIndex, ref instance4.m_events.m_buffer[eventIndex], citizenData.m_targetBuilding, citizenId);
+					if (citizenData.m_targetBuilding != 0 && citizenMan.m_citizens.m_buffer[citizenId].CurrentLocation == Citizen.Location.Visit) {
+						BuildingManager buildingMan = Singleton<BuildingManager>.instance;
+						BuildingInfo info = buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding].Info;
+						info.m_buildingAI.VisitorEnter(citizenData.m_targetBuilding, ref buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding], citizenId);
 					}
 				}
 			}
@@ -469,8 +483,13 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private void GetBuildingTargetPosition(ushort instanceID, ref CitizenInstance citizenData, float minSqrDistance) {
+		private void GetBuildingTargetPosition(ushort instanceID, ref CitizenInstance data, float minSqrDistance) {
 			Log.Error($"HumanAI.GetBuildingTargetPosition is not overriden!");
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void WaitTouristVehicle(ushort instanceID, ref CitizenInstance data, ushort targetBuildingId) {
+			Log.Error($"HumanAI.InvokeWaitTouristVehicle is not overriden!");
 		}
 	}
 }

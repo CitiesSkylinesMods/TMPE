@@ -103,6 +103,11 @@ namespace TrafficManager.Custom.PathFinding {
 			public bool ignoreFlooded;
 
 			/// <summary>
+			/// Should path costs be ignored?
+			/// </summary>
+			public bool ignoreCosts;
+
+			/// <summary>
 			/// Should random parking apply?
 			/// </summary>
 			public bool randomParking;
@@ -333,6 +338,9 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			if (args.hasCombustionEngine) {
 				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 4;
+			}
+			if (args.ignoreCosts) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 8;
 			}
 			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
 			this.m_pathUnits.m_buffer[unit].m_buildIndex = args.buildIndex;

@@ -88,6 +88,7 @@ namespace TrafficManager.Custom.Manager {
 				this.m_vehicles.m_buffer[(int)vehicleId].m_lastPathOffset = 0;
 				this.m_vehicles.m_buffer[(int)vehicleId].m_gateIndex = 0;
 				this.m_vehicles.m_buffer[(int)vehicleId].m_waterSource = 0;
+				this.m_vehicles.m_buffer[(int)vehicleId].m_touristCount = 0;
 				info.m_vehicleAI.CreateVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
 				info.m_vehicleAI.FrameDataUpdated(vehicleId, ref this.m_vehicles.m_buffer[vehicleId], ref this.m_vehicles.m_buffer[vehicleId].m_frame0);
 				this.m_vehicleCount = (int)(this.m_vehicles.ItemCount() - 1u);

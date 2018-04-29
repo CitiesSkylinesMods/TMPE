@@ -55,6 +55,7 @@ namespace TrafficManager.Custom.AI {
 				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
 				args.ignoreFlooded = false;
 				args.randomParking = false;
+				args.ignoreCosts = false;
 				args.stablePath = true;
 				args.skipQueue = true;
 

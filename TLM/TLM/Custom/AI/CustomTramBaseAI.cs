@@ -170,6 +170,7 @@ namespace TrafficManager.Custom.AI {
 				args.hasCombustionEngine = false;
 				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
 				args.ignoreFlooded = false;
+				args.ignoreCosts = false;
 				args.randomParking = false;
 				args.stablePath = true;
 				args.skipQueue = true;

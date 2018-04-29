@@ -390,6 +390,29 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Reverse-Redirection TouristAI::GetCamperProbability calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomTouristAI).GetMethod("GetCamperProbability",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (Citizen.Wealth)
+							},
+							null),
+							typeof(TouristAI).GetMethod("GetCamperProbability",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (Citizen.Wealth)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect TouristAI::GetCamperProbability");
+					detourFailed = true;
+				}
+
 				Log.Info("Reverse-Redirection HumanAI::GetBuildingTargetPosition calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("GetBuildingTargetPosition",
@@ -489,6 +512,33 @@ namespace TrafficManager {
 								null)));
 				} catch (Exception) {
 					Log.Error("Could not reverse-redirect HumanAI::Spawn");
+					detourFailed = true;
+				}
+
+				Log.Info("Reverse-Redirection HumanAI::WaitTouristVehicle calls");
+				try {
+					Detours.Add(new Detour(typeof(CustomHumanAI).GetMethod("WaitTouristVehicle",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (ushort)
+							},
+							null),
+							typeof(HumanAI).GetMethod("WaitTouristVehicle",
+								BindingFlags.NonPublic | BindingFlags.Instance,
+								null,
+								new[]
+								{
+									typeof (ushort),
+									typeof (CitizenInstance).MakeByRefType(),
+									typeof (ushort)
+								},
+								null)));
+				} catch (Exception) {
+					Log.Error("Could not reverse-redirect HumanAI::WaitTouristVehicle");
 					detourFailed = true;
 				}
 
@@ -1530,7 +1580,8 @@ namespace TrafficManager {
 							{
 								typeof (ushort),
 								typeof (CitizenInstance).MakeByRefType(),
-								typeof (bool)
+								typeof (bool),
+								typeof (VehicleInfo).MakeByRefType()
 							},
 							null), typeof(CustomResidentAI).GetMethod("CustomGetVehicleInfo")));
 				} catch (Exception) {
@@ -1547,7 +1598,8 @@ namespace TrafficManager {
 							{
 								typeof (ushort),
 								typeof (CitizenInstance).MakeByRefType(),
-								typeof (bool)
+								typeof (bool),
+								typeof (VehicleInfo).MakeByRefType()
 							},
 							null), typeof(CustomTouristAI).GetMethod("CustomGetVehicleInfo")));
 				} catch (Exception) {

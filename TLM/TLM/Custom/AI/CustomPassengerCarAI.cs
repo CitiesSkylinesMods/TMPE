@@ -44,6 +44,7 @@ namespace TrafficManager.Custom.AI {
 			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 			ushort driverInstanceId = GetDriverInstanceId(vehicleID, ref data);
 			ushort targetBuildingId = 0;
+			bool targetIsNode = false;
 			if (driverInstanceId != 0) {
 				if ((data.m_flags & Vehicle.Flags.Parking) != (Vehicle.Flags)0) {
 					uint citizen = citizenManager.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
@@ -53,18 +54,23 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 				targetBuildingId = citizenManager.m_instances.m_buffer[(int)driverInstanceId].m_targetBuilding;
+				targetIsNode = ((citizenManager.m_instances.m_buffer[driverInstanceId].m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None);
 			}
 			if (targetBuildingId == 0) {
 				target = InstanceID.Empty;
 				return Locale.Get("VEHICLE_STATUS_CONFUSED");
 			}
-			bool flag = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;
-			if (flag) {
+			bool leavingCity = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;
+			if (leavingCity) {
 				target = InstanceID.Empty;
 				return Locale.Get("VEHICLE_STATUS_LEAVING");
 			}
 			target = InstanceID.Empty;
-			target.Building = targetBuildingId;
+			if (targetIsNode) {
+				target.NetNode = targetBuildingId;
+			} else {
+				target.Building = targetBuildingId;
+			}
 
 			string ret = Locale.Get("VEHICLE_STATUS_GOINGTO");
 			// NON-STOCK CODE START
@@ -264,7 +270,10 @@ namespace TrafficManager.Custom.AI {
 			if (allowRandomParking && // NON-STOCK CODE
 				!movingToParkingPos &&
 				targetBuildingId != 0 &&
-				Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office) {
+				(
+					Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office ||
+					(citizenManager.m_instances.m_buffer[driverInstanceId].m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None
+				)) {
 				randomParking = true;
 			}
 
@@ -309,6 +318,7 @@ namespace TrafficManager.Custom.AI {
 				args.hasCombustionEngine = this.CombustionEngine();
 				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
 				args.ignoreFlooded = false;
+				args.ignoreCosts = false;
 				args.randomParking = false;
 				args.stablePath = false;
 				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;

@@ -331,6 +331,7 @@ namespace TrafficManager.Traffic.Data {
 				args.hasCombustionEngine = false;
 				args.ignoreBlocked = false;
 				args.ignoreFlooded = false;
+				args.ignoreCosts = false;
 				args.randomParking = false;
 				args.stablePath = false;
 				args.skipQueue = false;
