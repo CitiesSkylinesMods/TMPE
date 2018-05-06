@@ -242,7 +242,11 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void Reset() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[4]) {
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+
+			if (fineDebug) {
 				Log.Warning($"ExtCitizenInstance.Reset({instanceId}): Resetting ext. citizen instance {instanceId}");
 			}
 #endif
@@ -260,9 +264,15 @@ namespace TrafficManager.Traffic.Data {
 		/// Releases the return path
 		/// </summary>
 		internal void ReleaseReturnPath() {
+#if DEBUG
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+#endif
+
 			if (returnPathId != 0) {
 #if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[2])
+				if (debug)
 					Log._Debug($"Releasing return path {returnPathId} of citizen instance {instanceId}. ReturnPathState={returnPathState}");
 #endif
 
@@ -277,7 +287,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		internal void UpdateReturnPathState() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[4])
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+
+			if (fineDebug)
 				Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {instanceId}");
 #endif
 			if (returnPathId != 0 && returnPathState == ExtPathState.Calculating) {
@@ -285,13 +299,13 @@ namespace TrafficManager.Traffic.Data {
 				if ((returnPathFlags & PathUnit.FLAG_READY) != 0) {
 					returnPathState = ExtPathState.Ready;
 #if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[4])
+					if (fineDebug)
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {returnPathId} SUCCEEDED. Flags={returnPathFlags}. Setting ReturnPathState={returnPathState}");
 #endif
 				} else if ((returnPathFlags & PathUnit.FLAG_FAILED) != 0) {
 					returnPathState = ExtPathState.Failed;
 #if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
+					if (debug)
 						Log._Debug($"CustomHumanAI.CustomSimulationStep: Return path {returnPathId} FAILED. Flags={returnPathFlags}. Setting ReturnPathState={returnPathState}");
 #endif
 				}
@@ -305,12 +319,18 @@ namespace TrafficManager.Traffic.Data {
 		/// <param name="targetPos">Target position</param>
 		/// <returns></returns>
 		internal bool CalculateReturnPath(Vector3 parkPos, Vector3 targetPos) {
+#if DEBUG
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+#endif
+
 			ReleaseReturnPath();
 
 			PathUnit.Position parkPathPos;
 			PathUnit.Position targetPathPos;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out parkPathPos) &&
-				CustomPathManager.FindPathPositionWithSpiralLoop(targetPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out targetPathPos)) {
+			if (CustomPathManager.FindPathPositionWithSpiralLoop(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out parkPathPos) &&
+				CustomPathManager.FindPathPositionWithSpiralLoop(targetPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out targetPathPos)) {
 
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
@@ -338,7 +358,7 @@ namespace TrafficManager.Traffic.Data {
 
 				if (CustomPathManager._instance.CreatePath(out pathId, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 #if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
+					if (debug)
 						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return path of citizen instance {instanceId}, path={pathId}, parkPathPos.segment={parkPathPos.m_segment}, parkPathPos.lane={parkPathPos.m_lane}, targetPathPos.segment={targetPathPos.m_segment}, targetPathPos.lane={targetPathPos.m_lane}");
 #endif
 
@@ -349,7 +369,7 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[2])
+			if (debug)
 				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {instanceId}.");
 #endif
 

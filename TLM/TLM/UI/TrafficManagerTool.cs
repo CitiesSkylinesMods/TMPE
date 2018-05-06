@@ -712,6 +712,8 @@ namespace TrafficManager.UI {
 					labelStr += ", acc: " + laneTrafficData[i].accumulatedDensities;
 #endif
 				}
+
+				labelStr += ", nd: " + Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nodes;
 #if DEBUG
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";

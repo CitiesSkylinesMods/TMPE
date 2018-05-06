@@ -63,7 +63,11 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void Reset() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[4]) {
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+
+			if (fineDebug) {
 				Log.Warning($"ExtCitizen.Reset({citizenId}): Resetting ext. citizen {citizenId}");
 			}
 #endif

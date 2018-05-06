@@ -39,7 +39,11 @@ namespace TrafficManager.Manager.Impl {
 
 		public void OnArriveAtDestination(uint citizenId, ref Citizen citizen) {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[4])
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+
+			if (fineDebug)
 				Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called. switching transportMode={ExtCitizens[citizenId].transportMode} to lastTransportMode={ExtCitizens[citizenId].lastTransportMode}");
 #endif
 			if (ExtCitizens[citizenId].lastLocation == Citizen.Location.Home) {

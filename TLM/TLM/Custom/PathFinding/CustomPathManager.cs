@@ -402,30 +402,30 @@ namespace TrafficManager.Custom.PathFinding {
 			return false;
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
-			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, allowUnderground, requireConnect, maxDistance, out pathPos);
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, otherLaneType, otherVehicleType, allowUnderground, requireConnect, maxDistance, out pathPos);
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPos) {
 			PathUnit.Position position2;
 			float distanceSqrA;
 			float distanceSqrB;
-			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPos, out position2, out distanceSqrA, out distanceSqrB);
+			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, otherLaneType, otherVehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPos, out position2, out distanceSqrA, out distanceSqrB);
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
-			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, otherLaneType, otherVehicleType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
-			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, secondaryPosition, service, laneType, vehicleType, otherLaneType, otherVehicleType, VehicleInfo.VehicleType.None, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
-			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, stopType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+			return FindPathPositionWithSpiralLoop(position, null, service, laneType, vehicleType, otherLaneType, otherVehicleType, stopType, allowUnderground, requireConnect, maxDistance, out pathPosA, out pathPosB, out distanceSqrA, out distanceSqrB);
 		}
 
-		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
+		public static bool FindPathPositionWithSpiralLoop(Vector3 position, Vector3? secondaryPosition, ItemClass.Service service, NetInfo.LaneType laneType, VehicleInfo.VehicleType vehicleType, NetInfo.LaneType otherLaneType, VehicleInfo.VehicleType otherVehicleType, VehicleInfo.VehicleType stopType, bool allowUnderground, bool requireConnect, float maxDistance, out PathUnit.Position pathPosA, out PathUnit.Position pathPosB, out float distanceSqrA, out float distanceSqrB) {
 			int iMin = Mathf.Max((int)((position.z - (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), 0);
 			int iMax = Mathf.Min((int)((position.z + (float)NetManager.NODEGRID_CELL_SIZE) / (float)NetManager.NODEGRID_CELL_SIZE + (float)NetManager.NODEGRID_RESOLUTION / 2f), NetManager.NODEGRID_RESOLUTION-1);
 
@@ -474,45 +474,63 @@ namespace TrafficManager.Custom.PathFinding {
 					NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 					if (segmentInfo != null &&
 						segmentInfo.m_class.m_service == service &&
-						(netManager.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Collapsed | NetSegment.Flags.Flooded)) == NetSegment.Flags.None && (allowUnderground || !segmentInfo.m_netAI.IsUnderground())
-						) {
+						(netManager.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Collapsed | NetSegment.Flags.Flooded)) == NetSegment.Flags.None &&
+						(allowUnderground || !segmentInfo.m_netAI.IsUnderground())) {
 
-						ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
-						ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
-						Vector3 startNodePos = netManager.m_nodes.m_buffer[startNodeId].m_position;
-						Vector3 endNodePos = netManager.m_nodes.m_buffer[endNodeId].m_position;
-	
-						Vector3 posA; int laneIndexA; float laneOffsetA;
-						Vector3 posB; int laneIndexB; float laneOffsetB;
-
-						if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(position, laneType, vehicleType, stopType, requireConnect, out posA, out laneIndexA, out laneOffsetA, out posB, out laneIndexB, out laneOffsetB)) {
-							float dist = Vector3.SqrMagnitude(position - posA);
-							if (secondaryPosition != null)
-								dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
-
-							if (dist < minDist) {
-								found = true;
-
-								minDist = dist;
-								myPathPosA.m_segment = segmentId;
-								myPathPosA.m_lane = (byte)laneIndexA;
-								myPathPosA.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetA * 255f), 0, 255);
-								myDistanceSqrA = dist;
-
-								dist = Vector3.SqrMagnitude(position - posB);
-								if (secondaryPosition != null)
-									dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posB);
-
-								if (laneIndexB < 0) {
-									myPathPosB.m_segment = 0;
-									myPathPosB.m_lane = 0;
-									myPathPosB.m_offset = 0;
-									myDistanceSqrB = float.MaxValue;
+						bool otherPassed = true;
+						if (otherLaneType != NetInfo.LaneType.None || otherVehicleType != VehicleInfo.VehicleType.None) {
+							// check if any lane is present that matches the given conditions
+							otherPassed = false;
+							Constants.ServiceFactory.NetService.IterateSegmentLanes(segmentId, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort segtId, ref NetSegment segment, byte laneIndex) {
+								if (
+									(otherLaneType == NetInfo.LaneType.None || (laneInfo.m_laneType & otherLaneType) != NetInfo.LaneType.None) &&
+									(otherVehicleType == VehicleInfo.VehicleType.None || (laneInfo.m_vehicleType & otherVehicleType) != VehicleInfo.VehicleType.None)) {
+									otherPassed = true;
+									return false;
 								} else {
-									myPathPosB.m_segment = segmentId;
-									myPathPosB.m_lane = (byte)laneIndexB;
-									myPathPosB.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetB * 255f), 0, 255);
-									myDistanceSqrB = dist;
+									return true;
+								}
+							});
+						}
+
+						if (otherPassed) {
+							ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
+							ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
+							Vector3 startNodePos = netManager.m_nodes.m_buffer[startNodeId].m_position;
+							Vector3 endNodePos = netManager.m_nodes.m_buffer[endNodeId].m_position;
+	
+							Vector3 posA; int laneIndexA; float laneOffsetA;
+							Vector3 posB; int laneIndexB; float laneOffsetB;
+
+							if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(position, laneType, vehicleType, stopType, requireConnect, out posA, out laneIndexA, out laneOffsetA, out posB, out laneIndexB, out laneOffsetB)) {
+								float dist = Vector3.SqrMagnitude(position - posA);
+								if (secondaryPosition != null)
+									dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posA);
+
+								if (dist < minDist) {
+									found = true;
+
+									minDist = dist;
+									myPathPosA.m_segment = segmentId;
+									myPathPosA.m_lane = (byte)laneIndexA;
+									myPathPosA.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetA * 255f), 0, 255);
+									myDistanceSqrA = dist;
+
+									dist = Vector3.SqrMagnitude(position - posB);
+									if (secondaryPosition != null)
+										dist += Vector3.SqrMagnitude((Vector3)secondaryPosition - posB);
+
+									if (laneIndexB < 0) {
+										myPathPosB.m_segment = 0;
+										myPathPosB.m_lane = 0;
+										myPathPosB.m_offset = 0;
+										myDistanceSqrB = float.MaxValue;
+									} else {
+										myPathPosB.m_segment = segmentId;
+										myPathPosB.m_lane = (byte)laneIndexB;
+										myPathPosB.m_offset = (byte)Mathf.Clamp(Mathf.RoundToInt(laneOffsetB * 255f), 0, 255);
+										myDistanceSqrB = dist;
+									}
 								}
 							}
 						}

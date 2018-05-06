@@ -464,7 +464,11 @@ namespace TrafficManager.Custom.AI {
 
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[2])
+			bool vehDebug = GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && vehDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && vehDebug;
+
+			if (debug)
 				Log.Warning($"CustomCarAI.CustomStartPathFind({vehicleID}): called for vehicle {vehicleID}, startPos={startPos}, endPos={endPos}, startBothWays={startBothWays}, endBothWays={endBothWays}, undergroundTarget={undergroundTarget}");
 #endif
 
@@ -527,7 +531,7 @@ namespace TrafficManager.Custom.AI {
 
 				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 #if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[2])
+					if (debug)
 						Log._Debug($"CustomCarAI.CustomStartPathFind({vehicleID}): Path-finding starts for vehicle {vehicleID}, path={path}, extVehicleType={vehicleType}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
 #endif
 

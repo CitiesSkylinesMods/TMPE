@@ -188,10 +188,10 @@ namespace TrafficManager.Manager.Impl {
 			int coarsePathPosIndex = vehicleData.m_pathPositionIndex >> 1;
 			PathUnit.Position curPathPos;
 			PathUnit.Position nextPathPos = default(PathUnit.Position);
-			if ((vehicleData.m_pathPositionIndex & 1) == 0) {
+			//if ((vehicleData.m_pathPositionIndex & 1) == 0) {
 				curPathPos = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(coarsePathPosIndex);
 				pathManager.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(coarsePathPosIndex, out nextPathPos);
-			} else {
+			/*} else {
 				uint firstUnitId = vehicleData.m_path;
 				int firstCoarsePathPosIndex = coarsePathPosIndex;
 				bool invalid = false;
@@ -200,7 +200,7 @@ namespace TrafficManager.Manager.Impl {
 					int secondCoarsePathPosIndex = firstCoarsePathPosIndex;
 					PathUnit.GetNextPosition(ref secondUnitId, ref secondCoarsePathPosIndex, out nextPathPos, out invalid);
 				}
-			}
+			}*/
 			state.UpdatePosition(ref vehicleData, ref curPathPos, ref nextPathPos);
 		}
 
