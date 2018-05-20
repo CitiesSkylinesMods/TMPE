@@ -219,3 +219,6 @@ TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction
 Public_transport
 Prevent_excessive_transfers_at_public_transport_stations
 Compact_main_menu
+Window_transparency
+Overlay_transparency
+Remove_this_citizen

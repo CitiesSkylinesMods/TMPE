@@ -18,7 +18,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Lane speed randomization interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 0f;
+		public float LaneSpeedRandInterval = 5f;
 
 		/// <summary>
 		/// Maximum number of considered lane changes

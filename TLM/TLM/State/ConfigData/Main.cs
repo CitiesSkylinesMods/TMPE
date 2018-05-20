@@ -35,6 +35,16 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public bool TinyMainMenu = true;
 
+		/// <summary>
+		/// User interface transparency
+		/// </summary>
+		public byte GuiTransparency = 30;
+
+		/// <summary>
+		/// Overlay transparency
+		/// </summary>
+		public byte OverlayTransparency = 40;
+
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
 			newMessages.Add(messageKey);

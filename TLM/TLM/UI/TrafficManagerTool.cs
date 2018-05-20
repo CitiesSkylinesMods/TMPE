@@ -22,7 +22,7 @@ using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
-	public class TrafficManagerTool : DefaultTool {
+	public class TrafficManagerTool : DefaultTool, IObserver<GlobalConfig> {
 		public struct NodeVisitItem {
 			public ushort nodeId;
 			public bool startNode;
@@ -54,6 +54,8 @@ namespace TrafficManager.UI {
         internal static ExtVehicleType[] InfoSignsToDisplay = new ExtVehicleType[] { ExtVehicleType.PassengerCar, ExtVehicleType.Bicycle, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck, ExtVehicleType.Service, ExtVehicleType.RailVehicle };
 
 		private static SubTool activeSubTool = null;
+
+		private static IDisposable confDisposable;
 
 		static TrafficManagerTool() {
 			
@@ -101,6 +103,23 @@ namespace TrafficManager.UI {
 			return (float)Screen.height / 1200f;
 		}
 
+		internal float GetWindowAlpha() {
+			return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
+		}
+
+		internal float GetHandleAlpha(bool hovered) {
+			byte transparency = GlobalConfig.Instance.Main.OverlayTransparency;
+			if (hovered) {
+				// reduce transparency when handle is hovered
+				transparency = (byte)Math.Min(20, transparency >> 2);
+			}
+			return TransparencyToAlpha(transparency);
+		}
+
+		private static float TransparencyToAlpha(byte transparency) {
+			return Mathf.Clamp(100 - (int)transparency, 0f, 100f) / 100f;
+		}
+
 		internal void Initialize() {
 			Log.Info("TrafficManagerTool: Initialization running now.");
 			subTools.Clear();
@@ -124,7 +143,16 @@ namespace TrafficManager.UI {
 
 			SetToolMode(ToolMode.None);
 
+			if (confDisposable != null) {
+				confDisposable.Dispose();
+			}
+			confDisposable = GlobalConfig.Instance.Subscribe(this);
+
 			Log.Info("TrafficManagerTool: Initialization completed.");
+		}
+
+		public void OnUpdate(IObservable<GlobalConfig> observable) {
+			InitializeSubTools();
 		}
 
 		internal void InitializeSubTools() {
@@ -326,11 +354,11 @@ namespace TrafficManager.UI {
 				//#endif
 
 				foreach (KeyValuePair<ToolMode, SubTool> en in subTools) {
-					en.Value.ShowGUIOverlay(en.Key != GetToolMode());
+					en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
 				}
 
 				var guiColor = GUI.color;
-				guiColor.a = 0.9f;
+				guiColor.a = 1f;
 				GUI.color = guiColor;
 
 				if (activeSubTool != null)
@@ -375,57 +403,57 @@ namespace TrafficManager.UI {
 		}
 
 		public void DrawStaticSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, float alpha) {
-			DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, false, alpha);
+			float size) {
+			DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, false);
 		}
 
 		public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, true, defaultAlpha, hoverAlpha);
+			float size) {
+			return DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, true);
 		}
 
 		public bool DrawGenericSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
-			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellSize, cellSize, xu, yu, x, y, size, size, canHover, defaultAlpha, hoverAlpha);
+			float size, bool canHover) {
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellSize, cellSize, xu, yu, x, y, size, size, canHover);
 		}
 
 		public void DrawStaticOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, float alpha) {
-			DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, false, alpha);
+			float width, float height) {
+			DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, false);
 		}
 
 		public bool DrawHoverableOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, true, defaultAlpha, hoverAlpha);
+			float width, float height) {
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, true);
 		}
 
 		public bool DrawGenericOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
+			float width, float height, bool canHover) {
 			Vector3 worldPos = gridOrigin + cellWidth * (float)x * xu + cellHeight * (float)y * yu; // grid position in game coordinates
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover, defaultAlpha, hoverAlpha);
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover);
 		}
 
-		public void DrawStaticSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float alpha) {
-			DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false, alpha);
+		public void DrawStaticSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false);
 		}
 
-		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true);
 		}
 
-		public bool DrawGenericSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover, defaultAlpha, hoverAlpha);
+		public bool DrawGenericSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, bool canHover) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover);
 		}
 
-		public void DrawStaticOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float alpha) {
-			DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false, alpha);
+		public void DrawStaticOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false);
 		}
 
-		public bool DrawHoverableOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true);
 		}
 
-		public bool DrawGenericOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+		public bool DrawGenericOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, bool canHover) {
 			Vector3 screenPos;
 			if (! WorldToScreenPoint(worldPos, out screenPos)) {
 				return false;
@@ -438,15 +466,12 @@ namespace TrafficManager.UI {
 			Rect boundingBox = new Rect(screenPos.x - width / 2f, screenPos.y - height / 2f, width, height);
 
 			Color guiColor = GUI.color;
-			guiColor.a = defaultAlpha;
 
 			bool hovered = false;
 			if (canHover) {
 				hovered = IsMouseOver(boundingBox);
-				if (hovered && hoverAlpha != null) {
-					guiColor.a = (float)hoverAlpha;
-				}
 			}
+			guiColor.a = GetHandleAlpha(hovered);
 
 			GUI.color = guiColor;
 			GUI.DrawTexture(boundingBox, texture);
@@ -1117,6 +1142,22 @@ namespace TrafficManager.UI {
 			result.Apply();
 
 			return result;
+		}
+
+		public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
+			Color[] texColors = tex.GetPixels();
+			Color[] retPixels = new Color[texColors.Length];
+
+			for (int i = 0; i < texColors.Length; ++i) {
+				retPixels[i] = new Color(texColors[i].r, texColors[i].g, texColors[i].b, texColors[i].a * alpha);
+			}
+
+			Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
+			ret.SetPixels(retPixels);
+			ret.Apply();
+
+			return ret;
 		}
 
 		internal static bool IsMouseOver(Rect boundingBox) {

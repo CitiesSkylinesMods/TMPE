@@ -219,3 +219,6 @@ TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the jun
 Public_transport Public transport
 Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations
 Compact_main_menu Compact main menu
+Window_transparency Window transparency
+Overlay_transparency Overlay transparency
+Remove_this_citizen Remove this citizen

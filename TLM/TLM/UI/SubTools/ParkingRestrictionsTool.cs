@@ -43,7 +43,7 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
 			if (viewOnly && !Options.parkingRestrictionsOverlay)
 				return;
 
@@ -157,12 +157,10 @@ namespace TrafficManager.UI.SubTools {
 				}
 				bool hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
+				guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
 				if (hoveredHandle) {
 					// mouse hovering over sign
 					hovered = true;
-					guiColor.a = 0.8f;
-				} else {
-					guiColor.a = 0.5f;
 				}
 
 				GUI.color = guiColor;

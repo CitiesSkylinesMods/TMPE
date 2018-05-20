@@ -174,7 +174,7 @@ namespace TrafficManager.UI.SubTools {
 			//Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds: currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(x => x.ToString()).ToArray())}");
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
 			if (viewOnly && !Options.prioritySignsOverlay)
 				return;
 
@@ -245,7 +245,7 @@ namespace TrafficManager.UI.SubTools {
 							showRemoveButton = true;
 						}
 
-						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], camPos, signPos, 90f, !viewOnly, 0.5f, 0.8f) && clicked) {
+						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], camPos, signPos, 90f, !viewOnly) && clicked) {
 							PriorityType? newSign = null;
 							switch (sign) {
 								case PriorityType.Main:
@@ -274,7 +274,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					// draw remove button and handle click
-					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, camPos, nodePos, 90f, 0.5f, 0.8f) && clicked) {
+					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, camPos, nodePos, 90f) && clicked) {
 						prioMan.RemovePrioritySignsFromNode(nodeId);
 						Log._Debug($"PrioritySignsTool.ShowGUI: Removed priority signs from node {nodeId}");
 						removedNodeId = nodeId;
@@ -348,6 +348,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Initialize() {
+			base.Initialize();
 			Cleanup();
 			if (Options.prioritySignsOverlay) {
 				RefreshCurrentPriorityNodeIds();

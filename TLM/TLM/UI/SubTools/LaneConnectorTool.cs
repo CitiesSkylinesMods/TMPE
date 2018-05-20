@@ -424,6 +424,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Initialize() {
+			base.Initialize();
 			Cleanup();
 			if (Options.connectedLanesOverlay) {
 				RefreshCurrentNodeMarkers();

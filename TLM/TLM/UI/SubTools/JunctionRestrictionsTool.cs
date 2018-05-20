@@ -52,7 +52,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
 			if (viewOnly && !Options.junctionRestrictionsOverlay)
 				return;
 
@@ -141,6 +141,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Initialize() {
+			base.Initialize();
 			Cleanup();
 			if (Options.junctionRestrictionsOverlay) {
 				RefreshCurrentRestrictedNodeIds();
@@ -222,7 +223,7 @@ namespace TrafficManager.UI.SubTools {
 				// draw "lane-changing when going straight allowed" sign at (0; 0)
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowLaneChangesWhileGoingStraight)) {
-					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TextureResources.LaneChangeAllowedTexture2D : TextureResources.LaneChangeForbiddenTexture2D, out signHovered);
+					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LaneChangeAllowedTexture2D : TextureResources.LaneChangeForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
 						if (MainTool.CheckClicked()) {
@@ -240,7 +241,7 @@ namespace TrafficManager.UI.SubTools {
 				// draw "u-turns allowed" sign at (1; 0)
 				allowed = JunctionRestrictionsManager.Instance.IsUturnAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowUTurns)) {
-					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TextureResources.UturnAllowedTexture2D : TextureResources.UturnForbiddenTexture2D, out signHovered);
+					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.UturnAllowedTexture2D : TextureResources.UturnForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
 
@@ -260,7 +261,7 @@ namespace TrafficManager.UI.SubTools {
 				// draw "entering blocked junctions allowed" sign at (0; 1)
 				allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
 				if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
-					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
+					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
 
@@ -279,7 +280,7 @@ namespace TrafficManager.UI.SubTools {
 				// draw "pedestrian crossing allowed" sign at (1; 1)
 				allowed = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentId, startNode);
 				if (!viewOnly || !allowed) {
-					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, ref guiColor, allowed ? TextureResources.PedestrianCrossingAllowedTexture2D : TextureResources.PedestrianCrossingForbiddenTexture2D, out signHovered);
+					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.PedestrianCrossingAllowedTexture2D : TextureResources.PedestrianCrossingForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
 
@@ -297,7 +298,7 @@ namespace TrafficManager.UI.SubTools {
 			return hovered;
 		}
 
-		private void DrawSign(bool viewOnly, ref Vector3 camPos, ref Vector3 xu, ref Vector3 yu, float f, ref Vector3 zero, int x, int y, ref Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
+		private void DrawSign(bool viewOnly, ref Vector3 camPos, ref Vector3 xu, ref Vector3 yu, float f, ref Vector3 zero, int x, int y, Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
 			Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
 			Vector3 signScreenPos;
@@ -315,12 +316,7 @@ namespace TrafficManager.UI.SubTools {
 
 			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
 			hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
-			if (hoveredHandle) {
-				// mouse hovering over sign
-				guiColor.a = 0.8f;
-			} else {
-				guiColor.a = 0.5f;
-			}
+			guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
 
 			GUI.color = guiColor;
 			GUI.DrawTexture(boundingBox, signTexture);

@@ -245,41 +245,15 @@ namespace TrafficManager.UI.SubTools {
 				(!IsNodeSelected(HoveredNodeId) ^ onlySelected) &&
 				!MainTool.GetToolController().IsInsideUI &&
 				Cursor.visible &&
-				Flags.mayHaveTrafficLight(HoveredNodeId)) {
-				//var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
-
-				//if ((node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None) {
+				Flags.mayHaveTrafficLight(HoveredNodeId)
+			) {
 				MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, false, false);
-
-				/*Bezier3 bezier;
-				bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-				bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-
-				var color = MainTool.GetToolColor(false, false);
-
-				NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-					segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);*/
-				//}
 			}
 
 			if (SelectedNodeIds.Count <= 0) return;
 
 			foreach (var index in SelectedNodeIds) {
-				//var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_segment0];
-
 				MainTool.DrawNodeCircle(cameraInfo, index, true, false);
-
-				/*Bezier3 bezier;
-
-				bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_position;
-				bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[index].m_position;
-
-				var color = MainTool.GetToolColor(true, false);
-
-				NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-					segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-				MainTool.DrawOverlayBezier(cameraInfo, bezier, color);*/
 			}
 		}
 
@@ -689,8 +663,8 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Initialize() {
+			base.Initialize();
 			Cleanup();
-
 			if (Options.timedLightsOverlay) {
 				RefreshCurrentTimedNodeIds();
 			} else {
@@ -818,7 +792,7 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiTimedTrafficLightsNode() {
 			_cursorInSecondaryPanel = false;
 
-			_windowRect2 = GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, Translation.GetString("Select_nodes_windowTitle"));
+			_windowRect2 = GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, Translation.GetString("Select_nodes_windowTitle"), WindowStyle);
 
 			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
 		}
@@ -830,7 +804,7 @@ namespace TrafficManager.UI.SubTools {
 
 			_cursorInSecondaryPanel = false;
 
-			_windowRect = GUILayout.Window(253, _windowRect, _guiTimedControlPanel, Translation.GetString("Timed_traffic_lights_manager"));
+			_windowRect = GUILayout.Window(253, _windowRect, _guiTimedControlPanel, Translation.GetString("Timed_traffic_lights_manager"), WindowStyle);
 
 			_cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
 
@@ -841,7 +815,7 @@ namespace TrafficManager.UI.SubTools {
 		private void _guiTimedTrafficLightsCopy() {
 			_cursorInSecondaryPanel = false;
 
-			_windowRect2 = GUILayout.Window(255, _windowRect2, _guiTimedTrafficLightsPasteWindow, Translation.GetString("Paste"));
+			_windowRect2 = GUILayout.Window(255, _windowRect2, _guiTimedTrafficLightsPasteWindow, Translation.GetString("Paste"), WindowStyle);
 
 			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
 		}
@@ -1030,17 +1004,15 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
-			if (viewOnly && !Options.timedLightsOverlay /*&&
-				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsAddNode &&
-				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsRemoveNode &&
-				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsSelectNode &&
-				TrafficManagerTool.GetToolMode() != ToolMode.TimedLightsShowLights*/)
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
+			if (! ToolMode.TimedLightsShowLights.Equals(toolMode)) {
+				// TODO refactor timed light related tool modes to sub tool modes
+				return;
+			}
+			if (viewOnly && !Options.timedLightsOverlay)
 				return;
 
-			/*if (TrafficManagerTool.GetToolMode() == ToolMode.TimedLightsShowLights) {
-				ShowGUI();
-			}*/
+			Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
@@ -1048,40 +1020,18 @@ namespace TrafficManager.UI.SubTools {
 				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
 					continue;
 				}
-#if DEBUG
-				bool debug = nodeId == 21361;
-#endif
+
 				if (SelectedNodeIds.Contains((ushort)nodeId)) {
-#if DEBUG
-					if (debug)
-						Log._Debug($"TimedTrafficLightsTool.ShowGUIOverlay: Node {nodeId} is selected");
-#endif
 					continue;
 				}
 
 				if (tlsMan.HasTimedSimulation((ushort)nodeId)) {
 					ITimedTrafficLights timedNode = tlsMan.TrafficLightSimulations[nodeId].TimedLight;
 
-					var nodePositionVector3 = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-					var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-					var diff = nodePositionVector3 - camPos;
-					if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
-						continue; // do not draw if too distant
+					var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-					Vector3 nodeScreenPosition;
-					bool visible = MainTool.WorldToScreenPoint(nodePositionVector3, out nodeScreenPosition);
-
-					if (!visible)
-						continue;
-					
-					var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
-					var size = 120f * zoom;
-
-					var guiColor = GUI.color;
-					guiColor.a = 0.5f;
-					var nodeDrawingBox = new Rect(nodeScreenPosition.x - size / 2, nodeScreenPosition.y - size / 2, size, size);
-					//Log._Debug($"GUI Color: {guiColor} {GUI.color}");
-					GUI.DrawTexture(nodeDrawingBox, timedNode.IsStarted() ? (timedNode.IsInTestMode() ? TextureResources.ClockTestTexture2D : TextureResources.ClockPlayTexture2D) : TextureResources.ClockPauseTexture2D);
+					Texture2D tex = timedNode.IsStarted() ? (timedNode.IsInTestMode() ? TextureResources.ClockTestTexture2D : TextureResources.ClockPlayTexture2D) : TextureResources.ClockPauseTexture2D;
+					MainTool.DrawGenericSquareOverlayTexture(tex, camPos, nodePos, 120f, false);
 				}
 			}
 		}
@@ -1168,12 +1118,9 @@ namespace TrafficManager.UI.SubTools {
 
 						// SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
 						if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-							guiColor.a = _hoveredButton[0] == srcSegmentId &&
+							guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId &&
 										 (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) &&
-										 _hoveredNode == nodeId
-								? 0.92f
-								: 0.6f;
-
+										 _hoveredNode == nodeId);
 							GUI.color = guiColor;
 
 							var myRect2 = new Rect(screenPos.x - manualPedestrianWidth / 2 - (_timedPanelAdd || _timedEditStep >= 0 ? lightWidth : 0) + 5f * zoom,
@@ -1195,7 +1142,7 @@ namespace TrafficManager.UI.SubTools {
 						}
 
 						// SWITCH PEDESTRIAN LIGHT
-						guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+						guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 && _hoveredNode == nodeId);
 
 						GUI.color = guiColor;
 
@@ -1244,11 +1191,8 @@ namespace TrafficManager.UI.SubTools {
 						offsetScreenPos.y -= (lightHeight + 10f * zoom) * lightOffset;
 
 						if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-							guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == -1 &&
-										 _hoveredNode == nodeId
-								? 0.92f
-								: 0.6f;
-							
+							guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == -1 &&
+										 _hoveredNode == nodeId);							
 							GUI.color = guiColor;
 
 							var myRect1 = new Rect(offsetScreenPos.x - modeWidth / 2,
@@ -1279,7 +1223,7 @@ namespace TrafficManager.UI.SubTools {
 								if ((TrafficManagerTool.InfoSignsToDisplay[k] & vehicleType) == ExtVehicleType.None)
 									continue;
 								var infoRect = new Rect(offsetScreenPos.x + modeWidth / 2f + 7f * zoom * (float)(numInfos + 1) + infoWidth * (float)numInfos, offsetScreenPos.y - infoHeight / 2f, infoWidth, infoHeight);
-								guiColor.a = 0.6f;
+								guiColor.a = MainTool.GetHandleAlpha(false);
 								GUI.DrawTexture(infoRect, TextureResources.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
 								++numInfos;
 							}
@@ -1374,7 +1318,7 @@ namespace TrafficManager.UI.SubTools {
 						switch (liveSegmentLight.CurrentMode) {
 							case LightMode.Simple: {
 									// no arrow light
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 
@@ -1432,7 +1376,7 @@ namespace TrafficManager.UI.SubTools {
 							case LightMode.SingleLeft:
 								if (hasOutgoingLeftSegment) {
 									// left arrow light
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 
@@ -1486,7 +1430,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 
 								// forward-right arrow light
-								guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+								guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId);
 
 								GUI.color = guiColor;
 
@@ -1519,11 +1463,9 @@ namespace TrafficManager.UI.SubTools {
 								// COUNTER
 								if (timedActive && _timedShowNumbers) {
 									var counterSize = 20f * zoom;
-
 									var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 0);
-
+				
 									float numOffset;
-
 									if (liveSegmentLight.LightMain == RoadBaseAI.TrafficLightState.Red) {
 										numOffset = counterSize + 96f * zoom - modeHeight * 2;
 									} else {
@@ -1549,7 +1491,7 @@ namespace TrafficManager.UI.SubTools {
 								break;
 							case LightMode.SingleRight: {
 									// forward-left light
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 
@@ -1562,7 +1504,6 @@ namespace TrafficManager.UI.SubTools {
 									if (hasOutgoingForwardSegment && hasOutgoingLeftSegment) {
 										hasOtherLight = true;
 										drawForwardLeftLightTexture(liveSegmentLight.LightMain, myRect4);
-
 										lightType = 1;
 									} else if (hasOutgoingForwardSegment) {
 										hasOtherLight = true;
@@ -1627,10 +1568,8 @@ namespace TrafficManager.UI.SubTools {
 
 									// right arrow light
 									if (hasOutgoingRightSegment) {
-										guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
-													 _hoveredNode == nodeId
-											? 0.92f
-											: 0.6f;
+										guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
+													 _hoveredNode == nodeId);
 
 										GUI.color = guiColor;
 
@@ -1692,7 +1631,7 @@ namespace TrafficManager.UI.SubTools {
 							default:
 								// left arrow light
 								if (hasOutgoingLeftSegment) {
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 
@@ -1759,7 +1698,7 @@ namespace TrafficManager.UI.SubTools {
 
 								// forward arrow light
 								if (hasOutgoingForwardSegment) {
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 
@@ -1823,7 +1762,7 @@ namespace TrafficManager.UI.SubTools {
 
 								// right arrow light
 								if (hasOutgoingRightSegment) {
-									guiColor.a = _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId ? 0.92f : 0.6f;
+									guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 5 && _hoveredNode == nodeId);
 
 									GUI.color = guiColor;
 

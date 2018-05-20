@@ -76,7 +76,7 @@ namespace TrafficManager.UI {
 
 			public override Texture2D AtlasTexture {
 				get {
-					return TextureResources.RemoveVehicleButtonTexture2D;
+					return TextureResources.RemoveButtonTexture2D;
 				}
 			}
 

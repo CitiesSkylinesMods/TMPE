@@ -2534,6 +2534,12 @@ namespace TrafficManager {
 				if (removeVehicleButtonExtender != null) {
 					Object.Destroy(removeVehicleButtonExtender, 10f);
 				}
+
+				// remove citizen instance button
+				var removeCitizenInstanceButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveCitizenInstanceButtonExtender>();
+				if (removeCitizenInstanceButtonExtender != null) {
+					Object.Destroy(removeCitizenInstanceButtonExtender, 10f);
+				}
 #if TRACE
 				Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
@@ -2660,6 +2666,9 @@ namespace TrafficManager {
 
 			// add "remove vehicle" button
 			UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
+
+			// add "remove citizen instance" button
+			UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 			
 			initDetours();
 

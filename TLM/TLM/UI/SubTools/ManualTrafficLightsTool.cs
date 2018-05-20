@@ -119,7 +119,7 @@ namespace TrafficManager.UI.SubTools {
 						hoveredSegment = RenderManualPedestrianLightSwitch(zoom, end.SegmentId, screenPos, lightWidth, segmentLights, hoveredSegment);
 
 						// SWITCH PEDESTRIAN LIGHT
-						guiColor.a = _hoveredButton[0] == end.SegmentId && _hoveredButton[1] == 2 && segmentLights.ManualPedestrianMode ? 0.92f : 0.6f;
+						guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == end.SegmentId && _hoveredButton[1] == 2 && segmentLights.ManualPedestrianMode);
 						GUI.color = guiColor;
 
 						var myRect3 = new Rect(screenPos.x - pedestrianWidth / 2 - lightWidth + 5f * zoom, screenPos.y - pedestrianHeight / 2 + 22f * zoom, pedestrianWidth, pedestrianHeight);
@@ -166,7 +166,7 @@ namespace TrafficManager.UI.SubTools {
 								if ((TrafficManagerTool.InfoSignsToDisplay[k] & vehicleType) == ExtVehicleType.None)
 									continue;
 								var infoRect = new Rect(offsetScreenPos.x + modeWidth / 2f + 7f * zoom * (float)(numInfos + 1) + infoWidth * (float)numInfos, offsetScreenPos.y - infoHeight / 2f, infoWidth, infoHeight);
-								guiColor.a = 0.6f;
+								guiColor.a = MainTool.GetHandleAlpha(false);
 								GUI.DrawTexture(infoRect, TextureResources.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
 								++numInfos;
 							}
@@ -228,7 +228,7 @@ namespace TrafficManager.UI.SubTools {
 			var manualPedestrianWidth = 36f * zoom;
 			var manualPedestrianHeight = 35f * zoom;
 
-			guiColor.a = _hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) ? 0.92f : 0.6f;
+			guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2));
 
 			GUI.color = guiColor;
 
@@ -478,7 +478,7 @@ namespace TrafficManager.UI.SubTools {
 			var guiColor = GUI.color;
 			// right arrow light
 			if (hasRightSegment)
-				guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == 4 ? 0.92f : 0.6f;
+				guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && _hoveredButton[1] == 4);
 
 			GUI.color = guiColor;
 
@@ -650,7 +650,7 @@ namespace TrafficManager.UI.SubTools {
 		private void SetAlpha(int segmentId, int buttonId) {
 			var guiColor = GUI.color;
 
-			guiColor.a = _hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId ? 0.92f : 0.6f;
+			guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId);
 
 			GUI.color = guiColor;
 		}

@@ -24,6 +24,8 @@ namespace TrafficManager.State {
 		private static UICheckBox instantEffectsToggle = null;
 		private static UICheckBox lockButtonToggle = null;
 		private static UICheckBox lockMenuToggle = null;
+		private static UISlider guiTransparencySlider = null;
+		private static UISlider overlayTransparencySlider = null;
 		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
@@ -212,6 +214,8 @@ namespace TrafficManager.State {
 			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.Main.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
 			tinyMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Compact_main_menu"), GlobalConfig.Instance.Main.TinyMainMenu, onTinyMenuChanged) as UICheckBox;
+			guiTransparencySlider = generalGroup.AddSlider(Translation.GetString("Window_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.GuiTransparency, onGuiTransparencyChanged) as UISlider;
+			overlayTransparencySlider = generalGroup.AddSlider(Translation.GetString("Overlay_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.OverlayTransparency, onOverlayTransparencyChanged) as UISlider;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
@@ -472,6 +476,30 @@ namespace TrafficManager.State {
 				return false;
 			}
 			return true;
+		}
+
+		private static void onGuiTransparencyChanged(float newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			setGuiTransparency((byte)Mathf.RoundToInt(newVal));
+			guiTransparencySlider.tooltip = Translation.GetString("Window_transparency") + ": " + GlobalConfig.Instance.Main.GuiTransparency + " %";
+
+			GlobalConfig.WriteConfig();
+
+			Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiTransparency}");
+		}
+
+		private static void onOverlayTransparencyChanged(float newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			setOverlayTransparency((byte)Mathf.RoundToInt(newVal));
+			overlayTransparencySlider.tooltip = Translation.GetString("Overlay_transparency") + ": " + GlobalConfig.Instance.Main.OverlayTransparency + " %";
+
+			GlobalConfig.WriteConfig();
+
+			Log._Debug($"OverlayTransparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
 		}
 
 		private static void onAltLaneSelectionRatioChanged(float newVal) {
@@ -1045,6 +1073,24 @@ namespace TrafficManager.State {
 
 			if (changed && !newAdvancedAI) {
 				setAltLaneSelectionRatio(0);
+			}
+		}
+
+		public static void setGuiTransparency(byte val) {
+			bool changed = val != GlobalConfig.Instance.Main.GuiTransparency;
+			GlobalConfig.Instance.Main.GuiTransparency = val;
+
+			if (changed && guiTransparencySlider != null) {
+				guiTransparencySlider.value = val;
+			}
+		}
+
+		public static void setOverlayTransparency(byte val) {
+			bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
+			GlobalConfig.Instance.Main.OverlayTransparency = val;
+
+			if (changed && overlayTransparencySlider != null) {
+				overlayTransparencySlider.value = val;
 			}
 		}
 

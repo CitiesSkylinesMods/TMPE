@@ -58,6 +58,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void Initialize() {
+			base.Initialize();
 			Cleanup();
 			if (Options.vehicleRestrictionsOverlay) {
 				RefreshCurrentRestrictedSegmentIds();
@@ -92,7 +93,7 @@ namespace TrafficManager.UI.SubTools {
 			if (SelectedSegmentId != 0) {
 				_cursorInSecondaryPanel = false;
 
-				windowRect = GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"));
+				windowRect = GUILayout.Window(255, windowRect, _guiVehicleRestrictionsWindow, Translation.GetString("Vehicle_restrictions"), WindowStyle);
 				_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
 				//overlayHandleHovered = false;
@@ -114,7 +115,7 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
 			if (viewOnly && !Options.vehicleRestrictionsOverlay)
 				return;
 
@@ -371,7 +372,7 @@ namespace TrafficManager.UI.SubTools {
 					if (allowed && viewOnly)
 						continue; // do not draw allowed vehicles in view-only mode
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.VehicleRestrictionTextures[vehicleType][allowed], camPos, zero, f, xu, yu, x, y, vehicleRestrictionsSignSize, !viewOnly, 0.5f, 0.8f);
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.VehicleRestrictionTextures[vehicleType][allowed], camPos, zero, f, xu, yu, x, y, vehicleRestrictionsSignSize, !viewOnly);
 					if (hoveredHandle)
 						hovered = true;
 
