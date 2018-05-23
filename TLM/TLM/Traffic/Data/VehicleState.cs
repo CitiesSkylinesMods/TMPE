@@ -12,11 +12,13 @@ using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using ColossalFramework.Math;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		public const int STATE_UPDATE_SHIFT = 6;
 		public const int JUNCTION_RECHECK_SHIFT = 4;
+		public const uint MAX_TIMED_RAND = 100;
 
 		[Flags]
 		public enum Flags {
@@ -40,6 +42,17 @@ namespace TrafficManager.Traffic.Data {
 				float ret = 0;
 				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
 					ret = veh.GetLastFrameVelocity().sqrMagnitude;
+					return true;
+				});
+				return ret;
+			}
+		}
+
+		public float Velocity {
+			get {
+				float ret = 0;
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
+					ret = veh.GetLastFrameVelocity().magnitude;
 					return true;
 				});
 				return ret;
@@ -78,6 +91,7 @@ namespace TrafficManager.Traffic.Data {
 		public ushort previousVehicleIdOnSegment;
 		public ushort nextVehicleIdOnSegment;
 		public ushort lastAltLaneSelSegmentId;
+		public byte timedRand;
 		private VehicleJunctionTransitState junctionTransitState;
 
 		public override string ToString() {
@@ -106,6 +120,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
 				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
+				"\t" + $"timedRand = {timedRand}\n" +
 				"VehicleState]";
 		}
 
@@ -133,6 +148,7 @@ namespace TrafficManager.Traffic.Data {
 			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
+			timedRand = 0;
 		}
 
 		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
@@ -485,6 +501,13 @@ namespace TrafficManager.Traffic.Data {
 		internal bool IsJunctionTransitStateNew() {
 			uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
 			return (lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
+		}
+
+		public void StepRand() {
+			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+			if (rand.UInt32(20) == 0) {
+				timedRand = (byte)(((uint)timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
+			}
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {

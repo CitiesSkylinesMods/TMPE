@@ -39,5 +39,10 @@ namespace TrafficManager.State.ConfigData {
 		/// Minimum required traffic flow improvement for safe lane changes
 		/// </summary>
 		public float MinSafeTrafficImprovement = 20f;
+
+		/// <summary>
+		/// Minimum relative speed (in %) where volume measurement starts
+		/// </summary>
+		public ushort VolumeMeasurementRelSpeedThreshold = 50;
 	}
 }

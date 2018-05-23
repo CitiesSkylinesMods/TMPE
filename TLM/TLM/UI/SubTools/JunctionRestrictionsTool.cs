@@ -259,22 +259,24 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				// draw "entering blocked junctions allowed" sign at (0; 1)
-				allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
-				if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
-					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
-					if (signHovered && handleClick) {
-						hovered = true;
+				if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2) {
+					allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
+					if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
+						DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
+						if (signHovered && handleClick) {
+							hovered = true;
 
-						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance.ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
-							stateUpdated = true;
+							if (MainTool.CheckClicked()) {
+								JunctionRestrictionsManager.Instance.ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
+								stateUpdated = true;
+							}
 						}
-					}
 
-					if (viewOnly)
-						++y;
-					else
-						++x;
+						if (viewOnly)
+							++y;
+						else
+							++x;
+					}
 				}
 
 				// draw "pedestrian crossing allowed" sign at (1; 1)

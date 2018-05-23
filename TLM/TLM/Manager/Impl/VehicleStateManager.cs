@@ -58,12 +58,14 @@ namespace TrafficManager.Manager.Impl {
 			}
 #endif
 
+			state.StepRand();
+
 			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex
 #if MEASUREDENSITY
 				, length
 #endif
 				/*, (ushort)state.velocity*/
-				, (ushort) state.SqrVelocity);
+				, (ushort) state.Velocity);
 		}
 
 		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {

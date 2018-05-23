@@ -53,5 +53,12 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleState">vehicle state</param>
 		/// <returns></returns>
 		bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState);
+
+		/// <summary>
+		/// Calculates the current randomization value for a vehicle.
+		/// </summary>
+		/// <param name="vehicleId">vehicle id</param>
+		/// <returns>a number between 0 and 99</returns>
+		uint GetVehicleRand(ushort vehicleId);
 	}
 }

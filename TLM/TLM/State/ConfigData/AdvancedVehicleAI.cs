@@ -18,7 +18,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// minimum base lane changing cost
 		/// </summary>
-		public float LaneChangingBaseMinCost = 1.25f;
+		public float LaneChangingBaseMinCost = 1.1f;
 
 		/// <summary>
 		/// maximum base lane changing cost

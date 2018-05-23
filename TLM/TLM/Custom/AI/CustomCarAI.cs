@@ -323,11 +323,10 @@ namespace TrafficManager.Custom.AI {
 				// === START INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
 				if (Options.realisticSpeeds) {
 					// === START INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
-					float vehicleRand = 0.01f * (float)(vehicleId % 100);
-					// float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
+					float vehicleRand = 0.01f * (float)Constants.ManagerFactory.VehicleBehaviorManager.GetVehicleRand(vehicleId);
 					// === END INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
 					if (this.m_info.m_isLargeVehicle) {
-						maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.9 .. 1
+						maxSpeed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 					} else if (isRecklessDriver) {
 						maxSpeed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
 					} else {
@@ -437,11 +436,10 @@ namespace TrafficManager.Custom.AI {
 				// === START INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
 				if (Options.realisticSpeeds) {
 					// === START INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
-					float vehicleRand = 0.01f * (float)(vehicleId % 100);
-					// float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
+					float vehicleRand = 0.01f * (float)Constants.ManagerFactory.VehicleBehaviorManager.GetVehicleRand(vehicleId);
 					// === END INLINED VERSION OF VehicleBehaviorManager.ApplyRealisticSpeeds ===
 					if (this.m_info.m_isLargeVehicle) {
-						maxSpeed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.9 .. 1
+						maxSpeed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 					} else if (isRecklessDriver) {
 						maxSpeed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
 					} else {

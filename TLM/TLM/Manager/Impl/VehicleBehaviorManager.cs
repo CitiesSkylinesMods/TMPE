@@ -143,13 +143,6 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is not a train.");
 #endif
 
-				bool checkSpace = !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(prevPos.m_segment, isTargetStartNode) && !isRecklessDriver;
-
-				//TrafficLightSimulation nodeSim = TrafficLightSimulation.GetNodeSimulation(destinationNodeId);
-				//if (timedNode != null && timedNode.vehiclesMayEnterBlockedJunctions) {
-				//	checkSpace = false;
-				//}
-
 				// stock priority signs
 				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == (Vehicle.Flags)0 &&
 					((NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags & (NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd)) != NetLane.Flags.None &&
@@ -179,37 +172,35 @@ namespace TrafficManager.Manager.Impl {
 					}
 				}
 
-				if (checkSpace) {
+				// entering blocked junctions
+				if (MustCheckSpace(prevPos.m_segment, isTargetStartNode, ref targetNode, isRecklessDriver)) {
 #if BENCHMARK
 					//using (var bm = new Benchmark(null, "CheckSpace")) {
 #endif
 					// check if there is enough space
-					if ((targetNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction &&
-						targetNode.CountSegments() != 2) {
-						//var len = vehicleData.CalculateTotalLength(frontVehicleId) + 2f;
-						var len = vehicleState.totalLength + 2f;
-						if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
-							var sufficientSpace = false;
-							if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
-								NetNode.Flags nextTargetNodeFlags = netManager.m_nodes.m_buffer[nextTargetNodeId].m_flags;
-								if ((nextTargetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
-									netManager.m_nodes.m_buffer[nextTargetNodeId].CountSegments() == 2) {
-									uint nextLaneId = PathManager.GetLaneID(nextPosition);
-									if (nextLaneId != 0u) {
-										sufficientSpace = netManager.m_lanes.m_buffer[nextLaneId].CheckSpace(len);
-									}
+					var len = vehicleState.totalLength + 2f;
+					if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
+						var sufficientSpace = false;
+						if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
+							NetNode.Flags nextTargetNodeFlags = netManager.m_nodes.m_buffer[nextTargetNodeId].m_flags;
+							if ((nextTargetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
+								netManager.m_nodes.m_buffer[nextTargetNodeId].CountSegments() == 2) {
+								uint nextLaneId = PathManager.GetLaneID(nextPosition);
+								if (nextLaneId != 0u) {
+									sufficientSpace = netManager.m_lanes.m_buffer[nextLaneId].CheckSpace(len);
 								}
 							}
-							if (!sufficientSpace) {
-								maxSpeed = 0f;
+						}
+
+						if (!sufficientSpace) {
+							maxSpeed = 0f;
 #if DEBUG
-								if (debug)
-									Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to BLOCKED");
+							if (debug)
+								Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to BLOCKED");
 #endif
 
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
-								return false;
-							}
+							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+							return false;
 						}
 					}
 #if BENCHMARK
@@ -594,6 +585,30 @@ namespace TrafficManager.Manager.Impl {
 			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, sqrVelocity, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
 		}
 
+		/// <summary>
+		/// Checks if a vehicle must check if the subsequent segment is empty while going from segment <paramref name="segmentId"/>
+		/// through node <paramref name="startNode"/>.
+		/// </summary>
+		/// <param name="segmentId">source segment id</param>
+		/// <param name="startNode">is transit node start node of source segment?</param>
+		/// <param name="node">transit node</param>
+		/// <param name="isRecklessDriver">reckless driver?</param>
+		/// <returns></returns>
+		protected bool MustCheckSpace(ushort segmentId, bool startNode, ref NetNode node, bool isRecklessDriver) {
+			if (isRecklessDriver) {
+				return false;
+			} else {
+				bool checkSpace;
+				if (Options.junctionRestrictionsEnabled) {
+					checkSpace = !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
+				} else {
+					checkSpace = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction;
+				}
+
+				return checkSpace & node.CountSegments() != 2;
+			}
+		}
+
 		public bool MayDespawn(ref Vehicle vehicleData) {
 			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
@@ -645,14 +660,21 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public uint GetVehicleRand(ushort vehicleId) {
-			return (uint)(vehicleId % 100);
+			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
+			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
+			uint step = VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
+			if (step >= intv) {
+				step = VehicleState.MAX_TIMED_RAND - step;
+			}
+
+			return range + step;
 		}
 
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, VehicleInfo vehicleInfo, bool isRecklessDriver) {
 			if (Options.realisticSpeeds) {
 				float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
-					speed *= 0.9f + vehicleRand * 0.1f; // a little variance, 0.9 .. 1
+					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 				} else if (isRecklessDriver) {
 					speed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
 				} else {
@@ -1026,6 +1048,19 @@ namespace TrafficManager.Manager.Impl {
 
 					// This lane is a valid candidate.
 
+					//bool next1StartNode = next1PathPos.m_offset < 128;
+					//ushort next1TransitNode = 0;
+					//Services.NetService.ProcessSegment(next1PathPos.m_segment, delegate (ushort next1SegId, ref NetSegment next1Seg) {
+					//	next1TransitNode = next1StartNode ? next1Seg.m_startNode : next1Seg.m_endNode;
+					//	return true;
+					//});
+
+					//bool next1TransitNodeIsJunction = false;
+					//Services.NetService.ProcessNode(next1TransitNode, delegate (ushort nId, ref NetNode node) {
+					//	next1TransitNodeIsJunction = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+					//	return true;
+					//});
+
 					/*
 					 * Check if next1 lane is clear
 					 */
@@ -1326,14 +1361,15 @@ namespace TrafficManager.Manager.Impl {
 
 				if (bestStaySpeedDiff < 0 && bestOptSpeedDiff > bestStaySpeedDiff) {
 					// found a lane change that improves vehicle speed
-					float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
+					//float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
+					ushort optImprovementInKmH = SpeedLimitManager.Instance.LaneToCustomSpeedLimit(bestOptSpeedDiff - bestStaySpeedDiff, false);
 					float speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
 #if DEBUG
 					if (debug) {
-						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. improvement={improvement}% speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
+						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. optImprovementInKmH={optImprovementInKmH} km/h speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
 					}
 #endif
-					if (improvement >= conf.DynamicLaneSelection.MinSafeSpeedImprovement &&
+					if (optImprovementInKmH >= conf.DynamicLaneSelection.MinSafeSpeedImprovement &&
 						(foundSafeLaneChange || (speedDiff <= conf.DynamicLaneSelection.MaxUnsafeSpeedDiff))
 						) {
 						// speed improvement is significant
