@@ -58,9 +58,11 @@ namespace TrafficManager {
 						log += $"\n\t{missingDetour}";
 					}
 					Log.Info(log);
-					Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
-						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
-					});
+					if (GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage) {
+						Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+							UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Incompatibility Issue", error, true);
+						});
+					}
 				}
 			}
 

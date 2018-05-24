@@ -222,3 +222,4 @@ Compact_main_menu
 Window_transparency
 Overlay_transparency
 Remove_this_citizen
+Show_error_message_if_a_mod_incompatibility_is_detected

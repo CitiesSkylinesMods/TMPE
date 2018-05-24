@@ -28,6 +28,7 @@ namespace TrafficManager.State {
 		private static UISlider overlayTransparencySlider = null;
 		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
+		private static UICheckBox showCompatibilityCheckErrorToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -217,19 +218,11 @@ namespace TrafficManager.State {
 			guiTransparencySlider = generalGroup.AddSlider(Translation.GetString("Window_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.GuiTransparency, onGuiTransparencyChanged) as UISlider;
 			overlayTransparencySlider = generalGroup.AddSlider(Translation.GetString("Overlay_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.OverlayTransparency, onOverlayTransparencyChanged) as UISlider;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
+			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Show_error_message_if_a_mod_incompatibility_is_detected"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
 			instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
-
-			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
-			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
-			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
-			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
-			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
-			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
-			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
-			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
 			// GAMEPLAY
 			++tabIndex;
@@ -346,16 +339,27 @@ namespace TrafficManager.State {
 
 			panelHelper = new UIHelper(currentPanel);
 
-			resetStuckEntitiesBtn = panelHelper.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+			var maintenanceGroup = panelHelper.AddGroup(Translation.GetString("Maintenance"));
+
+			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
 #if DEBUG
-			resetSpeedLimitsBtn = panelHelper.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
+			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 #endif
-			reloadGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
-			resetGlobalConfBtn = panelHelper.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
+			reloadGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
+			resetGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
 
 #if QUEUEDSTATS
-			showPathFindStatsToggle = panelHelper.AddCheckbox(Translation.GetString("Show_path-find_stats"), showPathFindStats, onShowPathFindStatsChanged) as UICheckBox;
+			showPathFindStatsToggle = maintenanceGroup.AddCheckbox(Translation.GetString("Show_path-find_stats"), showPathFindStats, onShowPathFindStatsChanged) as UICheckBox;
 #endif
+
+			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
+			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
+			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
+			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
+			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
+			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
+			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
+			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
 #if DEBUG
 
@@ -631,6 +635,12 @@ namespace TrafficManager.State {
 		private static void onEnableTutorialsChanged(bool newValue) {
 			Log._Debug($"Enable tutorial messages changed to {newValue}");
 			GlobalConfig.Instance.Main.EnableTutorial = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onShowCompatibilityCheckErrorChanged(bool newValue) {
+			Log._Debug($"Show mod compatibility error changed to {newValue}");
+			GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage = newValue;
 			GlobalConfig.WriteConfig();
 		}
 

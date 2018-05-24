@@ -45,6 +45,11 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public byte OverlayTransparency = 40;
 
+		/// <summary>
+		/// Extended mod compatibility check
+		/// </summary>
+		public bool ShowCompatibilityCheckErrorMessage = true;
+
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
 			newMessages.Add(messageKey);
