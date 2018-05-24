@@ -14,6 +14,8 @@ namespace TrafficManager.Manager {
 		private IDictionary<ushort, IDisposable> nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
 		private object geoLock = new object();
 
+		protected virtual bool AllowInvalidNodes { get; } = false;
+
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Subscribed node geometries: {nodeGeometryUnsubscribers.Keys.CollectionToString()}");
@@ -82,14 +84,17 @@ namespace TrafficManager.Manager {
 		protected abstract void HandleInvalidNode(NodeGeometry geometry);
 		protected abstract void HandleValidNode(NodeGeometry geometry);
 
-		public void OnUpdate(NodeGeometry geometry) {
+		public void OnUpdate(IObservable<NodeGeometry> observable) {
+			NodeGeometry geometry = (NodeGeometry)observable;
 			if (!geometry.IsValid()) {
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"{this.GetType().Name}.HandleInvalidNode({geometry.NodeId})");
 #endif
 				HandleInvalidNode(geometry);
-				UnsubscribeFromNodeGeometry(geometry.NodeId);
+				if (!AllowInvalidNodes) {
+					UnsubscribeFromNodeGeometry(geometry.NodeId);
+				}
 			} else {
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])

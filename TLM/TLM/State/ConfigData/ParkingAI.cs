@@ -35,7 +35,7 @@ namespace TrafficManager.State.ConfigData {
 		public float MaxBuildingToPedestrianLaneDistance = 96f;
 
 		/// <summary>
-		/// Maximum allowed distance between home and parked car when travelling home without forced to use the car
+		/// Maximum allowed distance between home/source building and parked car when travelling home without forced to use the car
 		/// </summary>
 		public float MaxParkedCarDistanceToHome = 256f;
 

@@ -1,6 +1,4 @@
-﻿#define DEBUGMERGEx
-#define DEBUGLOCKSx
-#define EXTRAPFx
+﻿#define DEBUGLOCKSx
 #define COUNTSEGMENTSTONEXTJUNCTIONx
 
 using System;
@@ -118,6 +116,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private bool _stablePath;
 		private bool _randomParking;
 		private bool _transportVehicle;
+		private bool _ignoreCost;
 		private PathUnitQueueItem queueItem;
 		private NetSegment.Flags _disableMask;
 		/*private ExtVehicleType? _extVehicleType;
@@ -145,7 +144,6 @@ namespace TrafficManager.Custom.PathFinding {
 		private GlobalConfig _conf = null;
 
 		private static readonly CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
-		private static readonly LaneConnectionManager laneConnManager = LaneConnectionManager.Instance;
 		private static readonly JunctionRestrictionsManager junctionManager = JunctionRestrictionsManager.Instance;
 		private static readonly VehicleRestrictionsManager vehicleRestrictionsManager = VehicleRestrictionsManager.Instance;
 		private static readonly SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
@@ -153,9 +151,6 @@ namespace TrafficManager.Custom.PathFinding {
 		private static readonly RoutingManager routingManager = RoutingManager.Instance;
 
 		public bool IsMasterPathFind = false;
-#if EXTRAPF
-		public bool IsExtraPathFind = false;
-#endif
 
 		protected virtual void Awake() {
 #if DEBUG
@@ -268,6 +263,7 @@ namespace TrafficManager.Custom.PathFinding {
 			this._maxLength = this.PathUnits.m_buffer[unit].m_length;
 			this._pathFindIndex = (this._pathFindIndex + 1u & 32767u);
 			this._pathRandomizer = new Randomizer(unit);
+
 			this._carBanMask = NetSegment.Flags.CarBan;
 			this._isHeavyVehicle = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 16) != 0);
 			if (_isHeavyVehicle) {
@@ -280,6 +276,7 @@ namespace TrafficManager.Custom.PathFinding {
 			this._stablePath = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 64) != 0);
 			this._randomParking = ((this.PathUnits.m_buffer[unit].m_simulationFlags & 128) != 0);
 			this._transportVehicle = ((byte)(this._laneTypes & NetInfo.LaneType.TransportVehicle) != 0);
+			this._ignoreCost = (this._stablePath || (this.PathUnits.m_buffer[unit].m_simulationFlags & 8) != 0);
 			this._disableMask = (NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed);
 			if ((this.PathUnits.m_buffer[unit].m_simulationFlags & 2) == 0) {
 				this._disableMask |= NetSegment.Flags.Flooded;
@@ -294,9 +291,9 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGNEWPF && DEBUG
 			bool debug = this._debug = _conf.Debug.Switches[0] &&
 				((_conf.Debug.ExtVehicleType == ExtVehicleType.None && queueItem.vehicleType == ExtVehicleType.None) || (queueItem.vehicleType & _conf.Debug.ExtVehicleType) != ExtVehicleType.None) &&
-				(_conf.Debug.StartSegmentId <= 0 || data.m_position00.m_segment == _conf.Debug.StartSegmentId || data.m_position02.m_segment == _conf.Debug.StartSegmentId) &&
-				(_conf.Debug.EndSegmentId <= 0 || data.m_position01.m_segment == _conf.Debug.EndSegmentId || data.m_position03.m_segment == _conf.Debug.EndSegmentId) &&
-				(_conf.Debug.VehicleId <= 0 || queueItem.vehicleId == _conf.Debug.VehicleId)
+				(_conf.Debug.StartSegmentId == 0 || data.m_position00.m_segment == _conf.Debug.StartSegmentId || data.m_position02.m_segment == _conf.Debug.StartSegmentId) &&
+				(_conf.Debug.EndSegmentId == 0 || data.m_position01.m_segment == _conf.Debug.EndSegmentId || data.m_position03.m_segment == _conf.Debug.EndSegmentId) &&
+				(_conf.Debug.VehicleId == 0 || queueItem.vehicleId == _conf.Debug.VehicleId)
 				;
 			if (debug) {
 				Log._Debug($"CustomPathFind.PathFindImplementation: START calculating path unit {unit}, type {queueItem.vehicleType}");
@@ -394,7 +391,8 @@ namespace TrafficManager.Custom.PathFinding {
 					$"\tbufferItemStartA: segment={bufferItemStartA.m_position.m_segment} lane={bufferItemStartA.m_position.m_lane} off={bufferItemStartA.m_position.m_offset} laneId={bufferItemStartA.m_laneID}\n" +
 					$"\tbufferItemStartB: segment={bufferItemStartB.m_position.m_segment} lane={bufferItemStartB.m_position.m_lane} off={bufferItemStartB.m_position.m_offset} laneId={bufferItemStartB.m_laneID}\n" +
 					$"\tbufferItemEndA: segment={bufferItemEndA.m_position.m_segment} lane={bufferItemEndA.m_position.m_lane} off={bufferItemEndA.m_position.m_offset} laneId={bufferItemEndA.m_laneID}\n" +
-					$"\tbufferItemEndB: segment={bufferItemEndB.m_position.m_segment} lane={bufferItemEndB.m_position.m_lane} off={bufferItemEndB.m_position.m_offset} laneId={bufferItemEndB.m_laneID}\n"
+					$"\tbufferItemEndB: segment={bufferItemEndB.m_position.m_segment} lane={bufferItemEndB.m_position.m_lane} off={bufferItemEndB.m_position.m_offset} laneId={bufferItemEndB.m_laneID}\n" +
+					$"\tvehicleItem: segment={data.m_position11.m_segment} lane={data.m_position11.m_lane} off={data.m_position11.m_offset} laneId={_vehicleLane} vehiclePosIndicator={vehiclePosIndicator}\n"
 					);
 			}
 #endif
@@ -544,7 +542,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 			// we could calculate a valid path
 
-			float duration = finalBufferItem.m_duration;
+			float duration = (this._laneTypes != NetInfo.LaneType.Pedestrian) ? finalBufferItem.m_duration : finalBufferItem.m_methodDistance;
 			this.PathUnits.m_buffer[unit].m_length = duration;
 			this.PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.m_lanesUsed; // NON-STOCK CODE
 			this.PathUnits.m_buffer[unit].m_vehicleTypes = (ushort)finalBufferItem.m_vehiclesUsed; // NON-STOCK CODE
@@ -772,7 +770,7 @@ namespace TrafficManager.Custom.PathFinding {
 					int prevLaneIndex = (int)item.m_position.m_lane;
 					if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
 						if (allowPedSwitch) { // NON-STOCK CODE
-							bool isEndBendOrJunction = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
+							bool canCrossStreet = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
 							bool isOnCenterPlatform = prevIsCenterPlatform && (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Junction)) == NetNode.Flags.None;
 							ushort nextLeftSegment = prevSegmentId;
 							ushort nextRightSegment = prevSegmentId;
@@ -822,7 +820,7 @@ namespace TrafficManager.Custom.PathFinding {
 									}
 								}
 							}
-							if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
+							if (leftLaneId != 0u && (nextLeftSegment != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
 #if DEBUGNEWPF
 								if (debugPed) {
 										logBuf.Add($"*PED* item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}): Exploring left segment\n" +
@@ -837,7 +835,7 @@ namespace TrafficManager.Custom.PathFinding {
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 											"\t" + $"nextLeftSegment={nextLeftSegment}\n" +
 											"\t" + $"leftLaneId={leftLaneId}\n" +
-											"\t" + $"isEndBendOrJunction={isEndBendOrJunction}\n" +
+											"\t" + $"mayCrossStreet={canCrossStreet}\n" +
 											"\t" + $"isOnCenterPlatform={isOnCenterPlatform}\n" +
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 											"\t" + $"nextIsStartNode={nextIsStartNode}\n"
@@ -847,7 +845,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 								this.ProcessItemPedBicycle(debugPed, item, nextNodeId, nextLeftSegment, ref prevSegment, ref netManager.m_segments.m_buffer[(int)nextLeftSegment], connectOffset, connectOffset, leftLaneIndex, leftLaneId); // ped
 							}
-							if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || isEndBendOrJunction || isOnCenterPlatform)) {
+							if (rightLaneId != 0u && rightLaneId != leftLaneId && (nextRightSegment != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
 #if DEBUGNEWPF
 								if (debugPed) {
 									logBuf.Add($"*PED* item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}): Exploring right segment\n" +
@@ -862,7 +860,7 @@ namespace TrafficManager.Custom.PathFinding {
 										"\t" + $"nextIsStartNode={nextIsStartNode}\n" +
 										"\t" + $"nextRightSegment={nextRightSegment}\n" +
 										"\t" + $"rightLaneId={rightLaneId}\n" +
-										"\t" + $"isEndBendOrJunction={isEndBendOrJunction}\n" +
+										"\t" + $"mayCrossStreet={canCrossStreet}\n" +
 										"\t" + $"isOnCenterPlatform={isOnCenterPlatform}\n" +
 										"\t" + $"nextIsStartNode={nextIsStartNode}\n"
 										);
@@ -986,12 +984,13 @@ namespace TrafficManager.Custom.PathFinding {
 
 				bool allowPedestrian = (byte)(this._laneTypes & NetInfo.LaneType.Pedestrian) != 0; // allow pedestrian switching to vehicle?
 				bool nextIsBeautificationNode = nextNode.Info.m_class.m_service == ItemClass.Service.Beautification;
-				bool allowPedestrians = false; // is true if cim is using a bike
+				bool allowBicycle = false; // is true if cim may switch from a pedestrian lane to a bike lane
 				byte parkingConnectOffset = 0;
 				if (allowPedestrian) {
 					if (prevIsBicycleLane) {
+						// we are going to a bicycle lane
 						parkingConnectOffset = connectOffset;
-						allowPedestrians = nextIsBeautificationNode;
+						allowBicycle = nextIsBeautificationNode;
 					} else if (this._vehicleLane != 0u) {
 						// there is a parked vehicle position
 						if (this._vehicleLane != item.m_laneID) {
@@ -1016,7 +1015,7 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 				}
 
-				if ((this._vehicleTypes & (VehicleInfo.VehicleType.Ferry | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None) {
+				if ((this._vehicleTypes & (VehicleInfo.VehicleType.Ferry /* | VehicleInfo.VehicleType.Monorail*/)) != VehicleInfo.VehicleType.None) {
 					// monorail / ferry
 
 					for (int k = 0; k < 8; k++) {
@@ -1025,21 +1024,28 @@ namespace TrafficManager.Custom.PathFinding {
 							continue;
 						}
 
-						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowPedestrians, isMiddle);
+						this.ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowBicycle, isMiddle);
 					}
 
-					if ((nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None &&
-						(this._vehicleTypes & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None) {
+					if ((nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None /*&&
+						(this._vehicleTypes & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None*/) {
 						this.ProcessItemCosts(debug, item, nextNodeId, prevSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref prevSegment, ref prevRelSimilarLaneIndex, connectOffset, true, false, isMiddle);
 					}
 				} else {
-					// road vehicles, trams, trains, metros, etc.
+					// road vehicles, trams, trains, metros, monorails, etc.
 
 
-					bool explorePrevSegment = false;
+					// specifies if vehicles should follow lane arrows
 					bool isStrictLaneChangePolicyEnabled = false;
-					bool handleStockUturn = (this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None;
-					bool stockUturn = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+					// specifies if the entity is allowed to u-turn (in general)
+					bool isEntityAllowedToUturn = (this._vehicleTypes & (VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail)) == VehicleInfo.VehicleType.None;
+					// specifies if thes next node allows for u-turns
+					bool isUturnAllowedHere = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+					/*
+					 * specifies if u-turns are handled by custom code.
+					 * If not (performCustomVehicleUturns == false) AND the vanilla u-turn condition (stockUturn) evaluates to true, then u-turns are handled by the vanilla code
+					 */
+					//bool performCustomVehicleUturns = false;
 					bool prevIsRouted = prevLaneEndRouting.routed
 #if DEBUG
 						&& !_conf.Debug.Switches[11]
@@ -1051,20 +1057,18 @@ namespace TrafficManager.Custom.PathFinding {
 						bool nextIsUntouchable = (nextNode.m_flags & (NetNode.Flags.Untouchable)) != NetNode.Flags.None;
 						bool nextIsTransitionOrJunction = (nextNode.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None;
 						bool nextIsBend = (nextNode.m_flags & (NetNode.Flags.Bend)) != NetNode.Flags.None;
-						bool nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 
-						// determine if the vehicle may u-turn at the target node
-						explorePrevSegment =
-							(this._vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None &&
-							(nextIsEndOrOneWayOut || // stock u-turn points
+						// determine if the vehicle may u-turn at the target node according to customization
+						isUturnAllowedHere =
+							isUturnAllowedHere || // stock u-turn points
 							(Options.junctionRestrictionsEnabled &&
 							_isRoadVehicle && // only road vehicles may perform u-turns
 							junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode) && // only do u-turns if allowed
-							!nextIsBeautificationNode && // no u-turns at beautification nodes
+							!nextIsBeautificationNode && // no u-turns at beautification nodes // TODO refactor to JunctionManager
 							prevIsCarLane && // u-turns for road vehicles only
 							!_isHeavyVehicle && // only small vehicles may perform u-turns
-							(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes
-							!prevIsOutgoingOneWay)); // do not u-turn on one-ways
+							(nextIsTransitionOrJunction || nextIsBend) && // perform u-turns at transitions, junctions and bend nodes // TODO refactor to JunctionManager
+							!prevIsOutgoingOneWay); // do not u-turn on one-ways // TODO refactor to JunctionManager
 
 						isStrictLaneChangePolicyEnabled =
 							!nextIsBeautificationNode && // do not obey lane arrows at beautification nodes
@@ -1077,16 +1081,21 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 							(Options.relaxedBusses && queueItem.vehicleType == ExtVehicleType.Bus)); // option: busses may ignore lane arrows
 
-						handleStockUturn = !explorePrevSegment;
+						/*if (! performCustomVehicleUturns) {
+							isUturnAllowedHere = false;
+						}*/
+						//isEntityAllowedToUturn = isEntityAllowedToUturn && !performCustomVehicleUturns;
+
 
 #if DEBUGNEWPF
 						if (debug)
-							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}):\n" +
+							logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane} (id {item.m_laneID}), node {nextNodeId} ({nextIsStartNode}):\n" +
 								"\t" + $"_extPathType={queueItem.pathType}\n" +
 								"\t" + $"_vehicleTypes={_vehicleTypes}, _laneTypes={_laneTypes}\n" +
 								"\t" + $"_extVehicleType={queueItem.vehicleType}\n" +
 								"\t" + $"_isRoadVehicle={_isRoadVehicle}\n" +
 								"\t" + $"_isHeavyVehicle={_isHeavyVehicle}\n" +
+								"\t" + $"_vehicleLane={_vehicleLane}\n" +
 								"\t" + $"_stablePath={_stablePath}\n" +
 								"\t" + $"_isLaneConnectionObeyingEntity={_isLaneConnectionObeyingEntity}\n" +
 								"\t" + $"_isLaneArrowObeyingEntity={_isLaneArrowObeyingEntity}\n\n" +
@@ -1098,12 +1107,12 @@ namespace TrafficManager.Custom.PathFinding {
 								"\t" + $"nextIsTransitionOrJunction={nextIsTransitionOrJunction}\n" +
 								"\t" + $"nextIsBend={nextIsBend}\n" +
 								"\t" + $"nextIsUntouchable={nextIsUntouchable}\n" +
-								"\t" + $"nextIsEndOrOneWayOut={nextIsEndOrOneWayOut}\n\n" +
-								"\t" + $"allowPedestrians={allowPedestrians}\n" +
+								"\t" + $"allowBicycle={allowBicycle}\n" +
 								"\t" + $"isCustomUturnAllowed={junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode)}\n" +
-								"\t" + $"explorePrevSegment={explorePrevSegment}\n" +
 								"\t" + $"isStrictLaneArrowPolicyEnabled={isStrictLaneChangePolicyEnabled}\n" +
-								"\t" + $"handleStockUturn={handleStockUturn}\n"
+								"\t" + $"isEntityAllowedToUturn={isEntityAllowedToUturn}\n" +
+								"\t" + $"isUturnAllowedHere={isUturnAllowedHere}\n"
+								//"\t" + $"performCustomVehicleUturns={performCustomVehicleUturns}\n"
 								);
 #endif
 					} else {
@@ -1123,8 +1132,12 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 					}
 
-					if (allowPedestrians || !prevIsRouted) {
-						/* pedestrian to bicycle switch or no routing information available */
+					if (allowBicycle || !prevIsRouted) {
+						/*
+						 * pedestrian to bicycle lane switch or no routing information available:
+						 *		if pedestrian lanes should be explored (allowBicycle == true): do this here
+						 *		if previous segment has custom routing (prevIsRouted == true): do NOT explore vehicle lanes here, else: vanilla exploration of vehicle lanes
+						*/
 
 #if DEBUGNEWPF
 						if (debug) {
@@ -1136,10 +1149,10 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 #endif
 
-						if (explorePrevSegment) {
-							stockUturn = true;
-							handleStockUturn = true;
-						}
+						/*if (performCustomVehicleUturns) {
+							isUturnAllowedHere = true;
+							isEntityAllowedToUturn = true;
+						}*/
 
 						ushort nextSegmentId = prevSegment.GetRightSegment(nextNodeId);
 						for (int k = 0; k < 8; ++k) {
@@ -1147,8 +1160,9 @@ namespace TrafficManager.Custom.PathFinding {
 								break;
 							}
 
-							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, !prevIsRouted, allowPedestrians, isMiddle)) {
-								stockUturn = true;
+							if (ProcessItemCosts(debug, item, nextNodeId, nextSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, !prevIsRouted, allowBicycle, isMiddle)) {
+								// exceptional u-turns
+								isUturnAllowedHere = true;
 							}
 
 							nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
@@ -1199,7 +1213,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 							}
 
-							if ((queueItem.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None &&
+							if (_isRoadVehicle &&
 								prevLaneInfo != null &&
 								prevIsCarLane) {
 
@@ -1220,7 +1234,7 @@ namespace TrafficManager.Custom.PathFinding {
 								 */
 
 								// Apply costs for traffic ban policies
-								if (prevLaneInfo.m_laneType == NetInfo.LaneType.Vehicle &&
+								if ((prevLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
 										(prevLaneInfo.m_vehicleType & this._vehicleTypes) == VehicleInfo.VehicleType.Car &&
 										(netManager.m_segments.m_buffer[item.m_position.m_segment].m_flags & this._carBanMask) != NetSegment.Flags.None) {
 									// heavy vehicle ban / car ban ("Old Town" policy)
@@ -1362,7 +1376,7 @@ namespace TrafficManager.Custom.PathFinding {
 								 * (6) Apply junction costs
 								 * =======================================================================================================
 								 */
-								 if (Options.advancedAI && (queueItem.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None && nextIsJunction && prevSegmentRouting.highway) {
+								 if (Options.advancedAI && nextIsJunction && prevSegmentRouting.highway) {
 									if (segmentSelectionCost == null) {
 										segmentSelectionCost = 1f;
 									}
@@ -1375,7 +1389,6 @@ namespace TrafficManager.Custom.PathFinding {
 								 * (7) Apply traffic measurement costs for segment selection
 								 * =======================================================================================================
 								 */
-
 								if (Options.advancedAI && (queueItem.vehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None && !_stablePath) {
 									// segment selection based on segment traffic volume
 									NetInfo.Direction prevFinalDir = nextIsStartNode ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
@@ -1434,23 +1447,80 @@ namespace TrafficManager.Custom.PathFinding {
 								ushort nextSegmentId = laneTransitions[k].segmentId;
 
 								if (nextSegmentId == 0) {
+#if DEBUGNEWPF
+									if (debug) {
+										logBuf.Add(
+											$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+											"\t" + $"CUSTOM exploration\n" +
+											"\t" + $"transition iteration {k}:\n" +
+											"\t" + $"{laneTransitions[k].ToString()}\n" +
+											"\t" + $"*** SKIPPING *** (nextSegmentId=0)\n"
+											);
+										FlushMainLog(logBuf, unitId);
+									}
+#endif
 									continue;
 								}
 
 								bool uturn = nextSegmentId == prevSegmentId;
 								if (uturn) {
-									if (explorePrevSegment) {
-										// prevent double exploration of previous segment during this method execution
-										handleStockUturn = false;
-									} else {
+									// prevent double/forbidden exploration of previous segment by vanilla code during this method execution
+									if (! isEntityAllowedToUturn || ! isUturnAllowedHere) {
+#if DEBUGNEWPF
+										if (debug) {
+											logBuf.Add(
+												$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+												"\t" + $"CUSTOM exploration\n" +
+												"\t" + $"transition iteration {k}:\n" +
+												"\t" + $"{laneTransitions[k].ToString()}\n" +
+												"\t" + $"*** SKIPPING *** (u-turns prohibited)\n"
+												);
+											FlushMainLog(logBuf, unitId);
+										}
+#endif
 										continue;
 									}
 								}
 
-								bool relaxedLaneChanging = (queueItem.vehicleType & (ExtVehicleType.Service | ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None && queueItem.vehicleId == 0 && (laneTransitions[k].laneId == _startLaneA || laneTransitions[k].laneId == _startLaneB);
+								if (laneTransitions[k].type == LaneEndTransitionType.Invalid) {
+#if DEBUGNEWPF
+									if (debug) {
+										logBuf.Add(
+											$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+											"\t" + $"CUSTOM exploration\n" +
+											"\t" + $"transition iteration {k}:\n" +
+											"\t" + $"{laneTransitions[k].ToString()}\n" +
+											"\t" + $"*** SKIPPING *** (invalid transition)\n"
+											);
+										FlushMainLog(logBuf, unitId);
+									}
+#endif
+									continue;
+								}
+
+								// allow vehicles to ignore strict lane routing when moving off
+								bool relaxedLaneChanging =
+									_isRoadVehicle &&
+									(queueItem.vehicleType & (ExtVehicleType.Service | ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None &&
+									queueItem.vehicleId == 0 &&
+									(laneTransitions[k].laneId == _startLaneA || laneTransitions[k].laneId == _startLaneB);
+
 								if (! relaxedLaneChanging &&
-									(laneTransitions[k].type == LaneEndTransitionType.Invalid ||
-									(isStrictLaneChangePolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed))) {
+									(isStrictLaneChangePolicyEnabled && laneTransitions[k].type == LaneEndTransitionType.Relaxed)) {
+#if DEBUGNEWPF
+									if (debug) {
+										logBuf.Add(
+											$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+											"\t" + $"CUSTOM exploration\n" +
+											"\t" + $"transition iteration {k}:\n" +
+											"\t" + $"{laneTransitions[k].ToString()}\n" +
+											"\t" + $"relaxedLaneChanging={relaxedLaneChanging}\n" +
+											"\t" + $"isStrictLaneChangePolicyEnabled={relaxedLaneChanging}\n" +
+											"\t" + $"*** SKIPPING *** (incompatible lane)\n"
+											);
+										FlushMainLog(logBuf, unitId);
+									}
+#endif
 									continue;
 								}
 
@@ -1460,48 +1530,24 @@ namespace TrafficManager.Custom.PathFinding {
 										$"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
 										"\t" + $"CUSTOM exploration\n" +
 										"\t" + $"transition iteration {k}:\n" +
-										"\t" + $"{laneTransitions[k].ToString()}\n"
+										"\t" + $"{laneTransitions[k].ToString()}\n" +
+										"\t" + $"> PERFORMING EXPLORATION NOW <\n"
 										);
 									FlushMainLog(logBuf, unitId);
 								}
 #endif
 
-								/*
-								 * =======================================================================================================
-								 * (8) Apply u-turn costs
-								 * =======================================================================================================
-								 */
-
-								/*float? laneSelCost = laneSelectionCost;
-								if (uturn && prevIsCarLane && !isMiddle) {
-									// add lane selection costs for u-turns
-									if (laneSelCost == null) {
-										laneSelCost = 1f;
-									}
-
-									laneSelCost *= _conf.AdvancedVehicleAI.UturnCostFactor;
-
-#if DEBUGNEWPF
-									if (debug)
-										logBuf.Add($"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
-											"\t" + $"applied u-turn cost factor:\n" +
-											"\t" + $"(old) laneSelectionCost={laneSelectionCost}\n" +
-											"\t" + $"=> laneSelCost={laneSelCost}\n"
-										);
-#endif
-
-								}*/
-
 								bool foundForced = false;
 								int prevLaneIndexFromInner = prevRelSimilarLaneIndex;
 								if (ProcessItemCosts(debug, false, laneChangingCostCalculationMode, item, nextNodeId, nextSegmentId, ref prevSegment, /*prevSegmentRouting,*/ ref netManager.m_segments.m_buffer[nextSegmentId], /*routingManager.segmentRoutings[nextSegmentId],*/ ref prevLaneIndexFromInner, connectOffset, true, false, laneTransitions[k].laneIndex, laneTransitions[k].laneId, laneTransitions[k].distance, segmentSelectionCost, laneSelectionCost, isMiddle, out foundForced)) {
-									stockUturn = true;
+										// process exceptional u-turning in vanilla code
+										isUturnAllowedHere = true;
 								}
 							}
 						}
 					}
 
-					if (handleStockUturn && stockUturn) {
+					if (!prevIsRouted && isEntityAllowedToUturn && isUturnAllowedHere) {
 #if DEBUGNEWPF
 						if (debug) {
 							logBuf.Add($"path unit {unitId}\n" +
@@ -1545,8 +1591,11 @@ namespace TrafficManager.Custom.PathFinding {
 				} // allowPedSwitch
 			} // !prevIsPedestrianLane
 
-			if (nextNode.m_lane != 0u &&
-				(!Options.prohibitPocketCars || queueItem.vehicleType != ExtVehicleType.PassengerCar || (item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)) {
+			// [18/05/06] conditions commented out because cims could not go to an outside connection with path "walk -> public transport -> walk -> car"
+			if (nextNode.m_lane != 0u /*&&
+				(!Options.prohibitPocketCars ||
+				queueItem.vehicleType != ExtVehicleType.PassengerCar ||
+				(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)*/) {
 				// transport lines, cargo lines, etc.
 
 				bool targetDisabled = (nextNode.m_flags & (NetNode.Flags.Disabled | NetNode.Flags.DisableOnlyMiddle)) == NetNode.Flags.Disabled;
@@ -1582,7 +1631,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		// 2
-		private void ProcessItemPublicTransport(bool debug, BufferItem item, ushort nextNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, uint nextLane, byte offset, byte connectOffset) {
+		private void ProcessItemPublicTransport(bool debug, BufferItem item, ushort nextNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment prevSegment, ref NetSegment nextSegment, uint nextLaneId, byte offset, byte connectOffset) {
 			if ((nextSegment.m_flags & _disableMask) != NetSegment.Flags.None) {
 				return;
 			}
@@ -1629,6 +1678,14 @@ namespace TrafficManager.Custom.PathFinding {
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed; 
 			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					comparisonValue += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			uint laneIndex = 0;
 #if DEBUG
 			int wIter = 0;
@@ -1642,10 +1699,10 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 #endif
 
-				if (nextLane == curLaneId) {
+				if (nextLaneId == curLaneId) {
 					NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[laneIndex];
 					if (nextLaneInfo.CheckType(this._laneTypes, this._vehicleTypes)) {
-						Vector3 a = netManager.m_lanes.m_buffer[nextLane].CalculatePosition((float)offset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+						Vector3 a = netManager.m_lanes.m_buffer[nextLaneId].CalculatePosition((float)offset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 						float distance = Vector3.Distance(a, b);
 						BufferItem nextItem;
 #if COUNTSEGMENTSTONEXTJUNCTION
@@ -1665,8 +1722,9 @@ namespace TrafficManager.Custom.PathFinding {
 						} else {
 							nextItem.m_methodDistance = methodDistance + distance;
 						}
+
 						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, laneIndex, curLaneId, nextLaneInfo); // SpeedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, laneIndex, curLaneId, ref lane3); // NON-STOCK CODE
-						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 							nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength); // NON-STOCK CODE
 							nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
 							if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
@@ -1674,7 +1732,7 @@ namespace TrafficManager.Custom.PathFinding {
 							} else {
 								nextItem.m_direction = nextLaneInfo.m_finalDirection;
 							}
-							if (nextLane == this._startLaneA) {
+							if (nextLaneId == this._startLaneA) {
 								if (((byte)(nextItem.m_direction & NetInfo.Direction.Forward) == 0 || nextItem.m_position.m_offset < this._startOffsetA) && ((byte)(nextItem.m_direction & NetInfo.Direction.Backward) == 0 || nextItem.m_position.m_offset > this._startOffsetA)) {
 									return;
 								}
@@ -1683,7 +1741,7 @@ namespace TrafficManager.Custom.PathFinding {
 								nextItem.m_comparisonValue += nextOffsetDistance * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 								nextItem.m_duration += nextOffsetDistance * nextSegment.m_averageLength / nextSpeed;
 							}
-							if (nextLane == this._startLaneB) {
+							if (nextLaneId == this._startLaneB) {
 								if (((byte)(nextItem.m_direction & NetInfo.Direction.Forward) == 0 || nextItem.m_position.m_offset < this._startOffsetB) && ((byte)(nextItem.m_direction & NetInfo.Direction.Backward) == 0 || nextItem.m_position.m_offset > this._startOffsetB)) {
 									return;
 								}
@@ -1692,7 +1750,7 @@ namespace TrafficManager.Custom.PathFinding {
 								nextItem.m_comparisonValue += nextOffsetDistance * nextSegment.m_averageLength / (nextSpeed * this._maxLength);
 								nextItem.m_duration += nextOffsetDistance * nextSegment.m_averageLength / nextSpeed;
 							}
-							nextItem.m_laneID = nextLane;
+							nextItem.m_laneID = nextLaneId;
 							nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
 							nextItem.m_vehiclesUsed = (item.m_vehiclesUsed | nextLaneInfo.m_vehicleType);
 							nextItem.m_trafficRand = 0;
@@ -1753,7 +1811,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 #if DEBUGNEWPF
 			if (debug)
-				logBuf.Add($"isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={queueItem.vehicleType}, nonBus={(queueItem.vehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enableVehicle={enableVehicle}");
+				logBuf.Add($"isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, _extVehicleType={queueItem.vehicleType}, nonBus={(queueItem.vehicleType & (ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus)) != ExtVehicleType.None}, _stablePath={_stablePath}, enablePedestrian={enablePedestrian}, enableVehicle={enableVehicle}");
 #endif
 
 			float prevMaxSpeed = 1f;
@@ -1820,13 +1878,15 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 			}
 
-			float prevCost;
+			float prevDist;
 			if (prevLaneType == NetInfo.LaneType.PublicTransport) {
-				prevCost = netManager.m_lanes.m_buffer[item.m_laneID].m_length;
+				prevDist = netManager.m_lanes.m_buffer[item.m_laneID].m_length;
 			} else {
-				prevCost = Mathf.Max(SEGMENT_MIN_AVERAGE_LENGTH, prevSegment.m_averageLength);
+				prevDist = Mathf.Max(SEGMENT_MIN_AVERAGE_LENGTH, prevSegment.m_averageLength);
 			}
-			
+
+			float prevCost = prevDist;
+
 
 #if DEBUGNEWPF
 			float oldPrevCost = prevCost;
@@ -1854,11 +1914,20 @@ namespace TrafficManager.Custom.PathFinding {
 			// stock code check for vehicle ban policies removed
 			// stock code for transport lane usage control removed
 
+			// calculate ticket costs
+			float ticketCosts = 0f;
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					ticketCosts += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			if ((byte)(prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 				prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 			}
 			float prevOffsetCost = (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevCost;
-			float prevMethodDist = item.m_methodDistance + prevOffsetCost;
+			float prevMethodDist = item.m_methodDistance + (float)Mathf.Abs((int)(connectOffset - item.m_position.m_offset)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevDist;
 			float prevDuration = item.m_duration + prevOffsetCost / prevMaxSpeed;
 			// NON-STOCK: vehicle restriction are applied to previous segment length in MainPathFind (not here, and not to prevOffsetCost)
 			float prevComparisonPlusOffsetCostOverSpeed = item.m_comparisonValue + prevOffsetCost / (prevLaneSpeed * this._maxLength);
@@ -1966,14 +2035,14 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 						// NON-STOCK CODE END //
 #endif
-						nextItem.m_comparisonValue = 0;
+						nextItem.m_comparisonValue = ticketCosts;
 						nextItem.m_position.m_segment = nextSegmentId;
 						nextItem.m_position.m_lane = (byte)laneIndex;
 						nextItem.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) == 0) ? 0 : 255);
 						if ((byte)(nextLaneInfo.m_laneType & prevLaneType) == 0) {
 							nextItem.m_methodDistance = 0f;
 							// NON-STOCK CODE START
-							if (isMiddle && nextLaneInfo.m_laneType == NetInfo.LaneType.PublicTransport && (item.m_lanesUsed & NetInfo.LaneType.PublicTransport) != NetInfo.LaneType.None) {
+							if (Options.realisticPublicTransport && isMiddle && nextLaneInfo.m_laneType == NetInfo.LaneType.PublicTransport && (item.m_lanesUsed & NetInfo.LaneType.PublicTransport) != NetInfo.LaneType.None) {
 								// apply penalty when switching public transport vehicles
 								float transportTransitionPenalty = (_conf.PathFinding.PublicTransportTransitionMinPenalty + ((float)netManager.m_nodes.m_buffer[nextNodeId].m_maxWaitTime * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR) * (_conf.PathFinding.PublicTransportTransitionMaxPenalty - _conf.PathFinding.PublicTransportTransitionMinPenalty)) / (0.25f * this._maxLength);
 #if DEBUGNEWPF
@@ -1992,7 +2061,7 @@ namespace TrafficManager.Custom.PathFinding {
 							logBuf.Add($"checking if methodDistance is in range: {nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian} || {nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance} ({nextItem.m_methodDistance})");
 #endif
 
-						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 
 							// NON-STOCK CODE START //
 							if (laneChangingCostCalculationMode == LaneChangingCostCalculationMode.None) {
@@ -2008,6 +2077,22 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 							}
 							nextItem.m_duration = prevDuration + transitionCost / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
+
+							// account for public tranport transition costs on non-PT paths
+							if (
+#if DEBUG
+								!_conf.Debug.Switches[20] &&
+#endif
+								Options.realisticPublicTransport &&
+								(curLaneId == this._startLaneA || curLaneId == this._startLaneB) &&
+								(item.m_lanesUsed & (NetInfo.LaneType.Pedestrian | NetInfo.LaneType.PublicTransport)) == NetInfo.LaneType.Pedestrian) {
+								float transportTransitionPenalty = (2f * _conf.PathFinding.PublicTransportTransitionMaxPenalty) / (0.25f * this._maxLength);
+#if DEBUGNEWPF
+								if (debug)
+									logBuf.Add($"applying public transport transition penalty on non-PT path: {transportTransitionPenalty}");
+#endif
+								nextItem.m_comparisonValue += transportTransitionPenalty;
+							}
 							// NON-STOCK CODE END //
 
 							nextItem.m_direction = nextDir;
@@ -2391,6 +2476,14 @@ namespace TrafficManager.Custom.PathFinding {
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * this._maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed;
+
+			if (! this._ignoreCost) {
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
+				if (ticketCost != 0) {
+					comparisonValue += (float)(ticketCost * this._pathRandomizer.Int32(2000u)) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
+				}
+			}
+
 			if (nextLaneIndex < numLanes) {
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
 				BufferItem nextItem;
@@ -2407,17 +2500,16 @@ namespace TrafficManager.Custom.PathFinding {
 				nextItem.m_position.m_lane = (byte)nextLaneIndex;
 				nextItem.m_position.m_offset = offset;
 				if ((byte)(nextLaneInfo.m_laneType & laneType) == 0) {
-					//comparisonValue += 100f / (0.25f * this._maxLength); // NON-STOCK CODE
 					nextItem.m_methodDistance = 0f;
 				} else {
-					// stock code commented
 					if (item.m_methodDistance == 0f) {
 						comparisonValue += 100f / (0.25f * this._maxLength);
 					}
 					nextItem.m_methodDistance = methodDistance + distance;
 				}
+
 				float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (uint)nextLaneIndex, nextLaneId, nextLaneInfo); // NON-STOCK CODE
-				if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance) {
+				if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 					nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.25f * this._maxLength);
 					nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
 					if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {

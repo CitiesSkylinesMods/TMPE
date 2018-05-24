@@ -128,10 +128,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsEndTransitionDone();
 			}
 
-			bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && StepDone(false);
+			bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && stepDone; //StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={StepDone(false)} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} stepDone={stepDone} ret={ret}");
 #endif
 			return ret;
 		}
@@ -146,10 +146,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsInEndTransition();
 			}
 
-			bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && StepDone(false);
+			bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && stepDone; //StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isInEndTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} isStepDone={StepDone(false)} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isInEndTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} stepDone={stepDone} ret={ret}");
 #endif
 			return ret;
 		}
@@ -160,10 +160,10 @@ namespace TrafficManager.TrafficLight.Impl {
 				return masterLights.GetStep(masterLights.CurrentStep).IsInStartTransition();
 			}
 
-			bool ret = getCurrentFrame() == startFrame && !StepDone(false);
+			bool ret = getCurrentFrame() == startFrame && !stepDone; //!StepDone(false);
 #if DEBUGTTL
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.isInStartTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} startFrame={startFrame} isStepDone={StepDone(false)} ret={ret}");
+				Log._Debug($"TimedTrafficLightsStep.isInStartTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} startFrame={startFrame} stepDone={stepDone} ret={ret}");
 #endif
 
 			return ret;
@@ -591,7 +591,7 @@ namespace TrafficManager.TrafficLight.Impl {
 #if DEBUGTTL
 			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId;
 			if (debug) {
-				Log._Debug($"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
+				Log.Warning($"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
 			}
 #else
 			bool debug = false;
@@ -718,7 +718,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 #if DEBUGTTL
 							if (debug)
-								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Total num of flowing cars on seg. {sourceSegmentId}, lane {laneIndex} going to seg. {targetSegmentId}: {numMovingVehicles} (all: {numVehicles})");
+								Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: Total num of cars on seg. {sourceSegmentId}, lane {laneIndex} going to seg. {targetSegmentId}: {numMovingVehicles} (all: {numVehicles})");
 #endif
 
 							bool addToFlow = false;
@@ -741,9 +741,17 @@ namespace TrafficManager.TrafficLight.Impl {
 							if (addToFlow) {
 								curTotalLaneFlow += numMovingVehicles;
 								++numLaneFlows;
+#if DEBUGTTL
+								if (debug)
+									Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ lane {laneIndex}, seg. {sourceSegmentId} going to seg. {targetSegmentId}: COUTING as FLOWING -- numMovingVehicles={numMovingVehicles}");
+#endif
 							} else {
 								curTotalLaneWait += numVehicles;
 								++numLaneWaits;
+#if DEBUGTTL
+								if (debug)
+									Log._Debug($"TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ lane {laneIndex}, seg. {sourceSegmentId} going to seg. {targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
+#endif
 							}
 
 #if DEBUGTTL

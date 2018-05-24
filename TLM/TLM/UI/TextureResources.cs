@@ -60,7 +60,8 @@ namespace TrafficManager.UI
 		public static readonly Texture2D MainMenuButtonTexture2D;
 		public static readonly Texture2D MainMenuButtonsTexture2D;
 		public static readonly Texture2D NoImageTexture2D;
-		public static readonly Texture2D RemoveVehicleButtonTexture2D;
+		public static readonly Texture2D RemoveButtonTexture2D;
+		public static readonly Texture2D WindowBackgroundTexture2D;
 
 		static TextureResources()
         {
@@ -177,7 +178,9 @@ namespace TrafficManager.UI
 			VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("taxi_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("tram_infosign.png", 449, 411);
 
-			RemoveVehicleButtonTexture2D = LoadDllResource("remove-vehicle-btn.png", 150, 30);
+			RemoveButtonTexture2D = LoadDllResource("remove-btn.png", 150, 30);
+
+			WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
 		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)

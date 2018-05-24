@@ -173,7 +173,7 @@ namespace TrafficManager.UI {
 			_recalcLinesButton = _createButton("Recalculate transport lines", y, clickRecalcLines);
 			y += 40;
 			height += 40;
-			_checkDetoursButton = _createButton("Print screen resolution", y, clickCheckDetours);
+			_checkDetoursButton = _createButton("Remove all parked vehicles", y, clickCheckDetours);
 			y += 40;
 			height += 40;
 			/*_noneToVehicleButton = _createButton("None -> Vehicle", y, clickNoneToVehicle);
@@ -300,10 +300,19 @@ namespace TrafficManager.UI {
 		}
 
 		private void clickCheckDetours(UIComponent component, UIMouseEventParameter eventParam) {
-			Log.Info($"Screen.width: {Screen.width} Screen.height: {Screen.height}");
+			SimulationManager.instance.AddAction(() => {
+				SimulationManager.instance.ForcedSimulationPaused = true;
+				for (uint i = 0; i < VehicleManager.instance.m_parkedVehicles.m_buffer.Length; ++i) {
+					VehicleManager.instance.ReleaseParkedVehicle((ushort)i);
+				}
+				SimulationManager.instance.ForcedSimulationPaused = false;
+			});
+
+			/*Log.Info($"Screen.width: {Screen.width} Screen.height: {Screen.height}");
 			Log.Info($"Screen.currentResolution.width: {Screen.currentResolution.width} Screen.currentResolution.height: {Screen.currentResolution.height}");
 			Vector2 resolution = UIView.GetAView().GetScreenResolution();
 			Log.Info($"UIView.screenResolution.width: {resolution.x} UIView.screenResolution.height: {resolution.y}");
+			*/
 
 			/*SimulationManager.instance.AddAction(() => {
 				PrintTransportStats();

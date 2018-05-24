@@ -49,119 +49,143 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		protected void CustomUpdatePathTargetPositions(ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos, ref int index, int max, float minSqrDistanceA, float minSqrDistanceB) {
+		protected void CustomUpdatePathTargetPositions(ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos, ref int targetPosIndex, int maxTargetPosIndex, float minSqrDistanceA, float minSqrDistanceB) {
 			PathManager pathMan = Singleton<PathManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
-			Vector4 targetPos0 = vehicleData.m_targetPos0;
-			targetPos0.w = 1000f;
+
+			Vector4 targetPos = vehicleData.m_targetPos0;
+			targetPos.w = 1000f;
 			float minSqrDistA = minSqrDistanceA;
 			uint pathId = vehicleData.m_path;
-			byte pathPosIndex = vehicleData.m_pathPositionIndex;
+			byte finePathPosIndex = vehicleData.m_pathPositionIndex;
 			byte lastPathOffset = vehicleData.m_lastPathOffset;
-			if (pathPosIndex == 255) {
-				pathPosIndex = 0;
-				if (index <= 0) {
+
+			// initial position
+			if (finePathPosIndex == 255) {
+				finePathPosIndex = 0;
+				if (targetPosIndex <= 0) {
 					vehicleData.m_pathPositionIndex = 0;
 				}
-				if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathId].CalculatePathPositionOffset(pathPosIndex >> 1, targetPos0, out lastPathOffset)) {
+
+				if (!Singleton<PathManager>.instance.m_pathUnits.m_buffer[pathId].CalculatePathPositionOffset(finePathPosIndex >> 1, targetPos, out lastPathOffset)) {
 					this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 					return;
 				}
 			}
 
-			PathUnit.Position position;
-			if (!pathMan.m_pathUnits.m_buffer[pathId].GetPosition(pathPosIndex >> 1, out position)) {
+			// get current path position, check for errors
+			PathUnit.Position currentPosition;
+			if (!pathMan.m_pathUnits.m_buffer[pathId].GetPosition(finePathPosIndex >> 1, out currentPosition)) {
 				this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 				return;
 			}
 
-			NetInfo curSegmentInfo = netManager.m_segments.m_buffer[(int)position.m_segment].Info;
-			if (curSegmentInfo.m_lanes.Length <= (int)position.m_lane) {
+			// get current segment info, check for errors
+			NetInfo curSegmentInfo = netManager.m_segments.m_buffer[(int)currentPosition.m_segment].Info;
+			if (curSegmentInfo.m_lanes.Length <= (int)currentPosition.m_lane) {
 				this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 				return;
 			}
 
-			uint curLaneId = PathManager.GetLaneID(position);
-			NetInfo.Lane laneInfo = curSegmentInfo.m_lanes[(int)position.m_lane];
+			// main loop
+			uint curLaneId = PathManager.GetLaneID(currentPosition);
+			NetInfo.Lane laneInfo = curSegmentInfo.m_lanes[(int)currentPosition.m_lane];
 			Bezier3 bezier;
 			bool firstIter = true; // NON-STOCK CODE
 			while (true) {
-				if ((pathPosIndex & 1) == 0) {
+				if ((finePathPosIndex & 1) == 0) {
+					// vehicle is not in transition
 					if (laneInfo.m_laneType != NetInfo.LaneType.CargoVehicle) {
 						bool first = true;
-						while (lastPathOffset != position.m_offset) {
+						while (lastPathOffset != currentPosition.m_offset) {
+							// catch up and update target position until we get to the current segment offset
 							if (first) {
 								first = false;
 							} else {
-								float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos0, refPos);
+								float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
 								int pathOffsetDelta;
 								if (distDiff < 0f) {
 									pathOffsetDelta = 4;
 								} else {
 									pathOffsetDelta = 4 + Mathf.Max(0, Mathf.CeilToInt(distDiff * 256f / (netManager.m_lanes.m_buffer[curLaneId].m_length + 1f)));
 								}
-								if (lastPathOffset > position.m_offset) {
-									lastPathOffset = (byte)Mathf.Max((int)lastPathOffset - pathOffsetDelta, (int)position.m_offset);
-								} else if (lastPathOffset < position.m_offset) {
-									lastPathOffset = (byte)Mathf.Min((int)lastPathOffset + pathOffsetDelta, (int)position.m_offset);
+								if (lastPathOffset > currentPosition.m_offset) {
+									lastPathOffset = (byte)Mathf.Max((int)lastPathOffset - pathOffsetDelta, (int)currentPosition.m_offset);
+								} else if (lastPathOffset < currentPosition.m_offset) {
+									lastPathOffset = (byte)Mathf.Min((int)lastPathOffset + pathOffsetDelta, (int)currentPosition.m_offset);
 								}
 							}
+
 							Vector3 curSegPos;
 							Vector3 curSegDir;
 							float curSegOffset;
-							this.CalculateSegmentPosition(vehicleID, ref vehicleData, position, curLaneId, lastPathOffset, out curSegPos, out curSegDir, out curSegOffset);
-							targetPos0.Set(curSegPos.x, curSegPos.y, curSegPos.z, Mathf.Min(targetPos0.w, curSegOffset));
+							this.CalculateSegmentPosition(vehicleID, ref vehicleData, currentPosition, curLaneId, lastPathOffset, out curSegPos, out curSegDir, out curSegOffset);
+							targetPos.Set(curSegPos.x, curSegPos.y, curSegPos.z, Mathf.Min(targetPos.w, curSegOffset));
 							float refPosSqrDist = (curSegPos - refPos).sqrMagnitude;
 							if (refPosSqrDist >= minSqrDistA) {
-								if (index <= 0) {
+								if (targetPosIndex <= 0) {
 									vehicleData.m_lastPathOffset = lastPathOffset;
 								}
-								vehicleData.SetTargetPos(index++, targetPos0);
+								vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 								minSqrDistA = minSqrDistanceB;
-								refPos = targetPos0;
-								targetPos0.w = 1000f;
-								if (index == max) {
+								refPos = targetPos;
+								targetPos.w = 1000f;
+								if (targetPosIndex == maxTargetPosIndex) {
+									// maximum target position index reached
 									return;
 								}
 							}
 						}
 					}
-					pathPosIndex += 1;
+
+					// set vehicle in transition
+					finePathPosIndex += 1;
 					lastPathOffset = 0;
-					if (index <= 0) {
-						vehicleData.m_pathPositionIndex = pathPosIndex;
+					if (targetPosIndex <= 0) {
+						vehicleData.m_pathPositionIndex = finePathPosIndex;
 						vehicleData.m_lastPathOffset = lastPathOffset;
 					}
 				}
 
-				int nextPathPosIndex = (pathPosIndex >> 1) + 1;
+				// vehicle is in transition now
+
+				/*
+				 * coarse path position format: 0..11 (always equals 'fine path position' / 2 == 'fine path position' >> 1)
+				 * fine path position format: 0..23
+				 */
+
+				// find next path unit (or abort if at path end)
+				int nextCoarsePathPosIndex = (finePathPosIndex >> 1) + 1;
 				uint nextPathId = pathId;
-				if (nextPathPosIndex >= (int)pathMan.m_pathUnits.m_buffer[pathId].m_positionCount) {
-					nextPathPosIndex = 0;
+				if (nextCoarsePathPosIndex >= (int)pathMan.m_pathUnits.m_buffer[pathId].m_positionCount) {
+					nextCoarsePathPosIndex = 0;
 					nextPathId = pathMan.m_pathUnits.m_buffer[pathId].m_nextPathUnit;
 					if (nextPathId == 0u) {
-						if (index <= 0) {
+						if (targetPosIndex <= 0) {
 							Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
 							vehicleData.m_path = 0u;
 						}
-						targetPos0.w = 1f;
-						vehicleData.SetTargetPos(index++, targetPos0);
+						targetPos.w = 1f;
+						vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 						return;
 					}
 				}
 
+				// check for errors
 				PathUnit.Position nextPathPos;
-				if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetPosition(nextPathPosIndex, out nextPathPos)) {
+				if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetPosition(nextCoarsePathPosIndex, out nextPathPos)) {
 					this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 					return;
 				}
 
+				// check for errors
 				NetInfo nextSegmentInfo = netManager.m_segments.m_buffer[(int)nextPathPos.m_segment].Info;
 				if (nextSegmentInfo.m_lanes.Length <= (int)nextPathPos.m_lane) {
 					this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 					return;
 				}
 
+				// find next lane (emergency vehicles / dynamic lane selection)
 				int bestLaneIndex = nextPathPos.m_lane;
 				if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != (Vehicle.Flags)0) {
 					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPathPos);
@@ -182,7 +206,7 @@ namespace TrafficManager.Custom.AI {
 
 						if (mayFindBestLane) {
 							uint next2PathId = nextPathId;
-							int next2PathPosIndex = nextPathPosIndex;
+							int next2PathPosIndex = nextCoarsePathPosIndex;
 							bool next2Invalid;
 							PathUnit.Position next2PathPos;
 							NetInfo next2SegmentInfo = null;
@@ -217,7 +241,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 							using (var bm = new Benchmark(null, "FindBestLane")) {
 #endif
-								bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, position, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
+								bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
 #if BENCHMARK
 							}
 #endif
@@ -226,9 +250,10 @@ namespace TrafficManager.Custom.AI {
 					}
 				}
 
+				// update lane index
 				if (bestLaneIndex != (int)nextPathPos.m_lane) {
 					nextPathPos.m_lane = (byte)bestLaneIndex;
-					pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextPathPosIndex, nextPathPos);
+					pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextCoarsePathPosIndex, nextPathPos);
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "AddTraffic")) {
 #endif
@@ -243,10 +268,11 @@ namespace TrafficManager.Custom.AI {
 #endif
 				}
 
+				// check for errors
 				uint nextLaneId = PathManager.GetLaneID(nextPathPos);
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[(int)nextPathPos.m_lane];
-				ushort curSegStartNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_startNode;
-				ushort curSegEndNodeId = netManager.m_segments.m_buffer[(int)position.m_segment].m_endNode;
+				ushort curSegStartNodeId = netManager.m_segments.m_buffer[(int)currentPosition.m_segment].m_startNode;
+				ushort curSegEndNodeId = netManager.m_segments.m_buffer[(int)currentPosition.m_segment].m_endNode;
 				ushort nextSegStartNodeId = netManager.m_segments.m_buffer[(int)nextPathPos.m_segment].m_startNode;
 				ushort nextSegEndNodeId = netManager.m_segments.m_buffer[(int)nextPathPos.m_segment].m_endNode;
 				if (nextSegStartNodeId != curSegStartNodeId &&
@@ -259,18 +285,19 @@ namespace TrafficManager.Custom.AI {
 					return;
 				}
 
+				// park vehicle
 				if (nextLaneInfo.m_laneType == NetInfo.LaneType.Pedestrian) {
 					if (vehicleID != 0 && (vehicleData.m_flags & Vehicle.Flags.Parking) == (Vehicle.Flags)0) {
-						byte inOffset = position.m_offset;
-						byte outOffset = position.m_offset;
-						if (this.ParkVehicle(vehicleID, ref vehicleData, position, nextPathId, nextPathPosIndex << 1, out outOffset)) {
+						byte inOffset = currentPosition.m_offset;
+						byte outOffset = currentPosition.m_offset;
+						if (this.ParkVehicle(vehicleID, ref vehicleData, currentPosition, nextPathId, nextCoarsePathPosIndex << 1, out outOffset)) {
 							if (outOffset != inOffset) {
-								if (index <= 0) {
+								if (targetPosIndex <= 0) {
 									vehicleData.m_pathPositionIndex = (byte)((int)vehicleData.m_pathPositionIndex & -2);
 									vehicleData.m_lastPathOffset = inOffset;
 								}
-								position.m_offset = outOffset;
-								pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathId)].SetPosition(pathPosIndex >> 1, position);
+								currentPosition.m_offset = outOffset;
+								pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)pathId)].SetPosition(finePathPosIndex >> 1, currentPosition);
 							}
 							vehicleData.m_flags |= Vehicle.Flags.Parking;
 						} else {
@@ -280,51 +307,55 @@ namespace TrafficManager.Custom.AI {
 					return;
 				}
 
+				// check for errors
 				if ((byte)(nextLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle | NetInfo.LaneType.TransportVehicle)) == 0) {
 					this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 					return;
 				}
 
+				// change vehicle
 				if (nextLaneInfo.m_vehicleType != this.m_info.m_vehicleType &&
-					this.NeedChangeVehicleType(vehicleID, ref vehicleData, nextPathPos, nextLaneId, nextLaneInfo.m_vehicleType, ref targetPos0)
+					this.NeedChangeVehicleType(vehicleID, ref vehicleData, nextPathPos, nextLaneId, nextLaneInfo.m_vehicleType, ref targetPos)
 				) {
-					float targetPos0ToRefPosSqrDist = ((Vector3)targetPos0 - refPos).sqrMagnitude;
+					float targetPos0ToRefPosSqrDist = ((Vector3)targetPos - refPos).sqrMagnitude;
 					if (targetPos0ToRefPosSqrDist >= minSqrDistA) {
-						vehicleData.SetTargetPos(index++, targetPos0);
+						vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 					}
-					if (index <= 0) {
-						while (index < max) {
-							vehicleData.SetTargetPos(index++, targetPos0);
+					if (targetPosIndex <= 0) {
+						while (targetPosIndex < maxTargetPosIndex) {
+							vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 						}
 						if (nextPathId != vehicleData.m_path) {
 							Singleton<PathManager>.instance.ReleaseFirstUnit(ref vehicleData.m_path);
 						}
-						vehicleData.m_pathPositionIndex = (byte)(nextPathPosIndex << 1);
-						PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos0, out vehicleData.m_lastPathOffset);
+						vehicleData.m_pathPositionIndex = (byte)(nextCoarsePathPosIndex << 1);
+						PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos, out vehicleData.m_lastPathOffset);
 						if (vehicleID != 0 && !this.ChangeVehicleType(vehicleID, ref vehicleData, nextPathPos, nextLaneId)) {
 							this.InvalidPath(vehicleID, ref vehicleData, vehicleID, ref vehicleData);
 						}
 					} else {
-						while (index < max) {
-							vehicleData.SetTargetPos(index++, targetPos0);
+						while (targetPosIndex < maxTargetPosIndex) {
+							vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 						}
 					}
 					return;
 				}
 
-				if (nextPathPos.m_segment != position.m_segment && vehicleID != 0) {
+				// unset leaving flag
+				if (nextPathPos.m_segment != currentPosition.m_segment && vehicleID != 0) {
 					vehicleData.m_flags &= ~Vehicle.Flags.Leaving;
 				}
 
+				// calculate next segment offset
 				byte nextSegOffset = 0;
 				if ((vehicleData.m_flags & Vehicle.Flags.Flying) != (Vehicle.Flags)0) {
 					nextSegOffset = (byte)((nextPathPos.m_offset < 128) ? 255 : 0);
 				} else if (curLaneId != nextLaneId && laneInfo.m_laneType != NetInfo.LaneType.CargoVehicle) {
-					PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos0, out nextSegOffset);
+					PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos, out nextSegOffset);
 					bezier = default(Bezier3);
 					Vector3 curSegDir;
 					float maxSpeed;
-					this.CalculateSegmentPosition(vehicleID, ref vehicleData, position, curLaneId, position.m_offset, out bezier.a, out curSegDir, out maxSpeed);
+					this.CalculateSegmentPosition(vehicleID, ref vehicleData, currentPosition, curLaneId, currentPosition.m_offset, out bezier.a, out curSegDir, out maxSpeed);
 					bool calculateNextNextPos = lastPathOffset == 0;
 					if (calculateNextNextPos) {
 						if ((vehicleData.m_flags & Vehicle.Flags.Reversed) != (Vehicle.Flags)0) {
@@ -337,25 +368,25 @@ namespace TrafficManager.Custom.AI {
 					float nextMaxSpeed;
 					if (calculateNextNextPos) {
 						PathUnit.Position nextNextPathPos;
-						if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(nextPathPosIndex, out nextNextPathPos)) {
+						if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(nextCoarsePathPosIndex, out nextNextPathPos)) {
 							nextNextPathPos = default(PathUnit.Position);
 						}
-						this.CalculateSegmentPosition(vehicleID, ref vehicleData, nextNextPathPos, nextPathPos, nextLaneId, nextSegOffset, position, curLaneId, position.m_offset, index, out bezier.d, out nextSegDir, out nextMaxSpeed);
+						this.CalculateSegmentPosition(vehicleID, ref vehicleData, nextNextPathPos, nextPathPos, nextLaneId, nextSegOffset, currentPosition, curLaneId, currentPosition.m_offset, targetPosIndex, out bezier.d, out nextSegDir, out nextMaxSpeed);
 					} else {
 						this.CalculateSegmentPosition(vehicleID, ref vehicleData, nextPathPos, nextLaneId, nextSegOffset, out bezier.d, out nextSegDir, out nextMaxSpeed);
 					}
 					if (nextMaxSpeed < 0.01f || (netManager.m_segments.m_buffer[(int)nextPathPos.m_segment].m_flags & (NetSegment.Flags.Collapsed | NetSegment.Flags.Flooded)) != NetSegment.Flags.None) {
-						if (index <= 0) {
+						if (targetPosIndex <= 0) {
 							vehicleData.m_lastPathOffset = lastPathOffset;
 						}
-						targetPos0 = bezier.a;
-						targetPos0.w = 0f;
-						while (index < max) {
-							vehicleData.SetTargetPos(index++, targetPos0);
+						targetPos = bezier.a;
+						targetPos.w = 0f;
+						while (targetPosIndex < maxTargetPosIndex) {
+							vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 						}
 						return;
 					}
-					if (position.m_offset == 0) {
+					if (currentPosition.m_offset == 0) {
 						curSegDir = -curSegDir;
 					}
 					if (nextSegOffset < nextPathPos.m_offset) {
@@ -380,7 +411,7 @@ namespace TrafficManager.Custom.AI {
 						}
 						nextMaxSpeed = Mathf.Min(nextMaxSpeed, this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1000f, curve));
 						while (lastPathOffset < 255) {
-							float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos0, refPos);
+							float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
 							int pathOffsetDelta;
 							if (distDiff < 0f) {
 								pathOffsetDelta = 8;
@@ -389,43 +420,45 @@ namespace TrafficManager.Custom.AI {
 							}
 							lastPathOffset = (byte)Mathf.Min((int)lastPathOffset + pathOffsetDelta, 255);
 							Vector3 bezierPos = bezier.Position((float)lastPathOffset * 0.003921569f);
-							targetPos0.Set(bezierPos.x, bezierPos.y, bezierPos.z, Mathf.Min(targetPos0.w, nextMaxSpeed));
+							targetPos.Set(bezierPos.x, bezierPos.y, bezierPos.z, Mathf.Min(targetPos.w, nextMaxSpeed));
 							float sqrMagnitude2 = (bezierPos - refPos).sqrMagnitude;
 							if (sqrMagnitude2 >= minSqrDistA) {
-								if (index <= 0) {
+								if (targetPosIndex <= 0) {
 									vehicleData.m_lastPathOffset = lastPathOffset;
 								}
 								if (nextNodeId != 0) {
-									this.UpdateNodeTargetPos(vehicleID, ref vehicleData, nextNodeId, ref netManager.m_nodes.m_buffer[(int)nextNodeId], ref targetPos0, index);
+									this.UpdateNodeTargetPos(vehicleID, ref vehicleData, nextNodeId, ref netManager.m_nodes.m_buffer[(int)nextNodeId], ref targetPos, targetPosIndex);
 								}
-								vehicleData.SetTargetPos(index++, targetPos0);
+								vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 								minSqrDistA = minSqrDistanceB;
-								refPos = targetPos0;
-								targetPos0.w = 1000f;
-								if (index == max) {
+								refPos = targetPos;
+								targetPos.w = 1000f;
+								if (targetPosIndex == maxTargetPosIndex) {
 									return;
 								}
 							}
 						}
 					}
 				} else {
-					PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos0, out nextSegOffset);
+					PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos, out nextSegOffset);
 				}
 
-				if (index <= 0) {
-					if (nextPathPosIndex == 0) {
+				// check for arrival
+				if (targetPosIndex <= 0) {
+					if (nextCoarsePathPosIndex == 0) {
 						Singleton<PathManager>.instance.ReleaseFirstUnit(ref vehicleData.m_path);
 					}
-					if (nextPathPosIndex >= (int)(pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)nextPathId)].m_positionCount - 1) && pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)nextPathId)].m_nextPathUnit == 0u && vehicleID != 0) {
+					if (nextCoarsePathPosIndex >= (int)(pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)nextPathId)].m_positionCount - 1) && pathMan.m_pathUnits.m_buffer[(int)((UIntPtr)nextPathId)].m_nextPathUnit == 0u && vehicleID != 0) {
 						this.ArrivingToDestination(vehicleID, ref vehicleData);
 					}
 				}
 
+				// prepare next loop iteration: go to next path position
 				pathId = nextPathId;
-				pathPosIndex = (byte)(nextPathPosIndex << 1);
+				finePathPosIndex = (byte)(nextCoarsePathPosIndex << 1);
 				lastPathOffset = nextSegOffset;
-				if (index <= 0) {
-					vehicleData.m_pathPositionIndex = pathPosIndex;
+				if (targetPosIndex <= 0) {
+					vehicleData.m_pathPositionIndex = finePathPosIndex;
 					vehicleData.m_lastPathOffset = lastPathOffset;
 					vehicleData.m_flags = ((vehicleData.m_flags & ~(Vehicle.Flags.OnGravel | Vehicle.Flags.Underground | Vehicle.Flags.Transition)) | nextSegmentInfo.m_setVehicleFlags);
 					if (this.LeftHandDrive(nextLaneInfo)) {
@@ -434,7 +467,7 @@ namespace TrafficManager.Custom.AI {
 						vehicleData.m_flags &= (Vehicle.Flags.Created | Vehicle.Flags.Deleted | Vehicle.Flags.Spawned | Vehicle.Flags.Inverted | Vehicle.Flags.TransferToTarget | Vehicle.Flags.TransferToSource | Vehicle.Flags.Emergency1 | Vehicle.Flags.Emergency2 | Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped | Vehicle.Flags.Leaving | Vehicle.Flags.Arriving | Vehicle.Flags.Reversed | Vehicle.Flags.TakingOff | Vehicle.Flags.Flying | Vehicle.Flags.Landing | Vehicle.Flags.WaitingSpace | Vehicle.Flags.WaitingCargo | Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget | Vehicle.Flags.Importing | Vehicle.Flags.Exporting | Vehicle.Flags.Parking | Vehicle.Flags.CustomName | Vehicle.Flags.OnGravel | Vehicle.Flags.WaitingLoading | Vehicle.Flags.Congestion | Vehicle.Flags.DummyTraffic | Vehicle.Flags.Underground | Vehicle.Flags.Transition | Vehicle.Flags.InsideBuilding);
 					}
 				}
-				position = nextPathPos;
+				currentPosition = nextPathPos;
 				curLaneId = nextLaneId;
 				laneInfo = nextLaneInfo;
 				firstIter = false; // NON-STOCK CODE

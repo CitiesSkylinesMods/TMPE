@@ -18,7 +18,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Lane speed randomization interval
 		/// </summary>
-		public float LaneSpeedRandInterval = 0f;
+		public float LaneSpeedRandInterval = 5f;
 
 		/// <summary>
 		/// Maximum number of considered lane changes
@@ -39,5 +39,10 @@ namespace TrafficManager.State.ConfigData {
 		/// Minimum required traffic flow improvement for safe lane changes
 		/// </summary>
 		public float MinSafeTrafficImprovement = 20f;
+
+		/// <summary>
+		/// Minimum relative speed (in %) where volume measurement starts
+		/// </summary>
+		public ushort VolumeMeasurementRelSpeedThreshold = 50;
 	}
 }

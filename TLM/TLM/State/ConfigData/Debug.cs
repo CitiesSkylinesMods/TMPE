@@ -27,7 +27,10 @@ namespace TrafficManager.State.ConfigData {
 				false, // 16: debug TramBaseAI.SimulationStep (2)
 				false, // 17: debug alternative lane selection
 				false, // 18: transport line path-find debugging
-				false  // 19: enable obligation to drive on the right hand side of the road
+				false, // 19: enable obligation to drive on the right hand side of the road
+				false, // 20: debug realistic public transport
+				false, // 21: debug "CalculateSegmentPosition"
+				false // 22: parking ai debug log (vehicles)
 			};
 
 		public int NodeId = 0;
@@ -35,6 +38,8 @@ namespace TrafficManager.State.ConfigData {
 		public int StartSegmentId = 0;
 		public int EndSegmentId = 0;
 		public int VehicleId = 0;
+		public int CitizenInstanceId = 0;
+		public uint CitizenId = 0;
 		public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
 	}
 #endif

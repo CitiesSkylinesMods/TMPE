@@ -84,8 +84,9 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="ret">status text to enrich</param>
 		/// <param name="extInstance">extended citizen instance data</param>
+		/// <param name="extCitizen">extended citizen data</param>
 		/// <returns></returns>
-		string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance);
+		string EnrichLocalizedCitizenStatus(string ret, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen);
 
 		/// <summary>
 		/// Adds Parking AI related information to the given passenger car status text.
@@ -103,6 +104,7 @@ namespace TrafficManager.Manager {
 		/// <param name="citizenInstanceId">citizen instance that shall be processed</param>
 		/// <param name="citizenInstance">citizen instance data</param>
 		/// <param name="extInstance">extended citizen instance data</param>
+		/// <param name="extCitizen">extended citizen data</param>
 		/// <param name="citizen">citizen data</param>
 		/// <param name="mainPathState">current state of the citizen instance's main path</param>
 		/// <returns>
@@ -113,7 +115,7 @@ namespace TrafficManager.Manager {
 		///		<code>FailedSoft</code>: Path-finding must be repeated.
 		///		<code>Ignore</code>: Default citizen behavior must be skipped. 
 		///	</returns>
-		ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref Citizen citizen, ExtPathState mainPathState);
+		ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen, ref Citizen citizen, ExtPathState mainPathState);
 
 		/// <summary>
 		/// Merges the current calculation states of the citizen's main path and return path (while driving a passenger car).
@@ -177,6 +179,18 @@ namespace TrafficManager.Manager {
 		/// <param name="calculateEndPos">if false, a parking space path position could be calculated (TODO negate & rename parameter)</param>
 		/// <returns>true if a parking space could be found, false otherwise</returns>
 		bool FindParkingSpaceForCitizen(Vector3 endPos, VehicleInfo vehicleInfo, ref ExtCitizenInstance extDriverInstance, ushort homeId, bool goingHome, ushort vehicleId, bool allowTourists, out Vector3 parkPos, ref PathUnit.Position endPathPos, out bool calculateEndPos);
+
+		/// <summary>
+		/// Tries to relocate the given parked car (<paramref name="parkedVehicleId"/>, <paramref name="parkedVehicle"/>)
+		/// within the vicinity of the given reference position <paramref name="refPos"/>.
+		/// </summary>
+		/// <param name="parkedVehicleId">parked vehicle id</param>
+		/// <param name="parkedVehicle">parked vehicle data</param>
+		/// <param name="refPos">reference position</param>
+		/// <param name="maxDistance">maximum allowed distance between reference position and parking space location</param>
+		/// <param name="homeId">Home building id of the citizen (For residential buildings, parked cars may only spawn at the home building)</param>
+		/// <returns><code>true</code> if the parked vehicle was relocated, <code>false</code> otherwise</returns>
+		bool TryMoveParkedVehicle(ushort parkedVehicleId, ref VehicleParked parkedVehicle, Vector3 refPos, float maxDistance, ushort homeId);
 
 		/// <summary>
 		/// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>

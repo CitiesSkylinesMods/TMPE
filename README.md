@@ -4,6 +4,9 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.6, 02/17/2018
+- **in development**
+
 1.10.5, 01/06/2018
 - UI scaling removed
 - Simplified Chinese translation updated (thanks to Emphasia for translating)

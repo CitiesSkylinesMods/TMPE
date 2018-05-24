@@ -10,7 +10,7 @@ using UnityEngine;
 namespace TrafficManager.UI.MainMenu {
 	public class StatsLabel : UILabel {
 		public override void Start() {
-			size = new Vector2(MainMenuPanel.MENU_WIDTH / 2, MainMenuPanel.TOP_BORDER);
+			size = new Vector2(MainMenuPanel.SIZE_PROFILES[0].MENU_WIDTH / 2, MainMenuPanel.SIZE_PROFILES[0].TOP_BORDER); // TODO use current size profile
 			text = "";
 			relativePosition = new Vector3(5f, -20f);
 			textAlignment = UIHorizontalAlignment.Left;

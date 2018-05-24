@@ -52,6 +52,12 @@ namespace TrafficManager.UI {
 		}
 
 		public class RemoveVehicleButton : LinearSpriteButton {
+			public override void Start() {
+				base.Start();
+				width = Width;
+				height = Height;
+			}
+
 			public override void HandleClick(UIMouseEventParameter p) {
 				InstanceID instance = WorldInfoPanel.GetCurrentInstanceID();
 				Log._Debug($"Current vehicle instance: {instance.Vehicle}");
@@ -70,7 +76,7 @@ namespace TrafficManager.UI {
 
 			public override Texture2D AtlasTexture {
 				get {
-					return TextureResources.RemoveVehicleButtonTexture2D;
+					return TextureResources.RemoveButtonTexture2D;
 				}
 			}
 

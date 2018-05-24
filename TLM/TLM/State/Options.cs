@@ -24,6 +24,9 @@ namespace TrafficManager.State {
 		private static UICheckBox instantEffectsToggle = null;
 		private static UICheckBox lockButtonToggle = null;
 		private static UICheckBox lockMenuToggle = null;
+		private static UISlider guiTransparencySlider = null;
+		private static UISlider overlayTransparencySlider = null;
+		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
@@ -54,6 +57,7 @@ namespace TrafficManager.State {
 		private static UICheckBox strongerRoadConditionEffectsToggle = null;
 		private static UICheckBox prohibitPocketCarsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
+		private static UICheckBox realisticPublicTransportToggle = null;
 		private static UISlider altLaneSelectionRatioSlider = null;
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
@@ -122,6 +126,7 @@ namespace TrafficManager.State {
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
 		public static bool advancedAI = false;
+		public static bool realisticPublicTransport = false;
 		public static byte altLaneSelectionRatio = 0;
 		public static bool highwayRules = false;
 #if DEBUG
@@ -208,6 +213,9 @@ namespace TrafficManager.State {
 			languageDropdown = generalGroup.AddDropdown(Translation.GetString("Language") + ":", languageLabels, languageIndex, onLanguageChanged) as UIDropDown;
 			lockButtonToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_button_position"), GlobalConfig.Instance.Main.MainMenuButtonPosLocked, onLockButtonChanged) as UICheckBox;
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
+			tinyMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Compact_main_menu"), GlobalConfig.Instance.Main.TinyMainMenu, onTinyMenuChanged) as UICheckBox;
+			guiTransparencySlider = generalGroup.AddSlider(Translation.GetString("Window_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.GuiTransparency, onGuiTransparencyChanged) as UISlider;
+			overlayTransparencySlider = generalGroup.AddSlider(Translation.GetString("Overlay_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.OverlayTransparency, onOverlayTransparencyChanged) as UISlider;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
@@ -253,6 +261,9 @@ namespace TrafficManager.State {
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
 			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+
+			var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
+			realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
 
 			// VEHICLE RESTRICTIONS
 			++tabIndex;
@@ -467,6 +478,30 @@ namespace TrafficManager.State {
 			return true;
 		}
 
+		private static void onGuiTransparencyChanged(float newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			setGuiTransparency((byte)Mathf.RoundToInt(newVal));
+			guiTransparencySlider.tooltip = Translation.GetString("Window_transparency") + ": " + GlobalConfig.Instance.Main.GuiTransparency + " %";
+
+			GlobalConfig.WriteConfig();
+
+			Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiTransparency}");
+		}
+
+		private static void onOverlayTransparencyChanged(float newVal) {
+			if (!checkGameLoaded())
+				return;
+
+			setOverlayTransparency((byte)Mathf.RoundToInt(newVal));
+			overlayTransparencySlider.tooltip = Translation.GetString("Overlay_transparency") + ": " + GlobalConfig.Instance.Main.OverlayTransparency + " %";
+
+			GlobalConfig.WriteConfig();
+
+			Log._Debug($"OverlayTransparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
+		}
+
 		private static void onAltLaneSelectionRatioChanged(float newVal) {
 			if (!checkGameLoaded())
 				return;
@@ -583,6 +618,13 @@ namespace TrafficManager.State {
 			Log._Debug($"Menu lock changed to {newValue}");
 			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
 			GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
+			GlobalConfig.WriteConfig();
+		}
+
+		private static void onTinyMenuChanged(bool newValue) {
+			Log._Debug($"Menu tiny changed to {newValue}");
+			GlobalConfig.Instance.Main.TinyMainMenu = newValue;
+			GlobalConfig.Instance.NotifyObservers();
 			GlobalConfig.WriteConfig();
 		}
 
@@ -839,6 +881,14 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onRealisticPublicTransportChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"realisticPublicTransport changed to {newValue}");
+			realisticPublicTransport = newValue;
+		}
+
 		private static void onRealisticSpeedsChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -944,17 +994,11 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickReloadGlobalConf() {
-			if (!checkGameLoaded())
-				return;
-
 			GlobalConfig.Reload();
 		}
 
 		private static void onClickResetGlobalConf() {
-			if (!checkGameLoaded())
-				return;
-
-			GlobalConfig.Reset(null);
+			GlobalConfig.Reset(null, true);
 		}
 
 		public static void setSimAccuracy(int newAccuracy) {
@@ -1032,6 +1076,24 @@ namespace TrafficManager.State {
 			}
 		}
 
+		public static void setGuiTransparency(byte val) {
+			bool changed = val != GlobalConfig.Instance.Main.GuiTransparency;
+			GlobalConfig.Instance.Main.GuiTransparency = val;
+
+			if (changed && guiTransparencySlider != null) {
+				guiTransparencySlider.value = val;
+			}
+		}
+
+		public static void setOverlayTransparency(byte val) {
+			bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
+			GlobalConfig.Instance.Main.OverlayTransparency = val;
+
+			if (changed && overlayTransparencySlider != null) {
+				overlayTransparencySlider.value = val;
+			}
+		}
+
 		public static void setAltLaneSelectionRatio(byte val) {
 			bool changed = val != altLaneSelectionRatio;
 			altLaneSelectionRatio = val;
@@ -1081,6 +1143,13 @@ namespace TrafficManager.State {
 			prohibitPocketCars = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
+		}
+
+		public static void setRealisticPublicTransport(bool newValue) {
+			bool valueChanged = newValue != realisticPublicTransport;
+			realisticPublicTransport = newValue;
+			if (realisticPublicTransportToggle != null)
+				realisticPublicTransportToggle.isChecked = newValue;
 		}
 
 		public static void setRealisticSpeeds(bool newValue) {

@@ -13,9 +13,10 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Util;
 
 namespace TrafficManager.UI.MainMenu {
-	public class MainMenuPanel : UIPanel {
+	public class MainMenuPanel : UIPanel, IObserver<GlobalConfig> {
 		private static readonly Type[] MENU_BUTTON_TYPES = new Type[] {
 			// first row
 			typeof(ToggleTrafficLightsButton),
@@ -32,19 +33,49 @@ namespace TrafficManager.UI.MainMenu {
 			typeof(VehicleRestrictionsButton),
 			typeof(ParkingRestrictionsButton),
 		};
-		private const int NUM_BUTTONS_PER_ROW = 6;
-		private const int NUM_ROWS = 2;
 
-		public const int VSPACING = 5;
-		public const int HSPACING = 5;
-		public const int TOP_BORDER = 25;
-		public const int BUTTON_SIZE = 30;
+		public class SizeProfile {
+			public int NUM_BUTTONS_PER_ROW { get; set; }
+			public int NUM_ROWS { get; set; }
+
+			public int VSPACING { get; set; }
+			public int HSPACING { get; set; }
+			public int TOP_BORDER { get; set; }
+			public int BUTTON_SIZE { get; set; }
+
+			public int MENU_WIDTH { get; set; }
+			public int MENU_HEIGHT { get; set; }
+		}
+
+		public static readonly SizeProfile[] SIZE_PROFILES = new SizeProfile[] {
+			new SizeProfile() {
+				NUM_BUTTONS_PER_ROW = 6,
+				NUM_ROWS = 2,
+
+				VSPACING = 5,
+				HSPACING = 5,
+				TOP_BORDER = 25,
+				BUTTON_SIZE = 30,
+
+				MENU_WIDTH = 215,
+				MENU_HEIGHT = 95
+			},
+			new SizeProfile() {
+				NUM_BUTTONS_PER_ROW = 6,
+				NUM_ROWS = 2,
+
+				VSPACING = 5,
+				HSPACING = 5,
+				TOP_BORDER = 25,
+				BUTTON_SIZE = 50,
+
+				MENU_WIDTH = 335,
+				MENU_HEIGHT = 135
+			}
+		};
 
 		public const int DEFAULT_MENU_X = 85;
 		public const int DEFAULT_MENU_Y = 60;
-
-		public const int MENU_WIDTH = 215;
-		public const int MENU_HEIGHT = 95;
 
 		public MenuButton[] Buttons { get; private set; }
 		public UILabel VersionLabel { get; private set; }
@@ -52,52 +83,48 @@ namespace TrafficManager.UI.MainMenu {
 
 		public UIDragHandle Drag { get; private set; }
 
+		IDisposable confDisposable;
+
+		private SizeProfile activeProfile = null;
+		private bool started = false;
+
 		//private UILabel optionsLabel;
 
 		public override void Start() {
+			GlobalConfig conf = GlobalConfig.Instance;
+			DetermineProfile(conf);
+
+			OnUpdate(conf);
+
+			confDisposable = conf.Subscribe(this);
+
 			isVisible = false;
 
 			backgroundSprite = "GenericPanel";
 			color = new Color32(64, 64, 64, 240);
-			width = MENU_WIDTH;
-			height = MENU_HEIGHT;
 
 			VersionLabel = AddUIComponent<VersionLabel>();
 			StatsLabel = AddUIComponent<StatsLabel>();
 
 			Buttons = new MenuButton[MENU_BUTTON_TYPES.Length];
-
-			int i = 0;
-			int y = TOP_BORDER;
-			for (int row = 0; row < NUM_ROWS; ++row) {
-				int x = HSPACING;
-				for (int col = 0; col < NUM_BUTTONS_PER_ROW; ++col) {
-					if (i >= Buttons.Length) {
-						break;
-					}
-
-					MenuButton button = AddUIComponent(MENU_BUTTON_TYPES[i]) as MenuButton;
-					button.relativePosition = new Vector3(x, y);
-					Buttons[i++] = button;
-					x += BUTTON_SIZE + HSPACING;
-				}
-				y += BUTTON_SIZE + VSPACING;
+			for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
+				Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as MenuButton;
 			}
-
-			GlobalConfig config = GlobalConfig.Instance;
-			Rect rect = new Rect(config.Main.MainMenuX, config.Main.MainMenuY, MENU_WIDTH, MENU_HEIGHT);
-			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			VectorUtil.ClampRectToScreen(ref rect, resolution);
-			absolutePosition = rect.position;
 
 			var dragHandler = new GameObject("TMPE_Menu_DragHandler");
 			dragHandler.transform.parent = transform;
 			dragHandler.transform.localPosition = Vector3.zero;
 			Drag = dragHandler.AddComponent<UIDragHandle>();
-
-			Drag.width = width;
-			Drag.height = TOP_BORDER;
 			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+
+			UpdateAllSizes();
+			started = true;
+		}
+
+		public override void OnDestroy() {
+			if (confDisposable != null) {
+				confDisposable.Dispose();
+			}
 		}
 
 		internal void SetPosLock(bool lck) {
@@ -118,6 +145,68 @@ namespace TrafficManager.UI.MainMenu {
 				GlobalConfig.WriteConfig();
 			}
 			base.OnPositionChanged();
+		}
+
+		public void OnUpdate(IObservable<GlobalConfig> observable) {
+			GlobalConfig config = (GlobalConfig)observable;
+			UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
+			if (started) {
+				DetermineProfile(config);
+				UpdateAllSizes();
+				Invalidate();
+			}
+		}
+
+		private void DetermineProfile(GlobalConfig conf) {
+			int profileIndex = conf.Main.TinyMainMenu ? 0 : 1;
+			activeProfile = SIZE_PROFILES[profileIndex];
+		}
+
+		public void UpdateAllSizes() {
+			UpdateSize();
+			UpdateDragSize();
+			UpdateButtons();
+		}
+
+		private void UpdateSize() {
+			width = activeProfile.MENU_WIDTH;
+			height = activeProfile.MENU_HEIGHT;
+		}
+
+		private void UpdateDragSize() {
+			Drag.width = width;
+			Drag.height = activeProfile.TOP_BORDER;
+		}
+
+		private void UpdateButtons() {
+			int i = 0;
+			int y = activeProfile.TOP_BORDER;
+			for (int row = 0; row < activeProfile.NUM_ROWS; ++row) {
+				int x = activeProfile.HSPACING;
+				for (int col = 0; col < activeProfile.NUM_BUTTONS_PER_ROW; ++col) {
+					if (i >= Buttons.Length) {
+						break;
+					}
+
+					MenuButton button = Buttons[i];
+					button.relativePosition = new Vector3(x, y);
+					button.width = activeProfile.BUTTON_SIZE;
+					button.height = activeProfile.BUTTON_SIZE;
+					button.Invalidate();
+					Buttons[i++] = button;
+					x += activeProfile.BUTTON_SIZE + activeProfile.HSPACING;
+				}
+				y += activeProfile.BUTTON_SIZE + activeProfile.VSPACING;
+			}
+		}
+
+		public void UpdatePosition(Vector2 pos) {
+			Rect rect = new Rect(pos.x, pos.y, activeProfile.MENU_WIDTH, activeProfile.MENU_HEIGHT);
+			Vector2 resolution = UIView.GetAView().GetScreenResolution();
+			VectorUtil.ClampRectToScreen(ref rect, resolution);
+			Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
+			absolutePosition = rect.position;
+			Invalidate();
 		}
 	}
 }

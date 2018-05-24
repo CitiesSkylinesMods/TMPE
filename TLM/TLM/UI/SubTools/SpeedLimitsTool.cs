@@ -27,15 +27,6 @@ namespace TrafficManager.UI.SubTools {
 		private Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 		private readonly float speedLimitSignSize = 80f;
 		private readonly int guiSpeedSignSize = 100;
-		private Texture2D SecondPanelTexture {
-			get {
-				if (secondPanelTexture == null) {
-					secondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
-				}
-				return secondPanelTexture;
-			}
-		}
-		private Texture2D secondPanelTexture = null;
 		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 225));
 		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 280, 400, 400));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
@@ -72,9 +63,9 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnToolGUI(Event e) {
 			base.OnToolGUI(e);
 
-			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"));
+			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"), WindowStyle);
 			if (defaultsWindowVisible) {
-				defaultsWindowRect = GUILayout.Window(258, defaultsWindowRect, _guiDefaultsWindow, Translation.GetString("Default_speed_limits"));
+				defaultsWindowRect = GUILayout.Window(258, defaultsWindowRect, _guiDefaultsWindow, Translation.GetString("Default_speed_limits"), WindowStyle);
 			}
 			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition) || (defaultsWindowVisible && defaultsWindowRect.Contains(Event.current.mousePosition));
 
@@ -86,7 +77,7 @@ namespace TrafficManager.UI.SubTools {
 			
 		}
 
-		public override void ShowGUIOverlay(bool viewOnly) {
+		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
 			if (viewOnly && !Options.speedLimitsOverlay)
 				return;
 
@@ -420,9 +411,9 @@ namespace TrafficManager.UI.SubTools {
 						directions.Add(laneInfo.m_finalDirection);
 					}
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly, 0.5f, 0.8f);
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly);
 					if (!viewOnly && !onlyMonorailLanes && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
-						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], camPos, zero, f, xu, yu, x, 1, speedLimitSignSize, 0.5f);
+						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], camPos, zero, f, xu, yu, x, 1, speedLimitSignSize);
 					}
 					if (hoveredHandle)
 						hovered = true;
@@ -475,12 +466,10 @@ namespace TrafficManager.UI.SubTools {
 					Rect boundingBox = new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size);
 					bool hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
+					guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
 					if (hoveredHandle) {
 						// mouse hovering over sign
 						hovered = true;
-						guiColor.a = 0.8f;
-					} else {
-						guiColor.a = 0.5f;
 					}
 
 					GUI.color = guiColor;

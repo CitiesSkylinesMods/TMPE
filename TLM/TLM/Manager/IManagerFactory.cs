@@ -10,6 +10,7 @@ namespace TrafficManager.Manager {
 		ICustomSegmentLightsManager CustomSegmentLightsManager { get; }
 		IExtBuildingManager ExtBuildingManager { get; }
 		IExtCitizenInstanceManager ExtCitizenInstanceManager { get; }
+		IExtCitizenManager ExtCitizenManager { get; }
 		IJunctionRestrictionsManager JunctionRestrictionsManager { get; }
 		ILaneArrowManager LaneArrowManager { get; }
 		ILaneConnectionManager LaneConnectionManager { get; }

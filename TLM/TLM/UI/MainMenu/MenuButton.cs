@@ -76,13 +76,13 @@ namespace TrafficManager.UI.MainMenu {
 
 		public override int Width {
 			get {
-				return 30;
+				return 50;
 			}
 		}
 
 		public override int Height {
 			get {
-				return 30;
+				return 50;
 			}
 		}
 	}

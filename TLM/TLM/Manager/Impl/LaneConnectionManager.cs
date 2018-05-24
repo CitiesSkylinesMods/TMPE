@@ -16,7 +16,7 @@ using TrafficManager.Geometry.Impl;
 namespace TrafficManager.Manager.Impl {
 	public class LaneConnectionManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>>, ILaneConnectionManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
-		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro;
+		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail;
 		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle | ExtVehicleType.Tram | ExtVehicleType.RailVehicle;
 
 		public static LaneConnectionManager Instance { get; private set; } = null;
@@ -39,6 +39,10 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
 		/// <returns></returns>
 		public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+			if (! Options.laneConnectorEnabled) {
+				return true;
+			}
+
 			if (targetLaneId == 0 || Flags.laneConnections[sourceLaneId] == null) {
 				return false;
 			}
@@ -66,6 +70,10 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="sourceLaneId"></param>
 		/// <returns></returns>
 		public bool HasConnections(uint sourceLaneId, bool startNode) {
+			if (!Options.laneConnectorEnabled) {
+				return false;
+			}
+
 			int nodeArrayIndex = startNode ? 0 : 1;
 
 			bool ret = Flags.laneConnections[sourceLaneId] != null && Flags.laneConnections[sourceLaneId][nodeArrayIndex] != null;
@@ -77,9 +85,14 @@ namespace TrafficManager.Manager.Impl {
 		/// </summary>
 		/// <param name="nodeId"></param>
 		public bool HasNodeConnections(ushort nodeId) {
+
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
 #endif
+
+			if (!Options.laneConnectorEnabled) {
+				return false;
+			}
 
 			bool ret = false;
 			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
@@ -96,6 +109,10 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool HasUturnConnections(ushort segmentId, bool startNode) {
+			if (!Options.laneConnectorEnabled) {
+				return false;
+			}
+
 			NetManager netManager = Singleton<NetManager>.instance;
 			int nodeArrayIndex = startNode ? 0 : 1;
 
@@ -116,6 +133,10 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		internal int CountConnections(uint sourceLaneId, bool startNode) {
+			if (!Options.laneConnectorEnabled) {
+				return 0;
+			}
+
 			if (Flags.laneConnections[sourceLaneId] == null)
 				return 0;
 			int nodeArrayIndex = startNode ? 0 : 1;
@@ -131,6 +152,10 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="laneId"></param>
 		/// <returns></returns>
 		internal uint[] GetLaneConnections(uint laneId, bool startNode) {
+			if (!Options.laneConnectorEnabled) {
+				return null;
+			}
+
 			if (Flags.laneConnections[laneId] == null)
 				return null;
 
@@ -421,6 +446,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGCONN
 			Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}) called");
 #endif
+			if (!Options.laneConnectorEnabled) {
+				return;
+			}
+
 			if (!Flags.mayHaveLaneArrows(laneId, startNode)) {
 #if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): lane {laneId}, startNode? {startNode} must not have lane arrows");

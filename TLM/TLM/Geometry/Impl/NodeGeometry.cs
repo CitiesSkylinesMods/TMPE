@@ -11,7 +11,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Geometry.Impl {
-	public class NodeGeometry : IObservable<NodeGeometry>, IEquatable<NodeGeometry> {
+	public class NodeGeometry : GenericObservable<NodeGeometry>, IEquatable<NodeGeometry> {
 		public struct SegmentEndReplacement {
 			public ISegmentEndId oldSegmentEndId;
 			public ISegmentEndId newSegmentEndId;
@@ -73,12 +73,12 @@ namespace TrafficManager.Geometry.Impl {
 		/// <summary>
 		/// Holds a list of observers which are being notified as soon as the managed node's geometry is updated (but not neccessarily modified)
 		/// </summary>
-		private List<IObserver<NodeGeometry>> observers = new List<IObserver<NodeGeometry>>();
+		//private List<IObserver<NodeGeometry>> observers = new List<IObserver<NodeGeometry>>();
 
 		/// <summary>
 		/// Lock object. Acquire this before accessing the HashSets.
 		/// </summary>
-		public readonly object Lock = new object();
+		//public readonly object Lock = new object();
 
 		public override string ToString() {
 			return $"[NodeGeometry ({NodeId})\n" +
@@ -108,7 +108,7 @@ namespace TrafficManager.Geometry.Impl {
 		/// </summary>
 		/// <param name="observer"></param>
 		/// <returns>An unsubscriber</returns>
-		public IDisposable Subscribe(IObserver<NodeGeometry> observer) {
+		/*public IDisposable Subscribe(IObserver<NodeGeometry> observer) {
 			try {
 				Monitor.Enter(Lock);
 				observers.Add(observer);
@@ -116,7 +116,7 @@ namespace TrafficManager.Geometry.Impl {
 				Monitor.Exit(Lock);
 			}
 			return new GenericUnsubscriber<NodeGeometry>(observers, observer, Lock);
-		}
+		}*/
 		
 		internal void AddSegmentEnd(SegmentEndGeometry segEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
@@ -292,17 +292,19 @@ namespace TrafficManager.Geometry.Impl {
 			return result;
 		}
 
-		internal void NotifyObservers() {
+		public override void NotifyObservers() {
 			//Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
 
-			List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
+			/*List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<NodeGeometry> observer in myObservers) {
 				try {
 					observer.OnUpdate(this);
 				} catch (Exception e) {
 					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of node {NodeId}: {e}");
 				}
-			}
+			}*/
+
+			base.NotifyObservers();
 
 			CurrentSegmentReplacement.oldSegmentEndId = null;
 			CurrentSegmentReplacement.newSegmentEndId = null;

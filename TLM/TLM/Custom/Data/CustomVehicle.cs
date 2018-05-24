@@ -21,6 +21,20 @@ namespace TrafficManager.Custom.Data {
 				vehicleData.m_flags |= Vehicle.Flags.Spawned;
 				vehManager.AddToGrid(vehicleId, ref vehicleData, vehicleInfo.m_isLargeVehicle);
 			}
+
+			if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0) {
+				ushort trailingVehicle = vehicleData.m_trailingVehicle;
+				int numIter = 0;
+				while (trailingVehicle != 0) {
+					vehManager.m_vehicles.m_buffer[trailingVehicle].Spawn(trailingVehicle);
+					trailingVehicle = vehManager.m_vehicles.m_buffer[trailingVehicle].m_trailingVehicle;
+					if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+						break;
+					}
+				}
+			}
+
 			if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle == 0 && vehicleInfo.m_trailers != null) {
 				bool hasTrailers = vehicleInfo.m_vehicleAI.VerticalTrailers();
 				ushort curVehicleId = vehicleId;

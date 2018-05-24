@@ -20,15 +20,6 @@ using UnityEngine;
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
 		private bool _cursorInSecondaryPanel;
-		private Texture2D SecondPanelTexture {
-			get {
-				if (secondPanelTexture == null) {
-					secondPanelTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, 1f));
-				}
-				return secondPanelTexture;
-			}
-		}
-		private Texture2D secondPanelTexture = null;
 
 		public LaneArrowTool(TrafficManagerTool mainTool) : base(mainTool) {
 			
@@ -74,18 +65,6 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
-			var style = new GUIStyle {
-				normal = { background = SecondPanelTexture },
-				alignment = TextAnchor.MiddleCenter,
-				border =
-				{
-					bottom = 2,
-					top = 2,
-					right = 2,
-					left = 2
-				}
-			};
-
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
 			Vector3 screenPos;
@@ -102,16 +81,17 @@ namespace TrafficManager.UI.SubTools {
 
 			int width = numLanes * 128;
 			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
-			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", style);
+			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
 			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+			NetManager netManager = Singleton<NetManager>.instance;
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
 			if (!_cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
-				var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
-
-				if ((netFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
+				var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
+				
+				if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId) && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId], MainTool.GetToolColor(false, false),
 						MainTool.GetToolColor(false, false));
 				}

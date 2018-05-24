@@ -22,7 +22,7 @@ using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
-	public class TrafficManagerTool : DefaultTool {
+	public class TrafficManagerTool : DefaultTool, IObserver<GlobalConfig> {
 		public struct NodeVisitItem {
 			public ushort nodeId;
 			public bool startNode;
@@ -55,6 +55,8 @@ namespace TrafficManager.UI {
 
 		private static SubTool activeSubTool = null;
 
+		private static IDisposable confDisposable;
+
 		static TrafficManagerTool() {
 			
 		}
@@ -66,7 +68,7 @@ namespace TrafficManager.UI {
 		internal static Rect MoveGUI(Rect rect) {
 			// x := main menu x + rect.x
 			// y := main menu y + main menu height + rect.y
-			return new Rect(MainMenuPanel.DEFAULT_MENU_X + rect.x, MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.MENU_HEIGHT + rect.y, rect.width, rect.height);
+			return new Rect(MainMenuPanel.DEFAULT_MENU_X + rect.x, MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y, rect.width, rect.height); // TODO use current size profile
 		}
 
 		internal bool IsNodeWithinViewDistance(ushort nodeId) {
@@ -101,6 +103,23 @@ namespace TrafficManager.UI {
 			return (float)Screen.height / 1200f;
 		}
 
+		internal float GetWindowAlpha() {
+			return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
+		}
+
+		internal float GetHandleAlpha(bool hovered) {
+			byte transparency = GlobalConfig.Instance.Main.OverlayTransparency;
+			if (hovered) {
+				// reduce transparency when handle is hovered
+				transparency = (byte)Math.Min(20, transparency >> 2);
+			}
+			return TransparencyToAlpha(transparency);
+		}
+
+		private static float TransparencyToAlpha(byte transparency) {
+			return Mathf.Clamp(100 - (int)transparency, 0f, 100f) / 100f;
+		}
+
 		internal void Initialize() {
 			Log.Info("TrafficManagerTool: Initialization running now.");
 			subTools.Clear();
@@ -124,7 +143,16 @@ namespace TrafficManager.UI {
 
 			SetToolMode(ToolMode.None);
 
+			if (confDisposable != null) {
+				confDisposable.Dispose();
+			}
+			confDisposable = GlobalConfig.Instance.Subscribe(this);
+
 			Log.Info("TrafficManagerTool: Initialization completed.");
+		}
+
+		public void OnUpdate(IObservable<GlobalConfig> observable) {
+			InitializeSubTools();
 		}
 
 		internal void InitializeSubTools() {
@@ -326,11 +354,11 @@ namespace TrafficManager.UI {
 				//#endif
 
 				foreach (KeyValuePair<ToolMode, SubTool> en in subTools) {
-					en.Value.ShowGUIOverlay(en.Key != GetToolMode());
+					en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
 				}
 
 				var guiColor = GUI.color;
-				guiColor.a = 0.9f;
+				guiColor.a = 1f;
 				GUI.color = guiColor;
 
 				if (activeSubTool != null)
@@ -375,57 +403,57 @@ namespace TrafficManager.UI {
 		}
 
 		public void DrawStaticSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, float alpha) {
-			DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, false, alpha);
+			float size) {
+			DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, false);
 		}
 
 		public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, true, defaultAlpha, hoverAlpha);
+			float size) {
+			return DrawGenericSquareOverlayGridTexture(texture, camPos, gridOrigin, cellSize, xu, yu, x, y, size, true);
 		}
 
 		public bool DrawGenericSquareOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellSize, Vector3 xu, Vector3 yu, uint x, uint y,
-			float size, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
-			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellSize, cellSize, xu, yu, x, y, size, size, canHover, defaultAlpha, hoverAlpha);
+			float size, bool canHover) {
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellSize, cellSize, xu, yu, x, y, size, size, canHover);
 		}
 
 		public void DrawStaticOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, float alpha) {
-			DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, false, alpha);
+			float width, float height) {
+			DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, false);
 		}
 
 		public bool DrawHoverableOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, true, defaultAlpha, hoverAlpha);
+			float width, float height) {
+			return DrawGenericOverlayGridTexture(texture, camPos, gridOrigin, cellWidth, cellHeight, xu, yu, x, y, width, height, true);
 		}
 
 		public bool DrawGenericOverlayGridTexture(Texture2D texture, Vector3 camPos, Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu, uint x, uint y,
-			float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha = null) {
+			float width, float height, bool canHover) {
 			Vector3 worldPos = gridOrigin + cellWidth * (float)x * xu + cellHeight * (float)y * yu; // grid position in game coordinates
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover, defaultAlpha, hoverAlpha);
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover);
 		}
 
-		public void DrawStaticSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float alpha) {
-			DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false, alpha);
+		public void DrawStaticSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false);
 		}
 
-		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true);
 		}
 
-		public bool DrawGenericSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover, defaultAlpha, hoverAlpha);
+		public bool DrawGenericSquareOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float size, bool canHover) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover);
 		}
 
-		public void DrawStaticOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float alpha) {
-			DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false, alpha);
+		public void DrawStaticOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height) {
+			DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false);
 		}
 
-		public bool DrawHoverableOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, float defaultAlpha, float hoverAlpha) {
-			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true, defaultAlpha, hoverAlpha);
+		public bool DrawHoverableOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height) {
+			return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true);
 		}
 
-		public bool DrawGenericOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, bool canHover, float defaultAlpha, float? hoverAlpha=null) {
+		public bool DrawGenericOverlayTexture(Texture2D texture, Vector3 camPos, Vector3 worldPos, float width, float height, bool canHover) {
 			Vector3 screenPos;
 			if (! WorldToScreenPoint(worldPos, out screenPos)) {
 				return false;
@@ -438,15 +466,12 @@ namespace TrafficManager.UI {
 			Rect boundingBox = new Rect(screenPos.x - width / 2f, screenPos.y - height / 2f, width, height);
 
 			Color guiColor = GUI.color;
-			guiColor.a = defaultAlpha;
 
 			bool hovered = false;
 			if (canHover) {
 				hovered = IsMouseOver(boundingBox);
-				if (hovered && hoverAlpha != null) {
-					guiColor.a = (float)hoverAlpha;
-				}
 			}
+			guiColor.a = GetHandleAlpha(hovered);
 
 			GUI.color = guiColor;
 			GUI.DrawTexture(boundingBox, texture);
@@ -623,9 +648,9 @@ namespace TrafficManager.UI {
 
 					float startDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[startNodeId].m_position).magnitude;
 					float endDist = (segmentOutput.m_hitPos - Singleton<NetManager>.instance.m_nodes.m_buffer[endNodeId].m_position).magnitude;
-					if (startDist < endDist && startDist < 25f)
+					if (startDist < endDist && startDist < 75f)
 						HoveredNodeId = startNodeId;
-					else if (endDist < startDist && endDist < 25f)
+					else if (endDist < startDist && endDist < 75f)
 						HoveredNodeId = endNodeId;
 				}
 
@@ -700,7 +725,7 @@ namespace TrafficManager.UI {
 				if (laneTrafficDataLoaded) {
 					labelStr += ", sp: " + (TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(segmentId, (byte)i, curLaneId, laneInfo) / 100) + "%";
 #if DEBUG
-					labelStr += ", buf: " + laneTrafficData.trafficBuffer + ", acc: " + laneTrafficData.accumulatedSpeeds;
+					labelStr += ", buf: " + laneTrafficData.trafficBuffer + ", max: " + laneTrafficData.maxTrafficBuffer + ", acc: " + laneTrafficData.accumulatedSpeeds;
 #if PFTRAFFICSTATS
 					labelStr += ", pfBuf: " + laneTrafficData.pathFindTrafficBuffer + "/" + laneTrafficData.lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData.lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
 #endif
@@ -712,6 +737,8 @@ namespace TrafficManager.UI {
 					labelStr += ", acc: " + laneTrafficData[i].accumulatedDensities;
 #endif
 				}
+
+				labelStr += ", nd: " + Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nodes;
 #if DEBUG
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + (CustomRoadAI.maxLaneDensities[segmentId] != null && i < CustomRoadAI.maxLaneDensities[segmentId].Length ? "" + CustomRoadAI.maxLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
 				//labelStr += " (" + (CustomRoadAI.currentLaneDensities[segmentId] != null && i < CustomRoadAI.currentLaneDensities[segmentId].Length ? "" + CustomRoadAI.currentLaneDensities[segmentId][i] : "?") + "/" + totalDensity + ")";
@@ -882,8 +909,17 @@ namespace TrafficManager.UI {
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
 			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
-			
-			for (int i = 1; i < vehicles.m_size; ++i) {
+
+
+			int startVehicleId = 1;
+			int endVehicleId = (int)(vehicles.m_size - 1);
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.VehicleId != 0) {
+				startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;
+			}
+#endif
+
+			for (int i = startVehicleId; i <= endVehicleId; ++i) {
 				Vehicle vehicle = vehicles.m_buffer[i];
 				if (vehicle.m_flags == 0) // node is unused
 					continue;
@@ -912,8 +948,8 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.sqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + ")\n" +
-					"d: " + driverInst.instanceId + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId;
+				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
+					"d: " + driverInst.instanceId + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " rnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetVehicleRand((ushort)i);
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -961,7 +997,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ", m: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString();
+				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ",\nm: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString() + ", tm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].transportMode + ", ltm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastTransportMode + ", ll: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastLocation;
 				if (citizenInstance.m_citizen != 0) {
 					Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenInstance.m_citizen];
 					if (citizen.m_parkedVehicle != 0) {
@@ -1106,6 +1142,22 @@ namespace TrafficManager.UI {
 			result.Apply();
 
 			return result;
+		}
+
+		public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
+			Color[] texColors = tex.GetPixels();
+			Color[] retPixels = new Color[texColors.Length];
+
+			for (int i = 0; i < texColors.Length; ++i) {
+				retPixels[i] = new Color(texColors[i].r, texColors[i].g, texColors[i].b, texColors[i].a * alpha);
+			}
+
+			Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
+			ret.SetPixels(retPixels);
+			ret.Apply();
+
+			return ret;
 		}
 
 		internal static bool IsMouseOver(Rect boundingBox) {

@@ -26,7 +26,7 @@ namespace TrafficManager.Geometry.Impl {
 	/// However, other methods may manually update geometry data by calling the "Recalculate" method. This is especially necessary for segments that are not visited by the
 	/// path-finding algorithm (apparently if a segment is not used by any vehicle)
 	/// </summary>
-	public class SegmentGeometry : IObservable<SegmentGeometry>, IEquatable<SegmentGeometry> {
+	public class SegmentGeometry : GenericObservable<SegmentGeometry>, IEquatable<SegmentGeometry> {
 		private static SegmentGeometry[] segmentGeometries;
 
 		public static void PrintDebugInfo() {
@@ -121,12 +121,12 @@ namespace TrafficManager.Geometry.Impl {
 		/// <summary>
 		/// Lock object. Acquire this before accessing the HashSets.
 		/// </summary>
-		public readonly object Lock = new object();
+		//public readonly object Lock = new object();
 
 		/// <summary>
 		/// Holds a list of observers which are being notified as soon as the managed segment's geometry is updated (but not neccessarily modified)
 		/// </summary>
-		private List<IObserver<SegmentGeometry>> observers = new List<IObserver<SegmentGeometry>>();
+		//private List<IObserver<SegmentGeometry>> observers = new List<IObserver<SegmentGeometry>>();
 
 		private bool valid = false;
 
@@ -147,7 +147,7 @@ namespace TrafficManager.Geometry.Impl {
 		/// </summary>
 		/// <param name="observer"></param>
 		/// <returns>An unsubscriber</returns>
-		public IDisposable Subscribe(IObserver<SegmentGeometry> observer) {
+		/*public IDisposable Subscribe(IObserver<SegmentGeometry> observer) {
 			try {
 				Monitor.Enter(Lock);
 				observers.Add(observer);
@@ -155,7 +155,7 @@ namespace TrafficManager.Geometry.Impl {
 				Monitor.Exit(Lock);
 			}
 			return new GenericUnsubscriber<SegmentGeometry>(observers, observer, Lock);
-		}
+		}*/
 
 		[Obsolete]
 		public static bool IsValid(ushort segmentId) {
@@ -1342,7 +1342,7 @@ namespace TrafficManager.Geometry.Impl {
 			LaneGeometries = newLaneGeos;
 		}*/
 
-		private void NotifyObservers() {
+		/*private void NotifyObservers() {
 			List<IObserver<SegmentGeometry>> myObservers = new List<IObserver<SegmentGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<SegmentGeometry> observer in myObservers) {
 				try {
@@ -1351,6 +1351,6 @@ namespace TrafficManager.Geometry.Impl {
 					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of segment {SegmentId}: {e}");
 				}
 			}
-		}
+		}*/
 	}
 }

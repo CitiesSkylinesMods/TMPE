@@ -148,6 +148,7 @@ namespace TrafficManager.Custom.AI {
 				args.hasCombustionEngine = this.CombustionEngine();
 				args.ignoreBlocked = this.IgnoreBlocked(vehicleID, ref vehicleData);
 				args.ignoreFlooded = false;
+				args.ignoreCosts = false;
 				args.randomParking = false;
 				args.stablePath = false;
 				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;

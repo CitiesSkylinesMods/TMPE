@@ -82,12 +82,9 @@ namespace TrafficManager.UI.MainMenu {
 
 			// Set the atlases for background/foreground
 			atlas = TextureUtil.GenerateLinearAtlas("TMPE_" + ButtonName + "Atlas", AtlasTexture, textureIds.Length, textureIds);
-			
-			UpdateProperties();
 
-			// Set the button dimensions.
-			width = Width;
-			height = Height;
+			m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
+			UpdateProperties();
 
 			// Enable button sounds.
 			playAudioEvents = true;

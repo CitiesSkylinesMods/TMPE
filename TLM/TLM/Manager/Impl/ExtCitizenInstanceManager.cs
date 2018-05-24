@@ -98,7 +98,7 @@ namespace TrafficManager.Manager.Impl {
 					if ((Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_flags & CitizenInstance.Flags.Created) == CitizenInstance.Flags.None) {
 						continue;
 					}
-					
+
 					Configuration.ExtCitizenInstanceData item = new Configuration.ExtCitizenInstanceData(instanceId);
 					item.pathMode = (int)ExtInstances[instanceId].pathMode;
 					item.failedParkingAttempts = ExtInstances[instanceId].failedParkingAttempts;

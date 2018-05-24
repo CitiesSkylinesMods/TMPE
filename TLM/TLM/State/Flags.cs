@@ -704,7 +704,7 @@ namespace TrafficManager.State {
 			int wIter = 0;
 			while (laneIndex < numLanes && curLaneId != 0u) {
 				++wIter;
-				if (wIter >= 20) {
+				if (wIter >= 100) {
 					Log.Error("Too many iterations in Flags.mayHaveLaneArrows!");
 					break;
 				}

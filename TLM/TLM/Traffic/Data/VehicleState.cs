@@ -12,11 +12,13 @@ using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using ColossalFramework.Math;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		public const int STATE_UPDATE_SHIFT = 6;
 		public const int JUNCTION_RECHECK_SHIFT = 4;
+		public const uint MAX_TIMED_RAND = 100;
 
 		[Flags]
 		public enum Flags {
@@ -32,6 +34,28 @@ namespace TrafficManager.Traffic.Data {
 					lastTransitStateUpdate = Now();
 				}
 				junctionTransitState = value;
+			}
+		}
+
+		public float SqrVelocity {
+			get {
+				float ret = 0;
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
+					ret = veh.GetLastFrameVelocity().sqrMagnitude;
+					return true;
+				});
+				return ret;
+			}
+		}
+
+		public float Velocity {
+			get {
+				float ret = 0;
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
+					ret = veh.GetLastFrameVelocity().magnitude;
+					return true;
+				});
+				return ret;
 			}
 		}
 
@@ -51,8 +75,8 @@ namespace TrafficManager.Traffic.Data {
 		public uint lastTransitStateUpdate;
 		public uint lastPositionUpdate;
 		public float totalLength;
-		public float sqrVelocity;
-		public float velocity;
+		//public float sqrVelocity;
+		//public float velocity;
 		public int waitTime;
 		public float reduceSqrSpeedByValueToYield;
 		public Flags flags;
@@ -67,6 +91,7 @@ namespace TrafficManager.Traffic.Data {
 		public ushort previousVehicleIdOnSegment;
 		public ushort nextVehicleIdOnSegment;
 		public ushort lastAltLaneSelSegmentId;
+		public byte timedRand;
 		private VehicleJunctionTransitState junctionTransitState;
 
 		public override string ToString() {
@@ -78,8 +103,8 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
 				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
 				"\t" + $"totalLength = {totalLength}\n" +
-				"\t" + $"velocity = {velocity}\n" +
-				"\t" + $"sqrVelocity = {sqrVelocity}\n" +
+				//"\t" + $"velocity = {velocity}\n" +
+				//"\t" + $"sqrVelocity = {sqrVelocity}\n" +
 				"\t" + $"waitTime = {waitTime}\n" +
 				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
 				"\t" + $"flags = {flags}\n" +
@@ -95,6 +120,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
 				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
+				"\t" + $"timedRand = {timedRand}\n" +
 				"VehicleState]";
 		}
 
@@ -118,10 +144,11 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
+			timedRand = 0;
 		}
 
 		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
@@ -271,8 +298,8 @@ namespace TrafficManager.Traffic.Data {
 
 			Unlink();
 
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
 			lastAltLaneSelSegmentId = 0;
@@ -301,7 +328,7 @@ namespace TrafficManager.Traffic.Data {
 #endif
 		}
 
-		internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
+		/*internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateVelocity({vehicleId}, {velocity}) called: {this}");
@@ -322,7 +349,7 @@ namespace TrafficManager.Traffic.Data {
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {velocity}) finished: {this}");
 #endif
-		}
+		}*/
 
 		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
@@ -411,8 +438,8 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 
 			totalLength = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 
 			flags &= ~Flags.Spawned;
 			
@@ -455,8 +482,8 @@ namespace TrafficManager.Traffic.Data {
 			heavyVehicle = false;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
-			velocity = 0;
-			sqrVelocity = 0;
+			//velocity = 0;
+			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			recklessDriver = false;
@@ -474,6 +501,13 @@ namespace TrafficManager.Traffic.Data {
 		internal bool IsJunctionTransitStateNew() {
 			uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
 			return (lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
+		}
+
+		public void StepRand() {
+			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+			if (rand.UInt32(20) == 0) {
+				timedRand = (byte)(((uint)timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
+			}
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
