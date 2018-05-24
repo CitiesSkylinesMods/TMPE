@@ -4,8 +4,28 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
-1.10.6, 02/17/2018
-- **in development**
+1.10.6, 05/24/2018
+- Updated for game version 1.10.0-f3
+- Accessibility: New option: Main menu size can be controlled
+- Accessibility: New option: GUI and overlay transparency can be controlled
+- New option: Penalties for switching between different public transport lines can be toggled
+- Cims can now be removed from the game
+- Improved window design
+- Path-finding: Service vehicles are now allowed to ignore lane arrows right after leaving their source building, thus service buildings should now work properly at dead-end roads with median
+- Advanced Vehicle AI: Tuned parameters
+- Dynamic Lane Selection: Absolute speed measurements are used instead of relative measurements
+- Improved randomization for realistic speeds such that vehicles may change their target velocity over time
+- Improved vehicle position tracking
+- Improved mod compatibility checks
+- Parking AI: Improved behavior in situations where vehicles are parked near public transport hubs and road connections are partially unavailable
+- Bugfix: Parking AI: Not all possible paths are regarded during path-finding
+- Bugfix: Parking AI: Cims become confused when trying to return their abandoned car back home (special thanks to Wildcard-25 for reporting and solving this issue)
+- Bugfix: Parking AI: Cims do not search for parking building when road-side parking spaces are found
+- Bugfix: Parking AI: Parked vehicles are spawned near the source building even when cims are already en route
+- Bugfix: Parking AI: Cims sometimes get stuck in an infinite loop while trying to enter their parked car
+- Bugfix: Lane connector does not work for roads with more than ten lanes
+- Bugfix: Allowing/Disallowing vehicles to enter a blocked junction does not work for certain junctions
+- Updated Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
 
 1.10.5, 01/06/2018
 - UI scaling removed
