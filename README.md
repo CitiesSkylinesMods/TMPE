@@ -12,6 +12,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Cims can now be removed from the game
 - Improved window design
 - Path-finding: Service vehicles are now allowed to ignore lane arrows right after leaving their source building, thus service buildings should now work properly at dead-end roads with median
+- Lane connector can be used on monorail tracks
 - Advanced Vehicle AI: Tuned parameters
 - Dynamic Lane Selection: Absolute speed measurements are used instead of relative measurements
 - Improved randomization for realistic speeds such that vehicles may change their target velocity over time
