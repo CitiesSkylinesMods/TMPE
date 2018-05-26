@@ -4,6 +4,9 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.7, in development
+- Bugfix: U-turn routing is inconsistent on transport lines vs. bus paths (#137, thanks to @Zorgoth for reporting this issue)
+
 1.10.6, 05/24/2018
 - Updated for game version 1.10.0-f3
 - Accessibility: New option: Main menu size can be controlled
