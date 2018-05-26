@@ -48,15 +48,18 @@ namespace TrafficManager.Manager.Impl {
 			int minIndex = frame * (NetManager.MAX_NODE_COUNT / SIM_MOD);
 			int maxIndex = (frame + 1) * (NetManager.MAX_NODE_COUNT / SIM_MOD) - 1;
 
-			for (int nodeId = minIndex; nodeId <= maxIndex; ++nodeId) {
-				// try {
-
-				//Flags.applyNodeTrafficLightFlag((ushort)nodeId);
-				TrafficLightSimulations[nodeId].SimulationStep();
-
-				/*} catch (Exception ex) {
-					Log.Warning($"Error occured while simulating traffic light @ node {nodeId}: {ex.ToString()}");
-				}*/
+			ushort failedNodeId = 0;
+			try {
+				for (int nodeId = minIndex; nodeId <= maxIndex; ++nodeId) {
+					failedNodeId = (ushort)nodeId;
+					TrafficLightSimulations[nodeId].SimulationStep();
+				}
+				failedNodeId = 0;
+			} catch (Exception ex) {
+				Log.Error($"Error occured while simulating traffic light @ node {failedNodeId}: {ex.ToString()}");
+				if (failedNodeId != 0) {
+					RemoveNodeFromSimulation((ushort)failedNodeId);
+				}
 			}
 		}
 
