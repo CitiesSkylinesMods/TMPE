@@ -20,6 +20,7 @@ using CSUtil.Commons;
 using TrafficManager.Custom.Data;
 using TrafficManager.Manager.Impl;
 using Harmony;
+using CSUtil.Redirection;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {
@@ -64,8 +65,28 @@ namespace TrafficManager {
 
 		public static bool IsGameLoaded { get; private set; } = false;
 
+		public static IDictionary<MethodBase, RedirectCallsState> MethodStates { get; private set; }
+
 		static LoadingExtension() {
-			HarmonyInstance.Create("de.viathinksoft.tmpe").PatchAll(Assembly.GetExecutingAssembly());
+			Assembly assembly = Assembly.GetExecutingAssembly();
+
+			HarmonyInstance.Create("de.viathinksoft.tmpe").PatchAll(assembly);
+
+			MethodStates = new Dictionary<MethodBase, RedirectCallsState>();
+			foreach (Type type in assembly.GetTypes()) {
+				object[] attributes = type.GetCustomAttributes(typeof(HarmonyPatch), true);
+				if (attributes.Length <= 0) {
+					continue;
+				}
+
+				foreach (object attr in attributes) {
+					HarmonyPatch harmonyPatchAttr = (HarmonyPatch)attr;
+					MethodBase info = HarmonyUtil.GetOriginalMethod(harmonyPatchAttr.info);
+					IntPtr ptr = info.MethodHandle.GetFunctionPointer();
+					RedirectCallsState state = RedirectionHelper.GetState(ptr);
+					MethodStates[info] = state;
+				}
+			}
 		}
 
 		public LoadingExtension() {

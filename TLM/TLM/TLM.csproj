@@ -246,7 +246,6 @@
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="Util\RedirectionHelper.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
@@ -395,6 +394,10 @@
     <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
       <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
       <Name>CSUtil.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CSUtil.Redirection\CSUtil.Redirection.csproj">
+      <Project>{7DCC08EF-DC85-47A4-BD6F-79FC52C7EF13}</Project>
+      <Name>CSUtil.Redirection</Name>
     </ProjectReference>
     <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
       <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
