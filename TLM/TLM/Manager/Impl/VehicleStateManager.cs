@@ -69,6 +69,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+			OnReleaseVehicle(vehicleId, ref vehicleData);
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
@@ -238,7 +239,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		public void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.OnReleaseVehicle({vehicleId}) called.");

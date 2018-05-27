@@ -12,20 +12,6 @@ using UnityEngine;
 
 namespace TrafficManager.Custom.Manager {
 	public class CustomVehicleManager : VehicleManager {
-		public void CustomReleaseVehicle(ushort vehicleId) {
-#if DEBUG
-			//Log._Debug($"CustomVehicleManager.CustomReleaseVehicle({vehicleId})");
-#endif
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnReleaseVehicle")) {
-#endif
-				VehicleStateManager.Instance.OnReleaseVehicle(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
-#if BENCHMARK
-			}
-#endif
-			ReleaseVehicleImplementation(vehicleId, ref this.m_vehicles.m_buffer[vehicleId]);
-		}
-
 		public bool CustomCreateVehicle(out ushort vehicleId, ref Randomizer r, VehicleInfo info, Vector3 position, TransferManager.TransferReason type, bool transferToSource, bool transferToTarget) {
 			// NON-STOCK CODE START
 #if BENCHMARK
@@ -107,11 +93,6 @@ namespace TrafficManager.Custom.Manager {
 			}
 			vehicleId = 0;
 			return false;
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private void ReleaseVehicleImplementation(ushort vehicleId, ref Vehicle vehicleData) {
-			Log.Error("CustomVehicleManager.ReleaseVehicleImplementation called.");
 		}
 	}
 }

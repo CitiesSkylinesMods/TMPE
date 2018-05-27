@@ -55,6 +55,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>lib\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -146,6 +149,7 @@
     <Compile Include="Manager\IVehicleBehaviorManager.cs" />
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
+    <Compile Include="Patch\_VehicleManager\ReleaseVehiclePatch.cs" />
     <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
@@ -427,6 +431,7 @@ xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\work
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
+xcopy /y "$(TargetDir)0Harmony.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

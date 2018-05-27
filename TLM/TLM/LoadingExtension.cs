@@ -19,6 +19,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Custom.Data;
 using TrafficManager.Manager.Impl;
+using Harmony;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {
@@ -63,6 +64,10 @@ namespace TrafficManager {
 
 		public static bool IsGameLoaded { get; private set; } = false;
 
+		static LoadingExtension() {
+			HarmonyInstance.Create("de.viathinksoft.tmpe").PatchAll(Assembly.GetExecutingAssembly());
+		}
+
 		public LoadingExtension() {
 		}
 
@@ -86,31 +91,6 @@ namespace TrafficManager {
 				bool detourFailed = false;
 
 				// REVERSE REDIRECTION
-
-				Log.Info("Reverse-Redirection CustomVehicleManager::ReleaseVehicleImplementation calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomVehicleManager).GetMethod("ReleaseVehicleImplementation",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-							},
-							null),
-							typeof(VehicleManager).GetMethod("ReleaseVehicleImplementation",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (Vehicle).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomVehicleManager::ReleaseVehicleImplementation");
-					detourFailed = true;
-				}
 
 #if DEBUGBUSBUG
 				// TODO remove
@@ -1310,22 +1290,6 @@ namespace TrafficManager {
 							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizen")));
 				} catch (Exception) {
 					Log.Error("Could not redirect CitizenManager::ReleaseCitizen");
-					detourFailed = true;
-				}
-
-				Log.Info("Redirection VehicleManager::ReleaseVehicle calls");
-				try {
-					Detours.Add(new Detour(typeof(VehicleManager).GetMethod("ReleaseVehicle",
-							BindingFlags.Public | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort)
-							},
-							null),
-							typeof(CustomVehicleManager).GetMethod("CustomReleaseVehicle")));
-				} catch (Exception) {
-					Log.Error("Could not redirect VehicleManager::ReleaseVehicle");
 					detourFailed = true;
 				}
 
