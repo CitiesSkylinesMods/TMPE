@@ -107,7 +107,7 @@ namespace TrafficManager.Traffic.Data {
 			bool uturnIsDefault = uturnAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(uturnAllowed) == GetDefaultUturnAllowed();
 			bool straightChangeIsDefault = straightLaneChangingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(straightLaneChangingAllowed) == GetDefaultLaneChangingAllowedWhenGoingStraight();
 			bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(enterWhenBlockedAllowed) == GetDefaultEnteringBlockedJunctionAllowed();
-			bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined || GetDefaultPedestrianCrossingAllowed();
+			bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(pedestrianCrossingAllowed) == GetDefaultPedestrianCrossingAllowed();
 
 			return uturnIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
 		}
