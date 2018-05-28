@@ -11,14 +11,14 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractNodeGeometryObservingManager : AbstractCustomManager, IObserver<NodeGeometry> {
-		private IDictionary<ushort, IDisposable> nodeGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
+		private IDisposable[] nodeGeometryUnsubscribers = new IDisposable[NetManager.MAX_NODE_COUNT];
 		private object geoLock = new object();
 
 		protected virtual bool AllowInvalidNodes { get; } = false;
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
-			Log._Debug($"Subscribed node geometries: {nodeGeometryUnsubscribers.Keys.CollectionToString()}");
+			Log._Debug($"Subscribed node geometries: {nodeGeometryUnsubscribers.Select(unsub => unsub != null).ToList().CollectionToString()}");
 		}
 
 		protected void UnsubscribeFromNodeGeometry(ushort nodeId) {
@@ -30,11 +30,7 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				IDisposable unsubscriber;
-				if (nodeGeometryUnsubscribers.TryGetValue(nodeId, out unsubscriber)) {
-					unsubscriber.Dispose();
-					nodeGeometryUnsubscribers.Remove(nodeId);
-				}
+				InternalUnsubscribeFromNodeGeometry(nodeId);
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromNodeGeometry({nodeId}): watched nodes: {String.Join(",", nodeGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
@@ -50,9 +46,23 @@ namespace TrafficManager.Manager {
 				Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromAllNodeGeometries() called.");
 #endif
 
-			List<ushort> nodeIds = new List<ushort>(nodeGeometryUnsubscribers.Keys);
-			foreach (ushort nodeId in nodeIds)
-				UnsubscribeFromNodeGeometry(nodeId);
+			try {
+				Monitor.Enter(geoLock);
+
+				for (int nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+					InternalUnsubscribeFromNodeGeometry((ushort)nodeId);
+				}
+			} finally {
+				Monitor.Exit(geoLock);
+			}
+		}
+
+		private void InternalUnsubscribeFromNodeGeometry(ushort nodeId) {
+			IDisposable unsubscriber = nodeGeometryUnsubscribers[nodeId];
+			if (unsubscriber != null) {
+				unsubscriber.Dispose();
+				nodeGeometryUnsubscribers[nodeId] = null;
+			}
 		}
 
 		protected void SubscribeToNodeGeometry(ushort nodeId) {
@@ -64,8 +74,8 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				if (!nodeGeometryUnsubscribers.ContainsKey(nodeId)) {
-					nodeGeometryUnsubscribers.Add(nodeId, NodeGeometry.Get(nodeId).Subscribe(this));
+				if (nodeGeometryUnsubscribers[nodeId] == null) {
+					nodeGeometryUnsubscribers[nodeId] = NodeGeometry.Get(nodeId).Subscribe(this);
 				}
 			} finally {
 				Monitor.Exit(geoLock);
