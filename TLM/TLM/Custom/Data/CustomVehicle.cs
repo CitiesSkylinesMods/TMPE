@@ -13,8 +13,6 @@ using UnityEngine;
 namespace TrafficManager.Custom.Data {
 	public static class CustomVehicle {
 		public static void Spawn(ref Vehicle vehicleData, ushort vehicleId) {
-			//Log._Debug($"CustomVehicle.Spawn({vehicleId}) called.");
-
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;
 			VehicleInfo vehicleInfo = vehicleData.Info;
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == (Vehicle.Flags)0) {
@@ -75,13 +73,7 @@ namespace TrafficManager.Custom.Data {
 			}
 
 			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnSpawnVehicle")) {
-#endif
-				VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
-#if BENCHMARK
-			}
-#endif
+			VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 		}
 
@@ -89,13 +81,7 @@ namespace TrafficManager.Custom.Data {
 			//Log._Debug($"CustomVehicle.Unspawn({vehicleId}) called.");
 
 			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnDespawnVehicle")) {
-#endif
-				VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
-#if BENCHMARK
-			}
-#endif
+			VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;

@@ -14,5 +14,11 @@ namespace TrafficManager.Manager {
 		/// <param name="citizenId">citizen id</param>
 		/// <param name="citizen">citizen data</param>
 		void OnArriveAtDestination(uint citizenId, ref Citizen citizen);
+
+		/// <summary>
+		/// Handles a released citizen.
+		/// </summary>
+		/// <param name="citizenId">citizen id</param>
+		void OnReleaseCitizen(uint citizenId);
 	}
 }

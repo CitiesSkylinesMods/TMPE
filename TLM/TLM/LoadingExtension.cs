@@ -14,7 +14,6 @@ using ColossalFramework.UI;
 using ColossalFramework.Math;
 using TrafficManager.Custom.PathFinding;
 using TrafficManager.Util;
-using TrafficManager.Custom.Manager;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Custom.Data;
@@ -70,6 +69,9 @@ namespace TrafficManager {
 		static LoadingExtension() {
 			Assembly assembly = Assembly.GetExecutingAssembly();
 
+#if DEBUG
+			HarmonyInstance.DEBUG = true;
+#endif
 			HarmonyInstance.Create("de.viathinksoft.tmpe").PatchAll(assembly);
 
 			MethodStates = new Dictionary<MethodBase, RedirectCallsState>();
@@ -112,137 +114,6 @@ namespace TrafficManager {
 				bool detourFailed = false;
 
 				// REVERSE REDIRECTION
-
-#if DEBUGBUSBUG
-				// TODO remove
-				Log.Info("Reverse-Redirection CustomNetManager::FinalizeNode calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("FinalizeNode",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-							},
-							null),
-							typeof(NetManager).GetMethod("FinalizeNode",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomNetManager::FinalizeNode");
-					detourFailed = true;
-				}
-
-				// TODO remove
-				Log.Info("Reverse-Redirection CustomNetManager::InitializeNode calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("InitializeNode",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-							},
-							null),
-							typeof(NetManager).GetMethod("InitializeNode",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomNetManager::InitializeNode");
-					detourFailed = true;
-				}
-
-				// TODO remove
-				Log.Info("Reverse-Redirection CustomNetManager::InitializeSegment calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomNetManager).GetMethod("InitializeSegment",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType(),
-							},
-							null),
-							typeof(NetManager).GetMethod("InitializeSegment",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomNetManager::InitializeSegment");
-					detourFailed = true;
-				}
-#endif
-
-				Log.Info("Reverse-Redirection CustomCitizenManager::ReleaseCitizenInstanceImplementation calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomCitizenManager).GetMethod("ReleaseCitizenInstanceImplementation",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-							},
-							null),
-							typeof(CitizenManager).GetMethod("ReleaseCitizenInstanceImplementation",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (ushort),
-									typeof (CitizenInstance).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomCitizenManager::ReleaseCitizenInstanceImplementation");
-					detourFailed = true;
-				}
-
-				Log.Info("Reverse-Redirection CustomCitizenManager::ReleaseCitizenImplementation calls");
-				try {
-					Detours.Add(new Detour(typeof(CustomCitizenManager).GetMethod("ReleaseCitizenImplementation",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (uint),
-									typeof (Citizen).MakeByRefType(),
-							},
-							null),
-							typeof(CitizenManager).GetMethod("ReleaseCitizenImplementation",
-								BindingFlags.NonPublic | BindingFlags.Instance,
-								null,
-								new[]
-								{
-									typeof (uint),
-									typeof (Citizen).MakeByRefType(),
-								},
-								null)));
-				} catch (Exception) {
-					Log.Error("Could not reverse-redirect CustomCitizenManager::ReleaseCitizenImplementation");
-					detourFailed = true;
-				}
-
 				Log.Info("Reverse-Redirection ResidentAI::GetTaxiProbability calls");
 				try {
 					Detours.Add(new Detour(typeof(CustomResidentAI).GetMethod("GetTaxiProbability",
@@ -1185,16 +1056,6 @@ namespace TrafficManager {
 
 				// FORWARD REDIRECTION
 
-				/*Log.Info("Redirecting NetAI::AfterSplitOrMove");
-				try {
-					Detours.Add(new Detour(
-							typeof(NetAI).GetMethod("AfterSplitOrMove"),
-							typeof(CustomNetAI).GetMethod("CustomAfterSplitOrMove")));
-				} catch (Exception) {
-					Log.Error("Could not redirect NetAI::AfterSplitOrMove.");
-					detourFailed = true;
-				}*/
-
 				Log.Info("Redirecting Vehicle AI Calculate Segment Calls (1)");
 				try {
 					Detours.Add(new Detour(typeof(VehicleAI).GetMethod("CalculateSegmentPosition",
@@ -1281,61 +1142,7 @@ namespace TrafficManager {
 					Log.Error("Could not redirect VehicleAI::UpdatePathTargetPositions.");
 					detourFailed = true;
 				}
-
-				Log.Info("Redirection CitizenManager::ReleaseCitizenInstance calls");
-				try {
-					Detours.Add(new Detour(typeof(CitizenManager).GetMethod("ReleaseCitizenInstance",
-							BindingFlags.Public | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort)
-							},
-							null),
-							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizenInstance")));
-				} catch (Exception) {
-					Log.Error("Could not redirect CitizenManager::ReleaseCitizenInstance");
-					detourFailed = true;
-				}
-
-				Log.Info("Redirection CitizenManager::ReleaseCitizen calls");
-				try {
-					Detours.Add(new Detour(typeof(CitizenManager).GetMethod("ReleaseCitizen",
-							BindingFlags.Public | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (uint)
-							},
-							null),
-							typeof(CustomCitizenManager).GetMethod("CustomReleaseCitizen")));
-				} catch (Exception) {
-					Log.Error("Could not redirect CitizenManager::ReleaseCitizen");
-					detourFailed = true;
-				}
-
-				Log.Info("Redirection VehicleManager::CreateVehicle calls");
-				try {
-					Detours.Add(new Detour(typeof(VehicleManager).GetMethod("CreateVehicle",
-							BindingFlags.Public | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort).MakeByRefType(),
-									typeof (Randomizer).MakeByRefType(),
-									typeof (VehicleInfo),
-									typeof (Vector3),
-									typeof (TransferManager.TransferReason),
-									typeof (bool),
-									typeof (bool)
-							},
-							null),
-							typeof(CustomVehicleManager).GetMethod("CustomCreateVehicle")));
-				} catch (Exception) {
-					Log.Error("Could not redirect VehicleManager::CreateVehicle calls");
-					detourFailed = true;
-				}
-
+				
 				Log.Info("Redirecting TramBaseAI Calculate Segment Calls (2)");
 				try {
 					Detours.Add(new Detour(typeof(TramBaseAI).GetMethod("CalculateSegmentPosition",
@@ -2339,89 +2146,6 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
-				// TODO remove
-				/*Log.Info("Redirection NetManager::FinalizeNode calls");
-				try {
-					Detours.Add(new Detour(typeof(NetManager).GetMethod("FinalizeNode",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType()
-							},
-							null),
-							typeof(CustomNetManager).GetMethod("CustomFinalizeNode")));
-				} catch (Exception) {
-					Log.Error("Could not redirect NetManager::FinalizeNode");
-					detourFailed = true;
-				}*/
-
-				Log.Info("Redirection NetManager::FinalizeSegment calls");
-				try {
-					Detours.Add(new Detour(typeof(NetManager).GetMethod("FinalizeSegment",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetSegment).MakeByRefType()
-							},
-							null),
-							typeof(CustomNetManager).GetMethod("CustomFinalizeSegment")));
-				} catch (Exception) {
-					Log.Error("Could not redirect NetManager::FinalizeSegment");
-					detourFailed = true;
-				}
-
-#if DEBUGBUSBUG
-				// TODO remove
-				Log.Info("Redirection NetManager::MoveNode calls");
-				try {
-					Detours.Add(new Detour(typeof(NetManager).GetMethod("MoveNode",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-									typeof (Vector3)
-							},
-							null),
-							typeof(CustomNetManager).GetMethod("CustomMoveNode",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (NetNode).MakeByRefType(),
-									typeof (Vector3)
-							},
-							null)));
-				} catch (Exception) {
-					Log.Error("Could not redirect NetManager::MoveNode");
-					detourFailed = true;
-				}
-#endif
-
-				Log.Info("Redirection NetManager::UpdateSegment calls");
-				try {
-					Detours.Add(new Detour(typeof(NetManager).GetMethod("UpdateSegment",
-							BindingFlags.NonPublic | BindingFlags.Instance,
-							null,
-							new[]
-							{
-									typeof (ushort),
-									typeof (ushort),
-									typeof (int),
-							},
-							null),
-							typeof(CustomNetManager).GetMethod("CustomUpdateSegment")));
-				} catch (Exception) {
-					Log.Error("Could not redirect NetManager::UpdateSegment");
-					detourFailed = true;
-				}
-
 				Log.Info("Redirection Vehicle::Spawn calls");
 				try {
 					Detours.Add(new Detour(typeof(Vehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Instance), typeof(CustomVehicle).GetMethod("Spawn", BindingFlags.Public | BindingFlags.Static)));
@@ -2437,7 +2161,7 @@ namespace TrafficManager {
 					Log.Error("Could not redirect Vehicle::Unspawn");
 					detourFailed = true;
 				}
-
+				
 				if (detourFailed) {
 					Log.Info("Detours failed");
 					Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {

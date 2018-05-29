@@ -101,9 +101,6 @@
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
-    <Compile Include="Custom\Manager\CustomNetManager.cs" />
-    <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
-    <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Geometry\GeometryCalculationMode.cs" />
     <Compile Include="Geometry\ISegmentEndId.cs" />
@@ -149,7 +146,14 @@
     <Compile Include="Manager\IVehicleBehaviorManager.cs" />
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
+    <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
+    <Compile Include="Patch\_CitizenManager\ReleaseCitizenInstancePatch.cs" />
+    <Compile Include="Patch\_NetManager\UpdateSegmentPatch.cs" />
+    <Compile Include="Patch\_NetManager\FinalizeSegmentPatch.cs" />
+    <Compile Include="Patch\_VehicleManager\CreateVehiclePatch.cs" />
     <Compile Include="Patch\_VehicleManager\ReleaseVehiclePatch.cs" />
+    <Compile Include="Patch\_Vehicle\UnspawnPatch.cs" />
+    <Compile Include="Patch\_Vehicle\SpawnPatch.cs" />
     <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
@@ -424,6 +428,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\WindowBackground.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "D:\Games\Steam\steamapps\workshop\content\255710\583429740"

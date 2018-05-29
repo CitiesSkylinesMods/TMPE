@@ -16,5 +16,26 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleId">vehicle id</param>
 		/// <param name="vehicleData">vehicle data</param>
 		void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData);
+
+		/// <summary>
+		/// Handles a created vehicle.
+		/// </summary>
+		/// <param name="vehicleId">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData);
+
+		/// <summary>
+		/// Handles a despawned vehicle.
+		/// </summary>
+		/// <param name="vehicleId">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		void OnSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData);
+
+		/// <summary>
+		/// Handles a spawned vehicle.
+		/// </summary>
+		/// <param name="vehicleId">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData);
 	}
 }

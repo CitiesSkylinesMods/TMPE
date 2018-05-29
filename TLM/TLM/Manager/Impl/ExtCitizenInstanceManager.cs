@@ -32,7 +32,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal void OnReleaseInstance(ushort instanceId) {
+		public void OnReleaseInstance(ushort instanceId) {
 			ExtInstances[instanceId].Reset();
 		}
 

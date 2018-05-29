@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal void OnReleaseCitizen(uint citizenId) {
+		public void OnReleaseCitizen(uint citizenId) {
 			ExtCitizens[citizenId].Reset();
 		}
 

@@ -68,7 +68,7 @@ namespace TrafficManager.Manager.Impl {
 				, (ushort) state.Velocity);
 		}
 
-		internal void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		public void OnCreateVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 			OnReleaseVehicle(vehicleId, ref vehicleData);
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
@@ -128,7 +128,7 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		internal void OnSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		public void OnSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) != (Vehicle.Flags.Created | Vehicle.Flags.Spawned) ||
 				(vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
@@ -207,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
 			state.UpdatePosition(ref vehicleData, ref curPathPos, ref nextPathPos);
 		}
 
-		internal void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
+		public void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
 				(vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) == 0) {
 #if DEBUG
