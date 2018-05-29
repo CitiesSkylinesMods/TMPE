@@ -21,7 +21,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig : GenericObservable<GlobalConfig> {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 13;
+		private static int LATEST_VERSION = 14;
 #if DEBUG
 		private static uint lastModificationCheckFrame = 0;
 #endif
@@ -115,6 +115,14 @@ namespace TrafficManager.State {
 
 				conf.Main.MainMenuButtonPosLocked = oldConfig.Main.MainMenuButtonPosLocked;
 				conf.Main.MainMenuPosLocked = oldConfig.Main.MainMenuPosLocked;
+
+				conf.Main.GuiTransparency = oldConfig.Main.GuiTransparency;
+				conf.Main.OverlayTransparency = oldConfig.Main.OverlayTransparency;
+
+				conf.Main.TinyMainMenu = oldConfig.Main.TinyMainMenu;
+
+				conf.Main.EnableTutorial = oldConfig.Main.EnableTutorial;
+				conf.Main.DisplayedTutorialMessages = oldConfig.Main.DisplayedTutorialMessages;
 			}
 			modifiedTime = WriteConfig(conf);
 			return conf;

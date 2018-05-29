@@ -99,6 +99,10 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
+					if (ExtInstances[instanceId].pathMode == ExtPathMode.None && ExtInstances[instanceId].returnPathId == 0) {
+						continue;
+					}
+
 					Configuration.ExtCitizenInstanceData item = new Configuration.ExtCitizenInstanceData(instanceId);
 					item.pathMode = (int)ExtInstances[instanceId].pathMode;
 					item.failedParkingAttempts = ExtInstances[instanceId].failedParkingAttempts;

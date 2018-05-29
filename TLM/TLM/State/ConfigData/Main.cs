@@ -48,7 +48,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Extended mod compatibility check
 		/// </summary>
-		public bool ShowCompatibilityCheckErrorMessage = true;
+		public bool ShowCompatibilityCheckErrorMessage = false;
 
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();

@@ -11,14 +11,14 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractSegmentGeometryObservingManager : AbstractCustomManager, IObserver<SegmentGeometry> {
-		private Dictionary<ushort, IDisposable> segGeometryUnsubscribers = new Dictionary<ushort, IDisposable>();
+		private IDisposable[] segGeometryUnsubscribers = new IDisposable[NetManager.MAX_SEGMENT_COUNT];
 		private object geoLock = new object();
 
 		protected virtual bool AllowInvalidSegments { get; } = false;
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
-			Log._Debug($"Subscribed segment geometries: {segGeometryUnsubscribers.Keys.CollectionToString()}");
+			Log._Debug($"Subscribed segment geometries: {segGeometryUnsubscribers.Select(unsub => unsub != null).ToList().CollectionToString()}");
 		}
 
 		protected void UnsubscribeFromSegmentGeometry(ushort segmentId) {
@@ -29,11 +29,7 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				IDisposable unsubscriber;
-				if (segGeometryUnsubscribers.TryGetValue(segmentId, out unsubscriber)) {
-					unsubscriber.Dispose();
-					segGeometryUnsubscribers.Remove(segmentId);
-				}
+				InternalUnsubscribeFromSegmentGeometry(segmentId);
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromSegmentGeometry({segmentId}): watched segments: {String.Join(",", segGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
@@ -48,9 +44,23 @@ namespace TrafficManager.Manager {
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"AbstractSegmentGeometryObservingManager.UnsubscribeFromAllSegmentGeometries() called.");
 #endif
-			List<ushort> segmentIds = new List<ushort>(segGeometryUnsubscribers.Keys);
-			foreach (ushort segmentId in segmentIds)
-				UnsubscribeFromSegmentGeometry(segmentId);
+			try {
+				Monitor.Enter(geoLock);
+
+				for (int segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+					InternalUnsubscribeFromSegmentGeometry((ushort)segmentId);
+				}
+			} finally {
+				Monitor.Exit(geoLock);
+			}
+		}
+
+		private void InternalUnsubscribeFromSegmentGeometry(ushort segmentId) {
+			IDisposable unsubscriber = segGeometryUnsubscribers[segmentId];
+			if (unsubscriber != null) {
+				unsubscriber.Dispose();
+				segGeometryUnsubscribers[segmentId] = null;
+			}
 		}
 
 		protected void SubscribeToSegmentGeometry(ushort segmentId) {
@@ -61,10 +71,10 @@ namespace TrafficManager.Manager {
 			try {
 				Monitor.Enter(geoLock);
 
-				if (!segGeometryUnsubscribers.ContainsKey(segmentId)) {
+				if (segGeometryUnsubscribers[segmentId] == null) {
 					SegmentGeometry geo = SegmentGeometry.Get(segmentId, AllowInvalidSegments);
 					if (geo != null) {
-						segGeometryUnsubscribers.Add(segmentId, geo.Subscribe(this));
+						segGeometryUnsubscribers[segmentId] = geo.Subscribe(this);
 					} else {
 #if DEBUGGEO
 						if (GlobalConfig.Instance.Debug.Switches[5])

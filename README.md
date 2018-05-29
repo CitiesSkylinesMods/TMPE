@@ -4,8 +4,11 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
-1.10.7, in development
+1.10.7, 05/28/2018
 - Bugfix: U-turn routing is inconsistent on transport lines vs. bus paths (#137, thanks to @Zorgoth for reporting this issue)
+- Bugfix: Junction restrictions for pedestrian crossings are sometimes not preserved (#142, thanks to Anrew and @wizardrazer for reporting this issue)
+- Fixed: Geometry subscription feature may cause performance issues (#145)
+- Fixed: Parking AI: Transport mode storage causes performance issues during loading (#147, thanks to @hannebambel002 and @oneeyets for reporting and further for providing logs and savegames)
 
 1.10.6, 05/24/2018
 - Updated for game version 1.10.0-f3
