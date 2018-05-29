@@ -104,6 +104,10 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
+					if (ExtCitizens[citizenId].transportMode == ExtTransportMode.None) {
+						continue;
+					}
+
 					Configuration.ExtCitizenData item = new Configuration.ExtCitizenData(citizenId);
 					item.lastTransportMode = (int)ExtCitizens[citizenId].transportMode;
 					ret.Add(item);
