@@ -40,7 +40,8 @@ namespace TrafficManager.Custom.AI {
 				PathCreationArgs args;
 				args.extPathType = ExtCitizenInstance.ExtPathType.None;
 				args.extVehicleType = ExtVehicleType.Bus;
-				args.vehicleId = vehicleID;
+				//args.vehicleId = vehicleID;
+				args.vehicleId = 0;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = startPosA;
 				args.startPosB = startPosB;

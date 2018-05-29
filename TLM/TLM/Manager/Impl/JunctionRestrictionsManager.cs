@@ -58,14 +58,12 @@ namespace TrafficManager.Manager.Impl {
 
 			protected override void HandleValidNode(NodeGeometry geometry) {
 				// update segment defaults
-				//Log.Warning($"JunctionRestrictionsNodeWatcher.HandleValidNode({geometry.NodeId}) called.");
 				foreach (SegmentEndGeometry endGeo in geometry.SegmentEndGeometries) {
 					if (endGeo == null) {
 						continue;
 					}
 
 					SegmentGeometry segGeo = endGeo.GetSegmentGeometry(true);
-					//Log._Debug($"JunctionRestrictionsNodeWatcher.HandleValidNode({geometry.NodeId}): segment iteration. seg={segGeo.SegmentId} valid={segGeo.IsValid()}");
 
 					if (segGeo.IsValid()) {
 						junctionRestrictionsManager.HandleValidSegment(segGeo);
@@ -396,6 +394,8 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
+					Log._Debug($"JunctionRestrictionsManager.LoadData: Loading junction restrictions for segment {segNodeConf.segmentId}: startNodeFlags={segNodeConf.startNodeFlags} endNodeFlags={segNodeConf.endNodeFlags}");
+
 					if (segNodeConf.startNodeFlags != null) {
 						Configuration.SegmentNodeFlags flags = segNodeConf.startNodeFlags;
 						if (flags.uturnAllowed != null) {
@@ -466,6 +466,8 @@ namespace TrafficManager.Manager.Impl {
 							startNodeFlags.straightLaneChangingAllowed = TernaryBoolUtil.ToOptBool(GetLaneChangingAllowedWhenGoingStraight((ushort)segmentId, true));
 							startNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, true));
 							startNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, true));
+
+							Log._Debug($"JunctionRestrictionsManager.SaveData: Saving start node junction restrictions for segment {segmentId}: {startNodeFlags}");
 						}
 					}
 
@@ -480,6 +482,8 @@ namespace TrafficManager.Manager.Impl {
 							endNodeFlags.straightLaneChangingAllowed = TernaryBoolUtil.ToOptBool(GetLaneChangingAllowedWhenGoingStraight((ushort)segmentId, false));
 							endNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, false));
 							endNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, false));
+
+							Log._Debug($"JunctionRestrictionsManager.SaveData: Saving end node junction restrictions for segment {segmentId}: {endNodeFlags}");
 						}
 					}
 

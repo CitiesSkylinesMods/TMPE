@@ -122,7 +122,7 @@ namespace TrafficManager.State {
 			bool error = false;
 			try {
 				if (data != null && data.Length != 0) {
-					Log.Info("Loading Data from New Load Routine!");
+					Log.Info($"Loading Data from New Load Routine! Length={data.Length}");
 					var memoryStream = new MemoryStream();
 					memoryStream.Write(data, 0, data.Length);
 					memoryStream.Position = 0;
