@@ -54,7 +54,6 @@ namespace TrafficManager.Manager.Impl {
 
 		protected bool segmentsUpdated = false;
 		protected ulong[] updatedSegmentBuckets = new ulong[576];
-		protected bool updateNotificationRequired = false;
 		protected object updateLock = new object();
 
 		protected override void InternalPrintDebugInfo() {
@@ -96,9 +95,6 @@ namespace TrafficManager.Manager.Impl {
 
 			try {
 				Monitor.Enter(updateLock);
-				/*if (updateNotificationRequired) {
-					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(Translation.GetString("Please_wait") + "...", Translation.GetString("Recalculating_lane_routing") + "...", false);
-				}*/ // TODO seems to crash the game for some users
 				segmentsUpdated = false;
 
 				int len = updatedSegmentBuckets.Length;
@@ -114,17 +110,12 @@ namespace TrafficManager.Manager.Impl {
 						updatedSegmentBuckets[i] = 0;
 					}
 				}
-
-				/*if (updateNotificationRequired) {
-					UIView.library.Hide("ExceptionPanel");
-				}*/
-				updateNotificationRequired = false;
 			} finally {
 				Monitor.Exit(updateLock);
 			}
 		}
 
-		public void RequestFullRecalculation(bool notify) {
+		public void RequestFullRecalculation() {
 			try {
 				Monitor.Enter(updateLock);
 
@@ -133,11 +124,13 @@ namespace TrafficManager.Manager.Impl {
 				}
 				Flags.clearHighwayLaneArrows();
 				segmentsUpdated = true;
-				updateNotificationRequired = notify;
+
+				if (Services.SimulationService.SimulationPaused || Services.SimulationService.ForcedSimulationPaused) {
+					SimulationStep();
+				}
 			} finally {
 				Monitor.Exit(updateLock);
 			}
-
 		}
 
 		public void RequestRecalculation(ushort segmentId, bool propagate = true) {
@@ -147,7 +140,10 @@ namespace TrafficManager.Manager.Impl {
 				updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)segmentId;
 				ResetIncomingHighwayLaneArrows(segmentId);
 				segmentsUpdated = true;
-				updateNotificationRequired = false;
+
+				if (Services.SimulationService.SimulationPaused || Services.SimulationService.ForcedSimulationPaused) {
+					SimulationStep();
+				}
 			} finally {
 				Monitor.Exit(updateLock);
 			}

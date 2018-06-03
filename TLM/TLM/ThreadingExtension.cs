@@ -66,28 +66,11 @@ namespace TrafficManager {
 				}
 			}
 
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "RoutingManager.SimulationStep")) {
-#endif
-				routeMan.SimulationStep();
-#if BENCHMARK
-			}
-#endif
+			routeMan.SimulationStep();
 
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "TrafficLightSimulationManager.SimulationStep")) {
-#endif
-
-				if (Options.timedLightsEnabled) {
-					//try {
-						tlsMan.SimulationStep();
-					/*} catch (Exception ex) {
-						Log.Warning($"Error occured while simulating traffic lights: {ex.ToString()}");
-					}*/
-				}
-#if BENCHMARK
+			if (Options.timedLightsEnabled) {
+				tlsMan.SimulationStep();
 			}
-#endif
 		}
 
 		/*public override void OnAfterSimulationFrame() {

@@ -723,7 +723,7 @@ namespace TrafficManager.State {
 			highwayRules = newHighwayRules;
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
-			RoutingManager.Instance.RequestFullRecalculation(true);
+			RoutingManager.Instance.RequestFullRecalculation();
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
@@ -812,7 +812,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			laneConnectorEnabled = val;
-			RoutingManager.Instance.RequestFullRecalculation(true);
+			RoutingManager.Instance.RequestFullRecalculation();
 			if (!val)
 				setConnectedLanesOverlay(false);
 		}
