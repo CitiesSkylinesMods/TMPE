@@ -78,6 +78,7 @@ namespace TrafficManager.State {
 
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
+		private static UIButton removeParkedVehiclesBtn = null;
 		private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
 		private static List<UITextField> debugValueFields = new List<UITextField>();
 		private static UITextField pathCostMultiplicatorField = null;
@@ -343,6 +344,7 @@ namespace TrafficManager.State {
 
 			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
 #if DEBUG
+			removeParkedVehiclesBtn = maintenanceGroup.AddButton(Translation.GetString("Remove_parked_vehicles"), onClickRemoveParkedVehicles) as UIButton;
 			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 #endif
 			reloadGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
@@ -993,6 +995,15 @@ namespace TrafficManager.State {
 
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
 				UtilityManager.Instance.ResetStuckEntities();
+			});
+		}
+
+		private static void onClickRemoveParkedVehicles() {
+			if (!checkGameLoaded())
+				return;
+
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				UtilityManager.Instance.RemoveParkedVehicles();
 			});
 		}
 

@@ -33,7 +33,7 @@ namespace TrafficManager.Manager {
 				InternalUnsubscribeFromNodeGeometry(nodeId);
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
-					Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromNodeGeometry({nodeId}): watched nodes: {String.Join(",", nodeGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
+					Log._Debug($"AbstractNodeGeometryObservingManager.UnsubscribeFromNodeGeometry({nodeId}): watched nodes: {nodeGeometryUnsubscribers.Select(unsub => unsub != null).ToList().CollectionToString()}");
 #endif
 			} finally {
 				Monitor.Exit(geoLock);
@@ -83,7 +83,7 @@ namespace TrafficManager.Manager {
 
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
-				Log._Debug($"AbstractNodeGeometryObservingManager.SubscribeToNodeGeometry({nodeId}): watched nodes: {String.Join(",", nodeGeometryUnsubscribers.Keys.Select(x => x.ToString()).ToArray())}");
+				Log._Debug($"AbstractNodeGeometryObservingManager.SubscribeToNodeGeometry({nodeId}): watched nodes: {nodeGeometryUnsubscribers.Select(unsub => unsub != null).ToList().CollectionToString()}");
 #endif
 		}
 

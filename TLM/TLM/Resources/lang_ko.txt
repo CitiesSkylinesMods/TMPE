@@ -223,3 +223,4 @@ Window_transparency Window transparency
 Overlay_transparency Overlay transparency
 Remove_this_citizen Remove this citizen
 Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
+Remove_parked_vehicles Remove parked vehicles

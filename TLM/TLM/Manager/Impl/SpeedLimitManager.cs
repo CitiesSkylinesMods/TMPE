@@ -233,6 +233,10 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		internal float GetLockFreeGameSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+			if (! MayHaveCustomSpeedLimits(laneInfo)) {
+				return laneInfo.m_speedLimit;
+			}
+
 			float speedLimit = 0;
 			ushort?[] fastArray = Flags.laneSpeedLimitArray[segmentId];
 			if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
