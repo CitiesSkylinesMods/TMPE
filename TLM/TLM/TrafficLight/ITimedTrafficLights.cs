@@ -3,6 +3,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Util;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight {
 	public interface ITimedTrafficLights : IObserver<NodeGeometry> {

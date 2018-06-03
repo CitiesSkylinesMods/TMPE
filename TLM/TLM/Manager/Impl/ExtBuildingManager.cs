@@ -22,13 +22,31 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>
-		public ExtBuilding[] ExtBuildings = null;
+		public ExtBuilding[] ExtBuildings { get; private set; } = null;
 
 		private ExtBuildingManager() {
 			ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
 			for (uint i = 0; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
 				ExtBuildings[i] = new ExtBuilding((ushort)i);
 			}
+		}
+
+		public void OnBeforeSimulationStep(ushort buildingId, ref Building data) {
+			// slowly decrease parking space demand / public transport demand if Parking AI is active
+			if (! Options.parkingAI) {
+				return;
+			}
+
+			uint frameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex >> 8;
+			if ((frameIndex & 1u) == 0u) {
+				RemoveDemand(ref ExtBuildings[buildingId]);
+			}
+		}
+
+		protected void RemoveDemand(ref ExtBuilding extBuilding) {
+			extBuilding.RemoveParkingSpaceDemand(GlobalConfig.Instance.ParkingAI.ParkingSpaceDemandDecrement);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, true);
+			extBuilding.RemovePublicTransportDemand(GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, false);
 		}
 
 		protected override void InternalPrintDebugInfo() {

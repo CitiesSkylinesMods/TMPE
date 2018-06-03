@@ -10,6 +10,7 @@ using TrafficManager.TrafficLight;
 using UnityEngine;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.UI.SubTools {
 	public class ToggleTrafficLightsTool : SubTool {
@@ -30,9 +31,9 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public void ToggleTrafficLight(ushort nodeId, ref NetNode node, bool showMessageOnError=true) {
-			UnableReason reason;
+			ToggleTrafficLightUnableReason reason;
 			if (!TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, ref node, out reason)) {
-				if (showMessageOnError && reason == UnableReason.HasTimedLight) {
+				if (showMessageOnError && reason == ToggleTrafficLightUnableReason.HasTimedLight) {
 					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return;

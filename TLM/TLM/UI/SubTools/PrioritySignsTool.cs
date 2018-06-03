@@ -18,6 +18,7 @@ using TrafficManager.Manager.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 using static TrafficManager.Util.SegmentTraverser;
 using ColossalFramework.UI;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -358,11 +359,11 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool MayNodeHavePrioritySigns(ushort nodeId) {
-			TrafficPriorityManager.UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId} may have priority signs.");
 			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
 				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
-				if (reason == TrafficPriorityManager.UnableReason.HasTimedLight) {
+				if (reason == SetPrioritySignUnableReason.HasTimedLight) {
 					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return false;

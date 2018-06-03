@@ -2,6 +2,7 @@
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight {
 	public interface ITimedTrafficLightsStep : ICustomSegmentLightsManager {

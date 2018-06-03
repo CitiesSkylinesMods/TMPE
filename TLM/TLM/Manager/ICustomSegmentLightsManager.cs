@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager {

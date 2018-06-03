@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace TrafficManager.Traffic {
+	// TODO this enum should be moved to TrafficManager.Traffic.Enums but deserialization fails if we just do that now.
 	[Flags]
 	public enum ExtVehicleType {
 		None = 0,

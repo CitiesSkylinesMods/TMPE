@@ -3,45 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager {
-	public enum VehicleRestrictionsMode {
-		/// <summary>
-		/// Interpret bus lanes as "free for all"
-		/// </summary>
-		Unrestricted,
-		/// <summary>
-		/// Interpret bus lanes according to the configuration
-		/// </summary>
-		Configured,
-		/// <summary>
-		/// Interpret bus lanes as restricted
-		/// </summary>
-		Restricted
-	}
-
-	/// <summary>
-	/// Represents vehicle restrictions effect strength
-	/// </summary>
-	public enum VehicleRestrictionsAggression {
-		/// <summary>
-		/// Low aggression
-		/// </summary>
-		Low = 0,
-		/// <summary>
-		/// Medium aggression
-		/// </summary>
-		Medium = 1,
-		/// <summary>
-		/// High aggression
-		/// </summary>
-		High = 2,
-		/// <summary>
-		/// Strict aggression
-		/// </summary>
-		Strict = 3
-	}
-
 	public interface IVehicleRestrictionsManager {
 		// TODO documentation
 		void AddAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType);

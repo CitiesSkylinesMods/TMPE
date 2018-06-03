@@ -11,6 +11,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;

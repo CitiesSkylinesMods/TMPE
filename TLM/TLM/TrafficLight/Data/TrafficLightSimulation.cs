@@ -9,6 +9,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.TrafficLight.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Data {
 	public struct TrafficLightSimulation {

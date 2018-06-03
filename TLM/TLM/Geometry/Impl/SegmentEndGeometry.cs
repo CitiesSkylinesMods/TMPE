@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 using UnityEngine;
 

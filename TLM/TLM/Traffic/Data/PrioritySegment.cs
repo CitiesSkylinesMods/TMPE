@@ -1,26 +1,11 @@
 using System;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Traffic.Data {
 	/// <summary>
 	/// A priority segment specifies the priority signs that are present at each end of a certain segment.
 	/// </summary>
 	public struct PrioritySegment {
-		public enum PriorityType {
-			None = 0,
-			/// <summary>
-			/// Priority road
-			/// </summary>
-			Main = 1,
-			/// <summary>
-			/// Stop sign
-			/// </summary>
-			Stop = 2,
-			/// <summary>
-			/// Yield sign
-			/// </summary>
-			Yield = 3
-		}
-
 		/// <summary>
 		/// Priority sign at start node (default: None)
 		/// </summary>

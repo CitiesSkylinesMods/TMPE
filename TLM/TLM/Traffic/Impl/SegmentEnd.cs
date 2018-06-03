@@ -19,6 +19,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 
 /// <summary>
 /// A segment end describes a directional traffic segment connected to a controlled node
@@ -111,11 +112,6 @@ namespace TrafficManager.Traffic.Impl {
 			int numProcessed = 0;
 			while (vehicleId != 0) {
 				MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref vehStateManager.VehicleStates[vehicleId], ref numProcessed);
-
-				if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
-					break;
-				}
-
 				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
 			}
 
@@ -132,7 +128,7 @@ namespace TrafficManager.Traffic.Impl {
 				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
 #endif
 
-			if ((state.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+			if ((state.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: Vehicle {vehicleId} is unspawned. Ignoring.");

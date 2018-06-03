@@ -274,7 +274,9 @@ namespace TrafficManager.UI {
 
 		private void clickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
-				UtilityManager.Instance.PrintDebugInfo();
+				foreach (ICustomManager customManager in LoadingExtension.RegisteredManagers) {
+					customManager.PrintDebugInfo();
+				}
 			});
 		}
 

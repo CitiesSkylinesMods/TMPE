@@ -8,6 +8,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
@@ -29,7 +30,7 @@ namespace TrafficManager.Manager.Impl {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Vehicle states:");
 			for (int i = 0; i < VehicleStates.Length; ++i) {
-				if ((VehicleStates[i].flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+				if ((VehicleStates[i].flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 					continue;
 				}
 				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
@@ -43,7 +44,32 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		internal void LogTraffic(ushort vehicleId) {
+		public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
+			// (stock code from PassengerCarAI.GetDriverInstance)
+			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+			uint citizenUnitId = data.m_citizenUnits;
+			int numIter = 0;
+			while (citizenUnitId != 0) {
+				uint nextCitizenUnitId = citizenManager.m_units.m_buffer[citizenUnitId].m_nextUnit;
+				for (int i = 0; i < 5; i++) {
+					uint citizenId = citizenManager.m_units.m_buffer[citizenUnitId].GetCitizen(i);
+					if (citizenId != 0) {
+						ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[citizenId].m_instance;
+						if (citizenInstanceId != 0) {
+							return citizenInstanceId;
+						}
+					}
+				}
+				citizenUnitId = nextCitizenUnitId;
+				if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
+			}
+			return 0;
+		}
+
+		public void LogTraffic(ushort vehicleId) {
 			LogTraffic(vehicleId, ref VehicleStates[vehicleId]);
 		}
 
@@ -87,7 +113,7 @@ namespace TrafficManager.Manager.Impl {
 			VehicleStates[vehicleId].OnCreate(ref vehicleData);
 		}
 
-		internal ExtVehicleType OnStartPathFind(ushort vehicleId, ref Vehicle vehicleData, ExtVehicleType? vehicleType) {
+		public ExtVehicleType OnStartPathFind(ushort vehicleId, ref Vehicle vehicleData, ExtVehicleType? vehicleType) {
 			if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
 				(vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 #if DEBUG

@@ -13,19 +13,13 @@ using TrafficManager.State;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using ColossalFramework.Math;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		public const int STATE_UPDATE_SHIFT = 6;
 		public const int JUNCTION_RECHECK_SHIFT = 4;
 		public const uint MAX_TIMED_RAND = 100;
-
-		[Flags]
-		public enum Flags {
-			None = 0,
-			Created = 1,
-			Spawned = 1 << 1
-		}
 
 		public VehicleJunctionTransitState JunctionTransitState {
 			get { return junctionTransitState; }
@@ -79,7 +73,7 @@ namespace TrafficManager.Traffic.Data {
 		//public float velocity;
 		public int waitTime;
 		public float reduceSqrSpeedByValueToYield;
-		public Flags flags;
+		public ExtVehicleFlags flags;
 		public ExtVehicleType vehicleType;
 		public bool heavyVehicle;
 		public bool recklessDriver;
@@ -133,7 +127,7 @@ namespace TrafficManager.Traffic.Data {
 			totalLength = 0;
 			waitTime = 0;
 			reduceSqrSpeedByValueToYield = 0;
-			flags = Flags.None;
+			flags = ExtVehicleFlags.None;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
 			recklessDriver = false;
@@ -235,7 +229,7 @@ namespace TrafficManager.Traffic.Data {
 				Log._Debug($"VehicleState.OnCreate({vehicleId}) called: {this}");
 #endif
 			
-			if ((flags & Flags.Created) != Flags.None) {
+			if ((flags & ExtVehicleFlags.Created) != ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnCreate({vehicleId}): Vehicle is already created.");
@@ -246,7 +240,7 @@ namespace TrafficManager.Traffic.Data {
 			DetermineVehicleType(ref vehicleData);
 			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
 			recklessDriver = false;
-			flags = Flags.Created;
+			flags = ExtVehicleFlags.Created;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -260,7 +254,7 @@ namespace TrafficManager.Traffic.Data {
 				Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}) called: {this}");
 #endif
 
-			if ((flags & Flags.Created) == Flags.None) {
+			if ((flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}): Vehicle has not yet been created.");
@@ -288,7 +282,7 @@ namespace TrafficManager.Traffic.Data {
 				Log._Debug($"VehicleState.OnSpawn({vehicleId}) called: {this}");
 #endif
 
-			if ((flags & Flags.Created) == Flags.None) {
+			if ((flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnSpawn({vehicleId}): Vehicle has not yet been created.");
@@ -320,7 +314,7 @@ namespace TrafficManager.Traffic.Data {
 				return;
 			}
 
-			flags |= Flags.Spawned;
+			flags |= ExtVehicleFlags.Spawned;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -357,7 +351,7 @@ namespace TrafficManager.Traffic.Data {
 				Log._Debug($"VehicleState.UpdatePosition({vehicleId}) called: {this}");
 #endif
 
-			if ((flags & Flags.Spawned) == Flags.None) {
+			if ((flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Vehicle is not yet spawned.");
@@ -416,7 +410,7 @@ namespace TrafficManager.Traffic.Data {
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleState.OnDespawn({vehicleId} called: {this}");
 #endif
-			if ((flags & Flags.Spawned) == Flags.None) {
+			if ((flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnDespawn({vehicleId}): Vehicle is not spawned.");
@@ -424,7 +418,7 @@ namespace TrafficManager.Traffic.Data {
 				return;
 			}
 
-			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
+			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(Constants.ManagerFactory.VehicleStateManager.GetDriverInstanceId(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
 			
 			Unlink();
 
@@ -441,7 +435,7 @@ namespace TrafficManager.Traffic.Data {
 			//velocity = 0;
 			//sqrVelocity = 0;
 
-			flags &= ~Flags.Spawned;
+			flags &= ~ExtVehicleFlags.Spawned;
 			
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -455,7 +449,7 @@ namespace TrafficManager.Traffic.Data {
 				Log._Debug($"VehicleState.OnRelease({vehicleId}) called: {this}");
 #endif
 
-			if ((flags & Flags.Created) == Flags.None) {
+			if ((flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is not created.");
@@ -463,7 +457,7 @@ namespace TrafficManager.Traffic.Data {
 				return;
 			}
 
-			if ((flags & Flags.Spawned) != Flags.None) {
+			if ((flags & ExtVehicleFlags.Spawned) != ExtVehicleFlags.None) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is spawned.");
@@ -477,7 +471,7 @@ namespace TrafficManager.Traffic.Data {
 			lastPositionUpdate = Now();
 			waitTime = 0;
 			reduceSqrSpeedByValueToYield = 0;
-			flags = Flags.None;
+			flags = ExtVehicleFlags.None;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
 			previousVehicleIdOnSegment = 0;

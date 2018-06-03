@@ -7,9 +7,10 @@ using TrafficManager.State;
 using ColossalFramework;
 using TrafficManager.Geometry;
 using static TrafficManager.State.Flags;
-using TrafficManager.Traffic;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
 	public class LaneArrowManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string>, ILaneArrowManager {
@@ -37,7 +38,7 @@ namespace TrafficManager.Manager.Impl {
 			return false;
 		}
 
-		public bool ToggleLaneArrows(uint laneId, bool startNode, LaneArrows flags, out LaneArrowChangeResult res) {
+		public bool ToggleLaneArrows(uint laneId, bool startNode, LaneArrows flags, out SetLaneArrowUnableReason res) {
 			if (Flags.toggleLaneArrowFlags(laneId, startNode, flags, out res)) {
 				OnLaneChange(laneId);
 				return true;
@@ -107,12 +108,12 @@ namespace TrafficManager.Manager.Impl {
 						uint laneArrowFlags = flags & Flags.lfr;
 						uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & Flags.lfr);
 #if DEBUG
-						Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
+						Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((LaneArrows)(laneArrowFlags)).ToString() + ")");
 						if ((origFlags | laneArrowFlags) == origFlags) { // only load if setting differs from default
 							Log._Debug("Flags for lane " + laneId + " are original (" + ((NetLane.Flags)(origFlags)).ToString() + ")");
 						}
 #endif
-						SetLaneArrows(laneId, (Flags.LaneArrows)laneArrowFlags);
+						SetLaneArrows(laneId, (LaneArrows)laneArrowFlags);
 					} catch (Exception e) {
 						Log.Error($"Error loading Lane Split data. Length: {split.Length} value: {split}\nError: {e.ToString()}");
 						success = false;
@@ -137,7 +138,7 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 
 					uint laneArrowFlags = laneArrowData.arrows & Flags.lfr;
-					SetLaneArrows(laneArrowData.laneId, (Flags.LaneArrows)laneArrowFlags);
+					SetLaneArrows(laneArrowData.laneId, (LaneArrows)laneArrowFlags);
 				} catch (Exception e) {
 					Log.Error($"Error loading lane arrow data for lane {laneArrowData.laneId}, arrows={laneArrowData.arrows}: {e.ToString()}");
 					success = false;
@@ -150,7 +151,7 @@ namespace TrafficManager.Manager.Impl {
 			List<Configuration.LaneArrowData> ret = new List<Configuration.LaneArrowData>();
 			for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
 				try {
-					Flags.LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);
+					LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);
 
 					if (laneArrows == null)
 						continue;

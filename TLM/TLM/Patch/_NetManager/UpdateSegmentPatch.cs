@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 
 namespace TrafficManager.Patch._NetManager {

@@ -8,6 +8,7 @@ using TrafficManager.Custom.AI;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 using UnityEngine;
 using static TrafficManager.Traffic.Data.ExtCitizen;
@@ -21,6 +22,13 @@ namespace TrafficManager.Manager.Impl {
 		/// All additional data for citizens. Index: citizen id
 		/// </summary>
 		public ExtCitizen[] ExtCitizens = null;
+
+		private ExtCitizenManager() {
+			ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];
+			for (uint i = 0; i < CitizenManager.MAX_CITIZEN_COUNT; ++i) {
+				ExtCitizens[i] = new ExtCitizen(i);
+			}
+		}
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
@@ -37,7 +45,7 @@ namespace TrafficManager.Manager.Impl {
 			ExtCitizens[citizenId].Reset();
 		}
 
-		public void OnArriveAtDestination(uint citizenId, ref Citizen citizen) {
+		public void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData) {
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
@@ -51,8 +59,14 @@ namespace TrafficManager.Manager.Impl {
 			}
 			ExtCitizens[citizenId].transportMode = ExtTransportMode.None;
 
-			if (citizen.CurrentLocation != Citizen.Location.Moving) {
-				ExtCitizens[citizenId].lastLocation = citizen.CurrentLocation;
+			ushort targetBuildingId = instanceData.m_targetBuilding;
+			Services.CitizenService.ProcessCitizen(citizenId, delegate (uint citId, ref Citizen cit) {
+				cit.SetLocationByBuilding(citId, targetBuildingId);
+				return true;
+			});
+
+			if (citizenData.CurrentLocation != Citizen.Location.Moving) {
+				ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
 			}
 		}
 
@@ -60,10 +74,30 @@ namespace TrafficManager.Manager.Impl {
 			ExtCitizens[citizenId].Reset();
 		}
 
-		private ExtCitizenManager() {
-			ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];
-			for (uint i = 0; i < CitizenManager.MAX_CITIZEN_COUNT; ++i) {
-				ExtCitizens[i] = new ExtCitizen(i);
+		// stock code
+		public Citizen.AgeGroup GetAgeGroup(Citizen.AgePhase agePhase) {
+			switch (agePhase) {
+				case Citizen.AgePhase.Child:
+					return Citizen.AgeGroup.Child;
+				case Citizen.AgePhase.Teen0:
+				case Citizen.AgePhase.Teen1:
+					return Citizen.AgeGroup.Teen;
+				case Citizen.AgePhase.Young0:
+				case Citizen.AgePhase.Young1:
+				case Citizen.AgePhase.Young2:
+					return Citizen.AgeGroup.Young;
+				case Citizen.AgePhase.Adult0:
+				case Citizen.AgePhase.Adult1:
+				case Citizen.AgePhase.Adult2:
+				case Citizen.AgePhase.Adult3:
+					return Citizen.AgeGroup.Adult;
+				case Citizen.AgePhase.Senior0:
+				case Citizen.AgePhase.Senior1:
+				case Citizen.AgePhase.Senior2:
+				case Citizen.AgePhase.Senior3:
+					return Citizen.AgeGroup.Senior;
+				default:
+					return Citizen.AgeGroup.Adult;
 			}
 		}
 

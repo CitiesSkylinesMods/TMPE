@@ -14,6 +14,7 @@ using TrafficManager.Manager;
 using System.Linq;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Geometry.Impl {
 	/// <summary>

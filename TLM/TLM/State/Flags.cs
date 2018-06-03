@@ -10,30 +10,12 @@ using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 
 namespace TrafficManager.State {
 	[Obsolete]
 	public class Flags {
-		[Flags]
-		public enum LaneArrows { // compatible with NetLane.Flags
-			None = 0,
-			Forward = 16,
-			Left = 32,
-			Right = 64,
-			LeftForward = 48,
-			LeftRight = 96,
-			ForwardRight = 80,
-			LeftForwardRight = 112
-		}
-
-		public enum LaneArrowChangeResult {
-			Invalid,
-			HighwayArrows,
-			LaneConnection,
-			Success
-		}
-
 		public static readonly uint lfr = (uint)NetLane.Flags.LeftForwardRight;
 		
 		/// <summary>
@@ -649,20 +631,20 @@ namespace TrafficManager.State {
 			applyLaneArrowFlags(laneId, false);
 		}
 
-		public static bool toggleLaneArrowFlags(uint laneId, bool startNode, LaneArrows flags, out LaneArrowChangeResult res) {
+		public static bool toggleLaneArrowFlags(uint laneId, bool startNode, LaneArrows flags, out SetLaneArrowUnableReason res) {
 			if (!mayHaveLaneArrows(laneId)) {
 				removeLaneArrowFlags(laneId);
-				res = LaneArrowChangeResult.Invalid;
+				res = SetLaneArrowUnableReason.Invalid;
 				return false;
 			}
 
 			if (highwayLaneArrowFlags[laneId] != null) {
-				res = LaneArrowChangeResult.HighwayArrows;
+				res = SetLaneArrowUnableReason.HighwayArrows;
 				return false; // disallow custom lane arrows in highway rule mode
 			}
 
 			if (LaneConnectionManager.Instance.HasConnections(laneId, startNode)) { // TODO refactor
-				res = LaneArrowChangeResult.LaneConnection;
+				res = SetLaneArrowUnableReason.LaneConnection;
 				return false; // custom lane connection present
 			}
 
@@ -677,10 +659,10 @@ namespace TrafficManager.State {
 			arrows ^= flags;
 			laneArrowFlags[laneId] = arrows;
 			if (applyLaneArrowFlags(laneId, false)) {
-				res = LaneArrowChangeResult.Success;
+				res = SetLaneArrowUnableReason.Success;
 				return true;
 			} else {
-				res = LaneArrowChangeResult.Invalid;
+				res = SetLaneArrowUnableReason.Invalid;
 				return false;
 			}
 		}

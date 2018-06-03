@@ -19,6 +19,7 @@ using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -943,7 +944,7 @@ namespace TrafficManager.UI {
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 				VehicleState vState = vehStateManager.VehicleStates[(ushort)i];
-				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
+				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[Constants.ManagerFactory.VehicleStateManager.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);

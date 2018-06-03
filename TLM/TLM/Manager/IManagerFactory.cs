@@ -11,6 +11,7 @@ namespace TrafficManager.Manager {
 		IExtBuildingManager ExtBuildingManager { get; }
 		IExtCitizenInstanceManager ExtCitizenInstanceManager { get; }
 		IExtCitizenManager ExtCitizenManager { get; }
+		IExtPathManager ExtPathManager { get; }
 		IJunctionRestrictionsManager JunctionRestrictionsManager { get; }
 		ILaneArrowManager LaneArrowManager { get; }
 		ILaneConnectionManager LaneConnectionManager { get; }

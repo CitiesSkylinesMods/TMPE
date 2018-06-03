@@ -17,6 +17,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using CSUtil.Commons.Benchmark;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Impl {
 	// TODO class should be completely reworked, approx. in version 1.10

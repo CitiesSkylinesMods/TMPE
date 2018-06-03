@@ -13,6 +13,7 @@ using TrafficManager.Util;
 using CSUtil.Commons;
 using TrafficManager.State;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Impl {
 	/// <summary>

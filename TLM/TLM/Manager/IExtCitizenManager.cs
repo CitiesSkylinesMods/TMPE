@@ -12,13 +12,21 @@ namespace TrafficManager.Manager {
 		/// Called whenever a citizen reaches their destination building.
 		/// </summary>
 		/// <param name="citizenId">citizen id</param>
-		/// <param name="citizen">citizen data</param>
-		void OnArriveAtDestination(uint citizenId, ref Citizen citizen);
+		/// <param name="citizenData">citizen data</param>
+		/// <param name="instanceData">citizen instance data</param>
+		void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData);
 
 		/// <summary>
 		/// Handles a released citizen.
 		/// </summary>
 		/// <param name="citizenId">citizen id</param>
 		void OnReleaseCitizen(uint citizenId);
+
+		/// <summary>
+		/// Calculates the age group for the given age phase.
+		/// </summary>
+		/// <param name="agePhase">age phase</param>
+		/// <returns>age group</returns>
+		Citizen.AgeGroup GetAgeGroup(Citizen.AgePhase agePhase);
 	}
 }

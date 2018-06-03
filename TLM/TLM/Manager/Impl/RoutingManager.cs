@@ -11,6 +11,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using static TrafficManager.State.Flags;
@@ -1274,22 +1275,22 @@ namespace TrafficManager.Manager.Impl {
 
 		private void UpdateHighwayLaneArrows(uint laneId, bool startNode, ArrowDirection dir) {
 
-			Flags.LaneArrows? prevHighwayArrows = Flags.getHighwayLaneArrowFlags(laneId);
-			Flags.LaneArrows newHighwayArrows = Flags.LaneArrows.None;
+			LaneArrows? prevHighwayArrows = Flags.getHighwayLaneArrowFlags(laneId);
+			LaneArrows newHighwayArrows = LaneArrows.None;
 			if (prevHighwayArrows != null)
-				newHighwayArrows = (Flags.LaneArrows)prevHighwayArrows;
+				newHighwayArrows = (LaneArrows)prevHighwayArrows;
 			if (dir == ArrowDirection.Right)
-				newHighwayArrows |= Flags.LaneArrows.Left;
+				newHighwayArrows |= LaneArrows.Left;
 			else if (dir == ArrowDirection.Left)
-				newHighwayArrows |= Flags.LaneArrows.Right;
+				newHighwayArrows |= LaneArrows.Right;
 			else if (dir == ArrowDirection.Forward)
-				newHighwayArrows |= Flags.LaneArrows.Forward;
+				newHighwayArrows |= LaneArrows.Forward;
 
 #if DEBUGROUTING
 			//Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData: highway rules -- next lane {laneId} obeys highway rules. Setting highway lane arrows to {newHighwayArrows}. prevHighwayArrows={prevHighwayArrows}");
 #endif
 
-			if (newHighwayArrows != prevHighwayArrows && newHighwayArrows != Flags.LaneArrows.None) {
+			if (newHighwayArrows != prevHighwayArrows && newHighwayArrows != LaneArrows.None) {
 				Flags.setHighwayLaneArrowFlags(laneId, newHighwayArrows, false);
 			}
 		}

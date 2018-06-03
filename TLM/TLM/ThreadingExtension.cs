@@ -17,7 +17,8 @@ using ColossalFramework.UI;
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Linq.Expressions;
-using CSUtil.Redirection;
+using TrafficManager.RedirectionFramework;
+using TrafficManager.RedirectionFramework;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -49,7 +50,7 @@ namespace TrafficManager {
 					}
 				}
 
-				foreach (KeyValuePair<MethodBase, RedirectCallsState> entry in LoadingExtension.MethodStates) {
+				foreach (KeyValuePair<MethodBase, RedirectCallsState> entry in LoadingExtension.HarmonyMethodStates) {
 					MethodBase method = entry.Key;
 					RedirectCallsState oldState = entry.Value;
 					RedirectCallsState newState = RedirectionHelper.GetState(method.MethodHandle.GetFunctionPointer());
@@ -57,9 +58,9 @@ namespace TrafficManager {
 					if (!oldState.Equals(newState)) {
 						missingDetours.Add($"<Harmony> {method.DeclaringType.Name}.{method.Name} with {method.GetParameters().Length} parameters ({method.DeclaringType.AssemblyQualifiedName})");
 					}
-
-					Log.Info($"ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Detours checked. Result: {missingDetours.Count} missing detours");
 				}
+
+				Log.Info($"ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Detours checked. Result: {missingDetours.Count} missing detours");
 
 				if (missingDetours.Count > 0) {
 					string error = "Traffic Manager: President Edition detected an incompatibility with another mod! You can continue playing but it's NOT recommended. Traffic Manager will not work as expected. See TMPE.log for technical details.";

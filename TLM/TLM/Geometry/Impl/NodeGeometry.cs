@@ -7,6 +7,7 @@ using System.Threading;
 using TrafficManager.Manager;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 

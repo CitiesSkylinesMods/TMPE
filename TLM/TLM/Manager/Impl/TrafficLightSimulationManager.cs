@@ -13,6 +13,8 @@ using TrafficManager.TrafficLight.Impl;
 using TrafficManager.Geometry.Impl;
 using CSUtil.Commons.Benchmark;
 using TrafficManager.TrafficLight.Data;
+using TrafficManager.Traffic.Enums;
+using static RoadBaseAI;
 
 namespace TrafficManager.Manager.Impl {
 	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>>, ITrafficLightSimulationManager {
@@ -22,7 +24,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// For each node id: traffic light simulation assigned to the node
 		/// </summary>
-		public TrafficLightSimulation[] TrafficLightSimulations;
+		public TrafficLightSimulation[] TrafficLightSimulations { get; private set; } = null;
 		//public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations = new Dictionary<ushort, TrafficLightSimulation>();
 
 		private TrafficLightSimulationManager() {
@@ -40,6 +42,165 @@ namespace TrafficManager.Manager.Impl {
 					continue;
 				}
 				Log._Debug($"Simulation {i}: {TrafficLightSimulations[i]}");
+			}
+		}
+
+		public void GetTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState) {
+
+			bool callStockMethod = true;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "callStockMethod")) {
+#endif
+			callStockMethod = !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
+#if BENCHMARK
+			}
+#endif
+
+			if (callStockMethod) {
+				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState);
+			} else {
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "GetCustomTrafficLightState")) {
+#endif
+				GetCustomTrafficLightState(
+#if DEBUG
+						vehicleId, ref vehicleData,
+#endif
+						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, ref TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId]);
+#if BENCHMARK
+				}
+#endif
+			}
+		}
+
+		public void GetTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, ref NetSegment segmentData, uint frame, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, out bool vehicles, out bool pedestrians) {
+
+
+			bool callStockMethod = true;
+
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "callStockMethod")) {
+#endif
+			callStockMethod = !Options.timedLightsEnabled || !TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
+#if BENCHMARK
+			}
+#endif
+
+			if (callStockMethod) {
+				RoadBaseAI.GetTrafficLightState(nodeId, ref segmentData, frame, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+			} else {
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "GetCustomTrafficLightState")) {
+#endif
+				GetCustomTrafficLightState(
+#if DEBUG
+						vehicleId, ref vehicleData,
+#endif
+						nodeId, fromSegmentId, fromLaneIndex, toSegmentId, out vehicleLightState, out pedestrianLightState, ref TrafficLightSimulationManager.Instance.TrafficLightSimulations[nodeId]);
+#if BENCHMARK
+				}
+#endif
+				vehicles = false;
+				pedestrians = false;
+			}
+		}
+
+		// TODO this should be optimized
+		protected void GetCustomTrafficLightState(
+#if DEBUG
+			ushort vehicleId, ref Vehicle vehicleData,
+#endif
+			ushort nodeId, ushort fromSegmentId, byte fromLaneIndex, ushort toSegmentId, out RoadBaseAI.TrafficLightState vehicleLightState, out RoadBaseAI.TrafficLightState pedestrianLightState, ref TrafficLightSimulation nodeSim) {
+
+			// get responsible traffic light
+			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
+			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
+			if (geometry == null) {
+				Log.Error($"GetTrafficLightState: No geometry information @ node {nodeId}, segment {fromSegmentId}.");
+				vehicleLightState = TrafficLightState.Green;
+				pedestrianLightState = TrafficLightState.Green;
+				return;
+			}
+
+			// determine node position at `fromSegment` (start/end)
+			bool isStartNode = geometry.StartNodeId() == nodeId;
+
+			ICustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode, false);
+
+			if (lights != null) {
+				// get traffic lights state for pedestrians
+				pedestrianLightState = (lights.PedestrianLightState != null) ? (RoadBaseAI.TrafficLightState)lights.PedestrianLightState : RoadBaseAI.TrafficLightState.Green;
+			} else {
+				pedestrianLightState = TrafficLightState.Green;
+				Log._Debug($"GetTrafficLightState: No pedestrian light @ node {nodeId}, segment {fromSegmentId} found.");
+			}
+
+			ICustomSegmentLight light = lights == null ? null : lights.GetCustomLight(fromLaneIndex);
+			if (lights == null || light == null) {
+				//Log.Warning($"GetTrafficLightState: No custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex} found. lights null? {lights == null} light null? {light == null}");
+				vehicleLightState = RoadBaseAI.TrafficLightState.Green;
+				return;
+			}
+
+			// get traffic light state from responsible traffic light
+			if (toSegmentId == fromSegmentId) {
+				vehicleLightState = Constants.ServiceFactory.SimulationService.LeftHandDrive ? light.LightRight : light.LightLeft;
+			} else if (geometry.IsLeftSegment(toSegmentId, isStartNode)) {
+				vehicleLightState = light.LightLeft;
+			} else if (geometry.IsRightSegment(toSegmentId, isStartNode)) {
+				vehicleLightState = light.LightRight;
+			} else {
+				vehicleLightState = light.LightMain;
+			}
+#if DEBUG
+			//Log._Debug($"GetTrafficLightState: Getting light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}. vehicleLightState={vehicleLightState}, pedestrianLightState={pedestrianLightState}");
+#endif
+		}
+
+		public void SetVisualState(ushort nodeId, ref NetSegment segmentData, uint frame, RoadBaseAI.TrafficLightState vehicleLightState, RoadBaseAI.TrafficLightState pedestrianLightState, bool vehicles, bool pedestrians) {
+			// stock code from RoadBaseAI.SetTrafficLightState
+
+			int num = (int)pedestrianLightState << 2 | (int)vehicleLightState;
+			if (segmentData.m_startNode == nodeId) {
+				if ((frame >> 8 & 1u) == 0u) {
+					segmentData.m_trafficLightState0 = (byte)((int)(segmentData.m_trafficLightState0 & 240) | num);
+				} else {
+					segmentData.m_trafficLightState1 = (byte)((int)(segmentData.m_trafficLightState1 & 240) | num);
+				}
+				if (vehicles) {
+					segmentData.m_flags |= NetSegment.Flags.TrafficStart;
+				} else {
+					segmentData.m_flags &= ~NetSegment.Flags.TrafficStart;
+				}
+				if (pedestrians) {
+					segmentData.m_flags |= NetSegment.Flags.CrossingStart;
+				} else {
+					segmentData.m_flags &= ~NetSegment.Flags.CrossingStart;
+				}
+			} else {
+				if ((frame >> 8 & 1u) == 0u) {
+					segmentData.m_trafficLightState0 = (byte)((int)(segmentData.m_trafficLightState0 & 15) | num << 4);
+				} else {
+					segmentData.m_trafficLightState1 = (byte)((int)(segmentData.m_trafficLightState1 & 15) | num << 4);
+				}
+				if (vehicles) {
+					segmentData.m_flags |= NetSegment.Flags.TrafficEnd;
+				} else {
+					segmentData.m_flags &= ~NetSegment.Flags.TrafficEnd;
+				}
+				if (pedestrians) {
+					segmentData.m_flags |= NetSegment.Flags.CrossingEnd;
+				} else {
+					segmentData.m_flags &= ~NetSegment.Flags.CrossingEnd;
+				}
 			}
 		}
 
@@ -288,7 +449,7 @@ namespace TrafficManager.Manager.Impl {
 					int j = 0;
 					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
 						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
-						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].TimedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (TrafficLight.StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
+						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].TimedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
 							if (!Services.NetService.IsSegmentValid(e.Key))
@@ -330,7 +491,7 @@ namespace TrafficManager.Manager.Impl {
 								}
 								Configuration.CustomSegmentLight cnfLight = e2.Value;
 
-								light.InternalCurrentMode = (TrafficLight.LightMode)cnfLight.currentMode; // TODO improve & remove
+								light.InternalCurrentMode = (LightMode)cnfLight.currentMode; // TODO improve & remove
 								light.SetStates(cnfLight.mainLight, cnfLight.leftLight, cnfLight.rightLight, false);
 							}
 						}

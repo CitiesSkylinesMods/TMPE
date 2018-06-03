@@ -17,38 +17,34 @@ using TrafficManager.Manager.Impl;
 using System.Runtime.CompilerServices;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.AI {
-	class CustomVehicleAI : VehicleAI { // TODO inherit from PrefabAI (in order to keep the correct references to `base`)
-		//private static readonly int MIN_BLOCK_COUNTER_PATH_RECALC_VALUE = 3;
-
+	[TargetType(typeof(VehicleAI))]
+	public class CustomVehicleAI : VehicleAI { // TODO inherit from PrefabAI (in order to keep the correct references to `base`)
+		[RedirectMethod]
 		public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position position, uint laneID, byte offset, PathUnit.Position prevPos, uint prevLaneID, byte prevOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			CalculateSegPos(vehicleID, ref vehicleData, position, laneID, offset, out pos, out dir, out maxSpeed);
 		}
 
-		public void CustomCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+		[RedirectMethod]
+		public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			CalculateSegPos(vehicleID, ref vehicleData, position, laneID, offset, out pos, out dir, out maxSpeed);
 		}
 
-		protected virtual void CalculateSegPos(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+		public void CalculateSegPos(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager instance = Singleton<NetManager>.instance;
 			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float laneSpeedLimit;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
-#endif
-					laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
-#if BENCHMARK
-				}
-#endif
+				float laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit; // NON-STOCK CODE
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, laneSpeedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
 			}
 		}
 
+		[RedirectMethod]
 		protected void CustomUpdatePathTargetPositions(ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos, ref int targetPosIndex, int maxTargetPosIndex, float minSqrDistanceA, float minSqrDistanceB) {
 			PathManager pathMan = Singleton<PathManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
@@ -195,14 +191,7 @@ namespace TrafficManager.Custom.AI {
 						this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
 						!this.m_info.m_isLargeVehicle
 					) {
-						bool mayFindBestLane = false;
-#if BENCHMARK
-						using (var bm = new Benchmark(null, "MayFindBestLane")) {
-#endif
-							mayFindBestLane = VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID]);
-#if BENCHMARK
-						}
-#endif
+						bool mayFindBestLane = VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID]);
 
 						if (mayFindBestLane) {
 							uint next2PathId = nextPathId;
@@ -238,13 +227,7 @@ namespace TrafficManager.Custom.AI {
 								next4PathPos = default(PathUnit.Position);
 							}
 
-#if BENCHMARK
-							using (var bm = new Benchmark(null, "FindBestLane")) {
-#endif
-								bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
-#if BENCHMARK
-							}
-#endif
+							bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
 						}
 						// NON-STOCK CODE END
 					}
@@ -254,18 +237,8 @@ namespace TrafficManager.Custom.AI {
 				if (bestLaneIndex != (int)nextPathPos.m_lane) {
 					nextPathPos.m_lane = (byte)bestLaneIndex;
 					pathMan.m_pathUnits.m_buffer[nextPathId].SetPosition(nextCoarsePathPosIndex, nextPathPos);
-#if BENCHMARK
-					using (var bm = new Benchmark(null, "AddTraffic")) {
-#endif
-						// prevent multiple lane changes to the same lane from happening at the same time
-						TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane
-#if MEASUREDENSITY
-								, VehicleStateManager.Instance.VehicleStates[vehicleID].totalLength
-#endif
-								, 0); // NON-STOCK CODE
-#if BENCHMARK
-					}
-#endif
+					// prevent multiple lane changes to the same lane from happening at the same time
+					TrafficMeasurementManager.Instance.AddTraffic(nextPathPos.m_segment, nextPathPos.m_lane, 0); // NON-STOCK CODE
 				}
 
 				// check for errors
@@ -474,6 +447,7 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static int FindBestLane(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position) {
 			Log.Error("CustomVehicleAI.FindBestLane called");

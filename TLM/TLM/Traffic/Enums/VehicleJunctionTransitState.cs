@@ -1,4 +1,4 @@
-namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic.Enums {
 	public enum VehicleJunctionTransitState {
 		/// <summary>
 		/// Represents an unknown/ignored state

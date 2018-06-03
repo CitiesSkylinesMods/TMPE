@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TrafficManager.Geometry {
+namespace TrafficManager.Traffic.Enums {
 	public enum GeometryCalculationMode {
 		Init,
 		Propagate,

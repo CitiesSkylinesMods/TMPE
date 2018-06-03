@@ -69,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
-			Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
+			//Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
 			DestroySegmentEnd(GetIndex(segmentId, startNode));
 		}
 
@@ -131,7 +131,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void DestroySegmentEnd(int index) {
 #if DEBUG
-			Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
+			//Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
 #endif
 			SegmentEnds[index]?.Destroy();
 			SegmentEnds[index] = null;

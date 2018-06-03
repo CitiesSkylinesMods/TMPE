@@ -14,6 +14,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using System.Reflection;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.State {
 
@@ -87,7 +88,6 @@ namespace TrafficManager.State {
 		private static UIButton resetGlobalConfBtn = null;
 
 		public static bool instantEffects = true;
-		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
 		public static bool realisticSpeeds = true;
 		public static int recklessDrivers = 3;
@@ -136,7 +136,7 @@ namespace TrafficManager.State {
 		public static bool showLanes = false;
 #endif
 		public static bool strongerRoadConditionEffects = false;
-		public static bool prohibitPocketCars = false;
+		public static bool parkingAI = false;
 		public static bool disableDespawning = false;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
@@ -221,7 +221,6 @@ namespace TrafficManager.State {
 			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Show_error_message_if_a_mod_incompatibility_is_detected"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
-			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
 			instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
 
 			// GAMEPLAY
@@ -253,7 +252,7 @@ namespace TrafficManager.State {
 			altLaneSelectionRatioSlider = vehAiGroup.AddSlider(Translation.GetString("Dynamic_lane_section") + ":", 0, 100, 5, altLaneSelectionRatio, onAltLaneSelectionRatioChanged) as UISlider;
 
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
-			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
+			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), parkingAI, onProhibitPocketCarsChanged) as UICheckBox;
 
 			var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
 			realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
@@ -652,14 +651,6 @@ namespace TrafficManager.State {
 			instantEffects = newValue;
 		}
 
-		private static void onSimAccuracyChanged(int newAccuracy) {
-			if (!checkGameLoaded())
-				return;
-
-			Log._Debug($"Simulation accuracy changed to {newAccuracy}");
-			simAccuracy = newAccuracy;
-		}
-
 		private static void onVehicleRestrictionsAggressionChanged(int newValue) {
 			if (!checkGameLoaded())
 				return;
@@ -883,8 +874,8 @@ namespace TrafficManager.State {
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
 
-			prohibitPocketCars = newValue;
-			if (prohibitPocketCars) {
+			parkingAI = newValue;
+			if (parkingAI) {
 				AdvancedParkingManager.Instance.OnEnableFeature();
 			} else {
 				AdvancedParkingManager.Instance.OnDisableFeature();
@@ -1009,12 +1000,6 @@ namespace TrafficManager.State {
 
 		private static void onClickResetGlobalConf() {
 			GlobalConfig.Reset(null, true);
-		}
-
-		public static void setSimAccuracy(int newAccuracy) {
-			simAccuracy = newAccuracy;
-			if (simAccuracyDropdown != null)
-				simAccuracyDropdown.selectedIndex = newAccuracy;
 		}
 
 		public static void setVehicleRestrictionsAggression(VehicleRestrictionsAggression val) {
@@ -1149,8 +1134,8 @@ namespace TrafficManager.State {
 		}
 
 		public static void setProhibitPocketCars(bool newValue) {
-			bool valueChanged = newValue != prohibitPocketCars;
-			prohibitPocketCars = newValue;
+			bool valueChanged = newValue != parkingAI;
+			parkingAI = newValue;
 			if (prohibitPocketCarsToggle != null)
 				prohibitPocketCarsToggle.isChecked = newValue;
 		}

@@ -19,8 +19,11 @@ using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.PathFinding {
+	[TargetType(typeof(PathFind))]
 	public class CustomPathFind : PathFind {
 		private struct BufferItem {
 			public PathUnit.Position m_position;
@@ -212,6 +215,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
+		[RedirectMethod]
 		public new bool CalculatePath(uint unit, bool skipQueue) {
 			return ExtCalculatePath(unit, skipQueue);
 		}
@@ -504,7 +508,7 @@ namespace TrafficManager.Custom.PathFinding {
 								this.ProcessItemMain(unit, candidateItem, ref instance.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.segmentRoutings[candidateItem.m_position.m_segment], routingManager.laneEndBackwardRoutings[0], specialNodeId, false, ref instance.m_nodes.m_buffer[specialNodeId], laneOffset, true);
 							}
 							specialNodeId = instance.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
-							if (++num6 == 32768) {
+							if (++num6 >= NetManager.MAX_NODE_COUNT) {
 								Log.Warning("Special loop: Too many iterations");
 								break;
 							}
@@ -917,7 +921,7 @@ namespace TrafficManager.Custom.PathFinding {
 					// NON-STOCK CODE START
 					// switch from vehicle to pedestrian lane (parking)
 					bool parkingAllowed = true;
-					if (Options.prohibitPocketCars) {
+					if (Options.parkingAI) {
 						if (queueItem.vehicleType == ExtVehicleType.PassengerCar) {
 							if ((byte)(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 								// if pocket cars are prohibited, a citizen may only park their car once per path
@@ -1005,9 +1009,9 @@ namespace TrafficManager.Custom.PathFinding {
 						parkingConnectOffset = 128;
 					} else {
 						// pocket car spawning
-						if (Options.prohibitPocketCars &&
+						if (Options.parkingAI &&
 								queueItem.vehicleType == ExtVehicleType.PassengerCar &&
-								(queueItem.pathType == ExtCitizenInstance.ExtPathType.WalkingOnly || (queueItem.pathType == ExtCitizenInstance.ExtPathType.DrivingOnly && item.m_position.m_segment != _startSegmentA && item.m_position.m_segment != _startSegmentB))) {
+								(queueItem.pathType == ExtPathType.WalkingOnly || (queueItem.pathType == ExtPathType.DrivingOnly && item.m_position.m_segment != _startSegmentA && item.m_position.m_segment != _startSegmentB))) {
 							allowPedestrian = false;
 						} else {
 							parkingConnectOffset = (byte)this._pathRandomizer.UInt32(1u, 254u);

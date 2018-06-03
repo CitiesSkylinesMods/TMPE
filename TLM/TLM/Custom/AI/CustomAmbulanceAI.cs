@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using TrafficManager.RedirectionFramework.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,16 +9,15 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
-	class CustomAmbulanceAI : CarAI {
+	[TargetType(typeof(AmbulanceAI))]
+	public class CustomAmbulanceAI : CarAI {
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-#if DEBUG
-			//Log._Debug($"CustomAmbulanceAI.CustomStartPathFind called for vehicle {vehicleID}");
-#endif
-
 			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
 
 			VehicleInfo info = this.m_info;
@@ -41,7 +41,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = vehicleType;
 				args.vehicleId = vehicleID;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
@@ -62,7 +62,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = false;
 				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

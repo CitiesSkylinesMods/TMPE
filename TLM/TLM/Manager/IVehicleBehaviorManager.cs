@@ -3,11 +3,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic.Data;
+using UnityEngine;
 
 namespace TrafficManager.Manager {
 	public interface IVehicleBehaviorManager {
 		// TODO define me!
 		// TODO documentation
+
+		/// <summary>
+		/// Tries to park a passenger car near its current position.
+		/// </summary>
+		/// <param name="vehicleID">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="vehicleInfo">vehicle info</param>
+		/// <param name="driverCitizenId">driver citizen id</param>
+		/// <param name="driverCitizenInstanceId">driver citizen instance id</param>
+		/// <param name="driverExtInstance">driver extended citizen instance</param>
+		/// <param name="targetBuildingId">target building id</param>
+		/// <param name="pathPos">current path position</param>
+		/// <param name="nextPath">next path unit id</param>
+		/// <param name="nextPositionIndex">next path position index</param>
+		/// <param name="segmentOffset">current segment offset</param>
+		/// <returns><code>true</code> if parking (will) succeed, <code>false</code> otherwise</returns>
+		bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ushort driverCitizenInstanceId, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset);
+
+		/// <summary>
+		/// Starts path-finding for a passenger car.
+		/// </summary>
+		/// <param name="vehicleID">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="vehicleInfo">vehicle info (in stock code, this is passed via VehicleAI.m_info. Don't know if this is actually always equal to vehicleData.Info)</param>
+		/// <param name="driverInstanceId">driver citizen instance id</param>
+		/// <param name="driverExtInstance">driver extended citizen instance</param>
+		/// <param name="startPos">start position</param>
+		/// <param name="endPos">end position</param>
+		/// <param name="startBothWays">allow considering both road sides at start position?</param>
+		/// <param name="endBothWays">allow considering both road sides at end position?</param>
+		/// <param name="undergroundTarget">is target in undeground?</param>
+		/// <param name="isHeavyVehicle">is this a heavy vehicle?</param>
+		/// <param name="hasCombustionEngine">does the vehicle have a combustion engine?</param>
+		/// <param name="ignoreBlocked">should blocked roads be ignored?</param>
+		/// <returns></returns>
+		bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked);
 
 		/// <summary>
 		/// Checks if space reservation at <paramref name="targetPos"/> is allowed. When a custom traffic light is active at the transit node

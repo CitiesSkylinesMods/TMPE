@@ -145,7 +145,7 @@ namespace TrafficManager.Manager.Impl {
 			return curRelSpeed;
 		}
 
-		public void SimulationStep(ushort segmentId, ref NetSegment segment) {
+		public void OnBeforeSimulationStep(ushort segmentId, ref NetSegment segment) {
 			GlobalConfig conf = GlobalConfig.Instance;
 			
 			// calculate traffic density

@@ -38,6 +38,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public IExtPathManager ExtPathManager {
+			get {
+				return Impl.ExtPathManager.Instance;
+			}
+		}
+
 		public IJunctionRestrictionsManager JunctionRestrictionsManager {
 			get {
 				return Impl.JunctionRestrictionsManager.Instance;

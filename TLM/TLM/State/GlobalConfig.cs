@@ -1,6 +1,4 @@
-﻿#define RUSHHOUR
-
-using ColossalFramework;
+﻿using ColossalFramework;
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
@@ -22,16 +20,6 @@ namespace TrafficManager.State {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
 		private static int LATEST_VERSION = 14;
-#if DEBUG
-		private static uint lastModificationCheckFrame = 0;
-#endif
-
-		public static int? RushHourParkingSearchRadius { get; private set; } = null;
-
-#if RUSHHOUR
-		private static DateTime? rushHourConfigModifiedTime = null;
-		private const string RUSHHOUR_CONFIG_FILENAME = "RushHourOptions.xml";
-#endif
 
 		public static GlobalConfig Instance {
 			get {
@@ -63,10 +51,6 @@ namespace TrafficManager.State {
 		}
 
 		internal static void OnLevelUnloading() {
-#if RUSHHOUR
-			rushHourConfigModifiedTime = null;
-			RushHourParkingSearchRadius = null;
-#endif
 		}
 
 		private static DateTime ModifiedTime = DateTime.MinValue;
@@ -243,67 +227,5 @@ namespace TrafficManager.State {
 				Log.Warning("Could not determine modification date of global config.");
 			}
 		}
-
-#if RUSHHOUR
-		private static void ReloadRushHourConfigIfNewer() { // TODO refactor
-			try {
-				DateTime newModifiedTime = File.GetLastWriteTime(RUSHHOUR_CONFIG_FILENAME);
-				if (rushHourConfigModifiedTime != null) {
-					if (newModifiedTime <= rushHourConfigModifiedTime)
-						return;
-				}
-
-				rushHourConfigModifiedTime = newModifiedTime;
-
-				XmlDocument doc = new XmlDocument();
-				doc.Load(RUSHHOUR_CONFIG_FILENAME);
-				XmlNode root = doc.DocumentElement;
-
-				XmlNode betterParkingNode = root.SelectSingleNode("OptionPanel/data/BetterParking");
-				XmlNode parkingSpaceRadiusNode = root.SelectSingleNode("OptionPanel/data/ParkingSearchRadius");
-
-				if ("True".Equals(betterParkingNode.InnerText)) {
-					RushHourParkingSearchRadius = int.Parse(parkingSpaceRadiusNode.InnerText);
-				}
-
-				Log._Debug($"RushHour config has changed. Setting searchRadius={RushHourParkingSearchRadius}");
-			} catch (Exception ex) {
-				Log.Error("GlobalConfig.ReloadRushHourConfigIfNewer: " + ex.ToString());
-			}
-		}
-#endif
-
-		public void SimulationStep() {
-#if RUSHHOUR
-			if (LoadingExtension.IsRushHourLoaded) {
-				ReloadRushHourConfigIfNewer();
-			}
-#endif
-		}
-
-		/*public IDisposable Subscribe(IObserver<GlobalConfig> observer) {
-			try {
-				Monitor.Enter(ObserverLock);
-				Log.Info($"Adding {observer} as observer of global config");
-				observers.Add(observer);
-			} finally {
-				Monitor.Exit(ObserverLock);
-			}
-			return new GenericUnsubscriber<GlobalConfig>(observers, observer, ObserverLock);
-		}*/
-
-		/*protected void NotifyObservers() {
-			//Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
-
-			List<IObserver<GlobalConfig>> myObservers = new List<IObserver<GlobalConfig>>(observers); // in case somebody unsubscribes while iterating over subscribers
-			foreach (IObserver<GlobalConfig> observer in myObservers) {
-				try {
-					Log.Info($"Notifying global config observer {observer}");
-					observer.OnUpdate(this);
-				} catch (Exception e) {
-					Log.Error($"GlobalConfig.NotifyObservers: An exception occured while notifying an observer of global config: {e}");
-				}
-			}
-		}*/
 	}
 }

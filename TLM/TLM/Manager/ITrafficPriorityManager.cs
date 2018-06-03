@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic.Enums;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.Manager {

@@ -4,68 +4,11 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager {
-	/// <summary>
-	/// Indicates if a private car [may]/[shall]/[must not] be used
-	/// </summary>
-	public enum CarUsagePolicy {
-		/// <summary>
-		/// Citizens may use their own car
-		/// </summary>
-		Allowed,
-		/// <summary>
-		/// Citizens are forced to use their car
-		/// </summary>
-		Forced,
-		/// <summary>
-		/// Citizens are forbidden to use their car
-		/// </summary>
-		Forbidden
-	}
-
-	/// <summary>
-	/// Indicates the current state while approaching a private car
-	/// </summary>
-	public enum ParkedCarApproachState {
-		/// <summary>
-		/// Citizen is not approaching their parked car
-		/// </summary>
-		None,
-		/// <summary>
-		/// Citizen is currently approaching their parked car
-		/// </summary>
-		Approaching,
-		/// <summary>
-		/// Citizen has approaching their parked car
-		/// </summary>
-		Approached,
-		/// <summary>
-		/// Citizen failed to approach their parked car
-		/// </summary>
-		Failure
-	}
-
-	/// <summary>
-	/// Represents the reason why a parked car could not be spawned
-	/// </summary>
-	public enum ParkingUnableReason {
-		/// <summary>
-		/// Parked car could be spawned
-		/// </summary>
-		None,
-		/// <summary>
-		/// No free parking space was found
-		/// </summary>
-		NoSpaceFound,
-		/// <summary>
-		/// The maximum allowed number of parked vehicles has been reached
-		/// </summary>
-		LimitHit
-	}
-
 	public interface IAdvancedParkingManager : IFeatureManager {
 		/// <summary>
 		/// Determines the color the given building should be colorized with given the current info view mode.
@@ -95,6 +38,16 @@ namespace TrafficManager.Manager {
 		/// <param name="driverExtInstance">extended citizen instance data</param>
 		/// <returns></returns>
 		string EnrichLocalizedCarStatus(string ret, ref ExtCitizenInstance driverExtInstance);
+
+		/// <summary>
+		/// Makes the given citizen instance enter their parked car.
+		/// </summary>
+		/// <param name="instanceID">Citizen instance id</param>
+		/// <param name="instanceData">Citizen instance data</param>
+		/// <param name="parkedVehicleId">Parked vehicle id</param>
+		/// <param name="vehicleId">Vehicle id</param>
+		/// <returns>true if entering the car succeeded, false otherwise</returns>
+		bool EnterParkedCar(ushort instanceID, ref CitizenInstance instanceData, ushort parkedVehicleId, out ushort vehicleId);
 
 		/// <summary>
 		/// Merges the current calculation states of the citizen's main path and return path (while walking).
@@ -234,6 +187,7 @@ namespace TrafficManager.Manager {
 		/// Tries to find a parking space in the broaded vicinity of the given position <paramref name="targetPos"/>.
 		/// </summary>
 		/// <param name="targetPos">Target position that is used as a center point for the search procedure</param>
+		/// <param name="searchDir">Search direction</param>
 		/// <param name="vehicleInfo">Vehicle that shall be parked (used for gathering vehicle geometry information)</param>
 		/// <param name="homeId">Home building id of the citizen (citizens are not allowed to park their car on foreign residential premises)</param>
 		/// <param name="vehicleId">Vehicle that shall be parked</param>
@@ -244,7 +198,7 @@ namespace TrafficManager.Manager {
 		/// <param name="parkRot">identified parking space rotation (only valid if method returns true)</param>
 		/// <param name="parkOffset">identified parking space offset (only valid if method returns true)</param>
 		/// <returns>true if a parking space could be found, false otherwise</returns>
-		bool FindParkingSpaceInVicinity(Vector3 targetPos, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset);
+		bool FindParkingSpaceInVicinity(Vector3 targetPos, Vector3 searchDir, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset);
 
 		/// <summary>
 		/// Tries to find a parking space for a moving vehicle at a given segment. The search

@@ -9,6 +9,7 @@ using TrafficManager.Custom.AI;
 using CSUtil.Commons;
 using TrafficManager.State;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Impl {
 	/// <summary>
@@ -301,7 +302,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			ushort nodeId = lights.NodeId;
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			uint num = (uint)(((int)nodeId << 8) / 32768);
+			uint simGroup = (uint)nodeId >> 7;
 
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
@@ -333,9 +334,9 @@ namespace TrafficManager.TrafficLight.Impl {
 			Log._Debug($"Setting visual traffic light state of node {NodeId}, seg. {SegmentId} to vehicleState={vehicleLightState} pedState={pedestrianLightState}");
 #endif
 
-			uint now = ((currentFrameIndex - num) >> 8) & 1;
-			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
-			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
+			uint now = ((currentFrameIndex - simGroup) >> 8) & 1;
+			Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(nodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
+			Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(nodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
 		}
 
 		public RoadBaseAI.TrafficLightState GetVisualLightState() {

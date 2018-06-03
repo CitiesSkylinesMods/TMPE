@@ -7,6 +7,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {

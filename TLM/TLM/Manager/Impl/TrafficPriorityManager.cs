@@ -13,6 +13,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
 	public class TrafficPriorityManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>>, ITrafficPriorityManager {
@@ -74,14 +75,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public enum UnableReason {
-			None,
-			NoJunction,
-			HasTimedLight,
-			InvalidSegment,
-			NotIncoming
-		}
-
 		public const float MAX_SQR_STOP_VELOCITY = 0.01f;
 		public const float MAX_SQR_YIELD_VELOCITY = 0.09f;
 		public const float MAX_YIELD_VELOCITY = 0.3f;
@@ -110,36 +103,36 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MayNodeHavePrioritySigns(ushort nodeId) {
-			UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			return MayNodeHavePrioritySigns(nodeId, out reason);
 		}
 
-		public bool MayNodeHavePrioritySigns(ushort nodeId, out UnableReason reason) {
+		public bool MayNodeHavePrioritySigns(ushort nodeId, out SetPrioritySignUnableReason reason) {
 			if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
-				reason = UnableReason.NoJunction;
+				reason = SetPrioritySignUnableReason.NoJunction;
 				//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
 				return false;
 			}
 
 			if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-				reason = UnableReason.HasTimedLight;
+				reason = SetPrioritySignUnableReason.HasTimedLight;
 				//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
 				return false;
 			}
 
 			//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=true");
-			reason = UnableReason.None;
+			reason = SetPrioritySignUnableReason.None;
 			return true;
 		}
 
 		public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode) {
-			UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			return MaySegmentHavePrioritySign(segmentId, startNode, out reason);
 		}
 
-		public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out UnableReason reason) {
+		public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out SetPrioritySignUnableReason reason) {
 			if (! Services.NetService.IsSegmentValid(segmentId)) {
-				reason = UnableReason.InvalidSegment;
+				reason = SetPrioritySignUnableReason.InvalidSegment;
 				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
 				return false;
 			}
@@ -152,24 +145,24 @@ namespace TrafficManager.Manager.Impl {
 			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
 
 			if (endGeo.OutgoingOneWay) {
-				reason = UnableReason.NotIncoming;
+				reason = SetPrioritySignUnableReason.NotIncoming;
 				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
 				return false;
 			}
 
 			Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=true");
-			reason = UnableReason.None;
+			reason = SetPrioritySignUnableReason.None;
 			return true;
 		}
 
 		public bool MaySegmentHavePrioritySign(ushort segmentId) {
-			UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			return MaySegmentHavePrioritySign(segmentId, out reason);
 		}
 
-		public bool MaySegmentHavePrioritySign(ushort segmentId, out UnableReason reason) {
+		public bool MaySegmentHavePrioritySign(ushort segmentId, out SetPrioritySignUnableReason reason) {
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
-				reason = UnableReason.InvalidSegment;
+				reason = SetPrioritySignUnableReason.InvalidSegment;
 				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result=false, reason={reason}");
 				return false;
 			}
@@ -203,13 +196,13 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type) {
-			UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			return SetPrioritySign(segmentId, startNode, type, out reason);
 		}
 
-		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out UnableReason reason) {
+		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out SetPrioritySignUnableReason reason) {
 			bool ret = true;
-			reason = UnableReason.None;
+			reason = SetPrioritySignUnableReason.None;
 
 			if (type != PriorityType.None &&
 				! MaySegmentHavePrioritySign(segmentId, startNode, out reason)) {
@@ -222,7 +215,7 @@ namespace TrafficManager.Manager.Impl {
 				SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
 				if (segGeo == null) {
 					Log.Error($"TrafficPriorityManager.SetPrioritySign: No geometry information available for segment {segmentId}");
-					reason = UnableReason.InvalidSegment;
+					reason = SetPrioritySignUnableReason.InvalidSegment;
 					return false;
 				}
 
@@ -362,18 +355,16 @@ namespace TrafficManager.Manager.Impl {
 			}*/
 
 			// calculate approx. time after which the transit node will be reached
-			float targetTimeToTransitNode = Single.NaN;
-			if (Options.simAccuracy <= 1) {
-				Vector3 targetToNode = transitNode.m_position - vehicle.GetLastFramePosition();
-				Vector3 targetVel = vehicle.GetLastFrameVelocity();
-				float targetSpeed = targetVel.magnitude;
-				float targetDistanceToTransitNode = targetToNode.magnitude;
+			Vector3 targetToNode = transitNode.m_position - vehicle.GetLastFramePosition();
+			Vector3 targetVel = vehicle.GetLastFrameVelocity();
+			float targetSpeed = targetVel.magnitude;
+			float targetDistanceToTransitNode = targetToNode.magnitude;
 
-				if (targetSpeed > 0)
-					targetTimeToTransitNode = targetDistanceToTransitNode / targetSpeed;
-				else
-					targetTimeToTransitNode = 0;
-			}
+			float targetTimeToTransitNode = Single.NaN;
+			if (targetSpeed > 0)
+				targetTimeToTransitNode = targetDistanceToTransitNode / targetSpeed;
+			else
+				targetTimeToTransitNode = 0;
 
 #if DEBUG
 			if (debug)
@@ -472,7 +463,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 #endif
 
-			if ((incomingState.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+			if ((incomingState.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUG
 				if (debug)
 					Log.Warning($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming vehicle is not spawned.");
@@ -545,8 +536,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 					// check if estimated approach time of the incoming vehicle is within bounds (only if incoming vehicle is far enough away from the junction and target vehicle is moving)
-					if (Options.simAccuracy <= 1 &&
-						!Single.IsInfinity(targetTimeToTransitNode) &&
+					if (!Single.IsInfinity(targetTimeToTransitNode) &&
 						!Single.IsNaN(targetTimeToTransitNode) &&
 						incomingToNode.sqrMagnitude > GlobalConfig.Instance.PriorityRules.MaxPriorityCheckSqrDist
 					) {
@@ -1045,7 +1035,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected void UpdateNode(ushort nodeId) {
-			UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			if (! MayNodeHavePrioritySigns(nodeId, out reason)) {
 				RemovePrioritySignsFromNode(nodeId);
 				return;

@@ -10,6 +10,7 @@ using TrafficManager.Traffic;
 using CSUtil.Commons;
 using TrafficManager.TrafficLight.Impl;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
 	/// <summary>

@@ -12,6 +12,7 @@ using TrafficManager.Util;
 using UnityEngine;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
 	public class LaneConnectionManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>>, ILaneConnectionManager {
@@ -471,7 +472,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			Flags.LaneArrows arrows = Flags.LaneArrows.None;
+			LaneArrows arrows = LaneArrows.None;
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
@@ -524,23 +525,23 @@ namespace TrafficManager.Manager.Impl {
 				switch (dir) {
 					case ArrowDirection.Turn:
 						if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-							if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
+							if ((arrows & LaneArrows.Right) != LaneArrows.None)
 								continue;
 						} else {
-							if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
+							if ((arrows & LaneArrows.Left) != LaneArrows.None)
 								continue;
 						}
 						break;
 					case ArrowDirection.Forward:
-						if ((arrows & Flags.LaneArrows.Forward) != Flags.LaneArrows.None)
+						if ((arrows & LaneArrows.Forward) != LaneArrows.None)
 							continue;
 						break;
 					case ArrowDirection.Left:
-						if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
+						if ((arrows & LaneArrows.Left) != LaneArrows.None)
 							continue;
 						break;
 					case ArrowDirection.Right:
-						if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
+						if ((arrows & LaneArrows.Right) != LaneArrows.None)
 							continue;
 						break;
 					default:
@@ -576,19 +577,19 @@ namespace TrafficManager.Manager.Impl {
 					switch (dir) {
 						case ArrowDirection.Turn:
 							if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-								arrows |= Flags.LaneArrows.Right;
+								arrows |= LaneArrows.Right;
 							} else {
-								arrows |= Flags.LaneArrows.Left;
+								arrows |= LaneArrows.Left;
 							}
 							break;
 						case ArrowDirection.Forward:
-							arrows |= Flags.LaneArrows.Forward;
+							arrows |= LaneArrows.Forward;
 							break;
 						case ArrowDirection.Left:
-							arrows |= Flags.LaneArrows.Left;
+							arrows |= LaneArrows.Left;
 							break;
 						case ArrowDirection.Right:
-							arrows |= Flags.LaneArrows.Right;
+							arrows |= LaneArrows.Right;
 							break;
 						default:
 							continue;

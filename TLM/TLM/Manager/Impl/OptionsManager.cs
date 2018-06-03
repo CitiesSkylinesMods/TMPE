@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
 	public class OptionsManager : AbstractCustomManager, IOptionsManager {
@@ -22,7 +23,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool LoadData(byte[] data) {
 			if (data.Length >= 1) {
-				Options.setSimAccuracy(data[0]);
+				//Options.setSimAccuracy(data[0]);
 			}
 
 			if (data.Length >= 2) {
@@ -182,7 +183,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public byte[] SaveData(ref bool success) {
 			return new byte[] {
-						(byte)Options.simAccuracy,
+						(byte)0,//Options.simAccuracy,
 						(byte)0,//Options.laneChangingRandomization,
 						(byte)Options.recklessDrivers,
 						(byte)(Options.relaxedBusses ? 1 : 0),
@@ -207,7 +208,7 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.laneConnectorEnabled ? 1 : 0),
 						(byte)(Options.junctionRestrictionsOverlay ? 1 : 0),
 						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0),
-						(byte)(Options.prohibitPocketCars ? 1 : 0),
+						(byte)(Options.parkingAI ? 1 : 0),
 						(byte)(Options.preferOuterLane ? 1 : 0),
 						(byte)(Options.realisticSpeeds ? 1 : 0),
 						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
