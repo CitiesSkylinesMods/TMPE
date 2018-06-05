@@ -739,9 +739,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			prioritySignsEnabled = val;
-			if (val) {
-				VehicleStateManager.Instance.InitAllVehicles();
-			} else {
+			if (!val) {
 				setPrioritySignsOverlay(false);
 				setTrafficLightPriorityRules(false);
 			}
@@ -753,9 +751,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			timedLightsEnabled = val;
-			if (val) {
-				VehicleStateManager.Instance.InitAllVehicles();
-			} else {
+			if (!val) {
 				setTimedLightsOverlay(false);
 				setTrafficLightPriorityRules(false);
 			}

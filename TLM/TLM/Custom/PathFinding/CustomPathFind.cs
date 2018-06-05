@@ -1723,7 +1723,7 @@ namespace TrafficManager.Custom.PathFinding {
 							nextItem.m_methodDistance = methodDistance + distance;
 						}
 
-						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, laneIndex, curLaneId, nextLaneInfo); // SpeedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, laneIndex, curLaneId, ref lane3); // NON-STOCK CODE
+						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (byte)laneIndex, curLaneId, nextLaneInfo); // SpeedLimitManager.GetLockFreeGameSpeedLimit(nextSegmentId, laneIndex, curLaneId, ref lane3); // NON-STOCK CODE
 						if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 							nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * this._maxLength); // NON-STOCK CODE
 							nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
@@ -2004,7 +2004,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 						// NON-STOCK CODE START //
-						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, laneIndex, curLaneId, nextLaneInfo);
+						float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (byte)laneIndex, curLaneId, nextLaneInfo);
 						float customDeltaCost = 0f;
 						// NON-STOCK CODE END //
 
@@ -2508,7 +2508,7 @@ namespace TrafficManager.Custom.PathFinding {
 					nextItem.m_methodDistance = methodDistance + distance;
 				}
 
-				float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (uint)nextLaneIndex, nextLaneId, nextLaneInfo); // NON-STOCK CODE
+				float nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (byte)nextLaneIndex, nextLaneId, nextLaneInfo); // NON-STOCK CODE
 				if (nextLaneInfo.m_laneType != NetInfo.LaneType.Pedestrian || nextItem.m_methodDistance < _conf.PathFinding.MaxWalkingDistance || _stablePath) {
 					nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.25f * this._maxLength);
 					nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextMaxSpeed) * 0.5f);
@@ -2803,8 +2803,8 @@ namespace TrafficManager.Custom.PathFinding {
 		/// <param name="laneId"></param>
 		/// <param name="lane"></param>
 		/// <returns></returns>
-		protected virtual float GetLaneSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane lane) {
-			return Options.customSpeedLimitsEnabled ? speedLimitManager.GetLockFreeGameSpeedLimit(segmentId, (uint)laneIndex, laneId, lane) : lane.m_speedLimit;
+		protected virtual float GetLaneSpeedLimit(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane lane) {
+			return Options.customSpeedLimitsEnabled ? speedLimitManager.GetLockFreeGameSpeedLimit(segmentId, laneIndex, laneId, lane) : lane.m_speedLimit;
 		}
 	}
 }

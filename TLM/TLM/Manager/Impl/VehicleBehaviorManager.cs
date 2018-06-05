@@ -78,7 +78,6 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="frontVehicleId">vehicle id</param>
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="sqrVelocity">last frame squared velocity</param>
-		/// <param name="isRecklessDriver">if true, this vehicle ignores red traffic lights and priority signs</param>
 		/// <param name="prevPos">previous path position</param>
 		/// <param name="prevTargetNodeId">previous target node</param>
 		/// <param name="prevLaneID">previous lane</param>
@@ -89,7 +88,11 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="nextTargetNodeId">next target node</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
+		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
+			return MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.VehicleStateManager.VehicleStates[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref nextPosition, nextTargetNodeId, out maxSpeed);
+		}
+
+		protected bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 			//public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || targetNodeId == GlobalConfig.Instance.Debug.NodeId);
@@ -125,16 +128,19 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
+			bool isRecklessDriver = vehicleState.recklessDriver;
+
 			var netManager = Singleton<NetManager>.instance;
 
 			bool hasActiveTimedSimulation = (Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId));
 			bool hasTrafficLightFlag = (targetNode.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
-			bool hasTrafficLight = hasTrafficLightFlag || hasActiveTimedSimulation;
 			if (hasActiveTimedSimulation && !hasTrafficLightFlag) {
 				TrafficLightManager.Instance.AddTrafficLight(targetNodeId, ref targetNode);
 			}
-			bool checkTrafficLights = hasActiveTimedSimulation;
+			bool hasTrafficLight = hasTrafficLightFlag || hasActiveTimedSimulation;
+			bool checkTrafficLights = true;
 			bool isTargetStartNode = prevSegment.m_startNode == targetNodeId;
+			bool isLevelCrossing = (targetNode.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 			if ((vehicleData.Info.m_vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) == VehicleInfo.VehicleType.None) {
 				// check if to check space
 
@@ -208,15 +214,20 @@ namespace TrafficManager.Manager.Impl {
 #endif
 				}
 
-				checkTrafficLights = checkTrafficLights || (((NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags & NetLane.Flags.JoinedJunction) == NetLane.Flags.None || (targetNode.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None);
+				bool isJoinedJunction = ((NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
+				checkTrafficLights = !isJoinedJunction || isLevelCrossing;
 			} else {
 #if DEBUG
 				if (debug)
 					Log._Debug($"CustomVehicleAI.MayChangeSegment: Vehicle {frontVehicleId} is a train/metro/monorail.");
 #endif
 
-				if (vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Monorail) {
-					checkTrafficLights = true;
+				if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Monorail) {
+					// vanilla traffic light flags are not rendered on monorail tracks
+					checkTrafficLights = hasActiveTimedSimulation;
+				} else if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
+					// vanilla traffic light flags are not rendered on train tracks, except for level crossings
+					checkTrafficLights = hasActiveTimedSimulation || isLevelCrossing;
 				}
 			}
 
@@ -244,14 +255,6 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 					var destinationInfo = targetNode.Info;
-
-					//					if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
-					//#if DEBUG
-					//						if (debug)
-					//							Log._Debug($"Vehicle {vehicleId}: Setting JunctionTransitState to ENTER (1)");
-					//#endif
-					//						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
-					//					}
 
 					uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 					uint targetNodeLower8Bits = (uint)((targetNodeId << 8) / 32768);
@@ -341,6 +344,7 @@ namespace TrafficManager.Manager.Impl {
 							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 #endif
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
 							vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
 							vehicleData.m_waitCounter = 0;
@@ -572,7 +576,6 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="frontVehicleId">vehicle id</param>
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="sqrVelocity">last frame squared velocity</param>
-		/// <param name="isRecklessDriver">if true, this vehicle ignores red traffic lights and priority signs</param>
 		/// <param name="prevPos">previous path position</param>
 		/// <param name="prevTargetNodeId">previous target node</param>
 		/// <param name="prevLaneID">previous lane</param>
@@ -581,8 +584,8 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="laneID">current lane</param>
 		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
-			return MayChangeSegment(frontVehicleId, ref vehicleState, ref vehicleData, sqrVelocity, isRecklessDriver, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
+		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
+			return MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.VehicleStateManager.VehicleStates[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
 		}
 
 		/// <summary>
@@ -613,7 +616,7 @@ namespace TrafficManager.Manager.Impl {
 			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
-		public float CalcMaxSpeed(ushort vehicleId, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool isRecklessDriver) {
+		public float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed) {
 			if (Singleton<NetManager>.instance.m_treatWetAsSnow) {
 				DistrictManager districtManager = Singleton<DistrictManager>.instance;
 				byte district = districtManager.GetDistrict(pos);
@@ -653,7 +656,7 @@ namespace TrafficManager.Manager.Impl {
 				maxSpeed *= 1f + (float)segment.m_condition * 0.0005882353f; // vanilla: ±0% .. +15 %
 			}
 
-			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, vehicleInfo, isRecklessDriver);
+			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref vehicleData, vehicleInfo);
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 
 			return maxSpeed;
@@ -670,7 +673,8 @@ namespace TrafficManager.Manager.Impl {
 			return range + step;
 		}
 
-		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, VehicleInfo vehicleInfo, bool isRecklessDriver) {
+		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo) {
+			bool isRecklessDriver = IsRecklessDriver(vehicleId, ref vehicleData);
 			if (Options.realisticSpeeds) {
 				float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
@@ -686,12 +690,6 @@ namespace TrafficManager.Manager.Impl {
 			return speed;
 		}
 
-		/// <summary>
-		/// Determines if the given vehicle is driven by a reckless driver
-		/// </summary>
-		/// <param name="vehicleId"></param>
-		/// <param name="vehicleData"></param>
-		/// <returns></returns>
 		public bool IsRecklessDriver(ushort vehicleId, ref Vehicle vehicleData) {
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
 				return true;
@@ -1179,7 +1177,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 					NetInfo.Lane next1LaneInfo = next1SegInfo.m_lanes[currentFwdTransitions[i].laneIndex];
 					float next1MaxSpeed = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
-					float targetSpeed = Math.Min(vehicleMaxSpeed, ApplyRealisticSpeeds(next1MaxSpeed, vehicleId, vehicleInfo, recklessDriver));
+					float targetSpeed = Math.Min(vehicleMaxSpeed, ApplyRealisticSpeeds(next1MaxSpeed, vehicleId, ref vehicleData, vehicleInfo));
 
 					ushort meanSpeed = TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
 

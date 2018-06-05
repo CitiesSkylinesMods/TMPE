@@ -328,29 +328,6 @@ namespace TrafficManager.Traffic.Data {
 #endif
 		}
 
-		/*internal void UpdateVelocity(ref Vehicle vehicleData, float velocity) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.UpdateVelocity({vehicleId}, {velocity}) called: {this}");
-#endif
-
-			if ((flags & Flags.Spawned) == Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}): Vehicle is not yet spawned.");
-#endif
-				OnSpawn(ref vehicleData);
-			}
-
-			this.velocity = velocity;
-			this.sqrVelocity = velocity * velocity;
-
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.UpdateSqrVelocity({vehicleId}, {velocity}) finished: {this}");
-#endif
-		}*/
-
 		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -438,8 +415,6 @@ namespace TrafficManager.Traffic.Data {
 			nextLaneIndex = 0;
 
 			totalLength = 0;
-			//velocity = 0;
-			//sqrVelocity = 0;
 
 			flags &= ~Flags.Spawned;
 			
@@ -482,8 +457,6 @@ namespace TrafficManager.Traffic.Data {
 			heavyVehicle = false;
 			previousVehicleIdOnSegment = 0;
 			nextVehicleIdOnSegment = 0;
-			//velocity = 0;
-			//sqrVelocity = 0;
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			recklessDriver = false;
