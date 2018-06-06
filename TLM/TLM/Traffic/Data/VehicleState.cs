@@ -558,7 +558,7 @@ namespace TrafficManager.Traffic.Data {
 				case VehicleInfo.VehicleType.Car:
 					if (ai is PassengerCarAI)
 						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI || ai is DisasterResponseVehicleAI) {
+					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI || ai is DisasterResponseVehicleAI || ai is ParkMaintenanceVehicleAI) {
 						return ExtVehicleType.Service;
 					}
 					if (ai is CarTrailerAI)
