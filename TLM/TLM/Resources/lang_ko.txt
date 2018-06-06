@@ -216,10 +216,10 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 교차로에 신호등 시
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 다른 교차로를 클릭하여 추가하십시오. 선택된 교차로의 신호등들은 구성된 시간표와 신호에 맞게 같이 작동되게 됩니다.\n\n교차로에서 신호등 시간표를 추가하는 것을 중단하려면 마우스 우클릭을 클릭하십시오.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 교차로에 신호등 시간표 제거하는 방법
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction 신호등 시간표가 구성되어 있는 교차로를 클릭하십시오. 클릭된 신호등은 더 이상 해당 시간표 통제를 받지않게 됩니다.\n\n교차로에서 신호등 시간표를 제거하는 것을 중단하려면 마우스 우클릭을 클릭하십시오.
-Public_transport Public transport
-Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations
-Compact_main_menu Compact main menu
-Window_transparency Window transparency
-Overlay_transparency Overlay transparency
-Remove_this_citizen Remove this citizen
-Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
+Public_transport 대중 교통
+Prevent_excessive_transfers_at_public_transport_stations 시민들의 다른 대중교통 노선 이용 시 패턴 최적화
+Compact_main_menu TMPE 메뉴 아이콘 크게/작게 설정
+Window_transparency 패널 투명도(오른쪽으로 갈수록 투명함)
+Overlay_transparency 보조 아이콘 투명도(도로 위 표지판, 속도제한 아이콘 투명도 등)
+Remove_this_citizen 해당 시민 삭제
+Show_error_message_if_a_mod_incompatibility_is_detected 모드와 비 호환되는 모드 발견 시 에러 보여주기
