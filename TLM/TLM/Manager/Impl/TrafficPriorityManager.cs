@@ -256,12 +256,20 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out UnableReason reason) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+#endif
+
 			bool ret = true;
 			reason = UnableReason.None;
 
 			if (type != PriorityType.None &&
 				! MaySegmentHavePrioritySign(segmentId, startNode, out reason)) {
-				Log._Debug($"TrafficPriorityManager.SetPrioritySign: Segment {segmentId} @ {startNode} may not have a priority sign: {reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.SetPrioritySign: Segment {segmentId} @ {startNode} may not have a priority sign: {reason}");
+				}
+#endif
 				ret = false;
 				type = PriorityType.None;
 			}
@@ -292,7 +300,11 @@ namespace TrafficManager.Manager.Impl {
 
 			UnsubscribeFromSegmentGeometryIfRequired(segmentId);
 			SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
-			Log._Debug($"TrafficPriorityManager.SetPrioritySign: segmentId={segmentId}, startNode={startNode}, type={type}, result={ret}, reason={reason}");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.SetPrioritySign: segmentId={segmentId}, startNode={startNode}, type={type}, result={ret}, reason={reason}");
+			}
+#endif
 			return ret;
 		}
 
@@ -1205,6 +1217,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 					bool startNode = segGeo.StartNodeId() == prioSegData.nodeId;
 
+					Log._Debug($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
 					SetPrioritySign(prioSegData.segmentId, startNode, (PriorityType)prioSegData.priorityType);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
