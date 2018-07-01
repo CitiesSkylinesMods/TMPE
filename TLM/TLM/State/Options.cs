@@ -76,9 +76,9 @@ namespace TrafficManager.State {
 		private static UICheckBox enableJunctionRestrictionsToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
+		private static UIButton removeParkedVehiclesBtn = null;
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
-		private static UIButton removeParkedVehiclesBtn = null;
 		private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
 		private static List<UITextField> debugValueFields = new List<UITextField>();
 		private static UITextField pathCostMultiplicatorField = null;
@@ -343,8 +343,8 @@ namespace TrafficManager.State {
 			var maintenanceGroup = panelHelper.AddGroup(Translation.GetString("Maintenance"));
 
 			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
-#if DEBUG
 			removeParkedVehiclesBtn = maintenanceGroup.AddButton(Translation.GetString("Remove_parked_vehicles"), onClickRemoveParkedVehicles) as UIButton;
+#if DEBUG
 			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 #endif
 			reloadGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
