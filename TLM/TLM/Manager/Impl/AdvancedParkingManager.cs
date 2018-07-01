@@ -214,8 +214,9 @@ namespace TrafficManager.Manager.Impl {
 					// no return path calculated: ignore
 #if DEBUG
 					if (debug)
-						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): return path state is None. Ignoring and returning main path state.");
+						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): return path state is None. Setting pathMode=DrivingToTarget and returning main path state.");
 #endif
+					driverExtInstance.pathMode = ExtPathMode.DrivingToTarget;
 					return mainPathState;
 				case ExtPathState.Calculating:
 					// return path not read yet: wait for it
@@ -237,7 +238,7 @@ namespace TrafficManager.Manager.Impl {
 					driverExtInstance.ReleaseReturnPath();
 #if DEBUG
 					if (fineDebug)
-						Log._Debug($"CAdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.instanceId}! CurrentPathMode={driverExtInstance.pathMode}");
+						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.instanceId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[vehicleData.m_path].m_laneTypes;
 					bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
