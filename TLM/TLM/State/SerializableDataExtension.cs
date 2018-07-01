@@ -134,6 +134,7 @@ namespace TrafficManager.State {
 				}
 			} catch (Exception e) {
 				Log.Error($"Error deserializing data: {e.ToString()}");
+				Log.Info(e.StackTrace);
 				error = true;
 			}
 

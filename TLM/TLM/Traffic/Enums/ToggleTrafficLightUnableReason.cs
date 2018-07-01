@@ -8,6 +8,7 @@ namespace TrafficManager.Traffic.Enums {
 		None,
 		NoJunction,
 		HasTimedLight,
+		IsLevelCrossing,
 		InsufficientSegments
 	}
 }

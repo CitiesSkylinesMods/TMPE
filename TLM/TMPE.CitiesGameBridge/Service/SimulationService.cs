@@ -46,6 +46,18 @@ namespace CitiesGameBridge.Service {
 			}
 		}
 
+		public bool SimulationPaused {
+			get {
+				return Singleton<SimulationManager>.instance.SimulationPaused;
+			}			
+		}
+
+		public bool ForcedSimulationPaused {
+			get {
+				return Singleton<SimulationManager>.instance.ForcedSimulationPaused;
+			}
+		}
+
 		public void AddAction(Action action) {
 			Singleton<SimulationManager>.instance.AddAction(action);
 		}

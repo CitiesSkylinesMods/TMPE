@@ -77,6 +77,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableJunctionRestrictionsToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
+		private static UIButton removeParkedVehiclesBtn = null;
 #if DEBUG
 		private static UIButton resetSpeedLimitsBtn = null;
 		private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
@@ -341,6 +342,7 @@ namespace TrafficManager.State {
 			var maintenanceGroup = panelHelper.AddGroup(Translation.GetString("Maintenance"));
 
 			resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
+			removeParkedVehiclesBtn = maintenanceGroup.AddButton(Translation.GetString("Remove_parked_vehicles"), onClickRemoveParkedVehicles) as UIButton;
 #if DEBUG
 			resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 #endif
@@ -712,7 +714,7 @@ namespace TrafficManager.State {
 			highwayRules = newHighwayRules;
 			Flags.clearHighwayLaneArrows();
 			Flags.applyAllFlags();
-			RoutingManager.Instance.RequestFullRecalculation(true);
+			RoutingManager.Instance.RequestFullRecalculation();
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
@@ -728,9 +730,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			prioritySignsEnabled = val;
-			if (val) {
-				VehicleStateManager.Instance.InitAllVehicles();
-			} else {
+			if (!val) {
 				setPrioritySignsOverlay(false);
 				setTrafficLightPriorityRules(false);
 			}
@@ -742,9 +742,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			timedLightsEnabled = val;
-			if (val) {
-				VehicleStateManager.Instance.InitAllVehicles();
-			} else {
+			if (!val) {
 				setTimedLightsOverlay(false);
 				setTrafficLightPriorityRules(false);
 			}
@@ -801,7 +799,7 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			laneConnectorEnabled = val;
-			RoutingManager.Instance.RequestFullRecalculation(true);
+			RoutingManager.Instance.RequestFullRecalculation();
 			if (!val)
 				setConnectedLanesOverlay(false);
 		}
@@ -984,6 +982,15 @@ namespace TrafficManager.State {
 
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
 				UtilityManager.Instance.ResetStuckEntities();
+			});
+		}
+
+		private static void onClickRemoveParkedVehicles() {
+			if (!checkGameLoaded())
+				return;
+
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+				UtilityManager.Instance.RemoveParkedVehicles();
 			});
 		}
 

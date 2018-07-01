@@ -145,7 +145,7 @@ namespace TrafficManager.State {
 						&& !conf.Debug.Switches[10]
 #endif
 						) {
-						Constants.ManagerFactory.RoutingManager.RequestFullRecalculation(true);
+						Constants.ManagerFactory.RoutingManager.RequestFullRecalculation();
 					}
 
 #if DEBUG

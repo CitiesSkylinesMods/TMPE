@@ -52,9 +52,13 @@ namespace TrafficManager.Manager.Impl {
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
 			if (fineDebug)
-				Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called. switching transportMode={ExtCitizens[citizenId].transportMode} to lastTransportMode={ExtCitizens[citizenId].lastTransportMode}");
+				Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called");
 #endif
 			if (ExtCitizens[citizenId].lastLocation == Citizen.Location.Home) {
+#if DEBUG
+				if (fineDebug)
+					Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}): setting lastTransportMode=transportMode={ExtCitizens[citizenId].transportMode}");
+#endif
 				ExtCitizens[citizenId].lastTransportMode = ExtCitizens[citizenId].transportMode;
 			}
 			ExtCitizens[citizenId].transportMode = ExtTransportMode.None;
@@ -67,6 +71,10 @@ namespace TrafficManager.Manager.Impl {
 
 			if (citizenData.CurrentLocation != Citizen.Location.Moving) {
 				ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
+#if DEBUG
+				if (fineDebug)
+					Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}): setting lastLocation={ExtCitizens[citizenId].lastLocation}");
+#endif
 			}
 		}
 

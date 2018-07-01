@@ -164,7 +164,7 @@ namespace TrafficManager.Manager.Impl {
             float meanSpeedLimit = 0f;
             uint validLanes = 0;
             uint curLaneId = segment.m_lanes;
-            for (uint laneIndex = 0; laneIndex < segmentInfo.m_lanes.Length; ++laneIndex) {
+            for (byte laneIndex = 0; laneIndex < segmentInfo.m_lanes.Length; ++laneIndex) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 				NetInfo.Direction d = laneInfo.m_finalDirection;
 				if (finalDir != null && d != finalDir)
@@ -232,7 +232,11 @@ namespace TrafficManager.Manager.Impl {
 			return ToGameSpeedLimit(GetCustomSpeedLimit(laneId));
 		}
 
-		internal float GetLockFreeGameSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+		public float GetLockFreeGameSpeedLimit(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
+			if (! MayHaveCustomSpeedLimits(laneInfo)) {
+				return laneInfo.m_speedLimit;
+			}
+
 			float speedLimit = 0;
 			ushort?[] fastArray = Flags.laneSpeedLimitArray[segmentId];
 			if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {

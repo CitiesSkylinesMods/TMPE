@@ -8,6 +8,8 @@ namespace GenericGameBridge.Service {
 		uint CurrentFrameIndex { get; }
 		Vector3 CameraPosition { get; }
 		Randomizer Randomizer { get; }
+		bool SimulationPaused { get; }
+		bool ForcedSimulationPaused { get; }
 		void AddAction(System.Action action);
 		void PauseSimulation(bool forced);
 		void ResumeSimulation(bool forced);
