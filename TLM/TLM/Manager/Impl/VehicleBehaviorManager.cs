@@ -944,33 +944,22 @@ namespace TrafficManager.Manager.Impl {
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY) {
-											hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
+										hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
 #if DEBUG
-											if (debug)
-												Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
+										if (debug)
+											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
 #endif
 
-											if (!hasPriority) {
-												vehicleData.m_blockCounter = 0;
-												maxSpeed = 0f;
-												return false;
-											} else {
-#if DEBUG
-												if (debug)
-													Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no incoming cars)");
-#endif
-												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-											}
+										if (!hasPriority) {
+											vehicleData.m_blockCounter = 0;
+											maxSpeed = 0f;
+											return false;
 										} else {
 #if DEBUG
 											if (debug)
-												Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has not yet reached yield speed (reduce {sqrVelocity} by {vehicleState.reduceSqrSpeedByValueToYield})");
+												Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no incoming cars)");
 #endif
-
-											// vehicle has not yet reached yield speed
-											maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
-											return false;
+											vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 										}
 									} else {
 #if DEBUG

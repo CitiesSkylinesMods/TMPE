@@ -76,8 +76,6 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public const float MAX_SQR_STOP_VELOCITY = 0.01f;
-		public const float MAX_SQR_YIELD_VELOCITY = 0.09f;
-		public const float MAX_YIELD_VELOCITY = 0.3f;
 
 		/// <summary>
 		/// List of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id

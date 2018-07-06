@@ -72,7 +72,6 @@ namespace TrafficManager.Traffic.Data {
 		//public float sqrVelocity;
 		//public float velocity;
 		public int waitTime;
-		public float reduceSqrSpeedByValueToYield;
 		public ExtVehicleFlags flags;
 		public ExtVehicleType vehicleType;
 		public bool heavyVehicle;
@@ -100,7 +99,6 @@ namespace TrafficManager.Traffic.Data {
 				//"\t" + $"velocity = {velocity}\n" +
 				//"\t" + $"sqrVelocity = {sqrVelocity}\n" +
 				"\t" + $"waitTime = {waitTime}\n" +
-				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
 				"\t" + $"flags = {flags}\n" +
 				"\t" + $"vehicleType = {vehicleType}\n" +
 				"\t" + $"heavyVehicle = {heavyVehicle}\n" +
@@ -126,7 +124,6 @@ namespace TrafficManager.Traffic.Data {
 			lastPositionUpdate = Now();
 			totalLength = 0;
 			waitTime = 0;
-			reduceSqrSpeedByValueToYield = 0;
 			flags = ExtVehicleFlags.None;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
@@ -238,7 +235,6 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 			DetermineVehicleType(ref vehicleData);
-			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
 			recklessDriver = false;
 			flags = ExtVehicleFlags.Created;
 
@@ -445,7 +441,6 @@ namespace TrafficManager.Traffic.Data {
 			lastTransitStateUpdate = Now();
 			lastPositionUpdate = Now();
 			waitTime = 0;
-			reduceSqrSpeedByValueToYield = 0;
 			flags = ExtVehicleFlags.None;
 			vehicleType = ExtVehicleType.None;
 			heavyVehicle = false;
