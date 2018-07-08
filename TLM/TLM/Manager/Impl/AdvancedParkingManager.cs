@@ -564,27 +564,8 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 							// check if citizen is at an outside connection
-							bool isAtOutsideConnection = false;
+							bool isAtOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceId, ref instanceData, ref citizenData);
 							ushort sourceBuildingId = instanceData.m_sourceBuilding;
-
-							if (sourceBuildingId != 0) {
-								isAtOutsideConnection = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;// Info.m_buildingAI is OutsideConnectionAI;
-								float distToOutsideConnection = (instanceData.GetLastFramePosition() - Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_position).magnitude;
-								if (isAtOutsideConnection && distToOutsideConnection > GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance) {
-									isAtOutsideConnection = false;
-#if DEBUG
-									if (fineDebug) {
-										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Source building {sourceBuildingId} of citizen instance {instanceId} is an outside connection but cim is too far away: {distToOutsideConnection}");
-									}
-#endif
-								}
-							} else {
-#if DEBUG
-								if (fineDebug) {
-									Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): No source building!");
-								}
-#endif
-							}
 
 #if DEBUG
 							if (debug && isAtOutsideConnection) {

@@ -31,7 +31,7 @@ namespace TrafficManager.Custom.AI {
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
 			if (debug)
-				Log.Warning($"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen {instanceData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={instanceData.m_sourceBuilding}, targetBuilding={instanceData.m_targetBuilding}, pathMode={extInstance.pathMode}");
+				Log.Warning($"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen {instanceData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={instanceData.m_sourceBuilding}, targetBuilding={instanceData.m_targetBuilding}, pathMode={extInstance.pathMode}, enableTransport={enableTransport}, ignoreCost={ignoreCost}");
 #endif
 
 			// NON-STOCK CODE START
@@ -40,10 +40,23 @@ namespace TrafficManager.Custom.AI {
 			ushort homeId = citizenManager.m_citizens.m_buffer[instanceData.m_citizen].m_homeBuilding;
 			CarUsagePolicy carUsageMode = CarUsagePolicy.Allowed;
 
+			bool isAtNonRoadOutsideConnection = false;
+			if (Options.prohibitPocketCars) {
+				ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
+				isAtNonRoadOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen]) && sourceBuildingService != ItemClass.Service.Road;
+#if DEBUG
+				if (debug)
+					Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Is citizen at a non-road outside connection? {isAtNonRoadOutsideConnection} ({sourceBuildingService})");
+#endif
+			}
+
 			// disallow car usage if citizen is on a walking tour
-			if ((instanceData.m_flags & CitizenInstance.Flags.OnTour) != CitizenInstance.Flags.None) {
+			bool isOnWalkingTour = (instanceData.m_flags & CitizenInstance.Flags.OnTour) != CitizenInstance.Flags.None;
+			if (ignoreCost /* = we are a mascot */ || isAtNonRoadOutsideConnection || isOnWalkingTour) {
 				carUsageMode = CarUsagePolicy.Forbidden;
-				vehicleInfo = null; // TODO check if citizens may use bikes on walking tours
+				if (isOnWalkingTour) {
+					vehicleInfo = null;
+				}
 			}
 			
 #if BENCHMARK
@@ -123,7 +136,7 @@ namespace TrafficManager.Custom.AI {
 					/*
 					 * reuse parked vehicle info
 					 */
-					if (parkedVehicleId != 0) {
+					if (carUsageMode != CarUsagePolicy.Forbidden && parkedVehicleId != 0) {
 						vehicleInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
 					}
 
@@ -181,7 +194,6 @@ namespace TrafficManager.Custom.AI {
 						 * 1. a parked car or
 						 * 2. the target building
 						 */
-						vehicleInfo = null;
 						carUsageMode = CarUsagePolicy.Forbidden;
 
 						if (extInstance.pathMode == ExtCitizenInstance.ExtPathMode.CalculatingWalkingPathToParkedCar) {
