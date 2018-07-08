@@ -214,8 +214,9 @@ namespace TrafficManager.Manager.Impl {
 					// no return path calculated: ignore
 #if DEBUG
 					if (debug)
-						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): return path state is None. Ignoring and returning main path state.");
+						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): return path state is None. Setting pathMode=DrivingToTarget and returning main path state.");
 #endif
+					driverExtInstance.pathMode = ExtPathMode.DrivingToTarget;
 					return mainPathState;
 				case ExtPathState.Calculating:
 					// return path not read yet: wait for it
@@ -237,7 +238,7 @@ namespace TrafficManager.Manager.Impl {
 					driverExtInstance.ReleaseReturnPath();
 #if DEBUG
 					if (fineDebug)
-						Log._Debug($"CAdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.instanceId}! CurrentPathMode={driverExtInstance.pathMode}");
+						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Path is ready for vehicle {vehicleId}, citizen instance {driverExtInstance.instanceId}! CurrentPathMode={driverExtInstance.pathMode}");
 #endif
 					byte laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[vehicleData.m_path].m_laneTypes;
 					bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
@@ -563,27 +564,8 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 							// check if citizen is at an outside connection
-							bool isAtOutsideConnection = false;
+							bool isAtOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceId, ref instanceData, ref citizenData);
 							ushort sourceBuildingId = instanceData.m_sourceBuilding;
-
-							if (sourceBuildingId != 0) {
-								isAtOutsideConnection = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;// Info.m_buildingAI is OutsideConnectionAI;
-								float distToOutsideConnection = (instanceData.GetLastFramePosition() - Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_position).magnitude;
-								if (isAtOutsideConnection && distToOutsideConnection > GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance) {
-									isAtOutsideConnection = false;
-#if DEBUG
-									if (fineDebug) {
-										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Source building {sourceBuildingId} of citizen instance {instanceId} is an outside connection but cim is too far away: {distToOutsideConnection}");
-									}
-#endif
-								}
-							} else {
-#if DEBUG
-								if (fineDebug) {
-									Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): No source building!");
-								}
-#endif
-							}
 
 #if DEBUG
 							if (debug && isAtOutsideConnection) {
@@ -665,7 +647,7 @@ namespace TrafficManager.Manager.Impl {
 								}
 
 								if (parkedVehicleId != 0) {
-									if (instanceData.m_targetBuilding != 0) {
+									/*if (instanceData.m_targetBuilding != 0) {
 										// check distance between parked vehicle and target building. If it is too small then the cim is walking/using transport to get to their target
 										float parkedDistToTarget = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_targetBuilding].m_position - Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_position).magnitude;
 										if ((instanceData.m_targetBuilding != homeId && parkedDistToTarget < GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding) ||
@@ -679,7 +661,7 @@ namespace TrafficManager.Manager.Impl {
 
 											return ExtSoftPathState.FailedSoft;
 										}
-									}
+									}*/
 
 									// citizen has to reach their parked vehicle first
 #if DEBUG
@@ -700,16 +682,39 @@ namespace TrafficManager.Manager.Impl {
 									return ExtSoftPathState.FailedSoft;
 								}
 							} else {
-								// citizen is located at an outside connection: allow spawning of pocket cars (stock procedure).
-								extInstance.pathMode = ExtPathMode.DrivingToTarget;
+								// citizen is located at an outside connection
 
 #if DEBUG
 								if (fineDebug)
 									Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Citizen {instanceData.m_citizen} (citizen instance {instanceId}) is located at an outside connection: {sourceBuildingId} CurrentPathMode={extInstance.pathMode}");
 #endif
-
-								extCitizen.transportMode |= ExtCitizen.ExtTransportMode.Car;
-								return ExtSoftPathState.Ready;
+								// FIXME Bug: If path contains a public transport segment, they start spawning pocket cars at the destination stop.
+								if (!usesPublicTransport) {
+									// allow spawning of pocket cars (stock procedure). 
+#if DEBUG
+									if (fineDebug)
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen {instanceData.m_citizen} (citizen instance {instanceId}) at outside connection {sourceBuildingId} contains car section and does not contain public transport section: Taking path as it is.");
+#endif
+									extInstance.pathMode = ExtPathMode.DrivingToTarget;
+									extCitizen.transportMode |= ExtCitizen.ExtTransportMode.Car;
+									return ExtSoftPathState.Ready;
+								} else {
+									// prohibit car usage if not at a road connection, limit public transport usage for road connections
+									if (Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].Info.m_class.m_service == ItemClass.Service.Road) {
+#if DEBUG
+										if (fineDebug)
+											Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen {instanceData.m_citizen} (citizen instance {instanceId}) at ROAD outside connection {sourceBuildingId} contains car section and contains public transport section: Recalculating car path.");
+#endif
+										extInstance.pathMode = ExtPathMode.RequiresCarPath;
+									} else {
+#if DEBUG
+										if (fineDebug)
+											Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen {instanceData.m_citizen} (citizen instance {instanceId}) at NON-ROAD outside connection {sourceBuildingId} contains car section and contains public transport section: Recalculating walking/PT path.");
+#endif
+										extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+									}
+									return ExtSoftPathState.FailedSoft;
+								}
 							}
 						} else {
 							// path does not contain a car section: path can be reused for walking

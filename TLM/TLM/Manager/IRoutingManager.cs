@@ -148,7 +148,7 @@ namespace TrafficManager.Manager {
 	public interface IRoutingManager {
 		// TODO documentation
 		void SimulationStep();
-		void RequestFullRecalculation(bool notify);
+		void RequestFullRecalculation();
 		void RequestRecalculation(ushort segmentId, bool propagate = true);
 	}
 }

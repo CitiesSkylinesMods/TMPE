@@ -19,7 +19,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// Known vehicles and their current known positions. Index: vehicle id
 		/// </summary>
-		internal VehicleState[] VehicleStates = null;
+		public VehicleState[] VehicleStates { get; private set; } = null;
 
 		static VehicleStateManager() {
 			Instance = new VehicleStateManager();
@@ -64,7 +64,6 @@ namespace TrafficManager.Manager.Impl {
 #if MEASUREDENSITY
 				, length
 #endif
-				/*, (ushort)state.velocity*/
 				, (ushort) state.Velocity);
 		}
 
@@ -156,27 +155,19 @@ namespace TrafficManager.Manager.Impl {
 			VehicleStates[vehicleId].previousVehicleIdOnSegment = previousVehicleId;
 		}
 
-		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData/*, float? velocity=null*/) {
-			if (!Options.prioritySignsEnabled && !Options.timedLightsEnabled) {
-				return;
-			}
-
-			//float vel = velocity != null ? (float)velocity : vehicleData.GetLastFrameVelocity().magnitude;
-
+		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData) {
 			ushort connectedVehicleId = vehicleId;
 			while (connectedVehicleId != 0) {
-				UpdateVehiclePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], ref VehicleStates[connectedVehicleId]/*, vel*/);
+				UpdateVehiclePosition(ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], ref VehicleStates[connectedVehicleId]);
 				connectedVehicleId = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId].m_trailingVehicle;
 			}
 		}
 
-		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state/*, float velocity*/) {
+		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({state.vehicleId}) called");
 #endif
-
-			//state.UpdateVelocity(ref vehicleData, velocity);
 
 			if (vehicleData.m_path == 0 || (vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0 ||
 				(state.lastPathId == vehicleData.m_path && state.lastPathPositionIndex == vehicleData.m_pathPositionIndex)
@@ -262,30 +253,28 @@ namespace TrafficManager.Manager.Impl {
 
 		internal void InitAllVehicles() {
 			Log._Debug("VehicleStateManager: InitAllVehicles()");
-			if (Options.prioritySignsEnabled || Options.timedLightsEnabled) {
-				VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-				for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
-					Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
-						if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
-							return true;
-						}
-
-						OnCreateVehicle(vId, ref vehicle);
-
-						if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
-							OnStartPathFind(vId, ref vehicle, ExtVehicleType.Emergency);
-						}
-
-						if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
-							return true;
-						}
-
-						OnSpawnVehicle(vId, ref vehicle);
-						
+			for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+				Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
+					if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
 						return true;
-					});
-				}
+					}
+
+					OnCreateVehicle(vId, ref vehicle);
+
+					if ((vehicle.m_flags & Vehicle.Flags.Emergency2) != 0) {
+						OnStartPathFind(vId, ref vehicle, ExtVehicleType.Emergency);
+					}
+
+					if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
+						return true;
+					}
+
+					OnSpawnVehicle(vId, ref vehicle);
+						
+					return true;
+				});
 			}
 		}
 

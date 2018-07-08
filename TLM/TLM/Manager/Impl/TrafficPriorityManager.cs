@@ -115,15 +115,26 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MayNodeHavePrioritySigns(ushort nodeId, out UnableReason reason) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+#endif
 			if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
 				reason = UnableReason.NoJunction;
-				//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
 			if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
 				reason = UnableReason.HasTimedLight;
-				//Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
@@ -138,14 +149,25 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out UnableReason reason) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+#endif
 			if (! Services.NetService.IsSegmentValid(segmentId)) {
 				reason = UnableReason.InvalidSegment;
-				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
 			if (! MayNodeHavePrioritySigns(Services.NetService.GetSegmentNodeId(segmentId, startNode), out reason)) {
-				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
@@ -153,11 +175,19 @@ namespace TrafficManager.Manager.Impl {
 
 			if (endGeo.OutgoingOneWay) {
 				reason = UnableReason.NotIncoming;
-				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
-			Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=true");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=true");
+			}
+#endif
 			reason = UnableReason.None;
 			return true;
 		}
@@ -168,16 +198,27 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool MaySegmentHavePrioritySign(ushort segmentId, out UnableReason reason) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+#endif
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
 				reason = UnableReason.InvalidSegment;
-				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result=false, reason={reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result=false, reason={reason}");
+				}
+#endif
 				return false;
 			}
 
 			bool ret =
 				(MaySegmentHavePrioritySign(segmentId, true, out reason) ||
 				MaySegmentHavePrioritySign(segmentId, false, out reason));
-			Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result={ret}, reason={reason}");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result={ret}, reason={reason}");
+			}
+#endif
 			return ret;
 		}
 
@@ -190,6 +231,9 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool HasNodePrioritySign(ushort nodeId) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+#endif
 			bool ret = false;
 			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
 				if (HasSegmentPrioritySign(segmentId, nodeId == segment.m_startNode)) {
@@ -198,7 +242,11 @@ namespace TrafficManager.Manager.Impl {
 				}
 				return true;
 			});
-			//Log._Debug($"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={ret}");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={ret}");
+			}
+#endif
 			return ret;
 		}
 
@@ -208,12 +256,20 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out UnableReason reason) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+#endif
+
 			bool ret = true;
 			reason = UnableReason.None;
 
 			if (type != PriorityType.None &&
 				! MaySegmentHavePrioritySign(segmentId, startNode, out reason)) {
-				Log._Debug($"TrafficPriorityManager.SetPrioritySign: Segment {segmentId} @ {startNode} may not have a priority sign: {reason}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TrafficPriorityManager.SetPrioritySign: Segment {segmentId} @ {startNode} may not have a priority sign: {reason}");
+				}
+#endif
 				ret = false;
 				type = PriorityType.None;
 			}
@@ -244,13 +300,22 @@ namespace TrafficManager.Manager.Impl {
 
 			UnsubscribeFromSegmentGeometryIfRequired(segmentId);
 			SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
-			Log._Debug($"TrafficPriorityManager.SetPrioritySign: segmentId={segmentId}, startNode={startNode}, type={type}, result={ret}, reason={reason}");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.SetPrioritySign: segmentId={segmentId}, startNode={startNode}, type={type}, result={ret}, reason={reason}");
+			}
+#endif
 			return ret;
 		}
 
 		public void RemovePrioritySignsFromNode(ushort nodeId) {
-			Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromNode: nodeId={nodeId}");
-			
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromNode: nodeId={nodeId}");
+			}
+#endif
+
 			Services.NetService.IterateNodeSegments(nodeId, delegate(ushort segmentId, ref NetSegment segment) {
 				RemovePrioritySignFromSegmentEnd(segmentId, nodeId == segment.m_startNode);
 				return true;
@@ -258,14 +323,24 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void RemovePrioritySignsFromSegment(ushort segmentId) {
-			Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromSegment: segmentId={segmentId}");
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromSegment: segmentId={segmentId}");
+			}
+#endif
 
 			RemovePrioritySignFromSegmentEnd(segmentId, true);
 			RemovePrioritySignFromSegmentEnd(segmentId, false);
 		}
 
 		public void RemovePrioritySignFromSegmentEnd(ushort segmentId, bool startNode) {
-			Log._Debug($"TrafficPriorityManager.RemovePrioritySignFromSegment: segmentId={segmentId}, startNode={startNode}");
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.RemovePrioritySignFromSegment: segmentId={segmentId}, startNode={startNode}");
+			}
+#endif
 
 			if (startNode) {
 				PrioritySegments[segmentId].startType = PriorityType.None;
@@ -282,6 +357,10 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public byte CountPrioritySignsAtNode(ushort nodeId, PriorityType sign) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+#endif
+
 			byte ret = 0;
 			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
 				if (GetPrioritySign(segmentId, segment.m_startNode == nodeId) == sign) {
@@ -289,7 +368,11 @@ namespace TrafficManager.Manager.Impl {
 				}
 				return true;
 			});
-			Log._Debug($"TrafficPriorityManager.CountPrioritySignsAtNode: nodeId={nodeId}, sign={sign}, result={ret}");
+#if DEBUG
+			if (debug) {
+				Log._Debug($"TrafficPriorityManager.CountPrioritySignsAtNode: nodeId={nodeId}, sign={sign}, result={ret}");
+			}
+#endif
 			return ret;
 		}
 
@@ -1134,6 +1217,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 					bool startNode = segGeo.StartNodeId() == prioSegData.nodeId;
 
+					Log._Debug($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
 					SetPrioritySign(prioSegData.segmentId, startNode, (PriorityType)prioSegData.priorityType);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save

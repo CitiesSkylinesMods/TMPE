@@ -31,7 +31,7 @@ namespace TrafficManager.Manager.Impl {
 			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
 				Log._Debug($"TrafficLightManager.SetTrafficLight: called for node {nodeId}, flag={flag}");
 #endif
-			if (! IsTrafficLightToggleable(nodeId, ref node, out reason)) {
+			if (! IsTrafficLightToggleable(nodeId, flag, ref node, out reason)) {
 #if DEBUGTTL
 				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
 					Log._Debug($"TrafficLightManager.SetTrafficLight: Traffic light @ {nodeId} is not toggleable");
@@ -95,8 +95,8 @@ namespace TrafficManager.Manager.Impl {
 			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
 		}
 
-		public bool IsTrafficLightToggleable(ushort nodeId, ref NetNode node, out UnableReason reason) {
-			if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
+		public bool IsTrafficLightToggleable(ushort nodeId, bool flag, ref NetNode node, out UnableReason reason) {
+			if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
 				reason = UnableReason.HasTimedLight;
 #if DEBUGTTL
 				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
@@ -105,11 +105,20 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			if (!LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction), (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
+			if (flag && !LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction), (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
 				reason = UnableReason.NoJunction;
 #if DEBUGTTL
 				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
 					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is not a junction");
+#endif
+				return false;
+			}
+
+			if (!flag && LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.LevelCrossing), (uint)(NetNode.Flags.LevelCrossing))) {
+				reason = UnableReason.IsLevelCrossing;
+#if DEBUGTTL
+				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is a level crossing");
 #endif
 				return false;
 			}
@@ -152,12 +161,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool IsTrafficLightEnablable(ushort nodeId, ref NetNode node, out UnableReason reason) {
-			bool ret = IsTrafficLightToggleable(nodeId, ref node, out reason);
-			if (reason == UnableReason.HasTimedLight) {
-				reason = UnableReason.None;
-				return true;
-			}
-			return ret;
+			return IsTrafficLightToggleable(nodeId, true, ref node, out reason);
 		}
 
 		public bool HasTrafficLight(ushort nodeId, ref NetNode node) {

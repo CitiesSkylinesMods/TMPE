@@ -69,7 +69,12 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
-			Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			if (debug) {
+				Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
+			}
+#endif
 			DestroySegmentEnd(GetIndex(segmentId, startNode));
 		}
 
@@ -83,35 +88,63 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+#endif
+
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
 			if (segGeo == null) {
-				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing all segment ends.");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing all segment ends.");
+				}
+#endif
 				RemoveSegmentEnds(segmentId);
 				return false;
 			}
 
 			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
 			if (endGeo == null) {
-				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment end {segmentId} @ {startNode} is invalid. Removing segment end.");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment end {segmentId} @ {startNode} is invalid. Removing segment end.");
+				}
+#endif
 				RemoveSegmentEnd(segmentId, startNode);
 				return false;
 			}
 
 			if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
 				TrafficLightSimulationManager.Instance.HasTimedSimulation(endGeo.NodeId())) {
-				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");
-				ISegmentEnd end = GetOrAddSegmentEnd(segmentId, startNode);
+#if DEBUG
+				if (debug) {
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");
+				}
+#endif
+					ISegmentEnd end = GetOrAddSegmentEnd(segmentId, startNode);
 				if (end == null) {
 					Log.Warning($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Failed to add segment end.");
 					return false;
 				} else {
-					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Added segment end. Updating now.");
+#if DEBUG
+					if (debug) {
+						Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Added segment end. Updating now.");
+					}
+#endif
 					end.Update();
-					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Update of segment end finished.");
+#if DEBUG
+					if (debug) {
+						Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Update of segment end finished.");
+					}
+#endif
 					return true;
 				}
 			} else {
-				Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} neither has timed light nor priority sign. Removing segment end {segmentId} @ {startNode}");
+#if DEBUG
+				if (debug) {
+					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} neither has timed light nor priority sign. Removing segment end {segmentId} @ {startNode}");
+				}
+#endif
 				RemoveSegmentEnd(segmentId, startNode);
 				return false;
 			}
@@ -131,7 +164,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void DestroySegmentEnd(int index) {
 #if DEBUG
-			Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
+			//Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
 #endif
 			SegmentEnds[index]?.Destroy();
 			SegmentEnds[index] = null;

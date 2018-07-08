@@ -4,6 +4,18 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog    
+1.10.8, 01/07/2018
+- Updated Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
+- Updated Polish translation (thanks to @Krzychu1245 for translating)
+- Added button to remove parked vehicles (in options dialog, see maintenance tab)
+- Parking AI: Removed check for distance between parked vehicle and target building
+- Bugfix: Parking AI: Cims spawn pocket cars when they originate from an outside connection
+- Bugfix: Incorrect speed limits returned for pedestrian lanes
+- Bugfix: Routing is not updated while the game is paused (thanks to @Oh My Lawwwd! for reporting)
+- Bugfix: Vanilla traffic lights are ignored when either the priority signs or timed traffic light features are disabled (thanks to @aubergine10 for reporting)
+- Bugfix: Park maintenance vehicles are not recognized as service vehicles
+- Bugfix: Cars leaving city state "thinking of a good parking spot" (thanks to @aubergine10 for reporting)
+
 1.10.7, 05/28/2018
 - Bugfix: U-turn routing is inconsistent on transport lines vs. bus paths (#137, thanks to @Zorgoth for reporting this issue)
 - Bugfix: Junction restrictions for pedestrian crossings are sometimes not preserved (#142, thanks to Anrew and @wizardrazer for reporting this issue)

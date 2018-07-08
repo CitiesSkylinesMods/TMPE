@@ -251,7 +251,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 					using (var bm = new Benchmark(null, "MayChangeSegment")) {
 #endif
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], ref vehicleData, sqrVelocity, false, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) {
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, sqrVelocity, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) {
 						return;
 					} else {
 #if BENCHMARK	

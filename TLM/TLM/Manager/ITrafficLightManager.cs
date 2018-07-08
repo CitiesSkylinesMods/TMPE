@@ -8,6 +8,7 @@ namespace TrafficManager.Manager {
 		None,
 		NoJunction,
 		HasTimedLight,
+		IsLevelCrossing,
 		InsufficientSegments
 	}
 
@@ -17,7 +18,7 @@ namespace TrafficManager.Manager {
 		bool AddTrafficLight(ushort nodeId, ref NetNode node, out UnableReason reason);
 		bool HasTrafficLight(ushort nodeId, ref NetNode node);
 		bool IsTrafficLightEnablable(ushort nodeId, ref NetNode node, out UnableReason reason);
-		bool IsTrafficLightToggleable(ushort nodeId, ref NetNode node, out UnableReason reason);
+		bool IsTrafficLightToggleable(ushort nodeId, bool flag, ref NetNode node, out UnableReason reason);
 		bool RemoveTrafficLight(ushort nodeId, ref NetNode node);
 		bool RemoveTrafficLight(ushort nodeId, ref NetNode node, out UnableReason reason);
 		bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node);
