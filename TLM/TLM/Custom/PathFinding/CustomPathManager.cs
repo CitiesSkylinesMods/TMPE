@@ -1,6 +1,6 @@
 #define QUEUEDSTATSx
-#define EXTRAPFx
 #define DEBUGPF3x
+#define PF2
 
 using System;
 using System.Reflection;
@@ -152,7 +152,11 @@ namespace TrafficManager.Custom.PathFinding {
 		/// </summary>
 		internal PathUnitQueueItem[] queueItems;
 
+#if PF2
+		private CustomPathFind2[] _replacementPathFinds;
+#else
 		internal CustomPathFind[] _replacementPathFinds;
+#endif
 
 		public static CustomPathManager _instance;
 
@@ -160,12 +164,6 @@ namespace TrafficManager.Custom.PathFinding {
 		public static uint TotalQueuedPathFinds {
 			get; private set;
 		} = 0;
-
-#if EXTRAPF
-		public static uint ExtraQueuedPathFinds {
-			get; private set;
-		} = 0;
-#endif
 #endif
 
 		public static bool InitDone {
@@ -197,24 +195,25 @@ namespace TrafficManager.Custom.PathFinding {
 			var stockPathFinds = GetComponents<PathFind>();
 			var numOfStockPathFinds = stockPathFinds.Length;
 			int numCustomPathFinds = numOfStockPathFinds;
-#if EXTRAPF
-			++numCustomPathFinds;
-#endif
 
 			Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
+#if PF2
+			_replacementPathFinds = new CustomPathFind2[numCustomPathFinds];
+#else
 			_replacementPathFinds = new CustomPathFind[numCustomPathFinds];
+#endif
+
 			try {
 				Monitor.Enter(this.m_bufferLock);
 
 				for (var i = 0; i < numCustomPathFinds; i++) {
+#if PF2
+					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind2>();
+#else
 					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
 					_replacementPathFinds[i].pfId = i;
 					if (i == 0) {
 						_replacementPathFinds[i].IsMasterPathFind = true;
-					}
-#if EXTRAPF
-					else if (i == numCustomPathFinds - 1) {
-						_replacementPathFinds[i].IsExtraPathFind = true;
 					}
 #endif
 				}
@@ -354,36 +353,41 @@ namespace TrafficManager.Custom.PathFinding {
 			this.m_pathUnits.m_buffer[unit].m_length = args.maxLength;
 			this.m_pathUnits.m_buffer[unit].m_positionCount = 20;
 			int minQueued = 10000000;
+#if PF2
+			CustomPathFind2 pathFind = null;
+#else
 			CustomPathFind pathFind = null;
+#endif
+
 #if QUEUEDSTATS
 			TotalQueuedPathFinds = 0;
-#if EXTRAPF
-			ExtraQueuedPathFinds = 0;
-#endif
 #endif
 			for (int i = 0; i < _replacementPathFinds.Length; ++i) {
+#if PF2
+				CustomPathFind2 pathFindCandidate = _replacementPathFinds[i];
+#else
 				CustomPathFind pathFindCandidate = _replacementPathFinds[i];
+#endif
+
 #if QUEUEDSTATS
 				TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
-#if EXTRAPF
-				if (pathFindCandidate.IsExtraPathFind)
-					ExtraQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
-#endif
 #endif
 				if (pathFindCandidate.IsAvailable
-#if EXTRAPF
-					&& (!pathFindCandidate.IsExtraPathFind)
-#endif
 					&& pathFindCandidate.m_queuedPathFindCount < minQueued) {
 					minQueued = pathFindCandidate.m_queuedPathFindCount;
 					pathFind = pathFindCandidate;
 				}
 			}
 
+#if PF2
+			if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
+				return true;
+			}
+#else
 			if (pathFind != null && pathFind.ExtCalculatePath(unit, args.skipQueue)) {
 				return true;
 			}
-
+#endif
 
 			// NON-STOCK CODE START
 			try {
@@ -560,9 +564,15 @@ namespace TrafficManager.Custom.PathFinding {
 		}*/
 
 		private void StopPathFinds() {
+#if PF2
+			foreach (CustomPathFind2 pathFind in _replacementPathFinds) {
+				UnityEngine.Object.Destroy(pathFind);
+			}
+#else
 			foreach (CustomPathFind pathFind in _replacementPathFinds) {
 				UnityEngine.Object.Destroy(pathFind);
 			}
+#endif
 		}
 
 		protected virtual void OnDestroy() {

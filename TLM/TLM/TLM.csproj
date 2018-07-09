@@ -102,6 +102,7 @@
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
     <Compile Include="Custom\Manager\CustomVehicleManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind2.cs" />
     <Compile Include="Geometry\GeometryCalculationMode.cs" />
     <Compile Include="Geometry\ISegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />

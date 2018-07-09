@@ -1,5 +1,4 @@
-﻿#define EXTRAPFx
-#define QUEUEDSTATSx
+﻿#define QUEUEDSTATSx
 
 using ColossalFramework;
 using ColossalFramework.Math;
