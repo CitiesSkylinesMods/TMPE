@@ -233,7 +233,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public float GetLockFreeGameSpeedLimit(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
-			if (! MayHaveCustomSpeedLimits(laneInfo)) {
+			if (! Options.customSpeedLimitsEnabled || ! MayHaveCustomSpeedLimits(laneInfo)) {
 				return laneInfo.m_speedLimit;
 			}
 

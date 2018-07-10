@@ -545,14 +545,15 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 					}
 
-					NetInfo.LaneType laneType = m_laneTypes & ~NetInfo.LaneType.Pedestrian;
-					VehicleInfo.VehicleType vehicleType = m_vehicleTypes & ~VehicleInfo.VehicleType.Bicycle;
+					NetInfo.LaneType nextLaneType = m_laneTypes & ~NetInfo.LaneType.Pedestrian;
+					VehicleInfo.VehicleType nextVehicleType = m_vehicleTypes & ~VehicleInfo.VehicleType.Bicycle;
 					if ((item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
-						laneType &= ~(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
+						nextLaneType &= ~(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 					}
+
 					int sameSegLaneIndex = default(int);
 					uint sameSegLaneId = default(uint);
-					if (laneType != NetInfo.LaneType.None && vehicleType != VehicleInfo.VehicleType.None && netManager.m_segments.m_buffer[prevSegmentId].GetClosestLane(prevLaneIndex, laneType, vehicleType, out sameSegLaneIndex, out sameSegLaneId)) {
+					if (nextLaneType != NetInfo.LaneType.None && nextVehicleType != VehicleInfo.VehicleType.None && netManager.m_segments.m_buffer[prevSegmentId].GetClosestLane(prevLaneIndex, nextLaneType, nextVehicleType, out sameSegLaneIndex, out sameSegLaneId)) {
 						NetInfo.Lane sameSegLaneInfo = prevSegmentInfo.m_lanes[sameSegLaneIndex];
 						byte sameSegConnectOffset = (byte)(((netManager.m_segments.m_buffer[prevSegmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None == ((sameSegLaneInfo.m_finalDirection & NetInfo.Direction.Backward) != NetInfo.Direction.None)) ? 1 : 254);
 						BufferItem nextItem = item;
