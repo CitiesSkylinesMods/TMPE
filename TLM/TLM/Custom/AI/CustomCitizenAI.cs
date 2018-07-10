@@ -40,6 +40,11 @@ namespace TrafficManager.Custom.AI {
 			ushort homeId = citizenManager.m_citizens.m_buffer[instanceData.m_citizen].m_homeBuilding;
 			CarUsagePolicy carUsageMode = CarUsagePolicy.Allowed;
 
+			bool isOnWalkingTour = (instanceData.m_flags & CitizenInstance.Flags.OnTour) != CitizenInstance.Flags.None;
+			if (isOnWalkingTour) {
+				vehicleInfo = null;
+			}
+
 			if (Options.prohibitPocketCars) {
 				ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
 				bool isAtNonRoadOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen]) && sourceBuildingService != ItemClass.Service.Road;
@@ -49,12 +54,8 @@ namespace TrafficManager.Custom.AI {
 #endif
 
 				// disallow car usage if citizen is on a walking tour
-				bool isOnWalkingTour = (instanceData.m_flags & CitizenInstance.Flags.OnTour) != CitizenInstance.Flags.None;
 				if (ignoreCost /* = we are a mascot */ || isAtNonRoadOutsideConnection || isOnWalkingTour) {
 					carUsageMode = CarUsagePolicy.Forbidden;
-					if (isOnWalkingTour) {
-						vehicleInfo = null;
-					}
 				}
 			}
 			
