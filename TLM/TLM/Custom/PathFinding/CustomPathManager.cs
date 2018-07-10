@@ -1,6 +1,5 @@
 #define QUEUEDSTATSx
 #define DEBUGPF3x
-#define PF2
 
 using System;
 using System.Reflection;
@@ -155,7 +154,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if PF2
 		private CustomPathFind2[] _replacementPathFinds;
 #else
-		internal CustomPathFind[] _replacementPathFinds;
+		private CustomPathFind[] _replacementPathFinds;
 #endif
 
 		public static CustomPathManager _instance;

@@ -2,16 +2,11 @@
 using ColossalFramework.Math;
 using ColossalFramework.UI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using UnityEngine;
-using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.PathFinding {
-	public class CustomPathFind2 : PathFind {
+	public class StockPathFind : MonoBehaviour {
 		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
 		private const float TICKET_COST_CONVERSION_FACTOR = BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
 
@@ -23,56 +18,17 @@ namespace TrafficManager.Custom.PathFinding {
 			public uint m_laneID;
 			public NetInfo.Direction m_direction;
 			public NetInfo.LaneType m_lanesUsed;
-			//public VehicleInfo.VehicleType m_vehiclesUsed;
-			//public float m_trafficRand;
 		}
 
-		// private stock fields
-		FieldInfo pathUnitsField;
-		FieldInfo queueFirstField;
-		FieldInfo queueLastField;
-		FieldInfo queueLockField;
-		FieldInfo calculatingField;
-		FieldInfo terminatedField;
-		FieldInfo pathFindThreadField;
-
-		private Array32<PathUnit> m_pathUnits {
-			get { return pathUnitsField.GetValue(this) as Array32<PathUnit>; }
-			set { pathUnitsField.SetValue(this, value); }
-		}
-
-		private uint m_queueFirst {
-			get { return (uint)queueFirstField.GetValue(this); }
-			set { queueFirstField.SetValue(this, value); }
-		}
-
-		private uint m_queueLast {
-			get { return (uint)queueLastField.GetValue(this); }
-			set { queueLastField.SetValue(this, value); }
-		}
-
-		private uint m_calculating {
-			get { return (uint)calculatingField.GetValue(this); }
-			set { calculatingField.SetValue(this, value); }
-		}
-
-		private object m_queueLock {
-			get { return queueLockField.GetValue(this); }
-			set { queueLockField.SetValue(this, value); }
-		}
-
-		private Thread m_customPathFindThread {
-			get { return (Thread)pathFindThreadField.GetValue(this); }
-			set { pathFindThreadField.SetValue(this, value); }
-		}
-
-		private bool m_terminated {
-			get { return (bool)terminatedField.GetValue(this); }
-			set { terminatedField.SetValue(this, value); }
-		}
-
-		// stock fields
+		private Array32<PathUnit> m_pathUnits;
+		private uint m_queueFirst;
+		private uint m_queueLast;
+		private uint m_calculating;
+		private object m_queueLock;
+		private Thread m_pathFindThread;
+		private bool m_terminated;
 		public ThreadProfiler m_pathfindProfiler;
+		public volatile int m_queuedPathFindCount;
 		private object m_bufferLock;
 		private int m_bufferMinPos;
 		private int m_bufferMaxPos;
@@ -102,25 +58,13 @@ namespace TrafficManager.Custom.PathFinding {
 		private NetInfo.LaneType m_laneTypes;
 		private VehicleInfo.VehicleType m_vehicleTypes;
 
-		// custom fields
-		private PathUnitQueueItem m_queueItem;
-#if DEBUG
-		public uint m_failedPathFinds = 0;
-		public uint m_succeededPathFinds = 0;
-#endif
+		public bool IsAvailable {
+			get {
+				return m_pathFindThread.IsAlive;
+			}
+		}
 
 		private void Awake() {
-			Type stockPathFindType = typeof(PathFind);
-			const BindingFlags fieldFlags = BindingFlags.NonPublic | BindingFlags.Instance;
-
-			pathUnitsField = stockPathFindType.GetField("m_pathUnits", fieldFlags);
-			queueFirstField = stockPathFindType.GetField("m_queueFirst", fieldFlags);
-			queueLastField = stockPathFindType.GetField("m_queueLast", fieldFlags);
-			queueLockField = stockPathFindType.GetField("m_queueLock", fieldFlags);
-			terminatedField = stockPathFindType.GetField("m_terminated", fieldFlags);
-			calculatingField = stockPathFindType.GetField("m_calculating", fieldFlags);
-			pathFindThreadField = stockPathFindType.GetField("m_pathFindThread", fieldFlags);
-
 			m_pathfindProfiler = new ThreadProfiler();
 			m_laneLocation = new uint[262144];
 			m_laneTarget = new PathUnit.Position[262144];
@@ -130,19 +74,19 @@ namespace TrafficManager.Custom.PathFinding {
 			m_queueLock = new object();
 			m_bufferLock = Singleton<PathManager>.instance.m_bufferLock;
 			m_pathUnits = Singleton<PathManager>.instance.m_pathUnits;
-			m_customPathFindThread = new Thread(PathFindThread);
-			m_customPathFindThread.Name = "Pathfind";
-			m_customPathFindThread.Priority = SimulationManager.SIMULATION_PRIORITY;
-			m_customPathFindThread.Start();
-
-			if (!m_customPathFindThread.IsAlive) {
+			m_pathFindThread = new Thread(PathFindThread);
+			m_pathFindThread.Name = "Pathfind";
+			m_pathFindThread.Priority = SimulationManager.SIMULATION_PRIORITY;
+			m_pathFindThread.Start();
+			if (!m_pathFindThread.IsAlive) {
 				CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find thread failed to start!");
 			}
 		}
 
 		private void OnDestroy() {
+			while (!Monitor.TryEnter(m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
+			}
 			try {
-				Monitor.Enter(m_queueLock);
 				m_terminated = true;
 				Monitor.PulseAll(m_queueLock);
 			} finally {
@@ -150,33 +94,23 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
-		public new bool CalculatePath(uint unit, bool skipQueue) {
-			return ExtCalculatePath(unit, skipQueue);
-		}
-
-		public bool ExtCalculatePath(uint unit, bool skipQueue) {
-			if (CustomPathManager._instance.AddPathReference(unit)) {
+		public bool CalculatePath(uint unit, bool skipQueue) {
+			if (Singleton<PathManager>.instance.AddPathReference(unit)) {
+				while (!Monitor.TryEnter(m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
+				}
 				try {
-					Monitor.Enter(m_queueLock);
-
 					if (skipQueue) {
 						if (m_queueLast == 0) {
 							m_queueLast = unit;
 						} else {
-							// NON-STOCK CODE START
-							CustomPathManager._instance.queueItems[unit].nextPathUnitId = m_queueFirst;
-							// NON-STOCK CODE END
-							// PathUnits.m_buffer[unit].m_nextPathUnit = QueueFirst; // stock code commented
+							m_pathUnits.m_buffer[unit].m_nextPathUnit = m_queueFirst;
 						}
 						m_queueFirst = unit;
 					} else {
 						if (m_queueLast == 0) {
 							m_queueFirst = unit;
 						} else {
-							// NON-STOCK CODE START
-							CustomPathManager._instance.queueItems[m_queueLast].nextPathUnitId = unit;
-							// NON-STOCK CODE END
-							// PathUnits.m_buffer[QueueLast].m_nextPathUnit = unit; // stock code commented
+							m_pathUnits.m_buffer[m_queueLast].m_nextPathUnit = unit;
 						}
 						m_queueLast = unit;
 					}
@@ -191,6 +125,25 @@ namespace TrafficManager.Custom.PathFinding {
 				return true;
 			}
 			return false;
+		}
+
+		public void WaitForAllPaths() {
+			while (!Monitor.TryEnter(m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
+			}
+			try {
+				while (true) {
+					if (m_queueFirst == 0 && m_calculating == 0) {
+						break;
+					}
+					if (!m_terminated) {
+						Monitor.Wait(m_queueLock);
+						continue;
+					}
+					break;
+				}
+			} finally {
+				Monitor.Exit(m_queueLock);
+			}
 		}
 
 		private void PathFindImplementation(uint unit, ref PathUnit data) {
@@ -361,12 +314,12 @@ namespace TrafficManager.Custom.PathFinding {
 
 					if ((candidateItem.m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
 						ushort startNodeId = netManager.m_segments.m_buffer[candidateItem.m_position.m_segment].m_startNode;
-						ProcessItemMain(candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], ref netManager.m_lanes.m_buffer[candidateItem.m_laneID], startNodeId, ref netManager.m_nodes.m_buffer[startNodeId], 0, false);
+						ProcessItemMain(candidateItem, startNodeId, ref netManager.m_nodes.m_buffer[startNodeId], (byte)0, false);
 					}
 
 					if ((candidateItem.m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
 						ushort endNodeId = netManager.m_segments.m_buffer[candidateItem.m_position.m_segment].m_endNode;
-						ProcessItemMain(candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], ref netManager.m_lanes.m_buffer[candidateItem.m_laneID], endNodeId, ref netManager.m_nodes.m_buffer[endNodeId], 255, false);
+						ProcessItemMain(candidateItem, endNodeId, ref netManager.m_nodes.m_buffer[endNodeId], (byte)255, false);
 					}
 
 					int numIter = 0;
@@ -389,7 +342,7 @@ namespace TrafficManager.Custom.PathFinding {
 							}
 
 							if ((candidateItem.m_direction & direction) != NetInfo.Direction.None && (!nodesDisabled || (netManager.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
-								ProcessItemMain(candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], ref netManager.m_lanes.m_buffer[candidateItem.m_laneID], specialNodeId, ref netManager.m_nodes.m_buffer[specialNodeId], laneOffset, true);
+								ProcessItemMain(candidateItem, specialNodeId, ref netManager.m_nodes.m_buffer[specialNodeId], laneOffset, true);
 							}
 
 							specialNodeId = netManager.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
@@ -404,23 +357,15 @@ namespace TrafficManager.Custom.PathFinding {
 
 			if (!canFindPath) {
 				m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
-				// NON-STOCK CODE START
-#if DEBUG
-				++m_failedPathFinds;
-#endif
-				// NON-STOCK CODE END
 			} else {
 				float duration = (m_laneTypes != NetInfo.LaneType.Pedestrian && (m_laneTypes & NetInfo.LaneType.Pedestrian) != NetInfo.LaneType.None) ? finalBufferItem.m_duration : finalBufferItem.m_methodDistance;
 				m_pathUnits.m_buffer[unit].m_length = duration;
 				m_pathUnits.m_buffer[unit].m_speed = (byte)Mathf.Clamp(finalBufferItem.m_methodDistance * 100f / Mathf.Max(0.01f, finalBufferItem.m_duration), 0f, 255f);
-
 				uint currentPathUnitId = unit;
 				int currentItemPositionCount = 0;
 				int sumOfPositionCounts = 0;
 				PathUnit.Position currentPosition = finalBufferItem.m_position;
-
-				if ((currentPosition.m_segment != bufferItemEndA.m_position.m_segment || currentPosition.m_lane != bufferItemEndA.m_position.m_lane || currentPosition.m_offset != bufferItemEndA.m_position.m_offset) &&
-					(currentPosition.m_segment != bufferItemEndB.m_position.m_segment || currentPosition.m_lane != bufferItemEndB.m_position.m_lane || currentPosition.m_offset != bufferItemEndB.m_position.m_offset)) {
+				if ((currentPosition.m_segment != bufferItemEndA.m_position.m_segment || currentPosition.m_lane != bufferItemEndA.m_position.m_lane || currentPosition.m_offset != bufferItemEndA.m_position.m_offset) && (currentPosition.m_segment != bufferItemEndB.m_position.m_segment || currentPosition.m_lane != bufferItemEndB.m_position.m_lane || currentPosition.m_offset != bufferItemEndB.m_position.m_offset)) {
 					if (startOffset != currentPosition.m_offset) {
 						PathUnit.Position position2 = currentPosition;
 						position2.m_offset = startOffset;
@@ -433,56 +378,31 @@ namespace TrafficManager.Custom.PathFinding {
 
 				for (int k = 0; k < 262144; k++) {
 					m_pathUnits.m_buffer[currentPathUnitId].SetPosition(currentItemPositionCount++, currentPosition);
-
-					if ((currentPosition.m_segment == bufferItemEndA.m_position.m_segment && currentPosition.m_lane == bufferItemEndA.m_position.m_lane && currentPosition.m_offset == bufferItemEndA.m_position.m_offset) ||
-					(currentPosition.m_segment == bufferItemEndB.m_position.m_segment && currentPosition.m_lane == bufferItemEndB.m_position.m_lane && currentPosition.m_offset == bufferItemEndB.m_position.m_offset)) {
-						m_pathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
-						sumOfPositionCounts += currentItemPositionCount;
-						if (sumOfPositionCounts != 0) {
-							currentPathUnitId = m_pathUnits.m_buffer[unit].m_nextPathUnit;
-							currentItemPositionCount = m_pathUnits.m_buffer[unit].m_positionCount;
-							int numIter = 0;
-							while (currentPathUnitId != 0) {
-								m_pathUnits.m_buffer[currentPathUnitId].m_length = duration * (float)(sumOfPositionCounts - currentItemPositionCount) / (float)sumOfPositionCounts;
-								currentItemPositionCount += m_pathUnits.m_buffer[currentPathUnitId].m_positionCount;
-								currentPathUnitId = m_pathUnits.m_buffer[currentPathUnitId].m_nextPathUnit;
-								if (++numIter >= 262144) {
-									CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-									break;
-								}
-							}
-						}
-						m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_READY;
-						// NON-STOCK CODE START
-#if DEBUG
-						++m_succeededPathFinds;
-#endif
-						// NON-STOCK CODE END
-						return;
+					if (currentPosition.m_segment == bufferItemEndA.m_position.m_segment && currentPosition.m_lane == bufferItemEndA.m_position.m_lane && currentPosition.m_offset == bufferItemEndA.m_position.m_offset) {
+						goto IL_0c87;
+					}
+					if (currentPosition.m_segment == bufferItemEndB.m_position.m_segment && currentPosition.m_lane == bufferItemEndB.m_position.m_lane && currentPosition.m_offset == bufferItemEndB.m_position.m_offset) {
+						goto IL_0c87;
 					}
 					
 					if (currentItemPositionCount == 12) {
-						uint createdPathUnitId;
+						while (!Monitor.TryEnter(m_bufferLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
+						}
+						uint createdPathUnitId = default(uint);
 						try {
-							Monitor.Enter(m_bufferLock);
-
-							if (!m_pathUnits.CreateItem(out createdPathUnitId, ref m_pathRandomizer)) {
-								m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
-								// NON-STOCK CODE START
-#if DEBUG
-								++m_failedPathFinds;
-#endif
-								// NON-STOCK CODE END
-								return;
+							if (m_pathUnits.CreateItem(out createdPathUnitId, ref m_pathRandomizer)) {
+								m_pathUnits.m_buffer[createdPathUnitId] = m_pathUnits.m_buffer[currentPathUnitId];
+								m_pathUnits.m_buffer[createdPathUnitId].m_referenceCount = 1;
+								m_pathUnits.m_buffer[createdPathUnitId].m_pathFindFlags = 4;
+								m_pathUnits.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
+								m_pathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
+								sumOfPositionCounts += currentItemPositionCount;
+								Singleton<PathManager>.instance.m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1);
+								goto end_IL_0dbc;
 							}
-
-							m_pathUnits.m_buffer[createdPathUnitId] = m_pathUnits.m_buffer[currentPathUnitId];
-							m_pathUnits.m_buffer[createdPathUnitId].m_referenceCount = 1;
-							m_pathUnits.m_buffer[createdPathUnitId].m_pathFindFlags = PathUnit.FLAG_READY;
-							m_pathUnits.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
-							m_pathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
-							sumOfPositionCounts += currentItemPositionCount;
-							Singleton<PathManager>.instance.m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1);
+							m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
+							return;
+							end_IL_0dbc:;
 						} finally {
 							Monitor.Exit(m_bufferLock);
 						}
@@ -493,28 +413,40 @@ namespace TrafficManager.Custom.PathFinding {
 
 					uint laneID = PathManager.GetLaneID(currentPosition);
 					currentPosition = m_laneTarget[laneID];
+					continue;
+					IL_0c87:
+					m_pathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
+					sumOfPositionCounts += currentItemPositionCount;
+					if (sumOfPositionCounts != 0) {
+						currentPathUnitId = m_pathUnits.m_buffer[unit].m_nextPathUnit;
+						currentItemPositionCount = m_pathUnits.m_buffer[unit].m_positionCount;
+						int numIter = 0;
+						while (currentPathUnitId != 0) {
+							m_pathUnits.m_buffer[currentPathUnitId].m_length = duration * (float)(sumOfPositionCounts - currentItemPositionCount) / (float)sumOfPositionCounts;
+							currentItemPositionCount += m_pathUnits.m_buffer[currentPathUnitId].m_positionCount;
+							currentPathUnitId = m_pathUnits.m_buffer[currentPathUnitId].m_nextPathUnit;
+							if (++numIter >= 262144) {
+								CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+								break;
+							}
+						}
+					}
+					m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_READY;
+					return;
 				}
-
 				m_pathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
-				// NON-STOCK CODE START
-#if DEBUG
-				++m_failedPathFinds;
-#endif
-				// NON-STOCK CODE END
 			}
 		}
 
 		// 1
-		private void ProcessItemMain(BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
+		private void ProcessItemMain(BufferItem item, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
 			NetManager netManager = Singleton<NetManager>.instance;
-
-			ushort prevSegmentId = item.m_position.m_segment;
 			bool prevIsPedestrianLane = false;
 			bool prevIsBicycleLane = false;
 			bool prevIsCenterPlatform = false;
 			bool prevIsElevated = false;
 			int prevRelSimilarLaneIndex = 0;
-			NetInfo prevSegmentInfo = prevSegment.Info;
+			NetInfo prevSegmentInfo = netManager.m_segments.m_buffer[item.m_position.m_segment].Info;
 			if (item.m_position.m_lane < prevSegmentInfo.m_lanes.Length) {
 				NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[item.m_position.m_lane];
 				prevIsPedestrianLane = (prevLaneInfo.m_laneType == NetInfo.LaneType.Pedestrian);
@@ -528,35 +460,33 @@ namespace TrafficManager.Custom.PathFinding {
 				for (int i = 0; i < 8; i++) {
 					ushort nextSegmentId = nextNode.GetSegment(i);
 					if (nextSegmentId != 0) {
-						ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
+						ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, !prevIsPedestrianLane, prevIsPedestrianLane);
 					}
 				}
 			} else if (prevIsPedestrianLane) {
 				if (!prevIsElevated) {
+					ushort prevSegmentId = item.m_position.m_segment;
 					int prevLaneIndex = item.m_position.m_lane;
 					if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
 						bool canCrossStreet = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
 						bool isOnCenterPlatform = prevIsCenterPlatform && (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Junction)) == NetNode.Flags.None;
 						ushort nextLeftSegmentId = prevSegmentId;
 						ushort nextRightSegmentId = prevSegmentId;
-						int leftLaneIndex;
-						int rightLaneIndex;
-						uint leftLaneId;
-						uint rightLaneId;
-
-						prevSegment.GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, prevLaneIndex, isOnCenterPlatform, out leftLaneIndex, out rightLaneIndex, out leftLaneId, out rightLaneId);
-
+						int leftLaneIndex = default(int);
+						int rightLaneIndex = default(int);
+						uint leftLaneId = default(uint);
+						uint rightLaneId = default(uint);
+						netManager.m_segments.m_buffer[prevSegmentId].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, prevLaneIndex, isOnCenterPlatform, out leftLaneIndex, out rightLaneIndex, out leftLaneId, out rightLaneId);
 						if (leftLaneId == 0 || rightLaneId == 0) {
-							ushort leftSegmentId;
-							ushort rightSegmentId;
-							prevSegment.GetLeftAndRightSegments(nextNodeId, out leftSegmentId, out rightSegmentId);
-
+							ushort leftSegmentId = default(ushort);
+							ushort rightSegmentId = default(ushort);
+							netManager.m_segments.m_buffer[prevSegmentId].GetLeftAndRightSegments(nextNodeId, out leftSegmentId, out rightSegmentId);
 							int numIter = 0;
 							while (leftSegmentId != 0 && leftSegmentId != prevSegmentId && leftLaneId == 0) {
-								int someLeftLaneIndex;
-								int someRightLaneIndex;
-								uint someLeftLaneId;
-								uint someRightLaneId;
+								int someLeftLaneIndex = default(int);
+								int someRightLaneIndex = default(int);
+								uint someLeftLaneId = default(uint);
+								uint someRightLaneId = default(uint);
 								netManager.m_segments.m_buffer[leftSegmentId].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
 
 								if (someRightLaneId != 0) {
@@ -574,10 +504,10 @@ namespace TrafficManager.Custom.PathFinding {
 
 							numIter = 0;
 							while (rightSegmentId != 0 && rightSegmentId != prevSegmentId && rightLaneId == 0) {
-								int someLeftLaneIndex;
-								int someRightLaneIndex;
-								uint someLeftLaneId;
-								uint someRightLaneId;
+								int someLeftLaneIndex = default(int);
+								int someRightLaneIndex = default(int);
+								uint someLeftLaneId = default(uint);
+								uint someRightLaneId = default(uint);
 								netManager.m_segments.m_buffer[rightSegmentId].GetLeftAndRightLanes(nextNodeId, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, -1, isOnCenterPlatform, out someLeftLaneIndex, out someRightLaneIndex, out someLeftLaneId, out someRightLaneId);
 
 								if (someLeftLaneId != 0) {
@@ -595,23 +525,22 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 
 						if (leftLaneId != 0 && (nextLeftSegmentId != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
-							ProcessItemPedBicycle(item, ref prevSegment, ref prevLane, nextLeftSegmentId, ref netManager.m_segments.m_buffer[nextLeftSegmentId], nextNodeId, ref nextNode, leftLaneIndex, leftLaneId, ref netManager.m_lanes.m_buffer[leftLaneId], connectOffset, connectOffset);
+							ProcessItemPedBicycle(item, nextNodeId, nextLeftSegmentId, ref netManager.m_segments.m_buffer[nextLeftSegmentId], connectOffset, connectOffset, leftLaneIndex, leftLaneId);
 						}
 
 						if (rightLaneId != 0 && rightLaneId != leftLaneId && (nextRightSegmentId != prevSegmentId || canCrossStreet || isOnCenterPlatform)) {
-							ProcessItemPedBicycle(item, ref prevSegment, ref prevLane, nextRightSegmentId, ref netManager.m_segments.m_buffer[nextRightSegmentId], nextNodeId, ref nextNode, rightLaneIndex, rightLaneId, ref netManager.m_lanes.m_buffer[rightLaneId], connectOffset, connectOffset);
+							ProcessItemPedBicycle(item, nextNodeId, nextRightSegmentId, ref netManager.m_segments.m_buffer[nextRightSegmentId], connectOffset, connectOffset, rightLaneIndex, rightLaneId);
 						}
-
-						int nextLaneIndex;
-						uint nextLaneId;
-						if ((m_vehicleTypes & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None && prevSegment.GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Bicycle, out nextLaneIndex, out nextLaneId)) {
-							ProcessItemPedBicycle(item, ref prevSegment, ref prevLane, prevSegmentId, ref prevSegment, nextNodeId, ref nextNode, nextLaneIndex, nextLaneId, ref netManager.m_lanes.m_buffer[nextLaneId], connectOffset, connectOffset);
+						int nextLaneIndex = default(int);
+						uint nextLaneId = default(uint);
+						if ((m_vehicleTypes & VehicleInfo.VehicleType.Bicycle) != VehicleInfo.VehicleType.None && netManager.m_segments.m_buffer[prevSegmentId].GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Bicycle, out nextLaneIndex, out nextLaneId)) {
+							ProcessItemPedBicycle(item, nextNodeId, prevSegmentId, ref netManager.m_segments.m_buffer[prevSegmentId], connectOffset, connectOffset, nextLaneIndex, nextLaneId);
 						}
 					} else {
 						for (int j = 0; j < 8; j++) {
 							ushort nextSegmentId = nextNode.GetSegment(j);
 							if (nextSegmentId != 0 && nextSegmentId != prevSegmentId) {
-								ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, false, true);
+								ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, false, true);
 							}
 						}
 					}
@@ -621,17 +550,16 @@ namespace TrafficManager.Custom.PathFinding {
 					if ((item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
 						laneType &= ~(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 					}
-
-					int sameSegLaneIndex;
-					uint sameSegLaneId;
-					if (laneType != NetInfo.LaneType.None && vehicleType != VehicleInfo.VehicleType.None && prevSegment.GetClosestLane(prevLaneIndex, laneType, vehicleType, out sameSegLaneIndex, out sameSegLaneId)) {
+					int sameSegLaneIndex = default(int);
+					uint sameSegLaneId = default(uint);
+					if (laneType != NetInfo.LaneType.None && vehicleType != VehicleInfo.VehicleType.None && netManager.m_segments.m_buffer[prevSegmentId].GetClosestLane(prevLaneIndex, laneType, vehicleType, out sameSegLaneIndex, out sameSegLaneId)) {
 						NetInfo.Lane sameSegLaneInfo = prevSegmentInfo.m_lanes[sameSegLaneIndex];
-						byte sameSegConnectOffset = (byte)(((prevSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None == ((sameSegLaneInfo.m_finalDirection & NetInfo.Direction.Backward) != NetInfo.Direction.None)) ? 1 : 254);
+						byte sameSegConnectOffset = (byte)(((netManager.m_segments.m_buffer[prevSegmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None == ((sameSegLaneInfo.m_finalDirection & NetInfo.Direction.Backward) != NetInfo.Direction.None)) ? 1 : 254);
 						BufferItem nextItem = item;
 						if (m_randomParking) {
 							nextItem.m_comparisonValue += (float)m_pathRandomizer.Int32(300u) / m_maxLength;
 						}
-						ProcessItemPedBicycle(nextItem, ref prevSegment, ref prevLane, prevSegmentId, ref prevSegment, nextNodeId, ref nextNode, sameSegLaneIndex, sameSegLaneId, ref netManager.m_lanes.m_buffer[sameSegLaneId], sameSegConnectOffset, 128);
+						ProcessItemPedBicycle(nextItem, nextNodeId, prevSegmentId, ref netManager.m_segments.m_buffer[prevSegmentId], sameSegConnectOffset, (byte)128, sameSegLaneIndex, sameSegLaneId);
 					}
 				}
 			} else {
@@ -658,28 +586,26 @@ namespace TrafficManager.Custom.PathFinding {
 					bool isUturnAllowedHere = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
 					for (int k = 0; k < 8; k++) {
 						nextSegmentId = nextNode.GetSegment(k);
-						if (nextSegmentId != 0 && nextSegmentId != prevSegmentId) {
-							ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowBicycle);
+						if (nextSegmentId != 0 && nextSegmentId != item.m_position.m_segment) {
+							ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowBicycle);
 						}
 					}
 
 					if (isUturnAllowedHere && (m_vehicleTypes & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None) {
-						nextSegmentId = prevSegmentId;
-						ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, false);
+						nextSegmentId = item.m_position.m_segment;
+						ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, false);
 					}
 				} else {
 					bool isUturnAllowedHere = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-					nextSegmentId = prevSegment.GetRightSegment(nextNodeId);
+					nextSegmentId = netManager.m_segments.m_buffer[item.m_position.m_segment].GetRightSegment(nextNodeId);
 					for (int l = 0; l < 8; l++) {
 						if (nextSegmentId == 0) {
 							break;
 						}
-
-						if (nextSegmentId == prevSegmentId) {
+						if (nextSegmentId == item.m_position.m_segment) {
 							break;
 						}
-
-						if (ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowBicycle)) {
+						if (ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, allowBicycle)) {
 							isUturnAllowedHere = true;
 						}
 
@@ -687,15 +613,17 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 
 					if (isUturnAllowedHere && (m_vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None) {
-						ProcessItemCosts(item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, prevSegmentId, ref prevSegment, ref prevRelSimilarLaneIndex, connectOffset, true, false);
+						nextSegmentId = item.m_position.m_segment;
+						ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, false);
 					}
 				}
 
 				if (allowPedestrian) {
-					int nextLaneIndex;
-					uint nextLaneId;
-					if (prevSegment.GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Pedestrian, m_vehicleTypes, out nextLaneIndex, out nextLaneId)) {
-						ProcessItemPedBicycle(item, ref prevSegment, ref prevLane, prevSegmentId, ref prevSegment, nextNodeId, ref nextNode, nextLaneIndex, nextLaneId, ref netManager.m_lanes.m_buffer[nextLaneId], parkingConnectOffset, parkingConnectOffset);
+					nextSegmentId = item.m_position.m_segment;
+					int nextLaneIndex = default(int);
+					uint nextLaneId = default(uint);
+					if (netManager.m_segments.m_buffer[nextSegmentId].GetClosestLane((int)item.m_position.m_lane, NetInfo.LaneType.Pedestrian, m_vehicleTypes, out nextLaneIndex, out nextLaneId)) {
+						ProcessItemPedBicycle(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], parkingConnectOffset, parkingConnectOffset, nextLaneIndex, nextLaneId);
 					}
 				}
 			}
@@ -703,14 +631,14 @@ namespace TrafficManager.Custom.PathFinding {
 			if (nextNode.m_lane != 0) {
 				bool targetDisabled = (nextNode.m_flags & (NetNode.Flags.Disabled | NetNode.Flags.DisableOnlyMiddle)) == NetNode.Flags.Disabled;
 				ushort nextSegmentId = netManager.m_lanes.m_buffer[nextNode.m_lane].m_segment;
-				if (nextSegmentId != 0 && nextSegmentId != prevSegmentId) {
-					ProcessItemPublicTransport(item, ref prevSegment, ref prevLane, nextNodeId, targetDisabled, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], nextNode.m_lane, nextNode.m_laneOffset, connectOffset);
+				if (nextSegmentId != 0 && nextSegmentId != item.m_position.m_segment) {
+					ProcessItemPublicTransport(item, nextNodeId, targetDisabled, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], nextNode.m_lane, nextNode.m_laneOffset, connectOffset);
 				}
 			}
 		}
 
 		// 2
-		private void ProcessItemPublicTransport(BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, ushort nextNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment nextSegment, uint nextLaneId, byte offset, byte connectOffset) {
+		private void ProcessItemPublicTransport(BufferItem item, ushort nextNodeId, bool targetDisabled, ushort nextSegmentId, ref NetSegment nextSegment, uint nextLaneId, byte offset, byte connectOffset) {
 			if ((nextSegment.m_flags & m_disableMask) != NetSegment.Flags.None) {
 				return;
 			}
@@ -721,7 +649,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 
 			NetInfo nextSegmentInfo = nextSegment.Info;
-			NetInfo prevSegmentInfo = prevSegment.Info;
+			NetInfo prevSegmentInfo = netManager.m_segments.m_buffer[item.m_position.m_segment].Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
 			uint curLaneId = nextSegment.m_lanes;
 			float prevMaxSpeed = 1f;
@@ -734,18 +662,16 @@ namespace TrafficManager.Custom.PathFinding {
 				if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
 					prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 				}
-				prevSpeed = CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref prevSegment, prevLaneInfo);
+				prevSpeed = CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref netManager.m_segments.m_buffer[item.m_position.m_segment], prevLaneInfo);
 			}
-
-			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? prevSegment.m_averageLength : prevLane.m_length;
+			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? netManager.m_segments.m_buffer[item.m_position.m_segment].m_averageLength : netManager.m_lanes.m_buffer[item.m_laneID].m_length;
 			float offsetLength = (float)Mathf.Abs(connectOffset - item.m_position.m_offset) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevLength;
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * m_maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed;
-			Vector3 b = prevLane.CalculatePosition((float)(int)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
-
+			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)(int)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			if (!m_ignoreCost) {
-				int ticketCost = prevLane.m_ticketCost;
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
 				if (ticketCost != 0) {
 					comparisonValue += (float)(ticketCost * m_pathRandomizer.Int32(2000u)) * TICKET_COST_CONVERSION_FACTOR;
 				}
@@ -827,15 +753,15 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		// 3
-		private bool ProcessItemCosts(BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, ushort nextNodeId, ref NetNode nextNode, ushort nextSegmentId, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
+		private bool ProcessItemCosts(BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment nextSegment, ref int laneIndexFromInner, byte connectOffset, bool enableVehicle, bool enablePedestrian) {
 			bool blocked = false;
-			if ((nextSegment.m_flags & m_disableMask) != NetSegment.Flags.None) {
+			if ((nextSegment.m_flags & m_disableMask) != 0) {
 				return blocked;
 			}
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			NetInfo nextSegmentInfo = nextSegment.Info;
-			NetInfo prevSegmentInfo = prevSegment.Info;
+			NetInfo prevSegmentInfo = netManager.m_segments.m_buffer[item.m_position.m_segment].Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
 			uint curLaneId = nextSegment.m_lanes;
 			NetInfo.Direction nextDir = (nextNodeId != nextSegment.m_startNode) ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
@@ -849,14 +775,14 @@ namespace TrafficManager.Custom.PathFinding {
 				prevLaneType = prevLaneInfo.m_laneType;
 				prevVehicleType = prevLaneInfo.m_vehicleType;
 				prevMaxSpeed = prevLaneInfo.m_speedLimit;
-				prevLaneSpeed = CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref prevSegment, prevLaneInfo);
+				prevLaneSpeed = CalculateLaneSpeed(connectOffset, item.m_position.m_offset, ref netManager.m_segments.m_buffer[item.m_position.m_segment], prevLaneInfo);
 			}
 
 			bool acuteTurningAngle = false;
 			if (prevLaneType == NetInfo.LaneType.Vehicle && (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
 				float turningAngle = 0.01f - Mathf.Min(nextSegmentInfo.m_maxTurnAngleCos, prevSegmentInfo.m_maxTurnAngleCos);
 				if (turningAngle < 1f) {
-					Vector3 vector = (nextNodeId != prevSegment.m_startNode) ? prevSegment.m_endDirection : prevSegment.m_startDirection;
+					Vector3 vector = (nextNodeId != netManager.m_segments.m_buffer[item.m_position.m_segment].m_startNode) ? netManager.m_segments.m_buffer[item.m_position.m_segment].m_endDirection : netManager.m_segments.m_buffer[item.m_position.m_segment].m_startDirection;
 					Vector3 vector2 = ((nextDir & NetInfo.Direction.Forward) == NetInfo.Direction.None) ? nextSegment.m_startDirection : nextSegment.m_endDirection;
 					float dirDotProd = vector.x * vector2.x + vector.z * vector2.z;
 					if (dirDotProd >= turningAngle) {
@@ -864,17 +790,15 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 				}
 			}
-
-			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? prevSegment.m_averageLength : prevLane.m_length;
+			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? netManager.m_segments.m_buffer[item.m_position.m_segment].m_averageLength : netManager.m_lanes.m_buffer[item.m_laneID].m_length;
 			float offsetLength = (float)Mathf.Abs(connectOffset - item.m_position.m_offset) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevLength;
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float duration = item.m_duration + offsetLength / prevMaxSpeed;
 
 			if (!m_stablePath) {
-				offsetLength *= (float)(new Randomizer(m_pathFindIndex << 16 | item.m_position.m_segment).Int32(900, 1000 + prevSegment.m_trafficDensity * 10) + m_pathRandomizer.Int32(20u)) * 0.001f;
+				offsetLength *= (float)(new Randomizer(m_pathFindIndex << 16 | item.m_position.m_segment).Int32(900, 1000 + netManager.m_segments.m_buffer[item.m_position.m_segment].m_trafficDensity * 10) + m_pathRandomizer.Int32(20u)) * 0.001f;
 			}
-
-			if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None && (prevVehicleType & m_vehicleTypes) == VehicleInfo.VehicleType.Car && (prevSegment.m_flags & m_carBanMask) != NetSegment.Flags.None) {
+			if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None && (prevVehicleType & m_vehicleTypes) == VehicleInfo.VehicleType.Car && (netManager.m_segments.m_buffer[item.m_position.m_segment].m_flags & m_carBanMask) != NetSegment.Flags.None) {
 				offsetLength *= 7.5f;
 			}
 
@@ -884,20 +808,17 @@ namespace TrafficManager.Custom.PathFinding {
 
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevLaneSpeed * m_maxLength);
 			if (!m_ignoreCost) {
-				int ticketCost = prevLane.m_ticketCost;
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
 				if (ticketCost != 0) {
 					comparisonValue += (float)(ticketCost * m_pathRandomizer.Int32(2000u)) * TICKET_COST_CONVERSION_FACTOR;
 				}
 			}
-
-			if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
+			if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0) {
 				prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 			}
-
-			Vector3 b = prevLane.CalculatePosition((float)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+			Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)(int)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			int newLaneIndexFromInner = laneIndexFromInner;
-			bool transitionNode = (nextNode.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
-
+			bool transitionNode = (netManager.m_nodes.m_buffer[nextNodeId].m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 			NetInfo.LaneType allowedLaneTypes = m_laneTypes;
 			VehicleInfo.VehicleType allowedVehicleTypes = m_vehicleTypes;
 			if (!enableVehicle) {
@@ -912,24 +833,22 @@ namespace TrafficManager.Custom.PathFinding {
 
 			for (int i = 0; i < nextNumLanes && curLaneId != 0; i++) {
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[i];
-				if ((nextLaneInfo.m_finalDirection & nextFinalDir) != NetInfo.Direction.None) {
-					if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes) && (nextSegmentId != item.m_position.m_segment || i != item.m_position.m_lane) && (nextLaneInfo.m_finalDirection & nextFinalDir) != NetInfo.Direction.None) {
+				float transitionCost;
+				BufferItem nextItem = default(BufferItem);
+				if ((nextLaneInfo.m_finalDirection & nextFinalDir) != 0) {
+					if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes) && (nextSegmentId != item.m_position.m_segment || i != item.m_position.m_lane) && (nextLaneInfo.m_finalDirection & nextFinalDir) != 0) {
 						if (acuteTurningAngle && nextLaneInfo.m_laneType == NetInfo.LaneType.Vehicle && (nextLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
 							continue;
 						}
-
-						BufferItem nextItem = default(BufferItem);
-
 						Vector3 a = ((nextDir & NetInfo.Direction.Forward) == NetInfo.Direction.None) ? netManager.m_lanes.m_buffer[curLaneId].m_bezier.a : netManager.m_lanes.m_buffer[curLaneId].m_bezier.d;
-						float transitionCost = Vector3.Distance(a, b);
+						transitionCost = Vector3.Distance(a, b);
 						if (transitionNode) {
 							transitionCost *= 2f;
 						}
-
 						float transitionCostOverMeanMaxSpeed = transitionCost / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f * m_maxLength);
 						nextItem.m_position.m_segment = nextSegmentId;
 						nextItem.m_position.m_lane = (byte)i;
-						nextItem.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) ? 255 : 0);
+						nextItem.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) != 0) ? 255 : 0);
 						if ((nextLaneInfo.m_laneType & prevLaneType) == NetInfo.LaneType.None) {
 							nextItem.m_methodDistance = 0f;
 						} else {
@@ -937,8 +856,7 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 
 						if (nextLaneInfo.m_laneType == NetInfo.LaneType.Pedestrian && !(nextItem.m_methodDistance < 1000f) && !m_stablePath) {
-							curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-							continue;
+							goto IL_09e6;
 						}
 
 						nextItem.m_comparisonValue = comparisonValue + transitionCostOverMeanMaxSpeed;
@@ -946,89 +864,95 @@ namespace TrafficManager.Custom.PathFinding {
 						nextItem.m_direction = nextDir;
 
 						if (curLaneId == m_startLaneA) {
-							if (((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetA) &&
-								((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None || nextItem.m_position.m_offset > m_startOffsetA)) {
-								curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-								continue;
+							if ((nextItem.m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None && nextItem.m_position.m_offset >= m_startOffsetA) {
+								goto IL_06c5;
 							}
-
-							float nextLaneSpeed = CalculateLaneSpeed(m_startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
-							float nextOffset = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetA) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
-
-							nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextLaneSpeed * m_maxLength);
-							nextItem.m_duration += nextOffset * nextSegment.m_averageLength / nextLaneSpeed;
-						}
-
-						if (curLaneId == m_startLaneB) {
-							if (((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetB) &&
-								((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None || nextItem.m_position.m_offset > m_startOffsetB)) {
-								curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-								continue;
+							if ((nextItem.m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None && nextItem.m_position.m_offset <= m_startOffsetA) {
+								goto IL_06c5;
 							}
-
-							float nextLaneSpeed = CalculateLaneSpeed(m_startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
-							float nextOffset = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetB) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
-
-							nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextLaneSpeed * m_maxLength);
-							nextItem.m_duration += nextOffset * nextSegment.m_averageLength / nextLaneSpeed;
+							curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+							continue;
 						}
-
-						if (!m_ignoreBlocked && (nextSegment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && (nextLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
-							nextItem.m_comparisonValue += 0.1f;
-							blocked = true;
-						}
-
-						nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
-						nextItem.m_laneID = curLaneId;
-
-						if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None && (nextLaneInfo.m_vehicleType & m_vehicleTypes) != VehicleInfo.VehicleType.None) {
-							int firstTarget = netManager.m_lanes.m_buffer[curLaneId].m_firstTarget;
-							int lastTarget = netManager.m_lanes.m_buffer[curLaneId].m_lastTarget;
-							if (laneIndexFromInner < firstTarget || laneIndexFromInner >= lastTarget) {
-								nextItem.m_comparisonValue += Mathf.Max(1f, transitionCost * 3f - 3f) / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f * m_maxLength);
-							}
-							if (!m_transportVehicle && nextLaneInfo.m_laneType == NetInfo.LaneType.TransportVehicle) {
-								nextItem.m_comparisonValue += 20f / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f * m_maxLength);
-							}
-						}
-
-						AddBufferItem(nextItem, item.m_position);
+						goto IL_0765;
 					}
-				} else {
-					if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None && (nextLaneInfo.m_vehicleType & prevVehicleType) != VehicleInfo.VehicleType.None) {
-						newLaneIndexFromInner++;
-					}
+				} else if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None && (nextLaneInfo.m_vehicleType & prevVehicleType) != VehicleInfo.VehicleType.None) {
+					newLaneIndexFromInner++;
 				}
-
+				goto IL_09e6;
+				IL_06c5:
+				float nextLaneSpeed = CalculateLaneSpeed(m_startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
+				float nextOffset = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetA) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
+				nextItem.m_comparisonValue += nextOffset * nextSegment.m_averageLength / (nextLaneSpeed * m_maxLength);
+				nextItem.m_duration += nextOffset * nextSegment.m_averageLength / nextLaneSpeed;
+				goto IL_0765;
+				IL_09e6:
 				curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
 				continue;
+				IL_085e:
+				if (!m_ignoreBlocked && (nextSegment.m_flags & NetSegment.Flags.Blocked) != NetSegment.Flags.None && (nextLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
+					nextItem.m_comparisonValue += 0.1f;
+					blocked = true;
+				}
+				nextItem.m_lanesUsed = (item.m_lanesUsed | nextLaneInfo.m_laneType);
+				nextItem.m_laneID = curLaneId;
+				if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None && (nextLaneInfo.m_vehicleType & m_vehicleTypes) != VehicleInfo.VehicleType.None) {
+					int firstTarget = netManager.m_lanes.m_buffer[curLaneId].m_firstTarget;
+					int lastTarget = netManager.m_lanes.m_buffer[curLaneId].m_lastTarget;
+					if (laneIndexFromInner < firstTarget || laneIndexFromInner >= lastTarget) {
+						nextItem.m_comparisonValue += Mathf.Max(1f, transitionCost * 3f - 3f) / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f * m_maxLength);
+					}
+					if (!m_transportVehicle && nextLaneInfo.m_laneType == NetInfo.LaneType.TransportVehicle) {
+						nextItem.m_comparisonValue += 20f / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f * m_maxLength);
+					}
+				}
+				AddBufferItem(nextItem, item.m_position);
+				goto IL_09e6;
+				IL_0765:
+				if (curLaneId == m_startLaneB) {
+					if ((nextItem.m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None && nextItem.m_position.m_offset >= m_startOffsetB) {
+						goto IL_07be;
+					}
+					if ((nextItem.m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None && nextItem.m_position.m_offset <= m_startOffsetB) {
+						goto IL_07be;
+					}
+					curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+					continue;
+				}
+				goto IL_085e;
+				IL_07be:
+				float nextLaneSpeed2 = CalculateLaneSpeed(m_startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
+				float nextOffset2 = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetB) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
+				nextItem.m_comparisonValue += nextOffset2 * nextSegment.m_averageLength / (nextLaneSpeed2 * m_maxLength);
+				nextItem.m_duration += nextOffset2 * nextSegment.m_averageLength / nextLaneSpeed2;
+				goto IL_085e;
 			}
 			laneIndexFromInner = newLaneIndexFromInner;
 			return blocked;
 		}
 
 		// 4
-		private void ProcessItemPedBicycle(BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, ushort nextSegmentId, ref NetSegment nextSegment, ushort nextNodeId, ref NetNode nextNode, int nextLaneIndex, uint nextLaneId, ref NetLane nextLane, byte connectOffset, byte laneSwitchOffset) {
+		private void ProcessItemPedBicycle(BufferItem item, ushort nextNodeId, ushort nextSegmentId, ref NetSegment nextSegment, byte connectOffset, byte laneSwitchOffset, int nextLaneIndex, uint nextLaneId) {
 			if ((nextSegment.m_flags & m_disableMask) != NetSegment.Flags.None) {
 				return;
 			}
 
+			NetManager netManager = Singleton<NetManager>.instance;
 			NetInfo nextSegmentInfo = nextSegment.Info;
-			NetInfo prevSegmentInfo = prevSegment.Info;
+			NetInfo prevSegmentInfo = netManager.m_segments.m_buffer[item.m_position.m_segment].Info;
 			int nextNumLanes = nextSegmentInfo.m_lanes.Length;
 			float distance;
 			byte offset;
 			if (nextSegmentId == item.m_position.m_segment) {
-				Vector3 b = prevLane.CalculatePosition((float)(int)laneSwitchOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
-				Vector3 a = nextLane.CalculatePosition((float)(int)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+				Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)(int)laneSwitchOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+				Vector3 a = netManager.m_lanes.m_buffer[nextLaneId].CalculatePosition((float)(int)connectOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 				distance = Vector3.Distance(a, b);
 				offset = connectOffset;
 			} else {
 				NetInfo.Direction direction = (NetInfo.Direction)((nextNodeId != nextSegment.m_startNode) ? 1 : 2);
-				Vector3 b = prevLane.CalculatePosition((float)(int)laneSwitchOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
-				Vector3 a = ((direction & NetInfo.Direction.Forward) == NetInfo.Direction.None) ? nextLane.m_bezier.a : nextLane.m_bezier.d;
+				Vector3 b = netManager.m_lanes.m_buffer[item.m_laneID].CalculatePosition((float)(int)laneSwitchOffset * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+				Vector3 a = ((direction & NetInfo.Direction.Forward) == NetInfo.Direction.None) ? netManager.m_lanes.m_buffer[nextLaneId].m_bezier.a : netManager.m_lanes.m_buffer[nextLaneId].m_bezier.d;
 				distance = Vector3.Distance(a, b);
-				offset = (byte)(((direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) ? 255 : 0);
+				offset = (byte)(((direction & NetInfo.Direction.Forward) != 0) ? 255 : 0);
 			}
 
 			float prevMaxSpeed = 1f;
@@ -1041,17 +965,16 @@ namespace TrafficManager.Custom.PathFinding {
 				if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
 					prevLaneType = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
 				}
-				prevSpeed = CalculateLaneSpeed(laneSwitchOffset, item.m_position.m_offset, ref prevSegment, prevLaneInfo);
+				prevSpeed = CalculateLaneSpeed(laneSwitchOffset, item.m_position.m_offset, ref netManager.m_segments.m_buffer[item.m_position.m_segment], prevLaneInfo);
 			}
-
-			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? prevSegment.m_averageLength : prevLane.m_length;
+			float prevLength = (prevLaneType != NetInfo.LaneType.PublicTransport) ? netManager.m_segments.m_buffer[item.m_position.m_segment].m_averageLength : netManager.m_lanes.m_buffer[item.m_laneID].m_length;
 			float offsetLength = (float)Mathf.Abs(laneSwitchOffset - item.m_position.m_offset) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * prevLength;
 			float methodDistance = item.m_methodDistance + offsetLength;
 			float comparisonValue = item.m_comparisonValue + offsetLength / (prevSpeed * m_maxLength);
 			float duration = item.m_duration + offsetLength / prevMaxSpeed;
 
 			if (!m_ignoreCost) {
-				int ticketCost = prevLane.m_ticketCost;
+				int ticketCost = netManager.m_lanes.m_buffer[item.m_laneID].m_ticketCost;
 				if (ticketCost != 0) {
 					comparisonValue += (float)(ticketCost * m_pathRandomizer.Int32(2000u)) * TICKET_COST_CONVERSION_FACTOR;
 				}
@@ -1080,7 +1003,6 @@ namespace TrafficManager.Custom.PathFinding {
 
 				nextItem.m_comparisonValue = comparisonValue + distance / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.25f * m_maxLength);
 				nextItem.m_duration = duration + distance / ((prevMaxSpeed + nextLaneInfo.m_speedLimit) * 0.5f);
-
 				if ((nextSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
 					nextItem.m_direction = NetInfo.InvertDirection(nextLaneInfo.m_finalDirection);
 				} else {
@@ -1088,11 +1010,14 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 
 				if (nextLaneId == m_startLaneA) {
-					if (((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetA) &&
-						((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None || nextItem.m_position.m_offset > m_startOffsetA)) {
-						return;
+					if ((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetA) {
+						if ((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None) {
+							return;
+						}
+						if (nextItem.m_position.m_offset > m_startOffsetA) {
+							return;
+						}
 					}
-					
 					float nextSpeed = CalculateLaneSpeed(m_startOffsetA, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
 					float nextOffset = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetA) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 
@@ -1101,11 +1026,14 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 
 				if (nextLaneId == m_startLaneB) {
-					if (((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetB) &&
-						((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None || nextItem.m_position.m_offset > m_startOffsetB)) {
-						return;
+					if ((nextItem.m_direction & NetInfo.Direction.Forward) == NetInfo.Direction.None || nextItem.m_position.m_offset < m_startOffsetB) {
+						if ((nextItem.m_direction & NetInfo.Direction.Backward) == NetInfo.Direction.None) {
+							return;
+						}
+						if (nextItem.m_position.m_offset > m_startOffsetB) {
+							return;
+						}
 					}
-					
 					float nextSpeed = CalculateLaneSpeed(m_startOffsetB, nextItem.m_position.m_offset, ref nextSegment, nextLaneInfo);
 					float nextOffset = (float)Mathf.Abs(nextItem.m_position.m_offset - m_startOffsetB) * BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 
@@ -1157,7 +1085,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 
 			while (m_bufferMax[comparisonBufferPos] == 63) {
-				++comparisonBufferPos;
+				comparisonBufferPos++;
 				if (comparisonBufferPos == 1024) {
 					return;
 				}
@@ -1169,13 +1097,13 @@ namespace TrafficManager.Custom.PathFinding {
 
 			bufferIndex = (comparisonBufferPos << 6 | ++m_bufferMax[comparisonBufferPos]);
 			m_buffer[bufferIndex] = item;
-			m_laneLocation[item.m_laneID] = (m_pathFindIndex << 16 | (uint)bufferIndex);
+			m_laneLocation[item.m_laneID] = (uint)((int)(m_pathFindIndex << 16) | bufferIndex);
 			m_laneTarget[item.m_laneID] = target;
 		}
 
 		private float CalculateLaneSpeed(byte startOffset, byte endOffset, ref NetSegment segment, NetInfo.Lane laneInfo) {
 			NetInfo.Direction direction = ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? laneInfo.m_finalDirection : NetInfo.InvertDirection(laneInfo.m_finalDirection);
-			if ((direction & NetInfo.Direction.Avoid) != NetInfo.Direction.None) {
+			if ((direction & NetInfo.Direction.Avoid) != 0) {
 				if (endOffset > startOffset && direction == NetInfo.Direction.AvoidForward) {
 					return laneInfo.m_speedLimit * 0.1f;
 				}
@@ -1204,77 +1132,51 @@ namespace TrafficManager.Custom.PathFinding {
 
 		private void PathFindThread() {
 			while (true) {
-				try {
-					Monitor.Enter(m_queueLock);
-
-					while (m_queueFirst == 0 && !m_terminated) {
-						Monitor.Wait(m_queueLock);
-					}
-
-					if (m_terminated) {
-						break;
-					}
-
-					m_calculating = m_queueFirst;
-					// NON-STOCK CODE START
-					m_queueFirst = CustomPathManager._instance.queueItems[m_calculating].nextPathUnitId;
-					// NON-STOCK CODE END
-					// QueueFirst = PathUnits.m_buffer[Calculating].m_nextPathUnit; // stock code commented
-
-					if (m_queueFirst == 0) {
-						m_queueLast = 0u;
-						m_queuedPathFindCount = 0;
-					} else {
-						m_queuedPathFindCount--;
-					}
-
-					// NON-STOCK CODE START
-					CustomPathManager._instance.queueItems[m_calculating].nextPathUnitId = 0u;
-					// NON-STOCK CODE END
-					// PathUnits.m_buffer[Calculating].m_nextPathUnit = 0u; // stock code commented
-
-					m_pathUnits.m_buffer[m_calculating].m_pathFindFlags = (byte)((m_pathUnits.m_buffer[m_calculating].m_pathFindFlags & ~PathUnit.FLAG_CREATED) | PathUnit.FLAG_CALCULATING);
-
-					// NON-STOCK CODE START
-					m_queueItem = CustomPathManager._instance.queueItems[m_calculating];
-					// NON-STOCK CODE END
-				} finally {
-					Monitor.Exit(m_queueLock);
-				}
-
-				try {
-					m_pathfindProfiler.BeginStep();
+				if (Monitor.TryEnter(m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
 					try {
-						PathFindImplementation(m_calculating, ref m_pathUnits.m_buffer[m_calculating]);
+						while (m_queueFirst == 0 && !m_terminated) {
+							Monitor.Wait(m_queueLock);
+						}
+						if (!m_terminated) {
+							m_calculating = m_queueFirst;
+							m_queueFirst = m_pathUnits.m_buffer[m_calculating].m_nextPathUnit;
+							if (m_queueFirst == 0) {
+								m_queueLast = 0u;
+								m_queuedPathFindCount = 0;
+							} else {
+								m_queuedPathFindCount--;
+							}
+							m_pathUnits.m_buffer[m_calculating].m_nextPathUnit = 0u;
+							m_pathUnits.m_buffer[m_calculating].m_pathFindFlags = (byte)((m_pathUnits.m_buffer[m_calculating].m_pathFindFlags & -2) | 2);
+							goto end_IL_001a;
+						}
+						return;
+						end_IL_001a:;
 					} finally {
-						m_pathfindProfiler.EndStep();
+						Monitor.Exit(m_queueLock);
 					}
-				} catch (Exception ex) {
-					UIView.ForwardException(ex);
-					CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find error: " + ex.Message + "\n" + ex.StackTrace);
-					m_pathUnits.m_buffer[m_calculating].m_pathFindFlags |= PathUnit.FLAG_FAILED;
-					// NON-STOCK CODE START
-#if DEBUG
-					++m_failedPathFinds;
-#endif
-					// NON-STOCK CODE END
-				}
-
-				try {
-					Monitor.Enter(m_queueLock);
-
-					m_pathUnits.m_buffer[m_calculating].m_pathFindFlags = (byte)(m_pathUnits.m_buffer[m_calculating].m_pathFindFlags & ~PathUnit.FLAG_CALCULATING);
-
-					// NON-STOCK CODE START
-					CustomPathManager._instance.queueItems[m_calculating].queued = false;
-					CustomPathManager._instance.ReleasePath(m_calculating);
-					// NON-STOCK CODE END
-					// Singleton<PathManager>.instance.ReleasePath(Calculating); // stock code commented
-
-					m_calculating = 0u;
-					Monitor.Pulse(m_queueLock);
-				} finally {
-					Monitor.Exit(m_queueLock);
+					try {
+						m_pathfindProfiler.BeginStep();
+						try {
+							PathFindImplementation(m_calculating, ref m_pathUnits.m_buffer[m_calculating]);
+						} finally {
+							m_pathfindProfiler.EndStep();
+						}
+					} catch (Exception ex) {
+						UIView.ForwardException(ex);
+						CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find error: " + ex.Message + "\n" + ex.StackTrace);
+						m_pathUnits.m_buffer[m_calculating].m_pathFindFlags |= 8;
+					}
+					while (!Monitor.TryEnter(m_queueLock, SimulationManager.SYNCHRONIZE_TIMEOUT)) {
+					}
+					try {
+						m_pathUnits.m_buffer[m_calculating].m_pathFindFlags = (byte)(m_pathUnits.m_buffer[m_calculating].m_pathFindFlags & -3);
+						Singleton<PathManager>.instance.ReleasePath(m_calculating);
+						m_calculating = 0u;
+						Monitor.Pulse(m_queueLock);
+					} finally {
+						Monitor.Exit(m_queueLock);
+					}
 				}
 			}
 		}

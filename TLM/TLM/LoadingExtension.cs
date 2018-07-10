@@ -1893,7 +1893,11 @@ namespace TrafficManager {
 								typeof (bool)
 							},
 							null),
+#if PF2
+							typeof(CustomPathFind2).GetMethod("CalculatePath")));
+#else
 							typeof(CustomPathFind).GetMethod("CalculatePath")));
+#endif
 				} catch (Exception) {
 					Log.Error("Could not redirect PathFind::CalculatePath");
 					detourFailed = true;
