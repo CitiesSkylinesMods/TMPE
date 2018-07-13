@@ -3,8 +3,13 @@ A modification for **Cities: Skylines** to add additional traffic control.
 
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
-# Changelog    
-1.10.8, 01/07/2018
+# Changelog
+1.10.9, 07/13/2018
+- Updated for game version 1.10.1-f3
+- Re-implemented path-finding algorithm
+- Updated French translation (thanks to mjm92150 for translating!)
+
+1.10.8, 07/01/2018
 - Updated Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
 - Updated Polish translation (thanks to @Krzychu1245 for translating)
 - Added button to remove parked vehicles (in options dialog, see maintenance tab)
