@@ -45,17 +45,45 @@ namespace TrafficManager.Custom.AI {
 				vehicleInfo = null;
 			}
 
+			bool startAtRoadConnection = false;
 			if (Options.prohibitPocketCars) {
 				ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
-				bool isAtNonRoadOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen]) && sourceBuildingService != ItemClass.Service.Road;
-#if DEBUG
-				if (debug)
-					Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Is citizen at a non-road outside connection? {isAtNonRoadOutsideConnection} ({sourceBuildingService})");
-#endif
 
-				// disallow car usage if citizen is on a walking tour
-				if (ignoreCost /* = we are a mascot */ || isAtNonRoadOutsideConnection || isOnWalkingTour) {
-					carUsageMode = CarUsagePolicy.Forbidden;
+				/*
+				 * force car usage if citizen is at a road outside connection,
+				 * probibit car usage if citizen is at a non-road outside connection
+				 */
+				if (Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen])) {
+					if (sourceBuildingService == ItemClass.Service.Road) {
+						if (instanceData.Info.m_agePhase > Citizen.AgePhase.Child && !ignoreCost && !isOnWalkingTour) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is located at a road outside connection: Setting path mode to 'RequiresCarPath'");
+#endif
+							extInstance.pathMode = ExtPathMode.RequiresCarPath;
+							startAtRoadConnection = true;
+						} else {
+#if DEBUG
+							if (debug)
+								Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is located at a road outside connection but is not allowed to use a car (agePhase={instanceData.Info.m_agePhase}, ignoreCost={ignoreCost}, isOnWalkingTour={isOnWalkingTour}): ABORTING PATH-FINDING");
+#endif
+							extInstance.Reset();
+							return false;
+						}
+					} else {
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is located at a non-road outside connection: Setting path mode to 'RequiresWalkingPathToTarget'");
+#endif
+						extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+					}
+				} else if (ignoreCost /* = we are a mascot */ || isOnWalkingTour) {
+					// disallow car usage if citizen is a mascot or on a walking tour
+#if DEBUG
+					if (debug)
+						Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen ignores cost ({ignoreCost}) or is on a walking tour ({isOnWalkingTour}): Setting path mode to 'RequiresWalkingPathToTarget'");
+#endif
+					extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
 				}
 			}
 			
@@ -100,7 +128,7 @@ namespace TrafficManager.Custom.AI {
 						case ExtPathMode.CalculatingCarPathToAltParkPos:
 						case ExtPathMode.CalculatingCarPathToKnownParkPos:
 						case ExtPathMode.CalculatingCarPathToTarget:
-							if (parkedVehicleId == 0 || carUsageMode == CarUsagePolicy.Forbidden) {
+							if (!startAtRoadConnection && (parkedVehicleId == 0 || carUsageMode == CarUsagePolicy.Forbidden)) {
 								// parked vehicle not present or citizen is on a walking tour
 
 #if DEBUG
@@ -287,7 +315,10 @@ namespace TrafficManager.Custom.AI {
 							Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Setting startPos={startPos} for citizen instance {instanceID}. CurrentDepartureMode={extInstance.pathMode}");
 #endif
 
-						if (instanceData.m_targetBuilding == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) {
+						if (
+							instanceData.m_targetBuilding == 0 ||
+							(Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_targetBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None
+						) {
 							/*
 							 * the citizen is starting their journey and the target is not an outside connection
 							 * -> find a suitable parking space near the target

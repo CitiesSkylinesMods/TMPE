@@ -1454,7 +1454,7 @@ namespace TrafficManager.Custom.PathFinding {
 				bool nextIsStartNode = nextNodeId == nextSegment.m_startNode;
 				if (nextIsStartNode || nextNodeId == nextSegment.m_endNode) {
 #if JUNCTIONRESTRICTIONS
-					if (Options.junctionRestrictionsEnabled) {
+					if (Options.junctionRestrictionsEnabled && item.m_position.m_segment == nextSegmentId) {
 						// check if pedestrians are not allowed to cross here
 						if (!m_junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, nextIsStartNode)) {
 							return;

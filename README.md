@@ -4,6 +4,10 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
+1.10.10, 07/14/2018
+- Bugfix: Parking AI causes unnecessary path-findings (#183, thanks to Sipke82 for reporting)
+- Bugfix: Prohibiting cims from crossing the road also affect paths where crossing is unnecessary (#168, thanks to aubergine10 for reporting) 
+
 1.10.9, 07/13/2018
 - Updated for game version 1.10.1-f3
 - Re-implemented path-finding algorithm
