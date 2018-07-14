@@ -530,7 +530,7 @@ namespace TrafficManager.Manager.Impl {
 				bool usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
 				bool usesCar = (laneTypes & (byte)(NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != 0 && (vehicleTypes & (ushort)(VehicleInfo.VehicleType.Car)) != 0;
 
-				if (usesPublicTransport && usesCar && extInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos) {
+				if (usesPublicTransport && usesCar && (extInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos || extInstance.pathMode == ExtPathMode.CalculatingCarPathToAltParkPos)) {
 					/*
 					 * when using public transport together with a car (assuming a "source -> walk -> drive -> walk -> use public transport -> walk -> target" path)
 					 * discard parking space information since the cim has to park near the public transport stop
@@ -563,7 +563,6 @@ namespace TrafficManager.Manager.Impl {
 								Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen instance {instanceId} contains passenger car section. Ensuring that citizen is allowed to use their car.");
 #endif
 
-							// check if citizen is at an outside connection
 							ushort sourceBuildingId = instanceData.m_sourceBuilding;
 							ushort homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instanceData.m_citizen].m_homeBuilding;
 
@@ -686,8 +685,33 @@ namespace TrafficManager.Manager.Impl {
 							if (debug)
 								Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen instance {instanceId} contains passenger car section and citizen should stand in front of their car.");
 #endif
-
-							if (parkedVehicleId == 0) {
+							if (
+								Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceId, ref instanceData, ref citizenData) &&
+								Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service == ItemClass.Service.Road
+							) {
+								// car path calculated starting at road outside connection: success
+								if (extInstance.pathMode == ExtPathMode.CalculatingCarPathToAltParkPos) {
+									extInstance.pathMode = ExtPathMode.DrivingToAltParkPos;
+									extInstance.parkingPathStartPosition = null;
+#if DEBUG
+									if (debug)
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path to an alternative parking position is READY! CurrentPathMode={extInstance.pathMode}");
+#endif
+								} else if (extInstance.pathMode == ExtPathMode.CalculatingCarPathToTarget) {
+									extInstance.pathMode = ExtPathMode.DrivingToTarget;
+#if DEBUG
+									if (debug)
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Car path is READY! CurrentPathMode={extInstance.pathMode}");
+#endif
+								} else if (extInstance.pathMode == ExtPathMode.CalculatingCarPathToKnownParkPos) {
+									extInstance.pathMode = ExtPathMode.DrivingToKnownParkPos;
+#if DEBUG
+									if (debug)
+										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Car path to known parking position is READY! CurrentPathMode={extInstance.pathMode}");
+#endif
+								}
+								return ExtSoftPathState.Ready;
+							} else if (parkedVehicleId == 0) {
 								// error! could not find/spawn parked car
 #if DEBUG
 								if (debug)
@@ -1670,7 +1694,11 @@ namespace TrafficManager.Manager.Impl {
 			if (driverExtInstance.IsValid()) {
 				switch (driverExtInstance.pathMode) {
 					case ExtPathMode.DrivingToAltParkPos:
-						ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" + driverExtInstance.failedParkingAttempts + "), " + ret;
+						if (driverExtInstance.failedParkingAttempts <= 1) {
+							ret = Translation.GetString("Looking_for_a_parking_spot") + ", " + ret;
+						} else {
+							ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" + driverExtInstance.failedParkingAttempts + "), " + ret;
+						}
 						break;
 					case ExtPathMode.CalculatingCarPathToKnownParkPos:
 					case ExtPathMode.DrivingToKnownParkPos:

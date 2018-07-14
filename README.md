@@ -5,6 +5,8 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
 1.10.10, 07/14/2018
+- Parking AI: Improved park & ride behavior
+- Parking AI: Walking paths from parking position to destination building take public transportation into account
 - Bugfix: Parking AI causes unnecessary path-findings (#183, thanks to Sipke82 for reporting)
 - Bugfix: Prohibiting cims from crossing the road also affect paths where crossing is unnecessary (#168, thanks to aubergine10 for reporting) 
 

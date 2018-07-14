@@ -172,10 +172,12 @@ namespace TrafficManager.Custom.AI {
 							skipQueue = true;
 
 						bool allowTourists = false;
+						bool searchAtCurrentPos = false;
 						if (driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
 							// previous parking attempt failed
 							driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToAltParkPos;
 							allowTourists = true;
+							searchAtCurrentPos = true;
 
 #if DEBUG
 							if (debug)
@@ -217,7 +219,7 @@ namespace TrafficManager.Custom.AI {
 						bool calcEndPos;
 						Vector3 parkPos;
 
-						if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(endPos, vehicleData.Info, ref driverExtInstance, homeId, targetBuildingId == homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
+						if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(searchAtCurrentPos ? vehicleData.GetLastFramePosition() : endPos, vehicleData.Info, ref driverExtInstance, homeId, targetBuildingId == homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
 							calculateEndPos = calcEndPos;
 							allowRandomParking = false;
 							movingToParkingPos = true;
@@ -548,7 +550,9 @@ namespace TrafficManager.Custom.AI {
 
 					if (!foundParkingSpace && (driverExtInstance.pathMode == ExtCitizenInstance.ExtPathMode.DrivingToAltParkPos || driverExtInstance.pathMode == ExtCitizenInstance.ExtPathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
 						// increase parking space demand of target building
-						ExtBuildingManager.Instance.ExtBuildings[targetBuildingId].AddParkingSpaceDemand(GlobalConfig.Instance.ParkingAI.FailedParkingSpaceDemandIncrement * (uint)driverExtInstance.failedParkingAttempts);
+						if (driverExtInstance.failedParkingAttempts > 1) {
+							ExtBuildingManager.Instance.ExtBuildings[targetBuildingId].AddParkingSpaceDemand(GlobalConfig.Instance.ParkingAI.FailedParkingSpaceDemandIncrement * (uint)(driverExtInstance.failedParkingAttempts - 1));
+						}
 					}
 
 					if (! foundParkingSpace) {

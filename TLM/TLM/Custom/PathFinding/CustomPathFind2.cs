@@ -819,12 +819,21 @@ namespace TrafficManager.Custom.PathFinding {
 					} else {
 						// pocket car spawning
 #if PARKINGAI
-						if (Options.prohibitPocketCars &&
-								m_queueItem.vehicleType == ExtVehicleType.PassengerCar &&
-								(m_queueItem.pathType == ExtCitizenInstance.ExtPathType.WalkingOnly ||
-								(m_queueItem.pathType == ExtCitizenInstance.ExtPathType.DrivingOnly && item.m_position.m_segment != m_startSegmentA && item.m_position.m_segment != m_startSegmentB))) {
-							/* disallow pocket cars on walking paths, allow only if a driving path is required and we reached the start segment */
-							allowPedestrian = false;
+						if (
+							Options.prohibitPocketCars
+						) {
+							if (
+								(m_queueItem.pathType == ExtCitizenInstance.ExtPathType.WalkingOnly && prevIsCarLane) || 
+								(
+									m_queueItem.pathType == ExtCitizenInstance.ExtPathType.DrivingOnly &&
+									m_queueItem.vehicleType == ExtVehicleType.PassengerCar &&
+									((item.m_position.m_segment != m_startSegmentA && item.m_position.m_segment != m_startSegmentB) || !prevIsCarLane)
+								)
+							) {
+								/* allow pocket cars only if an instant driving path is required and we are at the start segment */
+								/* disallow pocket cars on walking paths */
+								allowPedestrian = false;
+							}
 						} else {
 #endif
 							switchConnectOffset = (byte)m_pathRandomizer.UInt32(1u, 254u);
