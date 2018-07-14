@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.State.ConfigData {
 #if DEBUG
@@ -41,6 +42,7 @@ namespace TrafficManager.State.ConfigData {
 		public int CitizenInstanceId = 0;
 		public uint CitizenId = 0;
 		public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
+		public ExtPathMode ExtPathMode = ExtPathMode.None;
 	}
 #endif
 }
