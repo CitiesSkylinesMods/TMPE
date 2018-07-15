@@ -19,7 +19,7 @@ namespace TrafficManager.State {
 	public class GlobalConfig : GenericObservable<GlobalConfig> {
 		public const string FILENAME = "TMPE_GlobalConfig.xml";
 		public const string BACKUP_FILENAME = FILENAME + ".bak";
-		private static int LATEST_VERSION = 14;
+		private static int LATEST_VERSION = 15;
 
 		public static GlobalConfig Instance {
 			get {

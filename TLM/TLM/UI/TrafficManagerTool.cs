@@ -949,6 +949,12 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
 
+#if DEBUG
+				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
+					continue;
+				}
+#endif
+
 				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
 					"di: " + driverInst.instanceId + " dc: " + driverInst.GetCitizenId() + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " rnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetVehicleRand((ushort)i);
 
@@ -997,6 +1003,12 @@ namespace TrafficManager.UI {
 				_counterStyle.fontSize = (int)(10f * zoom);
 				_counterStyle.normal.textColor = new Color(1f, 0f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
+
+#if DEBUG
+				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
+					continue;
+				}
+#endif
 
 				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ",\nm: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString() + ", tm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].transportMode + ", ltm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastTransportMode + ", ll: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastLocation;
 				if (citizenInstance.m_citizen != 0) {

@@ -1,5 +1,3 @@
-#define EXTRAPFx
-
 using System;
 using System.Linq;
 using ColossalFramework;

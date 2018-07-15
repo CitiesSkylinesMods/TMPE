@@ -196,7 +196,7 @@ namespace TrafficManager.Traffic.Data {
 				args.endPosA = targetPathPos;
 				args.endPosB = dummyPathPos;
 				args.vehiclePosition = dummyPathPos;
-				args.laneTypes = NetInfo.LaneType.Pedestrian;
+				args.laneTypes = NetInfo.LaneType.Pedestrian | NetInfo.LaneType.PublicTransport;
 				args.vehicleTypes = VehicleInfo.VehicleType.None;
 				args.maxLength = 20000f;
 				args.isHeavyVehicle = false;

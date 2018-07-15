@@ -43,11 +43,11 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Minimum penalty for entering public transport vehicles
 		/// </summary>
-		public float PublicTransportTransitionMinPenalty = 250f;
+		public float PublicTransportTransitionMinPenalty = 0f;
 
 		/// <summary>
 		/// Maximum penalty for entering public transport vehicles
 		/// </summary>
-		public float PublicTransportTransitionMaxPenalty = 500f;
+		public float PublicTransportTransitionMaxPenalty = 100f;
 	}
 }

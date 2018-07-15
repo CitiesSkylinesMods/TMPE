@@ -9,10 +9,10 @@ namespace TrafficManager {
 
 		public static readonly string Version = "1.11.0-harmony";
 
-		public static readonly uint GameVersion = 176284432u;
+		public static readonly uint GameVersion = 176415504u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 10u;
-		public static readonly uint GameVersionC = 0u;
+		public static readonly uint GameVersionC = 1u;
 		public static readonly uint GameVersionBuild = 3u;
 
 		public string Name => "Traffic Manager: President Edition [" + Version + "]";

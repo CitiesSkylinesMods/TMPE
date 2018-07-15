@@ -13,9 +13,13 @@ namespace TrafficManager.Traffic.Enums {
 		/// </summary>
 		Allowed,
 		/// <summary>
-		/// Citizens are forced to use their car
+		/// Citizens are forced to use their parked car
 		/// </summary>
-		Forced,
+		ForcedParked,
+		/// <summary>
+		/// Citizens are forced to use a pocket car
+		/// </summary>
+		ForcedPocket,
 		/// <summary>
 		/// Citizens are forbidden to use their car
 		/// </summary>

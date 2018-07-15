@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.State.ConfigData {
 #if DEBUG
 	public class Debug {
 		public bool[] Switches = {
-				false, // 0: path-find debug log
-				false, // 1: path-find costs debug log
+				false, // 0: -
+				false, // 1: -
 				false, // 2: parking ai debug log (basic)
 				false, // 3: do not actually repair stuck vehicles/cims, just report
 				false, // 4: parking ai debug log (extended)
@@ -19,7 +21,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 8: debug routing
 				false, // 9: debug vehicle to segment end linking
 				false, // 10: prevent routing recalculation on global configuration reload
-				false, // 11: disable custom routing
+				false, // 11: -
 				false, // 12: pedestrian path-find debug log
 				false, // 13: priority rules debug
 				false, // 14: disable GUI overlay of citizens having a valid path
@@ -41,6 +43,7 @@ namespace TrafficManager.State.ConfigData {
 		public int CitizenInstanceId = 0;
 		public uint CitizenId = 0;
 		public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
+		public ExtPathMode ExtPathMode = ExtPathMode.None;
 	}
 #endif
 }

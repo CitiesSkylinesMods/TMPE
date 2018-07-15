@@ -17,22 +17,34 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool pedestrianCrossingAllowed;
 
 		private bool defaultEnterWhenBlockedAllowed;
+		private bool defaultUturnAllowed;
 		//private bool defaultPedestrianCrossingAllowed;
 
 		public void UpdateDefaults(SegmentEndGeometry segmentEndGeometry) {
 			NodeGeometry nodeGeo = NodeGeometry.Get(segmentEndGeometry.NodeId());
 
 			bool newDefaultEnterWhenBlockedAllowed = false;
-			NetNode.Flags _nodeFlags = NetNode.Flags.None;
+			bool newDefaultUturnAllowed = false;
+			//NetNode.Flags _nodeFlags = NetNode.Flags.None;
 			Constants.ServiceFactory.NetService.ProcessNode(segmentEndGeometry.NodeId(), delegate (ushort nodeId, ref NetNode node) {
-				_nodeFlags = node.m_flags;
+				//_nodeFlags = node.m_flags;
 				int numOutgoing = 0;
 				int numIncoming = 0;
 				node.CountLanes(nodeId, 0, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, true, ref numOutgoing, ref numIncoming);
 				newDefaultEnterWhenBlockedAllowed = numOutgoing == 1 || numIncoming == 1;
+
+				if (Options.allowUTurns) {
+					newDefaultUturnAllowed =
+						(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition | NetNode.Flags.Bend | NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
+						node.Info?.m_class?.m_service != ItemClass.Service.Beautification
+					;
+				} else {
+					newDefaultUturnAllowed = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+				}
 				return true;
 			});
 			defaultEnterWhenBlockedAllowed = newDefaultEnterWhenBlockedAllowed;
+			defaultUturnAllowed = newDefaultUturnAllowed;
 			//Log._Debug($"SegmentEndFlags.UpdateDefaults: this={this} _nodeFlags={_nodeFlags} defaultEnterWhenBlockedAllowed={defaultEnterWhenBlockedAllowed}");
 		}
 
@@ -45,7 +57,7 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool GetDefaultUturnAllowed() {
-			return Options.allowUTurns;
+			return defaultUturnAllowed;
 		}
 
 		public bool IsLaneChangingAllowedWhenGoingStraight() {

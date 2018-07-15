@@ -1,5 +1,4 @@
 #define QUEUEDSTATSx
-#define EXTRAPFx
 
 using System;
 using System.Linq;
@@ -488,9 +487,6 @@ namespace TrafficManager.UI {
 #if QUEUEDSTATS
 			if (showPathFindStats && title != null) {
 				title.text = CustomPathManager.TotalQueuedPathFinds.ToString();
-#if EXTRAPF
-				title.text += "+" + CustomPathManager.ExtraQueuedPathFinds.ToString();
-#endif
 			}
 #endif
 		}

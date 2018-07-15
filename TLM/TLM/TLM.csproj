@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS</DefineConstants>
+    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>0</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -27,7 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>QUEUEDSTATS</DefineConstants>
+    <DefineConstants>PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -35,7 +35,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK</DefineConstants>
+    <DefineConstants>PF2;DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -47,6 +47,17 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Benchmark\</OutputPath>
     <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningLevel>0</WarningLevel>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\PF2_Debug\</OutputPath>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF2;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -123,6 +134,7 @@
     <Compile Include="RedirectionFramework\Redirector.cs" />
     <Compile Include="RedirectionFramework\Tuple.cs" />
     <Compile Include="Traffic\Enums\GeometryCalculationMode.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind2.cs" />
     <Compile Include="Geometry\ISegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />

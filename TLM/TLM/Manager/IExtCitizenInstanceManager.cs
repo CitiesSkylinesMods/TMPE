@@ -63,5 +63,14 @@ namespace TrafficManager.Manager {
 		/// <param name="target">instance id</param>
 		/// <returns>localized status</returns>
 		String GetResidentLocalizedStatus(ushort instanceID, ref CitizenInstance data, out bool mayAddCustomStatus, out InstanceID target);
+
+		/// <summary>
+		/// Determines if the given citizen instance is located at an outside connection.
+		/// </summary>
+		/// <param name="instanceId">citizen instance id</param>
+		/// <param name="instanceData">citizen instance data</param>
+		/// <param name="citizenData">citizen data</param>
+		/// <returns><code>true</code> if the citizen instance is located at an outside connection, <code>false</code> otherwise</returns>
+		bool IsAtOutsideConnection(ushort instanceId, ref CitizenInstance instanceData, ref Citizen citizenData);
 	}
 }
