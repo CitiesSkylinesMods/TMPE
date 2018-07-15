@@ -1642,7 +1642,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ROUTING
 		// 5 (custom: process routed vehicle paths)
 		private bool ProcessItemRouted(BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, float prevMaxSpeed, float prevLaneSpeed,
-#if ADVANCEDAI && ROUTING
+#if ADVANCEDAI
 			bool enableAdvancedAI, float laneChangingCost,
 #endif
 			float segmentSelectionCost, float laneSelectionCost, ushort nextNodeId, ref NetNode nextNode, bool isMiddle, SegmentRoutingData prevSegmentRouting, LaneEndRoutingData prevLaneEndRouting, byte connectOffset) {
@@ -1796,11 +1796,10 @@ namespace TrafficManager.Custom.PathFinding {
 					continue;
 				}
 
-				bool foundForced = false;
 				int dummy = -1; // not required when using custom routing
 				if (
 					ProcessItemCosts(item, ref prevSegment, ref prevLane, prevMaxSpeed, prevLaneSpeed,
-#if ADVANCEDAI && ROUTING
+#if ADVANCEDAI
 					enableAdvancedAI, laneChangingCost,
 #endif
 					nextNodeId, ref nextNode, isMiddle, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], segmentSelectionCost, laneSelectionCost, laneTransitions[k], ref dummy, connectOffset, true, false)
