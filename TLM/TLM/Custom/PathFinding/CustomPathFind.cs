@@ -23,7 +23,9 @@ using TrafficManager.Traffic.Enums;
 using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.PathFinding {
+#if !PF2
 	[TargetType(typeof(PathFind))]
+#endif
 	public class CustomPathFind : PathFind {
 		private struct BufferItem {
 			public PathUnit.Position m_position;
@@ -215,7 +217,9 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
+#if !PF2
 		[RedirectMethod]
+#endif
 		public new bool CalculatePath(uint unit, bool skipQueue) {
 			return ExtCalculatePath(unit, skipQueue);
 		}

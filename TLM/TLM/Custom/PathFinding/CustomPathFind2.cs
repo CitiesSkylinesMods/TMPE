@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
+using TrafficManager.RedirectionFramework.Attributes;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
@@ -19,6 +20,9 @@ using UnityEngine;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.PathFinding {
+#if PF2
+	[TargetType(typeof(PathFind))]
+#endif
 	public class CustomPathFind2 : PathFind {
 		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
 		private const float TICKET_COST_CONVERSION_FACTOR = BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR * 0.0001f;
@@ -199,6 +203,9 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 		}
 
+#if PF2
+		[RedirectMethod]
+#endif
 		public new bool CalculatePath(uint unit, bool skipQueue) {
 			return ExtCalculatePath(unit, skipQueue);
 		}
