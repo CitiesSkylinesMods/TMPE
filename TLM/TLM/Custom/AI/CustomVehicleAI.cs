@@ -190,7 +190,7 @@ namespace TrafficManager.Custom.AI {
 						this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car &&
 						!this.m_info.m_isLargeVehicle
 					) {
-						bool mayFindBestLane = VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID]);
+						bool mayFindBestLane = VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref ExtVehicleManager.Instance.ExtVehicles[vehicleID]);
 
 						if (mayFindBestLane) {
 							uint next2PathId = nextPathId;
@@ -226,7 +226,7 @@ namespace TrafficManager.Custom.AI {
 								next4PathPos = default(PathUnit.Position);
 							}
 
-							bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref VehicleStateManager.Instance.VehicleStates[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
+							bestLaneIndex = VehicleBehaviorManager.Instance.FindBestLane(vehicleID, ref vehicleData, ref ExtVehicleManager.Instance.ExtVehicles[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPathPos, nextSegmentInfo, next2PathPos, next2SegmentInfo, next3PathPos, next3SegmentInfo, next4PathPos);
 						}
 						// NON-STOCK CODE END
 					}

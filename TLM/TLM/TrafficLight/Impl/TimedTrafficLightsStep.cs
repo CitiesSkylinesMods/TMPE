@@ -613,7 +613,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					continue;
 				}
 
-				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[timedNodeId].TimedLight;
+				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 				ITimedTrafficLightsStep slaveStep = slaveTTL.GetStep(stepRefIndex);
 
 				// minimum time reached. check traffic! loop over source segments

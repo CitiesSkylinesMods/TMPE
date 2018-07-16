@@ -32,7 +32,7 @@ namespace TrafficManager.Patch._VehicleManager {
 		[HarmonyPostfix]
 		public static void Postfix(VehicleManager __instance, bool __result, ref ushort vehicle) {
 			if (__result) {
-				Constants.ManagerFactory.VehicleStateManager.OnCreateVehicle(vehicle, ref __instance.m_vehicles.m_buffer[vehicle]); // NON-STOCK CODE
+				Constants.ManagerFactory.ExtVehicleManager.OnCreateVehicle(vehicle, ref __instance.m_vehicles.m_buffer[vehicle]); // NON-STOCK CODE
 			}
 		}
 	}

@@ -84,7 +84,7 @@ namespace TrafficManager.Traffic.Impl {
 		public IDictionary<ushort, uint>[] MeasureOutgoingVehicles(bool includeStopped=true, bool debug = false) {
 			//VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			//NetManager netManager = Singleton<NetManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
 
 			// TODO pre-calculate this
 			uint avgSegLen = 0;
@@ -111,8 +111,11 @@ namespace TrafficManager.Traffic.Impl {
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int numProcessed = 0;
 			while (vehicleId != 0) {
-				MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref vehStateManager.VehicleStates[vehicleId], ref numProcessed);
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle veh) {
+					MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref veh, ref vehStateManager.ExtVehicles[vehicleId], ref numProcessed);
+					return true;
+				});
+				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 			}
 
 #if DEBUGMETRIC
@@ -122,7 +125,7 @@ namespace TrafficManager.Traffic.Impl {
 			return ret;
 		}
 
-		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref VehicleState state, ref int numProcessed) {
+		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref Vehicle vehicle, ref ExtVehicle state, ref int numProcessed) {
 #if DEBUGMETRIC
 			if (debug)
 				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
@@ -161,10 +164,10 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			if (!includeStopped && state.SqrVelocity < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+			if (!includeStopped && vehicle.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 #if DEBUGMETRIC
 				if (debug)
-					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({state.SqrVelocity})");
+					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({vehicle.GetLastFrameVelocity().sqrMagnitude})");
 #endif
 				++numProcessed;
 				return;
@@ -193,13 +196,13 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		public int GetRegisteredVehicleCount() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
 
 			ushort vehicleId = FirstRegisteredVehicleId;
 			int ret = 0;
 			while (vehicleId != 0) {
 				++ret;
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
+				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 			}
 			return ret;
 		}
@@ -209,9 +212,9 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		private void UnregisterAllVehicles() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager extVehicleMan = ExtVehicleManager.Instance;
 			while (FirstRegisteredVehicleId != 0) {
-				vehStateManager.VehicleStates[FirstRegisteredVehicleId].Unlink();
+				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[FirstRegisteredVehicleId]);
 			}
 		}
 

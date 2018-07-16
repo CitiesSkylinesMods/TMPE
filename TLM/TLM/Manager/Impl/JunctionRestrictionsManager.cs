@@ -224,8 +224,45 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected override void HandleValidSegment(SegmentGeometry geometry) {
-			//Log.Warning($"JunctionRestrictionsManager.HandleValidSegment({geometry.SegmentId}) called.");
-			SegmentFlags[geometry.SegmentId].UpdateDefaults(geometry);
+			//Log._Debug($"JunctionRestrictionsManager.HandleValidSegment({geometry.SegmentId}) called.");
+			UpdateDefaults(geometry);
+		}
+
+		protected void UpdateDefaults(SegmentGeometry geometry) {
+			UpdateDefaults(geometry.StartNodeGeometry);
+			UpdateDefaults(geometry.EndNodeGeometry);
+		}
+
+		protected void UpdateDefaults(SegmentEndGeometry endGeo) {
+			bool defaultUturnAllowed = false;
+			bool defaultStraightLaneChangingAllowed = false;
+			bool defaultEnterWhenBlockedAllowed = false;
+			bool defaultPedestrianCrossingAllowed = false;
+
+			Constants.ServiceFactory.NetService.ProcessNode(endGeo.NodeId(), delegate (ushort nodeId, ref NetNode node) {
+				int numOutgoing = 0;
+				int numIncoming = 0;
+				node.CountLanes(nodeId, 0, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, true, ref numOutgoing, ref numIncoming);
+				defaultEnterWhenBlockedAllowed = numOutgoing == 1 || numIncoming == 1;
+
+				if (Options.allowUTurns) {
+					defaultUturnAllowed =
+						(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition | NetNode.Flags.Bend | NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
+						node.Info?.m_class?.m_service != ItemClass.Service.Beautification
+					;
+				} else {
+					defaultUturnAllowed = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+				}
+				return true;
+			});
+
+			defaultPedestrianCrossingAllowed = true;
+			defaultStraightLaneChangingAllowed = Options.allowLaneChangesWhileGoingStraight;
+			defaultEnterWhenBlockedAllowed = defaultEnterWhenBlockedAllowed || Options.allowEnterBlockedJunctions;
+			defaultUturnAllowed = defaultUturnAllowed;
+
+			SegmentFlags[endGeo.SegmentId].SetDefaults(endGeo.StartNode, defaultUturnAllowed, defaultStraightLaneChangingAllowed, defaultEnterWhenBlockedAllowed, defaultPedestrianCrossingAllowed);
+			//Log._Debug($"SegmentEndFlags.UpdateDefaults: this={this} _nodeFlags={_nodeFlags} defaultEnterWhenBlockedAllowed={defaultEnterWhenBlockedAllowed}");
 		}
 
 		public bool IsUturnAllowed(ushort segmentId, bool startNode) {

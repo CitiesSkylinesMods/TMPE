@@ -23,6 +23,7 @@ namespace TrafficManager.Custom.AI {
 	public class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
 		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
+			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
@@ -53,11 +54,11 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
+			extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
 
 			if (!Options.isStockLaneChangerUsed()) {
 				// Advanced AI traffic measurement
-				VehicleStateManager.Instance.LogTraffic(vehicleId);
+				extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
 			}
 			// NON-STOCK CODE END
 
@@ -94,7 +95,7 @@ namespace TrafficManager.Custom.AI {
 
 		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
-			VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null); // NON-STOCK CODE
+			ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null); // NON-STOCK CODE
 
 			VehicleInfo info = this.m_info;
 			bool allowUnderground;
@@ -220,10 +221,11 @@ namespace TrafficManager.Custom.AI {
 					segment.b = pos - dir.normalized * this.m_info.m_generatedInfo.m_size.z;
 				}*/
 				if (prevSourceNodeId == refTargetNodeId) {
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, sqrVelocity, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) {
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, sqrVelocity, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId)) {
+						maxSpeed = 0;
 						return;
 					} else {
-						VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
+						ExtVehicleManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
 					}
 				}
 			}

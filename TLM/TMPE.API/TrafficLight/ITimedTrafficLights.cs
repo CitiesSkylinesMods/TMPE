@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using CSUtil.Commons;
-using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic;
-using TrafficManager.Util;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Util;
 
 namespace TrafficManager.TrafficLight {
-	public interface ITimedTrafficLights : IObserver<NodeGeometry> {
+	public interface ITimedTrafficLights {
 		IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; }
 		ushort NodeId { get; }
 		ushort MasterNodeId { get; set; } // TODO private set

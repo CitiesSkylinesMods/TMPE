@@ -27,6 +27,7 @@ namespace TrafficManager.Manager.Impl {
 			ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];
 			for (uint i = 0; i < CitizenManager.MAX_CITIZEN_COUNT; ++i) {
 				ExtCitizens[i] = new ExtCitizen(i);
+				Reset(ref ExtCitizens[i]);
 			}
 		}
 
@@ -34,7 +35,7 @@ namespace TrafficManager.Manager.Impl {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Extended citizen data:");
 			for (int i = 0; i < ExtCitizens.Length; ++i) {
-				if (!ExtCitizens[i].IsValid()) {
+				if (!IsValid((uint)i)) {
 					continue;
 				}
 				Log._Debug($"Citizen {i}: {ExtCitizens[i]}");
@@ -42,7 +43,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void OnReleaseCitizen(uint citizenId) {
-			ExtCitizens[citizenId].Reset();
+			Reset(ref ExtCitizens[citizenId]);
 		}
 
 		public void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData) {
@@ -79,7 +80,26 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void ResetCitizen(uint citizenId) {
-			ExtCitizens[citizenId].Reset();
+			Reset(ref ExtCitizens[citizenId]);
+		}
+
+		public void Reset(ref ExtCitizen extCitizen) {
+			extCitizen.transportMode = ExtTransportMode.None;
+			extCitizen.lastTransportMode = ExtTransportMode.None;
+			ResetLastLocation(ref extCitizen);
+		}
+
+		public bool IsValid(uint citizenId) {
+			return Constants.ServiceFactory.CitizenService.IsCitizenValid(citizenId);
+		}
+
+		protected void ResetLastLocation(ref ExtCitizen extCitizen) {
+			Citizen.Location loc = Citizen.Location.Moving;
+			Constants.ServiceFactory.CitizenService.ProcessCitizen(extCitizen.citizenId, delegate (uint citId, ref Citizen citizen) {
+				loc = citizen.CurrentLocation;
+				return true;
+			});
+			extCitizen.lastLocation = loc;
 		}
 
 		// stock code
@@ -116,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
 
 		internal void Reset() {
 			for (int i = 0; i < ExtCitizens.Length; ++i) {
-				ExtCitizens[i].Reset();
+				Reset(ref ExtCitizens[i]);
 			}
 		}
 

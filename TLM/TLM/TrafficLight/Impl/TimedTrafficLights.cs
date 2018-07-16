@@ -20,7 +20,7 @@ using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Impl {
 	// TODO define TimedTrafficLights per node group, not per individual nodes
-	public class TimedTrafficLights : ITimedTrafficLights {
+	public class TimedTrafficLights : ITimedTrafficLights, IObserver<NodeGeometry> {
 		public ushort NodeId {
 			get; private set;
 		}
@@ -611,7 +611,7 @@ namespace TrafficManager.TrafficLight.Impl {
 									continue;
 								}
 
-								ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+								ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 								slaveTTL.GetStep(CurrentStep).Start(CurrentStep);
 								slaveTTL.GetStep(CurrentStep).UpdateLiveLights();
 							}
@@ -629,7 +629,7 @@ namespace TrafficManager.TrafficLight.Impl {
 									continue;
 								}
 
-								ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+								ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 								slaveTTL.GetStep(CurrentStep).NextStepRefIndex = bestNextStepIndex;
 							}
 						}
@@ -682,7 +682,7 @@ namespace TrafficManager.TrafficLight.Impl {
 						continue;
 					}
 
-					ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+					ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 					slaveTTL.CurrentStep = newStepIndex;
 
 #if DEBUGTTL
@@ -712,7 +712,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					continue;
 				}
 
-				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 				slaveTTL.GetStep(CurrentStep).UpdateLiveLights(noTransition);
 			}
 		}
@@ -729,7 +729,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					continue;
 				}
 
-				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 
 				slaveTTL.GetStep(CurrentStep).SetStepDone();
 				slaveTTL.CurrentStep = newCurrentStep;
@@ -936,7 +936,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public ITimedTrafficLights MasterLights() {
-			return TrafficLightSimulationManager.Instance.TrafficLightSimulations[MasterNodeId].TimedLight;
+			return TrafficLightSimulationManager.Instance.TrafficLightSimulations[MasterNodeId].timedLight;
 		}
 
 		public void SetTestMode(bool testMode) {
@@ -985,7 +985,7 @@ namespace TrafficManager.TrafficLight.Impl {
 							continue;
 						}
 
-						ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+						ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 						slaveTTL.AddStep(otherStep.MinTime, otherStep.MaxTime, otherStep.ChangeMetric, otherStep.WaitFlowBalance, true);
 					}
 				}
@@ -998,7 +998,7 @@ namespace TrafficManager.TrafficLight.Impl {
 							continue;
 						}
 
-						ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].TimedLight;
+						ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
 						slaveTTL.AddStep(ourStep.MinTime, ourStep.MaxTime, ourStep.ChangeMetric, ourStep.WaitFlowBalance, true);
 					}
 				}
@@ -1020,7 +1020,7 @@ namespace TrafficManager.TrafficLight.Impl {
 				if (!tlsMan.TrafficLightSimulations[timedNodeId].IsTimedLight()) {
 					continue;
 				}
-				ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].TimedLight;
+				ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 
 				for (int i = 0; i < NumSteps(); ++i) {
 					minTimes[i] += ttl.GetStep(i).MinTime;
@@ -1057,7 +1057,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					continue;
 				}
 
-				ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].TimedLight;
+				ITimedTrafficLights ttl = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 
 				ttl.Stop();
 				ttl.TestMode = false;
@@ -1080,9 +1080,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			ISegmentEndManager segEndMan = Constants.ManagerFactory.SegmentEndManager;
 
-			ICollection<SegmentEndId> segmentEndsToDelete = new HashSet<SegmentEndId>();
+			ICollection<ISegmentEndId> segmentEndsToDelete = new HashSet<ISegmentEndId>();
 			// update currently set segment ends
-			foreach (SegmentEndId endId in segmentEndIds) {
+			foreach (ISegmentEndId endId in segmentEndIds) {
 #if DEBUGTTL
 				if (debug)
 					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: updating existing segment end {endId} for node {NodeId}");
@@ -1111,7 +1111,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			}
 
 			// remove all invalid segment ends
-			foreach (SegmentEndId endId in segmentEndsToDelete) {
+			foreach (ISegmentEndId endId in segmentEndsToDelete) {
 #if DEBUGTTL
 				if (debug)
 					Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: Removing invalid segment end {endId} @ node {NodeId}");

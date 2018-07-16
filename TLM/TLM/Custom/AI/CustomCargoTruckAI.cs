@@ -47,7 +47,7 @@ namespace TrafficManager.Custom.AI {
 			//Log._Debug($"CustomCargoTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
-			ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+			ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
 			if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
 				Log.Warning($"CustomCargoTruck.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");

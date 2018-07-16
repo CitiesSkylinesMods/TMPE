@@ -134,9 +134,9 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public IVehicleStateManager VehicleStateManager {
+		public IExtVehicleManager ExtVehicleManager {
 			get {
-				return Impl.VehicleStateManager.Instance;
+				return Impl.ExtVehicleManager.Instance;
 			}
 		}
 	}

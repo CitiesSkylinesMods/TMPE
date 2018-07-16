@@ -1,10 +1,4 @@
 ﻿using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
 
 namespace TrafficManager.Traffic.Data {
 	/// <summary>
@@ -13,11 +7,6 @@ namespace TrafficManager.Traffic.Data {
 	public struct SegmentFlags {
 		public SegmentEndFlags startNodeFlags;
 		public SegmentEndFlags endNodeFlags;
-
-		public void UpdateDefaults(SegmentGeometry segmentGeometry) {
-			startNodeFlags.UpdateDefaults(segmentGeometry.StartNodeGeometry);
-			endNodeFlags.UpdateDefaults(segmentGeometry.EndNodeGeometry);
-		}
 
 		public bool IsUturnAllowed(bool startNode) {
 			return startNode ? startNodeFlags.IsUturnAllowed() : endNodeFlags.IsUturnAllowed();
@@ -80,6 +69,14 @@ namespace TrafficManager.Traffic.Data {
 				startNodeFlags.SetPedestrianCrossingAllowed(value);
 			} else {
 				endNodeFlags.SetPedestrianCrossingAllowed(value);
+			}
+		}
+
+		public void SetDefaults(bool startNode, bool defaultUturnAllowed, bool defaultStraightLaneChangingAllowed, bool defaultEnterWhenBlockedAllowed, bool defaultPedestrianCrossingAllowed) {
+			if (startNode) {
+				startNodeFlags.SetDefaults(defaultUturnAllowed, defaultStraightLaneChangingAllowed, defaultEnterWhenBlockedAllowed, defaultPedestrianCrossingAllowed);
+			} else {
+				endNodeFlags.SetDefaults(defaultUturnAllowed, defaultStraightLaneChangingAllowed, defaultEnterWhenBlockedAllowed, defaultPedestrianCrossingAllowed);
 			}
 		}
 

@@ -89,7 +89,7 @@ namespace TrafficManager.Custom.AI {
 				return false;
 			}
 
-			return Constants.ManagerFactory.VehicleBehaviorManager.StartPassengerCarPathFind(vehicleID, ref vehicleData, this.m_info, driverInstanceId, ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], startPos, endPos, startBothWays, endBothWays, undergroundTarget, IsHeavyVehicle(), CombustionEngine(), IgnoreBlocked(vehicleID, ref vehicleData));
+			return Constants.ManagerFactory.VehicleBehaviorManager.StartPassengerCarPathFind(vehicleID, ref vehicleData, this.m_info, driverInstanceId, ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], startPos, endPos, startBothWays, endBothWays, undergroundTarget, IsHeavyVehicle(), CombustionEngine(), IgnoreBlocked(vehicleID, ref vehicleData));
 		}
 		
 		[RedirectMethod]

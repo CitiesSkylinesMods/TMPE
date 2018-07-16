@@ -455,7 +455,7 @@ namespace TrafficManager.Manager.Impl {
 			ArrowDirection targetToDir = endGeo.GetDirection(nextPos.m_segment); // absolute target direction of target vehicle
 
 			// iterate over all cars approaching the transit node and check if the target vehicle should be prioritized
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
 			CustomSegmentLightsManager segLightsManager = CustomSegmentLightsManager.Instance;
 
 			NodeGeometry transitNodeGeo = NodeGeometry.Get(transitNodeId);
@@ -511,7 +511,7 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): checking other vehicle {incomingVehicleId} @ seg. {otherSegmentId}");
 					}
 #endif
-					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, endGeo, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.VehicleStates[incomingVehicleId], incomingOnMain, otherEndGeo, otherLights, incomingFromDir)) {
+					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, endGeo, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.ExtVehicles[incomingVehicleId], incomingOnMain, otherEndGeo, otherLights, incomingFromDir)) {
 #if DEBUG
 						if (debug) {
 							Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): incoming vehicle {incomingVehicleId} is conflicting.");
@@ -521,7 +521,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 
 					// check next incoming vehicle
-					incomingVehicleId = vehStateManager.VehicleStates[incomingVehicleId].nextVehicleIdOnSegment;
+					incomingVehicleId = vehStateManager.ExtVehicles[incomingVehicleId].nextVehicleIdOnSegment;
 				}
 			}
 #if DEBUG
@@ -534,7 +534,7 @@ namespace TrafficManager.Manager.Impl {
 
 		private bool IsConflictingVehicle(bool debug, Vector3 transitNodePos, float targetTimeToTransitNode, ushort vehicleId, ref Vehicle vehicle,
 						ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos, bool onMain, SegmentEndGeometry endGeo,
-						ArrowDirection targetToDir, ushort incomingVehicleId, ref Vehicle incomingVehicle, ref VehicleState incomingState, bool incomingOnMain,
+						ArrowDirection targetToDir, ushort incomingVehicleId, ref Vehicle incomingVehicle, ref ExtVehicle incomingState, bool incomingOnMain,
 						SegmentEndGeometry incomingEndGeo, ICustomSegmentLights incomingLights, ArrowDirection incomingFromDir) {
 #if DEBUG
 			if (debug) {
@@ -579,11 +579,11 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			if (incomingState.JunctionTransitState != VehicleJunctionTransitState.None) {
+			if (incomingState.junctionTransitState != VehicleJunctionTransitState.None) {
 				Vector3 incomingVel = incomingVehicle.GetLastFrameVelocity();
-				bool incomingStateChangedRecently = incomingState.IsJunctionTransitStateNew();
-				if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Approach ||
-					incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave
+				bool incomingStateChangedRecently = Constants.ManagerFactory.ExtVehicleManager.IsJunctionTransitStateNew(ref incomingState);
+				if (incomingState.junctionTransitState == VehicleJunctionTransitState.Approach ||
+					incomingState.junctionTransitState == VehicleJunctionTransitState.Leave
 				) {
 					if ((incomingState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
 						float incomingSqrSpeed = incomingVel.sqrMagnitude;
@@ -592,7 +592,7 @@ namespace TrafficManager.Manager.Impl {
 							if (debug)
 								Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming {incomingVehicleId} is LEAVING or APPROACHING but not moving. -> BLOCKED");
 #endif
-							incomingState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
+							Constants.ManagerFactory.ExtVehicleManager.SetJunctionTransitState(ref incomingState, VehicleJunctionTransitState.Blocked);
 							incomingStateChangedRecently = true;
 							return false;
 						}
@@ -654,7 +654,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 
 				if (!incomingStateChangedRecently &&
-					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Blocked/* ||
+					(incomingState.junctionTransitState == VehicleJunctionTransitState.Blocked/* ||
 					(incomingState.JunctionTransitState == VehicleJunctionTransitState.Stop && vehicleId < incomingVehicleId)*/)
 				) {
 #if DEBUG
@@ -683,7 +683,7 @@ namespace TrafficManager.Manager.Impl {
 			} else {
 #if DEBUG
 				if (debug)
-					Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming {incomingVehicleId} (main) is not conflicting ({incomingState.JunctionTransitState}).");
+					Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming {incomingVehicleId} (main) is not conflicting ({incomingState.junctionTransitState}).");
 #endif
 				return false;
 			}
@@ -705,7 +705,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="incomingOnMain">true if the incoming vehicle is coming from a main road</param>
 		/// <returns>true if the target vehicle has priority, false otherwise</returns>
 		private bool HasVehiclePriority(bool debug, ushort vehicleId, ref Vehicle vehicle, ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos,
-				bool onMain, ArrowDirection targetToDir, ushort incomingVehicleId, ref Vehicle incomingVehicle, ref VehicleState incomingState, bool incomingOnMain,
+				bool onMain, ArrowDirection targetToDir, ushort incomingVehicleId, ref Vehicle incomingVehicle, ref ExtVehicle incomingState, bool incomingOnMain,
 				ArrowDirection incomingFromDir, ArrowDirection incomingToRelDir) {
 #if DEBUG
 			if (debug) {
@@ -820,7 +820,7 @@ namespace TrafficManager.Manager.Impl {
 
 			if (ret) {
 				// check if the incoming vehicle is leaving (though the target vehicle has priority)
-				bool incomingIsLeaving = incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave;
+				bool incomingIsLeaving = incomingState.junctionTransitState == VehicleJunctionTransitState.Leave;
 #if DEBUG
 				if (debug) {
 					Log._Debug($"  TrafficPriorityManager.HasVehiclePriority({vehicleId}, {incomingVehicleId}): >>> Car {vehicleId} has priority over {incomingVehicleId}. incomingIsLeaving={incomingIsLeaving}");
@@ -852,11 +852,11 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="incomingVehicleId">(optional) incoming vehicle id</param>
 		/// <returns>true if both vehicles are on a collision course, false otherwise</returns>
 		public bool DetectCollision(bool debug, ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos,
-			ref VehicleState incomingState, ArrowDirection targetToDir, ArrowDirection incomingFromDir, ArrowDirection incomingToRelDir, ushort vehicleId=0, ushort incomingVehicleId=0
+			ref ExtVehicle incomingState, ArrowDirection targetToDir, ArrowDirection incomingFromDir, ArrowDirection incomingToRelDir, ushort vehicleId=0, ushort incomingVehicleId=0
 		) {
 			bool sameTargets = nextPos.m_segment == incomingState.nextSegmentId;
 			bool wouldCollide;
-			bool incomingIsLeaving = incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave;
+			bool incomingIsLeaving = incomingState.junctionTransitState == VehicleJunctionTransitState.Leave;
 			if (sameTargets) {
 				// both are going to the same segment
 #if DEBUG

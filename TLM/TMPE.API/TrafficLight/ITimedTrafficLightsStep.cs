@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Enums;
@@ -28,7 +27,7 @@ namespace TrafficManager.TrafficLight {
 		bool IsInEndTransition();
 		bool IsEndTransitionDone();
 		bool RelocateSegmentLights(ushort sourceSegmentId, ushort targetSegmentId);
-		ICustomSegmentLights RemoveSegmentLights(ushort segmentId);
+		new ICustomSegmentLights RemoveSegmentLights(ushort segmentId);
 		bool SetSegmentLights(ushort segmentId, ICustomSegmentLights lights);
 		void SetStepDone();
 		bool ShouldGoToNextStep(float flow, float wait, out float metric);

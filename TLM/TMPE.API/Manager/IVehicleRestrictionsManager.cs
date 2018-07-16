@@ -39,11 +39,9 @@ namespace TrafficManager.Manager {
 		bool IsTaxiAllowed(ExtVehicleType? allowedTypes);
 		bool IsTramAllowed(ExtVehicleType? allowedTypes);
 		bool IsTramLane(NetInfo.Lane laneInfo);
-		bool LoadData(List<Configuration.LaneVehicleTypes> data);
 		void NotifyStartEndNode(ushort segmentId);
 		void OnLevelUnloading();
 		void RemoveAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType);
-		List<Configuration.LaneVehicleTypes> SaveData(ref bool success);
 		void ToggleAllowedType(ushort segmentId, NetInfo segmentInfo, uint laneIndex, uint laneId, NetInfo.Lane laneInfo, ExtVehicleType vehicleType, bool add);
 	}
 }

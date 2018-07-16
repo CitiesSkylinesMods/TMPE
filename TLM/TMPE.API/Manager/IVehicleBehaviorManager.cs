@@ -34,6 +34,7 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="vehicleInfo">vehicle info (in stock code, this is passed via VehicleAI.m_info. Don't know if this is actually always equal to vehicleData.Info)</param>
 		/// <param name="driverInstanceId">driver citizen instance id</param>
+		/// <param name="driverInstanceData">driver citizen instance data</param>
 		/// <param name="driverExtInstance">driver extended citizen instance</param>
 		/// <param name="startPos">start position</param>
 		/// <param name="endPos">end position</param>
@@ -44,7 +45,7 @@ namespace TrafficManager.Manager {
 		/// <param name="hasCombustionEngine">does the vehicle have a combustion engine?</param>
 		/// <param name="ignoreBlocked">should blocked roads be ignored?</param>
 		/// <returns></returns>
-		bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked);
+		bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref CitizenInstance driverInstanceData, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked);
 
 		/// <summary>
 		/// Checks if space reservation at <paramref name="targetPos"/> is allowed. When a custom traffic light is active at the transit node
@@ -80,7 +81,7 @@ namespace TrafficManager.Manager {
 		/// <param name="next3PathPos">3rd next path position</param>
 		/// <param name="next4PathPos">4th next path position</param>
 		/// <returns>target position lane index</returns>
-		int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos);
+		int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos);
 
 		/// <summary>
 		/// Determines if the given vehicle is allowed to find an alternative lane.
@@ -89,14 +90,7 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleData">vehicle data</param>
 		/// <param name="vehicleState">vehicle state</param>
 		/// <returns></returns>
-		bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState);
-
-		/// <summary>
-		/// Calculates the current randomization value for a vehicle.
-		/// </summary>
-		/// <param name="vehicleId">vehicle id</param>
-		/// <returns>a number between 0 and 99</returns>
-		uint GetVehicleRand(ushort vehicleId);
+		bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState);
 
 		/// <summary>
 		/// Applies realistic speed multipliers to the given velocity.

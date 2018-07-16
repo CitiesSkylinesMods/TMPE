@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
 
 namespace TrafficManager.Traffic.Data {
 	/// <summary>
@@ -16,36 +14,16 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool enterWhenBlockedAllowed;
 		public TernaryBool pedestrianCrossingAllowed;
 
-		private bool defaultEnterWhenBlockedAllowed;
-		private bool defaultUturnAllowed;
-		//private bool defaultPedestrianCrossingAllowed;
+		public bool defaultUturnAllowed;
+		public bool defaultEnterWhenBlockedAllowed;
+		public bool defaultStraightLaneChangingAllowed;
+		public bool defaultPedestrianCrossingAllowed;
 
-		public void UpdateDefaults(SegmentEndGeometry segmentEndGeometry) {
-			NodeGeometry nodeGeo = NodeGeometry.Get(segmentEndGeometry.NodeId());
-
-			bool newDefaultEnterWhenBlockedAllowed = false;
-			bool newDefaultUturnAllowed = false;
-			//NetNode.Flags _nodeFlags = NetNode.Flags.None;
-			Constants.ServiceFactory.NetService.ProcessNode(segmentEndGeometry.NodeId(), delegate (ushort nodeId, ref NetNode node) {
-				//_nodeFlags = node.m_flags;
-				int numOutgoing = 0;
-				int numIncoming = 0;
-				node.CountLanes(nodeId, 0, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, true, ref numOutgoing, ref numIncoming);
-				newDefaultEnterWhenBlockedAllowed = numOutgoing == 1 || numIncoming == 1;
-
-				if (Options.allowUTurns) {
-					newDefaultUturnAllowed =
-						(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition | NetNode.Flags.Bend | NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
-						node.Info?.m_class?.m_service != ItemClass.Service.Beautification
-					;
-				} else {
-					newDefaultUturnAllowed = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
-				}
-				return true;
-			});
-			defaultEnterWhenBlockedAllowed = newDefaultEnterWhenBlockedAllowed;
-			defaultUturnAllowed = newDefaultUturnAllowed;
-			//Log._Debug($"SegmentEndFlags.UpdateDefaults: this={this} _nodeFlags={_nodeFlags} defaultEnterWhenBlockedAllowed={defaultEnterWhenBlockedAllowed}");
+		public void SetDefaults(bool defaultUturnAllowed, bool defaultStraightLaneChangingAllowed, bool defaultEnterWhenBlockedAllowed, bool defaultPedestrianCrossingAllowed) {
+			this.defaultUturnAllowed = defaultUturnAllowed;
+			this.defaultStraightLaneChangingAllowed = defaultStraightLaneChangingAllowed;
+			this.defaultEnterWhenBlockedAllowed = defaultEnterWhenBlockedAllowed;
+			this.defaultPedestrianCrossingAllowed = defaultPedestrianCrossingAllowed;
 		}
 
 		public bool IsUturnAllowed() {
@@ -69,7 +47,7 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool GetDefaultLaneChangingAllowedWhenGoingStraight() {
-			return Options.allowLaneChangesWhileGoingStraight;
+			return defaultStraightLaneChangingAllowed;
 		}
 
 		public bool IsEnteringBlockedJunctionAllowed() {
@@ -84,7 +62,7 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool GetDefaultEnteringBlockedJunctionAllowed() {
-			return defaultEnterWhenBlockedAllowed || Options.allowEnterBlockedJunctions;
+			return defaultEnterWhenBlockedAllowed;
 		}
 
 		public bool IsPedestrianCrossingAllowed() {
@@ -96,7 +74,7 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool GetDefaultPedestrianCrossingAllowed() {
-			return true;
+			return defaultPedestrianCrossingAllowed;
 		}
 
 		public void SetUturnAllowed(bool value) {

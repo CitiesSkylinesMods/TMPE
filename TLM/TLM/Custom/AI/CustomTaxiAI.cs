@@ -18,7 +18,7 @@ namespace TrafficManager.Custom.AI {
 		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 			CitizenManager instance = Singleton<CitizenManager>.instance;
-			ushort passengerInstanceId = Constants.ManagerFactory.VehicleStateManager.GetDriverInstanceId(vehicleID, ref vehicleData);
+			ushort passengerInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId(vehicleID, ref vehicleData);
 			if (passengerInstanceId == 0 || (instance.m_instances.m_buffer[(int)passengerInstanceId].m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
 				return base.StartPathFind(vehicleID, ref vehicleData, startPos, endPos, startBothWays, endBothWays, undergroundTarget);
 			}

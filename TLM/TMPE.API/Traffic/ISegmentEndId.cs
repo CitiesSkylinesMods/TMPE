@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TrafficManager.Geometry {
+namespace TrafficManager.Traffic {
 	public interface ISegmentEndId : IEquatable<ISegmentEndId> {
 		// TODO documentation
 		ushort SegmentId { get; }

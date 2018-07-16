@@ -236,7 +236,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(TrafficPriorityManager.Instance);
 			RegisteredManagers.Add(UtilityManager.Instance);
 			RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
-			RegisteredManagers.Add(VehicleStateManager.Instance);
+			RegisteredManagers.Add(ExtVehicleManager.Instance);
 		}
 
 		public override void OnReleased() {

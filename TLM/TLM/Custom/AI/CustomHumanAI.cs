@@ -168,6 +168,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
+			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
@@ -184,7 +185,7 @@ namespace TrafficManager.Custom.AI {
 							Log.Warning($"CustomHumanAI.ExtSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.pathMode}) but parked car has disappeared. RESET.");
 #endif
 
-					extInstance.Reset();
+					extCitInstMan.Reset(ref extInstance);
 
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
@@ -212,7 +213,7 @@ namespace TrafficManager.Custom.AI {
 							instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Cheering | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
 							if (!this.StartPathFind(instanceID, ref instanceData)) {
 								instanceData.Unspawn(instanceID);
-								extInstance.Reset();
+								extCitInstMan.Reset(ref extInstance);
 							}
 
 							return true;

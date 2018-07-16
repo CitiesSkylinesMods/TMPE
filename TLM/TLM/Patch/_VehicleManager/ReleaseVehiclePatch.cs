@@ -13,7 +13,7 @@ namespace TrafficManager.Patch._VehicleManager {
 		/// </summary>
 		[HarmonyPrefix]
 		public static void Prefix(VehicleManager __instance, ushort vehicle) {
-			Constants.ManagerFactory.VehicleStateManager.OnReleaseVehicle(vehicle, ref __instance.m_vehicles.m_buffer[vehicle]);
+			Constants.ManagerFactory.ExtVehicleManager.OnReleaseVehicle(vehicle, ref __instance.m_vehicles.m_buffer[vehicle]);
 		}
 	}
 }

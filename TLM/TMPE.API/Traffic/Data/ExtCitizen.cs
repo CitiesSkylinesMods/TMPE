@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TrafficManager.State;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Traffic.Data {
@@ -34,40 +33,11 @@ namespace TrafficManager.Traffic.Data {
 				"ExtCitizen]";
 		}
 
-		internal ExtCitizen(uint citizenId) {
+		public ExtCitizen(uint citizenId) {
 			this.citizenId = citizenId;
 			transportMode = ExtTransportMode.None;
 			lastTransportMode = ExtTransportMode.None;
 			lastLocation = Citizen.Location.Moving;
-			ResetLastLocation();
-		}
-
-		internal bool IsValid() {
-			return Constants.ServiceFactory.CitizenService.IsCitizenValid(citizenId);
-		}
-
-		internal void Reset() {
-#if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
-
-			if (fineDebug) {
-				Log.Warning($"ExtCitizen.Reset({citizenId}): Resetting ext. citizen {citizenId}");
-			}
-#endif
-			transportMode = ExtTransportMode.None;
-			lastTransportMode = ExtTransportMode.None;
-			ResetLastLocation();
-		}
-
-		private void ResetLastLocation() {
-			Citizen.Location loc = Citizen.Location.Moving;
-			Constants.ServiceFactory.CitizenService.ProcessCitizen(citizenId, delegate (uint citId, ref Citizen citizen) {
-				loc = citizen.CurrentLocation;
-				return true;
-			});
-			lastLocation = loc;
 		}
 	}
 }

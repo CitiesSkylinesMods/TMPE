@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C911D31C-C85D-42A8-A839-7B209A715495}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TMPE.API</RootNamespace>
+    <AssemblyName>TMPE.API</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ColossalManaged">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+    </Reference>
+    <Reference Include="ICities">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Manager\IAdvancedParkingManager.cs" />
+    <Compile Include="Manager\ICustomDataManager.cs" />
+    <Compile Include="Manager\ICustomManager.cs" />
+    <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IExtBuildingManager.cs" />
+    <Compile Include="Manager\IExtCitizenInstanceManager.cs" />
+    <Compile Include="Manager\IExtCitizenManager.cs" />
+    <Compile Include="Manager\IExtPathManager.cs" />
+    <Compile Include="Manager\IFeatureManager.cs" />
+    <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
+    <Compile Include="Manager\ILaneArrowManager.cs" />
+    <Compile Include="Manager\ILaneConnectionManager.cs" />
+    <Compile Include="Manager\IManagerFactory.cs" />
+    <Compile Include="Manager\IOptionsManager.cs" />
+    <Compile Include="Manager\IParkingRestrictionsManager.cs" />
+    <Compile Include="Manager\IRoutingManager.cs" />
+    <Compile Include="Manager\ISegmentEndManager.cs" />
+    <Compile Include="Manager\ISpeedLimitManager.cs" />
+    <Compile Include="Manager\ITrafficLightManager.cs" />
+    <Compile Include="Manager\ITrafficLightSimulationManager.cs" />
+    <Compile Include="Manager\ITrafficMeasurementManager.cs" />
+    <Compile Include="Manager\ITrafficPriorityManager.cs" />
+    <Compile Include="Manager\IUtilityManager.cs" />
+    <Compile Include="Manager\IVehicleBehaviorManager.cs" />
+    <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
+    <Compile Include="Manager\IExtVehicleManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrafficLight\Data\TrafficLightSimulation.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLight.cs" />
+    <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
+    <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
+    <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
+    <Compile Include="Traffic\Data\ExtBuilding.cs" />
+    <Compile Include="Traffic\Data\ExtCitizen.cs" />
+    <Compile Include="Traffic\Data\ExtCitizenInstance.cs" />
+    <Compile Include="Traffic\Data\PathCreationArgs.cs" />
+    <Compile Include="Traffic\Data\PathUnitQueueItem.cs" />
+    <Compile Include="Traffic\Data\PrioritySegment.cs" />
+    <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
+    <Compile Include="Traffic\Data\SegmentFlags.cs" />
+    <Compile Include="Traffic\Data\ExtVehicle.cs" />
+    <Compile Include="Traffic\Enums\CarUsagePolicy.cs" />
+    <Compile Include="Traffic\Enums\ExtParkingSpaceLocation.cs" />
+    <Compile Include="Traffic\Enums\ExtPathMode.cs" />
+    <Compile Include="Traffic\Enums\ExtPathState.cs" />
+    <Compile Include="Traffic\Enums\ExtPathType.cs" />
+    <Compile Include="Traffic\Enums\ExtSoftPathState.cs" />
+    <Compile Include="Traffic\Enums\ExtTransportMode.cs" />
+    <Compile Include="Traffic\Enums\ExtVehicleFlags.cs" />
+    <Compile Include="Traffic\Enums\ExtVehicleType.cs" />
+    <Compile Include="Traffic\Enums\FlowWaitCalcMode.cs" />
+    <Compile Include="Traffic\Enums\GeometryCalculationMode.cs" />
+    <Compile Include="Traffic\Enums\LaneArrows.cs" />
+    <Compile Include="Traffic\Enums\LaneEndTransitionType.cs" />
+    <Compile Include="Traffic\Enums\LightMode.cs" />
+    <Compile Include="Traffic\Enums\ParkedCarApproachState.cs" />
+    <Compile Include="Traffic\Enums\ParkingUnableReason.cs" />
+    <Compile Include="Traffic\Enums\PriorityType.cs" />
+    <Compile Include="Traffic\Enums\SetLaneArrowUnableReason.cs" />
+    <Compile Include="Traffic\Enums\SetPrioritySignUnableReason.cs" />
+    <Compile Include="Traffic\Enums\StepChangeMetric.cs" />
+    <Compile Include="Traffic\Enums\ToggleTrafficLightUnableReason.cs" />
+    <Compile Include="Traffic\Enums\TrafficLightSimulationType.cs" />
+    <Compile Include="Traffic\Enums\VehicleJunctionTransitState.cs" />
+    <Compile Include="Traffic\Enums\VehicleRestrictionsAggression.cs" />
+    <Compile Include="Traffic\Enums\VehicleRestrictionsMode.cs" />
+    <Compile Include="Traffic\ISegmentEnd.cs" />
+    <Compile Include="Traffic\ISegmentEndId.cs" />
+    <Compile Include="Util\IObservable.cs" />
+    <Compile Include="Util\IObserver.cs" />
+    <Compile Include="Util\IVisitor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">
+      <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
+      <Name>CSUtil.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
+      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
+      <Name>TMPE.GenericGameBridge</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -76,7 +76,7 @@ namespace TrafficManager.Custom.Data {
 			}
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
+			ExtVehicleManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 		}
 
@@ -85,7 +85,7 @@ namespace TrafficManager.Custom.Data {
 			//Log._Debug($"CustomVehicle.Unspawn({vehicleId}) called.");
 
 			// NON-STOCK CODE START
-			VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
+			ExtVehicleManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;

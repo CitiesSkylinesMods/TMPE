@@ -26,7 +26,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "OnStartPathFind")) {
 #endif
-				vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
+				vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
 #if BENCHMARK
 			}
 #endif
