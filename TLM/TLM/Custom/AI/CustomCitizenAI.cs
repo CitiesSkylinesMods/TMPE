@@ -498,6 +498,7 @@ namespace TrafficManager.Custom.AI {
 				args.extPathType = extPathType;
 				args.extVehicleType = extVehicleType;
 				args.vehicleId = 0;
+				args.spawned = (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = startPosA;
 				args.startPosB = dummyPathPos;

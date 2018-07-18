@@ -338,6 +338,7 @@ namespace TrafficManager.Traffic.Data {
 				args.extPathType = ExtCitizenInstance.ExtPathType.WalkingOnly;
 				args.extVehicleType = ExtVehicleType.None;
 				args.vehicleId = 0;
+				args.spawned = true;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = parkPathPos;
 				args.startPosB = dummyPathPos;

@@ -37,6 +37,11 @@ namespace TrafficManager.Custom.PathFinding {
 			public ushort vehicleId;
 
 			/// <summary>
+			/// is entity alredy spawned?
+			/// </summary>
+			public bool spawned;
+
+			/// <summary>
 			/// Current build index
 			/// </summary>
 			public uint buildIndex;
@@ -128,6 +133,7 @@ namespace TrafficManager.Custom.PathFinding {
 			public ExtPathType pathType; // access requires acquisition of m_bufferLock
 			public ushort vehicleId; // access requires acquisition of m_bufferLock
 			public bool queued; // access requires acquisition of m_bufferLock
+			public bool spawned; // access requires acquisition of m_bufferLock
 
 			//public void Reset() {
 			//	vehicleType = ExtVehicleType.None;
@@ -142,6 +148,7 @@ namespace TrafficManager.Custom.PathFinding {
 				"\t" + $"pathType={pathType}\n" +
 				"\t" + $"vehicleId={vehicleId}\n" +
 				"\t" + $"queued={queued}\n" +
+				"\t" + $"spawned={spawned}\n" +
 				"PathUnitQueueItem]";
 			}
 		}
@@ -313,6 +320,7 @@ namespace TrafficManager.Custom.PathFinding {
 				queueItems[pathUnitId].vehicleType = args.extVehicleType;
 				queueItems[pathUnitId].vehicleId = args.vehicleId;
 				queueItems[pathUnitId].pathType = args.extPathType;
+				queueItems[pathUnitId].spawned = args.spawned;
 				queueItems[pathUnitId].queued = true;
 				// NON-STOCK CODE END
 

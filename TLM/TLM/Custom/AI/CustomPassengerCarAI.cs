@@ -310,6 +310,7 @@ namespace TrafficManager.Custom.AI {
 				args.extPathType = extPathType;
 				args.extVehicleType = ExtVehicleType.PassengerCar;
 				args.vehicleId = vehicleID;
+				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 				args.buildIndex = simMan.m_currentBuildIndex;
 				args.startPosA = startPosA;
 				args.startPosB = startPosB;
