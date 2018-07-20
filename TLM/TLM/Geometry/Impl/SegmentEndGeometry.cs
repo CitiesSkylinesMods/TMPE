@@ -395,7 +395,13 @@ namespace TrafficManager.Geometry.Impl {
 					} else {
 						OutgoingLeftSegments[NumOutgoingLeftSegments++] = otherSegmentId;
 					}
-				} else if (dir == ArrowDirection.Forward) {
+				} else {
+#if DEBUG
+					if (dir != ArrowDirection.Forward) {
+						Log.Warning($"Invalid segment direction detected: {dir} for segments {SegmentId} and {otherSegmentId}");
+					}
+#endif
+
 					StraightSegments[NumStraightSegments++] = otherSegmentId;
 					if (!otherIsOutgoingOneWay) {
 						IncomingStraightSegments[NumIncomingStraightSegments++] = otherSegmentId;
@@ -404,8 +410,6 @@ namespace TrafficManager.Geometry.Impl {
 					} else {
 						OutgoingStraightSegments[NumOutgoingStraightSegments++] = otherSegmentId;
 					}
-				} else {
-					Log.Warning($"Invalid segment direciton detected: {dir} for segments {SegmentId} and {otherSegmentId}");
 				}
 
 				// reset highway lane arrows
