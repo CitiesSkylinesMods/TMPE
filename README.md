@@ -9,7 +9,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Bugfix: Heavy vehicles are unable to u-turn at dead ends (#194)
 - Bugfix: Routing & Priority rules do not work properly for acute (< 30°)/obtuse(> 150°) segment angles (#199)
 - Bugfix: Buses do not prefer lanes with correct lane arrow (#206)
-- Bugfix: Race condition in path-finding might cause paths to be assigned to wrong vehicle/vitizen (#205)
+- Bugfix: Race condition in path-finding might cause paths to be assigned to wrong vehicle/citizen (#205)
 - Bugfix: Vehicles are unable to perform u-turns when setting off on multi-lane roads (#197)
 
 1.10.10, 07/14/2018
