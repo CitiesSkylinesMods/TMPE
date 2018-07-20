@@ -4,6 +4,14 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
+1.10.11, 07/21/2018
+- U-turn lane connections are represented by appropriate lane arrow (#201)
+- Bugfix: Heavy vehicles are unable to u-turn at dead ends (#194)
+- Bugfix: Routing & Priority rules do not work properly for acute (< 30°)/obtuse(> 150°) segment angles (#199)
+- Bugfix: Buses do not prefer lanes with correct lane arrow (#206)
+- Bugfix: Race condition in path-finding might cause paths to be assigned to wrong vehicle/vitizen (#205)
+- Bugfix: Vehicles are unable to perform u-turns when setting off on multi-lane roads (#197)
+
 1.10.10, 07/14/2018
 - Parking AI: Improved park & ride behavior
 - Parking AI: Walking paths from parking position to destination building take public transportation into account
