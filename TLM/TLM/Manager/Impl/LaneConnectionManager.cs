@@ -510,11 +510,14 @@ namespace TrafficManager.Manager.Impl {
 #endif
 				return;
 			}
+			ushort[] allSegmentIds = new ushort[connectedSegmentIds.Length + 1];
+			allSegmentIds[0] = segmentId;
+			Array.Copy(connectedSegmentIds, 0, allSegmentIds, 1, connectedSegmentIds.Length);
 
-			foreach (ushort connectedSegmentId in connectedSegmentIds) {
-				if (connectedSegmentId == 0)
+			foreach (ushort otherSegmentId in allSegmentIds) {
+				if (otherSegmentId == 0)
 					continue;
-				ArrowDirection dir = segmentGeo.GetDirection(connectedSegmentId, startNode);
+				ArrowDirection dir = segmentGeo.GetDirection(otherSegmentId, startNode);
 
 #if DEBUGCONN
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): processing connected segment {connectedSegmentId}. dir={dir}");
@@ -553,7 +556,7 @@ namespace TrafficManager.Manager.Impl {
 
 				bool addArrow = false;
 
-				uint curLaneId = netManager.m_segments.m_buffer[connectedSegmentId].m_lanes;
+				uint curLaneId = netManager.m_segments.m_buffer[otherSegmentId].m_lanes;
 				while (curLaneId != 0) {
 #if DEBUGCONN
 					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): processing connected segment {connectedSegmentId}: checking lane {curLaneId}");
