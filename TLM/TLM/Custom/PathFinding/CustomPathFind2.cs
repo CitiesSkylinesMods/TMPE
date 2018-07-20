@@ -1396,26 +1396,37 @@ namespace TrafficManager.Custom.PathFinding {
 						Options.advancedAI &&
 						prevIsRouted &&
 						m_isRoadVehicle &&
-						prevIsCarLane &&
-						!m_stablePath
+						prevIsCarLane
 					) {
 						enableAdvancedAI = true;
-						CalculateAdvancedAiCostFactors(
+						if (!m_stablePath) {
+							CalculateAdvancedAiCostFactors(
 #if DEBUG
-							debug, unitId,
+								debug, unitId,
 #endif
-							ref item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, ref segmentSelectionCost, ref laneSelectionCost, ref laneChangingCost
-						);
+								ref item, ref prevSegment, ref prevLane, nextNodeId, ref nextNode, ref segmentSelectionCost, ref laneSelectionCost, ref laneChangingCost
+							);
 
 #if DEBUG
-						if (debug) {
-							Debug(unitId, item, $"ProcessItemMain: vehicle -> vehicle: Custom routing with activated Advanced Vehicle AI: Calculated cost factors\n"
-								+ "\t" + $"segmentSelectionCost={segmentSelectionCost}\n"
-								+ "\t" + $"laneSelectionCost={laneSelectionCost}\n"
-								+ "\t" + $"laneChangingCost={laneChangingCost}"
-							);
-						}
+							if (debug) {
+								Debug(unitId, item, $"ProcessItemMain: vehicle -> vehicle: Custom routing with activated Advanced Vehicle AI: Calculated cost factors\n"
+									+ "\t" + $"segmentSelectionCost={segmentSelectionCost}\n"
+									+ "\t" + $"laneSelectionCost={laneSelectionCost}\n"
+									+ "\t" + $"laneChangingCost={laneChangingCost}"
+								);
+							}
 #endif
+						} else {
+#if DEBUG
+							if (debug) {
+								Debug(unitId, item, $"ProcessItemMain: vehicle -> vehicle: Custom routing with activated Advanced Vehicle AI and stable path: Using default cost factors\n"
+									+ "\t" + $"segmentSelectionCost={segmentSelectionCost}\n"
+									+ "\t" + $"laneSelectionCost={laneSelectionCost}\n"
+									+ "\t" + $"laneChangingCost={laneChangingCost}"
+								);
+							}
+#endif
+						}
 					}
 #endif
 
