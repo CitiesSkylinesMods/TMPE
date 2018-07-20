@@ -31,6 +31,14 @@ namespace TrafficManager.Geometry.Impl {
 			get; private set;
 		} = 0;
 
+		public byte NumIncomingSegments {
+			get; private set;
+		} = 0;
+
+		public byte NumOutgoingSegments {
+			get; private set;
+		} = 0;
+
 		public ushort[] LeftSegments {
 			get; private set;
 		} = new ushort[7];
@@ -60,14 +68,6 @@ namespace TrafficManager.Geometry.Impl {
 		} = new ushort[7];
 
 		public byte NumRightSegments {
-			get; private set;
-		} = 0;
-
-		public byte NumIncomingSegments {
-			get; private set;
-		} = 0;
-
-		public byte NumOutgoingSegments {
 			get; private set;
 		} = 0;
 
@@ -110,7 +110,7 @@ namespace TrafficManager.Geometry.Impl {
 		public byte NumOutgoingStraightSegments {
 			get; private set;
 		} = 0;
-
+		
 		/// <summary>
 		/// Indicates that the managed segment is only connected to highway segments at the start node
 		/// </summary>
@@ -139,6 +139,8 @@ namespace TrafficManager.Geometry.Impl {
 				"\t" + $"LastKnownNodeId = {LastKnownNodeId}\n" +
 				"\t" + $"ConnectedSegments = {ConnectedSegments.ArrayToString()}\n" +
 				"\t" + $"NumConnectedSegments = {NumConnectedSegments}\n" +
+				"\t" + $"NumIncomingSegments = {NumIncomingSegments}\n" +
+				"\t" + $"NumOutgoingSegments = {NumOutgoingSegments}\n" +
 				"\t" + $"LeftSegments = {LeftSegments.ArrayToString()}\n" +
 				"\t" + $"NumLeftSegments = {NumLeftSegments}\n" +
 				"\t" + $"IncomingLeftSegments = {IncomingLeftSegments.ArrayToString()}\n" +
@@ -147,8 +149,6 @@ namespace TrafficManager.Geometry.Impl {
 				"\t" + $"NumOutgoingLeftSegments = {NumOutgoingLeftSegments}\n" +
 				"\t" + $"RightSegments = {RightSegments.ArrayToString()}\n" +
 				"\t" + $"NumRightSegments = {NumRightSegments}\n" +
-				"\t" + $"NumIncomingSegments = {NumIncomingSegments}\n" +
-				"\t" + $"NumOutgoingSegments = {NumOutgoingSegments}\n" +
 				"\t" + $"IncomingRightSegments = {IncomingRightSegments.ArrayToString()}\n" +
 				"\t" + $"NumIncomingRightSegments = {NumIncomingRightSegments}\n" +
 				"\t" + $"OutgoingRightSegments = {OutgoingRightSegments.ArrayToString()}\n" +
@@ -376,7 +376,8 @@ namespace TrafficManager.Geometry.Impl {
 				if (! otherIsHighway || ! otherIsOneWay)
 					OnlyHighways = false;
 
-				if (IsRightSegment(SegmentId, otherSegmentId, nodeId)) {
+				ArrowDirection dir = GetSegmentDir(SegmentId, otherSegmentId, nodeId);
+				if (dir == ArrowDirection.Right) {
 					RightSegments[NumRightSegments++] = otherSegmentId;
 					if (!otherIsOutgoingOneWay) {
 						IncomingRightSegments[NumIncomingRightSegments++] = otherSegmentId;
@@ -385,7 +386,7 @@ namespace TrafficManager.Geometry.Impl {
 					} else {
 						OutgoingRightSegments[NumOutgoingRightSegments++] = otherSegmentId;
 					}
-				} else if (IsLeftSegment(SegmentId, otherSegmentId, nodeId)) {
+				} else if (dir == ArrowDirection.Left) {
 					LeftSegments[NumLeftSegments++] = otherSegmentId;
 					if (!otherIsOutgoingOneWay) {
 						IncomingLeftSegments[NumIncomingLeftSegments++] = otherSegmentId;
@@ -394,7 +395,7 @@ namespace TrafficManager.Geometry.Impl {
 					} else {
 						OutgoingLeftSegments[NumOutgoingLeftSegments++] = otherSegmentId;
 					}
-				} else {
+				} else if (dir == ArrowDirection.Forward) {
 					StraightSegments[NumStraightSegments++] = otherSegmentId;
 					if (!otherIsOutgoingOneWay) {
 						IncomingStraightSegments[NumIncomingStraightSegments++] = otherSegmentId;
@@ -403,6 +404,8 @@ namespace TrafficManager.Geometry.Impl {
 					} else {
 						OutgoingStraightSegments[NumOutgoingStraightSegments++] = otherSegmentId;
 					}
+				} else {
+					Log.Warning($"Invalid segment direciton detected: {dir} for segments {SegmentId} and {otherSegmentId}");
 				}
 
 				// reset highway lane arrows
@@ -477,12 +480,13 @@ namespace TrafficManager.Geometry.Impl {
 				return ArrowDirection.Right;
 			else if (IsLeftSegment(otherSegmentId))
 				return ArrowDirection.Left;
-			else
+			else if (IsStraightSegment(otherSegmentId))
 				return ArrowDirection.Forward;
+			return ArrowDirection.Turn;
 		}
 
 		// static methods
-
+		[Obsolete]
 		private static bool IsRightSegment(ushort fromSegment, ushort toSegment, ushort nodeid) {
 			if (fromSegment <= 0 || toSegment <= 0)
 				return false;
@@ -490,6 +494,7 @@ namespace TrafficManager.Geometry.Impl {
 			return IsLeftSegment(toSegment, fromSegment, nodeid);
 		}
 
+		[Obsolete]
 		private static bool IsLeftSegment(ushort fromSegment, ushort toSegment, ushort nodeid) {
 			if (fromSegment <= 0 || toSegment <= 0)
 				return false;
@@ -501,6 +506,39 @@ namespace TrafficManager.Geometry.Impl {
 			toDir.y = 0;
 			toDir.Normalize();
 			return Vector3.Cross(fromDir, toDir).y >= 0.5;
+		}
+
+		private static ArrowDirection GetSegmentDir(ushort fromSegment, ushort toSegment, ushort nodeId) {
+			if (fromSegment == 0 || toSegment == 0) {
+				return ArrowDirection.None;
+			}
+
+			Vector3 fromDir = GetSegmentDir(fromSegment, nodeId);
+			fromDir.y = 0;
+			fromDir.Normalize();
+			Vector3 toDir = GetSegmentDir(toSegment, nodeId);
+			toDir.y = 0;
+			toDir.Normalize();
+			float c = Vector3.Cross(fromDir, toDir).y;
+			
+			if (c >= 0.5f) { // [+30°, +150°]
+				return ArrowDirection.Left;
+			} else if (c <= -0.5f) { // [-30°, -150°]
+				return ArrowDirection.Right;
+			} else { // (-30°, +30°) / (-150°, -180°] / (+150°, +180°]
+				float d = Vector3.Dot(fromDir, toDir);
+				if (d > 0) { // (-30°, +30°)
+					if (c > 0) { // (0°, 30°]
+						return ArrowDirection.Left;
+					} else if (c < 0) { // (0°, -30°]
+						return ArrowDirection.Right;
+					} else { // [0°]
+						return ArrowDirection.Turn;
+					}
+				} else { // (-150°, -180°] / (+150°, +180°]
+					return ArrowDirection.Forward;
+				}
+			}
 		}
 
 		private static Vector3 GetSegmentDir(int segment, ushort nodeid) {
