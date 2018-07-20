@@ -423,50 +423,8 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 				// determine next segment direction by evaluating the geometry information
-				ArrowDirection nextIncomingDir = ArrowDirection.None;
-				bool isNextSegmentValid = true;
-
-				if (nextSegmentId != prevSegmentId) {
-					for (int j = 0; j < prevEndGeo.IncomingStraightSegments.Length; ++j) {
-						if (prevEndGeo.IncomingStraightSegments[j] == 0) {
-							break;
-						}
-						if (prevEndGeo.IncomingStraightSegments[j] == nextSegmentId) {
-							nextIncomingDir = ArrowDirection.Forward;
-							break;
-						}
-					}
-
-					if (nextIncomingDir == ArrowDirection.None) {
-						for (int j = 0; j < prevEndGeo.IncomingRightSegments.Length; ++j) {
-							if (prevEndGeo.IncomingRightSegments[j] == 0) {
-								break;
-							}
-							if (prevEndGeo.IncomingRightSegments[j] == nextSegmentId) {
-								nextIncomingDir = ArrowDirection.Right;
-								break;
-							}
-						}
-
-						if (nextIncomingDir == ArrowDirection.None) {
-							for (int j = 0; j < prevEndGeo.IncomingLeftSegments.Length; ++j) {
-								if (prevEndGeo.IncomingLeftSegments[j] == 0) {
-									break;
-								}
-								if (prevEndGeo.IncomingLeftSegments[j] == nextSegmentId) {
-									nextIncomingDir = ArrowDirection.Left;
-									break;
-								}
-							}
-
-							if (nextIncomingDir == ArrowDirection.None) {
-								isNextSegmentValid = false;
-							}
-						}
-					}
-				} else {
-					nextIncomingDir = ArrowDirection.Turn;
-				}
+				ArrowDirection nextIncomingDir = prevEndGeo.GetDirection(nextSegmentId);
+				bool isNextSegmentValid = nextIncomingDir != ArrowDirection.None;
 
 #if DEBUGROUTING
 				if (debug)
