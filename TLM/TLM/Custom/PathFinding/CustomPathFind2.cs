@@ -867,7 +867,7 @@ namespace TrafficManager.Custom.PathFinding {
 					}
 				}
 			} else if (prevIsPedestrianLane) {
-				// gwe are going to a pedestrian lane
+				// we are going to a pedestrian lane
 				if (!prevIsElevated) {
 					if (nextNode.Info.m_class.m_service != ItemClass.Service.Beautification) {
 						bool canCrossStreet = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.Junction)) != NetNode.Flags.None;
@@ -898,7 +898,14 @@ namespace TrafficManager.Custom.PathFinding {
 									nextLeftSegmentId = leftSegmentId;
 									leftLaneIndex = someRightLaneIndex;
 									leftLaneId = someRightLaneId;
+									break; // NON-STOCK CODE
 								} else {
+#if JUNCTIONRESTRICTIONS
+									// next segment does not have pedestrian lanes but cims need to cross it to reach the next segment
+									if (!m_junctionManager.IsPedestrianCrossingAllowed(leftSegmentId, netManager.m_segments.m_buffer[leftSegmentId].m_startNode == nextNodeId)) {
+										break;
+									}
+#endif
 									leftSegmentId = netManager.m_segments.m_buffer[leftSegmentId].GetLeftSegment(nextNodeId);
 								}
 
@@ -919,7 +926,14 @@ namespace TrafficManager.Custom.PathFinding {
 									nextRightSegmentId = rightSegmentId;
 									rightLaneIndex = someLeftLaneIndex;
 									rightLaneId = someLeftLaneId;
+									break; // NON-STOCK CODE
 								} else {
+#if JUNCTIONRESTRICTIONS
+									// next segment does not have pedestrian lanes but cims need to cross it to reach the next segment
+									if (!m_junctionManager.IsPedestrianCrossingAllowed(rightSegmentId, netManager.m_segments.m_buffer[rightSegmentId].m_startNode == nextNodeId)) {
+										break;
+									}
+#endif
 									rightSegmentId = netManager.m_segments.m_buffer[rightSegmentId].GetRightSegment(nextNodeId);
 								}
 
@@ -2644,9 +2658,10 @@ namespace TrafficManager.Custom.PathFinding {
 						(!m_isHeavyVehicle || isStockUturnPoint) && // only small vehicles may perform u-turns OR everyone at stock u-turn points
 						!prevIsOutgoingOneWay && // do not u-turn on one-ways
 						(
-							m_junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode) || // only do u-turns if allowed
+							m_junctionManager.IsUturnAllowed(prevSegmentId, nextIsStartNode)
+							/*|| // only do u-turns if allowed
 							(!m_queueItem.spawned && // or a yet unspawned vehicle ...
-							(prevSegmentId == m_startSegmentA || prevSegmentId == m_startSegmentB)) // ... starts at the current segment
+							(prevSegmentId == m_startSegmentA || prevSegmentId == m_startSegmentB)) // ... starts at the current segment*/
 						)
 					;
 

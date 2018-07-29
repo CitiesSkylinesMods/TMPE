@@ -355,7 +355,7 @@ namespace TrafficManager.Manager.Impl {
 
 			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
 			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetUturnAllowed: No geometry information available for segment {segmentId}");
+				Log.Error($"JunctionRestrictionsManager.SetPedestrianCrossingAllowed: No geometry information available for segment {segmentId}");
 				return false;
 			}
 
