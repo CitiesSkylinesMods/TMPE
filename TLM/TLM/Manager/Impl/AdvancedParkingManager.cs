@@ -1219,8 +1219,11 @@ namespace TrafficManager.Manager.Impl {
 
 			if (parkingSpaceSegmentId != 0) {
 				if (parkingBuildingId != 0) {
-					// choose nearest parking position
-					if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude) {
+					Randomizer rng = Singleton<SimulationManager>.instance.m_randomizer;
+
+					// choose nearest parking position, after a bit of randomization
+					if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude
+						&& rng.Int32(GlobalConfig.Instance.ParkingAI.VicinityParkingSpaceSelectionRand) != 0) {
 						// road parking space is closer
 #if DEBUG
 						if (debug)
@@ -1695,7 +1698,7 @@ namespace TrafficManager.Manager.Impl {
 				switch (driverExtInstance.pathMode) {
 					case ExtPathMode.DrivingToAltParkPos:
 						if (driverExtInstance.failedParkingAttempts <= 1) {
-							ret = Translation.GetString("Looking_for_a_parking_spot") + ", " + ret;
+							ret = Translation.GetString("Driving_to_a_parking_spot") + ", " + ret;
 						} else {
 							ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" + driverExtInstance.failedParkingAttempts + "), " + ret;
 						}

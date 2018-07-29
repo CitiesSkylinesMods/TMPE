@@ -14,6 +14,7 @@ namespace TrafficManager.State.ConfigData {
 		/// parking space search in vicinity is randomized. Cims do not always select the nearest parking space possible.
 		/// A value of 1u always selects the nearest parking space.
 		/// A value of 2u selects the nearest parking space with 50% chance, the next one with 25%, then 12.5% and so on.
+		/// A value of 3u selects the nearest parking space with 66.67% chance, the next one with 22.22%, then 7.4% and so on.
 		/// A value of 4u selects the nearest parking space with 75% chance, the next one with 18.75%, then 4.6875% and so on.
 		/// A value of N selects the nearest parking space with (N-1)/N chance, the next one with (1-(N-1)/N)*(N-1)/N, then (1-(N-1)/N)^2*(N-1)/N and so on.
 		/// </summary>
