@@ -219,10 +219,14 @@ namespace TrafficManager.UI.SubTools {
 				bool signHovered;
 				int x = 0;
 				int y = 0;
+				bool hasSignInFirstRow = false;
 
 				// draw "lane-changing when going straight allowed" sign at (0; 0)
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
-				if (incoming && (!viewOnly || allowed != Options.allowLaneChangesWhileGoingStraight)) {
+				if (
+					Constants.ManagerFactory.JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode) &&
+					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode))
+				) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LaneChangeAllowedTexture2D : TextureResources.LaneChangeForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
@@ -232,15 +236,16 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 
-					if (viewOnly)
-						++y;
-					else
-						++x;
+					++x;
+					hasSignInFirstRow = true;
 				}
 
 				// draw "u-turns allowed" sign at (1; 0)
 				allowed = JunctionRestrictionsManager.Instance.IsUturnAllowed(segmentId, startNode);
-				if (incoming && (!viewOnly || allowed != Options.allowUTurns)) {
+				if (
+					Constants.ManagerFactory.JunctionRestrictionsManager.IsUturnAllowedConfigurable(segmentId, startNode) &&
+					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultUturnAllowed(segmentId, startNode))
+				) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.UturnAllowedTexture2D : TextureResources.UturnForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;
@@ -254,34 +259,39 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 
+					hasSignInFirstRow = true;
+				}
+
+				x = 0;
+				if (hasSignInFirstRow) {
 					++y;
-					x = 0;
 				}
 
 				// draw "entering blocked junctions allowed" sign at (0; 1)
-				if (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].CountSegments() > 2) {
-					allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
-					if (incoming && (!viewOnly || allowed != Options.allowEnterBlockedJunctions)) {
-						DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
-						if (signHovered && handleClick) {
-							hovered = true;
+				allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
+				if (
+					Constants.ManagerFactory.JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable(segmentId, startNode) &&
+					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed(segmentId, startNode))
+				) {
+					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.EnterBlockedJunctionAllowedTexture2D : TextureResources.EnterBlockedJunctionForbiddenTexture2D, out signHovered);
+					if (signHovered && handleClick) {
+						hovered = true;
 
-							if (MainTool.CheckClicked()) {
-								JunctionRestrictionsManager.Instance.ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
-								stateUpdated = true;
-							}
+						if (MainTool.CheckClicked()) {
+							JunctionRestrictionsManager.Instance.ToggleEnteringBlockedJunctionAllowed(segmentId, startNode);
+							stateUpdated = true;
 						}
-
-						if (viewOnly)
-							++y;
-						else
-							++x;
 					}
+
+					++x;
 				}
 
 				// draw "pedestrian crossing allowed" sign at (1; 1)
 				allowed = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentId, startNode);
-				if (!viewOnly || !allowed) {
+				if (
+					Constants.ManagerFactory.JunctionRestrictionsManager.IsPedestrianCrossingAllowedConfigurable(segmentId, startNode) &&
+					(!viewOnly || !allowed)
+				) {
 					DrawSign(viewOnly, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.PedestrianCrossingAllowedTexture2D : TextureResources.PedestrianCrossingForbiddenTexture2D, out signHovered);
 					if (signHovered && handleClick) {
 						hovered = true;

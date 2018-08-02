@@ -648,7 +648,7 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): isNextValid={isNextSegmentValid} Compatible lanes: " + nextCompatibleTransitionDatas?.ArrayToString());
 #endif
 				if (isNextSegmentValid) {
-					bool laneChangesAllowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(nextSegmentId, isNextStartNodeOfNextSegment);
+					bool laneChangesAllowed = Options.junctionRestrictionsEnabled && JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(nextSegmentId, isNextStartNodeOfNextSegment);
 					int nextCompatibleLaneCount = numNextCompatibleTransitionDatas;
 					if (nextCompatibleLaneCount > 0) {
 						// we found compatible lanes

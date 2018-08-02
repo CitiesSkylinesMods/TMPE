@@ -184,7 +184,7 @@ namespace TrafficManager.Manager.Impl {
 					//using (var bm = new Benchmark(null, "CheckSpace")) {
 #endif
 					// check if there is enough space
-					var len = vehicleState.totalLength + 2f;
+					var len = vehicleState.totalLength + 4f;
 					if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
 						var sufficientSpace = false;
 						if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
@@ -605,10 +605,10 @@ namespace TrafficManager.Manager.Impl {
 				if (Options.junctionRestrictionsEnabled) {
 					checkSpace = !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
 				} else {
-					checkSpace = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction;
+					checkSpace = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction && node.CountSegments() != 2;
 				}
 
-				return checkSpace & node.CountSegments() != 2;
+				return checkSpace;
 			}
 		}
 

@@ -87,13 +87,13 @@ namespace TrafficManager.Traffic.Data {
 			return startNodeFlags.IsDefault() && endNodeFlags.IsDefault();
 		}
 
-		public void Reset(bool? startNode=null) {
+		public void Reset(bool? startNode=null, bool resetDefaults=true) {
 			if (startNode == null || (bool)startNode) {
-				startNodeFlags.Reset();
+				startNodeFlags.Reset(resetDefaults);
 			}
 
 			if (startNode == null || ! (bool)startNode) {
-				endNodeFlags.Reset();
+				endNodeFlags.Reset(resetDefaults);
 			}
 		}
 

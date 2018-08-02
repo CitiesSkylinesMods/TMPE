@@ -28,7 +28,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// artifical lane distance for vehicles that change to lanes which have an incompatible lane arrow configuration
 		/// </summary>
-		public byte IncompatibleLaneDistance = 1;
+		public byte IncompatibleLaneDistance = 2;
 
 		/// <summary>
 		/// artifical lane distance for u-turns
