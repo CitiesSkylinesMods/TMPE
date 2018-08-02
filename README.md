@@ -4,6 +4,14 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
+1.10.12, 08/02/2018
+- Added the option to allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
+- Updated Russian translation (thanks to vitalii2011 for translating)
+- Bent nodes do not allow for u-turns by default (#170)
+- Bugfix: Bus lines render u-turn where they should not (#207)
+- Bugfix: Parking AI: Cims leaving the city despawn their car at public transport stations (#214)
+- Bugfix: Crossing restrictions do not work at intersection between road and highway (#212)
+
 1.10.11, 07/21/2018
 - U-turn lane connections are represented by appropriate lane arrow (#201)
 - Bugfix: Heavy vehicles are unable to u-turn at dead ends (#194)
