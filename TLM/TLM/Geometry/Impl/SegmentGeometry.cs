@@ -26,7 +26,7 @@ namespace TrafficManager.Geometry.Impl {
 	/// However, other methods may manually update geometry data by calling the "Recalculate" method. This is especially necessary for segments that are not visited by the
 	/// path-finding algorithm (apparently if a segment is not used by any vehicle)
 	/// </summary>
-	public class SegmentGeometry : GenericObservable<SegmentGeometry>, IEquatable<SegmentGeometry> {
+	public class SegmentGeometry : IEquatable<SegmentGeometry> {
 		private static SegmentGeometry[] segmentGeometries;
 
 		public static void PrintDebugInfo() {
@@ -195,7 +195,8 @@ namespace TrafficManager.Geometry.Impl {
 					}
 
 					Cleanup();
-					NotifyObservers();
+					Constants.ManagerFactory.GeometryManager.OnUpdateSegment(this);
+					//NotifyObservers();
 				}
 				return;
 			}
@@ -261,7 +262,8 @@ namespace TrafficManager.Geometry.Impl {
 #if DEBUGGEO
 				//Log._Debug($"Recalculation of segment {SegmentId} completed. Valid? {IsValid()}");
 #endif
-				NotifyObservers();
+				Constants.ManagerFactory.GeometryManager.OnUpdateSegment(this);
+				//NotifyObservers();
 			} finally {
 #if DEBUGGEO
 				if (output)

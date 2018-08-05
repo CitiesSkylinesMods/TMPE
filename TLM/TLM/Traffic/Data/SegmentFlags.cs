@@ -14,11 +14,6 @@ namespace TrafficManager.Traffic.Data {
 		public SegmentEndFlags startNodeFlags;
 		public SegmentEndFlags endNodeFlags;
 
-		public void UpdateDefaults(SegmentGeometry segmentGeometry) {
-			startNodeFlags.UpdateDefaults(segmentGeometry.StartNodeGeometry);
-			endNodeFlags.UpdateDefaults(segmentGeometry.EndNodeGeometry);
-		}
-
 		public bool IsUturnAllowed(bool startNode) {
 			return startNode ? startNodeFlags.IsUturnAllowed() : endNodeFlags.IsUturnAllowed();
 		}

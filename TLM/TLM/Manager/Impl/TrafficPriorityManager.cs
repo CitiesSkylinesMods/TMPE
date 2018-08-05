@@ -15,64 +15,8 @@ using static TrafficManager.Traffic.Data.PrioritySegment;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
-	public class TrafficPriorityManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>>, ITrafficPriorityManager {
+	public class TrafficPriorityManager : AbstractGeometryObservingManager, ICustomDataManager<List<int[]>>, ICustomDataManager<List<Configuration.PrioritySegment>>, ITrafficPriorityManager {
 		public static readonly TrafficPriorityManager Instance = new TrafficPriorityManager();
-
-		protected class TrafficPriorityNodeWatcher : AbstractNodeGeometryObservingManager {
-			private TrafficPriorityManager priorityManager;
-
-			private PrioritySegment[] invalidPrioritySegments;
-
-			public TrafficPriorityNodeWatcher(TrafficPriorityManager priorityManager) {
-				this.priorityManager = priorityManager;
-				invalidPrioritySegments = new PrioritySegment[NetManager.MAX_SEGMENT_COUNT];
-			}
-
-			public void WatchNode(ushort nodeId) {
-				SubscribeToNodeGeometry(nodeId);
-			}
-
-			public void AddInvalidPrioritySegment(ushort segmentId, ref PrioritySegment prioritySegment) {
-				invalidPrioritySegments[segmentId] = prioritySegment;
-			}
-
-			public void Reset() {
-				for (int i = 0; i < invalidPrioritySegments.Length; ++i) {
-					invalidPrioritySegments[i].Reset();
-				}
-				UnsubscribeFromAllNodeGeometries();
-			}
-
-			protected override void HandleInvalidNode(NodeGeometry geometry) {
-				
-			}
-
-			protected override void HandleValidNode(NodeGeometry geometry) {
-				if (geometry.CurrentSegmentReplacement.oldSegmentEndId != null && geometry.CurrentSegmentReplacement.newSegmentEndId != null) {
-					ISegmentEndId oldSegmentEndId = geometry.CurrentSegmentReplacement.oldSegmentEndId;
-					ISegmentEndId newSegmentEndId = geometry.CurrentSegmentReplacement.newSegmentEndId;
-
-					PriorityType sign = PriorityType.None;
-					if (oldSegmentEndId.StartNode) {
-						sign = invalidPrioritySegments[oldSegmentEndId.SegmentId].startType;
-						invalidPrioritySegments[oldSegmentEndId.SegmentId].startType = PriorityType.None;
-					} else {
-						sign = invalidPrioritySegments[oldSegmentEndId.SegmentId].endType;
-						invalidPrioritySegments[oldSegmentEndId.SegmentId].endType = PriorityType.None;
-					}
-
-					if (sign == PriorityType.None) {
-						return;
-					}
-
-					Log._Debug($"TrafficPriorityManager.NodeWatcher.HandleValidNode({geometry.NodeId}): Segment replacement detected: {oldSegmentEndId.SegmentId} -> {newSegmentEndId.SegmentId}\n" +
-						$"Moving priority sign {sign} to new segment."
-					);
-
-					priorityManager.SetPrioritySign(newSegmentEndId.SegmentId, newSegmentEndId.StartNode, sign);
-				}
-			}
-		}
 
 		public enum UnableReason {
 			None,
@@ -91,11 +35,11 @@ namespace TrafficManager.Manager.Impl {
 		/// </summary>
 		private PrioritySegment[] PrioritySegments = null;
 
-		private TrafficPriorityNodeWatcher nodeWatcher = null;
+		private PrioritySegment[] invalidPrioritySegments;
 
 		private TrafficPriorityManager() {
 			PrioritySegments = new PrioritySegment[NetManager.MAX_SEGMENT_COUNT];
-			nodeWatcher = new TrafficPriorityNodeWatcher(this);
+			invalidPrioritySegments = new PrioritySegment[NetManager.MAX_SEGMENT_COUNT];
 		}
 
 		protected override void InternalPrintDebugInfo() {
@@ -107,6 +51,10 @@ namespace TrafficManager.Manager.Impl {
 				}
 				Log._Debug($"Segment {i}: {PrioritySegments[i]}");
 			}
+		}
+
+		protected void AddInvalidPrioritySegment(ushort segmentId, ref PrioritySegment prioritySegment) {
+			invalidPrioritySegments[segmentId] = prioritySegment;
 		}
 
 		public bool MayNodeHavePrioritySigns(ushort nodeId) {
@@ -287,9 +235,6 @@ namespace TrafficManager.Manager.Impl {
 					TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref node);
 					return true;
 				});
-
-				SubscribeToSegmentGeometry(segmentId);
-				nodeWatcher.WatchNode(nodeId);
 			}
 
 			if (startNode) {
@@ -298,7 +243,6 @@ namespace TrafficManager.Manager.Impl {
 				PrioritySegments[segmentId].endType = type;
 			}
 
-			UnsubscribeFromSegmentGeometryIfRequired(segmentId);
 			SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
 #if DEBUG
 			if (debug) {
@@ -349,7 +293,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
-			UnsubscribeFromSegmentGeometryIfRequired(segmentId);
 		}
 
 		public PriorityType GetPrioritySign(ushort segmentId, bool startNode) {
@@ -1108,7 +1051,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
 			if (!PrioritySegments[geometry.SegmentId].IsDefault()) {
-				nodeWatcher.AddInvalidPrioritySegment(geometry.SegmentId, ref PrioritySegments[geometry.SegmentId]);
+				AddInvalidPrioritySegment(geometry.SegmentId, ref PrioritySegments[geometry.SegmentId]);
 			}
 			RemovePrioritySignsFromSegment(geometry.SegmentId);
 		}
@@ -1127,6 +1070,30 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		protected override void HandleSegmentEndReplacement(NodeGeometry.SegmentEndReplacement replacement, SegmentEndGeometry newEndGeo) {
+			ISegmentEndId oldSegmentEndId = replacement.oldSegmentEndId;
+			ISegmentEndId newSegmentEndId = replacement.newSegmentEndId;
+
+			PriorityType sign = PriorityType.None;
+			if (oldSegmentEndId.StartNode) {
+				sign = invalidPrioritySegments[oldSegmentEndId.SegmentId].startType;
+				invalidPrioritySegments[oldSegmentEndId.SegmentId].startType = PriorityType.None;
+			} else {
+				sign = invalidPrioritySegments[oldSegmentEndId.SegmentId].endType;
+				invalidPrioritySegments[oldSegmentEndId.SegmentId].endType = PriorityType.None;
+			}
+
+			if (sign == PriorityType.None) {
+				return;
+			}
+
+			Log._Debug($"TrafficPriorityManager.HandleSegmentEndReplacement({replacement}): Segment replacement detected: {oldSegmentEndId.SegmentId} -> {newSegmentEndId.SegmentId}\n" +
+				$"Moving priority sign {sign} to new segment."
+			);
+
+			SetPrioritySign(newSegmentEndId.SegmentId, newSegmentEndId.StartNode, sign);
+		}
+
 		protected void UpdateNode(ushort nodeId) {
 			UnableReason reason;
 			if (! MayNodeHavePrioritySigns(nodeId, out reason)) {
@@ -1140,12 +1107,8 @@ namespace TrafficManager.Manager.Impl {
 			for (int i = 0; i < PrioritySegments.Length; ++i) {
 				RemovePrioritySignsFromSegment((ushort)i);
 			}
-			nodeWatcher.Reset();
-		}
-
-		protected void UnsubscribeFromSegmentGeometryIfRequired(ushort segmentId) {
-			if (! HasSegmentPrioritySign(segmentId)) {
-				UnsubscribeFromSegmentGeometry(segmentId);
+			for (int i = 0; i < invalidPrioritySegments.Length; ++i) {
+				invalidPrioritySegments[i].Reset();
 			}
 		}
 

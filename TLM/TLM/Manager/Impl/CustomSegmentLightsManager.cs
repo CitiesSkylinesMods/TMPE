@@ -15,7 +15,7 @@ namespace TrafficManager.Manager.Impl {
 	/// <summary>
 	/// Manages the states of all custom traffic lights on the map
 	/// </summary>
-	public class CustomSegmentLightsManager : AbstractSegmentGeometryObservingManager, ICustomSegmentLightsManager {
+	public class CustomSegmentLightsManager : AbstractGeometryObservingManager, ICustomSegmentLightsManager {
 		public static CustomSegmentLightsManager Instance { get; private set; } = null;
 
 		static CustomSegmentLightsManager() {
@@ -111,7 +111,6 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			SubscribeToSegmentGeometry(segmentId);
 			if (startNode) {
 				customSegment.StartNodeLights = new CustomSegmentLights(this, segmentId, startNode, false);
 				customSegment.StartNodeLights.SetLights(lightState);
@@ -183,7 +182,6 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="segmentId"></param>
 		public void RemoveSegmentLights(ushort segmentId) {
 			CustomSegments[segmentId] = null;
-			UnsubscribeFromSegmentGeometry(segmentId);
 		}
 
 		/// <summary>
@@ -209,7 +207,6 @@ namespace TrafficManager.Manager.Impl {
 
 			if (customSegment.StartNodeLights == null && customSegment.EndNodeLights == null) {
 				CustomSegments[segmentId] = null;
-				UnsubscribeFromSegmentGeometry(segmentId);
 			}
 		}
 
@@ -307,10 +304,6 @@ namespace TrafficManager.Manager.Impl {
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
 			RemoveSegmentLights(geometry.SegmentId);
-		}
-
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
-			
 		}
 
 		public override void OnLevelUnloading() {

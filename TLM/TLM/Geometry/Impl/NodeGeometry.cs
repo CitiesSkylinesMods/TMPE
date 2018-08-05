@@ -11,7 +11,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Geometry.Impl {
-	public class NodeGeometry : GenericObservable<NodeGeometry>, IEquatable<NodeGeometry> {
+	public class NodeGeometry : IEquatable<NodeGeometry> {
 		public struct SegmentEndReplacement {
 			public ISegmentEndId oldSegmentEndId;
 			public ISegmentEndId newSegmentEndId;
@@ -21,6 +21,10 @@ namespace TrafficManager.Geometry.Impl {
 					"\t" + $"oldSegmentEndId = {oldSegmentEndId}\n" +
 					"\t" + $"newSegmentEndId = {newSegmentEndId}\n" +
 					"SegmentEndReplacement]";
+			}
+
+			public bool IsDefined() {
+				return oldSegmentEndId != null && newSegmentEndId != null;
 			}
 		}
 
@@ -255,7 +259,7 @@ namespace TrafficManager.Geometry.Impl {
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
 #endif
-				NotifyObservers();
+				NotifyGeomentryManager();
 			}
 		}
 
@@ -265,7 +269,7 @@ namespace TrafficManager.Geometry.Impl {
 			}
 			lastRemovedSegmentEndId = null;
 			CurrentSegmentReplacement = default(SegmentEndReplacement);
-			NotifyObservers();
+			NotifyGeomentryManager();
 		}
 
 		public bool Equals(NodeGeometry otherNodeGeo) {
@@ -292,19 +296,10 @@ namespace TrafficManager.Geometry.Impl {
 			return result;
 		}
 
-		public override void NotifyObservers() {
-			//Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
-
-			/*List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
-			foreach (IObserver<NodeGeometry> observer in myObservers) {
-				try {
-					observer.OnUpdate(this);
-				} catch (Exception e) {
-					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of node {NodeId}: {e}");
-				}
-			}*/
-
-			base.NotifyObservers();
+		private void NotifyGeomentryManager() {
+			if (CurrentSegmentReplacement.IsDefined()) {
+				Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(CurrentSegmentReplacement);
+			}
 
 			CurrentSegmentReplacement.oldSegmentEndId = null;
 			CurrentSegmentReplacement.newSegmentEndId = null;

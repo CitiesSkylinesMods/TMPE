@@ -111,8 +111,7 @@ namespace TrafficManager.UI {
 			this.Invalidate();
 		}
 
-		public void OnUpdate(IObservable<GlobalConfig> observable) {
-			GlobalConfig config = (GlobalConfig)observable;
+		public void OnUpdate(GlobalConfig config) {
 			UpdatePosition(new Vector2(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY));
 		}
 

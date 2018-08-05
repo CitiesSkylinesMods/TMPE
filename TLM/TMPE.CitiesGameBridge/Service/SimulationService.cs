@@ -58,8 +58,8 @@ namespace CitiesGameBridge.Service {
 			}
 		}
 
-		public void AddAction(Action action) {
-			Singleton<SimulationManager>.instance.AddAction(action);
+		public AsyncAction AddAction(Action action) {
+			return Singleton<SimulationManager>.instance.AddAction(action);
 		}
 
 		public void PauseSimulation(bool forced) {

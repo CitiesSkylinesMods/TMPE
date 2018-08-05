@@ -7,7 +7,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.Manager.Impl {
-	public class ParkingRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
+	public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Parking;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
@@ -46,20 +46,14 @@ namespace TrafficManager.Manager.Impl {
 			}
 			int dirIndex = GetDirIndex(finalDir);
 			parkingAllowed[segmentId][dirIndex] = flag;
-			if (flag && parkingAllowed[segmentId][1 - dirIndex]) {
-				UnsubscribeFromSegmentGeometry(segmentId);
-			} else {
-				if (! flag) {
-					Services.SimulationService.AddAction(() => {
-						// force relocation of illegaly parked vehicles
-						Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
-							segment.UpdateSegment(segmentId);
-							return true;
-						});
+			if (!flag || !parkingAllowed[segmentId][1 - dirIndex]) {
+				Services.SimulationService.AddAction(() => {
+					// force relocation of illegaly parked vehicles
+					Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+						segment.UpdateSegment(segmentId);
+						return true;
 					});
-				}
-
-				SubscribeToSegmentGeometry(segmentId);
+				});
 			}
 			return true;
 		}

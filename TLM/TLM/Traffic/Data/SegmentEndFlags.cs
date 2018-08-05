@@ -22,12 +22,33 @@ namespace TrafficManager.Traffic.Data {
 		bool defaultEnterWhenBlockedAllowed;
 		bool defaultPedestrianCrossingAllowed;
 
-		public void UpdateDefaults(SegmentEndGeometry endGeo) {
+		public void UpdateDefaults(ushort segmentId, bool startNode, ref NetNode node) {
 			IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;
-			defaultUturnAllowed = junctionRestrictionsManager.GetDefaultUturnAllowed(endGeo.SegmentId, endGeo.StartNode);
-			defaultStraightLaneChangingAllowed = junctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(endGeo.SegmentId, endGeo.StartNode);
-			defaultEnterWhenBlockedAllowed = junctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed(endGeo.SegmentId, endGeo.StartNode);
-			defaultPedestrianCrossingAllowed = junctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed(endGeo.SegmentId, endGeo.StartNode);
+
+			if (! junctionRestrictionsManager.IsUturnAllowedConfigurable(segmentId, startNode, ref node)) {
+				uturnAllowed = TernaryBool.Undefined;
+			}
+
+			if (! junctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node)) {
+				straightLaneChangingAllowed = TernaryBool.Undefined;
+			}
+
+			if (! junctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable(segmentId, startNode, ref node)) {
+				enterWhenBlockedAllowed = TernaryBool.Undefined;
+			}
+
+			if (! junctionRestrictionsManager.IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref node)) {
+				pedestrianCrossingAllowed = TernaryBool.Undefined;
+			}
+
+			defaultUturnAllowed = junctionRestrictionsManager.GetDefaultUturnAllowed(segmentId, startNode, ref node);
+			defaultStraightLaneChangingAllowed = junctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node);
+			defaultEnterWhenBlockedAllowed = junctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed(segmentId, startNode, ref node);
+			defaultPedestrianCrossingAllowed = junctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed(segmentId, startNode, ref node);
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.Switches[11])
+				Log._Debug($"SegmentEndFlags.UpdateDefaults({segmentId}, {startNode}): Set defaults: defaultUturnAllowed={defaultUturnAllowed}, defaultStraightLaneChangingAllowed={defaultStraightLaneChangingAllowed}, defaultEnterWhenBlockedAllowed={defaultEnterWhenBlockedAllowed}, defaultPedestrianCrossingAllowed={defaultPedestrianCrossingAllowed}");
+#endif
 		}
 
 		public bool IsUturnAllowed() {

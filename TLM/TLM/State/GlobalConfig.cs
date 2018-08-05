@@ -44,7 +44,7 @@ namespace TrafficManager.State {
 				}
 				instance = value;
 				if (instance != null) {
-					instance.NotifyObservers();
+					instance.NotifyObservers(instance);
 				}
 			}
 		}

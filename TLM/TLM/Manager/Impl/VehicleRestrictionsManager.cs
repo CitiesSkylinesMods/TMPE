@@ -10,7 +10,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
-	public class VehicleRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>>, IVehicleRestrictionsManager {
+	public class VehicleRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneVehicleTypes>>, IVehicleRestrictionsManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail;
 		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain | ExtVehicleType.PassengerCar | ExtVehicleType.Bus | ExtVehicleType.Taxi | ExtVehicleType.CargoTruck | ExtVehicleType.Service | ExtVehicleType.Emergency;
@@ -237,7 +237,6 @@ namespace TrafficManager.Manager.Impl {
 
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex], VehicleRestrictionsMode.Configured); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
-			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
 			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
@@ -270,7 +269,6 @@ namespace TrafficManager.Manager.Impl {
 			allowedTypes |= vehicleType;
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex], VehicleRestrictionsMode.Configured); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
-			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
 			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
@@ -301,7 +299,6 @@ namespace TrafficManager.Manager.Impl {
 			allowedTypes &= ~vehicleType;
 			allowedTypes &= GetBaseMask(segmentInfo.m_lanes[laneIndex], VehicleRestrictionsMode.Configured); // ensure default base mask
 			Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
-			SubscribeToSegmentGeometry(segmentId);
 			NotifyStartEndNode(segmentId);
 
 			if (OptionsManager.Instance.MayPublishSegmentChanges()) {
@@ -501,13 +498,16 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void NotifyStartEndNode(ushort segmentId) {
+			// TODO this is hacky. Instead of notifying geometry observers we should add a seperate notification mechanic
 			// notify observers of start node and end node (e.g. for separate traffic lights)
 			ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
 			ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
-			if (startNodeId != 0)
-				NodeGeometry.Get(startNodeId).NotifyObservers();
-			if (endNodeId != 0)
-				NodeGeometry.Get(endNodeId).NotifyObservers();
+			if (startNodeId != 0) {
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(startNodeId));
+			}
+			if (endNodeId != 0) {
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(endNodeId));
+			}
 		}
 
 		protected override void HandleInvalidSegment(SegmentGeometry geometry) {

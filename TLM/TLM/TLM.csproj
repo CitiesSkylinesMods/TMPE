@@ -35,7 +35,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>PF2;DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -119,9 +119,9 @@
     <Compile Include="Geometry\ISegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
-    <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
-    <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
     <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IGeometryManager.cs" />
     <Compile Include="Manager\IExtBuildingManager.cs" />
     <Compile Include="Manager\IExtCitizenManager.cs" />
     <Compile Include="Manager\IExtCitizenInstanceManager.cs" />
@@ -130,6 +130,7 @@
     <Compile Include="Manager\ILaneArrowManager.cs" />
     <Compile Include="Manager\ILaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
+    <Compile Include="Manager\Impl\GeometryManager.cs" />
     <Compile Include="Manager\Impl\ManagerFactory.cs" />
     <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\RoutingManager.cs" />

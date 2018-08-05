@@ -15,7 +15,7 @@ using CSUtil.Commons.Benchmark;
 using TrafficManager.TrafficLight.Data;
 
 namespace TrafficManager.Manager.Impl {
-	public class TrafficLightSimulationManager : AbstractNodeGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>>, ITrafficLightSimulationManager {
+	public class TrafficLightSimulationManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>>, ITrafficLightSimulationManager {
 		public static readonly TrafficLightSimulationManager Instance = new TrafficLightSimulationManager();
 		public const int SIM_MOD = 64;
 	
@@ -80,7 +80,6 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SubscribeToNodeGeometry(nodeId);
 			return true;
 		}
 
@@ -91,7 +90,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="destroyGroup"></param>
 		public void RemoveNodeFromSimulation(ushort nodeId, bool destroyGroup, bool removeTrafficLight) {
 #if DEBUG
-			Log.Warning($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}, {destroyGroup}, {removeTrafficLight}) called.");
+			Log._Debug($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}, {destroyGroup}, {removeTrafficLight}) called.");
 #endif
 
 			if (! TrafficLightSimulations[nodeId].HasSimulation()) {
@@ -159,11 +158,10 @@ namespace TrafficManager.Manager.Impl {
 
 		private void RemoveNodeFromSimulation(ushort nodeId) {
 #if DEBUG
-			Log.Warning($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}) called.");
+			Log._Debug($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}) called.");
 #endif
 
 			TrafficLightSimulations[nodeId].Destroy();
-			UnsubscribeFromNodeGeometry(nodeId);
 		}
 
 		public override void OnLevelUnloading() {
@@ -178,16 +176,14 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected override void HandleValidNode(NodeGeometry geometry) {
-			if (! Flags.mayHaveTrafficLight(geometry.NodeId)) {
-				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node must not have a traffic light: Removing traffic light simulation.");
-				RemoveNodeFromSimulation(geometry.NodeId, false, true);
+			if (!TrafficLightSimulations[geometry.NodeId].HasSimulation()) {
+				//Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node is not controlled by a custom traffic light simulation.");
 				return;
 			}
 
-			if (!TrafficLightSimulations[geometry.NodeId].HasSimulation()) {
-				Log.Warning($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node is not controlled by a custom traffic light simulation.");
-				RemoveNodeFromSimulation(geometry.NodeId, false, false);
-				UnsubscribeFromNodeGeometry(geometry.NodeId);
+			if (! Flags.mayHaveTrafficLight(geometry.NodeId)) {
+				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node must not have a traffic light: Removing traffic light simulation.");
+				RemoveNodeFromSimulation(geometry.NodeId, false, true);
 				return;
 			}
 

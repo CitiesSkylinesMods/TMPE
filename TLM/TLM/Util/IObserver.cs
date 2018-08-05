@@ -4,6 +4,6 @@ using System.Text;
 
 namespace TrafficManager.Util {
 	public interface IObserver<T> {
-		void OnUpdate(IObservable<T> observable);
+		void OnUpdate(T subject);
 	}
 }

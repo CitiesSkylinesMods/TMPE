@@ -630,7 +630,7 @@ namespace TrafficManager.State {
 		private static void onTinyMenuChanged(bool newValue) {
 			Log._Debug($"Menu tiny changed to {newValue}");
 			GlobalConfig.Instance.Main.TinyMainMenu = newValue;
-			GlobalConfig.Instance.NotifyObservers();
+			GlobalConfig.Instance.NotifyObservers(GlobalConfig.Instance);
 			GlobalConfig.WriteConfig();
 		}
 

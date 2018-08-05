@@ -56,6 +56,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public IGeometryManager GeometryManager {
+			get {
+				return Impl.GeometryManager.Instance;
+			}
+		}
+
 		public IOptionsManager OptionsManager {
 			get {
 				return Impl.OptionsManager.Instance;
