@@ -67,22 +67,22 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="speed">vehicle target velocity</param>
 		/// <param name="vehicleId">vehicle id</param>
-		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="vehicleState">vehicle state</param>
 		/// <param name="vehicleInfo">vehicle info</param>
 		/// <returns>modified target velocity</returns>
-		float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo);
+		float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState vehicleState, VehicleInfo vehicleInfo);
 
 		/// <summary>
 		/// Calculates the target velocity for the given vehicle.
 		/// </summary>
 		/// <param name="vehicleId">vehicle id</param>
-		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="state">vehicle state</param>
 		/// <param name="vehicleInfo">vehicle info</param>
 		/// <param name="position">current path position</param>
 		/// <param name="segment">segment data</param>
 		/// <param name="pos">current world position</param>
 		/// <param name="maxSpeed">vehicle target velocity</param>
 		/// <returns>modified target velocity</returns>
-		float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed);
+		float CalcMaxSpeed(ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed);
 	}
 }

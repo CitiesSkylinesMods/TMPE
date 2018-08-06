@@ -241,7 +241,7 @@ namespace TrafficManager.Manager.Impl {
 
 			ITrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 			ICustomSegmentLightsManager segLightsMan = CustomSegmentLightsManager.Instance;
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0 || isLevelCrossing) {
 				if (hasTrafficLight && checkTrafficLights) {
 #if DEBUG
 					if (debug) {
@@ -268,7 +268,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 							targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - targetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 
-					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver) { // TODO no reckless driving at railroad crossings
+					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver && !isLevelCrossing) {
 						vehicleLightState = RoadBaseAI.TrafficLightState.Green;
 					}
 
@@ -598,25 +598,25 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="isRecklessDriver">reckless driver?</param>
 		/// <returns></returns>
 		protected bool MustCheckSpace(ushort segmentId, bool startNode, ref NetNode node, bool isRecklessDriver) {
+			bool checkSpace;
 			if (isRecklessDriver) {
-				return false;
+				checkSpace = (node.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None;
 			} else {
-				bool checkSpace;
 				if (Options.junctionRestrictionsEnabled) {
 					checkSpace = !JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(segmentId, startNode);
 				} else {
 					checkSpace = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction && node.CountSegments() != 2;
 				}
-
-				return checkSpace;
 			}
+
+			return checkSpace;
 		}
 
 		public bool MayDespawn(ref Vehicle vehicleData) {
 			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
-		public float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed) {
+		public float CalcMaxSpeed(ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed) {
 			if (Singleton<NetManager>.instance.m_treatWetAsSnow) {
 				DistrictManager districtManager = Singleton<DistrictManager>.instance;
 				byte district = districtManager.GetDistrict(pos);
@@ -656,7 +656,7 @@ namespace TrafficManager.Manager.Impl {
 				maxSpeed *= 1f + (float)segment.m_condition * 0.0005882353f; // vanilla: ±0% .. +15 %
 			}
 
-			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref vehicleData, vehicleInfo);
+			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref state, vehicleInfo);
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 
 			return maxSpeed;
@@ -673,18 +673,17 @@ namespace TrafficManager.Manager.Impl {
 			return range + step;
 		}
 
-		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo) {
-			bool isRecklessDriver = IsRecklessDriver(vehicleId, ref vehicleData);
+		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo) {
 			if (Options.realisticSpeeds) {
 				float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
-				} else if (isRecklessDriver) {
+				} else if (state.recklessDriver) {
 					speed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
 				} else {
 					speed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
 				}
-			} else if (isRecklessDriver) {
+			} else if (state.recklessDriver) {
 				speed *= 1.5f;
 			}
 			return speed;
@@ -1177,7 +1176,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 					NetInfo.Lane next1LaneInfo = next1SegInfo.m_lanes[currentFwdTransitions[i].laneIndex];
 					float next1MaxSpeed = SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
-					float targetSpeed = Math.Min(vehicleMaxSpeed, ApplyRealisticSpeeds(next1MaxSpeed, vehicleId, ref vehicleData, vehicleInfo));
+					float targetSpeed = Math.Min(vehicleMaxSpeed, ApplyRealisticSpeeds(next1MaxSpeed, vehicleId, ref vehicleState, vehicleInfo));
 
 					ushort meanSpeed = TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(currentFwdTransitions[i].segmentId, currentFwdTransitions[i].laneIndex, currentFwdTransitions[i].laneId, next1LaneInfo);
 

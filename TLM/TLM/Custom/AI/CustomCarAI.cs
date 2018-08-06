@@ -255,7 +255,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START (stock code replaced)
-			maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(vehicleId, ref vehicleData, this.m_info, prevPosition, ref netManager.m_segments.m_buffer[prevPosition.m_segment], pos, maxSpeed);
+			maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], this.m_info, prevPosition, ref netManager.m_segments.m_buffer[prevPosition.m_segment], pos, maxSpeed);
 			// NON-STOCK CODE END
 		}
 
@@ -278,7 +278,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			maxSpeed = VehicleBehaviorManager.Instance.CalcMaxSpeed(vehicleId, ref vehicleData, this.m_info, position, ref netManager.m_segments.m_buffer[position.m_segment], pos, maxSpeed);
+			maxSpeed = VehicleBehaviorManager.Instance.CalcMaxSpeed(vehicleId, ref VehicleStateManager.Instance.VehicleStates[vehicleId], this.m_info, position, ref netManager.m_segments.m_buffer[position.m_segment], pos, maxSpeed);
 			// NON-STOCK CODE END
 		}
 
