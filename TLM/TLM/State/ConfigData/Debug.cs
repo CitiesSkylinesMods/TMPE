@@ -10,8 +10,8 @@ namespace TrafficManager.State.ConfigData {
 #if DEBUG
 	public class Debug {
 		public bool[] Switches = {
-				false, // 0: -
-				false, // 1: -
+				false, // 0: path-finding debug log
+				false, // 1: routing basic debug log
 				false, // 2: parking ai debug log (basic)
 				false, // 3: do not actually repair stuck vehicles/cims, just report
 				false, // 4: parking ai debug log (extended)
@@ -21,7 +21,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 8: debug routing
 				false, // 9: debug vehicle to segment end linking
 				false, // 10: prevent routing recalculation on global configuration reload
-				false, // 11: -
+				false, // 11: debug junction restrictions
 				false, // 12: pedestrian path-find debug log
 				false, // 13: priority rules debug
 				false, // 14: disable GUI overlay of citizens having a valid path
@@ -32,7 +32,8 @@ namespace TrafficManager.State.ConfigData {
 				false, // 19: enable obligation to drive on the right hand side of the road
 				false, // 20: debug realistic public transport
 				false, // 21: debug "CalculateSegmentPosition"
-				false // 22: parking ai debug log (vehicles)
+				false, // 22: parking ai debug log (vehicles)
+				false // 23: debug lane connections
 			};
 
 		public int NodeId = 0;

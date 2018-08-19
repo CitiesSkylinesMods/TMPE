@@ -59,19 +59,21 @@ namespace TrafficManager.Custom.AI {
 				target = InstanceID.Empty;
 				return Locale.Get("VEHICLE_STATUS_CONFUSED");
 			}
+			string ret;
 			bool leavingCity = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;
 			if (leavingCity) {
 				target = InstanceID.Empty;
-				return Locale.Get("VEHICLE_STATUS_LEAVING");
-			}
-			target = InstanceID.Empty;
-			if (targetIsNode) {
-				target.NetNode = targetBuildingId;
+				ret = Locale.Get("VEHICLE_STATUS_LEAVING");
 			} else {
-				target.Building = targetBuildingId;
-			}
+				target = InstanceID.Empty;
+				if (targetIsNode) {
+					target.NetNode = targetBuildingId;
+				} else {
+					target.Building = targetBuildingId;
+				}
 
-			string ret = Locale.Get("VEHICLE_STATUS_GOINGTO");
+				ret = Locale.Get("VEHICLE_STATUS_GOINGTO");
+			}
 
 			// NON-STOCK CODE START
 			if (Options.parkingAI) {
@@ -118,13 +120,7 @@ namespace TrafficManager.Custom.AI {
 			uint driverCitizenId = citizenManager.m_instances.m_buffer[(int)driverCitizenInstanceId].m_citizen;
 			ushort targetBuildingId = citizenManager.m_instances.m_buffer[(int)driverCitizenInstanceId].m_targetBuilding; // NON-STOCK CODE
 			
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "ExtParkVehicle")) {
-#endif
-				return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(vehicleID, ref vehicleData, this.m_info, driverCitizenId, driverCitizenInstanceId, ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId], targetBuildingId, pathPos, nextPath, nextPositionIndex, out segmentOffset);
-#if BENCHMARK
-			}
-#endif
+			return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(vehicleID, ref vehicleData, this.m_info, driverCitizenId, ref citizenManager.m_citizens.m_buffer[driverCitizenId], driverCitizenInstanceId, ref citizenManager.m_instances.m_buffer[driverCitizenInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId], targetBuildingId, pathPos, nextPath, nextPositionIndex, out segmentOffset);
 		}
 
 		[RedirectReverse]

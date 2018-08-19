@@ -146,8 +146,7 @@ namespace TrafficManager.UI.MainMenu {
 			base.OnPositionChanged();
 		}
 
-		public void OnUpdate(IObservable<GlobalConfig> observable) {
-			GlobalConfig config = (GlobalConfig)observable;
+		public void OnUpdate(GlobalConfig config) {
 			UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
 			if (started) {
 				DetermineProfile(config);

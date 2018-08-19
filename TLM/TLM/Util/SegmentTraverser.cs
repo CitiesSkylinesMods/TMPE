@@ -187,8 +187,8 @@ namespace TrafficManager.Util {
 				if (nextSegGeometry != null) {
 					Log._Debug($"SegmentTraverser: Traversing segment {nextSegGeometry.SegmentId}");
 
-					if (visitor(new SegmentVisitData(prevSegGeometry, nextSegGeometry, viaInitialStartNode, prevNodeId == nextSegGeometry.StartNodeId(), false))) {
-						bool nextNodeIsStartNode = nextSegGeometry.StartNodeId() != prevNodeId;
+					if (visitor(new SegmentVisitData(prevSegGeometry, nextSegGeometry, viaInitialStartNode, prevNodeId == nextSegGeometry.StartNodeId, false))) {
+						bool nextNodeIsStartNode = nextSegGeometry.StartNodeId != prevNodeId;
 						TraverseRec(nextSegGeometry, nextNodeIsStartNode, viaInitialStartNode, direction, side, stopCrit, visitor, visitedSegmentIds);
 					}
 				}

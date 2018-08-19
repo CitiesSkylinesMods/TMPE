@@ -34,9 +34,9 @@ namespace TrafficManager.TrafficLight.Impl {
 				}
 
 				if (StartNode)
-					return segGeo.StartNodeId();
+					return segGeo.StartNodeId;
 				else
-					return segGeo.EndNodeId();
+					return segGeo.EndNodeId;
 			}
 		}
 
@@ -155,7 +155,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		[Obsolete]
 		protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId(), calculateAutoPedLight) {
+			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId, calculateAutoPedLight) {
 
 		}
 
@@ -377,7 +377,7 @@ namespace TrafficManager.TrafficLight.Impl {
 				Log._Debug($"CustomSegmentLights.CalculateAutoPedestrianLightState: Calculating pedestrian light state of seg. {SegmentId} @ node {NodeId}");
 #endif
 
-			SegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(SegmentId)?.GetEnd(StartNode);
+			ISegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(SegmentId)?.GetEnd(StartNode);
 
 			if (segmentEndGeometry == null) {
 				Log._Debug($"Could not get SegmentEndGeometry for segment {SegmentId} @ {NodeId}.");
@@ -385,7 +385,7 @@ namespace TrafficManager.TrafficLight.Impl {
 				return;
 			}
 
-			ushort nodeId = segmentEndGeometry.NodeId();
+			ushort nodeId = segmentEndGeometry.NodeId;
 			if (nodeId != NodeId) {
 				Log.Warning($"CustomSegmentLights.CalculateAutoPedestrianLightState: Node id mismatch! segment end node is {nodeId} but we are node {NodeId}. segmentEndGeometry={segmentEndGeometry} this={this}");
 				return;

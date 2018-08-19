@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Manager;
 
 namespace TrafficManager.Traffic.Data {
 	/// <summary>
@@ -15,66 +16,41 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool pedestrianCrossingAllowed;
 
 		public bool defaultUturnAllowed;
-		public bool defaultEnterWhenBlockedAllowed;
 		public bool defaultStraightLaneChangingAllowed;
+		public bool defaultEnterWhenBlockedAllowed;
 		public bool defaultPedestrianCrossingAllowed;
-
-		public void SetDefaults(bool defaultUturnAllowed, bool defaultStraightLaneChangingAllowed, bool defaultEnterWhenBlockedAllowed, bool defaultPedestrianCrossingAllowed) {
-			this.defaultUturnAllowed = defaultUturnAllowed;
-			this.defaultStraightLaneChangingAllowed = defaultStraightLaneChangingAllowed;
-			this.defaultEnterWhenBlockedAllowed = defaultEnterWhenBlockedAllowed;
-			this.defaultPedestrianCrossingAllowed = defaultPedestrianCrossingAllowed;
-		}
+		
 
 		public bool IsUturnAllowed() {
 			if (uturnAllowed == TernaryBool.Undefined) {
-				return GetDefaultUturnAllowed();
+				return defaultUturnAllowed;
 			}
 
 			return TernaryBoolUtil.ToBool(uturnAllowed);
 		}
 
-		public bool GetDefaultUturnAllowed() {
-			return defaultUturnAllowed;
-		}
-
 		public bool IsLaneChangingAllowedWhenGoingStraight() {
 			if (straightLaneChangingAllowed == TernaryBool.Undefined) {
-				return GetDefaultLaneChangingAllowedWhenGoingStraight();
+				return defaultStraightLaneChangingAllowed;
 			}
 
 			return TernaryBoolUtil.ToBool(straightLaneChangingAllowed);
 		}
 
-		public bool GetDefaultLaneChangingAllowedWhenGoingStraight() {
-			return defaultStraightLaneChangingAllowed;
-		}
-
 		public bool IsEnteringBlockedJunctionAllowed() {
-			//Log._Debug($"SegmentEndFlags.IsEnteringBlockedJunctionAllowed: this={this} enterWhenBlockedAllowed={enterWhenBlockedAllowed}");
 			if (enterWhenBlockedAllowed == TernaryBool.Undefined) {
-				//Log._Debug($"SegmentEndFlags.IsEnteringBlockedJunctionAllowed: returning default: {GetDefaultEnteringBlockedJunctionAllowed()}");
-				return GetDefaultEnteringBlockedJunctionAllowed();
+				return defaultEnterWhenBlockedAllowed;
 			}
 
-			//Log._Debug($"SegmentEndFlags.IsEnteringBlockedJunctionAllowed: returning custom: {TernaryBoolUtil.ToBool(enterWhenBlockedAllowed)}");
 			return TernaryBoolUtil.ToBool(enterWhenBlockedAllowed);
 		}
-
-		public bool GetDefaultEnteringBlockedJunctionAllowed() {
-			return defaultEnterWhenBlockedAllowed;
-		}
-
+		
 		public bool IsPedestrianCrossingAllowed() {
 			if (pedestrianCrossingAllowed == TernaryBool.Undefined) {
-				return GetDefaultPedestrianCrossingAllowed();
+				return defaultPedestrianCrossingAllowed;
 			}
 
 			return TernaryBoolUtil.ToBool(pedestrianCrossingAllowed);
-		}
-
-		public bool GetDefaultPedestrianCrossingAllowed() {
-			return defaultPedestrianCrossingAllowed;
 		}
 
 		public void SetUturnAllowed(bool value) {
@@ -94,19 +70,26 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool IsDefault() {
-			bool uturnIsDefault = uturnAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(uturnAllowed) == GetDefaultUturnAllowed();
-			bool straightChangeIsDefault = straightLaneChangingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(straightLaneChangingAllowed) == GetDefaultLaneChangingAllowedWhenGoingStraight();
-			bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(enterWhenBlockedAllowed) == GetDefaultEnteringBlockedJunctionAllowed();
-			bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(pedestrianCrossingAllowed) == GetDefaultPedestrianCrossingAllowed();
+			bool uturnIsDefault = uturnAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(uturnAllowed) == defaultUturnAllowed;
+			bool straightChangeIsDefault = straightLaneChangingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(straightLaneChangingAllowed) == defaultStraightLaneChangingAllowed;
+			bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(enterWhenBlockedAllowed) == defaultEnterWhenBlockedAllowed;
+			bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(pedestrianCrossingAllowed) == defaultPedestrianCrossingAllowed;
 
 			return uturnIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
 		}
 
-		public void Reset() {
+		public void Reset(bool resetDefaults=true) {
 			uturnAllowed = TernaryBool.Undefined;
 			straightLaneChangingAllowed = TernaryBool.Undefined;
 			enterWhenBlockedAllowed = TernaryBool.Undefined;
 			pedestrianCrossingAllowed = TernaryBool.Undefined;
+
+			if (resetDefaults) {
+				defaultUturnAllowed = false;
+				defaultStraightLaneChangingAllowed = false;
+				defaultEnterWhenBlockedAllowed = false;
+				defaultPedestrianCrossingAllowed = false;
+			}
 		}
 
 		public override string ToString() {

@@ -13,7 +13,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
-	public class LaneArrowManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string>, ILaneArrowManager {
+	public class LaneArrowManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string>, ILaneArrowManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 		public const ExtVehicleType EXT_VEHICLE_TYPES = ExtVehicleType.RoadVehicle &~ ExtVehicleType.Emergency;
@@ -49,7 +49,6 @@ namespace TrafficManager.Manager.Impl {
 		protected void OnLaneChange(uint laneId) {
 			Services.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
 				RoutingManager.Instance.RequestRecalculation(lane.m_segment);
-				SubscribeToSegmentGeometry(lane.m_segment);
 
 				if (OptionsManager.Instance.MayPublishSegmentChanges()) {
 					Services.NetService.PublishSegmentChanges(lane.m_segment);
@@ -58,11 +57,11 @@ namespace TrafficManager.Manager.Impl {
 			});
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
 			Flags.resetSegmentArrowFlags(geometry.SegmentId);
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ISegmentGeometry geometry) {
 			
 		}
 

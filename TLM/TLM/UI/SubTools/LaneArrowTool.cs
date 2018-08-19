@@ -112,7 +112,7 @@ namespace TrafficManager.UI.SubTools {
 				Log.Error($"LaneArrowTool._guiLaneChangeWindow: No geometry information available for segment {SelectedSegmentId}");
 				return;
 			}
-			bool startNode = geometry.StartNodeId() == SelectedNodeId;
+			bool startNode = geometry.StartNodeId == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();
 

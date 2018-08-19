@@ -20,6 +20,8 @@ using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using TrafficManager.Traffic.Enums;
+using static TrafficManager.Traffic.Data.ExtCitizenInstance;
+using System.Collections;
 
 namespace TrafficManager.UI {
 	[UsedImplicitly]
@@ -152,7 +154,7 @@ namespace TrafficManager.UI {
 			Log.Info("TrafficManagerTool: Initialization completed.");
 		}
 
-		public void OnUpdate(IObservable<GlobalConfig> observable) {
+		public void OnUpdate(GlobalConfig config) {
 			InitializeSubTools();
 		}
 
@@ -233,7 +235,7 @@ namespace TrafficManager.UI {
 
 		// Overridden to disable base class behavior
 		protected override void OnEnable() {
-			Log._Debug($"TrafficManagerTool.OnEnable");
+			Log._Debug($"TrafficManagerTool.OnEnable(): Performing cleanup");
 			foreach (KeyValuePair<ToolMode, SubTool> e in subTools) {
 				e.Value.Cleanup();
 			}

@@ -76,7 +76,7 @@ namespace TrafficManager.UI.SubTools {
 									if (otherGeo == null) {
 										continue;
 									}
-									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherGeo.StartNodeId() == data.curGeo.GetNodeId(startNode), secondaryPrioType);
+									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherGeo.StartNodeId == data.curGeo.GetNodeId(startNode), secondaryPrioType);
 								}
 							}
 						}

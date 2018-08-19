@@ -803,6 +803,7 @@ namespace TrafficManager.Manager.Impl {
 				args.extPathType = extPathType;
 				args.extVehicleType = extVehicleType;
 				args.vehicleId = 0;
+				args.spawned = (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = startPosA;
 				args.startPosB = dummyPathPos;
@@ -999,6 +1000,7 @@ namespace TrafficManager.Manager.Impl {
 				args.extPathType = ExtPathType.WalkingOnly;
 				args.extVehicleType = ExtVehicleType.None;
 				args.vehicleId = 0;
+				args.spawned = true;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = parkPathPos;
 				args.startPosB = dummyPathPos;

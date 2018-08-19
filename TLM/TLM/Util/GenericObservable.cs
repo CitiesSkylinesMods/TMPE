@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 
 namespace TrafficManager.Util {
-	public abstract class GenericObservable<T> : IObservable<T> where T : IObservable<T> {
+	public abstract class GenericObservable<T> : IObservable<T> {
 		/// <summary>
 		/// Holds a list of observers which are being notified as soon as the managed node's geometry is updated (but not neccessarily modified)
 		/// </summary>
@@ -36,14 +36,14 @@ namespace TrafficManager.Util {
 		/// <summary>
 		/// Notifies all observers that the observable object' state has changed
 		/// </summary>
-		public virtual void NotifyObservers() {
+		public virtual void NotifyObservers(T subject) {
 			//Log._Debug($"GenericObserable.NotifyObservers: Notifying observers of observable {this}");
 
 			List<IObserver<T>> myObservers = new List<IObserver<T>>(Observers); // in case somebody unsubscribes while iterating over subscribers
 			foreach (IObserver<T> observer in myObservers) {
 				try {
 					//Log._Debug($"GenericObserable.NotifyObservers: Notifying observer {observer} of observable {this}");
-					observer.OnUpdate(this);
+					observer.OnUpdate(subject);
 				} catch (Exception e) {
 					Log.Error($"GenericObserable.NotifyObservers: An exception occured while notifying an observer of observable {this}: {e}");
 				}

@@ -16,7 +16,7 @@ namespace TrafficManager.Manager.Impl {
 	/// <summary>
 	/// Manages the states of all custom traffic lights on the map
 	/// </summary>
-	public class CustomSegmentLightsManager : AbstractSegmentGeometryObservingManager, ICustomSegmentLightsManager {
+	public class CustomSegmentLightsManager : AbstractGeometryObservingManager, ICustomSegmentLightsManager {
 		public static CustomSegmentLightsManager Instance { get; private set; } = null;
 
 		static CustomSegmentLightsManager() {
@@ -52,7 +52,7 @@ namespace TrafficManager.Manager.Impl {
 				return null;
 			}
 
-			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
+			ISegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
 			if (endGeometry == null) {
 				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
 				return null;
@@ -65,7 +65,7 @@ namespace TrafficManager.Manager.Impl {
 			bool vehicles;
 			bool pedestrians;
 
-			RoadBaseAI.GetTrafficLightState(endGeometry.NodeId(), ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+			RoadBaseAI.GetTrafficLightState(endGeometry.NodeId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
 				currentFrameIndex - 256u, out vehicleLightState, out pedestrianLightState, out vehicles,
 				out pedestrians);
 
@@ -93,7 +93,7 @@ namespace TrafficManager.Manager.Impl {
 				return null;
 			}
 
-			SegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
+			ISegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
 			if (endGeometry == null) {
 				Log.Error($"CustomTrafficLightsManager.AddSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
 				return null;
@@ -112,7 +112,6 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			SubscribeToSegmentGeometry(segmentId);
 			if (startNode) {
 				customSegment.StartNodeLights = new CustomSegmentLights(this, segmentId, startNode, false);
 				customSegment.StartNodeLights.SetLights(lightState);
@@ -125,7 +124,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool SetSegmentLights(ushort nodeId, ushort segmentId, ICustomSegmentLights lights) {
-			SegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
+			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
 			if (endGeo == null) {
 				return false;
 			}
@@ -150,7 +149,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="nodeId"></param>
 		public void AddNodeLights(ushort nodeId) {
 			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			if (!nodeGeo.IsValid())
+			if (!nodeGeo.Valid)
 				return;
 
 			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
@@ -184,7 +183,6 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="segmentId"></param>
 		public void RemoveSegmentLights(ushort segmentId) {
 			CustomSegments[segmentId] = null;
-			UnsubscribeFromSegmentGeometry(segmentId);
 		}
 
 		/// <summary>
@@ -210,7 +208,6 @@ namespace TrafficManager.Manager.Impl {
 
 			if (customSegment.StartNodeLights == null && customSegment.EndNodeLights == null) {
 				CustomSegments[segmentId] = null;
-				UnsubscribeFromSegmentGeometry(segmentId);
 			}
 		}
 
@@ -299,19 +296,15 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-			SegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
+			ISegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
 			if (endGeometry == null) {
 				return null;
 			}
 			return GetSegmentLights(segmentId, endGeometry.StartNode, false);
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
 			RemoveSegmentLights(geometry.SegmentId);
-		}
-
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
-			
 		}
 
 		public override void OnLevelUnloading() {
@@ -320,11 +313,11 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public short ClockwiseIndexOfSegmentEnd(ISegmentEndId endId) {
-			SegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId)?.GetEnd(endId.StartNode);
+			ISegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId)?.GetEnd(endId.StartNode);
 			if (endGeo == null) {
 				return 0;
 			}
-			return endGeo.GetClockwiseIndex();
+			return endGeo.ClockwiseIndex;
 		}
 	}
 }

@@ -25,6 +25,7 @@ namespace TrafficManager {
 		//int ticksSinceLastMinuteUpdate = 0;
 
 		ITrafficLightSimulationManager tlsMan = Constants.ManagerFactory.TrafficLightSimulationManager;
+		IGeometryManager geoMan = Constants.ManagerFactory.GeometryManager;
 		IRoutingManager routeMan = Constants.ManagerFactory.RoutingManager;
 		IUtilityManager utilMan = Constants.ManagerFactory.UtilityManager;
 
@@ -34,6 +35,13 @@ namespace TrafficManager {
 			base.OnCreated(threading);
 
 			//ticksSinceLastMinuteUpdate = 0;
+		}
+
+		public override void OnBeforeSimulationTick() {
+			base.OnBeforeSimulationTick();
+
+			geoMan.SimulationStep();
+			routeMan.SimulationStep();
 		}
 
 		public override void OnBeforeSimulationFrame() {
@@ -77,8 +85,6 @@ namespace TrafficManager {
 					}
 				}
 			}
-
-			routeMan.SimulationStep();
 
 			if (Options.timedLightsEnabled) {
 				tlsMan.SimulationStep();

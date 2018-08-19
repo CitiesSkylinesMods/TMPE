@@ -11,6 +11,7 @@ namespace TrafficManager.Traffic.Data {
 		public ExtPathType pathType; // access requires acquisition of m_bufferLock
 		public ushort vehicleId; // access requires acquisition of m_bufferLock
 		public bool queued; // access requires acquisition of m_bufferLock
+		public bool spawned; // access requires acquisition of m_bufferLock
 
 		//public void Reset() {
 		//	vehicleType = ExtVehicleType.None;
@@ -25,6 +26,7 @@ namespace TrafficManager.Traffic.Data {
 			"\t" + $"pathType={pathType}\n" +
 			"\t" + $"vehicleId={vehicleId}\n" +
 			"\t" + $"queued={queued}\n" +
+			"\t" + $"spawned={spawned}\n" +
 			"PathUnitQueueItem]";
 		}
 	}

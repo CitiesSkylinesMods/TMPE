@@ -25,7 +25,7 @@ namespace TrafficManager.Manager {
 		/// <param name="nextPositionIndex">next path position index</param>
 		/// <param name="segmentOffset">current segment offset</param>
 		/// <returns><code>true</code> if parking (will) succeed, <code>false</code> otherwise</returns>
-		bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ushort driverCitizenInstanceId, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset);
+		bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ref Citizen driverCitizen, ushort driverCitizenInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset);
 
 		/// <summary>
 		/// Starts path-finding for a passenger car.
@@ -97,22 +97,22 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="speed">vehicle target velocity</param>
 		/// <param name="vehicleId">vehicle id</param>
-		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="extVehicle">ext. vehicle</param>
 		/// <param name="vehicleInfo">vehicle info</param>
 		/// <returns>modified target velocity</returns>
-		float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo);
+		float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo);
 
 		/// <summary>
 		/// Calculates the target velocity for the given vehicle.
 		/// </summary>
 		/// <param name="vehicleId">vehicle id</param>
-		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="extVehicle">ext. vehicle</param>
 		/// <param name="vehicleInfo">vehicle info</param>
 		/// <param name="position">current path position</param>
 		/// <param name="segment">segment data</param>
 		/// <param name="pos">current world position</param>
 		/// <param name="maxSpeed">vehicle target velocity</param>
 		/// <returns>modified target velocity</returns>
-		float CalcMaxSpeed(ushort vehicleId, ref Vehicle vehicleData, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed);
+		float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed);
 	}
 }

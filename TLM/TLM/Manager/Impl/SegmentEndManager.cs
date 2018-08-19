@@ -55,7 +55,7 @@ namespace TrafficManager.Manager.Impl {
 				return null;
 			}
 
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			ISegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
 			if (endGeo == null) {
 				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment end.");
 				return null;
@@ -103,7 +103,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			ISegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
 			if (endGeo == null) {
 #if DEBUG
 				if (debug) {
@@ -115,7 +115,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
-				TrafficLightSimulationManager.Instance.HasTimedSimulation(endGeo.NodeId())) {
+				TrafficLightSimulationManager.Instance.HasTimedSimulation(endGeo.NodeId)) {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");

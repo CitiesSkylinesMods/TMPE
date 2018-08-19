@@ -72,25 +72,17 @@ namespace TrafficManager.Traffic.Data {
 			}
 		}
 
-		public void SetDefaults(bool startNode, bool defaultUturnAllowed, bool defaultStraightLaneChangingAllowed, bool defaultEnterWhenBlockedAllowed, bool defaultPedestrianCrossingAllowed) {
-			if (startNode) {
-				startNodeFlags.SetDefaults(defaultUturnAllowed, defaultStraightLaneChangingAllowed, defaultEnterWhenBlockedAllowed, defaultPedestrianCrossingAllowed);
-			} else {
-				endNodeFlags.SetDefaults(defaultUturnAllowed, defaultStraightLaneChangingAllowed, defaultEnterWhenBlockedAllowed, defaultPedestrianCrossingAllowed);
-			}
-		}
-
 		public bool IsDefault() {
 			return startNodeFlags.IsDefault() && endNodeFlags.IsDefault();
 		}
 
-		public void Reset(bool? startNode=null) {
+		public void Reset(bool? startNode=null, bool resetDefaults=true) {
 			if (startNode == null || (bool)startNode) {
-				startNodeFlags.Reset();
+				startNodeFlags.Reset(resetDefaults);
 			}
 
 			if (startNode == null || ! (bool)startNode) {
-				endNodeFlags.Reset();
+				endNodeFlags.Reset(resetDefaults);
 			}
 		}
 

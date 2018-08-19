@@ -46,9 +46,6 @@ namespace TrafficManager.TrafficLight.Impl {
 		/// </summary>
 		public short RotationOffset { get; private set; } = 0;
 
-		private IDisposable nodeGeometryUnsubscriber = null;
-		private object geoLock = new object();
-
 		public IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; private set; } = null;
 
 		/// <summary>
@@ -76,7 +73,6 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			UpdateDirections(NodeGeometry.Get(nodeId));
 			UpdateSegmentEnds();
-			SubscribeToNodeGeometry();
 
 			started = false;
 		}
@@ -118,7 +114,7 @@ namespace TrafficManager.TrafficLight.Impl {
 						throw new Exception($"TimedTrafficLights.PasteSteps: No geometry information available for segment {targetSegmentId}");
 					}
 
-					bool targetStartNode = segGeo.StartNodeId() == NodeId;
+					bool targetStartNode = segGeo.StartNodeId == NodeId;
 
 					ICustomSegmentLights sourceLights = sourceStep.CustomSegmentLights[sourceSegmentId];
 					ICustomSegmentLights targetLights = sourceLights.Clone(targetStep, false);
@@ -181,7 +177,7 @@ namespace TrafficManager.TrafficLight.Impl {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: sourceLights is null @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
 						bufferedLights = step.RemoveSegmentLights(targetSegmentId);
-						sourceLights.Relocate(targetSegmentId, targetSegGeo.StartNodeId() == NodeId);
+						sourceLights.Relocate(targetSegmentId, targetSegGeo.StartNodeId == NodeId);
 						if (!step.SetSegmentLights(targetSegmentId, sourceLights)) {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: could not set lights for target segment @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
@@ -242,34 +238,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			Log._Debug($"<<<<< TimedTrafficLights.UpdateDirections: finished for node {NodeId}: {Directions.DictionaryToString()}");
 		}
 
-		private void UnsubscribeFromNodeGeometry() {
-			if (nodeGeometryUnsubscriber != null) {
-				try {
-					Monitor.Enter(geoLock);
-
-					nodeGeometryUnsubscriber.Dispose();
-					nodeGeometryUnsubscriber = null;
-				} finally {
-					Monitor.Exit(geoLock);
-				}
-			}
-		}
-
-		private void SubscribeToNodeGeometry() {
-			if (nodeGeometryUnsubscriber != null) {
-				return;
-			}
-
-			try {
-				Monitor.Enter(geoLock);
-
-				nodeGeometryUnsubscriber = NodeGeometry.Get(NodeId).Subscribe(this);
-			} finally {
-				Monitor.Exit(geoLock);
-			}
-		}
-
-		public void OnUpdate(IObservable<NodeGeometry> observable) {
+		public void OnUpdate(NodeGeometry nodeGeo) {
 			// not required since TrafficLightSimulation handles this for us: OnGeometryUpdate() is being called.
 			// TODO improve
 		}
@@ -456,7 +425,6 @@ namespace TrafficManager.TrafficLight.Impl {
 			DestroySegmentEnds();
 			Steps = null;
 			NodeGroup = null;
-			UnsubscribeFromNodeGeometry();
 		}
 
 		public bool IsStarted() {
@@ -970,7 +938,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			foreach (TimedTrafficLightsStep step in Steps) {
 				step.ChangeLightMode(segmentId, vehicleType, mode);
 			}
-			Constants.ManagerFactory.CustomSegmentLightsManager.SetLightMode(segmentId, segGeo.StartNodeId() == NodeId, vehicleType, mode);
+			Constants.ManagerFactory.CustomSegmentLightsManager.SetLightMode(segmentId, segGeo.StartNodeId == NodeId, vehicleType, mode);
 		}
 
 		public void Join(ITimedTrafficLights otherTimedLight) {

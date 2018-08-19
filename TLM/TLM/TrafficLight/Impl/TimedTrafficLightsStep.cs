@@ -957,12 +957,12 @@ namespace TrafficManager.TrafficLight.Impl {
 				return false;
 			}
 
-			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
+			if (segGeo.StartNodeId != timedNode.NodeId && segGeo.EndNodeId != timedNode.NodeId) {
 				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Target segment {targetSegmentId} is not connected to node {timedNode.NodeId}");
 				return false;
 			}
 
-			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
+			bool startNode = segGeo.StartNodeId == timedNode.NodeId;
 			CustomSegmentLights.Remove(sourceSegmentId);
 			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(targetSegmentId, startNode).Housekeeping(true, true);
 			sourceLights.Relocate(targetSegmentId, startNode, this);
@@ -988,13 +988,13 @@ namespace TrafficManager.TrafficLight.Impl {
 				return false;
 			}
 
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
+			ISegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
 			if (endGeo == null) {
 				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): No end geometry information available for segment {segmentId} @ {startNode}");
 				return false;
 			}
 
-			if (endGeo.NodeId() != timedNode.NodeId) {
+			if (endGeo.NodeId != timedNode.NodeId) {
 				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Segment {segmentId} is not connected to node {timedNode.NodeId} @ start {startNode}");
 				return false;
 			}
@@ -1040,12 +1040,12 @@ namespace TrafficManager.TrafficLight.Impl {
 				return false;
 			}
 
-			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
+			if (segGeo.StartNodeId != timedNode.NodeId && segGeo.EndNodeId != timedNode.NodeId) {
 				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not connected to node {timedNode.NodeId}");
 				return false;
 			}
 
-			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
+			bool startNode = segGeo.StartNodeId == timedNode.NodeId;
 			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(segmentId, startNode).Housekeeping(true, true);
 			lights.Relocate(segmentId, startNode, this);
 			CustomSegmentLights[segmentId] = lights;
@@ -1065,8 +1065,8 @@ namespace TrafficManager.TrafficLight.Impl {
 				return -1;
 			}
 
-			if (endGeo.NodeId() != timedNode.NodeId) {
-				Log.Warning($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd: @ node {timedNode.NodeId} does not handle custom traffic lights for node {endGeo.NodeId()}");
+			if (endGeo.NodeId != timedNode.NodeId) {
+				Log.Warning($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd: @ node {timedNode.NodeId} does not handle custom traffic lights for node {endGeo.NodeId}");
 				return -1;
 			}
 

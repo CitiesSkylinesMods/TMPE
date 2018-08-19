@@ -1303,7 +1303,7 @@ namespace TrafficManager.UI.SubTools {
 							Log.Error($"TimedTrafficLightsTool.ShowGUI: No geometry information available for segment {srcSegmentId}");
 							continue;
 						}
-						bool startNode = geometry.StartNodeId() == nodeId;
+						bool startNode = geometry.StartNodeId == nodeId;
 						if (geometry.IsOutgoingOneWay(startNode))
 							continue;
 

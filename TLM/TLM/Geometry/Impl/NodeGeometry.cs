@@ -12,19 +12,7 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Geometry.Impl {
-	public class NodeGeometry : GenericObservable<NodeGeometry>, IEquatable<NodeGeometry> {
-		public struct SegmentEndReplacement {
-			public ISegmentEndId oldSegmentEndId;
-			public ISegmentEndId newSegmentEndId;
-
-			public override string ToString() {
-				return $"[SegmentEndReplacement\n" +
-					"\t" + $"oldSegmentEndId = {oldSegmentEndId}\n" +
-					"\t" + $"newSegmentEndId = {newSegmentEndId}\n" +
-					"SegmentEndReplacement]";
-			}
-		}
-
+	public class NodeGeometry : INodeGeometry, IEquatable<NodeGeometry> {
 		private const byte MAX_NUM_SEGMENTS = 8;
 
 		private static NodeGeometry[] nodeGeometries;
@@ -36,7 +24,7 @@ namespace TrafficManager.Geometry.Impl {
 			"-----------------------";
 			buf += $"Total: {nodeGeometries.Length}\n";
 			foreach (NodeGeometry nodeGeo in nodeGeometries) {
-				if (nodeGeo.IsValid()) {
+				if (nodeGeo.Valid) {
 					buf += nodeGeo.ToString() + "\n" +
 					"-------------------------\n";
 				}
@@ -48,16 +36,16 @@ namespace TrafficManager.Geometry.Impl {
 			get; private set;
 		} = 0;
 
-		public bool IsSimpleJunction {
+		public bool SimpleJunction {
 			get {
-				return IncomingSegments == 1 || OutgoingSegments == 1;
+				return NumIncomingSegments == 1 || NumOutgoingSegments == 1;
 			}
 		}
 
 		private ISegmentEndId lastRemovedSegmentEndId = null;
 
-		public int IncomingSegments { get; private set; } = 0;
-		public int OutgoingSegments { get; private set; } = 0;
+		public int NumIncomingSegments { get; private set; } = 0;
+		public int NumOutgoingSegments { get; private set; } = 0;
 
 		public SegmentEndReplacement CurrentSegmentReplacement = default(SegmentEndReplacement);
 
@@ -65,28 +53,18 @@ namespace TrafficManager.Geometry.Impl {
 		/// Connected segment end geometries.
 		/// WARNING: Individual entries may be null
 		/// </summary>
-		public SegmentEndGeometry[] SegmentEndGeometries {
+		public ISegmentEndGeometry[] SegmentEndGeometries {
 			get; private set;
 		} = new SegmentEndGeometry[MAX_NUM_SEGMENTS];
 
 		public byte NumSegmentEnds { get; private set; } = 0;
 
-		/// <summary>
-		/// Holds a list of observers which are being notified as soon as the managed node's geometry is updated (but not neccessarily modified)
-		/// </summary>
-		//private List<IObserver<NodeGeometry>> observers = new List<IObserver<NodeGeometry>>();
-
-		/// <summary>
-		/// Lock object. Acquire this before accessing the HashSets.
-		/// </summary>
-		//public readonly object Lock = new object();
-
 		public override string ToString() {
 			return $"[NodeGeometry ({NodeId})\n" +
-				"\t" + $"IsValid() = {IsValid()}\n" +
-				"\t" + $"IsSimpleJunction = {IsSimpleJunction}\n" +
-				"\t" + $"IncomingSegments = {IncomingSegments}\n" +
-				"\t" + $"OutgoingSegments = {OutgoingSegments}\n" +
+				"\t" + $"IsValid() = {Valid}\n" +
+				"\t" + $"IsSimpleJunction = {SimpleJunction}\n" +
+				"\t" + $"IncomingSegments = {NumIncomingSegments}\n" +
+				"\t" + $"OutgoingSegments = {NumOutgoingSegments}\n" +
 				"\t" + $"SegmentEndGeometries = {SegmentEndGeometries.ArrayToString()}\n" +
 				"\t" + $"NumSegmentEnds = {NumSegmentEnds}\n" +
 				"NodeGeometry]";
@@ -100,31 +78,18 @@ namespace TrafficManager.Geometry.Impl {
 			this.NodeId = nodeId;
 		}
 
-		public bool IsValid() {
-			return Constants.ServiceFactory.NetService.IsNodeValid(NodeId);
-		}
-
-		/// <summary>
-		/// Registers an observer.
-		/// </summary>
-		/// <param name="observer"></param>
-		/// <returns>An unsubscriber</returns>
-		/*public IDisposable Subscribe(IObserver<NodeGeometry> observer) {
-			try {
-				Monitor.Enter(Lock);
-				observers.Add(observer);
-			} finally {
-				Monitor.Exit(Lock);
+		public bool Valid {
+			get {
+				return Constants.ServiceFactory.NetService.IsNodeValid(NodeId);
 			}
-			return new GenericUnsubscriber<NodeGeometry>(observers, observer, Lock);
-		}*/
+		}
 		
-		internal void AddSegmentEnd(SegmentEndGeometry segEndGeo, GeometryCalculationMode calcMode) {
+		public void AddSegmentEnd(ISegmentEndGeometry segEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Add segment end {segEndGeo.SegmentId}, start? {segEndGeo.StartNode} @ node {NodeId}");
 #endif
-			if (!IsValid()) {
+			if (!Valid) {
 				//Log.Error($"NodeGeometry: Trying to add segment {segmentId} @ invalid node {NodeId}");
 				Invalidate();
 				return;
@@ -133,7 +98,7 @@ namespace TrafficManager.Geometry.Impl {
 			bool found = false;
 			int freeIndex = -1;
 			for (int i = 0; i < MAX_NUM_SEGMENTS; ++i) {
-				SegmentEndGeometry storedEndGeo = SegmentEndGeometries[i];
+				ISegmentEndGeometry storedEndGeo = SegmentEndGeometries[i];
 				if (segEndGeo.Equals(storedEndGeo)) {
 					SegmentEndGeometries[i] = segEndGeo;
 					found = true;
@@ -163,7 +128,7 @@ namespace TrafficManager.Geometry.Impl {
 			Recalculate();
 		}
 
-		internal void RemoveSegmentEnd(SegmentEndGeometry segmentEndGeo, GeometryCalculationMode calcMode) {
+		public void RemoveSegmentEnd(ISegmentEndGeometry segmentEndGeo, GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Remove segment end {segmentEndGeo.SegmentId} @ {NodeId}, calcMode? {calcMode}");
@@ -173,7 +138,7 @@ namespace TrafficManager.Geometry.Impl {
 				return;
 			}
 
-			if (!IsValid()) {
+			if (!Valid) {
 				//Log.Warning($"NodeGeometry: Trying to remove segment {segmentId} @ invalid node {NodeId}");
 				Invalidate();
 				return;
@@ -193,12 +158,12 @@ namespace TrafficManager.Geometry.Impl {
 		}
 
 		private void Cleanup() {
-			IncomingSegments = 0;
-			OutgoingSegments = 0;
+			NumIncomingSegments = 0;
+			NumOutgoingSegments = 0;
 			NumSegmentEnds = 0;
 		}
 
-		internal void RecalculateSegments(ushort? ignoreSegmentId= null) {
+		private void RecalculateSegments(ushort? ignoreSegmentId= null) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"NodeGeometry: Propagate @ {NodeId}. ignoreSegmentId={ignoreSegmentId}");
@@ -214,11 +179,11 @@ namespace TrafficManager.Geometry.Impl {
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry: Recalculating segment {SegmentEndGeometries[i].SegmentId} @ {NodeId}");
 #endif
-				SegmentEndGeometries[i].GetSegmentGeometry(true).StartRecalculation(GeometryCalculationMode.NoPropagate);
+				SegmentGeometry.Get(SegmentEndGeometries[i].SegmentId, true).StartRecalculation(GeometryCalculationMode.NoPropagate);
 			}
 		}
 
-		internal void Recalculate() {
+		public void Recalculate() {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($">>> NodeGeometry: Recalculate @ {NodeId}");
@@ -227,7 +192,7 @@ namespace TrafficManager.Geometry.Impl {
 			Cleanup();
 
 			// check if node is valid
-			if (!IsValid()) {
+			if (!Valid) {
 				Invalidate();
 				return;
 			} else {
@@ -243,20 +208,19 @@ namespace TrafficManager.Geometry.Impl {
 						Log._Debug($"NodeGeometry.Recalculate: Iterating over segment end {SegmentEndGeometries[i].SegmentId} @ node {NodeId}");
 #endif
 
-					bool startNode = SegmentEndGeometries[i].StartNode;
-					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsIncoming(startNode))
+					if (SegmentEndGeometries[i].Incoming)
 						++incomingSegments;
-					if (SegmentEndGeometries[i].GetSegmentGeometry(true).IsOutgoing(startNode))
+					if (SegmentEndGeometries[i].Outgoing)
 						++outgoingSegments;
 				}
 
-				IncomingSegments = incomingSegments;
-				OutgoingSegments = outgoingSegments;
+				NumIncomingSegments = incomingSegments;
+				NumOutgoingSegments = outgoingSegments;
 #if DEBUGGEO
 				if (GlobalConfig.Instance.Debug.Switches[5])
 					Log._Debug($"NodeGeometry.Recalculate: Node {NodeId} has {incomingSegments} incoming and {outgoingSegments} outgoing segments.");
 #endif
-				NotifyObservers();
+				NotifyGeomentryManager();
 			}
 		}
 
@@ -266,7 +230,7 @@ namespace TrafficManager.Geometry.Impl {
 			}
 			lastRemovedSegmentEndId = null;
 			CurrentSegmentReplacement = default(SegmentEndReplacement);
-			NotifyObservers();
+			NotifyGeomentryManager();
 		}
 
 		public bool Equals(NodeGeometry otherNodeGeo) {
@@ -293,19 +257,10 @@ namespace TrafficManager.Geometry.Impl {
 			return result;
 		}
 
-		public override void NotifyObservers() {
-			//Log.Warning($"NodeGeometry.NotifyObservers(): CurrentSegmentReplacement={CurrentSegmentReplacement}");
-
-			/*List<IObserver<NodeGeometry>> myObservers = new List<IObserver<NodeGeometry>>(observers); // in case somebody unsubscribes while iterating over subscribers
-			foreach (IObserver<NodeGeometry> observer in myObservers) {
-				try {
-					observer.OnUpdate(this);
-				} catch (Exception e) {
-					Log.Error($"SegmentGeometry.NotifyObservers: An exception occured while notifying an observer of node {NodeId}: {e}");
-				}
-			}*/
-
-			base.NotifyObservers();
+		private void NotifyGeomentryManager() {
+			if (CurrentSegmentReplacement.IsDefined()) {
+				Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(CurrentSegmentReplacement);
+			}
 
 			CurrentSegmentReplacement.oldSegmentEndId = null;
 			CurrentSegmentReplacement.newSegmentEndId = null;

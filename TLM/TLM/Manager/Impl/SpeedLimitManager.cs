@@ -10,7 +10,7 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
-	public class SpeedLimitManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.LaneSpeedLimit>>, ICustomDataManager<Dictionary<string, float>>, ISpeedLimitManager {
+	public class SpeedLimitManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneSpeedLimit>>, ICustomDataManager<Dictionary<string, float>>, ISpeedLimitManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Monorail;
 
@@ -312,7 +312,6 @@ namespace TrafficManager.Manager.Impl {
 					continue;
 
 				Flags.setLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
-				SubscribeToSegmentGeometry(segmentId);
 			}
 		}
 
@@ -591,7 +590,6 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to {speedLimit}");
 #endif
 				Flags.setLaneSpeedLimit(curLaneId, speedLimit);
-				SubscribeToSegmentGeometry(segmentId);
 
 			nextIter:
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -753,7 +751,7 @@ namespace TrafficManager.Manager.Impl {
 			customizableNetInfos = mainNetInfos;
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
 			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].Info;
 			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].m_lanes;
 			int laneIndex = 0;
@@ -768,7 +766,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ISegmentGeometry geometry) {
 
 		}
 
@@ -790,7 +788,6 @@ namespace TrafficManager.Manager.Impl {
 						// lane speed limit differs from default speed limit
 						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
 						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
-						SubscribeToSegmentGeometry(segmentId);
 					} else {
 						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane speed limit of lane {laneSpeedLimit.laneId} ({laneSpeedLimit.speedLimit})");
 					}

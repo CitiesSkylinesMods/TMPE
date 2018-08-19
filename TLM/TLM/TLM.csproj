@@ -35,7 +35,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
-    <DefineConstants>PF2;DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>0</WarningLevel>
     <DebugType>full</DebugType>
@@ -112,6 +112,10 @@
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Geometry\Impl\SegmentEndId.cs" />
+    <Compile Include="Manager\AbstractCustomManager.cs" />
+    <Compile Include="Manager\AbstractFeatureManager.cs" />
+    <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
@@ -134,11 +138,9 @@
     <Compile Include="RedirectionFramework\Redirector.cs" />
     <Compile Include="RedirectionFramework\Tuple.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind2.cs" />
-    <Compile Include="Manager\AbstractCustomManager.cs" />
-    <Compile Include="Manager\AbstractFeatureManager.cs" />
-    <Compile Include="Manager\AbstractNodeGeometryObservingManager.cs" />
-    <Compile Include="Manager\AbstractSegmentGeometryObservingManager.cs" />
+    <Compile Include="Custom\PathFinding\StockPathFind.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
+    <Compile Include="Manager\Impl\GeometryManager.cs" />
     <Compile Include="Manager\Impl\ManagerFactory.cs" />
     <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\RoutingManager.cs" />
@@ -180,7 +182,6 @@
     <Compile Include="Geometry\Impl\SegmentEndGeometry.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
-    <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
     <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
     <Compile Include="Custom\AI\CustomHumanAI.cs" />

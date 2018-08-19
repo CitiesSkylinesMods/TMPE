@@ -224,7 +224,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START (stock code replaced)
-			maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(vehicleId, ref vehicleData, this.m_info, prevPosition, ref netManager.m_segments.m_buffer[prevPosition.m_segment], pos, maxSpeed);
+			maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(vehicleId, ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId], this.m_info, prevPosition, ref netManager.m_segments.m_buffer[prevPosition.m_segment], pos, maxSpeed);
 			// NON-STOCK CODE END
 		}
 
@@ -248,7 +248,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-			maxSpeed = VehicleBehaviorManager.Instance.CalcMaxSpeed(vehicleId, ref vehicleData, this.m_info, position, ref netManager.m_segments.m_buffer[position.m_segment], pos, maxSpeed);
+			maxSpeed = VehicleBehaviorManager.Instance.CalcMaxSpeed(vehicleId, ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId], this.m_info, position, ref netManager.m_segments.m_buffer[position.m_segment], pos, maxSpeed);
 			// NON-STOCK CODE END
 		}
 
@@ -302,6 +302,7 @@ namespace TrafficManager.Custom.AI {
 				args.extPathType = ExtPathType.None;
 				args.extVehicleType = vehicleType;
 				args.vehicleId = vehicleID;
+				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 				args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
 				args.startPosA = startPosA;
 				args.startPosB = startPosB;

@@ -56,6 +56,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geometry\ISegmentEndGeometry.cs" />
+    <Compile Include="Geometry\INodeGeometry.cs" />
+    <Compile Include="Geometry\ISegmentGeometry.cs" />
+    <Compile Include="Geometry\SegmentEndReplacement.cs" />
     <Compile Include="Manager\IAdvancedParkingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
@@ -65,6 +69,7 @@
     <Compile Include="Manager\IExtCitizenManager.cs" />
     <Compile Include="Manager\IExtPathManager.cs" />
     <Compile Include="Manager\IFeatureManager.cs" />
+    <Compile Include="Manager\IGeometryManager.cs" />
     <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
     <Compile Include="Manager\ILaneArrowManager.cs" />
     <Compile Include="Manager\ILaneConnectionManager.cs" />

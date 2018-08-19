@@ -22,6 +22,11 @@ namespace TrafficManager.Traffic.Data {
 		public ushort vehicleId;
 
 		/// <summary>
+		/// is entity alredy spawned?
+		/// </summary>
+		public bool spawned;
+
+		/// <summary>
 		/// Current build index
 		/// </summary>
 		public uint buildIndex;

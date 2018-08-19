@@ -7,7 +7,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.Manager.Impl {
-	public class ParkingRestrictionsManager : AbstractSegmentGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
+	public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Parking;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
@@ -46,30 +46,24 @@ namespace TrafficManager.Manager.Impl {
 			}
 			int dirIndex = GetDirIndex(finalDir);
 			parkingAllowed[segmentId][dirIndex] = flag;
-			if (flag && parkingAllowed[segmentId][1 - dirIndex]) {
-				UnsubscribeFromSegmentGeometry(segmentId);
-			} else {
-				if (! flag) {
-					Services.SimulationService.AddAction(() => {
-						// force relocation of illegaly parked vehicles
-						Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
-							segment.UpdateSegment(segmentId);
-							return true;
-						});
+			if (!flag || !parkingAllowed[segmentId][1 - dirIndex]) {
+				Services.SimulationService.AddAction(() => {
+					// force relocation of illegaly parked vehicles
+					Services.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
+						segment.UpdateSegment(segmentId);
+						return true;
 					});
-				}
-
-				SubscribeToSegmentGeometry(segmentId);
+				});
 			}
 			return true;
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
 			parkingAllowed[geometry.SegmentId][0] = true;
 			parkingAllowed[geometry.SegmentId][1] = true;
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ISegmentGeometry geometry) {
 			if (! MayHaveParkingRestriction(geometry.SegmentId)) {
 				parkingAllowed[geometry.SegmentId][0] = true;
 				parkingAllowed[geometry.SegmentId][1] = true;

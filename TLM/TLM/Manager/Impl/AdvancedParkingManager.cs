@@ -1333,13 +1333,14 @@ namespace TrafficManager.Manager.Impl {
 			ushort parkingSpaceSegmentId = FindParkingSpaceAtRoadSide(0, refPos, vehicleInfo.m_generatedInfo.m_size.x, vehicleInfo.m_generatedInfo.m_size.z, maxDist, true, out roadParkPos, out roadParkRot, out roadParkOffset);
 			ushort parkingBuildingId = FindParkingSpaceBuilding(vehicleInfo, homeId, 0, 0, refPos, maxDist, maxDist, true, out buildingParkPos, out buildingParkRot, out buildingParkOffset);
 
-			Randomizer rng = Services.SimulationService.Randomizer;
-
 			if (parkingSpaceSegmentId != 0) {
 				if (parkingBuildingId != 0) {
-					// choose random parking spot
-					if (rng.Int32(2) == 0) {
-						// choose road parking space
+					Randomizer rng = Services.SimulationService.Randomizer;
+
+					// choose nearest parking position, after a bit of randomization
+					if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude
+						&& rng.Int32(GlobalConfig.Instance.ParkingAI.VicinityParkingSpaceSelectionRand) != 0) {
+						// road parking space is closer
 #if DEBUG
 						if (debug)
 							Log._Debug($"Found an (alternative) road-side parking position for vehicle {vehicleId} @ segment {parkingSpaceSegmentId} after comparing distance with a bulding parking position @ {parkingBuildingId}!");
@@ -1803,7 +1804,7 @@ namespace TrafficManager.Manager.Impl {
 				switch (driverExtInstance.pathMode) {
 					case ExtPathMode.DrivingToAltParkPos:
 						if (driverExtInstance.failedParkingAttempts <= 1) {
-							ret = Translation.GetString("Looking_for_a_parking_spot") + ", " + ret;
+							ret = Translation.GetString("Driving_to_a_parking_spot") + ", " + ret;
 						} else {
 							ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" + driverExtInstance.failedParkingAttempts + "), " + ret;
 						}

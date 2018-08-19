@@ -10,7 +10,7 @@ namespace GenericGameBridge.Service {
 		Randomizer Randomizer { get; }
 		bool SimulationPaused { get; }
 		bool ForcedSimulationPaused { get; }
-		void AddAction(System.Action action);
+		AsyncAction AddAction(System.Action action);
 		void PauseSimulation(bool forced);
 		void ResumeSimulation(bool forced);
 	}

@@ -23,7 +23,6 @@ using TrafficManager.RedirectionFramework.Attributes;
 namespace TrafficManager.Custom.PathFinding {
 	[TargetType(typeof(PathManager))]
 	public class CustomPathManager : PathManager {
-
 		/// <summary>
 		/// Holds a linked list of path units waiting to be calculated
 		/// </summary>
@@ -192,6 +191,7 @@ namespace TrafficManager.Custom.PathFinding {
 				queueItems[pathUnitId].vehicleType = args.extVehicleType;
 				queueItems[pathUnitId].vehicleId = args.vehicleId;
 				queueItems[pathUnitId].pathType = args.extPathType;
+				queueItems[pathUnitId].spawned = args.spawned;
 				queueItems[pathUnitId].queued = true;
 				// NON-STOCK CODE END
 

@@ -199,13 +199,66 @@ namespace TrafficManager.State {
 		}
 
 		/// <summary>
-		/// Removes lane connections that exist between two given lanes
+		/// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
+		/// </summary>
+		/// <param name="sourceLaneId"></param>
+		/// <param name="targetLaneId"></param>
+		/// <param name="startNode"></param>
+		/// <returns></returns>
+		private static bool RemoveSingleLaneConnection(uint sourceLaneId, uint targetLaneId, bool startNode) {
+#if DEBUGFLAGS
+			Log._Debug($"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
+#endif
+			int nodeArrayIndex = startNode ? 0 : 1;
+
+			if (laneConnections[sourceLaneId] == null || laneConnections[sourceLaneId][nodeArrayIndex] == null)
+				return false;
+
+			uint[] srcLaneConnections = laneConnections[sourceLaneId][nodeArrayIndex];
+
+			bool ret = false;
+			int remainingConnections = 0;
+			for (int i = 0; i < srcLaneConnections.Length; ++i) {
+				if (srcLaneConnections[i] != targetLaneId) {
+					++remainingConnections;
+				} else {
+					ret = true;
+					srcLaneConnections[i] = 0;
+				}
+			}
+
+			if (remainingConnections <= 0) {
+				laneConnections[sourceLaneId][nodeArrayIndex] = null;
+				if (laneConnections[sourceLaneId][1 - nodeArrayIndex] == null)
+					laneConnections[sourceLaneId] = null; // total cleanup
+				return ret;
+			}
+
+			if (remainingConnections != srcLaneConnections.Length) {
+				laneConnections[sourceLaneId][nodeArrayIndex] = new uint[remainingConnections];
+				int k = 0;
+				for (int i = 0; i < srcLaneConnections.Length; ++i) {
+					if (srcLaneConnections[i] == 0)
+						continue;
+					laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
+				}
+			}
+			return ret;
+		}
+
+		/// <summary>
+		/// Removes any lane connections that exist between two given lanes
 		/// </summary>
 		/// <param name="lane1Id"></param>
 		/// <param name="lane2Id"></param>
 		/// <param name="startNode1"></param>
 		/// <returns></returns>
 		internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
+#if DEBUGCONN
+			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+			if (debug)
+				Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
+#endif
 			bool lane1Valid = CheckLane(lane1Id);
 			bool lane2Valid = CheckLane(lane2Id);
 
@@ -228,13 +281,20 @@ namespace TrafficManager.State {
 				bool startNode2;
 
 				LaneConnectionManager.Instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+				if (commonNodeId == 0) {
+					Log.Warning($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}): Could not identify common node between lanes {lane1Id} and {lane2Id}");
+				}
 
-				if (CleanupLaneConnections(lane1Id, lane2Id, startNode1))
+				if (RemoveSingleLaneConnection(lane1Id, lane2Id, startNode1))
 					ret = true;
-				if (CleanupLaneConnections(lane2Id, lane1Id, startNode2))
+				if (RemoveSingleLaneConnection(lane2Id, lane1Id, startNode2))
 					ret = true;
 			}
-			
+
+#if DEBUGCONN
+			if (debug)
+				Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}). ret={ret}");
+#endif
 			return ret;
 		}
 
@@ -244,13 +304,20 @@ namespace TrafficManager.State {
 		/// <param name="laneId"></param>
 		/// <param name="startNode"></param>
 		internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
-			//Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
+#if DEBUGCONN
+			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+			if (debug)
+				Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
+#endif
 			if (laneConnections[laneId] == null)
 				return;
 
 			bool laneValid = CheckLane(laneId);
 			bool clearBothSides = startNode == null || !laneValid;
-			//Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, clearBothSides={clearBothSides}");
+#if DEBUGCONN
+			if (debug)
+				Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, clearBothSides={clearBothSides}");
+#endif
 			int? nodeArrayIndex = null;
 			if (!clearBothSides) {
 				nodeArrayIndex = (bool)startNode ? 0 : 1;
@@ -270,8 +337,11 @@ namespace TrafficManager.State {
 					ushort commonNodeId;
 					bool startNode2;
 					LaneConnectionManager.Instance.GetCommonNodeId(laneId, otherLaneId, startNode1, out commonNodeId, out startNode2); // TODO refactor
-					
-					CleanupLaneConnections(otherLaneId, laneId, startNode2);
+					if (commonNodeId == 0) {
+						Log.Warning($"Flags.RemoveLaneConnections({laneId}, {startNode}): Could not identify common node between lanes {laneId} and {otherLaneId}");
+					}
+
+					RemoveSingleLaneConnection(otherLaneId, laneId, startNode2);
 				}
 
 				laneConnections[laneId][k] = null;
@@ -341,57 +411,6 @@ namespace TrafficManager.State {
 			laneConnections[sourceLaneId][nodeArrayIndex] = new uint[oldConnections.Length + 1];
 			Array.Copy(oldConnections, laneConnections[sourceLaneId][nodeArrayIndex], oldConnections.Length);
 			laneConnections[sourceLaneId][nodeArrayIndex][oldConnections.Length] = targetLaneId;
-		}
-
-		/// <summary>
-		/// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
-		/// </summary>
-		/// <param name="sourceLaneId"></param>
-		/// <param name="targetLaneId"></param>
-		/// <param name="startNode"></param>
-		/// <returns></returns>
-		private static bool CleanupLaneConnections(uint sourceLaneId, uint targetLaneId, bool startNode) {
-#if DEBUGFLAGS
-			Log._Debug($"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
-#endif
-			int nodeArrayIndex = startNode ? 0 : 1;
-
-			if (laneConnections[sourceLaneId] == null || laneConnections[sourceLaneId][nodeArrayIndex] == null)
-				return false;
-
-			uint[] srcLaneConnections = laneConnections[sourceLaneId][nodeArrayIndex];
-			if (srcLaneConnections == null) {
-				return false;
-			}
-
-			bool ret = false;
-			int remainingConnections = 0;
-			for (int i = 0; i < srcLaneConnections.Length; ++i) {
-				if (srcLaneConnections[i] != targetLaneId) {
-					++remainingConnections;
-				} else {
-					ret = true;
-					srcLaneConnections[i] = 0;
-				}
-			}
-
-			if (remainingConnections <= 0) {
-				laneConnections[sourceLaneId][nodeArrayIndex] = null;
-				if (laneConnections[sourceLaneId][1 - nodeArrayIndex] == null)
-					laneConnections[sourceLaneId] = null; // total cleanup
-				return ret;
-			}
-
-			if (remainingConnections != srcLaneConnections.Length) {
-				laneConnections[sourceLaneId][nodeArrayIndex] = new uint[remainingConnections];
-				int k = 0;
-				for (int i = 0; i < srcLaneConnections.Length; ++i) {
-					if (srcLaneConnections[i] == 0)
-						continue;
-					laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
-				}
-			}
-			return ret;
 		}
 
 		internal static bool CheckLane(uint laneId) { // TODO refactor
