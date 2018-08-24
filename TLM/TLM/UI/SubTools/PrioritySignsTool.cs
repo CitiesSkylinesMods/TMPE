@@ -72,11 +72,7 @@ namespace TrafficManager.UI.SubTools {
 
 							foreach (ushort otherSegmentId in data.curGeo.GetConnectedSegments(startNode)) {
 								if (!data.curGeo.IsStraightSegment(otherSegmentId, startNode)) {
-									SegmentGeometry otherGeo = SegmentGeometry.Get(otherSegmentId);
-									if (otherGeo == null) {
-										continue;
-									}
-									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherGeo.StartNodeId == data.curGeo.GetNodeId(startNode), secondaryPrioType);
+									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, data.curGeo.GetNodeId(startNode)), secondaryPrioType);
 								}
 							}
 						}
@@ -292,12 +288,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"PrioritySignsTool.SetPrioritySign: No geometry information available for segment {segmentId}");
-				return false;
-			}
-			ushort nodeId = segGeo.GetNodeId(startNode);
+			ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
 
 			// check for restrictions
 			if (!MayNodeHavePrioritySigns(nodeId)) {

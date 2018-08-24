@@ -214,14 +214,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (type != PriorityType.None) {
-				SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-				if (segGeo == null) {
-					Log.Error($"TrafficPriorityManager.SetPrioritySign: No geometry information available for segment {segmentId}");
-					reason = SetPrioritySignUnableReason.InvalidSegment;
-					return false;
-				}
-
-				ushort nodeId = segGeo.GetNodeId(startNode);
+				ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
 				Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 					TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref node);
 					return true;
@@ -1124,14 +1117,13 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-					if (segGeo == null) {
-						Log.Error($"TrafficPriorityManager.LoadData: No geometry information available for segment {segmentId}");
+					bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+					if (startNode == null) {
+						Log.Error($"TrafficPriorityManager.LoadData: No node found for node id {nodeId} @ seg. {segmentId}");
 						continue;
 					}
-					bool startNode = segGeo.StartNodeId == nodeId;
 
-					SetPrioritySign(segmentId, startNode, sign);
+					SetPrioritySign(segmentId, (bool)startNode, sign);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
 					Log.Warning("Error loading data from Priority segments: " + e.ToString());
@@ -1160,16 +1152,14 @@ namespace TrafficManager.Manager.Impl {
 					if (!Services.NetService.IsSegmentValid(prioSegData.segmentId)) {
 						continue;
 					}
-
-					SegmentGeometry segGeo = SegmentGeometry.Get(prioSegData.segmentId);
-					if (segGeo == null) {
-						Log.Error($"TrafficPriorityManager.SaveData: No geometry information available for segment {prioSegData.segmentId}");
+					bool? startNode = Services.NetService.IsStartNode(prioSegData.segmentId, prioSegData.nodeId);
+					if (startNode == null) {
+						Log.Error($"TrafficPriorityManager.LoadData: No node found for node id {prioSegData.nodeId} @ seg. {prioSegData.segmentId}");
 						continue;
 					}
-					bool startNode = segGeo.StartNodeId == prioSegData.nodeId;
 
 					Log._Debug($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
-					SetPrioritySign(prioSegData.segmentId, startNode, (PriorityType)prioSegData.priorityType);
+					SetPrioritySign(prioSegData.segmentId, (bool)startNode, (PriorityType)prioSegData.priorityType);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
 					Log.Warning("Error loading data from Priority segments: " + e.ToString());
@@ -1186,15 +1176,10 @@ namespace TrafficManager.Manager.Impl {
 					if (! Services.NetService.IsSegmentValid((ushort)segmentId) || ! HasSegmentPrioritySign((ushort)segmentId)) {
 						continue;
 					}
-					SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
-					if (segGeo == null) {
-						Log.Error($"TrafficPriorityManager.SaveData: No geometry information available for segment {segmentId}");
-						continue;
-					}
 
 					PriorityType startSign = GetPrioritySign((ushort)segmentId, true);
 					if (startSign != PriorityType.None) {
-						ushort startNodeId = segGeo.StartNodeId;
+						ushort startNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, true);
 						if (Services.NetService.IsNodeValid(startNodeId)) {
 							Log._Debug($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, startNodeId, (int)startSign));
@@ -1203,7 +1188,7 @@ namespace TrafficManager.Manager.Impl {
 
 					PriorityType endSign = GetPrioritySign((ushort)segmentId, false);
 					if (endSign != PriorityType.None) {
-						ushort endNodeId = segGeo.EndNodeId;
+						ushort endNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, false);
 						if (Services.NetService.IsNodeValid(endNodeId)) {
 							Log._Debug($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, endNodeId, (int)endSign));

@@ -64,5 +64,6 @@ namespace GenericGameBridge.Service {
 		void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
 		void ProcessSegment(ushort segmentId, ref NetSegment segment, NetSegmentHandler handler);
 		void PublishSegmentChanges(ushort segmentId);
+		bool? IsStartNode(ushort segmentId, ushort nodeId);
 	}
 }

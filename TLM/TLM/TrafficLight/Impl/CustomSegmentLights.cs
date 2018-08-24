@@ -26,23 +26,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		[Obsolete]
 		public ushort NodeId {
 			get {
-				SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
-
-				if (segGeo == null) {
-					Log.Info($"CustomSegmentLights.NodeId: No geometry information available for segment {SegmentId}");
-					return 0;
-				}
-
-				if (StartNode)
-					return segGeo.StartNodeId;
-				else
-					return segGeo.EndNodeId;
-			}
-		}
-
-		public short ClockwiseIndex {
-			get {
-				return LightsManager.ClockwiseIndexOfSegmentEnd(this);
+				return Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
 			}
 		}
 
@@ -155,7 +139,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		[Obsolete]
 		protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager, ushort nodeId, ushort segmentId, bool calculateAutoPedLight)
-			: this(lightsManager, segmentId, nodeId == SegmentGeometry.Get(segmentId)?.StartNodeId, calculateAutoPedLight) {
+			: this(lightsManager, segmentId, nodeId == Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, true), calculateAutoPedLight) {
 
 		}
 

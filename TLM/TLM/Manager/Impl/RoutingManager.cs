@@ -147,26 +147,17 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (propagate) {
-				SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-				if (segGeo == null) {
-					return;
-				}
-
-				foreach (ushort otherSegmentId in segGeo.GetConnectedSegments(true)) {
-					if (otherSegmentId == 0) {
-						continue;
-					}
-
+				ushort startNodeId = Services.NetService.GetSegmentNodeId(segmentId, true);
+				Services.NetService.IterateNodeSegments(startNodeId, delegate (ushort otherSegmentId, ref NetSegment otherSeg) {
 					RequestRecalculation(otherSegmentId, false);
-				}
+					return true;
+				});
 
-				foreach (ushort otherSegmentId in segGeo.GetConnectedSegments(false)) {
-					if (otherSegmentId == 0) {
-						continue;
-					}
-
+				ushort endNodeId = Services.NetService.GetSegmentNodeId(segmentId, false);
+				Services.NetService.IterateNodeSegments(endNodeId, delegate (ushort otherSegmentId, ref NetSegment otherSeg) {
 					RequestRecalculation(otherSegmentId, false);
-				}
+					return true;
+				});
 			}
 		}
 

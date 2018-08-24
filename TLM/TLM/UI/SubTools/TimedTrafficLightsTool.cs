@@ -1230,18 +1230,6 @@ namespace TrafficManager.UI.SubTools {
 							}
 						}
 
-						// Draw light index
-						/*if (!timedActive && _timedEditStep < 0 && lightOffset == 0) {
-							var indexSize = 20f * zoom;
-							var yOffset = indexSize + 77f * zoom - modeHeight * 2;
-							//var carNumRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset, counterSize, counterSize);
-							var segIndexRect = new Rect(offsetScreenPos.x, offsetScreenPos.y - yOffset - indexSize - 2f, indexSize, indexSize);
-
-							_counterStyle.fontSize = (int)(15f * zoom);
-							_counterStyle.normal.textColor = new Color(0f, 0f, 1f);
-							GUI.Label(segIndexRect, $"#{liveSegmentLight.ClockwiseIndex+1}", _counterStyle);
-						}*/
-
 #if DEBUG
 						if (timedActive /*&& _timedShowNumbers*/) {
 							//var prioSeg = TrafficPriorityManager.Instance.GetPrioritySegment(nodeId, srcSegmentId);

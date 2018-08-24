@@ -177,7 +177,6 @@ namespace TrafficManager.Geometry.Impl {
 				"\t" + $"OnlyHighways = {OnlyHighways}\n" +
 				"\t" + $"OutgoingOneWay = {OutgoingOneWay}\n" +
 				"\t" + $"IncomingOneWay = {IncomingOneWay}\n" +
-				"\t" + $"ClockwiseIndex = {ClockwiseIndex}\n" +
 				"SegmentEndGeometry]";
 		}
 
@@ -309,24 +308,6 @@ namespace TrafficManager.Geometry.Impl {
 			return SegmentGeometry.Get(SegmentId, ignoreInvalid);
 		}
 
-		public short ClockwiseIndex {
-			get {
-				// calculate clockwise index
-				short clockwiseIndex = -1;
-				Constants.ServiceFactory.NetService.IterateNodeSegments(NodeId, ClockDirection.Clockwise, delegate (ushort sId, ref NetSegment segment) {
-					++clockwiseIndex;
-					//Log._Debug($"SegmentEndGeometry.Recalculate: Setting clockwise index of seg. {sId} to {clockwiseIndex} (we are @ seg. {SegmentId})");
-
-					if (sId == SegmentId) {
-						return false;
-					}
-					return true;
-				});
-
-				return clockwiseIndex;
-			}
-		}
-
 		public void Recalculate(GeometryCalculationMode calcMode) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
@@ -368,15 +349,11 @@ namespace TrafficManager.Geometry.Impl {
 
 			//ItemClass connectionClass = netManager.m_segments.m_buffer[SegmentId].Info.GetConnectionClass();
 
-			ushort firstClockwiseSegmentId = 0;
 			bool hasOtherSegments = false;
 			for (var s = 0; s < 8; s++) {
 				ushort otherSegmentId = 0;
 				Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 					otherSegmentId = node.GetSegment(s);
-					if (s == 0) {
-						firstClockwiseSegmentId = otherSegmentId;
-					}
 					return true;
 				});
 				if (otherSegmentId == 0 || otherSegmentId == SegmentId || ! SegmentGeometry.IsValid(otherSegmentId))

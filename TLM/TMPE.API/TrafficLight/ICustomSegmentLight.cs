@@ -11,7 +11,6 @@ namespace TrafficManager.TrafficLight {
 		ushort NodeId { get; }
 		ushort SegmentId { get; }
 		bool StartNode { get; }
-		short ClockwiseIndex { get; }
 		LightMode CurrentMode { get; set; }
 		LightMode InternalCurrentMode { get; set; } // TODO should not be defined here
 		RoadBaseAI.TrafficLightState LightLeft { get; }

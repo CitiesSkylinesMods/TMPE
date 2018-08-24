@@ -107,12 +107,12 @@ namespace TrafficManager.UI.SubTools {
 			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
 			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
-			SegmentGeometry geometry = SegmentGeometry.Get(SelectedSegmentId);
-			if (geometry == null) {
-				Log.Error($"LaneArrowTool._guiLaneChangeWindow: No geometry information available for segment {SelectedSegmentId}");
+
+			bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+			if (startNode == null) {
+				Log.Error($"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} is not connected to node {SelectedNodeId}");
 				return;
 			}
-			bool startNode = geometry.StartNodeId == SelectedNodeId;
 
 			GUILayout.BeginHorizontal();
 
@@ -144,15 +144,15 @@ namespace TrafficManager.UI.SubTools {
 				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, LaneArrows.Left, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, (bool)startNode, LaneArrows.Left, out res);
 				}
 				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, LaneArrows.Forward, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, (bool)startNode, LaneArrows.Forward, out res);
 				}
 				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, LaneArrows.Right, out res);
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, (bool)startNode, LaneArrows.Right, out res);
 				}
 
 				if (buttonClicked) {

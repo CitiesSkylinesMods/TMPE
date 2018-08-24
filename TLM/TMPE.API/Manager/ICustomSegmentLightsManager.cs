@@ -20,6 +20,5 @@ namespace TrafficManager.Manager {
 		void SetLightMode(ushort segmentId, bool startNode, ExtVehicleType vehicleType, LightMode mode);
 		bool ApplyLightModes(ushort segmentId, bool startNode, ICustomSegmentLights otherLights);
 		bool SetSegmentLights(ushort nodeId, ushort segmentId, ICustomSegmentLights lights);
-		short ClockwiseIndexOfSegmentEnd(ISegmentEndId endId);
 	}
 }

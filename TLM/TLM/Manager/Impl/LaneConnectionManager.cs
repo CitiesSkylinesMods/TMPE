@@ -492,11 +492,10 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): startNode? {startNode}");
 #endif
 
-			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			if (!nodeGeo.Valid) {
+			if (! Services.NetService.IsNodeValid(nodeId)) {
 #if DEBUGCONN
 				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): invalid node geometry");
+					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): Node is invalid");
 #endif
 				return;
 			}
@@ -510,21 +509,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			ushort[] connectedSegmentIds = segmentGeo.GetConnectedSegments(startNode);
-			if (connectedSegmentIds == null) {
-#if DEBUGCONN
-				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): connectedSegmentIds is null");
-#endif
-				return;
-			}
-			ushort[] allSegmentIds = new ushort[connectedSegmentIds.Length + 1];
-			allSegmentIds[0] = segmentId;
-			Array.Copy(connectedSegmentIds, 0, allSegmentIds, 1, connectedSegmentIds.Length);
-
-			foreach (ushort otherSegmentId in allSegmentIds) {
-				if (otherSegmentId == 0)
-					continue;
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort otherSegmentId, ref NetSegment otherSeg) {
 				ArrowDirection dir = segmentGeo.GetDirection(otherSegmentId, startNode);
 
 #if DEBUGCONN
@@ -537,26 +522,26 @@ namespace TrafficManager.Manager.Impl {
 					case ArrowDirection.Turn:
 						if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
 							if ((arrows & LaneArrows.Right) != LaneArrows.None)
-								continue;
+								return true;
 						} else {
 							if ((arrows & LaneArrows.Left) != LaneArrows.None)
-								continue;
+								return true;
 						}
 						break;
 					case ArrowDirection.Forward:
 						if ((arrows & LaneArrows.Forward) != LaneArrows.None)
-							continue;
+							return true;
 						break;
 					case ArrowDirection.Left:
 						if ((arrows & LaneArrows.Left) != LaneArrows.None)
-							continue;
+							return true;
 						break;
 					case ArrowDirection.Right:
 						if ((arrows & LaneArrows.Right) != LaneArrows.None)
-							continue;
+							return true;
 						break;
 					default:
-						continue;
+						return true;
 				}
 
 #if DEBUGCONN
@@ -607,7 +592,7 @@ namespace TrafficManager.Manager.Impl {
 							arrows |= LaneArrows.Right;
 							break;
 						default:
-							continue;
+							return true;
 					}
 
 #if DEBUGCONN
@@ -615,7 +600,9 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): processing connected segment {otherSegmentId}: arrows={arrows}");
 #endif
 				}
-			}
+
+				return true;
+			});
 
 #if DEBUGCONN
 			if (debug)

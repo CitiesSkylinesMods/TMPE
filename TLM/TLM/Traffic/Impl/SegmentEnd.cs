@@ -224,10 +224,9 @@ namespace TrafficManager.Traffic.Impl {
 				numLanes = segment.Info.m_lanes.Length;
 				return true;
 			});
-			SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
 
-			if (segGeo == null) {
-				Log.Error($"SegmentEnd.Update: No geometry information available for segment {SegmentId}");
+			if (! Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+				Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
 				return;
 			}
 

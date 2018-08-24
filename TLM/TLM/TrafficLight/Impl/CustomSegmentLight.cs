@@ -35,12 +35,6 @@ namespace TrafficManager.TrafficLight.Impl {
 			}
 		}
 
-		public short ClockwiseIndex {
-			get {
-				return lights.ClockwiseIndex;
-			}
-		}
-
 		public LightMode CurrentMode {
 			get { return InternalCurrentMode; }
 			set {
@@ -148,8 +142,12 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ToggleMode() {
-			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
+			if (! Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+				Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
+				return;
+			}
 
+			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
 			if (geometry == null) {
 				Log.Error($"CustomSegmentLight.ToggleMode: No geometry information available for segment {SegmentId}");
 				return;

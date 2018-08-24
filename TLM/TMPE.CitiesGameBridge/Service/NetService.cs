@@ -274,5 +274,18 @@ namespace CitiesGameBridge.Service {
 				return true;
 			});
 		}
+
+		public bool? IsStartNode(ushort segmentId, ushort nodeId) {
+			bool? ret = null;
+			ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment seg) {
+				if (seg.m_startNode == nodeId) {
+					ret = true;
+				} else if (seg.m_endNode == nodeId) {
+					ret = false;
+				}
+				return true;
+			});
+			return ret;
+		}
 	}
 }

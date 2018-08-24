@@ -226,13 +226,6 @@ namespace TrafficManager.Geometry {
 		}
 
 		/// <summary>
-		/// Holds the clockwise index of the segment end
-		/// </summary>
-		short ClockwiseIndex {
-			get;
-		}
-
-		/// <summary>
 		/// Holds whether the segment end is valid
 		/// </summary>
 		bool Valid {

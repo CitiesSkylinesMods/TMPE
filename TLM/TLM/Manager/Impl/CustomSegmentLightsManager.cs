@@ -46,26 +46,19 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="segmentId"></param>
 		/// <param name="startNode"></param>
 		public ICustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
-			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
-			if (segGeometry == null) {
-				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is invalid.");
+			if (! Services.NetService.IsSegmentValid(segmentId)) {
 				return null;
 			}
 
-			ISegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
-			if (endGeometry == null) {
-				Log.Error($"CustomTrafficLightsManager.AddLiveSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
-				return null;
-			}
-
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+			uint currentFrameIndex = Services.SimulationService.CurrentFrameIndex;
 
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
 			bool vehicles;
 			bool pedestrians;
 
-			RoadBaseAI.GetTrafficLightState(endGeometry.NodeId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+			RoadBaseAI.GetTrafficLightState(nodeId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
 				currentFrameIndex - 256u, out vehicleLightState, out pedestrianLightState, out vehicles,
 				out pedestrians);
 
@@ -86,16 +79,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 			Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
-
-			SegmentGeometry segGeometry = SegmentGeometry.Get(segmentId);
-			if (segGeometry == null) {
-				Log.Error($"CustomTrafficLightsManager.AddSegmentLights: Segment {segmentId} is invalid.");
-				return null;
-			}
-
-			ISegmentEndGeometry endGeometry = segGeometry.GetEnd(startNode);
-			if (endGeometry == null) {
-				Log.Error($"CustomTrafficLightsManager.AddSegmentLights: Segment {segmentId} is not connected to a node @ start {startNode}");
+			if (!Services.NetService.IsSegmentValid(segmentId)) {
 				return null;
 			}
 
@@ -124,8 +108,8 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool SetSegmentLights(ushort nodeId, ushort segmentId, ICustomSegmentLights lights) {
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
-			if (endGeo == null) {
+			bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+			if (startNode == null) {
 				return false;
 			}
 
@@ -135,7 +119,7 @@ namespace TrafficManager.Manager.Impl {
 				CustomSegments[segmentId] = customSegment;
 			}
 
-			if (endGeo.StartNode) {
+			if ((bool)startNode) {
 				customSegment.StartNodeLights = lights;
 			} else {
 				customSegment.EndNodeLights = lights;
@@ -296,11 +280,11 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-			ISegmentEndGeometry endGeometry = SegmentGeometry.Get(segmentId)?.GetEnd(nodeId);
-			if (endGeometry == null) {
+			bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+			if (startNode == null) {
 				return null;
 			}
-			return GetSegmentLights(segmentId, endGeometry.StartNode, false);
+			return GetSegmentLights(segmentId, (bool)startNode, false);
 		}
 
 		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
@@ -310,14 +294,6 @@ namespace TrafficManager.Manager.Impl {
 		public override void OnLevelUnloading() {
 			base.OnLevelUnloading();
 			CustomSegments = new CustomSegment[NetManager.MAX_SEGMENT_COUNT];
-		}
-
-		public short ClockwiseIndexOfSegmentEnd(ISegmentEndId endId) {
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(endId.SegmentId)?.GetEnd(endId.StartNode);
-			if (endGeo == null) {
-				return 0;
-			}
-			return endGeo.ClockwiseIndex;
 		}
 	}
 }

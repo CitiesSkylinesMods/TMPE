@@ -109,12 +109,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					ushort sourceSegmentId = clockSortedSourceSegmentIds[i];
 					ushort targetSegmentId = clockSortedTargetSegmentIds[i];
 
-					SegmentGeometry segGeo = SegmentGeometry.Get(targetSegmentId);
-					if (segGeo == null) {
-						throw new Exception($"TimedTrafficLights.PasteSteps: No geometry information available for segment {targetSegmentId}");
-					}
-
-					bool targetStartNode = segGeo.StartNodeId == NodeId;
+					bool targetStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(targetSegmentId, NodeId);
 
 					ICustomSegmentLights sourceLights = sourceStep.CustomSegmentLights[sourceSegmentId];
 					ICustomSegmentLights targetLights = sourceLights.Clone(targetStep, false);
@@ -168,8 +163,6 @@ namespace TrafficManager.TrafficLight.Impl {
 						int targetIndex = (sourceIndex + 1) % clockSortedSegmentIds.Count;
 						ushort targetSegmentId = clockSortedSegmentIds[targetIndex];
 
-						SegmentGeometry targetSegGeo = SegmentGeometry.Get(targetSegmentId); // should never fail here
-
 						Log._Debug($"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Moving light @ seg. {sourceSegmentId} to seg. {targetSegmentId} @ step {stepIndex}");
 
 						ICustomSegmentLights sourceLights = sourceIndex == 0 ? step.RemoveSegmentLights(sourceSegmentId) : bufferedLights;
@@ -177,7 +170,7 @@ namespace TrafficManager.TrafficLight.Impl {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: sourceLights is null @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
 						bufferedLights = step.RemoveSegmentLights(targetSegmentId);
-						sourceLights.Relocate(targetSegmentId, targetSegGeo.StartNodeId == NodeId);
+						sourceLights.Relocate(targetSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(targetSegmentId, NodeId));
 						if (!step.SetSegmentLights(targetSegmentId, sourceLights)) {
 							throw new Exception($"TimedTrafficLights.Rotate({dir}): Error occurred while copying custom lights from {sourceSegmentId} to {targetSegmentId} @ step {stepIndex}: could not set lights for target segment @ sourceIndex={sourceIndex}, targetIndex={targetIndex}");
 						}
@@ -926,19 +919,23 @@ namespace TrafficManager.TrafficLight.Impl {
 			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
+			if (! Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
 #if DEBUGTTL
 				if (debug)
-					Log.Error($"TimedTrafficLights.ChangeLightMode: No geometry information available for segment {segmentId}");
+					Log.Error($"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");
 #endif
+				return;
+			}
+
+			bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+			if (startNode == null) {
 				return;
 			}
 
 			foreach (TimedTrafficLightsStep step in Steps) {
 				step.ChangeLightMode(segmentId, vehicleType, mode);
 			}
-			Constants.ManagerFactory.CustomSegmentLightsManager.SetLightMode(segmentId, segGeo.StartNodeId == NodeId, vehicleType, mode);
+			Constants.ManagerFactory.CustomSegmentLightsManager.SetLightMode(segmentId, (bool)startNode, vehicleType, mode);
 		}
 
 		public void Join(ITimedTrafficLights otherTimedLight) {
