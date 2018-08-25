@@ -112,6 +112,7 @@ namespace TrafficManager.State {
 					memoryStream.Position = 0;
 
 					var binaryFormatter = new BinaryFormatter();
+					binaryFormatter.AssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
 					_configuration = (Configuration)binaryFormatter.Deserialize(memoryStream);
 				} else {
 					Log.Info("No data to deserialize!");
