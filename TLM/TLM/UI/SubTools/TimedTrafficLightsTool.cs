@@ -16,6 +16,7 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
 using ColossalFramework.UI;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI.SubTools {
 	public class TimedTrafficLightsTool : SubTool {
@@ -189,12 +190,12 @@ namespace TrafficManager.UI.SubTools {
 						MainTool.SetToolMode(ToolMode.TimedLightsSelectNode);
 						return;
 					}
-					
-					// compare geometry
-					NodeGeometry sourceNodeGeo = NodeGeometry.Get(nodeIdToCopy);
-					NodeGeometry targetNodeGeo = NodeGeometry.Get(HoveredNodeId);
 
-					if (sourceNodeGeo.NumSegmentEnds != targetNodeGeo.NumSegmentEnds) {
+					// compare geometry
+					int numSourceSegments = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeIdToCopy].CountSegments();
+					int numTargetSegments = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeIdToCopy].CountSegments();
+
+					if (numSourceSegments != numTargetSegments) {
 						MainTool.ShowTooltip(Translation.GetString("The_chosen_traffic_light_program_is_incompatible_to_this_junction"));
 						return;
 					}
@@ -1041,6 +1042,8 @@ namespace TrafficManager.UI.SubTools {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 			CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
 			JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
+			IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			var hoveredSegment = false;
 
@@ -1062,13 +1065,20 @@ namespace TrafficManager.UI.SubTools {
 				var diff = nodePos - Camera.main.transform.position;
 				var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 
-				NodeGeometry nodeGeometry = NodeGeometry.Get(nodeId);
-				foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
-					if (end == null)
-						continue;
-					ushort srcSegmentId = end.SegmentId; // source segment
+				for (int i = 0; i < 8; ++i) {
+					ushort srcSegmentId = 0;
+					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+						srcSegmentId = node.GetSegment(i);
+						return true;
+					});
 
-					ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, end.StartNode, false);
+					if (srcSegmentId == 0) {
+						continue;
+					}
+
+					bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(srcSegmentId, nodeId);
+
+					ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(srcSegmentId, startNode, false);
 					if (liveSegmentLights == null)
 						continue;
 
@@ -1258,7 +1268,7 @@ namespace TrafficManager.UI.SubTools {
 							if (timedActive && _timedShowNumbers) {
 								var counterSize = 20f * zoom;
 
-								var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 3);
+								var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 3);
 
 								float numOffset;
 
@@ -1286,22 +1296,16 @@ namespace TrafficManager.UI.SubTools {
 							}
 						}
 
-						SegmentGeometry geometry = SegmentGeometry.Get(srcSegmentId);
-						if (geometry == null) {
-							Log.Error($"TimedTrafficLightsTool.ShowGUI: No geometry information available for segment {srcSegmentId}");
-							continue;
-						}
-						bool startNode = geometry.StartNodeId == nodeId;
-						if (geometry.IsOutgoingOneWay(startNode))
+						ExtSegment seg = segMan.ExtSegments[srcSegmentId];
+						ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(srcSegmentId, startNode)];
+
+						if (seg.oneWay && segEnd.outgoing)
 							continue;
 
-						var hasOutgoingLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
-						var hasOutgoingForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
-						var hasOutgoingRightSegment = geometry.HasOutgoingRightSegment(startNode);
-
-						/*var hasLeftSegment = geometry.HasLeftSegment(startNode);
-						var hasForwardSegment = geometry.HasStraightSegment(startNode);
-						var hasRightSegment = geometry.HasRightSegment(startNode);*/
+						bool hasOutgoingLeftSegment;
+						bool hasOutgoingForwardSegment;
+						bool hasOutgoingRightSegment;
+						segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId], out hasOutgoingLeftSegment, out hasOutgoingForwardSegment, out hasOutgoingRightSegment);
 
 						bool hasOtherLight = false;
 						switch (liveSegmentLight.CurrentMode) {
@@ -1332,7 +1336,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 0);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 
 										float numOffset;
 
@@ -1390,7 +1394,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 1);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
 
 										float numOffset;
 
@@ -1452,7 +1456,7 @@ namespace TrafficManager.UI.SubTools {
 								// COUNTER
 								if (timedActive && _timedShowNumbers) {
 									var counterSize = 20f * zoom;
-									var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 0);
+									var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 				
 									float numOffset;
 									if (liveSegmentLight.LightMain == RoadBaseAI.TrafficLightState.Red) {
@@ -1528,7 +1532,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, lightType);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, lightType);
 
 										float numOffset;
 
@@ -1584,7 +1588,7 @@ namespace TrafficManager.UI.SubTools {
 										if (timedActive && _timedShowNumbers) {
 											var counterSize = 20f * zoom;
 
-											var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 2);
+											var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
 
 											float numOffset;
 
@@ -1653,7 +1657,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 1);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
 
 										float numOffset;
 
@@ -1717,7 +1721,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 0);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 
 										float numOffset;
 
@@ -1776,7 +1780,7 @@ namespace TrafficManager.UI.SubTools {
 									if (timedActive && _timedShowNumbers) {
 										var counterSize = 20f * zoom;
 
-										var counter = timedNode.CheckNextChange(srcSegmentId, end.StartNode, vehicleType, 2);
+										var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
 
 										float numOffset;
 

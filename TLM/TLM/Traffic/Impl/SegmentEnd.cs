@@ -219,18 +219,24 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		public void Update() {
-			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate(ushort segmentId, ref NetSegment segment) {
+			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
 				StartNode = segment.m_startNode == NodeId;
 				numLanes = segment.Info.m_lanes.Length;
 				return true;
 			});
 
-			if (! Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
 				Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
 				return;
 			}
 
-			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
+				RebuildVehicleNumDicts(ref node);
+				return true;
+			});
+		}
+
+		private void RebuildVehicleNumDicts(ref NetNode node) {
 			numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 			numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 
@@ -241,15 +247,29 @@ namespace TrafficManager.Traffic.Impl {
 				numVehiclesMovingToSegmentId[laneIndex] = numVehicleMoving;
 				numVehiclesGoingToSegmentId[laneIndex] = numVehicleGoing;
 
-				foreach (ushort otherSegmentId in outgoingSegmentIds) {
-					numVehicleMoving[otherSegmentId] = 0;
-					numVehicleGoing[otherSegmentId] = 0;
-				}
-				numVehicleMoving[SegmentId] = 0;
-				numVehicleGoing[SegmentId] = 0;
-
 				return true;
 			});
+
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+			for (int i = 0; i < 8; ++i) {
+				ushort segId = node.GetSegment(i);
+				if (segId == 0) {
+					continue;
+				}
+
+				if (!segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, NodeId))].outgoing) {
+					continue;
+				}
+				
+				foreach (TinyDictionary<ushort, uint> numVehiclesMovingToSegId in numVehiclesMovingToSegmentId) {
+					numVehiclesMovingToSegId[segId] = 0;
+				}
+
+				foreach (TinyDictionary<ushort, uint> numVehiclesGoingToSegId in numVehiclesGoingToSegmentId) {
+					numVehiclesGoingToSegId[segId] = 0;
+				}
+			}
 		}
 	}
 }

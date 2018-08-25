@@ -110,9 +110,9 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
-
-			if (endGeo.OutgoingOneWay) {
+			IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			if (segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing && segMan.ExtSegments[segmentId].oneWay) {
 				reason = SetPrioritySignUnableReason.NotIncoming;
 #if DEBUG
 				if (debug) {
@@ -303,14 +303,16 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		public bool HasPriority(ushort vehicleId, ref Vehicle vehicle, ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos, ref NetNode transitNode) {
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(curPos.m_segment)?.GetEnd(startNode);
-			if (endGeo == null) {
-#if DEBUG
-				Log.Warning($"TrafficPriorityManager.HasPriority({vehicleId}): No segment end geometry found for segment {curPos.m_segment} @ {startNode}");
-				return true;
-#endif
-			}
+		public bool HasPriority(ushort vehicleId, ref Vehicle vehicle, ref PathUnit.Position curPos, ref ExtSegmentEnd curEnd, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos, ref NetNode transitNode) {
+			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+//			ISegmentEndGeometry endGeo = SegmentGeometry.Get(curPos.m_segment)?.GetEnd(startNode);
+//			if (Constants.ManagerFactory.ExtSegmentManager == null) {
+//#if DEBUG
+//				Log.Warning($"TrafficPriorityManager.HasPriority({vehicleId}): No segment end geometry found for segment {curPos.m_segment} @ {startNode}");
+//				return true;
+//#endif
+//			}
 
 			/*SegmentEnd end = SegmentEndManager.Instance.GetSegmentEnd(curPos.m_segment, startNode);
 			if (end == null) {
@@ -388,27 +390,26 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): estimated target time to transit node {transitNodeId} is {targetTimeToTransitNode} for vehicle {vehicleId}");
 #endif
 
-			ArrowDirection targetToDir = endGeo.GetDirection(nextPos.m_segment); // absolute target direction of target vehicle
+			ArrowDirection targetToDir = extSegEndMan.GetDirection(ref curEnd, nextPos.m_segment); // absolute target direction of target vehicle
 
 			// iterate over all cars approaching the transit node and check if the target vehicle should be prioritized
 			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
 			CustomSegmentLightsManager segLightsManager = CustomSegmentLightsManager.Instance;
 
-			NodeGeometry transitNodeGeo = NodeGeometry.Get(transitNodeId);
-			foreach (SegmentEndGeometry otherEndGeo in transitNodeGeo.SegmentEndGeometries) {
-				if (otherEndGeo == null) {
+			for (int i = 0; i < 8; ++i) {
+				ushort otherSegmentId = transitNode.GetSegment(i);
+				if (otherSegmentId == curEnd.segmentId || otherSegmentId == 0) {
 					continue;
 				}
 
-				ushort otherSegmentId = otherEndGeo.SegmentId;
-				if (otherSegmentId == curPos.m_segment) {
-					continue;
-				}
-
-				bool otherStartNode = otherEndGeo.StartNode;
-				if (otherEndGeo.OutgoingOneWay) {
-					// not an incoming segment
-					continue;
+				bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, transitNodeId);
+				ISegmentEnd incomingEnd = SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
+				if (incomingEnd == null) {
+#if DEBUG
+					if (debug)
+						Log.Error($"TrafficPriorityManager.HasPriority({vehicleId}): No segment end found for other segment {otherSegmentId} @ {otherStartNode}");
+#endif
+					return true;
 				}
 
 				ICustomSegmentLights otherLights = null;
@@ -423,16 +424,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 				bool incomingOnMain = otherSign == PriorityType.Main;
 
-				ISegmentEnd incomingEnd = SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
-				if (incomingEnd == null) {
-#if DEBUG
-					if (debug)
-						Log.Error($"TrafficPriorityManager.HasPriority({vehicleId}): No segment end found for other segment {otherSegmentId} @ {otherStartNode}");
-#endif
-					continue;
-				}
-
-				ArrowDirection incomingFromDir = endGeo.GetDirection(otherSegmentId); // absolute incoming direction of incoming vehicle
+				ArrowDirection incomingFromDir = extSegEndMan.GetDirection(ref curEnd, otherSegmentId); // absolute incoming direction of incoming vehicle
 
 #if DEBUG
 				if (debug)
@@ -447,7 +439,7 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): checking other vehicle {incomingVehicleId} @ seg. {otherSegmentId}");
 					}
 #endif
-					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, endGeo, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.ExtVehicles[incomingVehicleId], incomingOnMain, otherEndGeo, otherLights, incomingFromDir)) {
+					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, ref curEnd, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.ExtVehicles[incomingVehicleId], incomingOnMain, ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(otherSegmentId, otherStartNode)], otherLights, incomingFromDir)) {
 #if DEBUG
 						if (debug) {
 							Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): incoming vehicle {incomingVehicleId} is conflicting.");
@@ -469,9 +461,9 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		private bool IsConflictingVehicle(bool debug, Vector3 transitNodePos, float targetTimeToTransitNode, ushort vehicleId, ref Vehicle vehicle,
-						ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos, bool onMain, ISegmentEndGeometry endGeo,
+						ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos, bool onMain, ref ExtSegmentEnd curEnd,
 						ArrowDirection targetToDir, ushort incomingVehicleId, ref Vehicle incomingVehicle, ref ExtVehicle incomingState, bool incomingOnMain,
-						ISegmentEndGeometry incomingEndGeo, ICustomSegmentLights incomingLights, ArrowDirection incomingFromDir) {
+						ref ExtSegmentEnd incomingEnd, ICustomSegmentLights incomingLights, ArrowDirection incomingFromDir) {
 #if DEBUG
 			if (debug) {
 				Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Checking against other vehicle {incomingVehicleId}.");
@@ -498,7 +490,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ArrowDirection incomingToRelDir = incomingEndGeo.GetDirection(incomingState.nextSegmentId); // relative target direction of incoming vehicle
+			ArrowDirection incomingToRelDir = Constants.ManagerFactory.ExtSegmentEndManager.GetDirection(ref incomingEnd, incomingState.nextSegmentId); // relative target direction of incoming vehicle
 
 			if (incomingLights != null) {
 				ICustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
@@ -1030,28 +1022,28 @@ namespace TrafficManager.Manager.Impl {
 			return true;
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			if (!PrioritySegments[geometry.SegmentId].IsDefault()) {
-				AddInvalidPrioritySegment(geometry.SegmentId, ref PrioritySegments[geometry.SegmentId]);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			if (!PrioritySegments[seg.segmentId].IsDefault()) {
+				AddInvalidPrioritySegment(seg.segmentId, ref PrioritySegments[seg.segmentId]);
 			}
-			RemovePrioritySignsFromSegment(geometry.SegmentId);
+			RemovePrioritySignsFromSegment(seg.segmentId);
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
-			if (! MaySegmentHavePrioritySign(geometry.SegmentId, true)) {
-				RemovePrioritySignFromSegmentEnd(geometry.SegmentId, true);
+		protected override void HandleValidSegment(ref ExtSegment seg) {
+			if (! MaySegmentHavePrioritySign(seg.segmentId, true)) {
+				RemovePrioritySignFromSegmentEnd(seg.segmentId, true);
 			} else {
-				UpdateNode(geometry.StartNodeId);
+				UpdateNode(Services.NetService.GetSegmentNodeId(seg.segmentId, true));
 			}
 
-			if (!MaySegmentHavePrioritySign(geometry.SegmentId, false)) {
-				RemovePrioritySignFromSegmentEnd(geometry.SegmentId, false);
+			if (!MaySegmentHavePrioritySign(seg.segmentId, false)) {
+				RemovePrioritySignFromSegmentEnd(seg.segmentId, false);
 			} else {
-				UpdateNode(geometry.EndNodeId);
+				UpdateNode(Services.NetService.GetSegmentNodeId(seg.segmentId, false));
 			}
 		}
 
-		protected override void HandleSegmentEndReplacement(SegmentEndReplacement replacement, ISegmentEndGeometry newEndGeo) {
+		protected override void HandleSegmentEndReplacement(SegmentEndReplacement replacement, ref ExtSegmentEnd segEnd) {
 			ISegmentEndId oldSegmentEndId = replacement.oldSegmentEndId;
 			ISegmentEndId newSegmentEndId = replacement.newSegmentEndId;
 

@@ -16,7 +16,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
 		/// </summary>
 		[HarmonyPrefix]
 		public static bool Prefix(ushort nodeID, ref NetNode nodeData, ushort segmentID, ref NetSegment segmentData, ref NetNode.Flags flags, ref Color color) {
-			if (!Options.timedLightsEnabled || Constants.ManagerFactory.TrafficLightSimulationManager.TrafficLightSimulations[nodeID].IsSimulationRunning()) {
+			if (!Options.timedLightsEnabled || !Constants.ManagerFactory.TrafficLightSimulationManager.TrafficLightSimulations[nodeID].IsSimulationRunning()) {
 				return true;
 			}
 

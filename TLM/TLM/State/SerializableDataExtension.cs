@@ -49,22 +49,6 @@ namespace TrafficManager.State {
 				loadingSucceeded = false;
 			}
 
-			try {
-				Log.Info("Initializing node geometries");
-				NodeGeometry.OnBeforeLoadData();
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing NodeGeometry: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-			
-			try {
-				Log.Info("Initializing segment geometries");
-				SegmentGeometry.OnBeforeLoadData();
-			} catch (Exception e) {
-				Log.Error($"OnLoadData: Error while initializing SegmentGeometry: {e.ToString()}");
-				loadingSucceeded = false;
-			}
-
 			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
 				try {
 					Log.Info($"OnBeforeLoadData: {manager.GetType().Name}");
@@ -367,7 +351,9 @@ namespace TrafficManager.State {
 					memoryStream.Close();
 				}
 
-				foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+				List<ICustomManager> reverseManagers = new List<ICustomManager>(LoadingExtension.RegisteredManagers);
+				reverseManagers.Reverse();
+				foreach (ICustomManager manager in reverseManagers) {
 					try {
 						Log.Info($"OnAfterSaveData: {manager.GetType().Name}");
 						manager.OnAfterSaveData();

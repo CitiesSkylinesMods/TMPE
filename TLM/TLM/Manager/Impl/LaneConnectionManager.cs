@@ -11,6 +11,7 @@ using UnityEngine;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class LaneConnectionManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>>, ILaneConnectionManager {
@@ -341,17 +342,17 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUGCONN
 			bool debug = GlobalConfig.Instance.Debug.Switches[23];
 			if (debug)
-				Log._Debug($"LaneConnectionManager.HandleInvalidSegment({geometry.SegmentId}): Segment has become invalid. Removing lane connections.");
+				Log._Debug($"LaneConnectionManager.HandleInvalidSegment({seg.segmentId}): Segment has become invalid. Removing lane connections.");
 #endif
-			RemoveLaneConnectionsFromSegment(geometry.SegmentId, false, false);
-			RemoveLaneConnectionsFromSegment(geometry.SegmentId, true);
+			RemoveLaneConnectionsFromSegment(seg.segmentId, false, false);
+			RemoveLaneConnectionsFromSegment(seg.segmentId, true);
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 
 		}
 
@@ -500,17 +501,11 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			SegmentGeometry segmentGeo = SegmentGeometry.Get(segmentId);
-			if (segmentGeo == null) {
-#if DEBUGCONN
-				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): invalid segment geometry");
-#endif
-				return;
-			}
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
 			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort otherSegmentId, ref NetSegment otherSeg) {
-				ArrowDirection dir = segmentGeo.GetDirection(otherSegmentId, startNode);
+				ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
 
 #if DEBUGCONN
 				if (debug)

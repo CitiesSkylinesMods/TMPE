@@ -431,7 +431,7 @@ namespace TrafficManager.UI.SubTools {
 									return true;
 								}
 
-								Constants.ServiceFactory.NetService.ProcessSegment(data.segVisitData.curGeo.SegmentId, delegate (ushort curSegmentId, ref NetSegment curSegment) {
+								Constants.ServiceFactory.NetService.ProcessSegment(data.segVisitData.curSeg.segmentId, delegate (ushort curSegmentId, ref NetSegment curSegment) {
 									NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[data.curLanePos.laneIndex];
 									SpeedLimitManager.Instance.SetSpeedLimit(curSegmentId, data.curLanePos.laneIndex, curLaneInfo, data.curLanePos.laneId, speedLimitToSet);
 									return true;
@@ -493,7 +493,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 								bool reverse = data.segVisitData.viaStartNode == data.segVisitData.viaInitialStartNode;
 
-								ushort otherSegmentId = data.segVisitData.curGeo.SegmentId;
+								ushort otherSegmentId = data.segVisitData.curSeg.segmentId;
 								NetInfo otherSegmentInfo = netManager.m_segments.m_buffer[otherSegmentId].Info;
 								uint laneId = data.curLanePos.laneId;
 								byte laneIndex = data.curLanePos.laneIndex;

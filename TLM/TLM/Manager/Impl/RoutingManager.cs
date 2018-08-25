@@ -11,6 +11,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Traffic.Enums;
 using TrafficManager.UI;
 using TrafficManager.Util;
@@ -269,14 +270,14 @@ namespace TrafficManager.Manager.Impl {
 
 			segmentRoutings[segmentId].Reset();
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				return;
-			}
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
+			ExtSegmentEnd startSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)];
+			ExtSegmentEnd endSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)];
 
-			segmentRoutings[segmentId].highway = segGeo.Highway;
-			segmentRoutings[segmentId].startNodeOutgoingOneWay = segGeo.IsOutgoingOneWay(true);
-			segmentRoutings[segmentId].endNodeOutgoingOneWay = segGeo.IsOutgoingOneWay(false);
+			segmentRoutings[segmentId].highway = seg.highway;
+			segmentRoutings[segmentId].startNodeOutgoingOneWay = seg.oneWay && startSegEnd.outgoing;
+			segmentRoutings[segmentId].endNodeOutgoingOneWay = seg.oneWay && endSegEnd.outgoing;
 
 #if DEBUGROUTING
 			if (debugBasic)
@@ -312,28 +313,14 @@ namespace TrafficManager.Manager.Impl {
 
 			bool leftHandDrive = Constants.ServiceFactory.SimulationService.LeftHandDrive;
 
-			SegmentGeometry prevSegGeo = SegmentGeometry.Get(segmentId);
-			if (prevSegGeo == null) {
-#if DEBUGROUTING
-				if (debugFine)
-					Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): No segment geometry found");
-#endif
-				//Log.Warning($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegGeo for segment {segmentId} is null");
-				return;
-			}
-			ISegmentEndGeometry prevEndGeo = prevSegGeo.GetEnd(startNode);
-			if (prevEndGeo == null) {
-#if DEBUGROUTING
-				if (debugFine)
-					Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): No segment end geometry found");
-#endif
-				return;
-			}
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
+			ExtSegmentEnd prevEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
 			ushort prevSegmentId = segmentId;
 			int prevLaneIndex = laneIndex;
 			uint prevLaneId = laneId;
-			ushort nextNodeId = prevEndGeo.NodeId;
+			ushort nextNodeId = prevEnd.nodeId;
 
 			NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[prevLaneIndex];
 			if (!prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES)) {
@@ -345,44 +332,71 @@ namespace TrafficManager.Manager.Impl {
 			int prevSimilarLaneCount = prevLaneInfo.m_similarLaneCount;
 			int prevInnerSimilarLaneIndex = CalcInnerSimilarLaneIndex(prevSegmentId, prevLaneIndex);
 			int prevOuterSimilarLaneIndex = CalcOuterSimilarLaneIndex(prevSegmentId, prevLaneIndex);
-			bool prevHasBusLane = prevSegGeo.BusLane;
+			bool prevHasBusLane = prevSeg.buslane;
 
 			bool nextIsJunction = false;
 			bool nextIsTransition = false;
 			bool nextIsEndOrOneWayOut = false;
 			bool nextHasTrafficLights = false;
+			bool nextHasPrioritySigns = Constants.ManagerFactory.TrafficPriorityManager.HasNodePrioritySign(nextNodeId);
+			bool nextIsRealJunction = false;
 			Constants.ServiceFactory.NetService.ProcessNode(nextNodeId, delegate (ushort nodeId, ref NetNode node) {
 				nextIsJunction = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 				nextIsTransition = (node.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 				nextHasTrafficLights = (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 				nextIsEndOrOneWayOut = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+				nextIsRealJunction = node.CountSegments() >= 3;
 				return true;
 			});
 
 			bool nextIsSimpleJunction = false;
 			bool nextIsSplitJunction = false;
-			if (Options.highwayRules && !nextHasTrafficLights) {
+			if (Options.highwayRules && !nextHasTrafficLights && !nextHasPrioritySigns) {
 				// determine if junction is a simple junction (highway rules only apply to simple junctions)
-				NodeGeometry nodeGeo = NodeGeometry.Get(nextNodeId);
-				nextIsSimpleJunction = nodeGeo.SimpleJunction;
-				nextIsSplitJunction = nodeGeo.NumOutgoingSegments > 1;
+				int numOutgoing = 0;
+				int numIncoming = 0;
+
+				for (int i = 0; i < 8; ++i) {
+					ushort segId = 0;
+					Constants.ServiceFactory.NetService.ProcessNode(nextNodeId, delegate (ushort nId, ref NetNode node) {
+						segId = node.GetSegment(i);
+						return true;
+					});
+
+					if (segId == 0) {
+						continue;
+					}
+
+					bool start = (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, nextNodeId);
+					ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, start)];
+
+					if (segEnd.incoming) {
+						++numIncoming;
+					}
+
+					if (segEnd.outgoing) {
+						++numOutgoing;
+					}
+				}
+
+				nextIsSimpleJunction = numOutgoing == 1 || numIncoming == 1;
+				nextIsSplitJunction = numOutgoing > 1;
 			}
-			bool isNextRealJunction = prevSegGeo.CountOtherSegments(startNode) > 1;
-			bool nextAreOnlyOneWayHighways = prevEndGeo.OnlyHighways;
+			bool nextAreOnlyOneWayHighways = Constants.ManagerFactory.ExtSegmentEndManager.CalculateOnlyHighways(prevEnd.segmentId, prevEnd.startNode);
 
 			// determine if highway rules should be applied
-			bool onHighway = Options.highwayRules && nextAreOnlyOneWayHighways && prevEndGeo.OutgoingOneWay && prevSegGeo.Highway;
+			bool onHighway = Options.highwayRules && nextAreOnlyOneWayHighways && prevEnd.outgoing && prevSeg.oneWay && prevSeg.highway;
 			bool applyHighwayRules = onHighway && nextIsSimpleJunction;
-			bool applyHighwayRulesAtJunction = applyHighwayRules && isNextRealJunction;
+			bool applyHighwayRulesAtJunction = applyHighwayRules && nextIsRealJunction;
 			bool iterateViaGeometry = applyHighwayRulesAtJunction && prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ARROW_VEHICLE_TYPES);
 			ushort nextSegmentId = iterateViaGeometry ? segmentId : (ushort)0; // start with u-turns at highway junctions
 
 #if DEBUGROUTING
 			if (debugFine) {
-				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegment={segmentId}. Starting exploration with nextSegment={nextSegmentId} @ nextNodeId={nextNodeId} -- onHighway={onHighway} applyHighwayRules={applyHighwayRules} applyHighwayRulesAtJunction={applyHighwayRulesAtJunction} Options.highwayRules={Options.highwayRules} nextIsSimpleJunction={nextIsSimpleJunction} nextAreOnlyOneWayHighways={nextAreOnlyOneWayHighways} prevEndGeo.OutgoingOneWay={prevEndGeo.OutgoingOneWay} prevSegGeo.IsHighway()={prevSegGeo.Highway} iterateViaGeometry={iterateViaGeometry}");
+				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegment={segmentId}. Starting exploration with nextSegment={nextSegmentId} @ nextNodeId={nextNodeId} -- onHighway={onHighway} applyHighwayRules={applyHighwayRules} applyHighwayRulesAtJunction={applyHighwayRulesAtJunction} Options.highwayRules={Options.highwayRules} nextIsSimpleJunction={nextIsSimpleJunction} nextAreOnlyOneWayHighways={nextAreOnlyOneWayHighways} prevEndGeo.OutgoingOneWay={prevEnd.outgoing && prevSeg.oneWay} prevSegGeo.IsHighway()={prevSeg.highway} iterateViaGeometry={iterateViaGeometry}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegIsInverted={prevSegIsInverted} leftHandDrive={leftHandDrive}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSimilarLaneCount={prevSimilarLaneCount} prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex} prevOuterSimilarLaneIndex={prevOuterSimilarLaneIndex} prevHasBusLane={prevHasBusLane}");
-				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextIsJunction={nextIsJunction} nextIsEndOrOneWayOut={nextIsEndOrOneWayOut} nextHasTrafficLights={nextHasTrafficLights} nextIsSimpleJunction={nextIsSimpleJunction} nextIsSplitJunction={nextIsSplitJunction} isNextRealJunction={isNextRealJunction}");
+				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextIsJunction={nextIsJunction} nextIsEndOrOneWayOut={nextIsEndOrOneWayOut} nextHasTrafficLights={nextHasTrafficLights} nextIsSimpleJunction={nextIsSimpleJunction} nextIsSplitJunction={nextIsSplitJunction} isNextRealJunction={nextIsRealJunction}");
 			}
 #endif
 
@@ -421,8 +435,8 @@ namespace TrafficManager.Manager.Impl {
 					nextFirstLaneId = segment.m_lanes;
 					return true;
 				});
-				bool nextIsHighway = SegmentGeometry.calculateIsHighway(nextSegmentInfo);
-				bool nextHasBusLane = SegmentGeometry.calculateHasBusLane(nextSegmentInfo);
+				bool nextIsHighway = Constants.ManagerFactory.ExtSegmentManager.CalculateIsHighway(nextSegmentId);
+				bool nextHasBusLane = Constants.ManagerFactory.ExtSegmentManager.CalculateHasBusLane(nextSegmentId);
 
 #if DEBUGROUTING
 				if (debugFine) {
@@ -432,7 +446,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 				// determine next segment direction by evaluating the geometry information
-				ArrowDirection nextIncomingDir = prevEndGeo.GetDirection(nextSegmentId);
+				ArrowDirection nextIncomingDir = segEndMan.GetDirection(ref prevEnd, nextSegmentId);
 				bool isNextSegmentValid = nextIncomingDir != ArrowDirection.None;
 
 #if DEBUGROUTING
@@ -850,7 +864,7 @@ namespace TrafficManager.Manager.Impl {
 								if (debugFine)
 									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): u-turn: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
 #endif
-							} else if (isNextRealJunction) {
+							} else if (nextIsRealJunction) {
 #if DEBUGROUTING
 								if (debugFine)
 									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): next is real junction");
@@ -1080,7 +1094,7 @@ namespace TrafficManager.Manager.Impl {
 								byte compatibleLaneDist = 0;
 								if (nextIncomingDir == ArrowDirection.Turn) {
 									compatibleLaneDist = (byte)GlobalConfig.Instance.PathFinding.UturnLaneDistance;
-								} else if (!isNextRealJunction && ((!nextIsJunction && !nextIsTransition) || nextCompatibleLaneCount == prevSimilarLaneCount)) {
+								} else if (!nextIsRealJunction && ((!nextIsJunction && !nextIsTransition) || nextCompatibleLaneCount == prevSimilarLaneCount)) {
 									int relLaneDist = nextCompatibleOuterSimilarIndices[nextTransitionIndex] - prevOuterSimilarLaneIndex; // relative lane distance (positive: change to more outer lane, negative: change to more inner lane)
 									compatibleLaneDist = (byte)Math.Abs(relLaneDist);
 								}
@@ -1116,7 +1130,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 								nextCompatibleTransitionDatas[nextTransitionIndex].distance = compatibleLaneDist;
-								if (onHighway && !isNextRealJunction && compatibleLaneDist > 1) {
+								if (onHighway && !nextIsRealJunction && compatibleLaneDist > 1) {
 									// under normal circumstances vehicles should not change more than one lane on highways at one time
 									nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
 #if DEBUGROUTING
@@ -1360,26 +1374,26 @@ namespace TrafficManager.Manager.Impl {
 			return (finalDir & dir) != NetInfo.Direction.None;
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[1] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == geometry.SegmentId);
+			bool debug = GlobalConfig.Instance.Debug.Switches[1] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == seg.segmentId);
 			if (debug) {
-				Log._Debug($"RoutingManager.HandleInvalidSegment({geometry.SegmentId}) called.");
+				Log._Debug($"RoutingManager.HandleInvalidSegment({seg.segmentId}) called.");
 			}
 #endif
-			Flags.removeHighwayLaneArrowFlagsAtSegment(geometry.SegmentId);
-			ResetRoutingData(geometry.SegmentId);
+			Flags.removeHighwayLaneArrowFlagsAtSegment(seg.segmentId);
+			ResetRoutingData(seg.segmentId);
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[1] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == geometry.SegmentId);
+			bool debug = GlobalConfig.Instance.Debug.Switches[1] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == seg.segmentId);
 			if (debug) {
-				Log._Debug($"RoutingManager.HandleValidSegment({geometry.SegmentId}) called.");
+				Log._Debug($"RoutingManager.HandleValidSegment({seg.segmentId}) called.");
 			}
 #endif
-			ResetRoutingData(geometry.SegmentId);
-			RequestRecalculation(geometry.SegmentId);
+			ResetRoutingData(seg.segmentId);
+			RequestRecalculation(seg.segmentId);
 		}
 
 		public override void OnAfterLoadData() {

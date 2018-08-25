@@ -10,6 +10,8 @@ using CSUtil.Commons;
 using TrafficManager.State;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Manager;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.TrafficLight.Impl {
 	/// <summary>
@@ -142,24 +144,30 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ToggleMode() {
-			if (! Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
 				Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
 				return;
 			}
 
-			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
-			if (geometry == null) {
-				Log.Error($"CustomSegmentLight.ToggleMode: No geometry information available for segment {SegmentId}");
-				return;
-			}
+			IExtSegmentEndManager extSegMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
+				ToggleMode(ref extSegMan.ExtSegmentEnds[extSegMan.GetIndex(SegmentId, StartNode)], ref node);
+				return true;
+			});
+		}
 
+		private void ToggleMode(ref ExtSegmentEnd segEnd, ref NetNode node) {
+			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			bool startNode = lights.StartNode;
-			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
-			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
-			var hasRightSegment = geometry.HasOutgoingRightSegment(startNode);
 
+			bool hasLeftSegment;
+			bool hasForwardSegment;
+			bool hasRightSegment;
+			extSegEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out hasLeftSegment, out hasForwardSegment, out hasRightSegment);
+				
 #if DEBUG
-			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
+			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasLeftSegment={hasLeftSegment}, hasForwardSegment={hasForwardSegment}, hasRightSegment={hasRightSegment}");
 #endif
 
 			LightMode newMode = LightMode.Simple;
@@ -227,6 +235,12 @@ namespace TrafficManager.TrafficLight.Impl {
 			SetStates(null, null, invertedLight);
 
 			UpdateVisuals();
+		}
+
+		public RoadBaseAI.TrafficLightState GetLightState(ushort toSegmentId) {
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ArrowDirection dir = segEndMan.GetDirection(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(SegmentId, StartNode)], toSegmentId);
+			return GetLightState(dir);
 		}
 
 		public RoadBaseAI.TrafficLightState GetLightState(ArrowDirection dir) {

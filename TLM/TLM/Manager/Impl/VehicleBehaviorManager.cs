@@ -759,6 +759,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			VehicleJunctionTransitState transitState = extVehicle.junctionTransitState;
 			if (extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked) {
 #if DEBUG
@@ -823,7 +824,7 @@ namespace TrafficManager.Manager.Impl {
 
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {
-						bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
+						bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
 
 						if (!hasPriority) {
 							// green light but other cars are incoming and they have priority: stop
@@ -918,7 +919,7 @@ namespace TrafficManager.Manager.Impl {
 						if (debug)
 							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
 #endif
-							bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
+							bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
 #if DEBUG
 						if (debug)
 							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");

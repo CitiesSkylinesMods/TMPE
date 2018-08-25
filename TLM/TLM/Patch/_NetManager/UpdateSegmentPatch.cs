@@ -18,7 +18,7 @@ namespace TrafficManager.Patch._NetManager {
 		/// </summary>
 		[HarmonyPostfix]
 		public static void Postfix(NetManager __instance, ushort segment, ushort fromNode, int level) {
-			SegmentGeometry.Get(segment, true).StartRecalculation(GeometryCalculationMode.Propagate);
+			Constants.ManagerFactory.ExtSegmentManager.Recalculate(segment);
 		}
 	}
 }

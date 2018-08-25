@@ -116,6 +116,9 @@
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
+    <Compile Include="Manager\Impl\ExtNodeManager.cs" />
+    <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
+    <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
@@ -178,8 +181,6 @@
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="TrafficManager.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
-    <Compile Include="Geometry\Impl\NodeGeometry.cs" />
-    <Compile Include="Geometry\Impl\SegmentEndGeometry.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
@@ -189,7 +190,6 @@
     <Compile Include="Custom\AI\CustomRoadBaseAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />

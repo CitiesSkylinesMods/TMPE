@@ -190,19 +190,15 @@ namespace TrafficManager.UI.SubTools {
 			var guiColor = GUI.color;
 
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			for (int i = 0; i < 8; ++i) {
 				ushort segmentId = node.GetSegment(i);
 				if (segmentId == 0)
 					continue;
 
-				SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
-				if (geometry == null) {
-					Log.Error($"JunctionRestrictionsTool.drawSignHandles: No geometry information available for segment {segmentId}");
-					continue;
-				}
-				bool startNode = geometry.StartNodeId == nodeId;
-				bool incoming = geometry.IsIncoming(startNode);
+				bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+				bool incoming = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].incoming;
 
 				int numSignsPerRow = incoming ? 2 : 1;
 

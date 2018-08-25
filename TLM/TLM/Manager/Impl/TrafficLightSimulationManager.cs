@@ -122,18 +122,25 @@ namespace TrafficManager.Manager.Impl {
 
 			// get responsible traffic light
 			//Log._Debug($"GetTrafficLightState: Getting custom light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}.");
-			SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
-			if (geometry == null) {
-				Log.Error($"GetTrafficLightState: No geometry information @ node {nodeId}, segment {fromSegmentId}.");
+			//SegmentGeometry geometry = SegmentGeometry.Get(fromSegmentId);
+			//if (geometry == null) {
+			//	Log.Error($"GetTrafficLightState: No geometry information @ node {nodeId}, segment {fromSegmentId}.");
+			//	vehicleLightState = TrafficLightState.Green;
+			//	pedestrianLightState = TrafficLightState.Green;
+			//	return;
+			//}
+
+			// determine node position at `fromSegment` (start/end)
+			//bool isStartNode = geometry.StartNodeId == nodeId;
+			bool? isStartNode = Services.NetService.IsStartNode(fromSegmentId, nodeId);
+			if (isStartNode == null) {
+				Log.Error($"GetTrafficLightState: Invalid node {nodeId} for segment {fromSegmentId}.");
 				vehicleLightState = TrafficLightState.Green;
 				pedestrianLightState = TrafficLightState.Green;
 				return;
 			}
 
-			// determine node position at `fromSegment` (start/end)
-			bool isStartNode = geometry.StartNodeId == nodeId;
-
-			ICustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, isStartNode, false);
+			ICustomSegmentLights lights = CustomSegmentLightsManager.Instance.GetSegmentLights(fromSegmentId, (bool)isStartNode, false);
 
 			if (lights != null) {
 				// get traffic lights state for pedestrians
@@ -151,15 +158,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			// get traffic light state from responsible traffic light
-			if (toSegmentId == fromSegmentId) {
-				vehicleLightState = Constants.ServiceFactory.SimulationService.LeftHandDrive ? light.LightRight : light.LightLeft;
-			} else if (geometry.IsLeftSegment(toSegmentId, isStartNode)) {
-				vehicleLightState = light.LightLeft;
-			} else if (geometry.IsRightSegment(toSegmentId, isStartNode)) {
-				vehicleLightState = light.LightRight;
-			} else {
-				vehicleLightState = light.LightMain;
-			}
+			vehicleLightState = light.GetLightState(toSegmentId);
 #if DEBUG
 			//Log._Debug($"GetTrafficLightState: Getting light for vehicle {vehicleId} @ node {nodeId}, segment {fromSegmentId}, lane {fromLaneIndex}. vehicleLightState={vehicleLightState}, pedestrianLightState={pedestrianLightState}");
 #endif
@@ -400,39 +399,39 @@ namespace TrafficManager.Manager.Impl {
 			DestroyManualTrafficLight(ref sim);
 		}
 
-		protected override void HandleInvalidNode(INodeGeometry geometry) {
-			RemoveNodeFromSimulation(geometry.NodeId, false, true);
+		protected override void HandleInvalidNode(ushort nodeId, ref NetNode node) {
+			RemoveNodeFromSimulation(nodeId, false, true);
 		}
 
-		protected override void HandleValidNode(INodeGeometry geometry) {
-			if (!TrafficLightSimulations[geometry.NodeId].HasSimulation()) {
+		protected override void HandleValidNode(ushort nodeId, ref NetNode node) {
+			if (!TrafficLightSimulations[nodeId].HasSimulation()) {
 				//Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node is not controlled by a custom traffic light simulation.");
 				return;
 			}
 
-			if (! Flags.mayHaveTrafficLight(geometry.NodeId)) {
-				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Node must not have a traffic light: Removing traffic light simulation.");
-				RemoveNodeFromSimulation(geometry.NodeId, false, true);
+			if (! Flags.mayHaveTrafficLight(nodeId)) {
+				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({nodeId}): Node must not have a traffic light: Removing traffic light simulation.");
+				RemoveNodeFromSimulation(nodeId, false, true);
 				return;
 			}
 
-			foreach (SegmentEndGeometry end in geometry.SegmentEndGeometries) {
-				if (end == null)
+			for (int i = 0; i < 8; ++i) {
+				ushort segmentId = node.GetSegment(i);
+				if (segmentId == 0) {
 					continue;
+				}
 
-				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({geometry.NodeId}): Adding live traffic lights to segment {end.SegmentId}");
+				bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
 
+				Log._Debug($"TrafficLightSimulationManager.HandleValidNode({nodeId}): Adding live traffic lights to segment {segmentId}");
 				// housekeep timed light
-				CustomSegmentLightsManager.Instance.GetSegmentLights(end.SegmentId, end.StartNode).Housekeeping(true, true);
+				CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, startNode).Housekeeping(true, true);
 			}
 
 			// ensure there is a physical traffic light
-			Constants.ServiceFactory.NetService.ProcessNode(geometry.NodeId, delegate (ushort nodeId, ref NetNode node) {
-				Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(geometry.NodeId, ref node);
-				return true;
-			});
+			Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(nodeId, ref node);
 
-			TrafficLightSimulations[geometry.NodeId].Update();
+			TrafficLightSimulations[nodeId].Update();
 		}
 
 		public bool LoadData(List<Configuration.TimedTrafficLights> data) {

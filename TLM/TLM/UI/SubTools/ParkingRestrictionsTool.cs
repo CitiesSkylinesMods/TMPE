@@ -183,7 +183,7 @@ namespace TrafficManager.UI.SubTools {
 								}
 								bool reverse = data.segVisitData.viaStartNode == data.segVisitData.viaInitialStartNode;
 
-								ushort otherSegmentId = data.segVisitData.curGeo.SegmentId;
+								ushort otherSegmentId = data.segVisitData.curSeg.segmentId;
 								NetInfo otherSegmentInfo = netManager.m_segments.m_buffer[otherSegmentId].Info;
 								uint laneId = data.curLanePos.laneId;
 								byte laneIndex = data.curLanePos.laneIndex;

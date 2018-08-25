@@ -18,7 +18,7 @@ namespace TrafficManager.TrafficLight {
 		LinkedList<ExtVehicleType> VehicleTypes { get; } // TODO improve & remove
 		ExtVehicleType?[] VehicleTypeByLaneIndex { get; }
 
-		void CalculateAutoPedestrianLightState(bool propagate = true);
+		void CalculateAutoPedestrianLightState(ref NetNode node, bool propagate = true);
 		bool IsAnyGreen();
 		bool IsAnyInTransition();
 		bool IsAnyLeftGreen();

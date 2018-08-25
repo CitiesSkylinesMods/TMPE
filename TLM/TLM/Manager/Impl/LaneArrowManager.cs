@@ -11,6 +11,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class LaneArrowManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneArrowData>>, ICustomDataManager<string>, ILaneArrowManager {
@@ -57,11 +58,11 @@ namespace TrafficManager.Manager.Impl {
 			});
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			Flags.resetSegmentArrowFlags(geometry.SegmentId);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			Flags.resetSegmentArrowFlags(seg.segmentId);
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 			
 		}
 

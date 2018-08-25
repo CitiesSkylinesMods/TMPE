@@ -38,9 +38,33 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public IExtNodeManager ExtNodeManager {
+			get {
+				return Impl.ExtNodeManager.Instance;
+			}
+		}
+
 		public IExtPathManager ExtPathManager {
 			get {
 				return Impl.ExtPathManager.Instance;
+			}
+		}
+
+		public IExtSegmentManager ExtSegmentManager {
+			get {
+				return Impl.ExtSegmentManager.Instance;
+			}
+		}
+
+		public IExtSegmentEndManager ExtSegmentEndManager {
+			get {
+				return Impl.ExtSegmentEndManager.Instance;
+			}
+		}
+
+		public IExtVehicleManager ExtVehicleManager {
+			get {
+				return Impl.ExtVehicleManager.Instance;
 			}
 		}
 
@@ -137,12 +161,6 @@ namespace TrafficManager.Manager.Impl {
 		public IVehicleRestrictionsManager VehicleRestrictionsManager {
 			get {
 				return Impl.VehicleRestrictionsManager.Instance;
-			}
-		}
-
-		public IExtVehicleManager ExtVehicleManager {
-			get {
-				return Impl.ExtVehicleManager.Instance;
 			}
 		}
 	}

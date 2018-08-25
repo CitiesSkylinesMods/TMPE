@@ -59,7 +59,7 @@ namespace TrafficManager.Util {
 				bool isInitialSeg = segData.initial;
 				bool reverse = !isInitialSeg && segData.viaStartNode == segData.viaInitialStartNode;
 				bool ret = false;
-				Constants.ServiceFactory.NetService.ProcessSegment(segData.curGeo.SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
+				Constants.ServiceFactory.NetService.ProcessSegment(segData.curSeg.segmentId, delegate (ushort segmentId, ref NetSegment segment) {
 					Log._Debug($"SegmentLaneTraverser: Reached segment {segmentId}: isInitialSeg={isInitialSeg} viaStartNode={segData.viaStartNode} viaInitialStartNode={segData.viaInitialStartNode} reverse={reverse}");
 					IList <LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, laneTypeFilter, vehicleTypeFilter, reverse);
 

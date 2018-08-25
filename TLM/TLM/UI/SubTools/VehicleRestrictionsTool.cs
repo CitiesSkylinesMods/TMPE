@@ -249,7 +249,7 @@ namespace TrafficManager.UI.SubTools {
 					return true;
 				}
 
-				ushort segmentId = data.segVisitData.curGeo.SegmentId;
+				ushort segmentId = data.segVisitData.curSeg.segmentId;
 				NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
 				uint selectedLaneId = data.initLanePos.laneId;

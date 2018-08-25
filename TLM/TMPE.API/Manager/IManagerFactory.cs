@@ -11,7 +11,11 @@ namespace TrafficManager.Manager {
 		IExtBuildingManager ExtBuildingManager { get; }
 		IExtCitizenInstanceManager ExtCitizenInstanceManager { get; }
 		IExtCitizenManager ExtCitizenManager { get; }
+		IExtNodeManager ExtNodeManager { get; }
 		IExtPathManager ExtPathManager { get; }
+		IExtSegmentManager ExtSegmentManager { get; }
+		IExtSegmentEndManager ExtSegmentEndManager { get; }
+		IExtVehicleManager ExtVehicleManager { get; }
 		IJunctionRestrictionsManager JunctionRestrictionsManager { get; }
 		ILaneArrowManager LaneArrowManager { get; }
 		ILaneConnectionManager LaneConnectionManager { get; }
@@ -28,6 +32,5 @@ namespace TrafficManager.Manager {
 		IUtilityManager UtilityManager { get; }
 		IVehicleBehaviorManager VehicleBehaviorManager { get; }
 		IVehicleRestrictionsManager VehicleRestrictionsManager { get; }
-		IExtVehicleManager ExtVehicleManager { get; }
 	}
 }

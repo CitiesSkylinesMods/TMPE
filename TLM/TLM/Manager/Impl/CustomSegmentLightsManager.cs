@@ -11,6 +11,7 @@ using CSUtil.Commons;
 using TrafficManager.TrafficLight.Impl;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	/// <summary>
@@ -132,16 +133,14 @@ namespace TrafficManager.Manager.Impl {
 		/// </summary>
 		/// <param name="nodeId"></param>
 		public void AddNodeLights(ushort nodeId) {
-			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			if (!nodeGeo.Valid)
+			if (! Services.NetService.IsNodeValid(nodeId)) {
 				return;
-
-			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
-				if (endGeo == null)
-					continue;
-
-				AddSegmentLights(endGeo.SegmentId, endGeo.StartNode);
 			}
+
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				AddSegmentLights(segmentId, segment.m_startNode == nodeId);
+				return true;
+			});			
 		}
 
 		/// <summary>
@@ -149,16 +148,10 @@ namespace TrafficManager.Manager.Impl {
 		/// </summary>
 		/// <param name="nodeId"></param>
 		public void RemoveNodeLights(ushort nodeId) {
-			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			/*if (!nodeGeo.IsValid())
-				return;*/
-
-			foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
-				if (endGeo == null)
-					continue;
-
-				RemoveSegmentLight(endGeo.SegmentId, endGeo.StartNode);
-			}
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
+				RemoveSegmentLight(segmentId, segment.m_startNode == nodeId);
+				return true;
+			});
 		}
 
 		/// <summary>
@@ -287,8 +280,8 @@ namespace TrafficManager.Manager.Impl {
 			return GetSegmentLights(segmentId, (bool)startNode, false);
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			RemoveSegmentLights(geometry.SegmentId);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			RemoveSegmentLights(seg.segmentId);
 		}
 
 		public override void OnLevelUnloading() {

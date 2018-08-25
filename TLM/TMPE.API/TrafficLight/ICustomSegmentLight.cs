@@ -17,6 +17,7 @@ namespace TrafficManager.TrafficLight {
 		RoadBaseAI.TrafficLightState LightMain { get; }
 		RoadBaseAI.TrafficLightState LightRight { get; }
 
+		RoadBaseAI.TrafficLightState GetLightState(ushort toSegmentId);
 		RoadBaseAI.TrafficLightState GetLightState(ArrowDirection dir);
 		bool IsAnyGreen();
 		bool IsGreen(ArrowDirection dir);

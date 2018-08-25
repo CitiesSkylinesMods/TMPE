@@ -103,14 +103,20 @@ namespace TrafficManager.TrafficLight.Impl {
 			endTransitionStart = null;
 			stepDone = false;
 
-			NodeGeometry nodeGeometry = NodeGeometry.Get(timedNode.NodeId);
+			for (int i = 0; i < 8; ++i) {
+				ushort segmentId = 0;
+				Constants.ServiceFactory.NetService.ProcessNode(timedNode.NodeId, delegate (ushort nId, ref NetNode node) {
+					segmentId = node.GetSegment(i);
+					return true;
+				});
 
-			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
-				if (end == null)
+				if (segmentId == 0) {
 					continue;
+				}
 
-				if (! AddSegment(end.SegmentId, end.StartNode, makeRed)) {
-					Log.Warning($"TimedTrafficLightsStep.ctor: Failed to add segment {end.SegmentId} @ start {end.StartNode} to node {timedNode.NodeId}");
+				bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, timedNode.NodeId);
+				if (!AddSegment(segmentId, startNode, makeRed)) {
+					Log.Warning($"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} @ start {startNode} to node {timedNode.NodeId}");
 				}
 			}
 		}

@@ -9,7 +9,6 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
-using static TrafficManager.Geometry.Impl.NodeGeometry;
 
 namespace TrafficManager.Manager.Impl {
 	public class JunctionRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.SegmentNodeConf>>, IJunctionRestrictionsManager {
@@ -35,7 +34,8 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleSegmentEndReplacement(SegmentEndReplacement replacement, ISegmentEndGeometry endGeo) {
+		protected override void HandleSegmentEndReplacement(SegmentEndReplacement replacement, ref ExtSegmentEnd segEnd) {
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			ISegmentEndId oldSegmentEndId = replacement.oldSegmentEndId;
 			ISegmentEndId newSegmentEndId = replacement.newSegmentEndId;
 
@@ -48,8 +48,8 @@ namespace TrafficManager.Manager.Impl {
 				invalidSegmentFlags[oldSegmentEndId.SegmentId].endNodeFlags.Reset();
 			}
 
-			Services.NetService.ProcessNode(endGeo.NodeId, delegate (ushort nId, ref NetNode node) {
-				UpdateDefaults(newSegmentEndId, ref flags, ref node);
+			Services.NetService.ProcessNode(segEnd.nodeId, delegate (ushort nId, ref NetNode node) {
+				UpdateDefaults(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(newSegmentEndId.SegmentId, newSegmentEndId.StartNode)], ref flags, ref node);
 				return true;
 			});
 			Log._Debug($"JunctionRestrictionsManager.HandleSegmentEndReplacement({replacement}): Segment replacement detected: {oldSegmentEndId.SegmentId} -> {newSegmentEndId.SegmentId} @ {newSegmentEndId.StartNode}");
@@ -59,10 +59,10 @@ namespace TrafficManager.Manager.Impl {
 		public override void OnLevelLoading() {
 			base.OnLevelLoading();
 			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				SegmentGeometry geo = SegmentGeometry.Get((ushort)i);
-				if (geo != null && geo.Valid) {
+				ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[i];
+				if (seg.valid) {
 					//Log._Debug($"JunctionRestrictionsManager.OnLevelLoading: Handling valid segment {geo.SegmentId}");
-					HandleValidSegment(geo);
+					HandleValidSegment(ref seg);
 				}
 			}
 		}
@@ -151,68 +151,67 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
 			foreach (bool startNode in Constants.ALL_BOOL) {
 				SegmentEndFlags flags = startNode
-						? SegmentFlags[geometry.SegmentId].startNodeFlags
-						: SegmentFlags[geometry.SegmentId].endNodeFlags;
+						? SegmentFlags[seg.segmentId].startNodeFlags
+						: SegmentFlags[seg.segmentId].endNodeFlags;
 
 				if (! flags.IsDefault()) {
-					AddInvalidSegmentEndFlags(geometry.SegmentId, startNode, ref flags);
+					AddInvalidSegmentEndFlags(seg.segmentId, startNode, ref flags);
 				}
 
-				SegmentFlags[geometry.SegmentId].Reset(startNode, true);
+				SegmentFlags[seg.segmentId].Reset(startNode, true);
 			}
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
-			UpdateDefaults(geometry);
+		protected override void HandleValidSegment(ref ExtSegment seg) {
+			UpdateDefaults(ref seg);
 		}
 
-		protected void UpdateDefaults(ISegmentGeometry geometry) {
+		protected void UpdateDefaults(ref ExtSegment seg) {
+			ushort segmentId = seg.segmentId;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
 			//Log.Warning($"JunctionRestrictionsManager.HandleValidSegment({geometry.SegmentId}) called.");
-			if (geometry.StartNodeGeometry != null) {
-				ushort startNodeId = geometry.StartNodeId;
-				Services.NetService.ProcessNode(startNodeId, delegate (ushort nId, ref NetNode node) {
-					UpdateDefaults(geometry.StartNodeGeometry, ref SegmentFlags[geometry.SegmentId].startNodeFlags, ref node);
-					return true;
-				});
-			}
-
-			if (geometry.EndNodeGeometry != null) {
-				ushort endNodeId = geometry.EndNodeId;
-				Services.NetService.ProcessNode(endNodeId, delegate (ushort nId, ref NetNode node) {
-					UpdateDefaults(geometry.EndNodeGeometry, ref SegmentFlags[geometry.SegmentId].endNodeFlags, ref node);
-					return true;
-				});
-			}
+			ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
+			Services.NetService.ProcessNode(startNodeId, delegate (ushort nId, ref NetNode node) {
+				UpdateDefaults(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)], ref SegmentFlags[segmentId].startNodeFlags, ref node);
+				return true;
+			});
+			
+			ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
+			Services.NetService.ProcessNode(endNodeId, delegate (ushort nId, ref NetNode node) {
+				UpdateDefaults(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)], ref SegmentFlags[segmentId].endNodeFlags, ref node);
+				return true;
+			});
 		}
 
-		protected void UpdateDefaults(ISegmentEndId endId, ref SegmentEndFlags endFlags, ref NetNode node) {
-			if (!IsUturnAllowedConfigurable(endId.SegmentId, endId.StartNode, ref node)) {
+		protected void UpdateDefaults(ref ExtSegmentEnd segEnd, ref SegmentEndFlags endFlags, ref NetNode node) {
+			if (!IsUturnAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
 				endFlags.uturnAllowed = TernaryBool.Undefined;
 			}
 
-			if (!IsLaneChangingAllowedWhenGoingStraightConfigurable(endId.SegmentId, endId.StartNode, ref node)) {
+			if (!IsLaneChangingAllowedWhenGoingStraightConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
 				endFlags.straightLaneChangingAllowed = TernaryBool.Undefined;
 			}
 
-			if (!IsEnteringBlockedJunctionAllowedConfigurable(endId.SegmentId, endId.StartNode, ref node)) {
+			if (!IsEnteringBlockedJunctionAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
 				endFlags.enterWhenBlockedAllowed = TernaryBool.Undefined;
 			}
 
-			if (!IsPedestrianCrossingAllowedConfigurable(endId.SegmentId, endId.StartNode, ref node)) {
+			if (!IsPedestrianCrossingAllowedConfigurable(segEnd.segmentId, segEnd.startNode, ref node)) {
 				endFlags.pedestrianCrossingAllowed = TernaryBool.Undefined;
 			}
 
-			endFlags.defaultUturnAllowed = GetDefaultUturnAllowed(endId.SegmentId, endId.StartNode, ref node);
-			endFlags.defaultStraightLaneChangingAllowed = GetDefaultLaneChangingAllowedWhenGoingStraight(endId.SegmentId, endId.StartNode, ref node);
-			endFlags.defaultEnterWhenBlockedAllowed = GetDefaultEnteringBlockedJunctionAllowed(endId.SegmentId, endId.StartNode, ref node);
-			endFlags.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(endId.SegmentId, endId.StartNode, ref node);
+			endFlags.defaultUturnAllowed = GetDefaultUturnAllowed(segEnd.segmentId, segEnd.startNode, ref node);
+			endFlags.defaultStraightLaneChangingAllowed = GetDefaultLaneChangingAllowedWhenGoingStraight(segEnd.segmentId, segEnd.startNode, ref node);
+			endFlags.defaultEnterWhenBlockedAllowed = GetDefaultEnteringBlockedJunctionAllowed(segEnd.segmentId, segEnd.startNode, ref node);
+			endFlags.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(segEnd.segmentId, segEnd.startNode, ref node);
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[11])
-				Log._Debug($"JunctionRestrictionsManager.UpdateDefaults({endId.SegmentId}, {endId.StartNode}): Set defaults: defaultUturnAllowed={endFlags.defaultUturnAllowed}, defaultStraightLaneChangingAllowed={endFlags.defaultStraightLaneChangingAllowed}, defaultEnterWhenBlockedAllowed={endFlags.defaultEnterWhenBlockedAllowed}, defaultPedestrianCrossingAllowed={endFlags.defaultPedestrianCrossingAllowed}");
+				Log._Debug($"JunctionRestrictionsManager.UpdateDefaults({segEnd.segmentId}, {segEnd.startNode}): Set defaults: defaultUturnAllowed={endFlags.defaultUturnAllowed}, defaultStraightLaneChangingAllowed={endFlags.defaultStraightLaneChangingAllowed}, defaultEnterWhenBlockedAllowed={endFlags.defaultEnterWhenBlockedAllowed}, defaultPedestrianCrossingAllowed={endFlags.defaultPedestrianCrossingAllowed}");
 #endif
 		}
 
@@ -225,21 +224,14 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
-
-			if (endGeo == null) {
-				Log.Warning($"JunctionRestrictionsManager.IsUturnAllowedConfigurable({segmentId}, {startNode}): Could not get segment end geometry");
-				return false;
-			}
-
 			bool ret =
 				(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition | NetNode.Flags.End | NetNode.Flags.Bend | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
 				node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
-				!endGeo.IncomingOneWay && !endGeo.OutgoingOneWay
+				!Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay
 			;
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.IsUturnAllowedConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, incomingOneWay={endGeo.IncomingOneWay}, outgoingOneWay={endGeo.OutgoingOneWay}");
+				Log._Debug($"JunctionRestrictionsManager.IsUturnAllowedConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, seg.oneWay={Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay}");
 #endif
 			return ret;
 		}
@@ -285,22 +277,18 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
-
-			if (endGeo == null) {
-				Log.Warning($"JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable({segmentId}, {startNode}): Could not get segment end geometry");
-				return false;
-			}
-
+			IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			
 			bool ret =
 				(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None &&
 				node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
-				!endGeo.OutgoingOneWay &&
+				!(segMan.ExtSegments[segmentId].oneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing) &&
 				node.CountSegments() > 2
 			;
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, incomingOneWay={endGeo.IncomingOneWay}, outgoingOneWay={endGeo.OutgoingOneWay}, node.CountSegments()={node.CountSegments()}");
+				Log._Debug($"JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, outgoingOneWay={segMan.ExtSegments[segmentId].oneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing}, node.CountSegments()={node.CountSegments()}");
 #endif
 			return ret;
 		}
@@ -339,21 +327,17 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ISegmentEndGeometry endGeo = SegmentGeometry.Get(segmentId)?.GetEnd(startNode);
-
-			if (endGeo == null) {
-				Log.Warning($"JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable({segmentId}, {startNode}): Could not get segment end geometry");
-				return false;
-			}
+			IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			bool ret =
 				(node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None &&
 				node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
-				!endGeo.OutgoingOneWay;
+				!(segMan.ExtSegments[segmentId].oneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing);
 			;
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, outgoingOneWay={endGeo.OutgoingOneWay}");
+				Log._Debug($"JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}, outgoingOneWay={segMan.ExtSegments[segmentId].oneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing}");
 #endif
 			return ret;
 		}
@@ -497,14 +481,8 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetUturnAllowed: No geometry information available for segment {segmentId}");
-				return false;
-			}
-
 			SegmentFlags[segmentId].SetUturnAllowed(startNode, value);
-			OnSegmentChange(segmentId, startNode, segGeo, true);
+			OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
 			return true;
 		}
 
@@ -513,14 +491,8 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetUturnAllowed: No geometry information available for segment {segmentId}");
-				return false;
-			}
-
 			SegmentFlags[segmentId].SetLaneChangingAllowedWhenGoingStraight(startNode, value);
-			OnSegmentChange(segmentId, startNode, segGeo, true);
+			OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
 			return true;
 		}
 		
@@ -529,15 +501,9 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetUturnAllowed: No geometry information available for segment {segmentId}");
-				return false;
-			}
-
 			SegmentFlags[segmentId].SetEnteringBlockedJunctionAllowed(startNode, value);
 			// recalculation not needed here because this is a simulation-time feature
-			OnSegmentChange(segmentId, startNode, segGeo, false);
+			OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], false);
 			return true;
 		}
 
@@ -546,21 +512,13 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetPedestrianCrossingAllowed: No geometry information available for segment {segmentId}");
-				return false;
-			}
-
 			SegmentFlags[segmentId].SetPedestrianCrossingAllowed(startNode, value);
-			OnSegmentChange(segmentId, startNode, segGeo, true);
+			OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
 			return true;
 		}
 
-		protected void OnSegmentChange(ushort segmentId, bool startNode, SegmentGeometry segGeo, bool requireRecalc) {
-			ushort nodeId = segGeo.GetNodeId(startNode);
-
-			HandleValidSegment(segGeo);
+		protected void OnSegmentChange(ushort segmentId, bool startNode, ref ExtSegment seg, bool requireRecalc) {
+			HandleValidSegment(ref seg);
 
 			if (requireRecalc) {
 				RoutingManager.Instance.RequestRecalculation(segmentId);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
@@ -58,15 +59,15 @@ namespace TrafficManager.Manager.Impl {
 			return true;
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			parkingAllowed[geometry.SegmentId][0] = true;
-			parkingAllowed[geometry.SegmentId][1] = true;
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			parkingAllowed[seg.segmentId][0] = true;
+			parkingAllowed[seg.segmentId][1] = true;
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
-			if (! MayHaveParkingRestriction(geometry.SegmentId)) {
-				parkingAllowed[geometry.SegmentId][0] = true;
-				parkingAllowed[geometry.SegmentId][1] = true;
+		protected override void HandleValidSegment(ref ExtSegment seg) {
+			if (! MayHaveParkingRestriction(seg.segmentId)) {
+				parkingAllowed[seg.segmentId][0] = true;
+				parkingAllowed[seg.segmentId][1] = true;
 			}
 		}
 

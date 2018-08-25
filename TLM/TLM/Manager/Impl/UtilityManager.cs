@@ -64,20 +64,6 @@ namespace TrafficManager.Manager.Impl {
 				Log.Error($"Error occurred while printing debug info for flags: {e}");
 			}
 
-			Log._Debug("=== SegmentGeometry.PrintDebugInfo() ===");
-			try {
-				SegmentGeometry.PrintDebugInfo();
-			} catch (Exception e) {
-				Log.Error($"Error occurred while printing debug info for segment geometries: {e}");
-			}
-
-			Log._Debug("=== NodeGeometry.PrintDebugInfo() ===");
-			try {
-				NodeGeometry.PrintDebugInfo();
-			} catch (Exception e) {
-				Log.Error($"Error occurred while printing debug info for node geometries: {e}");
-			}
-
 			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
 				try {
 					manager.PrintDebugInfo();

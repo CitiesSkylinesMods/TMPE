@@ -7,6 +7,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 
@@ -504,19 +505,19 @@ namespace TrafficManager.Manager.Impl {
 			ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
 			ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
 			if (startNodeId != 0) {
-				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(startNodeId));
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(startNodeId);
 			}
 			if (endNodeId != 0) {
-				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(endNodeId));
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(endNodeId);
 			}
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			Flags.resetSegmentVehicleRestrictions(geometry.SegmentId);
-			ClearCache(geometry.SegmentId);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			Flags.resetSegmentVehicleRestrictions(seg.segmentId);
+			ClearCache(seg.segmentId);
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 			
 		}
 

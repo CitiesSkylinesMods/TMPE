@@ -8,8 +8,8 @@ using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
-using static TrafficManager.Geometry.Impl.NodeGeometry;
 
 namespace TrafficManager.Manager.Impl {
 	public class GeometryManager : AbstractCustomManager, IGeometryManager {
@@ -41,8 +41,8 @@ namespace TrafficManager.Manager.Impl {
 			SimulationStep();
 		}
 
-		public void OnUpdateSegment(ISegmentGeometry geo) {
-			MarkAsUpdated(geo);
+		public void OnUpdateSegment(ref ExtSegment seg) {
+			MarkAsUpdated(ref seg);
 		}
 
 		public void SimulationStep(bool onlyFirstPass=false) {
@@ -76,22 +76,22 @@ namespace TrafficManager.Manager.Impl {
 							for (int m = 0; m < 64; m++) {
 								if ((segMask & 1uL << m) != 0uL) {
 									ushort segmentId = (ushort)(i << 6 | m);
-									SegmentGeometry segmentGeometry = SegmentGeometry.Get(segmentId, true);
-									if (firstPass ^ !segmentGeometry.Valid) {
+									ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
+									if (firstPass ^ !seg.valid) {
 										if (! firstPass) {
 											updatesMissing = true;
 #if DEBUGGEO
 											if (debug)
-												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid segment {segmentGeometry.SegmentId} in second pass");
+												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid segment {segmentId} in second pass");
 #endif
 										}
 										continue;
 									}
 #if DEBUGGEO
 									if (debug)
-										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment {segmentGeometry.SegmentId}. Valid? {segmentGeometry.Valid} First pass? {firstPass}");
+										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment {segmentId}. Valid? {seg.valid} First pass? {firstPass}");
 #endif
-									NotifyObservers(new GeometryUpdate(segmentGeometry));
+									NotifyObservers(new GeometryUpdate(ref seg));
 									updatedSegmentBuckets[i] &= ~(1uL << m);
 								}
 							}
@@ -105,22 +105,22 @@ namespace TrafficManager.Manager.Impl {
 							for (int m = 0; m < 64; m++) {
 								if ((nodeMask & 1uL << m) != 0uL) {
 									ushort nodeId = (ushort)(i << 6 | m);
-									NodeGeometry nodeGeometry = NodeGeometry.Get(nodeId);
-									if (firstPass ^ !nodeGeometry.Valid) {
+									bool valid = Services.NetService.IsNodeValid(nodeId);
+									if (firstPass ^ !valid) {
 										if (!firstPass) {
 											updatesMissing = true;
 #if DEBUGGEO
 											if (debug)
-												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid node {nodeGeometry.NodeId} in second pass");
+												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid node {nodeId} in second pass");
 #endif
 										}
 										continue;
 									}
 #if DEBUGGEO
 									if (debug)
-										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about node {nodeGeometry.NodeId}. Valid? {nodeGeometry.Valid} First pass? {firstPass}");
+										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about node {nodeId}. Valid? {valid} First pass? {firstPass}");
 #endif
-									NotifyObservers(new GeometryUpdate(nodeGeometry));
+									NotifyObservers(new GeometryUpdate(nodeId));
 									updatedNodeBuckets[i] &= ~(1uL << m);
 								}
 							}
@@ -145,23 +145,21 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(ISegmentGeometry geometry) {
+		public void MarkAsUpdated(ref ExtSegment seg) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
-				Log._Debug($"GeometryManager.MarkAsUpdated(segment {geometry.SegmentId}): Marking segment as updated");
+				Log._Debug($"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
 #endif
 			try {
 				Monitor.Enter(updateLock);
 
-				ushort segmentId = geometry.SegmentId;
-
-				updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)(segmentId & 63);
+				updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (int)(seg.segmentId & 63);
 				stateUpdated = true;
 
-				MarkAsUpdated(NodeGeometry.Get(geometry.StartNodeId));
-				MarkAsUpdated(NodeGeometry.Get(geometry.EndNodeId));
+				MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
+				MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
 
-				if (! geometry.Valid) {
+				if (! seg.valid) {
 					SimulationStep(true);
 				}
 			} finally {
@@ -169,20 +167,19 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(INodeGeometry geometry) {
+		public void MarkAsUpdated(ushort nodeId) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
-				Log._Debug($"GeometryManager.MarkAsUpdated(node {geometry.NodeId}): Marking node as updated");
+				Log._Debug($"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
 #endif
 			try {
 				Monitor.Enter(updateLock);
 
-				ushort nodeId = geometry.NodeId;
 				if (nodeId != 0) {
 					updatedNodeBuckets[nodeId >> 6] |= 1uL << (int)(nodeId & 63);
 					stateUpdated = true;
 
-					if (!geometry.Valid) {
+					if (! Services.NetService.IsNodeValid(nodeId)) {
 						SimulationStep(true);
 					}
 				}

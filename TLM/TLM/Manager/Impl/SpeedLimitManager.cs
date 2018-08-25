@@ -6,6 +6,7 @@ using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 using UnityEngine;
 
@@ -751,9 +752,9 @@ namespace TrafficManager.Manager.Impl {
 			customizableNetInfos = mainNetInfos;
 		}
 
-		protected override void HandleInvalidSegment(ISegmentGeometry geometry) {
-			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].Info;
-			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].m_lanes;
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[seg.segmentId].Info;
+			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[seg.segmentId].m_lanes;
 			int laneIndex = 0;
 			while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
@@ -766,7 +767,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleValidSegment(ISegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 
 		}
 

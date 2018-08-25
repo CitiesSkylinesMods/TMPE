@@ -216,6 +216,9 @@ namespace TrafficManager {
 		}
 
 		private void RegisterCustomManagers() {
+			RegisteredManagers.Add(ExtNodeManager.Instance);
+			RegisteredManagers.Add(ExtSegmentManager.Instance);
+			RegisteredManagers.Add(ExtSegmentEndManager.Instance);
 			RegisteredManagers.Add(AdvancedParkingManager.Instance);
 			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
@@ -259,7 +262,9 @@ namespace TrafficManager {
 			TransportDemandUI = null;*/
 
 			try {
-				foreach (ICustomManager manager in RegisteredManagers) {
+				List<ICustomManager> reverseManagers = new List<ICustomManager>(RegisteredManagers);
+				reverseManagers.Reverse();
+				foreach (ICustomManager manager in reverseManagers) {
 					Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
 					manager.OnLevelUnloading();
 				}
