@@ -89,7 +89,7 @@ namespace TrafficManager.Util {
 			if (! initialSeg.valid)
 				return;
 
-			Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegmentId}");
+			//Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegmentId}");
 			if (visitor(new SegmentVisitData(ref initialSeg, ref initialSeg, false, false, true))) {
 				HashSet<ushort> visitedSegmentIds = new HashSet<ushort>();
 				visitedSegmentIds.Add(initialSegmentId);
@@ -108,11 +108,11 @@ namespace TrafficManager.Util {
 					return true;
 				});
 			}
-			Log._Debug($"SegmentTraverser: Traversal finished.");
+			//Log._Debug($"SegmentTraverser: Traversal finished.");
 		}
 
 		private static void TraverseRec(ref ExtSegment prevSeg, ref ExtSegmentEnd prevSegEnd, ref NetNode node, bool viaInitialStartNode, TraverseDirection direction, TraverseSide side, SegmentStopCriterion stopCrit, SegmentVisitor visitor, HashSet<ushort> visitedSegmentIds) {
-			Log._Debug($"SegmentTraverser: Traversing segment {prevSegEnd.segmentId}");
+			//Log._Debug($"SegmentTraverser: Traversing segment {prevSegEnd.segmentId}");
 
 			// collect next segment ids to traverse
 
@@ -157,10 +157,10 @@ namespace TrafficManager.Util {
 				}
 			}
 			nextSegmentIds.Remove(0);
-			Log._Debug($"SegmentTraverser: Fetched next segments to traverse: {nextSegmentIds.CollectionToString()}");
+			//Log._Debug($"SegmentTraverser: Fetched next segments to traverse: {nextSegmentIds.CollectionToString()}");
 
 			if (nextSegmentIds.Count >= 2 && (stopCrit & SegmentStopCriterion.Junction) != SegmentStopCriterion.None) {
-				Log._Debug($"SegmentTraverser: Stop criterion reached @ {prevSegEnd.segmentId}: {nextSegmentIds.Count} connected segments");
+				//Log._Debug($"SegmentTraverser: Stop criterion reached @ {prevSegEnd.segmentId}: {nextSegmentIds.Count} connected segments");
 				return;
 			}
 
@@ -169,7 +169,7 @@ namespace TrafficManager.Util {
 				if (visitedSegmentIds.Contains(nextSegmentId))
 					continue;
 				visitedSegmentIds.Add(nextSegmentId);
-				Log._Debug($"SegmentTraverser: Traversing segment {nextSegmentId}");
+				//Log._Debug($"SegmentTraverser: Traversing segment {nextSegmentId}");
 
 				ushort nextStartNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(nextSegmentId, true);
 				if (visitor(new SegmentVisitData(ref prevSeg, ref extSegMan.ExtSegments[nextSegmentId], viaInitialStartNode, prevSegEnd.nodeId == nextStartNodeId, false))) {
