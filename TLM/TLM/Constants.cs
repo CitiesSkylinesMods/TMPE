@@ -8,6 +8,7 @@ using TrafficManager.Manager;
 namespace TrafficManager {
 	public static class Constants {
 		public static readonly bool[] ALL_BOOL = new bool[] { false, true };
+		public const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
 
 		public static IServiceFactory ServiceFactory {
 			get {

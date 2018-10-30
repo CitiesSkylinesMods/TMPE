@@ -9,6 +9,14 @@ namespace TrafficManager.Traffic.Enums {
 	public enum ExtVehicleFlags {
 		None = 0,
 		Created = 1,
-		Spawned = 1 << 1
+		Spawned = 1 << 1,
+		/// <summary>
+		/// Describes that the vehicle needs to stop at the <code>stopPosition</code>
+		/// </summary>
+		Stopped = 1 << 2,
+		/// <summary>
+		/// Vehicle is behaving according to custom Emergency AI
+		/// </summary>
+		Emergency = 1 << 3
 	}
 }

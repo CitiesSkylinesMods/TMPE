@@ -1,4 +1,5 @@
 using TrafficManager.Traffic.Enums;
+using UnityEngine;
 
 namespace TrafficManager.Traffic.Data {
 	public struct ExtVehicle {
@@ -23,6 +24,9 @@ namespace TrafficManager.Traffic.Data {
 		public ushort lastAltLaneSelSegmentId;
 		public byte timedRand;
 		public VehicleJunctionTransitState junctionTransitState;
+		public Vector3 stopPosition;
+		public byte stopOffset;
+		public ushort nextParkingLaneVehicleId;
 
 		public override string ToString() {
 			return $"[VehicleState\n" +
@@ -48,6 +52,9 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
 				"\t" + $"timedRand = {timedRand}\n" +
+				"\t" + $"stopPosition = {stopPosition}\n" +
+				"\t" + $"stopOffset = {stopOffset}\n" +
+				"\t" + $"nextParkingLaneVehicleId = {nextParkingLaneVehicleId}\n" +
 				"VehicleState]";
 		}
 
@@ -73,6 +80,9 @@ namespace TrafficManager.Traffic.Data {
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			timedRand = 0;
+			stopPosition = Vector3.zero;
+			stopOffset = 0;
+			nextParkingLaneVehicleId = 0;
 		}
 	}
 }

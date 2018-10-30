@@ -78,7 +78,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="lightState">(optional) light state to set</param>
 		public ICustomSegmentLights AddSegmentLights(ushort segmentId, bool startNode, RoadBaseAI.TrafficLightState lightState=RoadBaseAI.TrafficLightState.Red) {
 #if DEBUG
-			Log._Debug($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
+			Log._Trace($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
 				return null;
@@ -169,7 +169,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="startNode"></param>
 		public void RemoveSegmentLight(ushort segmentId, bool startNode) {
 #if DEBUG
-			Log.Warning($"Removing segment light: {segmentId} @ startNode={startNode}");
+			Log._Trace($"Removing segment light: {segmentId} @ startNode={startNode}");
 #endif
 
 			CustomSegment customSegment = CustomSegments[segmentId];

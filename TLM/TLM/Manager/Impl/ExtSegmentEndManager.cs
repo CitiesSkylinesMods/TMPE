@@ -40,6 +40,16 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected void Reset(ref ExtSegmentEnd extSegmentEnd) {
+			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+			int numIter = 0;
+			while (extSegmentEnd.firstVehicleId != 0) {
+				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
+			}
 			extSegmentEnd.Reset();
 		}
 

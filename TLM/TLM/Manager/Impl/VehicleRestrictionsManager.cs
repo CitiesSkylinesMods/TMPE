@@ -536,11 +536,11 @@ namespace TrafficManager.Manager.Impl {
 
 					ExtVehicleType baseMask = GetBaseMask(laneVehicleTypes.laneId, VehicleRestrictionsMode.Configured);
 					ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
-					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
+					Log._Trace($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 					if (maskedType != baseMask) {
 						Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
 					} else {
-						Log._Debug($"Masked type does not differ from base type. Ignoring.");
+						Log._Trace($"Masked type does not differ from base type. Ignoring.");
 					}
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -556,6 +556,7 @@ namespace TrafficManager.Manager.Impl {
 			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
 				try {
 					ret.Add(new Configuration.LaneVehicleTypes(e.Key, e.Value));
+					Log._Trace($"Saving lane vehicle restriction: laneid={e.Key} vehicleType={e.Value}");
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
 					success = false;

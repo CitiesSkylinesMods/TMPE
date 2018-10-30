@@ -41,7 +41,7 @@ namespace TrafficManager.Traffic.Impl {
 		/// <summary>
 		/// Vehicles that are traversing or will traverse this segment
 		/// </summary>
-		public ushort FirstRegisteredVehicleId { get; set; } = 0; // TODO private set
+		//public ushort FirstRegisteredVehicleId { get; set; } = 0; // TODO private set
 
 		private bool cleanupRequested = false;
 
@@ -61,7 +61,6 @@ namespace TrafficManager.Traffic.Impl {
 			return $"[SegmentEnd {base.ToString()}\n" +
 				"\t" + $"NodeId = {NodeId}\n" +
 				"\t" + $"numLanes = {numLanes}\n" +
-				"\t" + $"FirstRegisteredVehicleId = {FirstRegisteredVehicleId}\n" +
 				"\t" + $"cleanupRequested = {cleanupRequested}\n" +
 				"\t" + $"numVehiclesMovingToSegmentId = " + (numVehiclesMovingToSegmentId == null ? "<null>" : numVehiclesMovingToSegmentId.ArrayToString()) + "\n" +
 				"\t" + $"numVehiclesGoingToSegmentId = " + (numVehiclesGoingToSegmentId == null ? "<null>" : numVehiclesGoingToSegmentId.ArrayToString()) + "\n" +
@@ -69,7 +68,6 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		public SegmentEnd(ushort segmentId, bool startNode) : base(segmentId, startNode) {
-			FirstRegisteredVehicleId = 0;
 			Update();
 		}
 		
@@ -85,6 +83,7 @@ namespace TrafficManager.Traffic.Impl {
 			//VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			//NetManager netManager = Singleton<NetManager>.instance;
 			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			// TODO pre-calculate this
 			uint avgSegLen = 0;
@@ -108,14 +107,21 @@ namespace TrafficManager.Traffic.Impl {
 				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}, includeStopped={includeStopped}.");
 #endif
 
-			ushort vehicleId = FirstRegisteredVehicleId;
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
 			int numProcessed = 0;
+			int numIter = 0;
 			while (vehicleId != 0) {
 				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle veh) {
 					MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref veh, ref vehStateManager.ExtVehicles[vehicleId], ref numProcessed);
 					return true;
 				});
 				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
 			}
 
 #if DEBUGMETRIC
@@ -197,12 +203,20 @@ namespace TrafficManager.Traffic.Impl {
 
 		public int GetRegisteredVehicleCount() {
 			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-			ushort vehicleId = FirstRegisteredVehicleId;
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
 			int ret = 0;
+			int numIter = 0;
 			while (vehicleId != 0) {
 				++ret;
 				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
 			}
 			return ret;
 		}
@@ -213,8 +227,16 @@ namespace TrafficManager.Traffic.Impl {
 
 		private void UnregisterAllVehicles() {
 			ExtVehicleManager extVehicleMan = ExtVehicleManager.Instance;
-			while (FirstRegisteredVehicleId != 0) {
-				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[FirstRegisteredVehicleId]);
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			int numIter = 0;
+			while (segEndMan.ExtSegmentEnds[endIndex].firstVehicleId != 0) {
+				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[segEndMan.ExtSegmentEnds[endIndex].firstVehicleId]);
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
 			}
 		}
 

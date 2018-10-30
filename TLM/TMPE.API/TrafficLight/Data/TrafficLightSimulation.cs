@@ -56,7 +56,7 @@ namespace TrafficManager.TrafficLight.Data {
 		}
 
 		public void Update() {
-			Log._Debug($"TrafficLightSimulation.Update(): called for node {nodeId}");
+			Log._Trace($"TrafficLightSimulation.Update(): called for node {nodeId}");
 
 			if (IsTimedLight()) {
 				timedLight.OnGeometryUpdate();

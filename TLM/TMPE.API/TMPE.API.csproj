@@ -64,6 +64,7 @@
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
     <Compile Include="Manager\ICustomSegmentLightsManager.cs" />
+    <Compile Include="Manager\IEmergencyBehaviorManager.cs" />
     <Compile Include="Manager\IExtSegmentEndManager.cs" />
     <Compile Include="Manager\IExtNodeManager.cs" />
     <Compile Include="Manager\IExtSegmentManager.cs" />
@@ -102,9 +103,11 @@
     <Compile Include="Traffic\Data\ExtBuilding.cs" />
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\ExtCitizenInstance.cs" />
+    <Compile Include="Traffic\Data\LaneTrafficData.cs" />
     <Compile Include="Traffic\Data\PathCreationArgs.cs" />
     <Compile Include="Traffic\Data\PathUnitQueueItem.cs" />
     <Compile Include="Traffic\Data\PrioritySegment.cs" />
+    <Compile Include="Traffic\Data\SegmentDirTrafficData.cs" />
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\ExtVehicle.cs" />
@@ -125,6 +128,7 @@
     <Compile Include="Traffic\Enums\ParkedCarApproachState.cs" />
     <Compile Include="Traffic\Enums\ParkingUnableReason.cs" />
     <Compile Include="Traffic\Enums\PriorityType.cs" />
+    <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
     <Compile Include="Traffic\Enums\SetLaneArrowUnableReason.cs" />
     <Compile Include="Traffic\Enums\SetPrioritySignUnableReason.cs" />
     <Compile Include="Traffic\Enums\StepChangeMetric.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
@@ -112,7 +113,8 @@ namespace TrafficManager.Manager {
 		/// <param name="segment">segment data</param>
 		/// <param name="pos">current world position</param>
 		/// <param name="maxSpeed">vehicle target velocity</param>
+		/// <param name="emergency">specifies if the segment is currently used by emergency vehicles</param>
 		/// <returns>modified target velocity</returns>
-		float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed);
+		float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool emergency);
 	}
 }

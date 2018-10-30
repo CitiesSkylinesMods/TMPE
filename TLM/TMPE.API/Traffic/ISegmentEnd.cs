@@ -7,7 +7,7 @@ namespace TrafficManager.Traffic {
 	public interface ISegmentEnd : ISegmentEndId {
 		[Obsolete]
 		ushort NodeId { get; }
-		ushort FirstRegisteredVehicleId { get; set; } // TODO private set
+		//ushort FirstRegisteredVehicleId { get; set; } // TODO private set
 
 		void Update();
 		void Destroy();

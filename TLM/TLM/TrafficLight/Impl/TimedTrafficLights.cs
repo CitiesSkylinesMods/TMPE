@@ -206,7 +206,11 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		private void UpdateDirections(ref NetNode node) {
-			Log._Debug($">>>>> TimedTrafficLights.UpdateDirections: called for node {NodeId}");
+#if DEBUG
+			bool debug = GlobalConfig.Instance.Debug.Switches[7] && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == NodeId);
+			if (debug)
+				Log._Debug($">>>>> TimedTrafficLights.UpdateDirections: called for node {NodeId}");
+#endif
 			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			Directions = new TinyDictionary<ushort, IDictionary<ushort, ArrowDirection>>();
 			for (int i = 0; i < 8; ++i) {
@@ -214,11 +218,14 @@ namespace TrafficManager.TrafficLight.Impl {
 
 				if (sourceSegmentId == 0)
 					continue;
-				Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {sourceSegmentId}");
+#if DEBUG
+				if (debug)
+					Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {sourceSegmentId}");
+#endif
 
 				IDictionary<ushort, ArrowDirection> dirs = new TinyDictionary<ushort, ArrowDirection>();
 				Directions.Add(sourceSegmentId, dirs);
-				ExtSegmentEnd sourceSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(sourceSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(sourceSegmentId, NodeId))];
+				int endIndex = segEndMan.GetIndex(sourceSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(sourceSegmentId, NodeId));
 
 				for (int k = 0; k < 8; ++k) {
 					ushort targetSegmentId = node.GetSegment(k);
@@ -226,12 +233,18 @@ namespace TrafficManager.TrafficLight.Impl {
 					if (targetSegmentId == 0)
 						continue;
 
-					ArrowDirection dir = segEndMan.GetDirection(ref sourceSegEnd, targetSegmentId);
+					ArrowDirection dir = segEndMan.GetDirection(ref segEndMan.ExtSegmentEnds[endIndex], targetSegmentId);
 					dirs.Add(targetSegmentId, dir);
-					Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {sourceSegmentId}, target segment {targetSegmentId}: adding dir {dir}");
+#if DEBUG
+					if (debug)
+						Log._Debug($"TimedTrafficLights.UpdateDirections: Processing source segment {sourceSegmentId}, target segment {targetSegmentId}: adding dir {dir}");
+#endif
 				}
 			}
-			Log._Debug($"<<<<< TimedTrafficLights.UpdateDirections: finished for node {NodeId}: {Directions.DictionaryToString()}");
+#if DEBUG
+			if (debug)
+				Log._Debug($"<<<<< TimedTrafficLights.UpdateDirections: finished for node {NodeId}: {Directions.DictionaryToString()}");
+#endif
 		}
 
 		public bool IsMasterNode() {
@@ -767,7 +780,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void OnGeometryUpdate() {
-			Log._Debug($"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}.");
+			Log._Trace($"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}.");
 
 			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
 				UpdateDirections(ref node);

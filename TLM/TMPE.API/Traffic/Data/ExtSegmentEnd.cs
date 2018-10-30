@@ -27,6 +27,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		public bool incoming;
 
+		/// <summary>
+		/// First registered vehicle id on this segment end
+		/// </summary>
+		public ushort firstVehicleId;
+
 		public override string ToString() {
 			return $"[ExtSegmentEnd {base.ToString()}\n" +
 				"\t" + $"segmentId={segmentId}\n" +
@@ -34,6 +39,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"nodeId={nodeId}\n" +
 				"\t" + $"outgoing={outgoing}\n" +
 				"\t" + $"incoming={incoming}\n" +
+				"\t" + $"firstVehicleId={firstVehicleId}\n" +
 				"ExtSegmentEnd]";
 		}
 
@@ -43,12 +49,14 @@ namespace TrafficManager.Traffic.Data {
 			nodeId = 0;
 			outgoing = false;
 			incoming = false;
+			firstVehicleId = 0;
 		}
 
 		public void Reset() {
 			nodeId = 0;
 			outgoing = false;
 			incoming = false;
+			firstVehicleId = 0;
 		}
 
 		public bool Equals(ExtSegmentEnd otherSegEnd) {

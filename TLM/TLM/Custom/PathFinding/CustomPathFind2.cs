@@ -1317,7 +1317,7 @@ namespace TrafficManager.Custom.PathFinding {
 					bool nextIsStartNode = nextNodeId == prevSegment.m_startNode;
 					if (nextIsStartNode || nextNodeId == prevSegment.m_endNode) {
 						laneRoutingIndex = m_routingManager.GetLaneEndRoutingIndex(item.m_laneID, nextIsStartNode);
-						prevIsRouted = m_routingManager.laneEndBackwardRoutings[laneRoutingIndex].routed;
+						prevIsRouted = m_routingManager.LaneEndBackwardRoutings[laneRoutingIndex].routed;
 #if DEBUG
 						if (debug) {
 							Debug(unitId, item, $"ProcessItemMain: vehicle -> vehicle: Is previous segment routed? {prevIsRouted}");
@@ -1469,7 +1469,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI
 							, enableAdvancedAI, laneChangingCost,
 #endif
-							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.segmentRoutings[prevSegmentId], m_routingManager.laneEndBackwardRoutings[laneRoutingIndex], connectOffset
+							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.SegmentRoutings[prevSegmentId], m_routingManager.LaneEndBackwardRoutings[laneRoutingIndex], connectOffset
 						)) {
 							exploreUturn = true; // allow exceptional u-turns
 						}
@@ -3079,10 +3079,8 @@ namespace TrafficManager.Custom.PathFinding {
 				 */
 				NetInfo.Direction prevFinalDir = nextIsStartNode ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 				prevFinalDir = ((prevSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevFinalDir : NetInfo.InvertDirection(prevFinalDir);
-				TrafficMeasurementManager.SegmentDirTrafficData prevDirTrafficData =
-					m_trafficMeasurementManager.segmentDirTrafficData[m_trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)];
 
-				float segmentTraffic = Mathf.Clamp(1f - (float)prevDirTrafficData.meanSpeed / (float)TrafficMeasurementManager.REF_REL_SPEED + item.m_trafficRand, 0, 1f);
+				float segmentTraffic = Mathf.Clamp(1f - (float)m_trafficMeasurementManager.SegmentDirTrafficData[m_trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)].meanSpeed / (float)TrafficMeasurementManager.REF_REL_SPEED + item.m_trafficRand, 0, 1f);
 
 				segmentSelectionCost *= 1f +
 					m_conf.AdvancedVehicleAI.TrafficCostFactor *

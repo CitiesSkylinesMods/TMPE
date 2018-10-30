@@ -85,7 +85,16 @@ namespace TrafficManager {
 			new ManualHarmonyPatch() {
 				method = typeof(RoadBaseAI).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() }, null),
 				prefix = new HarmonyMethod(typeof(Patch._RoadBaseAI.SegmentSimulationStepPatch).GetMethod("Prefix"))
-			}
+			}/*,
+			new ManualHarmonyPatch() {
+				method = typeof(CarAI).GetMethod("CheckOtherVehicle", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vehicle.Frame).MakeByRefType(), typeof(float).MakeByRefType(), typeof(bool).MakeByRefType(), typeof(Vector3).MakeByRefType(), typeof(float), typeof(ushort), typeof(Vehicle).MakeByRefType(), typeof(Vector3), typeof(Vector3), typeof(int) }, null),
+				prefix = new HarmonyMethod(typeof(Patch._CarAI.CheckOtherVehiclePatch).GetMethod("Prefix"))
+			}*/
+			/*,
+			new ManualHarmonyPatch() {
+				method = typeof(PassengerCarAI).GetMethod("CheckOverlap", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(ushort), typeof(Bezier3).MakeByRefType(), typeof(float), typeof(float), typeof(float).MakeByRefType(), typeof(float).MakeByRefType() }, null),
+				prefix = new HarmonyMethod(typeof(Patch._PassengerCarAI.CheckOverlapPatch).GetMethod("Prefix"))
+			}*/ // TODO implement
 		};
 
 		/// <summary>
@@ -221,6 +230,7 @@ namespace TrafficManager {
 			RegisteredManagers.Add(ExtSegmentEndManager.Instance);
 			RegisteredManagers.Add(AdvancedParkingManager.Instance);
 			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
+			RegisteredManagers.Add(EmergencyBehaviorManager.Instance);
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
 			RegisteredManagers.Add(ExtCitizenInstanceManager.Instance);
 			RegisteredManagers.Add(ExtCitizenManager.Instance);

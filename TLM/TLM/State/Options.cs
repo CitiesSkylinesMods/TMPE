@@ -60,6 +60,7 @@ namespace TrafficManager.State {
 		private static UICheckBox prohibitPocketCarsToggle = null;
 		private static UICheckBox advancedAIToggle = null;
 		private static UICheckBox realisticPublicTransportToggle = null;
+		private static UICheckBox emergencyAIToggle = null;
 		private static UISlider altLaneSelectionRatioSlider = null;
 		private static UICheckBox highwayRulesToggle = null;
 		private static UICheckBox preferOuterLaneToggle = null;
@@ -138,6 +139,7 @@ namespace TrafficManager.State {
 #endif
 		public static bool strongerRoadConditionEffects = false;
 		public static bool parkingAI = false;
+		public static bool emergencyAI = false;
 		public static bool disableDespawning = false;
 		public static bool preferOuterLane = false;
 		//public static byte publicTransportUsage = 1;
@@ -257,6 +259,9 @@ namespace TrafficManager.State {
 
 			var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
 			realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
+
+			var emergencyAiGroup = panelHelper.AddGroup(Translation.GetString("Emergency_AI"));
+			emergencyAIToggle = emergencyAiGroup.AddCheckbox(Translation.GetString("Enable_Emergency_AI"), emergencyAI, onEmergencyAIChanged) as UICheckBox;
 
 			// VEHICLE RESTRICTIONS
 			++tabIndex;
@@ -880,6 +885,20 @@ namespace TrafficManager.State {
 			}
 		}
 
+		private static void onEmergencyAIChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug($"emergencyAI changed to {newValue}");
+
+			emergencyAI = newValue;
+			if (emergencyAI) {
+				EmergencyBehaviorManager.Instance.OnEnableFeature();
+			} else {
+				EmergencyBehaviorManager.Instance.OnDisableFeature();
+			}
+		}
+
 		private static void onRealisticPublicTransportChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
@@ -1152,6 +1171,13 @@ namespace TrafficManager.State {
 			realisticPublicTransport = newValue;
 			if (realisticPublicTransportToggle != null)
 				realisticPublicTransportToggle.isChecked = newValue;
+		}
+
+		public static void setEmergencyAI(bool newValue) {
+			bool valueChanged = newValue != realisticPublicTransport;
+			emergencyAI = newValue;
+			if (emergencyAIToggle != null)
+				emergencyAIToggle.isChecked = newValue;
 		}
 
 		public static void setRealisticSpeeds(bool newValue) {

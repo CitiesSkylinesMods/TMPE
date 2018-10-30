@@ -403,14 +403,14 @@ namespace TrafficManager.Manager.Impl {
 				}
 
 				bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, transitNodeId);
-				ISegmentEnd incomingEnd = SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
+				/*ISegmentEnd incomingEnd = SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
 				if (incomingEnd == null) {
 #if DEBUG
 					if (debug)
 						Log.Error($"TrafficPriorityManager.HasPriority({vehicleId}): No segment end found for other segment {otherSegmentId} @ {otherStartNode}");
 #endif
 					return true;
-				}
+				}*/
 
 				ICustomSegmentLights otherLights = null;
 				if (Options.trafficLightPriorityRules) {
@@ -431,7 +431,9 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): checking other segment {otherSegmentId} @ {transitNodeId}");
 #endif
 
-				ushort incomingVehicleId = incomingEnd.FirstRegisteredVehicleId;
+				int otherEndIndex = extSegEndMan.GetIndex(otherSegmentId, otherStartNode);
+				ushort incomingVehicleId = extSegEndMan.ExtSegmentEnds[otherEndIndex].firstVehicleId;
+				int numIter = 0;
 				while (incomingVehicleId != 0) {
 #if DEBUG
 					if (debug) {
@@ -439,7 +441,7 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): checking other vehicle {incomingVehicleId} @ seg. {otherSegmentId}");
 					}
 #endif
-					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, ref curEnd, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.ExtVehicles[incomingVehicleId], incomingOnMain, ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(otherSegmentId, otherStartNode)], otherLights, incomingFromDir)) {
+					if (IsConflictingVehicle(debug, transitNode.m_position, targetTimeToTransitNode, vehicleId, ref vehicle, ref curPos, transitNodeId, startNode, ref nextPos, onMain, ref curEnd, targetToDir, incomingVehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[incomingVehicleId], ref vehStateManager.ExtVehicles[incomingVehicleId], incomingOnMain, ref extSegEndMan.ExtSegmentEnds[otherEndIndex], otherLights, incomingFromDir)) {
 #if DEBUG
 						if (debug) {
 							Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): incoming vehicle {incomingVehicleId} is conflicting.");
@@ -450,6 +452,11 @@ namespace TrafficManager.Manager.Impl {
 
 					// check next incoming vehicle
 					incomingVehicleId = vehStateManager.ExtVehicles[incomingVehicleId].nextVehicleIdOnSegment;
+
+					if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+						break;
+					}
 				}
 			}
 #if DEBUG
@@ -1150,7 +1157,7 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Debug($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
+					Log._Trace($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
 					SetPrioritySign(prioSegData.segmentId, (bool)startNode, (PriorityType)prioSegData.priorityType);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -1173,7 +1180,7 @@ namespace TrafficManager.Manager.Impl {
 					if (startSign != PriorityType.None) {
 						ushort startNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, true);
 						if (Services.NetService.IsNodeValid(startNodeId)) {
-							Log._Debug($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
+							Log._Trace($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, startNodeId, (int)startSign));
 						}
 					}
@@ -1182,7 +1189,7 @@ namespace TrafficManager.Manager.Impl {
 					if (endSign != PriorityType.None) {
 						ushort endNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, false);
 						if (Services.NetService.IsNodeValid(endNodeId)) {
-							Log._Debug($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
+							Log._Trace($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, endNodeId, (int)endSign));
 						}
 					}

@@ -156,5 +156,14 @@ namespace TrafficManager.Custom.AI {
 			Log.Error("FindParkingSpaceProp is not overridden!");
 			return false;
 		}
+
+		[RedirectReverse]
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public static bool CheckOverlap(ushort ignoreParked, ref Bezier3 bezier, float offset, float length, out float minPos, out float maxPos) {
+			Log.Error("CheckOverlap is not overridden!");
+			minPos = 0;
+			maxPos = 0;
+			return false;
+		}
 	}
 }

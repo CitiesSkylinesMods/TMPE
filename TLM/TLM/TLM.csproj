@@ -116,11 +116,14 @@
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
+    <Compile Include="Manager\Impl\EmergencyBehaviorManager.cs" />
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_PassengerCarAI\CheckOverlapPatch.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
+    <Compile Include="Patch\_CarAI\CheckOtherVehiclePatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
     <Compile Include="Patch\_TrainTrackBaseAI\LevelCrossingSimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\UpdateLanesPatch.cs" />
@@ -171,6 +174,7 @@
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />
+    <Compile Include="State\ConfigData\EmergencyAI.cs" />
     <Compile Include="State\ConfigData\ParkingAI.cs" />
     <Compile Include="State\ConfigData\PathFinding.cs" />
     <Compile Include="State\ConfigData\PriorityRules.cs" />

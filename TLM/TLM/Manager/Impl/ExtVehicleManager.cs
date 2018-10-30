@@ -197,13 +197,15 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			PathManager pathManager = Singleton<PathManager>.instance;
+			IExtSegmentEndManager segmentEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			// update vehicle position for timed traffic lights and priority signs
 			int coarsePathPosIndex = vehicleData.m_pathPositionIndex >> 1;
 			PathUnit.Position curPathPos = pathManager.m_pathUnits.m_buffer[vehicleData.m_path].GetPosition(coarsePathPosIndex);
 			PathUnit.Position nextPathPos = default(PathUnit.Position);
 			pathManager.m_pathUnits.m_buffer[vehicleData.m_path].GetNextPosition(coarsePathPosIndex, out nextPathPos);
-			UpdatePosition(ref extVehicle, ref vehicleData, ref curPathPos, ref nextPathPos);
+			bool startNode = IsTransitNodeCurStartNode(ref curPathPos, ref nextPathPos);
+			UpdatePosition(ref extVehicle, ref vehicleData, ref segmentEndMan.ExtSegmentEnds[segmentEndMan.GetIndex(curPathPos.m_segment, startNode)], ref curPathPos, ref nextPathPos);
 		}
 
 		public void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
@@ -259,9 +261,10 @@ namespace TrafficManager.Manager.Impl {
 			if (extVehicle.previousVehicleIdOnSegment != 0) {
 				ExtVehicles[extVehicle.previousVehicleIdOnSegment].nextVehicleIdOnSegment = extVehicle.nextVehicleIdOnSegment;
 			} else if (extVehicle.currentSegmentId != 0) {
-				ISegmentEnd curEnd = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(extVehicle.currentSegmentId, extVehicle.currentStartNode);
-				if (curEnd != null && curEnd.FirstRegisteredVehicleId == extVehicle.vehicleId) {
-					curEnd.FirstRegisteredVehicleId = extVehicle.nextVehicleIdOnSegment;
+				IExtSegmentEndManager segmentEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+				int endIndex = segmentEndMan.GetIndex(extVehicle.currentSegmentId, extVehicle.currentStartNode);
+				if (segmentEndMan.ExtSegmentEnds[endIndex].firstVehicleId == extVehicle.vehicleId) {
+					segmentEndMan.ExtSegmentEnds[endIndex].firstVehicleId = extVehicle.nextVehicleIdOnSegment;
 				}
 			}
 
@@ -285,18 +288,18 @@ namespace TrafficManager.Manager.Impl {
 #endif
 		}
 
-		public void Link(ref ExtVehicle extVehicle, ISegmentEnd end) {
+		public void Link(ref ExtVehicle extVehicle, ref ExtSegmentEnd end) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"ExtVehicleManager.Link({extVehicle.vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
 #endif
 
-			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
+			ushort oldFirstRegVehicleId = end.firstVehicleId;
 			if (oldFirstRegVehicleId != 0) {
 				ExtVehicles[oldFirstRegVehicleId].previousVehicleIdOnSegment = extVehicle.vehicleId;
 				extVehicle.nextVehicleIdOnSegment = oldFirstRegVehicleId;
 			}
-			end.FirstRegisteredVehicleId = extVehicle.vehicleId;
+			end.firstVehicleId = extVehicle.vehicleId;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -343,6 +346,10 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (vehicleType != null) {
+				if (extVehicle.vehicleType == ExtVehicleType.Emergency) {
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
+				}
 				extVehicle.vehicleType = (ExtVehicleType)vehicleType;
 			}
 
@@ -400,7 +407,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 		}
 
-		public void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+		public void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref ExtSegmentEnd segEnd, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}) called: {this}");
@@ -415,23 +422,34 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (extVehicle.nextSegmentId != nextPos.m_segment || extVehicle.nextLaneIndex != nextPos.m_lane) {
+				if (extVehicle.nextSegmentId != nextPos.m_segment && extVehicle.vehicleType == ExtVehicleType.Emergency) {
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(nextPos.m_segment, true);
+				}
+
 				extVehicle.nextSegmentId = nextPos.m_segment;
 				extVehicle.nextLaneIndex = nextPos.m_lane;
 			}
 
 			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-			ISegmentEnd end = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(curPos.m_segment, startNode);
+			//ISegmentEnd end = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(curPos.m_segment, startNode);
 
-			if (end == null || extVehicle.currentSegmentId != end.SegmentId || extVehicle.currentStartNode != end.StartNode || extVehicle.currentLaneIndex != curPos.m_lane) {
+			if (extVehicle.currentSegmentId != segEnd.segmentId || extVehicle.currentStartNode != segEnd.startNode || extVehicle.currentLaneIndex != curPos.m_lane) {
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Current segment end changed. seg. {extVehicle.currentSegmentId}, start {extVehicle.currentStartNode}, lane {extVehicle.currentLaneIndex} -> seg. {end?.SegmentId}, start {end?.StartNode}, lane {curPos.m_lane}");
+					Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Current segment end changed. seg. {extVehicle.currentSegmentId}, start {extVehicle.currentStartNode}, lane {extVehicle.currentLaneIndex} -> seg. {segEnd.segmentId}, start {segEnd.startNode}, lane {curPos.m_lane}");
 #endif
+				if (extVehicle.currentSegmentId != curPos.m_segment && extVehicle.vehicleType == ExtVehicleType.Emergency) {
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
+					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(curPos.m_segment, true);
+				}
+
 				if (extVehicle.currentSegmentId != 0) {
 #if DEBUG
 					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Unlinking from current segment end");
 #endif
+
 					Unlink(ref extVehicle);
 				}
 
@@ -443,16 +461,13 @@ namespace TrafficManager.Manager.Impl {
 				extVehicle.currentLaneIndex = curPos.m_lane;
 
 				extVehicle.waitTime = 0;
-				if (end != null) {
+
 #if DEBUGVSTATE
-					if (GlobalConfig.Instance.Debug.Switches[9])
-						Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
+				if (GlobalConfig.Instance.Debug.Switches[9])
+					Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Linking vehicle to segment end {segEnd.segmentId} @ {segEnd.startNode} ({segEnd.nodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
-					Link(ref extVehicle, end);
-					SetJunctionTransitState(ref extVehicle, VehicleJunctionTransitState.Approach);
-				} else {
-					SetJunctionTransitState(ref extVehicle, VehicleJunctionTransitState.None);
-				}
+				Link(ref extVehicle, ref segEnd);
+				SetJunctionTransitState(ref extVehicle, VehicleJunctionTransitState.Approach);
 			}
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -473,6 +488,11 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
+			if (extVehicle.vehicleType == ExtVehicleType.Emergency) {
+				Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
+				Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
+			}
+
 			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(GetDriverInstanceId(extVehicle.vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[extVehicle.vehicleId]));
 
 			Unlink(ref extVehicle);
@@ -487,8 +507,9 @@ namespace TrafficManager.Manager.Impl {
 			extVehicle.nextLaneIndex = 0;
 
 			extVehicle.totalLength = 0;
+			Constants.ManagerFactory.EmergencyBehaviorManager.UnstopVehicle(ref extVehicle);
 
-			extVehicle.flags &= ~ExtVehicleFlags.Spawned;
+			extVehicle.flags &= ExtVehicleFlags.Created;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -531,6 +552,7 @@ namespace TrafficManager.Manager.Impl {
 			extVehicle.lastAltLaneSelSegmentId = 0;
 			extVehicle.junctionTransitState = VehicleJunctionTransitState.None;
 			extVehicle.recklessDriver = false;
+			Constants.ManagerFactory.EmergencyBehaviorManager.UnstopVehicle(ref extVehicle);
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])

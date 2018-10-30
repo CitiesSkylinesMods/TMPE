@@ -20,6 +20,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public IEmergencyBehaviorManager EmergencyBehaviorManager {
+			get {
+				return Impl.EmergencyBehaviorManager.Instance;
+			}
+		}
+
 		public IExtBuildingManager ExtBuildingManager {
 			get {
 				return Impl.ExtBuildingManager.Instance;

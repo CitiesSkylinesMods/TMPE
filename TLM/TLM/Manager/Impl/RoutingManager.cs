@@ -30,7 +30,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// Structs for path-finding that contain required segment-related routing data
 		/// </summary>
-		public SegmentRoutingData[] segmentRoutings = new SegmentRoutingData[NetManager.MAX_SEGMENT_COUNT];
+		public SegmentRoutingData[] SegmentRoutings { get; private set; } = new SegmentRoutingData[NetManager.MAX_SEGMENT_COUNT];
 
 		/// <summary>
 		/// Structs for path-finding that contain required lane-end-related backward routing data.
@@ -38,7 +38,7 @@ namespace TrafficManager.Manager.Impl {
 		///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
 		///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
 		/// </summary>
-		public LaneEndRoutingData[] laneEndBackwardRoutings = new LaneEndRoutingData[(uint)NetManager.MAX_LANE_COUNT * 2u];
+		public LaneEndRoutingData[] LaneEndBackwardRoutings { get; private set; } = new LaneEndRoutingData[(uint)NetManager.MAX_LANE_COUNT * 2u];
 
 		/// <summary>
 		/// Structs for path-finding that contain required lane-end-related forward routing data.
@@ -46,7 +46,7 @@ namespace TrafficManager.Manager.Impl {
 		///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
 		///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
 		/// </summary>
-		public LaneEndRoutingData[] laneEndForwardRoutings = new LaneEndRoutingData[(uint)NetManager.MAX_LANE_COUNT * 2u];
+		public LaneEndRoutingData[] LaneEndForwardRoutings { get; private set; } = new LaneEndRoutingData[(uint)NetManager.MAX_LANE_COUNT * 2u];
 
 		protected bool segmentsUpdated = false;
 		protected ulong[] updatedSegmentBuckets = new ulong[576];
@@ -55,27 +55,27 @@ namespace TrafficManager.Manager.Impl {
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			String buf = $"Segment routings:\n";
-			for (int i = 0; i < segmentRoutings.Length; ++i) {
+			for (int i = 0; i < SegmentRoutings.Length; ++i) {
 				if (!Services.NetService.IsSegmentValid((ushort)i)) {
 					continue;
 				}
-				buf += $"Segment {i}: {segmentRoutings[i]}\n";
+				buf += $"Segment {i}: {SegmentRoutings[i]}\n";
 			}
 			buf += $"\nLane end backward routings:\n";
 			for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
 				if (!Services.NetService.IsLaneValid(laneId)) {
 					continue;
 				}
-				buf += $"Lane {laneId} @ start: {laneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, true)]}\n";
-				buf += $"Lane {laneId} @ end: {laneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, false)]}\n";
+				buf += $"Lane {laneId} @ start: {LaneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, true)]}\n";
+				buf += $"Lane {laneId} @ end: {LaneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, false)]}\n";
 			}
 			buf += $"\nLane end forward routings:\n";
 			for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
 				if (!Services.NetService.IsLaneValid(laneId)) {
 					continue;
 				}
-				buf += $"Lane {laneId} @ start: {laneEndForwardRoutings[GetLaneEndRoutingIndex(laneId, true)]}\n";
-				buf += $"Lane {laneId} @ end: {laneEndForwardRoutings[GetLaneEndRoutingIndex(laneId, false)]}\n";
+				buf += $"Lane {laneId} @ start: {LaneEndForwardRoutings[GetLaneEndRoutingIndex(laneId, true)]}\n";
+				buf += $"Lane {laneId} @ end: {LaneEndForwardRoutings[GetLaneEndRoutingIndex(laneId, false)]}\n";
 			}
 			Log._Debug(buf);
 		}
@@ -244,7 +244,7 @@ namespace TrafficManager.Manager.Impl {
 			if (debugBasic)
 				Log._Debug($"RoutingManager.ResetRoutingData: called for segment {segmentId}");
 #endif
-			segmentRoutings[segmentId].Reset();
+			SegmentRoutings[segmentId].Reset();
 
 			ResetIncomingHighwayLaneArrows(segmentId);
 
@@ -268,20 +268,20 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"RoutingManager.RecalculateSegmentRoutingData: called for seg. {segmentId}");
 #endif
 
-			segmentRoutings[segmentId].Reset();
+			SegmentRoutings[segmentId].Reset();
 
 			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
 			ExtSegmentEnd startSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)];
 			ExtSegmentEnd endSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)];
 
-			segmentRoutings[segmentId].highway = seg.highway;
-			segmentRoutings[segmentId].startNodeOutgoingOneWay = seg.oneWay && startSegEnd.outgoing;
-			segmentRoutings[segmentId].endNodeOutgoingOneWay = seg.oneWay && endSegEnd.outgoing;
+			SegmentRoutings[segmentId].highway = seg.highway;
+			SegmentRoutings[segmentId].startNodeOutgoingOneWay = seg.oneWay && startSegEnd.outgoing;
+			SegmentRoutings[segmentId].endNodeOutgoingOneWay = seg.oneWay && endSegEnd.outgoing;
 
 #if DEBUGROUTING
 			if (debugBasic)
-				Log._Debug($"RoutingManager.RecalculateSegmentRoutingData: Calculated routing data for segment {segmentId}: {segmentRoutings[segmentId]}");
+				Log._Debug($"RoutingManager.RecalculateSegmentRoutingData: Calculated routing data for segment {segmentId}: {SegmentRoutings[segmentId]}");
 #endif
 		}
 
@@ -1205,7 +1205,7 @@ namespace TrafficManager.Manager.Impl {
 			} // foreach segment
 
 			// update backward routing
-			laneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, startNode)] = backwardRouting;
+			LaneEndBackwardRoutings[GetLaneEndRoutingIndex(laneId, startNode)] = backwardRouting;
 
 			// update forward routing
 			LaneTransitionData[] newTransitions = backwardRouting.transitions;
@@ -1221,11 +1221,11 @@ namespace TrafficManager.Manager.Impl {
 					forwardTransition.segmentId = segmentId;
 					forwardTransition.startNode = startNode;
 
-					laneEndForwardRoutings[sourceIndex].AddTransition(forwardTransition);
+					LaneEndForwardRoutings[sourceIndex].AddTransition(forwardTransition);
 
 #if DEBUGROUTING
 					if (debugFine)
-						Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): adding transition to forward routing of laneId={laneId}, idx={laneIndex} @ seg. {newTransitions[i].segmentId} @ node {newTransitions[i].startNode} (sourceIndex={sourceIndex}): {forwardTransition.ToString()}\n\nNew forward routing:\n{laneEndForwardRoutings[sourceIndex].ToString()}");
+						Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): adding transition to forward routing of laneId={laneId}, idx={laneIndex} @ seg. {newTransitions[i].segmentId} @ node {newTransitions[i].startNode} (sourceIndex={sourceIndex}): {forwardTransition.ToString()}\n\nNew forward routing:\n{LaneEndForwardRoutings[sourceIndex].ToString()}");
 #endif
 				}
 			}
@@ -1244,15 +1244,15 @@ namespace TrafficManager.Manager.Impl {
 		protected void ResetLaneRoutings(uint laneId, bool startNode) {
 			uint index = GetLaneEndRoutingIndex(laneId, startNode);
 
-			LaneTransitionData[] oldBackwardTransitions = laneEndBackwardRoutings[index].transitions;
+			LaneTransitionData[] oldBackwardTransitions = LaneEndBackwardRoutings[index].transitions;
 			if (oldBackwardTransitions != null) {
 				for (int i = 0; i < oldBackwardTransitions.Length; ++i) {
 					uint sourceIndex = GetLaneEndRoutingIndex(oldBackwardTransitions[i].laneId, oldBackwardTransitions[i].startNode);
-					laneEndForwardRoutings[sourceIndex].RemoveTransition(laneId);
+					LaneEndForwardRoutings[sourceIndex].RemoveTransition(laneId);
 				}
 			}
 
-			laneEndBackwardRoutings[index].Reset();
+			LaneEndBackwardRoutings[index].Reset();
 		}
 
 		private void UpdateHighwayLaneArrows(uint laneId, bool startNode, ArrowDirection dir) {
@@ -1289,7 +1289,7 @@ namespace TrafficManager.Manager.Impl {
 			return i;
 		}*/
 
-		internal uint GetLaneEndRoutingIndex(uint laneId, bool startNode) {
+		public uint GetLaneEndRoutingIndex(uint laneId, bool startNode) {
 			return (uint)(laneId + (startNode ? 0u : (uint)NetManager.MAX_LANE_COUNT));
 		}
 

@@ -21,6 +21,8 @@ using static TrafficManager.Traffic.Data.PrioritySegment;
 namespace TrafficManager.Manager.Impl {
 	public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
 		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
+		public const float MAX_EVASION_SPEED = 8f * 1f; // 50 km/h
+		public const float EVASION_SPEED = 8f * 0.2f; // 10 km/h
 		public const float ICY_ROADS_MIN_SPEED = 8f * 0.4f; // 20 km/h
 		public const float ICY_ROADS_STUDDED_MIN_SPEED = 8f * 0.8f; // 40 km/h
 		public const float WET_ROADS_MAX_SPEED = 8f * 2f; // 100 km/h
@@ -981,7 +983,7 @@ namespace TrafficManager.Manager.Impl {
 			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
-		public float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed) {
+		public float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool emergency) {
 			if (Singleton<NetManager>.instance.m_treatWetAsSnow) {
 				DistrictManager districtManager = Singleton<DistrictManager>.instance;
 				byte district = districtManager.GetDistrict(pos);
@@ -1023,6 +1025,19 @@ namespace TrafficManager.Manager.Impl {
 
 			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref extVehicle, vehicleInfo);
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
+
+			if (extVehicle.vehicleType != ExtVehicleType.Emergency && emergency) {
+				/*if (behavior == EmergencyBehavior.EvadeOnParkingLane) {
+					maxSpeed = 0f;
+				} else {*/
+					maxSpeed = Math.Min(EVASION_SPEED, maxSpeed); // evading emergency vehicles
+				//}
+				//if (evasionSqrDist < GlobalConfig.Instance.EmergencyAI.MaxEvasionStopDistance) {
+					//maxSpeed = 0f;
+				/*} else {
+					maxSpeed = Math.Min(EVASION_SPEED, maxSpeed); // evading emergency vehicles
+				}*/
+			}
 
 			return maxSpeed;
 		}
@@ -1104,12 +1119,12 @@ namespace TrafficManager.Manager.Impl {
 				uint currentFwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentLaneId, startNode);
 
 #if DEBUG
-				if (currentFwdRoutingIndex < 0 || currentFwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-					Log.Error($"Invalid array index: currentFwdRoutingIndex={currentFwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentLaneId={currentLaneId}, startNode={startNode})");
+				if (currentFwdRoutingIndex < 0 || currentFwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+					Log.Error($"Invalid array index: currentFwdRoutingIndex={currentFwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentLaneId={currentLaneId}, startNode={startNode})");
 				}
 #endif
 
-				if (!RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].routed) {
+				if (!RoutingManager.Instance.LaneEndForwardRoutings[currentFwdRoutingIndex].routed) {
 #if DEBUG
 					if (debug) {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): No forward routing for next path position available.");
@@ -1118,7 +1133,7 @@ namespace TrafficManager.Manager.Impl {
 					return next1PathPos.m_lane;
 				}
 
-				LaneTransitionData[] currentFwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].transitions;
+				LaneTransitionData[] currentFwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[currentFwdRoutingIndex].transitions;
 
 				if (currentFwdTransitions == null) {
 #if DEBUG
@@ -1198,20 +1213,20 @@ namespace TrafficManager.Manager.Impl {
 						// next1 -> next2
 						uint next1FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentFwdTransitions[i].laneId, !currentFwdTransitions[i].startNode);
 #if DEBUG
-						if (next1FwdRoutingIndex < 0 || next1FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-							Log.Error($"Invalid array index: next1FwdRoutingIndex={next1FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, !currentFwdTransitions[i].startNode={!currentFwdTransitions[i].startNode})");
+						if (next1FwdRoutingIndex < 0 || next1FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+							Log.Error($"Invalid array index: next1FwdRoutingIndex={next1FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, !currentFwdTransitions[i].startNode={!currentFwdTransitions[i].startNode})");
 						}
 #endif
 
 #if DEBUG
 						if (debug) {
-							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next1 lane id={currentFwdTransitions[i].laneId}, seg.={currentFwdTransitions[i].segmentId}, index={currentFwdTransitions[i].laneIndex}, startNode={!currentFwdTransitions[i].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex]}");
+							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next1 lane id={currentFwdTransitions[i].laneId}, seg.={currentFwdTransitions[i].segmentId}, index={currentFwdTransitions[i].laneIndex}, startNode={!currentFwdTransitions[i].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex]}");
 						}
 #endif
-						if (!RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex].routed) {
+						if (!RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex].routed) {
 							continue;
 						}
-						LaneTransitionData[] next1FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex].transitions;
+						LaneTransitionData[] next1FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex].transitions;
 
 						if (next1FwdTransitions == null) {
 							continue;
@@ -1252,19 +1267,19 @@ namespace TrafficManager.Manager.Impl {
 								// next2 -> next3
 								uint next2FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(next1FwdTransitions[j].laneId, !next1FwdTransitions[j].startNode);
 #if DEBUG
-								if (next2FwdRoutingIndex < 0 || next2FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-									Log.Error($"Invalid array index: next2FwdRoutingIndex={next2FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (next1FwdTransitions[j].laneId={next1FwdTransitions[j].laneId}, !next1FwdTransitions[j].startNode={!next1FwdTransitions[j].startNode})");
+								if (next2FwdRoutingIndex < 0 || next2FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+									Log.Error($"Invalid array index: next2FwdRoutingIndex={next2FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (next1FwdTransitions[j].laneId={next1FwdTransitions[j].laneId}, !next1FwdTransitions[j].startNode={!next1FwdTransitions[j].startNode})");
 								}
 #endif
 #if DEBUG
 								if (debug) {
-									Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next2 lane id={next1FwdTransitions[j].laneId}, seg.={next1FwdTransitions[j].segmentId}, index={next1FwdTransitions[j].laneIndex}, startNode={!next1FwdTransitions[j].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex]}");
+									Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next2 lane id={next1FwdTransitions[j].laneId}, seg.={next1FwdTransitions[j].segmentId}, index={next1FwdTransitions[j].laneIndex}, startNode={!next1FwdTransitions[j].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex]}");
 								}
 #endif
-								if (!RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex].routed) {
+								if (!RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex].routed) {
 									continue;
 								}
-								LaneTransitionData[] next2FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex].transitions;
+								LaneTransitionData[] next2FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex].transitions;
 
 								if (next2FwdTransitions == null) {
 									continue;
@@ -1305,20 +1320,20 @@ namespace TrafficManager.Manager.Impl {
 										// next3 -> next4
 										uint next3FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(next2FwdTransitions[k].laneId, !next2FwdTransitions[k].startNode);
 #if DEBUG
-										if (next3FwdRoutingIndex < 0 || next3FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-											Log.Error($"Invalid array index: next3FwdRoutingIndex={next3FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (next2FwdTransitions[k].laneId={next2FwdTransitions[k].laneId}, !next2FwdTransitions[k].startNode={!next2FwdTransitions[k].startNode})");
+										if (next3FwdRoutingIndex < 0 || next3FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+											Log.Error($"Invalid array index: next3FwdRoutingIndex={next3FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (next2FwdTransitions[k].laneId={next2FwdTransitions[k].laneId}, !next2FwdTransitions[k].startNode={!next2FwdTransitions[k].startNode})");
 										}
 #endif
 
 #if DEBUG
 										if (debug) {
-											Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next3 lane id={next2FwdTransitions[k].laneId}, seg.={next2FwdTransitions[k].segmentId}, index={next2FwdTransitions[k].laneIndex}, startNode={!next2FwdTransitions[k].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex]}");
+											Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next3 lane id={next2FwdTransitions[k].laneId}, seg.={next2FwdTransitions[k].segmentId}, index={next2FwdTransitions[k].laneIndex}, startNode={!next2FwdTransitions[k].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex]}");
 										}
 #endif
-										if (!RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex].routed) {
+										if (!RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex].routed) {
 											continue;
 										}
-										LaneTransitionData[] next3FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex].transitions;
+										LaneTransitionData[] next3FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex].transitions;
 
 										if (next3FwdTransitions == null) {
 											continue;
@@ -1460,14 +1475,14 @@ namespace TrafficManager.Manager.Impl {
 					if (laneChange) {
 						uint next1BackRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentFwdTransitions[i].laneId, currentFwdTransitions[i].startNode);
 #if DEBUG
-						if (next1BackRoutingIndex < 0 || next1BackRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-							Log.Error($"Invalid array index: next1BackRoutingIndex={next1BackRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, currentFwdTransitions[i].startNode={currentFwdTransitions[i].startNode})");
+						if (next1BackRoutingIndex < 0 || next1BackRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+							Log.Error($"Invalid array index: next1BackRoutingIndex={next1BackRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, currentFwdTransitions[i].startNode={currentFwdTransitions[i].startNode})");
 						}
 #endif
-						if (!RoutingManager.Instance.laneEndBackwardRoutings[next1BackRoutingIndex].routed) {
+						if (!RoutingManager.Instance.LaneEndBackwardRoutings[next1BackRoutingIndex].routed) {
 							continue;
 						}
-						LaneTransitionData[] next1BackTransitions = RoutingManager.Instance.laneEndBackwardRoutings[next1BackRoutingIndex].transitions;
+						LaneTransitionData[] next1BackTransitions = RoutingManager.Instance.LaneEndBackwardRoutings[next1BackRoutingIndex].transitions;
 
 						if (next1BackTransitions == null) {
 							continue;

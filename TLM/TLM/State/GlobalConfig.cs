@@ -77,6 +77,8 @@ namespace TrafficManager.State {
 
 		public ParkingAI ParkingAI = new ParkingAI();
 
+		public EmergencyAI EmergencyAI = new EmergencyAI();
+
 		public PathFinding PathFinding = new PathFinding();
 
 		public PriorityRules PriorityRules = new PriorityRules();
@@ -164,6 +166,10 @@ namespace TrafficManager.State {
 
 					if (conf.ParkingAI == null) {
 						conf.ParkingAI = new ParkingAI();
+					}
+
+					if (conf.EmergencyAI == null) {
+						conf.EmergencyAI = new EmergencyAI();
 					}
 
 					if (conf.PathFinding == null) {

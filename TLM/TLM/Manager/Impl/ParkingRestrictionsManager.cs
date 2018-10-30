@@ -92,6 +92,7 @@ namespace TrafficManager.Manager.Impl {
 			Log.Info($"Loading parking restrictions data. {data.Count} elements");
 			foreach (Configuration.ParkingRestriction restr in data) {
 				try {
+					Log._Trace($"Setting forwardParkingAllowed={restr.forwardParkingAllowed}, backwardParkingAllowed={restr.backwardParkingAllowed} at segment {restr.segmentId}");
 					SetParkingAllowed(restr.segmentId, NetInfo.Direction.Forward, restr.forwardParkingAllowed);
 					SetParkingAllowed(restr.segmentId, NetInfo.Direction.Backward, restr.backwardParkingAllowed);
 				} catch (Exception e) {
@@ -114,6 +115,7 @@ namespace TrafficManager.Manager.Impl {
 					Configuration.ParkingRestriction restr = new Configuration.ParkingRestriction((ushort)segmentId);
 					restr.forwardParkingAllowed = parkingAllowed[segmentId][0];
 					restr.backwardParkingAllowed = parkingAllowed[segmentId][1];
+					Log._Trace($"Saving forwardParkingAllowed={restr.forwardParkingAllowed}, backwardParkingAllowed={restr.backwardParkingAllowed} at segment {restr.segmentId}");
 					ret.Add(restr);
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving parking restrictions @ {segmentId}: {ex.ToString()}");

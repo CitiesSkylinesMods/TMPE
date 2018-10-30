@@ -8,6 +8,7 @@ namespace TrafficManager.Manager {
 	public interface IManagerFactory {
 		IAdvancedParkingManager AdvancedParkingManager { get; }
 		ICustomSegmentLightsManager CustomSegmentLightsManager { get; }
+		IEmergencyBehaviorManager EmergencyBehaviorManager { get; }
 		IExtBuildingManager ExtBuildingManager { get; }
 		IExtCitizenInstanceManager ExtCitizenInstanceManager { get; }
 		IExtCitizenManager ExtCitizenManager { get; }

@@ -709,7 +709,7 @@ namespace TrafficManager.UI {
 				if (curLaneId == 0)
 					break;
 
-				TrafficMeasurementManager.LaneTrafficData laneTrafficData;
+				LaneTrafficData laneTrafficData;
 				bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetLaneTrafficData(segmentId, (byte)i, out laneTrafficData);
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
@@ -798,7 +798,7 @@ namespace TrafficManager.UI {
 
 				String labelStr = "Segment " + i;
 #if DEBUG
-				labelStr += ", flags: " + netManager.m_segments.m_buffer[i].m_flags.ToString(); // + ", condition: " + segments.m_buffer[i].m_condition;
+				labelStr += ", flags: " + netManager.m_segments.m_buffer[i].m_flags.ToString() + ", resc: " + EmergencyBehaviorManager.Instance.EmergencySegments[i]; // + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
 				labelStr += "\nsvc: " + service + ", sub: " + subService;
@@ -824,7 +824,7 @@ namespace TrafficManager.UI {
 				labelStr += ", ";
 #endif
 				labelStr += "mean speeds: ";
-				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].meanSpeed / 100) + "%/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].meanSpeed / 100) + "%";
+				labelStr += " " + (trafficMeasurementManager.SegmentDirTrafficData[fwdSegIndex].meanSpeed / 100) + "%/" + (trafficMeasurementManager.SegmentDirTrafficData[backSegIndex].meanSpeed / 100) + "%";
 #if PFTRAFFICSTATS || MEASURECONGESTION
 			labelStr += "\n";
 #endif

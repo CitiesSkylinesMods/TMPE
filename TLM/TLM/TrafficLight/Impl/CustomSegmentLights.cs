@@ -428,10 +428,9 @@ namespace TrafficManager.TrafficLight.Impl {
 					if (otherSegmentId == 0 || otherSegmentId == SegmentId)
 						continue;
 
-					ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
-					ExtSegmentEnd otherSegEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(otherSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, NodeId))];
+					//ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
 
-					if (!otherSegEnd.incoming) {
+					if (!segEndMan.ExtSegmentEnds[segEndMan.GetIndex(otherSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, NodeId))].incoming) {
 						continue;
 					}
 

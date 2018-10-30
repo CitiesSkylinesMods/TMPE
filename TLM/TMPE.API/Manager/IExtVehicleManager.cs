@@ -103,9 +103,10 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="extVehicle">vehicle</param>
 		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="segEnd">ext. segment end</param>
 		/// <param name="curPos">current path position</param>
 		/// <param name="nextPos">next path position</param>
-		void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos);
+		void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref ExtSegmentEnd segEnd, ref PathUnit.Position curPos, ref PathUnit.Position nextPos);
 
 		/// <summary>
 		/// Unlinks the given vehicle from any segment end that the vehicle is currently linked to.
@@ -117,8 +118,8 @@ namespace TrafficManager.Manager {
 		/// Links the given vehicle with the given segment end.
 		/// </summary>
 		/// <param name="extVehicle">vehicle</param>
-		/// <param name="end">segment end</param>
-		void Link(ref ExtVehicle extVehicle, ISegmentEnd end);
+		/// <param name="end">ext. segment end</param>
+		void Link(ref ExtVehicle extVehicle, ref ExtSegmentEnd end);
 
 		/// <summary>
 		/// Updates the vehicle's junction transit state to the given value.

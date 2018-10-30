@@ -51,7 +51,7 @@ namespace TrafficManager.Custom.PathFinding {
 		private const float SEGMENT_MIN_AVERAGE_LENGTH = 30f;
 		private const float LANE_DENSITY_DISCRETIZATION = 25f;
 		private const float LANE_USAGE_DISCRETIZATION = 25f;
-		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = 0.003921569f;
+		private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR;
 
 		//Expose the private fields
 		FieldInfo _fieldpathUnits;
@@ -471,13 +471,13 @@ namespace TrafficManager.Custom.PathFinding {
 					if ((byte)(candidateItem.m_direction & NetInfo.Direction.Forward) != 0) {
 						ushort startNode = netManager.m_segments.m_buffer[candidateItem.m_position.m_segment].m_startNode;
 						uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, true);
-						this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.segmentRoutings[candidateItem.m_position.m_segment], routingManager.laneEndBackwardRoutings[laneRoutingIndex], startNode, true, ref netManager.m_nodes.m_buffer[startNode], 0, false);
+						this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.SegmentRoutings[candidateItem.m_position.m_segment], routingManager.LaneEndBackwardRoutings[laneRoutingIndex], startNode, true, ref netManager.m_nodes.m_buffer[startNode], 0, false);
 					}
 
 					if ((byte)(candidateItem.m_direction & NetInfo.Direction.Backward) != 0) {
 						ushort endNode = netManager.m_segments.m_buffer[candidateItem.m_position.m_segment].m_endNode;
 						uint laneRoutingIndex = routingManager.GetLaneEndRoutingIndex(candidateItem.m_laneID, false);
-						this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.segmentRoutings[candidateItem.m_position.m_segment], routingManager.laneEndBackwardRoutings[laneRoutingIndex], endNode, false, ref netManager.m_nodes.m_buffer[endNode], 255, false);
+						this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.SegmentRoutings[candidateItem.m_position.m_segment], routingManager.LaneEndBackwardRoutings[laneRoutingIndex], endNode, false, ref netManager.m_nodes.m_buffer[endNode], 255, false);
 					}
 
 					// handle special nodes (e.g. bus stops)
@@ -509,7 +509,7 @@ namespace TrafficManager.Custom.PathFinding {
 										);
 								}
 #endif
-								this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.segmentRoutings[candidateItem.m_position.m_segment], routingManager.laneEndBackwardRoutings[0], specialNodeId, false, ref netManager.m_nodes.m_buffer[specialNodeId], laneOffset, true);
+								this.ProcessItemMain(unit, candidateItem, ref netManager.m_segments.m_buffer[candidateItem.m_position.m_segment], routingManager.SegmentRoutings[candidateItem.m_position.m_segment], routingManager.LaneEndBackwardRoutings[0], specialNodeId, false, ref netManager.m_nodes.m_buffer[specialNodeId], laneOffset, true);
 							}
 							specialNodeId = netManager.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
 							if (++num6 >= NetManager.MAX_NODE_COUNT) {
@@ -1401,7 +1401,7 @@ namespace TrafficManager.Custom.PathFinding {
 									// segment selection based on segment traffic volume
 									NetInfo.Direction prevFinalDir = nextIsStartNode ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
 									prevFinalDir = ((prevSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? prevFinalDir : NetInfo.InvertDirection(prevFinalDir);
-									TrafficMeasurementManager.SegmentDirTrafficData prevDirTrafficData = trafficMeasurementManager.segmentDirTrafficData[trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)];
+									SegmentDirTrafficData prevDirTrafficData = trafficMeasurementManager.SegmentDirTrafficData[trafficMeasurementManager.GetDirIndex(item.m_position.m_segment, prevFinalDir)];
 
 									float segmentTraffic = Mathf.Clamp(1f - (float)prevDirTrafficData.meanSpeed / (float)TrafficMeasurementManager.REF_REL_SPEED + item.m_trafficRand, 0, 1f);
 

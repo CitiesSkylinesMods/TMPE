@@ -620,7 +620,7 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
+					Log._Trace($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
 					AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -648,7 +648,7 @@ namespace TrafficManager.Manager.Impl {
 								if (!Services.NetService.IsLaneValid(otherHigherLaneId))
 									continue;
 
-								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
+								Log._Trace($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
 								ret.Add(new Configuration.LaneConnection(i, (uint)otherHigherLaneId, startNode));
 							}
 						}
