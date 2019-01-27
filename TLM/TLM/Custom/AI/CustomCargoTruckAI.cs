@@ -92,7 +92,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position startAltPosB;
 			float startAltDistSqrA;
 			float startAltDistSqrB;
-			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, allowUnderground, false, 32f, out startAltPosA, out startAltPosB, out startAltDistSqrA, out startAltDistSqrB)) {
+			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane, allowUnderground, false, 32f, out startAltPosA, out startAltPosB, out startAltDistSqrA, out startAltDistSqrB)) {
 				if (!startPosFound || startAltDistSqrA < startDistSqrA) {
 					startPosA = startAltPosA;
 					startPosB = startAltPosB;
@@ -110,7 +110,7 @@ namespace TrafficManager.Custom.AI {
 			PathUnit.Position endAltPosB;
 			float endAltDistSqrA;
 			float endAltDistSqrB;
-			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship, undergroundTarget, false, 32f, out endAltPosA, out endAltPosB, out endAltDistSqrA, out endAltDistSqrB)) {
+			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane, undergroundTarget, false, 32f, out endAltPosA, out endAltPosB, out endAltDistSqrA, out endAltDistSqrB)) {
 				if (!endPosFound || endAltDistSqrA < endDistSqrA) {
 					endPosA = endAltPosA;
 					endPosB = endAltPosB;
@@ -128,7 +128,7 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
-				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship;
+				VehicleInfo.VehicleType vehicleTypes =  VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane;
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
