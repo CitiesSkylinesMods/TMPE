@@ -4,9 +4,12 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
-1.10.13, 25/01/2019
-- Bugfix: Tollbooth fix
+1.10.14, 25/01/2019
 - Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
+- Bugfix: Vehicles doesn't stop when driving through toll booth
+
+1.10.13, 31/10/2018
+- Bugfix: Tollbooth fix
 
 1.10.12, 08/12/2018
 - Added the option to allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
