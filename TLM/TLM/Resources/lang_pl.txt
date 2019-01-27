@@ -223,5 +223,5 @@ Window_transparency Przezroczystość okna
 Overlay_transparency Przezroczystość nakł.
 Remove_this_citizen Usuń tego mieszkańca
 Show_error_message_if_a_mod_incompatibility_is_detected Pokaż informację o błędzie jeśli wykryto niezgodność modów
-Remove_parked_vehicles Remove parked vehicles
-Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
+Remove_parked_vehicles Usuń zaparkowane pojazdy
+Node_is_level_crossing To jest przejazd kolejowy. \nNie możesz tutaj wyłączyć sygnalizacji!
