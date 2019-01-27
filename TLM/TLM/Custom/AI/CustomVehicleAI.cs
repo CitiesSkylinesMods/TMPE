@@ -145,6 +145,27 @@ namespace TrafficManager.Custom.AI {
 						vehicleData.m_lastPathOffset = lastPathOffset;
 					}
 				}
+				
+				if ((vehicleData.m_flags2 & Vehicle.Flags2.EndStop) != 0)
+				{
+					if (targetPosIndex <= 0)
+					{
+						targetPos.w = 0f;
+						if (VectorUtils.LengthSqrXZ(vehicleData.GetLastFrameVelocity()) < 0.01f)
+						{
+							vehicleData.m_flags2 &= ~Vehicle.Flags2.EndStop;
+						}
+					}
+					else
+					{
+						targetPos.w = 1f;
+					}
+					while (targetPosIndex < maxTargetPosIndex)
+					{
+						vehicleData.SetTargetPos(targetPosIndex++, targetPos);
+					}
+					return;
+				}
 
 				// vehicle is in transition now
 
