@@ -7,6 +7,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 1.10.14, 25/01/2019 Wip
 - Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
 - Bugfix: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too
+- Bugfix: Cargo planes not spawn
 
 1.10.13, 31/10/2018
 - Bugfix: Tollbooth fix
