@@ -43,6 +43,7 @@ namespace TrafficManager.UI {
 
 			// add the menu
 			MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+			MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 #if DEBUG
 			DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
@@ -52,6 +53,9 @@ namespace TrafficManager.UI {
 
 		~UIBase() {
 			UnityEngine.Object.Destroy(MainMenuButton);
+			CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+			if(keyHandler != null)
+				UnityEngine.Object.Destroy(keyHandler);
 		}
 
 		public bool IsVisible() {
@@ -68,6 +72,10 @@ namespace TrafficManager.UI {
 		internal void RebuildMenu() {
 			Close();
 			if (MainMenu != null) {
+				CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+				if(keyHandler != null)
+				UnityEngine.Object.Destroy(keyHandler);
+				
 				UnityEngine.Object.Destroy(MainMenu);
 #if DEBUG
 				UnityEngine.Object.Destroy(DebugMenu);
@@ -75,6 +83,7 @@ namespace TrafficManager.UI {
 			}
 			var uiView = UIView.GetAView();
 			MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+			MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 #if DEBUG
 			DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
@@ -99,6 +108,7 @@ namespace TrafficManager.UI {
 			SetToolMode(TrafficManagerMode.Activated);
 			_uiShown = true;
 			MainMenuButton.UpdateSprites();
+			UIView.SetFocus(MainMenu);
 		}
 
 		public void Close() {

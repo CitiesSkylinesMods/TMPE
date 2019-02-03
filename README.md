@@ -4,6 +4,10 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
+1.10.15,
+- Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu
+- Updated pathfinding with missing vanilla logic
+
 1.10.14, 27/01/2019
 - Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
 - Bugfix: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too
