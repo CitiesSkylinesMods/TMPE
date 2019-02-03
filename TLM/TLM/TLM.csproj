@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -431,6 +431,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\WindowBackground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\left_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -2,6 +2,7 @@
 using ColossalFramework.Math;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -333,6 +334,36 @@ namespace TrafficManager.Manager.Impl {
 							vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
 							vehicleData.m_waitCounter = 0;
 						}
+
+                        // Check if turning right, and right on red if allowed
+                        if (Options.turnOnRed) {
+                            if (JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
+                                // Check if vehicle has stopped
+                                // TODO: If is a wreckless driver, yield / run
+                                // TODO: Disallow cutting into flowing traffic, disrupting the flow.
+                                // TODO: If turning onto a one-way road, allow turning for the opposite direction.
+                                if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+
+                                    ushort uCurrentSegment = prevPos.m_segment;
+                                    ushort uTargetSegment = position.m_segment;
+                                    ushort uTurnSegment = 0;
+
+                                    Constants.ServiceFactory.NetService.ProcessSegment(uCurrentSegment, delegate (ushort sId, ref NetSegment segment) {
+                                        if (Constants.ServiceFactory.SimulationService.LeftHandDrive) uTurnSegment = segment.GetLeftSegment(targetNodeId);
+                                        else uTurnSegment = segment.GetRightSegment(targetNodeId);
+                                        return true;
+                                    });
+
+                                    // Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, uTargetSegment={uTargetSegment}, uTurnSegment={uTurnSegment}");
+                                    if (uTargetSegment == uTurnSegment) {
+                                        // Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uTargetSegment({uTargetSegment})==uTurnSegment({uTurnSegment}), will turn on red!");
+                                        vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+                                        maxSpeed = 0f;
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
 
 						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 						maxSpeed = 0f;

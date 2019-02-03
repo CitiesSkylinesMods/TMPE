@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,14 +14,23 @@ namespace TrafficManager.Manager {
 		/// <returns><code>true</code> if u-turns may be customized, <code>false</code> otherwise</returns>
 		bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
-		/// <summary>
-		/// Determines if lane changing behavior may be controlled at the given segment end.
+        /// <summary>
+		/// Determines if turn-on-red behavior may be controlled at the given segment end.
 		/// </summary>
 		/// <param name="segmentId">segment id</param>
 		/// <param name="startNode">at start node?</param>
 		/// <param name="node">node data</param>
-		/// <returns><code>true</code> if lane changing may be customized, <code>false</code> otherwise</returns>
-		bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node);
+		/// <returns><code>true</code> if turn-on-red may be customized, <code>false</code> otherwise</returns>
+		bool IsTurnOnRedAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
+
+        /// <summary>
+        /// Determines if lane changing behavior may be controlled at the given segment end.
+        /// </summary>
+        /// <param name="segmentId">segment id</param>
+        /// <param name="startNode">at start node?</param>
+        /// <param name="node">node data</param>
+        /// <returns><code>true</code> if lane changing may be customized, <code>false</code> otherwise</returns>
+        bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
 		/// <summary>
 		/// Determines if entering blocked junctions may be controlled at the given segment end.
@@ -50,14 +59,23 @@ namespace TrafficManager.Manager {
 		/// <returns><code>true</code> if u-turns are allowed by default, <code>false</code> otherwise</returns>
 		bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node);
 
-		/// <summary>
-		/// Determines the default setting for straight lane changes at the given segment end.
-		/// </summary>
-		/// <param name="segmentId">segment id</param>
-		/// <param name="startNode">at start node?</param>
-		/// <param name="node">node data</param>
-		/// <returns><code>true</code> if straight lane changes are allowed by default, <code>false</code> otherwise</returns>
-		bool GetDefaultLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, ref NetNode node);
+        /// <summary>
+        /// Determines the default setting for turn-on-red at the given segment end.
+        /// </summary>
+        /// <param name="segmentId">segment id</param>
+        /// <param name="startNode">at start node?</param>
+        /// <param name="node">node data</param>
+        /// <returns><code>true</code> if turn-on-red is allowed by default, <code>false</code> otherwise</returns>
+        bool GetDefaultTurnOnRedAllowed(ushort segmentId, bool startNode, ref NetNode node);
+
+        /// <summary>
+        /// Determines the default setting for straight lane changes at the given segment end.
+        /// </summary>
+        /// <param name="segmentId">segment id</param>
+        /// <param name="startNode">at start node?</param>
+        /// <param name="node">node data</param>
+        /// <returns><code>true</code> if straight lane changes are allowed by default, <code>false</code> otherwise</returns>
+        bool GetDefaultLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, ref NetNode node);
 
 		/// <summary>
 		/// Determines the default setting for entering a blocked junction at the given segment end.
