@@ -30,6 +30,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
+        private static UICheckBox turnOnRedToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
@@ -91,6 +92,7 @@ namespace TrafficManager.State {
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
 		public static bool realisticSpeeds = true;
+        public static bool turnOnRed = false;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
@@ -253,6 +255,7 @@ namespace TrafficManager.State {
 				recklessDriversDropdown.width = 300;
 			}
 			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
+            turnOnRedToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
 				strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			}
@@ -917,6 +920,14 @@ namespace TrafficManager.State {
 			realisticSpeeds = value;
 		}
 
+        private static void onTurnOnRedChanged(bool value) {
+            if (!checkGameLoaded())
+                return;
+
+            Log._Debug($"turnOnRed changed to {value}");
+            turnOnRed = value;
+        }
+
 		private static void onDisableDespawningChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -1186,6 +1197,12 @@ namespace TrafficManager.State {
 			if (realisticSpeedsToggle != null)
 				realisticSpeedsToggle.isChecked = newValue;
 		}
+
+        public static void setTurnOnRed(bool newValue) {
+            turnOnRed = newValue;
+            if (turnOnRed != null)
+                turnOnRedToggle.isChecked = newValue;
+        }
 
 		public static void setDisableDespawning(bool value) {
 			disableDespawning = value;
