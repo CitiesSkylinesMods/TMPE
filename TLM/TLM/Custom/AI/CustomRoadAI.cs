@@ -411,7 +411,7 @@ namespace TrafficManager.Custom.AI {
 				NetSegment.CalculateMiddlePoints(vector3, startDir, vector4, endDir, smoothStart, smoothEnd, out b3, out c);
 				NetLane.Flags flags2 = (NetLane.Flags)instance.m_lanes.m_buffer[num16].m_flags;
 				NetLane.Flags flags3 = flags;
-				flags2 &= ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right | NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd | NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
+				flags2 &= ~(NetLane.Flags.Forward | NetLane.Flags.Left | NetLane.Flags.Right | NetLane.Flags.Merge | NetLane.Flags.YieldStart | NetLane.Flags.YieldEnd | NetLane.Flags.StartOneWayLeft | NetLane.Flags.StartOneWayRight | NetLane.Flags.EndOneWayLeft | NetLane.Flags.EndOneWayRight);
 				if ((byte)(lane.m_finalDirection & NetInfo.Direction.Both) == 2) {
 					flags3 &= ~NetLane.Flags.YieldEnd;
 				}
@@ -456,63 +456,89 @@ namespace TrafficManager.Custom.AI {
 					num18 = 255;
 					num19 = 0;
 					if (num25 != 0) {
-						int num26;
-						int num27;
-						if (lane.m_similarLaneCount >= num25) {
-							num26 = num20;
-							num27 = num22;
-						} else {
-							num26 = num20 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
-							num27 = num22 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
-						}
-						int num28 = num26;
-						int num29 = lane.m_similarLaneCount - num26 - num27;
-						int num30 = num27;
-						if (num29 > 0) {
-							if (num20 > num26) {
-								num28++;
-							}
-							if (num22 > num27) {
-								num30++;
-							}
-						}
-						if (num23 < num28) {
-							int num31 = (num23 * num20 + num28 - 1) / num28;
-							int num32 = ((num23 + 1) * num20 + num28 - 1) / num28;
-							if (num32 > num31) {
+						if (lane.m_similarLaneCount > num25 && num25 > 0)
+						{
+							num18 = num25 * num23 / lane.m_similarLaneCount;
+							num19 = num25 - num25 * num24 / lane.m_similarLaneCount;
+							flags2 |= NetLane.Flags.Merge;
+							if (num18 < num20)
+							{
 								flags2 |= NetLane.Flags.Left;
-								num18 = Mathf.Min(num18, num31);
-								num19 = Mathf.Max(num19, num32);
 							}
-						}
-						if (num23 >= num26 && num24 >= num27 && num21 != 0) {
-							if (lane.m_similarLaneCount > num25) {
-								num26++;
-							}
-							int num33 = num20 + ((num23 - num26) * num21 + num29 - 1) / num29;
-							int num34 = num20 + ((num23 + 1 - num26) * num21 + num29 - 1) / num29;
-							if (num34 > num33) {
-								flags2 |= NetLane.Flags.Forward;
-								num18 = Mathf.Min(num18, num33);
-								num19 = Mathf.Max(num19, num34);
-							}
-						}
-						if (num24 < num30) {
-							int num35 = num25 - ((num24 + 1) * num22 + num30 - 1) / num30;
-							int num36 = num25 - (num24 * num22 + num30 - 1) / num30;
-							if (num36 > num35) {
+							if (num25 - num19 < num22)
+							{
 								flags2 |= NetLane.Flags.Right;
-								num18 = Mathf.Min(num18, num35);
-								num19 = Mathf.Max(num19, num36);
 							}
-						}
-						if (this.m_highwayRules) {
-							if ((flags2 & NetLane.Flags.LeftRight) == NetLane.Flags.Left) {
-								if ((flags2 & NetLane.Flags.Forward) == NetLane.Flags.None || (num21 >= 2 && num20 == 1)) {
-									num19 = Mathf.Min(num19, num18 + 1);
+							if (num21 != 0 && num18 < num20 + num21 && num19 > num20)
+							{
+								flags2 |= NetLane.Flags.Forward;
+							}
+						} else {
+							int num26;
+							int num27;
+							if (lane.m_similarLaneCount >= num25) {
+								num26 = num20;
+								num27 = num22;
+							} else {
+								num26 = num20 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
+								num27 = num22 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
+							}
+
+							int num28 = num26;
+							int num29 = lane.m_similarLaneCount - num26 - num27;
+							int num30 = num27;
+							if (num29 > 0) {
+								if (num20 > num26) {
+									num28++;
 								}
-							} else if ((flags2 & NetLane.Flags.LeftRight) == NetLane.Flags.Right && ((flags2 & NetLane.Flags.Forward) == NetLane.Flags.None || (num21 >= 2 && num22 == 1))) {
-								num18 = Mathf.Max(num18, num19 - 1);
+
+								if (num22 > num27) {
+									num30++;
+								}
+							}
+
+							if (num23 < num28) {
+								int num31 = (num23 * num20 + num28 - 1) / num28;
+								int num32 = ((num23 + 1) * num20 + num28 - 1) / num28;
+								if (num32 > num31) {
+									flags2 |= NetLane.Flags.Left;
+									num18 = Mathf.Min(num18, num31);
+									num19 = Mathf.Max(num19, num32);
+								}
+							}
+
+							if (num23 >= num26 && num24 >= num27 && num21 != 0) {
+								if (lane.m_similarLaneCount > num25) {
+									num26++;
+								}
+
+								int num33 = num20 + ((num23 - num26) * num21 + num29 - 1) / num29;
+								int num34 = num20 + ((num23 + 1 - num26) * num21 + num29 - 1) / num29;
+								if (num34 > num33) {
+									flags2 |= NetLane.Flags.Forward;
+									num18 = Mathf.Min(num18, num33);
+									num19 = Mathf.Max(num19, num34);
+								}
+							}
+
+							if (num24 < num30) {
+								int num35 = num25 - ((num24 + 1) * num22 + num30 - 1) / num30;
+								int num36 = num25 - (num24 * num22 + num30 - 1) / num30;
+								if (num36 > num35) {
+									flags2 |= NetLane.Flags.Right;
+									num18 = Mathf.Min(num18, num35);
+									num19 = Mathf.Max(num19, num36);
+								}
+							}
+
+							if (this.m_highwayRules) {
+								if ((flags2 & NetLane.Flags.LeftRight) == NetLane.Flags.Left) {
+									if ((flags2 & NetLane.Flags.Forward) == NetLane.Flags.None || (num21 >= 2 && num20 == 1)) {
+										num19 = Mathf.Min(num19, num18 + 1);
+									}
+								} else if ((flags2 & NetLane.Flags.LeftRight) == NetLane.Flags.Right && ((flags2 & NetLane.Flags.Forward) == NetLane.Flags.None || (num21 >= 2 && num22 == 1))) {
+									num18 = Mathf.Max(num18, num19 - 1);
+								}
 							}
 						}
 					}
