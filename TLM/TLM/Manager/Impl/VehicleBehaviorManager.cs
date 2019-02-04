@@ -347,9 +347,10 @@ namespace TrafficManager.Manager.Impl {
                                     ushort uCurrentSegment = prevPos.m_segment;
                                     ushort uTargetSegment = position.m_segment;
 
-                                    // If you can't turn preferred and you're not on a one-way road, don't turn
+                                    // If you can turn preferred and you're on a one-way road and not going straight, continue
                                     SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
-                                    if ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? currentSegGeo.HasLeftSegment(true) : currentSegGeo.HasRightSegment(true)) || currentSegGeo.IsOneWay()) {
+                                    if ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? currentSegGeo.HasLeftSegment(true) : currentSegGeo.HasRightSegment(true)) ||
+                                        (currentSegGeo.IsOneWay() && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true))) {
 
                                         ushort uTurnSegment = 0;
 
@@ -362,10 +363,9 @@ namespace TrafficManager.Manager.Impl {
                                             return true;
                                         });
 
-                                        // If you're not going straight and the direction you are going is the same as the preferred lane or you're going from a one-way road to another one-way road, turn
+                                        // If the direction you are going is the same as the preferred lane or you're going from a one-way road to another one-way road, turn
                                         SegmentGeometry turnSegGeo = SegmentGeometry.Get(uTurnSegment);
-                                        if (!currentSegGeo.IsStraightSegment(uTurnSegment, true) &&
-                                            (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() == true && turnSegGeo?.IsOneWay() == true))) {
+                                        if (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() == true && turnSegGeo?.IsOneWay() == true)) {
                                             vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
                                             maxSpeed = 0f;
                                             return true;
