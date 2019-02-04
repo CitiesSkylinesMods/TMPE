@@ -346,27 +346,31 @@ namespace TrafficManager.Manager.Impl {
 
                                     ushort uCurrentSegment = prevPos.m_segment;
                                     ushort uTargetSegment = position.m_segment;
-                                    ushort uTurnSegment = 0;
 
-                                    Constants.ServiceFactory.NetService.ProcessSegment(uCurrentSegment, delegate (ushort sId, ref NetSegment segment) {
-                                        if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-                                            uTurnSegment = segment.GetLeftSegment(targetNodeId);
-                                        } else {
-                                            uTurnSegment = segment.GetRightSegment(targetNodeId);
-                                        }
-                                        return true;
-                                    });
-
+                                    // If you can't turn preferred and you're not on a one-way road, don't turn
                                     SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
-                                    SegmentGeometry targetSegGeo = SegmentGeometry.Get(uTargetSegment);
+                                    if ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? currentSegGeo.HasLeftSegment(true) : currentSegGeo.HasRightSegment(true)) || currentSegGeo.IsOneWay()) {
 
-                                    // Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, uTargetSegment={uTargetSegment}, uTurnSegment={uTurnSegment}");
-                                    // Allow from a one-way to another one-way or if the target is the same as the preferred turn segment
-                                    if (uTargetSegment == uTurnSegment || (currentSegGeo?.IsOneWay() == true && targetSegGeo?.IsOneWay() == true)) {
-                                        // Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uTargetSegment({uTargetSegment})==uTurnSegment({uTurnSegment}), will turn on red!");
-                                        vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-                                        maxSpeed = 0f;
-                                        return true;
+                                        ushort uTurnSegment = 0;
+
+                                        Constants.ServiceFactory.NetService.ProcessSegment(uCurrentSegment, delegate (ushort sId, ref NetSegment segment) {
+                                            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                                                uTurnSegment = segment.GetLeftSegment(targetNodeId);
+                                            } else {
+                                                uTurnSegment = segment.GetRightSegment(targetNodeId);
+                                            }
+                                            return true;
+                                        });
+
+                                        // If you're not going straight and the direction you are going is the same as the preferred lane or you're going from a one-way road to another one-way road, turn
+                                        SegmentGeometry turnSegGeo = SegmentGeometry.Get(uTurnSegment);
+                                        if (!currentSegGeo.IsStraightSegment(uTurnSegment, true) &&
+                                            (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() == true && turnSegGeo?.IsOneWay() == true))) {
+                                            vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
+                                            maxSpeed = 0f;
+                                            return true;
+                                        }
+
                                     }
                                 }
                             }
