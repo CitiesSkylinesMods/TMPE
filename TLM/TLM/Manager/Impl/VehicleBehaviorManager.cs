@@ -335,14 +335,15 @@ namespace TrafficManager.Manager.Impl {
 							vehicleData.m_waitCounter = 0;
 						}
 
-                        // Check if turning right, and right on red if allowed
+                        // Check if turning in the preferred direction, and if turning while it's red is allowed
                         if (Options.turnOnRed) {
                             if (JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
                                 // Check if vehicle has stopped
-                                // TODO: If is a wreckless driver, yield / run
                                 // TODO: Disallow cutting into flowing traffic, disrupting the flow.
                                 // TODO: If turning onto a one-way road, allow turning for the opposite direction.
-                                if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+                                if (
+                                    (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY)
+                                    || vehicleState.recklessDriver && sqrVelocity <= TrafficPriorityManager.MAX_YIELD_VELOCITY) {
 
                                     ushort uCurrentSegment = prevPos.m_segment;
                                     ushort uTargetSegment = position.m_segment;
