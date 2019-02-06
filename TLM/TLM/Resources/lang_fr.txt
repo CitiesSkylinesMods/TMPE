@@ -151,6 +151,7 @@ General Général
 Gameplay Gameplay
 Overlays Interface
 Realistic_speeds Vitesses réalistes
+Turn_on_red Allumer le rouge
 Evacuation_busses_may_ignore_traffic_rules Les bus d'évacuation peuvent ignorer les règles de traffic
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Les bus d'évacuation peuvent peut-être n'être utilisés que pour atteindre un abri
 Vehicle_behavior Comportement des véhicules

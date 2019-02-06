@@ -151,6 +151,7 @@ General General
 Gameplay Gameplay
 Overlays Overlays
 Realistic_speeds Realistic speeds
+Turn_on_red 赤にする
 Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
 Vehicle_behavior Vehicle behavior

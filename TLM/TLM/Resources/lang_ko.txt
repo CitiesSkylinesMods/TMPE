@@ -151,6 +151,7 @@ General 기본
 Gameplay 게임플레이
 Overlays 화면표시
 Realistic_speeds 현실적인 속도
+Turn_on_red 빨간색으로 켜십시오.
 Evacuation_busses_may_ignore_traffic_rules 대피 버스는 교통규칙을 무시합니다
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 대피 버스는 대피소 도착을 위한 용도로만 사용할 수 있습니다
 Vehicle_behavior 차량 제한

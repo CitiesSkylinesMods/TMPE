@@ -151,6 +151,7 @@ General Общее
 Gameplay Геймплей
 Overlays Оверлеи
 Realistic_speeds Реалистичные скорости
+Turn_on_red Включи красный
 Evacuation_busses_may_ignore_traffic_rules Автобусы эвакуации игнорируют правила движения
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Эвакуационные автобусы, только чтобы добраться до аварийного убежища
 Vehicle_behavior Поведение транспорта

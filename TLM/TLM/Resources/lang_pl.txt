@@ -151,6 +151,7 @@ General Ogólne
 Gameplay Rozgrywka
 Overlays Nakładki
 Realistic_speeds Realistyczne prędkości
+Turn_on_red Włącz czerwony
 Evacuation_busses_may_ignore_traffic_rules Autobusy ewakuacyjne mogą ignorować przepisy
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Autobusy ewakuacyjne mogą przewozić tylko do schroniena
 Vehicle_behavior Zachowanie pojazdu

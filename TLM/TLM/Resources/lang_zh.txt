@@ -151,6 +151,7 @@ General 常规
 Gameplay 游戏
 Overlays 重叠
 Realistic_speeds 真实的速度
+Turn_on_red 打开红色
 Evacuation_busses_may_ignore_traffic_rules 应急疏散巴士可忽略交通规则
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 应急疏散巴士仅可用于到达避难所
 Vehicle_behavior 车辆行为
