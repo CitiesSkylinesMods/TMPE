@@ -679,7 +679,7 @@ namespace TrafficManager.Manager.Impl {
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 				} else if (state.recklessDriver) {
-					speed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
+					speed *= 1.1f + vehicleRand * 0.5f; // woohooo, 1.1 .. 1.6
 				} else {
 					speed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
 				}

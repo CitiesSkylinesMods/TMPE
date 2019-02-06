@@ -5,9 +5,10 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
 1.10.15,
-- Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu
+- Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu (thanks to @aubergine10 for suggestion)
 - Updated pathfinding with missing vanilla logic
-- Tweaked values in CargoTruckAI path finding (thanks to @pcfantasy)
+- Tweaked values in CargoTruckAI path finding (thanks to @pcfantasy for improvement suggestion)
+- Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to @aubergine10 for suggestion)
 
 1.10.14, 27/01/2019
 - Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
