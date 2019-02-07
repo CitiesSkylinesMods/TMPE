@@ -1,4 +1,4 @@
-using ColossalFramework;
+﻿using ColossalFramework;
 using ColossalFramework.Math;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
@@ -339,9 +339,7 @@ namespace TrafficManager.Manager.Impl {
                         if (Options.turnOnRed) {
                             if (JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
                                 // Check if vehicle has stopped
-                                // TODO: Disallow cutting into flowing traffic, disrupting the flow.
-                                if (
-                                    (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY)
+                                if ((vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY)
                                     || isRecklessDriver && sqrVelocity <= TrafficPriorityManager.MAX_YIELD_VELOCITY) {
 
                                     ushort uCurrentSegment = prevPos.m_segment;
@@ -372,7 +370,8 @@ namespace TrafficManager.Manager.Impl {
                                         if (debug)
                                             Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): turnOnRed, targetIsTurn={uTargetSegment == uTurnSegment}, oneWayToOneWay={currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true}");
 #endif
-                                        if (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true)) {
+                                        bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
+                                        if (hasPriority && (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true))) {
                                             vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
                                             maxSpeed = 0f;
                                             return true;
