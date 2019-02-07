@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Активировать продвинутый AI
 Vehicles_may_enter_blocked_junctions Транспорт может заезжать в тупики
 All_vehicles_may_ignore_lane_arrows Весь транспорт может игнорировать стрелки движения
 Busses_may_ignore_lane_arrows Автобусы могут игнорировать стрелки движения
+Turn_on_red Транспортные средства могут повернуть на красный светофор
 Reckless_driving Опасное вождение
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Настройки для каждого сохранения свои
@@ -151,7 +152,6 @@ General Общее
 Gameplay Геймплей
 Overlays Оверлеи
 Realistic_speeds Реалистичные скорости
-Turn_on_red Включи красный
 Evacuation_busses_may_ignore_traffic_rules Автобусы эвакуации игнорируют правила движения
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Эвакуационные автобусы, только чтобы добраться до аварийного убежища
 Vehicle_behavior Поведение транспорта

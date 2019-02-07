@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Włącz Zaawansowaną Sztuczną Inteligencję Pojazd�
 Vehicles_may_enter_blocked_junctions Pojazdy mogą wjeżdżać na zablokowane skrzyżowania
 All_vehicles_may_ignore_lane_arrows Wszystkie pojazdy mogą ignorować strzałki pasów
 Busses_may_ignore_lane_arrows Autobusy mogą ignorować strzałki pasów
+Turn_on_red Pojazdy mogą skręcić na czerwonym świetle
 Reckless_driving Lekkomyślna jazda (funkcja w wer. BETA)
 TMPE_Title Menedżer ruchu: Edycja Prezydencka
 Settings_are_defined_for_each_savegame_separately ustawienia są definiowane oddzielnie dla każdego zapisu
@@ -151,7 +152,6 @@ General Ogólne
 Gameplay Rozgrywka
 Overlays Nakładki
 Realistic_speeds Realistyczne prędkości
-Turn_on_red Włącz czerwony
 Evacuation_busses_may_ignore_traffic_rules Autobusy ewakuacyjne mogą ignorować przepisy
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Autobusy ewakuacyjne mogą przewozić tylko do schroniena
 Vehicle_behavior Zachowanie pojazdu

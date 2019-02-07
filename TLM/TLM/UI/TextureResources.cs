@@ -164,10 +164,10 @@ namespace TrafficManager.UI
 			UturnAllowedTexture2D = LoadDllResource("uturn_allowed.png", 200, 200);
 			UturnForbiddenTexture2D = LoadDllResource("uturn_forbidden.png", 200, 200);
 
-            RightOnRedAllowedTexture2D = LoadDllResource("right_on_red_allowed.png", 200, 333);
-            RightOnRedForbiddenTexture2D = LoadDllResource("right_on_red_forbidden.png", 200, 333);
-            LeftOnRedAllowedTexture2D = LoadDllResource("left_on_red_allowed.png", 200, 333);
-            LeftOnRedForbiddenTexture2D = LoadDllResource("left_on_red_forbidden.png", 200, 333);
+            RightOnRedAllowedTexture2D = LoadDllResource("right_on_red_allowed.png", 200, 200);
+            RightOnRedForbiddenTexture2D = LoadDllResource("right_on_red_forbidden.png", 200, 200);
+            LeftOnRedAllowedTexture2D = LoadDllResource("left_on_red_allowed.png", 200, 200);
+            LeftOnRedForbiddenTexture2D = LoadDllResource("left_on_red_forbidden.png", 200, 200);
 
             EnterBlockedJunctionAllowedTexture2D = LoadDllResource("enterblocked_allowed.png", 200, 200);
 			EnterBlockedJunctionForbiddenTexture2D = LoadDllResource("enterblocked_forbidden.png", 200, 200);

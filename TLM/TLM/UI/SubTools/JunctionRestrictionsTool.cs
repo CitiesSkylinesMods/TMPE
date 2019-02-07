@@ -286,9 +286,9 @@ namespace TrafficManager.UI.SubTools {
                     (!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node)))
                 ) {
                     if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered, 1.667f);
+                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered);
                     } else {
-                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered, 1.667f);
+                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered);
                     }
 
                     if (signHovered && handleClick) {

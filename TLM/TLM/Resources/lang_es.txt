@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Activar IA de vehículos avanzada
 Vehicles_may_enter_blocked_junctions Vehículos pueden entrar a cruces bloqueados
 All_vehicles_may_ignore_lane_arrows Todos los vehículos pueden ignorar las flechas de las vías
 Busses_may_ignore_lane_arrows Buses pueden ignorar flechas de las vías
+Turn_on_red Los vehículos pueden girar en los semáforos rojos.
 Reckless_driving Conducción agresiva (BETA)
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Los ajustes son definidos para cada partida por separado
@@ -151,7 +152,6 @@ General General
 Gameplay Jugabilidad
 Overlays Capas de información
 Realistic_speeds Velocidades realistas
-Turn_on_red Encender rojo
 Evacuation_busses_may_ignore_traffic_rules Los buses de evacuación pueden ignorar reglas de tránsito
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Los buses de evacuación sólo pueden usarse para llegar a un refugio
 Vehicle_behavior Comportamiento vehícular

@@ -342,15 +342,18 @@ namespace TrafficManager.Manager.Impl {
                                 // TODO: Disallow cutting into flowing traffic, disrupting the flow.
                                 if (
                                     (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY)
-                                    || vehicleState.recklessDriver && sqrVelocity <= TrafficPriorityManager.MAX_YIELD_VELOCITY) {
+                                    || isRecklessDriver && sqrVelocity <= TrafficPriorityManager.MAX_YIELD_VELOCITY) {
 
                                     ushort uCurrentSegment = prevPos.m_segment;
                                     ushort uTargetSegment = position.m_segment;
 
-                                    // If you can turn preferred and you're on a one-way road and not going straight, continue
+                                    // If you can turn preferred and you're not going straight, continue
                                     SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
-                                    if ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? currentSegGeo.HasLeftSegment(true) : currentSegGeo.HasRightSegment(true)) ||
-                                        (currentSegGeo.IsOneWay() && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true))) {
+#if DEBUG
+                                    if (debug)
+                                        Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, hasPreferredSegment={currentSegGeo.HasPreferredSegment()}, isStraightSegment1={currentSegGeo.IsStraightSegment(uTargetSegment, false)}, isStraightSegment2={currentSegGeo.IsStraightSegment(uTargetSegment, true)}");
+#endif
+                                    if (currentSegGeo.HasPreferredSegment() && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true)) {
 
                                         ushort uTurnSegment = 0;
 
@@ -365,7 +368,11 @@ namespace TrafficManager.Manager.Impl {
 
                                         // If the direction you are going is the same as the preferred lane or you're going from a one-way road to another one-way road, turn
                                         SegmentGeometry turnSegGeo = SegmentGeometry.Get(uTurnSegment);
-                                        if (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() == true && turnSegGeo?.IsOneWay() == true)) {
+#if DEBUG
+                                        if (debug)
+                                            Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): turnOnRed, targetIsTurn={uTargetSegment == uTurnSegment}, oneWayToOneWay={currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true}");
+#endif
+                                        if (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true)) {
                                             vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
                                             maxSpeed = 0f;
                                             return true;

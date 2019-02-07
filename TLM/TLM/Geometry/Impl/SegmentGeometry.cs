@@ -898,13 +898,23 @@ namespace TrafficManager.Geometry.Impl {
 			return contains;
 		}
 
-		/// <summary>
-		/// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
-		/// 
-		/// A segment geometry verification is not performed.
-		/// </summary>
-		/// <returns>true, if, according to the stored geometry data, the managed segment is only connected to highways at the given node, false otherwise</returns>
-		public bool HasOnlyHighways(bool startNode) {
+        /// <summary>
+        /// Determines if, according to the stored geometry data, the segment is elgible for turning right-on-red.
+        /// 
+        /// A segment geometry verification is not performed.
+        /// </summary>
+        /// <returns>true, </returns>
+        public bool HasPreferredSegment() {
+            return ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? HasLeftSegment(false) || HasLeftSegment(true) : HasRightSegment(false) || HasRightSegment(true)) || this.IsOneWay());
+        }
+
+        /// <summary>
+        /// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
+        /// 
+        /// A segment geometry verification is not performed.
+        /// </summary>
+        /// <returns>true, if, according to the stored geometry data, the managed segment is only connected to highways at the given node, false otherwise</returns>
+        public bool HasOnlyHighways(bool startNode) {
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.OnlyHighways;
 		}

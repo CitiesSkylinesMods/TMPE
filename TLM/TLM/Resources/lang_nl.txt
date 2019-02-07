@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Verbeterde voertuig-KI activeren
 Vehicles_may_enter_blocked_junctions Voertuigen moge geblokkeerde kruisingen oprijden
 All_vehicles_may_ignore_lane_arrows Alle voertuigen mogen voorsorteerpijlen negeren
 Busses_may_ignore_lane_arrows Bussen mogen voorsorteerpijlen negeren
+Turn_on_red Voertuigen kunnen bij rode verkeerslichten draaien
 Reckless_driving Roekeloos rijden
 TMPE_Title Traffic Manager: Presidentiële editie
 Settings_are_defined_for_each_savegame_separately Instellingen worden per spelstand opgeslagen
@@ -152,7 +153,6 @@ General Algemeen
 Gameplay Spelverloop
 Overlays Transparanten
 Realistic_speeds Realistische snelheden
-Turn_on_red Rood inschakelen
 Evacuation_busses_may_ignore_traffic_rules Evacuatiebussen mogen verkeersregels overtreden
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuatiebussen mogen enkel gebruikt worden om schuilkelders te bereiken
 Vehicle_behavior Vortuiggedrag

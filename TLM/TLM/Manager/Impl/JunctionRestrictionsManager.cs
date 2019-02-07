@@ -260,8 +260,13 @@ namespace TrafficManager.Manager.Impl {
             bool debug = GlobalConfig.Instance.Debug.Switches[11];
 #endif
 
-            bool ret = (node.m_flags & (NetNode.Flags.Junction)) != NetNode.Flags.None &&
-                    node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
+            SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
+            SegmentEndGeometry endGeo = segGeo?.GetEnd(startNode);
+
+            bool ret = (node.m_flags & (NetNode.Flags.TrafficLights | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
+                    node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
+                    !endGeo.OutgoingOneWay &&
+                    segGeo?.HasPreferredSegment() == true;
 
 #if DEBUG
             if (debug)
