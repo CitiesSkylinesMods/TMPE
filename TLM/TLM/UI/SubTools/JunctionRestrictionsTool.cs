@@ -282,7 +282,7 @@ namespace TrafficManager.UI.SubTools {
                 configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
                 if (
                     debug ||
-                    (configurable &&
+                    (configurable && Options.turnOnRed &&
                     (!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node)))
                 ) {
                     if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
