@@ -2,16 +2,16 @@ Switch_traffic_lights 红绿灯增删
 Add_priority_signs 添加路口优先权
 Manual_traffic_lights 手动控制红绿灯
 Timed_traffic_lights 红绿灯定时设置
-Change_lane_arrows 变更车道行驶方向
-Clear_Traffic 清除所有车辆 
+Change_lane_arrows 变更车道方向
+Clear_Traffic 清除所有车辆
 Disable_despawning 禁止车辆消失
 Enable_despawning 允许车辆消失
-NODE_IS_LIGHT 道路路口有红绿灯。\n请选择“红绿灯增删”，并点选该道路路口来删除信号灯。
-NODE_IS_TIMED_LIGHT 道路路口有自制信号灯程序，\n请选择“红绿灯定时设置”，再点选该道路路口并点选「删除」以删除设定。
-Select_nodes_windowTitle 请选择道路路口
-Select_nodes 请选择道路路口
-Node 道路路口
-Deselect_all_nodes 取消选择所选道路路口
+NODE_IS_LIGHT 路口有红绿灯。\n请选择「红绿灯增删」，并点选该路口来删除红绿灯。
+NODE_IS_TIMED_LIGHT 路口有自定时红绿灯，\n请选择「红绿灯定时设置」，再点选该路口并点选「删除」以删除设定。
+Select_nodes_windowTitle 请选择路口
+Select_nodes 请选择路口
+Node 路口
+Deselect_all_nodes 取消选择所选路口
 Setup_timed_traffic_light 设置红绿灯定时
 State 状态
 Skip 跳过
@@ -31,21 +31,21 @@ Sensitivity 灵敏度
 Very_Low 非常低
 Low 低
 Medium 中
-High 高 
+High 高
 Very_high 非常高
-Extreme_long_green/red_phases 最长的红绿灯时间
+Extreme_long_green/red_phases 极长的红绿灯时间
 Very_long_green/red_phases 非常长的红绿灯时间
 Long_green/red_phases 较长的红绿灯时间
 Moderate_green/red_phases 适当的红绿灯时间
 Short_green/red_phases 较短的红绿灯时间
 Very_short_green/red_phases 非常短的红绿灯时间
-Extreme_short_green/red_phases 最短的红绿灯时间
+Extreme_short_green/red_phases 极短的红绿灯时间
 Hide_counters 隐藏计数器
 Show_counters 显示计数器
 Start 启动
 Stop 停止
 Enable_test_mode_(stay_in_current_step) 启用测试模式（保持当前步骤）
-avg._flow 平均流量
+avg._flow 平均通行
 avg._wait 平均等待
 min/max 最短/最长
 Lane 车道
@@ -53,80 +53,80 @@ Set_Speed 设定限速 {0}
 Max_speed 最高限速
 Segment 路段
 incoming 进入
-Enable_Advanced_Vehicle_AI 启用加强版车辆AI
-Vehicles_may_enter_blocked_junctions 堵车时车辆可以进入路口加塞
-All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道行驶方向
-Busses_may_ignore_lane_arrows 公交车可忽略车道行驶方向
+Enable_Advanced_Vehicle_AI 启用高级车辆AI
+Vehicles_may_enter_blocked_junctions 车辆可以进入堵塞路口加塞
+All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道方向
+Busses_may_ignore_lane_arrows 公交车可忽略车道方向
 Reckless_driving 违规驾驶
-TMPE_Title 交通管理:总统版(贴吧简体中文翻译）
-Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置存档,以后就不用再重复设置)
-Simulation_accuracy 模拟真实度（高真实模拟会影响性能）
-Enable_highway_specific_lane_merging/splitting_rules 实行高速公路特定的车道合流/分离规则
-Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 司机习惯变换车道（仅适用于加强版AI启动时)
-Maintenance 错误修复
-Very_often 很频繁
+TMPE_Title 交通管理：总统版
+Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储\n(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置再存档,以后就不用再重复设置)
+Simulation_accuracy 模拟真实度（高真实度会影响性能）
+Enable_highway_specific_lane_merging/splitting_rules 实行高速公路特定车道合流/分离规则
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): 司机倾向变更车道（仅适用于高级AI启用时)
+Maintenance 维护
+Very_often 总是
 Often 经常
 Sometimes 偶尔
 Rarely 很少
 Very_rarely 极少
-Only_if_necessary 仅在必要时候  
-Nodes_and_segments 路口和道路的显示
-Lanes 车道  
+Only_if_necessary 仅在必要时
+Nodes_and_segments 道路节点和段
+Lanes 车道
 Path_Of_Evil_(10_%) 无视法纪 (10 %)
 Rush_Hour_(5_%) 鲁莽驾驶 (5 %)
 Minor_Complaints_(2_%) 稍有违法 (2 %)
 Holy_City_(0_%) 遵纪守法 (0 %)
-Forget_toggled_traffic_lights 重置所有红绿灯设置  
-Road_is_already_in_a_group! 道路已经在连锁群组中
+Forget_toggled_traffic_lights 重置所有红绿灯设置
+Road_is_already_in_a_group! 道路已经在组合中
 All_selected_roads_must_be_of_the_same_type! 所有选中的道路必须是同一类型的
-Create_group 创建连锁群组
-Delete_group 删除连锁群组
+Create_group 创建组合
+Delete_group 删除组合
 Add_zoning 添加分区
 Remove_zoning 删除分区
-Lane_Arrow_Changer_Disabled_Highway 因为使用了高速道路规则系统，所以不能改变这条车道的箭头。
-Add_junction_to_timed_light 添加一路口纳入定时
-Remove_junction_from_timed_light 删除一路口定时连锁
-Select_junction 选择一道路路口
+Lane_Arrow_Changer_Disabled_Highway 不能改变这条车道的箭头因已启用高速公路特定规则
+Add_junction_to_timed_light 向定时红绿灯添加一路口
+Remove_junction_from_timed_light 从定时红绿灯移除一路口
+Select_junction 选择一路口
 Cancel 取消
 Speed_limits 道路限速设置
-Persistently_visible_overlays 持续可见覆盖
-Priority_signs 优先通行权标志  
+Persistently_visible_overlays 持续可见的覆盖
+Priority_signs 优先通行权设置
 Vehicles_may_do_u-turns_at_junctions 车辆可在路口掉头
-Vehicles_going_straight_may_change_lanes_at_junctions 直行车辆可能在交叉路口变换车道
-Allow_u-turns 允许车辆掉头 
+Vehicles_going_straight_may_change_lanes_at_junctions 直行车辆可以在路口变更车道
+Allow_u-turns 允许车辆掉头
 Allow_lane_changing_for_vehicles_going_straight 允许直行车辆变更车道
 Allow_vehicles_to_enter_a_blocked_junction 允许车辆进入堵塞路口
 Road_condition_has_a_bigger_impact_on_vehicle_speed 道路状况对车辆速度有较大影响
-Vehicle_restrictions 道路车种限制管理  
+Vehicle_restrictions 道路车种限制
 Copy 复制
 Paste 粘贴
-Invert 道路车种限制设定反选应用
-Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 应用两个路口之间的所有路段车种限制设定
+Invert 反转
+Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions 应用车种限制设定至两个路口间所有路段
 Allow_all_vehicles 允许所有车种通行
 Ban_all_vehicles 禁止所有车种通行
-Set_all_traffic_lights_to_red 将所有信号灯设为红灯
+Set_all_traffic_lights_to_red 将所有红绿灯设为红灯
 Rotate_left 向左旋转
 Rotate_right 向右旋转
 Name 名称
 Apply 应用
-Select_a_timed_traffic_light_program 请选择一个信号灯来定时时间程序
-The_chosen_traffic_light_program_is_incompatible_to_this_junction 所选择的信号灯模式不能用于此路口
+Select_a_timed_traffic_light_program 请选择一个红绿灯来设定定时
+The_chosen_traffic_light_program_is_incompatible_to_this_junction 所选择的红绿灯模式不能用于此路口
 Advanced_AI_cannot_be_activated 高级车辆AI无法启动
-The_Advanced_Vehicle_AI_cannot_be_activated 高级车辆AI无法启动，是因为您所使用了其他车辆控制模组正使用中（例如 Improved AI 或 Traffic++）
+The_Advanced_Vehicle_AI_cannot_be_activated 高级车辆AI无法启动，因为您已启用其他车辆控制MOD
 Enable_dynamic_path_calculation 启用动态路径计算
-Lane_Arrow_Changer_Disabled_Connection 贴吧简体中文汉化温馨提示:因为你已经使用手动创建道路连接该车道方向，在使用车道箭头功能是禁止的，使用车道连接器后请不要重复使用车道箭头修改功能.
+Lane_Arrow_Changer_Disabled_Connection 车道箭头不可改变因为你已经手动创建车道连接
 Lane_connector 车道连接工具
 Connected_lanes 已连接车道
-Use_alternative_view_mode 使用代替视图模式
+Use_alternative_view_mode 使用替代视图模式
 Road_type 道路类型
 Default_speed_limit 默认道路限速
-Unit_system 单位制度
+Unit_system 单元制度
 Metric 公制
 Imperial 英制
-Use_more_CPU_cores_for_route_calculation_if_available 计算路线将使用更多的CPU内核 (如果可供使用的话)
-Activated_features 激活功能
+Use_more_CPU_cores_for_route_calculation_if_available 使用更多的CPU内核来计算路线(如果可用)
+Activated_features 启用功能
 Junction_restrictions 路口管制
-Prohibit_spawning_of_pocket_cars 禁止口袋胶囊汽车生产(测试版功能)
+Prohibit_spawning_of_pocket_cars 禁止袖珍车产生
 Reset_stuck_cims_and_vehicles 重置卡住的行人和车辆
 Default_speed_limits 默认速度限制
 Looking_for_a_parking_spot 寻找停车位
@@ -136,12 +136,12 @@ Entering_vehicle 进入车辆
 Walking_to_car 走向汽车
 Using_public_transport 使用公共交通
 Walking 步行
-Thinking_of_a_good_parking_spot 盘算一个好停车位
+Thinking_of_a_good_parking_spot 找一个好停车位
 Switch_view 切换视图
 Outgoing_demand 出货需求
 Incoming_demand 进货需求
 Advanced_Vehicle_AI 高级车辆AI
-Heavy_trucks_prefer_outer_lanes_on_highways 大型车辆在高速公路上优先行驶右侧车道
+Heavy_trucks_prefer_outer_lanes_on_highways 大型车辆在高速公路上优先行驶外侧车道
 Parking_AI 停车AI
 Enable_more_realistic_parking 启用更真实的停车位
 Reset_custom_speed_limits 重置自定义速度限制
@@ -149,25 +149,25 @@ Reload_global_configuration 重新加载所有设定
 Reset_global_configuration 重置所有设定
 General 常规
 Gameplay 游戏
-Overlays 重叠
-Realistic_speeds 真实的速度
+Overlays 覆盖
+Realistic_speeds 真实车速
 Evacuation_busses_may_ignore_traffic_rules 应急疏散巴士可忽略交通规则
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 应急疏散巴士仅可用于到达避难所
 Vehicle_behavior 车辆行为
-Policies_&_Restrictions 政策和限制
-At_junctions 位于十字路口
+Policies_&_Restrictions 政策与限制
+At_junctions 位于路口
 In_case_of_emergency 在紧急情况下
-Show_lane-wise_speed_limits 开启道路各个车道限速设置
-Language 语言设置
-Game_language 自动识别游戏语言
-requires_game_restart 需重新启动方可生效
-Customizations_come_into_effect_instantaneously 订制模拟真实度开启选项则将会立即生效
+Show_lane-wise_speed_limits 显示道路各车道限速设置
+Language 语言
+Game_language 同游戏语言
+requires_game_restart 重启后生效
+Customizations_come_into_effect_instantaneously 订制模拟真实度将立即生效
 Options 选项
 Lock_main_menu_button_position 锁定主菜单按钮位置
-Lock_main_menu_position 主菜单位置
+Lock_main_menu_position 锁定主菜单位置
 Recalculating_lane_routing 重新计算车道路线
 Please_wait 请稍候
-Parking_restrictions 道路边停车控制管理
+Parking_restrictions 路边停车限制
 Simulation 模拟
 On_roads 专用道路
 Ban_private_cars_and_trucks_on_bus_lanes 禁止私家车和卡车驶入公交车专用道
@@ -175,53 +175,54 @@ default 默认
 flow_ratio 通行比例
 wait_ratio 等候比例
 After_min._time_has_elapsed_switch_to_next_step_if 在设定最短时间过后，跳转至下一步骤，如果
-Adaptive_step_switching 适应性步骤切换
+Adaptive_step_switching 渐进逐步切换
 Dynamic_lane_section 智能车道选择
 Percentage_of_vehicles_performing_dynamic_lane_section 进行智能车道选择的车辆百分比
-Vehicle_restrictions_aggression 车辆交规违反率
+Vehicle_restrictions_aggression 车辆交规严格度
 Strict 严苛
-Show_path-find_stats 显示车辆寻找车道数据
+Show_path-find_stats 显示车辆寻找路线数据
 Remove_this_vehicle 移除此车辆
-Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 让行规则适用于带自定义交通灯计时的路口
-Enable_tutorial_messages Enable tutorial messages
-TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
-TMPE_TUTORIAL_BODY_MainMenu Welcome to TM:PE!\n\nUser manual: http://www.viathinksoft.de/tmpe
-TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Junction restrictions
-TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Control how vehicles and pedestrians shall behave at junctions.\n\n1. Click on the junction you want to manage\n2. Click on the appropriate icon to toggle restrictions.\n\nAvailable restrictions:\n- Allow/Disallow lane changing for vehicle going straight on\n- Allow/Disallow u-turns\n- Allow/Disallow vehicles to enter a blocked junction\n- Allow/disallow pedestrians to cross the street
-TMPE_TUTORIAL_HEAD_LaneArrowTool Lane arrows
-TMPE_TUTORIAL_BODY_LaneArrowTool Restrict the set of directions that vehicles are allowed to take.\n\n1. Click on a road segment next to a junction\n2. Select the allowed directions.
-TMPE_TUTORIAL_HEAD_LaneConnectorTool Lane connector
-TMPE_TUTORIAL_BODY_LaneConnectorTool Connect two or more lanes with each other in order to tell which lanes vehicles may use.\n\n1. Click on a lane changing point (grey circles).\n2. Click on a source marker.\n3. Click on a target marker to connect it with the source marker.\n4. Click anywhere with your secondary mouse button to return back to source marker selection.\n\nAvailable hotkeys:\n\n- Delete or Backspace: Remove all lane connections\n- Shift + S: Cycle through all available "stay on lane" patterns
-TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Manual traffic lights
-TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Try out custom traffic lights.\n\n1. Click on a junction\n2. Use the tool to control traffic lights.
-TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parking restrictions
-TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Control where parking is allowed.\n\nClick on the "P" icons.\n\nAvailable hotkeys:\n\n- Shift: Hold while clicking to apply parking restrictions to multiple road segments at once
-TMPE_TUTORIAL_HEAD_PrioritySignsTool Priority signs
-TMPE_TUTORIAL_BODY_PrioritySignsTool Define priority rules at junctions.\n\n1. Click on a junction.\n2. Click on the blank spots to cycle through the available priority signs (priority road, yield, stop).\n\nAvailable hotkeys:\n\n- Shift: Hold Shift to add priority signs to multiple road segments at once. Click again while holding Shift to cycle through all available patterns.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool Speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool Set up speed restrictions.\n\n1. In the window, click on the speed limit you want to set.\n2. Click on a road segment to change the speed limit.\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply speed limits to multiple road segments at once.\n- Ctrl: Hold Ctrl to control speed limits per individual lane.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Timed traffic lights
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Set up timed traffic lights.\n\n1. Click on a junction.\n2. In the window, click on "Add step".\n3. Click on the overlay elements to set desired traffic lights states.\n4. Click on "Add".\n5. Repeat as desired.
-TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Toggle traffic lights
-TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Add or remove traffic lights to/from junctions.\n\nClick on a junction to toggle traffic lights.
-TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
-TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-Public_transport Public transport
-Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations
-Compact_main_menu Compact main menu
-Window_transparency Window transparency
-Overlay_transparency Overlay transparency
-Remove_this_citizen Remove this citizen
-Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
-Remove_parked_vehicles Remove parked vehicles
-Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 优先通行规则适用于带自定时红绿灯的路口
+
+Enable_tutorial_messages 启用教程信息
+TMPE_TUTORIAL_HEAD_MainMenu 交通管理：总统版
+TMPE_TUTORIAL_BODY_MainMenu 欢迎使用TM:PE！\n\n使用手册：http://www.viathinksoft.de/tmpe
+TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool 路口管制
+TMPE_TUTORIAL_BODY_JunctionRestrictionsTool 控制车辆和行人在路口的行为。\n\n1. 单击你想要设置的路口\n2. 单击合适的图标来切换限制\n\n可选限制（允许/不许）：\n- 直行车辆在路口变更车道\n- 车辆在路口掉头\n- 车辆进入堵塞路口\n- 行人横穿道路
+TMPE_TUTORIAL_HEAD_LaneArrowTool 变更车道方向
+TMPE_TUTORIAL_BODY_LaneArrowTool 限制车辆的可选方向。\n\n1. 单击路口前的路段\n2. 选择允许的方向
+TMPE_TUTORIAL_HEAD_LaneConnectorTool 车道连接工具
+TMPE_TUTORIAL_BODY_LaneConnectorTool 连接2+条车道来告知车辆可用的车道。\n\n1. 单击一个车道变更点(灰色圆圈)\n2. 单击一个来源车道\n3. 单击目标车道来建立连接\n4. 任意位置单击右键返回来源车道选择\n\n可用热键：\n\n- Delete or Backspace：移除所有车道连接\n- Shift + S：(循环)查看所有"stay on lane"模式
+TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool 手动控制红绿灯
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool 尝试自定时的红绿灯。\n\n1. 单击一个路口\n2. 使用此工具来控制红绿灯
+TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool 路边停车限制
+TMPE_TUTORIAL_BODY_ParkingRestrictionsTool 控制是否允许停车。\n\n单击"P"标志\n\n可用热键：\n\n- Shift：按住可一次性应用路边停车限制至多个路段
+TMPE_TUTORIAL_HEAD_PrioritySignsTool 优先通行权设置
+TMPE_TUTORIAL_BODY_PrioritySignsTool 设置路口的优先通行权。\n\n1. 单击一个路口\n2. 单击空白点来(循环)选择可用的优先通行权(干道、减速让行、停车让行)\n\n可用热键：\n\n- Shift：按住可一次性应用优先通行权至多个路段;按住时单击可(循环)选择可用的优先通行权
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool 道路限速设置
+TMPE_TUTORIAL_BODY_SpeedLimitsTool 设置道路限速。\n\n1. 在窗口中单击你想要设置的限速\n2. 单击一个路段来应用限速\n\n可用热键：\n\n- Shift：按住可一次性应用限速至多个路段\n- Ctrl：按住来单独设置每条车道的限速
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool 红绿灯定时设置
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool 设置红绿灯定时。\n\n1. 单击一个路口\n2. 在窗口中单击"添加定时"\n3. 单击覆盖元素来设置所要的红绿灯状态\n4. 单击"添加"\n5. 按需重复
+TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool 红绿灯增删
+TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool 对路口增加/删除红绿灯。\n\n单击一个路口来增删红绿灯
+TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool 道路车种限制
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool 禁止车辆通过特定路段。\n\n1. 单击一个路段\n2. 单击图标来切换限制\n\n车辆种类：\n\n- 公路车辆：客车、公交车、出租车、货车、服务车辆、应急车辆\n- 轨道车辆：客运列车、货运列车\n\n可用热键：\n\n- Shift：按住可一次性应用车种限制至多个路段
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults 默认速度限制
+TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. 在上半部分使用箭头来(循环)选择所有的道路种类\n2. 在下半部分选择限速\n3. 单击"保存"来设置所选限速为新建该种类道路的默认;单击"保存 & 应用"来同时更新所选种类已有的道路
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep 添加定时
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. 单击红绿灯来切换他们的状态;使用"改变模式"按钮来添加定向的红绿灯\n2. 输入一个最小和最大区间：经过最小时间后红绿灯将统计并比较一段时间内的来车\n3. 可选红绿灯变换类型：默认情况下通行车辆少于等待车辆时变换\n4. 可选调整红绿灯的敏感度：例如移动滑条至左侧来使自定时红绿灯对等待车辆较不敏感
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy 复制自定时红绿灯
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy 单击另一个路口来粘贴。\n\n任意位置单击右键来取消
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 向自定时红绿灯添加一个路口
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 单击另一个路口来添加：两个红绿灯将被连接从而定时器将会同时控制两个路口\n\n任意位置单击右键来取消
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 从自定时红绿灯移除一个路口
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction 单击一个由该定时器控制的路口：所选的红绿灯将被移除从而该定时器将不再控制它\n\n任意位置单击右键来取消
+Public_transport 公共交通
+Prevent_excessive_transfers_at_public_transport_stations 避免公共交通站点的非必要换乘
+Compact_main_menu 紧凑主菜单
+Window_transparency 窗口透明度
+Overlay_transparency 覆盖透明度
+Remove_this_citizen 移除此居民
+Show_error_message_if_a_mod_incompatibility_is_detected 检测到MOD不兼容时提示
+Remove_parked_vehicles 移除停放的车辆
+Node_is_level_crossing 此节点级别交汇，不可禁用红绿灯。
