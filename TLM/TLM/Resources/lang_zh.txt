@@ -1,3 +1,4 @@
+TMPE_Title 交通管理：总统版
 Switch_traffic_lights 红绿灯增删
 Add_priority_signs 添加路口优先权
 Manual_traffic_lights 手动控制红绿灯
@@ -58,7 +59,6 @@ Vehicles_may_enter_blocked_junctions 车辆可以进入堵塞路口加塞
 All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道方向
 Busses_may_ignore_lane_arrows 公交车可忽略车道方向
 Reckless_driving 违规驾驶
-TMPE_Title 交通管理：总统版
 Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储\n(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置再存档,以后就不用再重复设置)
 Simulation_accuracy 模拟真实度（高真实度会影响性能）
 Enable_highway_specific_lane_merging/splitting_rules 实行高速公路特定车道合流/分离规则
@@ -182,7 +182,16 @@ Vehicle_restrictions_aggression 车辆交规严格度
 Strict 严苛
 Show_path-find_stats 显示车辆寻找路线数据
 Remove_this_vehicle 移除此车辆
+Remove_this_citizen 移除此居民
+Remove_parked_vehicles 移除停放的车辆
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 优先通行规则适用于带自定时红绿灯的路口
+Public_transport 公共交通
+Prevent_excessive_transfers_at_public_transport_stations 公共交通避免非必要换乘
+Compact_main_menu 紧凑主菜单
+Window_transparency 窗口透明度
+Overlay_transparency 覆盖透明度
+Show_error_message_if_a_mod_incompatibility_is_detected 检测到MOD不兼容时提示
+Node_is_level_crossing 此节点级别交汇，不可禁用红绿灯。
 
 Enable_tutorial_messages 启用教程信息
 TMPE_TUTORIAL_HEAD_MainMenu 交通管理：总统版
@@ -217,12 +226,3 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 向自定时红绿灯添�
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 单击另一个路口来添加：两个红绿灯将被连接从而定时器将会同时控制两个路口\n\n任意位置单击右键来取消
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 从自定时红绿灯移除一个路口
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction 单击一个由该定时器控制的路口：所选的红绿灯将被移除从而该定时器将不再控制它\n\n任意位置单击右键来取消
-Public_transport 公共交通
-Prevent_excessive_transfers_at_public_transport_stations 避免公共交通站点的非必要换乘
-Compact_main_menu 紧凑主菜单
-Window_transparency 窗口透明度
-Overlay_transparency 覆盖透明度
-Remove_this_citizen 移除此居民
-Show_error_message_if_a_mod_incompatibility_is_detected 检测到MOD不兼容时提示
-Remove_parked_vehicles 移除停放的车辆
-Node_is_level_crossing 此节点级别交汇，不可禁用红绿灯。
