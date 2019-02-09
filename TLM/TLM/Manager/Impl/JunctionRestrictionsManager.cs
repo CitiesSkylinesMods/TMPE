@@ -299,7 +299,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode);
+            return Options.turnOnRedEnabledByDefault ? SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode) : !SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode);
         }
 
         public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
