@@ -905,8 +905,13 @@ namespace TrafficManager.Geometry.Impl {
         /// </summary>
         /// <returns>true, if eligible for turn-on-red</returns>
         public bool HasValidTurnOnRedOutgoingSegment(SegmentEndGeometry segmentEndGeometry) {
-            return (Constants.ServiceFactory.SimulationService.LeftHandDrive ? segmentEndGeometry.NumOutgoingLeftSegments > 0 : segmentEndGeometry.NumOutgoingRightSegments > 0) ||
-                    (IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 || segmentEndGeometry.NumOutgoingRightSegments > 0));
+            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                return (segmentEndGeometry.NumOutgoingLeftSegments > 0 ||
+                    (IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 || segmentEndGeometry.NumOutgoingRightSegments > 0 && segmentEndGeometry.OutgoingOneWay)));
+            } else {
+                return (segmentEndGeometry.NumOutgoingRightSegments > 0 ||
+                    (IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 && segmentEndGeometry.OutgoingOneWay  || segmentEndGeometry.NumOutgoingRightSegments > 0)));
+            }
         }
 
 
