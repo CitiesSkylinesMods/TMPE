@@ -433,6 +433,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\WindowBackground.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\left_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"

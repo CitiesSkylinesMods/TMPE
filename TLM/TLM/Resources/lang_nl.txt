@@ -57,6 +57,8 @@ Enable_Advanced_Vehicle_AI Verbeterde voertuig-KI activeren
 Vehicles_may_enter_blocked_junctions Voertuigen moge geblokkeerde kruisingen oprijden
 All_vehicles_may_ignore_lane_arrows Alle voertuigen mogen voorsorteerpijlen negeren
 Busses_may_ignore_lane_arrows Bussen mogen voorsorteerpijlen negeren
+Turn_on_red_enabled_by_default Schakel rood ingeschakeld standaard in bij kruispunten
+Turn_on_red Voertuigen kunnen bij rode verkeerslichten draaien
 Reckless_driving Roekeloos rijden
 TMPE_Title Traffic Manager: Presidentiële editie
 Settings_are_defined_for_each_savegame_separately Instellingen worden per spelstand opgeslagen

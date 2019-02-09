@@ -57,6 +57,8 @@ Enable_Advanced_Vehicle_AI 启用加强版车辆AI
 Vehicles_may_enter_blocked_junctions 堵车时车辆可以进入路口加塞
 All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道行驶方向
 Busses_may_ignore_lane_arrows 公交车可忽略车道行驶方向
+Turn_on_red_enabled_by_default 默認情況下啟用交叉點處的紅色啟用
+Turn_on_red 车辆可能会在红色交通灯处转弯
 Reckless_driving 违规驾驶
 TMPE_Title 交通管理:总统版(贴吧简体中文翻译）
 Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置存档,以后就不用再重复设置)
