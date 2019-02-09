@@ -905,7 +905,13 @@ namespace TrafficManager.Geometry.Impl {
         /// </summary>
         /// <returns>true, </returns>
         public bool HasPreferredSegment() {
-            return ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? HasLeftSegment(false) || HasLeftSegment(true) : HasRightSegment(false) || HasRightSegment(true)) || this.IsOneWay());
+            bool hasRightSegStart = HasRightSegment(true);
+            bool hasRightSegEnd = HasRightSegment(false);
+            bool hasLeftSegStart = HasLeftSegment(true);
+            bool hasLeftSegEnd = HasLeftSegment(false);
+            return (
+                ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? hasLeftSegStart || hasLeftSegEnd : hasRightSegStart || hasRightSegEnd)) ||
+                (this.IsOneWay() && ((hasLeftSegStart || hasLeftSegEnd) || (hasRightSegStart || hasRightSegEnd))));
         }
 
         /// <summary>

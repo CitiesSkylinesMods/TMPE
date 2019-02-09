@@ -263,8 +263,9 @@ namespace TrafficManager.Manager.Impl {
             SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
             SegmentEndGeometry endGeo = segGeo?.GetEnd(startNode);
 
-            bool ret = (node.m_flags & (NetNode.Flags.TrafficLights | NetNode.Flags.OneWayOut)) != NetNode.Flags.None &&
+            bool ret = (node.m_flags & (NetNode.Flags.TrafficLights)) != NetNode.Flags.None &&
                     node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
+                    !LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.LevelCrossing)) &&
                     !endGeo.OutgoingOneWay &&
                     segGeo?.HasPreferredSegment() == true;
 
