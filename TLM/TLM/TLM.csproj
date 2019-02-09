@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -254,6 +254,7 @@
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\ModCompatibilityHelper.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
