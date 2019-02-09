@@ -267,7 +267,7 @@ namespace TrafficManager.Manager.Impl {
                     node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
                     !LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.LevelCrossing)) &&
                     !endGeo.OutgoingOneWay &&
-                    segGeo?.HasPreferredSegment() == true;
+                    segGeo?.HasValidTurnOnRedOutgoingSegment(endGeo) == true;
 
 #if DEBUG
             if (debug)

@@ -347,11 +347,12 @@ namespace TrafficManager.Manager.Impl {
 
                                     // If you can turn preferred and you're not going straight, continue
                                     SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
+                                    SegmentEndGeometry currentSegEndGeo = currentSegGeo.EndNodeGeometry;
 #if DEBUG
                                     if (debug)
-                                        Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, hasPreferredSegment={currentSegGeo.HasPreferredSegment()}, isStraightSegment1={currentSegGeo.IsStraightSegment(uTargetSegment, false)}, isStraightSegment2={currentSegGeo.IsStraightSegment(uTargetSegment, true)}");
+                                        Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, hasValidTurnOnRedOutgoingSegment={currentSegGeo.HasValidTurnOnRedOutgoingSegment(currentSegEndGeo)}, isStraightSegment1={currentSegGeo.IsStraightSegment(uTargetSegment, false)}, isStraightSegment2={currentSegGeo.IsStraightSegment(uTargetSegment, true)}");
 #endif
-                                    if (currentSegGeo.HasPreferredSegment() && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true)) {
+                                    if (currentSegGeo.HasValidTurnOnRedOutgoingSegment(currentSegEndGeo) && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true)) {
 
                                         ushort uTurnSegment = 0;
 

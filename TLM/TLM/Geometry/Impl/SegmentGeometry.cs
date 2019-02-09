@@ -899,20 +899,16 @@ namespace TrafficManager.Geometry.Impl {
 		}
 
         /// <summary>
-        /// Determines if, according to the stored geometry data, the segment is elgible for turning right-on-red.
+        /// Determines if, according to the stored geometry data, the segment is eligible for turn-on-red.
         /// 
         /// A segment geometry verification is not performed.
         /// </summary>
-        /// <returns>true, </returns>
-        public bool HasPreferredSegment() {
-            bool hasRightSegStart = HasRightSegment(true);
-            bool hasRightSegEnd = HasRightSegment(false);
-            bool hasLeftSegStart = HasLeftSegment(true);
-            bool hasLeftSegEnd = HasLeftSegment(false);
-            return (
-                ((Constants.ServiceFactory.SimulationService.LeftHandDrive ? hasLeftSegStart || hasLeftSegEnd : hasRightSegStart || hasRightSegEnd)) ||
-                (IsOneWay() && ((hasLeftSegStart || hasLeftSegEnd) || (hasRightSegStart || hasRightSegEnd))));
+        /// <returns>true, if eligible for turn-on-red</returns>
+        public bool HasValidTurnOnRedOutgoingSegment(SegmentEndGeometry segmentEndGeometry) {
+            return (Constants.ServiceFactory.SimulationService.LeftHandDrive ? segmentEndGeometry.NumOutgoingLeftSegments > 0 : segmentEndGeometry.NumOutgoingRightSegments > 0) ||
+                    IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 || segmentEndGeometry.NumOutgoingRightSegments > 0);
         }
+
 
         /// <summary>
         /// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
