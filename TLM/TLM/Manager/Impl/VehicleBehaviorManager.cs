@@ -347,7 +347,7 @@ namespace TrafficManager.Manager.Impl {
 
                                     // If you can turn preferred and you're not going straight, continue
                                     SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
-                                    SegmentEndGeometry currentSegEndGeo = currentSegGeo.EndNodeGeometry;
+                                    SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(true);
 #if DEBUG
                                     if (debug)
                                         Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, hasValidTurnOnRedOutgoingSegment={currentSegGeo.HasValidTurnOnRedOutgoingSegment(currentSegEndGeo)}, isStraightSegment1={currentSegGeo.IsStraightSegment(uTargetSegment, false)}, isStraightSegment2={currentSegGeo.IsStraightSegment(uTargetSegment, true)}");
@@ -365,7 +365,6 @@ namespace TrafficManager.Manager.Impl {
                                             return true;
                                         });
 
-                                        // If the direction you are going is the same as the preferred lane or you're going from a one-way road to another one-way road, turn
                                         SegmentGeometry turnSegGeo = SegmentGeometry.Get(uTurnSegment);
 #if DEBUG
                                         if (debug)
