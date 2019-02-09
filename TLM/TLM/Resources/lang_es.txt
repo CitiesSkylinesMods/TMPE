@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Activar IA de vehículos avanzada
 Vehicles_may_enter_blocked_junctions Vehículos pueden entrar a cruces bloqueados
 All_vehicles_may_ignore_lane_arrows Todos los vehículos pueden ignorar las flechas de las vías
 Busses_may_ignore_lane_arrows Buses pueden ignorar flechas de las vías
+Turn_on_red_enabled_by_default Activar rojo habilitado en uniones por defecto
 Turn_on_red Los vehículos pueden girar en los semáforos rojos.
 Reckless_driving Conducción agresiva (BETA)
 TMPE_Title Traffic Manager: President Edition

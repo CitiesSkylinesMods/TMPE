@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Enable Advanced Vehicle AI
 Vehicles_may_enter_blocked_junctions Vehicles may enter blocked junctions
 All_vehicles_may_ignore_lane_arrows All vehicles may ignore lane arrows
 Busses_may_ignore_lane_arrows Buses may ignore lane arrows
+Turn_on_red_enabled_by_default Turn on red enabled at junctions by default
 Turn_on_red Vehicles may turn at red traffic lights
 Reckless_driving Reckless driving
 TMPE_Title Traffic Manager: President Edition

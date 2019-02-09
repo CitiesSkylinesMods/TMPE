@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Verbesserte Fahrzeug-KI aktivieren
 Vehicles_may_enter_blocked_junctions Fahrzeuge dürfen in blockierte Kreuzungen einfahren
 All_vehicles_may_ignore_lane_arrows Alle Fahrzeuge dürfen Richtungspfeile ignorieren
 Busses_may_ignore_lane_arrows Busse dürfen Richtungspfeile ignorieren
+Turn_on_red_enabled_by_default Aktivieren Sie die Option Rot an Verbindungen standardmäßig aktiviert
 Turn_on_red Fahrzeuge können an roten Ampeln abbiegen
 Reckless_driving Rücksichtsloses Fahren
 TMPE_Title Traffic Manager: President Edition

@@ -286,7 +286,7 @@ namespace TrafficManager.Manager.Impl {
                 if (debug)
                     Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): Setting is not configurable. res=true");
 #endif
-                return true;
+                return Options.turnOnRedEnabledByDefault;
             }
 
             bool ret = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;

@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Активировать продвинутый AI
 Vehicles_may_enter_blocked_junctions Транспорт может заезжать в тупики
 All_vehicles_may_ignore_lane_arrows Весь транспорт может игнорировать стрелки движения
 Busses_may_ignore_lane_arrows Автобусы могут игнорировать стрелки движения
+Turn_on_red_enabled_by_default Включить красный включен на перекрестках по умолчанию
 Turn_on_red Транспортные средства могут повернуть на красный светофор
 Reckless_driving Опасное вождение
 TMPE_Title Traffic Manager: President Edition

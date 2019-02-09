@@ -57,6 +57,7 @@ Enable_Advanced_Vehicle_AI Włącz Zaawansowaną Sztuczną Inteligencję Pojazd�
 Vehicles_may_enter_blocked_junctions Pojazdy mogą wjeżdżać na zablokowane skrzyżowania
 All_vehicles_may_ignore_lane_arrows Wszystkie pojazdy mogą ignorować strzałki pasów
 Busses_may_ignore_lane_arrows Autobusy mogą ignorować strzałki pasów
+Turn_on_red_enabled_by_default Włącz domyślnie czerwony włączony na skrzyżowaniach
 Turn_on_red Pojazdy mogą skręcić na czerwonym świetle
 Reckless_driving Lekkomyślna jazda (funkcja w wer. BETA)
 TMPE_Title Menedżer ruchu: Edycja Prezydencka

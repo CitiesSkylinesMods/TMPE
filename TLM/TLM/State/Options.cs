@@ -33,6 +33,7 @@ namespace TrafficManager.State {
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
         private static UICheckBox allRelaxedToggle = null;
+        private static UICheckBox turnOnRedEnabledByDefaultToggle = null;
         private static UICheckBox turnOnRedToggle = null;
         private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
@@ -95,6 +96,7 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
+        public static bool turnOnRedEnabledByDefault = true;
         public static bool turnOnRed = false;
         public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;
@@ -293,6 +295,7 @@ namespace TrafficManager.State {
 			allRelaxedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
             relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
+            turnOnRedEnabledByDefaultToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Turn_on_red_enabled_by_default"), turnOnRedEnabledByDefault, onTurnOnRedEnabledByDefaultChanged) as UICheckBox;
             turnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
@@ -717,6 +720,14 @@ namespace TrafficManager.State {
 			allRelaxed = newAllRelaxed;
 		}
 
+        private static void onTurnOnRedEnabledByDefaultChanged(bool value) {
+            if (!checkGameLoaded())
+                return;
+
+            Log._Debug($"turnOnRedEnabledByDefault changed to {value}");
+            turnOnRedEnabledByDefault = value;
+        }
+
         private static void onTurnOnRedChanged(bool value) {
             if (!checkGameLoaded())
                 return;
@@ -1082,6 +1093,12 @@ namespace TrafficManager.State {
 			if (allRelaxedToggle != null)
 				allRelaxedToggle.isChecked = newAllRelaxed;
 		}
+
+        public static void setTurnOnRedEnabledByDefault(bool newValue) {
+            turnOnRedEnabledByDefault = newValue;
+            if (!turnOnRedEnabledByDefaultToggle != null)
+                turnOnRedEnabledByDefaultToggle.isChecked = newValue;
+        }
 
         public static void setTurnOnRed(bool newValue) {
             turnOnRed = newValue;
