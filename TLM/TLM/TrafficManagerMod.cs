@@ -25,7 +25,7 @@ namespace TrafficManager {
 
 		public void OnEnabled() {
 			Log.Info($"Traffic Manager: President Edition - Improved enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
-			if (UIView.isVisible) {
+			if (UIView.GetAView() != null) {
 				OnGameIntroLoaded();
 			} else {
 				LoadingManager.instance.m_introLoaded += OnGameIntroLoaded;

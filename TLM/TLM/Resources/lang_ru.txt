@@ -227,3 +227,4 @@ Remove_this_citizen Удалить этого гражданина
 Show_error_message_if_a_mod_incompatibility_is_detected Показывать сообщение об ошибке, если обнаружена несовместимость мода
 Remove_parked_vehicles Удалить припаркованный транспорт
 Node_is_level_crossing Это перекрёсток уровней.\nЗдесь нельзя отключить светофоры.
+Experimental_features [Experimental features]:

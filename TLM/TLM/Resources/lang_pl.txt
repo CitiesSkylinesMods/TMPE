@@ -57,8 +57,8 @@ Enable_Advanced_Vehicle_AI Włącz Zaawansowaną Sztuczną Inteligencję Pojazd�
 Vehicles_may_enter_blocked_junctions Pojazdy mogą wjeżdżać na zablokowane skrzyżowania
 All_vehicles_may_ignore_lane_arrows Wszystkie pojazdy mogą ignorować strzałki pasów
 Busses_may_ignore_lane_arrows Autobusy mogą ignorować strzałki pasów
-Turn_on_red_enabled_by_default Włącz domyślnie czerwony włączony na skrzyżowaniach
-Turn_on_red Pojazdy mogą skręcić na czerwonym świetle
+Turn_on_red_enabled_by_default Zezwalaj na skręt w prawo na czerwonym świetle na wszystkich skrzyżowaniach
+Turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Reckless_driving Lekkomyślna jazda (funkcja w wer. BETA)
 TMPE_Title Menedżer ruchu: Edycja Prezydencka
 Settings_are_defined_for_each_savegame_separately ustawienia są definiowane oddzielnie dla każdego zapisu
@@ -227,3 +227,4 @@ Remove_this_citizen Usuń tego mieszkańca
 Show_error_message_if_a_mod_incompatibility_is_detected Pokaż informację o błędzie jeśli wykryto niezgodność modów
 Remove_parked_vehicles Usuń zaparkowane pojazdy
 Node_is_level_crossing To jest przejazd kolejowy. \nNie możesz tutaj wyłączyć sygnalizacji!
+Experimental_features [Funkcje eksperymentalne]:

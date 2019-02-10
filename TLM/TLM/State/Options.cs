@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -96,7 +96,7 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
-        public static bool turnOnRedEnabledByDefault = true;
+		public static bool turnOnRedEnabledByDefault = false;
         public static bool turnOnRed = false;
         public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;
@@ -295,8 +295,6 @@ namespace TrafficManager.State {
 			allRelaxedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
             relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
-            turnOnRedEnabledByDefaultToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Turn_on_red_enabled_by_default"), turnOnRedEnabledByDefault, onTurnOnRedEnabledByDefaultChanged) as UICheckBox;
-            turnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
@@ -312,7 +310,13 @@ namespace TrafficManager.State {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
 				evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
 			}
-
+			var turnOnRedGroup = panelHelper.AddGroup(Translation.GetString("Experimental_features"));
+			turnOnRedToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
+			turnOnRedEnabledByDefaultToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red_enabled_by_default"), turnOnRedEnabledByDefault, onTurnOnRedEnabledByDefaultChanged) as UICheckBox;
+			if (!turnOnRedToggle.isChecked) {
+				turnOnRedEnabledByDefaultToggle.Disable();
+			}
+			
 			// OVERLAYS
 			++tabIndex;
 
@@ -734,6 +738,12 @@ namespace TrafficManager.State {
 
             Log._Debug($"turnOnRed changed to {value}");
             turnOnRed = value;
+            if (value) {
+	            turnOnRedEnabledByDefaultToggle.Enable();
+            } else {
+	            turnOnRedEnabledByDefaultToggle.isChecked = false;
+	            turnOnRedEnabledByDefaultToggle.Disable();
+            }
         }
 
         private static void onAdvancedAIChanged(bool newAdvancedAI) {
