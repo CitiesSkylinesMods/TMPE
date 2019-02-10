@@ -15,6 +15,7 @@ User manuals:
 - Gameplay: Tweaked values in CargoTruckAI path finding (thanks to @pcfantasy for improvement suggestion)
 - Gameplay: Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to @aubergine10 for suggestion) (#23)
 - UI: New icons for cargo and passenger train restriction (thanks to @aubergine10) (#17)
+- Translations: Simplified Chinese translation updated (thanks to @Emphasia for translating)
 - Other: Added notification if user is still subscribed to old original TM:PE
 - [Experimental feature] Turn on red (thanks to @FireController1847 for implementation and to @pcfantasy for source code base)
 
