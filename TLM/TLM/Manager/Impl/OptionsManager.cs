@@ -181,7 +181,7 @@ namespace TrafficManager.Manager.Impl {
                 Options.setTurnOnRed(data[38] == (byte)1);
             }
             
-            if (data.Length >= 39) {
+            if (data.Length >= 40) {
 	            Options.setTurnOnRedEnabledByDefault(data[39] == (byte)1);
             }
 
