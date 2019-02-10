@@ -9,6 +9,9 @@ User manuals:
 
 
 # Changelog
+1.10.16, [Work in progress]
+
+
 1.10.15, 10/02/2019
 - Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu (thanks to @aubergine10 for suggestion) (#16)
 - Gameplay: Updated pathfinding with missing vanilla logic
