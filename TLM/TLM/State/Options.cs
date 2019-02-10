@@ -32,8 +32,10 @@ namespace TrafficManager.State {
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
-		private static UICheckBox allRelaxedToggle = null;
-		private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
+        private static UICheckBox allRelaxedToggle = null;
+        private static UICheckBox turnOnRedEnabledByDefaultToggle = null;
+        private static UICheckBox turnOnRedToggle = null;
+        private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
@@ -94,7 +96,9 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
-		public static bool evacBussesMayIgnoreRules = false;
+		public static bool turnOnRedEnabledByDefault = false;
+        public static bool turnOnRed = false;
+        public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
@@ -290,12 +294,12 @@ namespace TrafficManager.State {
 #if DEBUG
 			allRelaxedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
-			relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
-			allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
+            relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
+            allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
-
+			
 			var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
 			vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
 			banRegularTrafficOnBusLanesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Ban_private_cars_and_trucks_on_bus_lanes"), banRegularTrafficOnBusLanes, onBanRegularTrafficOnBusLanesChanged) as UICheckBox;
@@ -306,7 +310,13 @@ namespace TrafficManager.State {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
 				evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
 			}
-
+			var turnOnRedGroup = panelHelper.AddGroup(Translation.GetString("Experimental_features"));
+			turnOnRedToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
+			turnOnRedEnabledByDefaultToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red_enabled_by_default"), turnOnRedEnabledByDefault, onTurnOnRedEnabledByDefaultChanged) as UICheckBox;
+			if (!turnOnRedToggle.isChecked) {
+				turnOnRedEnabledByDefaultToggle.Disable();
+			}
+			
 			// OVERLAYS
 			++tabIndex;
 
@@ -714,7 +724,29 @@ namespace TrafficManager.State {
 			allRelaxed = newAllRelaxed;
 		}
 
-		private static void onAdvancedAIChanged(bool newAdvancedAI) {
+        private static void onTurnOnRedEnabledByDefaultChanged(bool value) {
+            if (!checkGameLoaded())
+                return;
+
+            Log._Debug($"turnOnRedEnabledByDefault changed to {value}");
+            turnOnRedEnabledByDefault = value;
+        }
+
+        private static void onTurnOnRedChanged(bool value) {
+            if (!checkGameLoaded())
+                return;
+
+            Log._Debug($"turnOnRed changed to {value}");
+            turnOnRed = value;
+            if (value) {
+	            turnOnRedEnabledByDefaultToggle.Enable();
+            } else {
+	            turnOnRedEnabledByDefaultToggle.isChecked = false;
+	            turnOnRedEnabledByDefaultToggle.Disable();
+            }
+        }
+
+        private static void onAdvancedAIChanged(bool newAdvancedAI) {
 			if (!checkGameLoaded())
 				return;
 
@@ -1072,7 +1104,19 @@ namespace TrafficManager.State {
 				allRelaxedToggle.isChecked = newAllRelaxed;
 		}
 
-		public static void setHighwayRules(bool newHighwayRules) {
+        public static void setTurnOnRedEnabledByDefault(bool newValue) {
+            turnOnRedEnabledByDefault = newValue;
+            if (!turnOnRedEnabledByDefaultToggle != null)
+                turnOnRedEnabledByDefaultToggle.isChecked = newValue;
+        }
+
+        public static void setTurnOnRed(bool newValue) {
+            turnOnRed = newValue;
+            if (turnOnRedToggle != null)
+                turnOnRedToggle.isChecked = newValue;
+        }
+
+        public static void setHighwayRules(bool newHighwayRules) {
 			highwayRules = newHighwayRules;
 
 			if (highwayRulesToggle != null)

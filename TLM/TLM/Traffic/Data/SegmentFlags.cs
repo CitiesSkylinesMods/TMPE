@@ -18,6 +18,10 @@ namespace TrafficManager.Traffic.Data {
 			return startNode ? startNodeFlags.IsUturnAllowed() : endNodeFlags.IsUturnAllowed();
 		}
 
+        public bool IsTurnOnRedAllowed(bool startNode) {
+            return startNode ? startNodeFlags.IsTurnOnRedAllowed() : endNodeFlags.IsTurnOnRedAllowed();
+        }
+
 		public bool IsLaneChangingAllowedWhenGoingStraight(bool startNode) {
 			return startNode ? startNodeFlags.IsLaneChangingAllowedWhenGoingStraight() : endNodeFlags.IsLaneChangingAllowedWhenGoingStraight();
 		}
@@ -33,6 +37,10 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool GetUturnAllowed(bool startNode) {
 			return startNode ? startNodeFlags.uturnAllowed : endNodeFlags.uturnAllowed;
 		}
+
+        public TernaryBool GetTurnOnRedAllowed(bool startNode) {
+            return startNode ? startNodeFlags.turnOnRedAllowed : endNodeFlags.turnOnRedAllowed;
+        }
 
 		public TernaryBool GetLaneChangingAllowedWhenGoingStraight(bool startNode) {
 			return startNode ? startNodeFlags.straightLaneChangingAllowed : endNodeFlags.straightLaneChangingAllowed;
@@ -53,6 +61,14 @@ namespace TrafficManager.Traffic.Data {
 				endNodeFlags.SetUturnAllowed(value);
 			}
 		}
+
+        public void SetTurnOnRedAllowed(bool startNode, bool value) {
+            if (startNode) {
+                startNodeFlags.SetTurnOnRedAllowed(value);
+            } else {
+                endNodeFlags.SetTurnOnRedAllowed(value);
+            }
+        }
 
 		public void SetLaneChangingAllowedWhenGoingStraight(bool startNode, bool value) {
 			if (startNode) {

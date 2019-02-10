@@ -898,13 +898,30 @@ namespace TrafficManager.Geometry.Impl {
 			return contains;
 		}
 
-		/// <summary>
-		/// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
-		/// 
-		/// A segment geometry verification is not performed.
-		/// </summary>
-		/// <returns>true, if, according to the stored geometry data, the managed segment is only connected to highways at the given node, false otherwise</returns>
-		public bool HasOnlyHighways(bool startNode) {
+        /// <summary>
+        /// Determines if, according to the stored geometry data, the segment is eligible for turn-on-red.
+        /// 
+        /// A segment geometry verification is not performed.
+        /// </summary>
+        /// <returns>true, if eligible for turn-on-red</returns>
+        public bool HasValidTurnOnRedOutgoingSegment(SegmentEndGeometry segmentEndGeometry) {
+            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                return (segmentEndGeometry.NumOutgoingLeftSegments > 0 ||
+                    (IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 || segmentEndGeometry.NumOutgoingRightSegments > 0 && segmentEndGeometry.OutgoingOneWay)));
+            } else {
+                return (segmentEndGeometry.NumOutgoingRightSegments > 0 ||
+                    (IsOneWay() && (segmentEndGeometry.NumOutgoingLeftSegments > 0 && segmentEndGeometry.OutgoingOneWay  || segmentEndGeometry.NumOutgoingRightSegments > 0)));
+            }
+        }
+
+
+        /// <summary>
+        /// Determines if, according to the stored geometry data, the managed segment is only connected to highways at the given node.
+        /// 
+        /// A segment geometry verification is not performed.
+        /// </summary>
+        /// <returns>true, if, according to the stored geometry data, the managed segment is only connected to highways at the given node, false otherwise</returns>
+        public bool HasOnlyHighways(bool startNode) {
 			SegmentEndGeometry endGeometry = startNode ? startNodeGeometry : endNodeGeometry;
 			return endGeometry.OnlyHighways;
 		}

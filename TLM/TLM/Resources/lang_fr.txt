@@ -57,6 +57,8 @@ Enable_Advanced_Vehicle_AI Activer l'IA avancée des véhicules
 Vehicles_may_enter_blocked_junctions Les véhicules peuvent entrer dans les intersections bloquées
 All_vehicles_may_ignore_lane_arrows Tous les véhicules peuvent ignorer les directions des voies
 Busses_may_ignore_lane_arrows Les bus peuvent ignorer les directions des voies
+Turn_on_red_enabled_by_default Activer le rouge activé aux jonctions par défaut
+Turn_on_red Les véhicules peuvent tourner aux feux rouges
 Reckless_driving Conduite téméraire (fonctionnalité Bêta)
 TMPE_Title Traffic Manager: Edition Président
 Settings_are_defined_for_each_savegame_separately Paramètres définis pour chaque sauvegarde séparément
@@ -225,3 +227,4 @@ Remove_this_citizen Retirer ce citoyen
 Show_error_message_if_a_mod_incompatibility_is_detected Afficher le message d'erreur si une incompatibilité d'un mod est détectée
 Remove_parked_vehicles Enlever les véhicules stationnés
 Node_is_level_crossing Cette intersection est un passage à niveau.\nous ne pouvez pas désactiver les feux de circulation ici.
+Experimental_features [Experimental features]:

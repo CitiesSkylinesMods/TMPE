@@ -57,6 +57,8 @@ Enable_Advanced_Vehicle_AI Verbesserte Fahrzeug-KI aktivieren
 Vehicles_may_enter_blocked_junctions Fahrzeuge dürfen in blockierte Kreuzungen einfahren
 All_vehicles_may_ignore_lane_arrows Alle Fahrzeuge dürfen Richtungspfeile ignorieren
 Busses_may_ignore_lane_arrows Busse dürfen Richtungspfeile ignorieren
+Turn_on_red_enabled_by_default Aktivieren Sie die Option Rot an Verbindungen standardmäßig aktiviert
+Turn_on_red Fahrzeuge können an roten Ampeln abbiegen
 Reckless_driving Rücksichtsloses Fahren
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Einstellungen werden pro Spielstand gespeichert
@@ -225,3 +227,4 @@ Remove_this_citizen Diesen Cim entfernen
 Show_error_message_if_a_mod_incompatibility_is_detected Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
 Remove_parked_vehicles Entferne geparkte Autos
 Node_is_level_crossing Diese Kreuzung ist ein Bahnübergang.\nDu kannst die Ampeln hier nicht entfernen.
+Experimental_features [Experimental features]:

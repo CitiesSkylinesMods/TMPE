@@ -20,7 +20,7 @@ namespace TrafficManager.Util {
 			int t = width > height ? width : height;
 			int maxI = t * t;
 			for (int i = 0; i < maxI; i++) {
-				if ((-width / 2 <= x) && (x <= width / 2) && (-height / 2 <= y) && (y <= height / 2)) {
+				if ((-width >>1 <= x) && (x <= width >>1) && (-height >>1 <= y) && (y <= height >>1)) {
 					if (! handler(x, y))
 						break;
 				}

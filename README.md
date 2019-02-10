@@ -1,9 +1,24 @@
 # Cities: Skylines - Traffic Manager: *President Edition*
 A modification for **Cities: Skylines** to add additional traffic control.
 
-User manual: http://www.viathinksoft.de/tmpe/wiki
+User manuals:
+
+[Old documentation - from original version but still perfectly compatible](http://www.viathinksoft.de/tmpe/wiki)
+
+[New documentation - work-in-progress (thanks to @aubergine10)](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki)
+
 
 # Changelog
+1.10.15, 10/02/2019
+- Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu (thanks to @aubergine10 for suggestion) (#16)
+- Gameplay: Updated pathfinding with missing vanilla logic
+- Gameplay: Tweaked values in CargoTruckAI path finding (thanks to @pcfantasy for improvement suggestion)
+- Gameplay: Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to @aubergine10 for suggestion) (#23)
+- UI: New icons for cargo and passenger train restriction (thanks to @aubergine10) (#17)
+- Translations: Simplified Chinese translation updated (thanks to @Emphasia for translating)
+- Other: Added notification if user is still subscribed to old original TM:PE
+- [Experimental feature] Turn on red (thanks to @FireController1847 for implementation and to @pcfantasy for source code base)
+
 1.10.14, 27/01/2019
 - Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
 - Bugfix: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too

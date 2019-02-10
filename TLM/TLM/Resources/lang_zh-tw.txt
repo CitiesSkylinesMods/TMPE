@@ -57,6 +57,8 @@ Enable_Advanced_Vehicle_AI 啟用加強版行車 AI
 Vehicles_may_enter_blocked_junctions 塞車回堵時不用保持路口淨空。
 All_vehicles_may_ignore_lane_arrows 所有車輛可忽略車道遵行方向
 Busses_may_ignore_lane_arrows 公車可忽略車道遵行方向
+Turn_on_red_enabled_by_default 默认情况下启用交叉点处的红色启用
+Turn_on_red 車輛可能會在紅色交通燈處轉彎
 Reckless_driving 違規駕駛率（功能測試中）
 TMPE_Title 交通管理器：尊爵版
 Settings_are_defined_for_each_savegame_separately 每個存檔保有各自獨立的設定
@@ -225,3 +227,4 @@ Remove_this_citizen Remove this citizen
 Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
+Experimental_features [Experimental features]:

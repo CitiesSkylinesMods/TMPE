@@ -58,6 +58,8 @@ Enable_Advanced_Vehicle_AI 启用高级车辆AI
 Vehicles_may_enter_blocked_junctions 车辆可以进入堵塞路口加塞
 All_vehicles_may_ignore_lane_arrows 所有车辆可忽略车道方向
 Busses_may_ignore_lane_arrows 公交车可忽略车道方向
+Turn_on_red_enabled_by_default 默认启用「红灯可转弯」
+Turn_on_red 车辆红灯可转弯
 Reckless_driving 违规驾驶
 Settings_are_defined_for_each_savegame_separately 设置于每个存档独立存储\n(载入存档时会读取该存档中所存储的存档时TMPE的设置.建议载入存档后设置再存档,以后就不用再重复设置)
 Simulation_accuracy 模拟真实度（高真实度会影响性能）
@@ -192,6 +194,7 @@ Window_transparency 窗口透明度
 Overlay_transparency 覆盖透明度
 Show_error_message_if_a_mod_incompatibility_is_detected 检测到MOD不兼容时提示
 Node_is_level_crossing 此节点级别交汇，不可禁用红绿灯。
+Experimental_features [实验特性]:
 
 Enable_tutorial_messages 启用教程信息
 TMPE_TUTORIAL_HEAD_MainMenu 交通管理：总统版
