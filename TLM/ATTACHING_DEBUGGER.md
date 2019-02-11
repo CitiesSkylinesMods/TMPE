@@ -26,7 +26,7 @@ Now we apply a new ```mono.dll``` and test the game is working:
 
 * Make sure the game is **not** running
 * Open ```Unity-debugging-5.x.zip```:
-    * Navigate to ```Unity-debugging\ __unity-5.6.6__ \win64\```
+    * Navigate to ```Unity-debugging\unity-5.6.6\win64\``` (note: **```unity-5.6.6```**)
     * Copy ```mono.dll``` to ```<%STEAM%>\steamapps\common\Cities_Skylines\Cities_Data\Mono\```
 * Run the game to check if it's working:
     * If not, delete the downloaded ```mono.dll``` then restore the original version
