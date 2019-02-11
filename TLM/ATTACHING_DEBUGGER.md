@@ -1,3 +1,7 @@
+# Attaching Debugger to Cities.exe
+
+Use this guide to attach a debugger to Cities: Skylines.
+
 > **Notes:**
 > * Attaching a debugger can significantly reduce frame rate and cause lots of lag.
 > * This has only been tested on Windows.
