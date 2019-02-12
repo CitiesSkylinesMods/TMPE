@@ -227,4 +227,4 @@ Remove_this_citizen 해당 시민 삭제
 Show_error_message_if_a_mod_incompatibility_is_detected 모드와 비 호환되는 모드 발견 시 에러 보여주기
 Remove_parked_vehicles 주차된 차량 제거하기
 Node_is_level_crossing 해당 교차로는 평면 교차로입니다.\n따라서 신호등을 설치할 수 없습니다
-Experimental_features [Experimental features]:
+Experimental_features Experimental features
