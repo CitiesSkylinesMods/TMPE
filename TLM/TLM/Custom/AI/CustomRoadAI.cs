@@ -812,6 +812,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			int trafficDensity = 0;
+            int noiseDensity = 0;
 			if (data.m_trafficBuffer == 65535) {
 				if ((data.m_flags & NetSegment.Flags.Blocked) == NetSegment.Flags.None) {
 					data.m_flags |= NetSegment.Flags.Blocked;
@@ -822,17 +823,24 @@ namespace TrafficManager.Custom.AI {
 				int lengthDenominator = Mathf.RoundToInt(totalLength) << 4;
 				if (lengthDenominator != 0) {
 					trafficDensity = (int)((byte)Mathf.Min((int)(data.m_trafficBuffer * 100) / lengthDenominator, 100));
-				}
+                    noiseDensity = (int)((byte)Mathf.Min((int)(data.m_noiseBuffer * 250) / lengthDenominator, 100));
+                }
 			}
 			data.m_trafficBuffer = 0;
-			if (trafficDensity > (int)data.m_trafficDensity) {
+            data.m_noiseBuffer = 0;
+            if (trafficDensity > (int)data.m_trafficDensity) {
 				data.m_trafficDensity = (byte)Mathf.Min((int)(data.m_trafficDensity + 5), trafficDensity);
 			} else if (trafficDensity < (int)data.m_trafficDensity) {
 				data.m_trafficDensity = (byte)Mathf.Max((int)(data.m_trafficDensity - 5), trafficDensity);
 			}
-			//Vector3 startNodePos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
-			//Vector3 endNodePos = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
-			Vector3 middlePoint = (startNodePos + endNodePos) * 0.5f;
+            if (noiseDensity > (int)data.m_noiseDensity){
+                data.m_noiseDensity = (byte)Mathf.Min((int)(data.m_noiseDensity + 2), noiseDensity);
+            } else if (noiseDensity < (int)data.m_noiseDensity){
+                data.m_noiseDensity = (byte)Mathf.Max((int)(data.m_noiseDensity - 2), noiseDensity);
+            }
+            //Vector3 startNodePos = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
+            //Vector3 endNodePos = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
+            Vector3 middlePoint = (startNodePos + endNodePos) * 0.5f;
 			bool flooded = false;
 			if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
 				float waterLevelAtMiddlePoint = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(middlePoint));
@@ -859,7 +867,7 @@ namespace TrafficManager.Custom.AI {
 			DistrictManager districtManager = Singleton<DistrictManager>.instance;
 			byte districtId = districtManager.GetDistrict(middlePoint);
 			DistrictPolicies.CityPlanning cityPlanningPolicies = districtManager.m_districts.m_buffer[(int)districtId].m_cityPlanningPolicies;
-			int noisePollution = (int)(100 - (data.m_trafficDensity - 100) * (data.m_trafficDensity - 100) / 100);
+			int noisePollution = (int)(100 - (data.m_noiseDensity - 100) * (data.m_noiseDensity - 100) / 100);
 			if ((this.m_info.m_vehicleTypes & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
 				if ((this.m_info.m_setVehicleFlags & Vehicle.Flags.Underground) == 0) {
 					if (flooded && (data.m_flags & (NetSegment.Flags.AccessFailed | NetSegment.Flags.Blocked)) == NetSegment.Flags.None && simManager.m_randomizer.Int32(10u) == 0) {
