@@ -1,4 +1,4 @@
-# Cities: Skylines - Traffic Manager: *President Edition*
+# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 A modification for **Cities: Skylines** to add additional traffic control.
 
 User manuals:
