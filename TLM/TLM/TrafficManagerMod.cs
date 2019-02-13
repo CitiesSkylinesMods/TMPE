@@ -19,12 +19,12 @@ namespace TrafficManager {
 		public static readonly uint GameVersionC = 1u;
 		public static readonly uint GameVersionBuild = 2u;
 
-		public string Name => "Traffic Manager: President Edition - Improved [" + Version + "]";
+		public string Name => "TM:PE " + Version;
 
 		public string Description => "Manage your city's traffic";
 
 		public void OnEnabled() {
-			Log.Info($"Traffic Manager: President Edition - Improved enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
+			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
 			if (UIView.GetAView() != null) {
 				OnGameIntroLoaded();
 			} else {
@@ -33,7 +33,7 @@ namespace TrafficManager {
 		}
 
 		public void OnDisabled() {
-			Log.Info("Traffic Manager: President Edition - Improved disabled.");
+			Log.Info("TM:PE disabled.");
 			LoadingManager.instance.m_introLoaded -= OnGameIntroLoaded;
 		}
 
