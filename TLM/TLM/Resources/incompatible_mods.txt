@@ -14,7 +14,6 @@
 512341354;Central Services Dispatcher (WtM)
 844180955;City Drive
 529979180;CSL Service Reserve
-1647686914;AdvancedJunctionRule
 583556014;Enhanced Hearse AI [Fixed for v1.4+]
 433249875;[ARIS] Enhanced Hearse AI
 583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
