@@ -448,15 +448,7 @@ xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "$(LOCALAPPDATA)\Colossal Order
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-xcopy /y "$(TargetDir)CSUtil.Commons.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-
-del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"</PostBuildEvent>
+xcopy /y "$(TargetDir)CSUtil.Commons.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
