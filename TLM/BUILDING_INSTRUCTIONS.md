@@ -3,7 +3,7 @@
 # Project building instructions
 
 
-#### Prerequisites:
+### Prerequisites:
 * source code of this repository
 * source code of dependent repositories:
   * [CSUtil.CameraControl](https://github.com/krzychu124/CSUtil.CameraControl)
