@@ -4,16 +4,20 @@
 
 
 #### Prerequisites:
-* source code of this repository
-* source code of dependent repositories:
-  * [CSUtil.CameraControl](https://github.com/krzychu124/CSUtil.CameraControl)
-  * [OptionsFramework](https://github.com/krzychu124/OptionsFramework)
+* [Git for Windows](https://gitforwindows.org/) / [GitHub Desktop](https://desktop.github.com/)
 * one prefered __IDE__ _(Integrated Development Environment)_ to build project:
   * Visual Studio 2017 Community (free)
   * JetBrains Raider (paid)
   * or other similar...
-* copy contents of __CSUtil.CameraControl__ and __OptionsFramework__ to folders with corresponding names in repository source code folder ```<Your cloned source code folder>\TLM\* ```
-
+* sources of this repository: 
+  * Git for Windows console:
+    * use ```git clone https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition``` to download sources of this repository
+    * after successful cloning type ```cd Cities-Skylines-Traffic-Manager-President-Edition```
+    * then ```git submodule update --init --recursive``` to fetch dependencies
+  * Github desktop:
+    * clone repository using this link ```https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition.git```
+    * dependencies should be installed automatically
+    
 ## To build project follow actions:
 
 
@@ -21,7 +25,7 @@ Open __TMPL.sln__ located at ``` <Your cloned source code folder>\TLM\``` using 
 
 ##### Visual Studio:
 
- * use dropdown from __actions bar__ _(dropdown located under Team menu)_ to select active solution configuration
+ * use dropdown from __actions bar__ _(dropdown located under Team menu)_ to select _desired_ solution configuration
  * fix missing libraries locations - inside __Solution Explorer__ right click on every project and select __Properties__
  then __Reference Paths__ and add __Managed__ folder from game directory located under ```<game_dir>\Cities_Data\Managed```
  * to build project with selected configuration choose one of actions:
