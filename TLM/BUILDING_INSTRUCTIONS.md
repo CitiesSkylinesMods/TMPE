@@ -7,7 +7,7 @@
 * [Git for Windows](https://gitforwindows.org/) / [GitHub Desktop](https://desktop.github.com/)
 * one prefered __IDE__ _(Integrated Development Environment)_ to build project:
   * Visual Studio 2017 Community (free)
-  * JetBrains Raider (paid)
+  * JetBrains Rider (paid)
   * or other similar...
 * sources of this repository: 
   * Git for Windows console:
@@ -32,7 +32,7 @@ Open __TMPL.sln__ located at ``` <Your cloned source code folder>\TLM\``` using 
    * right click on __TLM__ project from __Solution Explorer__
    * use _Build_ menu -> _Build Solution_ __F6__
 
-##### JetBrains Raider:
+##### JetBrains Rider:
  * currently there is no GUI for adding Reference Paths so you have to create config for every project inside from scratch: 
  
    1. Create file with extension ```*.csproj.user```named as project name e.g. ```TLM.csproj.user```
