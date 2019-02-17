@@ -1,0 +1,21 @@
+583429740;Traffic Manager: President Edition
+1581695572;Traffic Manager: President Edition
+1348361731;Traffic Manager: President Edition ALPHA/DEBUG
+498363759;Traffic Manager + Improved AI
+563720449;Traffic Manager + Improved AI (Japanese Ver.)
+492391912;Improvedd AI (Traffic++)
+409184143;Traffic++
+626024868;Traffic++ V2
+407335588;No Despawn Mod
+600733054;No On-Street Parking
+1628112268;RightTurnNoStop
+1651036644;Addvanced Traffic Congestion Report
+411833858;Toggle Traffic Lights
+512341354;Central Services Dispatcher (WtM)
+844180955;City Drive
+529979180;CSL Service Reserve
+583556014;Enhanced Hearse AI [Fixed for v1.4+]
+433249875;[ARIS] Enhanced Hearse AI
+583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
+439582006;[ARIS] Enhanced Garbage Truck AI
+413847191;SOM - Services Optimisation Module
