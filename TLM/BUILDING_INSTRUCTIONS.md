@@ -1,7 +1,7 @@
 
 
-## Project building instructions
----
+# Project building instructions
+
 
 #### Prerequisites:
 * source code of this repository
@@ -14,8 +14,8 @@
   * or other similar...
 * copy contents of __CSUtil.CameraControl__ and __OptionsFramework__ to folders with corresponding names in repository source code folder ```<Your cloned source code folder>\TLM\* ```
 
-### To build project follow actions:
----
+## To build project follow actions:
+
 
 Open __TMPL.sln__ located at ``` <Your cloned source code folder>\TLM\``` using preferred __IDE__.
 
