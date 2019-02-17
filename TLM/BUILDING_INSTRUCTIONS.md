@@ -1,7 +1,7 @@
 
 
 ## Project building instructions
-===
+---
 
 #### Prerequisites:
 * source code of this repository
