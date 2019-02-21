@@ -1122,6 +1122,21 @@ namespace TrafficManager.Manager.Impl {
 								if (debugFine)
 									Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): -> compatibleLaneDist={compatibleLaneDist}");
 #endif
+                                //disable lane change at the edge of the map.
+                                if (Options.disableLaneChangeAtEdge)
+                                {
+                                    bool isEdgeOfTheMap = false;
+                                    isEdgeOfTheMap |= Math.Abs(Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId].m_middlePosition.x) > 8000;
+                                    isEdgeOfTheMap |= Math.Abs(Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId].m_middlePosition.z) > 8000;
+                                    if (isEdgeOfTheMap)
+                                    {
+                                        if (compatibleLaneDist != 0)
+                                        {
+                                            nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
+                                        }
+                                    }
+                                }
+
 
 								nextCompatibleTransitionDatas[nextTransitionIndex].distance = compatibleLaneDist;
 								if (onHighway && !isNextRealJunction && compatibleLaneDist > 1) {

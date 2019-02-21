@@ -186,3 +186,4 @@ FakesAssemblies/
 # MSVS 2017 artifacts
 /.vs/slnx.sqlite
 /TLM/.vs/TMPE/*
+*.csproj

@@ -2818,11 +2818,24 @@ namespace TrafficManager.Custom.PathFinding {
 					uturnExplored = true;
 				}
 
-				// allow vehicles to ignore strict lane routing when moving off
-				bool relaxedLaneRouting =
+                // allow vehicles to ignore strict lane routing when moving off
+                // disable lane change at the edge of the map.
+                bool disableLaneChangeAtEdge = false;
+                if (Options.disableLaneChangeAtEdge)
+                {
+                    bool isEdgeOfTheMap = false;
+                    isEdgeOfTheMap |= Math.Abs(Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId].m_middlePosition.x) > 8000;
+                    isEdgeOfTheMap |= Math.Abs(Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId].m_middlePosition.z) > 8000;
+                    if (isEdgeOfTheMap)
+                    {
+                        disableLaneChangeAtEdge = true;
+                    }
+                }
+
+                bool relaxedLaneRouting =
 					m_isRoadVehicle &&
 					(!m_queueItem.spawned || (m_queueItem.vehicleType & (ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None) &&
-					(laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB);
+					((laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB) && !disableLaneChangeAtEdge);
 
 #if DEBUG
 				if (debug) {
