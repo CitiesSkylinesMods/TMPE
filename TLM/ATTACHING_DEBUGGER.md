@@ -1,61 +1,104 @@
+# Attaching Debugger to Cities.exe
 
+Use this guide to attach a debugger to Cities: Skylines.
 
+> **Notes:**
+> * Attaching a debugger can significantly reduce frame rate and cause lots of lag.
+> * This has only been tested on Windows.
 
-## **Setting up debugger**
+### Setup
 
-## NOTE:
-## These operations can degrade game performance (even up to 50-70% loss of fps in larger cities - depends on your CPU) because of additional instuction calls due to enabled mono debugger!
+> You only need to follow these steps once to set up your debug environment.
 
+First, let's backup your current ```mono.dll```:
 
+* Navigate to ```<%STEAM%>\steamapps\common\Cities_Skylines\Cities_Data\Mono\```
+* Make a backup of ```mono.dll``` (you could just rename it ```mono-backup.dll```)
 
-### Requirements:
+> The location of ```<%STEAM%>``` is usually ```C:\Program Files (x86)\Steam```
 
-#### Go to [this repository](https://github.com/0xd4d/dnSpy/releases) and download two files:
-* dnSpy-net472.zip
-* Unity-debugging-5.x.zip
+Next, download the following files from [```https://github.com/0xd4d/dnSpy/releases```](https://github.com/0xd4d/dnSpy/releases):
 
+* ```dnSpy-net472.zip```
+* ```Unity-debugging-5.x.zip```
 
-#### Next:
-* open __Unity-debugging-5.x.zip__ and go to *"Unity-debugging\ __unity-5.6.6__ \win64\"* and extract *mono.dll* somewhere to your computer e.g. *Desktop*
-* go to steam game folder which containing Cities Skylines and backup *mono.dll* located inside *"Cities_Data\Mono"!*
-* copy extracted *mono.dll* to replace with original you've backed up
-* run game as usual using Steam to check if it's working properly
+Now we apply a new ```mono.dll``` and test the game is working:
 
-#### If game is working properly you can continue, if not just replace mono.dll from your backup and forget about attaching debugger to this game :cry:
+* Make sure the game is **not** running
+* Open ```Unity-debugging-5.x.zip```:
+    * Navigate to ```Unity-debugging\unity-5.6.6\win64\``` (note: **```unity-5.6.6```**)
+    * Copy ```mono.dll``` to ```<%STEAM%>\steamapps\common\Cities_Skylines\Cities_Data\Mono\```
+* Run the game to check if it's working:
+    * If not, delete the downloaded ```mono.dll``` then restore the original version
+    * You'll have to scour the internet to work out what went wrong, sorry.
+* Close the game
 
-* close game for now
-* add two **User env. variables** *(Win+R(Run) sysdm.cpl -> tab Advanced -> Env. Variables at the bottom)* :
-   * __key:__ *DNSPY_UNITY_DBG*
-   * __value:__ *--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,defer=y,no-hide-debugger*
+Next, add two environment variables:
 
-   * __key:__ *DNSPY_UNITY_DBG2*
-   * __value:__ *--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,suspend=n,no-hide-debugger*
+* Press **Win+R** (_Run dialog appears_):
+    * Enter ```sysdm.cpl```
+    * Choose **OK**
+* On the **Advanced** tab, choose **Environment Variables...**
+* The variables to add are shown below:
 
+1. > **key:** ```DNSPY_UNITY_DBG```  
+   > **value:** ```--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,defer=y,no-hide-debugger```
+2. > **key:** ```DNSPY_UNITY_DBG2```  
+   > **value:** ```--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,suspend=n,no-hide-debugger```
 
-* extract __dnSpy-net472.zip__ to any folder e.g. *dnSpy* *(no matter where)*
-* open extracted folder and run __dnSpy.exe__
-* from left __Assembly Explorer__ remove all dll's if any *(select one, hit __Ctrl+A__ and then __delete__)*
+Finally, unarchive **dnSpy**:
 
-* run again game as usual and switch *(Alt+Tab)* to running __dnSpy__
-* inside dnSpy IDE hit __F5__ or __Start__ button and select:
-   * Debug Engine: __Unity (Connect)__
-   * Port: __55555__
-* now you can click __OK__
-* after that you should see __orange status bar__ at the bottom of application with text: _"Running..."_
-* now open __Modules__ tab (_Debug -> Windows -> Modules_ (__Ctrl+Shift+A__))
-* if everything works properly you should see a lot of dll's and other "data-00..." names
-* right click on any name then select __Open All Modules__ (game may hang for few seconds) and press __OK__
-* now on the left side in Assembly Explorer you should see all dll's loaded in-game (note that there would be *duplicated names*)
-* right click on any of those names and then __Sort Assemblies__ for easier managing
+* Extract the downloaded ```dnSpy-net472.zip``` to a folder
+    * It can be anywhere, eg. ```dnSpy/``` on your desktop
 
-### Congratulations you've properly set up debugging workspace, now you can make your mods bugless with ease :wink:
+### Debugging
 
-#### ADDITIONAL NOTES:
-* use __Search__ *(Ctrl+Shift+K)* tab for searching anything you want inside all loaded assemblies (class, property, field, method etc...)
-* right click on method definition and select Analyze to check where it's used
+> Do this each time you want to debug the game.
 
-#### MOAR OF ADDITIONAL NOTES:
-* I don't know why we can see duplicated libs (maybe it's some sort of protection)but as you find out in a minute
-only one of them will have working breakpoints (usually it's that first of two after sorting) and if you find out which is working you can safely remove the other from Assembly Explorer
+First, launch **dnSpy**:
 
-* I don't recommend rebuilding your mod library with game running because after that you have to clear Assembly Explorer and open again Modules (and you will see even more duplicates of your dll)
+* Run ```dnSpy.exe```
+* On the left, in **Assembly Explorer**, remove any ```.dll``` files that are listed
+    * Tip: Select one, press **Ctrl+A** then **Delete**
+
+Now run the game and attach **dnSpy**:
+
+* Start ```Cities.exe```
+* **Alt+Tab** to **dnSpy** app
+* Press **F5** (or choose **Start**) and select:
+    * **Debug Engine:** ```Unity (Connect)```
+    * **Port:** ```55555```
+* Click **OK**:
+    * You should see an **orange status bar** at the bottom of application with text: ```Running...```
+* From the **Debug** menu, choose **Windows -> Modules** _(Ctrl+Shift+A)_
+* You should see lots of ```.dll``` files and some ```data-00...``` entries
+* **Right-click** on any of them, select **Open All Modules**, then * Click **OK**
+    * The game may hang for few seconds
+* On the left, in **Assembly Explorer**, you should see all ```.dll``` files loaded in-game
+    * There will be some duplicates
+* **Right-click** on any of them, then **Sort Assemblies** to make the list easier to work with
+
+That's it, you are debugging. Now your mods are sure to be bugless :P 
+
+### Reverting
+
+If you want to return the game back to normal:
+
+* Exit the game
+* Replace the downloaded ```mono.dll`` with your backup of the original ```mono.dll```
+* Start the game
+
+I'm sure you can work out how to simplify or automate toggling between the two ```mono.dll``` files :)
+
+### Tips
+
+* Use **Search** tab _(Ctrl+Shift+K)_ for to find class, property, field, method, etc...
+* You can right-click a method definition then select **Analyze** to see where it's used
+
+### Notes
+
+* I have no idea why there are duplicated libraries (some sort of protection?)
+* Only one copy of each library will have working breakpoints
+    * After sorting assemblies, it's usually the first instance of a listed file
+    * Once you know which one it is, you can safely remove the other from Assembly Explorer
+* Don't rebuild your mod library with game running, otherwise you'll have to clear Assembly Explorer and open the modules again, which means the duplicates come back
