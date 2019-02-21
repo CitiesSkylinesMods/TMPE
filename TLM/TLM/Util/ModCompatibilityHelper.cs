@@ -18,5 +18,10 @@ namespace TrafficManager.Util {
                 UIView.GetAView().panelsLibrary.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Detected Original TM:PE subscription", msg, false);
             }
         }
+
+        public static void CheckForIncompatibleMods() {
+            ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
+            mcc.PerformModCheck();
+        }
     }
 }

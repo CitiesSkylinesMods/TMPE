@@ -43,6 +43,7 @@ namespace TrafficManager {
 
 		private static void OnGameIntroLoaded() {
 			ModCompatibilityHelper.CheckForOriginalTMPE();
+			ModCompatibilityHelper.CheckForIncompatibleMods();
 		}
 	}
 }
