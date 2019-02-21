@@ -14,7 +14,7 @@ namespace TrafficManager.Util {
             Log.Info("Checking for original version of TM:PE steamID:583429740");
             if (IsSteamWorkshopItemSubscribed(583429740)) {
                 Log.Warning("Found original version of TM:PE steamID:583429740");
-                string msg = $"Traffic Manager: President Edition - Improved v.{TrafficManagerMod.Version} detected that you are subscribing to older version of TM:PE (steam id -> 583429740) made by @LinuxFan. \nPlease unsubscribe it from Steam Workshop and restart the game.";
+                string msg = $"TM:PE v.{TrafficManagerMod.Version} detected that you are subscribing to older version of TM:PE (steam id -> 583429740) made by @LinuxFan. \nPlease unsubscribe it from Steam Workshop and restart the game.";
                 UIView.GetAView().panelsLibrary.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Detected Original TM:PE subscription", msg, false);
             }
         }
