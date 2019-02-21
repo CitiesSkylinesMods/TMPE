@@ -35,7 +35,6 @@ namespace TrafficManager.State {
         private static UICheckBox allRelaxedToggle = null;
         private static UICheckBox turnOnRedEnabledByDefaultToggle = null;
         private static UICheckBox turnOnRedToggle = null;
-        private static UICheckBox disableLaneChangeAtEdgeToggle = null;
         private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
 		private static UICheckBox timedLightsOverlayToggle = null;
@@ -99,7 +98,6 @@ namespace TrafficManager.State {
 		public static bool allRelaxed = false;
 		public static bool turnOnRedEnabledByDefault = false;
         public static bool turnOnRed = false;
-        public static bool disableLaneChangeAtEdge = false;
         public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;
 		public static bool timedLightsOverlay = false;
@@ -318,10 +316,9 @@ namespace TrafficManager.State {
 			if (!turnOnRedToggle.isChecked) {
 				turnOnRedEnabledByDefaultToggle.Disable();
 			}
-            disableLaneChangeAtEdgeToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Disable_Lane_Change_At_Edge"), disableLaneChangeAtEdge, onDisableLaneChangeAtEdgeChanged) as UICheckBox;
-
-            // OVERLAYS
-            ++tabIndex;
+			
+			// OVERLAYS
+			++tabIndex;
 
 			AddOptionTab(tabStrip, Translation.GetString("Overlays"));
 			tabStrip.selectedIndex = tabIndex;
@@ -749,16 +746,6 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void onDisableLaneChangeAtEdgeChanged(bool value)
-        {
-            if (!checkGameLoaded())
-                return;
-
-            Log._Debug($"disableLaneChangeAtEdgeEnabled changed to {value}");
-            disableLaneChangeAtEdge = value;
-            RoutingManager.Instance.RequestFullRecalculation();
-        }
-
         private static void onAdvancedAIChanged(bool newAdvancedAI) {
 			if (!checkGameLoaded())
 				return;
@@ -1127,13 +1114,6 @@ namespace TrafficManager.State {
             turnOnRed = newValue;
             if (turnOnRedToggle != null)
                 turnOnRedToggle.isChecked = newValue;
-        }
-
-        public static void setDisableLaneChangeAtEdge(bool newValue)
-        {
-            disableLaneChangeAtEdge = newValue;
-            if (disableLaneChangeAtEdgeToggle != null)
-                disableLaneChangeAtEdgeToggle.isChecked = newValue;
         }
 
         public static void setHighwayRules(bool newHighwayRules) {
