@@ -7,23 +7,21 @@ using System.Text;
 using ColossalFramework.PlatformServices;
 using ColossalFramework.UI;
 using CSUtil.Commons;
+using TrafficManager.UI;
 using UnityEngine;
 
 namespace TrafficManager.Util {
     public class ModsCompatibilityChecker {
+        //TODO include %APPDATA% mods folder
+        
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
-        private static readonly string DEFAULT_INCOMPATIBLE_MODS_FILENAME = "incompatible_mods.txt";
-        private static readonly string STEAM_WORKSHOP_URL_PART = "https://steamcommunity.com/sharedfiles/filedetails/?id=";
-        private ulong[] userModList;
-        private Dictionary<ulong, string> incompatibleModList;
+        private const string DEFAULT_INCOMPATIBLE_MODS_FILENAME = "incompatible_mods.txt";
+        private readonly ulong[] userModList;
+        private readonly Dictionary<ulong, string> incompatibleModList;
 
         public ModsCompatibilityChecker() {
             incompatibleModList = LoadIncompatibleModList();
             userModList = GetUserModsList();
-        }
-
-        private string BuildUrl(ulong steamId) {
-            return STEAM_WORKSHOP_URL_PART + steamId;
         }
 
         public void PerformModCheck() {
@@ -32,37 +30,36 @@ namespace TrafficManager.Util {
             for (int i = 0; i < userModList.Length; i++) {
                 if (incompatibleModList.TryGetValue(userModList[i], out string incompatibleModName)) {
                     incompatibleMods.Add(userModList[i], incompatibleModName);
-                }        
+                }
             }
 
             if (incompatibleMods.Count > 0) {
-                StringBuilder builder = new StringBuilder().AppendLine()
-                    .AppendLine("Following list of mods is incompatible with current version of Traffic Manager: President Edition")
-                    .AppendLine("Please unsubscribe all mods from list below to prevent unexpected errors in game");
-                incompatibleMods.ForEach(pair => { builder.Append(pair.Value).AppendLine(BuildUrl(pair.Key)); });
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE Incompatible mods detected", builder.ToString(), false);
-                Log.Info(builder.ToString());
+                Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
+                IncompatibleModsPanel panel = IncompatibleModsPanel.Instance;
+                panel.IncompatibleMods = incompatibleMods;
+                panel.Initialize();
+                UIView.PushModal(panel);
             } else {
                 Log.Info("No incompatible mods detected");
             }
         }
+
         private Dictionary<ulong, string> LoadIncompatibleModList() {
             Dictionary<ulong, string> incompatibleMods = new Dictionary<ulong, string>();
             string[] lines;
             using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream(RESOURCES_PREFIX + DEFAULT_INCOMPATIBLE_MODS_FILENAME)) {
                 using (StreamReader sr = new StreamReader(st)) {
-                    lines = sr.ReadToEnd().Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
+                    lines = sr.ReadToEnd().Split(new string[] {"\n", "\r\n"}, StringSplitOptions.None);
                 }
             }
 
             for (int i = 0; i < lines.Length; i++) {
                 string[] strings = lines[i].Split(';');
-                ulong steamId;
-                if (ulong.TryParse(strings[0], out steamId)) {
-                    
-                incompatibleMods.Add(steamId, strings[1]);
+                if (ulong.TryParse(strings[0], out ulong steamId)) {
+                    incompatibleMods.Add(steamId, strings[1]);
                 }
             }
+
             return incompatibleMods;
         }
 
