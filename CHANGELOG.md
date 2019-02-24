@@ -1,8 +1,17 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
-1.10.16, [Work in progress]
-
+1.10.16, 24/02/2019
+- Gameplay: Fixed problem with vehicle despawn after road upgrade/remove (thanks @pcfantasy for implementation suggestion)(#86, #101)
+- Gameplay: Fixed problem with vehicles unable to choose lane when u-turn at dead-end (thanks @pcfantasy for implementation and @aubergine10 for neccesary tests)(#101)
+- Gameplay: Fixed problem when user couldn't change state of 'Turn on Red' while enabled_by_default option not selected (thanks @Sp3ctre18 for bug confirmation) (#102)
+- Gameplay: Added missing logic for noise density calculations (thanks to @pcfantasy for fix) (#66)
+- UI: New icons for empty and remove_priority_sign settings (thanks @aubergine10 for those icons) (#75, #77)
+- Other: Greatly improved incompatible mod scanner, added dialog to list and unsubscribe incompatible mods (#91)
+- Other: Changed mod name in Content Manager to __TM:PE__
+- Other: Discord server was set up by @FireController1847 - link in mod description
+- Other: Fixed 'silent error' inside log related with "Esc key handler" (#92)
+- Contribution: Added project building instructions and PR review
 
 1.10.15, 10/02/2019
 - Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu (thanks to @aubergine10 for suggestion) (#16)
