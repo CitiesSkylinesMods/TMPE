@@ -8,6 +8,7 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Impl;
 using TrafficManager.Util;
 using static TrafficManager.Geometry.Impl.NodeGeometry;
 
@@ -184,6 +185,16 @@ namespace TrafficManager.Manager.Impl {
         //	UpdateDefaults(segmentId);
         //}
 
+        /// <summary>
+        /// Check if turn on red value was set for selected segment at node - true/false but not null
+        /// </summary>
+        /// <param name="segmentId">segment id</param>
+        /// <param name="startNode">use start node</param>
+        /// <returns></returns>
+        public bool IsTurnOnRedValueSet(ushort segmentId, bool startNode) {
+	        return SegmentFlags[segmentId].IsTurnOnRedValueSet(startNode);
+        }
+
         protected void UpdateDefaults(SegmentGeometry geometry) {
             //Log.Warning($"JunctionRestrictionsManager.HandleValidSegment({geometry.SegmentId}) called.");
             ushort startNodeId = geometry.StartNodeId();
@@ -259,7 +270,9 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             bool debug = GlobalConfig.Instance.Debug.Switches[11];
 #endif
-
+	        if (!Options.turnOnRed)
+		        return false;
+	        
             SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
             SegmentEndGeometry endGeo = segGeo?.GetEnd(startNode);
 
@@ -285,12 +298,12 @@ namespace TrafficManager.Manager.Impl {
             if (!IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node)) {
 #if DEBUG
                 if (debug)
-                    Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): Setting is not configurable. res=true");
+                    Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): Setting is not configurable. res=false");
 #endif
-                return Options.turnOnRedEnabledByDefault;
+                return false;
             }
-
-            bool ret = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+			// Feature enabled and depends on default behaviour setting
+            bool ret = Options.turnOnRed && Options.turnOnRedEnabledByDefault; 
 #if DEBUG
             if (debug)
                 Log._Debug($"JunctionRestrictionsManager.GetTurnOnRedAllowed({segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");
@@ -299,7 +312,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsTurnOnRedAllowed(ushort segmentId, bool startNode) {
-            return Options.turnOnRedEnabledByDefault ? SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode) : !SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode);
+            return SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode);
         }
 
         public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node) {

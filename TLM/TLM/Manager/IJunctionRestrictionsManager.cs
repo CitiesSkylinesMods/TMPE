@@ -15,7 +15,7 @@ namespace TrafficManager.Manager {
 		bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
         /// <summary>
-		/// Determines if turn-on-red behavior may be controlled at the given segment end.
+		/// Determines if turn-on-red behavior is enabled and may be controlled at the given segment end.
 		/// </summary>
 		/// <param name="segmentId">segment id</param>
 		/// <param name="startNode">at start node?</param>

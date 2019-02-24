@@ -48,7 +48,7 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 			defaultUturnAllowed = junctionRestrictionsManager.GetDefaultUturnAllowed(segmentId, startNode, ref node);
-            defaultTurnOnRedAllowed = junctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node);
+			defaultTurnOnRedAllowed = junctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node);
 			defaultStraightLaneChangingAllowed = junctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node);
 			defaultEnterWhenBlockedAllowed = junctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed(segmentId, startNode, ref node);
 			defaultPedestrianCrossingAllowed = junctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed(segmentId, startNode, ref node);
@@ -72,6 +72,10 @@ namespace TrafficManager.Traffic.Data {
             }
 
             return TernaryBoolUtil.ToBool(turnOnRedAllowed);
+        }
+
+        public bool IsTurnOnRedSet() {
+	        return turnOnRedAllowed != TernaryBool.Undefined;
         }
 
 		public bool IsLaneChangingAllowedWhenGoingStraight() {
