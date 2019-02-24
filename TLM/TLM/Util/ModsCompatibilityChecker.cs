@@ -39,6 +39,7 @@ namespace TrafficManager.Util {
                 panel.IncompatibleMods = incompatibleMods;
                 panel.Initialize();
                 UIView.PushModal(panel);
+                panel.Focus();
             } else {
                 Log.Info("No incompatible mods detected");
             }

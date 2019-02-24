@@ -13,6 +13,7 @@ namespace TrafficManager.UI {
         public UILabel title;
         public UIButton closeButton;
         public UISprite warningIcon;
+        private UIPanel mainPanel;
         private static IncompatibleModsPanel _instance;
 
         public static IncompatibleModsPanel Instance {
@@ -29,33 +30,38 @@ namespace TrafficManager.UI {
 
         public void Initialize() {
             Log._Debug("IncompatibleModsPanel initialize");
-            isVisible = true;
+            if (mainPanel != null) {
+                Destroy(mainPanel);
+            }
 
-            backgroundSprite = "MenuPanel3";
-            color = new Color32(75, 75, 135, 255);
+            mainPanel = AddUIComponent<UIPanel>();
+            mainPanel.backgroundSprite = "UnlockingPanel2";
+            mainPanel.color = new Color32(75, 75, 135, 255);
             width = 600;
             height = 440;
+            mainPanel.width = 600;
+            mainPanel.height = 440;
 
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
             relativePosition = new Vector3(resolution.x / 2 - 300, resolution.y / 3);
+            mainPanel.relativePosition = Vector3.zero;
 
-           warningIcon = AddUIComponent<UISprite>();
-           warningIcon.size = new Vector2(40f, 40f);
-           warningIcon.spriteName = "IconWarning";
-           warningIcon.relativePosition = new Vector3(15, 15);
-           warningIcon.zOrder = 0;
+            warningIcon = mainPanel.AddUIComponent<UISprite>();
+            warningIcon.size = new Vector2(40f, 40f);
+            warningIcon.spriteName = "IconWarning";
+            warningIcon.relativePosition = new Vector3(15, 15);
+            warningIcon.zOrder = 0;
 
-            title = AddUIComponent<UILabel>();
+            title = mainPanel.AddUIComponent<UILabel>();
             title.autoSize = true;
             title.padding = new RectOffset(10, 10, 15, 15);
             title.relativePosition = new Vector2(60, 12);
             title.text = "Traffic Manager detected incompatible mods";
-            int y = 30;
 
-            UIPanel panel = AddUIComponent<UIPanel>();
+            UIPanel panel = mainPanel.AddUIComponent<UIPanel>();
             panel.relativePosition = new Vector2(20, 70);
             panel.size = new Vector2(565, 320);
-            
+
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.backgroundSprite = "";
             scrollablePanel.size = new Vector2(550, 340);
@@ -72,6 +78,7 @@ namespace TrafficManager.UI {
                 });
                 item = null;
             }
+
             scrollablePanel.FitTo(panel);
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
             scrollablePanel.builtinKeyNavigation = true;
@@ -106,6 +113,7 @@ namespace TrafficManager.UI {
             closeButton.hoveredBgSprite = "buttonclosehover";
             closeButton.pressedBgSprite = "buttonclosepressed";
 
+            isVisible = true;
             BringToFront();
         }
 
@@ -113,7 +121,9 @@ namespace TrafficManager.UI {
             closeButton.eventClick -= CloseButtonClick;
             TryPopModal();
             Hide();
+            Unfocus();
         }
+
 
         private UIPanel CreateEntry(ref UIScrollablePanel parent, string name, ulong steamId) {
             UIPanel panel = parent.AddUIComponent<UIPanel>();
@@ -175,7 +185,7 @@ namespace TrafficManager.UI {
         private void OnPluginsChanged() {
             Log._Debug("IncompatibleModsPanel.OnPluginsChanged() - Plugins changed");
         }
-        
+
         private void OnDisable() {
             Log._Debug("IncompatibleModsPanel disabled");
             PlatformService.workshop.eventUGCQueryCompleted -= this.OnQueryCompleted;
@@ -189,6 +199,7 @@ namespace TrafficManager.UI {
                 TryPopModal();
                 p.Use();
                 Hide();
+                Unfocus();
             }
 
             base.OnKeyDown(p);
