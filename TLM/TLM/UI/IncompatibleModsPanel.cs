@@ -9,7 +9,7 @@ using CSUtil.Commons;
 using UnityEngine;
 
 namespace TrafficManager.UI {
-    public class IncompatibleModsPanel : UIPanel, IDisposable {
+    public class IncompatibleModsPanel : UIPanel {
         private UILabel title;
         private UIButton closeButton;
         private UISprite warningIcon;
@@ -171,9 +171,6 @@ namespace TrafficManager.UI {
             button.eventClick += eventClick;
 
             return button;
-        }
-
-        public void Dispose() {
         }
 
         private void OnEnable() {
