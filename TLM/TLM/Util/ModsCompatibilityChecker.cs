@@ -13,7 +13,7 @@ using UnityEngine;
 namespace TrafficManager.Util {
     public class ModsCompatibilityChecker {
         //TODO include %APPDATA% mods folder
-        
+
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
         private const string DEFAULT_INCOMPATIBLE_MODS_FILENAME = "incompatible_mods.txt";
         private readonly ulong[] userModList;
@@ -35,11 +35,11 @@ namespace TrafficManager.Util {
 
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
-                IncompatibleModsPanel panel = IncompatibleModsPanel.Instance;
+                IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
                 panel.IncompatibleMods = incompatibleMods;
                 panel.Initialize();
                 UIView.PushModal(panel);
-                panel.Focus();
+                UIView.SetFocus(panel);
             } else {
                 Log.Info("No incompatible mods detected");
             }

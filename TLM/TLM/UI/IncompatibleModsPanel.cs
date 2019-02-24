@@ -9,30 +9,23 @@ using CSUtil.Commons;
 using UnityEngine;
 
 namespace TrafficManager.UI {
-    public class IncompatibleModsPanel : UIPanel {
-        public UILabel title;
-        public UIButton closeButton;
-        public UISprite warningIcon;
+    public class IncompatibleModsPanel : UIPanel, IDisposable {
+        private UILabel title;
+        private UIButton closeButton;
+        private UISprite warningIcon;
         private UIPanel mainPanel;
+        private UIComponent blurEffect;
         private static IncompatibleModsPanel _instance;
-
-        public static IncompatibleModsPanel Instance {
-            get {
-                if (_instance == null) {
-                    _instance = (UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel);
-                }
-
-                return _instance;
-            }
-        }
 
         public Dictionary<ulong, string> IncompatibleMods { get; set; }
 
         public void Initialize() {
             Log._Debug("IncompatibleModsPanel initialize");
             if (mainPanel != null) {
-                Destroy(mainPanel);
+                mainPanel.OnDestroy();
             }
+
+            isVisible = true;
 
             mainPanel = AddUIComponent<UIPanel>();
             mainPanel.backgroundSprite = "UnlockingPanel2";
@@ -57,6 +50,13 @@ namespace TrafficManager.UI {
             title.padding = new RectOffset(10, 10, 15, 15);
             title.relativePosition = new Vector2(60, 12);
             title.text = "Traffic Manager detected incompatible mods";
+
+            closeButton = mainPanel.AddUIComponent<UIButton>();
+            closeButton.eventClick += CloseButtonClick;
+            closeButton.relativePosition = new Vector3(width - closeButton.width - 45, 15f);
+            closeButton.normalBgSprite = "buttonclose";
+            closeButton.hoveredBgSprite = "buttonclosehover";
+            closeButton.pressedBgSprite = "buttonclosepressed";
 
             UIPanel panel = mainPanel.AddUIComponent<UIPanel>();
             panel.relativePosition = new Vector2(20, 70);
@@ -106,14 +106,17 @@ namespace TrafficManager.UI {
             thumb.relativePosition = Vector3.zero;
             verticalScroll.thumbObject = thumb;
 
-            closeButton = AddUIComponent<UIButton>();
-            closeButton.eventClick += CloseButtonClick;
-            closeButton.relativePosition = new Vector3(width - closeButton.width - 45, 15f);
-            closeButton.normalBgSprite = "buttonclose";
-            closeButton.hoveredBgSprite = "buttonclosehover";
-            closeButton.pressedBgSprite = "buttonclosepressed";
 
-            isVisible = true;
+            blurEffect = GameObject.Find("ModalEffect").GetComponent<UIComponent>();
+            AttachUIComponent(blurEffect.gameObject);
+            blurEffect.size = new Vector2(resolution.x, resolution.y);
+            blurEffect.absolutePosition = new Vector3(0, 0);
+            blurEffect.SendToBack();
+            if (blurEffect != null) {
+                blurEffect.isVisible = true;
+                ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+            }
+
             BringToFront();
         }
 
@@ -122,8 +125,8 @@ namespace TrafficManager.UI {
             TryPopModal();
             Hide();
             Unfocus();
+            eventparam.Use();
         }
-
 
         private UIPanel CreateEntry(ref UIScrollablePanel parent, string name, ulong steamId) {
             UIPanel panel = parent.AddUIComponent<UIPanel>();
@@ -170,6 +173,9 @@ namespace TrafficManager.UI {
             return button;
         }
 
+        public void Dispose() {
+        }
+
         private void OnEnable() {
             Log._Debug("IncompatibleModsPanel enabled");
             PlatformService.workshop.eventUGCQueryCompleted += OnQueryCompleted;
@@ -212,6 +218,10 @@ namespace TrafficManager.UI {
                 if (component != null) {
                     UIView.SetFocus(component);
                 }
+            }
+
+            if (blurEffect != null && UIView.ModalInputCount() == 0) {
+                ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate() { blurEffect.Hide(); });
             }
         }
     }
