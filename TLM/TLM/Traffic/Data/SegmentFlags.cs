@@ -22,6 +22,10 @@ namespace TrafficManager.Traffic.Data {
             return startNode ? startNodeFlags.IsTurnOnRedAllowed() : endNodeFlags.IsTurnOnRedAllowed();
         }
 
+        public bool IsTurnOnRedValueSet(bool startNode) {
+	        return startNode ? startNodeFlags.IsTurnOnRedSet() : endNodeFlags.IsTurnOnRedSet();
+        }
+
 		public bool IsLaneChangingAllowedWhenGoingStraight(bool startNode) {
 			return startNode ? startNodeFlags.IsLaneChangingAllowedWhenGoingStraight() : endNodeFlags.IsLaneChangingAllowedWhenGoingStraight();
 		}

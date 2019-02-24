@@ -280,11 +280,15 @@ namespace TrafficManager.UI.SubTools {
                 // draw "turn on red allowed" sign at (2; 0)
                 allowed = JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(segmentId, startNode);
                 configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
+                bool defaultAllowed = Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node);
+                bool turnOnRedValueSet = JunctionRestrictionsManager.Instance.IsTurnOnRedValueSet(segmentId, startNode);
                 if (
                     debug ||
-                    (configurable && Options.turnOnRed &&
-                    (!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node)))
+                    (configurable &&
+                    ((!viewOnly || allowed || turnOnRedValueSet)))
                 ) {
+	                // allowed only if value set to true or default is true
+	                allowed = turnOnRedValueSet ? allowed : defaultAllowed;
                     if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
                         DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered);
                     } else {
