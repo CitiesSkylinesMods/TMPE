@@ -285,7 +285,7 @@ namespace TrafficManager.UI.SubTools {
                 if (
                     debug ||
                     (configurable &&
-                    ((!viewOnly || allowed || turnOnRedValueSet)))
+                    ((!viewOnly || (turnOnRedValueSet && allowed != defaultAllowed))))
                 ) {
 	                // allowed only if value set to true or default is true
 	                allowed = turnOnRedValueSet ? allowed : defaultAllowed;
