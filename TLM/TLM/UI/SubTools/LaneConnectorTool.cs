@@ -1,4 +1,4 @@
-﻿using ColossalFramework;
+using ColossalFramework;
 using ColossalFramework.Math;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ using TrafficManager.Util;
 using UnityEngine;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI.SubTools {
@@ -114,7 +115,32 @@ namespace TrafficManager.UI.SubTools {
 							if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.laneId)) {
 								continue;
 							}
-							RenderLane(cameraInfo, laneMarker.position, targetLaneMarker.position, NetManager.instance.m_nodes.m_buffer[nodeId].m_position, laneMarker.color);
+							Vector3 lDir = NetManager.instance.m_lanes.m_buffer[laneMarker.laneId].m_bezier.Tangent(laneMarker.startNode? 0f :1f);
+							Vector3 tDir = NetManager.instance.m_lanes.m_buffer[targetLaneMarker.laneId].m_bezier.Tangent(targetLaneMarker.startNode ? 0f : 1f);
+							Vector3 p1;
+							Vector3 p2;
+							ClosestPointsOnTwoLines(out p1, laneMarker.position, lDir, targetLaneMarker.position, tDir);
+							float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(p1);
+							p1 = new Vector3(p1.x, terrainY, p1.z);
+
+							SegmentEndGeometry sge = SegmentGeometry.Get(laneMarker.segmentId)?.GetEnd(laneMarker.startNode);
+							ArrowDirection travelDirection = sge.GetDirection(targetLaneMarker.segmentId);
+							
+							if (laneMarker.segmentId == targetLaneMarker.segmentId) {
+								RenderLane(cameraInfo, laneMarker.position, targetLaneMarker.position, NetManager.instance.m_nodes.m_buffer[laneMarker.nodeId].m_position, laneMarker.color);
+							} else if (travelDirection == ArrowDirection.Forward) {
+								Vector3 mid = (laneMarker.position + targetLaneMarker.position) * 0.5f;
+								terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(mid);
+								mid = new Vector3(mid.x, terrainY, mid.z);
+								var distance = Vector2.Distance(laneMarker.position, mid);
+								Vector3 n = laneMarker.position + ((laneMarker.startNode? -1: 1) * lDir.normalized * distance);
+								var distance2 = Vector2.Distance(targetLaneMarker.position, mid);
+								Vector3 n2 = targetLaneMarker.position + ((targetLaneMarker.startNode? -1: 1) *tDir.normalized * distance2);
+								Bezier3 bezierTest3 = new Bezier3(laneMarker.position, n, n2, targetLaneMarker.position);
+								RenderManager.instance.OverlayEffect.DrawBezier(cameraInfo, laneMarker.color, bezierTest3, 0.1f, 0, 0, -1f, 1280f, true, true);
+							} else {
+								RenderLane(cameraInfo, laneMarker.position, targetLaneMarker.position, p1, laneMarker.color);
+							}
 						}
 
 						if (!viewOnly && nodeId == SelectedNodeId) {
@@ -479,10 +505,9 @@ namespace TrafficManager.UI.SubTools {
 						bool isTarget = false;
 						if (connManager.GetLaneEndPoint(segmentId, !isEndNode, laneIndex, laneId, laneInfo, out isSource, out isTarget, out pos)) {
 
-							pos = (Vector3)pos + offset;
+							pos = (Vector3) pos + offset;
 							float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(((Vector3)pos));
 							Vector3 finalPos = new Vector3(((Vector3)pos).x, terrainY, ((Vector3)pos).z);
-
 							nodeMarkers.Add(new NodeLaneMarker() {
 								segmentId = segmentId,
 								laneId = laneId,
@@ -570,7 +595,6 @@ namespace TrafficManager.UI.SubTools {
 			bezier.a = start;
 			bezier.d = end;
 			NetSegment.CalculateMiddlePoints(bezier.a, (middlePoint - bezier.a).normalized, bezier.d, (middlePoint - bezier.d).normalized, false, false, out bezier.b, out bezier.c);
-
 			RenderManager.instance.OverlayEffect.DrawBezier(cameraInfo, color, bezier, size, 0, 0, -1f, 1280f, false, true);
 		}
 
@@ -636,5 +660,33 @@ namespace TrafficManager.UI.SubTools {
 			new Color32(169, 104, 238, 255),
 			new Color32(97, 201, 238, 255),
 		};
+		public static bool ClosestPointsOnTwoLines(out Vector3 closestPointLine1, Vector3 linePoint1, Vector3 lineVec1, Vector3 linePoint2, Vector3 lineVec2){
+ 
+			closestPointLine1 = Vector3.zero;
+//			closestPointLine2 = Vector3.zero;
+ 
+			float a = Vector3.Dot(lineVec1, lineVec1);
+			float b = Vector3.Dot(lineVec1, lineVec2);
+			float e = Vector3.Dot(lineVec2, lineVec2);
+ 
+			float d = a*e - b*b;
+ 
+			//lines are not parallel
+			if(d != 0.0f){
+ 
+				Vector3 r = linePoint1 - linePoint2;
+				float c = Vector3.Dot(lineVec1, r);
+				float f = Vector3.Dot(lineVec2, r);
+ 
+				float s = (b*f - c*e) / d;
+				float t = (a*f - c*b) / d;
+ 
+				closestPointLine1 = linePoint1 + lineVec1 * s;
+//				closestPointLine2 = linePoint2 + lineVec2 * t;
+ 
+				return true;
+			}
+			return false;
+		}
 	}
 }
