@@ -18,3 +18,19 @@
 583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
 439582006;[ARIS] Enhanced Garbage Truck AI
 413847191;SOM - Services Optimisation Module
+418556522;Road Anarchy
+726005715;Roads United Core+
+680748394;Roads United: North America
+532863263;Multi-track Station Enabler
+442957897;Multi-track Station Enabler
+553184329;Sharp Junction Angles
+478820060;Network Extensions Project (v1)
+929114228;New Roads for Network Extensions
+436253779;Road Protractor
+651610627;Road Color Changer Continued
+785237088;Service Radius Adjuster
+422554572;81 Tiles Updated
+414702884;Zoneable Pedestrian Paths
+428094792;Remove Stuck Vehicles
+631694768;Extended Road Upgrade
+649522495;District Service Limit
