@@ -34,6 +34,7 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 - Other: Fixed 'silent error' inside log related with "Esc key handler" (#92)
 - Contribution: Added project building instructions and PR review
 
+See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 
 # Contributing
 
@@ -43,7 +44,7 @@ Contact us:
 
 * [Issue tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues)
 * [Discord (chat)](https://discord.gg/faKUnST)
-* [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252).
+* [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 # License
 
