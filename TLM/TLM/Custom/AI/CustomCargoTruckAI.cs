@@ -93,7 +93,7 @@ namespace TrafficManager.Custom.AI {
 			float startAltDistSqrA;
 			float startAltDistSqrB;
 			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane, allowUnderground, false, 32f, out startAltPosA, out startAltPosB, out startAltDistSqrA, out startAltDistSqrB)) {
-				if (!startPosFound || (startAltDistSqrA < startDistSqrA && (Mathf.Abs(startPos.x) > 4800f || Mathf.Abs(startPos.z) > 4800f))) {
+				if (!startPosFound || (startAltDistSqrA < startDistSqrA && (Mathf.Abs(endPos.x) > 8000f || Mathf.Abs(endPos.z) > 8000f))) {
 					startPosA = startAltPosA;
 					startPosB = startAltPosB;
 					startDistSqrA = startAltDistSqrA;
@@ -111,7 +111,7 @@ namespace TrafficManager.Custom.AI {
 			float endAltDistSqrA;
 			float endAltDistSqrB;
 			if (CustomPathManager.FindPathPosition(endPos, ItemClass.Service.PublicTransport, NetInfo.LaneType.Vehicle, VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane, undergroundTarget, false, 32f, out endAltPosA, out endAltPosB, out endAltDistSqrA, out endAltDistSqrB)) {
-				if (!endPosFound || (endAltDistSqrA < endDistSqrA && (Mathf.Abs(endPos.x) > 4800f || Mathf.Abs(endPos.z) > 4800f))) {
+				if (!endPosFound || (endAltDistSqrA < endDistSqrA && (Mathf.Abs(endPos.x) > 8000f || Mathf.Abs(endPos.z) > 8000f))) {
 					endPosA = endAltPosA;
 					endPosB = endAltPosB;
 					endDistSqrA = endAltDistSqrA;

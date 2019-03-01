@@ -58,7 +58,7 @@ namespace TrafficManager.UI {
 			Drag.width = width;
 			Drag.height = height;
 			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
-		}
+        }
 
 		public override void OnDestroy() {
 			if (confDisposable != null) {

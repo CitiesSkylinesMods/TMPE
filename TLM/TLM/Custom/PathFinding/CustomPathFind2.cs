@@ -2822,11 +2822,12 @@ namespace TrafficManager.Custom.PathFinding {
 					uturnExplored = true;
 				}
 
+				bool isStockUturnPoint = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 				// allow vehicles to ignore strict lane routing when moving off
 				bool relaxedLaneRouting =
 					m_isRoadVehicle &&
-					(!m_queueItem.spawned || (m_queueItem.vehicleType & (ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None) &&
-					(laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB);
+					((!m_queueItem.spawned || (m_queueItem.vehicleType & (ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None) &&
+					 (laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB)) || isStockUturnPoint;
 
 #if DEBUG
 				if (debug) {

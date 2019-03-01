@@ -205,6 +205,8 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -253,6 +255,7 @@
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\ModsCompatibilityChecker.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
@@ -398,6 +401,9 @@
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\incompatible_mods.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
       <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
       <Name>CSUtil.CameraControl</Name>
@@ -431,6 +437,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\WindowBackground.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\left_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
@@ -439,16 +451,7 @@ xcopy /y "$(TargetDir)TrafficManager.dll" "$(LOCALAPPDATA)\Colossal Order\Cities
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-xcopy /y "$(TargetDir)CSUtil.Commons.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-
-del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.Redirection.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"</PostBuildEvent>
+xcopy /y "$(TargetDir)CSUtil.Commons.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
