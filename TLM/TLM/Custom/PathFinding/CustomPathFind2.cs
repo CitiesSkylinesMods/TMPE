@@ -1975,11 +1975,9 @@ namespace TrafficManager.Custom.PathFinding {
 				comparisonValue += baseLength;
 			}
 #endif
-			if (!m_ignoreCost) {
-				int ticketCost = prevLane.m_ticketCost;
-				if (ticketCost != 0) {
-					comparisonValue += (float)(ticketCost * m_pathRandomizer.Int32(2000u)) * TICKET_COST_CONVERSION_FACTOR;
-				}
+			int ticketCost = prevLane.m_ticketCost;
+			if (!m_ignoreCost && ticketCost != 0) {
+				comparisonValue += (float)(ticketCost * m_pathRandomizer.Int32(2000u)) * TICKET_COST_CONVERSION_FACTOR;
 			}
 
 			if ((prevLaneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None) {
@@ -2074,6 +2072,9 @@ namespace TrafficManager.Custom.PathFinding {
 						if (isTransition) {
 							transitionCost *= 2f;
 						}
+						if (ticketCost != 0 && netManager.m_lanes.m_buffer[nextLaneId].m_ticketCost != 0) {
+							transitionCost *= 10f;
+						}
 
 						float nextMaxSpeed;
 #if SPEEDLIMITS
@@ -2085,6 +2086,17 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 						float transitionCostOverMeanMaxSpeed = transitionCost / ((prevMaxSpeed + nextMaxSpeed) * 0.5f * m_maxLength);
+#if ADVANCEDAI && ROUTING
+						if (!enableAdvancedAI) {
+#endif
+							if (!this.m_stablePath && (netManager.m_lanes.m_buffer[nextLaneId].m_flags & (ushort)NetLane.Flags.Merge) != 0) {
+								int firstTarget = netManager.m_lanes.m_buffer[nextLaneId].m_firstTarget;
+								int lastTarget = netManager.m_lanes.m_buffer[nextLaneId].m_lastTarget;
+								transitionCostOverMeanMaxSpeed *= (float)new Randomizer(this.m_pathFindIndex ^ nextLaneId).Int32(1000, (lastTarget - firstTarget + 2) * 1000) * 0.001f;
+							}
+#if ADVANCEDAI && ROUTING
+						}
+#endif
 						nextItem.m_position.m_segment = nextSegmentId;
 						nextItem.m_position.m_lane = (byte)nextLaneIndex;
 						nextItem.m_position.m_offset = (byte)(((nextDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) ? 255 : 0);
