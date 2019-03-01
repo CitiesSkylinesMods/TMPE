@@ -662,7 +662,11 @@ namespace TrafficManager.Manager.Impl {
 			return maxSpeed;
 		}
 
-		public uint GetVehicleRand(ushort vehicleId) {
+		public uint GetStaticVehicleRand(ushort vehicleId) {
+			return vehicleId % 100u;
+		}
+
+		public uint GetTimedVehicleRand(ushort vehicleId) {
 			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
 			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
 			uint step = VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
@@ -675,7 +679,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo) {
 			if (Options.realisticSpeeds) {
-				float vehicleRand = 0.01f * (float)GetVehicleRand(vehicleId);
+				float vehicleRand = 0.01f * (float)GetTimedVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 				} else if (state.recklessDriver) {
@@ -1461,7 +1465,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			uint vehicleRand = GetVehicleRand(vehicleId);
+			uint vehicleRand = GetStaticVehicleRand(vehicleId);
 
 			if (vehicleRand < 100 - (int)Options.altLaneSelectionRatio) {
 #if DEBUG
