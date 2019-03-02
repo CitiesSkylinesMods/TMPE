@@ -333,6 +333,7 @@ namespace TrafficManager.UI.SubTools {
 					hasSignInPrevRow = false;
 				}
 
+#if TURNONRED
 				// draw "turn on red allowed" sign at (2; 0)
 				allowed = JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(segmentId, startNode);
 				configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
@@ -358,6 +359,7 @@ namespace TrafficManager.UI.SubTools {
 
 					hasSignInPrevRow = true;
 				}
+#endif
 			}
 
 			guiColor.a = 1f;

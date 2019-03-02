@@ -177,9 +177,11 @@ namespace TrafficManager.Manager.Impl {
 				Options.setRealisticPublicTransport(data[37] == (byte)1);
 			}
 
+#if TURNONRED
 			if (data.Length >= 39) {
 				Options.setAllowTurnOnRed(data[38] == (byte)1);
 			}
+#endif
 
 			return true;
 		}
@@ -223,8 +225,10 @@ namespace TrafficManager.Manager.Impl {
 						(byte)Options.altLaneSelectionRatio,
 						(byte)Options.vehicleRestrictionsAggression,
 						(byte)(Options.trafficLightPriorityRules ? 1 : 0),
-						(byte)(Options.realisticPublicTransport ? 1 : 0),
-                        (byte)(Options.allowTurnOnRed ? 1 : 0)
+						(byte)(Options.realisticPublicTransport ? 1 : 0)
+#if TURNONRED
+						, (byte)(Options.allowTurnOnRed ? 1 : 0)
+#endif
 				};
 		}
 	}

@@ -49,7 +49,9 @@ namespace TrafficManager.State {
 #endif
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
+#if TURNONRED
 		private static UICheckBox allowTurnOnRedToggle = null;
+#endif
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
 		private static UICheckBox trafficLightPriorityRulesToggle = null;
 		private static UIDropDown vehicleRestrictionsAggressionDropdown = null;
@@ -125,7 +127,9 @@ namespace TrafficManager.State {
 #endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
+#if TURNONRED
 		public static bool allowTurnOnRed = false;
+#endif
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
@@ -287,7 +291,9 @@ namespace TrafficManager.State {
             relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+#if TURNONRED
 			allowTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_turn_on_red"), allowTurnOnRed, onAllowTurnOnRedChanged) as UICheckBox;
+#endif
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
 
@@ -844,6 +850,7 @@ namespace TrafficManager.State {
 			allowUTurns = newValue;
 		}
 
+#if TURNONRED
 		private static void onAllowTurnOnRedChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
@@ -851,6 +858,7 @@ namespace TrafficManager.State {
 			Log._Debug($"allowTurnOnRed changed to {value}");
 			allowTurnOnRed = value;
 		}
+#endif
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
 			if (!checkGameLoaded())
@@ -1075,11 +1083,13 @@ namespace TrafficManager.State {
 				allRelaxedToggle.isChecked = newAllRelaxed;
 		}
 
+#if TURNONRED
 		public static void setAllowTurnOnRed(bool newValue) {
 			allowTurnOnRed = newValue;
 			if (!allowTurnOnRedToggle != null)
 				allowTurnOnRedToggle.isChecked = newValue;
 		}
+#endif
 
 		public static void setHighwayRules(bool newHighwayRules) {
 			highwayRules = newHighwayRules;

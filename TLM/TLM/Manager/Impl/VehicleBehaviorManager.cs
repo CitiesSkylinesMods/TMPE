@@ -303,6 +303,7 @@ namespace TrafficManager.Manager.Impl {
 					//}
 #endif
 
+#if TURNONRED
 					// Check if turning in the preferred direction, and if turning while it's red is allowed
 					if (stopCar && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
 						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
@@ -317,6 +318,7 @@ namespace TrafficManager.Manager.Impl {
 							stopCar = false;
 						}
 					}
+#endif
 
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {

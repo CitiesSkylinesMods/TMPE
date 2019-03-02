@@ -256,6 +256,7 @@ namespace TrafficManager.Manager.Impl {
 			return SegmentFlags[segmentId].IsUturnAllowed(startNode);
 		}
 
+#if TURNONRED
 		public bool IsTurnOnRedAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[11];
@@ -303,6 +304,7 @@ namespace TrafficManager.Manager.Impl {
 		public bool IsTurnOnRedAllowed(ushort segmentId, bool startNode) {
 			return SegmentFlags[segmentId].IsTurnOnRedAllowed(startNode);
 		}
+#endif
 
 		public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
