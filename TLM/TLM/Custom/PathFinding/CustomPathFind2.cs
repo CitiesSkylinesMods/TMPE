@@ -2031,9 +2031,18 @@ namespace TrafficManager.Custom.PathFinding {
 #if ROUTING
 			if (transition != null) {
 				LaneTransitionData trans = (LaneTransitionData)transition;
-				nextLaneIndex = trans.laneIndex;
-				nextLaneId = trans.laneId;
-				maxNextLaneIndex = nextLaneIndex;
+				if (trans.laneIndex >= 0 && trans.laneIndex <= maxNextLaneIndex) {
+					nextLaneIndex = trans.laneIndex;
+					nextLaneId = trans.laneId;
+					maxNextLaneIndex = nextLaneIndex;
+				} else {
+#if DEBUG
+					if (debug) {
+						Debug(unitId, item, nextSegmentId, $"ProcessItemCosts: Invalid transition detected. Skipping.");
+					}
+#endif
+					return blocked;
+				}
 #if ADVANCEDAI
 				laneDist = trans.distance;
 #endif
