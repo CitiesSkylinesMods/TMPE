@@ -223,5 +223,6 @@ Window_transparency 패널 투명도(오른쪽으로 갈수록 투명함)
 Overlay_transparency 보조 아이콘 투명도(도로 위 표지판, 속도제한 아이콘 투명도 등)
 Remove_this_citizen 해당 시민 삭제
 Show_error_message_if_a_mod_incompatibility_is_detected 모드와 비 호환되는 모드 발견 시 에러 보여주기
-Remove_parked_vehicles Remove parked vehicles
-Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
+Remove_parked_vehicles 주차된 차량 제거하기
+Node_is_level_crossing 해당 교차로는 평면 교차로입니다.\n따라서 신호등을 설치할 수 없습니다
+Vehicles_may_turn_on_red 빨간 신호등에서 차량이 돌아올 수 있습니다

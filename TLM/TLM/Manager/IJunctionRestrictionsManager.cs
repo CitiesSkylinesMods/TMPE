@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,15 @@ namespace TrafficManager.Manager {
 		/// <param name="node">node data</param>
 		/// <returns><code>true</code> if u-turns may be customized, <code>false</code> otherwise</returns>
 		bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
+
+		/// <summary>
+		/// Determines if turn-on-red behavior is enabled and may be controlled at the given segment end.
+		/// </summary>
+		/// <param name="segmentId">segment id</param>
+		/// <param name="startNode">at start node?</param>
+		/// <param name="node">node data</param>
+		/// <returns><code>true</code> if turn-on-red may be customized, <code>false</code> otherwise</returns>
+		bool IsTurnOnRedAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node);
 
 		/// <summary>
 		/// Determines if lane changing behavior may be controlled at the given segment end.
@@ -49,6 +58,15 @@ namespace TrafficManager.Manager {
 		/// <param name="node">node data</param>
 		/// <returns><code>true</code> if u-turns are allowed by default, <code>false</code> otherwise</returns>
 		bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node);
+
+		/// <summary>
+		/// Determines the default setting for turn-on-red at the given segment end.
+		/// </summary>
+		/// <param name="segmentId">segment id</param>
+		/// <param name="startNode">at start node?</param>
+		/// <param name="node">node data</param>
+		/// <returns><code>true</code> if turn-on-red is allowed by default, <code>false</code> otherwise</returns>
+		bool GetDefaultTurnOnRedAllowed(ushort segmentId, bool startNode, ref NetNode node);
 
 		/// <summary>
 		/// Determines the default setting for straight lane changes at the given segment end.

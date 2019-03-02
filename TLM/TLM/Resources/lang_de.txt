@@ -225,3 +225,4 @@ Remove_this_citizen Diesen Cim entfernen
 Show_error_message_if_a_mod_incompatibility_is_detected Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
 Remove_parked_vehicles Entferne geparkte Autos
 Node_is_level_crossing Diese Kreuzung ist ein Bahnübergang.\nDu kannst die Ampeln hier nicht entfernen.
+Vehicles_may_turn_on_red Fahrzeuge dürfen an roten Ampeln abbiegen
