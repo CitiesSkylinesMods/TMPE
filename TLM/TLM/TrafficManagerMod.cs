@@ -13,11 +13,11 @@ namespace TrafficManager {
 
 		public static readonly string Version = "1.10.14-alpha";
 
-		public static readonly uint GameVersion = 180478736u;
+		public static readonly uint GameVersion = 180610064u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 11u;
-		public static readonly uint GameVersionC = 0u;
-		public static readonly uint GameVersionBuild = 3u;
+		public static readonly uint GameVersionC = 1u;
+		public static readonly uint GameVersionBuild = 4u;
 
 		public string Name => "Traffic Manager: President Edition [" + Version + "]";
 
