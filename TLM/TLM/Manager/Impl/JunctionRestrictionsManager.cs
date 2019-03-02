@@ -467,9 +467,11 @@ namespace TrafficManager.Manager.Impl {
 			return SegmentFlags[segmentId].GetUturnAllowed(startNode);
 		}
 
+#if TURNONRED
 		public TernaryBool GetTurnOnRedAllowed(ushort segmentId, bool startNode) {
 			return SegmentFlags[segmentId].GetTurnOnRedAllowed(startNode);
 		}
+#endif
 
 		public TernaryBool GetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode) {
 			return SegmentFlags[segmentId].GetLaneChangingAllowedWhenGoingStraight(startNode);
@@ -487,9 +489,11 @@ namespace TrafficManager.Manager.Impl {
 			return SetUturnAllowed(segmentId, startNode, !IsUturnAllowed(segmentId, startNode));
 		}
 
+#if TURNONRED
 		public bool ToggleTurnOnRedAllowed(ushort segmentId, bool startNode) {
 			return SetTurnOnRedAllowed(segmentId, startNode, !IsTurnOnRedAllowed(segmentId, startNode));
 		}
+#endif
 
 		public bool ToggleLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode) {
 			return SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, !IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode));
@@ -508,9 +512,11 @@ namespace TrafficManager.Manager.Impl {
 				SetUturnAllowed(segmentId, startNode, flags.IsUturnAllowed());
 			}
 
+#if TURNONRED
 			if (flags.turnOnRedAllowed != TernaryBool.Undefined) {
 				SetTurnOnRedAllowed(segmentId, startNode, flags.IsTurnOnRedAllowed());
 			}
+#endif
 
 			if (flags.straightLaneChangingAllowed != TernaryBool.Undefined) {
 				SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, flags.IsLaneChangingAllowedWhenGoingStraight());
@@ -545,6 +551,7 @@ namespace TrafficManager.Manager.Impl {
 			return true;
 		}
 
+#if TURNONRED
 		public bool SetTurnOnRedAllowed(ushort segmentId, bool startNode, bool value) {
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
 				return false;
@@ -560,6 +567,7 @@ namespace TrafficManager.Manager.Impl {
 			OnSegmentChange(segmentId, startNode, segGeo, true);
 			return true;
 		}
+#endif
 
 		public bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, bool value) {
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
@@ -654,9 +662,11 @@ namespace TrafficManager.Manager.Impl {
 									SetUturnAllowed(segNodeConf.segmentId, true, (bool)flags.uturnAllowed);
 								}
 
+#if TURNONRED
 								if (flags.turnOnRedAllowed != null && IsTurnOnRedAllowedConfigurable(segNodeConf.segmentId, true, ref node)) {
 									SetTurnOnRedAllowed(segNodeConf.segmentId, true, (bool)flags.turnOnRedAllowed);
 								}
+#endif
 
 								if (flags.straightLaneChangingAllowed != null && IsLaneChangingAllowedWhenGoingStraightConfigurable(segNodeConf.segmentId, true, ref node)) {
 									SetLaneChangingAllowedWhenGoingStraight(segNodeConf.segmentId, true, (bool)flags.straightLaneChangingAllowed);
@@ -699,9 +709,11 @@ namespace TrafficManager.Manager.Impl {
 									SetPedestrianCrossingAllowed(segNodeConf.segmentId, false, (bool)flags.pedestrianCrossingAllowed);
 								}
 
+#if TURNONRED
 								if (flags.turnOnRedAllowed != null) {
 									SetTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.turnOnRedAllowed);
 								}
+#endif
 								return true;
 							});
 						} else {
@@ -738,7 +750,9 @@ namespace TrafficManager.Manager.Impl {
 							startNodeFlags = new Configuration.SegmentNodeFlags();
 
 							startNodeFlags.uturnAllowed = TernaryBoolUtil.ToOptBool(GetUturnAllowed((ushort)segmentId, true));
+#if TURNONRED
 							startNodeFlags.turnOnRedAllowed = TernaryBoolUtil.ToOptBool(GetTurnOnRedAllowed((ushort)segmentId, true));
+#endif
 							startNodeFlags.straightLaneChangingAllowed = TernaryBoolUtil.ToOptBool(GetLaneChangingAllowedWhenGoingStraight((ushort)segmentId, true));
 							startNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, true));
 							startNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, true));
@@ -755,7 +769,9 @@ namespace TrafficManager.Manager.Impl {
 							endNodeFlags = new Configuration.SegmentNodeFlags();
 
 							endNodeFlags.uturnAllowed = TernaryBoolUtil.ToOptBool(GetUturnAllowed((ushort)segmentId, false));
+#if TURNONRED
 							endNodeFlags.turnOnRedAllowed = TernaryBoolUtil.ToOptBool(GetTurnOnRedAllowed((ushort)segmentId, false));
+#endif
 							endNodeFlags.straightLaneChangingAllowed = TernaryBoolUtil.ToOptBool(GetLaneChangingAllowedWhenGoingStraight((ushort)segmentId, false));
 							endNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, false));
 							endNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, false));
