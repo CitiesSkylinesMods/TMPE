@@ -303,6 +303,21 @@ namespace TrafficManager.Manager.Impl {
 					//}
 #endif
 
+					// Check if turning in the preferred direction, and if turning while it's red is allowed
+					if (stopCar && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
+						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
+						SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
+						ArrowDirection targetDir = currentSegEndGeo.GetDirection(position.m_segment);
+						bool lhd = Services.SimulationService.LeftHandDrive;
+						if (lhd && targetDir == ArrowDirection.Left || !lhd && targetDir == ArrowDirection.Right) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");
+#endif
+							stopCar = false;
+						}
+					}
+
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {
 						bool hasPriority = true;
@@ -318,7 +333,7 @@ namespace TrafficManager.Manager.Impl {
 							// green light but other cars are incoming and they have priority: stop
 #if DEBUG
 							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light but detected traffic with higher priority: stop.");
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light (or turn on red allowed) but detected traffic with higher priority: stop.");
 #endif
 							stopCar = true;
 						}

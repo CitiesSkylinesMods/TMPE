@@ -66,17 +66,13 @@ namespace TrafficManager.Traffic.Data {
 			return TernaryBoolUtil.ToBool(uturnAllowed);
 		}
 
-        public bool IsTurnOnRedAllowed() {
-            if (turnOnRedAllowed == TernaryBool.Undefined) {
-                return defaultTurnOnRedAllowed;
-            }
+		public bool IsTurnOnRedAllowed() {
+			if (turnOnRedAllowed == TernaryBool.Undefined) {
+				return defaultTurnOnRedAllowed;
+			}
 
-            return TernaryBoolUtil.ToBool(turnOnRedAllowed);
-        }
-
-        public bool IsTurnOnRedSet() {
-	        return turnOnRedAllowed != TernaryBool.Undefined;
-        }
+			return TernaryBoolUtil.ToBool(turnOnRedAllowed);
+		}
 
 		public bool IsLaneChangingAllowedWhenGoingStraight() {
 			if (straightLaneChangingAllowed == TernaryBool.Undefined) {
@@ -106,9 +102,9 @@ namespace TrafficManager.Traffic.Data {
 			uturnAllowed = TernaryBoolUtil.ToTernaryBool(value);
 		}
 
-        public void SetTurnOnRedAllowed(bool value) {
-            turnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
-        }
+		public void SetTurnOnRedAllowed(bool value) {
+			turnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+		}
 
 		public void SetLaneChangingAllowedWhenGoingStraight(bool value) {
 			straightLaneChangingAllowed = TernaryBoolUtil.ToTernaryBool(value);

@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI Activar IA de vehículos avanzada
 Vehicles_may_enter_blocked_junctions Vehículos pueden entrar a cruces bloqueados
 All_vehicles_may_ignore_lane_arrows Todos los vehículos pueden ignorar las flechas de las vías
 Busses_may_ignore_lane_arrows Buses pueden ignorar flechas de las vías
-Turn_on_red_enabled_by_default Activar rojo habilitado en uniones por defecto
-Turn_on_red Los vehículos pueden girar en los semáforos rojos.
 Reckless_driving Conducción agresiva (BETA)
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Los ajustes son definidos para cada partida por separado
@@ -227,4 +225,4 @@ Remove_this_citizen Remove this citizen
 Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
-Experimental_features Experimental features
+Vehicles_may_turn_on_red Los vehículos pueden girar en los semáforos rojos

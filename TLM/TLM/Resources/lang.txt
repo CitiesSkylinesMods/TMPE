@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI Enable Advanced Vehicle AI
 Vehicles_may_enter_blocked_junctions Vehicles may enter blocked junctions
 All_vehicles_may_ignore_lane_arrows All vehicles may ignore lane arrows
 Busses_may_ignore_lane_arrows Buses may ignore lane arrows
-Turn_on_red_enabled_by_default Turn on red enabled at junctions by default
-Turn_on_red Vehicles may turn at red traffic lights
 Reckless_driving Reckless driving
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Settings are defined for each savegame separately
@@ -227,4 +225,4 @@ Remove_this_citizen Remove this citizen
 Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
-Experimental_features Experimental features
+Vehicles_may_turn_on_red Vehicles may turn at red traffic lights

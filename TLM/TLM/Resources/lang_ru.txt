@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI Активировать продвинутый AI
 Vehicles_may_enter_blocked_junctions Транспорт может заезжать в тупики
 All_vehicles_may_ignore_lane_arrows Весь транспорт может игнорировать стрелки движения
 Busses_may_ignore_lane_arrows Автобусы могут игнорировать стрелки движения
-Turn_on_red_enabled_by_default Включить красный включен на перекрестках по умолчанию
-Turn_on_red Транспортные средства могут повернуть на красный светофор
 Reckless_driving Опасное вождение
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately Настройки для каждого сохранения свои
@@ -227,4 +225,4 @@ Remove_this_citizen Удалить этого гражданина
 Show_error_message_if_a_mod_incompatibility_is_detected Показывать сообщение об ошибке, если обнаружена несовместимость мода
 Remove_parked_vehicles Удалить припаркованный транспорт
 Node_is_level_crossing Это перекрёсток уровней.\nЗдесь нельзя отключить светофоры.
-Experimental_features Experimental features
+Vehicles_may_turn_on_red Транспортные средства могут повернуть на красный светофор
