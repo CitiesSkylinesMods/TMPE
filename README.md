@@ -5,7 +5,11 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
 1.10.14, 03/xx/2019
-- in progress
+- Synchronized code with krzychu124's version of TMPE (disabled experimental features / icons for now)
+- Bugfix: Vehicles change lanes at tollbooths
+- Bugfix: Path-finding: Array index is out of range due to a race condition (#227)
+- Bugfix: Citizen not found errors when using walking tours (#223)
+- Bugfix: Timed light indicator only visible when any timed light node is selected (#222)
 
 1.10.13, 10/31/2018
 - Updated for game version 1.11.0-f3
