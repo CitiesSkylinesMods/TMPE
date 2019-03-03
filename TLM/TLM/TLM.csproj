@@ -195,6 +195,8 @@
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -237,6 +239,7 @@
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\LoopUtil.cs" />
+    <Compile Include="Util\ModsCompatibilityChecker.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
@@ -380,6 +383,9 @@
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\incompatible_mods.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
       <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
       <Name>CSUtil.CameraControl</Name>
@@ -416,6 +422,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\WindowBackground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\left_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -1,21 +1,38 @@
-﻿# Cities: Skylines - Traffic Manager: *President Edition*
-A modification for **Cities: Skylines** to add additional traffic control.
-
-User manual: http://www.viathinksoft.de/tmpe/wiki
+﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
-1.11.0, in development
+1.10.16, 24/02/2019
+- Gameplay: Fixed problem with vehicle despawn after road upgrade/remove (thanks @pcfantasy for implementation suggestion)(#86, #101)
+- Gameplay: Fixed problem with vehicles unable to choose lane when u-turn at dead-end (thanks @pcfantasy for implementation and @aubergine10 for neccesary tests)(#101)
+- Gameplay: Fixed problem when user couldn't change state of 'Turn on Red' while enabled_by_default option not selected (thanks @Sp3ctre18 for bug confirmation) (#102)
+- Gameplay: Added missing logic for noise density calculations (thanks to @pcfantasy for fix) (#66)
+- UI: New icons for empty and remove_priority_sign settings (thanks @aubergine10 for those icons) (#75, #77)
+- Other: Greatly improved incompatible mod scanner, added dialog to list and unsubscribe incompatible mods (#91)
+- Other: Changed mod name in Content Manager to __TM:PE__
+- Other: Discord server was set up by @FireController1847 - link in mod description
+- Other: Fixed 'silent error' inside log related with "Esc key handler" (#92)
+- Contribution: Added project building instructions and PR review
 
-1.10.14, 03/03/2019
-- Synchronized code with krzychu124's version of TMPE (disabled experimental features / icons for now)
-- Bugfix: Vehicles change lanes at tollbooths
-- Bugfix: Path-finding: Array index is out of range due to a race condition (#227)
-- Bugfix: Citizen not found errors when using walking tours (#223)
-- Bugfix: Timed light indicator only visible when any timed light node is selected (#222)
-- Bugfix: Some option labels are too short (#235, @krzychu124 fixed this!)
+1.10.15, 10/02/2019
+- Enhancement: Now you can use Escape key to close Traffic Manager without returning to Pause Menu (thanks to @aubergine10 for suggestion) (#16)
+- Gameplay: Updated pathfinding with missing vanilla logic
+- Gameplay: Tweaked values in CargoTruckAI path finding (thanks to @pcfantasy for improvement suggestion)
+- Gameplay: Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to @aubergine10 for suggestion) (#23)
+- UI: New icons for cargo and passenger train restriction (thanks to @aubergine10) (#17)
+- Translations: Simplified Chinese translation updated (thanks to @Emphasia for translating)
+- Other: Added notification if user is still subscribed to old original TM:PE
+- [Experimental feature] Turn on red (thanks to @FireController1847 for implementation and to @pcfantasy for source code base)
 
-1.10.13, 10/31/2018
-- Updated for game version 1.11.0-f3
+1.10.14, 27/01/2019
+- Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
+- Bugfix: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too
+- Bugfix: Cargo Airport doesn't work (Cargo planes not spawning and not arriving)
+- Updated Polish translation
+- Updated Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
+- Fixed Mod Options layout (text label overlaps slider control if too wide)
+
+1.10.13, 31/10/2018
+- Bugfix: Tollbooth fix
 
 1.10.12, 08/12/2018
 - Added the option to allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
@@ -841,32 +858,3 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 
 1.2.0 (iMarbot)
 - Updated for 1.2.2-f2 game patch.
-
-# Current features
-
-- Add/Remove traffic lights
-- Adaptive timed traffic lights
-- Add priority signs
-- Change lane arrows
-- Connect individual lanes with each other
-- Add/Remove crosswalks
-- Manually control traffic lights
-- Timed traffic lights
-- Clear traffic
-- No despawn
-
-# Todo list
-
-- I would like to investigate why yellow traffic lights sometimes are not properly rendered.
-- I would like to implement traffic light templates so that you would not need to manually set up individual steps for common junction patterns.
-- Stop signs should be more useful. Drivers should act more realistically/confident when stop/yield signs and traffic jams meet together.
-- Adaptive Timed Traffic Lights: Currently only vehicles on the road segment next to the junction are being measured. I would like to expand the traffic measurement to 2 segments.
-- When switching between control modes, the UI starts to ignore user mouse input. This is annoying. I will hopefully fix that.
-- We could measure if there is traffic backing up after a timed traffic light. If it is the case (that is: cars having a green light do not move) the next timed step could be activated.
-- There are still some issues with crossings and pedestrain crossing lights (missing textures, double crosswalks). Let's see what can be done.
-- For new users it takes some time to understand how the mod works. Having something like a (video) manual would be great. Or just a better UI. 
-
-# Upcoming changes
-
-- Code optimization & refactoring
-- Timed Traffic Light Templates (ready-to-use directional traffic light patterns)

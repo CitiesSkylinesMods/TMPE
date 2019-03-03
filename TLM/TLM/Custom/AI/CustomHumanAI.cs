@@ -324,10 +324,63 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
-		[RedirectReverse]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private void ArriveAtDestination(ushort instanceID, ref CitizenInstance data, bool success) {
-			Log.Error($"HumanAI.ArriveAtDestination is not overriden!");
+		[RedirectMethod]
+		protected void CustomArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
+			uint citizenId = citizenData.m_citizen;
+			if (citizenId != 0) {
+				CitizenManager citizenMan = Singleton<CitizenManager>.instance;
+				citizenMan.m_citizens.m_buffer[citizenId].SetVehicle(citizenId, 0, 0u);
+
+				if ((citizenData.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
+					if (success) {
+						ushort targetBuildingId = citizenData.m_targetBuilding;
+						if (targetBuildingId != 0) {
+							ushort transportLineId = Singleton<NetManager>.instance.m_nodes.m_buffer[targetBuildingId].m_transportLine;
+							if (transportLineId != 0) {
+								TransportInfo info = Singleton<TransportManager>.instance.m_lines.m_buffer[transportLineId].Info;
+								if (info.m_vehicleType == VehicleInfo.VehicleType.None) {
+									targetBuildingId = (((instanceID & 1) != 0) ? TransportLine.GetPrevStop(targetBuildingId) : TransportLine.GetNextStop(targetBuildingId));
+									if (targetBuildingId != 0) {
+										citizenData.m_flags |= CitizenInstance.Flags.OnTour;
+										((CitizenAI)this).SetTarget(instanceID, ref citizenData, targetBuildingId, true);
+									} else {
+										// Unrolled goto statement
+										if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
+											return;
+										}
+										((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
+										((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
+										citizenData.Unspawn(instanceID);
+									}
+									return;
+								}
+								citizenData.m_flags |= CitizenInstance.Flags.OnTour;
+								this.WaitTouristVehicle(instanceID, ref citizenData, targetBuildingId);
+								return;
+							}
+						}
+					}
+				} else {
+					if (success) {
+						citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
+						// NON-STOCK CODE START
+						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
+						// NON-STOCK CODE END
+					}
+
+					if (citizenData.m_targetBuilding != 0 && citizenMan.m_citizens.m_buffer[citizenId].CurrentLocation == Citizen.Location.Visit) {
+						BuildingManager buildingMan = Singleton<BuildingManager>.instance;
+						BuildingInfo info = buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding].Info;
+						info.m_buildingAI.VisitorEnter(citizenData.m_targetBuilding, ref buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding], citizenId);
+					}
+				}
+			}
+			if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
+				return;
+			}
+			((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
+			((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
+			citizenData.Unspawn(instanceID);
 		}
 
 		[RedirectReverse]

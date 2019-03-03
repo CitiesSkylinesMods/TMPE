@@ -44,6 +44,7 @@ namespace TrafficManager.Custom.Data {
 				float length = (!hasTrailers) ? (vehicleInfo.m_generatedInfo.m_size.z * 0.5f) : 0f;
 				length -= (((vehicleData.m_flags & Vehicle.Flags.Inverted) == (Vehicle.Flags)0) ? vehicleInfo.m_attachOffsetBack : vehicleInfo.m_attachOffsetFront);
 				Randomizer randomizer = new Randomizer((int)vehicleId);
+				int trailerCount = 0;
 				for (int i = 0; i < vehicleInfo.m_trailers.Length; i++) {
 					if (randomizer.Int32(100u) < vehicleInfo.m_trailers[i].m_probability) {
 						VehicleInfo trailerInfo = vehicleInfo.m_trailers[i].m_info;
@@ -55,6 +56,7 @@ namespace TrafficManager.Custom.Data {
 						if (vehManager.CreateVehicle(out trailerVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, trailerInfo, position, (TransferManager.TransferReason)vehicleData.m_transferType, false, false)) {
 							vehManager.m_vehicles.m_buffer[(int)curVehicleId].m_trailingVehicle = trailerVehicleId;
 							vehManager.m_vehicles.m_buffer[(int)trailerVehicleId].m_leadingVehicle = curVehicleId;
+							vehManager.m_vehicles.m_buffer[(int)trailerVehicleId].m_gateIndex = vehicleData.m_gateIndex;
 							if (inverted) {
 								vehManager.m_vehicles.m_buffer[trailerVehicleId].m_flags |= Vehicle.Flags.Inverted;
 							}
@@ -71,6 +73,9 @@ namespace TrafficManager.Custom.Data {
 						}
 						length += ((!hasTrailers) ? (trailerInfo.m_generatedInfo.m_size.z * 0.5f) : 0f);
 						length -= ((!inverted) ? trailerInfo.m_attachOffsetBack : trailerInfo.m_attachOffsetFront);
+						if (++trailerCount == vehicleInfo.m_maxTrailerCount) {
+							break;
+						}
 					}
 				}
 			}

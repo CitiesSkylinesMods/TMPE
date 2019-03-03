@@ -178,7 +178,13 @@ namespace TrafficManager.Manager.Impl {
 				Options.setRealisticPublicTransport(data[37] == (byte)1);
 			}
 
+#if TURNONRED
 			if (data.Length >= 39) {
+				Options.setAllowTurnOnRed(data[38] == (byte)1);
+			}
+#endif
+
+			if (data.Length >= 40) {
 				Options.setEmergencyAI(data[38] == (byte)1);
 			}
 
@@ -224,9 +230,14 @@ namespace TrafficManager.Manager.Impl {
 						(byte)Options.altLaneSelectionRatio,
 						(byte)Options.vehicleRestrictionsAggression,
 						(byte)(Options.trafficLightPriorityRules ? 1 : 0),
-						(byte)(Options.realisticPublicTransport ? 1 : 0),
-						(byte)(Options.emergencyAI ? 1 : 0),
-				};
+						(byte)(Options.realisticPublicTransport ? 1 : 0)
+#if TURNONRED
+						, (byte)(Options.allowTurnOnRed ? 1 : 0)
+#else
+						, (byte)0
+#endif
+						, (byte)(Options.emergencyAI ? 1 : 0)
+			};
 		}
 	}
 }

@@ -225,3 +225,4 @@ Remove_this_citizen Remove this citizen
 Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
+Vehicles_may_turn_on_red Voertuigen kunnen bij rode verkeerslichten draaien

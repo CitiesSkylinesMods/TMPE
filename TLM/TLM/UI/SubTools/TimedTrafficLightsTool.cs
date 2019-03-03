@@ -1007,7 +1007,11 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-			if (! ToolMode.TimedLightsShowLights.Equals(toolMode)) {
+			if (! ToolMode.TimedLightsShowLights.Equals(toolMode) &&
+				! ToolMode.TimedLightsSelectNode.Equals(toolMode) &&
+				! ToolMode.TimedLightsAddNode.Equals(toolMode) &&
+				! ToolMode.TimedLightsRemoveNode.Equals(toolMode) &&
+				! ToolMode.TimedLightsCopyLights.Equals(toolMode)) {
 				// TODO refactor timed light related tool modes to sub tool modes
 				return;
 			}

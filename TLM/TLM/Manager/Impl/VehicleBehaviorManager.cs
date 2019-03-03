@@ -2,6 +2,7 @@
 using ColossalFramework.Math;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using GenericGameBridge.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -824,6 +825,23 @@ namespace TrafficManager.Manager.Impl {
 							break;
 					}
 
+#if TURNONRED
+					// Check if turning in the preferred direction, and if turning while it's red is allowed
+					if (stopCar && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
+						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
+						SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
+						ArrowDirection targetDir = currentSegEndGeo.GetDirection(position.m_segment);
+						bool lhd = Services.SimulationService.LeftHandDrive;
+						if (lhd && targetDir == ArrowDirection.Left || !lhd && targetDir == ArrowDirection.Right) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");
+#endif
+							stopCar = false;
+						}
+					}
+#endif
+
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {
 						bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
@@ -832,7 +850,7 @@ namespace TrafficManager.Manager.Impl {
 							// green light but other cars are incoming and they have priority: stop
 #if DEBUG
 						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light but detected traffic with higher priority: stop.");
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light (or turn on red allowed) but detected traffic with higher priority: stop.");
 #endif
 							stopCar = true;
 						}
@@ -1042,8 +1060,13 @@ namespace TrafficManager.Manager.Impl {
 			return maxSpeed;
 		}
 
-		public uint GetVehicleRand(ushort vehicleId) {
-			uint intv = ExtVehicleManager.MAX_TIMED_RAND / 2u;
+		// TODO v1.11.0: check this (check ApplyRealisticSpeeds: we call another method there)
+		public uint GetStaticVehicleRand(ushort vehicleId) {
+			return vehicleId % 100u;
+		}
+
+		public uint GetTimedVehicleRand(ushort vehicleId) {
+			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
 			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
 			uint step = ExtVehicleManager.Instance.ExtVehicles[vehicleId].timedRand;
 			if (step >= intv) {
@@ -1055,7 +1078,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo) {
 			if (Options.realisticSpeeds) {
-				float vehicleRand = 0.01f * (float)Constants.ManagerFactory.ExtVehicleManager.GetVehicleRand(vehicleId);
+				float vehicleRand = 0.01f * (float)Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
 				} else if (extVehicle.recklessDriver) {
@@ -1841,7 +1864,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			uint vehicleRand = Constants.ManagerFactory.ExtVehicleManager.GetVehicleRand(vehicleId);
+			uint vehicleRand = Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand(vehicleId);
 
 			if (vehicleRand < 100 - (int)Options.altLaneSelectionRatio) {
 #if DEBUG

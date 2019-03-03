@@ -94,23 +94,38 @@ namespace TrafficManager {
 		[Serializable]
 		public class SegmentNodeFlags {
 			public bool? uturnAllowed = null;
+#if TURNONRED
+            public bool? turnOnRedAllowed = null;
+#endif
 			public bool? straightLaneChangingAllowed = null;
 			public bool? enterWhenBlockedAllowed = null;
 			public bool? pedestrianCrossingAllowed = null;
 
 			public bool IsDefault() {
-				// TODO check this
-				return false;
-				//bool uturnIsDefault = uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
-				//bool straightChangeIsDefault = straightLaneChangingAllowed == null || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
-				//bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == null || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
-				//bool pedCrossingIsDefault = pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
+				// TODO v1.11.0: check this
+				bool uturnIsDefault = uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
+#if TURNONRED
+                bool turnOnRedIsDefault = turnOnRedAllowed == null || (bool)turnOnRedAllowed;
+#endif
+				bool straightChangeIsDefault = straightLaneChangingAllowed == null || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
+				bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == null || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
+				bool pedCrossingIsDefault = pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
 
-				//return uturnIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
+				return uturnIsDefault
+#if TURNONRED
+					&& turnOnRedIsDefault
+#endif
+					&& straightChangeIsDefault
+					&& enterWhenBlockedIsDefault
+					&& pedCrossingIsDefault;
 			}
 
 			public override string ToString() {
-				return $"uturnAllowed={uturnAllowed}, straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
+				return $"uturnAllowed={uturnAllowed}"
+#if TURNONRED
+					+ $", turnOnRedAllowed={turnOnRedAllowed}"
+#endif
+					+ $", straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
 			}
 		}
 

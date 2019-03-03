@@ -225,3 +225,4 @@ Remove_this_citizen Retirer ce citoyen
 Show_error_message_if_a_mod_incompatibility_is_detected Afficher le message d'erreur si une incompatibilité d'un mod est détectée
 Remove_parked_vehicles Enlever les véhicules stationnés
 Node_is_level_crossing Cette intersection est un passage à niveau.\nous ne pouvez pas désactiver les feux de circulation ici.
+Vehicles_may_turn_on_red Les véhicules peuvent tourner aux feux rouges
