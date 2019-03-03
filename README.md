@@ -1,11 +1,18 @@
-﻿# Cities: Skylines - Traffic Manager: *President Edition*
+﻿(Victor)
+This branch contains my still incomplete attempt to implement the emergency vehicle evasion feature.
+Vehicle can use half-lanes and parking spaces in order to evade emergency vehicles on duty.
+
+The feature was originally meant to be released with version 1.11.0.
+I also started with some major refactoring, introduced an API package, started a transition to the RedirectionFramework together with Harmony for handling detours.
+
+Open To-Dos: ? (must check)
+
+# Cities: Skylines - Traffic Manager: *President Edition*
 A modification for **Cities: Skylines** to add additional traffic control.
 
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
-1.11.0, in development
-
 1.10.14, 03/03/2019
 - Synchronized code with krzychu124's version of TMPE (disabled experimental features / icons for now)
 - Bugfix: Vehicles change lanes at tollbooths
