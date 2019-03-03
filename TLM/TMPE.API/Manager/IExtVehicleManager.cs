@@ -143,10 +143,19 @@ namespace TrafficManager.Manager {
 
 		/// <summary>
 		/// Calculates the current randomization value for a vehicle.
+		/// The value changes over time.
 		/// </summary>
 		/// <param name="vehicleId">vehicle id</param>
 		/// <returns>a number between 0 and 99</returns>
-		uint GetVehicleRand(ushort vehicleId);
+		uint GetTimedVehicleRand(ushort vehicleId);
+
+		/// <summary>
+		/// Calculates the randomization value for a vehicle.
+		/// The value is static throughout the vehicle's lifetime.
+		/// </summary>
+		/// <param name="vehicleId">vehicle id</param>
+		/// <returns>a number between 0 and 99</returns>
+		uint GetStaticVehicleRand(ushort vehicleId);
 
 		/// <summary>
 		/// Logs the given vehicle for traffic measurement.

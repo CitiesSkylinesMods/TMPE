@@ -206,6 +206,9 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			endFlags.defaultUturnAllowed = GetDefaultUturnAllowed(segEnd.segmentId, segEnd.startNode, ref node);
+#if TURNONRED
+			endFlags.defaultTurnOnRed = GetDefaultTurnOnRedAllowed(segEnd.segmentId, segEnd.startNode, ref node);
+#endif
 			endFlags.defaultStraightLaneChangingAllowed = GetDefaultLaneChangingAllowedWhenGoingStraight(segEnd.segmentId, segEnd.startNode, ref node);
 			endFlags.defaultEnterWhenBlockedAllowed = GetDefaultEnteringBlockedJunctionAllowed(segEnd.segmentId, segEnd.startNode, ref node);
 			endFlags.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(segEnd.segmentId, segEnd.startNode, ref node);

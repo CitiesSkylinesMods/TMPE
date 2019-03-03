@@ -162,7 +162,7 @@ namespace TrafficManager.Custom.AI {
 			}
 			if (vehicleId == 0 && (instanceData.m_flags & (CitizenInstance.Flags.Character | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) == CitizenInstance.Flags.None) {
 				instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
-				ArriveAtDestination(instanceID, ref instanceData, false);
+				CustomArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);
 			}
 		}
@@ -364,7 +364,7 @@ namespace TrafficManager.Custom.AI {
 					if (success) {
 						citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
 						// NON-STOCK CODE START
-						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
+						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId], ref citizenMan.m_instances.m_buffer[instanceID]);
 						// NON-STOCK CODE END
 					}
 

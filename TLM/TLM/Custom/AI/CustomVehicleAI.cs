@@ -853,14 +853,14 @@ namespace TrafficManager.Custom.AI {
 
 				// check for arrival
 				if (targetPosIndex <= 0) {
-					if ((netManager.m_segments.m_buffer[nextPathPos.m_segment].m_flags & NetSegment.Flags.Untouchable) != 0 && (netManager.m_segments.m_buffer[currentPosition.m_segment].m_flags & NetSegment.Flags.Untouchable) == NetSegment.Flags.None) {
-						ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPathPos.m_segment, 363f);
+					if ((netManager.m_segments.m_buffer[nextPosition.m_segment].m_flags & NetSegment.Flags.Untouchable) != 0 && (netManager.m_segments.m_buffer[currentPosition.m_segment].m_flags & NetSegment.Flags.Untouchable) == NetSegment.Flags.None) {
+						ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPosition.m_segment, 363f);
 						if (ownerBuildingId != 0) {
 							BuildingManager buildingMan = Singleton<BuildingManager>.instance;
 							BuildingInfo ownerBuildingInfo = buildingMan.m_buildings.m_buffer[ownerBuildingId].Info;
 							InstanceID itemID = default(InstanceID);
 							itemID.Vehicle = vehicleID;
-							ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(ownerBuildingId, ref buildingMan.m_buildings.m_buffer[ownerBuildingId], nextPathPos.m_segment, nextPathPos.m_offset, itemID);
+							ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(ownerBuildingId, ref buildingMan.m_buildings.m_buffer[ownerBuildingId], nextPosition.m_segment, nextPosition.m_offset, itemID);
 						}
 					}
 

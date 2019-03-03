@@ -18,13 +18,13 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool enterWhenBlockedAllowed;
 		public TernaryBool pedestrianCrossingAllowed;
 
-		bool defaultUturnAllowed;
+		public bool defaultUturnAllowed;
 #if TURNONRED
-        bool defaultTurnOnRedAllowed;
+        public bool defaultTurnOnRedAllowed;
 #endif
-		bool defaultStraightLaneChangingAllowed;
-		bool defaultEnterWhenBlockedAllowed;
-		bool defaultPedestrianCrossingAllowed;
+		public bool defaultStraightLaneChangingAllowed;
+		public bool defaultEnterWhenBlockedAllowed;
+		public bool defaultPedestrianCrossingAllowed;
 
 		/*public void UpdateDefaults(ushort segmentId, bool startNode, ref NetNode node) {
 			IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;

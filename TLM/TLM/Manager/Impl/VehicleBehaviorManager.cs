@@ -1060,22 +1060,6 @@ namespace TrafficManager.Manager.Impl {
 			return maxSpeed;
 		}
 
-		// TODO v1.11.0: check this (check ApplyRealisticSpeeds: we call another method there)
-		public uint GetStaticVehicleRand(ushort vehicleId) {
-			return vehicleId % 100u;
-		}
-
-		public uint GetTimedVehicleRand(ushort vehicleId) {
-			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
-			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
-			uint step = ExtVehicleManager.Instance.ExtVehicles[vehicleId].timedRand;
-			if (step >= intv) {
-				step = ExtVehicleManager.MAX_TIMED_RAND - step;
-			}
-
-			return range + step;
-		}
-
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo) {
 			if (Options.realisticSpeeds) {
 				float vehicleRand = 0.01f * (float)Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand(vehicleId);

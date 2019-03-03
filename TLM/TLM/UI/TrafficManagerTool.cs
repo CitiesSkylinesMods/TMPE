@@ -774,7 +774,7 @@ namespace TrafficManager.UI {
 				ItemClass.Service service = netManager.m_segments.m_buffer[i].Info.GetService();
 				ItemClass.SubService subService = netManager.m_segments.m_buffer[i].Info.GetSubService();
 #if !DEBUG
-				if ((segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
+				if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 					continue;
 #endif
 				var segmentInfo = netManager.m_segments.m_buffer[i].Info;

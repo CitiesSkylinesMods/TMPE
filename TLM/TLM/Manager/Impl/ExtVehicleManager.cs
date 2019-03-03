@@ -565,12 +565,16 @@ namespace TrafficManager.Manager.Impl {
 			return (extVehicle.lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
 		}
 
-		public uint GetVehicleRand(ushort vehicleId) {
-			uint intv = MAX_TIMED_RAND / 2u;
+		public uint GetStaticVehicleRand(ushort vehicleId) {
+			return vehicleId % 100u;
+		}
+
+		public uint GetTimedVehicleRand(ushort vehicleId) {
+			uint intv = ExtVehicleManager.MAX_TIMED_RAND / 2u;
 			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
 			uint step = ExtVehicleManager.Instance.ExtVehicles[vehicleId].timedRand;
 			if (step >= intv) {
-				step = MAX_TIMED_RAND - step;
+				step = ExtVehicleManager.MAX_TIMED_RAND - step;
 			}
 
 			return range + step;
