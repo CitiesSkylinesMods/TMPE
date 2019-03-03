@@ -4,7 +4,7 @@ A modification for **Cities: Skylines** to add additional traffic control.
 User manual: http://www.viathinksoft.de/tmpe/wiki
 
 # Changelog
-1.10.14, 03/xx/2019
+1.10.14, 03/03/2019
 - Synchronized code with krzychu124's version of TMPE (disabled experimental features / icons for now)
 - Bugfix: Vehicles change lanes at tollbooths
 - Bugfix: Path-finding: Array index is out of range due to a race condition (#227)
