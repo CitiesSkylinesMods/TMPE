@@ -10,6 +10,7 @@ User manual: http://www.viathinksoft.de/tmpe/wiki
 - Bugfix: Path-finding: Array index is out of range due to a race condition (#227)
 - Bugfix: Citizen not found errors when using walking tours (#223)
 - Bugfix: Timed light indicator only visible when any timed light node is selected (#222)
+- Bugfix: Some option labels are too short (#235, @krzychu124 fixed this!)
 
 1.10.13, 10/31/2018
 - Updated for game version 1.11.0-f3
