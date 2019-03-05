@@ -95,9 +95,7 @@ namespace TrafficManager {
 		[Serializable]
 		public class SegmentNodeFlags {
 			public bool? uturnAllowed = null;
-#if TURNONRED
             public bool? turnOnRedAllowed = null;
-#endif
 			public bool? straightLaneChangingAllowed = null;
 			public bool? enterWhenBlockedAllowed = null;
 			public bool? pedestrianCrossingAllowed = null;
