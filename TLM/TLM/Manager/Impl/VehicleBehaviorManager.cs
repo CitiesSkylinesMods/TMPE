@@ -304,7 +304,12 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 					// Check if turning in the preferred direction, and if turning while it's red is allowed
-					if (stopCar && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
+					if (
+						stopCar &&
+						sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY &&
+						JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode) &&
+						!isRecklessDriver
+					) {
 						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
 						SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
 						ArrowDirection targetDir = currentSegEndGeo.GetDirection(position.m_segment);
