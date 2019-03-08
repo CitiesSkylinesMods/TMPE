@@ -586,11 +586,10 @@ namespace TrafficManager.Traffic.Data {
 				//break;
 				case VehicleInfo.VehicleType.Plane:
 					if (ai is PassengerPlaneAI)
-					return ExtVehicleType.PassengerPlane;
-					if (!(ai is CargoPlaneAI))
-						break;
-					return ExtVehicleType.CargoPlane;
-				//break;
+						return ExtVehicleType.PassengerPlane;
+					if (ai is CargoPlaneAI)
+						return ExtVehicleType.CargoPlane;
+					break;
 				case VehicleInfo.VehicleType.Helicopter:
 					//if (ai is PassengerPlaneAI)
 					return ExtVehicleType.Helicopter;

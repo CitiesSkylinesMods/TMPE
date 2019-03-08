@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI 발전된 차량 AI 활성화
 Vehicles_may_enter_blocked_junctions 차량이 진입 금지도로에 들어갈 수 있습니다.
 All_vehicles_may_ignore_lane_arrows 모든 차량이 도로 화살표를 무시 할 수 있습니다.
 Busses_may_ignore_lane_arrows 버스가 도로 화살표를 무시 할 수 있습니다.
-Turn_on_red_enabled_by_default 교차점에서 기본적으로 빨간색 활성화
-Turn_on_red 빨간 신호등에서 차량이 돌아올 수 있습니다.
 Reckless_driving 난폭 운전 (베타 기능)
 TMPE_Title 트래픽 매니저 : 대통령 에디션
 Settings_are_defined_for_each_savegame_separately 설정은 각 저장된 게임마다 별개로 작동합니다.
@@ -228,3 +226,5 @@ Show_error_message_if_a_mod_incompatibility_is_detected 모드와 비 호환되�
 Remove_parked_vehicles 주차된 차량 제거하기
 Node_is_level_crossing 해당 교차로는 평면 교차로입니다.\n따라서 신호등을 설치할 수 없습니다
 Experimental_features Experimental features
+Turn_on_red_enabled_by_default 교차점에서 기본적으로 빨간색 활성화
+Turn_on_red 빨간 신호등에서 차량이 돌아올 수 있습니다.
