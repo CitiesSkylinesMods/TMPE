@@ -451,8 +451,16 @@ namespace TrafficManager.Custom.AI {
 									if (targetBuildingId != 0) {
 										citizenData.m_flags |= CitizenInstance.Flags.OnTour;
 										((CitizenAI)this).SetTarget(instanceID, ref citizenData, targetBuildingId, true);
-										return;
+									} else {
+										// Unrolled goto statement
+										if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
+											return;
+										}
+										((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
+										((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
+										citizenData.Unspawn(instanceID);
 									}
+									return;
 								}
 								citizenData.m_flags |= CitizenInstance.Flags.OnTour;
 								this.WaitTouristVehicle(instanceID, ref citizenData, targetBuildingId);
