@@ -303,18 +303,17 @@ namespace TrafficManager.Manager.Impl {
 					//}
 #endif
 
-					// Check if turning in the preferred direction, and if turning while it's red is allowed
+					// Turn-on-red: Check if turning in the preferred direction, and if turning while it's red is allowed
 					if (
+						Options.junctionRestrictionsEnabled &&
 						stopCar &&
 						sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY &&
 						JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode) &&
 						!isRecklessDriver
 					) {
-						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
-						SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
-						ArrowDirection targetDir = currentSegEndGeo.GetDirection(position.m_segment);
-						bool lhd = Services.SimulationService.LeftHandDrive;
-						if (lhd && targetDir == ArrowDirection.Left || !lhd && targetDir == ArrowDirection.Right) {
+						ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
+						int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
+						if (turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId == position.m_segment || turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId == position.m_segment) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");

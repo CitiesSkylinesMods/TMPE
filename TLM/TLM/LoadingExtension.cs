@@ -2489,7 +2489,8 @@ namespace TrafficManager {
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
 			RegisteredManagers.Add(ExtCitizenInstanceManager.Instance);
 			RegisteredManagers.Add(ExtCitizenManager.Instance);
-			RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
+			RegisteredManagers.Add(TurnOnRedManager.Instance);
+			RegisteredManagers.Add(JunctionRestrictionsManager.Instance); // depends on TurnOnRedManager
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
 			RegisteredManagers.Add(GeometryManager.Instance);

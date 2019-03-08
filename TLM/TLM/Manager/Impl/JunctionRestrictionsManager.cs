@@ -261,19 +261,13 @@ namespace TrafficManager.Manager.Impl {
 			bool debug = GlobalConfig.Instance.Debug.Switches[11];
 #endif
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			SegmentEndGeometry endGeo = segGeo?.GetEnd(startNode);
-
-			bool ret = (node.m_flags & (NetNode.Flags.TrafficLights | NetNode.Flags.LevelCrossing)) == NetNode.Flags.TrafficLights &&
-					node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
-					!endGeo.OutgoingOneWay &&
-					endGeo.NumOutgoingSegments > 1 &&
-					((Services.SimulationService.LeftHandDrive && endGeo.NumOutgoingLeftSegments > 0) ||
-					(!Services.SimulationService.LeftHandDrive && endGeo.NumOutgoingRightSegments > 0));
-
+			ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
+			bool ret =
+				turnOnRedMan.TurnOnRedSegments[turnOnRedMan.GetIndex(segmentId, startNode)].leftSegmentId != 0 ||
+				turnOnRedMan.TurnOnRedSegments[turnOnRedMan.GetIndex(segmentId, startNode)].rightSegmentId != 0;
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}, flags={node.m_flags}, service={node.Info?.m_class?.m_service}");
+				Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}");
 #endif
 
 			return ret;
