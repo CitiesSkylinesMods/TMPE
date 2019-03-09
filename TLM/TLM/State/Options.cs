@@ -363,7 +363,7 @@ namespace TrafficManager.State {
 			showPathFindStatsToggle = maintenanceGroup.AddCheckbox(Translation.GetString("Show_path-find_stats"), showPathFindStats, onShowPathFindStatsChanged) as UICheckBox;
 #endif
 
-			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
+			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features")) as UIHelper;
 			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
@@ -373,6 +373,7 @@ namespace TrafficManager.State {
 			turnOnRedEnabledToggle = featureGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRedEnabled, onTurnOnRedEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
+			Indent(turnOnRedEnabledToggle);
 #if DEBUG
 
 			// GLOBAL CONFIG
@@ -468,6 +469,12 @@ namespace TrafficManager.State {
 #endif
 
 			tabStrip.selectedIndex = 0;
+		}
+
+		private static void Indent<T>(T component) where T : UIComponent {
+			UIPanel panel = component.parent as UIPanel;
+			panel.autoLayout = false;
+			component.relativePosition += new Vector3(30, 0);
 		}
 
 		private static UIButton AddOptionTab(UITabstrip tabStrip, string caption) {
