@@ -2484,6 +2484,7 @@ namespace TrafficManager {
 		}
 
 		private void RegisterCustomManagers() {
+			RegisteredManagers.Add(GeometryManager.Instance);
 			RegisteredManagers.Add(AdvancedParkingManager.Instance);
 			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
@@ -2493,7 +2494,6 @@ namespace TrafficManager {
 			RegisteredManagers.Add(JunctionRestrictionsManager.Instance); // depends on TurnOnRedManager
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
-			RegisteredManagers.Add(GeometryManager.Instance);
 			RegisteredManagers.Add(OptionsManager.Instance);
 			RegisteredManagers.Add(ParkingRestrictionsManager.Instance);
 			RegisteredManagers.Add(RoutingManager.Instance);
