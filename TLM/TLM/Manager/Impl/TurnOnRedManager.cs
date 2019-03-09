@@ -166,6 +166,10 @@ namespace TrafficManager.Manager.Impl {
 				leftSegmentId = 0;
 			}
 
+			int index = GetIndex(endGeo.SegmentId, endGeo.StartNode);
+			TurnOnRedSegments[index].leftSegmentId = leftSegmentId;
+			TurnOnRedSegments[index].rightSegmentId = rightSegmentId;
+
 #if DEBUG
 			if (debug) {
 				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): Finished calculation. leftSegmentId={leftSegmentId}, rightSegmentId={rightSegmentId}");
@@ -176,6 +180,18 @@ namespace TrafficManager.Manager.Impl {
 		protected void ResetSegment(ushort segmentId) {
 			TurnOnRedSegments[GetIndex(segmentId, true)].Reset();
 			TurnOnRedSegments[GetIndex(segmentId, false)].Reset();
+		}
+
+		public override void OnBeforeLoadData() {
+			base.OnBeforeLoadData();
+
+			// JunctionRestrictionsManager requires our data during loading of custom data
+			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+				SegmentGeometry geo = SegmentGeometry.Get((ushort)i);
+				if (geo != null && geo.IsValid()) {
+					HandleValidSegment(geo);
+				}
+			}
 		}
 
 		public override void OnLevelUnloading() {

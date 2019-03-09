@@ -262,9 +262,10 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 			ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
+			int index = turnOnRedMan.GetIndex(segmentId, startNode);
 			bool ret =
-				turnOnRedMan.TurnOnRedSegments[turnOnRedMan.GetIndex(segmentId, startNode)].leftSegmentId != 0 ||
-				turnOnRedMan.TurnOnRedSegments[turnOnRedMan.GetIndex(segmentId, startNode)].rightSegmentId != 0;
+				turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0 ||
+				turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0;
 #if DEBUG
 			if (debug)
 				Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}");

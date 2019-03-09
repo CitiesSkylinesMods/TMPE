@@ -236,7 +236,8 @@ namespace TrafficManager.UI.SubTools {
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 				bool configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node);
 				if (
-					debug || (configurable &&
+					debug ||
+					(configurable &&
 					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node)))
 				) {
 					DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LaneChangeAllowedTexture2D : TextureResources.LaneChangeForbiddenTexture2D, out signHovered);
