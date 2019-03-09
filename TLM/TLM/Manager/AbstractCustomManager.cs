@@ -9,9 +9,23 @@ namespace TrafficManager.Manager {
 	/// <summary>
 	/// Abstract manager class, supports events before/after loading/saving.
 	/// 
-	/// Event sequence:
-	/// OnBeforeLoadData -> (loading game data) -> OnAfterLoadData -> (setting up detours) -> OnLevelLoading
-	/// OnBeforeSaveData -> (saving game data) -> OnAfterSaveData -> (releasing detours) -> OnLevelUnloading
+	/// Event sequences:
+	/// 
+	/// Startup / Level loading:
+	///		1. OnInit (TODO) ->
+	///		2. {Flags|NodeGeometry|SegmentGeometry}.OnBeforeLoadData ->
+	///		3. OnBeforeLoadData ->
+	///		4. (SerializableDataExtension loads custom game data) ->
+	///		5. OnAfterLoadData ->
+	///		6. (LoadingManager sets up detours) ->
+	///		7. OnLevelLoading
+	///	Saving:
+	///		1. OnBeforeSaveData ->
+	///		2. (SerializableDataExtension saves custom game data) ->
+	///		3. OnAfterSaveData
+	///	Level unloading:
+	///		1. (LoadingManager releases detours) ->
+	///		2. OnLevelUnloading
 	/// </summary>
 	public abstract class AbstractCustomManager : ICustomManager {
 		public IServiceFactory Services {
