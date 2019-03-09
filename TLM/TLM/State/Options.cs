@@ -844,6 +844,9 @@ namespace TrafficManager.State {
 		private static void onAllowEnterBlockedJunctionsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				return;
+			}
 
 			Log._Debug($"allowEnterBlockedJunctions changed to {newValue}");
 			setAllowEnterBlockedJunctions(newValue);
@@ -852,6 +855,9 @@ namespace TrafficManager.State {
 		private static void onAllowUTurnsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				return;
+			}
 
 			Log._Debug($"allowUTurns changed to {newValue}");
 			setAllowUTurns(newValue);
@@ -860,6 +866,9 @@ namespace TrafficManager.State {
 		private static void onAllowTurnOnRedChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !turnOnRedEnabled) {
+				return;
+			}
 
 			Log._Debug($"allowTurnOnRed changed to {newValue}");
 			setAllowTurnOnRed(newValue);
@@ -868,6 +877,9 @@ namespace TrafficManager.State {
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				return;
+			}
 
 			Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
 			allowLaneChangesWhileGoingStraight = newValue;
