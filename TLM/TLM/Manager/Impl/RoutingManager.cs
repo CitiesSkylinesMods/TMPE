@@ -310,6 +310,8 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
+			bool prevIsMergeLane = Constants.ServiceFactory.NetService.CheckLaneFlags(laneId, NetLane.Flags.Merge);
+
 			NetInfo prevSegmentInfo = null;
 			bool prevSegIsInverted = false;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort prevSegId, ref NetSegment segment) {
@@ -557,7 +559,20 @@ namespace TrafficManager.Manager.Impl {
 									}
 								}
 
-								if (!nextIsJunction) {
+								if (prevIsMergeLane && Constants.ServiceFactory.NetService.CheckLaneFlags(nextLaneId, NetLane.Flags.Merge)) {
+#if DEBUGROUTING
+									if (debugFine)
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a merge lane, as the previous lane. adding as Default.");
+#endif
+									if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
+#if DEBUGROUTING
+										if (debugFine)
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a continuous merge lane. adding as Default.");
+#endif
+										isCompatibleLane = true;
+										transitionType = LaneEndTransitionType.Default;
+									}
+								} else if (!nextIsJunction) {
 #if DEBUGROUTING
 									if (debugFine)
 										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is not a junction. adding as Default.");

@@ -145,23 +145,17 @@ namespace TrafficManager.Custom.AI {
 						vehicleData.m_lastPathOffset = lastPathOffset;
 					}
 				}
-				
-				if ((vehicleData.m_flags2 & Vehicle.Flags2.EndStop) != 0)
-				{
-					if (targetPosIndex <= 0)
-					{
+
+				if ((vehicleData.m_flags2 & Vehicle.Flags2.EndStop) != 0) {
+					if (targetPosIndex <= 0) {
 						targetPos.w = 0f;
-						if (VectorUtils.LengthSqrXZ(vehicleData.GetLastFrameVelocity()) < 0.01f)
-						{
+						if (VectorUtils.LengthSqrXZ(vehicleData.GetLastFrameVelocity()) < 0.01f) {
 							vehicleData.m_flags2 &= ~Vehicle.Flags2.EndStop;
 						}
-					}
-					else
-					{
+					} else {
 						targetPos.w = 1f;
 					}
-					while (targetPosIndex < maxTargetPosIndex)
-					{
+					while (targetPosIndex < maxTargetPosIndex) {
 						vehicleData.SetTargetPos(targetPosIndex++, targetPos);
 					}
 					return;
@@ -465,17 +459,17 @@ namespace TrafficManager.Custom.AI {
 
 				// check for arrival
 				if (targetPosIndex <= 0) {
-					if ((netManager.m_segments.m_buffer[(int)nextPathPos.m_segment].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None && (netManager.m_segments.m_buffer[(int)currentPosition.m_segment].m_flags & NetSegment.Flags.Untouchable) == NetSegment.Flags.None)
-					{
-						ushort ownerBuilding = NetSegment.FindOwnerBuilding(nextPathPos.m_segment, 363f);
-						if (ownerBuilding != 0)
-						{
-							BuildingManager buildingManager = Singleton<BuildingManager>.instance;
-							BuildingInfo ownerBuildingInfo = buildingManager.m_buildings.m_buffer[(int)ownerBuilding].Info;
-							InstanceID itemID = new InstanceID() { Vehicle = vehicleID };
-							ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(ownerBuilding, ref buildingManager.m_buildings.m_buffer[(int)ownerBuilding], nextPathPos.m_segment, nextPathPos.m_offset, itemID);
+					if ((netManager.m_segments.m_buffer[nextPathPos.m_segment].m_flags & NetSegment.Flags.Untouchable) != 0 && (netManager.m_segments.m_buffer[currentPosition.m_segment].m_flags & NetSegment.Flags.Untouchable) == NetSegment.Flags.None) {
+						ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPathPos.m_segment, 363f);
+						if (ownerBuildingId != 0) {
+							BuildingManager buildingMan = Singleton<BuildingManager>.instance;
+							BuildingInfo ownerBuildingInfo = buildingMan.m_buildings.m_buffer[ownerBuildingId].Info;
+							InstanceID itemID = default(InstanceID);
+							itemID.Vehicle = vehicleID;
+							ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(ownerBuildingId, ref buildingMan.m_buildings.m_buffer[ownerBuildingId], nextPathPos.m_segment, nextPathPos.m_offset, itemID);
 						}
 					}
+
 					if (nextCoarsePathPosIndex == 0) {
 						Singleton<PathManager>.instance.ReleaseFirstUnit(ref vehicleData.m_path);
 					}
