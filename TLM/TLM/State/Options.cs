@@ -804,6 +804,9 @@ namespace TrafficManager.State {
 			MenuRebuildRequired = true;
 			junctionRestrictionsEnabled = val;
 			if (!val) {
+				setAllowUTurns(false);
+				setAllowEnterBlockedJunctions(false);
+				setAllowLaneChangesWhileGoingStraight(false);
 				setTurnOnRedEnabled(false);
 				setJunctionRestrictionsOverlay(false);
 			}
