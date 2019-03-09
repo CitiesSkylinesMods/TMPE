@@ -144,6 +144,15 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public void MarkAllAsUpdated() {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
+				if (segGeo != null) {
+					MarkAsUpdated(segGeo, true);
+				}
+			}
+		}
+
 		public void MarkAsUpdated(SegmentGeometry geometry, bool updateNodes = true) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])

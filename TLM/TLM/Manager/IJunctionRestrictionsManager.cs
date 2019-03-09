@@ -94,5 +94,10 @@ namespace TrafficManager.Manager {
 		/// <param name="node">node data</param>
 		/// <returns><code>true</code> if crossing the road is allowed by default, <code>false</code> otherwise</returns>
 		bool GetDefaultPedestrianCrossingAllowed(ushort segmentId, bool startNode, ref NetNode node);
+
+		/// <summary>
+		/// Updates the default values for all junction restrictions and segments.
+		/// </summary>
+		void UpdateAllDefaults();
 	}
 }

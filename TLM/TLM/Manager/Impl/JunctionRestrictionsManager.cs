@@ -170,20 +170,14 @@ namespace TrafficManager.Manager.Impl {
 			UpdateDefaults(geometry);
 		}
 
-		//public void UpdateAllDefaults() {
-		//	for (int i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-		//		UpdateDefaults((ushort)i);
-		//	}
-		//}
-
-		//public void UpdateDefaults(ushort segmentId) {
-		//	SegmentGeometry geo = SegmentGeometry.Get(segmentId);
-		//	if (! geo.IsValid()) {
-		//		return;
-		//	}
-
-		//	UpdateDefaults(segmentId);
-		//}
+		public void UpdateAllDefaults() {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
+				if (segGeo != null) {
+					UpdateDefaults(segGeo);
+				}
+			}
+		}
 
 		protected void UpdateDefaults(SegmentGeometry geometry) {
 			//Log.Warning($"JunctionRestrictionsManager.HandleValidSegment({geometry.SegmentId}) called.");

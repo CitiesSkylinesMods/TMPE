@@ -39,5 +39,6 @@ namespace TrafficManager.Manager {
 		IDisposable Subscribe(IObserver<GeometryUpdate> observer);
 		void MarkAsUpdated(SegmentGeometry geometry, bool updateNodes = true);
 		void MarkAsUpdated(NodeGeometry geometry, bool updateSegments = false);
+		void MarkAllAsUpdated();
 	}
 }

@@ -828,12 +828,12 @@ namespace TrafficManager.State {
 			evacBussesMayIgnoreRules = value;
 		}
 
-		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
+		private static void onAllowEnterBlockedJunctionsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 
-			Log._Debug($"allowEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
-			allowEnterBlockedJunctions = newMayEnterBlockedJunctions;
+			Log._Debug($"allowEnterBlockedJunctions changed to {newValue}");
+			setAllowEnterBlockedJunctions(newValue);
 		}
 
 		private static void onAllowUTurnsChanged(bool newValue) {
@@ -841,15 +841,15 @@ namespace TrafficManager.State {
 				return;
 
 			Log._Debug($"allowUTurns changed to {newValue}");
-			allowUTurns = newValue;
+			setAllowUTurns(newValue);
 		}
 
-		private static void onAllowTurnOnRedChanged(bool value) {
+		private static void onAllowTurnOnRedChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 
-			Log._Debug($"allowTurnOnRed changed to {value}");
-			allowTurnOnRed = value;
+			Log._Debug($"allowTurnOnRed changed to {newValue}");
+			setAllowTurnOnRed(newValue);
 		}
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
@@ -1075,12 +1075,6 @@ namespace TrafficManager.State {
 				allRelaxedToggle.isChecked = newAllRelaxed;
 		}
 
-		public static void setAllowTurnOnRed(bool newValue) {
-			allowTurnOnRed = newValue;
-			if (!allowTurnOnRedToggle != null)
-				allowTurnOnRedToggle.isChecked = newValue;
-		}
-
 		public static void setHighwayRules(bool newHighwayRules) {
 			highwayRules = newHighwayRules;
 
@@ -1207,12 +1201,28 @@ namespace TrafficManager.State {
 			allowUTurns = value;
 			if (allowUTurnsToggle != null)
 				allowUTurnsToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowTurnOnRed(bool newValue) {
+			allowTurnOnRed = newValue;
+			if (!allowTurnOnRedToggle != null)
+				allowTurnOnRedToggle.isChecked = newValue;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
 		public static void setAllowLaneChangesWhileGoingStraight(bool value) {
 			allowLaneChangesWhileGoingStraight = value;
 			if (allowLaneChangesWhileGoingStraightToggle != null)
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowEnterBlockedJunctions(bool value) {
+			allowEnterBlockedJunctions = value;
+			if (allowEnterBlockedJunctionsToggle != null)
+				allowEnterBlockedJunctionsToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
 		public static void setTrafficLightPriorityRules(bool value) {
