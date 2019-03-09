@@ -305,7 +305,7 @@ namespace TrafficManager.Manager.Impl {
 
 					// Turn-on-red: Check if turning in the preferred direction, and if turning while it's red is allowed
 					if (
-						Options.junctionRestrictionsEnabled &&
+						Options.turnOnRedEnabled &&
 						stopCar &&
 						sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY &&
 						JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode) &&

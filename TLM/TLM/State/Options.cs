@@ -75,6 +75,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableVehicleRestrictionsToggle = null;
 		private static UICheckBox enableParkingRestrictionsToggle = null;
 		private static UICheckBox enableJunctionRestrictionsToggle = null;
+		private static UICheckBox turnOnRedEnabledToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
 		private static UIButton removeParkedVehiclesBtn = null;
@@ -150,6 +151,7 @@ namespace TrafficManager.State {
 		public static bool vehicleRestrictionsEnabled = true;
 		public static bool parkingRestrictionsEnabled = true;
 		public static bool junctionRestrictionsEnabled = true;
+		public static bool turnOnRedEnabled = true;
 		public static bool laneConnectorEnabled = true;
 
 		public static VehicleRestrictionsAggression vehicleRestrictionsAggression = VehicleRestrictionsAggression.Medium;
@@ -368,6 +370,8 @@ namespace TrafficManager.State {
 			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
 			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
+			turnOnRedEnabledToggle = featureGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRedEnabled, onTurnOnRedEnabledChanged) as UICheckBox;
+			turnOnRedEnabledToggle.relativePosition = new Vector3(turnOnRedEnabledToggle.relativePosition.x + 50, turnOnRedEnabledToggle.relativePosition.y, turnOnRedEnabledToggle.relativePosition.z); // ident
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
 #if DEBUG
@@ -800,8 +804,17 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			junctionRestrictionsEnabled = val;
-			if (!val)
+			if (!val) {
+				setTurnOnRedEnabled(false);
 				setJunctionRestrictionsOverlay(false);
+			}
+		}
+
+		private static void onTurnOnRedEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			setTurnOnRedEnabled(val);
 		}
 
 		private static void onLaneConnectorEnabledChanged(bool val) {
@@ -1206,7 +1219,7 @@ namespace TrafficManager.State {
 
 		public static void setAllowTurnOnRed(bool newValue) {
 			allowTurnOnRed = newValue;
-			if (!allowTurnOnRedToggle != null)
+			if (allowTurnOnRedToggle != null)
 				allowTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
@@ -1360,6 +1373,15 @@ namespace TrafficManager.State {
 				enableJunctionRestrictionsToggle.isChecked = newValue;
 			if (!newValue)
 				setJunctionRestrictionsOverlay(false);
+		}
+
+		public static void setTurnOnRedEnabled(bool newValue) {
+			turnOnRedEnabled = newValue;
+			if (turnOnRedEnabledToggle != null)
+				turnOnRedEnabledToggle.isChecked = newValue;
+			if (!newValue) {
+				setAllowTurnOnRed(false);
+			}
 		}
 
 		public static void setLaneConnectorEnabled(bool newValue) {
