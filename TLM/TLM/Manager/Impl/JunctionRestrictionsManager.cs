@@ -264,11 +264,12 @@ namespace TrafficManager.Manager.Impl {
 			ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
 			int index = turnOnRedMan.GetIndex(segmentId, startNode);
 			bool ret =
-				turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0 ||
-				turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0;
+				(node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None &&
+				(turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0 ||
+				turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0);
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}");
+				Log.Warning($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}");
 #endif
 
 			return ret;

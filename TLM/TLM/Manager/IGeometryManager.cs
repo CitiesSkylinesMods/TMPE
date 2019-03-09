@@ -37,7 +37,7 @@ namespace TrafficManager.Manager {
 		void OnUpdateSegment(SegmentGeometry geo);
 		void OnSegmentEndReplacement(SegmentEndReplacement replacement);
 		IDisposable Subscribe(IObserver<GeometryUpdate> observer);
-		void MarkAsUpdated(SegmentGeometry geometry);
-		void MarkAsUpdated(NodeGeometry geometry);
+		void MarkAsUpdated(SegmentGeometry geometry, bool updateNodes = true);
+		void MarkAsUpdated(NodeGeometry geometry, bool updateSegments = false);
 	}
 }

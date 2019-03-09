@@ -80,10 +80,11 @@ namespace TrafficManager.Manager.Impl {
 			ushort nodeId = endGeo.NodeId();
 
 			// check node
+			// note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
 			bool nodeValid = false;
 			Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 				nodeValid =
-					(node.m_flags & (NetNode.Flags.TrafficLights | NetNode.Flags.LevelCrossing)) == NetNode.Flags.TrafficLights &&
+					(node.m_flags & NetNode.Flags.LevelCrossing) == NetNode.Flags.None &&
 					node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
 				return true;
 			});
@@ -125,6 +126,25 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): right segment is not geometrically right");
+				}
+#endif
+				rightSegmentId = 0;
+			}
+
+			// check for incoming one-ways
+			if (leftSegmentId != 0 && SegmentGeometry.Get(leftSegmentId).GetEnd(nodeId).IncomingOneWay) {
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): left segment is incoming one-way");
+				}
+#endif
+				leftSegmentId = 0;
+			}
+
+			if (rightSegmentId != 0 && SegmentGeometry.Get(rightSegmentId).GetEnd(nodeId).IncomingOneWay) {
+#if DEBUG
+				if (debug) {
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): right segment is incoming one-way");
 				}
 #endif
 				rightSegmentId = 0;

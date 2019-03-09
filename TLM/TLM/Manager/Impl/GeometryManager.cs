@@ -144,7 +144,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(SegmentGeometry geometry) {
+		public void MarkAsUpdated(SegmentGeometry geometry, bool updateNodes = true) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"GeometryManager.MarkAsUpdated(segment {geometry.SegmentId}): Marking segment as updated");
@@ -157,8 +157,10 @@ namespace TrafficManager.Manager.Impl {
 				updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)(segmentId & 63);
 				stateUpdated = true;
 
-				MarkAsUpdated(NodeGeometry.Get(geometry.StartNodeId()));
-				MarkAsUpdated(NodeGeometry.Get(geometry.EndNodeId()));
+				if (updateNodes) {
+					MarkAsUpdated(NodeGeometry.Get(geometry.StartNodeId()));
+					MarkAsUpdated(NodeGeometry.Get(geometry.EndNodeId()));
+				}
 
 				if (! geometry.IsValid()) {
 					SimulationStep(true);
@@ -168,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(NodeGeometry geometry) {
+		public void MarkAsUpdated(NodeGeometry geometry, bool updateSegments = false) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"GeometryManager.MarkAsUpdated(node {geometry.NodeId}): Marking node as updated");
@@ -180,6 +182,14 @@ namespace TrafficManager.Manager.Impl {
 				if (nodeId != 0) {
 					updatedNodeBuckets[nodeId >> 6] |= 1uL << (int)(nodeId & 63);
 					stateUpdated = true;
+
+					if (updateSegments) {
+						foreach (SegmentEndGeometry segEndGeo in geometry.SegmentEndGeometries) {
+							if (segEndGeo != null) {
+								MarkAsUpdated(segEndGeo.GetSegmentGeometry(), false);
+							}
+						}
+					}
 
 					if (!geometry.IsValid()) {
 						SimulationStep(true);
