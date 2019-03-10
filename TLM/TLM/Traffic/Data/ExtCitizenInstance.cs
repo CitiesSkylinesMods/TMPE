@@ -328,10 +328,10 @@ namespace TrafficManager.Traffic.Data {
 			ReleaseReturnPath();
 
 			PathUnit.Position parkPathPos;
-			PathUnit.Position targetPathPos;
-			if (CustomPathManager.FindPathPositionWithSpiralLoop(parkPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out parkPathPos) &&
-				CustomPathManager.FindPathPositionWithSpiralLoop(targetPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out targetPathPos)) {
-
+			PathUnit.Position targetPathPos = default(PathUnit.Position);
+			bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(parkPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out parkPathPos);
+			bool foundTargetPathPos = foundParkPathPos && CustomPathManager.FindCitizenPathPosition(targetPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out targetPathPos);
+			if (foundParkPathPos && foundTargetPathPos) {
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
 				PathCreationArgs args;
@@ -366,13 +366,18 @@ namespace TrafficManager.Traffic.Data {
 					returnPathId = pathId;
 					returnPathState = ExtPathState.Calculating;
 					return true;
-				}
-			}
-
+				} else {
 #if DEBUG
-			if (debug)
-				Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {instanceId}.");
+					if (debug)
+						Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not create return path for citizen instance {instanceId}");
 #endif
+				}
+			} else {
+#if DEBUG
+				if (debug)
+					Log._Debug($"ExtCitizenInstance.CalculateReturnPath: Could not find path position(s) for either the parking position or target position of citizen instance {instanceId}: foundParkPathPos={foundParkPathPos} foundTargetPathPos={foundTargetPathPos}");
+#endif
+			}
 
 			return false;
 		}

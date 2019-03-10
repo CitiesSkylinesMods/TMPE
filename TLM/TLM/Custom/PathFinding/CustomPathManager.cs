@@ -566,6 +566,39 @@ namespace TrafficManager.Custom.PathFinding {
 			return pathPosA.m_segment != 0;
 		}
 
+		/// <summary>
+		/// Finds a suitable path position for a walking citizen with the given world position.
+		/// </summary>
+		/// <param name="pos">world position</param>
+		/// <param name="laneTypes">allowed lane types</param>
+		/// <param name="vehicleTypes">allowed vehicle types</param>
+		/// <param name="allowTransport">public transport allowed?</param>
+		/// <param name="allowUnderground">underground position allowed?</param>
+		/// <param name="position">resulting path position</param>
+		/// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
+		public static bool FindCitizenPathPosition(Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowTransport, bool allowUnderground, out PathUnit.Position position) {
+			// TODO move to ExtPathManager after harmony upgrade
+			position = default(PathUnit.Position);
+			float minDist = 1E+10f;
+			PathUnit.Position posA;
+			PathUnit.Position posB;
+			float distA;
+			float distB;
+			if (PathManager.FindPathPosition(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+				minDist = distA;
+				position = posA;
+			}
+			if (PathManager.FindPathPosition(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+				minDist = distA;
+				position = posA;
+			}
+			if (allowTransport && PathManager.FindPathPosition(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+				minDist = distA;
+				position = posA;
+			}
+			return position.m_segment != 0;
+		}
+
 		/*internal void ResetQueueItem(uint unit) {
 			queueItems[unit].Reset();
 		}*/
