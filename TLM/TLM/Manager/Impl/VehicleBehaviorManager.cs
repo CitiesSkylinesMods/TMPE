@@ -307,7 +307,7 @@ namespace TrafficManager.Manager.Impl {
 					if (
 						Options.turnOnRedEnabled &&
 						stopCar &&
-						sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY &&
+						sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity &&
 						JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode) &&
 						!isRecklessDriver
 					) {
@@ -424,7 +424,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+										if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity * GlobalConfig.Instance.PriorityRules.MaxStopVelocity) {
 											vehicleState.waitTime++;
 
 											//float minStopWaitTime = Singleton<SimulationManager>.instance.m_randomizer.UInt32(3);
@@ -485,7 +485,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 
-										if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY || Options.simAccuracy <= 2) {
+										if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity || Options.simAccuracy <= 2) {
 											if (Options.simAccuracy >= 4) {
 												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 											} else {
@@ -514,7 +514,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 											// vehicle has not yet reached yield speed
-											maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
+											maxSpeed = GlobalConfig.Instance.PriorityRules.MaxYieldVelocity;
 											return false;
 										}
 									} else {
@@ -568,7 +568,7 @@ namespace TrafficManager.Manager.Impl {
 									}
 									return true;
 							}
-						} else if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && (vehicleState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
+						} else if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity * GlobalConfig.Instance.PriorityRules.MaxStopVelocity && (vehicleState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
 							// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 							if (debug)
