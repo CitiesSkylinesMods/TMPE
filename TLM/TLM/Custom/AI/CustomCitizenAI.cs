@@ -88,6 +88,7 @@ namespace TrafficManager.Custom.AI {
 						carUsageMode = CarUsagePolicy.Forbidden;
 						break;
 					case ExtPathMode.RequiresCarPath:
+					case ExtPathMode.RequiresDirectCarPathToTarget:
 					case ExtPathMode.DrivingToTarget:
 					case ExtPathMode.DrivingToKnownParkPos:
 					case ExtPathMode.DrivingToAltParkPos:
@@ -152,7 +153,10 @@ namespace TrafficManager.Custom.AI {
 						if (instanceData.m_sourceBuilding != 0) {
 							ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
 
-							if (Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen])) {
+							if (
+								(Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None &&
+								(startPos - Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_position).magnitude <= GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+							) {
 								if (sourceBuildingService == ItemClass.Service.Road) {
 									if (vehicleInfo != null) {
 										/*

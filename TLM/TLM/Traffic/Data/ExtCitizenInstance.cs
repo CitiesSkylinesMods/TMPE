@@ -141,7 +141,13 @@ namespace TrafficManager.Traffic.Data {
 			/// <summary>
 			/// Indicates that the citizen is using a taxi to reach the target
 			/// </summary>
-			TaxiToTarget = 17
+			TaxiToTarget = 17,
+			/// <summary>
+			/// Indicates that the driving citizen requires a direct path to target (driving/public transport)
+			/// where possible transitions between different modes of transport happen as required (thus no search
+			/// for parking spaces is performed beforehand)
+			/// </summary>
+			RequiresDirectCarPathToTarget = 18,
 		}
 
 		public enum ExtParkingSpaceLocation {
@@ -395,6 +401,7 @@ namespace TrafficManager.Traffic.Data {
 				case ExtPathMode.DrivingToKnownParkPos:
 				case ExtPathMode.DrivingToTarget:
 				case ExtPathMode.RequiresCarPath:
+				case ExtPathMode.RequiresDirectCarPathToTarget:
 				case ExtPathMode.ParkingFailed:
 					return ExtPathType.DrivingOnly;
 				case ExtPathMode.CalculatingWalkingPathToParkedCar:
