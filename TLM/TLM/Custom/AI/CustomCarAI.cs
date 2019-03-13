@@ -116,7 +116,7 @@ namespace TrafficManager.Custom.AI {
 						// path mode has been updated, repeat path-finding
 						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
 						this.InvalidPath(vehicleId, ref vehicleData, vehicleId, ref vehicleData);
-						return;
+						break;
 				}
 				// NON-STOCK CODE END
 			} else {
@@ -133,7 +133,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			}
 #endif
-			if (!Options.isStockLaneChangerUsed()) {
+			if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
 #if BENCHMARK
 				using (var bm = new Benchmark(null, "LogTraffic")) {
 #endif
