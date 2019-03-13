@@ -36,7 +36,7 @@ namespace TrafficManager.Manager.Impl {
 						Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
 						break;
 					case ExtPathMode.RequiresCarPath:
-					case ExtPathMode.RequiresDirectCarPathToTarget:
+					case ExtPathMode.RequiresMixedCarPathToTarget:
 					case ExtPathMode.CalculatingCarPathToKnownParkPos:
 					case ExtPathMode.CalculatingCarPathToTarget:
 					case ExtPathMode.DrivingToKnownParkPos:
@@ -1036,7 +1036,7 @@ namespace TrafficManager.Manager.Impl {
 						if (debug)
 							Log._Debug($"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path failed but it may be retried to drive directly to the target / using public transport.");
 #endif
-						driverExtInstance.pathMode = ExtPathMode.RequiresDirectCarPathToTarget;
+						driverExtInstance.pathMode = ExtPathMode.RequiresMixedCarPathToTarget;
 						ret = ExtSoftPathState.FailedSoft;
 					}
 					break;
@@ -1754,7 +1754,7 @@ namespace TrafficManager.Manager.Impl {
 				switch (extInstance.pathMode) {
 					case ExtPathMode.ApproachingParkedCar:
 					case ExtPathMode.RequiresCarPath:
-					case ExtPathMode.RequiresDirectCarPathToTarget:
+					case ExtPathMode.RequiresMixedCarPathToTarget:
 						ret = Translation.GetString("Entering_vehicle") + ", " + ret;
 						break;
 					case ExtPathMode.RequiresWalkingPathToParkedCar:

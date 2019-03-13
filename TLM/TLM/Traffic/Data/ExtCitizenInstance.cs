@@ -147,7 +147,7 @@ namespace TrafficManager.Traffic.Data {
 			/// where possible transitions between different modes of transport happen as required (thus no search
 			/// for parking spaces is performed beforehand)
 			/// </summary>
-			RequiresDirectCarPathToTarget = 18,
+			RequiresMixedCarPathToTarget = 18,
 		}
 
 		public enum ExtParkingSpaceLocation {
@@ -401,7 +401,7 @@ namespace TrafficManager.Traffic.Data {
 				case ExtPathMode.DrivingToKnownParkPos:
 				case ExtPathMode.DrivingToTarget:
 				case ExtPathMode.RequiresCarPath:
-				case ExtPathMode.RequiresDirectCarPathToTarget:
+				case ExtPathMode.RequiresMixedCarPathToTarget:
 				case ExtPathMode.ParkingFailed:
 					return ExtPathType.DrivingOnly;
 				case ExtPathMode.CalculatingWalkingPathToParkedCar:

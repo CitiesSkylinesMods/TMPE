@@ -88,7 +88,7 @@ namespace TrafficManager.Custom.AI {
 						carUsageMode = CarUsagePolicy.Forbidden;
 						break;
 					case ExtPathMode.RequiresCarPath:
-					case ExtPathMode.RequiresDirectCarPathToTarget:
+					case ExtPathMode.RequiresMixedCarPathToTarget:
 					case ExtPathMode.DrivingToTarget:
 					case ExtPathMode.DrivingToKnownParkPos:
 					case ExtPathMode.DrivingToAltParkPos:
