@@ -66,8 +66,8 @@ namespace TrafficManager.Manager.Impl {
 			}
 #endif
 
-			// check if traffic can flow to the node and that there are more than one outgoing segments
-			if (endGeo.OutgoingOneWay || endGeo.NumOutgoingSegments <= 1) {
+			// check if traffic can flow to the node and that there is at least one outgoing segment
+			if (endGeo.OutgoingOneWay || endGeo.NumOutgoingSegments <= 0) {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): outgoing one-way or insufficient number of outgoing segments.");
@@ -150,6 +150,7 @@ namespace TrafficManager.Manager.Impl {
 				rightSegmentId = 0;
 			}
 
+#if TURNONRED_LEFT
 			if (endGeo.IncomingOneWay) {
 				if (lhd && rightSegmentId != 0 || !lhd && leftSegmentId != 0) {
 					// special case: one-way to one-way in non-preferred direction
@@ -178,7 +179,9 @@ namespace TrafficManager.Manager.Impl {
 						}
 					}
 				}
-			} else if (lhd) {
+			} else
+#endif
+			if (lhd) {
 				// default case (LHD): turn in preferred direction
 				rightSegmentId = 0;
 			} else {
