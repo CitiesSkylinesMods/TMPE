@@ -1,0 +1,8 @@
+language: csharp
+solution: "./TLM/TMPE.sln"
+branches:
+  only:
+    - master
+    - stable
+notifications:
+  - email: false
