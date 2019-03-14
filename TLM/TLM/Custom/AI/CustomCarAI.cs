@@ -65,8 +65,10 @@ namespace TrafficManager.Custom.AI {
 					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref vehicleData);
 					finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], mainPathState);
 
+#if DEBUG
 					if (debug)
 						Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Applied Parking AI logic. Path: {vehicleData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}");
+#endif
 				}
 #if BENCHMARK
 				}
