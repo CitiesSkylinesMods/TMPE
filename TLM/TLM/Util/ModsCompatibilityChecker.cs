@@ -28,7 +28,8 @@ namespace TrafficManager.Util {
             Log.Info("Performing incompatible mods check");
             Dictionary<ulong, string> incompatibleMods = new Dictionary<ulong, string>();
             for (int i = 0; i < userModList.Length; i++) {
-                if (incompatibleModList.TryGetValue(userModList[i], out string incompatibleModName)) {
+                string incompatibleModName;
+                if (incompatibleModList.TryGetValue(userModList[i], out incompatibleModName)) {
                     incompatibleMods.Add(userModList[i], incompatibleModName);
                 }
             }
@@ -56,7 +57,8 @@ namespace TrafficManager.Util {
 
             for (int i = 0; i < lines.Length; i++) {
                 string[] strings = lines[i].Split(';');
-                if (ulong.TryParse(strings[0], out ulong steamId)) {
+                ulong steamId;
+                if (ulong.TryParse(strings[0], out steamId)) {
                     incompatibleMods.Add(steamId, strings[1]);
                 }
             }
