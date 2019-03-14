@@ -190,19 +190,15 @@ namespace TrafficManager.UI.SubTools {
 			var guiColor = GUI.color;
 
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			for (int i = 0; i < 8; ++i) {
 				ushort segmentId = node.GetSegment(i);
 				if (segmentId == 0)
 					continue;
 
-				SegmentGeometry geometry = SegmentGeometry.Get(segmentId);
-				if (geometry == null) {
-					Log.Error($"JunctionRestrictionsTool.drawSignHandles: No geometry information available for segment {segmentId}");
-					continue;
-				}
-				bool startNode = geometry.StartNodeId() == nodeId;
-				bool incoming = geometry.IsIncoming(startNode);
+				bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+				bool incoming = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].incoming;
 
 				int numSignsPerRow = incoming ? 2 : 1;
 
@@ -230,7 +226,7 @@ namespace TrafficManager.UI.SubTools {
 				bool signHovered;
 				int x = 0;
 				int y = 0;
-				bool hasSignInFirstRow = false;
+				bool hasSignInPrevRow = false;
 
 				// draw "lane-changing when going straight allowed" sign at (0; 0)
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
@@ -249,7 +245,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					++x;
-					hasSignInFirstRow = true;
+					hasSignInPrevRow = true;
 				}
 
 				// draw "u-turns allowed" sign at (1; 0)
@@ -273,46 +269,14 @@ namespace TrafficManager.UI.SubTools {
 						}
 					}
 
-                    x++;
-					hasSignInFirstRow = true;
+					x++;
+					hasSignInPrevRow = true;
 				}
 
-                // draw "turn on red allowed" sign at (2; 0)
-                allowed = JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(segmentId, startNode);
-                configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
-                bool defaultAllowed = Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node);
-                bool turnOnRedValueSet = JunctionRestrictionsManager.Instance.IsTurnOnRedValueSet(segmentId, startNode);
-                if (
-                    debug ||
-                    (configurable &&
-                    ((!viewOnly || (turnOnRedValueSet && allowed != defaultAllowed))))
-                ) {
-	                // allowed only if value set to true or default is true
-	                allowed = turnOnRedValueSet ? allowed : defaultAllowed;
-                    if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered);
-                    } else {
-                        DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered);
-                    }
-
-                    if (signHovered && handleClick) {
-                        hovered = true;
-
-                        if (MainTool.CheckClicked()) {
-                            if (!JunctionRestrictionsManager.Instance.ToggleTurnOnRedAllowed(segmentId, startNode)) {
-                                // TODO MainTool.ShowTooltip(Translation.GetString("..."), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
-                            } else {
-                                stateUpdated = true;
-                            }
-                        }
-                    }
-
-                    hasSignInFirstRow = true;
-                }
-
                 x = 0;
-				if (hasSignInFirstRow) {
+				if (hasSignInPrevRow) {
 					++y;
+					hasSignInPrevRow = false;
 				}
 
 				// draw "entering blocked junctions allowed" sign at (0; 1)
@@ -334,6 +298,7 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					++x;
+					hasSignInPrevRow = true;
 				}
 
 				// draw "pedestrian crossing allowed" sign at (1; 1)
@@ -353,7 +318,44 @@ namespace TrafficManager.UI.SubTools {
 							stateUpdated = true;
 						}
 					}
+
+					x++;
+					hasSignInPrevRow = true;
 				}
+
+				x = 0;
+				if (hasSignInPrevRow) {
+					++y;
+					hasSignInPrevRow = false;
+				}
+
+#if TURNONRED
+				// draw "turn on red allowed" sign at (2; 0)
+				allowed = JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(segmentId, startNode);
+				configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
+				if (
+					debug ||
+					(configurable &&
+					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node)))
+				) {
+					if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+						DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered);
+					} else {
+						DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered);
+					}
+
+					if (signHovered && handleClick) {
+						hovered = true;
+
+						if (MainTool.CheckClicked()) {
+							JunctionRestrictionsManager.Instance.ToggleTurnOnRedAllowed(segmentId, startNode);
+							stateUpdated = true;
+						}
+					}
+
+					hasSignInPrevRow = true;
+				}
+#endif
 			}
 
 			guiColor.a = 1f;
@@ -362,7 +364,7 @@ namespace TrafficManager.UI.SubTools {
 			return hovered;
 		}
 
-		private void DrawSign(bool viewOnly, bool small, ref Vector3 camPos, ref Vector3 xu, ref Vector3 yu, float f, ref Vector3 zero, int x, int y, Color guiColor, Texture2D signTexture, out bool hoveredHandle, float aspectRatio = 1.0f) {
+		private void DrawSign(bool viewOnly, bool small, ref Vector3 camPos, ref Vector3 xu, ref Vector3 yu, float f, ref Vector3 zero, int x, int y, Color guiColor, Texture2D signTexture, out bool hoveredHandle) {
 			Vector3 signCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
 			Vector3 signScreenPos;
@@ -378,7 +380,7 @@ namespace TrafficManager.UI.SubTools {
 			var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 			var size = (small ? 0.75f : 1f) * (viewOnly ? 0.8f : 1f) * junctionRestrictionsSignSize * zoom;
 
-			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size * aspectRatio);
+			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
 			hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 			guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
 

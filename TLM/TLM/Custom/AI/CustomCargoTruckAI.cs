@@ -11,72 +11,48 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.RedirectionFramework.Attributes;
+using System.Runtime.CompilerServices;
 
 namespace TrafficManager.Custom.AI {
+	[TargetType(typeof(CargoTruckAI))]
 	public class CustomCargoTruckAI : CarAI {
+		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			try {
-				// NON-STOCK CODE START
-				bool mayDespawn = true;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "MayDespawn")) {
-#endif
-					mayDespawn = (vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
-#if BENCHMARK
-				}
-#endif
-				// NON-STOCK CODE END
+			// NON-STOCK CODE START
+			bool mayDespawn = (vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
+			// NON-STOCK CODE END
 
-				if (mayDespawn) {
-					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-				} else {
-					if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
-						RemoveOffers(vehicleId, ref vehicleData);
-						vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
-						vehicleData.m_flags |= Vehicle.Flags.GoingBack;
-						vehicleData.m_waitCounter = 0;
-						if (!StartPathFind(vehicleId, ref vehicleData)) {
-							vehicleData.Unspawn(vehicleId);
-						}
+			if (mayDespawn) {
+				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+			} else {
+				if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
+					RemoveOffers(vehicleId, ref vehicleData);
+					vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
+					vehicleData.m_flags |= Vehicle.Flags.GoingBack;
+					vehicleData.m_waitCounter = 0;
+					if (!StartPathFind(vehicleId, ref vehicleData)) {
+						vehicleData.Unspawn(vehicleId);
 					}
-
-					base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
 				}
-			} catch (Exception ex) {
-				Log.Error("Error in CargoTruckAI.SimulationStep: " + ex.ToString());
+
+				base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
 			}
 		}
 
-		// stock code
-		private static void RemoveOffers(ushort vehicleId, ref Vehicle data) {
-			if ((data.m_flags & Vehicle.Flags.WaitingTarget) != (Vehicle.Flags)0) {
-				var offer = default(TransferManager.TransferOffer);
-				offer.Vehicle = vehicleId;
-				if ((data.m_flags & Vehicle.Flags.TransferToSource) != (Vehicle.Flags)0) {
-					Singleton<TransferManager>.instance.RemoveIncomingOffer((TransferManager.TransferReason)data.m_transferType, offer);
-				} else if ((data.m_flags & Vehicle.Flags.TransferToTarget) != (Vehicle.Flags)0) {
-					Singleton<TransferManager>.instance.RemoveOutgoingOffer((TransferManager.TransferReason)data.m_transferType, offer);
-				}
-			}
-		}
-
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if DEBUG
 			//Log._Debug($"CustomCargoTruckAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnStartPathFind")) {
-#endif
-				ExtVehicleType vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-				if (vehicleType == ExtVehicleType.None) {
+			ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+			if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
-					Log.Warning($"CustomCargoTruck.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
+				Log.Warning($"CustomCargoTruck.CustomStartPathFind: Vehicle {vehicleID} does not have a valid vehicle type!");
 #endif
-				}
-#if BENCHMARK
 			}
-#endif
 
 			if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource | Vehicle.Flags.GoingBack)) != 0) {
 				return base.StartPathFind(vehicleID, ref vehicleData, startPos, endPos, startBothWays, endBothWays, undergroundTarget);
@@ -128,11 +104,11 @@ namespace TrafficManager.Custom.AI {
 					endPosB = default(PathUnit.Position);
 				}
 				NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.CargoVehicle;
-				VehicleInfo.VehicleType vehicleTypes =  VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane;
+				VehicleInfo.VehicleType vehicleTypes = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Ship | VehicleInfo.VehicleType.Plane;
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = ExtVehicleType.CargoVehicle;
 				args.vehicleId = vehicleID;
 				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -154,7 +130,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = false;
 				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-				if (pathMan.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (pathMan.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						pathMan.ReleasePath(vehicleData.m_path);
@@ -165,6 +141,12 @@ namespace TrafficManager.Custom.AI {
 				}
 			}
 			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		[RedirectReverse]
+		private void RemoveOffers(ushort vehicleId, ref Vehicle data) {
+			Log.Error("CustomCargoTruckAI.RemoveOffers called");
 		}
 	}
 }

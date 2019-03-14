@@ -19,6 +19,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 
 /// <summary>
 /// A segment end describes a directional traffic segment connected to a controlled node
@@ -40,7 +41,7 @@ namespace TrafficManager.Traffic.Impl {
 		/// <summary>
 		/// Vehicles that are traversing or will traverse this segment
 		/// </summary>
-		public ushort FirstRegisteredVehicleId { get; set; } = 0; // TODO private set
+		//public ushort FirstRegisteredVehicleId { get; set; } = 0; // TODO private set
 
 		private bool cleanupRequested = false;
 
@@ -60,7 +61,6 @@ namespace TrafficManager.Traffic.Impl {
 			return $"[SegmentEnd {base.ToString()}\n" +
 				"\t" + $"NodeId = {NodeId}\n" +
 				"\t" + $"numLanes = {numLanes}\n" +
-				"\t" + $"FirstRegisteredVehicleId = {FirstRegisteredVehicleId}\n" +
 				"\t" + $"cleanupRequested = {cleanupRequested}\n" +
 				"\t" + $"numVehiclesMovingToSegmentId = " + (numVehiclesMovingToSegmentId == null ? "<null>" : numVehiclesMovingToSegmentId.ArrayToString()) + "\n" +
 				"\t" + $"numVehiclesGoingToSegmentId = " + (numVehiclesGoingToSegmentId == null ? "<null>" : numVehiclesGoingToSegmentId.ArrayToString()) + "\n" +
@@ -68,7 +68,6 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		public SegmentEnd(ushort segmentId, bool startNode) : base(segmentId, startNode) {
-			FirstRegisteredVehicleId = 0;
 			Update();
 		}
 		
@@ -83,7 +82,8 @@ namespace TrafficManager.Traffic.Impl {
 		public IDictionary<ushort, uint>[] MeasureOutgoingVehicles(bool includeStopped=true, bool debug = false) {
 			//VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 			//NetManager netManager = Singleton<NetManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
 			// TODO pre-calculate this
 			uint avgSegLen = 0;
@@ -107,16 +107,21 @@ namespace TrafficManager.Traffic.Impl {
 				Log._Debug($"GetVehicleMetricGoingToSegment: Segment {SegmentId}, Node {NodeId}, includeStopped={includeStopped}.");
 #endif
 
-			ushort vehicleId = FirstRegisteredVehicleId;
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
 			int numProcessed = 0;
+			int numIter = 0;
 			while (vehicleId != 0) {
-				MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref vehStateManager.VehicleStates[vehicleId], ref numProcessed);
+				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle veh) {
+					MeasureOutgoingVehicle(debug, ret, includeStopped, avgSegLen, vehicleId, ref veh, ref vehStateManager.ExtVehicles[vehicleId], ref numProcessed);
+					return true;
+				});
+				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-				if ((Options.simAccuracy >= 3 && numProcessed >= 3) || (Options.simAccuracy == 2 && numProcessed >= 5) || (Options.simAccuracy == 1 && numProcessed >= 10)) {
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
-
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
 			}
 
 #if DEBUGMETRIC
@@ -126,13 +131,13 @@ namespace TrafficManager.Traffic.Impl {
 			return ret;
 		}
 
-		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref VehicleState state, ref int numProcessed) {
+		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref Vehicle vehicle, ref ExtVehicle state, ref int numProcessed) {
 #if DEBUGMETRIC
 			if (debug)
 				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
 #endif
 
-			if ((state.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+			if ((state.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: Vehicle {vehicleId} is unspawned. Ignoring.");
@@ -165,10 +170,10 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			if (!includeStopped && state.SqrVelocity < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+			if (!includeStopped && vehicle.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
 #if DEBUGMETRIC
 				if (debug)
-					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({state.SqrVelocity})");
+					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({vehicle.GetLastFrameVelocity().sqrMagnitude})");
 #endif
 				++numProcessed;
 				return;
@@ -197,13 +202,21 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		public int GetRegisteredVehicleCount() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-			ushort vehicleId = FirstRegisteredVehicleId;
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
 			int ret = 0;
+			int numIter = 0;
 			while (vehicleId != 0) {
 				++ret;
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
+				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
 			}
 			return ret;
 		}
@@ -213,26 +226,39 @@ namespace TrafficManager.Traffic.Impl {
 		}
 
 		private void UnregisterAllVehicles() {
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
-			while (FirstRegisteredVehicleId != 0) {
-				vehStateManager.VehicleStates[FirstRegisteredVehicleId].Unlink();
+			ExtVehicleManager extVehicleMan = ExtVehicleManager.Instance;
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
+			int numIter = 0;
+			while (segEndMan.ExtSegmentEnds[endIndex].firstVehicleId != 0) {
+				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[segEndMan.ExtSegmentEnds[endIndex].firstVehicleId]);
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
 			}
 		}
 
 		public void Update() {
-			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate(ushort segmentId, ref NetSegment segment) {
+			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate (ushort segmentId, ref NetSegment segment) {
 				StartNode = segment.m_startNode == NodeId;
 				numLanes = segment.Info.m_lanes.Length;
 				return true;
 			});
-			SegmentGeometry segGeo = SegmentGeometry.Get(SegmentId);
 
-			if (segGeo == null) {
-				Log.Error($"SegmentEnd.Update: No geometry information available for segment {SegmentId}");
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+				Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
 				return;
 			}
 
-			ushort[] outgoingSegmentIds = SegmentGeometry.Get(SegmentId).GetOutgoingSegments(StartNode);
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
+				RebuildVehicleNumDicts(ref node);
+				return true;
+			});
+		}
+
+		private void RebuildVehicleNumDicts(ref NetNode node) {
 			numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 			numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 
@@ -243,15 +269,29 @@ namespace TrafficManager.Traffic.Impl {
 				numVehiclesMovingToSegmentId[laneIndex] = numVehicleMoving;
 				numVehiclesGoingToSegmentId[laneIndex] = numVehicleGoing;
 
-				foreach (ushort otherSegmentId in outgoingSegmentIds) {
-					numVehicleMoving[otherSegmentId] = 0;
-					numVehicleGoing[otherSegmentId] = 0;
-				}
-				numVehicleMoving[SegmentId] = 0;
-				numVehicleGoing[SegmentId] = 0;
-
 				return true;
 			});
+
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+			for (int i = 0; i < 8; ++i) {
+				ushort segId = node.GetSegment(i);
+				if (segId == 0) {
+					continue;
+				}
+
+				if (!segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, NodeId))].outgoing) {
+					continue;
+				}
+				
+				foreach (TinyDictionary<ushort, uint> numVehiclesMovingToSegId in numVehiclesMovingToSegmentId) {
+					numVehiclesMovingToSegId[segId] = 0;
+				}
+
+				foreach (TinyDictionary<ushort, uint> numVehiclesGoingToSegId in numVehiclesGoingToSegmentId) {
+					numVehiclesGoingToSegId[segId] = 0;
+				}
+			}
 		}
 	}
 }

@@ -13,6 +13,7 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;
@@ -21,6 +22,8 @@ using static TrafficManager.Traffic.Data.PrioritySegment;
 namespace TrafficManager.Manager.Impl {
 	public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
 		public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
+		public const float MAX_EVASION_SPEED = 8f * 1f; // 50 km/h
+		public const float EVASION_SPEED = 8f * 0.2f; // 10 km/h
 		public const float ICY_ROADS_MIN_SPEED = 8f * 0.4f; // 20 km/h
 		public const float ICY_ROADS_STUDDED_MIN_SPEED = 8f * 0.8f; // 40 km/h
 		public const float WET_ROADS_MAX_SPEED = 8f * 2f; // 100 km/h
@@ -48,6 +51,527 @@ namespace TrafficManager.Manager.Impl {
 
 		}
 
+		public bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ref Citizen driverCitizen, ushort driverCitizenInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
+#if DEBUG
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverCitizenId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+#endif
+
+			PathManager pathManager = Singleton<PathManager>.instance;
+			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+			NetManager netManager = Singleton<NetManager>.instance;
+			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+
+			// NON-STOCK CODE START
+			bool allowPocketCars = true;
+			// NON-STOCK CODE END
+
+			if (driverCitizenId != 0u) {
+				if (Options.parkingAI && driverCitizenInstanceId != 0) {
+					allowPocketCars = false;
+				}
+
+				uint laneID = PathManager.GetLaneID(pathPos);
+				segmentOffset = (byte)Singleton<SimulationManager>.instance.m_randomizer.Int32(1, 254);
+				Vector3 refPos;
+				Vector3 vector;
+				netManager.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)segmentOffset * 0.003921569f, out refPos, out vector);
+				NetInfo info = netManager.m_segments.m_buffer[(int)pathPos.m_segment].Info;
+				bool isSegmentInverted = (netManager.m_segments.m_buffer[(int)pathPos.m_segment].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+				bool isPosNegative = info.m_lanes[(int)pathPos.m_lane].m_position < 0f;
+				vector.Normalize();
+				Vector3 searchDir;
+				if (isSegmentInverted != isPosNegative) {
+					searchDir.x = -vector.z;
+					searchDir.y = 0f;
+					searchDir.z = vector.x;
+				} else {
+					searchDir.x = vector.z;
+					searchDir.y = 0f;
+					searchDir.z = -vector.x;
+				}
+				ushort homeID = 0;
+				if (driverCitizenId != 0u) {
+					homeID = driverCitizen.m_homeBuilding;
+				}
+				Vector3 parkPos = default(Vector3);
+				Quaternion parkRot = default(Quaternion);
+				float parkOffset = -1f;
+
+				// NON-STOCK CODE START
+				bool foundParkingSpace = false;
+				bool searchedParkingSpace = false;
+
+				if (!allowPocketCars) {
+#if DEBUG
+					if (debug)
+						Log._Debug($"Vehicle {vehicleID} tries to park on a parking position now (flags: {vehicleData.m_flags})! CurrentPathMode={driverExtInstance.pathMode} path={vehicleData.m_path} pathPositionIndex={vehicleData.m_pathPositionIndex} segmentId={pathPos.m_segment} laneIndex={pathPos.m_lane} offset={pathPos.m_offset} nextPath={nextPath} refPos={refPos} searchDir={searchDir} home={homeID} driverCitizenId={driverCitizenId} driverCitizenInstanceId={driverCitizenInstanceId}");
+#endif
+
+					if (driverExtInstance.pathMode == ExtPathMode.DrivingToAltParkPos || driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos) {
+						// try to use previously found parking space
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {vehicleID} tries to park on an (alternative) parking position now! CurrentPathMode={driverExtInstance.pathMode} altParkingSpaceLocation={driverExtInstance.parkingSpaceLocation} altParkingSpaceLocationId={driverExtInstance.parkingSpaceLocationId}");
+#endif
+
+						switch (driverExtInstance.parkingSpaceLocation) {
+							case ExtParkingSpaceLocation.RoadSide:
+								uint parkLaneID; int parkLaneIndex;
+#if DEBUG
+								if (debug)
+									Log._Debug($"Vehicle {vehicleID} wants to park road-side @ segment {driverExtInstance.parkingSpaceLocationId}");
+#endif
+								searchedParkingSpace = true;
+								foundParkingSpace = AdvancedParkingManager.Instance.FindParkingSpaceRoadSideForVehiclePos(vehicleInfo, 0, driverExtInstance.parkingSpaceLocationId, refPos, out parkPos, out parkRot, out parkOffset, out parkLaneID, out parkLaneIndex);
+								break;
+							case ExtParkingSpaceLocation.Building:
+								float maxDist = 9999f;
+#if DEBUG
+								if (debug)
+									Log._Debug($"Vehicle {vehicleID} wants to park @ building {driverExtInstance.parkingSpaceLocationId}");
+#endif
+								searchedParkingSpace = true;
+								foundParkingSpace = AdvancedParkingManager.Instance.FindParkingSpacePropAtBuilding(vehicleInfo, homeID, 0, driverExtInstance.parkingSpaceLocationId, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[driverExtInstance.parkingSpaceLocationId], pathPos.m_segment, refPos, ref maxDist, true, out parkPos, out parkRot, out parkOffset);
+								break;
+							default:
+#if DEBUG
+								Log._Debug($"No alternative parking position stored for vehicle {vehicleID}! PathMode={driverExtInstance.pathMode}");
+#endif
+								break;
+						}
+					}
+				}
+
+				if (!searchedParkingSpace) {
+#if DEBUG
+					if (debug)
+						Log._Debug($"No parking space has yet been queried for vehicle {vehicleID}. Searching now.");
+#endif
+
+					searchedParkingSpace = true;
+					ExtParkingSpaceLocation location;
+					ushort locationId;
+					foundParkingSpace = Constants.ManagerFactory.AdvancedParkingManager.FindParkingSpaceInVicinity(refPos, searchDir, vehicleInfo, homeID, vehicleID, Options.parkingAI ? 32f : 16f, out location, out locationId, out parkPos, out parkRot, out parkOffset);
+				}
+
+				// NON-STOCK CODE END
+				ushort parkedVehicleId = 0;
+				bool parkedCarCreated = foundParkingSpace && vehicleManager.CreateParkedVehicle(out parkedVehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkPos, parkRot, driverCitizenId);
+				if (foundParkingSpace && parkedCarCreated) {
+					// we have reached a parking position
+#if DEBUG
+					float sqrDist = (refPos - parkPos).sqrMagnitude;
+					if (fineDebug)
+						Log._Debug($"Vehicle {vehicleID} succeeded in parking! CurrentPathMode={driverExtInstance.pathMode} sqrDist={sqrDist}");
+
+					if (GlobalConfig.Instance.Debug.Switches[6] && sqrDist >= 16000) {
+						Log._Debug($"CustomPassengerCarAI.CustomParkVehicle: FORCED PAUSE. Distance very large! Vehicle {vehicleID}. dist={sqrDist}");
+						Singleton<SimulationManager>.instance.SimulationPaused = true;
+					}
+#endif
+
+					driverCitizen.SetParkedVehicle(driverCitizenId, parkedVehicleId);
+					if (parkOffset >= 0f) {
+						segmentOffset = (byte)(parkOffset * 255f);
+					}
+
+					// NON-STOCK CODE START
+					if (!allowPocketCars) {
+						if ((driverExtInstance.pathMode == ExtPathMode.DrivingToAltParkPos || driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
+							// decrease parking space demand of target building
+							Constants.ManagerFactory.ExtBuildingManager.ModifyParkingSpaceDemand(ref ExtBuildingManager.Instance.ExtBuildings[targetBuildingId], parkPos, GlobalConfig.Instance.ParkingAI.MinFoundParkPosParkingSpaceDemandDelta, GlobalConfig.Instance.ParkingAI.MaxFoundParkPosParkingSpaceDemandDelta);
+						}
+
+						//if (driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToAltParkPos || driverExtInstance.CurrentPathMode == ExtCitizenInstance.PathMode.DrivingToKnownParkPos) {
+						// we have reached an (alternative) parking position and succeeded in finding a parking space
+						driverExtInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+						driverExtInstance.failedParkingAttempts = 0;
+						driverExtInstance.parkingSpaceLocation = ExtParkingSpaceLocation.None;
+						driverExtInstance.parkingSpaceLocationId = 0;
+#if DEBUG
+						if (debug)
+							Log._Debug($"Vehicle {vehicleID} has reached an (alternative) parking position! CurrentPathMode={driverExtInstance.pathMode} position={parkPos}");
+#endif
+						//}
+					}
+				} else if (!allowPocketCars) {
+					// could not find parking space. vehicle would despawn.
+					if (targetBuildingId != 0 && Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(driverCitizenInstanceId, ref driverInstance, ref driverCitizen)) {
+						// target is an outside connection
+						return true;
+					}
+
+					// Find parking space in the vicinity, redo path-finding to the parking space, park the vehicle and do citizen path-finding to the current target
+
+					if (!foundParkingSpace && (driverExtInstance.pathMode == ExtPathMode.DrivingToAltParkPos || driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos) && targetBuildingId != 0) {
+						// increase parking space demand of target building
+						if (driverExtInstance.failedParkingAttempts > 1) {
+							Constants.ManagerFactory.ExtBuildingManager.AddParkingSpaceDemand(ref ExtBuildingManager.Instance.ExtBuildings[targetBuildingId], GlobalConfig.Instance.ParkingAI.FailedParkingSpaceDemandIncrement * (uint)(driverExtInstance.failedParkingAttempts - 1));
+						}
+					}
+
+					if (!foundParkingSpace) {
+						++driverExtInstance.failedParkingAttempts;
+					} else {
+#if DEBUG
+						if (debug)
+							Log._Debug($"Parking failed for vehicle {vehicleID}: Parked car could not be created. ABORT.");
+#endif
+						driverExtInstance.failedParkingAttempts = GlobalConfig.Instance.ParkingAI.MaxParkingAttempts + 1;
+					}
+					driverExtInstance.pathMode = ExtPathMode.ParkingFailed;
+					driverExtInstance.parkingPathStartPosition = pathPos;
+
+#if DEBUG
+					if (debug)
+						Log._Debug($"Parking failed for vehicle {vehicleID}! (flags: {vehicleData.m_flags}) pathPos segment={pathPos.m_segment}, lane={pathPos.m_lane}, offset={pathPos.m_offset}. Trying to find parking space in the vicinity. FailedParkingAttempts={driverExtInstance.failedParkingAttempts}, CurrentPathMode={driverExtInstance.pathMode} foundParkingSpace={foundParkingSpace}");
+#endif
+
+					// invalidate paths of all passengers in order to force path recalculation
+					uint curUnitId = vehicleData.m_citizenUnits;
+					int numIter = 0;
+					while (curUnitId != 0u) {
+						uint nextUnit = citizenManager.m_units.m_buffer[curUnitId].m_nextUnit;
+						for (int i = 0; i < 5; i++) {
+							uint curCitizenId = citizenManager.m_units.m_buffer[curUnitId].GetCitizen(i);
+							if (curCitizenId != 0u) {
+								ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[curCitizenId].m_instance;
+								if (citizenInstanceId != 0) {
+
+#if DEBUG
+									if (debug)
+										Log._Debug($"Releasing path for citizen instance {citizenInstanceId} sitting in vehicle {vehicleID} (was {citizenManager.m_instances.m_buffer[citizenInstanceId].m_path}).");
+#endif
+									if (citizenInstanceId != driverCitizenInstanceId) {
+#if DEBUG
+										if (debug)
+											Log._Debug($"Resetting pathmode for passenger citizen instance {citizenInstanceId} sitting in vehicle {vehicleID} (was {ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode}).");
+#endif
+
+										Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(citizenInstanceId);
+									}
+
+									if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0) {
+										Singleton<PathManager>.instance.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+										citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
+									}
+								}
+							}
+						}
+						curUnitId = nextUnit;
+						if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+							CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+							break;
+						}
+					}
+					return false;
+					// NON-STOCK CODE END
+				}
+			} else {
+				segmentOffset = pathPos.m_offset;
+			}
+
+			// parking has succeeded
+			if (driverCitizenId != 0u) {
+				uint curCitizenUnitId = vehicleData.m_citizenUnits;
+				int numIter = 0;
+				while (curCitizenUnitId != 0u) {
+					uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+					for (int j = 0; j < 5; j++) {
+						uint citId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(j);
+						if (citId != 0u) {
+							ushort citizenInstanceId = citizenManager.m_citizens.m_buffer[citId].m_instance;
+							if (citizenInstanceId != 0) {
+								// NON-STOCK CODE START
+								if (!allowPocketCars) {
+									if (driverExtInstance.pathMode == ExtPathMode.RequiresWalkingPathToTarget) {
+#if DEBUG
+										if (debug)
+											Log._Debug($"Parking succeeded: Doing nothing for citizen instance {citizenInstanceId}! path: {citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_path}");
+#endif
+										ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode = ExtPathMode.RequiresWalkingPathToTarget;
+										continue;
+									}
+								}
+								// NON-STOCK CODE END
+
+								if (pathManager.AddPathReference(nextPath)) {
+									if (citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_path != 0u) {
+										pathManager.ReleasePath(citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_path);
+									}
+									citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_path = nextPath;
+									citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_pathPositionIndex = (byte)nextPositionIndex;
+									citizenManager.m_instances.m_buffer[(int)citizenInstanceId].m_lastPathOffset = segmentOffset;
+#if DEBUG
+									if (debug)
+										Log._Debug($"Parking succeeded (default): Setting path of citizen instance {citizenInstanceId} to {nextPath}!");
+#endif
+								}
+							}
+						}
+					}
+					curCitizenUnitId = nextUnit;
+					if (++numIter > 524288) {
+						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+						break;
+					}
+				}
+			}
+
+			if (!allowPocketCars) {
+				if (driverExtInstance.pathMode == ExtPathMode.RequiresWalkingPathToTarget) {
+#if DEBUG
+					if (debug)
+						Log._Debug($"Parking succeeded (alternative parking spot): Citizen instance {driverExtInstance} has to walk for the remaining path!");
+#endif
+					/*driverExtInstance.CurrentPathMode = ExtCitizenInstance.PathMode.CalculatingWalkingPathToTarget;
+					if (debug)
+						Log._Debug($"Setting CurrentPathMode of vehicle {vehicleID} to {driverExtInstance.CurrentPathMode}");*/
+				}
+			}
+
+			return true;
+		}
+
+		public bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref CitizenInstance driverInstanceData, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked) {
+#if DEBUG
+			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstanceData.m_citizen;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+
+			if (debug)
+				Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): called for vehicle {vehicleID}, driverInstanceId={driverInstanceId}, startPos={startPos}, endPos={endPos}, sourceBuilding={vehicleData.m_sourceBuilding}, targetBuilding={vehicleData.m_targetBuilding} pathMode={driverExtInstance.pathMode}");
+#endif
+
+			PathUnit.Position startPosA = default(PathUnit.Position);
+			PathUnit.Position startPosB = default(PathUnit.Position);
+			PathUnit.Position endPosA = default(PathUnit.Position);
+			float sqrDistA = 0f;
+			float sqrDistB;
+
+			ushort targetBuildingId = driverInstanceData.m_targetBuilding;
+			uint driverCitizenId = driverInstanceData.m_citizen;
+
+			// NON-STOCK CODE START
+			bool calculateEndPos = true;
+			bool allowRandomParking = true;
+			bool movingToParkingPos = false;
+			bool foundStartingPos = false;
+			bool skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+			ExtPathType extPathType = ExtPathType.None;
+#if BENCHMARK
+			using (var bm = new Benchmark(null, "ParkingAI")) {
+#endif
+			if (Options.parkingAI) {
+				//if (driverExtInstance != null) {
+#if DEBUG
+				if (debug)
+					Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): PathMode={driverExtInstance.pathMode} for vehicle {vehicleID}, driver citizen instance {driverExtInstance.instanceId}!");
+#endif
+
+				if (
+					driverExtInstance.pathMode != ExtPathMode.ParkingFailed &&
+					targetBuildingId != 0 &&
+					(Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None
+				) {
+					// target is outside connection
+					driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+
+#if DEBUG
+					if (debug)
+						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): PathMode was not ParkingFailed and target is outside connection: Setting pathMode={driverExtInstance.pathMode}");
+#endif
+				} else {
+					if (driverExtInstance.pathMode == ExtPathMode.DrivingToTarget || driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos || driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Skipping queue. pathMode={driverExtInstance.pathMode}");
+#endif
+						skipQueue = true;
+					}
+
+					bool allowTourists = false;
+					bool searchAtCurrentPos = false;
+					if (driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
+						// previous parking attempt failed
+						driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToAltParkPos;
+						allowTourists = true;
+						searchAtCurrentPos = true;
+
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Vehicle {vehicleID} shall move to an alternative parking position! CurrentPathMode={driverExtInstance.pathMode} FailedParkingAttempts={driverExtInstance.failedParkingAttempts}");
+#endif
+
+						if (driverExtInstance.parkingPathStartPosition != null) {
+							startPosA = (PathUnit.Position)driverExtInstance.parkingPathStartPosition;
+							foundStartingPos = true;
+#if DEBUG
+							if (debug)
+								Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Setting starting pos for {vehicleID} to segment={startPosA.m_segment}, laneIndex={startPosA.m_lane}, offset={startPosA.m_offset}");
+#endif
+						}
+						startBothWays = false;
+
+						if (driverExtInstance.failedParkingAttempts > GlobalConfig.Instance.ParkingAI.MaxParkingAttempts) {
+							// maximum number of parking attempts reached
+#if DEBUG
+							if (debug)
+								Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Reached maximum number of parking attempts for vehicle {vehicleID}! GIVING UP.");
+#endif
+							Constants.ManagerFactory.ExtCitizenInstanceManager.Reset(ref driverExtInstance);
+
+							// pocket car fallback
+							//vehicleData.m_flags |= Vehicle.Flags.Parking;
+							return false;
+						} else {
+#if DEBUG
+							if (fineDebug)
+								Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Increased number of parking attempts for vehicle {vehicleID}: {driverExtInstance.failedParkingAttempts}/{GlobalConfig.Instance.ParkingAI.MaxParkingAttempts}");
+#endif
+						}
+					} else {
+						driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToKnownParkPos;
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): No parking involved: Setting pathMode={driverExtInstance.pathMode}");
+#endif
+					}
+
+					ushort homeId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[driverCitizenId].m_homeBuilding;
+					bool calcEndPos;
+					Vector3 parkPos;
+
+					if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(searchAtCurrentPos ? vehicleData.GetLastFramePosition() : endPos, vehicleData.Info, ref driverExtInstance, homeId, targetBuildingId == homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
+						calculateEndPos = calcEndPos;
+						allowRandomParking = false;
+						movingToParkingPos = true;
+
+						if (!Constants.ManagerFactory.ExtCitizenInstanceManager.CalculateReturnPath(ref driverExtInstance, parkPos, endPos)) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Could not calculate return path for citizen instance {driverExtInstance.instanceId}, vehicle {vehicleID}. Resetting instance.");
+#endif
+							Constants.ManagerFactory.ExtCitizenInstanceManager.Reset(ref driverExtInstance);
+							return false;
+						}
+					} else if (driverExtInstance.pathMode == ExtPathMode.CalculatingCarPathToAltParkPos) {
+						// no alternative parking spot found: abort
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.instanceId} with CurrentPathMode={driverExtInstance.pathMode}! GIVING UP.");
+#endif
+						Constants.ManagerFactory.ExtCitizenInstanceManager.Reset(ref driverExtInstance);
+						return false;
+					} else {
+						// calculate a direct path to target
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): No alternative parking spot found for vehicle {vehicleID}, citizen instance {driverExtInstance.instanceId} with CurrentPathMode={driverExtInstance.pathMode}! Setting CurrentPathMode to 'CalculatingCarPath'.");
+#endif
+						driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+					}
+				}
+
+				extPathType = driverExtInstance.GetPathType();
+				/*} else {
+#if DEBUG
+					if (debug)
+						Log.Warning($"CustomPassengerCarAI.CustomStartPathFind: No driver citizen instance found for vehicle {vehicleID}!");
+#endif
+				}*/
+			}
+#if BENCHMARK
+			}
+#endif
+
+			NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle;
+			if (!movingToParkingPos) {
+				laneTypes |= NetInfo.LaneType.Pedestrian;
+			}
+			// NON-STOCK CODE END
+
+			VehicleInfo.VehicleType vehicleTypes = vehicleInfo.m_vehicleType;
+			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
+			bool randomParking = false;
+			bool combustionEngine = vehicleInfo.m_class.m_subService == ItemClass.SubService.ResidentialLow;
+			if (allowRandomParking && // NON-STOCK CODE
+				!movingToParkingPos &&
+				targetBuildingId != 0 &&
+				(
+					Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office ||
+					(driverInstanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None
+				)) {
+				randomParking = true;
+			}
+
+#if DEBUG
+			if (fineDebug)
+				Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Requesting path-finding for passenger car {vehicleID}, startPos={startPos}, endPos={endPos}, extPathType={extPathType}");
+#endif
+
+			// NON-STOCK CODE START
+			if (!foundStartingPos) {
+				foundStartingPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleTypes, allowUnderground, false, 32f, out startPosA, out startPosB, out sqrDistA, out sqrDistB);
+			}
+
+			bool foundEndPos = !calculateEndPos || Constants.ManagerFactory.ExtCitizenInstanceManager.FindEndPathPosition(driverInstanceId, ref driverInstanceData, endPos, Options.parkingAI && (targetBuildingId == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleTypes, undergroundTarget, out endPosA);
+			// NON-STOCK CODE END
+
+			if (foundStartingPos &&
+				foundEndPos) { // NON-STOCK CODE
+
+				if (!startBothWays || sqrDistA < 10f) {
+					startPosB = default(PathUnit.Position);
+				}
+				PathUnit.Position endPosB = default(PathUnit.Position);
+				SimulationManager simMan = Singleton<SimulationManager>.instance;
+				uint path;
+				PathUnit.Position dummyPathPos = default(PathUnit.Position);
+				// NON-STOCK CODE START
+				PathCreationArgs args;
+				args.extPathType = extPathType;
+				args.extVehicleType = ExtVehicleType.PassengerCar;
+				args.vehicleId = vehicleID;
+				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+				args.buildIndex = simMan.m_currentBuildIndex;
+				args.startPosA = startPosA;
+				args.startPosB = startPosB;
+				args.endPosA = endPosA;
+				args.endPosB = endPosB;
+				args.vehiclePosition = dummyPathPos;
+				args.laneTypes = laneTypes;
+				args.vehicleTypes = vehicleTypes;
+				args.maxLength = 20000f;
+				args.isHeavyVehicle = isHeavyVehicle;
+				args.hasCombustionEngine = hasCombustionEngine;
+				args.ignoreBlocked = ignoreBlocked;
+				args.ignoreFlooded = false;
+				args.ignoreCosts = false;
+				args.randomParking = randomParking;
+				args.stablePath = false;
+				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref simMan.m_randomizer, args)) {
+#if DEBUG
+					if (debug)
+						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Path-finding starts for passenger car {vehicleID}, path={path}, startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, laneType={laneTypes}, vehicleType={vehicleTypes}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+#endif
+					// NON-STOCK CODE END
+
+					if (vehicleData.m_path != 0u) {
+						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+					}
+					vehicleData.m_path = path;
+					vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public bool IsSpaceReservationAllowed(ushort transitNodeId, PathUnit.Position sourcePos, PathUnit.Position targetPos) {
 			if (!Options.timedLightsEnabled) {
 				return true;
@@ -59,7 +583,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 				Vehicle dummyVeh = default(Vehicle);
 #endif
-				CustomRoadAI.GetTrafficLightState(
+				Constants.ManagerFactory.TrafficLightSimulationManager.GetTrafficLightState(
 #if DEBUG
 					0, ref dummyVeh,
 #endif
@@ -70,6 +594,26 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 			return true;
+		}
+
+		/// <summary>
+		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
+		/// Sets the maximum allowed speed <paramref name="maxSpeed"/> if segment change is not allowed (otherwise <paramref name="maxSpeed"/> has to be set by the calling method).
+		/// </summary>
+		/// <param name="frontVehicleId">vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="sqrVelocity">last frame squared velocity</param>
+		/// <param name="prevPos">previous path position</param>
+		/// <param name="prevTargetNodeId">previous target node</param>
+		/// <param name="prevLaneID">previous lane</param>
+		/// <param name="position">current path position</param>
+		/// <param name="targetNodeId">transit node</param>
+		/// <param name="laneID">current lane</param>
+		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
+		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID) {
+			VehicleJunctionTransitState transitState = MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0);
+			Constants.ManagerFactory.ExtVehicleManager.SetJunctionTransitState(ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId], transitState);
+			return transitState == VehicleJunctionTransitState.Leave /* || transitState == VehicleJunctionTransitState.Blocked*/;
 		}
 
 		/// <summary>
@@ -87,51 +631,51 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="laneID">current lane</param>
 		/// <param name="nextPosition">next path position</param>
 		/// <param name="nextTargetNodeId">next target node</param>
-		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
 		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
-			return MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.VehicleStateManager.VehicleStates[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref nextPosition, nextTargetNodeId, out maxSpeed);
+		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId) {
+			VehicleJunctionTransitState transitState = MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref nextPosition, nextTargetNodeId);
+			Constants.ManagerFactory.ExtVehicleManager.SetJunctionTransitState(ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId], transitState);
+			return transitState == VehicleJunctionTransitState.Leave /* || transitState == VehicleJunctionTransitState.Blocked*/;
 		}
 
-		protected bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
+		protected VehicleJunctionTransitState MayChangeSegment(ushort frontVehicleId, ref ExtVehicle extVehicle, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId) {
 			//public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.NodeId <= 0 || targetNodeId == GlobalConfig.Instance.Debug.NodeId);
-#endif
-
-#if BENCHMARK
-			//using (var bm = new Benchmark(null, "MayDespawn")) {
 #endif
 
 			if (prevTargetNodeId != targetNodeId
 				|| (vehicleData.m_blockCounter == 255 && !VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) // NON-STOCK CODE
 			) {
 				// method should only be called if targetNodeId == prevTargetNode
-				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-				maxSpeed = 0f;
-				return true;
+				return VehicleJunctionTransitState.Leave;
 			}
-#if BENCHMARK
-			//}
-#endif
 
-
-			if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Leave) {
+			if (extVehicle.junctionTransitState == VehicleJunctionTransitState.Leave) {
 				// vehicle was already allowed to leave the junction
-				maxSpeed = 0f;
-				return true;
+				if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && (extVehicle.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
+					// vehicle is not moving. reset allowance to leave junction
+#if DEBUG
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
+#endif
+					return VehicleJunctionTransitState.Blocked;
+				} else {
+					return VehicleJunctionTransitState.Leave;
+				}
 			}
 
-			if ((vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop || vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) &&
-				vehicleState.lastTransitStateUpdate >> VehicleState.JUNCTION_RECHECK_SHIFT >= Constants.ServiceFactory.SimulationService.CurrentFrameIndex >> VehicleState.JUNCTION_RECHECK_SHIFT) {
+			uint currentFrameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+			if ((extVehicle.junctionTransitState == VehicleJunctionTransitState.Stop || extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked) &&
+				extVehicle.lastTransitStateUpdate >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT >= currentFrameIndex >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT) {
 				// reuse recent result
-				maxSpeed = 0f;
-				return false;
+				return extVehicle.junctionTransitState;
 			}
 
-			bool isRecklessDriver = vehicleState.recklessDriver;
+			bool isRecklessDriver = extVehicle.recklessDriver;
 
 			var netManager = Singleton<NetManager>.instance;
+			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
 			bool hasActiveTimedSimulation = (Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId));
 			bool hasTrafficLightFlag = (targetNode.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
@@ -158,34 +702,25 @@ namespace TrafficManager.Manager.Impl {
 						if ((vehicleData.m_flags2 & Vehicle.Flags2.Yielding) == (Vehicle.Flags2)0) {
 							if (sqrVelocity < 0.01f) {
 								vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
-							} else {
-								vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
 							}
-							maxSpeed = 0f;
-							return false;
+							return VehicleJunctionTransitState.Stop;
 						} else {
 							vehicleData.m_waitCounter = (byte)Mathf.Min((int)(vehicleData.m_waitCounter + 1), 4);
 							if (vehicleData.m_waitCounter < 4) {
-								maxSpeed = 0f;
-								return false;
+								return VehicleJunctionTransitState.Stop;
 							}
 							vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
 							vehicleData.m_waitCounter = 0;
 						}
 					} else if (sqrVelocity > 0.01f) {
-						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-						maxSpeed = 0f;
-						return false;
+						return VehicleJunctionTransitState.Stop;
 					}
 				}
 
 				// entering blocked junctions
 				if (MustCheckSpace(prevPos.m_segment, isTargetStartNode, ref targetNode, isRecklessDriver)) {
-#if BENCHMARK
-					//using (var bm = new Benchmark(null, "CheckSpace")) {
-#endif
 					// check if there is enough space
-					var len = vehicleState.totalLength + 4f;
+					var len = extVehicle.totalLength + 4f;
 					if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
 						var sufficientSpace = false;
 						if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
@@ -200,19 +735,14 @@ namespace TrafficManager.Manager.Impl {
 						}
 
 						if (!sufficientSpace) {
-							maxSpeed = 0f;
 #if DEBUG
 							if (debug)
 								Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState to BLOCKED");
 #endif
 
-							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
-							return false;
+							return VehicleJunctionTransitState.Blocked;
 						}
 					}
-#if BENCHMARK
-					//}
-#endif
 				}
 
 				bool isJoinedJunction = ((NetLane.Flags)netManager.m_lanes.m_buffer[prevLaneID].m_flags & NetLane.Flags.JoinedJunction) != NetLane.Flags.None;
@@ -232,12 +762,14 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.Blocked) {
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			VehicleJunctionTransitState transitState = extVehicle.junctionTransitState;
+			if (extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked) {
 #if DEBUG
 				if (debug)
 					Log._Debug($"Vehicle {frontVehicleId}: Setting JunctionTransitState from BLOCKED to APPROACH");
 #endif
-				vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
+				transitState = VehicleJunctionTransitState.Approach;
 			}
 
 			ITrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
@@ -245,43 +777,36 @@ namespace TrafficManager.Manager.Impl {
 			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) == 0 || isLevelCrossing) {
 				if (hasTrafficLight && checkTrafficLights) {
 #if DEBUG
-					if (debug) {
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Node {targetNodeId} has a traffic light.");
-					}
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Node {targetNodeId} has a traffic light.");
+				}
 #endif
-					RoadBaseAI.TrafficLightState vehicleLightState;
 					bool stopCar = false;
-#if BENCHMARK
-					//using (var bm = new Benchmark(null, "CheckTrafficLight")) {
-#endif
+					uint simGroup = (uint)targetNodeId >> 7;
 
-					var destinationInfo = targetNode.Info;
-
-					uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-					uint targetNodeLower8Bits = (uint)((targetNodeId << 8) / 32768);
-
+					RoadBaseAI.TrafficLightState vehicleLightState;
 					RoadBaseAI.TrafficLightState pedestrianLightState;
 					bool vehicles;
 					bool pedestrians;
-					CustomRoadAI.GetTrafficLightState(
+					Constants.ManagerFactory.TrafficLightSimulationManager.GetTrafficLightState(
 #if DEBUG
-							frontVehicleId, ref vehicleData,
+						frontVehicleId, ref vehicleData,
 #endif
-							targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - targetNodeLower8Bits, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+						targetNodeId, prevPos.m_segment, prevPos.m_lane, position.m_segment, ref prevSegment, currentFrameIndex - simGroup, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians); // TODO current frame index or reference frame index?
 
 					if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Car && isRecklessDriver && !isLevelCrossing) {
 						vehicleLightState = RoadBaseAI.TrafficLightState.Green;
 					}
 
 #if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle {frontVehicleId} has TL state {vehicleLightState} at node {targetNodeId}");
+				if (debug)
+					Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle {frontVehicleId} has TL state {vehicleLightState} at node {targetNodeId} (recklessDriver={isRecklessDriver})");
 #endif
 
-					uint random = currentFrameIndex - targetNodeLower8Bits & 255u;
+					uint random = currentFrameIndex - simGroup & 255u;
 					if (!vehicles && random >= 196u) {
 						vehicles = true;
-						RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - targetNodeLower8Bits, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
+						RoadBaseAI.SetTrafficLightState(targetNodeId, ref prevSegment, currentFrameIndex - simGroup, vehicleLightState, pedestrianLightState, vehicles, pedestrians);
 					}
 
 					switch (vehicleLightState) {
@@ -299,26 +824,33 @@ namespace TrafficManager.Manager.Impl {
 							}
 							break;
 					}
-#if BENCHMARK
-					//}
+
+#if TURNONRED
+					// Check if turning in the preferred direction, and if turning while it's red is allowed
+					if (stopCar && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
+						SegmentGeometry currentSegGeo = SegmentGeometry.Get(prevPos.m_segment);
+						SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
+						ArrowDirection targetDir = currentSegEndGeo.GetDirection(position.m_segment);
+						bool lhd = Services.SimulationService.LeftHandDrive;
+						if (lhd && targetDir == ArrowDirection.Left || !lhd && targetDir == ArrowDirection.Right) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");
+#endif
+							stopCar = false;
+						}
+					}
 #endif
 
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {
-						bool hasPriority = true;
-#if BENCHMARK
-						//using (var bm = new Benchmark(null, "CheckPriorityRulesAtTTL")) {
-#endif
-						hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
-#if BENCHMARK
-						//}
-#endif
+						bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
 
 						if (!hasPriority) {
 							// green light but other cars are incoming and they have priority: stop
 #if DEBUG
-							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light but detected traffic with higher priority: stop.");
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light (or turn on red allowed) but detected traffic with higher priority: stop.");
 #endif
 							stopCar = true;
 						}
@@ -326,8 +858,8 @@ namespace TrafficManager.Manager.Impl {
 
 					if (stopCar) {
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP");
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP");
 #endif
 
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
@@ -335,305 +867,110 @@ namespace TrafficManager.Manager.Impl {
 							vehicleData.m_waitCounter = 0;
 						}
 
-                        // Check if turning in the preferred direction, and if turning while it's red is allowed
-                        if (Options.turnOnRed) {
-                            if (JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode)) {
-                                // Check if vehicle has stopped
-                                if ((vehicleState.JunctionTransitState == VehicleJunctionTransitState.Stop && sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY)
-                                    || isRecklessDriver && sqrVelocity <= TrafficPriorityManager.MAX_YIELD_VELOCITY) {
-
-                                    ushort uCurrentSegment = prevPos.m_segment;
-                                    ushort uTargetSegment = position.m_segment;
-
-                                    // If you can turn preferred and you're not going straight, continue
-                                    SegmentGeometry currentSegGeo = SegmentGeometry.Get(uCurrentSegment);
-                                    SegmentEndGeometry currentSegEndGeo = currentSegGeo.GetEnd(targetNodeId);
-#if DEBUG
-                                    if (debug)
-                                        Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): uCurrentSegment={uCurrentSegment}, hasValidTurnOnRedOutgoingSegment={currentSegGeo.HasValidTurnOnRedOutgoingSegment(currentSegEndGeo)}, isStraightSegment1={currentSegGeo.IsStraightSegment(uTargetSegment, false)}, isStraightSegment2={currentSegGeo.IsStraightSegment(uTargetSegment, true)}");
-#endif
-                                    if (currentSegGeo.HasValidTurnOnRedOutgoingSegment(currentSegEndGeo) && !currentSegGeo.IsStraightSegment(uTargetSegment, false) && !currentSegGeo.IsStraightSegment(uTargetSegment, true)) {
-
-                                        ushort uTurnSegment = 0;
-
-                                        Constants.ServiceFactory.NetService.ProcessSegment(uCurrentSegment, delegate (ushort sId, ref NetSegment segment) {
-                                            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-                                                uTurnSegment = segment.GetLeftSegment(targetNodeId);
-                                            } else {
-                                                uTurnSegment = segment.GetRightSegment(targetNodeId);
-                                            }
-                                            return true;
-                                        });
-
-                                        SegmentGeometry turnSegGeo = SegmentGeometry.Get(uTurnSegment);
-#if DEBUG
-                                        if (debug)
-                                            Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): turnOnRed, targetIsTurn={uTargetSegment == uTurnSegment}, oneWayToOneWay={currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true}");
-#endif
-                                        bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
-                                        if (hasPriority && (uTargetSegment == uTurnSegment || (currentSegGeo.IsOneWay() && turnSegGeo?.IsOneWay() == true))) {
-                                            vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-                                            maxSpeed = 0f;
-                                            return true;
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-						maxSpeed = 0f;
 						vehicleData.m_blockCounter = 0;
-						return false;
+						return VehicleJunctionTransitState.Stop;
 					} else {
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 #endif
-						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
 
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
 							vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
 							vehicleData.m_waitCounter = 0;
 						}
+
+						return VehicleJunctionTransitState.Leave;
 					}
 				} else if (Options.prioritySignsEnabled && vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Monorail) {
-#if BENCHMARK
-					//using (var bm = new Benchmark(null, "CheckPriorityRules")) {
-#endif
-
 #if DEBUG
-					//bool debug = destinationNodeId == 10864;
-					//bool debug = destinationNodeId == 13531;
-					//bool debug = false;// targetNodeId == 5027;
-#endif
-					//bool debug = false;
-#if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
+				if (debug)
+					Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
 					var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
-					if (sign != PrioritySegment.PriorityType.None) {
+					if (sign != PriorityType.None) {
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
 #endif
 
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): JunctionTransitState={vehicleState.JunctionTransitState.ToString()}");
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): JunctionTransitState={transitState.ToString()}");
 #endif
 
-						if (vehicleState.JunctionTransitState == VehicleJunctionTransitState.None) {
+						if (transitState == VehicleJunctionTransitState.None) {
 #if DEBUG
-							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to APPROACH (prio)");
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to APPROACH (prio)");
 #endif
-							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Approach;
+							transitState = VehicleJunctionTransitState.Approach;
 						}
 
-						if (vehicleState.JunctionTransitState != VehicleJunctionTransitState.Leave) {
-							bool hasPriority;
-							switch (sign) {
-								case PriorityType.Stop:
-#if DEBUG
-									if (debug)
-										Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): STOP sign. waittime={vehicleState.waitTime}, sqrVelocity={sqrVelocity}");
-#endif
-
-									maxSpeed = 0f;
-
-									if (vehicleState.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait) waitTime={vehicleState.waitTime}");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-
-										if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
-											vehicleState.waitTime++;
-
-											//float minStopWaitTime = Singleton<SimulationManager>.instance.m_randomizer.UInt32(3);
-											if (vehicleState.waitTime >= 2) {
-												if (Options.simAccuracy >= 4) {
-													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-												} else {
-													hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
-#if DEBUG
-													if (debug)
-														Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority={hasPriority}");
-#endif
-
-													if (!hasPriority) {
-														vehicleData.m_blockCounter = 0;
-														return false;
-													}
-#if DEBUG
-													if (debug)
-														Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (min wait timeout)");
-#endif
-													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-												}
-
-#if DEBUG
-												if (debug)
-													Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle must first come to a full stop in front of the stop sign.");
-#endif
-												return false;
-											}
-										} else {
-#if DEBUG
-											if (debug)
-												Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has come to a full stop.");
-#endif
-											vehicleState.waitTime = 0;
-											return false;
-										}
-									} else {
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Max. wait time exceeded. Setting JunctionTransitState to LEAVE (max wait timeout)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-									}
-									break;
-								case PriorityType.Yield:
-#if DEBUG
-									if (debug)
-										Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): YIELD sign. waittime={vehicleState.waitTime}");
-#endif
-
-									if (vehicleState.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
-										vehicleState.waitTime++;
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-
-										if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_YIELD_VELOCITY || Options.simAccuracy <= 2) {
-											if (Options.simAccuracy >= 4) {
-												vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-											} else {
-												hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
-#if DEBUG
-												if (debug)
-													Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
-#endif
-
-												if (!hasPriority) {
-													vehicleData.m_blockCounter = 0;
-													maxSpeed = 0f;
-													return false;
-												} else {
-#if DEBUG
-													if (debug)
-														Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no incoming cars)");
-#endif
-													vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-												}
-											}
-										} else {
-#if DEBUG
-											if (debug)
-												Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has not yet reached yield speed (reduce {sqrVelocity} by {vehicleState.reduceSqrSpeedByValueToYield})");
-#endif
-
-											// vehicle has not yet reached yield speed
-											maxSpeed = TrafficPriorityManager.MAX_YIELD_VELOCITY;
-											return false;
-										}
-									} else {
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (max wait timeout)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-									}
-									break;
-								case PriorityType.Main:
-								default:
-#if DEBUG
-									if (debug)
-										Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): MAIN sign. waittime={vehicleState.waitTime}");
-#endif
-									maxSpeed = 0f;
-
-									if (Options.simAccuracy == 4)
-										return true;
-
-									if (vehicleState.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
-										vehicleState.waitTime++;
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-
-										hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, targetNodeId, isTargetStartNode, ref position, ref targetNode);
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): {hasPriority}");
-#endif
-
-										if (!hasPriority) {
-											vehicleData.m_blockCounter = 0;
-											return false;
-										}
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no conflicting car)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-									} else {
-#if DEBUG
-										if (debug)
-											Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Max. wait time exceeded. Setting JunctionTransitState to LEAVE (max wait timeout)");
-#endif
-										vehicleState.JunctionTransitState = VehicleJunctionTransitState.Leave;
-									}
-									return true;
+						if (sign == PriorityType.Stop) {
+							if (transitState == VehicleJunctionTransitState.Approach) {
+								extVehicle.waitTime = 0;
 							}
-						} else if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && (vehicleState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
-							// vehicle is not moving. reset allowance to leave junction
+
+							if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+								++extVehicle.waitTime;
+
+								if (extVehicle.waitTime < 2) {
+									vehicleData.m_blockCounter = 0;
+									return VehicleJunctionTransitState.Stop;
+								}
+							} else {
 #if DEBUG
 							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState from LEAVE to BLOCKED (speed to low)");
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has come to a full stop.");
 #endif
-							vehicleState.JunctionTransitState = VehicleJunctionTransitState.Blocked;
-
-							maxSpeed = 0f;
-							return false;
+								vehicleData.m_blockCounter = 0;
+								return VehicleJunctionTransitState.Stop;
+							}
 						}
-					}
-#if BENCHMARK
-					//}
+#if DEBUG
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): {sign} sign. waittime={extVehicle.waitTime}");
 #endif
-				}
-			}
-			maxSpeed = 0f; // maxSpeed should be set by caller
-			return true;
-		}
+						if (extVehicle.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
+							extVehicle.waitTime++;
+#if DEBUG
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
+#endif
+							bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
+#if DEBUG
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
+#endif
 
-		/// <summary>
-		/// Checks for traffic lights and priority signs when changing segments (for rail vehicles).
-		/// Sets the maximum allowed speed <paramref name="maxSpeed"/> if segment change is not allowed (otherwise <paramref name="maxSpeed"/> has to be set by the calling method).
-		/// </summary>
-		/// <param name="frontVehicleId">vehicle id</param>
-		/// <param name="vehicleData">vehicle data</param>
-		/// <param name="sqrVelocity">last frame squared velocity</param>
-		/// <param name="prevPos">previous path position</param>
-		/// <param name="prevTargetNodeId">previous target node</param>
-		/// <param name="prevLaneID">previous lane</param>
-		/// <param name="position">current path position</param>
-		/// <param name="targetNodeId">transit node</param>
-		/// <param name="laneID">current lane</param>
-		/// <param name="maxSpeed">maximum allowed speed (only valid if method returns false)</param>
-		/// <returns>true, if the vehicle may change segments, false otherwise.</returns>
-		public bool MayChangeSegment(ushort frontVehicleId, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, out float maxSpeed) {
-			return MayChangeSegment(frontVehicleId, ref Constants.ManagerFactory.VehicleStateManager.VehicleStates[frontVehicleId], ref vehicleData, sqrVelocity, ref prevPos, ref prevSegment, prevTargetNodeId, prevLaneID, ref position, targetNodeId, ref targetNode, laneID, ref DUMMY_POS, 0, out maxSpeed);
+							if (!hasPriority) {
+								vehicleData.m_blockCounter = 0;
+								return VehicleJunctionTransitState.Stop;
+							} else {
+#if DEBUG
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no conflicting cars)");
+#endif
+								return VehicleJunctionTransitState.Leave;
+							}
+						} else {
+#if DEBUG
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (max wait timeout)");
+#endif
+							return VehicleJunctionTransitState.Leave;
+						}
+					} else {
+						return VehicleJunctionTransitState.Leave;
+					}
+				} else {
+					return VehicleJunctionTransitState.Leave;
+				}
+			} else {
+				return VehicleJunctionTransitState.Leave;
+			}
 		}
 
 		/// <summary>
@@ -664,7 +1001,7 @@ namespace TrafficManager.Manager.Impl {
 			return !Options.disableDespawning || ((vehicleData.m_flags2 & (Vehicle.Flags2.Blown | Vehicle.Flags2.Floating)) != 0) || (vehicleData.m_flags & Vehicle.Flags.Parking) != 0;
 		}
 
-		public float CalcMaxSpeed(ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed) {
+		public float CalcMaxSpeed(ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo, PathUnit.Position position, ref NetSegment segment, Vector3 pos, float maxSpeed, bool emergency) {
 			if (Singleton<NetManager>.instance.m_treatWetAsSnow) {
 				DistrictManager districtManager = Singleton<DistrictManager>.instance;
 				byte district = districtManager.GetDistrict(pos);
@@ -704,38 +1041,23 @@ namespace TrafficManager.Manager.Impl {
 				maxSpeed *= 1f + (float)segment.m_condition * 0.0005882353f; // vanilla: ±0% .. +15 %
 			}
 
-			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref state, vehicleInfo);
+			maxSpeed = ApplyRealisticSpeeds(maxSpeed, vehicleId, ref extVehicle, vehicleInfo);
 			maxSpeed = Math.Max(MIN_SPEED, maxSpeed); // at least 10 km/h
 
 			return maxSpeed;
 		}
 
-		public uint GetStaticVehicleRand(ushort vehicleId) {
-			return vehicleId % 100u;
-		}
-
-		public uint GetTimedVehicleRand(ushort vehicleId) {
-			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
-			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
-			uint step = VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
-			if (step >= intv) {
-				step = VehicleState.MAX_TIMED_RAND - step;
-			}
-
-			return range + step;
-		}
-
-		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo) {
+		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref ExtVehicle extVehicle, VehicleInfo vehicleInfo) {
 			if (Options.realisticSpeeds) {
-				float vehicleRand = 0.01f * (float)GetTimedVehicleRand(vehicleId);
+				float vehicleRand = 0.01f * (float)Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
-				} else if (state.recklessDriver) {
-					speed *= 1.1f + vehicleRand * 0.5f; // woohooo, 1.1 .. 1.6
+				} else if (extVehicle.recklessDriver) {
+					speed *= 1.3f + vehicleRand * 1.7f; // woohooo, 1.3 .. 3
 				} else {
 					speed *= 0.8f + vehicleRand * 0.5f; // a little variance, 0.8 .. 1.3
 				}
-			} else if (state.recklessDriver) {
+			} else if (extVehicle.recklessDriver) {
 				speed *= 1.5f;
 			}
 			return speed;
@@ -758,7 +1080,7 @@ namespace TrafficManager.Manager.Impl {
 			return (uint)vehicleId % Options.getRecklessDriverModulo() == 0;
 		}
 
-		public int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos) {
+		public int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos) {
 			try {
 				GlobalConfig conf = GlobalConfig.Instance;
 #if DEBUG
@@ -791,12 +1113,12 @@ namespace TrafficManager.Manager.Impl {
 				uint currentFwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentLaneId, startNode);
 
 #if DEBUG
-				if (currentFwdRoutingIndex < 0 || currentFwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-					Log.Error($"Invalid array index: currentFwdRoutingIndex={currentFwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentLaneId={currentLaneId}, startNode={startNode})");
+				if (currentFwdRoutingIndex < 0 || currentFwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+					Log.Error($"Invalid array index: currentFwdRoutingIndex={currentFwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentLaneId={currentLaneId}, startNode={startNode})");
 				}
 #endif
 
-				if (!RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].routed) {
+				if (!RoutingManager.Instance.LaneEndForwardRoutings[currentFwdRoutingIndex].routed) {
 #if DEBUG
 					if (debug) {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): No forward routing for next path position available.");
@@ -805,7 +1127,7 @@ namespace TrafficManager.Manager.Impl {
 					return next1PathPos.m_lane;
 				}
 
-				LaneTransitionData[] currentFwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].transitions;
+				LaneTransitionData[] currentFwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[currentFwdRoutingIndex].transitions;
 
 				if (currentFwdTransitions == null) {
 #if DEBUG
@@ -885,20 +1207,20 @@ namespace TrafficManager.Manager.Impl {
 						// next1 -> next2
 						uint next1FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentFwdTransitions[i].laneId, !currentFwdTransitions[i].startNode);
 #if DEBUG
-						if (next1FwdRoutingIndex < 0 || next1FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-							Log.Error($"Invalid array index: next1FwdRoutingIndex={next1FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, !currentFwdTransitions[i].startNode={!currentFwdTransitions[i].startNode})");
+						if (next1FwdRoutingIndex < 0 || next1FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+							Log.Error($"Invalid array index: next1FwdRoutingIndex={next1FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, !currentFwdTransitions[i].startNode={!currentFwdTransitions[i].startNode})");
 						}
 #endif
 
 #if DEBUG
 						if (debug) {
-							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next1 lane id={currentFwdTransitions[i].laneId}, seg.={currentFwdTransitions[i].segmentId}, index={currentFwdTransitions[i].laneIndex}, startNode={!currentFwdTransitions[i].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex]}");
+							Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next1 lane id={currentFwdTransitions[i].laneId}, seg.={currentFwdTransitions[i].segmentId}, index={currentFwdTransitions[i].laneIndex}, startNode={!currentFwdTransitions[i].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex]}");
 						}
 #endif
-						if (!RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex].routed) {
+						if (!RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex].routed) {
 							continue;
 						}
-						LaneTransitionData[] next1FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next1FwdRoutingIndex].transitions;
+						LaneTransitionData[] next1FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex].transitions;
 
 						if (next1FwdTransitions == null) {
 							continue;
@@ -939,19 +1261,19 @@ namespace TrafficManager.Manager.Impl {
 								// next2 -> next3
 								uint next2FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(next1FwdTransitions[j].laneId, !next1FwdTransitions[j].startNode);
 #if DEBUG
-								if (next2FwdRoutingIndex < 0 || next2FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-									Log.Error($"Invalid array index: next2FwdRoutingIndex={next2FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (next1FwdTransitions[j].laneId={next1FwdTransitions[j].laneId}, !next1FwdTransitions[j].startNode={!next1FwdTransitions[j].startNode})");
+								if (next2FwdRoutingIndex < 0 || next2FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+									Log.Error($"Invalid array index: next2FwdRoutingIndex={next2FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (next1FwdTransitions[j].laneId={next1FwdTransitions[j].laneId}, !next1FwdTransitions[j].startNode={!next1FwdTransitions[j].startNode})");
 								}
 #endif
 #if DEBUG
 								if (debug) {
-									Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next2 lane id={next1FwdTransitions[j].laneId}, seg.={next1FwdTransitions[j].segmentId}, index={next1FwdTransitions[j].laneIndex}, startNode={!next1FwdTransitions[j].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex]}");
+									Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next2 lane id={next1FwdTransitions[j].laneId}, seg.={next1FwdTransitions[j].segmentId}, index={next1FwdTransitions[j].laneIndex}, startNode={!next1FwdTransitions[j].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex]}");
 								}
 #endif
-								if (!RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex].routed) {
+								if (!RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex].routed) {
 									continue;
 								}
-								LaneTransitionData[] next2FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next2FwdRoutingIndex].transitions;
+								LaneTransitionData[] next2FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex].transitions;
 
 								if (next2FwdTransitions == null) {
 									continue;
@@ -992,20 +1314,20 @@ namespace TrafficManager.Manager.Impl {
 										// next3 -> next4
 										uint next3FwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(next2FwdTransitions[k].laneId, !next2FwdTransitions[k].startNode);
 #if DEBUG
-										if (next3FwdRoutingIndex < 0 || next3FwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-											Log.Error($"Invalid array index: next3FwdRoutingIndex={next3FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (next2FwdTransitions[k].laneId={next2FwdTransitions[k].laneId}, !next2FwdTransitions[k].startNode={!next2FwdTransitions[k].startNode})");
+										if (next3FwdRoutingIndex < 0 || next3FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+											Log.Error($"Invalid array index: next3FwdRoutingIndex={next3FwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (next2FwdTransitions[k].laneId={next2FwdTransitions[k].laneId}, !next2FwdTransitions[k].startNode={!next2FwdTransitions[k].startNode})");
 										}
 #endif
 
 #if DEBUG
 										if (debug) {
-											Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next3 lane id={next2FwdTransitions[k].laneId}, seg.={next2FwdTransitions[k].segmentId}, index={next2FwdTransitions[k].laneIndex}, startNode={!next2FwdTransitions[k].startNode}: {RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex]}");
+											Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exploring transitions for next3 lane id={next2FwdTransitions[k].laneId}, seg.={next2FwdTransitions[k].segmentId}, index={next2FwdTransitions[k].laneIndex}, startNode={!next2FwdTransitions[k].startNode}: {RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex]}");
 										}
 #endif
-										if (!RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex].routed) {
+										if (!RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex].routed) {
 											continue;
 										}
-										LaneTransitionData[] next3FwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[next3FwdRoutingIndex].transitions;
+										LaneTransitionData[] next3FwdTransitions = RoutingManager.Instance.LaneEndForwardRoutings[next3FwdRoutingIndex].transitions;
 
 										if (next3FwdTransitions == null) {
 											continue;
@@ -1147,14 +1469,14 @@ namespace TrafficManager.Manager.Impl {
 					if (laneChange) {
 						uint next1BackRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentFwdTransitions[i].laneId, currentFwdTransitions[i].startNode);
 #if DEBUG
-						if (next1BackRoutingIndex < 0 || next1BackRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
-							Log.Error($"Invalid array index: next1BackRoutingIndex={next1BackRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, currentFwdTransitions[i].startNode={currentFwdTransitions[i].startNode})");
+						if (next1BackRoutingIndex < 0 || next1BackRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
+							Log.Error($"Invalid array index: next1BackRoutingIndex={next1BackRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.LaneEndForwardRoutings.Length} (currentFwdTransitions[i].laneId={currentFwdTransitions[i].laneId}, currentFwdTransitions[i].startNode={currentFwdTransitions[i].startNode})");
 						}
 #endif
-						if (!RoutingManager.Instance.laneEndBackwardRoutings[next1BackRoutingIndex].routed) {
+						if (!RoutingManager.Instance.LaneEndBackwardRoutings[next1BackRoutingIndex].routed) {
 							continue;
 						}
-						LaneTransitionData[] next1BackTransitions = RoutingManager.Instance.laneEndBackwardRoutings[next1BackRoutingIndex].transitions;
+						LaneTransitionData[] next1BackTransitions = RoutingManager.Instance.LaneEndBackwardRoutings[next1BackRoutingIndex].transitions;
 
 						if (next1BackTransitions == null) {
 							continue;
@@ -1477,7 +1799,7 @@ namespace TrafficManager.Manager.Impl {
 			return next1PathPos.m_lane;
 		}
 
-		public bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState) {
+		public bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState) {
 			GlobalConfig conf = GlobalConfig.Instance;
 #if DEBUG
 			bool debug = false; // conf.Debug.Switches[17] && (conf.Debug.VehicleId == 0 || conf.Debug.VehicleId == vehicleId);
@@ -1513,7 +1835,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			uint vehicleRand = GetStaticVehicleRand(vehicleId);
+			uint vehicleRand = Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand(vehicleId);
 
 			if (vehicleRand < 100 - (int)Options.altLaneSelectionRatio) {
 #if DEBUG

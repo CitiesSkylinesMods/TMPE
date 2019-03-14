@@ -7,6 +7,8 @@ using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
@@ -503,19 +505,19 @@ namespace TrafficManager.Manager.Impl {
 			ushort startNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode;
 			ushort endNodeId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
 			if (startNodeId != 0) {
-				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(startNodeId));
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(startNodeId);
 			}
 			if (endNodeId != 0) {
-				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(endNodeId));
+				Constants.ManagerFactory.GeometryManager.MarkAsUpdated(endNodeId);
 			}
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
-			Flags.resetSegmentVehicleRestrictions(geometry.SegmentId);
-			ClearCache(geometry.SegmentId);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			Flags.resetSegmentVehicleRestrictions(seg.segmentId);
+			ClearCache(seg.segmentId);
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 			
 		}
 
@@ -534,11 +536,11 @@ namespace TrafficManager.Manager.Impl {
 
 					ExtVehicleType baseMask = GetBaseMask(laneVehicleTypes.laneId, VehicleRestrictionsMode.Configured);
 					ExtVehicleType maskedType = laneVehicleTypes.vehicleTypes & baseMask;
-					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
+					Log._Trace($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 					if (maskedType != baseMask) {
 						Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
 					} else {
-						Log._Debug($"Masked type does not differ from base type. Ignoring.");
+						Log._Trace($"Masked type does not differ from base type. Ignoring.");
 					}
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -554,6 +556,7 @@ namespace TrafficManager.Manager.Impl {
 			foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
 				try {
 					ret.Add(new Configuration.LaneVehicleTypes(e.Key, e.Value));
+					Log._Trace($"Saving lane vehicle restriction: laneid={e.Key} vehicleType={e.Value}");
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving lane vehicle restrictions @ {e.Key}: {ex.ToString()}");
 					success = false;

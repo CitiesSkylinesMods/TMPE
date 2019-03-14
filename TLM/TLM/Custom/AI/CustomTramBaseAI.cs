@@ -15,10 +15,15 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.AI {
-	class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
+	[TargetType(typeof(TramBaseAI))]
+	public class CustomTramBaseAI : TramBaseAI { // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
+		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
+			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				byte pathFindFlags = Singleton<PathManager>.instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
@@ -49,22 +54,11 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
-#endif
-				VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData);
-#if BENCHMARK
-			}
-#endif
+			extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
+
 			if (!Options.isStockLaneChangerUsed()) {
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "LogTraffic")) {
-#endif
-					// Advanced AI traffic measurement
-					VehicleStateManager.Instance.LogTraffic(vehicleId);
-#if BENCHMARK
-				}
-#endif
+				// Advanced AI traffic measurement
+				extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
 			}
 			// NON-STOCK CODE END
 
@@ -92,38 +86,16 @@ namespace TrafficManager.Custom.AI {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 			} else if (vehicleData.m_blockCounter == 255) {
 				// NON-STOCK CODE START
-				bool mayDespawn = true;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "MayDespawn")) {
-#endif
-					mayDespawn = VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
-#if BENCHMARK
-				}
-#endif
-
-				if (mayDespawn) {
+				if (VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
 					// NON-STOCK CODE END
 					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
 				} // NON-STOCK CODE
 			}
 		}
 
-		private static void InitializePath(ushort vehicleID, ref Vehicle vehicleData) {
-			Log.Error("CustomTrainAI.InitializePath called");
-		}
-
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
-#if DEBUG
-			//Log._Debug($"CustomTramBaseAI.CustomStartPathFind called for vehicle {vehicleID}");
-#endif
-
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnStartPathFind")) {
-#endif
-			VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-#if BENCHMARK
-			}
-#endif
+			ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null); // NON-STOCK CODE
 
 			VehicleInfo info = this.m_info;
 			bool allowUnderground;
@@ -154,7 +126,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = ExtVehicleType.Tram;
 				args.vehicleId = vehicleID;
 				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -176,7 +148,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = true;
 				args.skipQueue = true;
 
-				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
@@ -189,6 +161,7 @@ namespace TrafficManager.Custom.AI {
 			return false;
 		}
 
+		[RedirectMethod]
 		public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextPosition, PathUnit.Position prevPosition, uint prevLaneId, byte prevOffset, PathUnit.Position refPosition, uint refLaneId, byte refOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			ushort prevSourceNodeId;
@@ -229,8 +202,8 @@ namespace TrafficManager.Custom.AI {
 			Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
 			float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-			netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection((float)prevOffset * 0.003921569f, out pos, out dir);
-			Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition((float)refOffset * 0.003921569f);
+			netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection((float)prevOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
+			Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition((float)refOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
 			Vector3 a = lastFrameData.m_position;
 			Vector3 a2 = lastFrameData.m_position;
 			Vector3 b2 = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
@@ -249,61 +222,38 @@ namespace TrafficManager.Custom.AI {
 					segment.b = pos - dir.normalized * this.m_info.m_generatedInfo.m_size.z;
 				}*/
 				if (prevSourceNodeId == refTargetNodeId) {
-#if BENCHMARK
-					using (var bm = new Benchmark(null, "MayChangeSegment")) {
-#endif
-					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, sqrVelocity, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId, out maxSpeed)) {
+					if (!VehicleBehaviorManager.Instance.MayChangeSegment(vehicleId, ref vehicleData, sqrVelocity, ref refPosition, ref netManager.m_segments.m_buffer[refPosition.m_segment], refTargetNodeId, refLaneId, ref prevPosition, prevSourceNodeId, ref netManager.m_nodes.m_buffer[prevSourceNodeId], prevLaneId, ref nextPosition, prevTargetNodeId)) {
+						maxSpeed = 0;
 						return;
 					} else {
-#if BENCHMARK	
-						using (var bm = new Benchmark(null, "UpdateVehiclePosition")) {
-#endif
-						VehicleStateManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
-#if BENCHMARK
-						}
-#endif
+						ExtVehicleManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData/*, lastFrameData.m_velocity.magnitude*/);
 					}
-#if BENCHMARK
-					}
-#endif
 				}
 			}
 
 			NetInfo info = netManager.m_segments.m_buffer[(int)prevPosition.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)prevPosition.m_lane) {
-				float speedLimit = 1;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
-#endif
-					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(prevPosition.m_segment, prevPosition.m_lane, prevLaneId, info.m_lanes[prevPosition.m_lane]) : info.m_lanes[prevPosition.m_lane].m_speedLimit;
-#if BENCHMARK
-				}
-#endif
+				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(prevPosition.m_segment, prevPosition.m_lane, prevLaneId, info.m_lanes[prevPosition.m_lane]) : info.m_lanes[prevPosition.m_lane].m_speedLimit; // NON-STOCK CODE
 				maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, speedLimit, netManager.m_lanes.m_buffer[prevLaneId].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
 			}
 		}
 
-		public void CustomCalculateSegmentPositionPathFinder(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
+		[RedirectMethod]
+		public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
 			NetManager instance = Singleton<NetManager>.instance;
-			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * 0.003921569f, out pos, out dir);
+			instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
 			NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
 			if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
-				float speedLimit = 1;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "GetLockFreeGameSpeedLimit")) {
-#endif
-					speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
-#if BENCHMARK
-				}
-#endif
+				float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit; // NON-STOCK CODE
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, speedLimit, instance.m_lanes.m_buffer[laneID].m_curve);
 			} else {
 				maxSpeed = this.CalculateTargetSpeed(vehicleID, ref vehicleData, 1f, 0f);
 			}
 		}
 
+		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[16] && GlobalConfig.Instance.Debug.NodeId == vehicleID;
@@ -379,7 +329,7 @@ namespace TrafficManager.Custom.AI {
 
 				if (Vector3.Dot(vehicleData.m_targetPos1 - vehicleData.m_targetPos0, (Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) < 0f && vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
 					int someIndex = -1;
-					InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, 0, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+					UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, 0, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
 					afterRotToTargetPos1DiffSqrMag = 0f;
 				}
 
@@ -391,7 +341,7 @@ namespace TrafficManager.Custom.AI {
 				int i = 0;
 				if (afterRotToTargetPos1DiffSqrMag < attachRotSqrDist) {
 					if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == (Vehicle.Flags)0) {
-						InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, 0, ref leaderData, ref i, 1, 2, attachRotSqrDist, oneSqr);
+						UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, 0, ref leaderData, ref i, 1, 2, attachRotSqrDist, oneSqr);
 					}
 					while (i < 4) {
 						vehicleData.SetTargetPos(i, vehicleData.GetTargetPos(i - 1));
@@ -433,7 +383,7 @@ namespace TrafficManager.Custom.AI {
 				float meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
 				if (Vector3.Dot(vehicleData.m_targetPos1 - vehicleData.m_targetPos0, (Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) < 0f && vehicleData.m_path != 0u && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == (Vehicle.Flags)0) {
 					int someIndex = -1;
-					InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+					UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref someIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
 					afterRotToTargetPos1DiffSqrMag = 0f;
 #if DEBUG
 					if (debug) {
@@ -452,7 +402,7 @@ namespace TrafficManager.Custom.AI {
 				bool hasValidPathTargetPos = false;
 				if ((afterRotToTargetPos1DiffSqrMag < maxSpeedAddSqr || vehicleData.m_targetPos3.w < 0.01f) && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == (Vehicle.Flags)0) {
 					if (vehicleData.m_path != 0u) {
-						InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, leaderID, ref leaderData, ref posIndex, 1, 4, maxSpeedAddSqr, meanSpeedAddSqr);
+						UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, posBeforeWheelRot, posAfterWheelRot, leaderID, ref leaderData, ref posIndex, 1, 4, maxSpeedAddSqr, meanSpeedAddSqr);
 					}
 					if (posIndex < 4) {
 						hasValidPathTargetPos = true;
@@ -624,7 +574,7 @@ namespace TrafficManager.Custom.AI {
 											Log._Debug($"CustomTramBaseAI.SimulationStep({vehicleID}): afterRotToTargetPos1Diff.z < Mathf.Abs(afterRotToTargetPos1Diff.x) * -10f. fwd={fwd} targetPos0TargetPos1Diff={targetPos0TargetPos1Diff} afterRotToTargetPos1Diff={afterRotToTargetPos1Diff}");
 										}
 #endif
-
+										// Fix: Trams get stuck
 										/*fwd.z = 0f;
 										afterRotToTargetPos1Diff = Vector3.zero;*/
 										maxSpeed = 0.5f; // NON-STOCK CODE
@@ -637,7 +587,7 @@ namespace TrafficManager.Custom.AI {
 									} else {
 										posAfterWheelRot = posBeforeWheelRot + Vector3.Normalize(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) * this.m_info.m_generatedInfo.m_wheelBase;
 										posIndex = -1;
-										InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, vehicleData.m_targetPos1, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) + 1f, 1f);
+										UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, vehicleData.m_targetPos1, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) + 1f, 1f);
 
 #if DEBUG
 										if (debug) {
@@ -647,7 +597,7 @@ namespace TrafficManager.Custom.AI {
 									}
 								} else {
 									posIndex = -1;
-									InvokeUpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
+									UpdatePathTargetPositions(tramBaseAI, vehicleID, ref vehicleData, vehicleData.m_targetPos0, posBeforeWheelRot, leaderID, ref leaderData, ref posIndex, 0, 0, Vector3.SqrMagnitude(posBeforeWheelRot - (Vector3)vehicleData.m_targetPos0) + 1f, 1f);
 									vehicleData.m_targetPos1 = posAfterWheelRot;
 									fwd.z = 0f;
 									afterRotToTargetPos1Diff = Vector3.zero;
@@ -795,21 +745,30 @@ namespace TrafficManager.Custom.AI {
 			//base.SimulationStep(vehicleID, ref vehicleData, ref frameData, leaderID, ref leaderData, lodPhysics);
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static void InvokeUpdatePathTargetPositions(TramBaseAI tramBaseAI, ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos1, Vector3 refPos2, ushort leaderID, ref Vehicle leaderData, ref int index, int max1, int max2, float minSqrDistanceA, float minSqrDistanceB) {
+		public static void UpdatePathTargetPositions(TramBaseAI tramBaseAI, ushort vehicleID, ref Vehicle vehicleData, Vector3 refPos1, Vector3 refPos2, ushort leaderID, ref Vehicle leaderData, ref int index, int max1, int max2, float minSqrDistanceA, float minSqrDistanceB) {
 			Log.Error($"CustomTramBaseAI.InvokeUpdatePathTargetPositions called! tramBaseAI={tramBaseAI}");
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static float GetMaxSpeed(ushort leaderID, ref Vehicle leaderData) {
 			Log.Error("CustomTrainAI.GetMaxSpeed called");
 			return 0f;
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static float CalculateMaxSpeed(float targetDist, float targetSpeed, float maxBraking) {
 			Log.Error("CustomTrainAI.CalculateMaxSpeed called");
 			return 0f;
+		}
+
+		[RedirectReverse]
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void InitializePath(ushort vehicleID, ref Vehicle vehicleData) {
+			Log.Error("CustomTrainAI.InitializePath called");
 		}
 	}
 }

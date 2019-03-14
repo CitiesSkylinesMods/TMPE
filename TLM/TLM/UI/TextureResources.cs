@@ -7,6 +7,7 @@ using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using TrafficManager.UI;
 using TrafficManager.Util;
 using UnityEngine;

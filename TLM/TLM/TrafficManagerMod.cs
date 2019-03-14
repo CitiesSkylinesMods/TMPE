@@ -11,20 +11,20 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.10.16";
+		public static readonly string Version = "1.11.0-harmony-alpha3";
 
-		public static readonly uint GameVersion = 180609552u;
+		public static readonly uint GameVersion = 180610064u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 11u;
 		public static readonly uint GameVersionC = 1u;
-		public static readonly uint GameVersionBuild = 2u;
+		public static readonly uint GameVersionBuild = 4u;
 
-		public string Name => "TM:PE " + Version;
+		public string Name => "Traffic Manager: President Edition [" + Version + "]";
 
 		public string Description => "Manage your city's traffic";
 
 		public void OnEnabled() {
-			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
+			Log.Info($"Traffic Manager: President Edition enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
 			if (UIView.GetAView() != null) {
 				OnGameIntroLoaded();
 			} else {
@@ -33,7 +33,7 @@ namespace TrafficManager {
 		}
 
 		public void OnDisabled() {
-			Log.Info("TM:PE disabled.");
+			Log.Info("Traffic Manager: President Edition disabled.");
 			LoadingManager.instance.m_introLoaded -= OnGameIntroLoaded;
 		}
 

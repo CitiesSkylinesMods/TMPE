@@ -9,6 +9,7 @@ namespace CSUtil.Commons {
 
 	public static class Log {
 		private enum LogLevel {
+			Trace,
 			Debug,
 			Info,
 			Warning,
@@ -33,6 +34,11 @@ namespace CSUtil.Commons {
 		[Conditional("DEBUG")]
 		public static void _Debug(string s) {
 			LogToFile(s, LogLevel.Debug);
+		}
+
+		[Conditional("TRACE")]
+		public static void _Trace(string s) {
+			LogToFile(s, LogLevel.Trace);
 		}
 
 		public static void Info(string s) {

@@ -49,18 +49,11 @@ namespace TrafficManager.Manager.Impl {
 				return end;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
+			if (! Services.NetService.IsSegmentValid(segmentId)) {
 				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment.");
 				return null;
 			}
-
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
-			if (endGeo == null) {
-				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment end.");
-				return null;
-			}
-
+			
 			return SegmentEnds[GetIndex(segmentId, startNode)] = new SegmentEnd(segmentId, startNode);
 		}
 
@@ -92,30 +85,19 @@ namespace TrafficManager.Manager.Impl {
 			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
 #endif
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
+			if (! Services.NetService.IsSegmentValid(segmentId)) {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing all segment ends.");
 				}
 #endif
+
 				RemoveSegmentEnds(segmentId);
 				return false;
 			}
-
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
-			if (endGeo == null) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment end {segmentId} @ {startNode} is invalid. Removing segment end.");
-				}
-#endif
-				RemoveSegmentEnd(segmentId, startNode);
-				return false;
-			}
-
+			
 			if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
-				TrafficLightSimulationManager.Instance.HasTimedSimulation(endGeo.NodeId())) {
+				TrafficLightSimulationManager.Instance.HasTimedSimulation(Services.NetService.GetSegmentNodeId(segmentId, startNode))) {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");

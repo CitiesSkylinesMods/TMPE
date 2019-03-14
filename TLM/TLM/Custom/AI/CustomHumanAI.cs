@@ -16,9 +16,13 @@ using System.Runtime.CompilerServices;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using TrafficManager.Traffic.Data;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.AI {
-	class CustomHumanAI : CitizenAI {
+	[TargetType(typeof(HumanAI))]
+	public class CustomHumanAI : CitizenAI {
+		[RedirectMethod]
 		public void CustomSimulationStep(ushort instanceID, ref CitizenInstance instanceData, Vector3 physicsLodRefPos) {
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
@@ -59,7 +63,7 @@ namespace TrafficManager.Custom.AI {
 				using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
 #endif
 					finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
-					if (Options.prohibitPocketCars) {
+					if (Options.parkingAI) {
 						finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], ref ExtCitizenManager.Instance.ExtCitizens[citizenId], ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen], mainPathState);
 #if DEBUG
 						if (debug)
@@ -132,7 +136,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "ExtSimulationStep")) {
 #endif
-				if (Options.prohibitPocketCars) {
+				if (Options.parkingAI) {
 					if (ExtSimulationStep(instanceID, ref instanceData, ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceID], physicsLodRefPos)) {
 						return;
 					}
@@ -163,7 +167,8 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
-		internal bool ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
+		public bool ExtSimulationStep(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos) {
+			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
@@ -180,7 +185,7 @@ namespace TrafficManager.Custom.AI {
 							Log.Warning($"CustomHumanAI.ExtSimulationStep({instanceID}): Citizen instance {instanceID} was walking to / reaching their parked car ({extInstance.pathMode}) but parked car has disappeared. RESET.");
 #endif
 
-					extInstance.Reset();
+					extCitInstMan.Reset(ref extInstance);
 
 					instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 					instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
@@ -208,7 +213,7 @@ namespace TrafficManager.Custom.AI {
 							instanceData.m_flags = instanceData.m_flags & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Cheering | CitizenInstance.Flags.Deleted | CitizenInstance.Flags.Underground | CitizenInstance.Flags.CustomName | CitizenInstance.Flags.Character | CitizenInstance.Flags.BorrowCar | CitizenInstance.Flags.HangAround | CitizenInstance.Flags.InsideBuilding | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.TryingSpawnVehicle | CitizenInstance.Flags.CannotUseTransport | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.OnPath | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.AtTarget | CitizenInstance.Flags.RequireSlowStart | CitizenInstance.Flags.Transition | CitizenInstance.Flags.RidingBicycle | CitizenInstance.Flags.OnBikeLane | CitizenInstance.Flags.CannotUseTaxi | CitizenInstance.Flags.CustomColor | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating | CitizenInstance.Flags.TargetFlags);
 							if (!this.StartPathFind(instanceID, ref instanceData)) {
 								instanceData.Unspawn(instanceID);
-								extInstance.Reset();
+								extCitInstMan.Reset(ref extInstance);
 							}
 
 							return true;
@@ -225,129 +230,15 @@ namespace TrafficManager.Custom.AI {
 
 					}
 				}
-			} else if (extInstance.pathMode == ExtCitizenInstance.ExtPathMode.WalkingToTarget ||
-					extInstance.pathMode == ExtCitizenInstance.ExtPathMode.TaxiToTarget
+			} else if (extInstance.pathMode == ExtPathMode.WalkingToTarget ||
+					extInstance.pathMode == ExtPathMode.TaxiToTarget
 			) {
 				AdvancedParkingManager.Instance.CitizenApproachingTargetSimulationStep(instanceID, ref instanceData, ref extInstance);
 			}
 			return false;
 		}
-
-		/// <summary>
-		/// Makes the given citizen instance enter their parked car.
-		/// </summary>
-		/// <param name="instanceID">Citizen instance id</param>
-		/// <param name="instanceData">Citizen instance data</param>
-		/// <param name="parkedVehicleId">Parked vehicle id</param>
-		/// <param name="vehicleId">Vehicle id</param>
-		/// <returns>true if entering the car succeeded, false otherwise</returns>
-		public static bool EnterParkedCar(ushort instanceID, ref CitizenInstance instanceData, ushort parkedVehicleId, out ushort vehicleId) {
-#if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
-
-			if (debug)
-				Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}, ..., {parkedVehicleId}) called.");
-#endif
-			VehicleManager vehManager = Singleton<VehicleManager>.instance;
-			NetManager netManager = Singleton<NetManager>.instance;
-			CitizenManager citManager = Singleton<CitizenManager>.instance;
-
-			Vector3 parkedVehPos = vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].m_position;
-			Quaternion parkedVehRot = vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].m_rotation;
-			VehicleInfo vehicleInfo = vehManager.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
-
-			PathUnit.Position vehLanePathPos;
-			if (! CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].GetPosition(0, out vehLanePathPos)) {
-#if DEBUG
-				if (debug)
-					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not get first car path position of citizen instance {instanceID}!");
-#endif
-
-				vehicleId = 0;
-				return false;
-			}
-			uint vehLaneId = PathManager.GetLaneID(vehLanePathPos);
-#if DEBUG
-			if (fineDebug)
-				Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Determined vehicle position for citizen instance {instanceID}: seg. {vehLanePathPos.m_segment}, lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
-#endif
-
-			Vector3 vehLanePos;
-			float vehLaneOff;
-			netManager.m_lanes.m_buffer[vehLaneId].GetClosestPosition(parkedVehPos, out vehLanePos, out vehLaneOff);
-			byte vehLaneOffset = (byte)Mathf.Clamp(Mathf.RoundToInt(vehLaneOff * 255f), 0, 255);
-
-			// movement vector from parked vehicle position to road position
-			Vector3 forwardVector = parkedVehPos + Vector3.ClampMagnitude(vehLanePos - parkedVehPos, 5f);
-			if (vehManager.CreateVehicle(out vehicleId, ref Singleton<SimulationManager>.instance.m_randomizer, vehicleInfo, parkedVehPos, TransferManager.TransferReason.None, false, false)) {
-				// update frame data
-				Vehicle.Frame frame = vehManager.m_vehicles.m_buffer[(int)vehicleId].m_frame0;
-				frame.m_rotation = parkedVehRot;
-
-				vehManager.m_vehicles.m_buffer[vehicleId].m_frame0 = frame;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_frame1 = frame;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_frame2 = frame;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_frame3 = frame;
-				vehicleInfo.m_vehicleAI.FrameDataUpdated(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId], ref frame);
-
-				// update vehicle target position
-				vehManager.m_vehicles.m_buffer[vehicleId].m_targetPos0 = new Vector4(vehLanePos.x, vehLanePos.y, vehLanePos.z, 2f);
-
-				// update other fields
-				vehManager.m_vehicles.m_buffer[vehicleId].m_flags = (vehManager.m_vehicles.m_buffer[vehicleId].m_flags | Vehicle.Flags.Stopped);
-				vehManager.m_vehicles.m_buffer[vehicleId].m_path = instanceData.m_path;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_pathPositionIndex = 0;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_lastPathOffset = vehLaneOffset;
-				vehManager.m_vehicles.m_buffer[vehicleId].m_transferSize = (ushort)(instanceData.m_citizen & 65535u);
-
-				if (! vehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
-#if DEBUG
-					if (debug)
-						Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceID}!");
-#endif
-					return false;
-				}
-
-				// change instances
-				InstanceID parkedVehInstance = InstanceID.Empty;
-				parkedVehInstance.ParkedVehicle = parkedVehicleId;
-				InstanceID vehInstance = InstanceID.Empty;
-				vehInstance.Vehicle = vehicleId;
-				Singleton<InstanceManager>.instance.ChangeInstance(parkedVehInstance, vehInstance);
-
-				// set vehicle id for citizen instance
-				instanceData.m_path = 0u;
-				citManager.m_citizens.m_buffer[instanceData.m_citizen].SetParkedVehicle(instanceData.m_citizen, 0);
-				citManager.m_citizens.m_buffer[instanceData.m_citizen].SetVehicle(instanceData.m_citizen, vehicleId, 0u);
-
-				// update citizen instance flags
-				instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
-				instanceData.m_flags &= ~CitizenInstance.Flags.EnteringVehicle;
-				instanceData.m_flags &= ~CitizenInstance.Flags.TryingSpawnVehicle;
-				instanceData.m_flags &= ~CitizenInstance.Flags.BoredOfWaiting;
-				instanceData.m_waitCounter = 0;
-
-				// unspawn citizen instance
-				instanceData.Unspawn(instanceID);
-
-#if DEBUG
-				if (fineDebug)
-					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Citizen instance {instanceID} is now entering vehicle {vehicleId}. Set vehicle target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
-#endif
-
-				return true;
-			} else {
-				// failed to find a road position
-#if DEBUG
-				if (debug)
-					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not find a road position for citizen instance {instanceID} near parked vehicle {parkedVehicleId}!");
-#endif
-				return false;
-			}
-		}
-
+		
+		[RedirectMethod]
 		public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
 #if DEBUGTTL
 			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId;
@@ -356,8 +247,8 @@ namespace TrafficManager.Custom.AI {
 			var netManager = Singleton<NetManager>.instance;
 
 			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			var num = (uint)(((int)nodeId << 8) / 32768);
-			var stepWaitTime = currentFrameIndex - num & 255u;
+			uint simGroup = (uint)nodeId >> 7;
+			var stepWaitTime = currentFrameIndex - simGroup & 255u;
 
 			// NON-STOCK CODE START //
 
@@ -395,10 +286,10 @@ namespace TrafficManager.Custom.AI {
 				}
 #endif
 
-				RoadBaseAI.GetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - num, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
+				RoadBaseAI.GetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - simGroup, out vehicleLightState, out pedestrianLightState, out vehicles, out pedestrians);
 				if (pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed || pedestrianLightState ==  RoadBaseAI.TrafficLightState.Red) {
 					if (!pedestrians && stepWaitTime >= 196u) {
-						RoadBaseAI.SetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - num, vehicleLightState, pedestrianLightState, vehicles, true);
+						RoadBaseAI.SetTrafficLightState(nodeId, ref netManager.m_segments.m_buffer[segmentId], currentFrameIndex - simGroup, vehicleLightState, pedestrianLightState, vehicles, true);
 					}
 					return false;
 				}
@@ -433,6 +324,7 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
+		[RedirectMethod]
 		protected void CustomArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
 			uint citizenId = citizenData.m_citizen;
 			if (citizenId != 0) {
@@ -472,7 +364,7 @@ namespace TrafficManager.Custom.AI {
 					if (success) {
 						citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
 						// NON-STOCK CODE START
-						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId]);
+						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId], ref citizenMan.m_instances.m_buffer[instanceID]);
 						// NON-STOCK CODE END
 					}
 
@@ -491,26 +383,31 @@ namespace TrafficManager.Custom.AI {
 			citizenData.Unspawn(instanceID);
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void PathfindFailure(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.PathfindFailure is not overriden!");
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void PathfindSuccess(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.PathfindSuccess is not overriden!");
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void Spawn(ushort instanceID, ref CitizenInstance data) {
 			Log.Error($"HumanAI.Spawn is not overriden!");
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void GetBuildingTargetPosition(ushort instanceID, ref CitizenInstance data, float minSqrDistance) {
 			Log.Error($"HumanAI.GetBuildingTargetPosition is not overriden!");
 		}
 
+		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void WaitTouristVehicle(ushort instanceID, ref CitizenInstance data, ushort targetBuildingId) {
 			Log.Error($"HumanAI.InvokeWaitTouristVehicle is not overriden!");

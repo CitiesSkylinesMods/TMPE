@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TLM", "TLM\TLM.csproj", "{7422AE58-8B0A-401C-9404-F4A438EFFE10}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -37,6 +37,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptionsFramework", "OptionsFramework\OptionsFramework.csproj", "{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSUtil.CameraControl", "CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj", "{F8759084-DF5B-4A54-B73C-824640A8FA3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMPE.API", "TMPE.API\TMPE.API.csproj", "{C911D31C-C85D-42A8-A839-7B209A715495}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,8 +139,21 @@ Global
 		{F8759084-DF5B-4A54-B73C-824640A8FA3F}.PF2_Debug|Any CPU.Build.0 = PF2_Debug|Any CPU
 		{F8759084-DF5B-4A54-B73C-824640A8FA3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8759084-DF5B-4A54-B73C-824640A8FA3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Benchmark|Any CPU.ActiveCfg = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Benchmark|Any CPU.Build.0 = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.PF2_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.PF2_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D8CDC16-6B32-4B3B-8599-35B23E9958B7}
 	EndGlobalSection
 EndGlobal

@@ -17,6 +17,7 @@ using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
 using CSUtil.Commons.Benchmark;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Impl {
 	// TODO class should be completely reworked, approx. in version 1.10
@@ -102,14 +103,20 @@ namespace TrafficManager.TrafficLight.Impl {
 			endTransitionStart = null;
 			stepDone = false;
 
-			NodeGeometry nodeGeometry = NodeGeometry.Get(timedNode.NodeId);
+			for (int i = 0; i < 8; ++i) {
+				ushort segmentId = 0;
+				Constants.ServiceFactory.NetService.ProcessNode(timedNode.NodeId, delegate (ushort nId, ref NetNode node) {
+					segmentId = node.GetSegment(i);
+					return true;
+				});
 
-			foreach (SegmentEndGeometry end in nodeGeometry.SegmentEndGeometries) {
-				if (end == null)
+				if (segmentId == 0) {
 					continue;
+				}
 
-				if (! AddSegment(end.SegmentId, end.StartNode, makeRed)) {
-					Log.Warning($"TimedTrafficLightsStep.ctor: Failed to add segment {end.SegmentId} @ start {end.StartNode} to node {timedNode.NodeId}");
+				bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, timedNode.NodeId);
+				if (!AddSegment(segmentId, startNode, makeRed)) {
+					Log.Warning($"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} @ start {startNode} to node {timedNode.NodeId}");
 				}
 			}
 		}
@@ -612,7 +619,7 @@ namespace TrafficManager.TrafficLight.Impl {
 					continue;
 				}
 
-				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[timedNodeId].TimedLight;
+				ITimedTrafficLights slaveTTL = tlsMan.TrafficLightSimulations[timedNodeId].timedLight;
 				ITimedTrafficLightsStep slaveStep = slaveTTL.GetStep(stepRefIndex);
 
 				// minimum time reached. check traffic! loop over source segments
@@ -950,21 +957,20 @@ namespace TrafficManager.TrafficLight.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(targetSegmentId);
-			if (segGeo == null) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): No geometry information available for target segment {targetSegmentId}");
+			if (! Constants.ServiceFactory.NetService.IsSegmentValid(targetSegmentId)) {
+				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Target segment {targetSegmentId} is invalid");
 				return false;
 			}
 
-			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
-				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Target segment {targetSegmentId} is not connected to node {timedNode.NodeId}");
+			bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(targetSegmentId, timedNode.NodeId);
+			if (startNode == null) {
+				Log.Error($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Node {timedNode.NodeId} is neither start nor end node of target segment {targetSegmentId}");
 				return false;
 			}
 
-			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
 			CustomSegmentLights.Remove(sourceSegmentId);
-			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(targetSegmentId, startNode).Housekeeping(true, true);
-			sourceLights.Relocate(targetSegmentId, startNode, this);
+			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(targetSegmentId, (bool)startNode).Housekeeping(true, true);
+			sourceLights.Relocate(targetSegmentId, (bool)startNode, this);
 			CustomSegmentLights[targetSegmentId] = sourceLights;
 
 			Log._Debug($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): Relocated lights: {sourceSegmentId} -> {targetSegmentId} @ node {timedNode.NodeId}");
@@ -981,19 +987,12 @@ namespace TrafficManager.TrafficLight.Impl {
 				Log._Debug($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}) called @ node {timedNode.NodeId}.");
 #endif
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): No geometry information available for segment {segmentId}");
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Segment {segmentId} is invalid");
 				return false;
 			}
 
-			SegmentEndGeometry endGeo = segGeo.GetEnd(startNode);
-			if (endGeo == null) {
-				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): No end geometry information available for segment {segmentId} @ {startNode}");
-				return false;
-			}
-
-			if (endGeo.NodeId() != timedNode.NodeId) {
+			if (Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode) != timedNode.NodeId) {
 				Log.Error($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): Segment {segmentId} is not connected to node {timedNode.NodeId} @ start {startNode}");
 				return false;
 			}
@@ -1033,50 +1032,22 @@ namespace TrafficManager.TrafficLight.Impl {
 				Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({segmentId}, {lights}) called.");
 #endif
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: No geometry information available for target segment {segmentId}");
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+				Log.Error($"TimedTrafficLightsStep.SetSegmentLights({segmentId}): Segment {segmentId} is invalid");
 				return false;
 			}
 
-			if (segGeo.StartNodeId() != timedNode.NodeId && segGeo.EndNodeId() != timedNode.NodeId) {
+			bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(segmentId, timedNode.NodeId);
+			if (startNode == null) {
 				Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not connected to node {timedNode.NodeId}");
 				return false;
 			}
 
-			bool startNode = segGeo.StartNodeId() == timedNode.NodeId;
-			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(segmentId, startNode).Housekeeping(true, true);
-			lights.Relocate(segmentId, startNode, this);
+			Constants.ManagerFactory.CustomSegmentLightsManager.GetOrLiveSegmentLights(segmentId, (bool)startNode).Housekeeping(true, true);
+			lights.Relocate(segmentId, (bool)startNode, this);
 			CustomSegmentLights[segmentId] = lights;
 			Log._Debug($"TimedTrafficLightsStep.SetSegmentLights: Set lights @ seg. {segmentId}, node {timedNode.NodeId}");
 			return true;
-		}
-
-		public short ClockwiseIndexOfSegmentEnd(ISegmentEndId endId) {
-#if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
-				Log._Debug($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd({endId}) called.");
-#endif
-			SegmentEndGeometry endGeo = SegmentEndGeometry.Get(endId);
-
-			if (endGeo == null) {
-				Log.Warning($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd: @ node {timedNode.NodeId}: No segment end geometry found for end id {endId}");
-				return -1;
-			}
-
-			if (endGeo.NodeId() != timedNode.NodeId) {
-				Log.Warning($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd: @ node {timedNode.NodeId} does not handle custom traffic lights for node {endGeo.NodeId()}");
-				return -1;
-			}
-
-			if (CustomSegmentLights.ContainsKey(endId.SegmentId)) {
-				Log.Warning($"TimedTrafficLightsStep.ClockwiseIndexOfSegmentEnd: @ node {timedNode.NodeId} does not handle custom traffic lights for segment {endId.SegmentId}");
-				return -1;
-			}
-
-			short index = Constants.ManagerFactory.CustomSegmentLightsManager.ClockwiseIndexOfSegmentEnd(endId);
-			index += timedNode.RotationOffset;
-			return (short)(index % (endGeo.NumConnectedSegments + 1));
 		}
 
 		// TODO IMPROVE THIS! Liskov substitution principle must hold.

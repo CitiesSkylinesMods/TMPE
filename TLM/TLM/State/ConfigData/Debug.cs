@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Enums;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.State.ConfigData {
@@ -33,7 +34,8 @@ namespace TrafficManager.State.ConfigData {
 				false, // 21: debug "CalculateSegmentPosition"
 				false, // 22: parking ai debug log (vehicles)
 				false, // 23: debug lane connections
-                false // 24: debug resource loading
+				false, // 24: debug emergency AI
+                false // 25: debug resource loading
 			};
 
 		public int NodeId = 0;

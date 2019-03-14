@@ -10,6 +10,8 @@ using TrafficManager.Util;
 using UnityEngine;
 using CSUtil.Commons;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class LaneConnectionManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneConnection>>, ILaneConnectionManager {
@@ -340,17 +342,17 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUGCONN
 			bool debug = GlobalConfig.Instance.Debug.Switches[23];
 			if (debug)
-				Log._Debug($"LaneConnectionManager.HandleInvalidSegment({geometry.SegmentId}): Segment has become invalid. Removing lane connections.");
+				Log._Debug($"LaneConnectionManager.HandleInvalidSegment({seg.segmentId}): Segment has become invalid. Removing lane connections.");
 #endif
-			RemoveLaneConnectionsFromSegment(geometry.SegmentId, false, false);
-			RemoveLaneConnectionsFromSegment(geometry.SegmentId, true);
+			RemoveLaneConnectionsFromSegment(seg.segmentId, false, false);
+			RemoveLaneConnectionsFromSegment(seg.segmentId, true);
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 
 		}
 
@@ -473,7 +475,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			Flags.LaneArrows arrows = Flags.LaneArrows.None;
+			LaneArrows arrows = LaneArrows.None;
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
@@ -491,40 +493,19 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): startNode? {startNode}");
 #endif
 
-			NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-			if (!nodeGeo.IsValid()) {
+			if (! Services.NetService.IsNodeValid(nodeId)) {
 #if DEBUGCONN
 				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): invalid node geometry");
+					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): Node is invalid");
 #endif
 				return;
 			}
 
-			SegmentGeometry segmentGeo = SegmentGeometry.Get(segmentId);
-			if (segmentGeo == null) {
-#if DEBUGCONN
-				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): invalid segment geometry");
-#endif
-				return;
-			}
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
-			ushort[] connectedSegmentIds = segmentGeo.GetConnectedSegments(startNode);
-			if (connectedSegmentIds == null) {
-#if DEBUGCONN
-				if (debug)
-					Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): connectedSegmentIds is null");
-#endif
-				return;
-			}
-			ushort[] allSegmentIds = new ushort[connectedSegmentIds.Length + 1];
-			allSegmentIds[0] = segmentId;
-			Array.Copy(connectedSegmentIds, 0, allSegmentIds, 1, connectedSegmentIds.Length);
-
-			foreach (ushort otherSegmentId in allSegmentIds) {
-				if (otherSegmentId == 0)
-					continue;
-				ArrowDirection dir = segmentGeo.GetDirection(otherSegmentId, startNode);
+			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort otherSegmentId, ref NetSegment otherSeg) {
+				ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
 
 #if DEBUGCONN
 				if (debug)
@@ -535,27 +516,27 @@ namespace TrafficManager.Manager.Impl {
 				switch (dir) {
 					case ArrowDirection.Turn:
 						if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-							if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
-								continue;
+							if ((arrows & LaneArrows.Right) != LaneArrows.None)
+								return true;
 						} else {
-							if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
-								continue;
+							if ((arrows & LaneArrows.Left) != LaneArrows.None)
+								return true;
 						}
 						break;
 					case ArrowDirection.Forward:
-						if ((arrows & Flags.LaneArrows.Forward) != Flags.LaneArrows.None)
-							continue;
+						if ((arrows & LaneArrows.Forward) != LaneArrows.None)
+							return true;
 						break;
 					case ArrowDirection.Left:
-						if ((arrows & Flags.LaneArrows.Left) != Flags.LaneArrows.None)
-							continue;
+						if ((arrows & LaneArrows.Left) != LaneArrows.None)
+							return true;
 						break;
 					case ArrowDirection.Right:
-						if ((arrows & Flags.LaneArrows.Right) != Flags.LaneArrows.None)
-							continue;
+						if ((arrows & LaneArrows.Right) != LaneArrows.None)
+							return true;
 						break;
 					default:
-						continue;
+						return true;
 				}
 
 #if DEBUGCONN
@@ -591,22 +572,22 @@ namespace TrafficManager.Manager.Impl {
 					switch (dir) {
 						case ArrowDirection.Turn:
 							if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
-								arrows |= Flags.LaneArrows.Right;
+								arrows |= LaneArrows.Right;
 							} else {
-								arrows |= Flags.LaneArrows.Left;
+								arrows |= LaneArrows.Left;
 							}
 							break;
 						case ArrowDirection.Forward:
-							arrows |= Flags.LaneArrows.Forward;
+							arrows |= LaneArrows.Forward;
 							break;
 						case ArrowDirection.Left:
-							arrows |= Flags.LaneArrows.Left;
+							arrows |= LaneArrows.Left;
 							break;
 						case ArrowDirection.Right:
-							arrows |= Flags.LaneArrows.Right;
+							arrows |= LaneArrows.Right;
 							break;
 						default:
-							continue;
+							return true;
 					}
 
 #if DEBUGCONN
@@ -614,7 +595,9 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): processing connected segment {otherSegmentId}: arrows={arrows}");
 #endif
 				}
-			}
+
+				return true;
+			});
 
 #if DEBUGCONN
 			if (debug)
@@ -637,7 +620,7 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Debug($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
+					Log._Trace($"Loading lane connection: lane {conn.lowerLaneId} -> {conn.higherLaneId}");
 					AddLaneConnection(conn.lowerLaneId, conn.higherLaneId, conn.lowerStartNode);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -665,7 +648,7 @@ namespace TrafficManager.Manager.Impl {
 								if (!Services.NetService.IsLaneValid(otherHigherLaneId))
 									continue;
 
-								Log._Debug($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
+								Log._Trace($"Saving lane connection: lane {i} -> {otherHigherLaneId}");
 								ret.Add(new Configuration.LaneConnection(i, (uint)otherHigherLaneId, startNode));
 							}
 						}

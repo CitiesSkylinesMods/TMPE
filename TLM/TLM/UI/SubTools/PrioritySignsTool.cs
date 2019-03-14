@@ -18,6 +18,8 @@ using TrafficManager.Manager.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 using static TrafficManager.Util.SegmentTraverser;
 using ColossalFramework.UI;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {
@@ -65,17 +67,22 @@ namespace TrafficManager.UI.SubTools {
 							break;
 					}
 
+					IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
 						foreach (bool startNode in Constants.ALL_BOOL) {
-							TrafficPriorityManager.Instance.SetPrioritySign(data.curGeo.SegmentId, startNode, primaryPrioType);
+							TrafficPriorityManager.Instance.SetPrioritySign(data.curSeg.segmentId, startNode, primaryPrioType);
+							ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(data.curSeg.segmentId, startNode);
+							ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(data.curSeg.segmentId, startNode)];
 
-							foreach (ushort otherSegmentId in data.curGeo.GetConnectedSegments(startNode)) {
-								if (!data.curGeo.IsStraightSegment(otherSegmentId, startNode)) {
-									SegmentGeometry otherGeo = SegmentGeometry.Get(otherSegmentId);
-									if (otherGeo == null) {
-										continue;
-									}
-									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherGeo.StartNodeId() == data.curGeo.GetNodeId(startNode), secondaryPrioType);
+							for (int i = 0; i < 8; ++i) {
+								ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
+								if (otherSegmentId == 0 || otherSegmentId == data.curSeg.segmentId) {
+									continue;
+								}
+
+								ArrowDirection dir = segEndMan.GetDirection(ref curEnd, otherSegmentId);
+								if (dir != ArrowDirection.Forward) {
+									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId), secondaryPrioType);
 								}
 							}
 						}
@@ -120,7 +127,7 @@ namespace TrafficManager.UI.SubTools {
 				if (HoveredSegmentId != 0) {
 					Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
 					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
-						NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[data.curGeo.SegmentId], color, color);
+						NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[data.curSeg.segmentId], color, color);
 						return true;
 					});
 				} else {
@@ -186,6 +193,8 @@ namespace TrafficManager.UI.SubTools {
 
 		public void ShowGUI(bool viewOnly) {
 			try {
+				IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+				IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 				TrafficLightManager tlm = TrafficLightManager.Instance;
@@ -205,23 +214,30 @@ namespace TrafficManager.UI.SubTools {
 						continue;
 					}
 
-					NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-
 					Vector3 nodePos = default(Vector3);
 					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 						nodePos = node.m_position;
 						return true;
 					});
 
-					foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
-						if (endGeo == null) {
+					for (int i = 0; i < 8; ++i) {
+						ushort segmentId = 0;
+						Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+							segmentId = node.GetSegment(i);
+							return true;
+						});
+
+						if (segmentId == 0) {
 							continue;
 						}
-						if (endGeo.OutgoingOneWay) {
+
+						bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+						ExtSegment seg = segMan.ExtSegments[segmentId];
+						ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+						if (seg.oneWay && segEnd.outgoing) {
 							continue;
 						}
-						ushort segmentId = endGeo.SegmentId;
-						bool startNode = endGeo.StartNode;
 
 						// calculate sign position
 						Vector3 signPos = nodePos;
@@ -291,12 +307,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"PrioritySignsTool.SetPrioritySign: No geometry information available for segment {segmentId}");
-				return false;
-			}
-			ushort nodeId = segGeo.GetNodeId(startNode);
+			ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
 
 			// check for restrictions
 			if (!MayNodeHavePrioritySigns(nodeId)) {
@@ -309,19 +320,22 @@ namespace TrafficManager.UI.SubTools {
 			if (success && (sign == PriorityType.Stop || sign == PriorityType.Yield)) {
 				// make all undefined segments a main road
 				Log._Debug($"PrioritySignsTool.SetPrioritySign: flagging remaining segments at node {nodeId} as main road.");
-				NodeGeometry nodeGeo = NodeGeometry.Get(nodeId);
-				foreach (SegmentEndGeometry endGeo in nodeGeo.SegmentEndGeometries) {
-					if (endGeo == null) {
+				for (int i = 0; i < 8; ++i) {
+					ushort otherSegmentId = 0;
+					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+						otherSegmentId = node.GetSegment(i);
+						return true;
+					});
+
+					if (otherSegmentId == 0 || otherSegmentId == segmentId) {
 						continue;
 					}
 
-					if (endGeo.SegmentId == segmentId) {
-						continue;
-					}
+					bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
 
-					if (TrafficPriorityManager.Instance.GetPrioritySign(endGeo.SegmentId, endGeo.StartNode) == PriorityType.None) {
-						Log._Debug($"PrioritySignsTool.SetPrioritySign: setting main priority sign for segment {endGeo.SegmentId} @ {nodeId}");
-						TrafficPriorityManager.Instance.SetPrioritySign(endGeo.SegmentId, endGeo.StartNode, PriorityType.Main);
+					if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode) == PriorityType.None) {
+						Log._Debug($"PrioritySignsTool.SetPrioritySign: setting main priority sign for segment {otherSegmentId} @ {nodeId}");
+						TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherStartNode, PriorityType.Main);
 					}
 				}
 			}
@@ -358,11 +372,11 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool MayNodeHavePrioritySigns(ushort nodeId) {
-			TrafficPriorityManager.UnableReason reason;
+			SetPrioritySignUnableReason reason;
 			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId} may have priority signs.");
 			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
 				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
-				if (reason == TrafficPriorityManager.UnableReason.HasTimedLight) {
+				if (reason == SetPrioritySignUnableReason.HasTimedLight) {
 					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return false;

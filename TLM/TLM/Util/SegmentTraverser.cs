@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Custom.AI;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Manager;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Util {
 	public class SegmentTraverser {
@@ -41,14 +43,14 @@ namespace TrafficManager.Util {
 
 		public class SegmentVisitData {
 			/// <summary>
-			/// Previously visited segment geometry
+			/// Previously visited ext. segment
 			/// </summary>
-			public SegmentGeometry prevGeo;
+			public ExtSegment prevSeg;
 
 			/// <summary>
-			/// Current segment geometry
+			/// Current ext. segment
 			/// </summary>
-			public SegmentGeometry curGeo;
+			public ExtSegment curSeg;
 
 			/// <summary>
 			/// If true the current segment geometry has been reached on a path via the initial segment's start node
@@ -65,9 +67,9 @@ namespace TrafficManager.Util {
 			/// </summary>
 			public bool initial;
 
-			public SegmentVisitData(SegmentGeometry prevGeo, SegmentGeometry curGeo, bool viaInitialStartNode, bool viaStartNode, bool initial) {
-				this.prevGeo = prevGeo;
-				this.curGeo = curGeo;
+			public SegmentVisitData(ref ExtSegment prevSeg, ref ExtSegment curSeg, bool viaInitialStartNode, bool viaStartNode, bool initial) {
+				this.prevSeg = prevSeg;
+				this.curSeg = curSeg;
 				this.viaInitialStartNode = viaInitialStartNode;
 				this.viaStartNode = viaStartNode;
 				this.initial = initial;
@@ -83,23 +85,34 @@ namespace TrafficManager.Util {
 		/// <param name="maximumDepth">Specifies the maximum depth to explore. At a depth of 0, no segment will be traversed (event the initial segment will be omitted).</param>
 		/// <param name="visitor">Specifies the stateful visitor that should be notified as soon as a traversable segment (which has not been traversed before) is found.</param>
 		public static void Traverse(ushort initialSegmentId, TraverseDirection direction, TraverseSide side, SegmentStopCriterion stopCrit, SegmentVisitor visitor) {
-			SegmentGeometry initialSegGeometry = SegmentGeometry.Get(initialSegmentId);
-			if (initialSegGeometry == null)
+			ExtSegment initialSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[initialSegmentId];
+			if (! initialSeg.valid)
 				return;
 
-			Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegGeometry.SegmentId}");
-			if (visitor(new SegmentVisitData(initialSegGeometry, initialSegGeometry, false, false, true))) {
+			//Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegmentId}");
+			if (visitor(new SegmentVisitData(ref initialSeg, ref initialSeg, false, false, true))) {
 				HashSet<ushort> visitedSegmentIds = new HashSet<ushort>();
 				visitedSegmentIds.Add(initialSegmentId);
 
-				TraverseRec(initialSegGeometry, true, true, direction, side, stopCrit, visitor, visitedSegmentIds);
-				TraverseRec(initialSegGeometry, false, false, direction, side, stopCrit, visitor, visitedSegmentIds);
+				IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+				ushort startNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, true);
+				Constants.ServiceFactory.NetService.ProcessNode(startNodeId, delegate (ushort nId, ref NetNode node) {
+					TraverseRec(ref initialSeg, ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, true)], ref node, true, direction, side, stopCrit, visitor, visitedSegmentIds);
+					return true;
+				});
+
+				ushort endNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, false);
+				Constants.ServiceFactory.NetService.ProcessNode(endNodeId, delegate (ushort nId, ref NetNode node) {
+					TraverseRec(ref initialSeg, ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, false)], ref node, false, direction, side, stopCrit, visitor, visitedSegmentIds);
+					return true;
+				});
 			}
-			Log._Debug($"SegmentTraverser: Traversal finished.");
+			//Log._Debug($"SegmentTraverser: Traversal finished.");
 		}
 
-		private static void TraverseRec(SegmentGeometry prevSegGeometry, bool exploreStartNode, bool viaInitialStartNode, TraverseDirection direction, TraverseSide side, SegmentStopCriterion stopCrit, SegmentVisitor visitor, HashSet<ushort> visitedSegmentIds) {
-			Log._Debug($"SegmentTraverser: Traversing segment {prevSegGeometry.SegmentId}");
+		private static void TraverseRec(ref ExtSegment prevSeg, ref ExtSegmentEnd prevSegEnd, ref NetNode node, bool viaInitialStartNode, TraverseDirection direction, TraverseSide side, SegmentStopCriterion stopCrit, SegmentVisitor visitor, HashSet<ushort> visitedSegmentIds) {
+			//Log._Debug($"SegmentTraverser: Traversing segment {prevSegEnd.segmentId}");
 
 			// collect next segment ids to traverse
 
@@ -111,86 +124,62 @@ namespace TrafficManager.Util {
 				throw new ArgumentException($"Invalid side {side} given.");
 			}
 
+			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
 			HashSet<ushort> nextSegmentIds = new HashSet<ushort>();
-			switch (direction) {
-				case TraverseDirection.AnyDirection:
-				default:
+			for (int i = 0; i < 8; ++i) {
+				ushort nextSegmentId = node.GetSegment(i);
+				if (nextSegmentId == 0 || nextSegmentId == prevSegEnd.segmentId) {
+					continue;
+				}
+
+				bool nextIsStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(nextSegmentId, prevSegEnd.nodeId);
+				ExtSegmentEnd nextSegEnd = extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(nextSegmentId, nextIsStartNode)];
+
+				if (
+					direction == TraverseDirection.AnyDirection ||
+					(direction == TraverseDirection.Incoming && nextSegEnd.incoming) ||
+					(direction == TraverseDirection.Outgoing && nextSegEnd.outgoing)
+				) {
 					if (side == TraverseSide.AnySide) {
-						nextSegmentIds.UnionWith(prevSegGeometry.GetConnectedSegments(exploreStartNode));
+						nextSegmentIds.Add(nextSegmentId);
 					} else {
-						if ((side & TraverseSide.Left) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetLeftSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Straight) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetStraightSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Right) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetRightSegments(exploreStartNode));
+						ArrowDirection dir = extSegEndMan.GetDirection(ref prevSegEnd, nextSegmentId);
+						if (
+							((side & TraverseSide.Left) != TraverseSide.None && dir == ArrowDirection.Left) ||
+							((side & TraverseSide.Straight) != TraverseSide.None && dir == ArrowDirection.Forward) ||
+							((side & TraverseSide.Right) != TraverseSide.None && dir == ArrowDirection.Right)
+						) {
+							nextSegmentIds.Add(nextSegmentId);
 						}
 					}
-					break;
-				case TraverseDirection.Incoming:
-					if (side == TraverseSide.AnySide) {
-						nextSegmentIds.UnionWith(prevSegGeometry.GetIncomingSegments(exploreStartNode));
-					} else {
-						if ((side & TraverseSide.Left) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetIncomingLeftSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Straight) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetIncomingStraightSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Right) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetIncomingRightSegments(exploreStartNode));
-						}
-					}
-					break;
-				case TraverseDirection.Outgoing:
-					if (side == TraverseSide.AnySide) {
-						nextSegmentIds.UnionWith(prevSegGeometry.GetOutgoingSegments(exploreStartNode));
-					} else {
-						if ((side & TraverseSide.Left) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetOutgoingLeftSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Straight) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetOutgoingStraightSegments(exploreStartNode));
-						}
-
-						if ((side & TraverseSide.Right) != TraverseSide.None) {
-							nextSegmentIds.UnionWith(prevSegGeometry.GetOutgoingRightSegments(exploreStartNode));
-						}
-					}
-					break;
+				}
 			}
 			nextSegmentIds.Remove(0);
-
-			Log._Debug($"SegmentTraverser: Fetched next segments to traverse: {nextSegmentIds.CollectionToString()}");
+			//Log._Debug($"SegmentTraverser: Fetched next segments to traverse: {nextSegmentIds.CollectionToString()}");
 
 			if (nextSegmentIds.Count >= 2 && (stopCrit & SegmentStopCriterion.Junction) != SegmentStopCriterion.None) {
-				Log._Debug($"SegmentTraverser: Stop criterion reached @ {prevSegGeometry.SegmentId}: {nextSegmentIds.Count} connected segments");
+				//Log._Debug($"SegmentTraverser: Stop criterion reached @ {prevSegEnd.segmentId}: {nextSegmentIds.Count} connected segments");
 				return;
 			}
 
-			ushort prevNodeId = prevSegGeometry.GetNodeId(exploreStartNode);
-
 			// explore next segments
 			foreach (ushort nextSegmentId in nextSegmentIds) {
-				if (nextSegmentId == 0 || visitedSegmentIds.Contains(nextSegmentId))
+				if (visitedSegmentIds.Contains(nextSegmentId))
 					continue;
 				visitedSegmentIds.Add(nextSegmentId);
+				//Log._Debug($"SegmentTraverser: Traversing segment {nextSegmentId}");
 
-				SegmentGeometry nextSegGeometry = SegmentGeometry.Get(nextSegmentId);
-				if (nextSegGeometry != null) {
-					Log._Debug($"SegmentTraverser: Traversing segment {nextSegGeometry.SegmentId}");
+				ushort nextStartNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(nextSegmentId, true);
+				if (visitor(new SegmentVisitData(ref prevSeg, ref extSegMan.ExtSegments[nextSegmentId], viaInitialStartNode, prevSegEnd.nodeId == nextStartNodeId, false))) {
+					bool nextNodeIsStartNode = nextStartNodeId != prevSegEnd.nodeId;
 
-					if (visitor(new SegmentVisitData(prevSegGeometry, nextSegGeometry, viaInitialStartNode, prevNodeId == nextSegGeometry.StartNodeId(), false))) {
-						bool nextNodeIsStartNode = nextSegGeometry.StartNodeId() != prevNodeId;
-						TraverseRec(nextSegGeometry, nextNodeIsStartNode, viaInitialStartNode, direction, side, stopCrit, visitor, visitedSegmentIds);
-					}
+					ExtSegmentEnd nextSegEnd = extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(nextSegmentId, nextNodeIsStartNode)];
+					Constants.ServiceFactory.NetService.ProcessNode(nextSegEnd.nodeId, delegate (ushort nId, ref NetNode nextNode) {
+						TraverseRec(ref extSegMan.ExtSegments[nextSegmentId], ref nextSegEnd, ref nextNode, viaInitialStartNode, direction, side, stopCrit, visitor, visitedSegmentIds);
+						return true;
+					});
 				}
 			}
 		}

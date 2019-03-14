@@ -7,8 +7,8 @@ using System.Threading;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
-using static TrafficManager.Geometry.Impl.NodeGeometry;
 
 namespace TrafficManager.Manager {
 	public abstract class AbstractGeometryObservingManager : AbstractCustomManager, IObserver<GeometryUpdate> {
@@ -20,32 +20,32 @@ namespace TrafficManager.Manager {
 		/// Handles an invalid segment
 		/// </summary>
 		/// <param name="geometry">segment geometry</param>
-		protected virtual void HandleInvalidSegment(SegmentGeometry geometry) { }
+		protected virtual void HandleInvalidSegment(ref ExtSegment seg) { }
 
 		/// <summary>
 		/// Handles a valid segment
 		/// </summary>
 		/// <param name="geometry">segment geometry</param>
-		protected virtual void HandleValidSegment(SegmentGeometry geometry) { }
+		protected virtual void HandleValidSegment(ref ExtSegment seg) { }
 
 		/// <summary>
 		/// Handles an invalid node
 		/// </summary>
 		/// <param name="geometry">node geometry</param>
-		protected virtual void HandleInvalidNode(NodeGeometry geometry) { }
+		protected virtual void HandleInvalidNode(ushort nodeId, ref NetNode node) { }
 
 		/// <summary>
 		/// Handles a valid node
 		/// </summary>
 		/// <param name="geometry">node geometry</param>
-		protected virtual void HandleValidNode(NodeGeometry geometry) { }
+		protected virtual void HandleValidNode(ushort nodeId, ref NetNode node) { }
 
 		/// <summary>
 		/// Handles a segment replacement
 		/// </summary>
 		/// <param name="replacement">segment replacement</param>
 		/// <param name="newEndGeo">new segment end geometry</param>
-		protected virtual void HandleSegmentEndReplacement(SegmentEndReplacement replacement, SegmentEndGeometry newEndGeo) { }
+		protected virtual void HandleSegmentEndReplacement(SegmentEndReplacement replacement, ref ExtSegmentEnd segEnd) { }
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
@@ -64,48 +64,50 @@ namespace TrafficManager.Manager {
 		}
 
 		public void OnUpdate(GeometryUpdate update) {
-			if (update.segmentGeometry != null) {
+			if (update.segment != null) {
 				// Handle a segment update
-				SegmentGeometry geometry = update.segmentGeometry;
-				if (!geometry.IsValid()) {
+				ExtSegment seg = (ExtSegment)update.segment;
+				if (!seg.valid) {
 #if DEBUGGEO
 					if (GlobalConfig.Instance.Debug.Switches[5])
-						Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({geometry.SegmentId})");
+						Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({seg.segmentId})");
 #endif
-					HandleInvalidSegment(geometry);
+					HandleInvalidSegment(ref seg);
 				} else {
 #if DEBUGGEO
 					if (GlobalConfig.Instance.Debug.Switches[5])
-						Log._Debug($"{this.GetType().Name}.HandleValidSegment({geometry.SegmentId})");
+						Log._Debug($"{this.GetType().Name}.HandleValidSegment({seg.segmentId})");
 #endif
-					HandleValidSegment(geometry);
+					HandleValidSegment(ref seg);
 				}
-			} else if (update.nodeGeometry != null) {
+			} else if (update.nodeId != null) {
 				// Handle a node update
-				NodeGeometry geometry = update.nodeGeometry;
-				if (!geometry.IsValid()) {
+				ushort nodeId = (ushort)update.nodeId;
+				Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+					if ((node.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created) {
 #if DEBUGGEO
-					if (GlobalConfig.Instance.Debug.Switches[5])
-						Log._Debug($"{this.GetType().Name}.HandleInvalidNode({geometry.NodeId})");
+						if (GlobalConfig.Instance.Debug.Switches[5])
+							Log._Debug($"{this.GetType().Name}.HandleValidNode({nodeId})");
 #endif
-					HandleInvalidNode(geometry);
-				} else {
+						HandleValidNode(nodeId, ref node);
+					} else {
 #if DEBUGGEO
-					if (GlobalConfig.Instance.Debug.Switches[5])
-						Log._Debug($"{this.GetType().Name}.HandleValidNode({geometry.NodeId})");
+						if (GlobalConfig.Instance.Debug.Switches[5])
+							Log._Debug($"{this.GetType().Name}.HandleInvalidNode({nodeId})");
 #endif
-					HandleValidNode(geometry);
-				}
+						HandleInvalidNode(nodeId, ref node);
+					}
+					return true;
+				});
 			} else {
 				// Handle a segment end replacement
-				SegmentEndGeometry endGeo = SegmentGeometry.Get(update.replacement.newSegmentEndId.SegmentId)?.GetEnd(update.replacement.newSegmentEndId.StartNode);
-				if (endGeo != null) {
+				IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
 #if DEBUGGEO
-					if (GlobalConfig.Instance.Debug.Switches[5])
-						Log._Debug($"{this.GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} -> {update.replacement.newSegmentEndId})");
+				if (GlobalConfig.Instance.Debug.Switches[5])
+					Log._Debug($"{this.GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} -> {update.replacement.newSegmentEndId})");
 #endif
-					HandleSegmentEndReplacement(update.replacement, endGeo);
-				}
+				HandleSegmentEndReplacement(update.replacement, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(update.replacement.newSegmentEndId.SegmentId, update.replacement.newSegmentEndId.StartNode)]);
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.RedirectionFramework.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,24 +10,17 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
-	class CustomPoliceCarAI : CarAI {
+	[TargetType(typeof(PoliceCarAI))]
+	public class CustomPoliceCarAI : CarAI {
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-#if DEBUG
-			//Log._Debug($"CustomPoliceCarAI.CustomStartPathFind called for vehicle {vehicleID}");
-#endif
+			ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
 
-			ExtVehicleType vehicleType = ExtVehicleType.None;
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnStartPathFind")) {
-#endif
-				 vehicleType = VehicleStateManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0 ? ExtVehicleType.Emergency : ExtVehicleType.Service);
-#if BENCHMARK
-			}
-#endif
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
@@ -48,7 +42,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = vehicleType;
 				args.vehicleId = vehicleID;
 				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -70,8 +64,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = false;
 				args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-				//Log._Debug($"CustomPoliceCarAI.CustomStartPathFind: Vehicle {vehicleID}, type {vehicleType}");
-				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 					if (vehicleData.m_path != 0u) {
 						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using TrafficManager.RedirectionFramework.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,16 +8,15 @@ using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
-	class CustomBusAI : CarAI {
+	[TargetType(typeof(BusAI))]
+	public class CustomBusAI : CarAI {
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
-#if DEBUG
-			//Log._Debug($"CustomBusAI.CustomStartPathFind called for vehicle {vehicleID}");
-#endif
-
 			VehicleInfo info = this.m_info;
 			bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 			PathUnit.Position startPosA;
@@ -38,7 +38,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = ExtVehicleType.Bus;
 				args.vehicleId = vehicleID;
 				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -60,7 +60,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = true;
 				args.skipQueue = true;
 
-				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {

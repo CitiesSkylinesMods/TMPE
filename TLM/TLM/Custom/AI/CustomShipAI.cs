@@ -1,6 +1,7 @@
 ﻿using ColossalFramework;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.RedirectionFramework.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,25 +10,21 @@ using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using UnityEngine;
 using static TrafficManager.Custom.PathFinding.CustomPathManager;
 
 namespace TrafficManager.Custom.AI {
-	class CustomShipAI : ShipAI {
+	[TargetType(typeof(ShipAI))]
+	public class CustomShipAI : ShipAI {
+		[RedirectMethod]
 		public bool CustomStartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays) {
 #if DEBUG
 			//Log._Debug($"CustomShipAI.CustomStartPathFind called for vehicle {vehicleID}");
 #endif
 
 			/// NON-STOCK CODE START ///
-			ExtVehicleType vehicleType = ExtVehicleType.None;
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "vehicleType")) {
-#endif
-				vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI ? ExtVehicleType.PassengerShip : ExtVehicleType.CargoVehicle;
-#if BENCHMARK
-			}
-#endif
+			ExtVehicleType vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI ? ExtVehicleType.PassengerShip : ExtVehicleType.CargoVehicle;
 			/// NON-STOCK CODE END ///
 
 			VehicleInfo info = this.m_info;
@@ -50,7 +47,7 @@ namespace TrafficManager.Custom.AI {
 				uint path;
 				// NON-STOCK CODE START
 				PathCreationArgs args;
-				args.extPathType = ExtCitizenInstance.ExtPathType.None;
+				args.extPathType = ExtPathType.None;
 				args.extVehicleType = vehicleType;
 				args.vehicleId = vehicleID;
 				args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -72,7 +69,7 @@ namespace TrafficManager.Custom.AI {
 				args.stablePath = false;
 				args.skipQueue = false;
 
-				if (CustomPathManager._instance.CreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+				if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
 					// NON-STOCK CODE END
 
 					if (vehicleData.m_path != 0u) {

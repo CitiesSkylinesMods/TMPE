@@ -19,6 +19,7 @@ using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using TrafficManager.Traffic.Enums;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 using System.Collections;
 
@@ -708,7 +709,7 @@ namespace TrafficManager.UI {
 				if (curLaneId == 0)
 					break;
 
-				TrafficMeasurementManager.LaneTrafficData laneTrafficData;
+				LaneTrafficData laneTrafficData;
 				bool laneTrafficDataLoaded = TrafficMeasurementManager.Instance.GetLaneTrafficData(segmentId, (byte)i, out laneTrafficData);
 
 				NetInfo.Lane laneInfo = segmentInfo.m_lanes[i];
@@ -762,44 +763,34 @@ namespace TrafficManager.UI {
 		/// </summary>
 		private void _guiSegments() {
 			TrafficMeasurementManager trafficMeasurementManager = TrafficMeasurementManager.Instance;
+			NetManager netManager = Singleton<NetManager>.instance;
 
 			GUIStyle _counterStyle = new GUIStyle();
 			SegmentEndManager endMan = SegmentEndManager.Instance;
-			Array16<NetSegment> segments = Singleton<NetManager>.instance.m_segments;
-			for (int i = 1; i < segments.m_size; ++i) {
-				if (segments.m_buffer[i].m_flags == NetSegment.Flags.None) // segment is unused
+			for (int i = 1; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+				if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) // segment is unused
 					continue;
-				ItemClass.Service service = segments.m_buffer[i].Info.GetService();
-				ItemClass.SubService subService = segments.m_buffer[i].Info.GetSubService();
-				/*if (service != ItemClass.Service.Road) {
-					if (service != ItemClass.Service.PublicTransport) {
-						continue;
-					} else {
-						if (subService != ItemClass.SubService.PublicTransportBus && subService != ItemClass.SubService.PublicTransportCableCar &&
-							subService != ItemClass.SubService.PublicTransportMetro && subService != ItemClass.SubService.PublicTransportMonorail &&
-							subService != ItemClass.SubService.PublicTransportTrain) {
-							continue;
-						}
-					}
-				}*/
+
+				ItemClass.Service service = netManager.m_segments.m_buffer[i].Info.GetService();
+				ItemClass.SubService subService = netManager.m_segments.m_buffer[i].Info.GetSubService();
 #if !DEBUG
-				if ((segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
+				if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
 					continue;
 #endif
-				var segmentInfo = segments.m_buffer[i].Info;
+				var segmentInfo = netManager.m_segments.m_buffer[i].Info;
 
-				Vector3 centerPos = segments.m_buffer[i].m_bounds.center;
+				Vector3 centerPos = netManager.m_segments.m_buffer[i].m_bounds.center;
 				Vector3 screenPos;
 				bool visible = WorldToScreenPoint(centerPos, out screenPos);
 
-				if (! visible)
+				if (!visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = centerPos - camPos;
 				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
-				
+
 				var zoom = 1.0f / diff.magnitude * 150f;
 
 				_counterStyle.fontSize = (int)(12f * zoom);
@@ -807,7 +798,7 @@ namespace TrafficManager.UI {
 
 				String labelStr = "Segment " + i;
 #if DEBUG
-				labelStr += ", flags: " + segments.m_buffer[i].m_flags.ToString(); // + ", condition: " + segments.m_buffer[i].m_condition;
+				labelStr += ", flags: " + netManager.m_segments.m_buffer[i].m_flags.ToString() + ", resc: " + EmergencyBehaviorManager.Instance.EmergencySegments[i]; // + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
 				labelStr += "\nsvc: " + service + ", sub: " + subService;
@@ -815,7 +806,7 @@ namespace TrafficManager.UI {
 				ISegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
 				labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
 #endif
-				labelStr += "\nTraffic: " + segments.m_buffer[i].m_trafficDensity + " %";
+				labelStr += "\nTraffic: " + netManager.m_segments.m_buffer[i].m_trafficDensity + " %";
 
 #if DEBUG
 
@@ -833,22 +824,22 @@ namespace TrafficManager.UI {
 				labelStr += ", ";
 #endif
 				labelStr += "mean speeds: ";
-				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].meanSpeed / 100) + "%/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].meanSpeed / 100) + "%";
+				labelStr += " " + (trafficMeasurementManager.SegmentDirTrafficData[fwdSegIndex].meanSpeed / 100) + "%/" + (trafficMeasurementManager.SegmentDirTrafficData[backSegIndex].meanSpeed / 100) + "%";
 #if PFTRAFFICSTATS || MEASURECONGESTION
-				labelStr += "\n";
+			labelStr += "\n";
 #endif
 #if PFTRAFFICSTATS
-				labelStr += "pf bufs: ";
-				labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].totalPathFindTrafficBuffer) + "/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].totalPathFindTrafficBuffer);
+			labelStr += "pf bufs: ";
+			labelStr += " " + (trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].totalPathFindTrafficBuffer) + "/" + (trafficMeasurementManager.segmentDirTrafficData[backSegIndex].totalPathFindTrafficBuffer);
 #endif
 #if PFTRAFFICSTATS && MEASURECONGESTION
-				labelStr += ", ";
+			labelStr += ", ";
 #endif
 #if MEASURECONGESTION
-				labelStr += "cong: ";
-				labelStr += " " + fwdCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongestionMeasurements + ")/" + backCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongestionMeasurements + ")";
+			labelStr += "cong: ";
+			labelStr += " " + fwdCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[fwdSegIndex].numCongestionMeasurements + ")/" + backCongestionRatio + "% (" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongested + "/" + trafficMeasurementManager.segmentDirTrafficData[backSegIndex].numCongestionMeasurements + ")";
 #endif
-				labelStr += "\nstart: " + segments.m_buffer[i].m_startNode + ", end: " + segments.m_buffer[i].m_endNode;
+				labelStr += "\nstart: " + netManager.m_segments.m_buffer[i].m_startNode + ", end: " + netManager.m_segments.m_buffer[i].m_endNode;
 #endif
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
@@ -857,7 +848,7 @@ namespace TrafficManager.UI {
 				GUI.Label(labelRect, labelStr, _counterStyle);
 
 				if (Options.showLanes)
-					_guiLanes((ushort)i, ref segments.m_buffer[i], ref segmentInfo);
+					_guiLanes((ushort)i, ref netManager.m_segments.m_buffer[i], ref segmentInfo);
 			}
 		}
 
@@ -865,25 +856,25 @@ namespace TrafficManager.UI {
 		/// Displays node ids over nodes
 		/// </summary>
 		private void _guiNodes() {
+			NetManager netManager = Singleton<NetManager>.instance;
 			GUIStyle _counterStyle = new GUIStyle();
-			Array16<NetNode> nodes = Singleton<NetManager>.instance.m_nodes;
 			
-			for (int i = 1; i < nodes.m_size; ++i) {
-				if ((nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
+			for (int i = 1; i < NetManager.MAX_NODE_COUNT; ++i) {
+				if ((netManager.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
 					continue;
 
-				Vector3 pos = nodes.m_buffer[i].m_position;
+				Vector3 pos = netManager.m_nodes.m_buffer[i].m_position;
 				Vector3 screenPos;
 				bool visible = WorldToScreenPoint(pos, out screenPos);
-				
-				if (! visible)
+
+				if (!visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 				var diff = pos - camPos;
 				if (diff.magnitude > DebugCloseLod)
 					continue; // do not draw if too distant
-				
+
 				var zoom = 1.0f / diff.magnitude * 150f;
 
 				_counterStyle.fontSize = (int)(15f * zoom);
@@ -891,8 +882,8 @@ namespace TrafficManager.UI {
 
 				String labelStr = "Node " + i;
 #if DEBUG
-				labelStr += $"\nflags: {nodes.m_buffer[i].m_flags}";
-				labelStr += $"\nlane: {nodes.m_buffer[i].m_lane}";
+				labelStr += $"\nflags: {netManager.m_nodes.m_buffer[i].m_flags}";
+				labelStr += $"\nlane: {netManager.m_nodes.m_buffer[i].m_lane}";
 #endif
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
@@ -906,15 +897,15 @@ namespace TrafficManager.UI {
 		/// </summary>
 		private void _guiVehicles() {
 			GUIStyle _counterStyle = new GUIStyle();
-			Array16<Vehicle> vehicles = Singleton<VehicleManager>.instance.m_vehicles;
 			LaneConnectionManager connManager = LaneConnectionManager.Instance;
 			SimulationManager simManager = Singleton<SimulationManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
-			VehicleStateManager vehStateManager = VehicleStateManager.Instance;
+			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
 
 			int startVehicleId = 1;
-			int endVehicleId = (int)(vehicles.m_size - 1);
+			int endVehicleId = (int)(VehicleManager.MAX_VEHICLE_COUNT - 1);
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.VehicleId != 0) {
 				startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;
@@ -922,15 +913,14 @@ namespace TrafficManager.UI {
 #endif
 
 			for (int i = startVehicleId; i <= endVehicleId; ++i) {
-				Vehicle vehicle = vehicles.m_buffer[i];
-				if (vehicle.m_flags == 0) // node is unused
+				if (vehicleManager.m_vehicles.m_buffer[i].m_flags == 0) // node is unused
 					continue;
 
-				Vector3 vehPos = vehicle.GetSmoothPosition((ushort)i);
+				Vector3 vehPos = vehicleManager.m_vehicles.m_buffer[i].GetSmoothPosition((ushort)i);
 				Vector3 screenPos;
 				bool visible = WorldToScreenPoint(vehPos, out screenPos);
-				
-				if (! visible)
+
+				if (!visible)
 					continue;
 
 				var camPos = simManager.m_simulationView.m_position;
@@ -944,11 +934,11 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(1f, 1f, 1f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				VehicleState vState = vehStateManager.VehicleStates[(ushort)i];
-				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
+				ExtVehicle vState = vehStateManager.ExtVehicles[(ushort)i];
+				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
-				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
+				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
 
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
@@ -956,42 +946,37 @@ namespace TrafficManager.UI {
 				}
 #endif
 
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
-					"di: " + driverInst.instanceId + " dc: " + driverInst.GetCitizenId() + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " srnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetStaticVehicleRand((ushort)i) + " trnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetTimedVehicleRand((ushort)i);
+				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.junctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
+					"di: " + driverInst.instanceId + " dc: " + ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId) + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " srnd: " + Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand((ushort)i) + " trnd: " + Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand((ushort)i);
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
 
 				GUI.Box(labelRect, labelStr, _counterStyle);
-
-				//_counterStyle.normal.background = null;
 			}
 		}
 
 		private void _guiCitizens() {
+			CitizenManager citManager = Singleton<CitizenManager>.instance;
 			GUIStyle _counterStyle = new GUIStyle();
-			Array16<CitizenInstance> citizenInstances = Singleton<CitizenManager>.instance.m_instances;
-			for (int i = 1; i < citizenInstances.m_size; ++i) {
-				CitizenInstance citizenInstance = citizenInstances.m_buffer[i];
-				if (citizenInstance.m_flags == CitizenInstance.Flags.None)
-					continue;
-				if ((citizenInstance.m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None)
+			for (int i = 1; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
+				if ((citManager.m_instances.m_buffer[i].m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None)
 					continue;
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.Switches[14]) {
 #endif
-					if (citizenInstance.m_path != 0) {
+					if (citManager.m_instances.m_buffer[i].m_path != 0) {
 						continue;
 					}
 #if DEBUG
 				}
 #endif
 
-				Vector3 pos = citizenInstance.GetSmoothPosition((ushort)i);
+				Vector3 pos = citManager.m_instances.m_buffer[i].GetSmoothPosition((ushort)i);
 				Vector3 screenPos;
 				bool visible = WorldToScreenPoint(pos, out screenPos);
-				
-				if (! visible)
+
+				if (!visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -1011,9 +996,9 @@ namespace TrafficManager.UI {
 				}
 #endif
 
-				String labelStr = "Inst. " + i + ", Cit. " + citizenInstance.m_citizen + ",\nm: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString() + ", tm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].transportMode + ", ltm: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastTransportMode + ", ll: " + ExtCitizenManager.Instance.ExtCitizens[citizenInstance.m_citizen].lastLocation;
-				if (citizenInstance.m_citizen != 0) {
-					Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenInstance.m_citizen];
+				String labelStr = "Inst. " + i + ", Cit. " + citManager.m_instances.m_buffer[i].m_citizen + ",\nm: " + ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode.ToString() + ", tm: " + ExtCitizenManager.Instance.ExtCitizens[citManager.m_instances.m_buffer[i].m_citizen].transportMode + ", ltm: " + ExtCitizenManager.Instance.ExtCitizens[citManager.m_instances.m_buffer[i].m_citizen].lastTransportMode + ", ll: " + ExtCitizenManager.Instance.ExtCitizens[citManager.m_instances.m_buffer[i].m_citizen].lastLocation;
+				if (citManager.m_instances.m_buffer[i].m_citizen != 0) {
+					Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citManager.m_instances.m_buffer[i].m_citizen];
 					if (citizen.m_parkedVehicle != 0) {
 						labelStr += "\nparked: " + citizen.m_parkedVehicle + " dist: " + (Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[citizen.m_parkedVehicle].m_position - pos).magnitude;
 					}
@@ -1030,18 +1015,17 @@ namespace TrafficManager.UI {
 		}
 
 		private void _guiBuildings() {
+			BuildingManager buildingManager = Singleton<BuildingManager>.instance;
 			GUIStyle _counterStyle = new GUIStyle();
-			Array16<Building> buildings = Singleton<BuildingManager>.instance.m_buildings;
-			for (int i = 1; i < buildings.m_size; ++i) {
-				Building building = buildings.m_buffer[i];
-				if (building.m_flags == Building.Flags.None)
+			for (int i = 1; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
+				if ((buildingManager.m_buildings.m_buffer[i].m_flags & Building.Flags.Created) == Building.Flags.None)
 					continue;
 
-				Vector3 pos = building.m_position;
+				Vector3 pos = buildingManager.m_buildings.m_buffer[i].m_position;
 				Vector3 screenPos;
 				bool visible = WorldToScreenPoint(pos, out screenPos);
-				
-				if (! visible)
+
+				if (!visible)
 					continue;
 
 				var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -1055,9 +1039,7 @@ namespace TrafficManager.UI {
 				_counterStyle.normal.textColor = new Color(0f, 1f, 0f);
 				//_counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
-				ExtBuilding extBuilding = ExtBuildingManager.Instance.ExtBuildings[i];
-
-				String labelStr = "Building " + i + ", PDemand: " + extBuilding.parkingSpaceDemand + ", IncTDem: " + extBuilding.incomingPublicTransportDemand + ", OutTDem: " + extBuilding.outgoingPublicTransportDemand;
+				String labelStr = "Building " + i + ", PDemand: " + ExtBuildingManager.Instance.ExtBuildings[i].parkingSpaceDemand + ", IncTDem: " + ExtBuildingManager.Instance.ExtBuildings[i].incomingPublicTransportDemand + ", OutTDem: " + ExtBuildingManager.Instance.ExtBuildings[i].outgoingPublicTransportDemand;
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);

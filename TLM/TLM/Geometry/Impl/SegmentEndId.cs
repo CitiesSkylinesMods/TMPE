@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic;
 
 namespace TrafficManager.Geometry.Impl {
 	public class SegmentEndId : ISegmentEndId {

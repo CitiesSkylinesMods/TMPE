@@ -28,18 +28,22 @@ namespace TrafficManager.Util {
             Log.Info("Performing incompatible mods check");
             Dictionary<ulong, string> incompatibleMods = new Dictionary<ulong, string>();
             for (int i = 0; i < userModList.Length; i++) {
-                if (incompatibleModList.TryGetValue(userModList[i], out string incompatibleModName)) {
+				string incompatibleModName;
+                if (incompatibleModList.TryGetValue(userModList[i], out incompatibleModName)) {
                     incompatibleMods.Add(userModList[i], incompatibleModName);
-                }
+					Log.Warning($"Incompatible mod detected: {incompatibleModName}");
+				}
             }
 
             if (incompatibleMods.Count > 0) {
-                Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
-                IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
+                Log.Warning($"{incompatibleMods.Count} incompatible mods detected!");
+#if SHOW_INCOMPATIBLE_MODS
+				IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
                 panel.IncompatibleMods = incompatibleMods;
                 panel.Initialize();
                 UIView.PushModal(panel);
                 UIView.SetFocus(panel);
+#endif
             } else {
                 Log.Info("No incompatible mods detected");
             }
@@ -56,7 +60,8 @@ namespace TrafficManager.Util {
 
             for (int i = 0; i < lines.Length; i++) {
                 string[] strings = lines[i].Split(';');
-                if (ulong.TryParse(strings[0], out ulong steamId)) {
+				ulong steamId;
+                if (ulong.TryParse(strings[0], out steamId)) {
                     incompatibleMods.Add(steamId, strings[1]);
                 }
             }
