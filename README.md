@@ -1,4 +1,4 @@
-﻿# Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
+﻿# Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST) [![Build status](https://ci.appveyor.com/api/projects/status/dehkvuxk8b3h66e7/branch/master?svg=true)](https://ci.appveyor.com/project/krzychu124/cities-skylines-traffic-manager-president-edition/branch/master)
 
 A mod for **Cities: Skylines** that gives you more control over road and rail traffic in your city.
 
