@@ -798,7 +798,7 @@ namespace TrafficManager.UI {
 
 				String labelStr = "Segment " + i;
 #if DEBUG
-				labelStr += ", flags: " + netManager.m_segments.m_buffer[i].m_flags.ToString() + ", resc: " + EmergencyBehaviorManager.Instance.EmergencySegments[i]; // + ", condition: " + segments.m_buffer[i].m_condition;
+				labelStr += ", flags: " + netManager.m_segments.m_buffer[i].m_flags.ToString(); // + ", condition: " + segments.m_buffer[i].m_condition;
 #endif
 #if DEBUG
 				labelStr += "\nsvc: " + service + ", sub: " + subService;
@@ -946,7 +946,7 @@ namespace TrafficManager.UI {
 				}
 #endif
 
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.junctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
+				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].GetLastFrameVelocity().sqrMagnitude + "] (len: " + vState.totalLength + ", " + vState.junctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
 					"di: " + driverInst.instanceId + " dc: " + ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId) + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " srnd: " + Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand((ushort)i) + " trnd: " + Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand((ushort)i);
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));

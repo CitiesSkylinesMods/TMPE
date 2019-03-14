@@ -346,10 +346,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (vehicleType != null) {
-				if (extVehicle.vehicleType == ExtVehicleType.Emergency) {
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
-				}
 				extVehicle.vehicleType = (ExtVehicleType)vehicleType;
 			}
 
@@ -422,11 +418,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (extVehicle.nextSegmentId != nextPos.m_segment || extVehicle.nextLaneIndex != nextPos.m_lane) {
-				if (extVehicle.nextSegmentId != nextPos.m_segment && extVehicle.vehicleType == ExtVehicleType.Emergency) {
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(nextPos.m_segment, true);
-				}
-
 				extVehicle.nextSegmentId = nextPos.m_segment;
 				extVehicle.nextLaneIndex = nextPos.m_lane;
 			}
@@ -439,10 +430,6 @@ namespace TrafficManager.Manager.Impl {
 				if (GlobalConfig.Instance.Debug.Switches[9])
 					Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Current segment end changed. seg. {extVehicle.currentSegmentId}, start {extVehicle.currentStartNode}, lane {extVehicle.currentLaneIndex} -> seg. {segEnd.segmentId}, start {segEnd.startNode}, lane {curPos.m_lane}");
 #endif
-				if (extVehicle.currentSegmentId != curPos.m_segment && extVehicle.vehicleType == ExtVehicleType.Emergency) {
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
-					Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(curPos.m_segment, true);
-				}
 
 				if (extVehicle.currentSegmentId != 0) {
 #if DEBUG
@@ -488,11 +475,6 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			if (extVehicle.vehicleType == ExtVehicleType.Emergency) {
-				Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.nextSegmentId, false);
-				Constants.ManagerFactory.EmergencyBehaviorManager.RegisterEmergencyVehicle(extVehicle.currentSegmentId, false);
-			}
-
 			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(GetDriverInstanceId(extVehicle.vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[extVehicle.vehicleId]));
 
 			Unlink(ref extVehicle);
@@ -502,13 +484,9 @@ namespace TrafficManager.Manager.Impl {
 			extVehicle.currentLaneIndex = 0;
 			extVehicle.lastAltLaneSelSegmentId = 0;
 			extVehicle.recklessDriver = false;
-
 			extVehicle.nextSegmentId = 0;
 			extVehicle.nextLaneIndex = 0;
-
 			extVehicle.totalLength = 0;
-			Constants.ManagerFactory.EmergencyBehaviorManager.UnstopVehicle(ref extVehicle);
-
 			extVehicle.flags &= ExtVehicleFlags.Created;
 
 #if DEBUG
@@ -552,7 +530,6 @@ namespace TrafficManager.Manager.Impl {
 			extVehicle.lastAltLaneSelSegmentId = 0;
 			extVehicle.junctionTransitState = VehicleJunctionTransitState.None;
 			extVehicle.recklessDriver = false;
-			Constants.ManagerFactory.EmergencyBehaviorManager.UnstopVehicle(ref extVehicle);
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])

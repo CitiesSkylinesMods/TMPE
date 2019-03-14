@@ -19,13 +19,7 @@ namespace TrafficManager.Manager.Impl {
 				return Impl.CustomSegmentLightsManager.Instance;
 			}
 		}
-
-		public IEmergencyBehaviorManager EmergencyBehaviorManager {
-			get {
-				return Impl.EmergencyBehaviorManager.Instance;
-			}
-		}
-
+		
 		public IExtBuildingManager ExtBuildingManager {
 			get {
 				return Impl.ExtBuildingManager.Instance;

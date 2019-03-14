@@ -53,7 +53,6 @@ namespace TrafficManager.UI {
 		private static UIButton _vehicleToNoneButton = null;
 		private static UIButton _printFlagsDebugInfoButton = null;
 		private static UIButton _printBenchmarkReportButton = null;
-		private static UIButton _toggleResuceLaneButton = null;
 #endif
 
 #if QUEUEDSTATS
@@ -192,9 +191,6 @@ namespace TrafficManager.UI {
 			y += 40;
 			height += 40;
 			_printBenchmarkReportButton = _createButton("Print benchmark report", y, clickPrintBenchmarkReport);
-			y += 40;
-			height += 40;
-			_toggleResuceLaneButton = _createButton("Toggle rescue lane", y, clickToggleRescueLane);
 			y += 40;
 			height += 40;
 #endif
@@ -412,13 +408,6 @@ namespace TrafficManager.UI {
 		private void clickResetBenchmarks(UIComponent component, UIMouseEventParameter eventParam) {
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
 				BenchmarkProfileProvider.Instance.ClearProfiles();
-			});
-		}
-
-		private void clickToggleRescueLane(UIComponent component, UIMouseEventParameter eventParam) {
-			ushort segmentId = Convert.ToUInt16(_goToField.text);
-			Constants.ServiceFactory.SimulationService.AddAction(() => {
-				EmergencyBehaviorManager.Instance.RegisterEmergencyVehicle(segmentId, ! EmergencyBehaviorManager.Instance.IsEmergencyActive(segmentId));
 			});
 		}
 
