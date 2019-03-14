@@ -518,7 +518,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
 				return false;
 			}
-			if (!value && LaneConnectionManager.Instance.HasUturnConnections(segmentId, startNode)) {
+			if (!value && Constants.ManagerFactory.LaneConnectionManager.HasUturnConnections(segmentId, startNode)) {
 				return false;
 			}
 
@@ -604,8 +604,8 @@ namespace TrafficManager.Manager.Impl {
 			HandleValidSegment(segGeo);
 
 			if (requireRecalc) {
-				RoutingManager.Instance.RequestRecalculation(segmentId);
-				if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+				Constants.ManagerFactory.RoutingManager.RequestRecalculation(segmentId);
+				if (Constants.ManagerFactory.OptionsManager.MayPublishSegmentChanges()) {
 					Services.NetService.PublishSegmentChanges(segmentId);
 				}
 			}
