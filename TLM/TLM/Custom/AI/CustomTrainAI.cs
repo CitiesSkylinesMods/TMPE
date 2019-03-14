@@ -54,7 +54,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			}
 #endif
-			if (!Options.isStockLaneChangerUsed()) {
+			if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
 #if BENCHMARK
 				using (var bm = new Benchmark(null, "LogTraffic")) {
 #endif

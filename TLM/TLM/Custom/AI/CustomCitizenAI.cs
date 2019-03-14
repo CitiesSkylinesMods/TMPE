@@ -88,6 +88,7 @@ namespace TrafficManager.Custom.AI {
 						carUsageMode = CarUsagePolicy.Forbidden;
 						break;
 					case ExtPathMode.RequiresCarPath:
+					case ExtPathMode.RequiresMixedCarPathToTarget:
 					case ExtPathMode.DrivingToTarget:
 					case ExtPathMode.DrivingToKnownParkPos:
 					case ExtPathMode.DrivingToAltParkPos:
@@ -152,7 +153,10 @@ namespace TrafficManager.Custom.AI {
 						if (instanceData.m_sourceBuilding != 0) {
 							ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
 
-							if (Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen])) {
+							if (
+								(Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None &&
+								(startPos - Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_position).magnitude <= GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+							) {
 								if (sourceBuildingService == ItemClass.Service.Road) {
 									if (vehicleInfo != null) {
 										/*
@@ -554,25 +558,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomFindPathPosition(ushort instanceID, ref CitizenInstance citizenData, Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowUnderground, out PathUnit.Position position) {
-			position = default(PathUnit.Position);
-			float minDist = 1E+10f;
-			PathUnit.Position posA;
-			PathUnit.Position posB;
-			float distA;
-			float distB;
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None && PathManager.FindPathPosition(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			return position.m_segment != 0;
+			return CustomPathManager.FindCitizenPathPosition(pos, laneTypes, vehicleTypes, (citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None, allowUnderground, out position);
 		}
 
 		// stock code

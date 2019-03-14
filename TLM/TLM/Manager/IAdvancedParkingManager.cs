@@ -124,19 +124,22 @@ namespace TrafficManager.Manager {
 		/// <summary>
 		/// Merges the current calculation states of the citizen's main path and return path (while driving a passenger car).
 		/// If a definite calculation state can be determined path-find failure/success is handled appropriately.
-		/// The returned path state indicates if further handling must be undertaken by the game.
+		/// The returned (soft) path state indicates if further handling must be undertaken by the game.
 		/// </summary>
 		/// <param name="vehicleId">vehicle that shall be processed</param>
 		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="driverInstance">driver citizen instance</param>
 		/// <param name="driverExtInstance">extended citizen instance data of the driving citizen</param>
 		/// <param name="mainPathState">current state of the citizen instance's main path</param>
 		/// <returns>
 		///		Indication of how (external) game logic should treat this situation:
 		///		<code>Calculating</code>: Paths are still being calculated. Game must await completion.
 		///		<code>Ready</code>: All paths are ready and path-find success must be handled.
-		///		<code>Failed</code>: At least one path calculation failed and the failure must be handled.
+		///		<code>FailedHard</code>: At least one path calculation failed and the failure must be handled.
+		///		<code>FailedSoft</code>: Path-finding must be repeated.
+		///		<code>Ignore</code>: Default citizen behavior must be skipped. 
 		/// </returns>
-		ExtPathState UpdateCarPathState(ushort vehicleId, ref Vehicle vehicleData, ref ExtCitizenInstance driverExtInstance, ExtPathState mainPathState);
+		ExtSoftPathState UpdateCarPathState(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ExtPathState mainPathState);
 
 		/// <summary>
 		/// Processes a citizen that is approaching their private car.

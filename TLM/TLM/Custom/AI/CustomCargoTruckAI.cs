@@ -15,36 +15,22 @@ using static TrafficManager.Custom.PathFinding.CustomPathManager;
 namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			try {
-				// NON-STOCK CODE START
-				bool mayDespawn = true;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "MayDespawn")) {
-#endif
-					mayDespawn = (vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
-#if BENCHMARK
-				}
-#endif
-				// NON-STOCK CODE END
-
-				if (mayDespawn) {
-					Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-				} else {
-					if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
-						RemoveOffers(vehicleId, ref vehicleData);
-						vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
-						vehicleData.m_flags |= Vehicle.Flags.GoingBack;
-						vehicleData.m_waitCounter = 0;
-						if (!StartPathFind(vehicleId, ref vehicleData)) {
-							vehicleData.Unspawn(vehicleId);
-						}
-					}
-
-					base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
-				}
-			} catch (Exception ex) {
-				Log.Error("Error in CargoTruckAI.SimulationStep: " + ex.ToString());
+			if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
+				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
+				return;
 			}
+
+			if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
+				RemoveOffers(vehicleId, ref vehicleData);
+				vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
+				vehicleData.m_flags |= Vehicle.Flags.GoingBack;
+				vehicleData.m_waitCounter = 0;
+				if (!StartPathFind(vehicleId, ref vehicleData)) {
+					vehicleData.Unspawn(vehicleId);
+				}
+			}
+
+			base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
 		}
 
 		// stock code

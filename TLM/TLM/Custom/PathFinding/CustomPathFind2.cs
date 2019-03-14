@@ -2070,7 +2070,7 @@ namespace TrafficManager.Custom.PathFinding {
 			for (; nextLaneIndex <= maxNextLaneIndex && nextLaneId != 0; nextLaneIndex++) {
 				NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextLaneIndex];
 				if ((nextLaneInfo.m_finalDirection & nextFinalDir) != NetInfo.Direction.None) {
-					if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes) && (nextSegmentId != item.m_position.m_segment || nextLaneIndex != item.m_position.m_lane) && (nextLaneInfo.m_finalDirection & nextFinalDir) != NetInfo.Direction.None) {
+					if (nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes) && (nextSegmentId != item.m_position.m_segment || nextLaneIndex != item.m_position.m_lane)) {
 						if (acuteTurningAngle && nextLaneInfo.m_laneType == NetInfo.LaneType.Vehicle && (nextLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
 							continue;
 						}
@@ -2331,8 +2331,26 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 							nextItem, item.m_position
 						);
+					} else {
+#if DEBUG
+						if (debug) {
+							Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemCosts: Lane type and/or vehicle type mismatch or same segment/lane. Skipping."
+								+ "\t" + $"allowedLaneTypes={allowedLaneTypes}\n"
+								+ "\t" + $"allowedVehicleTypes={allowedVehicleTypes}"
+							);
+						}
+#endif
 					}
 				} else {
+#if DEBUG
+					if (debug) {
+						Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemCosts: Lane direction mismatch. Skipping."
+							+ "\t" + $"nextLaneInfo.m_finalDirection={nextLaneInfo.m_finalDirection}\n"
+							+ "\t" + $"nextFinalDir={nextFinalDir}"
+						);
+					}
+#endif
+
 					if ((nextLaneInfo.m_laneType & prevLaneType) != NetInfo.LaneType.None && (nextLaneInfo.m_vehicleType & prevVehicleType) != VehicleInfo.VehicleType.None) {
 						newLaneIndexFromInner++;
 					}
