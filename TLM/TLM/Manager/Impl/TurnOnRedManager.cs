@@ -150,7 +150,6 @@ namespace TrafficManager.Manager.Impl {
 				rightSegmentId = 0;
 			}
 
-#if TURNONRED_LEFT
 			if (endGeo.IncomingOneWay) {
 				if (lhd && rightSegmentId != 0 || !lhd && leftSegmentId != 0) {
 					// special case: one-way to one-way in non-preferred direction
@@ -179,9 +178,7 @@ namespace TrafficManager.Manager.Impl {
 						}
 					}
 				}
-			} else
-#endif
-			if (lhd) {
+			} else if (lhd) {
 				// default case (LHD): turn in preferred direction
 				rightSegmentId = 0;
 			} else {
