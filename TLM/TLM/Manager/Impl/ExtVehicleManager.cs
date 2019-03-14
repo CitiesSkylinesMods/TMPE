@@ -666,9 +666,11 @@ namespace TrafficManager.Manager.Impl {
 					return ExtVehicleType.CargoShip;
 				//break;
 				case VehicleInfo.VehicleType.Plane:
-					//if (ai is PassengerPlaneAI)
-					return ExtVehicleType.PassengerPlane;
-				//break;
+					if (ai is PassengerPlaneAI)
+						return ExtVehicleType.PassengerPlane;
+					if (ai is CargoPlaneAI)
+						return ExtVehicleType.CargoPlane;
+					break;
 				case VehicleInfo.VehicleType.Helicopter:
 					//if (ai is PassengerPlaneAI)
 					return ExtVehicleType.Helicopter;
