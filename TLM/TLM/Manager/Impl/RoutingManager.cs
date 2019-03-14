@@ -626,7 +626,14 @@ namespace TrafficManager.Manager.Impl {
 									transitionType = LaneEndTransitionType.Default;
 
 									if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
-										nextForcedTransitionDatas[numNextForcedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, isNextStartNodeOfNextSegment);
+										nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, isNextStartNodeOfNextSegment);
+
+										if (! isNextRealJunction) {
+											// simple forced lane transition: set lane distance
+											nextForcedTransitionDatas[numNextForcedTransitionDatas].distance = (byte)Math.Abs(prevOuterSimilarLaneIndex - nextOuterSimilarLaneIndex);
+										}
+
+										++numNextForcedTransitionDatas;
 									} else {
 										Log.Warning($"nextForcedTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 									}
