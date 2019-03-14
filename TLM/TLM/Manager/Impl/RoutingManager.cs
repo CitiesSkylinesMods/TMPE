@@ -1128,16 +1128,18 @@ namespace TrafficManager.Manager.Impl {
 									continue; // disregard lane since it has outgoing connections
 								}
 
-								if (nextIncomingDir == ArrowDirection.Turn) {
+								if (
+									nextIncomingDir == ArrowDirection.Turn && // u-turn
+									!nextIsEndOrOneWayOut && // not a dead end
+									nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex // incoming lane is not innermost lane
+								) {
 									// force u-turns to happen on the innermost lane
-									if (nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
-										++compatibleLaneDist;
-										nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
+									++compatibleLaneDist;
+									nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
 #if DEBUGROUTING
-										if (debugFine)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
+									if (debugFine)
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
 #endif
-									}
 								}
 
 #if DEBUGROUTING
