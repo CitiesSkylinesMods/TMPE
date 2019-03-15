@@ -49,7 +49,8 @@ namespace TrafficManager.State {
 #endif
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
-		private static UICheckBox allowTurnOnRedToggle = null;
+		private static UICheckBox allowNearTurnOnRedToggle = null;
+		private static UICheckBox allowFarTurnOnRedToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
 		private static UICheckBox trafficLightPriorityRulesToggle = null;
 		private static UIDropDown vehicleRestrictionsAggressionDropdown = null;
@@ -126,7 +127,8 @@ namespace TrafficManager.State {
 #endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
-		public static bool allowTurnOnRed = false;
+		public static bool allowNearTurnOnRed = false;
+		public static bool allowFarTurnOnRed = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
@@ -289,9 +291,12 @@ namespace TrafficManager.State {
             relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
-			allowTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_turn_on_red"), allowTurnOnRed, onAllowTurnOnRedChanged) as UICheckBox;
+			allowNearTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_turn_on_red"), allowNearTurnOnRed, onAllowNearTurnOnRedChanged) as UICheckBox;
+			allowFarTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Also_apply_for_left/right_turns_between_one-way_streets"), allowFarTurnOnRed, onAllowFarTurnOnRedChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
+
+			Indent(allowFarTurnOnRedToggle);
 
 			var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
 			vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
@@ -872,15 +877,30 @@ namespace TrafficManager.State {
 			setAllowUTurns(newValue);
 		}
 
-		private static void onAllowTurnOnRedChanged(bool newValue) {
+		private static void onAllowNearTurnOnRedChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && !turnOnRedEnabled) {
 				return;
 			}
 
-			Log._Debug($"allowTurnOnRed changed to {newValue}");
-			setAllowTurnOnRed(newValue);
+			Log._Debug($"allowNearTurnOnRed changed to {newValue}");
+			setAllowNearTurnOnRed(newValue);
+
+			if (! newValue) {
+				setAllowFarTurnOnRed(false);
+			}
+		}
+
+		private static void onAllowFarTurnOnRedChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+			if (newValue && (!turnOnRedEnabled || !allowNearTurnOnRed)) {
+				return;
+			}
+
+			Log._Debug($"allowFarTurnOnRed changed to {newValue}");
+			setAllowFarTurnOnRed(newValue);
 		}
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
@@ -1238,10 +1258,17 @@ namespace TrafficManager.State {
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
-		public static void setAllowTurnOnRed(bool newValue) {
-			allowTurnOnRed = newValue;
-			if (allowTurnOnRedToggle != null)
-				allowTurnOnRedToggle.isChecked = newValue;
+		public static void setAllowNearTurnOnRed(bool newValue) {
+			allowNearTurnOnRed = newValue;
+			if (allowNearTurnOnRedToggle != null)
+				allowNearTurnOnRedToggle.isChecked = newValue;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowFarTurnOnRed(bool newValue) {
+			allowFarTurnOnRed = newValue;
+			if (allowFarTurnOnRedToggle != null)
+				allowFarTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
@@ -1401,7 +1428,8 @@ namespace TrafficManager.State {
 			if (turnOnRedEnabledToggle != null)
 				turnOnRedEnabledToggle.isChecked = newValue;
 			if (!newValue) {
-				setAllowTurnOnRed(false);
+				setAllowNearTurnOnRed(false);
+				setAllowFarTurnOnRed(false);
 			}
 		}
 

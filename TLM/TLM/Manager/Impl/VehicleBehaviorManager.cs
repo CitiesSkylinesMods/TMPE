@@ -308,12 +308,18 @@ namespace TrafficManager.Manager.Impl {
 						Options.turnOnRedEnabled &&
 						stopCar &&
 						sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity &&
-						JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(prevPos.m_segment, isTargetStartNode) &&
 						!isRecklessDriver
 					) {
+						IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 						ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
+						bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
 						int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
-						if (turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId == position.m_segment || turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId == position.m_segment) {
+						if (
+							(turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId == position.m_segment &&
+							junctionRestrictionsManager.IsTurnOnRedAllowed(lhd, prevPos.m_segment, isTargetStartNode)) ||
+							(turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId == position.m_segment &&
+							junctionRestrictionsManager.IsTurnOnRedAllowed(!lhd, prevPos.m_segment, isTargetStartNode))
+						) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");
