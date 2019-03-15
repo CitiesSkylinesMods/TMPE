@@ -82,11 +82,11 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public bool IsFarTurnOnRedAllowed() {
-			if (nearTurnOnRedAllowed == TernaryBool.Undefined) {
+			if (farTurnOnRedAllowed == TernaryBool.Undefined) {
 				return defaultFarTurnOnRedAllowed;
 			}
 
-			return TernaryBoolUtil.ToBool(nearTurnOnRedAllowed);
+			return TernaryBoolUtil.ToBool(farTurnOnRedAllowed);
 		}
 
 		public bool IsLaneChangingAllowedWhenGoingStraight() {

@@ -268,8 +268,8 @@ namespace TrafficManager.Manager.Impl {
 			bool lhd = Services.SimulationService.LeftHandDrive;
 			bool ret =
 				(node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None &&
-				(((lhd ^ !near) && turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0) ||
-				((!lhd ^ near) && turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0));
+				(((lhd == near) && turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0) ||
+				((!lhd == near) && turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0));
 #if DEBUG
 			if (debug)
 				Log.Warning($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({near}, {segmentId}, {startNode}): ret={ret}");
