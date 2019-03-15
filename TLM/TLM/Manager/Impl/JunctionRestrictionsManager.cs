@@ -299,7 +299,7 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 			
-			bool ret = Options.allowNearTurnOnRed;
+			bool ret = near ? Options.allowNearTurnOnRed : Options.allowFarTurnOnRed;
 #if DEBUG
 			if (debug)
 				Log._Debug($"JunctionRestrictionsManager.GetTurnOnRedAllowed({near}, {segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");
