@@ -228,4 +228,4 @@ Node_is_level_crossing Diese Kreuzung ist ein Bahnübergang.\nDu kannst die Ampe
 Experimental_features Experimentelle Features
 Turn_on_red Turn on red
 Vehicles_may_turn_on_red Fahrzeuge dürfen an roten Ampeln abbiegen
-Also_apply_for_left/right_turns_between_one-way_streets Gilt auch für Links- & Rechtskurven zwischen Einbahnstraßen
+Also_apply_to_left/right_turns_between_one-way_streets Gilt auch für Links- & Rechtskurven zwischen Einbahnstraßen

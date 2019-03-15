@@ -272,7 +272,7 @@ namespace TrafficManager.Manager.Impl {
 				((!lhd ^ near) && turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0));
 #if DEBUG
 			if (debug)
-				Log.Warning($"JunctionRestrictionsManager.IsNearTurnOnRedAllowedConfigurable({segmentId}, {startNode}): ret={ret}");
+				Log.Warning($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({near}, {segmentId}, {startNode}): ret={ret}");
 #endif
 
 			return ret;
@@ -294,7 +294,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!IsTurnOnRedAllowedConfigurable(near, segmentId, startNode, ref node)) {
 #if DEBUG
 				if (debug)
-					Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({segmentId}, {startNode}): Setting is not configurable. res=false");
+					Log._Debug($"JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable({near}, {segmentId}, {startNode}): Setting is not configurable. res=false");
 #endif
 				return false;
 			}
@@ -302,7 +302,7 @@ namespace TrafficManager.Manager.Impl {
 			bool ret = Options.allowNearTurnOnRed;
 #if DEBUG
 			if (debug)
-				Log._Debug($"JunctionRestrictionsManager.GetTurnOnRedAllowed({segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");
+				Log._Debug($"JunctionRestrictionsManager.GetTurnOnRedAllowed({near}, {segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");
 #endif
 			return ret;
 		}

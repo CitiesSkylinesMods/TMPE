@@ -292,7 +292,7 @@ namespace TrafficManager.State {
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
 			allowNearTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_turn_on_red"), allowNearTurnOnRed, onAllowNearTurnOnRedChanged) as UICheckBox;
-			allowFarTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Also_apply_for_left/right_turns_between_one-way_streets"), allowFarTurnOnRed, onAllowFarTurnOnRedChanged) as UICheckBox;
+			allowFarTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Also_apply_to_left/right_turns_between_one-way_streets"), allowFarTurnOnRed, onAllowFarTurnOnRedChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
 
@@ -859,6 +859,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowEnterBlockedJunctions(false);
 				return;
 			}
 
@@ -870,6 +871,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowUTurns(false);
 				return;
 			}
 
@@ -881,6 +883,8 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && !turnOnRedEnabled) {
+				setAllowNearTurnOnRed(false);
+				setAllowFarTurnOnRed(false);
 				return;
 			}
 
@@ -896,6 +900,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && (!turnOnRedEnabled || !allowNearTurnOnRed)) {
+				setAllowFarTurnOnRed(false);
 				return;
 			}
 
@@ -907,6 +912,7 @@ namespace TrafficManager.State {
 			if (!checkGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowLaneChangesWhileGoingStraight(false);
 				return;
 			}
 
@@ -917,6 +923,10 @@ namespace TrafficManager.State {
 		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !prioritySignsEnabled) {
+				setTrafficLightPriorityRules(false);
+				return;
+			}
 
 			Log._Debug($"trafficLightPriorityRules changed to {newValue}");
 			trafficLightPriorityRules = newValue;
