@@ -23,7 +23,7 @@ namespace TrafficManager.State.ConfigData {
 		/// <summary>
 		/// Maximum yield velocity
 		/// </summary>
-		public float MaxYieldVelocity = 3f;
+		public float MaxYieldVelocity = 2.5f;
 
 		/// <summary>
 		/// Maximum stop velocity
