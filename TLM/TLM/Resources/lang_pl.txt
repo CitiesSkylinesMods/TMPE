@@ -226,5 +226,6 @@ Show_error_message_if_a_mod_incompatibility_is_detected Pokaż informację o bł
 Remove_parked_vehicles Usuń zaparkowane pojazdy
 Node_is_level_crossing To jest przejazd kolejowy. \nNie możesz tutaj wyłączyć sygnalizacji!
 Experimental_features Funkcje eksperymentalne
-Turn_on_red_enabled_by_default Zezwalaj na skręt w prawo na czerwonym świetle na wszystkich skrzyżowaniach
-Turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
+Turn_on_red Turn on red
+Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
+Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets

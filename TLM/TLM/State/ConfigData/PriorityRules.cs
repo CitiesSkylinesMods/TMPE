@@ -19,5 +19,15 @@ namespace TrafficManager.State.ConfigData {
 		/// maximum waiting time at priority signs
 		/// </summary>
 		public uint MaxPriorityWaitTime = 100;
+
+		/// <summary>
+		/// Maximum yield velocity
+		/// </summary>
+		public float MaxYieldVelocity = 2.5f;
+
+		/// <summary>
+		/// Maximum stop velocity
+		/// </summary>
+		public float MaxStopVelocity = 0.1f;
 	}
 }

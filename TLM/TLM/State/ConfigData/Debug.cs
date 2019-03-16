@@ -33,7 +33,8 @@ namespace TrafficManager.State.ConfigData {
 				false, // 21: debug "CalculateSegmentPosition"
 				false, // 22: parking ai debug log (vehicles)
 				false, // 23: debug lane connections
-                false // 24: debug resource loading
+                false, // 24: debug resource loading
+				false // 25: debug turn-on-red
 			};
 
 		public int NodeId = 0;

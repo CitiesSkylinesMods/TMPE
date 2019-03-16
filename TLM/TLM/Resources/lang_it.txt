@@ -226,5 +226,6 @@ Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a 
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
 Experimental_features Experimental features
-Turn_on_red_enabled_by_default Attiva il rosso abilitato ai giunzioni di default
-Turn_on_red I veicoli possono girare ai semafori rossi
+Turn_on_red Girare ai semafori rossi
+Vehicles_may_turn_on_red I veicoli possono girare ai semafori rossi
+Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
