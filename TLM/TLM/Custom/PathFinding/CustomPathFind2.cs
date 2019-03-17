@@ -1971,7 +1971,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 			float baseLength = offsetLength / (prevLaneSpeed * m_maxLength); // NON-STOCK CODE
 			float comparisonValue = item.m_comparisonValue; // NON-STOCK CODE
-#if ADVANCEDAI && ROUTING
+#if ROUTING
 #if DEBUG
 			if (debug) {
 				Debug(unitId, item, nextSegmentId, $"ProcessItemCosts: Calculated base length\n"
@@ -1979,7 +1979,11 @@ namespace TrafficManager.Custom.PathFinding {
 				);
 			}
 #endif
-			if (!enableAdvancedAI) {
+			if (
+#if ADVANCEDAI
+				!enableAdvancedAI &&
+#endif
+				!m_stablePath) {
 				comparisonValue += baseLength;
 			}
 #endif
@@ -2051,9 +2055,8 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 					return blocked;
 				}
-#if ADVANCEDAI
+
 				laneDist = trans.distance;
-#endif
 #if DEBUG
 				if (debug) {
 					Debug(unitId, item, nextSegmentId, $"ProcessItemCosts: Custom transition given\n"
@@ -2243,7 +2246,8 @@ namespace TrafficManager.Custom.PathFinding {
 						// NON-STOCK CODE END
 #endif
 
-#if ADVANCEDAI && ROUTING
+#if ROUTING
+#if ADVANCEDAI
 						if (enableAdvancedAI) {
 							float adjustedBaseLength = baseLength;
 							if (m_queueItem.spawned || (nextLaneId != m_startLaneA && nextLaneId != m_startLaneB)) {
@@ -2266,6 +2270,23 @@ namespace TrafficManager.Custom.PathFinding {
 									+ "\t" + $"adjustedBaseLength={adjustedBaseLength}\n"
 									+ "\t" + $"laneDist={laneDist}\n"
 									+ "\t" + $"laneChangingCost={laneChangingCost}"
+								);
+							}
+#endif
+						} else
+#endif
+						if (m_stablePath) {
+							// all non-road vehicles with stable paths (trains, trams, etc.): apply lane distance factor
+							float adjustedBaseLength = baseLength;
+							adjustedBaseLength *= 1 + laneDist;
+							nextItem.m_comparisonValue += adjustedBaseLength;
+
+#if DEBUG
+							if (debug) {
+								Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemCosts: Applied stable path lane distance costs\n"
+									+ "\t" + $"baseLength={baseLength}\n"
+									+ "\t" + $"adjustedBaseLength={adjustedBaseLength}\n"
+									+ "\t" + $"laneDist={laneDist}"
 								);
 							}
 #endif
