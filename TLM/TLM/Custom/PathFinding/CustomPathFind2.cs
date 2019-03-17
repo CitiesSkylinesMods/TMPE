@@ -825,14 +825,12 @@ namespace TrafficManager.Custom.PathFinding {
 				prevIsCenterPlatform = prevLaneInfo.m_centerPlatform;
 				prevIsElevated = prevLaneInfo.m_elevated;
 
-#if ADVANCEDAI && ROUTING
+#if (ADVANCEDAI || PARKINGAI) && ROUTING
 				// NON-STOCK CODE START
-				if (Options.advancedAI) {
-					prevIsCarLane =
-						(prevLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
-						(prevLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None
-					;
-				}
+				prevIsCarLane =
+					(prevLaneInfo.m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
+					(prevLaneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None
+				;
 				// NON-STOCK CODE END
 #endif
 
@@ -1469,7 +1467,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI
 							, enableAdvancedAI, laneChangingCost,
 #endif
-							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.SegmentRoutings[prevSegmentId], m_routingManager.LaneEndBackwardRoutings[laneRoutingIndex], connectOffset
+							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.segmentRoutings[prevSegmentId], m_routingManager.laneEndBackwardRoutings[laneRoutingIndex], connectOffset, prevRelSimilarLaneIndex
 						)) {
 							exploreUturn = true; // allow exceptional u-turns
 						}
@@ -1962,7 +1960,7 @@ namespace TrafficManager.Custom.PathFinding {
 			offsetLength *= laneSelectionCost;
 #if DEBUG
 			if (debug) {
-				Debug(unitId, item, nextSegmentId, $"ProcessItemCosts: Applyied custom selection cost factors\n"
+				Debug(unitId, item, nextSegmentId, $"ProcessItemCosts: Applied custom selection cost factors\n"
 					+ "\t" + $"offsetLength={offsetLength}"
 				);
 			}
@@ -2616,7 +2614,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI
 			bool enableAdvancedAI, float laneChangingCost,
 #endif
-			float segmentSelectionCost, float laneSelectionCost, ushort nextNodeId, ref NetNode nextNode, bool isMiddle, SegmentRoutingData prevSegmentRouting, LaneEndRoutingData prevLaneEndRouting, byte connectOffset
+			float segmentSelectionCost, float laneSelectionCost, ushort nextNodeId, ref NetNode nextNode, bool isMiddle, SegmentRoutingData prevSegmentRouting, LaneEndRoutingData prevLaneEndRouting, byte connectOffset, int prevInnerSimilarLaneIndex
 		) {
 
 #if DEBUG
@@ -2635,6 +2633,7 @@ namespace TrafficManager.Custom.PathFinding {
 					+ "\t" + $"prevSegmentRouting={prevSegmentRouting}\n"
 					+ "\t" + $"prevLaneEndRouting={prevLaneEndRouting}\n"
 					+ "\t" + $"connectOffset={connectOffset}\n"
+					+ "\t" + $"prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex}\n"
 				);
 			}
 #endif
@@ -2878,12 +2877,11 @@ namespace TrafficManager.Custom.PathFinding {
 					uturnExplored = true;
 				}
 
-				bool isStockUturnPoint = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 				// allow vehicles to ignore strict lane routing when moving off
 				bool relaxedLaneRouting =
 					m_isRoadVehicle &&
 					((!m_queueItem.spawned || (m_queueItem.vehicleType & (ExtVehicleType.PublicTransport | ExtVehicleType.Emergency)) != ExtVehicleType.None) &&
-					 (laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB)) || isStockUturnPoint;
+					 (laneTransitions[k].laneId == m_startLaneA || laneTransitions[k].laneId == m_startLaneB));
 
 #if DEBUG
 				if (debug) {
@@ -2928,7 +2926,6 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 #endif
 
-				int dummy = -1; // not required when using custom routing
 				if (
 					ProcessItemCosts(
 #if DEBUG
@@ -2938,7 +2935,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI
 						enableAdvancedAI, laneChangingCost,
 #endif
-						nextNodeId, ref nextNode, isMiddle, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], segmentSelectionCost, laneSelectionCost, laneTransitions[k], ref dummy, connectOffset, true, false
+						nextNodeId, ref nextNode, isMiddle, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], segmentSelectionCost, laneSelectionCost, laneTransitions[k], ref prevInnerSimilarLaneIndex, connectOffset, true, false
 					)
 				) {
 					blocked = true;
