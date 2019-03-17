@@ -56,7 +56,46 @@ namespace TrafficManager.Manager.Impl {
 		public int GetIndex(ushort segmentId, bool startNode) {
 			return (int)segmentId * 2 + (startNode ? 0 : 1);
 		}
-		
+
+		public int GetIndex(ushort segmentId, ushort nodeId) {
+			bool found = false;
+			bool startNode = false;
+			Services.NetService.ProcessSegment(segmentId, (ushort _, ref NetSegment seg) => {
+				if (seg.m_startNode == nodeId) {
+					found = true;
+					startNode = true;
+				} else if (seg.m_endNode == nodeId) {
+					found = true;
+				}
+				return true;
+			});
+
+			if (!found) {
+				Log.Warning($"ExtSegmentEndManager.GetIndex({segmentId}, {nodeId}): Node is not connected to segment.");
+				return -1;
+			} else {
+				return GetIndex(segmentId, startNode);
+			}
+		}
+
+		public uint GetRegisteredVehicleCount(ref ExtSegmentEnd end) {
+			IExtVehicleManager vehStateManager = Constants.ManagerFactory.ExtVehicleManager;
+
+			ushort vehicleId = end.firstVehicleId;
+			uint ret = 0;
+			int numIter = 0;
+			while (vehicleId != 0) {
+				++ret;
+				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
+			}
+			return ret;
+		}
+
 		public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
 			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
 			if (! extSegMan.IsValid(sourceEnd.segmentId) || ! extSegMan.IsValid(targetSegmentId)) {
@@ -120,6 +159,10 @@ namespace TrafficManager.Manager.Impl {
 		public void Recalculate(ushort segmentId) {
 			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
 			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
+		}
+
+		public void Recalculate(ushort segmentId, bool startNode) {
+			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, startNode)]);
 		}
 
 		protected void Recalculate(ref ExtSegmentEnd segEnd) {
@@ -260,7 +303,6 @@ namespace TrafficManager.Manager.Impl {
 					continue;
 				}
 
-				ExtSegment otherSeg = extSegMan.ExtSegments[otherSegmentId];
 				bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, segEnd.nodeId);
 				ExtSegmentEnd otherSegEnd = ExtSegmentEnds[GetIndex(otherSegmentId, otherStartNode)];
 
@@ -268,8 +310,7 @@ namespace TrafficManager.Manager.Impl {
 					continue;
 				}
 
-				ArrowDirection dir = Constants.ManagerFactory.ExtSegmentEndManager.GetDirection(ref segEnd, otherSegmentId);
-				switch (dir) {
+				switch (GetDirection(ref segEnd, otherSegmentId)) {
 					case ArrowDirection.Left:
 						left = true;
 						break;
@@ -287,7 +328,7 @@ namespace TrafficManager.Manager.Impl {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Extended segment end data:");
 			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				if (! Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
+				if (!Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
 					continue;
 				}
 				Log._Debug($"Segment {i} @ start node: {ExtSegmentEnds[GetIndex((ushort)i, true)]}");

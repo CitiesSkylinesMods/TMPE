@@ -653,7 +653,10 @@ namespace TrafficManager.Manager.Impl {
 
 			if (extVehicle.junctionTransitState == VehicleJunctionTransitState.Leave) {
 				// vehicle was already allowed to leave the junction
-				if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY && (extVehicle.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
+				if (
+					sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity * GlobalConfig.Instance.PriorityRules.MaxStopVelocity &&
+					(extVehicle.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None
+				) {
 					// vehicle is not moving. reset allowance to leave junction
 #if DEBUG
 					if (debug)
@@ -883,8 +886,8 @@ namespace TrafficManager.Manager.Impl {
 
 					if (stopCar) {
 #if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP");
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP");
 #endif
 
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
@@ -892,14 +895,12 @@ namespace TrafficManager.Manager.Impl {
 							vehicleData.m_waitCounter = 0;
 						}
 
-						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
-						maxSpeed = 0f;
 						vehicleData.m_blockCounter = 0;
 						return VehicleJunctionTransitState.Stop;
 					} else {
 #if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
+						if (debug)
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 #endif
 
 						if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram || vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train) {
@@ -946,8 +947,8 @@ namespace TrafficManager.Manager.Impl {
 								}
 							} else {
 #if DEBUG
-							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has come to a full stop.");
+								if (debug)
+									Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has come to a full stop.");
 #endif
 								vehicleData.m_blockCounter = 0;
 								return VehicleJunctionTransitState.Stop;
@@ -991,7 +992,7 @@ namespace TrafficManager.Manager.Impl {
 						} else {
 #if DEBUG
 							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has not yet reached yield speed (reduce {sqrVelocity} by {vehicleState.reduceSqrSpeedByValueToYield})");
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has not yet reached yield speed (sqrVelocity={sqrVelocity})");
 #endif
 
 							// vehicle has not yet reached yield speed

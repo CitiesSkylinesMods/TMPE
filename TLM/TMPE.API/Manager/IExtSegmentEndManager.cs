@@ -29,10 +29,32 @@ namespace TrafficManager.Manager {
 		int GetIndex(ushort segmentId, bool startNode);
 
 		/// <summary>
+		/// Determines the index of the segment end.
+		/// </summary>
+		/// <param name="segmentId">segment id</param>
+		/// <param name="nodeId">node id</param>
+		/// <returns>index</returns>
+		int GetIndex(ushort segmentId, ushort nodeId);
+
+		/// <summary>
+		/// Counts the number of registered vehicles for the given segment end.
+		/// </summary>
+		/// <param name="end">segment end</param>
+		/// <returns>number of registered vehicles</returns>
+		uint GetRegisteredVehicleCount(ref ExtSegmentEnd end);
+
+		/// <summary>
 		/// Performs recalcution of the segment ends for the given segment id
 		/// </summary>
 		/// <param name="segmentId">segment id</param>
 		void Recalculate(ushort segmentId);
+
+		/// <summary>
+		/// Performs recalcution of the given segment end.
+		/// </summary>
+		/// <param name="segmentId">segment id</param>
+		/// <param name="startNode">at start node?</param>
+		void Recalculate(ushort segmentId, bool startNode);
 
 		/// <summary>
 		/// Determines the relative compass direction from the given source end to the target segment.

@@ -86,6 +86,7 @@
     <Compile Include="Manager\ITrafficLightSimulationManager.cs" />
     <Compile Include="Manager\ITrafficMeasurementManager.cs" />
     <Compile Include="Manager\ITrafficPriorityManager.cs" />
+    <Compile Include="Manager\ITurnOnRedManager.cs" />
     <Compile Include="Manager\IUtilityManager.cs" />
     <Compile Include="Manager\IVehicleBehaviorManager.cs" />
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\ExtVehicle.cs" />
+    <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
     <Compile Include="Traffic\Enums\CarUsagePolicy.cs" />
     <Compile Include="Traffic\Enums\ExtParkingSpaceLocation.cs" />
     <Compile Include="Traffic\Enums\ExtPathMode.cs" />

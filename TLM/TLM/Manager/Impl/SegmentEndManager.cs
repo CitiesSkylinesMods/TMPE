@@ -11,6 +11,7 @@ using TrafficManager.Traffic.Impl;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager.Impl {
+	[Obsolete("should be removed when implementing issue #240")]
 	public class SegmentEndManager : AbstractCustomManager, ISegmentEndManager {
 		public static readonly SegmentEndManager Instance = new SegmentEndManager();
 

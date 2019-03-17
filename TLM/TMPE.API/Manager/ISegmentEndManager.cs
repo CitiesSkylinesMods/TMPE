@@ -6,6 +6,7 @@ using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager {
+	[Obsolete("should be removed when implementing issue #240")]
 	public interface ISegmentEndManager {
 		// TODO documentation
 		ISegmentEnd GetOrAddSegmentEnd(ISegmentEndId endId);

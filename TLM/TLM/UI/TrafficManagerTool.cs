@@ -766,7 +766,7 @@ namespace TrafficManager.UI {
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			GUIStyle _counterStyle = new GUIStyle();
-			SegmentEndManager endMan = SegmentEndManager.Instance;
+			IExtSegmentEndManager endMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			for (int i = 1; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
 				if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) // segment is unused
 					continue;
@@ -802,9 +802,9 @@ namespace TrafficManager.UI {
 #endif
 #if DEBUG
 				labelStr += "\nsvc: " + service + ", sub: " + subService;
-				ISegmentEnd startEnd = endMan.GetSegmentEnd((ushort)i, true);
-				ISegmentEnd endEnd = endMan.GetSegmentEnd((ushort)i, false);
-				labelStr += "\nstart? " + (startEnd != null) + " veh.: " + startEnd?.GetRegisteredVehicleCount() + ", end? " + (endEnd != null) + " veh.: " + endEnd?.GetRegisteredVehicleCount();
+				uint startVehicles = endMan.GetRegisteredVehicleCount(ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)i, true)]);
+				uint endVehicles = endMan.GetRegisteredVehicleCount(ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)i, false)]);
+				labelStr += "\nstart veh.: " + startVehicles + ", end veh.: " + endVehicles;
 #endif
 				labelStr += "\nTraffic: " + netManager.m_segments.m_buffer[i].m_trafficDensity + " %";
 

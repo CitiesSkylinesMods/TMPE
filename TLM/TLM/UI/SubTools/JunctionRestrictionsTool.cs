@@ -377,7 +377,6 @@ namespace TrafficManager.UI.SubTools {
 						hasSignInPrevRow = true;
 					}
 				}
-#endif
 			}
 
 			guiColor.a = 1f;

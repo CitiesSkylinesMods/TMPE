@@ -634,7 +634,7 @@ namespace TrafficManager.Manager.Impl {
 									if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
 										nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, isNextStartNodeOfNextSegment);
 
-										if (! isNextRealJunction) {
+										if (!nextIsRealJunction) {
 											// simple forced lane transition: set lane distance
 											nextForcedTransitionDatas[numNextForcedTransitionDatas].distance = (byte)Math.Abs(prevOuterSimilarLaneIndex - nextOuterSimilarLaneIndex);
 										}

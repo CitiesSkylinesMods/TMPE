@@ -1467,7 +1467,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if ADVANCEDAI
 							, enableAdvancedAI, laneChangingCost,
 #endif
-							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.segmentRoutings[prevSegmentId], m_routingManager.laneEndBackwardRoutings[laneRoutingIndex], connectOffset, prevRelSimilarLaneIndex
+							segmentSelectionCost, laneSelectionCost, nextNodeId, ref nextNode, false, m_routingManager.SegmentRoutings[prevSegmentId], m_routingManager.LaneEndBackwardRoutings[laneRoutingIndex], connectOffset, prevRelSimilarLaneIndex
 						)) {
 							exploreUturn = true; // allow exceptional u-turns
 						}

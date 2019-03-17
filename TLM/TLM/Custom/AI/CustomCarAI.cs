@@ -60,13 +60,10 @@ namespace TrafficManager.Custom.AI {
 				if (debug)
 					Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Path: {vehicleData.m_path}, mainPathState={mainPathState}");
 #endif
-				ExtSoftPathState finalPathState = ExtSoftPathState.None;
-#if BENCHMARK
-				using (var bm = new Benchmark(null, "UpdateCarPathState")) {
-#endif
-				finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
-				if (Options.parkingAI && extVehicleMan.ExtVehicles[vehicleId].vehicleType == ExtVehicleType.PassengerCar) {
-					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref vehicleData);
+				IExtVehicleManager extVehicleManager = Constants.ManagerFactory.ExtVehicleManager;
+				ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+				if (Options.parkingAI && extVehicleManager.ExtVehicles[vehicleId].vehicleType == ExtVehicleType.PassengerCar) {
+					ushort driverInstanceId = extVehicleManager.GetDriverInstanceId(vehicleId, ref vehicleData);
 					finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], mainPathState);
 
 #if DEBUG
@@ -74,9 +71,6 @@ namespace TrafficManager.Custom.AI {
 						Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Applied Parking AI logic. Path: {vehicleData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}");
 #endif
 				}
-#if BENCHMARK
-				}
-#endif
 
 				switch (finalPathState) {
 					case ExtSoftPathState.Ready:
@@ -132,6 +126,7 @@ namespace TrafficManager.Custom.AI {
 			}
 
 			// NON-STOCK CODE START
+			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 			extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
 			
 			if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {

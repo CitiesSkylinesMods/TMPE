@@ -1601,7 +1601,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 			// [18/05/06] conditions commented out because cims could not go to an outside connection with path "walk -> public transport -> walk -> car"
 			if (nextNode.m_lane != 0u /*&&
-				(!Options.prohibitPocketCars ||
+				(!Options.parkingAI ||
 				queueItem.vehicleType != ExtVehicleType.PassengerCar ||
 				(item.m_lanesUsed & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None)*/) {
 				// transport lines, cargo lines, etc.

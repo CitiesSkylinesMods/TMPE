@@ -2,14 +2,10 @@ using ColossalFramework;
 using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Impl;
-using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
 	public class JunctionRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.SegmentNodeConf>>, IJunctionRestrictionsManager {
@@ -171,11 +167,13 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void UpdateAllDefaults() {
+			IExtSegmentManager extSegmentManager = Constants.ManagerFactory.ExtSegmentManager;
 			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
-				if (segGeo != null) {
-					UpdateDefaults(segGeo);
+				if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+					continue;
 				}
+
+				UpdateDefaults(ref extSegmentManager.ExtSegments[segmentId]);
 			}
 		}
 
@@ -223,8 +221,8 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			endFlags.defaultUturnAllowed = GetDefaultUturnAllowed(segEnd.segmentId, segEnd.startNode, ref node);
-			endFlags.defaultNearTurnOnRedAllowed = GetDefaultNearTurnOnRedAllowed(segmentId, startNode, ref node);
-			endFlags.defaultFarTurnOnRedAllowed = GetDefaultFarTurnOnRedAllowed(segmentId, startNode, ref node);
+			endFlags.defaultNearTurnOnRedAllowed = GetDefaultNearTurnOnRedAllowed(segEnd.segmentId, segEnd.startNode, ref node);
+			endFlags.defaultFarTurnOnRedAllowed = GetDefaultFarTurnOnRedAllowed(segEnd.segmentId, segEnd.startNode, ref node);
 			endFlags.defaultStraightLaneChangingAllowed = GetDefaultLaneChangingAllowedWhenGoingStraight(segEnd.segmentId, segEnd.startNode, ref node);
 			endFlags.defaultEnterWhenBlockedAllowed = GetDefaultEnteringBlockedJunctionAllowed(segEnd.segmentId, segEnd.startNode, ref node);
 			endFlags.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(segEnd.segmentId, segEnd.startNode, ref node);
@@ -624,21 +622,14 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			SegmentGeometry segGeo = SegmentGeometry.Get(segmentId);
-			if (segGeo == null) {
-				Log.Error($"JunctionRestrictionsManager.SetTurnOnRedAllowed: No geometry information available for segment {segmentId}");
-				return false;
-			}
-
 			if (near) {
 				SegmentFlags[segmentId].SetNearTurnOnRedAllowed(startNode, value);
 			} else {
 				SegmentFlags[segmentId].SetFarTurnOnRedAllowed(startNode, value);
 			}
-			OnSegmentChange(segmentId, startNode, segGeo, true);
+			OnSegmentChange(segmentId, startNode, ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
 			return true;
 		}
-#endif
 
 		public bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, bool value) {
 			if (!Services.NetService.IsSegmentValid(segmentId)) {

@@ -26,6 +26,7 @@ using TrafficManager.Traffic.Enums;
 /// (having custom traffic lights or priority signs).
 /// </summary>
 namespace TrafficManager.Traffic.Impl {
+	[Obsolete("should be removed when implementing issue #240")]
 	public class SegmentEnd : SegmentEndId, ISegmentEnd {
 		// TODO convert to struct
 
@@ -201,24 +202,9 @@ namespace TrafficManager.Traffic.Impl {
 			return;
 		}
 
-		public int GetRegisteredVehicleCount() {
-			ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
+		public uint GetRegisteredVehicleCount() {
 			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
-			int endIndex = segEndMan.GetIndex(SegmentId, StartNode);
-			ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
-			int ret = 0;
-			int numIter = 0;
-			while (vehicleId != 0) {
-				++ret;
-				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
-
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
-					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-					break;
-				}
-			}
-			return ret;
+			return segEndMan.GetRegisteredVehicleCount(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(SegmentId, StartNode)]);
 		}
 
 		public void Destroy() {

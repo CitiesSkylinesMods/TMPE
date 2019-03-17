@@ -10,7 +10,6 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using TrafficManager.Traffic.Enums;
-using TrafficManager.Traffic.Impl;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;

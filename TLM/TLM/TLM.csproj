@@ -121,6 +121,7 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Manager\Impl\SegmentEndManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
@@ -151,7 +152,6 @@
     <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\RoutingManager.cs" />
     <Compile Include="Manager\Impl\ExtPathManager.cs" />
-    <Compile Include="Manager\Impl\SegmentEndManager.cs" />
     <Compile Include="Manager\Impl\VehicleBehaviorManager.cs" />
     <Compile Include="Manager\Impl\ExtBuildingManager.cs" />
     <Compile Include="Manager\Impl\AdvancedParkingManager.cs" />
@@ -170,21 +170,6 @@
     <Compile Include="Patch\_VehicleManager\ReleaseVehiclePatch.cs" />
     <Compile Include="Patch\_Vehicle\UnspawnPatch.cs" />
     <Compile Include="Patch\_Vehicle\SpawnPatch.cs" />
-    <Compile Include="Manager\IAdvancedParkingManager.cs" />
-    <Compile Include="Manager\IOptionsManager.cs" />
-    <Compile Include="Manager\IParkingRestrictionsManager.cs" />
-    <Compile Include="Manager\IRoutingManager.cs" />
-    <Compile Include="Manager\ISegmentEndManager.cs" />
-    <Compile Include="Manager\ISpeedLimitManager.cs" />
-    <Compile Include="Manager\ITrafficLightManager.cs" />
-    <Compile Include="Manager\ITrafficLightSimulationManager.cs" />
-    <Compile Include="Manager\ITrafficMeasurementManager.cs" />
-    <Compile Include="Manager\ITrafficPriorityManager.cs" />
-    <Compile Include="Manager\ITurnOnRedManager.cs" />
-    <Compile Include="Manager\IUtilityManager.cs" />
-    <Compile Include="Manager\IVehicleBehaviorManager.cs" />
-    <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
-    <Compile Include="Manager\IVehicleStateManager.cs" />
     <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
@@ -197,18 +182,6 @@
     <Compile Include="State\Configuration.cs" />
     <Compile Include="State\GlobalConfig.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
-    <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
-    <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
-    <Compile Include="TrafficLight\Data\TrafficLightSimulation.cs" />
-    <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
-    <Compile Include="TrafficLight\LightMode.cs" />
-    <Compile Include="TrafficLight\StepChangeMetric.cs" />
-    <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
-    <Compile Include="Traffic\Data\ExtCitizen.cs" />
-    <Compile Include="Traffic\Data\SegmentFlags.cs" />
-    <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
-    <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
-    <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="TrafficManager.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
@@ -221,6 +194,7 @@
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
@@ -259,7 +233,6 @@
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
-    <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\GenericObservable.cs" />
@@ -473,17 +446,7 @@ xcopy /y "$(TargetDir)TMPE.API.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skyli
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
-
-del /Q "D:\Games\Steam\steamapps\workshop\content\255710\583429740\*"
-xcopy /y "$(TargetDir)TrafficManager.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.API.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)CSUtil.Commons.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"
-xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "D:\Games\Steam\steamapps\workshop\content\255710\583429740"</PostBuildEvent>
+xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

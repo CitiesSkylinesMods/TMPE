@@ -67,7 +67,7 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"TrafficLightManager.SetTrafficLight: Setting traffic light at node {nodeId} -- flags={flags}");
 #endif
 			node.m_flags = flags;
-			Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(nodeId), true);
+			Constants.ManagerFactory.GeometryManager.MarkAsUpdated(nodeId, true);
 			return true;
 		}
 

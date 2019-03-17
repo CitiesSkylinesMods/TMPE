@@ -147,10 +147,11 @@ namespace TrafficManager.Manager.Impl {
 
 		public void MarkAllAsUpdated() {
 			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
-				if (segGeo != null) {
-					MarkAsUpdated(segGeo, true);
+				if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+					continue;
 				}
+
+				MarkAsUpdated(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
 			}
 		}
 
@@ -191,11 +192,10 @@ namespace TrafficManager.Manager.Impl {
 					stateUpdated = true;
 
 					if (updateSegments) {
-						foreach (SegmentEndGeometry segEndGeo in geometry.SegmentEndGeometries) {
-							if (segEndGeo != null) {
-								MarkAsUpdated(segEndGeo.GetSegmentGeometry(), false);
-							}
-						}
+						Services.NetService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment _) => {
+							MarkAsUpdated(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], false);
+							return true;
+						});
 					}
 
 					if (! Services.NetService.IsNodeValid(nodeId)) {

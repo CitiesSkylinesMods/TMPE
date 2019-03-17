@@ -17,12 +17,12 @@ namespace TrafficManager.Traffic.Data {
 		public TernaryBool enterWhenBlockedAllowed;
 		public TernaryBool pedestrianCrossingAllowed;
 
-		bool defaultUturnAllowed;
-        bool defaultNearTurnOnRedAllowed;
-		bool defaultFarTurnOnRedAllowed;
-		bool defaultStraightLaneChangingAllowed;
-		bool defaultEnterWhenBlockedAllowed;
-		bool defaultPedestrianCrossingAllowed;
+		public bool defaultUturnAllowed;
+		public bool defaultNearTurnOnRedAllowed;
+		public bool defaultFarTurnOnRedAllowed;
+		public bool defaultStraightLaneChangingAllowed;
+		public bool defaultEnterWhenBlockedAllowed;
+		public bool defaultPedestrianCrossingAllowed;
 
 		public bool IsUturnAllowed() {
 			if (uturnAllowed == TernaryBool.Undefined) {

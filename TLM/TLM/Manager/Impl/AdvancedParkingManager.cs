@@ -267,6 +267,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public ExtSoftPathState UpdateCarPathState(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ExtPathState mainPathState) {
+			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitInstMan.GetCitizenId(driverExtInstance.instanceId);
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
@@ -294,7 +295,7 @@ namespace TrafficManager.Manager.Impl {
 
 			//ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(CustomPassengerCarAI.GetDriverInstance(vehicleId, ref vehicleData));
 
-			if (!driverExtInstance.IsValid()) {
+			if (!extCitInstMan.IsValid(driverExtInstance.instanceId)) {
 				// no driver
 #if DEBUG
 				if (debug)
@@ -303,13 +304,13 @@ namespace TrafficManager.Manager.Impl {
 				return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 			}
 
-			if (VehicleStateManager.Instance.VehicleStates[vehicleId].vehicleType != ExtVehicleType.PassengerCar) {
+			if (Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].vehicleType != ExtVehicleType.PassengerCar) {
 				// non-passenger cars are not handled
 #if DEBUG
 				if (debug)
 					Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): not a passenger car!");
 #endif
-				driverExtInstance.Reset();
+				extCitInstMan.Reset(ref driverExtInstance);
 				return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 			}
 
@@ -325,7 +326,7 @@ namespace TrafficManager.Manager.Impl {
 					if (debug)
 						Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}): Checking if path-finding may be repeated.");
 #endif
-					driverExtInstance.ReleaseReturnPath();
+					extCitInstMan.ReleaseReturnPath(ref driverExtInstance);
 					return OnCarPathFindFailure(vehicleId, ref vehicleData, ref driverInstance, ref driverExtInstance);
 				} else {
 #if DEBUG
@@ -1119,10 +1120,11 @@ namespace TrafficManager.Manager.Impl {
 		/// <param name="driverExtInstance">extended citizen instance information of driver</param>
 		/// <returns>if true path-finding may be repeated (path mode has been updated), false otherwise</returns>
 		protected ExtSoftPathState OnCarPathFindFailure(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstanceData, ref ExtCitizenInstance driverExtInstance) {
+			IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
 			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
 				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverExtInstance.GetCitizenId());
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitizenInstanceManager.GetCitizenId(driverExtInstance.instanceId));
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -1141,7 +1143,8 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Increasing parking space demand of target building {driverInstanceData.m_targetBuilding}");
 #endif
 					if (driverInstanceData.m_targetBuilding != 0) {
-						ExtBuildingManager.Instance.ExtBuildings[driverInstanceData.m_targetBuilding].AddParkingSpaceDemand((uint)GlobalConfig.Instance.ParkingAI.FailedParkingSpaceDemandIncrement);
+						IExtBuildingManager extBuildingManager = Constants.ManagerFactory.ExtBuildingManager;
+						extBuildingManager.AddParkingSpaceDemand(ref extBuildingManager.ExtBuildings[driverInstanceData.m_targetBuilding], (uint)GlobalConfig.Instance.ParkingAI.FailedParkingSpaceDemandIncrement);
 					}
 					break;
 			}
@@ -1166,7 +1169,7 @@ namespace TrafficManager.Manager.Impl {
 					if (debug)
 						Log._Debug($"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path failed and a direct target is not an option. Resetting driver ext. instance.");
 #endif
-					driverExtInstance.Reset();
+					extCitizenInstanceManager.Reset(ref driverExtInstance);
 					break;
 			}
 

@@ -22,7 +22,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// All additional data for citizen instance. Index: citizen instance id
 		/// </summary>
-		public ExtCitizenInstance[] ExtInstances = null;
+		public ExtCitizenInstance[] ExtInstances { get; private set; }
 
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
@@ -878,41 +878,6 @@ namespace TrafficManager.Manager.Impl {
 				position = posA;
 			}
 			return position.m_segment != 0;
-		}
-
-		public bool IsAtOutsideConnection(ushort instanceId, ref CitizenInstance instanceData, ref Citizen citizenData) {
-#if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
-
-			if (debug)
-				Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path-finding succeeded for citizen instance {instanceId}. Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
-#endif
-
-			bool isAtOutsideConnection = false;
-			ushort sourceBuildingId = instanceData.m_sourceBuilding;
-
-			if (sourceBuildingId != 0) {
-				isAtOutsideConnection = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;// Info.m_buildingAI is OutsideConnectionAI;
-				float distToOutsideConnection = (instanceData.GetLastFramePosition() - Singleton<BuildingManager>.instance.m_buildings.m_buffer[sourceBuildingId].m_position).magnitude;
-				if (isAtOutsideConnection && distToOutsideConnection > GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance) {
-					isAtOutsideConnection = false;
-#if DEBUG
-					if (fineDebug) {
-						Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Source building {sourceBuildingId} of citizen instance {instanceId} is an outside connection but cim is too far away: {distToOutsideConnection}");
-					}
-#endif
-				}
-			} else {
-#if DEBUG
-				if (fineDebug) {
-					Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): No source building!");
-				}
-#endif
-			}
-
-			return isAtOutsideConnection;
 		}
 
 		public bool IsValid(ushort instanceId) {

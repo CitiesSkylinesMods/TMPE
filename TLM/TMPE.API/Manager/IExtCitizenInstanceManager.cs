@@ -8,6 +8,8 @@ using UnityEngine;
 namespace TrafficManager.Manager {
 	public interface IExtCitizenInstanceManager {
 		// TODO define me!
+		ExtCitizenInstance[] ExtInstances { get; }
+
 		void ResetInstance(ushort instanceId);
 
 		/// <summary>

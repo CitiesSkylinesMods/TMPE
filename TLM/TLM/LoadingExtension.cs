@@ -233,7 +233,6 @@ namespace TrafficManager {
 			RegisteredManagers.Add(OptionsManager.Instance);
 			RegisteredManagers.Add(ParkingRestrictionsManager.Instance);
 			RegisteredManagers.Add(RoutingManager.Instance);
-			RegisteredManagers.Add(SegmentEndManager.Instance);
 			RegisteredManagers.Add(SpeedLimitManager.Instance);
 			RegisteredManagers.Add(TrafficLightManager.Instance);
 			RegisteredManagers.Add(TrafficLightSimulationManager.Instance);
@@ -242,7 +241,6 @@ namespace TrafficManager {
 			RegisteredManagers.Add(UtilityManager.Instance);
 			RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
 			RegisteredManagers.Add(ExtVehicleManager.Instance);
-			RegisteredManagers.Add(VehicleStateManager.Instance);
 			RegisteredManagers.Add(JunctionRestrictionsManager.Instance); // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
 		}
 
