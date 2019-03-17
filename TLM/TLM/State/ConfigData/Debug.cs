@@ -22,7 +22,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 9: debug vehicle to segment end linking
 				false, // 10: prevent routing recalculation on global configuration reload
 				false, // 11: debug junction restrictions
-				false, // 12: pedestrian path-find debug log
+				false, // 12: - unused -
 				false, // 13: priority rules debug
 				false, // 14: disable GUI overlay of citizens having a valid path
 				false, // 15: disable checking of other vehicles for trams

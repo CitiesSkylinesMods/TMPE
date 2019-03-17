@@ -73,6 +73,12 @@ namespace TrafficManager.Traffic.Enums {
 		/// <summary>
 		/// Indicates that the citizen is using a taxi to reach the target
 		/// </summary>
-		TaxiToTarget = 17
+		TaxiToTarget = 17,
+		/// <summary>
+		/// Indicates that the driving citizen requires a direct path to target (driving/public transport)
+		/// where possible transitions between different modes of transport happen as required (thus no search
+		/// for parking spaces is performed beforehand)
+		/// </summary>
+		RequiresMixedCarPathToTarget = 18,
 	}
 }

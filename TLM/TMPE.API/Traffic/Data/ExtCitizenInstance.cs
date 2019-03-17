@@ -90,6 +90,7 @@ namespace TrafficManager.Traffic.Data {
 				case ExtPathMode.DrivingToKnownParkPos:
 				case ExtPathMode.DrivingToTarget:
 				case ExtPathMode.RequiresCarPath:
+				case ExtPathMode.RequiresMixedCarPathToTarget:
 				case ExtPathMode.ParkingFailed:
 					return ExtPathType.DrivingOnly;
 				case ExtPathMode.CalculatingWalkingPathToParkedCar:

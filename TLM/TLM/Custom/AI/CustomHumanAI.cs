@@ -127,7 +127,7 @@ namespace TrafficManager.Custom.AI {
 						instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
 						instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown | CitizenInstance.Flags.Cheering);
 						this.InvalidPath(instanceID, ref instanceData);
-						return;
+						break;
 				}
 				// NON-STOCK CODE END
 			}

@@ -38,7 +38,11 @@ namespace TrafficManager.Custom.AI {
 		/// <param name="physicsLodRefPos"></param>
 		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+#if DEBUG
+			bool vehDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId;
+			bool debug = GlobalConfig.Instance.Debug.Switches[2] && vehDebug;
+			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && vehDebug;
+#endif
 
 			if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
 				PathManager pathManager = Singleton<PathManager>.instance;
@@ -52,24 +56,75 @@ namespace TrafficManager.Custom.AI {
 					mainPathState = ExtPathState.Ready;
 				}
 
+#if DEBUG
+				if (debug)
+					Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Path: {vehicleData.m_path}, mainPathState={mainPathState}");
+#endif
+				ExtSoftPathState finalPathState = ExtSoftPathState.None;
+#if BENCHMARK
+				using (var bm = new Benchmark(null, "UpdateCarPathState")) {
+#endif
+				finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 				if (Options.parkingAI && extVehicleMan.ExtVehicles[vehicleId].vehicleType == ExtVehicleType.PassengerCar) {
-					mainPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref ExtCitizenInstanceManager.Instance.ExtInstances[extVehicleMan.GetDriverInstanceId(vehicleId, ref vehicleData)], mainPathState);
+					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref vehicleData);
+					finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], mainPathState);
+
+#if DEBUG
+					if (debug)
+						Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Applied Parking AI logic. Path: {vehicleData.m_path}, mainPathState={mainPathState}, finalPathState={finalPathState}");
+#endif
+				}
+#if BENCHMARK
+				}
+#endif
+
+				switch (finalPathState) {
+					case ExtSoftPathState.Ready:
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Path-finding succeeded for vehicle {vehicleId} (finalPathState={finalPathState}). Path: {vehicleData.m_path} -- calling CarAI.PathfindSuccess");
+#endif
+
+						vehicleData.m_pathPositionIndex = 255;
+						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
+						vehicleData.m_flags &= ~Vehicle.Flags.Arriving;
+						this.PathfindSuccess(vehicleId, ref vehicleData);
+						this.TrySpawn(vehicleId, ref vehicleData);
+						break;
+					case ExtSoftPathState.Ignore:
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Path-finding result shall be ignored for vehicle {vehicleId} (finalPathState={finalPathState}). Path: {vehicleData.m_path} -- ignoring");
+#endif
+						return;
+					case ExtSoftPathState.Calculating:
+					default:
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): Path-finding result undetermined for vehicle {vehicleId} (finalPathState={finalPathState}). Path: {vehicleData.m_path} -- continue");
+#endif
+						break;
+					case ExtSoftPathState.FailedHard:
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): HARD path-finding failure for vehicle {vehicleId} (finalPathState={finalPathState}). Path: {vehicleData.m_path} -- calling CarAI.PathfindFailure");
+#endif
+						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
+						Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+						vehicleData.m_path = 0u;
+						this.PathfindFailure(vehicleId, ref vehicleData);
+						return;
+					case ExtSoftPathState.FailedSoft:
+#if DEBUG
+						if (debug)
+							Log._Debug($"CustomCarAI.CustomSimulationStep({vehicleId}): SOFT path-finding failure for vehicle {vehicleId} (finalPathState={finalPathState}). Path: {vehicleData.m_path} -- calling CarAI.InvalidPath");
+#endif
+						// path mode has been updated, repeat path-finding
+						vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
+						this.InvalidPath(vehicleId, ref vehicleData, vehicleId, ref vehicleData);
+						break;
 				}
 				// NON-STOCK CODE END
-
-				if (mainPathState == ExtPathState.Ready) {
-					vehicleData.m_pathPositionIndex = 255;
-					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
-					vehicleData.m_flags &= ~Vehicle.Flags.Arriving;
-					this.PathfindSuccess(vehicleId, ref vehicleData);
-					this.TrySpawn(vehicleId, ref vehicleData);
-				} else if (mainPathState == ExtPathState.Failed) {
-					vehicleData.m_flags &= ~Vehicle.Flags.WaitingPath;
-					Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
-					vehicleData.m_path = 0u;
-					this.PathfindFailure(vehicleId, ref vehicleData);
-					return;
-				}
 			} else {
 				if ((vehicleData.m_flags & Vehicle.Flags.WaitingSpace) != 0) {
 					this.TrySpawn(vehicleId, ref vehicleData);
@@ -78,9 +133,8 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
-
-			if (!Options.isStockLaneChangerUsed()) {
-				// Advanced AI traffic measurement
+			
+			if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
 				extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
 			}
 			// NON-STOCK CODE END

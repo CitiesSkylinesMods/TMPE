@@ -20,25 +20,22 @@ namespace TrafficManager.Custom.AI {
 	public class CustomCargoTruckAI : CarAI {
 		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-			// NON-STOCK CODE START
-			bool mayDespawn = (vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData);
-			// NON-STOCK CODE END
-
-			if (mayDespawn) {
+			if ((vehicleData.m_flags & Vehicle.Flags.Congestion) != 0 && VehicleBehaviorManager.Instance.MayDespawn(ref vehicleData)) {
 				Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-			} else {
-				if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
-					RemoveOffers(vehicleId, ref vehicleData);
-					vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
-					vehicleData.m_flags |= Vehicle.Flags.GoingBack;
-					vehicleData.m_waitCounter = 0;
-					if (!StartPathFind(vehicleId, ref vehicleData)) {
-						vehicleData.Unspawn(vehicleId);
-					}
-				}
-
-				base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
+				return;
 			}
+
+			if ((vehicleData.m_flags & Vehicle.Flags.WaitingTarget) != 0 && (vehicleData.m_waitCounter += 1) > 20) {
+				RemoveOffers(vehicleId, ref vehicleData);
+				vehicleData.m_flags &= ~Vehicle.Flags.WaitingTarget;
+				vehicleData.m_flags |= Vehicle.Flags.GoingBack;
+				vehicleData.m_waitCounter = 0;
+				if (!StartPathFind(vehicleId, ref vehicleData)) {
+					vehicleData.Unspawn(vehicleId);
+				}
+			}
+
+			base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
 		}
 
 		[RedirectMethod]

@@ -55,8 +55,8 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
-
-			if (!Options.isStockLaneChangerUsed()) {
+			
+			if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
 				// Advanced AI traffic measurement
 				extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
 			}
