@@ -232,7 +232,8 @@ namespace TrafficManager.UI.SubTools {
 				bool allowed = JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(segmentId, startNode);
 				bool configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node);
 				if (
-					debug || (configurable &&
+					debug ||
+					(configurable &&
 					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node)))
 				) {
 					DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LaneChangeAllowedTexture2D : TextureResources.LaneChangeForbiddenTexture2D, out signHovered);
@@ -329,31 +330,52 @@ namespace TrafficManager.UI.SubTools {
 					hasSignInPrevRow = false;
 				}
 
-#if TURNONRED
-				// draw "turn on red allowed" sign at (2; 0)
-				allowed = JunctionRestrictionsManager.Instance.IsTurnOnRedAllowed(segmentId, startNode);
-				configurable = Constants.ManagerFactory.JunctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node);
-				if (
-					debug ||
-					(configurable &&
-					(!viewOnly || allowed != Constants.ManagerFactory.JunctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node)))
-				) {
-					if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+				if (Options.turnOnRedEnabled) {
+					IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;
+					bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+
+					// draw "turn-left-on-red allowed" sign at (2; 0)
+					allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lhd, segmentId, startNode);
+					configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(lhd, segmentId, startNode, ref node);
+					if (
+						debug ||
+						(configurable &&
+						(!viewOnly || allowed != junctionRestrictionsManager.GetDefaultTurnOnRedAllowed(lhd, segmentId, startNode, ref node)))
+					) {
 						DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.LeftOnRedAllowedTexture2D : TextureResources.LeftOnRedForbiddenTexture2D, out signHovered);
-					} else {
-						DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered);
-					}
 
-					if (signHovered && handleClick) {
-						hovered = true;
+						if (signHovered && handleClick) {
+							hovered = true;
 
-						if (MainTool.CheckClicked()) {
-							JunctionRestrictionsManager.Instance.ToggleTurnOnRedAllowed(segmentId, startNode);
-							stateUpdated = true;
+							if (MainTool.CheckClicked()) {
+								junctionRestrictionsManager.ToggleTurnOnRedAllowed(lhd, segmentId, startNode);
+								stateUpdated = true;
+							}
 						}
+						hasSignInPrevRow = true;
 					}
+					x++;
 
-					hasSignInPrevRow = true;
+					// draw "turn-right-on-red allowed" sign at (2; 1)
+					allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(!lhd, segmentId, startNode);
+					configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(!lhd, segmentId, startNode, ref node);
+					if (
+						debug ||
+						(configurable &&
+						(!viewOnly || allowed != junctionRestrictionsManager.GetDefaultTurnOnRedAllowed(!lhd, segmentId, startNode, ref node)))
+					) {
+						DrawSign(viewOnly, !configurable, ref camPos, ref xu, ref yu, f, ref zero, x, y, guiColor, allowed ? TextureResources.RightOnRedAllowedTexture2D : TextureResources.RightOnRedForbiddenTexture2D, out signHovered);
+
+						if (signHovered && handleClick) {
+							hovered = true;
+
+							if (MainTool.CheckClicked()) {
+								junctionRestrictionsManager.ToggleTurnOnRedAllowed(!lhd, segmentId, startNode);
+								stateUpdated = true;
+							}
+						}
+						hasSignInPrevRow = true;
+					}
 				}
 #endif
 			}

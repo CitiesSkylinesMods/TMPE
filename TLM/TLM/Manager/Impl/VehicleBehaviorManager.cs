@@ -842,6 +842,31 @@ namespace TrafficManager.Manager.Impl {
 					}
 #endif
 
+					// Turn-on-red: Check if turning in the preferred direction, and if turning while it's red is allowed
+					if (
+						Options.turnOnRedEnabled &&
+						stopCar &&
+						sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity &&
+						!isRecklessDriver
+					) {
+						IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;
+						ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
+						bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+						int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
+						if (
+							(turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId == position.m_segment &&
+							junctionRestrictionsManager.IsTurnOnRedAllowed(lhd, prevPos.m_segment, isTargetStartNode)) ||
+							(turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId == position.m_segment &&
+							junctionRestrictionsManager.IsTurnOnRedAllowed(!lhd, prevPos.m_segment, isTargetStartNode))
+						) {
+#if DEBUG
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle may turn on red to target segment {position.m_segment}, lane {position.m_lane}");
+#endif
+							stopCar = false;
+						}
+					}
+
 					// check priority rules at unprotected traffic lights
 					if (!stopCar && Options.prioritySignsEnabled && Options.trafficLightPriorityRules && segLightsMan.IsSegmentLight(prevPos.m_segment, isTargetStartNode)) {
 						bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
@@ -849,8 +874,8 @@ namespace TrafficManager.Manager.Impl {
 						if (!hasPriority) {
 							// green light but other cars are incoming and they have priority: stop
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light (or turn on red allowed) but detected traffic with higher priority: stop.");
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Green traffic light (or turn on red allowed) but detected traffic with higher priority: stop.");
 #endif
 							stopCar = true;
 						}
@@ -867,6 +892,8 @@ namespace TrafficManager.Manager.Impl {
 							vehicleData.m_waitCounter = 0;
 						}
 
+						vehicleState.JunctionTransitState = VehicleJunctionTransitState.Stop;
+						maxSpeed = 0f;
 						vehicleData.m_blockCounter = 0;
 						return VehicleJunctionTransitState.Stop;
 					} else {
@@ -884,26 +911,23 @@ namespace TrafficManager.Manager.Impl {
 					}
 				} else if (Options.prioritySignsEnabled && vehicleData.Info.m_vehicleType != VehicleInfo.VehicleType.Monorail) {
 #if DEBUG
-				if (debug)
-					Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
+					if (debug)
+						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
 					var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
 					if (sign != PriorityType.None) {
 #if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
-#endif
-
-#if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): JunctionTransitState={transitState.ToString()}");
+						if (debug) {
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light and is a priority segment.");
+							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): JunctionTransitState={transitState.ToString()}");
+						}
 #endif
 
 						if (transitState == VehicleJunctionTransitState.None) {
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to APPROACH (prio)");
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to APPROACH (prio)");
 #endif
 							transitState = VehicleJunctionTransitState.Approach;
 						}
@@ -913,7 +937,7 @@ namespace TrafficManager.Manager.Impl {
 								extVehicle.waitTime = 0;
 							}
 
-							if (sqrVelocity <= TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+							if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity * GlobalConfig.Instance.PriorityRules.MaxStopVelocity) {
 								++extVehicle.waitTime;
 
 								if (extVehicle.waitTime < 2) {
@@ -929,38 +953,49 @@ namespace TrafficManager.Manager.Impl {
 								return VehicleJunctionTransitState.Stop;
 							}
 						}
-#if DEBUG
-					if (debug)
-						Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): {sign} sign. waittime={extVehicle.waitTime}");
-#endif
-						if (extVehicle.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
-							extVehicle.waitTime++;
-#if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
-#endif
-							bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
-#if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
-#endif
 
-							if (!hasPriority) {
-								vehicleData.m_blockCounter = 0;
-								return VehicleJunctionTransitState.Stop;
-							} else {
+						if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity) {
 #if DEBUG
 							if (debug)
-								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no conflicting cars)");
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): {sign} sign. waittime={extVehicle.waitTime}");
+#endif
+							if (extVehicle.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
+								extVehicle.waitTime++;
+#if DEBUG
+								if (debug)
+									Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to STOP (wait)");
+#endif
+								bool hasPriority = prioMan.HasPriority(frontVehicleId, ref vehicleData, ref prevPos, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)], targetNodeId, isTargetStartNode, ref position, ref targetNode);
+#if DEBUG
+								if (debug)
+									Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): hasPriority: {hasPriority}");
+#endif
+
+								if (!hasPriority) {
+									vehicleData.m_blockCounter = 0;
+									return VehicleJunctionTransitState.Stop;
+								} else {
+#if DEBUG
+									if (debug)
+										Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (no conflicting cars)");
+#endif
+									return VehicleJunctionTransitState.Leave;
+								}
+							} else {
+#if DEBUG
+								if (debug)
+									Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (max wait timeout)");
 #endif
 								return VehicleJunctionTransitState.Leave;
 							}
 						} else {
 #if DEBUG
-						if (debug)
-							Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Setting JunctionTransitState to LEAVE (max wait timeout)");
+							if (debug)
+								Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle has not yet reached yield speed (reduce {sqrVelocity} by {vehicleState.reduceSqrSpeedByValueToYield})");
 #endif
-							return VehicleJunctionTransitState.Leave;
+
+							// vehicle has not yet reached yield speed
+							return VehicleJunctionTransitState.Stop;
 						}
 					} else {
 						return VehicleJunctionTransitState.Leave;

@@ -170,7 +170,7 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			if (!includeStopped && vehicle.GetLastFrameVelocity().sqrMagnitude < TrafficPriorityManager.MAX_SQR_STOP_VELOCITY) {
+			if (!includeStopped && vehicle.GetLastFrameVelocity().sqrMagnitude < GlobalConfig.Instance.PriorityRules.MaxStopVelocity * GlobalConfig.Instance.PriorityRules.MaxStopVelocity) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: too slow ({vehicle.GetLastFrameVelocity().sqrMagnitude})");

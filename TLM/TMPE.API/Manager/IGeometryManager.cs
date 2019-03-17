@@ -37,7 +37,8 @@ namespace TrafficManager.Manager {
 		void OnUpdateSegment(ref ExtSegment segment);
 		void OnSegmentEndReplacement(SegmentEndReplacement replacement);
 		IDisposable Subscribe(IObserver<GeometryUpdate> observer);
-		void MarkAsUpdated(ref ExtSegment segment);
-		void MarkAsUpdated(ushort nodeId);
+		void MarkAllAsUpdated();
+		void MarkAsUpdated(ref ExtSegment segment, bool updateNodes = true);
+		void MarkAsUpdated(ushort nodeId, bool updateSegments = false);
 	}
 }

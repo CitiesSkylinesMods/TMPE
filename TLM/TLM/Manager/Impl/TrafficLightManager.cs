@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
+using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic.Enums;
 using TrafficManager.TrafficLight;
@@ -66,6 +67,7 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"TrafficLightManager.SetTrafficLight: Setting traffic light at node {nodeId} -- flags={flags}");
 #endif
 			node.m_flags = flags;
+			Constants.ManagerFactory.GeometryManager.MarkAsUpdated(NodeGeometry.Get(nodeId), true);
 			return true;
 		}
 

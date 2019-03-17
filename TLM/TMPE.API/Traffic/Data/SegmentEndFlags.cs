@@ -11,62 +11,18 @@ namespace TrafficManager.Traffic.Data {
 	/// </summary>
 	public struct SegmentEndFlags {
 		public TernaryBool uturnAllowed;
-#if TURNONRED
-        public TernaryBool turnOnRedAllowed;
-#endif
-        public TernaryBool straightLaneChangingAllowed;
+        public TernaryBool nearTurnOnRedAllowed;
+		public TernaryBool farTurnOnRedAllowed;
+		public TernaryBool straightLaneChangingAllowed;
 		public TernaryBool enterWhenBlockedAllowed;
 		public TernaryBool pedestrianCrossingAllowed;
 
-		public bool defaultUturnAllowed;
-#if TURNONRED
-        public bool defaultTurnOnRedAllowed;
-#endif
-		public bool defaultStraightLaneChangingAllowed;
-		public bool defaultEnterWhenBlockedAllowed;
-		public bool defaultPedestrianCrossingAllowed;
-
-		/*public void UpdateDefaults(ushort segmentId, bool startNode, ref NetNode node) {
-			IJunctionRestrictionsManager junctionRestrictionsManager = Constants.ManagerFactory.JunctionRestrictionsManager;
-
-			if (! junctionRestrictionsManager.IsUturnAllowedConfigurable(segmentId, startNode, ref node)) {
-				uturnAllowed = TernaryBool.Undefined;
-			}
-
-#if TURNONRED
-            if (! junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(segmentId, startNode, ref node)) {
-                turnOnRedAllowed = TernaryBool.Undefined;
-            }
-#endif
-
-			if (! junctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node)) {
-				straightLaneChangingAllowed = TernaryBool.Undefined;
-			}
-
-			if (! junctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable(segmentId, startNode, ref node)) {
-				enterWhenBlockedAllowed = TernaryBool.Undefined;
-			}
-
-			if (! junctionRestrictionsManager.IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref node)) {
-				pedestrianCrossingAllowed = TernaryBool.Undefined;
-			}
-
-			defaultUturnAllowed = junctionRestrictionsManager.GetDefaultUturnAllowed(segmentId, startNode, ref node);
-#if TURNONRED
-			defaultTurnOnRedAllowed = junctionRestrictionsManager.GetDefaultTurnOnRedAllowed(segmentId, startNode, ref node);
-#endif
-			defaultStraightLaneChangingAllowed = junctionRestrictionsManager.GetDefaultLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node);
-			defaultEnterWhenBlockedAllowed = junctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed(segmentId, startNode, ref node);
-			defaultPedestrianCrossingAllowed = junctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed(segmentId, startNode, ref node);
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[11])
-				Log._Debug($"SegmentEndFlags.UpdateDefaults({segmentId}, {startNode}): Set defaults: defaultUturnAllowed={defaultUturnAllowed}"
-#if TURNONRED
-					+ $", defaultTurnOnRedAllowed={defaultTurnOnRedAllowed}"
-#endif
-					+ $", defaultStraightLaneChangingAllowed={defaultStraightLaneChangingAllowed}, defaultEnterWhenBlockedAllowed={defaultEnterWhenBlockedAllowed}, defaultPedestrianCrossingAllowed={defaultPedestrianCrossingAllowed}");
-#endif
-		}*/
+		bool defaultUturnAllowed;
+        bool defaultNearTurnOnRedAllowed;
+		bool defaultFarTurnOnRedAllowed;
+		bool defaultStraightLaneChangingAllowed;
+		bool defaultEnterWhenBlockedAllowed;
+		bool defaultPedestrianCrossingAllowed;
 
 		public bool IsUturnAllowed() {
 			if (uturnAllowed == TernaryBool.Undefined) {
@@ -76,15 +32,21 @@ namespace TrafficManager.Traffic.Data {
 			return TernaryBoolUtil.ToBool(uturnAllowed);
 		}
 
-#if TURNONRED
-		public bool IsTurnOnRedAllowed() {
-			if (turnOnRedAllowed == TernaryBool.Undefined) {
-				return defaultTurnOnRedAllowed;
+		public bool IsNearTurnOnRedAllowed() {
+			if (nearTurnOnRedAllowed == TernaryBool.Undefined) {
+				return defaultNearTurnOnRedAllowed;
 			}
 
-			return TernaryBoolUtil.ToBool(turnOnRedAllowed);
+			return TernaryBoolUtil.ToBool(nearTurnOnRedAllowed);
 		}
-#endif
+
+		public bool IsFarTurnOnRedAllowed() {
+			if (farTurnOnRedAllowed == TernaryBool.Undefined) {
+				return defaultFarTurnOnRedAllowed;
+			}
+
+			return TernaryBoolUtil.ToBool(farTurnOnRedAllowed);
+		}
 
 		public bool IsLaneChangingAllowedWhenGoingStraight() {
 			if (straightLaneChangingAllowed == TernaryBool.Undefined) {
@@ -114,11 +76,13 @@ namespace TrafficManager.Traffic.Data {
 			uturnAllowed = TernaryBoolUtil.ToTernaryBool(value);
 		}
 
-#if TURNONRED
-		public void SetTurnOnRedAllowed(bool value) {
-			turnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+		public void SetNearTurnOnRedAllowed(bool value) {
+			nearTurnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
 		}
-#endif
+
+		public void SetFarTurnOnRedAllowed(bool value) {
+			farTurnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+		}
 
 		public void SetLaneChangingAllowedWhenGoingStraight(bool value) {
 			straightLaneChangingAllowed = TernaryBoolUtil.ToTernaryBool(value);
@@ -134,36 +98,27 @@ namespace TrafficManager.Traffic.Data {
 
 		public bool IsDefault() {
 			bool uturnIsDefault = uturnAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(uturnAllowed) == defaultUturnAllowed;
-#if TURNONRED
-            bool turnOnRedIsDefault = turnOnRedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(turnOnRedAllowed) == defaultTurnOnRedAllowed;
-#endif
+            bool nearTurnOnRedIsDefault = nearTurnOnRedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(nearTurnOnRedAllowed) == defaultNearTurnOnRedAllowed;
+			bool farTurnOnRedIsDefault = farTurnOnRedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(farTurnOnRedAllowed) == defaultFarTurnOnRedAllowed;
 			bool straightChangeIsDefault = straightLaneChangingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(straightLaneChangingAllowed) == defaultStraightLaneChangingAllowed;
 			bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(enterWhenBlockedAllowed) == defaultEnterWhenBlockedAllowed;
 			bool pedCrossingIsDefault = pedestrianCrossingAllowed == TernaryBool.Undefined || TernaryBoolUtil.ToBool(pedestrianCrossingAllowed) == defaultPedestrianCrossingAllowed;
 
-			return uturnIsDefault
-#if TURNONRED
-				&& turnOnRedIsDefault
-#endif
-				&& straightChangeIsDefault
-				&& enterWhenBlockedIsDefault
-				&& pedCrossingIsDefault;
+			return uturnIsDefault && nearTurnOnRedIsDefault && farTurnOnRedIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
 		}
 
 		public void Reset(bool resetDefaults=true) {
 			uturnAllowed = TernaryBool.Undefined;
-#if TURNONRED
-            turnOnRedAllowed = TernaryBool.Undefined;
-#endif
+            nearTurnOnRedAllowed = TernaryBool.Undefined;
+			farTurnOnRedAllowed = TernaryBool.Undefined;
 			straightLaneChangingAllowed = TernaryBool.Undefined;
 			enterWhenBlockedAllowed = TernaryBool.Undefined;
 			pedestrianCrossingAllowed = TernaryBool.Undefined;
 
 			if (resetDefaults) {
 				defaultUturnAllowed = false;
-#if TURNONRED
-                defaultTurnOnRedAllowed = false;
-#endif
+                defaultNearTurnOnRedAllowed = false;
+				defaultFarTurnOnRedAllowed = false;
 				defaultStraightLaneChangingAllowed = false;
 				defaultEnterWhenBlockedAllowed = false;
 				defaultPedestrianCrossingAllowed = false;
@@ -173,9 +128,8 @@ namespace TrafficManager.Traffic.Data {
 		public override string ToString() {
 			return $"[SegmentEndFlags\n" +
 				"\t" + $"uturnAllowed = {uturnAllowed}\n" +
-#if TURNONRED
-                "\t" + $"turnOnRedAllowed = {turnOnRedAllowed}\n" +
-#endif
+                "\t" + $"nearTurnOnRedAllowed = {nearTurnOnRedAllowed}\n" +
+				"\t" + $"farTurnOnRedAllowed = {farTurnOnRedAllowed}\n" +
 				"\t" + $"straightLaneChangingAllowed = {straightLaneChangingAllowed}\n" +
 				"\t" + $"enterWhenBlockedAllowed = {enterWhenBlockedAllowed}\n" +
 				"\t" + $"pedestrianCrossingAllowed = {pedestrianCrossingAllowed}\n" +

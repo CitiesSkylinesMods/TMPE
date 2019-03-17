@@ -216,19 +216,20 @@ namespace TrafficManager {
 		}
 
 		private void RegisterCustomManagers() {
+		// TODO represent data dependencies differently
 			RegisteredManagers.Add(ExtNodeManager.Instance);
 			RegisteredManagers.Add(ExtSegmentManager.Instance);
 			RegisteredManagers.Add(ExtSegmentEndManager.Instance);
+			RegisteredManagers.Add(GeometryManager.Instance);
 			RegisteredManagers.Add(AdvancedParkingManager.Instance);
 			RegisteredManagers.Add(CustomSegmentLightsManager.Instance);
 			RegisteredManagers.Add(ExtBuildingManager.Instance);
 			RegisteredManagers.Add(ExtCitizenInstanceManager.Instance);
 			RegisteredManagers.Add(ExtCitizenManager.Instance);
 			RegisteredManagers.Add(ExtPathManager.Instance);
-			RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
+			RegisteredManagers.Add(TurnOnRedManager.Instance);
 			RegisteredManagers.Add(LaneArrowManager.Instance);
 			RegisteredManagers.Add(LaneConnectionManager.Instance);
-			RegisteredManagers.Add(GeometryManager.Instance);
 			RegisteredManagers.Add(OptionsManager.Instance);
 			RegisteredManagers.Add(ParkingRestrictionsManager.Instance);
 			RegisteredManagers.Add(RoutingManager.Instance);
@@ -241,6 +242,8 @@ namespace TrafficManager {
 			RegisteredManagers.Add(UtilityManager.Instance);
 			RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
 			RegisteredManagers.Add(ExtVehicleManager.Instance);
+			RegisteredManagers.Add(VehicleStateManager.Instance);
+			RegisteredManagers.Add(JunctionRestrictionsManager.Instance); // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
 		}
 
 		public override void OnReleased() {

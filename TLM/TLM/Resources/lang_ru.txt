@@ -226,5 +226,6 @@ Show_error_message_if_a_mod_incompatibility_is_detected Показывать с�
 Remove_parked_vehicles Удалить припаркованный транспорт
 Node_is_level_crossing Это перекрёсток уровней.\nЗдесь нельзя отключить светофоры.
 Experimental_features Experimental features
-Turn_on_red_enabled_by_default Включить красный включен на перекрестках по умолчанию
-Turn_on_red Транспортные средства могут повернуть на красный светофор
+Turn_on_red Turn on red
+Vehicles_may_turn_on_red Транспортные средства могут повернуть на красный светофор
+Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets

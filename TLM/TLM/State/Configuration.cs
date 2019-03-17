@@ -95,9 +95,8 @@ namespace TrafficManager {
 		[Serializable]
 		public class SegmentNodeFlags {
 			public bool? uturnAllowed = null;
-#if TURNONRED
-            public bool? turnOnRedAllowed = null;
-#endif
+            public bool? turnOnRedAllowed = null; // controls near turns // TODO fix naming when the serialization system is updated
+			public bool? farTurnOnRedAllowed = null;
 			public bool? straightLaneChangingAllowed = null;
 			public bool? enterWhenBlockedAllowed = null;
 			public bool? pedestrianCrossingAllowed = null;
@@ -105,28 +104,17 @@ namespace TrafficManager {
 			public bool IsDefault() {
 				// TODO v1.11.0: check this
 				bool uturnIsDefault = uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
-#if TURNONRED
                 bool turnOnRedIsDefault = turnOnRedAllowed == null || (bool)turnOnRedAllowed;
-#endif
+				bool farTurnOnRedIsDefault = farTurnOnRedAllowed == null || (bool)farTurnOnRedAllowed;
 				bool straightChangeIsDefault = straightLaneChangingAllowed == null || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
 				bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == null || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
 				bool pedCrossingIsDefault = pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
 
-				return uturnIsDefault
-#if TURNONRED
-					&& turnOnRedIsDefault
-#endif
-					&& straightChangeIsDefault
-					&& enterWhenBlockedIsDefault
-					&& pedCrossingIsDefault;
+				return uturnIsDefault && turnOnRedIsDefault && farTurnOnRedIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
 			}
 
 			public override string ToString() {
-				return $"uturnAllowed={uturnAllowed}"
-#if TURNONRED
-					+ $", turnOnRedAllowed={turnOnRedAllowed}"
-#endif
-					+ $", straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
+				return $"uturnAllowed={uturnAllowed}, turnOnRedAllowed={turnOnRedAllowed}, farTurnOnRedAllowed={farTurnOnRedAllowed}, straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
 			}
 		}
 

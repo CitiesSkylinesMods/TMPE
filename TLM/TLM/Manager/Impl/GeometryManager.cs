@@ -145,7 +145,16 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(ref ExtSegment seg) {
+		public void MarkAllAsUpdated() {
+			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+				SegmentGeometry segGeo = SegmentGeometry.Get((ushort)segmentId);
+				if (segGeo != null) {
+					MarkAsUpdated(segGeo, true);
+				}
+			}
+		}
+
+		public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
@@ -156,8 +165,10 @@ namespace TrafficManager.Manager.Impl {
 				updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (int)(seg.segmentId & 63);
 				stateUpdated = true;
 
-				MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
-				MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
+				if (updateNodes) {
+					MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
+					MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
+				}
 
 				if (! seg.valid) {
 					SimulationStep(true);
@@ -167,7 +178,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		public void MarkAsUpdated(ushort nodeId) {
+		public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
 #if DEBUGGEO
 			if (GlobalConfig.Instance.Debug.Switches[5])
 				Log._Debug($"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
@@ -178,6 +189,14 @@ namespace TrafficManager.Manager.Impl {
 				if (nodeId != 0) {
 					updatedNodeBuckets[nodeId >> 6] |= 1uL << (int)(nodeId & 63);
 					stateUpdated = true;
+
+					if (updateSegments) {
+						foreach (SegmentEndGeometry segEndGeo in geometry.SegmentEndGeometries) {
+							if (segEndGeo != null) {
+								MarkAsUpdated(segEndGeo.GetSegmentGeometry(), false);
+							}
+						}
+					}
 
 					if (! Services.NetService.IsNodeValid(nodeId)) {
 						SimulationStep(true);

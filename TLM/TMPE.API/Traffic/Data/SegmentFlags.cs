@@ -12,11 +12,13 @@ namespace TrafficManager.Traffic.Data {
 			return startNode ? startNodeFlags.IsUturnAllowed() : endNodeFlags.IsUturnAllowed();
 		}
 
-#if TURNONRED
-		public bool IsTurnOnRedAllowed(bool startNode) {
-			return startNode ? startNodeFlags.IsTurnOnRedAllowed() : endNodeFlags.IsTurnOnRedAllowed();
+		public bool IsNearTurnOnRedAllowed(bool startNode) {
+			return startNode ? startNodeFlags.IsNearTurnOnRedAllowed() : endNodeFlags.IsNearTurnOnRedAllowed();
 		}
-#endif
+
+		public bool IsFarTurnOnRedAllowed(bool startNode) {
+			return startNode ? startNodeFlags.IsFarTurnOnRedAllowed() : endNodeFlags.IsFarTurnOnRedAllowed();
+		}
 
 		public bool IsLaneChangingAllowedWhenGoingStraight(bool startNode) {
 			return startNode ? startNodeFlags.IsLaneChangingAllowedWhenGoingStraight() : endNodeFlags.IsLaneChangingAllowedWhenGoingStraight();
@@ -34,11 +36,13 @@ namespace TrafficManager.Traffic.Data {
 			return startNode ? startNodeFlags.uturnAllowed : endNodeFlags.uturnAllowed;
 		}
 
-#if TURNONRED
-		public TernaryBool GetTurnOnRedAllowed(bool startNode) {
-			return startNode ? startNodeFlags.turnOnRedAllowed : endNodeFlags.turnOnRedAllowed;
+		public TernaryBool GetNearTurnOnRedAllowed(bool startNode) {
+			return startNode ? startNodeFlags.nearTurnOnRedAllowed : endNodeFlags.nearTurnOnRedAllowed;
 		}
-#endif
+
+		public TernaryBool GetFarTurnOnRedAllowed(bool startNode) {
+			return startNode ? startNodeFlags.farTurnOnRedAllowed : endNodeFlags.farTurnOnRedAllowed;
+		}
 
 		public TernaryBool GetLaneChangingAllowedWhenGoingStraight(bool startNode) {
 			return startNode ? startNodeFlags.straightLaneChangingAllowed : endNodeFlags.straightLaneChangingAllowed;
@@ -60,15 +64,21 @@ namespace TrafficManager.Traffic.Data {
 			}
 		}
 
-#if TURNONRED
-		public void SetTurnOnRedAllowed(bool startNode, bool value) {
+		public void SetNearTurnOnRedAllowed(bool startNode, bool value) {
 			if (startNode) {
-				startNodeFlags.SetTurnOnRedAllowed(value);
+				startNodeFlags.SetNearTurnOnRedAllowed(value);
 			} else {
-				endNodeFlags.SetTurnOnRedAllowed(value);
+				endNodeFlags.SetNearTurnOnRedAllowed(value);
 			}
 		}
-#endif
+
+		public void SetFarTurnOnRedAllowed(bool startNode, bool value) {
+			if (startNode) {
+				startNodeFlags.SetFarTurnOnRedAllowed(value);
+			} else {
+				endNodeFlags.SetFarTurnOnRedAllowed(value);
+			}
+		}
 
 		public void SetLaneChangingAllowedWhenGoingStraight(bool startNode, bool value) {
 			if (startNode) {
