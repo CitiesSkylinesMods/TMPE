@@ -21,7 +21,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// All additional data for citizens. Index: citizen id
 		/// </summary>
-		public ExtCitizen[] ExtCitizens = null;
+		public ExtCitizen[] ExtCitizens { get; } = null;
 
 		private ExtCitizenManager() {
 			ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];

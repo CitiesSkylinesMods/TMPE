@@ -44,7 +44,7 @@ namespace TrafficManager.Manager {
 		/// <param name="allowUnderground">allow position to be underground?</param>
 		/// <param name="position">result</param>
 		/// <returns><code>true</code> on success, <code>false</code> otherwise</returns>
-		bool FindEndPathPosition(ushort instanceID, ref CitizenInstance instanceData, Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowUnderground, out PathUnit.Position position);
+		bool FindPathPosition(ushort instanceID, ref CitizenInstance instanceData, Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowUnderground, out PathUnit.Position position);
 
 		/// <summary>
 		/// Generates the localized status for the given tourist.

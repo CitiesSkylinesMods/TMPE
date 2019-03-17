@@ -2,10 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager {
 	public interface IExtCitizenManager {
 		// TODO define me!
+		ExtCitizen[] ExtCitizens { get; }
+
+		/// <summary>
+		/// Resets the extended citizen with the given id.
+		/// </summary>
+		/// <param name="citizenId">citizen id</param>
 		void ResetCitizen(uint citizenId);
 
 		/// <summary>

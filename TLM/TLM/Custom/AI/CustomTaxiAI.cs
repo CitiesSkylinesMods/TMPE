@@ -33,7 +33,7 @@ namespace TrafficManager.Custom.AI {
 			float startSqrDistB;
 			PathUnit.Position endPosA;
 			if (CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, allowUnderground, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB) &&
-				Constants.ManagerFactory.ExtCitizenInstanceManager.FindEndPathPosition(passengerInstanceId, ref instance.m_instances.m_buffer[(int)passengerInstanceId], endPos, laneTypes, vehicleTypes, undergroundTarget, out endPosA)) {
+				Constants.ManagerFactory.ExtCitizenInstanceManager.FindPathPosition(passengerInstanceId, ref instance.m_instances.m_buffer[(int)passengerInstanceId], endPos, laneTypes, vehicleTypes, undergroundTarget, out endPosA)) {
 				if ((instance.m_instances.m_buffer[(int)passengerInstanceId].m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
 					laneTypes |= NetInfo.LaneType.PublicTransport;
 
