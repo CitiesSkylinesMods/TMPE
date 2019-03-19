@@ -149,7 +149,6 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 			//Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
 #endif
-			SegmentEnds[index]?.Destroy();
 			SegmentEnds[index] = null;
 		}
 

@@ -73,7 +73,7 @@ namespace TrafficManager.Traffic.Impl {
 		}
 		
 		~SegmentEnd() {
-			Destroy();
+			//Destroy();
 		}
 
 		/// <summary>
@@ -207,7 +207,7 @@ namespace TrafficManager.Traffic.Impl {
 			return segEndMan.GetRegisteredVehicleCount(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(SegmentId, StartNode)]);
 		}
 
-		public void Destroy() {
+		/*public void Destroy() {
 			UnregisterAllVehicles();
 		}
 
@@ -224,7 +224,7 @@ namespace TrafficManager.Traffic.Impl {
 					break;
 				}
 			}
-		}
+		}*/
 
 		public void Update() {
 			Constants.ServiceFactory.NetService.ProcessSegment(SegmentId, delegate (ushort segmentId, ref NetSegment segment) {

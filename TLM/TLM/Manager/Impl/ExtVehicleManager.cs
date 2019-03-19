@@ -265,6 +265,8 @@ namespace TrafficManager.Manager.Impl {
 				int endIndex = segmentEndMan.GetIndex(extVehicle.currentSegmentId, extVehicle.currentStartNode);
 				if (segmentEndMan.ExtSegmentEnds[endIndex].firstVehicleId == extVehicle.vehicleId) {
 					segmentEndMan.ExtSegmentEnds[endIndex].firstVehicleId = extVehicle.nextVehicleIdOnSegment;
+				} else {
+					Log.Error($"ExtVehicleManager.Unlink({extVehicle.vehicleId}): Unexpected first vehicle on segment {extVehicle.currentSegmentId}: {segmentEndMan.ExtSegmentEnds[endIndex].firstVehicleId}");
 				}
 			}
 
@@ -293,6 +295,9 @@ namespace TrafficManager.Manager.Impl {
 			if (GlobalConfig.Instance.Debug.Switches[9])
 				Log._Debug($"ExtVehicleManager.Link({extVehicle.vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
 #endif
+			if (extVehicle.currentSegmentId != 0) {
+				Unlink(ref extVehicle);
+			}
 
 			ushort oldFirstRegVehicleId = end.firstVehicleId;
 			if (oldFirstRegVehicleId != 0) {

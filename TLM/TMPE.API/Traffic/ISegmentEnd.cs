@@ -11,8 +11,8 @@ namespace TrafficManager.Traffic {
 		//ushort FirstRegisteredVehicleId { get; set; } // TODO private set
 
 		void Update();
-		void Destroy();
+		//void Destroy();
 		IDictionary<ushort, uint>[] MeasureOutgoingVehicles(bool includeStopped = true, bool debug = false);
-		uint GetRegisteredVehicleCount();
+		//uint GetRegisteredVehicleCount();
 	}
 }

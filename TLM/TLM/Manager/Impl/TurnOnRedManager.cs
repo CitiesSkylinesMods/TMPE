@@ -99,7 +99,7 @@ namespace TrafficManager.Manager.Impl {
 			});
 
 			// check if traffic can flow to the node and that there is at least one left segment
-			if (end.incoming && hasOutgoingSegment) {
+			if (!end.incoming || !hasOutgoingSegment) {
 #if DEBUG
 				if (debug) {
 					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): outgoing one-way or insufficient number of outgoing segments.");
