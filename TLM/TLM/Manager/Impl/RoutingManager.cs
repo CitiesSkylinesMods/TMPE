@@ -483,8 +483,10 @@ namespace TrafficManager.Manager.Impl {
                 //ushort compatibleLaneIndicesMask = 0;
                 int[] laneGroups = new int[nextSegmentInfo.m_lanes.Length];
                 int prevLaneGroup = 0;
-                List<NetInfo.Lane> prevSortedLanes = prevSegmentInfo.m_lanes.OrderBy(l => l.m_position).ToList();
-                List<NetInfo.Lane> sortedLanes = nextSegmentInfo.m_lanes.OrderBy(l => l.m_position).ToList();
+                List<NetInfo.Lane> prevSortedLanes = prevSegmentInfo.m_lanes.Where(l => (l.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None
+                    && (l.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None).OrderBy(l => l.m_position).ToList();
+                List<NetInfo.Lane> sortedLanes = nextSegmentInfo.m_lanes.Where(l => (l.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None
+                    && (l.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None).OrderBy(l => l.m_position).ToList();
 
                 if (prevSegmentInfo == nextSegmentInfo) {
                     if (!nextIsJunction) {
@@ -492,18 +494,32 @@ namespace TrafficManager.Manager.Impl {
                         int prevLaneSortedIndex = prevSortedLanes.IndexOf(prevLaneInfo);
                         for (byte prevLaneInx = 1; prevLaneInx <= prevLaneSortedIndex && prevLaneId != 0; prevLaneInx++) {
                             NetInfo.Lane laneInfo = prevSortedLanes[prevLaneInx];
-                            if (laneInfo.m_finalDirection != prevSortedLanes[prevLaneInx - 1].m_finalDirection || (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) == NetInfo.LaneType.None ||
-                            (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) == VehicleInfo.VehicleType.None || laneInfo.m_position > (prevSortedLanes[prevLaneInx - 1].m_position + (0.5f * prevSortedLanes[prevLaneInx - 1].m_width) + (0.5f * laneInfo.m_width) + 1)) {
+                            if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
                                 prevLaneGroup++;
+                            }
+                            if (laneInfo.m_finalDirection != prevSortedLanes[prevLaneInx - 1].m_finalDirection) {
+                                prevLaneGroup++;
+                            } else {
+                                var gap = laneInfo.m_position - prevSortedLanes[prevLaneInx - 1].m_position - (0.5f * prevSortedLanes[prevLaneInx - 1].m_width) - (0.5f * laneInfo.m_width);
+                                if (gap > 1) {
+                                    prevLaneGroup++;
+                                }
                             }
                         }
 
                         for (byte nextLaneInx = 1; nextLaneInx < sortedLanes.Count && nextLaneId != 0; nextLaneInx++) {
                             NetInfo.Lane laneInfo = sortedLanes[nextLaneInx];
                             laneGroups[nextLaneInx] = laneGroups[nextLaneInx - 1];
-                            if (laneInfo.m_finalDirection != sortedLanes[nextLaneInx - 1].m_finalDirection || (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) == NetInfo.LaneType.None ||
-                            (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) == VehicleInfo.VehicleType.None || laneInfo.m_position > (sortedLanes[nextLaneInx - 1].m_position + (0.5f * sortedLanes[nextLaneInx - 1].m_width) + (0.5f * laneInfo.m_width) + 1)) {
+                            if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
                                 laneGroups[nextLaneInx]++;
+                            }
+                            if (laneInfo.m_finalDirection != sortedLanes[nextLaneInx - 1].m_finalDirection) {
+                                laneGroups[nextLaneInx]++;
+                            } else {
+                                var gap = laneInfo.m_position - sortedLanes[nextLaneInx - 1].m_position - (0.5f * sortedLanes[nextLaneInx - 1].m_width) - (0.5f * laneInfo.m_width);
+                                if (gap > 1) {
+                                    laneGroups[nextLaneInx]++;
+                                }
                             }
                         }
                     }

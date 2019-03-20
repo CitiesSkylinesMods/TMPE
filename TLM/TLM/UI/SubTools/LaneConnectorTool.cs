@@ -407,7 +407,7 @@ namespace TrafficManager.UI.SubTools {
             RefreshCurrentNodeMarkers();
         }
 
-        private void RefreshCurrentNodeMarkers(ushort forceNodeId=0) {
+        private void RefreshCurrentNodeMarkers(ushort forceNodeId = 0) {
             if (forceNodeId == 0) {
                 currentNodeMarkers.Clear();
             } else {
@@ -471,15 +471,24 @@ namespace TrafficManager.UI.SubTools {
                 NetInfo.Lane[] lanes = NetManager.instance.m_segments.m_buffer[segmentId].Info.m_lanes;
                 uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
                 NetInfo info = NetManager.instance.m_segments.m_buffer[segmentId].Info;
-                int[] laneGroups = new int[lanes.Length];
-                List<NetInfo.Lane> sortedLanes = lanes.OrderBy(l => l.m_position).ToList();
+                List<NetInfo.Lane> sortedLanes = lanes.Where(l => (l.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None
+                    && (l.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None).OrderBy(l => l.m_position).ToList();
+                int[] laneGroups = new int[sortedLanes.Count()];
                 if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None) {
                     for (byte laneIndex = 1; laneIndex < sortedLanes.Count && laneId != 0; laneIndex++) {
-                        NetInfo.Lane laneInfo = sortedLanes[laneIndex];
                         laneGroups[laneIndex] = laneGroups[laneIndex - 1];
-                        if (laneInfo.m_finalDirection != sortedLanes[laneIndex - 1].m_finalDirection || (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) == NetInfo.LaneType.None ||
-                        (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) == VehicleInfo.VehicleType.None || laneInfo.m_position > sortedLanes[laneIndex - 1].m_position + (0.5f * sortedLanes[laneIndex - 1].m_width) + (0.5f * laneInfo.m_width) + 1) {
+                        NetInfo.Lane laneInfo = sortedLanes[laneIndex];
+                        NetInfo.Lane prevLaneInfo = sortedLanes[laneIndex - 1];
+                        if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
                             laneGroups[laneIndex]++;
+                        }
+                        if (laneInfo.m_finalDirection != prevLaneInfo.m_finalDirection) {
+                            laneGroups[laneIndex]++;
+                        } else {
+                            var gap = laneInfo.m_position - prevLaneInfo.m_position - (0.5f * prevLaneInfo.m_width) - (0.5f * laneInfo.m_width);
+                            if (gap > 1 ) {
+                                laneGroups[laneIndex]++;
+                            }
                         }
                     }
                 }
