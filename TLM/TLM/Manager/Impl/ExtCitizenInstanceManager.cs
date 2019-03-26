@@ -140,27 +140,41 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): called for citizen instance {instanceId}. Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
 #endif
 
-			Citizen.Location location = citizenData.CurrentLocation;
-			switch (location) {
-				case Citizen.Location.Home:
-				case Citizen.Location.Visit:
-				case Citizen.Location.Work:
+			bool spawned = (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None;
+			if ((citizenData.m_flags & (Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.None) {
+#if DEBUG
+				if (fineDebug) {
+					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is neither moving in nor dummy traffic: {citizenData.m_flags}");
+				}
+#endif
+
+				Citizen.Location location = citizenData.CurrentLocation;
+				switch (location) {
+					case Citizen.Location.Home:
+					case Citizen.Location.Visit:
+					case Citizen.Location.Work:
+#if DEBUG
+						if (fineDebug) {
+							Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is currently at location {location}. This is not an outside connection.");
+						}
+#endif
+						return false;
+				}
+
+				if (!spawned && (citizenData.m_vehicle == 0 || (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[citizenData.m_vehicle].m_flags & Vehicle.Flags.Spawned) == 0)) {
 #if DEBUG
 					if (fineDebug) {
-						Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is currently at location {location}. This is not an outside connection.");
+						Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen instance is not spawned ({instanceData.m_flags}) and does not have a spawned car. Not at an outside connection.");
 					}
 #endif
 					return false;
-			}
-
-			bool spawned = (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None;
-			if (!spawned && (citizenData.m_vehicle == 0 || (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[citizenData.m_vehicle].m_flags & Vehicle.Flags.Spawned) == 0)) {
+				}
+			} else {
 #if DEBUG
 				if (fineDebug) {
-					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen instance is not spawned ({instanceData.m_flags}) and does not have a spawned car. Not at an outside connection.");
+					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is moving in or dummy traffic: {citizenData.m_flags}");
 				}
 #endif
-				return false;
 			}
 
 			if (instanceData.m_sourceBuilding == 0) {
