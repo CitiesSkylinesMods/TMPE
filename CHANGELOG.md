@@ -1,6 +1,10 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
+10.18, 29/03/2019
+- Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
+- Bugfix: Trams perform turns on red (#248)
+
 10.17, 23/03/2019
 - Introduced new versioning scheme (10.17 instead of 1.10.17)
 - Synchronized code and version with stable version
