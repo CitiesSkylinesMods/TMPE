@@ -22,7 +22,7 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 * Clear traffic, stuck cims, etc.
 
 # Changelog
-### [10.18](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/1.17...10.18), 29/03/2019
+### [10.18](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.17...10.18), 29/03/2019
 - Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
 - Bugfix: Trams perform turns on red (#248)
 
