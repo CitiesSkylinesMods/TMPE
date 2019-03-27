@@ -130,86 +130,29 @@ namespace TrafficManager.Manager.Impl {
 			return ret;
 		}
 
-		public bool IsAtOutsideConnection(ushort instanceId, ref CitizenInstance instanceData, ref Citizen citizenData) {
+		public bool IsAtOutsideConnection(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 startPos) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug =
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extInstance.GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extInstance.instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extInstance.instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
 			if (debug)
-				Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): called for citizen instance {instanceId}. Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
+				Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({extInstance.instanceId}): called. Path: {instanceData.m_path} sourceBuilding={instanceData.m_sourceBuilding}");
 #endif
 
-			bool spawned = (instanceData.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None;
-			if ((citizenData.m_flags & (Citizen.Flags.MovingIn | Citizen.Flags.DummyTraffic)) == Citizen.Flags.None) {
-#if DEBUG
-				if (fineDebug) {
-					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is neither moving in nor dummy traffic: {citizenData.m_flags}");
-				}
-#endif
-
-				Citizen.Location location = citizenData.CurrentLocation;
-				switch (location) {
-					case Citizen.Location.Home:
-					case Citizen.Location.Visit:
-					case Citizen.Location.Work:
-#if DEBUG
-						if (fineDebug) {
-							Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is currently at location {location}. This is not an outside connection.");
-						}
-#endif
-						return false;
-				}
-
-				if (!spawned && (citizenData.m_vehicle == 0 || (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[citizenData.m_vehicle].m_flags & Vehicle.Flags.Spawned) == 0)) {
-#if DEBUG
-					if (fineDebug) {
-						Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen instance is not spawned ({instanceData.m_flags}) and does not have a spawned car. Not at an outside connection.");
-					}
-#endif
-					return false;
-				}
-			} else {
-#if DEBUG
-				if (fineDebug) {
-					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen is moving in or dummy traffic: {citizenData.m_flags}");
-				}
-#endif
-			}
-
-			if (instanceData.m_sourceBuilding == 0) {
-#if DEBUG
-				if (fineDebug) {
-					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Citizen instance does not have a source building. Not at an outside connection.");
-				}
-#endif
-				return false;
-			}
-			
-			if ((Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) {
-#if DEBUG
-				if (fineDebug) {
-					Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): Source building {instanceData.m_sourceBuilding} is not an outside connection.");
-				}
-#endif
-				return false;
-			}
-
-			Vector3 pos;
-			if (spawned) {
-				pos = instanceData.GetLastFramePosition();
-			} else {
-				pos = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[citizenData.m_vehicle].GetLastFramePosition();
-			}
-			
-			bool ret = (pos - Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_position).magnitude <= GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance;
+			bool ret =
+				(Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None &&
+				(startPos - Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].m_position).magnitude <= GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance;
 
 #if DEBUG
-			if (fineDebug) {
-				Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): pos={pos}, spawned={spawned}, ret={ret}");
-			}
+			if (debug)
+				Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): ret={ret}");
 #endif
-
 			return ret;
 		}
 	}

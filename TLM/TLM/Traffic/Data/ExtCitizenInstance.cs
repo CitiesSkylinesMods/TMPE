@@ -207,6 +207,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		public float lastDistanceToParkedCar;
 
+		/// <summary>
+		/// Specifies whether the last path-finding started at an outside connection
+		/// </summary>
+		public bool atOutsideConnection;
+
 		public override string ToString() {
 			return $"[ExtCitizenInstance\n" +
 				"\t" + $"instanceId = {instanceId}\n" +
@@ -218,6 +223,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"returnPathId = {returnPathId}\n" +
 				"\t" + $"returnPathState = {returnPathState}\n" +
 				"\t" + $"lastDistanceToParkedCar = {lastDistanceToParkedCar}\n" +
+				"\t" + $"atOutsideConnection = {atOutsideConnection}\n" +
 				"ExtCitizenInstance]";
 		}
 
@@ -231,6 +237,7 @@ namespace TrafficManager.Traffic.Data {
 			returnPathId = 0;
 			returnPathState = ExtPathState.None;
 			lastDistanceToParkedCar = 0;
+			atOutsideConnection = false;
 		}
 
 		internal bool IsValid() {
@@ -248,7 +255,11 @@ namespace TrafficManager.Traffic.Data {
 
 		internal void Reset() {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -262,6 +273,7 @@ namespace TrafficManager.Traffic.Data {
 			parkingSpaceLocation = ExtParkingSpaceLocation.None;
 			parkingSpaceLocationId = 0;
 			lastDistanceToParkedCar = float.MaxValue;
+			atOutsideConnection = false;
 			//ParkedVehiclePosition = default(Vector3);
 			ReleaseReturnPath();
 		}
@@ -271,7 +283,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		internal void ReleaseReturnPath() {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif
@@ -293,7 +309,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		internal void UpdateReturnPathState() {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -326,7 +346,11 @@ namespace TrafficManager.Traffic.Data {
 		/// <returns></returns>
 		internal bool CalculateReturnPath(Vector3 parkPos, Vector3 targetPos) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif
