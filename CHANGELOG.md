@@ -1,6 +1,11 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
+10.18, 29/03/2019
+- Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
+- Bugfix: Trams perform turns on red (#248)
+- Update: Service Radius Adjuster mod by Egi removed from incompatible mods list (#255)
+
 10.17, 23/03/2019
 - Introduced new versioning scheme (10.17 instead of 1.10.17)
 - Synchronized code and version with stable version
@@ -43,7 +48,7 @@
 - [Experimental feature] Turn on red (thanks to @FireController1847 for implementation and to @pcfantasy for source code base)
 
 1.10.14, 27/01/2019
-- Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group 
+- Bugfix: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group
 - Bugfix: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too
 - Bugfix: Cargo Airport doesn't work (Cargo planes not spawning and not arriving)
 - Updated Polish translation
@@ -74,7 +79,7 @@
 - Parking AI: Improved park & ride behavior
 - Parking AI: Walking paths from parking position to destination building take public transportation into account
 - Bugfix: Parking AI causes unnecessary path-findings (#183, thanks to Sipke82 for reporting)
-- Bugfix: Prohibiting cims from crossing the road also affect paths where crossing is unnecessary (#168, thanks to aubergine10 for reporting) 
+- Bugfix: Prohibiting cims from crossing the road also affect paths where crossing is unnecessary (#168, thanks to aubergine10 for reporting)
 
 1.10.9, 13/07/2018
 - Updated for game version 1.10.1-f3
@@ -156,7 +161,7 @@
 - Improved performance
 - Bugfix: Pedestrians sometimes ignore red traffic light signals (thanks to @(c)RIKUPI™ for reporting this issue)
 - Bugfix: Timed traffic lights do not correctly recognize set vehicle restrictions (thanks to @alborzka for reporting this issue)
-  
+
 1.10.1, 05/08/2017
 - Updated Polish, Korean, and Simplified Chinese translations
 - Bugfix: Default routing is disabled if the lane connector is used on a subset of all available lanes only
@@ -166,11 +171,11 @@
 1.10.0, 30/07/2017
 - New feature: Dynamic Lane Selection
 - New feature: Adaptive step switching
-- New feature: Individual vehicles may be removed from the game 
+- New feature: Individual vehicles may be removed from the game
 - New option: Vehicle restrictions aggression
 - New option: Vehicles follow priority rules at junctions with timed traffic lights
 - Improved path-finding performance
-- Improved traffic measurement engine performance 
+- Improved traffic measurement engine performance
 - Reorganized global configuration file (sorry, your main menu and main button positions are reset)
 - The option "Road condition has a bigger impact on vehicle speed" is only shown if the Snowfall DLC is owned
 - The flow/wait calculation mode to be used is now configurable via the global configuration file
@@ -189,23 +194,23 @@
 - Parking AI: Vehicles can now find parking spaces at the opposite road side
 - Parking AI: Included an improved fallback logic for some edge cases
 - Parking AI: Citizens should now be more successful in returning their cars back home  
-- Parking AI: Tuned parking radius parameters 
+- Parking AI: Tuned parking radius parameters
 - Parking AI: If the limit for parked vehicles is reached and parking fails due to it, no alternative parking space is queried
 - Vehicle AI: Busses prefer lanes with correct lane arrow over incorrect ones
 - Bugfix: Using the bulldozer tool might lead to inconsistent road geometry information
-- Bugfix: Citizens that fail to approach their parked car fly towards their target building 
+- Bugfix: Citizens that fail to approach their parked car fly towards their target building
 - Bugfix: Parking AI: Path-finding fails if cars are parked too far away from a road
 - Bugfix: Parking AI: Citizens approaching a car start to float away
 - Bugfix: "Heavy vehicles prefer outer lanes on highways" does not work
 - Bugfix: The lane connector does not allow connecting all available lane end points at train stations and on bidirectional one-lane train tracks
 - Bugfix: Vehicles may get stuck in several situations
-- Upgrading to a road with bus lanes now copies an already existing traffic light state to the new traffic light 
+- Upgrading to a road with bus lanes now copies an already existing traffic light state to the new traffic light
 
 1.9.6, 28/05/2017
 - Updated Simplified Chinese translation
 - Bugfix: Vehicles cannot perform u-turns at junctions with only one outgoing segment (thanks to @Sunbird for reporting this issue)
 - Bugfix: Path-finding costs for large distances exceed the maximum allowed value (thanks to @Huitsi for reporting this issue)
-- Bugfix: Under certain circumstances path-finding at railroad crossings allow switching from road to rail tracks. 
+- Bugfix: Under certain circumstances path-finding at railroad crossings allow switching from road to rail tracks.
 
 1.9.5, 24/05/2017
 - Updated for game version 1.7.1-f1
@@ -219,10 +224,10 @@
 
 1.9.4, 23/05/2017
 - New option: Ban private cars and trucks on bus lanes
-- Updated Spanish and French translation 
+- Updated Spanish and French translation
 - Optimized path-finding
 - Increased path-finding cost for private cars driving on bus lanes
-- Increased path-finding cost for disregarding vehicle restrictions 
+- Increased path-finding cost for disregarding vehicle restrictions
 - Bugfix: Path-finding is unable to calculate certain paths after modifying the road network
 
 1.9.3, 22/05/2017
@@ -230,9 +235,9 @@
 - Removed default vehicle restrictions from bus lanes
 - Modified junction restrictions come into effect instantaneously
 - UI: Saving a timed step does not reset the timed traffic light to the first state
-- Bugfix: AI: Segment traffic data is not taken into account 
+- Bugfix: AI: Segment traffic data is not taken into account
 - Bugfix: Priority rules are not properly obeyed
-- Bugfix: Under certain circumstances priority signs cannot be removed 
+- Bugfix: Under certain circumstances priority signs cannot be removed
 - Bugfix: Path-finding is unable to calculate certain paths
 
 1.9.2, 20/05/2017
@@ -260,18 +265,18 @@
 - UI: More compact, movable main menu UI
 - Added support for custom languages
 - Added Korean translation (thanks to @Toothless FLY [ROK]LSh.st for translating)
-- Updated translations: German, Polish, Russian, Portuguese, Traditional Chinese 
+- Updated translations: German, Polish, Russian, Portuguese, Traditional Chinese
 - Major code refactorings
 - AI: Tuned path-finding parameters
 - New option: Main button position can be locked
 - New option: Main menu position can be locked
 - New option: Added language selection in options dialog
-- New option: Customization of lane arrows, lane connections and vehicle restrictions can now come into effect instantaneously 
+- New option: Customization of lane arrows, lane connections and vehicle restrictions can now come into effect instantaneously
 - Bugfix: Cars sometimes get stuck forever when the Advanced Parking AI is activated (thanks to @cmfcmf for reporting this issue)
 - Bugfix: Busses do not perform u-turns even if the transport line show u-turns (thanks to @dymanoid for reporting this issue)
 - Bugfix: Timed traffic lights do not work as expected on single-direction train tracks (thanks to @DaEgi01 for reporting this issue)
 - Bugfix: Vehicle restriction and speed limit signs overlay is displayed on the wrong side of inverted road segments
-- Bugfix: Influx statistics value is zero (thanks to @hjo for reporting this issue) 
+- Bugfix: Influx statistics value is zero (thanks to @hjo for reporting this issue)
 
 1.8.16, 20/03/2017
 - Lane connections can now also be removed by pressing the backspace key
@@ -285,11 +290,11 @@
 
 1.8.14, 07/01/2017
 - Bugfix: Wait/flow ratio at timed traffic lights is sometimes not correctly calculated
-- Bugfix: A deadlock situation can arise at junctions with priority signs such that no vehicle enters the junction 
+- Bugfix: A deadlock situation can arise at junctions with priority signs such that no vehicle enters the junction
 - Bugfix: When adding a junction to a timed traffic light, sometimes light states given by user input are not correctly stored
 - Bugfix: Joining two timed traffic lights sets the minimum time to "1" for steps with zero minimum time assigned
 - Bugfix: Modifications of timed traffic light states are sometimes not visible while editting the light (but they are applied nonetheless)
-- Bugfix: Button background is not always correctly changed after clicking on a button within the main menu 
+- Bugfix: Button background is not always correctly changed after clicking on a button within the main menu
 - Tram lanes can now be customized by using the lane connector tool
 - Minor performance optimizations for priority sign simulation
 
@@ -330,7 +335,7 @@
 1.8.7, 24/12/2016
 - Bugfix: Parking AI: Cims that try to reach their parked car are sometimes teleported to another location where they start to fly through the map in order to reach their car
 - Bugfix: Parking AI: Cims owning a parked car do not consider using other means of transportation
-- Bugfix: Parking AI: Residents are unable to leave the city through a highway outside connection 
+- Bugfix: Parking AI: Residents are unable to leave the city through a highway outside connection
 - Bugfix: Trains/Trams are sometimes not detected at timed traffic lights
 - Advanced AI: Improved lane selection
 - The position of the main menu button is now forced inside screen bounds on startup
@@ -355,7 +360,7 @@
 1.8.4, 11/12/2016
 - New feature: "Stay on lane": By pressing Shift + S in the Lane Connector tool you can now link connected lanes such that vehicles are not allowed to change lanes at this point. Press Shift + S again to restrict "stay on lane" to either road direction.
 - U-turns are now only allowed to be performed from the innermost lane     
-- TMPE now detects if the number of spawned vehicles is reaching its limit (16384). If so, spawning of service/emergency vehicles is prioritized over spawning other vehicles. 
+- TMPE now detects if the number of spawned vehicles is reaching its limit (16384). If so, spawning of service/emergency vehicles is prioritized over spawning other vehicles.
 - Bugfix: Bicycles cannot change from bicycle lanes to pedestrian lanes
 - Bugfix: Travel probabilities set in the "Citizen Lifecycle Rebalance v2.1" mod are not obeyed (thanks to @informmanuel, @shaundoddmusic for reporting this issue)
 - Bugfix: Number of tourists seems to drop when activating the mod (statistics were not updated, thanks to @hpp7117, @wjrohn for reporting this issue)
@@ -367,7 +372,7 @@
 - Bugfix: Despite having the Parking AI activated, cims sometimes still spawn pocket cars.
 - Bugfix: When the Parking AI is active, bicycle lanes are not used (thanks to @informmanuel for reporting this issue)
 - Tweaked u-turn behavior
-- Improved info views 
+- Improved info views
 
 1.8.2, 3/12/2016
 - Bugfix: Taxis were not used (thanks to @[Delta ²k5] for reporting)
@@ -375,7 +380,7 @@
 
 1.8.1, 1/12/2016
 - Updated translations: Polish, Chinese (simplified)
-- Bugfix: Mod crashed when loading a second savegame 
+- Bugfix: Mod crashed when loading a second savegame
 
 1.8.0, 29/11/2016
 - Updated to game version 1.6.0-f4
@@ -399,7 +404,7 @@
 1.7.15, 26/10/2016
 - Bugfix: Timed traffic lights window disappears when clicking on it with the middle mouse button (thanks to @Nexus and @Mariobro14 for helping me identifying the cause of this bug)
 
-1.7.14, 18/10/2016 
+1.7.14, 18/10/2016
 - Updated for game version 1.5.2-f3
 
 1.7.13, 15/09/2016
@@ -432,7 +437,7 @@
 - In-game traffic light states are now correctly rendered when showing "yellow"
 - Removed negative effects on public transport usage
 - GUI: Traffic light states do not flicker anymore
-- Performance improvements 
+- Performance improvements
 
 1.7.8, 18/08/2016:
 - Bugfix: Cims sometimes got stuck (thanks to all reports and especially to @Thilawyn for providing a savegame)
@@ -496,7 +501,7 @@
 - Rewritten and simplified vehicle position tracking near timed traffic lights and priority signs for performance reasons
 - Improved performance of priority sign rules
 - AI: Cims now ignore junctions where pedestrian lights never change to green
-- AI: Removed the need to define a lane changing probability 
+- AI: Removed the need to define a lane changing probability
 - AI: Tweaked lane changing parameters
 - AI: Highway rules are automatically disabled at complex junctions (= more than 1 incoming and more than 1 outgoing roads)
 - Improved UI performance if overlays are deactivated
@@ -515,18 +520,18 @@
 
 1.6.22, 21/06/2016:
 - Speed/vehicle restrictions may now be applied to all road segments between two junctions by holding the shift key
-- Reworked how changes in the road network are recognized 
+- Reworked how changes in the road network are recognized
 - Advanced Vehicle AI: Improved lane selection at junctions where bus lanes end
 - Advanced Vehicle AI: Improved lane selection of busses
-- Improved automatic pedestrian lights 
+- Improved automatic pedestrian lights
 - Improved separate traffic lights: Traffic lights now control traffic lane-wise
 - UI: Sensitivity slider is only available while adding/editing a step or while in test mode
 - Bugfix: Lane selection on maps with left-hand traffic was incorrect
-- Bugfix: While building in pause mode, changes in the road network were not always recognized causing vehicles to stop/despawn 
+- Bugfix: While building in pause mode, changes in the road network were not always recognized causing vehicles to stop/despawn
 - Bugfix: Police cars off-duty were ignoring lane arrows
 - Bugfix: If public transport stops were near a junction, trams/busses were not counted by timed traffic lights (many thanks to Filip for identifying this problem)
 - Bugfix: Trains/Trams were sometimes ignoring timed traffic lights (many thanks to Filip for identifying this problem)
-- Bugfix: Building roads with bus lanes caused garbage, bodies, etc. to pile up 
+- Bugfix: Building roads with bus lanes caused garbage, bodies, etc. to pile up
 
 1.6.21, 14/06/2016:
 - Bugfix: Too few cargo trains were spawning (thanks to @Scratch, @toruk_makto1, @Mr.Miyagi, @mottoh and @Syparo for pointing out this problem)       
@@ -541,7 +546,7 @@
 1.6.18, 09/06/2016
 - Updated for game patch 1.5.0-f4
 - Improved performance of priority signs and timed traffic lights
-- Players can now select elevated rail segments/nodes 
+- Players can now select elevated rail segments/nodes
 - Trams and trains now follow priority signs
 - Improved UI behavior when setting up priority signs
 
@@ -580,11 +585,11 @@
 - Added Chinese translation
 - By pressing "Page up"/"Page down" you can now switch between traffic and default map view
 - Size of information icons and signs is now based on your screen resolution
-- UI code refactored 
+- UI code refactored
 
 1.6.10, 02/03/2016
 - Additional controls for vehicle restrictions added
-- Bugfix: Clicking on a Traffic Manager overlay resulted in vanilla game components (e.g. houses, vehicles) being activated 
+- Bugfix: Clicking on a Traffic Manager overlay resulted in vanilla game components (e.g. houses, vehicles) being activated
 
 1.6.9, 02/03/2016
 - Updated for game patch 1.3.2-f1
@@ -618,7 +623,7 @@
 
 1.6.4, 23/02/2016
 - Minor performance improvements
-- Bugfix: Path-finding calculated erroneous traffic density values 
+- Bugfix: Path-finding calculated erroneous traffic density values
 - Bugfix: Cims left the bus just to hop on a bus of the same line again (thanks to @kamzik911 for pointing out this problem)
 - Bugfix: Despawn control did not work (thanks to @xXHistoricalxDemoXx for pointing out this problem)
 - Bugfix: State of new settings was not displayed corretly (thanks to @Lord_Assaultーさま for pointing out this problem)
@@ -633,7 +638,7 @@
 1.6.2, 20/02/2016
 - Trams are now obeying speed limits (thanks to @Clausewitz for pointing out the issue)
 - Bugfix: Clear traffic sometimes throwed an error
-- Bugfix: Vehicle restrctions did not work as expected (thanks to @[Delta ²k5] for pointing out this problem) 
+- Bugfix: Vehicle restrctions did not work as expected (thanks to @[Delta ²k5] for pointing out this problem)
 - Bugfix: Transition of automatic pedestrian lights fixed
 
 1.6.1, 20/02/2016
@@ -669,7 +674,7 @@
 - Bugfix: Reckless driving does not apply for trains (thanks to @GordonDry for pointing out this problem)
 - Bugfix: Manual traffic lights were not working (thanks to @Mas71 for pointing out this problem)
 - Bugfix: Pedestrians were ignoring timed traffic lights (thanks to @Hannes8910 for pointing out this problem)
-- Bugfix: Sometimes speed limits were not saved (thanks to @cca_mikeman for pointing out this problem) 
+- Bugfix: Sometimes speed limits were not saved (thanks to @cca_mikeman for pointing out this problem)
 
 1.5.1, 31/01/2016
 - Trains are now following speed limits
@@ -700,11 +705,11 @@
 - Added translation to Russian (thanks to @FireGames for working on this!)
 - Bugfix: After removing a timed or manual light the traffic light was deleted (thanks to @Mas71 for pointing out this problem)
 - Bugfix: Segment geometries were not always calculated
-- Bugfix: In highway rule mode, lane arrows sometimes flickered 
-- Bugfix: Some traffic light arrows were sometimes not selectable 
- 
+- Bugfix: In highway rule mode, lane arrows sometimes flickered
+- Bugfix: Some traffic light arrows were sometimes not selectable
+
 1.4.7, 22/01/2016
-- Added translation to Portuguese (thanks to @igordeeoliveira for working on this!) 
+- Added translation to Portuguese (thanks to @igordeeoliveira for working on this!)
 - Reduced mean size of files can become quite big (thanks to @GordonDry for reporting this problem)
 - Bugfix: Freight ships/trains were not coming in (thanks to @Mas71 and @clus for reporting this problem)
 - Bugfix: The toggle "Vehicles may enter blocked junctions" did not work properly (thanks for @exxonic for reporting this problem)
@@ -717,7 +722,7 @@
 1.4.5, 22/01/2016
 - The option "Vehicles may enter blocked junctions" may now be defined for each junction separately
 - Bugfix: A deadlock in the path-finding is fixed
-- Bugfix: Small timed light sensitivity values (< 0.1) were not saved correctly 
+- Bugfix: Small timed light sensitivity values (< 0.1) were not saved correctly
 - Bugfix: Timed traffic lights were not working for some players
 - Refactored segment geometry calculation
 
@@ -751,7 +756,7 @@
 - Introducing Advanced Vehicle AI (disabled by default! Go to "Options" and enable it if you want to use it.)
 - Bugfix: Traffic lights were popping up in the middle of roads
 - Bugfix: Fixed the lane changer for left-hand traffic systems (thanks to @Phishie for pointing out this problem)
-- Bugfix: Traffic lights on invalid nodes are not saved anymore 
+- Bugfix: Traffic lights on invalid nodes are not saved anymore
 
 1.3.24, 13/01/2016
 - Improved handling of priority signs
@@ -778,13 +783,13 @@
 1.3.21, 06/01/2016
 - New feature: Traffic Sensitivity Tuning
 - UI improvements: When adding a new step to a timed traffic light the lights are inverted.
-- Timed traffic light status symbols should now be less annoying 
-- Bugfix: Deletion of junctions that were members of a traffic light group is now handled correctly 
+- Timed traffic light status symbols should now be less annoying
+- Bugfix: Deletion of junctions that were members of a traffic light group is now handled correctly
 
 1.3.20, 04/01/2016
 - Bugfix: Timed traffic lights are not saved correctly after upgrading a road nearby
 - UI improvements
-- New feature: Reckless driving 
+- New feature: Reckless driving
 
 1.3.19, 04/01/2016
 - Timed traffic lights: Absolute minimum time changed to 1
@@ -804,7 +809,7 @@
 
 1.3.16, 03/01/2016
 - Bugfix: Traffic light settings on roads of the Network Extensions mods are not saved (thanks to @Scarface, @martintech and @Sonic for pointing out this problem)
-- Improved save data management 
+- Improved save data management
 
 1.3.15, 02/01/2016
 - Simulation accuracy (and thus performance) is now controllable through the game options dialog
@@ -818,7 +823,7 @@
 
 1.3.13, 01/01/2016
 - Bugfix: Lane arrows are not correctly translated into path finding decisions (thanks to @bvoice360 for pointing out this problem)
-- Bugfix: Priority signs are sometimes undeletable (thank to @Blackwolf for pointing out this problem) 
+- Bugfix: Priority signs are sometimes undeletable (thank to @Blackwolf for pointing out this problem)
 - Bugfix: Errors occur when other mods without namespace definitions are loaded (thanks to @Arch Angel for pointing out this problem)
 - Connecting a new road segment to a junction that already has priority signs now allows modification of the new priority sign
 

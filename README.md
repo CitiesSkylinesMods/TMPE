@@ -22,24 +22,10 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 * Clear traffic, stuck cims, etc.
 
 # Changelog
-### [10.17](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/1.10.16...10.17), 23/03/2019
-- Introduced new versioning scheme (10.17 instead of 1.10.17)
-- Synchronized code and version with stable version
-- Updated russian translation (thanks to @vitalii201 for translating) (#207)
-- Updated list of incompatible mods (#115)
-- Removed stable version from list of incompatible mods (#168)
-- Turn-on-red can now be toggled for unpreferred turns between one-ways
-- Improved train behavior at shunts: Trains now prefer to stay on their track (#230)
-- Fixed and optimized lane selection for u-turns and at dead ends (#101)
-- Parking AI: Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
-- Bugfix: Parking AI: Tourist cars despawn because they assume they are at an outside connection (#218)
-- Bugfix: Parking AI: Return path calculation did not accept beautification segments (#218)
-- Bugfix: Parking AI: Cars/Citizens waiting for a path might jump around (#218)
-- Bugfix: Vanilla lane randomization does not work as intended at highway transitions (#112)
-- Bugfix: Vehicles change lanes at tollbooths (#225)
-- Bugfix: Path-finding: Array index is out of range due to a race condition (#221)
-- Bugfix: Citizen not found errors when using walking tours (#219)
-- Bugfix: Timed light indicator only visible when any timed light node is selected (#222)
+### [10.18](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.17...10.18), 29/03/2019
+- Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
+- Bugfix: Trams perform turns on red (#248)
+- Update: Service Radius Adjuster mod by Egi removed from incompatible mods list (#255)
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 
