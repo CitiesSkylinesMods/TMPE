@@ -25,6 +25,7 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 ### [10.18](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.17...10.18), 29/03/2019
 - Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
 - Bugfix: Trams perform turns on red (#248)
+- Update: Service Radius Adjuster mod by Egi removed from incompatible mods list (#255)
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 
