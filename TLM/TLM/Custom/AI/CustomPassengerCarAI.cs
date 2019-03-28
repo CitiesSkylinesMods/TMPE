@@ -125,7 +125,12 @@ namespace TrafficManager.Custom.AI {
 
 		public bool ExtStartPathFind(ushort vehicleID, ref Vehicle vehicleData, ushort driverInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverExtInstance.GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID) &&
+				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -272,12 +277,7 @@ namespace TrafficManager.Custom.AI {
 				}
 
 				extPathType = driverExtInstance.GetPathType();
-				/*} else {
-#if DEBUG
-					if (debug)
-						Log.Warning($"CustomPassengerCarAI.CustomStartPathFind: No driver citizen instance found for vehicle {vehicleID}!");
-#endif
-				}*/
+				driverExtInstance.atOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(driverInstanceId, ref driverInstance, ref driverExtInstance, startPos);
 			}
 #if BENCHMARK
 			}
@@ -377,6 +377,10 @@ namespace TrafficManager.Custom.AI {
 					return true;
 				}
 			}
+
+			if (Options.prohibitPocketCars) {
+				driverExtInstance.Reset();
+			}
 			return false;
 		}
 
@@ -438,7 +442,12 @@ namespace TrafficManager.Custom.AI {
 
 		internal bool ExtParkVehicle(ushort vehicleID, ref Vehicle vehicleData, uint driverCitizenId, ref Citizen driverCitizen, ushort driverCitizenInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverExtInstance.GetCitizenId();
+			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID) &&
+				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif
