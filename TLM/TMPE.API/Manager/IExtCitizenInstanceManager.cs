@@ -117,5 +117,15 @@ namespace TrafficManager.Manager {
 		/// </summary>
 		/// <param name="extInstance">ext. citizen instance</param>
 		void Reset(ref ExtCitizenInstance extInstance);
+
+		/// <summary>
+		/// Determines whether the given citizen instance is located at an outside connection based on the given start position.
+		/// </summary>
+		/// <param name="instanceId">citizen instance id</param>
+		/// <param name="instanceData">citizen instance data</param>
+		/// <param name="extInstance">extended citizen instance data</param>
+		/// <param name="startPos">start position</param>
+		/// <returns><code>true</code> if the citizen instance is located at an outside connection, <code>false</code> otherwise</returns>
+		bool IsAtOutsideConnection(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 startPos);
 	}
 }

@@ -59,12 +59,16 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool EnterParkedCar(ushort instanceID, ref CitizenInstance instanceData, ushort parkedVehicleId, out ushort vehicleId) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceID) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
 			if (debug)
-				Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}, ..., {parkedVehicleId}) called.");
+				Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}, ..., {parkedVehicleId}) called.");
 #endif
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;
 			NetManager netManager = Singleton<NetManager>.instance;
@@ -78,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].GetPosition(0, out vehLanePathPos)) {
 #if DEBUG
 				if (debug)
-					Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}): Could not get first car path position of citizen instance {instanceID}!");
+					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not get first car path position of citizen instance {instanceID}!");
 #endif
 
 				vehicleId = 0;
@@ -87,7 +91,7 @@ namespace TrafficManager.Manager.Impl {
 			uint vehLaneId = PathManager.GetLaneID(vehLanePathPos);
 #if DEBUG
 			if (fineDebug)
-				Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}): Determined vehicle position for citizen instance {instanceID}: seg. {vehLanePathPos.m_segment}, lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
+				Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Determined vehicle position for citizen instance {instanceID}: seg. {vehLanePathPos.m_segment}, lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
 #endif
 
 			Vector3 vehLanePos;
@@ -121,7 +125,7 @@ namespace TrafficManager.Manager.Impl {
 				if (!vehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
 #if DEBUG
 					if (debug)
-						Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}): Could not spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceID}!");
+						Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceID}!");
 #endif
 					return false;
 				}
@@ -150,7 +154,7 @@ namespace TrafficManager.Manager.Impl {
 
 #if DEBUG
 				if (fineDebug)
-					Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}): Citizen instance {instanceID} is now entering vehicle {vehicleId}. Set vehicle target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
+					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Citizen instance {instanceID} is now entering vehicle {vehicleId}. Set vehicle target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
 #endif
 
 				return true;
@@ -158,7 +162,7 @@ namespace TrafficManager.Manager.Impl {
 				// failed to find a road position
 #if DEBUG
 				if (debug)
-					Log._Debug($"AdvancedParkingManager.EnterParkedCar({instanceID}): Could not find a road position for citizen instance {instanceID} near parked vehicle {parkedVehicleId}!");
+					Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}): Could not find a road position for citizen instance {instanceID} near parked vehicle {parkedVehicleId}!");
 #endif
 				return false;
 			}
@@ -166,7 +170,11 @@ namespace TrafficManager.Manager.Impl {
 
 		public ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen, ref Citizen citizen, ExtPathState mainPathState) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenInstance.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == citizenInstanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenInstance.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == citizenInstance.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == citizenInstance.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 			if (fineDebug)
@@ -269,7 +277,12 @@ namespace TrafficManager.Manager.Impl {
 		public ExtSoftPathState UpdateCarPathState(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ExtPathState mainPathState) {
 			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitInstMan.GetCitizenId(driverExtInstance.instanceId);
+			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
+				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 			if (fineDebug)
@@ -411,7 +424,11 @@ namespace TrafficManager.Manager.Impl {
 
 		public ParkedCarApproachState CitizenApproachingParkedCarSimulationStep(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos, ref VehicleParked parkedCar) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif
@@ -554,7 +571,11 @@ namespace TrafficManager.Manager.Impl {
 		public bool CitizenApproachingTargetSimulationStep(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance) {
 			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif
@@ -615,7 +636,11 @@ namespace TrafficManager.Manager.Impl {
 			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 			IExtBuildingManager extBuildingMan = Constants.ManagerFactory.ExtBuildingManager;
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -822,10 +847,7 @@ namespace TrafficManager.Manager.Impl {
 							if (debug)
 								Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path for citizen instance {instanceId} contains passenger car section and citizen should stand in front of their car.");
 #endif
-							if (
-								Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceId, ref instanceData, ref citizenData) &&
-								Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service == ItemClass.Service.Road
-							) {
+							if (extInstance.atOutsideConnection) {
 								// car path calculated starting at road outside connection: success
 								if (extInstance.pathMode == ExtPathMode.CalculatingCarPathToAltParkPos) {
 									extInstance.pathMode = ExtPathMode.DrivingToAltParkPos;
@@ -847,6 +869,7 @@ namespace TrafficManager.Manager.Impl {
 										Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Car path to known parking position is READY! CurrentPathMode={extInstance.pathMode}");
 #endif
 								}
+								extInstance.atOutsideConnection = false; // citizen leaves outside connection
 								return ExtSoftPathState.Ready;
 							} else if (parkedVehicleId == 0) {
 								// error! could not find/spawn parked car
@@ -980,7 +1003,11 @@ namespace TrafficManager.Manager.Impl {
 			IExtBuildingManager extBuildingMan = Constants.ManagerFactory.ExtBuildingManager;
 
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -1124,7 +1151,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
 				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitizenInstanceManager.GetCitizenId(driverExtInstance.instanceId));
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -1210,7 +1240,12 @@ namespace TrafficManager.Manager.Impl {
 			IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitInstMan.GetCitizenId(extDriverInstance.instanceId);
+			bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
+				(GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == extDriverInstance.instanceId) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extDriverInstance.GetCitizenId()) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 #endif

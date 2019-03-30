@@ -22,17 +22,10 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 * Clear traffic, stuck cims, etc.
 
 # Changelog
-### [1.10.16](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/1.10.15...1.10.16), 24/02/2019
-- Gameplay: Fixed problem with vehicle despawn after road upgrade/remove (thanks @pcfantasy for implementation suggestion)(#86, #101)
-- Gameplay: Fixed problem with vehicles unable to choose lane when u-turn at dead-end (thanks @pcfantasy for implementation and @aubergine10 for neccesary tests)(#101)
-- Gameplay: Fixed problem when user couldn't change state of 'Turn on Red' while enabled_by_default option not selected (thanks @Sp3ctre18 for bug confirmation) (#102)
-- Gameplay: Added missing logic for noise density calculations (thanks to @pcfantasy for fix) (#66)
-- UI: New icons for empty and remove_priority_sign settings (thanks @aubergine10 for those icons) (#75, #77)
-- Other: Greatly improved incompatible mod scanner, added dialog to list and unsubscribe incompatible mods (#91)
-- Other: Changed mod name in Content Manager to __TM:PE__
-- Other: Discord server was set up by @FireController1847 - link in mod description
-- Other: Fixed 'silent error' inside log related with "Esc key handler" (#92)
-- Contribution: Added project building instructions and PR review
+### [10.18](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.17...10.18), 29/03/2019
+- Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
+- Bugfix: Trams perform turns on red (#248)
+- Update: Service Radius Adjuster mod by Egi removed from incompatible mods list (#255)
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 

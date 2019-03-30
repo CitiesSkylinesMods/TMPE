@@ -45,6 +45,8 @@ namespace TrafficManager.State.ConfigData {
 		public int VehicleId = 0;
 		public int CitizenInstanceId = 0;
 		public uint CitizenId = 0;
+		public uint SourceBuildingId = 0;
+		public uint TargetBuildingId = 0;
 		public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
 		public ExtPathMode ExtPathMode = ExtPathMode.None;
 	}

@@ -39,7 +39,7 @@ namespace TrafficManager.Custom.AI {
 		[RedirectMethod]
 		public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
 #if DEBUG
-			bool vehDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId;
+			bool vehDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && vehDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && vehDebug;
 #endif

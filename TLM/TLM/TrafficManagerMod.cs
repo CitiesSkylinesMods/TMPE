@@ -11,7 +11,7 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.11.0-harmony-alpha3";
+		public static readonly string Version = "11.0";
 
 		public static readonly uint GameVersion = 180610064u;
 		public static readonly uint GameVersionA = 1u;
