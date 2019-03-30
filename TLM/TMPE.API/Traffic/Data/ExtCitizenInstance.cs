@@ -51,6 +51,11 @@ namespace TrafficManager.Traffic.Data {
 		/// </summary>
 		public float lastDistanceToParkedCar;
 
+		/// <summary>
+		/// Specifies whether the last path-finding started at an outside connection
+		/// </summary>
+		public bool atOutsideConnection;
+
 		public override string ToString() {
 			return $"[ExtCitizenInstance\n" +
 				"\t" + $"instanceId = {instanceId}\n" +
@@ -62,6 +67,7 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"returnPathId = {returnPathId}\n" +
 				"\t" + $"returnPathState = {returnPathState}\n" +
 				"\t" + $"lastDistanceToParkedCar = {lastDistanceToParkedCar}\n" +
+				"\t" + $"atOutsideConnection = {atOutsideConnection}\n" +
 				"ExtCitizenInstance]";
 		}
 
@@ -75,6 +81,7 @@ namespace TrafficManager.Traffic.Data {
 			returnPathId = 0;
 			returnPathState = ExtPathState.None;
 			lastDistanceToParkedCar = 0;
+			atOutsideConnection = false;
 		}
 
 		/// <summary>
