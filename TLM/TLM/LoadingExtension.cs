@@ -119,7 +119,7 @@ namespace TrafficManager {
 
 				Log.Info("Reverting Harmony detours");
 				foreach (MethodBase m in HarmonyMethodStates.Keys) {
-					HarmonyInst.RemovePatch(m, HarmonyPatchType.All, HARMONY_ID);
+					HarmonyInst.Unpatch(m, HarmonyPatchType.All, HARMONY_ID);
 				}
 
 				DetourInited = false;
