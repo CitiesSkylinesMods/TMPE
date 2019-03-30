@@ -529,7 +529,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGLOAD
 						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
 #endif
-						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].TimedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (TrafficLight.StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
+						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].timedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
 							if (!Services.NetService.IsSegmentValid(e.Key))
