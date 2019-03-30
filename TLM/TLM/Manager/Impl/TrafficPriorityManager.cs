@@ -1155,7 +1155,9 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Trace($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
+#if DEBUGLOAD
+					Log._Debug($"Loading priority sign {(PriorityType)prioSegData.priorityType} @ seg. {prioSegData.segmentId}, start node? {startNode}");
+#endif
 					SetPrioritySign(prioSegData.segmentId, (bool)startNode, (PriorityType)prioSegData.priorityType);
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -1178,7 +1180,9 @@ namespace TrafficManager.Manager.Impl {
 					if (startSign != PriorityType.None) {
 						ushort startNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, true);
 						if (Services.NetService.IsNodeValid(startNodeId)) {
-							Log._Trace($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
+#if DEBUGSAVE
+							Log._Debug($"Saving priority sign of type {startSign} @ start node {startNodeId} of segment {segmentId}");
+#endif
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, startNodeId, (int)startSign));
 						}
 					}
@@ -1187,7 +1191,9 @@ namespace TrafficManager.Manager.Impl {
 					if (endSign != PriorityType.None) {
 						ushort endNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, false);
 						if (Services.NetService.IsNodeValid(endNodeId)) {
-							Log._Trace($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
+#if DEBUGSAVE
+							Log._Debug($"Saving priority sign of type {endSign} @ end node {endNodeId} of segment {segmentId}");
+#endif
 							ret.Add(new Configuration.PrioritySegment((ushort)segmentId, endNodeId, (int)endSign));
 						}
 					}

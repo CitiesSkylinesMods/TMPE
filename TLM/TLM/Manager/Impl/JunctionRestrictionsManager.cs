@@ -692,7 +692,9 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Trace($"JunctionRestrictionsManager.LoadData: Loading junction restrictions for segment {segNodeConf.segmentId}: startNodeFlags={segNodeConf.startNodeFlags} endNodeFlags={segNodeConf.endNodeFlags}");
+#if DEBUGLOAD
+					Log._Debug($"JunctionRestrictionsManager.LoadData: Loading junction restrictions for segment {segNodeConf.segmentId}: startNodeFlags={segNodeConf.startNodeFlags} endNodeFlags={segNodeConf.endNodeFlags}");
+#endif
 
 					if (segNodeConf.startNodeFlags != null) {
 						ushort startNodeId = Services.NetService.GetSegmentNodeId(segNodeConf.segmentId, true);
@@ -800,7 +802,9 @@ namespace TrafficManager.Manager.Impl {
 							startNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, true));
 							startNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, true));
 
-							Log._Trace($"JunctionRestrictionsManager.SaveData: Saving start node junction restrictions for segment {segmentId}: {startNodeFlags}");
+#if DEBUGSAVE
+							Log._Debug($"JunctionRestrictionsManager.SaveData: Saving start node junction restrictions for segment {segmentId}: {startNodeFlags}");
+#endif
 						}
 					}
 
@@ -818,7 +822,9 @@ namespace TrafficManager.Manager.Impl {
 							endNodeFlags.enterWhenBlockedAllowed = TernaryBoolUtil.ToOptBool(GetEnteringBlockedJunctionAllowed((ushort)segmentId, false));
 							endNodeFlags.pedestrianCrossingAllowed = TernaryBoolUtil.ToOptBool(GetPedestrianCrossingAllowed((ushort)segmentId, false));
 
-							Log._Trace($"JunctionRestrictionsManager.SaveData: Saving end node junction restrictions for segment {segmentId}: {endNodeFlags}");
+#if DEBUGSAVE
+							Log._Debug($"JunctionRestrictionsManager.SaveData: Saving end node junction restrictions for segment {segmentId}: {endNodeFlags}");
+#endif
 						}
 					}
 
@@ -831,7 +837,9 @@ namespace TrafficManager.Manager.Impl {
 					conf.startNodeFlags = startNodeFlags;
 					conf.endNodeFlags = endNodeFlags;
 
-					Log._Trace($"Saving segment-at-node flags for seg. {segmentId}");
+#if DEBUGSAVE
+					Log._Debug($"Saving segment-at-node flags for seg. {segmentId}");
+#endif
 					ret.Add(conf);
 				} catch (Exception e) {
 					Log.Error($"Exception occurred while saving segment node flags @ {segmentId}: {e.ToString()}");

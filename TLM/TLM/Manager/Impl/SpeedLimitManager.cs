@@ -465,7 +465,9 @@ namespace TrafficManager.Manager.Impl {
 			float gameSpeedLimit = ToGameSpeedLimit(AvailableSpeedLimits[customSpeedLimitIndex]);
 
 			// save speed limit in all NetInfos
-			Log._Trace($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
+#if DEBUGLOAD
+			Log._Debug($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
+#endif
 			UpdateNetInfoGameSpeedLimit(info, gameSpeedLimit);
 
 			List<string> childNetInfoNames;
@@ -473,7 +475,9 @@ namespace TrafficManager.Manager.Impl {
 				foreach (string childNetInfoName in childNetInfoNames) {
 					NetInfo childNetInfo;
 					if (NetInfoByName.TryGetValue(childNetInfoName, out childNetInfo)) {
-						Log._Trace($"Updating child NetInfo {childNetInfoName}: Setting speed limit to {gameSpeedLimit}");
+#if DEBUGLOAD
+						Log._Debug($"Updating child NetInfo {childNetInfoName}: Setting speed limit to {gameSpeedLimit}");
+#endif
 						CustomLaneSpeedLimitIndexByNetInfoName[childNetInfoName] = customSpeedLimitIndex;
 						UpdateNetInfoGameSpeedLimit(childNetInfo, gameSpeedLimit);
 					}
@@ -777,20 +781,28 @@ namespace TrafficManager.Manager.Impl {
 			foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
 				try {
 					if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
-						Log._Trace($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
+#if DEBUGLOAD
+						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
+#endif
 						continue;
 					}
 
 					ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneSpeedLimit.laneId].m_segment;
 					NetInfo info = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 					int customSpeedLimitIndex = GetCustomNetInfoSpeedLimitIndex(info);
-					Log._Trace($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: Custom speed limit index of segment {segmentId} info ({info}, name={info?.name}, lanes={info?.m_lanes} is {customSpeedLimitIndex}");
+#if DEBUGLOAD
+					Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: Custom speed limit index of segment {segmentId} info ({info}, name={info?.name}, lanes={info?.m_lanes} is {customSpeedLimitIndex}");
+#endif
 					if (customSpeedLimitIndex < 0 || AvailableSpeedLimits[customSpeedLimitIndex] != laneSpeedLimit.speedLimit) {
 						// lane speed limit differs from default speed limit
-						Log._Trace($"SpeedLimitManager.LoadData: Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+#if DEBUGLOAD
+						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+#endif
 						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
 					} else {
-						Log._Trace($"SpeedLimitManager.LoadData: Skipping lane speed limit of lane {laneSpeedLimit.laneId} ({laneSpeedLimit.speedLimit})");
+#if DEBUGLOAD
+						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane speed limit of lane {laneSpeedLimit.laneId} ({laneSpeedLimit.speedLimit})");
+#endif
 					}
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -806,7 +818,9 @@ namespace TrafficManager.Manager.Impl {
 			foreach (KeyValuePair<uint, ushort> e in Flags.getAllLaneSpeedLimits()) {
 				try {
 					Configuration.LaneSpeedLimit laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
-					Log._Trace($"Saving speed limit of lane {laneSpeedLimit.laneId}: {laneSpeedLimit.speedLimit}");
+#if DEBUGSAVE
+					Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: {laneSpeedLimit.speedLimit}");
+#endif
 					ret.Add(laneSpeedLimit);
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex.ToString()}");

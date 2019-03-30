@@ -87,7 +87,7 @@ namespace TrafficManager.Manager.Impl {
 		public bool LoadData(string data) {
 			bool success = true;
 			Log.Info($"Loading lane arrow data (old method)");
-#if DEBUG
+#if DEBUGLOAD
 			Log._Debug($"LaneFlags: {data}");
 #endif
 			var lanes = data.Split(',');
@@ -95,7 +95,9 @@ namespace TrafficManager.Manager.Impl {
 			if (lanes.Length > 1) {
 				foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
 					try {
+#if DEBUGLOAD
 						Log._Debug($"Split Data: {split[0]} , {split[1]}");
+#endif
 						var laneId = Convert.ToUInt32(split[0]);
 						uint flags = Convert.ToUInt32(split[1]);
 
@@ -107,8 +109,8 @@ namespace TrafficManager.Manager.Impl {
 						
 						uint laneArrowFlags = flags & Flags.lfr;
 						uint origFlags = (Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & Flags.lfr);
-#if DEBUG
-						Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((LaneArrows)(laneArrowFlags)).ToString() + ")");
+#if DEBUGLOAD
+						Log._Debug("Setting flags for lane " + laneId + " to " + flags + " (" + ((Flags.LaneArrows)(laneArrowFlags)).ToString() + ")");
 						if ((origFlags | laneArrowFlags) == origFlags) { // only load if setting differs from default
 							Log._Debug("Flags for lane " + laneId + " are original (" + ((NetLane.Flags)(origFlags)).ToString() + ")");
 						}
@@ -157,7 +159,9 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 
 					uint laneArrowInt = (uint)laneArrows;
+#if DEBUGSAVE
 					Log._Debug($"Saving lane arrows for lane {i}, setting to {laneArrows.ToString()} ({laneArrowInt})");
+#endif
 					ret.Add(new Configuration.LaneArrowData(i, laneArrowInt));
 				} catch (Exception e) {
 					Log.Error($"Exception occurred while saving lane arrows @ {i}: {e.ToString()}");

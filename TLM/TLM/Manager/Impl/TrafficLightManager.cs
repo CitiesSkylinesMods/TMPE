@@ -185,7 +185,9 @@ namespace TrafficManager.Manager.Impl {
 
 			foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
 				try {
+#if DEBUGLOAD
 					Log._Debug($"Traffic light split data: {split[0]} , {split[1]}");
+#endif
 					var nodeId = Convert.ToUInt16(split[0]);
 					uint flag = Convert.ToUInt16(split[1]);
 
@@ -216,7 +218,9 @@ namespace TrafficManager.Manager.Impl {
 					if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
 						continue;
 
+#if DEBUGLOAD
 					Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
+#endif
 					Services.NetService.ProcessNode(nodeLight.nodeId, delegate (ushort nodeId, ref NetNode node) {
 						SetTrafficLight(nodeLight.nodeId, nodeLight.trafficLight, ref node);
 						return true;

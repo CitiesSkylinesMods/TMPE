@@ -518,44 +518,60 @@ namespace TrafficManager.Manager.Impl {
 					ushort masterNodeId = masterNodeIdBySlaveNodeId[cnfTimedLights.nodeId];
 					List<ushort> nodeGroup = nodeGroupByMasterNodeId[masterNodeId];
 
-					Log._Trace($"Adding timed light at node {cnfTimedLights.nodeId}. NodeGroup: {string.Join(", ", nodeGroup.Select(x => x.ToString()).ToArray())}");
+#if DEBUGLOAD
+					Log._Debug($"Adding timed light at node {cnfTimedLights.nodeId}. NodeGroup: {string.Join(", ", nodeGroup.Select(x => x.ToString()).ToArray())}");
+#endif
 
 					SetUpTimedTrafficLight(cnfTimedLights.nodeId, nodeGroup);
 
 					int j = 0;
 					foreach (Configuration.TimedTrafficLightsStep cnfTimedStep in cnfTimedLights.timedSteps) {
-						Log._Trace($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
-						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].timedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
+#if DEBUGLOAD
+						Log._Debug($"Loading timed step {j} at node {cnfTimedLights.nodeId}");
+#endif
+						ITimedTrafficLightsStep step = TrafficLightSimulations[cnfTimedLights.nodeId].TimedLight.AddStep(cnfTimedStep.minTime, cnfTimedStep.maxTime, (TrafficLight.StepChangeMetric)cnfTimedStep.changeMetric, cnfTimedStep.waitFlowBalance);
 
 						foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in cnfTimedStep.segmentLights) {
 							if (!Services.NetService.IsSegmentValid(e.Key))
 								continue;
 							e.Value.nodeId = cnfTimedLights.nodeId;
 
-							Log._Trace($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
+#if DEBUGLOAD
+							Log._Debug($"Loading timed step {j}, segment {e.Key} at node {cnfTimedLights.nodeId}");
+#endif
 							ICustomSegmentLights lights = null;
 							if (!step.CustomSegmentLights.TryGetValue(e.Key, out lights)) {
-								Log._Trace($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
+#if DEBUGLOAD
+								Log._Debug($"No segment lights found at timed step {j} for segment {e.Key}, node {cnfTimedLights.nodeId}");
+#endif
 								continue;
 							}
 							Configuration.CustomSegmentLights cnfLights = e.Value;
 
-							Log._Trace($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+#if DEBUGLOAD
+							Log._Debug($"Loading pedestrian light @ seg. {e.Key}, step {j}: {cnfLights.pedestrianLightState} {cnfLights.manualPedestrianMode}");
+#endif
 
 							lights.ManualPedestrianMode = cnfLights.manualPedestrianMode;
 							lights.PedestrianLightState = cnfLights.pedestrianLightState;
 
 							bool first = true; // v1.10.2 transitional code
 							foreach (KeyValuePair<ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
-								Log._Trace($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+#if DEBUGLOAD
+								Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+#endif
 								ICustomSegmentLight light = null;
 								if (!lights.CustomLights.TryGetValue(e2.Key, out light)) {
-									Log._Trace($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+#if DEBUGLOAD
+									Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
+#endif
 									// v1.10.2 transitional code START
 									if (first) {
 										first = false;
 										if (!lights.CustomLights.TryGetValue(CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE, out light)) {
-											Log._Trace($"No segment light found for timed step {j}, segment {e.Key}, DEFAULT vehicleType {CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE} at node {cnfTimedLights.nodeId}");
+#if DEBUGLOAD
+											Log._Debug($"No segment light found for timed step {j}, segment {e.Key}, DEFAULT vehicleType {CustomSegmentLights.DEFAULT_MAIN_VEHICLETYPE} at node {cnfTimedLights.nodeId}");
+#endif
 											continue;
 										}
 									} else {
@@ -605,7 +621,9 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log._Trace($"Going to save timed light at node {nodeId}.");
+#if DEBUGSAVE
+					Log._Debug($"Going to save timed light at node {nodeId}.");
+#endif
 
 					var timedNode = TrafficLightSimulations[nodeId].timedLight;
 					timedNode.OnGeometryUpdate();
@@ -625,7 +643,9 @@ namespace TrafficManager.Manager.Impl {
 					cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
 					for (var j = 0; j < timedNode.NumSteps(); j++) {
-						Log._Trace($"Saving timed light step {j} at node {nodeId}.");
+#if DEBUGSAVE
+						Log._Debug($"Saving timed light step {j} at node {nodeId}.");
+#endif
 						ITimedTrafficLightsStep timedStep = timedNode.GetStep(j);
 						Configuration.TimedTrafficLightsStep cnfTimedStep = new Configuration.TimedTrafficLightsStep();
 						cnfTimedLights.timedSteps.Add(cnfTimedStep);
@@ -636,7 +656,9 @@ namespace TrafficManager.Manager.Impl {
 						cnfTimedStep.waitFlowBalance = timedStep.WaitFlowBalance;
 						cnfTimedStep.segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>();
 						foreach (KeyValuePair<ushort, ICustomSegmentLights> e in timedStep.CustomSegmentLights) {
-							Log._Trace($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
+#if DEBUGSAVE
+							Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
+#endif
 
 							ICustomSegmentLights segLights = e.Value;
 							Configuration.CustomSegmentLights cnfSegLights = new Configuration.CustomSegmentLights();
@@ -655,10 +677,14 @@ namespace TrafficManager.Manager.Impl {
 
 							cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
 
-							Log._Trace($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
+#if DEBUGSAVE
+							Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
+#endif
 
 							foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e2 in segLights.CustomLights) {
-								Log._Trace($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {nodeId}.");
+#if DEBUGSAVE
+								Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {nodeId}.");
+#endif
 
 								ICustomSegmentLight segLight = e2.Value;
 								Configuration.CustomSegmentLight cnfSegLight = new Configuration.CustomSegmentLight();
