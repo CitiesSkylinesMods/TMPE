@@ -165,6 +165,7 @@
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
     <Compile Include="PrintTransportLines.cs" />
+    <Compile Include="State\ConfigData\Gameplay.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />
