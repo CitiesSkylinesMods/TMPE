@@ -763,6 +763,7 @@ namespace TrafficManager.Manager.Impl {
 				vehicleState.lastAltLaneSelSegmentId = currentPathPos.m_segment;
 
 				bool recklessDriver = vehicleState.recklessDriver;
+				float maxReservedSpace = vehicleState.maxReservedSpace;
 
 				// cur -> next1
 				float vehicleLength = 1f + vehicleState.totalLength;
@@ -1168,7 +1169,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 							Services.NetService.ProcessLane(next1BackTransitions[j].laneId, delegate (uint prevLaneId, ref NetLane prevLane) {
-								prevLanesClear = prevLane.GetReservedSpace() <= (recklessDriver ? conf.DynamicLaneSelection.MaxRecklessReservedSpace : conf.DynamicLaneSelection.MaxReservedSpace);
+								prevLanesClear = prevLane.GetReservedSpace() <= maxReservedSpace;
 								return true;
 							});
 
@@ -1213,8 +1214,8 @@ namespace TrafficManager.Manager.Impl {
 
 					float relMeanSpeedInPercent = meanSpeed / (TrafficMeasurementManager.REF_REL_SPEED / TrafficMeasurementManager.REF_REL_SPEED_PERCENT_DENOMINATOR);
 					float randSpeed = 0f;
-					if (conf.DynamicLaneSelection.LaneSpeedRandInterval > 0) {
-						randSpeed = Services.SimulationService.Randomizer.Int32((uint)conf.DynamicLaneSelection.LaneSpeedRandInterval + 1u) - conf.DynamicLaneSelection.LaneSpeedRandInterval / 2f;
+					if (vehicleState.laneSpeedRandInterval > 0) {
+						randSpeed = Services.SimulationService.Randomizer.Int32((uint)vehicleState.laneSpeedRandInterval + 1u) - vehicleState.laneSpeedRandInterval / 2f;
 						relMeanSpeedInPercent += randSpeed;
 					}
 
@@ -1360,7 +1361,7 @@ namespace TrafficManager.Manager.Impl {
 					return bestStayNext1LaneIndex;
 				}
 
-				if (bestStayTotalLaneDist != bestOptTotalLaneDist && Math.Max(bestStayTotalLaneDist, bestOptTotalLaneDist) > conf.DynamicLaneSelection.MaxOptLaneChanges) {
+				if (bestStayTotalLaneDist != bestOptTotalLaneDist && Math.Max(bestStayTotalLaneDist, bestOptTotalLaneDist) > vehicleState.maxOptLaneChanges) {
 					/*
 					 * best route contains more lane changes than allowed: choose lane with the least number of future lane changes
 					 */
@@ -1397,8 +1398,8 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. optImprovementInKmH={optImprovementInKmH} km/h speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
 					}
 #endif
-					if (optImprovementInKmH >= conf.DynamicLaneSelection.MinSafeSpeedImprovement &&
-						(foundSafeLaneChange || (speedDiff <= conf.DynamicLaneSelection.MaxUnsafeSpeedDiff))
+					if (optImprovementInKmH >= vehicleState.minSafeSpeedImprovement &&
+						(foundSafeLaneChange || (speedDiff <= vehicleState.maxUnsafeSpeedDiff))
 						) {
 						// speed improvement is significant
 #if DEBUG
@@ -1424,7 +1425,7 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): found a lane change that optimizes overall traffic. optimization={optimization}%");
 					}
 #endif
-					if (optimization >= conf.DynamicLaneSelection.MinSafeTrafficImprovement) {
+					if (optimization >= vehicleState.minSafeTrafficImprovement) {
 						// traffic optimization is significant
 #if DEBUG
 						if (debug) {
