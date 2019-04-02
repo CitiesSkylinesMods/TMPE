@@ -397,6 +397,10 @@ namespace TrafficManager.Traffic.Data {
 
 				waitTime = 0;
 				if (end != null) {
+					if (vehicleData.m_trailingVehicle == 0) {
+						StepRand();
+					}
+
 #if DEBUGVSTATE
 					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
@@ -509,7 +513,7 @@ namespace TrafficManager.Traffic.Data {
 
 		public void StepRand() {
 			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
-			if (rand.UInt32(20) == 0) {
+			if (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleStepRand) == 0) {
 				timedRand = (byte)(((uint)timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
 				UpdateTimedRandValues();
 			}

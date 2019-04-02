@@ -1313,14 +1313,14 @@ namespace TrafficManager.Manager.Impl {
 				// decide if vehicle should stay or change
 
 				// vanishing lane change opportunity detection
-				int vehSel = vehicleId % 6;
+				int vehSel = vehicleId % 12;
 #if DEBUG
 				if (debug) {
 					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): vehMod4={vehSel} numReachableNext2Lanes={numReachableNext2Lanes} numReachableNext3Lanes={numReachableNext3Lanes}");
 				}
 #endif
-				if ((numReachableNext3Lanes == 1 && vehSel <= 2) || // 3/6 % of all vehicles will change lanes 3 segments in front
-					(numReachableNext2Lanes == 1 && vehSel <= 4) // 2/6 % of all vehicles will change lanes 2 segments in front, 1/5 will change at the last opportunity
+				if ((numReachableNext3Lanes == 1 && vehSel <= 5) || // 50% of all vehicles will change lanes 3 segments in front
+					(numReachableNext2Lanes == 1 && vehSel <= 9) // 33% of all vehicles will change lanes 2 segments in front, 16.67% will change at the last opportunity
 				) {
 					// vehicle must reach a certain lane since lane changing opportunities will vanish
 

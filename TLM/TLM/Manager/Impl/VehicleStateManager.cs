@@ -58,8 +58,6 @@ namespace TrafficManager.Manager.Impl {
 			}
 #endif
 
-			state.StepRand();
-
 			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex
 #if MEASUREDENSITY
 				, length
