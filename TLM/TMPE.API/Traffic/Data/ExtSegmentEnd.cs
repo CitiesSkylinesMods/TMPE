@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSUtil.Commons;
+using System;
 using TrafficManager.Manager;
 
 namespace TrafficManager.Traffic.Data {
@@ -47,13 +48,6 @@ namespace TrafficManager.Traffic.Data {
 		public ExtSegmentEnd(ushort segmentId, bool startNode) {
 			this.segmentId = segmentId;
 			this.startNode = startNode;
-			nodeId = 0;
-			outgoing = false;
-			incoming = false;
-			firstVehicleId = 0;
-		}
-
-		public void Reset() {
 			nodeId = 0;
 			outgoing = false;
 			incoming = false;

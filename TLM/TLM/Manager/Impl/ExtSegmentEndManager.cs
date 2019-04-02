@@ -34,6 +34,25 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+#if DEBUG
+		public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {
+			int index = GetIndex(segmentId, startNode);
+			ushort vehicleId = ExtSegmentEnds[index].firstVehicleId;
+			string ret = "";
+			int numIter = 0;
+			while (vehicleId != 0) {
+				ret += $" -> {vehicleId} (seg: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentSegmentId}@{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentStartNode} , adj: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].previousVehicleIdOnSegment}..{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment})";
+				vehicleId = Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+
+				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+					break;
+				}
+			}
+			return ret;
+		}
+#endif
+
 		public void Reset(ushort segmentId) {
 			Reset(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
 			Reset(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
@@ -50,7 +69,11 @@ namespace TrafficManager.Manager.Impl {
 					break;
 				}
 			}
-			extSegmentEnd.Reset();
+
+			extSegmentEnd.nodeId = 0;
+			extSegmentEnd.outgoing = false;
+			extSegmentEnd.incoming = false;
+			extSegmentEnd.firstVehicleId = 0;
 		}
 
 		public int GetIndex(ushort segmentId, bool startNode) {

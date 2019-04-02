@@ -115,13 +115,6 @@ namespace TrafficManager.Manager {
 		void Unlink(ref ExtVehicle extVehicle);
 
 		/// <summary>
-		/// Links the given vehicle with the given segment end.
-		/// </summary>
-		/// <param name="extVehicle">vehicle</param>
-		/// <param name="end">ext. segment end</param>
-		void Link(ref ExtVehicle extVehicle, ref ExtSegmentEnd end);
-
-		/// <summary>
 		/// Updates the vehicle's junction transit state to the given value.
 		/// </summary>
 		/// <param name="extVehicle">vehicle</param>
