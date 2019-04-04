@@ -477,13 +477,13 @@ namespace TrafficManager.State {
 		}
 
 		private static void Indent<T>(T component) where T : UIComponent {
-            var label = component.Find<UILabel>("Label");
+            UILabel label = component.Find<UILabel>("Label");
             if (label != null) {
-                label.padding = new RectOffset(25, 0, 0, 0);
+                label.padding = new RectOffset(22, 0, 0, 0);
             }
-            var check = component.Find<UISprite>("Unchecked");
+            UISprite check = component.Find<UISprite>("Unchecked");
             if (check != null) {
-                check.relativePosition += new Vector3(25.0f, 0);
+                check.relativePosition += new Vector3(22.0f, 0);
             }
 		}
 
