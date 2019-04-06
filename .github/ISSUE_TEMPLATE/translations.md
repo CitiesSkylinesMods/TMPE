@@ -29,7 +29,7 @@ English
 
 ### Localization File
 <!-- If you're familiar with github, go ahead and send us a Pull Request instead of submitting this issue. If not, click below this comment then drag-and-drop your translation file to upload it here. Alternatively, you can paste the URL to the file below. ->
-[translations.txt](https://github.com/FireController1847/Cities-Skylines-Traffic-Manager-President-Edition/files/3050698/translations.txt)
+[lang_en.txt](https://github.com/FireController1847/Cities-Skylines-Traffic-Manager-President-Edition/files/3050701/lang_en.txt)
 
 ### Additional Information
 <!-- Want to let us know anything else? Tell us below. ->
