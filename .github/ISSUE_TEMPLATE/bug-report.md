@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Help us understand what we need to fix.
-labels: 'bug triage'
+labels: bug triage
 ---
 
 <!-- Want to see an example bug report before you submit one? See: https://bit.ly/tmpe-etbr -->
