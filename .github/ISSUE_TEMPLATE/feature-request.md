@@ -6,8 +6,6 @@ labels: 'feature'
 assignees: ''
 ---
 
-<!-- Before submitting this feature, please search and make sure it hasn't already been suggested, thanks! -->
-
 ### Description
 <!-- In a few sentences, summarize what your idea is. -->
 

@@ -6,8 +6,6 @@ labels: ''
 assignees: ''
 ---
 
-<!-- Before submitting this issue, please search and make sure it hasn't already been reported, thanks! -->
-
 ### Description
 <!-- In a few sentences, summarize what the issue is. -->
 
