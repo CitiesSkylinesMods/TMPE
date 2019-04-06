@@ -6,10 +6,10 @@ labels: ''
 assignees: ''
 ---
 
-<!-- Before submitting this issue, please search and make sure it already hasn't been reported, thanks! -->
+<!-- Before submitting this issue, please search and make sure it hasn't already been reported, thanks! -->
 
 ### Description
-<!-- In one to two sentences, summarize what the issue is. -->
+<!-- In a few sentences, summarize what the issue is. -->
 
 
 ### Mod List
