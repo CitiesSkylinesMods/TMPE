@@ -4,70 +4,61 @@ about: Help us understand what we need to fix.
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
-__Bug Description__  
-_In one to two sentences, summarize what the issue is._  
-<!-- Type Below -->
+<!-- Before submitting this issue, please search and make sure it already hasn't been reported, thanks! -->
+
+### Description
+<!-- In one to two sentences, summarize what the issue is. -->
 
 
-__Mod List__  
-_Please list the mods that were enabled when you noticed the bug._
-<!-- Type Below -->
-
-__Output Log__  
-_Please post your output log here_
-<!-- Type Below -->
+### Mod List
+<!-- List the mods (and their versions) that were enabled when you noticed the bug. -->
 
 
-__Savegame__  
-_If this bug appeared in a specific save, please link to that here._
-<!-- Type Below -->
-
-__Screenshots__  
-_If you have screenshots of the issue, upload them here._
-<!-- Type Below -->
+### Output Log
+<!-- Post your output log below. How to: https://bit.ly/2I3YVFL -->
 
 
-__Additional Info__  
-_Have any other comments? Leave them here._
-<!-- Type Below -->
+### Savegame
+<!-- If this bug appeared in a specific save, please link to that below. How to: https://bit.ly/2FXog0z -->
+
+
+### Screenshots
+<!-- If you have screenshots of the issue, upload them below. How to: https://bit.ly/2Kc8owO -->
+
+
+### Additional Info
+<!-- Have any other comments? Leave them below. -->
 
 
 <!--
 EXAMPLE:
 
-__Bug Description__  
-_In one to two sentences, summarize what the issue is._  
-<!-- Type Below ->
-Cars drive slowly through and don't pay the toll.
+### Description
+<!-- In one to two sentences, summarize what the issue is. ->
+Cars drive slowly through the toll booth and don't pay the toll.
 
-__Mod List__  
-_Please list the mods that were enabled when you noticed the bug._
-<!-- Type Below ->
+### Mod List
+<!-- List the mods (and their versions) that were enabled when you noticed the bug. ->
 - TM:PE 10.18
 - Fine Road Tool 1.3.7
 - Real Time 1.17.3
 
-__Output Log__  
-_Please post your output log here_
-<!-- Type Below ->
+### Output Log
+<!-- Post your output log below. How to: https://bit.ly/2I3YVFL ->
 https://drive.google.com/open?id=1TudSzXD9I36Hm7B
 
-__Savegame__  
-_If this bug appeared in a specific save, please link to that here._
-<!-- Type Below ->
+### Savegame
+<!-- If this bug appeared in a specific save, please link to that below. How to: https://bit.ly/2FXog0z ->
 https://steamcommunity.com/sharedfiles/filedetails/?id=1703466356654
 
-__Screenshots__  
-_If you have screenshots of the issue, upload them here._
-<!-- Type Below ->
+### Screenshots
+<!-- If you have screenshots of the issue, upload them below. How to: https://bit.ly/2Kc8owO ->
 ![image](https://user-images.githubusercontent.com/49315744/55650504-2f598000-57e6-11e9-9f26.jpg)
 
-__Additional Info__  
-_Have any other comments? Leave them here.__
-<!-- Type Below ->
-N/A
+### Additional Info
+<!-- Have any other comments? Leave them below. ->
+It only happens every once in a while, is not a consistent problem.
 
 -->
