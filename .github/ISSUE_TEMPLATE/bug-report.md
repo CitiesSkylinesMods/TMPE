@@ -1,32 +1,42 @@
 ---
 name: Bug Report
 about: Help us understand what we need to fix.
-title: ''
-labels: ''
-assignees: ''
+labels: 'bug triage'
 ---
 
-<!-- Want to see an example bug report before you submit one? See this: https://bit.ly/tmpe-etbr -->
+<!-- Want to see an example bug report before you submit one? See: https://bit.ly/tmpe-etbr -->
 
 ### Description
-<!-- In a few sentences, summarize what the issue is. -->
+Replace me with a short description of the bug.
+
+
+### Reproduction Steps
+Please describe how to make this bug issue appear in our own savegames. If you don't know how, delete 2 and 3 and just put "I Don't Know."
+1. Replace me with your first step.
+2. Then replacement me with your second step.
+3. You can add more steps by adding more numbers. Also replace or delete me :)
 
 
 ### Mod List
-<!-- List the mods (and their versions) that were enabled when you noticed the bug. -->
+List the mods (and their versions) that were enabled when you noticed the bug.
+- Replace Me Mod 10.18
+- Replace Me Mod 1.3.7
+- You Can Add More Mods by Adding More Dashes: Replace/Delete Me Mod 4.3
 
 
 ### Output Log
-<!-- Post your output log below. How to: https://bit.ly/2I3YVFL -->
+We need your output log so we can check for any errors that may have happened when the bug appeared.
+<!-- Don't know how to share your log file? See: https://bit.ly/2I3YVFL -->
 
 
 ### Savegame
-<!-- If this bug appeared in a specific save, please link to that below. How to: https://bit.ly/2FXog0z -->
+Optional: If this bug appeared in a specific savegame, please share that below.
+<!-- Don't know how to share savegames? See: https://bit.ly/2FXog0z -->
 
 
 ### Screenshots
-<!-- If you have screenshots of the issue, upload them below. How to: https://bit.ly/2Kc8owO -->
+Optional: If this bug can be described using screenshots, please share them below.
+<!-- Don't know how to share screenshots? See: https://bit.ly/2Kc8owO -->
 
 
 ### Additional Info
-<!-- Have any other comments? Leave them below. -->
