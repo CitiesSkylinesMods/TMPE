@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Make suggestions on how TM:PE could improve.
-labels: feature triage
+labels: feature, triage
 ---
 
 <!-- Want to see an example feature request before you submit one? See: https://bit.ly/tmpe-etfr -->

@@ -1,7 +1,7 @@
 ---
 name: Translation Update
 about: Help us make TM:PE available for everyone, no matter what language.
-labels: localisation triage
+labels: localisation, triage
 ---
 
 <!-- Want to see an example translation update before you submit one? See: https://bit.ly/tmpe-ettu -->
