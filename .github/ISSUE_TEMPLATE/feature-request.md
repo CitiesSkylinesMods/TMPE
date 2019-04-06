@@ -2,7 +2,7 @@
 name: Feature Request
 about: Make suggestions on how TM:PE could improve.
 title: ''
-labels: ''
+labels: 'feature'
 assignees: ''
 ---
 
