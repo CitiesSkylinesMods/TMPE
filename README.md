@@ -2,7 +2,7 @@
 
 A mod for **Cities: Skylines** that gives you more control over road and rail traffic in your city.
 
-[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) • [Installation](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) • [User Guide](http://www.viathinksoft.de/tmpe/wiki) • [Issue Tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues) • [Report a Bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
+[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) • [Discord Guild](https://discord.gg/faKUnST) • [Installation](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) • [User Guide](http://www.viathinksoft.de/tmpe/wiki) • [Issue Tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues) • [Report a Bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
 
 # Features
 
