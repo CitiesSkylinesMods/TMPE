@@ -1,8 +1,8 @@
-﻿# Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST) [![Build status](https://ci.appveyor.com/api/projects/status/dehkvuxk8b3h66e7/branch/master?svg=true)](https://ci.appveyor.com/project/krzychu124/cities-skylines-traffic-manager-president-edition/branch/master)
+# Traffic Manager: *President Edition* [![Steam](https://img.shields.io/endpoint.svg?url=https://shieldsio-steam-workshop.jross.me/583429740)](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740) [![Discord](https://img.shields.io/discord/545065285862948894.svg?logo=discord&logoColor=F5F5F5)](https://discord.gg/faKUnST) [![Build status](https://ci.appveyor.com/api/projects/status/dehkvuxk8b3h66e7/branch/master?svg=true)](https://ci.appveyor.com/project/krzychu124/cities-skylines-traffic-manager-president-edition/branch/master)
 
 A mod for **Cities: Skylines** that gives you more control over road and rail traffic in your city.
 
-[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) • [Installation](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) • [User Guide](http://www.viathinksoft.de/tmpe/wiki) • [Issue Tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues) • [Report a Bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
+[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740) • [Discord Guild](https://discord.gg/faKUnST) • [Installation](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) • [User Guide](http://www.viathinksoft.de/tmpe/wiki) • [Issue Tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues) • [Report a Bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
 
 # Features
 
@@ -37,7 +37,8 @@ Contact us:
 
 * [Issue tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues)
 * [Discord (chat)](https://discord.gg/faKUnST)
-* [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+* [Steam Workshop (Stable)](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+* [Steam Workshop (Labs)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 # License
 
