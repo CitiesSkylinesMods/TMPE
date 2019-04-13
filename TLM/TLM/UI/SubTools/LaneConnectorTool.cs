@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
@@ -56,6 +56,11 @@
             [UsedImplicitly]
             internal NetInfo.LaneType LaneType;
             internal VehicleInfo.VehicleType VehicleType;
+        }
+
+        private class NodeLaneConnection {
+            internal NodeLaneMarker TargetMarker;
+            internal Bezier3 BezierArc;
         }
 
         public LaneConnectorTool(TrafficManagerTool mainTool)
@@ -457,6 +462,7 @@
                     selectedMarker.StartNode)) {
 
                     // try to remove connection
+                    // selectedMarker.ConnectedMarkers.Remove(selectedMarker.ConnectedMarkers.Find((item) => item.TargetMarker.segmentId == hoveredMarker.SegmentId && item.targetMarker.laneId == hoveredMarker.LaneId));
                     selectedMarker.ConnectedMarkers.Remove(hoveredMarker);
                     Log._DebugIf(
                         logLaneConn,
@@ -470,6 +476,8 @@
                     selectedMarker.StartNode))
                 {
                     // try to add connection
+                    // Bezier3 bezier3 = CalculateBezierConnection(selectedMarker, hoveredMarker);
+                    // NodeLaneConnection connection = new NodeLaneConnection() {TargetMarker = hoveredMarker, BezierArc = bezier3};
                     selectedMarker.ConnectedMarkers.Add(hoveredMarker);
                     Log._DebugIf(
                         logLaneConn,
@@ -703,12 +711,58 @@
                     }
 
                     if (connections.Contains(laneMarker2.LaneId)) {
+                        // Bezier3 bezier3 = CalculateBezierConnection(laneMarker1, laneMarker2);
+                        // NodeLaneConnection connection = new NodeLaneConnection() { targetMarker = laneMarker2, bezierArc = bezier3 };
                         laneMarker1.ConnectedMarkers.Add(laneMarker2);
                     }
                 }
             }
 
             return nodeMarkers;
+        }
+
+        /// <summary>
+        /// Calculates bezier arc between two markers
+        /// </summary>
+        /// <param name="start">start position marker</param>
+        /// <param name="target">end position marker</param>
+        /// <returns>Bezier arc</returns>
+        private Bezier3 CalculateBezierConnection(NodeLaneMarker start, NodeLaneMarker target) {
+            Bezier3 bezier3;
+            if (start.SegmentId != target.SegmentId) {
+                Vector3 lDir = NetManager.instance.m_lanes.m_buffer[start.LaneId].m_bezier.Tangent(start.StartNode ? 0f : 1f);
+                Vector3 tDir = NetManager.instance.m_lanes.m_buffer[target.LaneId].m_bezier.Tangent(target.startNode ? 0f : 1f);
+
+                // TODO fix
+                // SegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(start.segmentId).GetEnd(start.startNode);
+                bool isStraight = false; // segmentEndGeometry.IsStraightSegment(target.SegmentId);
+                // straight segments connection
+                if (isStraight) {
+                    Vector3 mid = (start.Position + target.Position) * 0.5f;
+                    float distance = Vector2.Distance(start.Position, mid);
+                    Vector3 n = start.Position + ((start.StartNode ? -1 : 1) * lDir.normalized * distance * 0.8f);
+                    float distance2 = Vector2.Distance(target.Position, mid);
+                    Vector3 n2 = target.Position + ((target.StartNode ? -1 : 1) * tDir.normalized * distance2 * 0.8f);
+                    bezier3 = new Bezier3(start.Position, n, n2, target.Position);
+                } else {
+                    Vector3 intersectionPoint;
+                    ClosestPointsOnTwoLines(out intersectionPoint, start.Position, lDir, target.Position, tDir);
+
+                    float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(intersectionPoint);
+                    intersectionPoint = new Vector3(intersectionPoint.x, terrainY, intersectionPoint.z);
+                    bezier3.a = start.Position;
+                    bezier3.d = target.Position;
+                    NetSegment.CalculateMiddlePoints(bezier3.a, (intersectionPoint - bezier3.a).normalized, bezier3.d, (intersectionPoint - bezier3.d).normalized, false, false, out bezier3.b, out bezier3.c);
+                }
+            } else {
+                // U-turn connection
+                Vector3 middlePoint = NetManager.instance.m_nodes.m_buffer[start.NodeId].m_position;
+                bezier3.a = start.Position;
+                bezier3.d = target.Position;
+                NetSegment.CalculateMiddlePoints(bezier3.a, (middlePoint - bezier3.a).normalized, bezier3.d, (middlePoint - bezier3.d).normalized, false, false, out bezier3.b, out bezier3.c);
+            }
+
+            return bezier3;
         }
 
         /// <summary>
@@ -799,6 +853,36 @@
             input.m_ignoreTerrain = true;
 
             return MainTool.DoRayCast(input, out output);
+        }
+
+        private bool ClosestPointsOnTwoLines(
+                                             out Vector3 closestPointLine1,
+                                             Vector3 linePoint1,
+                                             Vector3 lineVec1,
+                                             Vector3 linePoint2,
+                                             Vector3 lineVec2) {
+            closestPointLine1 = Vector3.zero;
+
+            float a = Vector3.Dot(lineVec1, lineVec1);
+            float b = Vector3.Dot(lineVec1, lineVec2);
+            float e = Vector3.Dot(lineVec2, lineVec2);
+
+            float d = (a * e) - (b * b);
+
+            //lines are not parallel
+            if (d != 0.0f) {
+                Vector3 r = linePoint1 - linePoint2;
+                float c = Vector3.Dot(lineVec1, r);
+                float f = Vector3.Dot(lineVec2, r);
+
+                float s = ((b * f) - (c * e)) / d;
+
+                closestPointLine1 = linePoint1 + (lineVec1 * s);
+
+                return true;
+            }
+
+            return false;
         }
 
         private static readonly Color32[] ColorChoices
