@@ -477,9 +477,14 @@ namespace TrafficManager.State {
 		}
 
 		private static void Indent<T>(T component) where T : UIComponent {
-			UIPanel panel = component.parent as UIPanel;
-			panel.autoLayout = false;
-			component.relativePosition += new Vector3(30, 0);
+            UILabel label = component.Find<UILabel>("Label");
+            if (label != null) {
+                label.padding = new RectOffset(22, 0, 0, 0);
+            }
+            UISprite check = component.Find<UISprite>("Unchecked");
+            if (check != null) {
+                check.relativePosition += new Vector3(22.0f, 0);
+            }
 		}
 
 		private static UIButton AddOptionTab(UITabstrip tabStrip, string caption) {
