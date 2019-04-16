@@ -229,3 +229,5 @@ Experimental_features Experimental features
 Turn_on_red Tourner aux feux rouges
 Vehicles_may_turn_on_red Les véhicules peuvent tourner aux feux rouges
 Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
+Timed_traffic_lights_manager_confirm Confirm!
+Timed_traffic_lights_manager_right_click_to_cancel Right click to cancel

@@ -229,3 +229,5 @@ Experimental_features Experimentelle Features
 Turn_on_red Turn on red
 Vehicles_may_turn_on_red Fahrzeuge dürfen an roten Ampeln abbiegen
 Also_apply_to_left/right_turns_between_one-way_streets Gilt auch für Links- & Rechtskurven zwischen Einbahnstraßen
+Timed_traffic_lights_manager_confirm Confirm!
+Timed_traffic_lights_manager_right_click_to_cancel Right click to cancel

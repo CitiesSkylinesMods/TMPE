@@ -20,7 +20,7 @@ namespace TrafficManager.UI.SubTools {
 	public class TimedTrafficLightsTool : SubTool {
 		private readonly GUIStyle _counterStyle = new GUIStyle();
 		private readonly int[] _hoveredButton = new int[2];
-		private bool nodeSelectionLocked = false;
+        private bool nodeSelectionLocked = false;
 		private List<ushort> SelectedNodeIds = new List<ushort>();
 		private bool _cursorInSecondaryPanel;
 		private Rect _windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 480, 350));
@@ -42,11 +42,13 @@ namespace TrafficManager.UI.SubTools {
 		private bool inTestMode = false;
 		private ushort nodeIdToCopy = 0;
 		private HashSet<ushort> currentTimedNodeIds;
-
+      
 		private GUIStyle layout = new GUIStyle { normal = { textColor = new Color(1f, 1f, 1f) } };
 		private GUIStyle layoutRed = new GUIStyle { normal = { textColor = new Color(1f, 0f, 0f) } };
 		private GUIStyle layoutGreen = new GUIStyle { normal = { textColor = new Color(0f, 1f, 0f) } };
 		private GUIStyle layoutYellow = new GUIStyle { normal = { textColor = new Color(1f, 1f, 0f) } };
+
+        private int confirmStepRemovalId = -1; // idx of step which removal confirm is shown 
 
 		public TimedTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			currentTimedNodeIds = new HashSet<ushort>();
@@ -360,8 +362,9 @@ namespace TrafficManager.UI.SubTools {
 										foreach (var nodeId in SelectedNodeIds) {
 											tlsMan.TrafficLightSimulations[nodeId].TimedLight?.MoveStep(i, i - 1);
 										}
-										_timedViewedStep = i - 1;
-									}
+                                        _timedViewedStep = i - 1;
+                                        confirmStepRemovalId = -1;
+                                    }
 								} else {
 									GUILayout.Space(50);
 								}
@@ -371,8 +374,9 @@ namespace TrafficManager.UI.SubTools {
 										foreach (var nodeId in SelectedNodeIds) {
 											tlsMan.TrafficLightSimulations[nodeId].TimedLight?.MoveStep(i, i + 1);
 										}
-										_timedViewedStep = i + 1;
-									}
+                                        _timedViewedStep = i + 1;
+                                        confirmStepRemovalId = -1;
+                                    }
 								} else {
 									GUILayout.Space(50);
 								}
@@ -386,7 +390,8 @@ namespace TrafficManager.UI.SubTools {
 									foreach (var nodeId in SelectedNodeIds) {
 										tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
 									}
-								}
+                                    confirmStepRemovalId = -1;
+                                }
 
 								if (GUILayout.Button(Translation.GetString("Edit"), GUILayout.Width(65))) {
 									_timedPanelAdd = false;
@@ -398,22 +403,42 @@ namespace TrafficManager.UI.SubTools {
 									_waitFlowBalance = timedNodeMain.GetStep(i).WaitFlowBalance;
 									_stepMinValueStr = _stepMinValue.ToString();
 									_stepMaxValueStr = _stepMaxValue.ToString();
-									nodeSelectionLocked = true;
+                                    nodeSelectionLocked = true;
+                                    confirmStepRemovalId = -1;
 
-									foreach (var nodeId in SelectedNodeIds) {
+                                    foreach (var nodeId in SelectedNodeIds) {
 										tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
 									}
 								}
-
-								if (GUILayout.Button(Translation.GetString("Delete"), GUILayout.Width(70))) {
-									_timedPanelAdd = false;
-									_timedViewedStep = -1;
-
-									foreach (var nodeId in SelectedNodeIds) {
-										tlsMan.TrafficLightSimulations[nodeId].TimedLight?.RemoveStep(i);
-									}
-								}
-							}
+                                GUI.color = Color.red;
+                                if (confirmStepRemovalId == i) {
+                                    GUI.color = Color.yellow;
+                                    if (GUILayout.Button(new GUIContent(Translation.GetString("Timed_traffic_lights_manager_confirm"), Translation.GetString("Timed_traffic_lights_manager_right_click_to_cancel")), GUILayout.Width(70))) {
+                                        if (Event.current.button == 0) {
+                                            RemoveStep(i);
+                                        }
+                                        confirmStepRemovalId = -1;
+                                    }
+                                    if (GUI.tooltip != string.Empty) {
+                                        var lastButtonPositionRect = GUILayoutUtility.GetLastRect();
+                                        lastButtonPositionRect.position.Set(lastButtonPositionRect.position.x, lastButtonPositionRect.position.y); // move area to next button for mouse detection over
+                                        
+                                        GUIStyle tooltipStyle = new GUIStyle();
+                                        tooltipStyle.normal.textColor = Color.yellow;
+                                        tooltipStyle.normal.background = WindowTexture;
+                                        //TODO calculate with to disable text clip
+                                        GUI.Label(new Rect(lastButtonPositionRect.x - 90, lastButtonPositionRect.y - 22, 310, 18), GUI.tooltip, tooltipStyle);
+                                    } 
+                                } else if (GUILayout.Button(Translation.GetString("Delete"), GUILayout.Width(70))) {
+                                    //skip confirmation if ctrl key hold while clicking
+                                    if (Event.current.control && Event.current.button == 0) { 
+                                        RemoveStep(i);
+                                    } else {
+                                        confirmStepRemovalId = i;
+                                    }
+                                }
+                                GUI.color = Color.white;
+                            }
 						}
 					} else {
 						nodeSelectionLocked = true;
@@ -523,8 +548,9 @@ namespace TrafficManager.UI.SubTools {
 								nodeSelectionLocked = true;
 								_timedViewedStep = -1;
 								_timedEditStep = -1;
-								_stepMetric = StepChangeMetric.Default;
-							}
+                                _stepMetric = StepChangeMetric.Default;
+                                confirmStepRemovalId = -1;
+                            }
 						}
 					}
 				}
@@ -579,9 +605,10 @@ namespace TrafficManager.UI.SubTools {
 						if (_timedEditStep < 0 && !_timedPanelAdd) {
 							if (GUILayout.Button(Translation.GetString("Start"))) {
 								_timedPanelAdd = false;
-								nodeSelectionLocked = false;
+                                nodeSelectionLocked = false;
+                                confirmStepRemovalId = -1;
 
-								foreach (var nodeId in SelectedNodeIds) {
+                                foreach (var nodeId in SelectedNodeIds) {
 									tlsMan.TrafficLightSimulations[nodeId].TimedLight?.Start();
 								}
 							}
@@ -601,8 +628,9 @@ namespace TrafficManager.UI.SubTools {
 
 					if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
 						timedNodeMain.RotateLeft();
-						_timedViewedStep = 0;
-					}
+                        _timedViewedStep = 0;
+                        confirmStepRemovalId = -1;
+                    }
 
 					if (GUILayout.Button(Translation.GetString("Copy"))) {
 						TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
@@ -612,8 +640,9 @@ namespace TrafficManager.UI.SubTools {
 
 					if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
 						timedNodeMain.RotateRight();
-						_timedViewedStep = 0;
-					}
+                        _timedViewedStep = 0;
+                        confirmStepRemovalId = -1;
+                    }
 
 					GUILayout.EndHorizontal();
 				}
@@ -621,14 +650,16 @@ namespace TrafficManager.UI.SubTools {
 				if (!timedLightActive) {
 					GUILayout.Space(30);
 
-					if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
-						TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
+                    if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
+                        confirmStepRemovalId = -1;
+                        TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
 						MainTool.SetToolMode(ToolMode.TimedLightsAddNode);
 					}
 
 					if (SelectedNodeIds.Count > 1) {
-						if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
-							TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
+                        if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
+                            confirmStepRemovalId = -1;
+                            TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
 							MainTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
 						}
 					}
@@ -648,7 +679,17 @@ namespace TrafficManager.UI.SubTools {
 			}
 		}
 
-		public override void Cleanup() {
+        private void RemoveStep(int stepIndex) {
+            TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+            _timedPanelAdd = false;
+            _timedViewedStep = -1;
+
+            foreach (var nodeId in SelectedNodeIds) {
+                tlsMan.TrafficLightSimulations[nodeId].TimedLight?.RemoveStep(stepIndex);
+            }
+        }
+
+        public override void Cleanup() {
 			SelectedNodeId = 0;
 			ClearSelectedNodes();
 
@@ -660,6 +701,7 @@ namespace TrafficManager.UI.SubTools {
 			_timedViewedStep = -1;
 			timedLightActive = false;
 			nodeIdToCopy = 0;
+            confirmStepRemovalId = -1;
 		}
 
 		public override void Initialize() {
@@ -794,8 +836,8 @@ namespace TrafficManager.UI.SubTools {
 
 			_windowRect2 = GUILayout.Window(252, _windowRect2, _guiTimedTrafficLightsNodeWindow, Translation.GetString("Select_nodes_windowTitle"), WindowStyle);
 
-			_cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
-		}
+            _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
+        }
 
 		private void _guiTimedTrafficLights() {
 			TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
@@ -809,8 +851,8 @@ namespace TrafficManager.UI.SubTools {
 			_cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
 
 			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(1, 1, 1)); // revert scaling
-			ShowGUI();
-		}
+            ShowGUI();
+        }
 
 		private void _guiTimedTrafficLightsCopy() {
 			_cursorInSecondaryPanel = false;
