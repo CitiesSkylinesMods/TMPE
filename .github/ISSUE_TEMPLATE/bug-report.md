@@ -18,7 +18,7 @@ Please describe how to make this bug issue appear in our own savegames. If you d
 
 
 ### Mod List
-List the mods (and their versions) that were enabled when you noticed the bug.
+Preferrably, if you notice a bug, please see if the bug is still apparent if ONLY TM:PE is enabled. If it is, all you have to put is TM:PE. In either case, please list the mods (and their versions) that were enabled when you noticed the bug.
 - Replace Me Mod 10.18
 - Replace Me Mod 1.3.7
 - You Can Add More Mods by Adding More Dashes: Replace/Delete Me Mod 4.3
