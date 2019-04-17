@@ -72,6 +72,9 @@ namespace TrafficManager.Util {
         }
 
         private ulong[] GetUserModsList() {
+            if (State.GlobalConfig.Instance.Main.CheckOnlyEnabledMods) {
+                return PluginManager.instance.GetPluginsInfo().Where(plugin => plugin.isEnabled).Select(info => info.publishedFileID.AsUInt64).ToArray();
+            }
             PublishedFileId[] ids = ContentManagerPanel.subscribedItemsTable.ToArray();
             return ids.Select(id => id.AsUInt64).ToArray();
         }

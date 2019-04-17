@@ -50,7 +50,7 @@ namespace TrafficManager.UI {
             title.autoSize = true;
             title.padding = new RectOffset(10, 10, 15, 15);
             title.relativePosition = new Vector2(60, 12);
-            title.text = "Traffic Manager detected incompatible mods";
+            title.text = Translation.GetString("Traffic_Manager_detected_incompatible_mods");
 
             closeButton = mainPanel.AddUIComponent<UIButton>();
             closeButton.eventClick += CloseButtonClick;
@@ -127,9 +127,7 @@ namespace TrafficManager.UI {
 
         private void RunModsCheckerOnStartup_eventCheckChanged(bool value) {
             Log._Debug("Incompatible mods checker run on game launch changed to " + value);
-            State.GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning = value;
-            State.GlobalConfig.WriteConfig();
-            State.GlobalConfig.Reload(true);
+            State.Options.setShowIncompatibleModCheckerWarning(value);
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {

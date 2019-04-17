@@ -55,6 +55,11 @@ namespace TrafficManager.State.ConfigData {
         /// </summary>
         public bool ShowIncompatibleModCheckerWarning = true;
 
+        /// <summary>
+        /// Skip disabled mods while running incompatible mod detector
+        /// </summary>
+        public bool CheckOnlyEnabledMods = false;
+
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
 			newMessages.Add(messageKey);
