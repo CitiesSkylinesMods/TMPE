@@ -229,3 +229,5 @@ Experimental_features Funkcje eksperymentalne
 Turn_on_red Skręć w prawo na czerwonym
 Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Also_apply_to_left/right_turns_between_one-way_streets Uwzględnia również skręt w lewo/prawo pomiędzy drogami jednokierunkowymi
+Show_warning_popup_if_an_incompatible_was_detected Pokaż ostrzeżenie jeśli znaleziono niekompatybilne mody
+Incompatible_mods_checker_autorun_on_game_launch Uruchamiaj sprawdzanie przy starcie gry

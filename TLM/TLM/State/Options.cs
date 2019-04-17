@@ -29,6 +29,7 @@ namespace TrafficManager.State {
 		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
+		private static UICheckBox showIncompatibleModCheckerWarningToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -228,6 +229,7 @@ namespace TrafficManager.State {
 			overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
 			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Show_error_message_if_a_mod_incompatibility_is_detected"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
+			showIncompatibleModCheckerWarningToggle = generalGroup.AddCheckbox(Translation.GetString("Show_warning_popup_if_an_incompatible_was_detected"), GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning, onShowIncompatibleModCheckerWarningChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -673,7 +675,13 @@ namespace TrafficManager.State {
 			GlobalConfig.WriteConfig();
 		}
 
-		private static void onInstantEffectsChanged(bool newValue) {
+        private static void onShowIncompatibleModCheckerWarningChanged(bool newValue) {
+            Log._Debug($"Show incompatible mod checker warnings changed to {newValue}");
+            GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning = newValue;
+            GlobalConfig.WriteConfig();
+        }
+
+        private static void onInstantEffectsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 

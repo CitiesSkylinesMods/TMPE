@@ -229,3 +229,5 @@ Experimental_features Experimental features
 Turn_on_red Turn on red
 Vehicles_may_turn_on_red 빨간 신호등에서 차량이 돌아올 수 있습니다.
 Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
+Show_warning_popup_if_an_incompatible_was_detected Show warning popup if an incompatible mod was detected
+Incompatible_mods_checker_autorun_on_game_launch Autorun on game launch
