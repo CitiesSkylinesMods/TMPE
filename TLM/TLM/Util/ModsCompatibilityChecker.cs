@@ -39,7 +39,7 @@ namespace TrafficManager.Util {
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
 
-                if (State.GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning) {
+                if (State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
                     IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
                     panel.IncompatibleMods = incompatibleMods;
                     panel.Initialize();
@@ -72,7 +72,7 @@ namespace TrafficManager.Util {
         }
 
         private ulong[] GetUserModsList() {
-            if (State.GlobalConfig.Instance.Main.CheckOnlyEnabledMods) {
+            if (State.GlobalConfig.Instance.Main.IgnoreDisabledMods) {
                 return PluginManager.instance.GetPluginsInfo().Where(plugin => plugin.isEnabled).Select(info => info.publishedFileID.AsUInt64).ToArray();
             }
             PublishedFileId[] ids = ContentManagerPanel.subscribedItemsTable.ToArray();

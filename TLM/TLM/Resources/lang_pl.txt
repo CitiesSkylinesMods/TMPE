@@ -222,14 +222,13 @@ Compact_main_menu Kompaktowe menu główne
 Window_transparency Przezroczystość okna
 Overlay_transparency Przezroczystość nakł.
 Remove_this_citizen Usuń tego mieszkańca
-Show_error_message_if_a_mod_incompatibility_is_detected Pokaż informację o błędzie jeśli wykryto niezgodność modów
 Remove_parked_vehicles Usuń zaparkowane pojazdy
 Node_is_level_crossing To jest przejazd kolejowy. \nNie możesz tutaj wyłączyć sygnalizacji!
 Experimental_features Funkcje eksperymentalne
 Turn_on_red Skręć w prawo na czerwonym
 Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Also_apply_to_left/right_turns_between_one-way_streets Uwzględnia również skręt w lewo/prawo pomiędzy drogami jednokierunkowymi
-Show_warning_popup_if_an_incompatible_was_detected Pokaż ostrzeżenie jeśli znaleziono niekompatybilne mody
-Incompatible_mods_checker_autorun_on_game_launch Uruchamiaj sprawdzanie przy starcie gry
-Check_only_enabled_mods Sprawdzaj tylko włączone mody
-Traffic_Manager_detected_incompatible_mods Traffic Manager wykrył niezgodne mody
+Scan_for_known_incompatible_mods_on_startup Uruchamiaj sprawdzanie przy starcie gry
+Ignore_disabled_mods Ignoruj wyłączone mody
+Traffic_Manager_detected_incompatible_mods Traffic Manager wykrył niekompatybilne mody
+Notify_me_if_there_is_an_unexpected_mod_conflict Powiadom mnie w razie nieoczekiwanej niezgodność modów

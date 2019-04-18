@@ -29,8 +29,8 @@ namespace TrafficManager.State {
 		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
-		private static UICheckBox showIncompatibleModCheckerWarningToggle = null;
-		private static UICheckBox checkOnlyEnabledModsToggle = null;
+		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
+		private static UICheckBox ignoreDisabledModsToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -157,8 +157,8 @@ namespace TrafficManager.State {
 		public static bool junctionRestrictionsEnabled = true;
 		public static bool turnOnRedEnabled = true;
 		public static bool laneConnectorEnabled = true;
-        public static bool showIncompatibleModCheckerWarningEnabled = true;
-        public static bool checkOnlyEnabledMods = false;
+        public static bool scanForKnownIncompatibleModsEnabled = true;
+        public static bool ignoreDisabledModsEnabled = false;
 
 		public static VehicleRestrictionsAggression vehicleRestrictionsAggression = VehicleRestrictionsAggression.Medium;
 
@@ -231,10 +231,10 @@ namespace TrafficManager.State {
 			overlayTransparencySlider = generalGroup.AddSlider(Translation.GetString("Overlay_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.OverlayTransparency, onOverlayTransparencyChanged) as UISlider;
 			overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
-			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Show_error_message_if_a_mod_incompatibility_is_detected"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
-			showIncompatibleModCheckerWarningToggle = generalGroup.AddCheckbox(Translation.GetString("Show_warning_popup_if_an_incompatible_was_detected"), GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning, onShowIncompatibleModCheckerWarningChanged) as UICheckBox;
-			checkOnlyEnabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Check_only_enabled_mods"), GlobalConfig.Instance.Main.CheckOnlyEnabledMods, onCheckOnlyEnabledModsChanged) as UICheckBox;
-            Indent(checkOnlyEnabledModsToggle);
+			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Notify_me_if_there_is_an_unexpected_mod_conflict"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
+			scanForKnownIncompatibleModsToggle = generalGroup.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, onScanForKnownIncompatibleModsChanged) as UICheckBox;
+			ignoreDisabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Ignore_disabled_mods"), GlobalConfig.Instance.Main.IgnoreDisabledMods, onIgnoreDisabledModsChanged) as UICheckBox;
+            Indent(ignoreDisabledModsToggle);
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -680,20 +680,20 @@ namespace TrafficManager.State {
 			GlobalConfig.WriteConfig();
 		}
 
-        private static void onShowIncompatibleModCheckerWarningChanged(bool newValue) {
+        private static void onScanForKnownIncompatibleModsChanged(bool newValue) {
             Log._Debug($"Show incompatible mod checker warnings changed to {newValue}");
-            GlobalConfig.Instance.Main.ShowIncompatibleModCheckerWarning = newValue;
+            GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup = newValue;
             if (newValue) {
                 GlobalConfig.WriteConfig();
             } else {
-                setCheckOnlyEnabledMods(false);
-                onCheckOnlyEnabledModsChanged(false);
+                setIgnoreDisabledMods(false);
+                onIgnoreDisabledModsChanged(false);
             }
         }
 
-        private static void onCheckOnlyEnabledModsChanged(bool newValue) {
-            Log._Debug($"Check only enabled mods changed to {newValue}");
-            GlobalConfig.Instance.Main.CheckOnlyEnabledMods = newValue;
+        private static void onIgnoreDisabledModsChanged(bool newValue) {
+            Log._Debug($"Ignore disabled mods changed to {newValue}");
+            GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
             GlobalConfig.WriteConfig();
         }
 
@@ -1489,20 +1489,20 @@ namespace TrafficManager.State {
 		}
 #endif
         
-        public static void setShowIncompatibleModCheckerWarning(bool value) {
-            showIncompatibleModCheckerWarningEnabled = value;
-            if (showIncompatibleModCheckerWarningToggle != null) {
-                showIncompatibleModCheckerWarningToggle.isChecked = value;
+        public static void setScanForKnownIncompatibleMods(bool value) {
+            scanForKnownIncompatibleModsEnabled = value;
+            if (scanForKnownIncompatibleModsToggle != null) {
+                scanForKnownIncompatibleModsToggle.isChecked = value;
             }
             if (!value) {
-                setCheckOnlyEnabledMods(false);
+                setIgnoreDisabledMods(false);
             }
         }
 
-        public static void setCheckOnlyEnabledMods(bool value) {
-            checkOnlyEnabledMods = value;
-            if (checkOnlyEnabledModsToggle != null) {
-                checkOnlyEnabledModsToggle.isChecked = value;
+        public static void setIgnoreDisabledMods(bool value) {
+            ignoreDisabledModsEnabled = value;
+            if (ignoreDisabledModsToggle != null) {
+                ignoreDisabledModsToggle.isChecked = value;
             }
         }
         /*internal static int getLaneChangingRandomizationTargetValue() {
