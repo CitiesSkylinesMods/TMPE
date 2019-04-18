@@ -383,33 +383,6 @@ namespace TrafficManager.UI.SubTools {
 
 								GUILayout.EndHorizontal();
 
-								if (GUILayout.Button(Translation.GetString("View"), GUILayout.Width(70))) {
-									_timedPanelAdd = false;
-									_timedViewedStep = i;
-
-									foreach (var nodeId in SelectedNodeIds) {
-										tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
-									}
-                                    confirmStepRemovalId = -1;
-                                }
-
-								if (GUILayout.Button(Translation.GetString("Edit"), GUILayout.Width(65))) {
-									_timedPanelAdd = false;
-									_timedEditStep = i;
-									_timedViewedStep = -1;
-									_stepMinValue = timedNodeMain.GetStep(i).MinTime;
-									_stepMaxValue = timedNodeMain.GetStep(i).MaxTime;
-									_stepMetric = timedNodeMain.GetStep(i).ChangeMetric;
-									_waitFlowBalance = timedNodeMain.GetStep(i).WaitFlowBalance;
-									_stepMinValueStr = _stepMinValue.ToString();
-									_stepMaxValueStr = _stepMaxValue.ToString();
-                                    nodeSelectionLocked = true;
-                                    confirmStepRemovalId = -1;
-
-                                    foreach (var nodeId in SelectedNodeIds) {
-										tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
-									}
-								}
                                 GUI.color = Color.red;
                                 if (confirmStepRemovalId == i) {
                                     GUI.color = Color.yellow;
@@ -438,6 +411,34 @@ namespace TrafficManager.UI.SubTools {
                                     }
                                 }
                                 GUI.color = Color.white;
+
+                                if (GUILayout.Button(Translation.GetString("Edit"), GUILayout.Width(65))) {
+                                    _timedPanelAdd = false;
+                                    _timedEditStep = i;
+                                    _timedViewedStep = -1;
+                                    _stepMinValue = timedNodeMain.GetStep(i).MinTime;
+                                    _stepMaxValue = timedNodeMain.GetStep(i).MaxTime;
+                                    _stepMetric = timedNodeMain.GetStep(i).ChangeMetric;
+                                    _waitFlowBalance = timedNodeMain.GetStep(i).WaitFlowBalance;
+                                    _stepMinValueStr = _stepMinValue.ToString();
+                                    _stepMaxValueStr = _stepMaxValue.ToString();
+                                    nodeSelectionLocked = true;
+                                    confirmStepRemovalId = -1;
+
+                                    foreach (var nodeId in SelectedNodeIds) {
+                                        tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
+                                    }
+                                }
+
+                                if (GUILayout.Button(Translation.GetString("View"), GUILayout.Width(70))) {
+                                    _timedPanelAdd = false;
+                                    _timedViewedStep = i;
+
+                                    foreach (var nodeId in SelectedNodeIds) {
+                                        tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
+                                    }
+                                    confirmStepRemovalId = -1;
+                                }
                             }
 						}
 					} else {
@@ -511,8 +512,12 @@ namespace TrafficManager.UI.SubTools {
 						_stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
 						if (!Int32.TryParse(_stepMaxValueStr, out _stepMaxValue))
 							_stepMaxValue = oldStepMaxValue;
+                        
+                        if (GUILayout.Button("X", GUILayout.Width(22))) {
+                            _timedPanelAdd = false;
+                        }
 
-						if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
+                        if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
 							TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
 							if (_stepMinValue < 0)
 								_stepMinValue = 0;
@@ -529,9 +534,6 @@ namespace TrafficManager.UI.SubTools {
 							
 							_timedPanelAdd = false;
 							_timedViewedStep = timedNodeMain.NumSteps() - 1;
-						}
-						if (GUILayout.Button("X", GUILayout.Width(22))) {
-							_timedPanelAdd = false;
 						}
 
 						GUILayout.EndHorizontal();
