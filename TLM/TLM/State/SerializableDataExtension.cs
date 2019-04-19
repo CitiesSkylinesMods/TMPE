@@ -24,7 +24,7 @@ using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.State {
 	public class SerializableDataExtension : SerializableDataExtensionBase {
-		private const string DataId = "TrafficManager_v1.0";
+		public const string DataId = "TrafficManager_v1.0";
 
 		private static ISerializableData _serializableData;
 		private static Configuration _configuration;
@@ -79,8 +79,19 @@ namespace TrafficManager.State {
 
 			try {
 				byte[] data = _serializableData.LoadData(DataId);
-				DeserializeData(data);
-			} catch (Exception e) {
+				_configuration = DeserializeData(data, out bool error);
+
+                if (!error)
+                {
+                    LoadDataState(_configuration,false,out error);
+                }
+
+                if (error)
+                {
+                    throw new ApplicationException("An error occurred while loading");
+                }
+
+            } catch (Exception e) {
 				Log.Error($"OnLoadData: Error while deserializing data: {e.ToString()}");
 				loadingSucceeded = false;
 			}
@@ -118,36 +129,7 @@ namespace TrafficManager.State {
 			}
 		}
 
-		private static void DeserializeData(byte[] data) {
-			bool error = false;
-			try {
-				if (data != null && data.Length != 0) {
-					Log.Info($"Loading Data from New Load Routine! Length={data.Length}");
-					var memoryStream = new MemoryStream();
-					memoryStream.Write(data, 0, data.Length);
-					memoryStream.Position = 0;
-
-					var binaryFormatter = new BinaryFormatter();
-					_configuration = (Configuration)binaryFormatter.Deserialize(memoryStream);
-				} else {
-					Log.Info("No data to deserialize!");
-				}
-			} catch (Exception e) {
-				Log.Error($"Error deserializing data: {e.ToString()}");
-				Log.Info(e.StackTrace);
-				error = true;
-			}
-
-			if (!error) {
-				LoadDataState(out error);
-			}
-
-			if (error) {
-				throw new ApplicationException("An error occurred while loading");
-			}
-		}
-
-		private static void LoadDataState(out bool error) {
+		public static void LoadDataState(Configuration _configuration, bool loadOnlyRoadSettings, out bool error) {
 			error = false;
 
 			Log.Info("Loading State from Config");
@@ -158,23 +140,34 @@ namespace TrafficManager.State {
 
 			TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-			// load ext. citizens
-			if (_configuration.ExtCitizens != null) {
-				if (!ExtCitizenManager.Instance.LoadData(_configuration.ExtCitizens)) {
-					error = true;
-				}
-			} else {
-				Log.Info("Ext. citizen data structure undefined!");
-			}
+            if(!loadOnlyRoadSettings)
+            {
+                // load ext. citizens
+                if (_configuration.ExtCitizens != null)
+                {
+                    if (!ExtCitizenManager.Instance.LoadData(_configuration.ExtCitizens))
+                    {
+                        error = true;
+                    }
+                }
+                else
+                {
+                    Log.Info("Ext. citizen data structure undefined!");
+                }
 
-			// load ext. citizen instances
-			if (_configuration.ExtCitizenInstances != null) {
-				if (!ExtCitizenInstanceManager.Instance.LoadData(_configuration.ExtCitizenInstances)) {
-					error = true;
-				}
-			} else {
-				Log.Info("Ext. citizen instance data structure undefined!");
-			}
+                // load ext. citizen instances
+                if (_configuration.ExtCitizenInstances != null)
+                {
+                    if (!ExtCitizenInstanceManager.Instance.LoadData(_configuration.ExtCitizenInstances))
+                    {
+                        error = true;
+                    }
+                }
+                else
+                {
+                    Log.Info("Ext. citizen instance data structure undefined!");
+                }
+            }			
 
 			// load priority segments
 			if (_configuration.PrioritySegments != null) {
@@ -293,9 +286,12 @@ namespace TrafficManager.State {
 		}
 
 		public override void OnSaveData() {
-			bool success = true;
 
-			/*try {
+            // Why don't we use exceptions?
+			bool success = true;
+            Log.Info("Saving Mod Data.");
+
+            /*try {
 				Log.Info("Recalculating segment geometries");
 				SegmentGeometry.OnBeforeSaveData();
 			} catch (Exception e) {
@@ -303,84 +299,155 @@ namespace TrafficManager.State {
 				error = true;
 			}*/
 
-			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
-				try {
-					Log.Info($"OnBeforeSaveData: {manager.GetType().Name}");
-					manager.OnBeforeSaveData();
-				} catch (Exception e) {
-					Log.Error($"OnSaveData: Error while notifying {manager.GetType().Name}.OnBeforeSaveData: {e.ToString()}");
-					success = false;
-				}
-			}
+            OnBeforeGameSaved(ref success);
 
 			try {
-				Log.Info("Saving Mod Data.");
-				var configuration = new Configuration();
 
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+                try
+                {
+                    // save options
+                    _serializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Unexpected error while saving options: " + ex.Message);
+                    success = false;
+                }
 
-				configuration.ExtCitizens = ExtCitizenManager.Instance.SaveData(ref success);
-				configuration.ExtCitizenInstances = ExtCitizenInstanceManager.Instance.SaveData(ref success);
+                Configuration config = CreateConfiguration(ref success);
+                _serializableData.SaveData(DataId, Serialize<Configuration>(config, ref success));
 
-				configuration.PrioritySegments = ((ICustomDataManager<List<int[]>>)TrafficPriorityManager.Instance).SaveData(ref success);
-				configuration.CustomPrioritySegments = ((ICustomDataManager<List<Configuration.PrioritySegment>>)TrafficPriorityManager.Instance).SaveData(ref success);
-
-				configuration.SegmentNodeConfs = JunctionRestrictionsManager.Instance.SaveData(ref success);
-
-				configuration.TimedLights = TrafficLightSimulationManager.Instance.SaveData(ref success);
-
-				//configuration.NodeTrafficLights = ((ICustomDataManager<string>)TrafficLightManager.Instance).SaveData(ref success);
-				//configuration.ToggledTrafficLights = ((ICustomDataManager<List<Configuration.NodeTrafficLight>>)TrafficLightManager.Instance).SaveData(ref success);
-				
-				configuration.LaneFlags = ((ICustomDataManager<string>)LaneArrowManager.Instance).SaveData(ref success);
-				configuration.LaneArrows = ((ICustomDataManager<List<Configuration.LaneArrowData>>)LaneArrowManager.Instance).SaveData(ref success);
-
-				configuration.LaneConnections = LaneConnectionManager.Instance.SaveData(ref success);
-
-				configuration.LaneSpeedLimits = ((ICustomDataManager<List<Configuration.LaneSpeedLimit>>)SpeedLimitManager.Instance).SaveData(ref success);
-
-				configuration.CustomDefaultSpeedLimits = ((ICustomDataManager<Dictionary<string, float>>)SpeedLimitManager.Instance).SaveData(ref success);
-
-				configuration.LaneAllowedVehicleTypes = VehicleRestrictionsManager.Instance.SaveData(ref success);
-				configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
-
-				try {
-					// save options
-					_serializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
-				} catch (Exception ex) {
-					Log.Error("Unexpected error while saving options: " + ex.Message);
-					success = false;
-				}
-
-				var binaryFormatter = new BinaryFormatter();
-				var memoryStream = new MemoryStream();
-
-				try {
-					binaryFormatter.Serialize(memoryStream, configuration);
-					memoryStream.Position = 0;
-					Log.Info($"Save data byte length {memoryStream.Length}");
-					_serializableData.SaveData(DataId, memoryStream.ToArray());
-				} catch (Exception ex) {
-					Log.Error("Unexpected error while saving data: " + ex.ToString());
-					success = false;
-				} finally {
-					memoryStream.Close();
-				}
-
-				foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
-					try {
-						Log.Info($"OnAfterSaveData: {manager.GetType().Name}");
-						manager.OnAfterSaveData();
-					} catch (Exception e) {
-						Log.Error($"OnSaveData: Error while notifying {manager.GetType().Name}.OnAfterSaveData: {e.ToString()}");
-						success = false;
-					}
-				}
 			} catch (Exception e) {
 				success = false;
 				Log.Error($"Error occurred while saving data: {e.ToString()}");
 				//UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("An error occurred while saving", "Traffic Manager: President Edition detected an error while saving. To help preventing future errors, please navigate to http://steamcommunity.com/sharedfiles/filedetails/?id=583429740 and follow the steps under 'In case problems arise'.", true);
 			}
-		}
-	}
+
+            OnAfterGameSaved(ref success);
+        }
+
+        public static void OnBeforeGameSaved(ref bool success)
+        {
+            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers)
+            {
+                try
+                {
+                    Log.Info($"OnBeforeSaveData: {manager.GetType().Name}");
+                    manager.OnBeforeSaveData();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"OnSaveData: Error while notifying {manager.GetType().Name}.OnBeforeSaveData: {e.ToString()}");
+                    success = false;
+                }
+            }
+        }
+
+        public static void OnAfterGameSaved(ref bool success)
+        {
+            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers)
+            {
+                try
+                {
+                    Log.Info($"OnAfterSaveData: {manager.GetType().Name}");
+                    manager.OnAfterSaveData();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"OnSaveData: Error while notifying {manager.GetType().Name}.OnAfterSaveData: {e.ToString()}");
+                    success = false;
+                }
+            }
+
+        }
+
+        public static Configuration CreateConfiguration(ref bool success)
+        {
+            var configuration = new Configuration();
+
+            TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+
+            configuration.ExtCitizens = ExtCitizenManager.Instance.SaveData(ref success);
+            configuration.ExtCitizenInstances = ExtCitizenInstanceManager.Instance.SaveData(ref success);
+
+            configuration.PrioritySegments = ((ICustomDataManager<List<int[]>>)TrafficPriorityManager.Instance).SaveData(ref success);
+            configuration.CustomPrioritySegments = ((ICustomDataManager<List<Configuration.PrioritySegment>>)TrafficPriorityManager.Instance).SaveData(ref success);
+
+            configuration.SegmentNodeConfs = JunctionRestrictionsManager.Instance.SaveData(ref success);
+
+            configuration.TimedLights = TrafficLightSimulationManager.Instance.SaveData(ref success);
+
+            //configuration.NodeTrafficLights = ((ICustomDataManager<string>)TrafficLightManager.Instance).SaveData(ref success);
+            //configuration.ToggledTrafficLights = ((ICustomDataManager<List<Configuration.NodeTrafficLight>>)TrafficLightManager.Instance).SaveData(ref success);
+
+            configuration.LaneFlags = ((ICustomDataManager<string>)LaneArrowManager.Instance).SaveData(ref success);
+            configuration.LaneArrows = ((ICustomDataManager<List<Configuration.LaneArrowData>>)LaneArrowManager.Instance).SaveData(ref success);
+
+            configuration.LaneConnections = LaneConnectionManager.Instance.SaveData(ref success);
+
+            configuration.LaneSpeedLimits = ((ICustomDataManager<List<Configuration.LaneSpeedLimit>>)SpeedLimitManager.Instance).SaveData(ref success);
+
+            configuration.CustomDefaultSpeedLimits = ((ICustomDataManager<Dictionary<string, float>>)SpeedLimitManager.Instance).SaveData(ref success);
+
+            configuration.LaneAllowedVehicleTypes = VehicleRestrictionsManager.Instance.SaveData(ref success);
+            configuration.ParkingRestrictions = ParkingRestrictionsManager.Instance.SaveData(ref success);
+
+            return configuration;
+        }
+
+        public static byte[] Serialize<T>(T obj, ref bool success) where T : class
+        {
+            var binaryFormatter = new BinaryFormatter();
+            var memoryStream = new MemoryStream();
+
+            try
+            {
+                binaryFormatter.Serialize(memoryStream, obj);
+                memoryStream.Position = 0;
+                Log.Info($"Save data byte length {memoryStream.Length}");
+                return memoryStream.ToArray();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unexpected error while saving data: " + ex.ToString());
+                success = false;
+                return null;
+            }
+            finally
+            {
+                memoryStream.Close();
+            }
+
+        }
+
+        public static Configuration DeserializeData(byte[] data, out bool error)
+        {
+            error = false;
+            try
+            {
+                if (data != null && data.Length != 0)
+                {
+                    Log.Info($"Loading Data from New Load Routine! Length={data.Length}");
+                    var memoryStream = new MemoryStream();
+                    memoryStream.Write(data, 0, data.Length);
+                    memoryStream.Position = 0;
+
+                    var binaryFormatter = new BinaryFormatter();
+                    return (Configuration)binaryFormatter.Deserialize(memoryStream);
+                }
+                else
+                {
+                    Log.Info("No data to deserialize!");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Error deserializing data: {e.ToString()}");
+                Log.Info(e.StackTrace);
+                error = true;
+            }
+            return null;
+        }
+
+    }
 }

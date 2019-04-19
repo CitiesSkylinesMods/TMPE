@@ -40,6 +40,7 @@ namespace TrafficManager {
 
 			geoMan.SimulationStep();
 			routeMan.SimulationStep();
+            Custom.AssetManager.ProvisionalDataLoader.SimulationStep();
 		}
 
 		public override void OnBeforeSimulationFrame() {

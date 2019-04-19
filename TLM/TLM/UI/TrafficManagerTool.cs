@@ -499,6 +499,11 @@ namespace TrafficManager.UI {
 		/// </summary>
 		/// <param name="localeKey"></param>
 		public static void ShowAdvisor(string localeKey) {
+
+            // redo!
+            if (LoadingExtension.IsInAssetEditor)
+                return;
+
 			if (! GlobalConfig.Instance.Main.EnableTutorial) {
 				return;
 			}

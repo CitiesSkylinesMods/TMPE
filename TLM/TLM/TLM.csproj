@@ -110,6 +110,9 @@
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
+    <Compile Include="Custom\AssetManager\BuildingDecorationPatch.cs" />
+    <Compile Include="Custom\AssetManager\IdentificationTool.cs" />
+    <Compile Include="Custom\AssetManager\ProvisionalDataLoader.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Custom\Manager\CustomNetManager.cs" />
     <Compile Include="Custom\Manager\CustomCitizenManager.cs" />
@@ -131,6 +134,7 @@
     <Compile Include="Manager\IJunctionRestrictionsManager.cs" />
     <Compile Include="Manager\ILaneArrowManager.cs" />
     <Compile Include="Manager\ILaneConnectionManager.cs" />
+    <Compile Include="Manager\Impl\AssetDataManager.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
     <Compile Include="Manager\Impl\GeometryManager.cs" />
     <Compile Include="Manager\Impl\TurnOnRedManager.cs" />
@@ -165,6 +169,7 @@
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
     <Compile Include="PrintTransportLines.cs" />
+    <Compile Include="Custom\AssetManager\AssetDataExtension.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />

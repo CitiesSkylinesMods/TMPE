@@ -19,6 +19,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Custom.Data;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Custom.AssetManager;
 
 namespace TrafficManager {
 	public class LoadingExtension : LoadingExtensionBase {
@@ -63,7 +64,9 @@ namespace TrafficManager {
 
 		public static bool IsGameLoaded { get; private set; } = false;
 
-		public LoadingExtension() {
+        public static bool IsInAssetEditor { get; private set; } = false;
+
+        public LoadingExtension() {
 		}
 
 		public void revertDetours() {
@@ -2393,6 +2396,49 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+                Log.Info("Redirection BuildingDecoration::LoadPaths calls");
+                try
+                {
+                    Detours.Add(new Detour(typeof(BuildingDecoration).GetMethod("LoadPaths",
+                            BindingFlags.Public | BindingFlags.Static,
+                            null,
+                            new[]
+                            {
+                                    typeof (BuildingInfo),
+                                    typeof (ushort),
+                                    typeof (Building).MakeByRefType(),
+                                    typeof (float)
+                            },
+                            null),
+                            typeof(BuildingDecorationPatch).GetMethod("LoadPaths")));
+                }
+                catch (Exception)
+                {
+                    Log.Error("Could not redirect BuildingDecoration::LoadPaths calls");
+                    detourFailed = true;
+                }
+
+                Log.Info("Redirection BuildingDecoration::SavePaths calls");
+                try
+                {
+                    Detours.Add(new Detour(typeof(BuildingDecoration).GetMethod("SavePaths",
+                            BindingFlags.Public | BindingFlags.Static,
+                            null,
+                            new[]
+                            {
+                                    typeof (BuildingInfo),
+                                    typeof (ushort),
+                                    typeof (Building).MakeByRefType()
+                            },
+                            null),
+                            typeof(BuildingDecorationPatch).GetMethod("SavePaths")));
+                }
+                catch (Exception)
+                {
+                    Log.Error("Could not redirect BuildingDecoration::SavePaths calls");
+                    detourFailed = true;
+                }
+
 #if DEBUGBUSBUG
 				// TODO remove
 				Log.Info("Redirection NetManager::MoveNode calls");
@@ -2423,7 +2469,7 @@ namespace TrafficManager {
 				}
 #endif
 
-				Log.Info("Redirection NetManager::UpdateSegment calls");
+                Log.Info("Redirection NetManager::UpdateSegment calls");
 				try {
 					Detours.Add(new Detour(typeof(NetManager).GetMethod("UpdateSegment",
 							BindingFlags.NonPublic | BindingFlags.Instance,
@@ -2507,7 +2553,8 @@ namespace TrafficManager {
 			RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
 			RegisteredManagers.Add(VehicleStateManager.Instance);
 			RegisteredManagers.Add(JunctionRestrictionsManager.Instance); // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
-		}
+            RegisteredManagers.Add(AssetDataManager.Instance);
+        }
 
 		public override void OnReleased() {
 			base.OnReleased();
@@ -2559,123 +2606,132 @@ namespace TrafficManager {
 			IsGameLoaded = false;
 		}
 
-		public override void OnLevelLoaded(LoadMode mode) {
-			SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
-			Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}");
-			base.OnLevelLoaded(mode);
+        public override void OnLevelLoaded(LoadMode mode) {
+            SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
+            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}");
+            base.OnLevelLoaded(mode);
 
-			Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
+            Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
 
-			IsGameLoaded = false;
-			switch (updateMode) {
-				case SimulationManager.UpdateMode.NewGameFromMap:
-				case SimulationManager.UpdateMode.NewGameFromScenario:
-				case SimulationManager.UpdateMode.LoadGame:
-					if (BuildConfig.applicationVersion != BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)) {
-						string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
-						string[] versionElms = majorVersionElms[0].Split('.');
-						uint versionA = Convert.ToUInt32(versionElms[0]);
-						uint versionB = Convert.ToUInt32(versionElms[1]);
-						uint versionC = Convert.ToUInt32(versionElms[2]);
+            IsGameLoaded = false;
+            switch (updateMode) {
+                case SimulationManager.UpdateMode.LoadAsset:
+                case SimulationManager.UpdateMode.NewAsset:
+                case SimulationManager.UpdateMode.NewGameFromMap:
+                case SimulationManager.UpdateMode.NewGameFromScenario:
+                case SimulationManager.UpdateMode.LoadGame:
+                    if (updateMode == SimulationManager.UpdateMode.LoadAsset || updateMode == SimulationManager.UpdateMode.NewAsset)
+                        IsInAssetEditor = true;
 
-						Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+                    if (BuildConfig.applicationVersion != BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)) {
+                        string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
+                        string[] versionElms = majorVersionElms[0].Split('.');
+                        uint versionA = Convert.ToUInt32(versionElms[0]);
+                        uint versionB = Convert.ToUInt32(versionElms[1]);
+                        uint versionC = Convert.ToUInt32(versionElms[2]);
 
-						bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
-							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB)/* ||
+                        Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+
+                        bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
+                            (TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB < versionB)/* ||
 							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC < versionC)*/;
 
-						bool isModNewer = TrafficManagerMod.GameVersionA < versionA ||
-							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB > versionB)/* ||
+                        bool isModNewer = TrafficManagerMod.GameVersionA < versionA ||
+                            (TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB > versionB)/* ||
 							(TrafficManagerMod.GameVersionA == versionA && TrafficManagerMod.GameVersionB == versionB && TrafficManagerMod.GameVersionC > versionC)*/;
 
-						if (isModTooOld) {
-							string msg = $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.";
-							Log.Error(msg);
-							Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
-								UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", msg, false);
-							});
-						} else if (isModNewer) {
-							string msg = $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.";
-							Log.Error(msg);
-							Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
-								UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", msg, false);
-							});
-						}
-					}
-					IsGameLoaded = true;
-					break;
-				default:
-					Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
-					return;
-			}
+                        if (isModTooOld) {
+                            string msg = $"Traffic Manager: President Edition detected that you are running a newer game version ({BuildConfig.applicationVersion}) than TM:PE has been built for ({BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}). Please be aware that TM:PE has not been updated for the newest game version yet and thus it is very likely it will not work as expected.";
+                            Log.Error(msg);
+                            Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+                                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE has not been updated yet", msg, false);
+                            });
+                        } else if (isModNewer) {
+                            string msg = $"Traffic Manager: President Edition has been built for game version {BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false)}. You are running game version {BuildConfig.applicationVersion}. Some features of TM:PE will not work with older game versions. Please let Steam update your game.";
+                            Log.Error(msg);
+                            Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+                                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Your game should be updated", msg, false);
+                            });
+                        }
+                    }
+                    IsGameLoaded = true;
+                    break;
+                default:
+                    Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
+                    return;
+            }
 
-			IsRainfallLoaded = CheckRainfallIsLoaded();
-			IsRushHourLoaded = CheckRushHourIsLoaded();
+            IsRainfallLoaded = CheckRainfallIsLoaded();
+            IsRushHourLoaded = CheckRushHourIsLoaded();
 
-			if (!IsPathManagerReplaced) {
-				try {
-					Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
-					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
+            if (!IsPathManagerReplaced) {
+                try {
+                    Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+                    var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
-					var stockPathManager = PathManager.instance;
-					Log._Debug($"Got stock PathManager instance {stockPathManager.GetName()}");
+                    var stockPathManager = PathManager.instance;
+                    Log._Debug($"Got stock PathManager instance {stockPathManager.GetName()}");
 
-					CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
-					Log._Debug("Added CustomPathManager to gameObject List");
+                    CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
+                    Log._Debug("Added CustomPathManager to gameObject List");
 
-					if (CustomPathManager == null) {
-						Log.Error("CustomPathManager null. Error creating it.");
-						return;
-					}
+                    if (CustomPathManager == null) {
+                        Log.Error("CustomPathManager null. Error creating it.");
+                        return;
+                    }
 
-					CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
-					Log._Debug("UpdateWithPathManagerValues success");
+                    CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
+                    Log._Debug("UpdateWithPathManagerValues success");
 
-					pathManagerInstance?.SetValue(null, CustomPathManager);
+                    pathManagerInstance?.SetValue(null, CustomPathManager);
 
-					Log._Debug("Getting Current SimulationManager");
-					var simManager =
-						typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
-							.GetValue(null) as FastList<ISimulationManager>;
+                    Log._Debug("Getting Current SimulationManager");
+                    var simManager =
+                        typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)?
+                            .GetValue(null) as FastList<ISimulationManager>;
 
-					Log._Debug("Removing Stock PathManager");
-					simManager?.Remove(stockPathManager);
+                    Log._Debug("Removing Stock PathManager");
+                    simManager?.Remove(stockPathManager);
 
-					Log._Debug("Adding Custom PathManager");
-					simManager?.Add(CustomPathManager);
+                    Log._Debug("Adding Custom PathManager");
+                    simManager?.Add(CustomPathManager);
 
-					Object.Destroy(stockPathManager, 10f);
+                    Object.Destroy(stockPathManager, 10f);
 
-					Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType().ToString());
+                    Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType().ToString());
 
-					IsPathManagerReplaced = true;
-				} catch (Exception ex) {
-					string error = "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.";
-					Log.Error(error);
-					Log.Error($"Path manager replacement error: {ex.ToString()}");
-					Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
-						UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", error, true);
-					});
-				}
-			}
+                    IsPathManagerReplaced = true;
+                } catch (Exception ex) {
+                    string error = "Traffic Manager: President Edition failed to load. You can continue playing but it's NOT recommended. Traffic Manager will not work as expected.";
+                    Log.Error(error);
+                    Log.Error($"Path manager replacement error: {ex.ToString()}");
+                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(() => {
+                        UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("TM:PE failed to load", error, true);
+                    });
+                }
+            }
 
-			Log.Info("Adding Controls to UI.");
-			if (BaseUI == null) {
-				Log._Debug("Adding UIBase instance.");
-				BaseUI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
-			}
+            Log.Info("Adding Controls to UI.");
+            if (BaseUI == null) {
+                Log._Debug("Adding UIBase instance.");
+                BaseUI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
+            }
 
-			// Init transport demand UI
-			if (TransportDemandUI == null) {
-				var uiView = UIView.GetAView();
-				TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
-			}
+            if (!IsInAssetEditor)
+            {
+                // Init transport demand UI
+                if (TransportDemandUI == null)
+                {
+                    var uiView = UIView.GetAView();
+                    TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
+                }
 
-			// add "remove vehicle" button
-			UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
+                // add "remove vehicle" button
+                UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
 
-			// add "remove citizen instance" button
-			UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+                // add "remove citizen instance" button
+                UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+            }
 			
 			initDetours();
 

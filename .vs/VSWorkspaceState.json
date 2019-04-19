@@ -1,0 +1,19 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\TLM",
+    "\\TLM\\TLM",
+    "\\TLM\\TLM\\Custom",
+    "\\TLM\\TLM\\Custom\\Data",
+    "\\TLM\\TLM\\Custom\\Manager",
+    "\\TLM\\TLM\\Custom\\PathFinding",
+    "\\TLM\\TLM\\Manager",
+    "\\TLM\\TLM\\Manager\\Impl",
+    "\\TLM\\TLM\\Resources",
+    "\\TLM\\TLM\\State",
+    "\\TLM\\TLM\\UI",
+    "\\TLM\\TLM\\UI\\SubTools"
+  ],
+  "SelectedNode": "\\TLM\\TLM\\State\\AssetDataExtension.cs",
+  "PreviewInSolutionExplorer": false
+}
