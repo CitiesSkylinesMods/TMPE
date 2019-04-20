@@ -1,6 +1,14 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
+10.19, 20/04/2019
+- Bugfix: Mod options overlapping issue (#250, #266). 
+- Added: Japanese language (thanks mashitaro) (#258). 
+- Update: Chinese language (thanks Emphasia) (#285, #286). 
+- Update: "Vanilla Trees Remover" as incompatible mod (it breaks mod options screen) (#271, #290). 
+- Update: Moved "Delete" step button on timed traffic lights (#283, #285). 
+- Update: Mod incompatibility checker can now be disabled, or skip disabled mods (#264, #284, #286). 
+
 10.18, 29/03/2019
 - Bugfix: Parking AI: Cars do not spawn at outside connections (#245)
 - Bugfix: Trams perform turns on red (#248)
