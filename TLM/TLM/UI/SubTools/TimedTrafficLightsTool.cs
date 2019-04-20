@@ -378,10 +378,12 @@ namespace TrafficManager.UI.SubTools {
 								}
 
 								GUILayout.EndHorizontal();
-                                
+
+                                GUI.color = Color.red;
                                 if (GUILayout.Button(Translation.GetString("Delete"), GUILayout.Width(70))) {
                                         RemoveStep(i);
                                 }
+                                GUI.color = Color.white;
 
                                 if (GUILayout.Button(Translation.GetString("Edit"), GUILayout.Width(65))) {
                                     _timedPanelAdd = false;
