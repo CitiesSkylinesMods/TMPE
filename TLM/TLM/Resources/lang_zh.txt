@@ -224,11 +224,11 @@ Overlay_transparency 覆盖透明度
 Remove_this_citizen 移除此居民
 Remove_parked_vehicles 移除停放的车辆
 Node_is_level_crossing 此节点级别交汇，不可禁用红绿灯。
-Experimental_features Experimental features
-Turn_on_red Turn on red
-Vehicles_may_turn_on_red 车辆红灯可转弯
-Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
-Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
-Ignore_disabled_mods Ignore disabled mods
-Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
-Notify_me_if_there_is_an_unexpected_mod_conflict 检测到MOD不兼容时提示
+Experimental_features 实验特性
+Turn_on_red 红灯可转弯
+Vehicles_may_turn_on_red 车辆遇红灯可转弯
+Also_apply_to_left/right_turns_between_one-way_streets 单行道左右转也适用
+Scan_for_known_incompatible_mods_on_startup 启动时检测是否存在已知不兼容MOD
+Ignore_disabled_mods 忽略未启用MOD
+Traffic_Manager_detected_incompatible_mods 检测到的不兼容MOD
+Notify_me_if_there_is_an_unexpected_mod_conflict 检测到不兼容MOD时提示
