@@ -42,8 +42,10 @@ namespace TrafficManager {
 		}
 
 		private static void OnGameIntroLoaded() {
-			ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-			mcc.PerformModCheck();
+            if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
+                ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
+                mcc.PerformModCheck();
+            }
 		}
 	}
 }

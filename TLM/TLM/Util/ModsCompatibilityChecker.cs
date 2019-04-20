@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using ColossalFramework;
 using ColossalFramework.PlatformServices;
+using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
 using TrafficManager.UI;
@@ -36,11 +38,14 @@ namespace TrafficManager.Util {
 
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
-                IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
-                panel.IncompatibleMods = incompatibleMods;
-                panel.Initialize();
-                UIView.PushModal(panel);
-                UIView.SetFocus(panel);
+
+                if (State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
+                    IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
+                    panel.IncompatibleMods = incompatibleMods;
+                    panel.Initialize();
+                    UIView.PushModal(panel);
+                    UIView.SetFocus(panel);
+                }
             } else {
                 Log.Info("No incompatible mods detected");
             }
@@ -67,6 +72,9 @@ namespace TrafficManager.Util {
         }
 
         private ulong[] GetUserModsList() {
+            if (State.GlobalConfig.Instance.Main.IgnoreDisabledMods) {
+                return PluginManager.instance.GetPluginsInfo().Where(plugin => plugin.isEnabled).Select(info => info.publishedFileID.AsUInt64).ToArray();
+            }
             PublishedFileId[] ids = ContentManagerPanel.subscribedItemsTable.ToArray();
             return ids.Select(id => id.AsUInt64).ToArray();
         }
