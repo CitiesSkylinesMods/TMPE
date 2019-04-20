@@ -229,5 +229,3 @@ Experimental_features Funkcje eksperymentalne
 Turn_on_red Skręć w prawo na czerwonym
 Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Also_apply_to_left/right_turns_between_one-way_streets Uwzględnia również skręt w lewo/prawo pomiędzy drogami jednokierunkowymi
-Timed_traffic_lights_manager_confirm Potwierdź!
-Timed_traffic_lights_manager_right_click_to_cancel Kliknij prawym by anulować

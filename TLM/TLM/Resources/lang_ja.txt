@@ -229,5 +229,3 @@ Experimental_features 実験的な機能
 Turn_on_red 赤信号で曲がる
 Vehicles_may_turn_on_red 車両が赤信号で曲がることがある
 Also_apply_to_left/right_turns_between_one-way_streets 一方通行路の左右の曲がり角にも適用
-Timed_traffic_lights_manager_confirm Confirm!
-Timed_traffic_lights_manager_right_click_to_cancel Right click to cancel
