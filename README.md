@@ -22,7 +22,7 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 * Clear traffic, stuck cims, etc.
 
 # Changelog
-### [10.19](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.18...10.18), 20/04/2019
+### [10.19](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.18...10.19), 20/04/2019
 - Bugfix: Mod options overlapping issue (#250, #266). 
 - Added: Japanese language (thanks mashitaro) (#258). 
 - Update: Chinese language (thanks Emphasia) (#285, #286). 
