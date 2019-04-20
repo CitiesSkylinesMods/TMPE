@@ -231,4 +231,4 @@ Also_apply_to_left/right_turns_between_one-way_streets 一方通行路の左右�
 Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
 Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
-Notify_me_if_there_is_an_unexpected_mod_conflict modの非互換性が検出された場合にエラーメッセージを表示する
+Notify_me_if_there_is_an_unexpected_mod_conflict modの非互換性が検出された場合にエラーメッセージを表示す
