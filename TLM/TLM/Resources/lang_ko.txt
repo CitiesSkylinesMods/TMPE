@@ -155,7 +155,7 @@ Evacuation_busses_may_ignore_traffic_rules 대피 버스는 교통규칙을 무�
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 대피 버스는 대피소 도착을 위한 용도로만 사용할 수 있습니다
 Vehicle_behavior 차량 제한
 Policies_&_Restrictions 정책 및 제한
-At_junctions 교차로 설정
+At_junctions 교차로 일괄 설정
 In_case_of_emergency 긴급 상황 설정
 Show_lane-wise_speed_limits 차선 속도제한 보기
 Language 언어
@@ -179,7 +179,7 @@ Adaptive_step_switching 적응형 신호 변경
 Dynamic_lane_section 유동적 차량 차선변경 빈도
 Percentage_of_vehicles_performing_dynamic_lane_section 유동적 차량 차선변경 빈도 백분율
 Vehicle_restrictions_aggression 진입불가 도로 회피 빈도
-Strict 엄격하게 제어함
+Strict 무제한
 Show_path-find_stats 현재 경로를 찾는 차량수를 PFs 수치로 표기합니다
 Remove_this_vehicle 해당 차량을 제거합니다
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 차량이 신호등 시간표가 구성된 교차로에서 교통 표지판 규칙을 준수합니다
@@ -224,11 +224,11 @@ Overlay_transparency 보조 아이콘 투명도(도로 위 표지판, 속도제�
 Remove_this_citizen 해당 시민 삭제
 Remove_parked_vehicles 주차된 차량 제거하기
 Node_is_level_crossing 해당 교차로는 평면 교차로입니다.\n따라서 신호등을 설치할 수 없습니다
-Experimental_features Experimental features
-Turn_on_red Turn on red
-Vehicles_may_turn_on_red 빨간 신호등에서 차량이 돌아올 수 있습니다.
-Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
-Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
-Ignore_disabled_mods Ignore disabled mods
-Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Experimental_features 실험 기능
+Turn_on_red 빨간 신호등에서 우회전을 허용 규칙
+Vehicles_may_turn_on_red 빨간 신호등에서 차량이 진입 할 수 있습니다.
+Also_apply_to_left/right_turns_between_one-way_streets 빨간 신호등에서 우회전을 허용
+Scan_for_known_incompatible_mods_on_startup 게임 실행시 비호환되는 모드 스캔
+Ignore_disabled_mods 비활성화된 모드 무시하기
+Traffic_Manager_detected_incompatible_mods Traffic Manager와 비호환되는 모드 감지
 Notify_me_if_there_is_an_unexpected_mod_conflict 모드와 비 호환되는 모드 발견 시 에러 보여주기
