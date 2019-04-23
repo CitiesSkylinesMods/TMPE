@@ -65,17 +65,21 @@ namespace TrafficManager.Custom.AssetManager
                 {
                     if (nodePairs[segment.StartNode] != newSegment.m_startNode)
                         throw new IdentificationToolException("Cannot make node pairs: Different values for the same key");
-                    continue;
                 }
-                nodePairs[segment.StartNode] = newSegment.m_startNode;
+                else
+                {
+                    nodePairs[segment.StartNode] = newSegment.m_startNode;
+                }
 
                 if (nodePairs.ContainsKey(segment.EndNode))
                 {
                     if (nodePairs[segment.EndNode] != newSegment.m_endNode)
                         throw new IdentificationToolException("Cannot make node pairs: Different values for the same key");
-                    continue;
                 }
-                nodePairs[segment.EndNode] = newSegment.m_endNode;
+                else
+                {
+                    nodePairs[segment.EndNode] = newSegment.m_endNode;
+                }
 
                 uint[] oldLanes = segment.Lanes;
                 uint[] newLanes = GetLanes(newSegment);
@@ -115,13 +119,14 @@ namespace TrafficManager.Custom.AssetManager
             {
                 item.lowerLaneId = lanePairs[item.lowerLaneId];
                 item.higherLaneId = lanePairs[item.higherLaneId];
-                if (item.lowerLaneId > item.higherLaneId)
+                // (dead end)
+                /*if (item.lowerLaneId > item.higherLaneId)
                 {
                     uint buffer = item.lowerLaneId;
                     item.lowerLaneId = item.higherLaneId;
                     item.higherLaneId = buffer;
                     item.lowerStartNode = !item.lowerStartNode;
-                }
+                }*/
             }
 
             // lane arrows
