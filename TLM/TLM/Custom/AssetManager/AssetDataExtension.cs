@@ -114,7 +114,8 @@ namespace TrafficManager.Custom.AssetManager
 
                 userData.Add(SerializableDataExtension.DataId + segmentsString, SerializableDataExtension.Serialize<List<IdentificationTool.AssetSegment>>(data.Segments, ref success));
                 userData.Add(SerializableDataExtension.DataId + dataString, data.TmpeConfiguration);
-                AssetDataManager.Instance.AssetsWithData[IdentificationTool.GetNameWithoutPrefix(info.name)] = data;
+                //AssetDataManager.Instance.AssetsWithData[IdentificationTool.GetNameWithoutPrefix(info.name)] = data;
+                AssetDataManager.Instance.AssetsWithData[name + "_Data"] = data;
             }
         }
 

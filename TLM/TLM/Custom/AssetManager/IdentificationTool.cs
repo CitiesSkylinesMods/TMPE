@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 using static TrafficManager.Configuration;
 
 namespace TrafficManager.Custom.AssetManager
@@ -152,31 +153,38 @@ namespace TrafficManager.Custom.AssetManager
 
             // timed lights
             // TODO: remove all failed matches
-            config.TimedLights.RemoveAll(item => !segmentPairs.ContainsKey(item.nodeId));
+            //config.TimedLights.RemoveAll(item => !segmentPairs.ContainsKey(item.nodeId));
             foreach (var item in config.TimedLights)
             {
-                item.nodeId = nodePairs[item.nodeId];
-                for (int i = 0; i < item.nodeGroup.Count; i++)
+                try
                 {
-                    item.nodeGroup[i] = nodePairs[item.nodeGroup[i]];
-                }
-
-                for (int i = 0; i < item.timedSteps.Count; i++)
-                {
-                    Dictionary<ushort, CustomSegmentLights> newTimedSteps = new Dictionary<ushort, CustomSegmentLights>();
-                    foreach (var pair in item.timedSteps[i].segmentLights)
+                    item.nodeId = nodePairs[item.nodeId];
+                    for (int i = 0; i < item.nodeGroup.Count; i++)
                     {
-                        var costumSegmentLights = pair.Value;
-                        costumSegmentLights.nodeId = nodePairs[costumSegmentLights.nodeId];
-                        costumSegmentLights.segmentId = segmentPairs[costumSegmentLights.segmentId];
-                        foreach (var pair2 in costumSegmentLights.customLights)
-                        {
-                            pair2.Value.nodeId = nodePairs[pair2.Value.nodeId];
-                            pair2.Value.segmentId = segmentPairs[pair2.Value.segmentId];
-                        }
-                        newTimedSteps[nodePairs[pair.Key]] = pair.Value;
+                        item.nodeGroup[i] = nodePairs[item.nodeGroup[i]];
                     }
-                    item.timedSteps[i].segmentLights = newTimedSteps;
+
+                    for (int i = 0; i < item.timedSteps.Count; i++)
+                    {
+                        Dictionary<ushort, CustomSegmentLights> newTimedSteps = new Dictionary<ushort, CustomSegmentLights>();
+                        foreach (var pair in item.timedSteps[i].segmentLights)
+                        {
+                            var costumSegmentLights = pair.Value;
+                            costumSegmentLights.nodeId = nodePairs[costumSegmentLights.nodeId];
+                            costumSegmentLights.segmentId = segmentPairs[costumSegmentLights.segmentId];
+                            foreach (var pair2 in costumSegmentLights.customLights)
+                            {
+                                pair2.Value.nodeId = nodePairs[pair2.Value.nodeId];
+                                pair2.Value.segmentId = segmentPairs[pair2.Value.segmentId];
+                            }
+                            newTimedSteps[nodePairs[pair.Key]] = pair.Value;
+                        }
+                        item.timedSteps[i].segmentLights = newTimedSteps;
+                    }
+                }
+                catch (Exception)
+                {
+                    Debug.Log("Failed to translate timed light");
                 }
             }
 
