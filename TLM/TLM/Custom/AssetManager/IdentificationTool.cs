@@ -169,15 +169,15 @@ namespace TrafficManager.Custom.AssetManager
                         Dictionary<ushort, CustomSegmentLights> newTimedSteps = new Dictionary<ushort, CustomSegmentLights>();
                         foreach (var pair in item.timedSteps[i].segmentLights)
                         {
-                            var costumSegmentLights = pair.Value;
-                            costumSegmentLights.nodeId = nodePairs[costumSegmentLights.nodeId];
-                            costumSegmentLights.segmentId = segmentPairs[costumSegmentLights.segmentId];
-                            foreach (var pair2 in costumSegmentLights.customLights)
+                            var customSegmentLights = pair.Value;
+                            customSegmentLights.nodeId = nodePairs[customSegmentLights.nodeId];
+                            customSegmentLights.segmentId = segmentPairs[customSegmentLights.segmentId];
+                            foreach (var pair2 in customSegmentLights.customLights)
                             {
                                 pair2.Value.nodeId = nodePairs[pair2.Value.nodeId];
                                 pair2.Value.segmentId = segmentPairs[pair2.Value.segmentId];
                             }
-                            newTimedSteps[nodePairs[pair.Key]] = pair.Value;
+                            newTimedSteps[segmentPairs[pair.Key]] = customSegmentLights;
                         }
                         item.timedSteps[i].segmentLights = newTimedSteps;
                     }
@@ -185,6 +185,8 @@ namespace TrafficManager.Custom.AssetManager
                 catch (Exception)
                 {
                     Debug.Log("Failed to translate timed light");
+                    item.nodeGroup = null;
+                    item.nodeId = 0;
                 }
             }
 
