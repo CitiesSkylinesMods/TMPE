@@ -13,6 +13,8 @@ using TrafficManager.State;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using ColossalFramework.Math;
+using TrafficManager.State.ConfigData;
+using TrafficManager.Util;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
@@ -94,6 +96,14 @@ namespace TrafficManager.Traffic.Data {
 		public byte timedRand;
 		private VehicleJunctionTransitState junctionTransitState;
 
+		// Dynamic Lane Selection
+		public float maxReservedSpace;
+		public float laneSpeedRandInterval;
+		public int maxOptLaneChanges;
+		public float maxUnsafeSpeedDiff;
+		public float minSafeSpeedImprovement;
+		public float minSafeTrafficImprovement;
+
 		public override string ToString() {
 			return $"[VehicleState\n" +
 				"\t" + $"vehicleId = {vehicleId}\n" +
@@ -121,6 +131,12 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
 				"\t" + $"timedRand = {timedRand}\n" +
+				"\t" + $"maxReservedSpace = {maxReservedSpace}\n" +
+				"\t" + $"laneSpeedRandInterval = {laneSpeedRandInterval}\n" +
+				"\t" + $"maxOptLaneChanges = {maxOptLaneChanges}\n" +
+				"\t" + $"maxUnsafeSpeedDiff = {maxUnsafeSpeedDiff}\n" +
+				"\t" + $"minSafeSpeedImprovement = {minSafeSpeedImprovement}\n" +
+				"\t" + $"minSafeTrafficImprovement = {minSafeTrafficImprovement}\n" +
 				"VehicleState]";
 		}
 
@@ -149,6 +165,12 @@ namespace TrafficManager.Traffic.Data {
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			timedRand = 0;
+			maxReservedSpace = 0;
+			laneSpeedRandInterval = 0;
+			maxOptLaneChanges = 0;
+			maxUnsafeSpeedDiff = 0;
+			minSafeSpeedImprovement = 0;
+			minSafeTrafficImprovement = 0;
 		}
 
 		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
@@ -273,6 +295,7 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
+			UpdateTimedRandValues();
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -303,7 +326,9 @@ namespace TrafficManager.Traffic.Data {
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
 			lastAltLaneSelSegmentId = 0;
+
 			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
+			UpdateTimedRandValues();
 
 			try {
 				totalLength = vehicleData.CalculateTotalLength(vehicleId);
@@ -372,6 +397,10 @@ namespace TrafficManager.Traffic.Data {
 
 				waitTime = 0;
 				if (end != null) {
+					if (vehicleData.m_trailingVehicle == 0) {
+						StepRand();
+					}
+
 #if DEBUGVSTATE
 					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
@@ -460,6 +489,12 @@ namespace TrafficManager.Traffic.Data {
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			recklessDriver = false;
+			maxReservedSpace = 0;
+			laneSpeedRandInterval = 0;
+			maxOptLaneChanges = 0;
+			maxUnsafeSpeedDiff = 0;
+			minSafeSpeedImprovement = 0;
+			minSafeTrafficImprovement = 0;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -478,9 +513,23 @@ namespace TrafficManager.Traffic.Data {
 
 		public void StepRand() {
 			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
-			if (rand.UInt32(20) == 0) {
+			if (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleStepRand) == 0) {
 				timedRand = (byte)(((uint)timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
+				UpdateTimedRandValues();
 			}
+		}
+
+		private void UpdateTimedRandValues() {
+			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+			DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
+			maxReservedSpace = recklessDriver
+				? MathUtil.RandomizeFloat(rand, dls.MinMaxRecklessReservedSpace, dls.MaxMaxRecklessReservedSpace)
+				: MathUtil.RandomizeFloat(rand, dls.MinMaxReservedSpace, dls.MaxMaxReservedSpace);
+			laneSpeedRandInterval = MathUtil.RandomizeFloat(rand, dls.MinLaneSpeedRandInterval, dls.MaxLaneSpeedRandInterval);
+			maxOptLaneChanges = rand.Int32(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1);
+			maxUnsafeSpeedDiff = MathUtil.RandomizeFloat(rand, dls.MinMaxUnsafeSpeedDiff, dls.MaxMaxOptLaneChanges);
+			minSafeSpeedImprovement = MathUtil.RandomizeFloat(rand, dls.MinMinSafeSpeedImprovement, dls.MaxMinSafeSpeedImprovement);
+			minSafeTrafficImprovement = MathUtil.RandomizeFloat(rand, dls.MinMinSafeTrafficImprovement, dls.MaxMinSafeTrafficImprovement);
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
