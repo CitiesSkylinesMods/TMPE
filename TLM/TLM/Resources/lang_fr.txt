@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI Activer l'IA avancée des véhicules
 Vehicles_may_enter_blocked_junctions Les véhicules peuvent entrer dans les intersections bloquées
 All_vehicles_may_ignore_lane_arrows Tous les véhicules peuvent ignorer les directions des voies
 Busses_may_ignore_lane_arrows Les bus peuvent ignorer les directions des voies
-Turn_on_red_enabled_by_default Activer le rouge activé aux jonctions par défaut
-Turn_on_red Les véhicules peuvent tourner aux feux rouges
 Reckless_driving Conduite téméraire (fonctionnalité Bêta)
 TMPE_Title Traffic Manager: Edition Président
 Settings_are_defined_for_each_savegame_separately Paramètres définis pour chaque sauvegarde séparément
@@ -224,7 +222,13 @@ Compact_main_menu Menu principal compact
 Window_transparency Fenêtre transparente
 Overlay_transparency Superposition de transparence
 Remove_this_citizen Retirer ce citoyen
-Show_error_message_if_a_mod_incompatibility_is_detected Afficher le message d'erreur si une incompatibilité d'un mod est détectée
 Remove_parked_vehicles Enlever les véhicules stationnés
 Node_is_level_crossing Cette intersection est un passage à niveau.\nous ne pouvez pas désactiver les feux de circulation ici.
 Experimental_features Experimental features
+Turn_on_red Tourner aux feux rouges
+Vehicles_may_turn_on_red Les véhicules peuvent tourner aux feux rouges
+Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
+Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
+Ignore_disabled_mods Ignore disabled mods
+Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Notify_me_if_there_is_an_unexpected_mod_conflict Afficher le message d'erreur si une incompatibilité d'un mod est détectée

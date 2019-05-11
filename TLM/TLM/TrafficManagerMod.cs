@@ -11,7 +11,7 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "1.10.15";
+		public static readonly string Version = "10.19";
 
 		public static readonly uint GameVersion = 180609552u;
 		public static readonly uint GameVersionA = 1u;
@@ -42,7 +42,10 @@ namespace TrafficManager {
 		}
 
 		private static void OnGameIntroLoaded() {
-			ModCompatibilityHelper.CheckForOriginalTMPE();
+            if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
+                ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
+                mcc.PerformModCheck();
+            }
 		}
 	}
 }

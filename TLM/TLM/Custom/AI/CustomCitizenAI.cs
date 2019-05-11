@@ -26,7 +26,11 @@ namespace TrafficManager.Custom.AI {
 
 		public bool ExtStartPathFind(ushort instanceID, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo, bool enableTransport, bool ignoreCost) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen;
+			bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceID) &&
+				(GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
+				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
+				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+			;
 			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
@@ -43,6 +47,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "ParkingAI.Preparation")) {
 #endif
+			bool startsAtOutsideConnection = false;
 			if (Options.prohibitPocketCars) {
 				switch (extInstance.pathMode) {
 					case ExtPathMode.RequiresWalkingPathToParkedCar:
@@ -88,6 +93,7 @@ namespace TrafficManager.Custom.AI {
 						carUsageMode = CarUsagePolicy.Forbidden;
 						break;
 					case ExtPathMode.RequiresCarPath:
+					case ExtPathMode.RequiresMixedCarPathToTarget:
 					case ExtPathMode.DrivingToTarget:
 					case ExtPathMode.DrivingToKnownParkPos:
 					case ExtPathMode.DrivingToAltParkPos:
@@ -131,6 +137,7 @@ namespace TrafficManager.Custom.AI {
 						break;
 				}
 
+				startsAtOutsideConnection = Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref extInstance, startPos);
 				if (extInstance.pathMode == ExtPathMode.None) {
 					if ((instanceData.m_flags & CitizenInstance.Flags.OnTour) != CitizenInstance.Flags.None || ignoreCost) {
 						/*
@@ -152,7 +159,7 @@ namespace TrafficManager.Custom.AI {
 						if (instanceData.m_sourceBuilding != 0) {
 							ItemClass.Service sourceBuildingService = Singleton<BuildingManager>.instance.m_buildings.m_buffer[instanceData.m_sourceBuilding].Info.m_class.m_service;
 
-							if (Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(instanceID, ref instanceData, ref citizenManager.m_citizens.m_buffer[instanceData.m_citizen])) {
+							if (startsAtOutsideConnection) {
 								if (sourceBuildingService == ItemClass.Service.Road) {
 									if (vehicleInfo != null) {
 										/*
@@ -174,6 +181,7 @@ namespace TrafficManager.Custom.AI {
 										if (debug)
 											Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is located at a road outside connection but does not have a car template: ABORTING PATH-FINDING");
 #endif
+										extInstance.Reset();
 										return false;
 									}
 								} else {
@@ -398,7 +406,7 @@ namespace TrafficManager.Custom.AI {
 				 * determine path type from path mode
 				 */
 				extPathType = extInstance.GetPathType();
-
+				extInstance.atOutsideConnection = startsAtOutsideConnection;
 				/*
 				 * the following holds:
 				 * - pathMode is now either CalculatingWalkingPathToParkedCar, CalculatingWalkingPathToTarget, CalculatingCarPathToTarget, CalculatingCarPathToKnownParkPos or None.
@@ -548,31 +556,14 @@ namespace TrafficManager.Custom.AI {
 			if (Options.prohibitPocketCars) {
 				if (debug)
 					Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): CustomCitizenAI.CustomStartPathFind: [PFFAIL] failed for citizen instance {instanceID} (CurrentPathMode={extInstance.pathMode}). startPosA.segment={startPosA.m_segment}, startPosA.lane={startPosA.m_lane}, startPosA.offset={startPosA.m_offset}, endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}, endPosA.offset={endPosA.m_offset}, foundStartPos={foundStartPos}, foundEndPos={foundEndPos}");
+				extInstance.Reset();
 			}
 #endif
 			return false;
 		}
 
 		public bool CustomFindPathPosition(ushort instanceID, ref CitizenInstance citizenData, Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowUnderground, out PathUnit.Position position) {
-			position = default(PathUnit.Position);
-			float minDist = 1E+10f;
-			PathUnit.Position posA;
-			PathUnit.Position posB;
-			float distA;
-			float distB;
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if ((citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None && PathManager.FindPathPosition(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			return position.m_segment != 0;
+			return CustomPathManager.FindCitizenPathPosition(pos, laneTypes, vehicleTypes, (citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None, allowUnderground, out position);
 		}
 
 		// stock code

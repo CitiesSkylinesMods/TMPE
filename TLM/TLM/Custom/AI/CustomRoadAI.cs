@@ -456,21 +456,17 @@ namespace TrafficManager.Custom.AI {
 					num18 = 255;
 					num19 = 0;
 					if (num25 != 0) {
-						if (lane.m_similarLaneCount > num25 && num25 > 0)
-						{
+						if (lane.m_similarLaneCount > num25 && num25 > 0) {
 							num18 = num25 * num23 / lane.m_similarLaneCount;
 							num19 = num25 - num25 * num24 / lane.m_similarLaneCount;
 							flags2 |= NetLane.Flags.Merge;
-							if (num18 < num20)
-							{
+							if (num18 < num20) {
 								flags2 |= NetLane.Flags.Left;
 							}
-							if (num25 - num19 < num22)
-							{
+							if (num25 - num19 < num22) {
 								flags2 |= NetLane.Flags.Right;
 							}
-							if (num21 != 0 && num18 < num20 + num21 && num19 > num20)
-							{
+							if (num21 != 0 && num18 < num20 + num21 && num19 > num20) {
 								flags2 |= NetLane.Flags.Forward;
 							}
 						} else {
@@ -483,7 +479,6 @@ namespace TrafficManager.Custom.AI {
 								num26 = num20 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
 								num27 = num22 * lane.m_similarLaneCount / (num25 + (num21 >> 1));
 							}
-
 							int num28 = num26;
 							int num29 = lane.m_similarLaneCount - num26 - num27;
 							int num30 = num27;
@@ -491,12 +486,10 @@ namespace TrafficManager.Custom.AI {
 								if (num20 > num26) {
 									num28++;
 								}
-
 								if (num22 > num27) {
 									num30++;
 								}
 							}
-
 							if (num23 < num28) {
 								int num31 = (num23 * num20 + num28 - 1) / num28;
 								int num32 = ((num23 + 1) * num20 + num28 - 1) / num28;
@@ -506,12 +499,10 @@ namespace TrafficManager.Custom.AI {
 									num19 = Mathf.Max(num19, num32);
 								}
 							}
-
 							if (num23 >= num26 && num24 >= num27 && num21 != 0) {
 								if (lane.m_similarLaneCount > num25) {
 									num26++;
 								}
-
 								int num33 = num20 + ((num23 - num26) * num21 + num29 - 1) / num29;
 								int num34 = num20 + ((num23 + 1 - num26) * num21 + num29 - 1) / num29;
 								if (num34 > num33) {
@@ -520,7 +511,6 @@ namespace TrafficManager.Custom.AI {
 									num19 = Mathf.Max(num19, num34);
 								}
 							}
-
 							if (num24 < num30) {
 								int num35 = num25 - ((num24 + 1) * num22 + num30 - 1) / num30;
 								int num36 = num25 - (num24 * num22 + num30 - 1) / num30;
@@ -530,7 +520,6 @@ namespace TrafficManager.Custom.AI {
 									num19 = Mathf.Max(num19, num36);
 								}
 							}
-
 							if (this.m_highwayRules) {
 								if ((flags2 & NetLane.Flags.LeftRight) == NetLane.Flags.Left) {
 									if ((flags2 & NetLane.Flags.Forward) == NetLane.Flags.None || (num21 >= 2 && num20 == 1)) {

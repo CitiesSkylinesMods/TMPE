@@ -26,10 +26,6 @@ namespace TrafficManager.Manager.Impl {
 			NotIncoming
 		}
 
-		public const float MAX_SQR_STOP_VELOCITY = 0.01f;
-		public const float MAX_SQR_YIELD_VELOCITY = 0.09f;
-		public const float MAX_YIELD_VELOCITY = 0.3f;
-
 		/// <summary>
 		/// List of segments that are connected to roads with timed traffic lights or priority signs. Index: segment id
 		/// </summary>
@@ -541,7 +537,7 @@ namespace TrafficManager.Manager.Impl {
 				) {
 					if ((incomingState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
 						float incomingSqrSpeed = incomingVel.sqrMagnitude;
-						if (!incomingStateChangedRecently && incomingSqrSpeed <= MAX_SQR_STOP_VELOCITY) {
+						if (!incomingStateChangedRecently && incomingSqrSpeed <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity) {
 #if DEBUG
 							if (debug)
 								Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming {incomingVehicleId} is LEAVING or APPROACHING but not moving. -> BLOCKED");

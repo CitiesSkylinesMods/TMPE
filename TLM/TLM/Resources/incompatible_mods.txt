@@ -1,4 +1,3 @@
-583429740;Traffic Manager: President Edition
 1581695572;Traffic Manager: President Edition
 1348361731;Traffic Manager: President Edition ALPHA/DEBUG
 498363759;Traffic Manager + Improved AI
@@ -14,8 +13,36 @@
 512341354;Central Services Dispatcher (WtM)
 844180955;City Drive
 529979180;CSL Service Reserve
-583556014;Enhanced Hearse AI [Fixed for v1.4+]
 433249875;[ARIS] Enhanced Hearse AI
-583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
+583556014;Enhanced Hearse AI [Fixed for v1.4+]
+813835241;Enhanced Hearse AI [1.6]
 439582006;[ARIS] Enhanced Garbage Truck AI
+583552152;Enhanced Garbage Truck AI [Fixed for v1.4+]
+813835391;Enhanced Garbage Truck AI [1.6]
 413847191;SOM - Services Optimisation Module
+418556522;Road Anarchy
+954034590;Road Anarchy V2
+726005715;Roads United Core+
+680748394;Roads United: North America
+532863263;Multi-track Station Enabler
+442957897;Multi-track Station Enabler
+553184329;Sharp Junction Angles
+478820060;Network Extensions Project (v1)
+658653260;Network Nodes Editor [Experimental]
+929114228;New Roads for Network Extensions
+436253779;Road Protractor
+651610627;Road Color Changer Continued
+422554572;81 Tiles Updated
+414702884;Zoneable Pedestrian Paths
+631694768;Extended Road Upgrade
+649522495;District Service Limit
+428094792;[ARIS] Remove Stuck Vehicles
+587530437;Remove Stuck Vehicles [Fixed for v1.4+]
+813834836;Remove Stuck Vehicles [1.6]
+421028969;[ARIS] Skylines Overwatch
+583538182;Skylines Overwatch [Fixed for v1.3+]
+813833476;Skylines Overwatch [1.6]
+408209297;Extended Road Upgrade
+417926819;Road Assistant
+631930385;Realistic Vehicle Speeds
+877950833;Vanilla Trees Remover

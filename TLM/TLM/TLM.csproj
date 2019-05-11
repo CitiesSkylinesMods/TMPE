@@ -20,8 +20,9 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>0</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,64 +32,65 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugGeometry\</OutputPath>
     <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WarningLevel>0</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Benchmark\</OutputPath>
     <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WarningLevel>0</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
     <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF2;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WarningLevel>0</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\dependencies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="ColossalManaged">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
+      <HintPath>..\dependencies\ColossalManaged.dll</HintPath>
     </Reference>
     <Reference Include="ICities">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
+      <HintPath>..\dependencies\ICities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Managed\System.Core.dll</HintPath>
+      <HintPath>..\dependencies\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\dependencies\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Networking">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
+      <HintPath>..\dependencies\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Games\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\dependencies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +133,7 @@
     <Compile Include="Manager\ILaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
     <Compile Include="Manager\Impl\GeometryManager.cs" />
+    <Compile Include="Manager\Impl\TurnOnRedManager.cs" />
     <Compile Include="Manager\Impl\ManagerFactory.cs" />
     <Compile Include="Manager\Impl\ParkingRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\RoutingManager.cs" />
@@ -156,6 +159,7 @@
     <Compile Include="Manager\ITrafficLightSimulationManager.cs" />
     <Compile Include="Manager\ITrafficMeasurementManager.cs" />
     <Compile Include="Manager\ITrafficPriorityManager.cs" />
+    <Compile Include="Manager\ITurnOnRedManager.cs" />
     <Compile Include="Manager\IUtilityManager.cs" />
     <Compile Include="Manager\IVehicleBehaviorManager.cs" />
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
@@ -183,6 +187,7 @@
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
+    <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="TrafficManager.cs" />
     <Compile Include="Traffic\Data\ExtBuilding.cs" />
@@ -206,6 +211,7 @@
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -254,7 +260,7 @@
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
     <Compile Include="Util\LoopUtil.cs" />
-    <Compile Include="Util\ModCompatibilityHelper.cs" />
+    <Compile Include="Util\ModsCompatibilityChecker.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
@@ -400,6 +406,9 @@
     <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\incompatible_mods.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl\CSUtil.CameraControl.csproj">
       <Project>{f8759084-df5b-4a54-b73c-824640a8fa3f}</Project>
       <Name>CSUtil.CameraControl</Name>
@@ -438,6 +447,13 @@
     <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
     <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
     <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

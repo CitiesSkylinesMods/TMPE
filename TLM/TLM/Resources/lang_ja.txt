@@ -57,8 +57,6 @@ Enable_Advanced_Vehicle_AI Advanced Vehicle AIを有効にする
 Vehicles_may_enter_blocked_junctions 交差点内での停車を許可
 All_vehicles_may_ignore_lane_arrows 全車両に対して車線矢印の無視を許可
 Busses_may_ignore_lane_arrows バスに対して車線矢印の無視を許可
-Turn_on_red_enabled_by_default デフォルトでジャンクションで有効になっている赤をオン
-Turn_on_red 車両が赤信号で曲がることがある
 Reckless_driving 無謀運転 (ベータ機能/いくらかの市民が交通ルールを無視します)
 TMPE_Title Traffic Manager: President Edition
 Settings_are_defined_for_each_savegame_separately 設定は各セーブデータ毎に保存されます
@@ -115,116 +113,122 @@ Select_a_timed_traffic_light_program 時間設定付き信号のプログラム�
 The_chosen_traffic_light_program_is_incompatible_to_this_junction 選択された信号パターンはこの交差点と互換性がありません
 Advanced_AI_cannot_be_activated Advanced Vehicle AIは有効にできません
 The_Advanced_Vehicle_AI_cannot_be_activated Advanced Vehicle AIは、車両の振る舞いを変える他のMOD(例えばImproved AIやTraffic++)を既に使っているため、有効にできません.
-Enable_dynamic_path_calculation Enable dynamic path calculation
-Lane_Arrow_Changer_Disabled_Connection The lane arrow changer for this lane is disabled because you have created lane connections by hand.
-Lane_connector Lane connector
-Connected_lanes Connected lanes
-Use_alternative_view_mode Use alternative view mode
-Road_type Road type
-Default_speed_limit Default speed limit
-Unit_system Unit system
-Metric Metric
-Imperial Imperial
-Use_more_CPU_cores_for_route_calculation_if_available Use more CPU cores for route calculation (if available)
-Activated_features Activated features
-Junction_restrictions Junction restrictions
-Prohibit_spawning_of_pocket_cars Prohibit spawning of pocket cars
-Reset_stuck_cims_and_vehicles Reset stuck cims and vehicles
-Default_speed_limits Default speed limits
-Looking_for_a_parking_spot Looking for a parking spot
-Driving_to_a_parking_spot Driving to a parking spot
-Driving_to_another_parking_spot Driving to another parking spot
-Entering_vehicle Entering vehicle
-Walking_to_car Walking to car
-Using_public_transport Using public transport
-Walking Walking
-Thinking_of_a_good_parking_spot Thinking of a good parking spot
-Switch_view Switch view
-Outgoing_demand Outgoing demand
-Incoming_demand Incoming demand
-Advanced_Vehicle_AI Advanced Vehicle AI
-Heavy_trucks_prefer_outer_lanes_on_highways Heavy vehicles prefer outer lanes on highways
-Parking_AI Parking AI
-Enable_more_realistic_parking Enable more realistic parking
-Reset_custom_speed_limits Reset custom speed limits
-Reload_global_configuration Reload global configuration
-Reset_global_configuration Reset global configuration
-General General
-Gameplay Gameplay
-Overlays Overlays
-Realistic_speeds Realistic speeds
-Evacuation_busses_may_ignore_traffic_rules Evacuation busses may ignore traffic rules
-Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation busses may only be used to reach a shelter
-Vehicle_behavior Vehicle behavior
-Policies_&_Restrictions Policies & Restrictions
-At_junctions At junctions
-In_case_of_emergency In case of emergency
-Show_lane-wise_speed_limits Show lane-wise speed limits
-Language Language
-Game_language Game language
-requires_game_restart requires game restart
-Customizations_come_into_effect_instantaneously Customizations come into effect instantaneously
-Options Options
-Lock_main_menu_button_position Lock main menu button position
-Lock_main_menu_position Lock main menu position
-Recalculating_lane_routing Recalculating lane routing
-Please_wait Please wait
-Parking_restrictions Parking restrictions
-Simulation Simulation
-On_roads On roads
-Ban_private_cars_and_trucks_on_bus_lanes Ban private cars and trucks on bus lanes
-default default
-flow_ratio flow ratio
-wait_ratio wait ratio
-After_min._time_has_elapsed_switch_to_next_step_if After min. time has elapsed, switch to next step if
-Adaptive_step_switching Adaptive step switching
-Dynamic_lane_section Dynamic lane selection
-Percentage_of_vehicles_performing_dynamic_lane_section Percentage of vehicles performing dynamic lane selection
-Vehicle_restrictions_aggression Vehicle restrictions aggression
-Strict Strict
-Show_path-find_stats Show path-find stats
-Remove_this_vehicle Remove this vehicle
-Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Vehicles follow priority rules at junctions with timed traffic lights
-Enable_tutorial_messages Enable tutorial messages
+Enable_dynamic_path_calculation 動的なパス計算を有効にする
+Lane_Arrow_Changer_Disabled_Connection 手動で車線接続を作成したため、この車線の矢印の変更は無効になっています
+Lane_connector 車線を接続
+Connected_lanes 接続した車線
+Use_alternative_view_mode 代替表示モードを使用する
+Road_type 道路の種類
+Default_speed_limit デフォルトの制限速度
+Unit_system 単位系
+Metric メートル法
+Imperial ヤード・ポンド法
+Use_more_CPU_cores_for_route_calculation_if_available ルート計算にもっとCPUコアを使用する（利用可能な場合）
+Activated_features 有効な機能
+Junction_restrictions 交差点の制限
+Prohibit_spawning_of_pocket_cars ポケットカーの生成禁止
+Reset_stuck_cims_and_vehicles 立ち往生している人や車両をリセットする
+Default_speed_limits デフォルトの制限速度
+Looking_for_a_parking_spot 駐車場を探す
+Driving_to_a_parking_spot 駐車場への運転
+Driving_to_another_parking_spot 別の駐車場への運転
+Entering_vehicle 入庫
+Walking_to_car 車まで歩く
+Using_public_transport 公共交通機関を利用する
+Walking 歩く
+Thinking_of_a_good_parking_spot 好ましい駐車場を考える
+Switch_view ビューを切り替える
+Outgoing_demand 出ていく需要
+Incoming_demand 入っていく需要
+Advanced_Vehicle_AI 高度な車両AI
+Heavy_trucks_prefer_outer_lanes_on_highways 高速道路では大型車は外側車線を選択します
+Parking_AI 駐車AI
+Enable_more_realistic_parking より現実的な駐車を有効にする
+Reset_custom_speed_limits カスタム速度制限をリセットする
+Reload_global_configuration グローバル設定のリロード
+Reset_global_configuration グローバル設定をリセット
+General 全般
+Gameplay ゲームプレイ
+Overlays オーバーレイ
+Realistic_speeds 現実的なスピード
+Evacuation_busses_may_ignore_traffic_rules 避難バスは交通規則を無視するであろう
+Evacuation_busses_may_only_be_used_to_reach_a_shelter 避難バスは避難所へのアクセスにのみ使用できます
+Vehicle_behavior 車両の挙動
+Policies_&_Restrictions ポリシーと制限
+At_junctions 交差点で
+In_case_of_emergency 緊急の場合に
+Show_lane-wise_speed_limits 車線毎の制限速度を表示する
+Language 言語
+Game_language ゲームの言語
+requires_game_restart ゲームの再起動が必要
+Customizations_come_into_effect_instantaneously カスタマイズが即座に有効になります
+Options オプション
+Lock_main_menu_button_position メインメニューボタン位置をロックする
+Lock_main_menu_position メインメニュー位置をロック
+Recalculating_lane_routing レーンルーティングの再計算
+Please_wait お待ちください
+Parking_restrictions 駐車規制
+Simulation シミュレーション
+On_roads 道路上
+Ban_private_cars_and_trucks_on_bus_lanes 自家用車やトラックのバスレーン通行禁止
+default デフォルト
+flow_ratio 流動割合
+wait_ratio 待ち割合
+After_min._time_has_elapsed_switch_to_next_step_if 最小時間が経過した後、次のステップに切り替える条件
+Adaptive_step_switching 適応ステップスイッチング
+Dynamic_lane_section 動的レーン選択
+Percentage_of_vehicles_performing_dynamic_lane_section 動的レーン選択を実行する車両の割合
+Vehicle_restrictions_aggression 車両制限適用の厳格さ
+Strict 厳密
+Show_path-find_stats パス検索統計情報を表示する
+Remove_this_vehicle この車両を削除する
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights 車両は時間設定付き信号機がある交差点で一般的な優先のルールに従います
+Enable_tutorial_messages チュートリアルメッセージを有効にする
 TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
-TMPE_TUTORIAL_BODY_MainMenu Welcome to TM:PE!\n\nUser manual: http://www.viathinksoft.de/tmpe
-TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Junction restrictions
-TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Control how vehicles and pedestrians shall behave at junctions.\n\n1. Click on the junction you want to manage\n2. Click on the appropriate icon to toggle restrictions.\n\nAvailable restrictions:\n- Allow/Disallow lane changing for vehicle going straight on\n- Allow/Disallow u-turns\n- Allow/Disallow vehicles to enter a blocked junction\n- Allow/disallow pedestrians to cross the street
-TMPE_TUTORIAL_HEAD_LaneArrowTool Lane arrows
-TMPE_TUTORIAL_BODY_LaneArrowTool Restrict the set of directions that vehicles are allowed to take.\n\n1. Click on a road segment next to a junction\n2. Select the allowed directions.
-TMPE_TUTORIAL_HEAD_LaneConnectorTool Lane connector
-TMPE_TUTORIAL_BODY_LaneConnectorTool Connect two or more lanes with each other in order to tell which lanes vehicles may use.\n\n1. Click on a lane changing point (grey circles).\n2. Click on a source marker.\n3. Click on a target marker to connect it with the source marker.\n4. Click anywhere with your secondary mouse button to return back to source marker selection.\n\nAvailable hotkeys:\n\n- Delete or Backspace: Remove all lane connections\n- Shift + S: Cycle through all available "stay on lane" patterns
-TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Manual traffic lights
-TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Try out custom traffic lights.\n\n1. Click on a junction\n2. Use the tool to control traffic lights.
-TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parking restrictions
-TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Control where parking is allowed.\n\nClick on the "P" icons.\n\nAvailable hotkeys:\n\n- Shift: Hold while clicking to apply parking restrictions to multiple road segments at once
-TMPE_TUTORIAL_HEAD_PrioritySignsTool Priority signs
-TMPE_TUTORIAL_BODY_PrioritySignsTool Define priority rules at junctions.\n\n1. Click on a junction.\n2. Click on the blank spots to cycle through the available priority signs (priority road, yield, stop).\n\nAvailable hotkeys:\n\n- Shift: Hold Shift to add priority signs to multiple road segments at once. Click again while holding Shift to cycle through all available patterns.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool Speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool Set up speed restrictions.\n\n1. In the window, click on the speed limit you want to set.\n2. Click on a road segment to change the speed limit.\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply speed limits to multiple road segments at once.\n- Ctrl: Hold Ctrl to control speed limits per individual lane.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Timed traffic lights
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Set up timed traffic lights.\n\n1. Click on a junction.\n2. In the window, click on "Add step".\n3. Click on the overlay elements to set desired traffic lights states.\n4. Click on "Add".\n5. Repeat as desired.
-TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Toggle traffic lights
-TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Add or remove traffic lights to/from junctions.\n\nClick on a junction to toggle traffic lights.
-TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
-TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
-TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
-TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-Public_transport Public transport
-Prevent_excessive_transfers_at_public_transport_stations Prevent unnecessary transfers at public transport stations
-Compact_main_menu Compact main menu
-Window_transparency Window transparency
-Overlay_transparency Overlay transparency
-Remove_this_citizen Remove this citizen
-Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
-Remove_parked_vehicles Remove parked vehicles
-Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
-Experimental_features Experimental features
+TMPE_TUTORIAL_BODY_MainMenu ようこそ TM:PE!\n\nユーザーマニュアル: http://www.viathinksoft.de/tmpe
+TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool 交差点の制限
+TMPE_TUTORIAL_BODY_JunctionRestrictionsTool 車両や歩行者が交差点でどのように行動するのかを制御します。\n\n1. 管理したい交差点をクリックします。\n2. 適切なアイコンをクリックして、制限を切り替えます。\n\n利用可能な制限:\n- 直進中の車両の車線変更を許可/禁止\n- Uターンの許可/禁止\n- 交差点の先が渋滞している交差点への車両の進入を許可/禁止\n- 歩行者が道路を横断することを許可/禁止する
+TMPE_TUTORIAL_HEAD_LaneArrowTool 車線の矢印
+TMPE_TUTORIAL_BODY_LaneArrowTool 車両が進行する方向を制限します。\n\n1. 交差点の横にある道路区間をクリックします\n2. 許可する方向を選択してください。
+TMPE_TUTORIAL_HEAD_LaneConnectorTool 車線の接続
+TMPE_TUTORIAL_BODY_LaneConnectorTool 車両がどの車線を使用できるかを知るために、2つ以上の車線を互いに接続します。\n\n1. 車線変更点（灰色の丸）をクリックします。\n2. ソースマーカーをクリックします。\n3. ターゲットマーカーをクリックしてソースマーカーと接続します。\n4. 任意の場所で右クリックすると、ソースマーカーの選択に戻ります。\n\n利用可能なホットキー:\n\n- Delete または Backspace: すべての車線接続を削除\n- Shift + S: 利用可能なすべての「車線を維持する」パターンを順番に切り替えます
+TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool 手動信号機
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool カスタム信号機を試してみてください。\n\n1. 交差点をクリックします。\n2. ツールを使用して信号機を制御します。
+TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool 駐車規制
+TMPE_TUTORIAL_BODY_ParkingRestrictionsTool 駐車を許可する場所を制御します。\n\n「P」アイコンをクリックします。\n\n利用可能なホットキー:\n\n- Shift: クリックしながら押したままにすると、一度に複数の道路区間に駐車制限が適用されます
+TMPE_TUTORIAL_HEAD_PrioritySignsTool 優先標識
+TMPE_TUTORIAL_BODY_PrioritySignsTool 交差点で優先順位規則を定義します。\n\n1. 交差点をクリックします。\n2. 空白の箇所をクリックして、利用可能な優先標識（優先道路,徐行,一時停止）を順に切り替えます。\n\n利用可能なホットキー:\n\n- Shift: Shiftキーを押しながら一度に複数の道路区間に優先標識を追加します。 Shiftキーを押しながらもう一度クリックすると、使用可能なすべてのパターンが順に切り替わります。
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool 制限速度
+TMPE_TUTORIAL_BODY_SpeedLimitsTool 速度制限を設定します。\n\n1. ウィンドウで、設定したい制限速度をクリックします。\n2. 制限速度を変更するには、道路区間をクリックしてください。\n\n利用可能なホットキー:\n\n- Shift: Shiftキーを押しながらクリックすると、一度に複数の道路区間に制限速度が適用されます。\n- Ctrl: 個々の車線ごとの制限速度を制御するにはCtrlを押します。
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool 時間設定付き信号
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool 時間設定付き信号を設定します。\n\n1. 交差点をクリックします。\n2. ウィンドウ内で、 「状態の追加」をクリックしてください。\n3. オーバーレイ要素をクリックして、目的の信号機の状態を設定します。\n4. 「追加」をクリックしてください。\n5. 必要に応じて繰り返してください。
+TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool 信号機の付け外し
+TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool 信号機の交差点への追加または削除をします。\n\n交差点をクリックして信号を付け外しします。
+TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool 車両の制限
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool 特定の道路区間の車両を禁止する。\n\n1. 道路区間をクリックします。\n2. アイコンをクリックして制限を切り替えます。\n\n区別された車種:\n\n- 道路車両: 乗用車,バス,タクシー,貨物トラック,公共サービス車両、緊急車両\n- 鉄道車両：旅客列車、貨物列車\n\n利用可能なホットキー:\n\n- Shift: Shiftキーを押しながらクリックすると、一度に複数の道路区間に制限が適用されます。
+TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults デフォルトの制限速度
+TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. 上半分の矢印を使用して、すべての道路タイプを順に切り替えます。\n2. 下半分で、制限速度を選択します。\n3. 「保存」をクリックして、選択した制限速度を選択したタイプの将来の道路区間のデフォルトとして設定します。 選択した種類の既存の道路をすべて更新するには、「保存して適用」をクリックします。
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep 時間設定を追加する
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. ゲーム内オーバーレイ内で、信号機をクリックして状態を変更します。 矢印信号を追加するには、「モードの変更」ボタンを使用します。\n2. ステップの最短時間と最長時間の両方を入力します。 最短時間が経過すると、信号機が接近してくる車両を数えて比較します。\n3. 必要に応じて、ステップ切り替えタイプを選択します。 デフォルトでは、待っているよりもおおよそ少ない車両が運転している場合、ステップは変わります。\n4. 必要に応じて、感度を調整してください。 たとえば、スライダーを左に動かすと、待機中の車両に対するタイムシグナルの感度が低くなります。 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy 時間設定付き信号をコピーする
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy 別の交差点をクリックして時間設定付き信号を貼り付けます。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 時間設定付き信号機に交差点を追加する 
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 追加するには、他の交差点をクリックします。 両方の信号は、時間設定プログラムが両方の交差点を一度に制御するように結合されます。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 時間設定付き信号機から交差点を削除する
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction この時間設定プログラムによって制御されている交差点の1つをクリックします。 選択した信号機は削除され、時間設定プログラムによって管理されなくなります。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
+Public_transport 公共交通機関
+Prevent_excessive_transfers_at_public_transport_stations 公共交通機関での不必要な輸送を防ぐ
+Compact_main_menu コンパクトメインメニュー
+Window_transparency ウィンドウの透明度
+Overlay_transparency オーバーレイの透明度
+Remove_this_citizen この市民を削除する
+Remove_parked_vehicles 駐車中の車両を取り除く
+Node_is_level_crossing この交差点は踏切です。\nここで信号機を無効にすることはできません。
+Experimental_features 実験的な機能
+Turn_on_red 赤信号で曲がる
+Vehicles_may_turn_on_red 車両が赤信号で曲がることがある
+Also_apply_to_left/right_turns_between_one-way_streets 一方通行路の左右の曲がり角にも適用
+Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
+Ignore_disabled_mods Ignore disabled mods
+Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Notify_me_if_there_is_an_unexpected_mod_conflict modの非互換性が検出された場合にエラーメッセージを表示す

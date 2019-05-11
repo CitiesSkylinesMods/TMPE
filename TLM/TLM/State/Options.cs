@@ -29,13 +29,13 @@ namespace TrafficManager.State {
 		private static UICheckBox tinyMenuToggle = null;
 		private static UICheckBox enableTutorialToggle = null;
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
+		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
+		private static UICheckBox ignoreDisabledModsToggle = null;
 		private static UICheckBox realisticSpeedsToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
-        private static UICheckBox allRelaxedToggle = null;
-        private static UICheckBox turnOnRedEnabledByDefaultToggle = null;
-        private static UICheckBox turnOnRedToggle = null;
-        private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
+		private static UICheckBox allRelaxedToggle = null;
+		private static UICheckBox evacBussesMayIgnoreRulesToggle = null;
 		private static UICheckBox prioritySignsOverlayToggle = null;
 		private static UICheckBox timedLightsOverlayToggle = null;
 		private static UICheckBox speedLimitsOverlayToggle = null;
@@ -51,6 +51,8 @@ namespace TrafficManager.State {
 #endif
 		private static UICheckBox allowEnterBlockedJunctionsToggle = null;
 		private static UICheckBox allowUTurnsToggle = null;
+		private static UICheckBox allowNearTurnOnRedToggle = null;
+		private static UICheckBox allowFarTurnOnRedToggle = null;
 		private static UICheckBox allowLaneChangesWhileGoingStraightToggle = null;
 		private static UICheckBox trafficLightPriorityRulesToggle = null;
 		private static UIDropDown vehicleRestrictionsAggressionDropdown = null;
@@ -76,6 +78,7 @@ namespace TrafficManager.State {
 		private static UICheckBox enableVehicleRestrictionsToggle = null;
 		private static UICheckBox enableParkingRestrictionsToggle = null;
 		private static UICheckBox enableJunctionRestrictionsToggle = null;
+		private static UICheckBox turnOnRedEnabledToggle = null;
 		private static UICheckBox enableLaneConnectorToggle = null;
 
 		private static UIButton removeParkedVehiclesBtn = null;
@@ -96,9 +99,7 @@ namespace TrafficManager.State {
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
-		public static bool turnOnRedEnabledByDefault = false;
-        public static bool turnOnRed = false;
-        public static bool evacBussesMayIgnoreRules = false;
+		public static bool evacBussesMayIgnoreRules = false;
 		public static bool prioritySignsOverlay = false;
 		public static bool timedLightsOverlay = false;
 		public static bool speedLimitsOverlay = false;
@@ -128,6 +129,8 @@ namespace TrafficManager.State {
 #endif
 		public static bool allowEnterBlockedJunctions = false;
 		public static bool allowUTurns = false;
+		public static bool allowNearTurnOnRed = false;
+		public static bool allowFarTurnOnRed = false;
 		public static bool allowLaneChangesWhileGoingStraight = false;
 		public static bool trafficLightPriorityRules = false;
 		public static bool banRegularTrafficOnBusLanes = false;
@@ -152,7 +155,10 @@ namespace TrafficManager.State {
 		public static bool vehicleRestrictionsEnabled = true;
 		public static bool parkingRestrictionsEnabled = true;
 		public static bool junctionRestrictionsEnabled = true;
+		public static bool turnOnRedEnabled = true;
 		public static bool laneConnectorEnabled = true;
+        public static bool scanForKnownIncompatibleModsEnabled = true;
+        public static bool ignoreDisabledModsEnabled = false;
 
 		public static VehicleRestrictionsAggression vehicleRestrictionsAggression = VehicleRestrictionsAggression.Medium;
 
@@ -221,15 +227,14 @@ namespace TrafficManager.State {
 			lockMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Lock_main_menu_position"), GlobalConfig.Instance.Main.MainMenuPosLocked, onLockMenuChanged) as UICheckBox;
 			tinyMenuToggle = generalGroup.AddCheckbox(Translation.GetString("Compact_main_menu"), GlobalConfig.Instance.Main.TinyMainMenu, onTinyMenuChanged) as UICheckBox;
 			guiTransparencySlider = generalGroup.AddSlider(Translation.GetString("Window_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.GuiTransparency, onGuiTransparencyChanged) as UISlider;
-			if (guiTransparencySlider != null) {
-				guiTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-			}
+			guiTransparencySlider.parent.Find<UILabel>("Label").width = 500;
 			overlayTransparencySlider = generalGroup.AddSlider(Translation.GetString("Overlay_transparency") + ":", 0, 90, 5, GlobalConfig.Instance.Main.OverlayTransparency, onOverlayTransparencyChanged) as UISlider;
-			if (overlayTransparencySlider != null) {
-				overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-			}
+			overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
 			enableTutorialToggle = generalGroup.AddCheckbox(Translation.GetString("Enable_tutorial_messages"), GlobalConfig.Instance.Main.EnableTutorial, onEnableTutorialsChanged) as UICheckBox;
-			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Show_error_message_if_a_mod_incompatibility_is_detected"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
+			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Notify_me_if_there_is_an_unexpected_mod_conflict"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
+			scanForKnownIncompatibleModsToggle = generalGroup.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, onScanForKnownIncompatibleModsChanged) as UICheckBox;
+			ignoreDisabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Ignore_disabled_mods"), GlobalConfig.Instance.Main.IgnoreDisabledMods, onIgnoreDisabledModsChanged) as UICheckBox;
+            Indent(ignoreDisabledModsToggle);
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -253,9 +258,7 @@ namespace TrafficManager.State {
 			var vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
 
 			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
-			if (recklessDriversDropdown != null) {
-				recklessDriversDropdown.width = 300;
-			}
+			recklessDriversDropdown.width = 300;
 			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
 				strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
@@ -265,10 +268,8 @@ namespace TrafficManager.State {
 			var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
 			advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
 			altLaneSelectionRatioSlider = vehAiGroup.AddSlider(Translation.GetString("Dynamic_lane_section") + ":", 0, 100, 5, altLaneSelectionRatio, onAltLaneSelectionRatioChanged) as UISlider;
-			if (altLaneSelectionRatioSlider != null) {
-				altLaneSelectionRatioSlider.parent.Find<UILabel>("Label").width = 450;
-			}
-			
+			altLaneSelectionRatioSlider.parent.Find<UILabel>("Label").width = 450;
+
 			var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
 			prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), prohibitPocketCars, onProhibitPocketCarsChanged) as UICheckBox;
 
@@ -297,9 +298,13 @@ namespace TrafficManager.State {
             relaxedBussesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Busses_may_ignore_lane_arrows"), relaxedBusses, onRelaxedBussesChanged) as UICheckBox;
             allowEnterBlockedJunctionsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_enter_blocked_junctions"), allowEnterBlockedJunctions, onAllowEnterBlockedJunctionsChanged) as UICheckBox;
 			allowUTurnsToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_do_u-turns_at_junctions"), allowUTurns, onAllowUTurnsChanged) as UICheckBox;
+			allowNearTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_may_turn_on_red"), allowNearTurnOnRed, onAllowNearTurnOnRedChanged) as UICheckBox;
+			allowFarTurnOnRedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Also_apply_to_left/right_turns_between_one-way_streets"), allowFarTurnOnRed, onAllowFarTurnOnRedChanged) as UICheckBox;
 			allowLaneChangesWhileGoingStraightToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_going_straight_may_change_lanes_at_junctions"), allowLaneChangesWhileGoingStraight, onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
 			trafficLightPriorityRulesToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"), trafficLightPriorityRules, onTrafficLightPriorityRulesChanged) as UICheckBox;
-			
+
+			Indent(allowFarTurnOnRedToggle);
+
 			var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
 			vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
 			banRegularTrafficOnBusLanesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Ban_private_cars_and_trucks_on_bus_lanes"), banRegularTrafficOnBusLanes, onBanRegularTrafficOnBusLanesChanged) as UICheckBox;
@@ -310,13 +315,7 @@ namespace TrafficManager.State {
 				var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
 				evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
 			}
-			var turnOnRedGroup = panelHelper.AddGroup(Translation.GetString("Experimental_features"));
-			turnOnRedToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRed, onTurnOnRedChanged) as UICheckBox;
-			turnOnRedEnabledByDefaultToggle = turnOnRedGroup.AddCheckbox(Translation.GetString("Turn_on_red_enabled_by_default"), turnOnRedEnabledByDefault, onTurnOnRedEnabledByDefaultChanged) as UICheckBox;
-			if (!turnOnRedToggle.isChecked) {
-				turnOnRedEnabledByDefaultToggle.Disable();
-			}
-			
+
 			// OVERLAYS
 			++tabIndex;
 
@@ -376,15 +375,17 @@ namespace TrafficManager.State {
 			showPathFindStatsToggle = maintenanceGroup.AddCheckbox(Translation.GetString("Show_path-find_stats"), showPathFindStats, onShowPathFindStatsChanged) as UICheckBox;
 #endif
 
-			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features"));
+			var featureGroup = panelHelper.AddGroup(Translation.GetString("Activated_features")) as UIHelper;
 			enablePrioritySignsToggle = featureGroup.AddCheckbox(Translation.GetString("Priority_signs"), prioritySignsEnabled, onPrioritySignsEnabledChanged) as UICheckBox;
 			enableTimedLightsToggle = featureGroup.AddCheckbox(Translation.GetString("Timed_traffic_lights"), timedLightsEnabled, onTimedLightsEnabledChanged) as UICheckBox;
 			enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(Translation.GetString("Speed_limits"), customSpeedLimitsEnabled, onCustomSpeedLimitsEnabledChanged) as UICheckBox;
 			enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Vehicle_restrictions"), vehicleRestrictionsEnabled, onVehicleRestrictionsEnabledChanged) as UICheckBox;
 			enableParkingRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Parking_restrictions"), parkingRestrictionsEnabled, onParkingRestrictionsEnabledChanged) as UICheckBox;
 			enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(Translation.GetString("Junction_restrictions"), junctionRestrictionsEnabled, onJunctionRestrictionsEnabledChanged) as UICheckBox;
+			turnOnRedEnabledToggle = featureGroup.AddCheckbox(Translation.GetString("Turn_on_red"), turnOnRedEnabled, onTurnOnRedEnabledChanged) as UICheckBox;
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
+			Indent(turnOnRedEnabledToggle);
 #if DEBUG
 
 			// GLOBAL CONFIG
@@ -480,6 +481,17 @@ namespace TrafficManager.State {
 #endif
 
 			tabStrip.selectedIndex = 0;
+		}
+
+		private static void Indent<T>(T component) where T : UIComponent {
+            UILabel label = component.Find<UILabel>("Label");
+            if (label != null) {
+                label.padding = new RectOffset(22, 0, 0, 0);
+            }
+            UISprite check = component.Find<UISprite>("Unchecked");
+            if (check != null) {
+                check.relativePosition += new Vector3(22.0f, 0);
+            }
 		}
 
 		private static UIButton AddOptionTab(UITabstrip tabStrip, string caption) {
@@ -668,7 +680,24 @@ namespace TrafficManager.State {
 			GlobalConfig.WriteConfig();
 		}
 
-		private static void onInstantEffectsChanged(bool newValue) {
+        private static void onScanForKnownIncompatibleModsChanged(bool newValue) {
+            Log._Debug($"Show incompatible mod checker warnings changed to {newValue}");
+            GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup = newValue;
+            if (newValue) {
+                GlobalConfig.WriteConfig();
+            } else {
+                setIgnoreDisabledMods(false);
+                onIgnoreDisabledModsChanged(false);
+            }
+        }
+
+        private static void onIgnoreDisabledModsChanged(bool newValue) {
+            Log._Debug($"Ignore disabled mods changed to {newValue}");
+            GlobalConfig.Instance.Main.IgnoreDisabledMods = newValue;
+            GlobalConfig.WriteConfig();
+        }
+
+        private static void onInstantEffectsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 
@@ -724,29 +753,7 @@ namespace TrafficManager.State {
 			allRelaxed = newAllRelaxed;
 		}
 
-        private static void onTurnOnRedEnabledByDefaultChanged(bool value) {
-            if (!checkGameLoaded())
-                return;
-
-            Log._Debug($"turnOnRedEnabledByDefault changed to {value}");
-            turnOnRedEnabledByDefault = value;
-        }
-
-        private static void onTurnOnRedChanged(bool value) {
-            if (!checkGameLoaded())
-                return;
-
-            Log._Debug($"turnOnRed changed to {value}");
-            turnOnRed = value;
-            if (value) {
-	            turnOnRedEnabledByDefaultToggle.Enable();
-            } else {
-	            turnOnRedEnabledByDefaultToggle.isChecked = false;
-	            turnOnRedEnabledByDefaultToggle.Disable();
-            }
-        }
-
-        private static void onAdvancedAIChanged(bool newAdvancedAI) {
+		private static void onAdvancedAIChanged(bool newAdvancedAI) {
 			if (!checkGameLoaded())
 				return;
 
@@ -837,8 +844,20 @@ namespace TrafficManager.State {
 
 			MenuRebuildRequired = true;
 			junctionRestrictionsEnabled = val;
-			if (!val)
+			if (!val) {
+				setAllowUTurns(false);
+				setAllowEnterBlockedJunctions(false);
+				setAllowLaneChangesWhileGoingStraight(false);
+				setTurnOnRedEnabled(false);
 				setJunctionRestrictionsOverlay(false);
+			}
+		}
+
+		private static void onTurnOnRedEnabledChanged(bool val) {
+			if (!checkGameLoaded())
+				return;
+
+			setTurnOnRedEnabled(val);
 		}
 
 		private static void onLaneConnectorEnabledChanged(bool val) {
@@ -865,25 +884,66 @@ namespace TrafficManager.State {
 			evacBussesMayIgnoreRules = value;
 		}
 
-		private static void onAllowEnterBlockedJunctionsChanged(bool newMayEnterBlockedJunctions) {
+		private static void onAllowEnterBlockedJunctionsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowEnterBlockedJunctions(false);
+				return;
+			}
 
-			Log._Debug($"allowEnterBlockedJunctions changed to {newMayEnterBlockedJunctions}");
-			allowEnterBlockedJunctions = newMayEnterBlockedJunctions;
+			Log._Debug($"allowEnterBlockedJunctions changed to {newValue}");
+			setAllowEnterBlockedJunctions(newValue);
 		}
 
 		private static void onAllowUTurnsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowUTurns(false);
+				return;
+			}
 
 			Log._Debug($"allowUTurns changed to {newValue}");
-			allowUTurns = newValue;
+			setAllowUTurns(newValue);
+		}
+
+		private static void onAllowNearTurnOnRedChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+			if (newValue && !turnOnRedEnabled) {
+				setAllowNearTurnOnRed(false);
+				setAllowFarTurnOnRed(false);
+				return;
+			}
+
+			Log._Debug($"allowNearTurnOnRed changed to {newValue}");
+			setAllowNearTurnOnRed(newValue);
+
+			if (! newValue) {
+				setAllowFarTurnOnRed(false);
+			}
+		}
+
+		private static void onAllowFarTurnOnRedChanged(bool newValue) {
+			if (!checkGameLoaded())
+				return;
+			if (newValue && (!turnOnRedEnabled || !allowNearTurnOnRed)) {
+				setAllowFarTurnOnRed(false);
+				return;
+			}
+
+			Log._Debug($"allowFarTurnOnRed changed to {newValue}");
+			setAllowFarTurnOnRed(newValue);
 		}
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !junctionRestrictionsEnabled) {
+				setAllowLaneChangesWhileGoingStraight(false);
+				return;
+			}
 
 			Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
 			allowLaneChangesWhileGoingStraight = newValue;
@@ -892,6 +952,10 @@ namespace TrafficManager.State {
 		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
+			if (newValue && !prioritySignsEnabled) {
+				setTrafficLightPriorityRules(false);
+				return;
+			}
 
 			Log._Debug($"trafficLightPriorityRules changed to {newValue}");
 			trafficLightPriorityRules = newValue;
@@ -1104,19 +1168,7 @@ namespace TrafficManager.State {
 				allRelaxedToggle.isChecked = newAllRelaxed;
 		}
 
-        public static void setTurnOnRedEnabledByDefault(bool newValue) {
-            turnOnRedEnabledByDefault = newValue;
-            if (!turnOnRedEnabledByDefaultToggle != null)
-                turnOnRedEnabledByDefaultToggle.isChecked = newValue;
-        }
-
-        public static void setTurnOnRed(bool newValue) {
-            turnOnRed = newValue;
-            if (turnOnRedToggle != null)
-                turnOnRedToggle.isChecked = newValue;
-        }
-
-        public static void setHighwayRules(bool newHighwayRules) {
+		public static void setHighwayRules(bool newHighwayRules) {
 			highwayRules = newHighwayRules;
 
 			if (highwayRulesToggle != null)
@@ -1242,12 +1294,35 @@ namespace TrafficManager.State {
 			allowUTurns = value;
 			if (allowUTurnsToggle != null)
 				allowUTurnsToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowNearTurnOnRed(bool newValue) {
+			allowNearTurnOnRed = newValue;
+			if (allowNearTurnOnRedToggle != null)
+				allowNearTurnOnRedToggle.isChecked = newValue;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowFarTurnOnRed(bool newValue) {
+			allowFarTurnOnRed = newValue;
+			if (allowFarTurnOnRedToggle != null)
+				allowFarTurnOnRedToggle.isChecked = newValue;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
 		public static void setAllowLaneChangesWhileGoingStraight(bool value) {
 			allowLaneChangesWhileGoingStraight = value;
 			if (allowLaneChangesWhileGoingStraightToggle != null)
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+		}
+
+		public static void setAllowEnterBlockedJunctions(bool value) {
+			allowEnterBlockedJunctions = value;
+			if (allowEnterBlockedJunctionsToggle != null)
+				allowEnterBlockedJunctionsToggle.isChecked = value;
+			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
 		}
 
 		public static void setTrafficLightPriorityRules(bool value) {
@@ -1387,6 +1462,16 @@ namespace TrafficManager.State {
 				setJunctionRestrictionsOverlay(false);
 		}
 
+		public static void setTurnOnRedEnabled(bool newValue) {
+			turnOnRedEnabled = newValue;
+			if (turnOnRedEnabledToggle != null)
+				turnOnRedEnabledToggle.isChecked = newValue;
+			if (!newValue) {
+				setAllowNearTurnOnRed(false);
+				setAllowFarTurnOnRed(false);
+			}
+		}
+
 		public static void setLaneConnectorEnabled(bool newValue) {
 			MenuRebuildRequired = true;
 			laneConnectorEnabled = newValue;
@@ -1403,8 +1488,24 @@ namespace TrafficManager.State {
 				showPathFindStatsToggle.isChecked = value;
 		}
 #endif
+        
+        public static void setScanForKnownIncompatibleMods(bool value) {
+            scanForKnownIncompatibleModsEnabled = value;
+            if (scanForKnownIncompatibleModsToggle != null) {
+                scanForKnownIncompatibleModsToggle.isChecked = value;
+            }
+            if (!value) {
+                setIgnoreDisabledMods(false);
+            }
+        }
 
-		/*internal static int getLaneChangingRandomizationTargetValue() {
+        public static void setIgnoreDisabledMods(bool value) {
+            ignoreDisabledModsEnabled = value;
+            if (ignoreDisabledModsToggle != null) {
+                ignoreDisabledModsToggle.isChecked = value;
+            }
+        }
+        /*internal static int getLaneChangingRandomizationTargetValue() {
 			int ret = 100;
 			switch (laneChangingRandomization) {
 				case 0:
@@ -1426,7 +1527,7 @@ namespace TrafficManager.State {
 			return ret;
 		}*/
 
-		/*internal static float getLaneChangingProbability() {
+        /*internal static float getLaneChangingProbability() {
 			switch (laneChangingRandomization) {
 				case 0:
 					return 0.5f;
@@ -1442,7 +1543,7 @@ namespace TrafficManager.State {
 			return 0.01f;
 		}*/
 
-		internal static int getRecklessDriverModulo() {
+        internal static int getRecklessDriverModulo() {
 			switch (recklessDrivers) {
 				case 0:
 					return 10;

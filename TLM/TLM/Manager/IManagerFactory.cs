@@ -24,6 +24,7 @@ namespace TrafficManager.Manager {
 		ITrafficLightSimulationManager TrafficLightSimulationManager { get; }
 		ITrafficMeasurementManager TrafficMeasurementManager { get; }
 		ITrafficPriorityManager TrafficPriorityManager { get; }
+		ITurnOnRedManager TurnOnRedManager { get; }
 		IUtilityManager UtilityManager { get; }
 		IVehicleBehaviorManager VehicleBehaviorManager { get; }
 		IVehicleRestrictionsManager VehicleRestrictionsManager { get; }

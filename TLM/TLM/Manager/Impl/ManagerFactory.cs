@@ -116,6 +116,12 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public ITurnOnRedManager TurnOnRedManager {
+			get {
+				return Impl.TurnOnRedManager.Instance;
+			}
+		}
+
 		public IUtilityManager UtilityManager {
 			get {
 				return Impl.UtilityManager.Instance;

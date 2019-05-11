@@ -310,6 +310,8 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
+			bool prevIsMergeLane = Constants.ServiceFactory.NetService.CheckLaneFlags(laneId, NetLane.Flags.Merge);
+
 			NetInfo prevSegmentInfo = null;
 			bool prevSegIsInverted = false;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort prevSegId, ref NetSegment segment) {
@@ -557,7 +559,20 @@ namespace TrafficManager.Manager.Impl {
 									}
 								}
 
-								if (!nextIsJunction) {
+								if (prevIsMergeLane && Constants.ServiceFactory.NetService.CheckLaneFlags(nextLaneId, NetLane.Flags.Merge)) {
+#if DEBUGROUTING
+									if (debugFine)
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a merge lane, as the previous lane. adding as Default.");
+#endif
+									if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
+#if DEBUGROUTING
+										if (debugFine)
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a continuous merge lane. adding as Default.");
+#endif
+										isCompatibleLane = true;
+										transitionType = LaneEndTransitionType.Default;
+									}
+								} else if (!nextIsJunction) {
 #if DEBUGROUTING
 									if (debugFine)
 										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is not a junction. adding as Default.");
@@ -611,7 +626,14 @@ namespace TrafficManager.Manager.Impl {
 									transitionType = LaneEndTransitionType.Default;
 
 									if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
-										nextForcedTransitionDatas[numNextForcedTransitionDatas++].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, isNextStartNodeOfNextSegment);
+										nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(nextLaneId, nextLaneIndex, transitionType, nextSegmentId, isNextStartNodeOfNextSegment);
+
+										if (! isNextRealJunction) {
+											// simple forced lane transition: set lane distance
+											nextForcedTransitionDatas[numNextForcedTransitionDatas].distance = (byte)Math.Abs(prevOuterSimilarLaneIndex - nextOuterSimilarLaneIndex);
+										}
+
+										++numNextForcedTransitionDatas;
 									} else {
 										Log.Warning($"nextForcedTransitionDatas overflow @ source lane {prevLaneId}, idx {prevLaneIndex} @ seg. {prevSegmentId}");
 									}
@@ -1106,16 +1128,18 @@ namespace TrafficManager.Manager.Impl {
 									continue; // disregard lane since it has outgoing connections
 								}
 
-								if (nextIncomingDir == ArrowDirection.Turn) {
+								if (
+									nextIncomingDir == ArrowDirection.Turn && // u-turn
+									!nextIsEndOrOneWayOut && // not a dead end
+									nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex // incoming lane is not innermost lane
+								) {
 									// force u-turns to happen on the innermost lane
-									if (nextCompatibleOuterSimilarIndex != maxNextCompatibleOuterSimilarIndex) {
-										++compatibleLaneDist;
-										nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
+									++compatibleLaneDist;
+									nextCompatibleTransitionDatas[nextTransitionIndex].type = LaneEndTransitionType.Relaxed;
 #if DEBUGROUTING
-										if (debugFine)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
+									if (debugFine)
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): Next lane ({nextCompatibleTransitionDatas[nextTransitionIndex].laneId}) is avoided u-turn. Incrementing compatible lane distance to {compatibleLaneDist}");
 #endif
-									}
 								}
 
 #if DEBUGROUTING
