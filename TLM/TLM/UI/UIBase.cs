@@ -53,7 +53,9 @@ namespace TrafficManager.UI {
 
 		~UIBase() {
 			UnityEngine.Object.Destroy(MainMenuButton);
-			UnityEngine.Object.Destroy(MainMenu);
+			CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+			if(keyHandler != null)
+				UnityEngine.Object.Destroy(keyHandler);
 		}
 
 		public bool IsVisible() {
