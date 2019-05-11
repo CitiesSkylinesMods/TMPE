@@ -185,12 +185,7 @@ namespace TrafficManager.Manager.Impl {
 	            Options.setTurnOnRedEnabledByDefault(data[39] == (byte)1);
             }
 
-            if (data.Length >= 41)
-            {
-                Options.setDisableLaneChangeAtEdge(data[40] == (byte)1);
-            }
-
-            return true;
+			return true;
 		}
 
 		public byte[] SaveData(ref bool success) {
@@ -235,8 +230,7 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.realisticPublicTransport ? 1 : 0),
                         (byte)(Options.turnOnRed ? 1 : 0),
                         (byte)(Options.turnOnRedEnabledByDefault ? 1 : 0),
-                        (byte)(Options.disableLaneChangeAtEdge ? 1 : 0),
-                };
+				};
 		}
 	}
 }
