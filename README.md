@@ -50,7 +50,7 @@ Contact us:
 # Notice
 
 The TM:PE team is happy to support you if you have any issues with the mod under the following conditions:
-- You are using the latest version of the stable and/or labs mod.
+- You are using the latest version of the STABLE and/or LABS mod.
 - You are using a properly purchaed version of Cities: Skylines.
 
 We will not provide support if:
