@@ -86,7 +86,7 @@ Remove_zoning Retirer le zonage
 Lane_Arrow_Changer_Disabled_Highway Le modificateur de directions pour cette voie est désactivé car vous avez activé le système de règles pour autoroutes.
 Add_junction_to_timed_light Ajouter une intersection à ce feu tricolore
 Remove_junction_from_timed_light Retirer une intersection de ce feu tricolore
-Select_junction Sélectionner une intersection
+Select_junction Sélectionnez une intersection
 Cancel Annuler
 Speed_limits Limitations de vitesse
 Persistently_visible_overlays Annonces en superposition visibles de façon permanente
@@ -188,7 +188,7 @@ TMPE_TUTORIAL_HEAD_MainMenu Gestionnaire de trafic : Édition Président
 TMPE_TUTORIAL_BODY_MainMenu Bienvenue sur TM:PE !\n\nManuel d'utilisateur : http://www.viathinksoft.de/tmpe
 TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Restrictions aux carrefours
 TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Comment contrôler le comportement des véhicules et des piétons aux carrefours.\n\n1. Cliquez sur le carrefour que vous voulez gérer\n2. Cliquez sur l'icône appropriée pour basculer entre les restrictions.\n\nRestrictions disponibles :\n- Autoriser/Interdire le changement de voie pour que le véhicule continue tout droit\n- Autoriser/Interdire les demi-tours\n- Autoriser/Interdire aux véhicules d'entrer dans un carrefour bloqué\n- Autoriser/Interdire aux pietons de traverser la rue
-TMPE_TUTORIAL_HEAD_LaneArrowTool Directions des voies de circulation
+TMPE_TUTORIAL_HEAD_LaneArrowTool Flèches directionnelles
 TMPE_TUTORIAL_BODY_LaneArrowTool Restreindre l'ensemble des directions que les véhicules sont autorisés à prendre.\n\n1. Cliquez sur un segment de route à côté d'une intersection\n2. Sélectionnez les directions autorisées.
 TMPE_TUTORIAL_HEAD_LaneConnectorTool Connecteur des voies de circulation
 TMPE_TUTORIAL_BODY_LaneConnectorTool Reliez deux ou plusieurs voies entre elles afin de déterminer les voies que les véhicules peuvent utiliser.\n\n1. Cliquez sur une intersection (cercles gris).\n2. Cliquez sur un marqueur de source.\n3. Cliquez sur un marqueur cible pour le relier au marqueur source.\n4. Cliquez n'importe où avec le bouton secondaire de la souris pour revenir à la sélection du marqueur source.\n\nTouches de raccourci disponibles :\n\n- Supprimer ou Retour arrière : Supprimer toutes les connexions de voie\n- Shift + S : Parcourir tous les modèles "rester sur la voie" disponibles
