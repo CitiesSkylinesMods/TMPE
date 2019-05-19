@@ -1,6 +1,10 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
+10.20, 21/05/2019
+- Updated for game version 1.12.0-f5
+- Updated Korean translation (#294)
+
 10.19, 20/04/2019
 - Bugfix: Mod options overlapping issue (#250, #266). 
 - Added: Japanese language (thanks mashitaro) (#258). 

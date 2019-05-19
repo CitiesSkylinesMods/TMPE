@@ -22,13 +22,9 @@ A mod for **Cities: Skylines** that gives you more control over road and rail tr
 * Clear traffic, stuck cims, etc.
 
 # Changelog
-### [10.19](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.18...10.19), 20/04/2019
-- Bugfix: Mod options overlapping issue (#250, #266). 
-- Added: Japanese language (thanks mashitaro) (#258). 
-- Update: Chinese language (thanks Emphasia) (#285, #286). 
-- Update: "Vanilla Trees Remover" as incompatible mod (it breaks mod options screen) (#271, #290). 
-- Update: Moved "Delete" step button on timed traffic lights (#283, #285). 
-- Update: Mod incompatibility checker can now be disabled, or skip disabled mods (#264, #284, #286). 
+### [10.20](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.19...10.20), 21/05/2019
+- Updated for game version 1.12.0-f5
+- Updated Korean translation (#294)
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 
