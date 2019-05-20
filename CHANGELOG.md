@@ -3,7 +3,8 @@
 # Changelog
 10.20, 21/05/2019
 - Updated for game version 1.12.0-f5
-- Updated Korean translation (#294)
+- Updated Korean translation (thanks Twotoolus-FLY-LShst) (#294)
+- Updated French translation (thanks PierreTSE) (#311)
 
 10.19, 20/04/2019
 - Bugfix: Mod options overlapping issue (#250, #266). 
