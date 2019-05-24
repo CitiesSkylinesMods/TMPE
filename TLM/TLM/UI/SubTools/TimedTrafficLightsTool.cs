@@ -400,7 +400,7 @@ namespace TrafficManager.UI.SubTools {
                                     nodeSelectionLocked = true;
 
                                     foreach (var nodeId in SelectedNodeIds) {
-                                        tlsMan.TrafficLightSimulations[nodeId].TimedLight?.GetStep(i).UpdateLiveLights(true);
+                                        tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(i).UpdateLiveLights(true);
                                     }
                                 }
 
@@ -654,7 +654,7 @@ namespace TrafficManager.UI.SubTools {
             _timedViewedStep = -1;
 
             foreach (var nodeId in SelectedNodeIds) {
-                tlsMan.TrafficLightSimulations[nodeId].TimedLight?.RemoveStep(stepIndex);
+                tlsMan.TrafficLightSimulations[nodeId].timedLight?.RemoveStep(stepIndex);
             }
         }
 
