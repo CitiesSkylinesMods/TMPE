@@ -222,10 +222,13 @@ Compact_main_menu Kompaktes Hauptmenü
 Window_transparency Fenstertransparenz
 Overlay_transparency Overlaytransparenz
 Remove_this_citizen Diesen Cim entfernen
-Show_error_message_if_a_mod_incompatibility_is_detected Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
 Remove_parked_vehicles Entferne geparkte Autos
 Node_is_level_crossing Diese Kreuzung ist ein Bahnübergang.\nDu kannst die Ampeln hier nicht entfernen.
 Experimental_features Experimentelle Features
 Turn_on_red Turn on red
 Vehicles_may_turn_on_red Fahrzeuge dürfen an roten Ampeln abbiegen
 Also_apply_to_left/right_turns_between_one-way_streets Gilt auch für Links- & Rechtskurven zwischen Einbahnstraßen
+Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
+Ignore_disabled_mods Ignore disabled mods
+Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Notify_me_if_there_is_an_unexpected_mod_conflict Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
