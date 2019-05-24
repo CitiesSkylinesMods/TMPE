@@ -67,6 +67,16 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release LABS|AnyCPU'">
+    <OutputPath>bin\Release LABS\</OutputPath>
+    <DefineConstants>PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\dependencies\Assembly-CSharp.dll</HintPath>

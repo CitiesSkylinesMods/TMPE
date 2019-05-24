@@ -10,10 +10,12 @@ using UnityEngine;
 
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
-
-		public static readonly string Version = "10.20";
-
-		public static readonly uint GameVersion = 184673552u;
+#if LABS
+        public static readonly string Version = "10.20 LABS";
+#else
+        public static readonly string Version = "10.20";
+#endif
+        public static readonly uint GameVersion = 184673552u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 12u;
 		public static readonly uint GameVersionC = 0u;
