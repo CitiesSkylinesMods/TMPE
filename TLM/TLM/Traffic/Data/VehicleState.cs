@@ -520,6 +520,11 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		private void UpdateTimedRandValues() {
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.Switches[9])
+				Log._Debug($"VehicleState.UpdateTimedRandValues({vehicleId}) called.");
+#endif
+
 			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
 			DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
 			maxReservedSpace = recklessDriver
