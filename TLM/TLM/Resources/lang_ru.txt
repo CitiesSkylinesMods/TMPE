@@ -1,4 +1,4 @@
-Switch_traffic_lights Установка светофора
+﻿Switch_traffic_lights Установка светофора
 Add_priority_signs Знаки приоритета
 Manual_traffic_lights Ручной светофор
 Timed_traffic_lights Настраиваемый светофор
@@ -33,13 +33,13 @@ Low Замедленное
 Medium Среднее
 High Высокое
 Very_high Очень высоко
-Extreme_long_green/red_phases Слишком долгие фазы зеленый/красный
-Very_long_green/red_phases Очень долгие фазы зеленый/красный
-Long_green/red_phases Долгие фазы зеленый/красный
-Moderate_green/red_phases Умеренные фазы зеленый/красный
-Short_green/red_phases Короткие фазы зеленый/красный
-Very_short_green/red_phases Очень короткие фазы зеленый/красный
-Extreme_short_green/red_phases Слишком короткие фазы зеленый/красный
+Extreme_long_green/red_phases Слишком долгие фазы зелёный/красный
+Very_long_green/red_phases Очень долгие фазы зелёный/красный
+Long_green/red_phases Долгие фазы зелёный/красный
+Moderate_green/red_phases Умеренные фазы зелёный/красный
+Short_green/red_phases Короткие фазы зелёный/красный
+Very_short_green/red_phases Очень короткие фазы зелёный/красный
+Extreme_short_green/red_phases Слишком короткие фазы зелёный/красный
 Hide_counters Скрыть счётчики
 Show_counters Показать счётчики
 Start Начать
@@ -83,7 +83,7 @@ Create_group Создать группу
 Delete_group Удалить группу
 Add_zoning Добавить зонирование
 Remove_zoning Удалить зонирование
-Lane_Arrow_Changer_Disabled_Highway Изменение стрелки полосы для этого перекрестка отключено, по причине вашей активации системы правил шоссе.
+Lane_Arrow_Changer_Disabled_Highway Изменение стрелки полосы для этого перекрёстка отключено, по причине вашей активации системы правил шоссе.
 Add_junction_to_timed_light Добавить перекрёсток в список
 Remove_junction_from_timed_light Убрать перекрёсток из списка
 Select_junction Добавление перекрёстка в список
@@ -141,7 +141,7 @@ Switch_view Переключение обзора
 Outgoing_demand Исходящее требование
 Incoming_demand Входящее требование
 Advanced_Vehicle_AI Продвинутый AI транспорта
-Heavy_trucks_prefer_outer_lanes_on_highways Большегрузные траки предпочитают крайние полосы на шоссе
+Heavy_trucks_prefer_outer_lanes_on_highways Большегрузный транспорт предпочитает крайние полосы на шоссе
 Parking_AI AI парковки
 Enable_more_realistic_parking Включить более реалистичную парковку
 Reset_custom_speed_limits Сбросить свои ограничения скорости
@@ -182,7 +182,7 @@ Vehicle_restrictions_aggression Следование транспортным о
 Strict Строгое
 Show_path-find_stats Показать статистику поиска пути
 Remove_this_vehicle Удалить этот транспорт
-Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Следование правилам приоритета на перекрёстках с настраиваемыми светофорами
+Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights Правила приоритета на перекрёстках с настраиваемыми светофорами
 Enable_tutorial_messages Включить обучающие сообщения
 TMPE_TUTORIAL_HEAD_MainMenu Traffic Manager: President Edition
 TMPE_TUTORIAL_BODY_MainMenu Welcome to TM:PE!\n\nUser manual: http://www.viathinksoft.de/tmpe
@@ -222,10 +222,13 @@ Compact_main_menu Компактное Главное меню
 Window_transparency Прозрачность окна
 Overlay_transparency Прозрачность элементов(оверлеев) TM:PE
 Remove_this_citizen Удалить этого гражданина
-Show_error_message_if_a_mod_incompatibility_is_detected Показывать сообщение об ошибке при несовместимости мода
 Remove_parked_vehicles Удалить припаркованный транспорт
 Node_is_level_crossing Это перекрёсток уровней.\nЗдесь нельзя отключить светофоры.
-Experimental_features Experimental features
-Turn_on_red Turn on red
-Vehicles_may_turn_on_red Транспортные средства могут повернуть на красный светофор
-Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
+Experimental_features Экспериментальные функции
+Turn_on_red Поворот направо на красный
+Vehicles_may_turn_on_red Разрешить поворот направо на красный сигнал светофора
+Also_apply_to_left/right_turns_between_one-way_streets Разрешить направо/налево между улицами с односторонним движением
+Scan_for_known_incompatible_mods_on_startup Сканирование известных несовместимых модов при запуске
+Ignore_disabled_mods Игнорировать отключённые моды
+Traffic_Manager_detected_incompatible_mods Traffic Manager обнаружил несовместимые моды
+Notify_me_if_there_is_an_unexpected_mod_conflict Показывать сообщение об ошибке при несовместимости модов

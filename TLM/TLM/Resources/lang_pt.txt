@@ -222,10 +222,13 @@ Compact_main_menu Compact main menu
 Window_transparency Window transparency
 Overlay_transparency Overlay transparency
 Remove_this_citizen Remove this citizen
-Show_error_message_if_a_mod_incompatibility_is_detected Show error message if a mod incompatibility is detected
 Remove_parked_vehicles Remove parked vehicles
 Node_is_level_crossing This junction is a level crossing.\nYou cannot disable traffic lights here.
 Experimental_features Experimental features
 Turn_on_red Virar nos semáforos vermelhos
 Vehicles_may_turn_on_red Veículos podem virar nos semáforos vermelhos
 Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
+Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
+Ignore_disabled_mods Ignore disabled mods
+Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Notify_me_if_there_is_an_unexpected_mod_conflict Notify me if there is an unexpected mod conflict

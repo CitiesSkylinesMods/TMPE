@@ -14,6 +14,7 @@ namespace TrafficManager.UI {
         private UIButton closeButton;
         private UISprite warningIcon;
         private UIPanel mainPanel;
+        private UICheckBox runModsCheckerOnStartup;
         private UIComponent blurEffect;
         private static IncompatibleModsPanel _instance;
 
@@ -49,7 +50,7 @@ namespace TrafficManager.UI {
             title.autoSize = true;
             title.padding = new RectOffset(10, 10, 15, 15);
             title.relativePosition = new Vector2(60, 12);
-            title.text = "Traffic Manager detected incompatible mods";
+            title.text = Translation.GetString("Traffic_Manager_detected_incompatible_mods");
 
             closeButton = mainPanel.AddUIComponent<UIButton>();
             closeButton.eventClick += CloseButtonClick;
@@ -61,6 +62,10 @@ namespace TrafficManager.UI {
             UIPanel panel = mainPanel.AddUIComponent<UIPanel>();
             panel.relativePosition = new Vector2(20, 70);
             panel.size = new Vector2(565, 320);
+
+            UIHelper helper = new UIHelper(mainPanel);
+            runModsCheckerOnStartup = helper.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, RunModsCheckerOnStartup_eventCheckChanged) as UICheckBox;
+            runModsCheckerOnStartup.relativePosition = new Vector3(20, height - 30f);
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.backgroundSprite = "";
@@ -118,6 +123,11 @@ namespace TrafficManager.UI {
             }
 
             BringToFront();
+        }
+
+        private void RunModsCheckerOnStartup_eventCheckChanged(bool value) {
+            Log._Debug("Incompatible mods checker run on game launch changed to " + value);
+            State.Options.setScanForKnownIncompatibleMods(value);
         }
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
