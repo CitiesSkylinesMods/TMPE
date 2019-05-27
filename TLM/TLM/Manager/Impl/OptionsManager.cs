@@ -189,10 +189,6 @@ namespace TrafficManager.Manager.Impl {
 				Options.setAllowFarTurnOnRed(data[40] == (byte)1);
 			}
 
-			if (data.Length >= 42) {
-				Options.setAllowFarTurnOnRed(data[41] == (byte)1);
-			}
-
 			return true;
 		}
 
