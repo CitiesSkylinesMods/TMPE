@@ -151,7 +151,7 @@ Reset_global_configuration Reset algemene configuratie
 General Algemeen
 Gameplay Spelverloop
 Overlays Transparanten
-Realistic_speeds Realistische snelheden
+Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules Evacuatiebussen mogen verkeersregels overtreden
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuatiebussen mogen enkel gebruikt worden om schuilkelders te bereiken
 Vehicle_behavior Vortuiggedrag

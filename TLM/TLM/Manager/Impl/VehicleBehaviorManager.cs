@@ -694,18 +694,11 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public uint GetTimedVehicleRand(ushort vehicleId) {
-			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
-			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
-			uint step = VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
-			if (step >= intv) {
-				step = VehicleState.MAX_TIMED_RAND - step;
-			}
-
-			return range + step;
+			return (uint)(vehicleId % 2) * 50u + VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
 		}
 
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo) {
-			if (Options.realisticSpeeds) {
+			if (Options.individualDrivingStyle) {
 				float vehicleRand = 0.01f * (float)GetTimedVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
@@ -751,6 +744,9 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): currentLaneId={currentLaneId}, currentPathPos=[seg={currentPathPos.m_segment}, lane={currentPathPos.m_lane}, off={currentPathPos.m_offset}] next1PathPos=[seg={next1PathPos.m_segment}, lane={next1PathPos.m_lane}, off={next1PathPos.m_offset}] next2PathPos=[seg={next2PathPos.m_segment}, lane={next2PathPos.m_lane}, off={next2PathPos.m_offset}] next3PathPos=[seg={next3PathPos.m_segment}, lane={next3PathPos.m_lane}, off={next3PathPos.m_offset}] next4PathPos=[seg={next4PathPos.m_segment}, lane={next4PathPos.m_lane}, off={next4PathPos.m_offset}]");
 				}
 #endif
+				if (!vehicleState.dlsReady) {
+					vehicleState.UpdateDynamicLaneSelectionParameters();
+				}
 
 				if (vehicleState.lastAltLaneSelSegmentId == currentPathPos.m_segment) {
 #if DEBUG

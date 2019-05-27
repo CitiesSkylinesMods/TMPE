@@ -6,8 +6,8 @@ using System.Text;
 namespace TrafficManager.State.ConfigData {
 	public class Gameplay {
 		/// <summary>
-		/// Modulo value for vehicle behavior randomization
+		/// Modulo value for time-varying vehicle behavior randomization
 		/// </summary>
-		public uint VehicleStepRand = 20;
+		public uint VehicleTimedRandModulo = 10;
 	}
 }

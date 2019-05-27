@@ -150,7 +150,7 @@ Reset_global_configuration 重置所有設定
 General 普通
 Gameplay 遊戲
 Overlays 重疊
-Realistic_speeds 現實速度
+Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules 緊急疏散公車可忽略交通規則
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 緊急疏散公車僅可用於到達避難所
 Vehicle_behavior 車輛行為

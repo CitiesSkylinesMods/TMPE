@@ -47,6 +47,12 @@ namespace TrafficManager.State.ConfigData {
 
 		// ---
 
+		/*
+		 * max. reserved space:
+		 *   low = egoistic
+		 *   high = altruistic
+		 */
+
 		/// <summary>
 		/// Minimum maximum allowed reserved space on previous vehicle lane (for regular drivers)
 		/// </summary>
@@ -67,6 +73,12 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public float MaxMaxRecklessReservedSpace = 50f;
 
+		/*
+		 * lane speed randomization interval:
+		 *    low = altruistic (driver sees the true lane speed)
+		 *    high = egoistic (driver imagines to be in the slowest queue, http://www.bbc.com/future/story/20130827-why-other-queues-move-faster)
+		 */
+
 		/// <summary>
 		/// Minimum lane speed randomization interval
 		/// </summary>
@@ -76,6 +88,12 @@ namespace TrafficManager.State.ConfigData {
 		/// Maximum lane speed randomization interval
 		/// </summary>
 		public float MaxLaneSpeedRandInterval = 25f;
+
+		/* 
+		 * max. considered lane changes:
+		 *    low = altruistic
+		 *    high = egoistic
+		 */
 
 		/// <summary>
 		/// Maximum number of considered lane changes
@@ -87,15 +105,27 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public int MaxMaxOptLaneChanges = 3;
 
+		/* 
+		 * max. allowed speed difference for unsafe lane changes
+		 *    low = altruistic
+		 *    high = egoistic
+		 */
+
 		/// <summary>
-		/// Minimum maximum allowed speed difference for safe lane changes (in game units)
+		/// Minimum maximum allowed speed difference for unsafe lane changes (in game units)
 		/// </summary>
 		public float MinMaxUnsafeSpeedDiff = 0.1f;
 
 		/// <summary>
-		/// Maximum maximum allowed speed difference for safe lane changes (in game units)
+		/// Maximum maximum allowed speed difference for unsafe lane changes (in game units)
 		/// </summary>
 		public float MaxMaxUnsafeSpeedDiff = 1f;
+
+		/* 
+		 * min. required speed improvement for safe lane changes
+		 *    low = egoistic
+		 *    high = altruistic
+		 */
 
 		/// <summary>
 		/// Minimum minimum required speed improvement for safe lane changes (in km/h)
@@ -106,6 +136,12 @@ namespace TrafficManager.State.ConfigData {
 		/// Maximum minimum required speed improvement for safe lane changes (in km/h)
 		/// </summary>
 		public float MaxMinSafeSpeedImprovement = 30f;
+
+		/* 
+		 * min. required traffic flow improvement for safe lane changes
+		 *    low = egoistic
+		 *    high = altruistic
+		 */
 
 		/// <summary>
 		/// Minimum minimum required traffic flow improvement for safe lane changes (in %)
