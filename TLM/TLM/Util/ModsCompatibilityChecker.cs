@@ -36,19 +36,6 @@ namespace TrafficManager.Util {
                 }
             }
 
-            // Based on the build, also warn about other TM:PE builds if present
-            //
-            // Note: Workshop published versions still won't detect local installs but at
-            // least it will reduce number of users havin two workshop versions subscribed
-#if LABS
-            incompatibleMods.Add(583429740 , "TM:PE STABLE");
-#elif DEBUG
-            incompatibleMods.Add(1637663252, "TM:PE LABS");
-            incompatibleMods.Add(583429740 , "TM:PE STABLE");
-#else // STABLE
-            incompatibleMods.Add(1637663252, "TM:PE LABS");
-#endif
-
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
 
@@ -80,6 +67,19 @@ namespace TrafficManager.Util {
                     incompatibleMods.Add(steamId, strings[1]);
                 }
             }
+
+            // Treat any other branches of TM:PE as incompatible (causes issues with saving road customisations).
+            // This still won't detect local builds, but will reduce support workload from end users who have
+            // multiple TM:PE subscribed.
+            // See also: https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues/211 
+#if LABS
+            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+#elif DEBUG // assume local build
+            incompatibleMods.Add(1637663252, "TM:PE LABS");
+            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+#else // STABLE
+            incompatibleMods.Add(1637663252, "TM:PE LABS");
+#endif
 
             return incompatibleMods;
         }
