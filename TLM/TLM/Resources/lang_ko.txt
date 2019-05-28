@@ -230,5 +230,5 @@ Vehicles_may_turn_on_red 빨간 신호등에서 차량이 진입 할 수 있습�
 Also_apply_to_left/right_turns_between_one-way_streets 빨간 신호등에서 우회전을 허용
 Scan_for_known_incompatible_mods_on_startup 게임 실행시 비호환되는 모드 스캔
 Ignore_disabled_mods 비활성화된 모드 무시하기
-Traffic_Manager_detected_incompatible_mods Traffic Manager와 비호환되는 모드 감지
+Traffic_Manager_detected_incompatible_mods 와 비호환되는 모드 감지
 Notify_me_if_there_is_an_unexpected_mod_conflict 모드와 비 호환되는 모드 발견 시 에러 보여주기

@@ -230,5 +230,5 @@ Vehicles_may_turn_on_red Les véhicules peuvent tourner aux feux rouges
 Also_apply_to_left/right_turns_between_one-way_streets Appliquer de même aux virages gauche/droite entre des rues à sens unique
 Scan_for_known_incompatible_mods_on_startup Rechercher les mods incompatibles au lancement
 Ignore_disabled_mods Ignorer les mods désactivés
-Traffic_Manager_detected_incompatible_mods Le gestionnaire de trafic a détecté des mods incompatibles
+Traffic_Manager_detected_incompatible_mods a détecté des mods incompatibles
 Notify_me_if_there_is_an_unexpected_mod_conflict Afficher un message d'erreur si un mod incompatible est détecté

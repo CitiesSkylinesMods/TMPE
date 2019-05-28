@@ -230,5 +230,5 @@ Vehicles_may_turn_on_red Voertuigen kunnen bij rode verkeerslichten draaien
 Also_apply_to_left/right_turns_between_one-way_streets Also apply to left & right turns between one-way streets
 Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
 Ignore_disabled_mods Ignore disabled mods
-Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Notify me if there is an unexpected mod conflict
