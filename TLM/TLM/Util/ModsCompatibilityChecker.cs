@@ -36,6 +36,19 @@ namespace TrafficManager.Util {
                 }
             }
 
+            // Based on the build, also warn about other TM:PE builds if present
+            //
+            // Note: Workshop published versions still won't detect local installs but at
+            // least it will reduce number of users havin two workshop versions subscribed
+#if LABS
+            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+#elif DEBUG
+            incompatibleMods.Add(1637663252, "TM:PE LABS");
+            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+#else // STABLE
+            incompatibleMods.Add(1637663252, "TM:PE LABS");
+#endif
+
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
 
