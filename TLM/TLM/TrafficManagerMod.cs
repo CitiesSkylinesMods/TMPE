@@ -11,7 +11,8 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-        public string Version => "10.20";
+        // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
+        public static readonly string Version = "10.20";
 
 #if LABS
         public string Branch => "LABS";
