@@ -10,20 +10,26 @@ using UnityEngine;
 
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
+
+        public string Version => "10.20";
+
 #if LABS
-        public static readonly string Version = "10.20 LABS";
+        public string Branch => "LABS";
+#elif DEBUG
+        public string Branch => "DEBUG";
 #else
-        public static readonly string Version = "10.20";
+        public string Branch => "STABLE";
 #endif
+
+        public string Name => "TM:PE " + Version + " " + Branch;
+
+        public string Description => "Manage your city's traffic";
+
         public static readonly uint GameVersion = 184673552u;
 		public static readonly uint GameVersionA = 1u;
 		public static readonly uint GameVersionB = 12u;
 		public static readonly uint GameVersionC = 0u;
 		public static readonly uint GameVersionBuild = 5u;
-
-		public string Name => "TM:PE " + Version;
-
-		public string Description => "Manage your city's traffic";
 
 		public void OnEnabled() {
 			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
