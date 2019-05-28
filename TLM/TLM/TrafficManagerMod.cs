@@ -11,13 +11,13 @@ using UnityEngine;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-		public static readonly string Version = "10.18";
+		public static readonly string Version = "10.20";
 
-		public static readonly uint GameVersion = 180609552u;
+		public static readonly uint GameVersion = 184673552u;
 		public static readonly uint GameVersionA = 1u;
-		public static readonly uint GameVersionB = 11u;
-		public static readonly uint GameVersionC = 1u;
-		public static readonly uint GameVersionBuild = 2u;
+		public static readonly uint GameVersionB = 12u;
+		public static readonly uint GameVersionC = 0u;
+		public static readonly uint GameVersionBuild = 5u;
 
 		public string Name => "TM:PE " + Version;
 
@@ -42,8 +42,10 @@ namespace TrafficManager {
 		}
 
 		private static void OnGameIntroLoaded() {
-			ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-			mcc.PerformModCheck();
+            if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
+                ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
+                mcc.PerformModCheck();
+            }
 		}
 	}
 }
