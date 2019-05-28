@@ -73,12 +73,12 @@ namespace TrafficManager.Util {
             // multiple TM:PE subscribed.
             // See also: https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues/211 
 #if LABS
-            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+            incompatibleMods.Add(583429740u , "TM:PE STABLE");
 #elif DEBUG // assume local build
-            incompatibleMods.Add(1637663252, "TM:PE LABS");
-            incompatibleMods.Add(583429740 , "TM:PE STABLE");
+            incompatibleMods.Add(1637663252u, "TM:PE LABS");
+            incompatibleMods.Add(583429740u , "TM:PE STABLE");
 #else // STABLE
-            incompatibleMods.Add(1637663252, "TM:PE LABS");
+            incompatibleMods.Add(1637663252u, "TM:PE LABS");
 #endif
 
             return incompatibleMods;
