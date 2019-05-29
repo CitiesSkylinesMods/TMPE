@@ -12,11 +12,11 @@ namespace TrafficManager.UI.MainMenu {
             size = new Vector2(MainMenuPanel.SIZE_PROFILES[0].MENU_WIDTH, MainMenuPanel.SIZE_PROFILES[0].TOP_BORDER); // TODO use current size profile
 
 #if LABS
-            text = "TM:PE " + TrafficManagerMod.Version + "-L";
+            text = "TM:PE " + TrafficManagerMod.Version + " LABS";
 #elif DEBUG
-            text = "TM:PE " + TrafficManagerMod.Version + "-D";
+            text = "TM:PE " + TrafficManagerMod.Version + " DEBUG";
 #else // STABLE
-            text = "TM:PE " + TrafficManagerMod.Version + "-S";
+            text = "TM:PE " + TrafficManagerMod.Version + " STABLE";
 #endif
             relativePosition = new Vector3(5f, 5f);
 
