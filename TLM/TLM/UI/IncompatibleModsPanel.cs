@@ -6,10 +6,14 @@ using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
+using ICities;
 using UnityEngine;
+using static ColossalFramework.Plugins.PluginManager;
 
 namespace TrafficManager.UI {
     public class IncompatibleModsPanel : UIPanel {
+        private const ulong LOCAL_TMPE = 0u;
+
         private UILabel title;
         private UIButton closeButton;
         private UISprite warningIcon;
@@ -79,9 +83,10 @@ namespace TrafficManager.UI {
             scrollablePanel.size = new Vector2(550, 340);
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
+
+            int acc = 0;
+            UIPanel item;
             if (IncompatibleMods.Count != 0) {
-                int acc = 0;
-                UIPanel item;
                 IncompatibleMods.ForEach((pair) => {
                     item = CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
                     item.relativePosition = new Vector2(0, acc);
@@ -90,6 +95,17 @@ namespace TrafficManager.UI {
                 });
                 item = null;
             }
+
+// directive block commented out for testing
+// #if !DEBUG
+            if (GetLocalMod("TM:PE") != null) {
+                Log._Debug("Local build of TM:PE found");
+                item = CreateEntry(ref scrollablePanel, "TM:PE LOCAL BUILD", LOCAL_TMPE);
+                item.relativePosition = new Vector2(0, acc);
+                item.size = new Vector2(560, 50);
+                item = null;
+            }
+// #endif
 
             scrollablePanel.FitTo(panel);
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
@@ -117,7 +133,6 @@ namespace TrafficManager.UI {
             thumb.autoSize = true;
             thumb.relativePosition = Vector3.zero;
             verticalScroll.thumbObject = thumb;
-
 
             blurEffect = GameObject.Find("ModalEffect").GetComponent<UIComponent>();
             AttachUIComponent(blurEffect.gameObject);
@@ -153,21 +168,39 @@ namespace TrafficManager.UI {
             label.text = name;
             label.textAlignment = UIHorizontalAlignment.Left;
             label.relativePosition = new Vector2(10, 15);
-            CreateButton(panel, "Unsubscribe", (int) panel.width - 170, 10, delegate(UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
+            if (steamId == LOCAL_TMPE) { // local TM:PE needs deleting
+                CreateButton(panel, "Delete", (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
+            } else { // workshop mod needs unsubscribing
+                CreateButton(panel, "Unsubscribe", (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
+            }
             return panel;
         }
 
         private void UnsubscribeClick(UIComponent component, UIMouseEventParameter eventparam, ulong steamId) {
-            Log.Info("Trying to unsubscribe workshop item " + steamId);
-            component.isEnabled = false;
-            if (PlatformService.workshop.Unsubscribe(new PublishedFileId(steamId))) {
-                IncompatibleMods.Remove(steamId);
+
+            if (steamId == LOCAL_TMPE) { // Local TM:PE
+
+                Log.Info("Trying to delete local build of TM:PE");
+                component.isEnabled = false;
+                PluginInfo localTMPE = GetLocalMod("TM:PE");
+                // TODO: Find out how to delete the local mod using its PluginInfo
                 component.parent.Disable();
                 component.isVisible = false;
-                Log.Info("Workshop item " + steamId + " unsubscribed");
-            } else {
-                Log.Warning("Failed unsubscribing workshop item " + steamId);
-                component.isEnabled = true;
+
+            } else { // Workshop mod
+
+                Log.Info("Trying to unsubscribe workshop item " + steamId);
+                component.isEnabled = false;
+                if (PlatformService.workshop.Unsubscribe(new PublishedFileId(steamId))) {
+                    IncompatibleMods.Remove(steamId);
+                    component.parent.Disable();
+                    component.isVisible = false;
+                    Log.Info("Workshop item " + steamId + " unsubscribed");
+                } else {
+                    Log.Warning("Failed unsubscribing workshop item " + steamId);
+                    component.isEnabled = true;
+                }
+
             }
         }
 
@@ -237,6 +270,40 @@ namespace TrafficManager.UI {
             if (blurEffect != null && UIView.ModalInputCount() == 0) {
                 ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate() { blurEffect.Hide(); });
             }
+        }
+
+        // get plugin info for a local mod
+        // note: may be null if mod not found
+        private PluginInfo GetLocalMod(string name)
+        {
+            try
+            {
+                foreach (PluginInfo plugin in Singleton<PluginManager>.instance.GetPluginsInfo())
+                {
+                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains(name))
+                    {
+                        return plugin;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[TM:PE] ModsCompatibilityChecker.GetLocalMod() ERROR:");
+                Debug.LogException(e);
+            }
+            return null;
+        }
+
+        // returns name of mod as defined in the IUserMod class of that mod
+        private string GetModName(PluginInfo pluginInfo)
+        {
+            string name = pluginInfo.name;
+            IUserMod[] instances = pluginInfo.GetInstances<IUserMod>();
+            if ((int)instances.Length > 0)
+            {
+                name = instances[0].Name;
+            }
+            return name;
         }
     }
 }
