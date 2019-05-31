@@ -414,7 +414,12 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 
 #if DEBUG
-			if (m_debug) {
+			bool detourMissing = (m_vehicleTypes & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None && !m_queueItem.queued;
+			if (detourMissing) {
+				Log.Warning($"Path-finding for unhandled vehicle requested!");
+			}
+
+			if (m_debug || detourMissing) {
 				Debug(unit, $"PathFindImplementation: Preparing calculation:\n" +
 					$"\tbufferItemStartA: segment={bufferItemStartA.m_position.m_segment} lane={bufferItemStartA.m_position.m_lane} off={bufferItemStartA.m_position.m_offset} laneId={bufferItemStartA.m_laneID}\n" +
 					$"\tbufferItemStartB: segment={bufferItemStartB.m_position.m_segment} lane={bufferItemStartB.m_position.m_lane} off={bufferItemStartB.m_position.m_offset} laneId={bufferItemStartB.m_laneID}\n" +
