@@ -310,8 +310,6 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			bool prevIsMergeLane = Constants.ServiceFactory.NetService.CheckLaneFlags(laneId, NetLane.Flags.Merge);
-
 			NetInfo prevSegmentInfo = null;
 			bool prevSegIsInverted = false;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort prevSegId, ref NetSegment segment) {
@@ -361,13 +359,23 @@ namespace TrafficManager.Manager.Impl {
 			bool nextIsTransition = false;
 			bool nextIsEndOrOneWayOut = false;
 			bool nextHasTrafficLights = false;
+			ushort buildingId = 0;
 			Constants.ServiceFactory.NetService.ProcessNode(nextNodeId, delegate (ushort nodeId, ref NetNode node) {
 				nextIsJunction = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 				nextIsTransition = (node.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 				nextHasTrafficLights = (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 				nextIsEndOrOneWayOut = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+				buildingId = NetNode.FindOwnerBuilding(nextNodeId, 32f);
 				return true;
 			});
+
+			bool isTollBooth = false;
+			if (buildingId != 0) {
+				Constants.ServiceFactory.BuildingService.ProcessBuilding(buildingId, (ushort bId, ref Building building) => {
+					isTollBooth = building.Info.m_buildingAI is TollBoothAI;
+					return true;
+				});
+			}
 
 			bool nextIsSimpleJunction = false;
 			bool nextIsSplitJunction = false;
@@ -393,6 +401,7 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegIsInverted={prevSegIsInverted} leftHandDrive={leftHandDrive}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSimilarLaneCount={prevSimilarLaneCount} prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex} prevOuterSimilarLaneIndex={prevOuterSimilarLaneIndex} prevHasBusLane={prevHasBusLane}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextIsJunction={nextIsJunction} nextIsEndOrOneWayOut={nextIsEndOrOneWayOut} nextHasTrafficLights={nextHasTrafficLights} nextIsSimpleJunction={nextIsSimpleJunction} nextIsSplitJunction={nextIsSplitJunction} isNextRealJunction={isNextRealJunction}");
+				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextNodeId={nextNodeId} buildingId={buildingId} isTollBooth={isTollBooth}");
 			}
 #endif
 
@@ -559,15 +568,15 @@ namespace TrafficManager.Manager.Impl {
 									}
 								}
 
-								if (prevIsMergeLane && Constants.ServiceFactory.NetService.CheckLaneFlags(nextLaneId, NetLane.Flags.Merge)) {
+								if (isTollBooth) {
 #if DEBUGROUTING
 									if (debugFine)
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a merge lane, as the previous lane. adding as Default.");
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextNodeId={nextNodeId}, buildingId={buildingId} is a toll booth. Preventing lane changes.");
 #endif
 									if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
 #if DEBUGROUTING
 										if (debugFine)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a continuous merge lane. adding as Default.");
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is associated with a toll booth (buildingId={buildingId}). adding as Default.");
 #endif
 										isCompatibleLane = true;
 										transitionType = LaneEndTransitionType.Default;
