@@ -150,7 +150,7 @@ Reset_global_configuration Reset global configuration
 General General
 Gameplay Gameplay
 Overlays Overlays
-Realistic_speeds Realistic speeds
+Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules Evacuation buses may ignore traffic rules
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Evacuation buses may only be used to reach a shelter
 Vehicle_behavior Vehicle behavior

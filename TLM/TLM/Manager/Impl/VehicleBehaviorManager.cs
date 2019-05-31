@@ -694,18 +694,11 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public uint GetTimedVehicleRand(ushort vehicleId) {
-			uint intv = VehicleState.MAX_TIMED_RAND / 2u;
-			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
-			uint step = VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
-			if (step >= intv) {
-				step = VehicleState.MAX_TIMED_RAND - step;
-			}
-
-			return range + step;
+			return (uint)(vehicleId % 2) * 50u + VehicleStateManager.Instance.VehicleStates[vehicleId].timedRand;
 		}
 
 		public float ApplyRealisticSpeeds(float speed, ushort vehicleId, ref VehicleState state, VehicleInfo vehicleInfo) {
-			if (Options.realisticSpeeds) {
+			if (Options.individualDrivingStyle) {
 				float vehicleRand = 0.01f * (float)GetTimedVehicleRand(vehicleId);
 				if (vehicleInfo.m_isLargeVehicle) {
 					speed *= 0.75f + vehicleRand * 0.25f; // a little variance, 0.75 .. 1
@@ -751,6 +744,9 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): currentLaneId={currentLaneId}, currentPathPos=[seg={currentPathPos.m_segment}, lane={currentPathPos.m_lane}, off={currentPathPos.m_offset}] next1PathPos=[seg={next1PathPos.m_segment}, lane={next1PathPos.m_lane}, off={next1PathPos.m_offset}] next2PathPos=[seg={next2PathPos.m_segment}, lane={next2PathPos.m_lane}, off={next2PathPos.m_offset}] next3PathPos=[seg={next3PathPos.m_segment}, lane={next3PathPos.m_lane}, off={next3PathPos.m_offset}] next4PathPos=[seg={next4PathPos.m_segment}, lane={next4PathPos.m_lane}, off={next4PathPos.m_offset}]");
 				}
 #endif
+				if (!vehicleState.dlsReady) {
+					vehicleState.UpdateDynamicLaneSelectionParameters();
+				}
 
 				if (vehicleState.lastAltLaneSelSegmentId == currentPathPos.m_segment) {
 #if DEBUG
@@ -763,6 +759,7 @@ namespace TrafficManager.Manager.Impl {
 				vehicleState.lastAltLaneSelSegmentId = currentPathPos.m_segment;
 
 				bool recklessDriver = vehicleState.recklessDriver;
+				float maxReservedSpace = vehicleState.maxReservedSpace;
 
 				// cur -> next1
 				float vehicleLength = 1f + vehicleState.totalLength;
@@ -1168,7 +1165,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 							Services.NetService.ProcessLane(next1BackTransitions[j].laneId, delegate (uint prevLaneId, ref NetLane prevLane) {
-								prevLanesClear = prevLane.GetReservedSpace() <= (recklessDriver ? conf.DynamicLaneSelection.MaxRecklessReservedSpace : conf.DynamicLaneSelection.MaxReservedSpace);
+								prevLanesClear = prevLane.GetReservedSpace() <= maxReservedSpace;
 								return true;
 							});
 
@@ -1213,8 +1210,8 @@ namespace TrafficManager.Manager.Impl {
 
 					float relMeanSpeedInPercent = meanSpeed / (TrafficMeasurementManager.REF_REL_SPEED / TrafficMeasurementManager.REF_REL_SPEED_PERCENT_DENOMINATOR);
 					float randSpeed = 0f;
-					if (conf.DynamicLaneSelection.LaneSpeedRandInterval > 0) {
-						randSpeed = Services.SimulationService.Randomizer.Int32((uint)conf.DynamicLaneSelection.LaneSpeedRandInterval + 1u) - conf.DynamicLaneSelection.LaneSpeedRandInterval / 2f;
+					if (vehicleState.laneSpeedRandInterval > 0) {
+						randSpeed = Services.SimulationService.Randomizer.Int32((uint)vehicleState.laneSpeedRandInterval + 1u) - vehicleState.laneSpeedRandInterval / 2f;
 						relMeanSpeedInPercent += randSpeed;
 					}
 
@@ -1312,14 +1309,14 @@ namespace TrafficManager.Manager.Impl {
 				// decide if vehicle should stay or change
 
 				// vanishing lane change opportunity detection
-				int vehSel = vehicleId % 6;
+				int vehSel = vehicleId % 12;
 #if DEBUG
 				if (debug) {
 					Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): vehMod4={vehSel} numReachableNext2Lanes={numReachableNext2Lanes} numReachableNext3Lanes={numReachableNext3Lanes}");
 				}
 #endif
-				if ((numReachableNext3Lanes == 1 && vehSel <= 2) || // 3/6 % of all vehicles will change lanes 3 segments in front
-					(numReachableNext2Lanes == 1 && vehSel <= 4) // 2/6 % of all vehicles will change lanes 2 segments in front, 1/5 will change at the last opportunity
+				if ((numReachableNext3Lanes == 1 && vehSel <= 5) || // 50% of all vehicles will change lanes 3 segments in front
+					(numReachableNext2Lanes == 1 && vehSel <= 9) // 33% of all vehicles will change lanes 2 segments in front, 16.67% will change at the last opportunity
 				) {
 					// vehicle must reach a certain lane since lane changing opportunities will vanish
 
@@ -1360,7 +1357,7 @@ namespace TrafficManager.Manager.Impl {
 					return bestStayNext1LaneIndex;
 				}
 
-				if (bestStayTotalLaneDist != bestOptTotalLaneDist && Math.Max(bestStayTotalLaneDist, bestOptTotalLaneDist) > conf.DynamicLaneSelection.MaxOptLaneChanges) {
+				if (bestStayTotalLaneDist != bestOptTotalLaneDist && Math.Max(bestStayTotalLaneDist, bestOptTotalLaneDist) > vehicleState.maxOptLaneChanges) {
 					/*
 					 * best route contains more lane changes than allowed: choose lane with the least number of future lane changes
 					 */
@@ -1397,8 +1394,8 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. optImprovementInKmH={optImprovementInKmH} km/h speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
 					}
 #endif
-					if (optImprovementInKmH >= conf.DynamicLaneSelection.MinSafeSpeedImprovement &&
-						(foundSafeLaneChange || (speedDiff <= conf.DynamicLaneSelection.MaxUnsafeSpeedDiff))
+					if (optImprovementInKmH >= vehicleState.minSafeSpeedImprovement &&
+						(foundSafeLaneChange || (speedDiff <= vehicleState.maxUnsafeSpeedDiff))
 						) {
 						// speed improvement is significant
 #if DEBUG
@@ -1424,7 +1421,7 @@ namespace TrafficManager.Manager.Impl {
 						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): found a lane change that optimizes overall traffic. optimization={optimization}%");
 					}
 #endif
-					if (optimization >= conf.DynamicLaneSelection.MinSafeTrafficImprovement) {
+					if (optimization >= vehicleState.minSafeTrafficImprovement) {
 						// traffic optimization is significant
 #if DEBUG
 						if (debug) {
