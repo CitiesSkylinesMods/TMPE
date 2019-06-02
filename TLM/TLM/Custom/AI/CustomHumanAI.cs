@@ -166,7 +166,7 @@ namespace TrafficManager.Custom.AI {
 			}
 			if (vehicleId == 0 && (instanceData.m_flags & (CitizenInstance.Flags.Character | CitizenInstance.Flags.WaitingPath | CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) == CitizenInstance.Flags.None) {
 				instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround | CitizenInstance.Flags.Panicking | CitizenInstance.Flags.SittingDown);
-				CustomArriveAtDestination(instanceID, ref instanceData, false);
+				ArriveAtDestination(instanceID, ref instanceData, false);
 				citizenManager.ReleaseCitizenInstance(instanceID);
 			}
 		}
@@ -332,65 +332,6 @@ namespace TrafficManager.Custom.AI {
 			return true;
 		}
 
-		[RedirectMethod]
-		protected void CustomArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
-			uint citizenId = citizenData.m_citizen;
-			if (citizenId != 0) {
-				CitizenManager citizenMan = Singleton<CitizenManager>.instance;
-				citizenMan.m_citizens.m_buffer[citizenId].SetVehicle(citizenId, 0, 0u);
-
-				if ((citizenData.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
-					if (success) {
-						ushort targetBuildingId = citizenData.m_targetBuilding;
-						if (targetBuildingId != 0) {
-							ushort transportLineId = Singleton<NetManager>.instance.m_nodes.m_buffer[targetBuildingId].m_transportLine;
-							if (transportLineId != 0) {
-								TransportInfo info = Singleton<TransportManager>.instance.m_lines.m_buffer[transportLineId].Info;
-								if (info.m_vehicleType == VehicleInfo.VehicleType.None) {
-									targetBuildingId = (((instanceID & 1) != 0) ? TransportLine.GetPrevStop(targetBuildingId) : TransportLine.GetNextStop(targetBuildingId));
-									if (targetBuildingId != 0) {
-										citizenData.m_flags |= CitizenInstance.Flags.OnTour;
-										((CitizenAI)this).SetTarget(instanceID, ref citizenData, targetBuildingId, true);
-									} else {
-										// Unrolled goto statement
-										if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
-											return;
-										}
-										((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
-										((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
-										citizenData.Unspawn(instanceID);
-									}
-									return;
-								}
-								citizenData.m_flags |= CitizenInstance.Flags.OnTour;
-								this.WaitTouristVehicle(instanceID, ref citizenData, targetBuildingId);
-								return;
-							}
-						}
-					}
-				} else {
-					if (success) {
-						citizenMan.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, citizenData.m_targetBuilding);
-						// NON-STOCK CODE START
-						Constants.ManagerFactory.ExtCitizenManager.OnArriveAtDestination(citizenId, ref citizenMan.m_citizens.m_buffer[citizenId], ref citizenMan.m_instances.m_buffer[instanceID]);
-						// NON-STOCK CODE END
-					}
-
-					if (citizenData.m_targetBuilding != 0 && citizenMan.m_citizens.m_buffer[citizenId].CurrentLocation == Citizen.Location.Visit) {
-						BuildingManager buildingMan = Singleton<BuildingManager>.instance;
-						BuildingInfo info = buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding].Info;
-						info.m_buildingAI.VisitorEnter(citizenData.m_targetBuilding, ref buildingMan.m_buildings.m_buffer[citizenData.m_targetBuilding], citizenId);
-					}
-				}
-			}
-			if ((citizenData.m_flags & CitizenInstance.Flags.HangAround) != 0 && success) {
-				return;
-			}
-			((CitizenAI)this).SetSource(instanceID, ref citizenData, (ushort)0);
-			((CitizenAI)this).SetTarget(instanceID, ref citizenData, (ushort)0);
-			citizenData.Unspawn(instanceID);
-		}
-
 		[RedirectReverse]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void PathfindFailure(ushort instanceID, ref CitizenInstance data) {
@@ -419,6 +360,12 @@ namespace TrafficManager.Custom.AI {
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void WaitTouristVehicle(ushort instanceID, ref CitizenInstance data, ushort targetBuildingId) {
 			Log.Error($"HumanAI.InvokeWaitTouristVehicle is not overriden!");
+		}
+
+		[RedirectReverse]
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void ArriveAtDestination(ushort instanceID, ref CitizenInstance citizenData, bool success) {
+			Log.Error($"HumanAI.ArriveAtDestination is not overriden!");
 		}
 	}
 }
