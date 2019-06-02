@@ -129,10 +129,11 @@ namespace TrafficManager.Manager {
 		bool IsJunctionTransitStateNew(ref ExtVehicle extVehicle);
 
 		/// <summary>
-		/// Calculates a new random value for speed randomization.
+		/// Triggers the randomization mechanism that might select a new random value for time-varying vehicle behavior (e.g. speed)
 		/// </summary>
-		/// <param name="extVehicle">vehicle</param>
-		void StepRand(ref ExtVehicle extVehicle);
+		/// <param name="extVehicle">ext. vehicle data</param>
+		/// <param name="force">whether to force generation of a new value</param>
+		void StepRand(ref ExtVehicle extVehicle, bool force);
 
 		/// <summary>
 		/// Calculates the current randomization value for a vehicle.
@@ -156,5 +157,11 @@ namespace TrafficManager.Manager {
 		/// <param name="vehicleId">vehicle id</param>
 		/// <param name="vehicle">vehicle</param>
 		void LogTraffic(ushort vehicleId, ref Vehicle vehicle);
+
+		/// <summary>
+		/// Randomly selects a new set of DLS parameters.
+		/// </summary>
+		/// <param name="extVehicle">ext. vehicle data</param>
+		void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle);
 	}
 }

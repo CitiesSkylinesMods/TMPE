@@ -131,7 +131,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			if (data.Length >= 28) {
-				Options.setRealisticSpeeds(data[27] == (byte)1);
+				Options.setIndividualDrivingStyle(data[27] == (byte)1);
 			}
 
 			if (data.Length >= 29) {
@@ -222,7 +222,7 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.junctionRestrictionsEnabled ? 1 : 0),
 						(byte)(Options.parkingAI ? 1 : 0),
 						(byte)(Options.preferOuterLane ? 1 : 0),
-						(byte)(Options.realisticSpeeds ? 1 : 0),
+						(byte)(Options.individualDrivingStyle ? 1 : 0),
 						(byte)(Options.evacBussesMayIgnoreRules ? 1 : 0),
 						(byte)(Options.instantEffects ? 1 : 0),
 						(byte)(Options.parkingRestrictionsEnabled ? 1 : 0),

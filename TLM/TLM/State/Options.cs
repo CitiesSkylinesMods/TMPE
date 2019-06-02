@@ -32,7 +32,7 @@ namespace TrafficManager.State {
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
 		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
 		private static UICheckBox ignoreDisabledModsToggle = null;
-		private static UICheckBox realisticSpeedsToggle = null;
+		private static UICheckBox individualDrivingStyleToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
 		private static UICheckBox allRelaxedToggle = null;
@@ -95,7 +95,7 @@ namespace TrafficManager.State {
 
 		public static bool instantEffects = true;
 		//public static int laneChangingRandomization = 2;
-		public static bool realisticSpeeds = true;
+		public static bool individualDrivingStyle = true;
 		public static int recklessDrivers = 3;
 		public static bool relaxedBusses = false;
 		public static bool allRelaxed = false;
@@ -258,7 +258,8 @@ namespace TrafficManager.State {
 
 			recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
 			recklessDriversDropdown.width = 300;
-			realisticSpeedsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Realistic_speeds"), realisticSpeeds, onRealisticSpeedsChanged) as UICheckBox;
+			individualDrivingStyleToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Individual_driving_styles"), individualDrivingStyle, onIndividualDrivingStyleChanged) as UICheckBox;
+
 			if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
 				strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
 			}
@@ -1006,12 +1007,12 @@ namespace TrafficManager.State {
 			realisticPublicTransport = newValue;
 		}
 
-		private static void onRealisticSpeedsChanged(bool value) {
+		private static void onIndividualDrivingStyleChanged(bool value) {
 			if (!checkGameLoaded())
 				return;
 
-			Log._Debug($"realisticSpeeds changed to {value}");
-			realisticSpeeds = value;
+			Log._Debug($"individualDrivingStyle changed to {value}");
+			setIndividualDrivingStyle(value);
 		}
 
 		private static void onDisableDespawningChanged(bool value) {
@@ -1272,10 +1273,12 @@ namespace TrafficManager.State {
 				realisticPublicTransportToggle.isChecked = newValue;
 		}
 
-		public static void setRealisticSpeeds(bool newValue) {
-			realisticSpeeds = newValue;
-			if (realisticSpeedsToggle != null)
-				realisticSpeedsToggle.isChecked = newValue;
+		public static void setIndividualDrivingStyle(bool newValue) {
+			individualDrivingStyle = newValue;
+
+			if (individualDrivingStyleToggle != null) {
+				individualDrivingStyleToggle.isChecked = newValue;
+			}
 		}
 
 		public static void setDisableDespawning(bool value) {
@@ -1550,6 +1553,14 @@ namespace TrafficManager.State {
 					return 10000;
 			}
 			return 10000;
+		}
+
+		/// <summary>
+		/// Determines whether Dynamic Lane Selection (DLS) is enabled.
+		/// </summary>
+		/// <returns></returns>
+		public static bool IsDynamicLaneSelectionActive() {
+			return advancedAI && altLaneSelectionRatio > 0;
 		}
 	}
 }

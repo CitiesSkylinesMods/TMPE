@@ -73,6 +73,8 @@ namespace TrafficManager.State {
 
 		public DynamicLaneSelection DynamicLaneSelection = new DynamicLaneSelection();
 
+		public Gameplay Gameplay = new Gameplay();
+
 		public Main Main = new Main();
 
 		public ParkingAI ParkingAI = new ParkingAI();
@@ -160,6 +162,10 @@ namespace TrafficManager.State {
 
 					if (conf.DynamicLaneSelection == null) {
 						conf.DynamicLaneSelection = new DynamicLaneSelection();
+					}
+
+					if (conf.Gameplay == null) {
+						conf.Gameplay = new Gameplay();
 					}
 
 					if (conf.ParkingAI == null) {

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
+using TrafficManager.State.ConfigData;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using TrafficManager.Traffic.Enums;
@@ -94,8 +95,6 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 #endif
-
-			StepRand(ref extVehicle);
 
 			if (Options.advancedAI) {
 				TrafficMeasurementManager.Instance.AddTraffic(extVehicle.currentSegmentId, extVehicle.currentLaneIndex
@@ -372,6 +371,9 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"ExtVehicleManager.OnStartPathFind({extVehicle.vehicleId}, {vehicleType}) finished: {extVehicle}");
 #endif
 
+			StepRand(ref extVehicle, true);
+			UpdateDynamicLaneSelectionParameters(ref extVehicle);
+
 			return extVehicle.vehicleType;
 		}
 
@@ -395,6 +397,8 @@ namespace TrafficManager.Manager.Impl {
 			extVehicle.lastPathPositionIndex = 0;
 			extVehicle.lastAltLaneSelSegmentId = 0;
 			extVehicle.recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(extVehicle.vehicleId, ref vehicleData);
+			StepRand(ref extVehicle, true);
+			UpdateDynamicLaneSelectionParameters(ref extVehicle);
 
 			try {
 				extVehicle.totalLength = vehicleData.CalculateTotalLength(extVehicle.vehicleId);
@@ -556,21 +560,53 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public uint GetTimedVehicleRand(ushort vehicleId) {
-			uint intv = ExtVehicleManager.MAX_TIMED_RAND / 2u;
-			uint range = intv * (uint)(vehicleId % (100u / intv)); // is one of [0, 50]
-			uint step = ExtVehicleManager.Instance.ExtVehicles[vehicleId].timedRand;
-			if (step >= intv) {
-				step = ExtVehicleManager.MAX_TIMED_RAND - step;
-			}
-
-			return range + step;
+			return (uint)((vehicleId % 2) * 50u + (ExtVehicles[vehicleId].timedRand >> 1));
 		}
 
-		public void StepRand(ref ExtVehicle extVehicle) {
+		public void StepRand(ref ExtVehicle extVehicle, bool force) {
 			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
-			if (rand.UInt32(20) == 0) {
-				extVehicle.timedRand = (byte)(((uint)extVehicle.timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
+			if (force || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0)) {
+				extVehicle.timedRand = Options.individualDrivingStyle ? (byte)rand.UInt32(100) : (byte)50;
 			}
+		}
+
+		public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.Switches[9])
+				Log._Debug($"VehicleState.UpdateDynamicLaneSelectionParameters({extVehicle.vehicleId}) called.");
+#endif
+
+			if (!Options.IsDynamicLaneSelectionActive()) {
+				extVehicle.dlsReady = false;
+				return;
+			}
+
+			if (extVehicle.dlsReady) {
+				return;
+			}
+
+			float egoism = (float)extVehicle.timedRand / 100f;
+			float altruism = 1f - egoism;
+			DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
+
+			if (Options.individualDrivingStyle) {
+				extVehicle.maxReservedSpace = extVehicle.recklessDriver
+					? Mathf.Lerp(dls.MinMaxRecklessReservedSpace, dls.MaxMaxRecklessReservedSpace, altruism)
+					: Mathf.Lerp(dls.MinMaxReservedSpace, dls.MaxMaxReservedSpace, altruism);
+				extVehicle.laneSpeedRandInterval = Mathf.Lerp(dls.MinLaneSpeedRandInterval, dls.MaxLaneSpeedRandInterval, egoism);
+				extVehicle.maxOptLaneChanges = (int)Math.Round(Mathf.Lerp(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1, egoism));
+				extVehicle.maxUnsafeSpeedDiff = Mathf.Lerp(dls.MinMaxUnsafeSpeedDiff, dls.MaxMaxOptLaneChanges, egoism);
+				extVehicle.minSafeSpeedImprovement = Mathf.Lerp(dls.MinMinSafeSpeedImprovement, dls.MaxMinSafeSpeedImprovement, altruism);
+				extVehicle.minSafeTrafficImprovement = Mathf.Lerp(dls.MinMinSafeTrafficImprovement, dls.MaxMinSafeTrafficImprovement, altruism);
+			} else {
+				extVehicle.maxReservedSpace = extVehicle.recklessDriver ? dls.MaxRecklessReservedSpace : dls.MaxReservedSpace;
+				extVehicle.laneSpeedRandInterval = dls.LaneSpeedRandInterval;
+				extVehicle.maxOptLaneChanges = dls.MaxOptLaneChanges;
+				extVehicle.maxUnsafeSpeedDiff = dls.MaxUnsafeSpeedDiff;
+				extVehicle.minSafeSpeedImprovement = dls.MinSafeSpeedImprovement;
+				extVehicle.minSafeTrafficImprovement = dls.MinSafeTrafficImprovement;
+			}
+			extVehicle.dlsReady = true;
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
