@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ColossalFramework;
 using ColossalFramework.Globalization;
+using ColossalFramework.IO;
 using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
@@ -84,6 +85,13 @@ namespace TrafficManager.UI {
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
 
+#if !DEBUG
+            if (GetLocalTMPE() != null) {
+                Log._Debug("Local build of TM:PE found - adding to IncompatbileMods list");
+                IncompatibleMods.Add(LOCAL_TMPE, "TM:PE LOCAL BUILD");
+            }
+#endif
+
             int acc = 0;
             UIPanel item;
             if (IncompatibleMods.Count != 0) {
@@ -95,17 +103,6 @@ namespace TrafficManager.UI {
                 });
                 item = null;
             }
-
-// directive block commented out for testing
-// #if !DEBUG
-            if (GetLocalMod("TM:PE") != null) {
-                Log._Debug("Local build of TM:PE found");
-                item = CreateEntry(ref scrollablePanel, "TM:PE LOCAL BUILD", LOCAL_TMPE);
-                item.relativePosition = new Vector2(0, acc);
-                item.size = new Vector2(560, 50);
-                item = null;
-            }
-// #endif
 
             scrollablePanel.FitTo(panel);
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
@@ -178,29 +175,26 @@ namespace TrafficManager.UI {
 
         private void UnsubscribeClick(UIComponent component, UIMouseEventParameter eventparam, ulong steamId) {
 
-            if (steamId == LOCAL_TMPE) { // Local TM:PE
+            bool success = false;
 
+            component.isEnabled = false;
+
+            if (steamId == LOCAL_TMPE) {
                 Log.Info("Trying to delete local build of TM:PE");
-                component.isEnabled = false;
-                PluginInfo localTMPE = GetLocalMod("TM:PE");
-                // TODO: Find out how to delete the local mod using its PluginInfo
+                success = DeleteLocalTMPE();
+            } else {
+                Log.Info("Trying to unsubscribe workshop item " + steamId);
+                success = PlatformService.workshop.Unsubscribe(new PublishedFileId(steamId));
+            }
+
+            if (success) {
+                IncompatibleMods.Remove(steamId);
                 component.parent.Disable();
                 component.isVisible = false;
-
-            } else { // Workshop mod
-
-                Log.Info("Trying to unsubscribe workshop item " + steamId);
-                component.isEnabled = false;
-                if (PlatformService.workshop.Unsubscribe(new PublishedFileId(steamId))) {
-                    IncompatibleMods.Remove(steamId);
-                    component.parent.Disable();
-                    component.isVisible = false;
-                    Log.Info("Workshop item " + steamId + " unsubscribed");
-                } else {
-                    Log.Warning("Failed unsubscribing workshop item " + steamId);
-                    component.isEnabled = true;
-                }
-
+                Log.Info("Successfully removed incompatbile mod");
+            } else {
+                Log.Warning("Failed to remove incompatible mod");
+                component.isEnabled = true;
             }
         }
 
@@ -272,15 +266,29 @@ namespace TrafficManager.UI {
             }
         }
 
-        // get plugin info for a local mod
-        // note: may be null if mod not found
-        private PluginInfo GetLocalMod(string name)
+        private bool DeleteLocalTMPE()
+        {
+            PluginInfo localTMPE = GetLocalTMPE();
+            try
+            {
+                localTMPE.Unload();
+                DirectoryUtils.DeleteDirectory(localTMPE.modPath);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Failed to delete local TM:PE from " + localTMPE.modPath);
+                return false;
+            }
+        }
+
+        private PluginInfo GetLocalTMPE()
         {
             try
             {
                 foreach (PluginInfo plugin in Singleton<PluginManager>.instance.GetPluginsInfo())
                 {
-                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains(name))
+                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains("TM:PE"))
                     {
                         return plugin;
                     }
@@ -288,7 +296,7 @@ namespace TrafficManager.UI {
             }
             catch (Exception e)
             {
-                Debug.Log("[TM:PE] ModsCompatibilityChecker.GetLocalMod() ERROR:");
+                Log.Warning("ModsCompatibilityChecker.GetLocalTMPE() error - see game log for details");
                 Debug.LogException(e);
             }
             return null;
