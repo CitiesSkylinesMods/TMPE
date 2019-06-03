@@ -85,9 +85,9 @@ namespace TrafficManager.UI {
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
 
-            int acc = 0;
-            UIPanel item;
             if (IncompatibleMods.Count != 0) {
+                int acc = 0;
+                UIPanel item;
                 IncompatibleMods.ForEach((pair) => {
                     item = CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
                     item.relativePosition = new Vector2(0, acc);
