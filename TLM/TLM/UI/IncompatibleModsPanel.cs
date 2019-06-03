@@ -151,18 +151,19 @@ namespace TrafficManager.UI {
         }
 
         private UIPanel CreateEntry(ref UIScrollablePanel parent, string name, ulong steamId) {
+            string caption = steamId == LOCAL_TMPE ? "Delete" : "Unsubscribe";
+
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);
             panel.backgroundSprite = "ContentManagerItemBackground";
+
             UILabel label = panel.AddUIComponent<UILabel>();
             label.text = name;
             label.textAlignment = UIHorizontalAlignment.Left;
             label.relativePosition = new Vector2(10, 15);
-            if (steamId == LOCAL_TMPE) { // local TM:PE needs deleting
-                CreateButton(panel, "Delete", (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
-            } else { // workshop mod needs unsubscribing
-                CreateButton(panel, "Unsubscribe", (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
-            }
+
+            CreateButton(panel, caption, (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
+
             return panel;
         }
 
