@@ -9,12 +9,15 @@ using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
+using ICities;
 using TrafficManager.UI;
 using UnityEngine;
+using static ColossalFramework.Plugins.PluginManager;
 
 namespace TrafficManager.Util {
     public class ModsCompatibilityChecker {
         //TODO include %APPDATA% mods folder
+        private const ulong LOCAL_TMPE = 0u;
 
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
         private const string DEFAULT_INCOMPATIBLE_MODS_FILENAME = "incompatible_mods.txt";
@@ -35,6 +38,13 @@ namespace TrafficManager.Util {
                     incompatibleMods.Add(userModList[i], incompatibleModName);
                 }
             }
+
+#if !DEBUG
+            if (HasLocalTMPE())
+            {
+                incompatibleMods.Add(LOCAL_TMPE, "TM:PE Local Build");
+            }
+#endif
 
             if (incompatibleMods.Count > 0) {
                 Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
@@ -90,6 +100,39 @@ namespace TrafficManager.Util {
             }
             PublishedFileId[] ids = ContentManagerPanel.subscribedItemsTable.ToArray();
             return ids.Select(id => id.AsUInt64).ToArray();
+        }
+
+        private bool HasLocalTMPE()
+        {
+            try
+            {
+                foreach (PluginInfo plugin in Singleton<PluginManager>.instance.GetPluginsInfo())
+                {
+                    // How to detect local mod: plugin.publishedFileID.AsUInt64 == ulong.MaxValue
+                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains("TM:PE"))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("ModsCompatibilityChecker.HasLocalTMPE() error - see game log for details");
+                Debug.LogException(e);
+            }
+            return false;
+        }
+
+        // returns name of mod as defined in the IUserMod class of that mod
+        private string GetModName(PluginInfo plugin)
+        {
+            string name = plugin.name;
+            IUserMod[] instances = plugin.GetInstances<IUserMod>();
+            if ((int)instances.Length > 0)
+            {
+                name = instances[0].Name;
+            }
+            return name;
         }
     }
 }

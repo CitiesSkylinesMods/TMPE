@@ -85,13 +85,6 @@ namespace TrafficManager.UI {
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
 
-#if !DEBUG
-            if (GetLocalTMPE() != null) {
-                Log._Debug("Local build of TM:PE found - adding to IncompatbileMods list");
-                IncompatibleMods.Add(LOCAL_TMPE, "TM:PE LOCAL BUILD");
-            }
-#endif
-
             int acc = 0;
             UIPanel item;
             if (IncompatibleMods.Count != 0) {
@@ -271,7 +264,9 @@ namespace TrafficManager.UI {
             PluginInfo localTMPE = GetLocalTMPE();
             try
             {
+                Log._Debug("Attempt to Unload local TM:PE");
                 localTMPE.Unload();
+                Log._Debug("Attempt to delete local TM:PE folder " + localTMPE.modPath);
                 DirectoryUtils.DeleteDirectory(localTMPE.modPath);
                 return true;
             }
@@ -296,7 +291,7 @@ namespace TrafficManager.UI {
             }
             catch (Exception e)
             {
-                Log.Warning("ModsCompatibilityChecker.GetLocalTMPE() error - see game log for details");
+                Log.Warning("IncompatibleModsWarning.GetLocalTMPE() error - see game log for details");
                 Debug.LogException(e);
             }
             return null;
