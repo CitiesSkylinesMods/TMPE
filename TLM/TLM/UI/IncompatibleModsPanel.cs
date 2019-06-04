@@ -7,27 +7,30 @@ using ColossalFramework.PlatformServices;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
-using ICities;
 using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
 
-namespace TrafficManager.UI {
-    public class IncompatibleModsPanel : UIPanel {
-        private const ulong LOCAL_TMPE = 0u;
+namespace TrafficManager.UI
+{
+    public class IncompatibleModsPanel : UIPanel
+    {
+        private const ulong LOCAL_MOD = ulong.MaxValue;
 
+        private static IncompatibleModsPanel _instance;
         private UILabel title;
         private UIButton closeButton;
         private UISprite warningIcon;
         private UIPanel mainPanel;
         private UICheckBox runModsCheckerOnStartup;
         private UIComponent blurEffect;
-        private static IncompatibleModsPanel _instance;
 
-        public Dictionary<ulong, string> IncompatibleMods { get; set; }
+        public Dictionary<PluginInfo, string> IncompatibleMods { get; set; }
 
-        public void Initialize() {
+        public void Initialize()
+        {
             Log._Debug("IncompatibleModsPanel initialize");
-            if (mainPanel != null) {
+            if (mainPanel != null)
+            {
                 mainPanel.OnDestroy();
             }
 
@@ -42,7 +45,7 @@ namespace TrafficManager.UI {
             mainPanel.height = 440;
 
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
-            relativePosition = new Vector3(resolution.x / 2 - 300, resolution.y / 3);
+            relativePosition = new Vector3((resolution.x / 2) - 300, resolution.y / 3);
             mainPanel.relativePosition = Vector3.zero;
 
             warningIcon = mainPanel.AddUIComponent<UISprite>();
@@ -80,15 +83,17 @@ namespace TrafficManager.UI {
             runModsCheckerOnStartup.relativePosition = new Vector3(20, height - 30f);
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
-            scrollablePanel.backgroundSprite = "";
+            scrollablePanel.backgroundSprite = string.Empty;
             scrollablePanel.size = new Vector2(550, 340);
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
 
-            if (IncompatibleMods.Count != 0) {
+            if (IncompatibleMods.Count != 0)
+            {
                 int acc = 0;
                 UIPanel item;
-                IncompatibleMods.ForEach((pair) => {
+                IncompatibleMods.ForEach((pair) =>
+                {
                     item = CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
                     item.relativePosition = new Vector2(0, acc);
                     item.size = new Vector2(560, 50);
@@ -129,7 +134,8 @@ namespace TrafficManager.UI {
             blurEffect.size = new Vector2(resolution.x, resolution.y);
             blurEffect.absolutePosition = new Vector3(0, 0);
             blurEffect.SendToBack();
-            if (blurEffect != null) {
+            if (blurEffect != null)
+            {
                 blurEffect.isVisible = true;
                 ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
             }
@@ -137,12 +143,27 @@ namespace TrafficManager.UI {
             BringToFront();
         }
 
-        private void RunModsCheckerOnStartup_eventCheckChanged(bool value) {
+        protected override void OnKeyDown(UIKeyEventParameter p)
+        {
+            if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Return))
+            {
+                TryPopModal();
+                p.Use();
+                Hide();
+                Unfocus();
+            }
+
+            base.OnKeyDown(p);
+        }
+
+        private void RunModsCheckerOnStartup_eventCheckChanged(bool value)
+        {
             Log._Debug("Incompatible mods checker run on game launch changed to " + value);
             State.Options.setScanForKnownIncompatibleMods(value);
         }
 
-        private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
+        private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam)
+        {
             closeButton.eventClick -= CloseButtonClick;
             TryPopModal();
             Hide();
@@ -150,49 +171,72 @@ namespace TrafficManager.UI {
             eventparam.Use();
         }
 
-        private UIPanel CreateEntry(ref UIScrollablePanel parent, string name, ulong steamId) {
-            string caption = steamId == LOCAL_TMPE ? "Delete" : "Unsubscribe";
+        private UIPanel CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod)
+        {
+            string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD ? "Delete" : "Unsubscribe";
 
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);
             panel.backgroundSprite = "ContentManagerItemBackground";
 
             UILabel label = panel.AddUIComponent<UILabel>();
-            label.text = name;
+            label.text = modName;
             label.textAlignment = UIHorizontalAlignment.Left;
             label.relativePosition = new Vector2(10, 15);
 
-            CreateButton(panel, caption, (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, steamId); });
+            CreateButton(panel, caption, (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, mod); });
 
             return panel;
         }
 
-        private void UnsubscribeClick(UIComponent component, UIMouseEventParameter eventparam, ulong steamId) {
+        private void UnsubscribeClick(UIComponent component, UIMouseEventParameter eventparam, PluginInfo mod)
+        {
 
             bool success = false;
 
+            // disable button to prevent accidental clicks
             component.isEnabled = false;
 
-            if (steamId == LOCAL_TMPE) {
-                Log.Info("Trying to delete local build of TM:PE");
-                success = DeleteLocalTMPE();
-            } else {
-                Log.Info("Trying to unsubscribe workshop item " + steamId);
-                success = PlatformService.workshop.Unsubscribe(new PublishedFileId(steamId));
+            Log.Info($"Removing incompatible mod '{mod.name}' from {mod.modPath}");
+            if (mod.publishedFileID.AsUInt64 == LOCAL_MOD)
+            {
+                success = DeleteLocalTMPE(mod);
+            }
+            else
+            {
+                success = PlatformService.workshop.Unsubscribe(mod.publishedFileID);
             }
 
-            if (success) {
-                IncompatibleMods.Remove(steamId);
+            if (success)
+            {
+                IncompatibleMods.Remove(mod);
                 component.parent.Disable();
                 component.isVisible = false;
-                Log.Info("Successfully removed incompatbile mod");
-            } else {
-                Log.Warning("Failed to remove incompatible mod");
+            }
+            else
+            {
+                Log.Warning($"Failed to remove mod '{mod.name}'");
                 component.isEnabled = true;
             }
         }
 
-        private UIButton CreateButton(UIComponent parent, string text, int x, int y, MouseEventHandler eventClick) {
+        private bool DeleteLocalTMPE(PluginInfo mod)
+        {
+            try
+            {
+                Log._Debug($"Deleting local TM:PE from {mod.modPath}");
+                //mod.Unload();
+                DirectoryUtils.DeleteDirectory(mod.modPath);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        private UIButton CreateButton(UIComponent parent, string text, int x, int y, MouseEventHandler eventClick)
+        {
             var button = parent.AddUIComponent<UIButton>();
             button.textScale = 0.8f;
             button.width = 150f;
@@ -211,7 +255,8 @@ namespace TrafficManager.UI {
             return button;
         }
 
-        private void OnEnable() {
+        private void OnEnable()
+        {
             Log._Debug("IncompatibleModsPanel enabled");
             PlatformService.workshop.eventUGCQueryCompleted += OnQueryCompleted;
             Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
@@ -219,15 +264,18 @@ namespace TrafficManager.UI {
             LocaleManager.eventLocaleChanged += OnLocaleChanged;
         }
 
-        private void OnQueryCompleted(UGCDetails result, bool ioerror) {
+        private void OnQueryCompleted(UGCDetails result, bool ioerror)
+        {
             Log._Debug("IncompatibleModsPanel.OnQueryCompleted() - " + result.result.ToString("D") + " IO error?:" + ioerror);
         }
 
-        private void OnPluginsChanged() {
+        private void OnPluginsChanged()
+        {
             Log._Debug("IncompatibleModsPanel.OnPluginsChanged() - Plugins changed");
         }
 
-        private void OnDisable() {
+        private void OnDisable()
+        {
             Log._Debug("IncompatibleModsPanel disabled");
             PlatformService.workshop.eventUGCQueryCompleted -= this.OnQueryCompleted;
             Singleton<PluginManager>.instance.eventPluginsChanged -= this.OnPluginsChanged;
@@ -235,79 +283,22 @@ namespace TrafficManager.UI {
             LocaleManager.eventLocaleChanged -= this.OnLocaleChanged;
         }
 
-        protected override void OnKeyDown(UIKeyEventParameter p) {
-            if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Return)) {
-                TryPopModal();
-                p.Use();
-                Hide();
-                Unfocus();
-            }
-
-            base.OnKeyDown(p);
-        }
-
-        private void TryPopModal() {
-            if (UIView.HasModalInput()) {
+        private void TryPopModal()
+        {
+            if (UIView.HasModalInput())
+            {
                 UIView.PopModal();
                 UIComponent component = UIView.GetModalComponent();
-                if (component != null) {
+                if (component != null)
+                {
                     UIView.SetFocus(component);
                 }
             }
 
-            if (blurEffect != null && UIView.ModalInputCount() == 0) {
-                ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate() { blurEffect.Hide(); });
-            }
-        }
-
-        private bool DeleteLocalTMPE()
-        {
-            PluginInfo localTMPE = GetLocalTMPE();
-            try
+            if (blurEffect != null && UIView.ModalInputCount() == 0)
             {
-                Log._Debug("Attempt to Unload local TM:PE");
-                localTMPE.Unload();
-                Log._Debug("Attempt to delete local TM:PE folder " + localTMPE.modPath);
-                DirectoryUtils.DeleteDirectory(localTMPE.modPath);
-                return true;
+                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate () { blurEffect.Hide(); });
             }
-            catch (Exception e)
-            {
-                Log.Warning("Failed to delete local TM:PE from " + localTMPE.modPath);
-                return false;
-            }
-        }
-
-        private PluginInfo GetLocalTMPE()
-        {
-            try
-            {
-                foreach (PluginInfo plugin in Singleton<PluginManager>.instance.GetPluginsInfo())
-                {
-                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains("TM:PE"))
-                    {
-                        return plugin;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Warning("IncompatibleModsWarning.GetLocalTMPE() error - see game log for details");
-                Debug.LogException(e);
-            }
-            return null;
-        }
-
-        // returns name of mod as defined in the IUserMod class of that mod
-        private string GetModName(PluginInfo pluginInfo)
-        {
-            string name = pluginInfo.name;
-            IUserMod[] instances = pluginInfo.GetInstances<IUserMod>();
-            if ((int)instances.Length > 0)
-            {
-                name = instances[0].Name;
-            }
-            return name;
         }
     }
 }

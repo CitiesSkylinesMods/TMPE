@@ -1,138 +1,159 @@
+using ColossalFramework;
+using ColossalFramework.Plugins;
+using ColossalFramework.UI;
+using CSUtil.Commons;
+using ICities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using ColossalFramework;
-using ColossalFramework.PlatformServices;
-using ColossalFramework.Plugins;
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using ICities;
 using TrafficManager.UI;
-using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
 
-namespace TrafficManager.Util {
-    public class ModsCompatibilityChecker {
-        //TODO include %APPDATA% mods folder
-        private const ulong LOCAL_TMPE = 0u;
+namespace TrafficManager.Util
+{
+    public class ModsCompatibilityChecker
+    {
 
+        public const ulong LOCAL_MOD = ulong.MaxValue;
+
+        // Used for LoadIncompatibleModsList()
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
-        private const string DEFAULT_INCOMPATIBLE_MODS_FILENAME = "incompatible_mods.txt";
-        private readonly ulong[] userModList;
-        private readonly Dictionary<ulong, string> incompatibleModList;
+        private const string INCOMPATIBLE_MODS_FILE = "incompatible_mods.txt";
 
-        public ModsCompatibilityChecker() {
-            incompatibleModList = LoadIncompatibleModList();
-            userModList = GetUserModsList();
-        }
+        // parsed contents of incompatible_mods.txt
+        private readonly Dictionary<ulong, string> incompatibleMods;
 
-        public void PerformModCheck() {
-            Log.Info("Performing incompatible mods check");
-            Dictionary<ulong, string> incompatibleMods = new Dictionary<ulong, string>();
-            for (int i = 0; i < userModList.Length; i++) {
-                string incompatibleModName;
-                if (incompatibleModList.TryGetValue(userModList[i], out incompatibleModName)) {
-                    incompatibleMods.Add(userModList[i], incompatibleModName);
-                }
-            }
-
-#if !DEBUG
-            if (HasLocalTMPE())
-            {
-                incompatibleMods.Add(LOCAL_TMPE, "TM:PE Local Build");
-            }
-#endif
-
-            if (incompatibleMods.Count > 0) {
-                Log.Warning("Incompatible mods detected! Count: " + incompatibleMods.Count);
-
-                if (State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
-                    IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
-                    panel.IncompatibleMods = incompatibleMods;
-                    panel.Initialize();
-                    UIView.PushModal(panel);
-                    UIView.SetFocus(panel);
-                }
-            } else {
-                Log.Info("No incompatible mods detected");
-            }
-        }
-
-        private Dictionary<ulong, string> LoadIncompatibleModList() {
-            Dictionary<ulong, string> incompatibleMods = new Dictionary<ulong, string>();
-            string[] lines;
-            using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream(RESOURCES_PREFIX + DEFAULT_INCOMPATIBLE_MODS_FILENAME)) {
-                using (StreamReader sr = new StreamReader(st)) {
-                    lines = sr.ReadToEnd().Split(new string[] {"\n", "\r\n"}, StringSplitOptions.None);
-                }
-            }
-
-            for (int i = 0; i < lines.Length; i++) {
-                string[] strings = lines[i].Split(';');
-                ulong steamId;
-                if (ulong.TryParse(strings[0], out steamId)) {
-                    incompatibleMods.Add(steamId, strings[1]);
-                }
-            }
-
-            // Treat any other branches of TM:PE as incompatible (causes issues with saving road customisations).
-            // This still won't detect local builds, but will reduce support workload from end users who have
-            // multiple TM:PE subscribed.
-            // See also: https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues/211 
-#if LABS
-            incompatibleMods.Add(583429740u , "TM:PE STABLE");
-#elif DEBUG // assume local build
-            incompatibleMods.Add(1637663252u, "TM:PE LABS");
-            incompatibleMods.Add(583429740u , "TM:PE STABLE");
-#else // STABLE
-            incompatibleMods.Add(1637663252u, "TM:PE LABS");
-#endif
-
-            return incompatibleMods;
-        }
-
-        private ulong[] GetUserModsList() {
-            if (State.GlobalConfig.Instance.Main.IgnoreDisabledMods) {
-                return PluginManager.instance.GetPluginsInfo().Where(plugin => plugin.isEnabled).Select(info => info.publishedFileID.AsUInt64).ToArray();
-            }
-            PublishedFileId[] ids = ContentManagerPanel.subscribedItemsTable.ToArray();
-            return ids.Select(id => id.AsUInt64).ToArray();
-        }
-
-        private bool HasLocalTMPE()
+        public ModsCompatibilityChecker()
         {
-            try
-            {
-                foreach (PluginInfo plugin in Singleton<PluginManager>.instance.GetPluginsInfo())
-                {
-                    // How to detect local mod: plugin.publishedFileID.AsUInt64 == ulong.MaxValue
-                    if (!plugin.isBuiltin && !plugin.isCameraScript && plugin.publishedFileID.AsUInt64 == ulong.MaxValue && GetModName(plugin).Contains("TM:PE"))
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Warning("ModsCompatibilityChecker.HasLocalTMPE() error - see game log for details");
-                Debug.LogException(e);
-            }
-            return false;
+            incompatibleMods = LoadListOfIncompatibleMods();
         }
 
-        // returns name of mod as defined in the IUserMod class of that mod
-        private string GetModName(PluginInfo plugin)
+        public void PerformModCheck()
+        {
+            Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
+
+            if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
+            {
+                IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
+                panel.IncompatibleMods = detected;
+                panel.Initialize();
+                UIView.PushModal(panel);
+                UIView.SetFocus(panel);
+            }
+        }
+
+        /// <summary>
+        /// Iterates installed mods looking for known incompatibilities.
+        /// </summary>
+        /// 
+        /// <returns>A list of detected incompatible mods.</returns>
+        /// 
+        /// <exception cref="ArgumentException">Invalid folder path (contains invalid characters, is empty, or contains only white spaces).</exception>
+        /// <exception cref="PathTooLongException">Path is too long (longer than the system-defined maximum length).</exception>
+        public Dictionary<PluginInfo, string> ScanForIncompatibleMods()
+        {
+            Log.Info("Scanning for incompatible mods");
+
+            // list of installed incompatible mods
+            Dictionary<PluginInfo, string> results = new Dictionary<PluginInfo, string>();
+
+            // only check enabled mods?
+            bool filterToEnabled = State.GlobalConfig.Instance.Main.IgnoreDisabledMods;
+
+            // iterate plugins
+            foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo())
+            {
+                if (!mod.isBuiltin && !mod.isCameraScript && (!filterToEnabled || mod.isEnabled))
+                {
+                    string modName = GetModName(mod);
+
+                    if (incompatibleMods.ContainsKey(mod.publishedFileID.AsUInt64))
+                    {
+                        Log.Info($"Incompatible mod: {mod.publishedFileID.AsUInt64} - {modName}");
+                        results.Add(mod, modName);
+                    }
+#if !DEBUG
+                    // Workshop TM:PE builds treat local builds as incompatible
+                    else if (mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
+                    {
+                        Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
+                        string folder = Path.GetDirectoryName(mod.modPath).Split(Path.DirectorySeparatorChar).Last();
+                        results.Add(mod, $"{modName} in /{folder}");
+                    }
+#endif
+                }
+            }
+
+            Log.Info($"Scan complete: {results.Count} incompatible mod(s) found");
+
+            return results;
+        }
+
+        /// <summary>
+        /// Gets the name of the specified mod.
+        /// 
+        /// It will return the <see cref="IUserMod.Name"/> if found, otherwise it will return <see cref="PluginInfo.name"/> (assembly name).
+        /// </summary>
+        /// 
+        /// <param name="plugin">The <see cref="PluginInfo"/> associated with the mod.</param>
+        /// 
+        /// <returns>The name of the specified plugin.</returns>
+        public string GetModName(PluginInfo plugin)
         {
             string name = plugin.name;
             IUserMod[] instances = plugin.GetInstances<IUserMod>();
-            if ((int)instances.Length > 0)
+            if (instances.Length > 0)
             {
                 name = instances[0].Name;
             }
             return name;
+        }
+
+        /// <summary>
+        /// Loads and parses the <c>incompatible_mods.txt</c> resource, adds other workshop branches of TM:PE as applicable.
+        /// </summary>
+        /// 
+        /// <returns>A dictionary of mod names referenced by Steam Workshop ID.</returns>
+        private Dictionary<ulong, string> LoadListOfIncompatibleMods()
+        {
+            // list of known incompatible mods
+            Dictionary<ulong, string> results = new Dictionary<ulong, string>();
+
+            // load the file
+            string[] lines;
+            using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream(RESOURCES_PREFIX + INCOMPATIBLE_MODS_FILE))
+            {
+                using (StreamReader sr = new StreamReader(st))
+                {
+                    lines = sr.ReadToEnd().Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
+                }
+            }
+
+            Log.Info($"{INCOMPATIBLE_MODS_FILE} contains {lines.Length} entries");
+
+            // parse the file
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] strings = lines[i].Split(';');
+                if (ulong.TryParse(strings[0], out ulong steamId))
+                {
+                    results.Add(steamId, strings[1]);
+                }
+            }
+
+            // Treat other workshop-published branches of TM:PE, as applicable, as conflicts
+#if LABS
+            results.Add(583429740u , "TM:PE STABLE");
+#elif DEBUG
+            results.Add(1637663252u, "TM:PE LABS");
+            results.Add(583429740u, "TM:PE STABLE");
+#else
+            results.Add(1637663252u, "TM:PE LABS");
+#endif
+
+            return results;
         }
     }
 }
