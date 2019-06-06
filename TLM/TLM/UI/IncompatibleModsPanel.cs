@@ -255,34 +255,6 @@ namespace TrafficManager.UI
             return button;
         }
 
-        private void OnEnable()
-        {
-            Log._Debug("IncompatibleModsPanel enabled");
-            PlatformService.workshop.eventUGCQueryCompleted += OnQueryCompleted;
-            Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
-            Singleton<PluginManager>.instance.eventPluginsStateChanged += OnPluginsChanged;
-            LocaleManager.eventLocaleChanged += OnLocaleChanged;
-        }
-
-        private void OnQueryCompleted(UGCDetails result, bool ioerror)
-        {
-            Log._Debug("IncompatibleModsPanel.OnQueryCompleted() - " + result.result.ToString("D") + " IO error?:" + ioerror);
-        }
-
-        private void OnPluginsChanged()
-        {
-            Log._Debug("IncompatibleModsPanel.OnPluginsChanged() - Plugins changed");
-        }
-
-        private void OnDisable()
-        {
-            Log._Debug("IncompatibleModsPanel disabled");
-            PlatformService.workshop.eventUGCQueryCompleted -= this.OnQueryCompleted;
-            Singleton<PluginManager>.instance.eventPluginsChanged -= this.OnPluginsChanged;
-            Singleton<PluginManager>.instance.eventPluginsStateChanged -= this.OnPluginsChanged;
-            LocaleManager.eventLocaleChanged -= this.OnLocaleChanged;
-        }
-
         private void TryPopModal()
         {
             if (UIView.HasModalInput())
