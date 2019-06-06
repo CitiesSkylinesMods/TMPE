@@ -136,8 +136,8 @@ namespace TrafficManager.Util
             // parse the file
             for (int i = 0; i < lines.Length; i++)
             {
-                string[] strings = lines[i].Split(';');
                 ulong steamId;
+                string[] strings = lines[i].Split(';');
                 if (ulong.TryParse(strings[0], out steamId))
                 {
                     results.Add(steamId, strings[1]);
