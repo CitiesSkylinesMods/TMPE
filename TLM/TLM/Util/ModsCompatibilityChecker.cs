@@ -79,7 +79,7 @@ namespace TrafficManager.Util
                     else if (mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
-                        string folder = Path.GetDirectoryName(mod.modPath).Split(Path.DirectorySeparatorChar).Last();
+                        string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
                         results.Add(mod, $"{modName} in /{folder}");
                     }
 #endif
