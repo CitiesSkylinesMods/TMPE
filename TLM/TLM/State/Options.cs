@@ -510,16 +510,18 @@ namespace TrafficManager.State {
 			return tabButton;
 		}
 
-		private static bool checkGameLoaded() {
+		private static bool IsGameLoaded(bool warn=true) {
 			if (!SerializableDataExtension.StateLoading && !LoadingExtension.IsGameLoaded) {
-				UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Nope!", Translation.GetString("Settings_are_defined_for_each_savegame_separately") + ". https://www.viathinksoft.de/tmpe/#options", false);
+				if (warn) {
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage("Nope!", Translation.GetString("Settings_are_defined_for_each_savegame_separately") + ". https://www.viathinksoft.de/tmpe/#options", false);
+				}
 				return false;
 			}
 			return true;
 		}
 
 		private static void onGuiTransparencyChanged(float newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			setGuiTransparency((byte)Mathf.RoundToInt(newVal));
@@ -531,7 +533,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onOverlayTransparencyChanged(float newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			setOverlayTransparency((byte)Mathf.RoundToInt(newVal));
@@ -543,7 +545,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAltLaneSelectionRatioChanged(float newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			setAltLaneSelectionRatio((byte)Mathf.RoundToInt(newVal));
@@ -553,7 +555,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onPrioritySignsOverlayChanged(bool newPrioritySignsOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"prioritySignsOverlay changed to {newPrioritySignsOverlay}");
@@ -563,7 +565,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onTimedLightsOverlayChanged(bool newTimedLightsOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"timedLightsOverlay changed to {newTimedLightsOverlay}");
@@ -573,7 +575,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onSpeedLimitsOverlayChanged(bool newSpeedLimitsOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"speedLimitsOverlay changed to {newSpeedLimitsOverlay}");
@@ -583,7 +585,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onVehicleRestrictionsOverlayChanged(bool newVehicleRestrictionsOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
@@ -593,7 +595,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onParkingRestrictionsOverlayChanged(bool newParkingRestrictionsOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"parkingRestrictionsOverlay changed to {newParkingRestrictionsOverlay}");
@@ -603,7 +605,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onJunctionRestrictionsOverlayChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"junctionRestrictionsOverlay changed to {newValue}");
@@ -613,7 +615,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onConnectedLanesOverlayChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"connectedLanesOverlay changed to {newValue}");
@@ -649,14 +651,18 @@ namespace TrafficManager.State {
 
 		private static void onLockButtonChanged(bool newValue) {
 			Log._Debug($"Button lock changed to {newValue}");
-			LoadingExtension.BaseUI.MainMenuButton.SetPosLock(newValue);
+			if (IsGameLoaded(false)) {
+				LoadingExtension.BaseUI.MainMenuButton.SetPosLock(newValue);
+			}
 			GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
 			GlobalConfig.WriteConfig();
 		}
 
 		private static void onLockMenuChanged(bool newValue) {
 			Log._Debug($"Menu lock changed to {newValue}");
-			LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
+			if (IsGameLoaded(false)) {
+				LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
+			}
 			GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
 			GlobalConfig.WriteConfig();
 		}
@@ -698,7 +704,7 @@ namespace TrafficManager.State {
         }
 
         private static void onInstantEffectsChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Instant effects changed to {newValue}");
@@ -706,7 +712,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onVehicleRestrictionsAggressionChanged(int newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"vehicleRestrictionsAggression changed to {newValue}");
@@ -722,7 +728,7 @@ namespace TrafficManager.State {
 		}*/
 
 		private static void onRecklessDriversChanged(int newRecklessDrivers) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Reckless driver amount changed to {newRecklessDrivers}");
@@ -730,7 +736,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onRelaxedBussesChanged(bool newRelaxedBusses) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Relaxed busses changed to {newRelaxedBusses}");
@@ -738,7 +744,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAllRelaxedChanged(bool newAllRelaxed) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"All relaxed changed to {newAllRelaxed}");
@@ -746,7 +752,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAdvancedAIChanged(bool newAdvancedAI) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"advancedAI changed to {newAdvancedAI}");
@@ -754,7 +760,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onHighwayRulesChanged(bool newHighwayRules) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			bool changed = newHighwayRules != highwayRules;
@@ -770,14 +776,14 @@ namespace TrafficManager.State {
 		}
 
 		private static void onPreferOuterLaneChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			preferOuterLane = val;
 		}
 
 		private static void onPrioritySignsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -789,7 +795,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onTimedLightsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -801,7 +807,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onCustomSpeedLimitsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -811,7 +817,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onVehicleRestrictionsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -821,7 +827,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onParkingRestrictionsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -831,7 +837,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onJunctionRestrictionsEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			MenuRebuildRequired = true;
@@ -846,14 +852,14 @@ namespace TrafficManager.State {
 		}
 
 		private static void onTurnOnRedEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			setTurnOnRedEnabled(val);
 		}
 
 		private static void onLaneConnectorEnabledChanged(bool val) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			bool changed = val != laneConnectorEnabled;
@@ -869,7 +875,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onEvacBussesMayIgnoreRulesChanged(bool value) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"evacBussesMayIgnoreRules changed to {value}");
@@ -877,7 +883,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAllowEnterBlockedJunctionsChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
 				setAllowEnterBlockedJunctions(false);
@@ -889,7 +895,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAllowUTurnsChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
 				setAllowUTurns(false);
@@ -901,7 +907,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAllowNearTurnOnRedChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && !turnOnRedEnabled) {
 				setAllowNearTurnOnRed(false);
@@ -918,7 +924,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onAllowFarTurnOnRedChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && (!turnOnRedEnabled || !allowNearTurnOnRed)) {
 				setAllowFarTurnOnRed(false);
@@ -940,7 +946,7 @@ namespace TrafficManager.State {
 #endif
 
 		private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && !junctionRestrictionsEnabled) {
 				setAllowLaneChangesWhileGoingStraight(false);
@@ -952,7 +958,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 			if (newValue && !prioritySignsEnabled) {
 				setTrafficLightPriorityRules(false);
@@ -968,7 +974,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onBanRegularTrafficOnBusLanesChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"banRegularTrafficOnBusLanes changed to {newValue}");
@@ -978,7 +984,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onStrongerRoadConditionEffectsChanged(bool newStrongerRoadConditionEffects) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"strongerRoadConditionEffects changed to {newStrongerRoadConditionEffects}");
@@ -986,7 +992,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onProhibitPocketCarsChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"prohibitPocketCars changed to {newValue}");
@@ -1000,7 +1006,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onRealisticPublicTransportChanged(bool newValue) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"realisticPublicTransport changed to {newValue}");
@@ -1008,7 +1014,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onIndividualDrivingStyleChanged(bool value) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"individualDrivingStyle changed to {value}");
@@ -1016,7 +1022,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onDisableDespawningChanged(bool value) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"disableDespawning changed to {value}");
@@ -1024,7 +1030,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onNodesOverlayChanged(bool newNodesOverlay) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Nodes overlay changed to {newNodesOverlay}");
@@ -1032,7 +1038,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onShowLanesChanged(bool newShowLanes) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Show lanes changed to {newShowLanes}");
@@ -1040,7 +1046,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onVehicleOverlayChanged(bool newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Vehicle overlay changed to {newVal}");
@@ -1048,7 +1054,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onCitizenOverlayChanged(bool newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Citizen overlay changed to {newVal}");
@@ -1056,7 +1062,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onBuildingOverlayChanged(bool newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Building overlay changed to {newVal}");
@@ -1065,7 +1071,7 @@ namespace TrafficManager.State {
 
 #if QUEUEDSTATS
 		private static void onShowPathFindStatsChanged(bool newVal) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Show path-find stats changed to {newVal}");
@@ -1074,7 +1080,7 @@ namespace TrafficManager.State {
 #endif
 
 		private static void onFloatValueChanged(string varName, string newValueStr, ref float var) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			try {
@@ -1088,7 +1094,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onBoolValueChanged(string varName, bool newVal, ref bool var) {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			var = newVal;
@@ -1096,7 +1102,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickResetStuckEntities() {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
@@ -1105,7 +1111,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickRemoveParkedVehicles() {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Constants.ServiceFactory.SimulationService.AddAction(() => {
@@ -1114,7 +1120,7 @@ namespace TrafficManager.State {
 		}
 
 		private static void onClickResetSpeedLimits() {
-			if (!checkGameLoaded())
+			if (!IsGameLoaded())
 				return;
 
 			Flags.resetSpeedLimits();
