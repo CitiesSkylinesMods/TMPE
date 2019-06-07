@@ -595,7 +595,7 @@ namespace TrafficManager.Manager.Impl {
 											(nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
 											(nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
 											(nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-											(nextIncomingDir == ArrowDirection.Turn && (nextIsSimpleJunction || nextIsEndOrOneWayOut || ((leftHandDrive && hasRightArrow) || (!leftHandDrive && hasLeftArrow))))) { // valid turning lane
+											(nextIncomingDir == ArrowDirection.Turn && (!isNextRealJunction || nextIsEndOrOneWayOut || ((leftHandDrive && hasRightArrow) || (!leftHandDrive && hasLeftArrow))))) { // valid turning lane
 #if DEBUGROUTING
 										if (debugFine)
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): lane arrow check passed for nextLaneId={nextLaneId}, idx={nextLaneIndex}. adding as default lane.");
