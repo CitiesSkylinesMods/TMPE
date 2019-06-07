@@ -466,7 +466,8 @@ namespace TrafficManager.Manager.Impl {
 				return true;
 			}
 
-			bool ret = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+			// crossing is allowed at junctions and at untouchable nodes (for example: spiral underground parking)
+			bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) != NetNode.Flags.None;
 #if DEBUG
 			if (debug)
 				Log._Debug($"JunctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed({segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");

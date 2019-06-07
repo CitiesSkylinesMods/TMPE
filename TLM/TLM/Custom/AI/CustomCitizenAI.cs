@@ -563,7 +563,7 @@ namespace TrafficManager.Custom.AI {
 		}
 
 		public bool CustomFindPathPosition(ushort instanceID, ref CitizenInstance citizenData, Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowUnderground, out PathUnit.Position position) {
-			return CustomPathManager.FindCitizenPathPosition(pos, laneTypes, vehicleTypes, (citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None, allowUnderground, out position);
+			return CustomPathManager.FindCitizenPathPosition(pos, laneTypes, vehicleTypes, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, (citizenData.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None, allowUnderground, out position);
 		}
 
 		// stock code
