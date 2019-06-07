@@ -947,7 +947,7 @@ namespace TrafficManager.State {
 			}
 
 			Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
-			allowLaneChangesWhileGoingStraight = newValue;
+			setAllowLaneChangesWhileGoingStraight(newValue);
 		}
 
 		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
@@ -1298,6 +1298,7 @@ namespace TrafficManager.State {
 			if (allowUTurnsToggle != null)
 				allowUTurnsToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowNearTurnOnRed(bool newValue) {
@@ -1305,6 +1306,7 @@ namespace TrafficManager.State {
 			if (allowNearTurnOnRedToggle != null)
 				allowNearTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowFarTurnOnRed(bool newValue) {
@@ -1312,6 +1314,7 @@ namespace TrafficManager.State {
 			if (allowFarTurnOnRedToggle != null)
 				allowFarTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowLaneChangesWhileGoingStraight(bool value) {
@@ -1319,6 +1322,7 @@ namespace TrafficManager.State {
 			if (allowLaneChangesWhileGoingStraightToggle != null)
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowEnterBlockedJunctions(bool value) {
@@ -1326,6 +1330,7 @@ namespace TrafficManager.State {
 			if (allowEnterBlockedJunctionsToggle != null)
 				allowEnterBlockedJunctionsToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setTrafficLightPriorityRules(bool value) {
