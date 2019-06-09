@@ -163,7 +163,9 @@ namespace TrafficManager.Custom.PathFinding {
 		public uint m_failedPathFinds = 0;
 		public uint m_succeededPathFinds = 0;
 		private bool m_debug = false;
+		private bool m_logFailureOnly = false;
 		private IDictionary<ushort, IList<ushort>> m_debugPositions = null;
+		private IList<string> m_logBuffer = new List<string>();
 #endif
 #if PARKINGAI || JUNCTIONRESTRICTIONS
 		private ushort m_startSegmentA;
@@ -316,8 +318,10 @@ namespace TrafficManager.Custom.PathFinding {
 				(m_conf.Debug.EndSegmentId == 0 || data.m_position01.m_segment == m_conf.Debug.EndSegmentId || data.m_position03.m_segment == m_conf.Debug.EndSegmentId) &&
 				(m_conf.Debug.VehicleId == 0 || m_queueItem.vehicleId == m_conf.Debug.VehicleId)
 			;
+			m_logFailureOnly = m_debug && m_conf.Debug.Switches[26];
 			if (m_debug) {
 				m_debugPositions = new Dictionary<ushort, IList<ushort>>();
+				m_logBuffer.Clear();
 			}
 #endif
 
@@ -616,6 +620,7 @@ namespace TrafficManager.Custom.PathFinding {
 						}
 					}
 					Debug(unit, $"PathFindImplementation: Reachability graph:\n== REACHABLE ==\n" + reachableBuf + "\n== UNREACHABLE ==\n" + unreachableBuf);
+					FlushLog(false);
 				}
 #endif
 				// NON-STOCK CODE END
@@ -673,6 +678,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 						if (m_debug) {
 							Debug(unit, $"PathFindImplementation: Path-find succeeded");
+							FlushLog(true);
 						}
 #endif
 						// NON-STOCK CODE END
@@ -692,6 +698,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 								if (m_debug) {
 									Debug(unit, $"Path-finding failed: Could not create path unit");
+									FlushLog(false);
 								}
 #endif
 								// NON-STOCK CODE END
@@ -728,6 +735,7 @@ namespace TrafficManager.Custom.PathFinding {
 
 				if (m_debug) {
 					Debug(unit, $"Path-finding failed: Internal loop break error");
+					FlushLog(false);
 				}
 #endif
 				// NON-STOCK CODE END
@@ -735,8 +743,21 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 #if DEBUG
+		private void FlushLog(bool success) {
+			if (m_logFailureOnly && success) {
+				return;
+			}
+
+			StringBuilder sb = new StringBuilder();
+			m_logBuffer.ForEach((entry) => {
+				sb.AppendLine(entry + "\n");
+			});
+			Log._Debug(sb.ToString());
+			m_logBuffer.Clear();
+		}
+
 		private void Debug(uint unit, string message) {
-			Log._Debug(
+			m_logBuffer.Add(
 				$"PF T#({Thread.CurrentThread.ManagedThreadId}) IDX#({m_pathFindIndex}):\n"
 				+ $"UNIT({unit})\n"
 				+ message
@@ -744,7 +765,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		private void Debug(uint unit, BufferItem item, string message) {
-			Log._Debug(
+			m_logBuffer.Add(
 				$"PF T#({Thread.CurrentThread.ManagedThreadId}) IDX#({m_pathFindIndex}):\n"
 				+ $"UNIT({unit}): s#({item.m_position.m_segment}), l#({item.m_position.m_lane})\n"
 				+ $"ITEM({item})\n"
@@ -753,7 +774,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		private void Debug(uint unit, BufferItem item, ushort nextSegmentId, string message) {
-			Log._Debug(
+			m_logBuffer.Add(
 				$"PF T#({Thread.CurrentThread.ManagedThreadId}) IDX#({m_pathFindIndex}):\n"
 				+ $"UNIT({unit}): s#({item.m_position.m_segment}), l#({item.m_position.m_lane}) -> s#({nextSegmentId})\n"
 				+ $"ITEM({item})\n"
@@ -762,7 +783,7 @@ namespace TrafficManager.Custom.PathFinding {
 		}
 
 		private void Debug(uint unit, BufferItem item, ushort nextSegmentId, int nextLaneIndex, uint nextLaneId, string message) {
-			Log._Debug(
+			m_logBuffer.Add(
 				$"PF T#({Thread.CurrentThread.ManagedThreadId}) IDX#({m_pathFindIndex}):\n"
 				+ $"UNIT({unit}): s#({item.m_position.m_segment}), l#({item.m_position.m_lane}) -> s#({nextSegmentId}), l#({nextLaneIndex}), lid#({nextLaneId})\n"
 				+ $"ITEM({item})\n"

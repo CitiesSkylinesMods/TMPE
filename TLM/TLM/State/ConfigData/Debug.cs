@@ -21,7 +21,7 @@ namespace TrafficManager.State.ConfigData {
 				false, // 9: debug vehicle to segment end linking
 				false, // 10: prevent routing recalculation on global configuration reload
 				false, // 11: debug junction restrictions
-				false, // 12: - unused -
+				false, // 12: debug pedestrian path-finding
 				false, // 13: priority rules debug
 				false, // 14: disable GUI overlay of citizens having a valid path
 				false, // 15: disable checking of other vehicles for trams
@@ -34,7 +34,8 @@ namespace TrafficManager.State.ConfigData {
 				false, // 22: parking ai debug log (vehicles)
 				false, // 23: debug lane connections
                 false, // 24: debug resource loading
-				false // 25: debug turn-on-red
+				false, // 25: debug turn-on-red
+				false // 26: log failed path-finds only (requires Switch[0] to be true)
 			};
 
 		public int NodeId = 0;
