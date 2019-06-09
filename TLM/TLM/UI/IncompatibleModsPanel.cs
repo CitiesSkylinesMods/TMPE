@@ -173,7 +173,7 @@ namespace TrafficManager.UI
 
         private UIPanel CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod)
         {
-            string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD ? "Delete" : "Unsubscribe";
+            string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD ? Translation.GetString("Delete") : Translation.GetString("Unsubscribe");
 
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);

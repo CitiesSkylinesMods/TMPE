@@ -232,3 +232,4 @@ Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on 
 Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
+Unsubscribe Unsubscribe
