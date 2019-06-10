@@ -31,6 +31,9 @@ namespace TrafficManager.Util
             incompatibleMods = LoadListOfIncompatibleMods();
         }
 
+        /// <summary>
+        /// Initiates scan for incompatible mods. If any found, and the user has enabled the mod checker, it creates and initialises the modal dialog panel.
+        /// </summary>
         public void PerformModCheck()
         {
             Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
