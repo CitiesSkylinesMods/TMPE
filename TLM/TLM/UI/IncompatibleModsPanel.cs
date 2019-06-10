@@ -24,8 +24,16 @@ namespace TrafficManager.UI
         private UICheckBox runModsCheckerOnStartup;
         private UIComponent blurEffect;
 
+        /// <summary>
+        /// List of incompatible mods from <see cref="TrafficManager.Util.ModsCompatibilityChecker"/>.
+        /// </summary>
         public Dictionary<PluginInfo, string> IncompatibleMods { get; set; }
 
+        /// <summary>
+        /// Initialises the dialog, populates it with list of incompatible mods, and adds it to the modal stack.
+        /// 
+        /// If the modal stack was previously empty, a blur effect is added over the screen background.
+        /// </summary>
         public void Initialize()
         {
             Log._Debug("IncompatibleModsPanel initialize");
@@ -91,14 +99,13 @@ namespace TrafficManager.UI
             scrollablePanel.autoLayoutDirection = LayoutDirection.Vertical;
             scrollablePanel.autoLayout = true;
 
+            // Populate list of incompatible mods
             if (IncompatibleMods.Count != 0)
             {
-                UIPanel item;
                 IncompatibleMods.ForEach((pair) =>
                 {
-                    item = CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
+                    CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
                 });
-                item = null;
             }
 
             scrollablePanel.FitTo(panel);
@@ -128,6 +135,7 @@ namespace TrafficManager.UI
             thumb.relativePosition = Vector3.zero;
             verticalScroll.thumbObject = thumb;
 
+            // Add blur effect if applicable
             blurEffect = GameObject.Find("ModalEffect").GetComponent<UIComponent>();
             AttachUIComponent(blurEffect.gameObject);
             blurEffect.size = new Vector2(resolution.x, resolution.y);
@@ -139,9 +147,15 @@ namespace TrafficManager.UI
                 ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
             }
 
+            // Make sure modal dialog is in front of all other UI
             BringToFront();
         }
 
+        /// <summary>
+        /// Allows the user to press "Esc" to close the dialog.
+        /// </summary>
+        /// 
+        /// <param name="p">Details about the key press.</param>
         protected override void OnKeyDown(UIKeyEventParameter p)
         {
             if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Return))
@@ -155,18 +169,32 @@ namespace TrafficManager.UI
             base.OnKeyDown(p);
         }
 
+        /// <summary>
+        /// Hnadles click of the "Run incompatible check on startup" checkbox and updates game options accordingly.
+        /// </summary>
+        /// 
+        /// <param name="value">The new value of the checkbox; <c>true</c> if checked, otherwise <c>false</c>.</param>
         private void RunModsCheckerOnStartup_eventCheckChanged(bool value)
         {
             Log._Debug("Incompatible mods checker run on game launch changed to " + value);
             State.Options.setScanForKnownIncompatibleMods(value);
         }
 
+        /// <summary>
+        /// Handles click of the "close dialog" button; pops the dialog off the modal stack.
+        /// </summary>
+        /// 
+        /// <param name="component">Handle to the close button UI component (not used).</param>
+        /// <param name="eventparam">Details about the click event.</param>
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam)
         {
             CloseDialog();
             eventparam.Use();
         }
 
+        /// <summary>
+        /// Pops the popup dialog off the modal stack.
+        /// </summary>
         private void CloseDialog()
         {
             closeButton.eventClick -= CloseButtonClick;
@@ -175,7 +203,14 @@ namespace TrafficManager.UI
             Unfocus();
         }
 
-        private UIPanel CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod)
+        /// <summary>
+        /// Creates a panel representing the mod and adds it to the <paramref name="parent"/> UI component.
+        /// </summary>
+        /// 
+        /// <param name="parent">The parent UI component that the panel will be added to.</param>
+        /// <param name="modName">The name of the mod, which is displayed to user.</param>
+        /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
+        private void CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod)
         {
             string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD ? Translation.GetString("Delete") : Translation.GetString("Unsubscribe");
 
@@ -189,13 +224,20 @@ namespace TrafficManager.UI
             label.relativePosition = new Vector2(10, 15);
 
             CreateButton(panel, caption, (int)panel.width - 170, 10, delegate (UIComponent component, UIMouseEventParameter param) { UnsubscribeClick(component, param, mod); });
-
-            return panel;
         }
 
+        /// <summary>
+        /// Handles click of "Unsubscribe" or "Delete" button; removes the associated mod and updates UI.
+        /// 
+        /// Once all incompatible mods are removed, the dialog will be closed automatically.
+        /// </summary>
+        /// 
+        /// <param name="component">A handle to the UI button that was clicked.</param>
+        /// <param name="eventparam">Details of the click event.</param>
+        /// <param name="mod">The <see cref="PluginInfo"/> instance of the mod to remove.</param>
         private void UnsubscribeClick(UIComponent component, UIMouseEventParameter eventparam, PluginInfo mod)
         {
-
+            eventparam.Use();
             bool success = false;
 
             // disable button to prevent accidental clicks
@@ -229,6 +271,13 @@ namespace TrafficManager.UI
             }
         }
 
+        /// <summary>
+        /// Deletes a locally installed TM:PE mod.
+        /// </summary>
+        /// 
+        /// <param name="mod">The <see cref="PluginInfo"/> associated with the mod that needs deleting.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if successfully deleted, otherwise <c>false</c>.</returns>
         private bool DeleteLocalTMPE(PluginInfo mod)
         {
             try
@@ -244,7 +293,16 @@ namespace TrafficManager.UI
             }
         }
 
-        private UIButton CreateButton(UIComponent parent, string text, int x, int y, MouseEventHandler eventClick)
+        /// <summary>
+        /// Creates an `Unsubscribe` or `Delete` button (as applicable to mod location) and attaches it to the <paramref name="parent"/> UI component.
+        /// </summary>
+        /// 
+        /// <param name="parent">The parent UI component which the button will be attached to.</param>
+        /// <param name="text">The translated text to display on the button.</param>
+        /// <param name="x">The x position of the top-left corner of the button, relative to <paramref name="parent"/>.</param>
+        /// <param name="y">The y position of the top-left corner of the button, relative to <paramref name="parent"/>.</param>
+        /// <param name="eventClick">The event handler for when the button is clicked.</param>
+        private void CreateButton(UIComponent parent, string text, int x, int y, MouseEventHandler eventClick)
         {
             var button = parent.AddUIComponent<UIButton>();
             button.textScale = 0.8f;
@@ -260,10 +318,11 @@ namespace TrafficManager.UI
             button.text = text;
             button.relativePosition = new Vector3(x, y);
             button.eventClick += eventClick;
-
-            return button;
         }
 
+        /// <summary>
+        /// Pops the dialog from the modal stack. If no more modal dialogs are present, the background blur effect is also removed.
+        /// </summary>
         private void TryPopModal()
         {
             if (UIView.HasModalInput())
