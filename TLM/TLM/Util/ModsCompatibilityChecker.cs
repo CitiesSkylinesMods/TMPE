@@ -1,4 +1,5 @@
 using ColossalFramework;
+using ColossalFramework.PlatformServices; // used in RELEASE builds
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
@@ -6,7 +7,7 @@ using ICities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Linq; // used in RELEASE builds
 using System.Reflection;
 using TrafficManager.UI;
 using static ColossalFramework.Plugins.PluginManager;
@@ -62,6 +63,10 @@ namespace TrafficManager.Util
             // only check enabled mods?
             bool filterToEnabled = State.GlobalConfig.Instance.Main.IgnoreDisabledMods;
 
+#if !DEBUG
+            bool offline = IsOffline();
+#endif
+
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo())
             {
@@ -76,7 +81,7 @@ namespace TrafficManager.Util
                     }
 #if !DEBUG
                     // Workshop TM:PE builds treat local builds as incompatible
-                    else if (mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
+                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
                         string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
@@ -110,6 +115,39 @@ namespace TrafficManager.Util
             }
             return name;
         }
+
+        /// <summary>
+        /// Works out if the game is effectively running in offline mode, in which no workshop mod subscriptions will be active.
+        /// 
+        /// Applicalbe "offline" states include:
+        /// 
+        /// * Origin plaform service (no support for Steam workshop)
+        /// * Steam (or other platform service) not active
+        /// * --noWorkshop launch option
+        /// 
+        /// This is allows LABS and STABLE builds to be used offline without trying to delete themselves.
+        /// </summary>
+        /// 
+        /// <returns>Returns <c>true</c> if game is offline for any reason, otherwise <c>false</c>.</returns>
+#if !DEBUG
+        private bool IsOffline()
+        {
+            // TODO: Work out if TGP and QQGame platform services allow workshop
+            if (PlatformService.platformType == PlatformType.Origin)
+            {
+                return true;
+            }
+            else if (!PlatformService.active)
+            {
+                return true;
+            }
+            else if (PluginManager.noWorkshop)
+            {
+                return true;
+            }
+            return false;
+        }
+#endif
 
         /// <summary>
         /// Loads and parses the <c>incompatible_mods.txt</c> resource, adds other workshop branches of TM:PE as applicable.
