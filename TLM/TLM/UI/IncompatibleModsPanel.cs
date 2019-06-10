@@ -257,8 +257,9 @@ namespace TrafficManager.UI
             {
                 IncompatibleMods.Remove(mod);
                 component.parent.Disable();
-                component.parent.isVisible = false;
+                component.isVisible = false;
 
+                // automatically close the dialog if no more mods to remove
                 if (IncompatibleMods.Count == 0)
                 {
                     CloseDialog();
