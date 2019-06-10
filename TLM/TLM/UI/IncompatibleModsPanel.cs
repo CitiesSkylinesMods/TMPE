@@ -87,17 +87,16 @@ namespace TrafficManager.UI
             scrollablePanel.size = new Vector2(550, 340);
             scrollablePanel.relativePosition = new Vector3(0, 0);
             scrollablePanel.clipChildren = true;
+            scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
+            scrollablePanel.autoLayoutDirection = LayoutDirection.Vertical;
+            scrollablePanel.autoLayout = true;
 
             if (IncompatibleMods.Count != 0)
             {
-                int acc = 0;
                 UIPanel item;
                 IncompatibleMods.ForEach((pair) =>
                 {
                     item = CreateEntry(ref scrollablePanel, pair.Value, pair.Key);
-                    item.relativePosition = new Vector2(0, acc);
-                    item.size = new Vector2(560, 50);
-                    acc += 50;
                 });
                 item = null;
             }
@@ -164,11 +163,16 @@ namespace TrafficManager.UI
 
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam)
         {
+            CloseDialog();
+            eventparam.Use();
+        }
+
+        private void CloseDialog()
+        {
             closeButton.eventClick -= CloseButtonClick;
             TryPopModal();
             Hide();
             Unfocus();
-            eventparam.Use();
         }
 
         private UIPanel CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod)
@@ -211,7 +215,12 @@ namespace TrafficManager.UI
             {
                 IncompatibleMods.Remove(mod);
                 component.parent.Disable();
-                component.isVisible = false;
+                component.parent.isVisible = false;
+
+                if (IncompatibleMods.Count == 0)
+                {
+                    CloseDialog();
+                }
             }
             else
             {
