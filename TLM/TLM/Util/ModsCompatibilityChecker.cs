@@ -133,15 +133,15 @@ namespace TrafficManager.Util
         private bool IsOffline()
         {
             // TODO: Work out if TGP and QQGame platform services allow workshop
-            if (PlatformService.platformType == PlatformType.Origin)
+            if (PluginManager.noWorkshop)
+            {
+                return true;
+            }
+            else if (PlatformService.platformType == PlatformType.Origin)
             {
                 return true;
             }
             else if (!PlatformService.active)
-            {
-                return true;
-            }
-            else if (PluginManager.noWorkshop)
             {
                 return true;
             }
