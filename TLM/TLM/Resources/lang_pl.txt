@@ -1,4 +1,4 @@
-Switch_traffic_lights Włącznik sygnalizacji
+﻿Switch_traffic_lights Włącznik sygnalizacji
 Add_priority_signs Dodaj znaki pierwszeństwa
 Manual_traffic_lights Sygnalizacja Ręczna
 Timed_traffic_lights Sygnalizacja Czasowa
@@ -232,4 +232,4 @@ Scan_for_known_incompatible_mods_on_startup Uruchamiaj sprawdzanie przy starcie 
 Ignore_disabled_mods Ignoruj wyłączone mody
 Traffic_Manager_detected_incompatible_mods wykrył niekompatybilne mody
 Notify_me_if_there_is_an_unexpected_mod_conflict Powiadom mnie w razie nieoczekiwanej niezgodność modów
-Unsubscribe Unsubscribe
+Unsubscribe Odsubskrybuj
