@@ -16,11 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMPE.GlobalConfigGenerator", "TMPE.GlobalConfigGenerator\TMPE.GlobalConfigGenerator.csproj", "{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7422AE58-8B0A-401C-9404-F4A438EFFE10} = {7422AE58-8B0A-401C-9404-F4A438EFFE10}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMPE.UnitTest", "TMPE.UnitTest\TMPE.UnitTest.csproj", "{D0D1848A-9BAE-4121-89A0-66757D16BC73}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMPE.GenericGameBridge", "TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj", "{663B991F-32A1-46E1-A4D3-540F8EA7F386}"
@@ -60,18 +55,6 @@ Global
 		{7422AE58-8B0A-401C-9404-F4A438EFFE10}.Release LABS|Any CPU.Build.0 = Release LABS|Any CPU
 		{7422AE58-8B0A-401C-9404-F4A438EFFE10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7422AE58-8B0A-401C-9404-F4A438EFFE10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Benchmark|Any CPU.ActiveCfg = Benchmark|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Benchmark|Any CPU.Build.0 = Benchmark|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.PF2_Debug|Any CPU.ActiveCfg = PF2_Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.PF2_Debug|Any CPU.Build.0 = PF2_Debug|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Release LABS|Any CPU.ActiveCfg = Release|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Release LABS|Any CPU.Build.0 = Release|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48D1868B-EE81-4339-95C9-4C5EADEB9ECA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D0D1848A-9BAE-4121-89A0-66757D16BC73}.Benchmark|Any CPU.ActiveCfg = Benchmark|Any CPU
 		{D0D1848A-9BAE-4121-89A0-66757D16BC73}.Benchmark|Any CPU.Build.0 = Benchmark|Any CPU
 		{D0D1848A-9BAE-4121-89A0-66757D16BC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
