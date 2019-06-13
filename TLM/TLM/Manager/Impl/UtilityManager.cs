@@ -93,8 +93,12 @@ namespace TrafficManager.Manager.Impl {
 		public void ResetStuckEntities() {
 			Log.Info($"UtilityManager.RemoveStuckEntities() called.");
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			bool wasPaused = Singleton<SimulationManager>.instance.ForcedSimulationPaused;
+
+			if (!wasPaused) {
+				Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			}
 
 			Log.Info($"UtilityManager.RemoveStuckEntities(): Waiting for all paths.");
 			Singleton<PathManager>.instance.WaitForAllPaths();
@@ -150,8 +154,10 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			if (!wasPaused) {
+				Log.Info($"UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			}
 		}
 	}
 }

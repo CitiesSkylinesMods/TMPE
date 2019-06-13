@@ -13,12 +13,13 @@ using TrafficManager.State;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using ColossalFramework.Math;
+using TrafficManager.State.ConfigData;
+using TrafficManager.Util;
 
 namespace TrafficManager.Traffic.Data {
 	public struct VehicleState {
 		public const int STATE_UPDATE_SHIFT = 6;
 		public const int JUNCTION_RECHECK_SHIFT = 4;
-		public const uint MAX_TIMED_RAND = 100;
 
 		[Flags]
 		public enum Flags {
@@ -94,6 +95,15 @@ namespace TrafficManager.Traffic.Data {
 		public byte timedRand;
 		private VehicleJunctionTransitState junctionTransitState;
 
+		// Dynamic Lane Selection
+		public bool dlsReady;
+		public float maxReservedSpace;
+		public float laneSpeedRandInterval;
+		public int maxOptLaneChanges;
+		public float maxUnsafeSpeedDiff;
+		public float minSafeSpeedImprovement;
+		public float minSafeTrafficImprovement;
+
 		public override string ToString() {
 			return $"[VehicleState\n" +
 				"\t" + $"vehicleId = {vehicleId}\n" +
@@ -121,6 +131,13 @@ namespace TrafficManager.Traffic.Data {
 				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
 				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
 				"\t" + $"timedRand = {timedRand}\n" +
+				"\t" + $"dlsReady = {dlsReady}\n" +
+				"\t" + $"maxReservedSpace = {maxReservedSpace}\n" +
+				"\t" + $"laneSpeedRandInterval = {laneSpeedRandInterval}\n" +
+				"\t" + $"maxOptLaneChanges = {maxOptLaneChanges}\n" +
+				"\t" + $"maxUnsafeSpeedDiff = {maxUnsafeSpeedDiff}\n" +
+				"\t" + $"minSafeSpeedImprovement = {minSafeSpeedImprovement}\n" +
+				"\t" + $"minSafeTrafficImprovement = {minSafeTrafficImprovement}\n" +
 				"VehicleState]";
 		}
 
@@ -149,6 +166,13 @@ namespace TrafficManager.Traffic.Data {
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			timedRand = 0;
+			dlsReady = false;
+			maxReservedSpace = 0;
+			laneSpeedRandInterval = 0;
+			maxOptLaneChanges = 0;
+			maxUnsafeSpeedDiff = 0;
+			minSafeSpeedImprovement = 0;
+			minSafeTrafficImprovement = 0;
 		}
 
 		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
@@ -273,6 +297,8 @@ namespace TrafficManager.Traffic.Data {
 			}
 
 			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
+			StepRand(true);
+			UpdateDynamicLaneSelectionParameters();
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -303,7 +329,10 @@ namespace TrafficManager.Traffic.Data {
 			lastPathId = 0;
 			lastPathPositionIndex = 0;
 			lastAltLaneSelSegmentId = 0;
+
 			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
+			StepRand(true);
+			UpdateDynamicLaneSelectionParameters();
 
 			try {
 				totalLength = vehicleData.CalculateTotalLength(vehicleId);
@@ -372,6 +401,10 @@ namespace TrafficManager.Traffic.Data {
 
 				waitTime = 0;
 				if (end != null) {
+					if (vehicleData.m_leadingVehicle == 0) {
+						StepRand(false);
+					}
+
 #if DEBUGVSTATE
 					if (GlobalConfig.Instance.Debug.Switches[9])
 						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
@@ -460,6 +493,12 @@ namespace TrafficManager.Traffic.Data {
 			lastAltLaneSelSegmentId = 0;
 			junctionTransitState = VehicleJunctionTransitState.None;
 			recklessDriver = false;
+			maxReservedSpace = 0;
+			laneSpeedRandInterval = 0;
+			maxOptLaneChanges = 0;
+			maxUnsafeSpeedDiff = 0;
+			minSafeSpeedImprovement = 0;
+			minSafeTrafficImprovement = 0;
 
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
@@ -476,11 +515,50 @@ namespace TrafficManager.Traffic.Data {
 			return (lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
 		}
 
-		public void StepRand() {
+		public void StepRand(bool init) {
 			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
-			if (rand.UInt32(20) == 0) {
-				timedRand = (byte)(((uint)timedRand + rand.UInt32(25)) % MAX_TIMED_RAND);
+			if (init || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0)) {
+				timedRand = Options.individualDrivingStyle ? (byte)rand.UInt32(100) : (byte)50;
 			}
+		}
+
+		public void UpdateDynamicLaneSelectionParameters() {
+#if DEBUG
+			if (GlobalConfig.Instance.Debug.Switches[9])
+				Log._Debug($"VehicleState.UpdateDynamicLaneSelectionParameters({vehicleId}) called.");
+#endif
+
+			if (!Options.IsDynamicLaneSelectionActive()) {
+				dlsReady = false;
+				return;
+			}
+
+			if (dlsReady) {
+				return;
+			}
+
+			float egoism = (float)timedRand / 100f;
+			float altruism = 1f - egoism;
+			DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
+
+			if (Options.individualDrivingStyle) {
+				maxReservedSpace = recklessDriver
+					? Mathf.Lerp(dls.MinMaxRecklessReservedSpace, dls.MaxMaxRecklessReservedSpace, altruism)
+					: Mathf.Lerp(dls.MinMaxReservedSpace, dls.MaxMaxReservedSpace, altruism);
+				laneSpeedRandInterval = Mathf.Lerp(dls.MinLaneSpeedRandInterval, dls.MaxLaneSpeedRandInterval, egoism);
+				maxOptLaneChanges = (int)Math.Round(Mathf.Lerp(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1, egoism));
+				maxUnsafeSpeedDiff = Mathf.Lerp(dls.MinMaxUnsafeSpeedDiff, dls.MaxMaxOptLaneChanges, egoism);
+				minSafeSpeedImprovement = Mathf.Lerp(dls.MinMinSafeSpeedImprovement, dls.MaxMinSafeSpeedImprovement, altruism);
+				minSafeTrafficImprovement = Mathf.Lerp(dls.MinMinSafeTrafficImprovement, dls.MaxMinSafeTrafficImprovement, altruism);
+			} else {
+				maxReservedSpace = recklessDriver ? dls.MaxRecklessReservedSpace : dls.MaxReservedSpace;
+				laneSpeedRandInterval = dls.LaneSpeedRandInterval;
+				maxOptLaneChanges = dls.MaxOptLaneChanges;
+				maxUnsafeSpeedDiff = dls.MaxUnsafeSpeedDiff;
+				minSafeSpeedImprovement = dls.MinSafeSpeedImprovement;
+				minSafeTrafficImprovement = dls.MinSafeTrafficImprovement;
+			}
+			dlsReady = true;
 		}
 
 		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {

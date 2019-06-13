@@ -113,6 +113,7 @@
     <Compile Include="Custom\AI\CustomCommonBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
+    <Compile Include="Custom\AI\CustomPostVanAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
     <Compile Include="Custom\AI\CustomTaxiAI.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IVehicleStateManager.cs" />
     <Compile Include="PrintTransportLines.cs" />
+    <Compile Include="State\ConfigData\Gameplay.cs" />
     <Compile Include="State\ConfigData\Debug.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />
@@ -269,6 +271,7 @@
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />

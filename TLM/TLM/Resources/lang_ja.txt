@@ -150,7 +150,7 @@ Reset_global_configuration グローバル設定をリセット
 General 全般
 Gameplay ゲームプレイ
 Overlays オーバーレイ
-Realistic_speeds 現実的なスピード
+Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules 避難バスは交通規則を無視するであろう
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 避難バスは避難所へのアクセスにのみ使用できます
 Vehicle_behavior 車両の挙動

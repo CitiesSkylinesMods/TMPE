@@ -2266,6 +2266,28 @@ namespace TrafficManager {
 					detourFailed = true;
 				}
 
+				Log.Info("Redirection PostVanAI::StartPathFind calls");
+				try {
+					Detours.Add(new Detour(typeof(PostVanAI).GetMethod("StartPathFind",
+							BindingFlags.NonPublic | BindingFlags.Instance,
+							null,
+							new[]
+							{
+								typeof (ushort),
+								typeof (Vehicle).MakeByRefType(),
+								typeof (Vector3),
+								typeof (Vector3),
+								typeof (bool),
+								typeof (bool),
+								typeof (bool)
+							},
+							null),
+							typeof(CustomPostVanAI).GetMethod("CustomStartPathFind")));
+				} catch (Exception) {
+					Log.Error("Could not redirect PostVanAI::StartPathFind");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirection RoadBaseAI::SetTrafficLightState calls");
 				try {
 					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod("SetTrafficLightState",

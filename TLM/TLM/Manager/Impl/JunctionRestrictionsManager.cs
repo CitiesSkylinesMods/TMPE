@@ -707,7 +707,7 @@ namespace TrafficManager.Manager.Impl {
 									SetNearTurnOnRedAllowed(segNodeConf.segmentId, true, (bool)flags.turnOnRedAllowed);
 								}
 
-								if (flags.farTurnOnRedAllowed != null && IsNearTurnOnRedAllowedConfigurable(segNodeConf.segmentId, true, ref node)) {
+								if (flags.farTurnOnRedAllowed != null && IsFarTurnOnRedAllowedConfigurable(segNodeConf.segmentId, true, ref node)) {
 									SetFarTurnOnRedAllowed(segNodeConf.segmentId, true, (bool)flags.farTurnOnRedAllowed);
 								}
 
@@ -752,11 +752,11 @@ namespace TrafficManager.Manager.Impl {
 									SetPedestrianCrossingAllowed(segNodeConf.segmentId, false, (bool)flags.pedestrianCrossingAllowed);
 								}
 
-								if (flags.turnOnRedAllowed != null) {
+								if (flags.turnOnRedAllowed != null && IsNearTurnOnRedAllowedConfigurable(segNodeConf.segmentId, false, ref node)) {
 									SetNearTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.turnOnRedAllowed);
 								}
 
-								if (flags.farTurnOnRedAllowed != null) {
+								if (flags.farTurnOnRedAllowed != null && IsFarTurnOnRedAllowedConfigurable(segNodeConf.segmentId, false, ref node)) {
 									SetFarTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.farTurnOnRedAllowed);
 								}
 								return true;

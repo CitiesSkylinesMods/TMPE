@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+VisualStudioVersion = 15.0.28307.539
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TLM", "TLM\TLM.csproj", "{7422AE58-8B0A-401C-9404-F4A438EFFE10}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -144,6 +144,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {48E6CCE9-FF8E-4D57-96D2-09BD83C6088F}
+		SolutionGuid = {CFCFBDC9-2706-483F-B4A3-F810E5CDE489}
 	EndGlobalSection
 EndGlobal
