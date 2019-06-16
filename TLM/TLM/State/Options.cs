@@ -31,6 +31,7 @@ namespace TrafficManager.State {
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
 		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
 		private static UICheckBox ignoreDisabledModsToggle = null;
+		private static UICheckBox displayMphToggle = null;
 		private static UICheckBox individualDrivingStyleToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -234,7 +235,11 @@ namespace TrafficManager.State {
 			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Notify_me_if_there_is_an_unexpected_mod_conflict"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
 			scanForKnownIncompatibleModsToggle = generalGroup.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, onScanForKnownIncompatibleModsChanged) as UICheckBox;
 			ignoreDisabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Ignore_disabled_mods"), GlobalConfig.Instance.Main.IgnoreDisabledMods, onIgnoreDisabledModsChanged) as UICheckBox;
-            Indent(ignoreDisabledModsToggle);
+			Indent(ignoreDisabledModsToggle);
+			displayMphToggle = generalGroup.AddCheckbox(
+				                   Translation.GetString("Display_speed_limits_mph"),
+				                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+				                   onDisplayMphChanged) as UICheckBox;
 
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
@@ -698,7 +703,13 @@ namespace TrafficManager.State {
             GlobalConfig.WriteConfig();
         }
 
-        private static void onInstantEffectsChanged(bool newValue) {
+        private static void onDisplayMphChanged(bool newValue) {
+	        Log._Debug($"Display MPH changed to {newValue}");
+	        GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
+	        GlobalConfig.WriteConfig();
+        }
+
+		private static void onInstantEffectsChanged(bool newValue) {
 			if (!checkGameLoaded())
 				return;
 

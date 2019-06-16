@@ -232,3 +232,7 @@ Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on 
 Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Notify me if there is an unexpected mod conflict
+Speed_limit_unlimited No limit
+Display_speed_limits_mph Display speed limits as mph instead of km/h
+Miles_per_hour Miles per hour
+Kilometers_per_hour Kilometers per hour

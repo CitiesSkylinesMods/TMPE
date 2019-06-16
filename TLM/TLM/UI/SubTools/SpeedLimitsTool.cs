@@ -13,6 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
@@ -259,7 +260,13 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 
 			// speed limit sign
-			GUILayout.Box(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[currentSpeedLimitIndex]], GUILayout.Width(guiSpeedSignSize), GUILayout.Height(guiSpeedSignSize));
+			var limit = SpeedLimitManager.Instance.AvailableSpeedLimits[currentSpeedLimitIndex];
+			GUILayout.Box(TextureResources.GetSpeedLimitTexture(limit),
+			              GUILayout.Width(guiSpeedSignSize),
+			              GUILayout.Height(guiSpeedSignSize));
+			GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				                ? Translation.GetString("Miles_per_hour")
+				                : Translation.GetString("Kilometers_per_hour"));
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
@@ -327,12 +334,23 @@ namespace TrafficManager.UI.SubTools {
 
 			Color oldColor = GUI.color;
 			for (int i = 0; i < SpeedLimitManager.Instance.AvailableSpeedLimits.Count; ++i) {
-				if (curSpeedLimitIndex != i)
+				if (curSpeedLimitIndex != i) {
 					GUI.color = Color.gray;
-				float signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
-				if (GUILayout.Button(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
+				}
+
+                                // The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
+				GUILayout.BeginVertical();
+				var signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
+				var limit = SpeedLimitManager.Instance.AvailableSpeedLimits[i];
+				if (GUILayout.Button(
+					TextureResources.GetSpeedLimitTexture(limit),
+					GUILayout.Width(signSize),
+					GUILayout.Height(signSize))) {
 					curSpeedLimitIndex = i;
 				}
+                                // For MPH setting display KM/H below, for KM/H setting display MPH
+				GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? limit.ToKmphString() : limit.ToMphString());
+				GUILayout.EndVertical();
 				GUI.color = oldColor;
 
 				if (i == 6) {
@@ -361,7 +379,7 @@ namespace TrafficManager.UI.SubTools {
 			NetManager netManager = Singleton<NetManager>.instance;
 
 			bool hovered = false;
-			ushort speedLimitToSet = viewOnly ? (ushort)0 : SpeedLimitManager.Instance.AvailableSpeedLimits[curSpeedLimitIndex];
+			ushort speedLimitToSet = viewOnly ? (ushort)0 : SpeedLimitManager.Instance.AvailableSpeedLimits[curSpeedLimitIndex].Kmph;
 
 			bool showPerLane = showLimitsPerLane;
 			if (!viewOnly) {
@@ -411,7 +429,11 @@ namespace TrafficManager.UI.SubTools {
 						directions.Add(laneInfo.m_finalDirection);
 					}
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly);
+					var limit = SpeedLimitDef.KmphToSpeedLimitDef[
+						SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)];
+					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
+						TextureResources.GetSpeedLimitTexture(limit),
+						camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly);
 					if (!viewOnly && !onlyMonorailLanes && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
 						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], camPos, zero, f, xu, yu, x, 1, speedLimitSignSize);
 					}
@@ -473,7 +495,9 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					GUI.color = guiColor;
-					GUI.DrawTexture(boundingBox, TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key)]);
+                                        var limit = SpeedLimitDef.KmphToSpeedLimitDef[SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key)];
+					GUI.DrawTexture(boundingBox,
+					                TextureResources.GetSpeedLimitTexture(limit));
 
 					if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
 						// change the speed limit to the selected one

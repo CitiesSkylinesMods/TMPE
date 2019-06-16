@@ -6,6 +6,7 @@ using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
+using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 using UnityEngine;
 
@@ -30,24 +31,24 @@ namespace TrafficManager.Manager.Impl {
 			// TODO implement
 		}
 
-		public readonly List<ushort> AvailableSpeedLimits;
+		public readonly List<SpeedLimitDef> AvailableSpeedLimits;
 
 		private SpeedLimitManager() {
-			AvailableSpeedLimits = new List<ushort>();
-			AvailableSpeedLimits.Add(10);
-			AvailableSpeedLimits.Add(20);
-			AvailableSpeedLimits.Add(30);
-			AvailableSpeedLimits.Add(40);
-			AvailableSpeedLimits.Add(50);
-			AvailableSpeedLimits.Add(60);
-			AvailableSpeedLimits.Add(70);
-			AvailableSpeedLimits.Add(80);
-			AvailableSpeedLimits.Add(90);
-			AvailableSpeedLimits.Add(100);
-			AvailableSpeedLimits.Add(110);
-			AvailableSpeedLimits.Add(120);
-			AvailableSpeedLimits.Add(130);
-			AvailableSpeedLimits.Add(0);
+			AvailableSpeedLimits = new List<SpeedLimitDef>();
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km10);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km20);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km30);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km40);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km50);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km60);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km70);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km80);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km90);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km100);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km110);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km120);
+			AvailableSpeedLimits.Add(SpeedLimitDef.Km130);
+			AvailableSpeedLimits.Add(SpeedLimitDef.NoLimit);
 
 			vanillaLaneSpeedLimitsByNetInfoName = new Dictionary<string, float[]>();
 			CustomLaneSpeedLimitIndexByNetInfoName = new Dictionary<string, int>();
@@ -427,7 +428,9 @@ namespace TrafficManager.Manager.Impl {
 			string infoName = info.name;
 			int speedLimitIndex;
 			if (!CustomLaneSpeedLimitIndexByNetInfoName.TryGetValue(infoName, out speedLimitIndex)) {
-				return AvailableSpeedLimits.IndexOf(GetVanillaNetInfoSpeedLimit(info, true));
+				return SpeedLimitDef.FindKmphInList(
+					AvailableSpeedLimits,
+					GetVanillaNetInfoSpeedLimit(info, true));
 			}
 
 			return speedLimitIndex;
@@ -461,7 +464,7 @@ namespace TrafficManager.Manager.Impl {
 			string infoName = info.name;
 			CustomLaneSpeedLimitIndexByNetInfoName[infoName] = customSpeedLimitIndex;
 
-			float gameSpeedLimit = ToGameSpeedLimit(AvailableSpeedLimits[customSpeedLimitIndex]);
+			float gameSpeedLimit = ToGameSpeedLimit(AvailableSpeedLimits[customSpeedLimitIndex].Kmph);
 
 			// save speed limit in all NetInfos
 			Log._Debug($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
@@ -534,7 +537,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!MayHaveCustomSpeedLimits(laneInfo)) {
 				return false;
 			}
-			if (!AvailableSpeedLimits.Contains(speedLimit)) {
+			if (!SpeedLimitDef.DoesListContainKmph(AvailableSpeedLimits, speedLimit)) {
 				return false;
 			}
 			if (!Services.NetService.IsLaneValid(laneId)) {
@@ -556,7 +559,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!MayHaveCustomSpeedLimits(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
 				return false;
 			}
-			if (!AvailableSpeedLimits.Contains(speedLimit)) {
+			if (!SpeedLimitDef.DoesListContainKmph(AvailableSpeedLimits, speedLimit)) {
 				return false;
 			}
 
@@ -784,7 +787,8 @@ namespace TrafficManager.Manager.Impl {
 					NetInfo info = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 					int customSpeedLimitIndex = GetCustomNetInfoSpeedLimitIndex(info);
 					Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: Custom speed limit index of segment {segmentId} info ({info}, name={info?.name}, lanes={info?.m_lanes} is {customSpeedLimitIndex}");
-					if (customSpeedLimitIndex < 0 || AvailableSpeedLimits[customSpeedLimitIndex] != laneSpeedLimit.speedLimit) {
+					if (customSpeedLimitIndex < 0
+					    || AvailableSpeedLimits[customSpeedLimitIndex].Kmph != laneSpeedLimit.speedLimit) {
 						// lane speed limit differs from default speed limit
 						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
 						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
@@ -824,7 +828,7 @@ namespace TrafficManager.Manager.Impl {
 					continue;
 
 				ushort customSpeedLimit = LaneToCustomSpeedLimit(e.Value, true);
-				int customSpeedLimitIndex = AvailableSpeedLimits.IndexOf(customSpeedLimit);
+				int customSpeedLimitIndex = SpeedLimitDef.FindKmphInList(AvailableSpeedLimits, customSpeedLimit);
 				if (customSpeedLimitIndex >= 0) {
 					SetCustomNetInfoSpeedLimitIndex(netInfo, customSpeedLimitIndex);
 				}
@@ -836,7 +840,7 @@ namespace TrafficManager.Manager.Impl {
 			Dictionary<string, float> ret = new Dictionary<string, float>();
 			foreach (KeyValuePair<string, int> e in CustomLaneSpeedLimitIndexByNetInfoName) {
 				try {
-					ushort customSpeedLimit = AvailableSpeedLimits[e.Value];
+					ushort customSpeedLimit = AvailableSpeedLimits[e.Value].Kmph;
 					float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
 
 					ret.Add(e.Key, gameSpeedLimit);

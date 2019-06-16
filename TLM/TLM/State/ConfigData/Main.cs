@@ -10,6 +10,7 @@ namespace TrafficManager.State.ConfigData {
 		/// Main menu button position
 		/// </summary>
 		public int MainMenuButtonX = 464;
+
 		public int MainMenuButtonY = 10;
 		public bool MainMenuButtonPosLocked = false;
 
@@ -17,6 +18,7 @@ namespace TrafficManager.State.ConfigData {
 		/// Main menu position
 		/// </summary>
 		public int MainMenuX = MainMenuPanel.DEFAULT_MENU_X;
+
 		public int MainMenuY = MainMenuPanel.DEFAULT_MENU_Y;
 		public bool MainMenuPosLocked = false;
 
@@ -50,18 +52,26 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public bool ShowCompatibilityCheckErrorMessage = false;
 
-        /// <summary>
-        /// Shows warning dialog if any incompatible mods detected
-        /// </summary>
-        public bool ScanForKnownIncompatibleModsAtStartup = true;
+		/// <summary>
+		/// Shows warning dialog if any incompatible mods detected
+		/// </summary>
+		public bool ScanForKnownIncompatibleModsAtStartup = true;
 
-        /// <summary>
-        /// Skip disabled mods while running incompatible mod detector
-        /// </summary>
-        public bool IgnoreDisabledMods = true;
+		/// <summary>
+		/// Skip disabled mods while running incompatible mod detector
+		/// </summary>
+		public bool IgnoreDisabledMods = true;
+
+		/// <summary>
+		/// Prefer Miles per hour instead of Kmph (affects speed limits display
+		/// but internally Kmph are still used).
+		/// </summary>
+		public bool DisplaySpeedLimitsMph = false;
 
 		public void AddDisplayedTutorialMessage(string messageKey) {
-			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
+			HashSet<string> newMessages = DisplayedTutorialMessages != null
+				                              ? new HashSet<string>(DisplayedTutorialMessages)
+				                              : new HashSet<string>();
 			newMessages.Add(messageKey);
 			DisplayedTutorialMessages = newMessages.ToArray();
 		}

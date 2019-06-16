@@ -186,6 +186,7 @@
     <Compile Include="TrafficLight\LightMode.cs" />
     <Compile Include="TrafficLight\StepChangeMetric.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
+    <Compile Include="Traffic\Data\SpeedLimitDef.cs" />
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
@@ -364,6 +365,12 @@
     <EmbeddedResource Include="Resources\lang_ja.txt" />
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
+    <EmbeddedResource Include="Resources\5.png" />
+    <EmbeddedResource Include="Resources\12.png" />
+    <EmbeddedResource Include="Resources\25.png" />
+    <EmbeddedResource Include="Resources\45.png" />
+    <EmbeddedResource Include="Resources\55.png" />
+    <EmbeddedResource Include="Resources\75.png" />
     <EmbeddedResource Include="Resources\0.png" />
     <EmbeddedResource Include="Resources\10.png" />
     <EmbeddedResource Include="Resources\100.png" />
