@@ -387,6 +387,24 @@ namespace TrafficManager.State {
 			enableLaneConnectorToggle = featureGroup.AddCheckbox(Translation.GetString("Lane_connector"), laneConnectorEnabled, onLaneConnectorEnabledChanged) as UICheckBox;
 
 			Indent(turnOnRedEnabledToggle);
+
+                        // KEYBOARD
+                        ++tabIndex;
+
+                        AddOptionTab(tabStrip, Translation.GetString("Keyboard"));
+                        tabStrip.selectedIndex = tabIndex;
+
+                        currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+                        currentPanel.autoLayout = true;
+                        currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+                        currentPanel.autoLayoutPadding.top = 5;
+                        currentPanel.autoLayoutPadding.left = 10;
+                        currentPanel.autoLayoutPadding.right = 10;
+
+                        panelHelper = new UIHelper(currentPanel);
+
+                        var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keyboard"));
+                        ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<OptionsKeymappingMain>();
 #if DEBUG
 
 			// GLOBAL CONFIG
@@ -481,7 +499,7 @@ namespace TrafficManager.State {
 			}*/
 #endif
 
-			tabStrip.selectedIndex = 0;
+                        tabStrip.selectedIndex = 0;
 		}
 
 		private static void Indent<T>(T component) where T : UIComponent {

@@ -367,7 +367,8 @@ namespace TrafficManager.UI {
 					activeSubTool.OnToolGUI(e);
 				else
 					base.OnToolGUI(e);
-			} catch (Exception ex) {
+                                
+                        } catch (Exception ex) {
 				Log.Error("GUI Error: " + ex.ToString());
 			}
 		}

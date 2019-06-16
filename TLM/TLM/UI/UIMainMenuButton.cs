@@ -123,5 +123,18 @@ namespace TrafficManager.UI {
 			absolutePosition = rect.position;
 			Invalidate();
 		}
-	}
+
+                public void OnGUI() {
+                        if (!UIView.HasModalInput()
+                            && !UIView.HasInputFocus()
+                            && OptionsKeymapping.KeyToggleTMPEMainMenu.IsPressed(Event.current))
+                        {
+                                LoadingExtension.BaseUI?.ToggleMainMenu();
+                        }
+
+                        // FIXME: Tooltip text is not displayed on the tool button
+                        // var shortcutText = OptionsKeymapping.KeyToggleTMPEMainMenu.ToLocalizedString("KEYNAME");
+                        // tooltip = Translation.GetString("Keyboard_toggle_TMPE_main_menu") + shortcutText;
+                }
+        }
 }

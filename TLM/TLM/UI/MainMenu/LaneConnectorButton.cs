@@ -1,35 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ColossalFramework.UI;
-using TrafficManager.Manager;
+﻿using ColossalFramework;
 using TrafficManager.State;
 
 namespace TrafficManager.UI.MainMenu {
 	public class LaneConnectorButton : MenuToolModeButton {
-		public override ToolMode ToolMode {
-			get {
-				return ToolMode.LaneConnector;
-			}
-		}
-		
-		public override ButtonFunction Function {
-			get {
-				return ButtonFunction.LaneConnector;
-			}
-		}
-
-		public override string Tooltip {
-			get {
-				return "Lane_connector";
-			}
-		}
-
-		public override bool Visible {
-			get {
-				return Options.laneConnectorEnabled;
-			}
-		}
-	}
+		public override ToolMode ToolMode => ToolMode.LaneConnector;
+                public override ButtonFunction Function => ButtonFunction.LaneConnector;
+                public override string Tooltip => "Lane_connector";
+                public override bool Visible => Options.laneConnectorEnabled;
+                public override SavedInputKey ShortcutKey => OptionsKeymapping.KeyLaneConnectionsTool;
+        }
 }

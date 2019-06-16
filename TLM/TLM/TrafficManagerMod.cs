@@ -23,7 +23,7 @@ namespace TrafficManager {
 
 		public string Description => "Manage your city's traffic";
 
-		public void OnEnabled() {
+                public void OnEnabled() {
 			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
 			if (UIView.GetAView() != null) {
 				OnGameIntroLoaded();

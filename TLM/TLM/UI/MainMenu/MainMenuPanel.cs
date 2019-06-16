@@ -12,6 +12,7 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.UI.SubTools;
 using TrafficManager.Util;
 
 namespace TrafficManager.UI.MainMenu {
@@ -206,5 +207,37 @@ namespace TrafficManager.UI.MainMenu {
 			absolutePosition = rect.position;
 			Invalidate();
 		}
-	}
+
+                public void OnGUI() {
+                        // Some safety checks to not trigger while full screen/modals are open
+                        // Check the key and then click the corresponding button
+                        if (!UIView.HasModalInput()
+                            && !UIView.HasInputFocus()) {
+                                if (OptionsKeymapping.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(ToggleTrafficLightsButton));
+                                } else if (OptionsKeymapping.KeyLaneArrowTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(LaneArrowsButton));
+                                } else if (OptionsKeymapping.KeyLaneConnectionsTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(LaneConnectorButton));
+                                } else if (OptionsKeymapping.KeyPrioritySignsTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(PrioritySignsButton));
+                                } else if (OptionsKeymapping.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(JunctionRestrictionsButton));
+                                } else if (OptionsKeymapping.KeySpeedLimitsTool.IsPressed(Event.current)) {
+                                        ClickToolButton(typeof(SpeedLimitsButton));
+                                }
+                        }
+                }
+
+                /// <summary>For given button class type, find it in the tool palette and send click</summary>
+                /// <param name="t">Something like typeof(ToggleTrafficLightsButton)</param>
+                void ClickToolButton(Type t) {
+                        for (var i = 0; i < MENU_BUTTON_TYPES.Length; i++) {
+                                if (MENU_BUTTON_TYPES[i] == t) {
+                                        Buttons[i].SimulateClick();
+                                        return;
+                                }
+                        }
+                }
+        }
 }

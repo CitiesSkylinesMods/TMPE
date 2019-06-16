@@ -94,10 +94,11 @@ namespace TrafficManager.UI {
 				Log.Error("Error on Show(): " + e.ToString());
 			}
 
-			foreach (MenuButton button in GetMenu().Buttons) {
+			foreach (var button in GetMenu().Buttons) {
 				button.UpdateProperties();
 			}
-			GetMenu().Show();
+
+                        GetMenu().Show();
 			Translation.ReloadTutorialTranslations();
 			TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
