@@ -29,7 +29,7 @@ namespace TrafficManager.Manager.Impl {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Vehicle states:");
 			for (int i = 0; i < VehicleStates.Length; ++i) {
-				if ((VehicleStates[i].flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+				if ((VehicleStates[i].VehicleFlags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
 					continue;
 				}
 				Log._Debug($"Vehicle {i}: {VehicleStates[i]}");
@@ -48,7 +48,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected void LogTraffic(ushort vehicleId, ref VehicleState state) {
-			if (state.currentSegmentId == 0) {
+			if (state.CurrentSegmentId == 0) {
 				return;
 			}
 #if MEASUREDENSITY
@@ -58,7 +58,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 #endif
 
-			TrafficMeasurementManager.Instance.AddTraffic(state.currentSegmentId, state.currentLaneIndex
+			TrafficMeasurementManager.Instance.AddTraffic(state.CurrentSegmentId, state.CurrentLaneIndex
 #if MEASUREDENSITY
 				, length
 #endif
@@ -146,11 +146,11 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void SetNextVehicleIdOnSegment(ushort vehicleId, ushort nextVehicleId) {
-			VehicleStates[vehicleId].nextVehicleIdOnSegment = nextVehicleId;
+			VehicleStates[vehicleId].NextVehicleIdOnSegment = nextVehicleId;
 		}
 
 		public void SetPreviousVehicleIdOnSegment(ushort vehicleId, ushort previousVehicleId) {
-			VehicleStates[vehicleId].previousVehicleIdOnSegment = previousVehicleId;
+			VehicleStates[vehicleId].PreviousVehicleIdOnSegment = previousVehicleId;
 		}
 
 		internal void UpdateVehiclePosition(ushort vehicleId, ref Vehicle vehicleData) {
@@ -164,11 +164,11 @@ namespace TrafficManager.Manager.Impl {
 		protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref VehicleState state) {
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({state.vehicleId}) called");
+				Log._Debug($"VehicleStateManager.UpdateVehiclePosition({state.VehicleId}) called");
 #endif
 
 			if (vehicleData.m_path == 0 || (vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0 ||
-				(state.lastPathId == vehicleData.m_path && state.lastPathPositionIndex == vehicleData.m_pathPositionIndex)
+				(state.LastPathId == vehicleData.m_path && state.LastPathPositionIndex == vehicleData.m_pathPositionIndex)
 			) {
 				return;
 			}

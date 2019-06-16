@@ -3,686 +3,766 @@
 
 using System;
 using ColossalFramework;
-using UnityEngine;
-using System.Collections.Generic;
-using TrafficManager.TrafficLight;
-using TrafficManager.Traffic;
-using TrafficManager.Manager;
+using ColossalFramework.Math;
+using CSUtil.Commons;
 using TrafficManager.Custom.AI;
 using TrafficManager.State;
-using CSUtil.Commons;
-using TrafficManager.Manager.Impl;
-using ColossalFramework.Math;
 using TrafficManager.State.ConfigData;
-using TrafficManager.Util;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace TrafficManager.Traffic.Data {
-	public struct VehicleState {
-		public const int STATE_UPDATE_SHIFT = 6;
-		public const int JUNCTION_RECHECK_SHIFT = 4;
+        public struct VehicleState {
+                public const int STATE_UPDATE_SHIFT = 6;
+                public const int JUNCTION_RECHECK_SHIFT = 4;
 
-		[Flags]
-		public enum Flags {
-			None = 0,
-			Created = 1,
-			Spawned = 1 << 1
-		}
+                public ushort VehicleId;
+                public uint LastPathId;
+                public byte LastPathPositionIndex;
+                public uint LastTransitStateUpdate;
+                public uint LastPositionUpdate;
+                public float TotalLength;
+                public int WaitTime;
+                public float ReduceSqrSpeedByValueToYield;
+                public Flags VehicleFlags;
+                public ExtVehicleType VehicleType;
+                public bool IsHeavyVehicle;
+                public bool IsRecklessDriver;
+                public ushort CurrentSegmentId;
+                public bool IsCurrentStartNode;
+                public byte CurrentLaneIndex;
+                public ushort NextSegmentId;
+                public byte NextLaneIndex;
+                public ushort PreviousVehicleIdOnSegment;
+                public ushort NextVehicleIdOnSegment;
+                public ushort LastAltLaneSelSegmentId;
+                public byte TimedRand;
 
-		public VehicleJunctionTransitState JunctionTransitState {
-			get { return junctionTransitState; }
-			set {
-				if (value != junctionTransitState) {
-					lastTransitStateUpdate = Now();
-				}
-				junctionTransitState = value;
-			}
-		}
+                // Dynamic Lane Selection
+                public bool IsDlsReady;
+                public float MaxReservedSpace;
+                public float LaneSpeedRandInterval;
+                public int MaxOptLaneChanges;
+                public float MaxUnsafeSpeedDiff;
+                public float MinSafeSpeedImprovement;
+                public float MinSafeTrafficImprovement;
 
-		public float SqrVelocity {
-			get {
-				float ret = 0;
-				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
-					ret = veh.GetLastFrameVelocity().sqrMagnitude;
-					return true;
-				});
-				return ret;
-			}
-		}
+                private VehicleJunctionTransitState junctionTransitState_;
 
-		public float Velocity {
-			get {
-				float ret = 0;
-				Constants.ServiceFactory.VehicleService.ProcessVehicle(vehicleId, delegate (ushort vehId, ref Vehicle veh) {
-					ret = veh.GetLastFrameVelocity().magnitude;
-					return true;
-				});
-				return ret;
-			}
-		}
+                internal VehicleState(ushort vehicleId) {
+                        VehicleId = vehicleId;
+                        LastPathId = 0;
+                        LastPathPositionIndex = 0;
+                        LastTransitStateUpdate = Now();
+                        LastPositionUpdate = Now();
+                        TotalLength = 0;
+                        WaitTime = 0;
+                        ReduceSqrSpeedByValueToYield = 0;
+                        VehicleFlags = Flags.None;
+                        VehicleType = ExtVehicleType.None;
+                        IsHeavyVehicle = false;
+                        IsRecklessDriver = false;
+                        CurrentSegmentId = 0;
+                        IsCurrentStartNode = false;
+                        CurrentLaneIndex = 0;
+                        NextSegmentId = 0;
+                        NextLaneIndex = 0;
+                        PreviousVehicleIdOnSegment = 0;
+                        NextVehicleIdOnSegment = 0;
+                        LastAltLaneSelSegmentId = 0;
+                        junctionTransitState_ = VehicleJunctionTransitState.None;
+                        TimedRand = 0;
+                        IsDlsReady = false;
+                        MaxReservedSpace = 0;
+                        LaneSpeedRandInterval = 0;
+                        MaxOptLaneChanges = 0;
+                        MaxUnsafeSpeedDiff = 0;
+                        MinSafeSpeedImprovement = 0;
+                        MinSafeTrafficImprovement = 0;
+                }
 
-		/*public bool Valid {
-			get {
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Created) == 0) {
-					return false;
-				}
-				return valid;
-			}
-			internal set { valid = value; }
-		}*/
+                [Flags]
+                public enum Flags
+                {
+                        None = 0,
+                        Created = 1,
+                        Spawned = 1 << 1
+                }
 
-		public ushort vehicleId;
-		public uint lastPathId;
-		public byte lastPathPositionIndex;
-		public uint lastTransitStateUpdate;
-		public uint lastPositionUpdate;
-		public float totalLength;
-		//public float sqrVelocity;
-		//public float velocity;
-		public int waitTime;
-		public float reduceSqrSpeedByValueToYield;
-		public Flags flags;
-		public ExtVehicleType vehicleType;
-		public bool heavyVehicle;
-		public bool recklessDriver;
-		public ushort currentSegmentId;
-		public bool currentStartNode;
-		public byte currentLaneIndex;
-		public ushort nextSegmentId;
-		public byte nextLaneIndex;
-		public ushort previousVehicleIdOnSegment;
-		public ushort nextVehicleIdOnSegment;
-		public ushort lastAltLaneSelSegmentId;
-		public byte timedRand;
-		private VehicleJunctionTransitState junctionTransitState;
+                public VehicleJunctionTransitState JunctionTransitState {
+                        get => junctionTransitState_;
+                        set {
+                                if (value != junctionTransitState_) {
+                                        LastTransitStateUpdate = Now();
+                                }
 
-		// Dynamic Lane Selection
-		public bool dlsReady;
-		public float maxReservedSpace;
-		public float laneSpeedRandInterval;
-		public int maxOptLaneChanges;
-		public float maxUnsafeSpeedDiff;
-		public float minSafeSpeedImprovement;
-		public float minSafeTrafficImprovement;
+                                junctionTransitState_ = value;
+                        }
+                }
 
-		public override string ToString() {
-			return $"[VehicleState\n" +
-				"\t" + $"vehicleId = {vehicleId}\n" +
-				"\t" + $"lastPathId = {lastPathId}\n" +
-				"\t" + $"lastPathPositionIndex = {lastPathPositionIndex}\n" +
-				"\t" + $"JunctionTransitState = {JunctionTransitState}\n" +
-				"\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
-				"\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
-				"\t" + $"totalLength = {totalLength}\n" +
-				//"\t" + $"velocity = {velocity}\n" +
-				//"\t" + $"sqrVelocity = {sqrVelocity}\n" +
-				"\t" + $"waitTime = {waitTime}\n" +
-				"\t" + $"reduceSqrSpeedByValueToYield = {reduceSqrSpeedByValueToYield}\n" +
-				"\t" + $"flags = {flags}\n" +
-				"\t" + $"vehicleType = {vehicleType}\n" +
-				"\t" + $"heavyVehicle = {heavyVehicle}\n" +
-				"\t" + $"recklessDriver = {recklessDriver}\n" +
-				"\t" + $"currentSegmentId = {currentSegmentId}\n" +
-				"\t" + $"currentStartNode = {currentStartNode}\n" +
-				"\t" + $"currentLaneIndex = {currentLaneIndex}\n" +
-				"\t" + $"nextSegmentId = {nextSegmentId}\n" +
-				"\t" + $"nextLaneIndex = {nextLaneIndex}\n" +
-				"\t" + $"previousVehicleIdOnSegment = {previousVehicleIdOnSegment}\n" +
-				"\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
-				"\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
-				"\t" + $"junctionTransitState = {junctionTransitState}\n" +
-				"\t" + $"timedRand = {timedRand}\n" +
-				"\t" + $"dlsReady = {dlsReady}\n" +
-				"\t" + $"maxReservedSpace = {maxReservedSpace}\n" +
-				"\t" + $"laneSpeedRandInterval = {laneSpeedRandInterval}\n" +
-				"\t" + $"maxOptLaneChanges = {maxOptLaneChanges}\n" +
-				"\t" + $"maxUnsafeSpeedDiff = {maxUnsafeSpeedDiff}\n" +
-				"\t" + $"minSafeSpeedImprovement = {minSafeSpeedImprovement}\n" +
-				"\t" + $"minSafeTrafficImprovement = {minSafeTrafficImprovement}\n" +
-				"VehicleState]";
-		}
+                public float SqrVelocity {
+                        get {
+                                float ret = 0;
+                                Constants.ServiceFactory.VehicleService.ProcessVehicle(
+                                        VehicleId,
+                                        (ushort vehId, ref Vehicle veh) => {
+                                                ret = veh
+                                                      .GetLastFrameVelocity()
+                                                      .sqrMagnitude;
+                                                return true;
+                                        });
+                                return ret;
+                        }
+                }
 
-		internal VehicleState(ushort vehicleId) {
-			this.vehicleId = vehicleId;
-			lastPathId = 0;
-			lastPathPositionIndex = 0;
-			lastTransitStateUpdate = Now();
-			lastPositionUpdate = Now();
-			totalLength = 0;
-			waitTime = 0;
-			reduceSqrSpeedByValueToYield = 0;
-			flags = Flags.None;
-			vehicleType = ExtVehicleType.None;
-			heavyVehicle = false;
-			recklessDriver = false;
-			currentSegmentId = 0;
-			currentStartNode = false;
-			currentLaneIndex = 0;
-			nextSegmentId = 0;
-			nextLaneIndex = 0;
-			previousVehicleIdOnSegment = 0;
-			nextVehicleIdOnSegment = 0;
-			//velocity = 0;
-			//sqrVelocity = 0;
-			lastAltLaneSelSegmentId = 0;
-			junctionTransitState = VehicleJunctionTransitState.None;
-			timedRand = 0;
-			dlsReady = false;
-			maxReservedSpace = 0;
-			laneSpeedRandInterval = 0;
-			maxOptLaneChanges = 0;
-			maxUnsafeSpeedDiff = 0;
-			minSafeSpeedImprovement = 0;
-			minSafeTrafficImprovement = 0;
-		}
+                public float Velocity {
+                        get {
+                                float ret = 0;
+                                Constants.ServiceFactory.VehicleService.ProcessVehicle(
+                                        VehicleId, (ushort vehId, ref Vehicle veh) => {
+                                                ret = veh.GetLastFrameVelocity().magnitude;
+                                                return true;
+                                        });
+                                return ret;
+                        }
+                }
 
-		/*private void Reset(bool unlink=true) { // TODO this is called in wrong places!
-			if (unlink)
-				Unlink();
+                public override string ToString()
+                {
+                        return "[VehicleState\n" +
+                               "\t" + $"vehicleId = {VehicleId}\n" +
+                               "\t" + $"lastPathId = {LastPathId}\n" +
+                               "\t" + $"lastPathPositionIndex = {LastPathPositionIndex}\n" +
+                               "\t" + $"JunctionTransitState = {JunctionTransitState}\n" +
+                               "\t" + $"lastTransitStateUpdate = {LastTransitStateUpdate}\n" +
+                               "\t" + $"lastPositionUpdate = {LastPositionUpdate}\n" +
+                               "\t" + $"totalLength = {TotalLength}\n" +
+                               //"\t" + $"velocity = {velocity}\n" +
+                               //"\t" + $"sqrVelocity = {sqrVelocity}\n" +
+                               "\t" + $"waitTime = {WaitTime}\n" +
+                               "\t" + $"reduceSqrSpeedByValueToYield = {ReduceSqrSpeedByValueToYield}\n" +
+                               "\t" + $"flags = {VehicleFlags}\n" +
+                               "\t" + $"vehicleType = {VehicleType}\n" +
+                               "\t" + $"heavyVehicle = {IsHeavyVehicle}\n" +
+                               "\t" + $"recklessDriver = {IsRecklessDriver}\n" +
+                               "\t" + $"currentSegmentId = {CurrentSegmentId}\n" +
+                               "\t" + $"currentStartNode = {IsCurrentStartNode}\n" +
+                               "\t" + $"currentLaneIndex = {CurrentLaneIndex}\n" +
+                               "\t" + $"nextSegmentId = {NextSegmentId}\n" +
+                               "\t" + $"nextLaneIndex = {NextLaneIndex}\n" +
+                               "\t" + $"previousVehicleIdOnSegment = {PreviousVehicleIdOnSegment}\n" +
+                               "\t" + $"nextVehicleIdOnSegment = {NextVehicleIdOnSegment}\n" +
+                               "\t" + $"lastAltLaneSelSegmentId = {LastAltLaneSelSegmentId}\n" +
+                               "\t" + $"junctionTransitState = {junctionTransitState_}\n" +
+                               "\t" + $"timedRand = {TimedRand}\n" +
+                               "\t" + $"dlsReady = {IsDlsReady}\n" +
+                               "\t" + $"maxReservedSpace = {MaxReservedSpace}\n" +
+                               "\t" + $"laneSpeedRandInterval = {LaneSpeedRandInterval}\n" +
+                               "\t" + $"maxOptLaneChanges = {MaxOptLaneChanges}\n" +
+                               "\t" + $"maxUnsafeSpeedDiff = {MaxUnsafeSpeedDiff}\n" +
+                               "\t" + $"minSafeSpeedImprovement = {MinSafeSpeedImprovement}\n" +
+                               "\t" + $"minSafeTrafficImprovement = {MinSafeTrafficImprovement}\n" +
+                               "VehicleState]";
+                }
 
-			Valid = false;
-			totalLength = 0f;
-			//VehicleType = ExtVehicleType.None;
-			waitTime = 0;
-			JunctionTransitState = VehicleJunctionTransitState.None;
-			lastStateUpdate = 0;
-		}*/
-
-		/*public ExtCitizenInstance GetDriverExtInstance() {
-			ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstance(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-			if (driverInstanceId != 0) {
-				return ExtCitizenInstanceManager.Instance.GetExtInstance(driverInstanceId);
-			}
-			return null;
-		}*/
-
-		internal void Unlink() {
+                public void UpdateDynamicLaneSelectionParameters() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.Unlink({vehicleId}) called: Unlinking vehicle from all segment ends\nstate:{this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.UpdateDynamicLaneSelectionParameters({VehicleId}) called.");
+                        }
 #endif
 
-			IVehicleStateManager vehStateManager = Constants.ManagerFactory.VehicleStateManager;
+                        if (!Options.IsDynamicLaneSelectionActive()) {
+                                IsDlsReady = false;
+                                return;
+                        }
 
-			lastPositionUpdate = Now();
+                        if (IsDlsReady) {
+                                return;
+                        }
 
-			if (previousVehicleIdOnSegment != 0) {
-				vehStateManager.SetNextVehicleIdOnSegment(previousVehicleIdOnSegment, nextVehicleIdOnSegment);// VehicleStates[previousVehicleIdOnSegment].nextVehicleIdOnSegment = nextVehicleIdOnSegment;
-			} else if (currentSegmentId != 0) {
-				ISegmentEnd curEnd = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(currentSegmentId, currentStartNode);
-				if (curEnd != null && curEnd.FirstRegisteredVehicleId == vehicleId) {
-					curEnd.FirstRegisteredVehicleId = nextVehicleIdOnSegment;
-				}
-			}
+                        var egoism = TimedRand / 100f;
+                        var altruism = 1f - egoism;
+                        var dls = GlobalConfig.Instance.DynamicLaneSelection;
 
-			if (nextVehicleIdOnSegment != 0) {
-				vehStateManager.SetPreviousVehicleIdOnSegment(nextVehicleIdOnSegment, previousVehicleIdOnSegment);// .VehicleStates[nextVehicleIdOnSegment].previousVehicleIdOnSegment = previousVehicleIdOnSegment;
-			}
+                        if (Options.individualDrivingStyle) {
+                                MaxReservedSpace = IsRecklessDriver
+                                        ? Mathf.Lerp(dls.MinMaxRecklessReservedSpace,
+                                                     dls.MaxMaxRecklessReservedSpace,
+                                                     altruism)
+                                        : Mathf.Lerp(dls.MinMaxReservedSpace,
+                                                     dls.MaxMaxReservedSpace,
+                                                     altruism);
+                                LaneSpeedRandInterval = Mathf.Lerp(dls.MinLaneSpeedRandInterval,
+                                                                   dls.MaxLaneSpeedRandInterval,
+                                                                   egoism);
+                                MaxOptLaneChanges = (int)Math.Round(
+                                        Mathf.Lerp(dls.MinMaxOptLaneChanges,
+                                                   dls.MaxMaxOptLaneChanges + 1,
+                                                   egoism));
+                                MaxUnsafeSpeedDiff = Mathf.Lerp(dls.MinMaxUnsafeSpeedDiff,
+                                                                dls.MaxMaxOptLaneChanges,
+                                                                egoism);
+                                MinSafeSpeedImprovement = Mathf.Lerp(dls.MinMinSafeSpeedImprovement,
+                                                                     dls.MaxMinSafeSpeedImprovement,
+                                                                     altruism);
+                                MinSafeTrafficImprovement = Mathf.Lerp(dls.MinMinSafeTrafficImprovement,
+                                                                       dls.MaxMinSafeTrafficImprovement,
+                                                                       altruism);
+                        }
+                        else {
+                                MaxReservedSpace = IsRecklessDriver
+                                                           ? dls.MaxRecklessReservedSpace
+                                                           : dls.MaxReservedSpace;
+                                LaneSpeedRandInterval = dls.LaneSpeedRandInterval;
+                                MaxOptLaneChanges = dls.MaxOptLaneChanges;
+                                MaxUnsafeSpeedDiff = dls.MaxUnsafeSpeedDiff;
+                                MinSafeSpeedImprovement = dls.MinSafeSpeedImprovement;
+                                MinSafeTrafficImprovement = dls.MinSafeTrafficImprovement;
+                        }
+                        IsDlsReady = true;
+                }
 
-			nextVehicleIdOnSegment = 0;
-			previousVehicleIdOnSegment = 0;
-
-			currentSegmentId = 0;
-			currentStartNode = false;
-			currentLaneIndex = 0;
-
-			lastPathId = 0;
-			lastPathPositionIndex = 0;
-
+                internal void Unlink() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.Unlink({vehicleId}) finished: Unlinked vehicle from all segment ends\nstate:{this}");
-#endif
-		}
-
-		private void Link(ISegmentEnd end) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.Link({vehicleId}) called: Linking vehicle to segment end {end}\nstate:{this}");
-#endif
-
-			ushort oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
-			if (oldFirstRegVehicleId != 0) {
-				Constants.ManagerFactory.VehicleStateManager.SetPreviousVehicleIdOnSegment(oldFirstRegVehicleId, vehicleId);// VehicleStates[oldFirstRegVehicleId].previousVehicleIdOnSegment = vehicleId;
-				nextVehicleIdOnSegment = oldFirstRegVehicleId;
-			}
-			end.FirstRegisteredVehicleId = vehicleId;
-
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.Link({vehicleId}) finished: Linked vehicle to segment end {end}\nstate:{this}");
-#endif
-		}
-
-		internal void OnCreate(ref Vehicle vehicleData) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnCreate({vehicleId}) called: {this}");
-#endif
-			
-			if ((flags & Flags.Created) != Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnCreate({vehicleId}): Vehicle is already created.");
-#endif
-				OnRelease(ref vehicleData);
-			}
-
-			DetermineVehicleType(ref vehicleData);
-			reduceSqrSpeedByValueToYield = UnityEngine.Random.Range(256f, 784f);
-			recklessDriver = false;
-			flags = Flags.Created;
-
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnCreate({vehicleId}) finished: {this}");
-#endif
-		}
-
-		internal ExtVehicleType OnStartPathFind(ref Vehicle vehicleData, ExtVehicleType? vehicleType) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}) called: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.Unlink({VehicleId}) called: " +
+                                            $"Unlinking vehicle from all segment ends\nstate:{this}");
+                        }
 #endif
 
-			if ((flags & Flags.Created) == Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}): Vehicle has not yet been created.");
-#endif
-				OnCreate(ref vehicleData);
-			}
+                        var vehStateManager = Constants.ManagerFactory.VehicleStateManager;
 
-			if (vehicleType != null) {
-				this.vehicleType = (ExtVehicleType)vehicleType;
-			}
+                        LastPositionUpdate = Now();
 
-			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
-			StepRand(true);
-			UpdateDynamicLaneSelectionParameters();
+                        if (PreviousVehicleIdOnSegment != 0) {
+                                vehStateManager.SetNextVehicleIdOnSegment(
+                                        PreviousVehicleIdOnSegment,
+                                        NextVehicleIdOnSegment); 
+                                
+                                // VehicleStates[previousVehicleIdOnSegment].nextVehicleIdOnSegment = nextVehicleIdOnSegment;
+                        } else if (CurrentSegmentId != 0) {
+                                var curEnd =
+                                        Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(
+                                                CurrentSegmentId, IsCurrentStartNode);
+                                if (curEnd != null && curEnd.FirstRegisteredVehicleId == VehicleId) {
+                                        curEnd.FirstRegisteredVehicleId = NextVehicleIdOnSegment;
+                                }
+                        }
 
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnStartPathFind({vehicleId}, {vehicleType}) finished: {this}");
-#endif
+                        if (NextVehicleIdOnSegment != 0) {
+                                vehStateManager.SetPreviousVehicleIdOnSegment(
+                                        NextVehicleIdOnSegment,
+                                        PreviousVehicleIdOnSegment); 
+                                
+                                // .VehicleStates[nextVehicleIdOnSegment].previousVehicleIdOnSegment = previousVehicleIdOnSegment;
+                        }
 
-			return this.vehicleType;
-		}
+                        NextVehicleIdOnSegment = 0;
+                        PreviousVehicleIdOnSegment = 0;
 
-		internal void OnSpawn(ref Vehicle vehicleData) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnSpawn({vehicleId}) called: {this}");
-#endif
+                        CurrentSegmentId = 0;
+                        IsCurrentStartNode = false;
+                        CurrentLaneIndex = 0;
 
-			if ((flags & Flags.Created) == Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnSpawn({vehicleId}): Vehicle has not yet been created.");
-#endif
-				OnCreate(ref vehicleData);
-			}
-
-			Unlink();
-
-			//velocity = 0;
-			//sqrVelocity = 0;
-			lastPathId = 0;
-			lastPathPositionIndex = 0;
-			lastAltLaneSelSegmentId = 0;
-
-			recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(vehicleId, ref vehicleData);
-			StepRand(true);
-			UpdateDynamicLaneSelectionParameters();
-
-			try {
-				totalLength = vehicleData.CalculateTotalLength(vehicleId);
-			} catch (Exception
-#if DEBUG
-			e
-#endif
-			) {
-				totalLength = 0;
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnSpawn({vehicleId}): Error occurred while calculating total length: {e}\nstate: {this}");
-#endif
-				return;
-			}
-
-			flags |= Flags.Spawned;
+                        LastPathId = 0;
+                        LastPathPositionIndex = 0;
 
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnSpawn({vehicleId}) finished: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.Unlink({VehicleId}) finished: " +
+                                            $"Unlinked vehicle from all segment ends\nstate:{this}");
+                        }
 #endif
-		}
+                }
 
-		internal void UpdatePosition(ref Vehicle vehicleData, ref PathUnit.Position curPos, ref PathUnit.Position nextPos, bool skipCheck = false) {
+                internal void OnCreate(ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.UpdatePosition({vehicleId}) called: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnCreate({VehicleId}) called: {this}");
+                        }
 #endif
 
-			if ((flags & Flags.Spawned) == Flags.None) {
+                        if ((VehicleFlags & Flags.Created) != Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Vehicle is not yet spawned.");
+                                if (GlobalConfig.Instance.Debug.Switches[9])
+                                        Log._Debug($"VehicleState.OnCreate({VehicleId}): Vehicle is already created.");
 #endif
-				OnSpawn(ref vehicleData);
-			}
+                                OnRelease(ref vehicleData);
+                        }
 
-			if (nextSegmentId != nextPos.m_segment || nextLaneIndex != nextPos.m_lane) {
-				nextSegmentId = nextPos.m_segment;
-				nextLaneIndex = nextPos.m_lane;
-			}
+                        DetermineVehicleType(ref vehicleData);
+                        ReduceSqrSpeedByValueToYield = Random.Range(256f, 784f);
+                        IsRecklessDriver = false;
+                        VehicleFlags = Flags.Created;
 
-			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-			ISegmentEnd end = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(curPos.m_segment, startNode);
-
-			if (end == null || currentSegmentId != end.SegmentId || currentStartNode != end.StartNode || currentLaneIndex != curPos.m_lane) {
 #if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Current segment end changed. seg. {currentSegmentId}, start {currentStartNode}, lane {currentLaneIndex} -> seg. {end?.SegmentId}, start {end?.StartNode}, lane {curPos.m_lane}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnCreate({VehicleId}) finished: {this}");
+                        }
 #endif
-				if (currentSegmentId != 0) {
+                }
+
+                internal ExtVehicleType OnStartPathFind(ref Vehicle vehicleData, ExtVehicleType? vehicleType) {
 #if DEBUG
-					if (GlobalConfig.Instance.Debug.Switches[9])
-						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Unlinking from current segment end");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnStartPathFind({VehicleId}, {vehicleType}) called: {this}");
+                        }
 #endif
-					Unlink();
-				}
 
-				lastPathId = vehicleData.m_path;
-				lastPathPositionIndex = vehicleData.m_pathPositionIndex;
+                        if ((VehicleFlags & Flags.Created) == Flags.None) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnStartPathFind({VehicleId}, {vehicleType}): " +
+                                                   "Vehicle has not yet been created.");
+                                }
+#endif
+                                OnCreate(ref vehicleData);
+                        }
 
-				currentSegmentId = curPos.m_segment;
-				currentStartNode = startNode;
-				currentLaneIndex = curPos.m_lane;
+                        if (vehicleType != null) {
+                                VehicleType = (ExtVehicleType)vehicleType;
+                        }
 
-				waitTime = 0;
-				if (end != null) {
-					if (vehicleData.m_leadingVehicle == 0) {
-						StepRand(false);
-					}
+                        IsRecklessDriver =
+                                Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(
+                                        VehicleId, ref vehicleData);
+                        StepRand(true);
+                        UpdateDynamicLaneSelectionParameters();
+
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnStartPathFind({VehicleId}, {vehicleType}) finished: {this}");
+                        }
+#endif
+
+                        return VehicleType;
+                }
+
+                /// <summary>
+                /// Called from VehicleStateManager on vehicle spawn
+                /// </summary>
+                /// <param name="vehicleData">The connected vehicle</param>
+                internal void OnSpawn(ref Vehicle vehicleData) {
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnSpawn({VehicleId}) called: {this}");
+                        }
+#endif
+
+                        if ((VehicleFlags & Flags.Created) == Flags.None) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnSpawn({VehicleId}): " +
+                                                   "Vehicle has not yet been created.");
+                                }
+#endif
+                                OnCreate(ref vehicleData);
+                        }
+
+                        Unlink();
+
+                        LastPathId = 0;
+                        LastPathPositionIndex = 0;
+                        LastAltLaneSelSegmentId = 0;
+
+                        IsRecklessDriver =
+                                Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(
+                                        VehicleId, ref vehicleData);
+                        StepRand(true);
+                        UpdateDynamicLaneSelectionParameters();
+
+                        try {
+                                TotalLength = vehicleData.CalculateTotalLength(VehicleId);
+                        }
+#if DEBUG
+                        catch (Exception e) {
+#else
+                        catch (Exception) {
+#endif
+                                TotalLength = 0;
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnSpawn({VehicleId}): Error occurred while " +
+                                                   $"calculating total length: {e}\nstate: {this}");
+                                }
+#endif
+                                return;
+                        }
+
+                        VehicleFlags |= Flags.Spawned;
+
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnSpawn({VehicleId}) finished: {this}");
+                        }
+#endif
+                }
+
+                internal void UpdatePosition(ref Vehicle vehicleData,
+                                             ref PathUnit.Position curPos,
+                                             ref PathUnit.Position nextPos, 
+                                             bool skipCheck = false) {
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.UpdatePosition({VehicleId}) called: {this}");
+                        }
+#endif
+
+                        if ((VehicleFlags & Flags.Spawned) == Flags.None) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) { 
+                                        Log._Debug($"VehicleState.UpdatePosition({VehicleId}): Vehicle is not yet spawned.");
+                                }
+#endif
+                                OnSpawn(ref vehicleData);
+                        }
+
+                        if (NextSegmentId != nextPos.m_segment || NextLaneIndex != nextPos.m_lane) {
+                                NextSegmentId = nextPos.m_segment;
+                                NextLaneIndex = nextPos.m_lane;
+                        }
+
+                        var startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
+                        var end = Constants.ManagerFactory.SegmentEndManager.GetSegmentEnd(curPos.m_segment, startNode);
+
+                        if (end == null || CurrentSegmentId != end.SegmentId || IsCurrentStartNode != end.StartNode ||
+                            CurrentLaneIndex != curPos.m_lane) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.UpdatePosition({VehicleId}): Current segment end changed. " +
+                                                   $"seg. {CurrentSegmentId}, start {IsCurrentStartNode}, lane {CurrentLaneIndex} -> " +
+                                                   $"seg. {end?.SegmentId}, start {end?.StartNode}, lane {curPos.m_lane}");
+                                }
+#endif
+                                if (CurrentSegmentId != 0) {
+#if DEBUG
+                                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                                Log._Debug($"VehicleState.UpdatePosition({VehicleId}): " +
+                                                           "Unlinking from current segment end");
+                                        }
+#endif
+                                        Unlink();
+                                }
+
+                                LastPathId = vehicleData.m_path;
+                                LastPathPositionIndex = vehicleData.m_pathPositionIndex;
+
+                                CurrentSegmentId = curPos.m_segment;
+                                IsCurrentStartNode = startNode;
+                                CurrentLaneIndex = curPos.m_lane;
+
+                                WaitTime = 0;
+                                if (end != null) {
+                                        if (vehicleData.m_leadingVehicle == 0) {
+                                                StepRand(false);
+                                        }
 
 #if DEBUGVSTATE
-					if (GlobalConfig.Instance.Debug.Switches[9])
-						Log._Debug($"VehicleState.UpdatePosition({vehicleId}): Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} ({end.NodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
+                                        if (GlobalConfig.Instance.Debug.Switches[9])
+                                                Log._Debug($"VehicleState.UpdatePosition({vehicleId}): "+
+                                                           $"Linking vehicle to segment end {end.SegmentId} @ {end.StartNode} "+
+                                                           $"({end.NodeId}). Current position: Seg. {curPos.m_segment}, "+
+                                                           $"lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: "+
+                                                           $"Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
-					Link(end);
-					JunctionTransitState = VehicleJunctionTransitState.Approach;
-				} else {
-					JunctionTransitState = VehicleJunctionTransitState.None;
-				}
-			}
+                                        Link(end);
+                                        JunctionTransitState = VehicleJunctionTransitState.Approach;
+                                } else {
+                                        JunctionTransitState = VehicleJunctionTransitState.None;
+                                }
+                        }
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.UpdatePosition({vehicleId}) finshed: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.UpdatePosition({VehicleId}) finshed: {this}");
+                        }
 #endif
-		}
+                }
 
-		internal void OnDespawn() {
+                /// <summary>Called from VehicleStateManager on despawn</summary>
+                internal void OnDespawn() {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnDespawn({vehicleId} called: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnDespawn({VehicleId} called: {this}");
+                        }
 #endif
-			if ((flags & Flags.Spawned) == Flags.None) {
+                        if ((VehicleFlags & Flags.Spawned) == Flags.None) {
 #if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnDespawn({vehicleId}): Vehicle is not spawned.");
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnDespawn({VehicleId}): Vehicle is not spawned.");
+                                }
 #endif
-				return;
-			}
+                                return;
+                        }
 
-			Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]));
-			
-			Unlink();
+                        Constants.ManagerFactory.ExtCitizenInstanceManager.ResetInstance(
+                                CustomPassengerCarAI.GetDriverInstanceId(
+                                        VehicleId,
+                                        ref Singleton<VehicleManager>
+                                            .instance.m_vehicles.m_buffer[VehicleId]));
 
-			currentSegmentId = 0;
-			currentStartNode = false;
-			currentLaneIndex = 0;
-			lastAltLaneSelSegmentId = 0;
-			recklessDriver = false;
+                        Unlink();
 
-			nextSegmentId = 0;
-			nextLaneIndex = 0;
+                        CurrentSegmentId = 0;
+                        IsCurrentStartNode = false;
+                        CurrentLaneIndex = 0;
+                        LastAltLaneSelSegmentId = 0;
+                        IsRecklessDriver = false;
 
-			totalLength = 0;
+                        NextSegmentId = 0;
+                        NextLaneIndex = 0;
 
-			flags &= ~Flags.Spawned;
-			
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnDespawn({vehicleId}) finished: {this}");
-#endif
-		}
+                        TotalLength = 0;
 
-		internal void OnRelease(ref Vehicle vehicleData) {
-#if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnRelease({vehicleId}) called: {this}");
-#endif
-
-			if ((flags & Flags.Created) == Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is not created.");
-#endif
-				return;
-			}
-
-			if ((flags & Flags.Spawned) != Flags.None) {
-#if DEBUG
-				if (GlobalConfig.Instance.Debug.Switches[9])
-					Log._Debug($"VehicleState.OnRelease({vehicleId}): Vehicle is spawned.");
-#endif
-				OnDespawn();
-			}
-
-			lastPathId = 0;
-			lastPathPositionIndex = 0;
-			lastTransitStateUpdate = Now();
-			lastPositionUpdate = Now();
-			waitTime = 0;
-			reduceSqrSpeedByValueToYield = 0;
-			flags = Flags.None;
-			vehicleType = ExtVehicleType.None;
-			heavyVehicle = false;
-			previousVehicleIdOnSegment = 0;
-			nextVehicleIdOnSegment = 0;
-			lastAltLaneSelSegmentId = 0;
-			junctionTransitState = VehicleJunctionTransitState.None;
-			recklessDriver = false;
-			maxReservedSpace = 0;
-			laneSpeedRandInterval = 0;
-			maxOptLaneChanges = 0;
-			maxUnsafeSpeedDiff = 0;
-			minSafeSpeedImprovement = 0;
-			minSafeTrafficImprovement = 0;
+                        VehicleFlags &= ~Flags.Spawned;
 
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.OnRelease({vehicleId}) finished: {this}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnDespawn({VehicleId}) finished: {this}");
+                        }
 #endif
-		}
+                }
 
-		/// <summary>
-		/// Determines if the junction transit state has been recently modified
-		/// </summary>
-		/// <returns></returns>
-		internal bool IsJunctionTransitStateNew() {
-			uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
-			return (lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
-		}
-
-		public void StepRand(bool init) {
-			Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
-			if (init || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0)) {
-				timedRand = Options.individualDrivingStyle ? (byte)rand.UInt32(100) : (byte)50;
-			}
-		}
-
-		public void UpdateDynamicLaneSelectionParameters() {
+                internal void OnRelease(ref Vehicle vehicleData) {
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.UpdateDynamicLaneSelectionParameters({vehicleId}) called.");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnRelease({VehicleId}) called: {this}");
+                        }
 #endif
 
-			if (!Options.IsDynamicLaneSelectionActive()) {
-				dlsReady = false;
-				return;
-			}
+                        if ((VehicleFlags & Flags.Created) == Flags.None) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnRelease({VehicleId}): Vehicle is not created.");
+                                }
+#endif
+                                return;
+                        }
 
-			if (dlsReady) {
-				return;
-			}
+                        if ((VehicleFlags & Flags.Spawned) != Flags.None) {
+#if DEBUG
+                                if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                        Log._Debug($"VehicleState.OnRelease({VehicleId}): Vehicle is spawned.");
+                                }
+#endif
+                                OnDespawn();
+                        }
 
-			float egoism = (float)timedRand / 100f;
-			float altruism = 1f - egoism;
-			DynamicLaneSelection dls = GlobalConfig.Instance.DynamicLaneSelection;
-
-			if (Options.individualDrivingStyle) {
-				maxReservedSpace = recklessDriver
-					? Mathf.Lerp(dls.MinMaxRecklessReservedSpace, dls.MaxMaxRecklessReservedSpace, altruism)
-					: Mathf.Lerp(dls.MinMaxReservedSpace, dls.MaxMaxReservedSpace, altruism);
-				laneSpeedRandInterval = Mathf.Lerp(dls.MinLaneSpeedRandInterval, dls.MaxLaneSpeedRandInterval, egoism);
-				maxOptLaneChanges = (int)Math.Round(Mathf.Lerp(dls.MinMaxOptLaneChanges, dls.MaxMaxOptLaneChanges + 1, egoism));
-				maxUnsafeSpeedDiff = Mathf.Lerp(dls.MinMaxUnsafeSpeedDiff, dls.MaxMaxOptLaneChanges, egoism);
-				minSafeSpeedImprovement = Mathf.Lerp(dls.MinMinSafeSpeedImprovement, dls.MaxMinSafeSpeedImprovement, altruism);
-				minSafeTrafficImprovement = Mathf.Lerp(dls.MinMinSafeTrafficImprovement, dls.MaxMinSafeTrafficImprovement, altruism);
-			} else {
-				maxReservedSpace = recklessDriver ? dls.MaxRecklessReservedSpace : dls.MaxReservedSpace;
-				laneSpeedRandInterval = dls.LaneSpeedRandInterval;
-				maxOptLaneChanges = dls.MaxOptLaneChanges;
-				maxUnsafeSpeedDiff = dls.MaxUnsafeSpeedDiff;
-				minSafeSpeedImprovement = dls.MinSafeSpeedImprovement;
-				minSafeTrafficImprovement = dls.MinSafeTrafficImprovement;
-			}
-			dlsReady = true;
-		}
-
-		private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-			bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-			ushort transitNodeId1 = 0;
-			Constants.ServiceFactory.NetService.ProcessSegment(curPos.m_segment, delegate (ushort segmentId, ref NetSegment segment) {
-				transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
-				return true;
-			});
-
-			ushort transitNodeId2 = 0;
-			Constants.ServiceFactory.NetService.ProcessSegment(nextPos.m_segment, delegate (ushort segmentId, ref NetSegment segment) {
-				transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
-				return true;
-			});
-
-			if (transitNodeId1 != transitNodeId2) {
-				return 0;
-			}
-			return transitNodeId1;
-		}
-
-		private static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
-			// note: does not check if curPos and nextPos are successive path positions
-			bool startNode;
-			if (curPos.m_offset == 0) {
-				startNode = true;
-			} else if (curPos.m_offset == 255) {
-				startNode = false;
-			} else if (nextPos.m_offset == 0) {
-				startNode = true;
-			} else {
-				startNode = false;
-			}
-			return startNode;
-		}
-
-		private static uint Now() {
-			return Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
-		}
-
-		private void DetermineVehicleType(ref Vehicle vehicleData) {
-			VehicleAI ai = vehicleData.Info.m_vehicleAI;
-
-			if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
-				vehicleType = ExtVehicleType.Emergency;
-			} else {
-				ExtVehicleType? type = DetermineVehicleTypeFromAIType(ai, false);
-				if (type != null) {
-					vehicleType = (ExtVehicleType)type;
-				} else {
-					vehicleType = ExtVehicleType.None;
-				}
-			}
-
-			if (vehicleType == ExtVehicleType.CargoTruck) {
-				heavyVehicle = ((CargoTruckAI)ai).m_isHeavyVehicle;
-			} else {
-				heavyVehicle = false;
-			}
+                        LastPathId = 0;
+                        LastPathPositionIndex = 0;
+                        LastTransitStateUpdate = Now();
+                        LastPositionUpdate = Now();
+                        WaitTime = 0;
+                        ReduceSqrSpeedByValueToYield = 0;
+                        VehicleFlags = Flags.None;
+                        VehicleType = ExtVehicleType.None;
+                        IsHeavyVehicle = false;
+                        PreviousVehicleIdOnSegment = 0;
+                        NextVehicleIdOnSegment = 0;
+                        LastAltLaneSelSegmentId = 0;
+                        junctionTransitState_ = VehicleJunctionTransitState.None;
+                        IsRecklessDriver = false;
+                        MaxReservedSpace = 0;
+                        LaneSpeedRandInterval = 0;
+                        MaxOptLaneChanges = 0;
+                        MaxUnsafeSpeedDiff = 0;
+                        MinSafeSpeedImprovement = 0;
+                        MinSafeTrafficImprovement = 0;
 
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[9])
-				Log._Debug($"VehicleState.DetermineVehicleType({vehicleId}): vehicleType={vehicleType}, heavyVehicle={heavyVehicle}. Info={vehicleData.Info?.name}");
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.OnRelease({VehicleId}) finished: {this}");
+                        }
 #endif
-		}
+                }
 
-		private ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
-			if (emergencyOnDuty)
-				return ExtVehicleType.Emergency;
+                /// <summary>
+                /// Determines if the junction transit state has been recently modified
+                /// </summary>
+                /// <returns></returns>
+                internal bool IsJunctionTransitStateNew() {
+                        var frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+                        return (LastTransitStateUpdate >> STATE_UPDATE_SHIFT) >= (frame >> STATE_UPDATE_SHIFT);
+                }
 
-			switch (ai.m_info.m_vehicleType) {
-				case VehicleInfo.VehicleType.Bicycle:
-					return ExtVehicleType.Bicycle;
-				case VehicleInfo.VehicleType.Car:
-					if (ai is PassengerCarAI)
-						return ExtVehicleType.PassengerCar;
-					if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI || ai is HearseAI || ai is GarbageTruckAI || ai is MaintenanceTruckAI || ai is SnowTruckAI || ai is WaterTruckAI || ai is DisasterResponseVehicleAI || ai is ParkMaintenanceVehicleAI || ai is PostVanAI) {
-						return ExtVehicleType.Service;
-					}
-					if (ai is CarTrailerAI)
-						return ExtVehicleType.None;
-					if (ai is BusAI)
-						return ExtVehicleType.Bus;
-					if (ai is TaxiAI)
-						return ExtVehicleType.Taxi;
-					if (ai is CargoTruckAI)
-						return ExtVehicleType.CargoTruck;
-					break;
-				case VehicleInfo.VehicleType.Metro:
-				case VehicleInfo.VehicleType.Train:
-				case VehicleInfo.VehicleType.Monorail:
-					if (ai is CargoTrainAI)
-						return ExtVehicleType.CargoTrain;
-					return ExtVehicleType.PassengerTrain;
-				case VehicleInfo.VehicleType.Tram:
-					return ExtVehicleType.Tram;
-				case VehicleInfo.VehicleType.Ship:
-					if (ai is PassengerShipAI)
-						return ExtVehicleType.PassengerShip;
-					//if (ai is CargoShipAI)
-					return ExtVehicleType.CargoShip;
-				//break;
-				case VehicleInfo.VehicleType.Plane:
-					if (ai is PassengerPlaneAI)
-						return ExtVehicleType.PassengerPlane;
-					if (ai is CargoPlaneAI)
-						return ExtVehicleType.CargoPlane;
-					break;
-				case VehicleInfo.VehicleType.Helicopter:
-					//if (ai is PassengerPlaneAI)
-					return ExtVehicleType.Helicopter;
-				//break;
-				case VehicleInfo.VehicleType.Ferry:
-					return ExtVehicleType.Ferry;
-				case VehicleInfo.VehicleType.Blimp:
-					return ExtVehicleType.Blimp;
-				case VehicleInfo.VehicleType.CableCar:
-					return ExtVehicleType.CableCar;
-			}
+                private static ushort GetTransitNodeId(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+                        var startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
+                        ushort transitNodeId1 = 0;
+                        Constants.ServiceFactory.NetService.ProcessSegment(
+                                curPos.m_segment,
+                                (ushort segmentId, ref NetSegment segment) => {
+                                        transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
+                                        return true;
+                                });
+
+                        ushort transitNodeId2 = 0;
+                        Constants.ServiceFactory.NetService.ProcessSegment(
+                                nextPos.m_segment,
+                                (ushort segmentId, ref NetSegment segment) => {
+                                        transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
+                                        return true;
+                                });
+
+                        return transitNodeId1 != transitNodeId2 ? (ushort)0 : transitNodeId1;
+                }
+
+                private static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
+                        // note: does not check if curPos and nextPos are successive path positions
+                        bool startNode;
+                        if (curPos.m_offset == 0) {
+                                startNode = true;
+                        }
+                        else if (curPos.m_offset == 255) {
+                                startNode = false;
+                        }
+                        else if (nextPos.m_offset == 0) {
+                                startNode = true;
+                        }
+                        else {
+                                startNode = false;
+                        }
+                        return startNode;
+                }
+
+                private static uint Now() {
+                        return Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+                }
+
+                private void Link(ISegmentEnd end) {
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.Link({VehicleId}) called: " +
+                                           $"Linking vehicle to segment end {end}\nstate:{this}");
+                        }
+#endif
+
+                        var oldFirstRegVehicleId = end.FirstRegisteredVehicleId;
+                        if (oldFirstRegVehicleId != 0) {
+                                Constants.ManagerFactory.VehicleStateManager.SetPreviousVehicleIdOnSegment(oldFirstRegVehicleId, VehicleId);
+                                // VehicleStates[oldFirstRegVehicleId].previousVehicleIdOnSegment = vehicleId;
+                                NextVehicleIdOnSegment = oldFirstRegVehicleId;
+                        }
+                        end.FirstRegisteredVehicleId = VehicleId;
+
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.Link({VehicleId}) finished: " +
+                                           $"Linked vehicle to segment end {end}\nstate:{this}");
+                        }
+#endif
+                }
+
+                private void StepRand(bool init) {
+                        var rand = Constants.ServiceFactory.SimulationService.Randomizer;
+                        if (init || rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0) {
+                                TimedRand = Options.individualDrivingStyle 
+                                                    ? (byte)rand.UInt32(100) 
+                                                    : (byte)50;
+                        }
+                }
+      
+                private void DetermineVehicleType(ref Vehicle vehicleData) {
+                        var ai = vehicleData.Info.m_vehicleAI;
+
+                        if ((vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0) {
+                                VehicleType = ExtVehicleType.Emergency;
+                        } else {
+                                var type = DetermineVehicleTypeFromAIType(ai, false);
+                                if (type != null) {
+                                        VehicleType = (ExtVehicleType)type;
+                                } else {
+                                        VehicleType = ExtVehicleType.None;
+                                }
+                        }
+
+                        IsHeavyVehicle = VehicleType == ExtVehicleType.CargoTruck 
+                                         && ((CargoTruckAI)ai).m_isHeavyVehicle;
+
+#if DEBUG
+                        if (GlobalConfig.Instance.Debug.Switches[9]) {
+                                Log._Debug($"VehicleState.DetermineVehicleType({VehicleId}): " +
+                                            $"vehicleType={VehicleType}, heavyVehicle={IsHeavyVehicle}. " +
+                                            $"Info={vehicleData.Info?.name}");
+                        }
+#endif
+                }
+
+                private ExtVehicleType? DetermineVehicleTypeFromAIType(VehicleAI ai, bool emergencyOnDuty) {
+                        if (emergencyOnDuty) {
+                                return ExtVehicleType.Emergency;
+                        }
+
+                        switch (ai.m_info.m_vehicleType) {
+                                case VehicleInfo.VehicleType.Bicycle:
+                                        return ExtVehicleType.Bicycle;
+                                case VehicleInfo.VehicleType.Car:
+                                        switch (ai) {
+                                                case PassengerCarAI _:
+                                                        return ExtVehicleType.PassengerCar;
+                                                case AmbulanceAI _:
+                                                case FireTruckAI _:
+                                                case PoliceCarAI _:
+                                                case HearseAI _:
+                                                case GarbageTruckAI _:
+                                                case MaintenanceTruckAI _:
+                                                case SnowTruckAI _:
+                                                case WaterTruckAI _:
+                                                case DisasterResponseVehicleAI _:
+                                                case ParkMaintenanceVehicleAI _:
+                                                case PostVanAI _:
+                                                        return ExtVehicleType.Service;
+                                                case CarTrailerAI _:
+                                                        return ExtVehicleType.None;
+                                                case BusAI _:
+                                                        return ExtVehicleType.Bus;
+                                                case TaxiAI _:
+                                                        return ExtVehicleType.Taxi;
+                                                case CargoTruckAI _:
+                                                        return ExtVehicleType.CargoTruck;
+                                        }
+
+                                        break;
+                                case VehicleInfo.VehicleType.Metro:
+                                case VehicleInfo.VehicleType.Train:
+                                case VehicleInfo.VehicleType.Monorail:
+                                        return ai is CargoTrainAI 
+                                                       ? ExtVehicleType.CargoTrain 
+                                                       : ExtVehicleType.PassengerTrain;
+
+                                case VehicleInfo.VehicleType.Tram:
+                                        return ExtVehicleType.Tram;
+                                case VehicleInfo.VehicleType.Ship:
+                                        return ai is PassengerShipAI 
+                                                       ? ExtVehicleType.PassengerShip 
+                                                       : ExtVehicleType.CargoShip;
+
+                                        //if (ai is CargoShipAI)
+                                //break;
+                                case VehicleInfo.VehicleType.Plane:
+                                        switch (ai) {
+                                                case PassengerPlaneAI _:
+                                                        return ExtVehicleType.PassengerPlane;
+                                                case CargoPlaneAI _:
+                                                        return ExtVehicleType.CargoPlane;
+                                        }
+
+                                        break;
+                                case VehicleInfo.VehicleType.Helicopter:
+                                        //if (ai is PassengerPlaneAI)
+                                        return ExtVehicleType.Helicopter;
+                                //break;
+                                case VehicleInfo.VehicleType.Ferry:
+                                        return ExtVehicleType.Ferry;
+                                case VehicleInfo.VehicleType.Blimp:
+                                        return ExtVehicleType.Blimp;
+                                case VehicleInfo.VehicleType.CableCar:
+                                        return ExtVehicleType.CableCar;
+                        }
 #if DEBUGVSTATE
-			Log._Debug($"VehicleState.DetermineVehicleType({vehicleId}): Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
+                        Log._Debug($"VehicleState.DetermineVehicleType({vehicleId}): "+
+                                   $"Could not determine vehicle type from ai type: {ai.GetType().ToString()}");
 #endif
-			return null;
-		}
-	}
+                        return null;
+                }
+        }
 }

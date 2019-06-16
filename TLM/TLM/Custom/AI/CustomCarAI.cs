@@ -61,7 +61,7 @@ namespace TrafficManager.Custom.AI {
 				using (var bm = new Benchmark(null, "UpdateCarPathState")) {
 #endif
 				finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
-				if (Options.prohibitPocketCars && VehicleStateManager.Instance.VehicleStates[vehicleId].vehicleType == ExtVehicleType.PassengerCar) {
+				if (Options.prohibitPocketCars && VehicleStateManager.Instance.VehicleStates[vehicleId].VehicleType == ExtVehicleType.PassengerCar) {
 					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId(vehicleId, ref vehicleData);
 					finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(vehicleId, ref vehicleData, ref Singleton<CitizenManager>.instance.m_instances.m_buffer[driverInstanceId], ref ExtCitizenInstanceManager.Instance.ExtInstances[driverInstanceId], mainPathState);
 

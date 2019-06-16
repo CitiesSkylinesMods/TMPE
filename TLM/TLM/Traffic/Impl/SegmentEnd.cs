@@ -20,11 +20,11 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
 
-/// <summary>
-/// A segment end describes a directional traffic segment connected to a controlled node
-/// (having custom traffic lights or priority signs).
-/// </summary>
 namespace TrafficManager.Traffic.Impl {
+        /// <summary>
+        /// A segment end describes a directional traffic segment connected to a controlled node
+        /// (having custom traffic lights or priority signs).
+        /// </summary>
 	public class SegmentEnd : SegmentEndId, ISegmentEnd {
 		// TODO convert to struct
 
@@ -116,7 +116,7 @@ namespace TrafficManager.Traffic.Impl {
 					break;
 				}
 
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
+				vehicleId = vehStateManager.VehicleStates[vehicleId].NextVehicleIdOnSegment;
 			}
 
 #if DEBUGMETRIC
@@ -129,10 +129,10 @@ namespace TrafficManager.Traffic.Impl {
 		protected void MeasureOutgoingVehicle(bool debug, IDictionary<ushort, uint>[] ret, bool includeStopped, uint avgSegmentLength, ushort vehicleId, ref VehicleState state, ref int numProcessed) {
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.currentSegmentId}, start {state.currentStartNode}, lane {state.currentLaneIndex} going to seg. {state.nextSegmentId}, lane {state.nextLaneIndex}");
+				Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Checking vehicle {vehicleId}. Coming from seg. {state.CurrentSegmentId}, start {state.IsCurrentStartNode}, lane {state.CurrentLaneIndex} going to seg. {state.NextSegmentId}, lane {state.NextLaneIndex}");
 #endif
 
-			if ((state.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+			if ((state.VehicleFlags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: Vehicle {vehicleId} is unspawned. Ignoring.");
@@ -141,7 +141,7 @@ namespace TrafficManager.Traffic.Impl {
 			}
 
 #if DEBUGMETRIC
-			if (state.currentSegmentId != SegmentId || state.currentStartNode != StartNode) {
+			if (state.CurrentSegmentId != SegmentId || state.IsCurrentStartNode != StartNode) {
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} error: Segment end mismatch! {state.ToString()}");
 				//RequestCleanup();
@@ -149,7 +149,7 @@ namespace TrafficManager.Traffic.Impl {
 			}
 #endif
 
-			if (state.nextSegmentId == 0) {
+			if (state.NextSegmentId == 0) {
 #if DEBUGMETRIC
 				if (debug)
 					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId}: Ignoring vehicle");
@@ -157,10 +157,10 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			if (state.currentLaneIndex >= ret.Length || !ret[state.currentLaneIndex].ContainsKey(state.nextSegmentId)) {
+			if (state.CurrentLaneIndex >= ret.Length || !ret[state.CurrentLaneIndex].ContainsKey(state.NextSegmentId)) {
 #if DEBUGMETRIC
 				if (debug)
-					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} is on lane {state.currentLaneIndex} and wants to go to segment {state.nextSegmentId} but one or both are invalid: {ret.CollectionToString()}");
+					Log._Debug($" MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId} (start={StartNode})) Vehicle {vehicleId} is on lane {state.CurrentLaneIndex} and wants to go to segment {state.NextSegmentId} but one or both are invalid: {ret.CollectionToString()}");
 #endif
 				return;
 			}
@@ -177,20 +177,20 @@ namespace TrafficManager.Traffic.Impl {
 			
 			uint normLength = 10u;
 			if (avgSegmentLength > 0) {
-				normLength = Math.Min(100u, (uint)(Math.Max(1u, state.totalLength) * 100u) / avgSegmentLength) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
+				normLength = Math.Min(100u, (uint)(Math.Max(1u, state.TotalLength) * 100u) / avgSegmentLength) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
 			}
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) NormLength of vehicle {vehicleId}: {state.totalLength} -> {normLength} (avgSegmentLength={avgSegmentLength})");
+				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) NormLength of vehicle {vehicleId}: {state.TotalLength} -> {normLength} (avgSegmentLength={avgSegmentLength})");
 #endif
 
-			ret[state.currentLaneIndex][state.nextSegmentId] += normLength;
+			ret[state.CurrentLaneIndex][state.NextSegmentId] += normLength;
 			++numProcessed;
 
 #if DEBUGMETRIC
 			if (debug)
-				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: ***ADDED*** ({state.currentSegmentId}@{state.currentLaneIndex} -> {state.nextSegmentId}@{state.nextLaneIndex})!");
+				Log._Debug($"  MeasureOutgoingVehicle: (Segment {SegmentId}, Node {NodeId}) Vehicle {vehicleId}: ***ADDED*** ({state.CurrentSegmentId}@{state.CurrentLaneIndex} -> {state.NextSegmentId}@{state.NextLaneIndex})!");
 #endif
 
 			return;
@@ -203,7 +203,7 @@ namespace TrafficManager.Traffic.Impl {
 			int ret = 0;
 			while (vehicleId != 0) {
 				++ret;
-				vehicleId = vehStateManager.VehicleStates[vehicleId].nextVehicleIdOnSegment;
+				vehicleId = vehStateManager.VehicleStates[vehicleId].NextVehicleIdOnSegment;
 			}
 			return ret;
 		}

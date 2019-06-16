@@ -471,7 +471,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 
 					// check next incoming vehicle
-					incomingVehicleId = vehStateManager.VehicleStates[incomingVehicleId].nextVehicleIdOnSegment;
+					incomingVehicleId = vehStateManager.VehicleStates[incomingVehicleId].NextVehicleIdOnSegment;
 				}
 			}
 #if DEBUG
@@ -490,11 +490,11 @@ namespace TrafficManager.Manager.Impl {
 			if (debug) {
 				Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Checking against other vehicle {incomingVehicleId}.");
 				Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): TARGET is coming from seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
-				Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): INCOMING is coming from seg. {incomingState.currentSegmentId}, start {incomingState.currentStartNode}, lane {incomingState.currentLaneIndex}, going to seg. {incomingState.nextSegmentId}, lane {incomingState.nextLaneIndex}\nincoming state: {incomingState}");
+				Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): INCOMING is coming from seg. {incomingState.CurrentSegmentId}, start {incomingState.IsCurrentStartNode}, lane {incomingState.CurrentLaneIndex}, going to seg. {incomingState.NextSegmentId}, lane {incomingState.NextLaneIndex}\nincoming state: {incomingState}");
 			}
 #endif
 
-			if ((incomingState.flags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
+			if ((incomingState.VehicleFlags & VehicleState.Flags.Spawned) == VehicleState.Flags.None) {
 #if DEBUG
 				if (debug)
 					Log.Warning($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Incoming vehicle is not spawned.");
@@ -512,10 +512,10 @@ namespace TrafficManager.Manager.Impl {
 				return false;
 			}
 
-			ArrowDirection incomingToRelDir = incomingEndGeo.GetDirection(incomingState.nextSegmentId); // relative target direction of incoming vehicle
+			ArrowDirection incomingToRelDir = incomingEndGeo.GetDirection(incomingState.NextSegmentId); // relative target direction of incoming vehicle
 
 			if (incomingLights != null) {
-				ICustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.currentLaneIndex);
+				ICustomSegmentLight incomingLight = incomingLights.GetCustomLight(incomingState.CurrentLaneIndex);
 #if DEBUG
 				if (debug)
 					Log._Debug($"TrafficPriorityManager.IsConflictingVehicle({vehicleId}, {incomingVehicleId}): Detected traffic light. Incoming state ({incomingToRelDir}): {incomingLight.GetLightState(incomingToRelDir)}");
@@ -535,7 +535,7 @@ namespace TrafficManager.Manager.Impl {
 				if (incomingState.JunctionTransitState == VehicleJunctionTransitState.Approach ||
 					incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave
 				) {
-					if ((incomingState.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
+					if ((incomingState.VehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None) {
 						float incomingSqrSpeed = incomingVel.sqrMagnitude;
 						if (!incomingStateChangedRecently && incomingSqrSpeed <= GlobalConfig.Instance.PriorityRules.MaxStopVelocity) {
 #if DEBUG
@@ -661,7 +661,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
 			if (debug) {
 				Log._Debug("");
-				Log._Debug($"  TrafficPriorityManager.HasVehiclePriority({vehicleId}, {incomingVehicleId}): *** Checking if vehicle {vehicleId} (main road = {onMain}) @ (seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}) -> (seg. {nextPos.m_segment}, lane {nextPos.m_lane}) has priority over {incomingVehicleId} (main road = {incomingOnMain}) @ (seg. {incomingState.currentSegmentId}, start {incomingState.currentStartNode}, lane {incomingState.currentLaneIndex}) -> (seg. {incomingState.nextSegmentId}, lane {incomingState.nextLaneIndex}).");
+				Log._Debug($"  TrafficPriorityManager.HasVehiclePriority({vehicleId}, {incomingVehicleId}): *** Checking if vehicle {vehicleId} (main road = {onMain}) @ (seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}) -> (seg. {nextPos.m_segment}, lane {nextPos.m_lane}) has priority over {incomingVehicleId} (main road = {incomingOnMain}) @ (seg. {incomingState.CurrentSegmentId}, start {incomingState.IsCurrentStartNode}, lane {incomingState.CurrentLaneIndex}) -> (seg. {incomingState.NextSegmentId}, lane {incomingState.NextLaneIndex}).");
             }
 #endif
 
@@ -674,7 +674,7 @@ namespace TrafficManager.Manager.Impl {
 				return true;
 			}
 
-			if (curPos.m_segment == incomingState.currentSegmentId) {
+			if (curPos.m_segment == incomingState.CurrentSegmentId) {
 				// both vehicles are coming from the same segment. do not apply priority rules in this case.
 #if DEBUG
 				if (debug) {
@@ -726,7 +726,7 @@ namespace TrafficManager.Manager.Impl {
 			 * (1) COLLISION DETECTION
 			 */
 
-			bool sameTargets = nextPos.m_segment == incomingState.nextSegmentId;
+			bool sameTargets = nextPos.m_segment == incomingState.NextSegmentId;
 			bool wouldCollide = DetectCollision(debug, ref curPos, transitNodeId, startNode, ref nextPos, ref incomingState, targetToDir, incomingFromDir, incomingToRelDir, vehicleId, incomingVehicleId);
 
 			if (!wouldCollide) {
@@ -805,7 +805,7 @@ namespace TrafficManager.Manager.Impl {
 		public bool DetectCollision(bool debug, ref PathUnit.Position curPos, ushort transitNodeId, bool startNode, ref PathUnit.Position nextPos,
 			ref VehicleState incomingState, ArrowDirection targetToDir, ArrowDirection incomingFromDir, ArrowDirection incomingToRelDir, ushort vehicleId=0, ushort incomingVehicleId=0
 		) {
-			bool sameTargets = nextPos.m_segment == incomingState.nextSegmentId;
+			bool sameTargets = nextPos.m_segment == incomingState.NextSegmentId;
 			bool wouldCollide;
 			bool incomingIsLeaving = incomingState.JunctionTransitState == VehicleJunctionTransitState.Leave;
 			if (sameTargets) {
@@ -816,7 +816,7 @@ namespace TrafficManager.Manager.Impl {
 				}
 #endif
 
-				if (nextPos.m_lane == incomingState.nextLaneIndex) {
+				if (nextPos.m_lane == incomingState.NextLaneIndex) {
 					// both are going to the same lane: lane order is always incorrect
 #if DEBUG
 					if (debug) {
@@ -836,10 +836,10 @@ namespace TrafficManager.Manager.Impl {
 						case ArrowDirection.Turn:
 						default: // (should not happen)
 								 // target & incoming are going left: stay left
-							wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, nextPos.m_lane, incomingState.nextLaneIndex); // stay left
+							wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, nextPos.m_lane, incomingState.NextLaneIndex); // stay left
 #if DEBUG
 							if (debug) {
-								Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir}. Checking if lane {nextPos.m_lane} is LEFT to {incomingState.nextLaneIndex}. would collide? {wouldCollide}");
+								Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir}. Checking if lane {nextPos.m_lane} is LEFT to {incomingState.NextLaneIndex}. would collide? {wouldCollide}");
 							}
 #endif
 							break;
@@ -849,19 +849,19 @@ namespace TrafficManager.Manager.Impl {
 								case ArrowDirection.Left:
 								case ArrowDirection.Forward:
 									// target is going forward, incoming is coming from left/forward: stay right
-									wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, incomingState.nextLaneIndex, nextPos.m_lane); // stay right
+									wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, incomingState.NextLaneIndex, nextPos.m_lane); // stay right
 #if DEBUG
 									if (debug) {
-										Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir} and incoming is coming from {incomingFromDir}. Checking if lane {nextPos.m_lane} is RIGHT to {incomingState.nextLaneIndex}. would collide? {wouldCollide}");
+										Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir} and incoming is coming from {incomingFromDir}. Checking if lane {nextPos.m_lane} is RIGHT to {incomingState.NextLaneIndex}. would collide? {wouldCollide}");
 									}
 #endif
 									break;
 								case ArrowDirection.Right:
 									// target is going forward, incoming is coming from right: stay left
-									wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, nextPos.m_lane, incomingState.nextLaneIndex); // stay left
+									wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, nextPos.m_lane, incomingState.NextLaneIndex); // stay left
 #if DEBUG
 									if (debug) {
-										Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir} and incoming is coming from {incomingFromDir}. Checking if lane {nextPos.m_lane} is LEFT to {incomingState.nextLaneIndex}. would collide? {wouldCollide}");
+										Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going {targetToDir} and incoming is coming from {incomingFromDir}. Checking if lane {nextPos.m_lane} is LEFT to {incomingState.NextLaneIndex}. would collide? {wouldCollide}");
 									}
 #endif
 									break;
@@ -878,10 +878,10 @@ namespace TrafficManager.Manager.Impl {
 							break;
 						case ArrowDirection.Right:
 							// target is going right: stay right
-							wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, incomingState.nextLaneIndex, nextPos.m_lane); // stay right
+							wouldCollide = !IsLaneOrderConflictFree(debug, nextPos.m_segment, transitNodeId, incomingState.NextLaneIndex, nextPos.m_lane); // stay right
 #if DEBUG
 							if (debug) {
-								Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going RIGHT. Checking if lane {nextPos.m_lane} is RIGHT to {incomingState.nextLaneIndex}. would collide? {wouldCollide}");
+								Log._Debug($"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): Target is going RIGHT. Checking if lane {nextPos.m_lane} is RIGHT to {incomingState.NextLaneIndex}. would collide? {wouldCollide}");
 							}
 #endif
 							break;

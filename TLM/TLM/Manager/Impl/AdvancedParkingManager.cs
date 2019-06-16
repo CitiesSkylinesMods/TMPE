@@ -195,7 +195,7 @@ namespace TrafficManager.Manager.Impl {
 				return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 			}
 
-			if (VehicleStateManager.Instance.VehicleStates[vehicleId].vehicleType != ExtVehicleType.PassengerCar) {
+			if (VehicleStateManager.Instance.VehicleStates[vehicleId].VehicleType != ExtVehicleType.PassengerCar) {
 				// non-passenger cars are not handled
 #if DEBUG
 				if (debug)
