@@ -90,7 +90,7 @@ namespace TrafficManager.Traffic.Data {
                 }
 
                 public VehicleJunctionTransitState JunctionTransitState {
-                        get => junctionTransitState_;
+                        get { return junctionTransitState_; }
                         set {
                                 if (value != junctionTransitState_) {
                                         LastTransitStateUpdate = Now();
@@ -696,29 +696,22 @@ namespace TrafficManager.Traffic.Data {
                                 case VehicleInfo.VehicleType.Bicycle:
                                         return ExtVehicleType.Bicycle;
                                 case VehicleInfo.VehicleType.Car:
-                                        switch (ai) {
-                                                case PassengerCarAI _:
-                                                        return ExtVehicleType.PassengerCar;
-                                                case AmbulanceAI _:
-                                                case FireTruckAI _:
-                                                case PoliceCarAI _:
-                                                case HearseAI _:
-                                                case GarbageTruckAI _:
-                                                case MaintenanceTruckAI _:
-                                                case SnowTruckAI _:
-                                                case WaterTruckAI _:
-                                                case DisasterResponseVehicleAI _:
-                                                case ParkMaintenanceVehicleAI _:
-                                                case PostVanAI _:
-                                                        return ExtVehicleType.Service;
-                                                case CarTrailerAI _:
-                                                        return ExtVehicleType.None;
-                                                case BusAI _:
-                                                        return ExtVehicleType.Bus;
-                                                case TaxiAI _:
-                                                        return ExtVehicleType.Taxi;
-                                                case CargoTruckAI _:
-                                                        return ExtVehicleType.CargoTruck;
+                                        if (ai is PassengerCarAI) {
+                                                return ExtVehicleType.PassengerCar;
+                                        } else if (ai is AmbulanceAI || ai is FireTruckAI || ai is PoliceCarAI ||
+                                                   ai is HearseAI || ai is GarbageTruckAI ||
+                                                   ai is MaintenanceTruckAI || ai is SnowTruckAI ||
+                                                   ai is WaterTruckAI || ai is DisasterResponseVehicleAI ||
+                                                   ai is ParkMaintenanceVehicleAI || ai is PostVanAI) {
+                                                return ExtVehicleType.Service;
+                                        } else if (ai is CarTrailerAI) {
+                                                return ExtVehicleType.None;
+                                        } else if (ai is BusAI) {
+                                                return ExtVehicleType.Bus;
+                                        } else if (ai is TaxiAI) {
+                                                return ExtVehicleType.Taxi;
+                                        } else if (ai is CargoTruckAI) {
+                                                return ExtVehicleType.CargoTruck;
                                         }
 
                                         break;
@@ -739,11 +732,10 @@ namespace TrafficManager.Traffic.Data {
                                         //if (ai is CargoShipAI)
                                 //break;
                                 case VehicleInfo.VehicleType.Plane:
-                                        switch (ai) {
-                                                case PassengerPlaneAI _:
-                                                        return ExtVehicleType.PassengerPlane;
-                                                case CargoPlaneAI _:
-                                                        return ExtVehicleType.CargoPlane;
+                                        if (ai is PassengerPlaneAI) {
+                                                return ExtVehicleType.PassengerPlane;
+                                        } else if (ai is CargoPlaneAI) {
+                                                return ExtVehicleType.CargoPlane;
                                         }
 
                                         break;
