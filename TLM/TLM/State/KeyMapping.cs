@@ -29,6 +29,9 @@ namespace TrafficManager.State {
                                       KeyJunctionRestrictionsTool);
                         AddKeymapping(Translation.GetString("Keyboard_use_speed_limits_tool"), 
                                       KeySpeedLimitsTool);
+
+                        AddKeymapping(Translation.GetString("Keyboard_lane_connector_stay_in_lane"),
+                                      KeyLaneConnectorStayInLane);
                 }
         }
 
@@ -76,6 +79,12 @@ namespace TrafficManager.State {
                         new SavedInputKey("keySpeedLimitsTool",
                                           KEYBOARD_SHORTCUTS_FILENAME,
                                           SavedInputKey.Encode(KeyCode.S, true, true, false),
+                                          true);
+
+                public static SavedInputKey KeyLaneConnectorStayInLane =
+                        new SavedInputKey("keyLaneConnectorStayInLane",
+                                          KEYBOARD_SHORTCUTS_FILENAME,
+                                          SavedInputKey.Encode(KeyCode.S, false, true, false),
                                           true);
 
                 private SavedInputKey editingBinding_;
