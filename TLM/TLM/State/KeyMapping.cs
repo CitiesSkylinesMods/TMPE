@@ -17,17 +17,17 @@ namespace TrafficManager.State {
                         AddKeymapping(Translation.GetString("Keyboard_toggle_TMPE_main_menu"),
                                       KeyToggleTMPEMainMenu);
 
-                        AddKeymapping(Translation.GetString("Keyboard_toggle_traffic_lights_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_toggle_traffic_lights_tool"),
                                       KeyToggleTrafficLightTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_lane_arrow_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_use_lane_arrow_tool"),
                                       KeyLaneArrowTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_lane_connections_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_use_lane_connections_tool"),
                                       KeyLaneConnectionsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_priority_signs_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_use_priority_signs_tool"),
                                       KeyPrioritySignsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_junction_restrictions_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_use_junction_restrictions_tool"),
                                       KeyJunctionRestrictionsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_speed_limits_tool"), 
+                        AddKeymapping(Translation.GetString("Keyboard_use_speed_limits_tool"),
                                       KeySpeedLimitsTool);
 
                         AddKeymapping(Translation.GetString("Keyboard_lane_connector_stay_in_lane"),
@@ -38,7 +38,7 @@ namespace TrafficManager.State {
         public class OptionsKeymapping : UICustomControl {
                 protected static readonly string KeyBindingTemplate = "KeyBindingTemplate";
                 private const string KEYBOARD_SHORTCUTS_FILENAME = "TMPE_Keyboard";
-                
+
                 public static SavedInputKey KeyToggleTMPEMainMenu =
                         new SavedInputKey("keyToggleTMPEMainMenu",
                                           KEYBOARD_SHORTCUTS_FILENAME,
@@ -274,8 +274,8 @@ namespace TrafficManager.State {
                         }
 
                         var value = field.GetValue(null);
-                        if (value is InputKey key) {
-                                return key;
+                        if (value is InputKey) {
+                                return (InputKey) value;
                         }
 
                         return 0;
