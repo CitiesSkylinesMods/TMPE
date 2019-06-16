@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		private VehicleStateManager() {
-			VehicleStates = new VehicleState[VehicleManager.instance.m_vehicles.m_buffer.Length];
+			VehicleStates = new VehicleState[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
 			for (uint i = 0; i < VehicleStates.Length; ++i) {
 				VehicleStates[i] = new VehicleState((ushort)i);
 			}
@@ -249,7 +249,7 @@ namespace TrafficManager.Manager.Impl {
 			Log._Debug("VehicleStateManager: InitAllVehicles()");
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-			for (uint vehicleId = 0; vehicleId < VehicleManager.instance.m_vehicles.m_buffer.Length; ++vehicleId) {
+			for (uint vehicleId = 0; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
 					if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
 						return true;
