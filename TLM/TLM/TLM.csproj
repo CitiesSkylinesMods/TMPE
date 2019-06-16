@@ -176,6 +176,7 @@
     <Compile Include="State\ConfigData\TimedTrafficLights.cs" />
     <Compile Include="State\ConfigData\AdvancedVehicleAI.cs" />
     <Compile Include="State\GlobalConfig.cs" />
+    <Compile Include="State\KeyMapping.cs" />
     <Compile Include="TrafficLight\FlowWaitCalcMode.cs" />
     <Compile Include="TrafficLight\ICustomSegmentLight.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
