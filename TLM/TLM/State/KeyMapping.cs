@@ -14,23 +14,23 @@ namespace TrafficManager.State {
         public class OptionsKeymappingMain : OptionsKeymapping {
                 private void Awake() {
                         TryCreateConfig();
-                        AddKeymapping(Translation.GetString("Keyboard_toggle_TMPE_main_menu"),
+                        AddKeymapping(Translation.GetString("Keybind_toggle_TMPE_main_menu"),
                                       KeyToggleTMPEMainMenu);
 
-                        AddKeymapping(Translation.GetString("Keyboard_toggle_traffic_lights_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_toggle_traffic_lights_tool"),
                                       KeyToggleTrafficLightTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_lane_arrow_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_use_lane_arrow_tool"),
                                       KeyLaneArrowTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_lane_connections_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_use_lane_connections_tool"),
                                       KeyLaneConnectionsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_priority_signs_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_use_priority_signs_tool"),
                                       KeyPrioritySignsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_junction_restrictions_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_use_junction_restrictions_tool"),
                                       KeyJunctionRestrictionsTool);
-                        AddKeymapping(Translation.GetString("Keyboard_use_speed_limits_tool"),
+                        AddKeymapping(Translation.GetString("Keybind_use_speed_limits_tool"),
                                       KeySpeedLimitsTool);
 
-                        AddKeymapping(Translation.GetString("Keyboard_lane_connector_stay_in_lane"),
+                        AddKeymapping(Translation.GetString("Keybind_lane_connector_stay_in_lane"),
                                       KeyLaneConnectorStayInLane);
                 }
         }
