@@ -530,7 +530,8 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
-					var visible = MainTool.WorldToScreenPoint(e.Value, out var screenPos);
+					Vector3 screenPos;
+					var visible = MainTool.WorldToScreenPoint(e.Value, out screenPos);
 
 					if (!visible) {
 						continue;

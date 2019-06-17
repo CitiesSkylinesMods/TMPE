@@ -759,7 +759,8 @@ namespace TrafficManager.State {
 			try {
 				Monitor.Enter(laneSpeedLimitLock);
 
-				if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out var speedLimit)) {
+				float speedLimit;
+				if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out speedLimit)) {
 					return null;
 				}
 

@@ -369,7 +369,8 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			string infoName = info.name;
-			if (!vanillaLaneSpeedLimitsByNetInfoName.TryGetValue(infoName, out var vanillaSpeedLimits)) {
+			float[] vanillaSpeedLimits;
+			if (!vanillaLaneSpeedLimitsByNetInfoName.TryGetValue(infoName, out vanillaSpeedLimits)) {
 				return 0;
 			}
 
@@ -799,7 +800,8 @@ namespace TrafficManager.Manager.Impl {
 			const bool success = true;
 			Log.Info($"Loading custom default speed limit data. {data.Count} elements");
 			foreach (var e in data) {
-				if (!NetInfoByName.TryGetValue(e.Key, out var netInfo)) {
+				NetInfo netInfo;
+				if (!NetInfoByName.TryGetValue(e.Key, out netInfo)) {
 					continue;
 				}
 
