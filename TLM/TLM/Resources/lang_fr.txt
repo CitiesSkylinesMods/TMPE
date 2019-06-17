@@ -232,3 +232,12 @@ Scan_for_known_incompatible_mods_on_startup Rechercher les mods incompatibles au
 Ignore_disabled_mods Ignorer les mods désactivés
 Traffic_Manager_detected_incompatible_mods Le gestionnaire de trafic a détecté des mods incompatibles
 Notify_me_if_there_is_an_unexpected_mod_conflict Afficher un message d'erreur si un mod incompatible est détecté
+Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
+Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
+Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
+Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
+Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
+Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
+Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
+Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybinds Keybinds
