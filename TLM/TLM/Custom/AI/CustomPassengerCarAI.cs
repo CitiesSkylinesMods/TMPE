@@ -135,7 +135,7 @@ namespace TrafficManager.Custom.AI {
 			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
 
 			if (debug)
-				Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): called for vehicle {vehicleID}, driverInstanceId={driverInstanceId}, startPos={startPos}, endPos={endPos}, sourceBuilding={vehicleData.m_sourceBuilding}, targetBuilding={vehicleData.m_targetBuilding} pathMode={driverExtInstance.pathMode}");
+				Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): called for vehicle {vehicleID}, driverInstanceId={driverInstanceId}, startPos={startPos}, endPos={endPos}, sourceBuilding={driverInstance.m_sourceBuilding}, targetBuilding={driverInstance.m_targetBuilding} pathMode={driverExtInstance.pathMode}");
 #endif
 
 			PathUnit.Position startPosA = default(PathUnit.Position);
@@ -149,7 +149,10 @@ namespace TrafficManager.Custom.AI {
 
 			// NON-STOCK CODE START
 			bool calculateEndPos = true;
-			bool allowRandomParking = true;
+			bool randomParking = targetBuildingId != 0 && (
+				Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office ||
+				(driverInstance.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None
+			);
 			bool movingToParkingPos = false;
 			bool foundStartingPos = false;
 			bool skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
@@ -167,9 +170,10 @@ namespace TrafficManager.Custom.AI {
 				if (driverExtInstance.pathMode == ExtPathMode.RequiresMixedCarPathToTarget) {
 					driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
 					startBothWays = false;
+					randomParking = true;
 #if DEBUG
 					if (debug)
-						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): PathMode was RequiresDirectCarPathToTarget: Parking spaces will NOT be searched beforehand. Setting pathMode={driverExtInstance.pathMode}");
+						Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): PathMode was RequiresMixedCarPathToTarget: Parking spaces will NOT be searched beforehand. Setting pathMode={driverExtInstance.pathMode}");
 #endif
 				} else if (
 					driverExtInstance.pathMode != ExtPathMode.ParkingFailed &&
@@ -215,6 +219,12 @@ namespace TrafficManager.Custom.AI {
 						}
 						startBothWays = false;
 
+#if DEBUG
+						if (driverExtInstance.failedParkingAttempts > 15) {
+							Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Detected long Parking AI loop! failedParkingAttempts={driverExtInstance.failedParkingAttempts}");
+						}
+#endif
+
 						if (driverExtInstance.failedParkingAttempts > GlobalConfig.Instance.ParkingAI.MaxParkingAttempts) {
 							// maximum number of parking attempts reached
 #if DEBUG
@@ -247,7 +257,7 @@ namespace TrafficManager.Custom.AI {
 					Vector3 returnPos = searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
 					if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(returnPos, vehicleData.Info, ref driverExtInstance, homeId, targetBuildingId == homeId, vehicleID, allowTourists, out parkPos, ref endPosA, out calcEndPos)) {
 						calculateEndPos = calcEndPos;
-						allowRandomParking = false;
+						randomParking = false;
 						movingToParkingPos = true;
 
 						if (!driverExtInstance.CalculateReturnPath(parkPos, returnPos)) {
@@ -303,17 +313,7 @@ namespace TrafficManager.Custom.AI {
 
 			VehicleInfo.VehicleType vehicleTypes = this.m_info.m_vehicleType;
 			bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
-			bool randomParking = false;
 			bool combustionEngine = this.m_info.m_class.m_subService == ItemClass.SubService.ResidentialLow;
-			if (allowRandomParking && // NON-STOCK CODE
-				!movingToParkingPos &&
-				targetBuildingId != 0 &&
-				(
-					Singleton<BuildingManager>.instance.m_buildings.m_buffer[(int)targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office ||
-					(driverInstance.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None
-				)) {
-				randomParking = true;
-			}
 
 #if DEBUG
 			if (fineDebug)
@@ -325,7 +325,43 @@ namespace TrafficManager.Custom.AI {
 				foundStartingPos = CustomPathManager.FindPathPosition(startPos, ItemClass.Service.Road, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, vehicleTypes, allowUnderground, false, 32f, out startPosA, out startPosB, out sqrDistA, out sqrDistB);
 			}
 
-			bool foundEndPos = !calculateEndPos || driverInstance.Info.m_citizenAI.FindPathPosition(driverInstanceId, ref driverInstance, endPos, Options.prohibitPocketCars && (targetBuildingId == 0 || (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) ? NetInfo.LaneType.Pedestrian : (laneTypes | NetInfo.LaneType.Pedestrian), vehicleTypes, undergroundTarget, out endPosA);
+			NetInfo.LaneType endPosLaneTypes = NetInfo.LaneType.None;
+			NetInfo.LaneType otherLaneTypes = NetInfo.LaneType.None;
+			VehicleInfo.VehicleType otherVehicleTypes = VehicleInfo.VehicleType.None;
+
+			if (movingToParkingPos) {
+				endPosLaneTypes = NetInfo.LaneType.Pedestrian;
+				otherLaneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+				otherVehicleTypes = VehicleInfo.VehicleType.Car;
+#if DEBUG
+				if (fineDebug)
+					Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Vehicle is moving to a parking spot.");
+#endif
+			} else {
+				endPosLaneTypes =
+					Options.prohibitPocketCars && (
+						targetBuildingId == 0 ||
+						(Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None
+					)
+						? NetInfo.LaneType.Pedestrian
+						: (laneTypes | NetInfo.LaneType.Pedestrian);
+#if DEBUG
+				if (fineDebug)
+					Log._Debug($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Vehicle is NOT moving to a parking spot. endPosLaneTypes={endPosLaneTypes}");
+#endif
+			}
+
+			bool foundEndPos =
+				!calculateEndPos ||
+				CustomPathManager.FindCitizenPathPosition(
+					endPos,
+					endPosLaneTypes,
+					vehicleTypes,
+					otherLaneTypes,
+					otherVehicleTypes,
+					(driverInstance.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None,
+					undergroundTarget,
+					out endPosA);
 			// NON-STOCK CODE END
 
 			if (foundStartingPos &&

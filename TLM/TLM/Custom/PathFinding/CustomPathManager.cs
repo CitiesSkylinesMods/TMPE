@@ -331,22 +331,25 @@ namespace TrafficManager.Custom.PathFinding {
 			unit = pathUnitId;
 
 			if (args.isHeavyVehicle) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 16;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IS_HEAVY;
 			}
 			if (args.ignoreBlocked || args.ignoreFlooded) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 32;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_BLOCKED;
 			}
 			if (args.stablePath) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 64;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_STABLE_PATH;
 			}
 			if (args.randomParking) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 2;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_RANDOM_PARKING;
+			}
+			if (args.ignoreFlooded) {
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_FLOODED;
 			}
 			if (args.hasCombustionEngine) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 4;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_COMBUSTION;
 			}
 			if (args.ignoreCosts) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= 8;
+				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_COST;
 			}
 			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
 			this.m_pathUnits.m_buffer[unit].m_buildIndex = args.buildIndex;
@@ -568,15 +571,18 @@ namespace TrafficManager.Custom.PathFinding {
 
 		/// <summary>
 		/// Finds a suitable path position for a walking citizen with the given world position.
+		/// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.
 		/// </summary>
 		/// <param name="pos">world position</param>
 		/// <param name="laneTypes">allowed lane types</param>
 		/// <param name="vehicleTypes">allowed vehicle types</param>
+		/// <param name="otherLaneTypes">allowed lane types for secondary lane</param>
+		/// <param name="otherVehicleTypes">other vehicle types for secondary lane</param>
 		/// <param name="allowTransport">public transport allowed?</param>
 		/// <param name="allowUnderground">underground position allowed?</param>
 		/// <param name="position">resulting path position</param>
 		/// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
-		public static bool FindCitizenPathPosition(Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, bool allowTransport, bool allowUnderground, out PathUnit.Position position) {
+		public static bool FindCitizenPathPosition(Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, NetInfo.LaneType otherLaneTypes, VehicleInfo.VehicleType otherVehicleTypes, bool allowTransport, bool allowUnderground, out PathUnit.Position position) {
 			// TODO move to ExtPathManager after harmony upgrade
 			position = default(PathUnit.Position);
 			float minDist = 1E+10f;
@@ -584,15 +590,15 @@ namespace TrafficManager.Custom.PathFinding {
 			PathUnit.Position posB;
 			float distA;
 			float distB;
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+			if (FindPathPositionWithSpiralLoop(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
 				minDist = distA;
 				position = posA;
 			}
-			if (PathManager.FindPathPosition(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+			if (FindPathPositionWithSpiralLoop(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
 				minDist = distA;
 				position = posA;
 			}
-			if (allowTransport && PathManager.FindPathPosition(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
+			if (allowTransport && FindPathPositionWithSpiralLoop(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.prohibitPocketCars ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
 				minDist = distA;
 				position = posA;
 			}

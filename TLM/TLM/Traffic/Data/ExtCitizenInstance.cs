@@ -359,8 +359,8 @@ namespace TrafficManager.Traffic.Data {
 
 			PathUnit.Position parkPathPos;
 			PathUnit.Position targetPathPos = default(PathUnit.Position);
-			bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(parkPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out parkPathPos);
-			bool foundTargetPathPos = foundParkPathPos && CustomPathManager.FindCitizenPathPosition(targetPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out targetPathPos);
+			bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(parkPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, out parkPathPos);
+			bool foundTargetPathPos = foundParkPathPos && CustomPathManager.FindCitizenPathPosition(targetPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, out targetPathPos);
 			if (foundParkPathPos && foundTargetPathPos) {
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);
 				uint pathId;
