@@ -240,3 +240,4 @@ Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
 Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
 Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
 Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybinds Keybinds

@@ -232,3 +232,12 @@ Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on 
 Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
+Keybind_toggle_TMPE_main_menu TM:PE-Hauptmenü umschalten
+Keybind_toggle_traffic_lights_tool Werkzeug 'Ampeln setzen' verwenden
+Keybind_use_lane_arrow_tool Werkzeug 'Richtungspfeile' verwenden
+Keybind_use_lane_connections_tool Werkzeug 'Fahrspurverbinder' verwenden
+Keybind_use_priority_signs_tool Werkzeug 'Vorfahrtsschilder' verwenden
+Keybind_use_junction_restrictions_tool Werkzeug 'Kreuzungsbeschränkungen' verwenden
+Keybind_use_speed_limits_tool Werkzeug 'Geschwindigkeitsbeschränkungen' verwenden
+Keybind_lane_connector_stay_in_lane Fahrspurverbinder: Bleib auf der Fahrspur
+Keybinds Tastenkombinationen

@@ -391,7 +391,7 @@ namespace TrafficManager.State {
                         // KEYBOARD
                         ++tabIndex;
 
-                        AddOptionTab(tabStrip, Translation.GetString("Keyboard"));
+                        AddOptionTab(tabStrip, Translation.GetString("Keybinds"));
                         tabStrip.selectedIndex = tabIndex;
 
                         currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -403,7 +403,7 @@ namespace TrafficManager.State {
 
                         panelHelper = new UIHelper(currentPanel);
 
-                        var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keyboard"));
+                        var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
                         ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<OptionsKeymappingMain>();
 #if DEBUG
 
