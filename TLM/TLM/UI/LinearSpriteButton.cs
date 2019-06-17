@@ -95,11 +95,12 @@ namespace TrafficManager.UI.MainMenu {
 		public abstract string Tooltip { get; }
 		public abstract bool Visible { get; }
 		public abstract void HandleClick(UIMouseEventParameter p);
-                public virtual SavedInputKey ShortcutKey {
-                        get { return null; }
-                }
 
-                protected override void OnClick(UIMouseEventParameter p) {
+		public virtual SavedInputKey ShortcutKey {
+			get { return null; }
+		}
+
+		protected override void OnClick(UIMouseEventParameter p) {
 			HandleClick(p);
 			UpdateProperties();
 		}
@@ -114,10 +115,10 @@ namespace TrafficManager.UI.MainMenu {
 			m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = GetButtonForegroundTextureId(ButtonName, FunctionName, active);
 			m_ForegroundSprites.m_Hovered = m_PressedFgSprite = GetButtonForegroundTextureId(ButtonName, FunctionName, true);
 
-                        var shortcutText = ShortcutKey == null
-                                                   ? string.Empty
-                                                   : "\n" + ShortcutKey.ToLocalizedString("KEYNAME");
-                        tooltip = Translation.GetString(Tooltip) + shortcutText;
+			var shortcutText = ShortcutKey == null
+				                   ? string.Empty
+				                   : "\n" + ShortcutKey.ToLocalizedString("KEYNAME");
+			tooltip = Translation.GetString(Tooltip) + shortcutText;
 
 			isVisible = Visible;
 			this.Invalidate();

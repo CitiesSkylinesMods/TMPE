@@ -388,23 +388,23 @@ namespace TrafficManager.State {
 
 			Indent(turnOnRedEnabledToggle);
 
-                        // KEYBOARD
-                        ++tabIndex;
+			// KEYBOARD
+			++tabIndex;
 
-                        AddOptionTab(tabStrip, Translation.GetString("Keybinds"));
-                        tabStrip.selectedIndex = tabIndex;
+			AddOptionTab(tabStrip, Translation.GetString("Keybinds"));
+			tabStrip.selectedIndex = tabIndex;
 
-                        currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-                        currentPanel.autoLayout = true;
-                        currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-                        currentPanel.autoLayoutPadding.top = 5;
-                        currentPanel.autoLayoutPadding.left = 10;
-                        currentPanel.autoLayoutPadding.right = 10;
+			currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
+			currentPanel.autoLayout = true;
+			currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+			currentPanel.autoLayoutPadding.top = 5;
+			currentPanel.autoLayoutPadding.left = 10;
+			currentPanel.autoLayoutPadding.right = 10;
 
-                        panelHelper = new UIHelper(currentPanel);
+			panelHelper = new UIHelper(currentPanel);
 
-                        var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
-                        ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<OptionsKeymappingMain>();
+			var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
+			((UIPanel) ((UIHelper) keyboardGroup).self).gameObject.AddComponent<OptionsKeymappingMain>();
 #if DEBUG
 
 			// GLOBAL CONFIG

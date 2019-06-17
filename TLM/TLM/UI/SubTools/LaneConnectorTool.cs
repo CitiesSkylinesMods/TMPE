@@ -34,7 +34,14 @@ namespace TrafficManager.UI.SubTools {
 		private NodeLaneMarker hoveredMarker = null;
 		private Dictionary<ushort, List<NodeLaneMarker>> currentNodeMarkers;
 		private StayInLaneMode stayInLaneMode = StayInLaneMode.None;
-		//private bool initDone = false;
+                //private bool initDone = false;
+                
+                /// <summary>Unity frame when OnGui detected the shortcut for Stay in Lane.
+                /// Resets when the event is consumed or after a few frames.</summary>
+                private int frameStayInLanePressed = 0;
+
+                /// <summary>Clear lane lines is Delete or Backspace</summary>
+                private int frameClearPressed = 0;
 
 		class NodeLaneMarker {
 			internal ushort segmentId;
@@ -60,7 +67,21 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnToolGUI(Event e) {
-			//Log._Debug($"TppLaneConnectorTool: OnToolGUI. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId} IsInsideUI={MainTool.GetToolController().IsInsideUI}");
+//			Log._Debug($"TppLaneConnectorTool: OnToolGUI. SelectedNodeId={SelectedNodeId} " +
+//			           $"SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} " +
+//			           $"HoveredSegmentId={HoveredSegmentId} IsInsideUI={MainTool.GetToolController().IsInsideUI}");
+
+			if (OptionsKeymapping.KeyLaneConnectorStayInLane.IsPressed(e)) {
+				frameStayInLanePressed = Time.frameCount;
+				// this will be consumed in RenderOverlay() if the key was pressed
+				// not too long ago (within 20 Unity frames or 0.33 sec)
+			}
+
+			if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) {
+				frameClearPressed = Time.frameCount;
+				// this will be consumed in RenderOverlay() if the key was pressed
+				// not too long ago (within 20 Unity frames or 0.33 sec)
+			}
 		}
 
 		public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -97,7 +118,7 @@ namespace TrafficManager.UI.SubTools {
 					continue; // do not draw if too distant
 
 				List<NodeLaneMarker> nodeMarkers;
-				bool hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
+				var hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
 
 				if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
 					MainTool.DrawNodeCircle(cameraInfo, (ushort)nodeId, DefaultNodeMarkerColor, true);
@@ -187,13 +208,20 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}
 
-				bool deleteAll = Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace);
-				bool stayInLane = OptionsKeymapping.KeyLaneConnectorStayInLane.IsPressed(Event.current)
-                                                  && Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].CountSegments() == 2;
-				if (stayInLane)
+				var deleteAll = frameClearPressed > 0 && (Time.frameCount - frameClearPressed) < 20; // 0.33 sec
+
+				// Must press Shift+S (or another shortcut) within last 20 frames for this to work
+				var stayInLane = frameStayInLanePressed > 0 
+				                 && (Time.frameCount - frameStayInLanePressed) < 20 // 0.33 sec
+						 && Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].CountSegments() == 2;
+
+				if (stayInLane) {
+					frameStayInLanePressed = 0; // not pressed anymore (consumed)
 					deleteAll = true;
+				}
 
 				if (deleteAll) {
+					frameClearPressed = 0; // consumed
 					// remove all connections at selected node
 					LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(SelectedNodeId);
 					RefreshCurrentNodeMarkers(SelectedNodeId);

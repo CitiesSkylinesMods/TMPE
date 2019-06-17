@@ -8,29 +8,10 @@ using TrafficManager.Manager.Impl;
 
 namespace TrafficManager.UI.MainMenu {
 	public class ClearTrafficButton : MenuButton {
-		public override bool Active {
-			get {
-				return false;
-			}
-		}
-
-		public override ButtonFunction Function {
-			get {
-				return ButtonFunction.ClearTraffic;
-			}
-		}
-
-		public override string Tooltip {
-			get {
-				return "Clear_Traffic";
-			}
-		}
-
-		public override bool Visible {
-			get {
-				return true;
-			}
-		}
+		public override bool Active => false;
+		public override ButtonFunction Function => ButtonFunction.ClearTraffic;
+		public override string Tooltip => "Clear_Traffic";
+		public override bool Visible => true;
 
 		public override void OnClickInternal(UIMouseEventParameter p) {
 			ConfirmPanel.ShowModal(Translation.GetString("Clear_Traffic"), Translation.GetString("Clear_Traffic") + "?", delegate (UIComponent comp, int ret) {

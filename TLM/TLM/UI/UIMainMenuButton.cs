@@ -58,7 +58,7 @@ namespace TrafficManager.UI {
 			Drag.width = width;
 			Drag.height = height;
 			Drag.enabled = !GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
-        }
+	}
 
 		public override void OnDestroy() {
 			if (confDisposable != null) {
@@ -124,17 +124,16 @@ namespace TrafficManager.UI {
 			Invalidate();
 		}
 
-                public void OnGUI() {
-                        if (!UIView.HasModalInput()
-                            && !UIView.HasInputFocus()
-                            && OptionsKeymapping.KeyToggleTMPEMainMenu.IsPressed(Event.current))
-                        {
-                                LoadingExtension.BaseUI?.ToggleMainMenu();
-                        }
+		public void OnGUI() {
+			if (!UIView.HasModalInput()
+			    && !UIView.HasInputFocus()
+			    && OptionsKeymapping.KeyToggleTMPEMainMenu.IsPressed(Event.current)) {
+				LoadingExtension.BaseUI?.ToggleMainMenu();
+			}
 
-                        // FIXME: Tooltip text is not displayed on the tool button
-                        // var shortcutText = OptionsKeymapping.KeyToggleTMPEMainMenu.ToLocalizedString("KEYNAME");
-                        // tooltip = Translation.GetString("Keybind_toggle_TMPE_main_menu") + shortcutText;
-                }
-        }
+			// FIXME: Tooltip text is not displayed on the tool button
+			// var shortcutText = OptionsKeymapping.KeyToggleTMPEMainMenu.ToLocalizedString("KEYNAME");
+			// tooltip = Translation.GetString("Keybind_toggle_TMPE_main_menu") + shortcutText;
+		}
+	}
 }
