@@ -47,7 +47,7 @@ namespace TrafficManager.UI
 		public static readonly Texture2D ClockPlayTexture2D;
 		public static readonly Texture2D ClockPauseTexture2D;
 		public static readonly Texture2D ClockTestTexture2D;
-		public static readonly IDictionary<ushort, Texture2D> SpeedLimitTextures;
+		public static readonly IDictionary<int, Texture2D> SpeedLimitTextures;
 		public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
 		public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 		public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
@@ -69,8 +69,7 @@ namespace TrafficManager.UI
 		public static readonly Texture2D RemoveButtonTexture2D;
 		public static readonly Texture2D WindowBackgroundTexture2D;
 
-		static TextureResources()
-        {
+		static TextureResources() {
 			// missing image
 			NoImageTexture2D = LoadDllResource("noimage.png", 64, 64);
 
@@ -112,8 +111,10 @@ namespace TrafficManager.UI
 			PedestrianRedLightTexture2D = LoadDllResource("pedestrian_light_1.png", 73, 123);
 			PedestrianGreenLightTexture2D = LoadDllResource("pedestrian_light_2.png", 73, 123);
 			// light mode
-			LightModeTexture2D = LoadDllResource(Translation.GetTranslatedFileName("light_mode.png"), 103, 95);
-			LightCounterTexture2D = LoadDllResource(Translation.GetTranslatedFileName("light_counter.png"), 103, 95);
+			LightModeTexture2D =
+				LoadDllResource(Translation.GetTranslatedFileName("light_mode.png"), 103, 95);
+			LightCounterTexture2D =
+				LoadDllResource(Translation.GetTranslatedFileName("light_counter.png"), 103, 95);
 			// pedestrian mode
 			PedestrianModeAutomaticTexture2D = LoadDllResource("pedestrian_mode_1.png", 73, 70);
 			PedestrianModeManualTexture2D = LoadDllResource("pedestrian_mode_2.png", 73, 73);
@@ -124,7 +125,7 @@ namespace TrafficManager.UI
 			PrioritySignTextures[PriorityType.Main] = LoadDllResource("sign_priority.png", 200, 200);
 			PrioritySignTextures[PriorityType.Stop] = LoadDllResource("sign_stop.png", 200, 200);
 			PrioritySignTextures[PriorityType.Yield] = LoadDllResource("sign_yield.png", 200, 200);
-			
+
 			// delete priority sign
 			SignRemoveTexture2D = LoadDllResource("remove_signs.png", 256, 256);
 
@@ -133,19 +134,15 @@ namespace TrafficManager.UI
 			ClockPauseTexture2D = LoadDllResource("clock_pause.png", 512, 512);
 			ClockTestTexture2D = LoadDllResource("clock_test.png", 512, 512);
 
-			SpeedLimitTextures = new TinyDictionary<ushort, Texture2D>();
-			// Load speed limit signs for Kmph and Mph
-			foreach (var speedLimit in SpeedLimitManager.Instance.AvailableSpeedLimits) {
-				if (!SpeedLimitTextures.ContainsKey(speedLimit.Kmph)) {
-					SpeedLimitTextures.Add(speedLimit.Kmph,
-					                       LoadDllResource(speedLimit.Kmph + ".png", 200, 200));
-				}
+			// TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
+			SpeedLimitTextures = new TinyDictionary<int, Texture2D>();
 
-				if (!SpeedLimitTextures.ContainsKey(speedLimit.Mph)) {
-					var resource = LoadDllResource(speedLimit.Mph + ".png", 200, 200);
-					SpeedLimitTextures.Add(speedLimit.Mph,
-					                       resource != null ? resource : SpeedLimitTextures[10]);
-				}
+			// Load shared speed limit signs for Kmph and Mph
+			// Assumes that signs from 0 to 140 with step 5 exist, 0.png denotes no limit sign
+			for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
+				var resource = LoadDllResource(speedLimit + ".png", 200, 200);
+				SpeedLimitTextures.Add(speedLimit,
+				                       resource ?? SpeedLimitTextures[5]);
 			}
 
 			VehicleRestrictionTextures = new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>>();
@@ -154,14 +151,18 @@ namespace TrafficManager.UI
 			VehicleRestrictionTextures[ExtVehicleType.CargoTruck] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Emergency] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.PassengerCar] = new TinyDictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] = new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] =
+				new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Service] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Taxi] = new TinyDictionary<bool, Texture2D>();
 
-			foreach (KeyValuePair<ExtVehicleType, IDictionary<bool, Texture2D>> e in VehicleRestrictionTextures) {
-				foreach (bool b in new bool[]{false, true}) {
+			foreach (KeyValuePair<ExtVehicleType, IDictionary<bool, Texture2D>> e in
+				VehicleRestrictionTextures) {
+				foreach (bool b in new bool[] {false, true}) {
 					string suffix = b ? "allowed" : "forbidden";
-					e.Value[b] = LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200, 200);
+					e.Value[b] =
+						LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200,
+						                200);
 				}
 			}
 
@@ -181,21 +182,30 @@ namespace TrafficManager.UI
 			LeftOnRedForbiddenTexture2D = LoadDllResource("left_on_red_forbidden.png", 200, 200);
 
 			EnterBlockedJunctionAllowedTexture2D = LoadDllResource("enterblocked_allowed.png", 200, 200);
-			EnterBlockedJunctionForbiddenTexture2D = LoadDllResource("enterblocked_forbidden.png", 200, 200);
+			EnterBlockedJunctionForbiddenTexture2D =
+				LoadDllResource("enterblocked_forbidden.png", 200, 200);
 
 			PedestrianCrossingAllowedTexture2D = LoadDllResource("crossing_allowed.png", 200, 200);
 			PedestrianCrossingForbiddenTexture2D = LoadDllResource("crossing_forbidden.png", 200, 200);
 
 			VehicleInfoSignTextures = new TinyDictionary<ExtVehicleType, Texture2D>();
-			VehicleInfoSignTextures[ExtVehicleType.Bicycle] = LoadDllResource("bicycle_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.Bicycle] =
+				LoadDllResource("bicycle_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Bus] = LoadDllResource("bus_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.CargoTrain] = LoadDllResource("cargotrain_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.CargoTruck] = LoadDllResource("cargotruck_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.Emergency] = LoadDllResource("emergency_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.PassengerCar] = LoadDllResource("passengercar_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.PassengerTrain] = LoadDllResource("passengertrain_infosign.png", 449, 411);
-			VehicleInfoSignTextures[ExtVehicleType.RailVehicle] = VehicleInfoSignTextures[ExtVehicleType.PassengerTrain];
-			VehicleInfoSignTextures[ExtVehicleType.Service] = LoadDllResource("service_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.CargoTrain] =
+				LoadDllResource("cargotrain_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.CargoTruck] =
+				LoadDllResource("cargotruck_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.Emergency] =
+				LoadDllResource("emergency_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.PassengerCar] =
+				LoadDllResource("passengercar_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.PassengerTrain] =
+				LoadDllResource("passengertrain_infosign.png", 449, 411);
+			VehicleInfoSignTextures[ExtVehicleType.RailVehicle] =
+				VehicleInfoSignTextures[ExtVehicleType.PassengerTrain];
+			VehicleInfoSignTextures[ExtVehicleType.Service] =
+				LoadDllResource("service_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("taxi_infosign.png", 449, 411);
 			VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("tram_infosign.png", 449, 411);
 
@@ -204,8 +214,22 @@ namespace TrafficManager.UI
 			WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
 		}
 
-		public static Texture2D GetSpeedLimitTexture(SpeedLimitDef limit) {
-			return GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? SpeedLimitTextures[limit.Mph] : SpeedLimitTextures[limit.Kmph];
+		/// <summary>
+		/// Given speed limit, round it up to nearest Kmph or Mph and produce a texture
+		/// </summary>
+		/// <param name="speedLimit">Ingame speed</param>
+		/// <returns>The texture, hopefully it existed</returns>
+		public static Texture2D GetSpeedLimitTexture(float speedLimit) {
+			if (speedLimit >= SpeedLimitManager.MAX_SPEED) {
+				// Special value for max speed
+				return SpeedLimitTextures[0];
+			}
+			var index = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				       ? SpeedLimit.ToMphRounded(speedLimit)
+				       : SpeedLimit.ToKmphRounded(speedLimit);
+			var trimIndex = Math.Min(SpeedLimit.UPPER_KMPH, Math.Max((ushort)0, index));
+			// Log._Debug($"texture for {speedLimit} is {index} trim={trimIndex}");
+			return SpeedLimitTextures[trimIndex];
 		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)

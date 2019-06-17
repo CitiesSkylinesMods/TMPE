@@ -186,7 +186,7 @@
     <Compile Include="TrafficLight\LightMode.cs" />
     <Compile Include="TrafficLight\StepChangeMetric.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
-    <Compile Include="Traffic\Data\SpeedLimitDef.cs" />
+    <Compile Include="Traffic\Data\SpeedLimit.cs" />
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
@@ -366,7 +366,6 @@
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
     <EmbeddedResource Include="Resources\5.png" />
-    <EmbeddedResource Include="Resources\12.png" />
     <EmbeddedResource Include="Resources\25.png" />
     <EmbeddedResource Include="Resources\45.png" />
     <EmbeddedResource Include="Resources\55.png" />
@@ -464,6 +463,20 @@
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\15.png" />
+    <EmbeddedResource Include="Resources\35.png" />
+    <EmbeddedResource Include="Resources\65.png" />
+    <EmbeddedResource Include="Resources\85.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\105.png" />
+    <EmbeddedResource Include="Resources\115.png" />
+    <EmbeddedResource Include="Resources\125.png" />
+    <EmbeddedResource Include="Resources\135.png" />
+    <EmbeddedResource Include="Resources\140.png" />
+    <EmbeddedResource Include="Resources\95.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

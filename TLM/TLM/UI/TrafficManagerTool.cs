@@ -948,7 +948,7 @@ namespace TrafficManager.UI {
 				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[CustomPassengerCarAI.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
-				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicle.GetLastFrameVelocity().magnitude);
+				float vehSpeed = SpeedLimit.ToKmphRounded(vehicle.GetLastFrameVelocity().magnitude);
 
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
@@ -956,8 +956,19 @@ namespace TrafficManager.UI {
 				}
 #endif
 
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + vState.SqrVelocity + "] (len: " + vState.totalLength + ", " + vState.JunctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
-					"di: " + driverInst.instanceId + " dc: " + driverInst.GetCitizenId() + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " srnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetStaticVehicleRand((ushort)i) + " trnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetTimedVehicleRand((ushort)i);
+				string labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : string.Empty)
+				                  + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2="
+				                  + vState.SqrVelocity + "] (len: " + vState.totalLength + ", "
+				                  + vState.JunctionTransitState + " @ " + vState.currentSegmentId
+				                  + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex
+				                  + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: "
+				                  + vState.waitTime + "\n" + "di: " + driverInst.instanceId
+				                  + " dc: " + driverInst.GetCitizenId() + " m: " + driverInst.pathMode
+				                  + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation
+				                  + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate
+				                  + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId
+				                  + " srnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetStaticVehicleRand((ushort)i)
+				                  + " trnd: " + Constants.ManagerFactory.VehicleBehaviorManager.GetTimedVehicleRand((ushort)i);
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
