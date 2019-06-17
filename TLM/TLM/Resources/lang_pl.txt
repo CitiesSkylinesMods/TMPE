@@ -232,12 +232,12 @@ Scan_for_known_incompatible_mods_on_startup Uruchamiaj sprawdzanie przy starcie 
 Ignore_disabled_mods Ignoruj wyłączone mody
 Traffic_Manager_detected_incompatible_mods Traffic Manager wykrył niekompatybilne mody
 Notify_me_if_there_is_an_unexpected_mod_conflict Powiadom mnie w razie nieoczekiwanej niezgodność modów
-Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
-Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
-Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
-Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
-Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
-Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
-Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
-Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
-Keybinds Keybinds
+Keybind_toggle_TMPE_main_menu Menu TM:PE
+Keybind_toggle_traffic_lights_tool Narzędzie 'Przełącznik Sygnalizacji świetlnej'
+Keybind_use_lane_arrow_tool Narzędzie 'Strzałki pasów ruchu'
+Keybind_use_lane_connections_tool Narzędzie 'Połącz pasy ruchu'
+Keybind_use_priority_signs_tool Narzędzie 'Znaki pierwszeństwa'
+Keybind_use_junction_restrictions_tool Narzędzie 'Ograniczenia na skrzyżowaniu'
+Keybind_use_speed_limits_tool Narzędzie 'Limity prędkości'
+Keybind_lane_connector_stay_in_lane Połącz pasy ruchu: Pozostań na pasie
+Keybinds Skróty klawiszowe
