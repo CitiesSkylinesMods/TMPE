@@ -760,7 +760,7 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
 					           $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
 					           $"lanes={info?.m_lanes} is {customSpeedLimit}");
-					if (customSpeedLimit > 0) {
+					if (SpeedLimit.IsValidRange(customSpeedLimit)) {
 						// lane speed limit differs from default speed limit
 						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: " +
 						           $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
