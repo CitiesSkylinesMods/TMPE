@@ -209,23 +209,25 @@ namespace TrafficManager.UI.MainMenu {
 		}
 
 		public void OnGUI() {
+			// Return if modal window is active or the main menu is hidden
+			if (!this.isVisible || UIView.HasModalInput() || UIView.HasInputFocus()) {
+				return;
+			}
+
 			// Some safety checks to not trigger while full screen/modals are open
 			// Check the key and then click the corresponding button
-			if (!UIView.HasModalInput()
-			    && !UIView.HasInputFocus()) {
-				if (OptionsKeymapping.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(ToggleTrafficLightsButton));
-				} else if (OptionsKeymapping.KeyLaneArrowTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(LaneArrowsButton));
-				} else if (OptionsKeymapping.KeyLaneConnectionsTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(LaneConnectorButton));
-				} else if (OptionsKeymapping.KeyPrioritySignsTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(PrioritySignsButton));
-				} else if (OptionsKeymapping.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(JunctionRestrictionsButton));
-				} else if (OptionsKeymapping.KeySpeedLimitsTool.IsPressed(Event.current)) {
-					ClickToolButton(typeof(SpeedLimitsButton));
-				}
+			if (OptionsKeymapping.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(ToggleTrafficLightsButton));
+			} else if (OptionsKeymapping.KeyLaneArrowTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(LaneArrowsButton));
+			} else if (OptionsKeymapping.KeyLaneConnectionsTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(LaneConnectorButton));
+			} else if (OptionsKeymapping.KeyPrioritySignsTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(PrioritySignsButton));
+			} else if (OptionsKeymapping.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(JunctionRestrictionsButton));
+			} else if (OptionsKeymapping.KeySpeedLimitsTool.IsPressed(Event.current)) {
+				ClickToolButton(typeof(SpeedLimitsButton));
 			}
 		}
 
