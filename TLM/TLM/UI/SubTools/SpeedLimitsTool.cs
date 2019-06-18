@@ -553,11 +553,11 @@ namespace TrafficManager.UI.SubTools {
 
 					// Draw something right here, the road sign texture
 					GUI.color = guiColor;
-                                        var displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
+					var displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
 					var tex = TextureResources.GetSpeedLimitTexture(displayLimit);
-	                                GUI.DrawTexture(boundingBox, tex);
+					GUI.DrawTexture(boundingBox, tex);
 
-                                        if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
+					if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
 						// change the speed limit to the selected one
 						//Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()} to {speedLimitToSet}");
 						SpeedLimitManager.Instance.SetSpeedLimit(segmentId, e.Key, currentPaletteSpeedLimit);

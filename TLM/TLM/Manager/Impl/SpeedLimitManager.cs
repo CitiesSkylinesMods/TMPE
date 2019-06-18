@@ -495,14 +495,12 @@ namespace TrafficManager.Manager.Impl {
 			return vehicleSpeed;
 		}
 
-		/// <summary>
-		/// Sets the speed limit of a given lane.
-		/// </summary>
+		/// <summary>Sets the speed limit of a given lane.</summary>
 		/// <param name="segmentId"></param>
 		/// <param name="laneIndex"></param>
 		/// <param name="laneInfo"></param>
 		/// <param name="laneId"></param>
-		/// <param name="speedLimit"></param>
+		/// <param name="speedLimit">Game speed units, 0=unlimited</param>
 		/// <returns></returns>
 		public bool SetSpeedLimit(ushort segmentId, uint laneIndex, NetInfo.Lane laneInfo, uint laneId, float speedLimit) {
 			if (!MayHaveCustomSpeedLimits(laneInfo)) {

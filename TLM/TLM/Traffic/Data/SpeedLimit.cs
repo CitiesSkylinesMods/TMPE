@@ -83,7 +83,7 @@ namespace TrafficManager.Traffic.Data {
 		}
 
 		public static bool IsValidRange(float speed) {
-			return speed >= LOWER_SPEED && speed <= UPPER_SPEED;
+			return IsZero(speed) || (speed >= LOWER_SPEED && speed <= UPPER_SPEED);
 		}
 
 		/// <summary>

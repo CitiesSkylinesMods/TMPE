@@ -220,8 +220,8 @@ namespace TrafficManager.UI
 		/// <param name="speedLimit">Ingame speed</param>
 		/// <returns>The texture, hopefully it existed</returns>
 		public static Texture2D GetSpeedLimitTexture(float speedLimit) {
-			if (speedLimit >= SpeedLimitManager.MAX_SPEED) {
-				// Special value for max speed
+			// Special value for max speed, give it 5% margin for safety 950km/h+
+			if (speedLimit > SpeedLimitManager.MAX_SPEED * 0.95f) {
 				return SpeedLimitTextures[0];
 			}
 			var index = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
