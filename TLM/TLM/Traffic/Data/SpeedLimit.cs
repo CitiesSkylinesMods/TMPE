@@ -20,11 +20,13 @@ namespace TrafficManager.Traffic.Data {
 		private const ushort LOWER_KMPH = 10;
 		public const ushort UPPER_KMPH = 140;
 		private const ushort KMPH_STEP = 10;
+		public const int BREAK_PALETTE_COLUMN_KMPH = 8; // palette shows N in a row, then break and another row
 
 		private const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
 		private const ushort LOWER_MPH = 5;
-		private const ushort UPPER_MPH = 85;
+		private const ushort UPPER_MPH = 90;
 		private const ushort MPH_STEP = 5;
+		public const int BREAK_PALETTE_COLUMN_MPH = 10; // palette shows M in a row, then break and another row
 
 		private const float LOWER_SPEED = 0.1f; 
 		private const float UPPER_SPEED = 2 * 10.0f; // 1000 km/h

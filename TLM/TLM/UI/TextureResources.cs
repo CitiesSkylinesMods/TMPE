@@ -227,6 +227,10 @@ namespace TrafficManager.UI
 			var index = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
 				       ? SpeedLimit.ToMphRounded(speedLimit)
 				       : SpeedLimit.ToKmphRounded(speedLimit);
+			// Trim by kmph because UPPER_KMPH is the max road sign that we have
+			if (index > SpeedLimit.UPPER_KMPH) {
+				Log.Info($"Trimming speed={speedLimit} index={index} to 140");
+			}
 			var trimIndex = Math.Min(SpeedLimit.UPPER_KMPH, Math.Max((ushort)0, index));
 			// Log._Debug($"texture for {speedLimit} is {index} trim={trimIndex}");
 			return SpeedLimitTextures[trimIndex];

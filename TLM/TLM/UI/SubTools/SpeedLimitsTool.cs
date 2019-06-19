@@ -35,7 +35,7 @@ namespace TrafficManager.UI.SubTools {
 		private readonly int guiSpeedSignSize = 90;
 
 		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 225));
-		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 280, 400, 400));
+		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
 		private int currentInfoIndex = -1;
@@ -200,15 +200,6 @@ namespace TrafficManager.UI.SubTools {
 			}
 			//Log._Debug($"currentInfoIndex={currentInfoIndex} currentSpeedLimitIndex={currentSpeedLimitIndex}");
 
-                        // Close button. TODO: Make more visible or obey 'Esc' pressed or something
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			if (GUILayout.Button("X", GUILayout.Width(50))) {
-				defaultsWindowVisible = false;
-			}
-
-			GUILayout.EndHorizontal();
-
 			// Road type label
 			GUILayout.BeginVertical();
 			GUILayout.Space(10);
@@ -315,6 +306,13 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.Space(10);
 
 			GUILayout.BeginHorizontal();
+
+			// Close button. TODO: Make more visible or obey 'Esc' pressed or something
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("X", GUILayout.Width(80))) {
+				defaultsWindowVisible = false;
+			}
+
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
 				SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
@@ -372,8 +370,9 @@ namespace TrafficManager.UI.SubTools {
 			allSpeedLimits.Add(0); // add last item: no limit
 
 			var showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-			var column = 0u; // break palette to a new line at 8 or something
-			var breakColumn = showMph ? 8 : 7; // MPH have more items so break 1 column later
+			var column = 0u; // break palette to a new line at breakColumn
+			var breakColumn = showMph ? SpeedLimit.BREAK_PALETTE_COLUMN_MPH
+				                  : SpeedLimit.BREAK_PALETTE_COLUMN_KMPH; 
 
 			foreach (var speedLimit in allSpeedLimits) {
 				// Highlight palette item if it is very close to its float speed
@@ -381,39 +380,63 @@ namespace TrafficManager.UI.SubTools {
 					GUI.color = Color.gray;
 				}
 
-                                // The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
-				GUILayout.BeginVertical();
-				var signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
-				if (GUILayout.Button(
-					TextureResources.GetSpeedLimitTexture(speedLimit),
-					GUILayout.Width(signSize),
-					GUILayout.Height(signSize))) {
-					currentPaletteSpeedLimit = speedLimit;
-				}
-                                // For MPH setting display KM/H below, for KM/H setting display MPH
-				GUILayout.Label(showMph ? SpeedLimit.ToKmphPreciseString(speedLimit)
-					                : SpeedLimit.ToMphPreciseString(speedLimit));
-				GUILayout.EndVertical();
+				_guiSpeedLimitsWindow_AddButton(showMph, speedLimit);
 				GUI.color = oldColor;
 
 				// TODO: This can be calculated from SpeedLimit MPH or KMPH limit constants
-				if (column == breakColumn) {
+				column++;
+				if (column % breakColumn == 0) {
 					GUILayout.EndHorizontal();
 					GUILayout.BeginHorizontal();
-				}
-				column++;
+				} 
 			}
 
+			while (column % breakColumn != 0) {
+				// The last row is not finished, might want to add a spacer
+				_guiSpeedLimitsWindow_AddDummy();
+				column++;
+			}
 			GUILayout.EndHorizontal();
 
-			if (GUILayout.Button(Translation.GetString("Default_speed_limits"))) {
+			GUILayout.BeginHorizontal();
+			if (GUILayout.Button(Translation.GetString("Default_speed_limits"),
+			                     GUILayout.Width(200))) {
 				TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
 				defaultsWindowVisible = true;
 			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
 
 			showLimitsPerLane = GUILayout.Toggle(showLimitsPerLane, Translation.GetString("Show_lane-wise_speed_limits"));
 
 			DragWindow(ref windowRect);
+		}
+
+		/// <summary>Like addButton helper below, but adds unclickable space of the same size</summary>
+		private void _guiSpeedLimitsWindow_AddDummy() {
+			GUILayout.BeginVertical();
+			var signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
+			GUILayout.Button( null as Texture, GUILayout.Width(signSize), GUILayout.Height(signSize));
+			GUILayout.EndVertical();
+		}
+
+		/// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>
+		/// <param name="showMph">Config value from GlobalConfig.I.M.ShowMPH</param>
+		/// <param name="speedLimit">The float speed to show</param>
+		private void _guiSpeedLimitsWindow_AddButton(bool showMph, float speedLimit) {
+			// The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
+			GUILayout.BeginVertical();
+			var signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
+			if (GUILayout.Button(
+				TextureResources.GetSpeedLimitTexture(speedLimit),
+				GUILayout.Width(signSize),
+				GUILayout.Height(signSize))) {
+				currentPaletteSpeedLimit = speedLimit;
+			}
+			// For MPH setting display KM/H below, for KM/H setting display MPH
+			GUILayout.Label(showMph ? SpeedLimit.ToKmphPreciseString(speedLimit)
+				                : SpeedLimit.ToMphPreciseString(speedLimit));
+			GUILayout.EndVertical();
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, ref NetSegment segment, bool viewOnly, ref Vector3 camPos) {
