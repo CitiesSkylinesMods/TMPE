@@ -13,6 +13,7 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
+using TrafficManager.State.ConfigData;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
@@ -65,13 +66,26 @@ namespace TrafficManager.UI.SubTools {
 				return;
 			}
 
+			// Get currently selected now
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
 			Vector3 screenPos;
 			bool visible = MainTool.WorldToScreenPoint(nodePos, out screenPos);
 
-			if (!visible)
+			if (!visible) {
 				return;
+			}
+			
+			// Get the other node, to calculate screen angle
+			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId];
+			var otherNodeId = segment.GetOtherNode(SelectedNodeId);
+			var otherNodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[otherNodeId].m_position;
+			Vector3 otherNodeScreenPos;
+			MainTool.WorldToScreenPoint(otherNodePos, out otherNodeScreenPos);
+			var screenSegment = screenPos - otherNodeScreenPos;
+			
+			// Segment rotation in screen coords + 90 degrees
+			var angle = Mathf.Atan2(screenSegment.y, screenSegment.x) * 180f / Mathf.PI;
 
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = nodePos - camPos;
@@ -79,9 +93,16 @@ namespace TrafficManager.UI.SubTools {
 			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
-			int width = numLanes * 128;
+			const int GUI_LANE_WIDTH = 128;
+			int width = numLanes * GUI_LANE_WIDTH;
 			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
+
+			// Save the GUI rotation, rotate the GUI along the segment + 90°, and restore then
+			var oldMatrix = GUI.matrix;
+			GUIUtility.RotateAroundPivot(angle + 90f, windowRect3.center);
 			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
+			GUI.matrix = oldMatrix;
+
 			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
 		}
 
