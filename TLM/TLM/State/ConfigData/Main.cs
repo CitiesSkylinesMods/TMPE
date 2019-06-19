@@ -10,7 +10,6 @@ namespace TrafficManager.State.ConfigData {
 		/// Main menu button position
 		/// </summary>
 		public int MainMenuButtonX = 464;
-
 		public int MainMenuButtonY = 10;
 		public bool MainMenuButtonPosLocked = false;
 
@@ -18,7 +17,6 @@ namespace TrafficManager.State.ConfigData {
 		/// Main menu position
 		/// </summary>
 		public int MainMenuX = MainMenuPanel.DEFAULT_MENU_X;
-
 		public int MainMenuY = MainMenuPanel.DEFAULT_MENU_Y;
 		public bool MainMenuPosLocked = false;
 
