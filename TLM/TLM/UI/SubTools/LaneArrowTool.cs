@@ -67,35 +67,63 @@ namespace TrafficManager.UI.SubTools {
 			}
 
 			// Get currently selected now
-			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+			var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+			Vector3 nodeWorldPos = nodesBuffer[SelectedNodeId].m_position;
 
-			Vector3 screenPos;
-			bool visible = MainTool.WorldToScreenPoint(nodePos, out screenPos);
+			Vector3 nodeScreenPos;
+			bool visible = MainTool.WorldToScreenPoint(nodeWorldPos, out nodeScreenPos);
 
 			if (!visible) {
 				return;
 			}
 			
-			// Get the other node, to calculate screen angle
+			// Get the segment and the bezier for it to calculate screen angle
 			var segment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId];
+			// var segmentDir = SelectedNodeId == segment.m_endNode ? segment.m_endDirection : segment.m_startDirection;
+			float rotateDegrees;
 			var otherNodeId = segment.GetOtherNode(SelectedNodeId);
-			var otherNodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[otherNodeId].m_position;
-			Vector3 otherNodeScreenPos;
-			MainTool.WorldToScreenPoint(otherNodePos, out otherNodeScreenPos);
-			var screenSegment = screenPos - otherNodeScreenPos;
-			
-			// Segment rotation in screen coords + 90 degrees
-			var rotateDegrees = 90f + Mathf.Atan2(screenSegment.y, screenSegment.x) * Mathf.Rad2Deg;
+			var otherNodeWorldPos = Singleton<NetManager>.instance.m_nodes.m_buffer[otherNodeId].m_position;
+
+			if (segment.IsStraight()) {
+				Vector3 otherNodeScreenPos;
+				MainTool.WorldToScreenPoint(otherNodeWorldPos, out otherNodeScreenPos);
+				var screenSegment = nodeScreenPos - otherNodeScreenPos;
+
+				// Segment rotation in screen coords + 90 degrees
+				rotateDegrees = 90f + Mathf.Atan2(screenSegment.y, screenSegment.x) * Mathf.Rad2Deg;
+			} else {
+				// Handle some curvature, take the last tangent
+				var bezier = default(Bezier3);
+				bezier.a = nodesBuffer[segment.m_startNode].m_position;
+				bezier.d = nodesBuffer[segment.m_endNode].m_position;
+				NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, 
+				                                 bezier.d, segment.m_endDirection, 
+				                                 false, false, 
+				                                 out bezier.b, out bezier.c);
+				var isStartNode = SelectedNodeId == segment.m_startNode;
+				var tangent = bezier.Tangent(isStartNode ? 0f : 1f);
+
+				// Build a short tangent 3d vector from the selected node towards the calculated tangent vec3
+				Vector3 tangentScreen;
+				MainTool.WorldToScreenPoint(nodeWorldPos + tangent.normalized * 10f, out tangentScreen);
+				tangentScreen -= nodeScreenPos;
+				if (isStartNode) {
+					// For start node flip the direction, so that the GUI looks right
+					tangentScreen *= -1;
+				}
+				rotateDegrees = 90f + Mathf.Atan2(tangentScreen.y, tangentScreen.x) * Mathf.Rad2Deg;
+				Log.Info($"tang={tangent} ts={tangentScreen} ang={rotateDegrees}");
+			}
 
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-			var diff = nodePos - camPos;
+			var diff = nodeWorldPos - camPos;
 
 			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
 			const int GUI_LANE_WIDTH = 128;
 			int width = numLanes * GUI_LANE_WIDTH;
-			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
+			var windowRect3 = new Rect(nodeScreenPos.x - width / 2, nodeScreenPos.y - 70, width, 50);
 
 			// Save the GUI rotation, rotate the GUI along the segment + 90°, and restore then
 			var oldMatrix = GUI.matrix;
