@@ -249,28 +249,6 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		/// <summary>
-		/// Converts a lane speed limit to a custom speed limit.
-		/// </summary>
-		/// <param name="laneSpeedLimit"></param>
-		/// <returns></returns>
-		public ushort LaneToCustomSpeedLimit_Deprecated(float laneSpeedLimit, bool roundToSignLimits=true) {
-			laneSpeedLimit /= 2f; // 1 == 100 km/h
-
-			if (! roundToSignLimits) {
-				return (ushort)Mathf.Round(laneSpeedLimit * 100f);
-			}
-
-			// translate the floating point speed limit into our discrete version
-			ushort speedLimit = 0;
-			if (laneSpeedLimit < 0.15f)
-				speedLimit = 10;
-			else if (laneSpeedLimit < 1.35f)
-				speedLimit = (ushort)((ushort)Mathf.Round(laneSpeedLimit * 10f) * 10u);
-
-			return speedLimit;
-		}
-
-		/// <summary>
 		/// Explicitly stores currently set speed limits for all segments of the specified NetInfo
 		/// </summary>
 		/// <param name="info"></param>
@@ -483,16 +461,6 @@ namespace TrafficManager.Manager.Impl {
 					lane.m_speedLimit = gameSpeedLimit;
 				}
 			}
-		}
-
-		/// <summary>
-		/// Converts a vehicle's velocity to a custom speed.
-		/// </summary>
-		/// <param name="vehicleSpeed"></param>
-		/// <returns></returns>
-		public float VehicleToCustomSpeed_Deprecated(float vehicleSpeed) {
-			// return LaneToCustomSpeedLimit(vehicleSpeed / 8f, false);
-			return vehicleSpeed;
 		}
 
 		/// <summary>Sets the speed limit of a given lane.</summary>
