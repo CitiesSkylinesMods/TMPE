@@ -112,7 +112,6 @@ namespace TrafficManager.UI.SubTools {
 					tangentScreen *= -1;
 				}
 				rotateDegrees = 90f + Mathf.Atan2(tangentScreen.y, tangentScreen.x) * Mathf.Rad2Deg;
-				Log.Info($"tang={tangent} ts={tangentScreen} ang={rotateDegrees}");
 			}
 
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
