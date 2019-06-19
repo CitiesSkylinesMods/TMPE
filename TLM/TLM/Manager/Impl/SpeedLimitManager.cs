@@ -763,7 +763,6 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public bool LoadData(Dictionary<string, float> data) {
-			const bool success = true;
 			Log.Info($"Loading custom default speed limit data. {data.Count} elements");
 			foreach (var e in data) {
 				NetInfo netInfo;
@@ -775,7 +774,7 @@ namespace TrafficManager.Manager.Impl {
 					SetCustomNetInfoSpeedLimit(netInfo, e.Value);
 				}
 			}
-			return success;
+			return true; // true = success
 		}
 
 		Dictionary<string, float> ICustomDataManager<Dictionary<string, float>>.SaveData(ref bool success) {
