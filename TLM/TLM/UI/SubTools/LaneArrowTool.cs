@@ -85,7 +85,7 @@ namespace TrafficManager.UI.SubTools {
 			var screenSegment = screenPos - otherNodeScreenPos;
 			
 			// Segment rotation in screen coords + 90 degrees
-			var angle = Mathf.Atan2(screenSegment.y, screenSegment.x) * 180f / Mathf.PI;
+			var rotateDegrees = 90f + Mathf.Atan2(screenSegment.y, screenSegment.x) * Mathf.Rad2Deg;
 
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 			var diff = nodePos - camPos;
@@ -99,11 +99,24 @@ namespace TrafficManager.UI.SubTools {
 
 			// Save the GUI rotation, rotate the GUI along the segment + 90°, and restore then
 			var oldMatrix = GUI.matrix;
-			GUIUtility.RotateAroundPivot(angle + 90f, windowRect3.center);
-			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
+			GUIUtility.RotateAroundPivot(rotateDegrees, windowRect3.center);
+			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, string.Empty, BorderlessStyle);
 			GUI.matrix = oldMatrix;
 
-			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
+			// Rotate the mouse in opposite direction and check whether it is inside the rotated window frame
+			var mousePosRotated = rotateVector2_(Event.current.mousePosition, windowRect3.center, -rotateDegrees);
+			_cursorInSecondaryPanel = windowRect3.Contains(mousePosRotated);
+		}
+
+		private Vector2 rotateVector2_(Vector2 v, Vector2 center, float degrees) {
+			v -= center;
+			var sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
+			var cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+			var tx = v.x;
+			var ty = v.y;
+			v.x = (cos * tx) - (sin * ty);
+			v.y = (sin * tx) + (cos * ty);
+			return v + center;
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
