@@ -434,7 +434,7 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button(
 				TextureResources.GetSpeedLimitTexture(speedLimit),
 				GUILayout.Width(signSize),
-				GUILayout.Height(signSize))) {
+				showMph ? GUILayout.Height(signSize * 1.25f) : GUILayout.Height(signSize))) {
 				currentPaletteSpeedLimit = speedLimit;
 			}
 			// For MPH setting display KM/H below, for KM/H setting display MPH
@@ -505,9 +505,10 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					var laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
-					var hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
+					var hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
 						TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
-						camPos, zero, f, xu, yu, x, 0, speedLimitSignSize,
+						camPos, zero, f, f, xu, yu, x, 0, speedLimitSignSize,
+						GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? speedLimitSignSize * 1.25f : speedLimitSignSize,
 						!viewOnly);
 
 					if (!viewOnly
@@ -569,7 +570,8 @@ namespace TrafficManager.UI.SubTools {
 					var guiColor = GUI.color;
 					var boundingBox = new Rect(screenPos.x - (size / 2),
 					                            screenPos.y - (size / 2),
-					                            size, size);
+					                            size,
+								    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? size * 1.25f : size);
 					var hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
 					guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);

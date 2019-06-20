@@ -365,24 +365,6 @@
     <EmbeddedResource Include="Resources\lang_ja.txt" />
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
-    <EmbeddedResource Include="Resources\5.png" />
-    <EmbeddedResource Include="Resources\25.png" />
-    <EmbeddedResource Include="Resources\45.png" />
-    <EmbeddedResource Include="Resources\55.png" />
-    <EmbeddedResource Include="Resources\75.png" />
-    <EmbeddedResource Include="Resources\0.png" />
-    <EmbeddedResource Include="Resources\10.png" />
-    <EmbeddedResource Include="Resources\100.png" />
-    <EmbeddedResource Include="Resources\120.png" />
-    <EmbeddedResource Include="Resources\130.png" />
-    <EmbeddedResource Include="Resources\20.png" />
-    <EmbeddedResource Include="Resources\30.png" />
-    <EmbeddedResource Include="Resources\40.png" />
-    <EmbeddedResource Include="Resources\50.png" />
-    <EmbeddedResource Include="Resources\60.png" />
-    <EmbeddedResource Include="Resources\70.png" />
-    <EmbeddedResource Include="Resources\80.png" />
-    <EmbeddedResource Include="Resources\90.png" />
     <EmbeddedResource Include="Resources\clock_pause.png" />
     <EmbeddedResource Include="Resources\clock_test.png" />
     <EmbeddedResource Include="Resources\clock_play.png" />
@@ -398,9 +380,6 @@
     <EmbeddedResource Include="Resources\enterblocked_forbidden.png" />
     <EmbeddedResource Include="Resources\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\uturn_forbidden.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\110.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\MenuButton.png" />
@@ -465,18 +444,54 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\15.png" />
-    <EmbeddedResource Include="Resources\35.png" />
-    <EmbeddedResource Include="Resources\65.png" />
-    <EmbeddedResource Include="Resources\85.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\105.png" />
-    <EmbeddedResource Include="Resources\115.png" />
-    <EmbeddedResource Include="Resources\125.png" />
-    <EmbeddedResource Include="Resources\135.png" />
-    <EmbeddedResource Include="Resources\140.png" />
-    <EmbeddedResource Include="Resources\95.png" />
+    <EmbeddedResource Include="Resources\0_kmh.png" />
+    <EmbeddedResource Include="Resources\0_mph.png" />
+    <EmbeddedResource Include="Resources\100_kmh.png" />
+    <EmbeddedResource Include="Resources\105_kmh.png" />
+    <EmbeddedResource Include="Resources\10_kmh.png" />
+    <EmbeddedResource Include="Resources\10_mph.png" />
+    <EmbeddedResource Include="Resources\110_kmh.png" />
+    <EmbeddedResource Include="Resources\115_kmh.png" />
+    <EmbeddedResource Include="Resources\120_kmh.png" />
+    <EmbeddedResource Include="Resources\125_kmh.png" />
+    <EmbeddedResource Include="Resources\130_kmh.png" />
+    <EmbeddedResource Include="Resources\135_kmh.png" />
+    <EmbeddedResource Include="Resources\140_kmh.png" />
+    <EmbeddedResource Include="Resources\15_kmh.png" />
+    <EmbeddedResource Include="Resources\15_mph.png" />
+    <EmbeddedResource Include="Resources\20_kmh.png" />
+    <EmbeddedResource Include="Resources\20_mph.png" />
+    <EmbeddedResource Include="Resources\25_kmh.png" />
+    <EmbeddedResource Include="Resources\25_mph.png" />
+    <EmbeddedResource Include="Resources\30_kmh.png" />
+    <EmbeddedResource Include="Resources\30_mph.png" />
+    <EmbeddedResource Include="Resources\35_kmh.png" />
+    <EmbeddedResource Include="Resources\35_mph.png" />
+    <EmbeddedResource Include="Resources\40_kmh.png" />
+    <EmbeddedResource Include="Resources\40_mph.png" />
+    <EmbeddedResource Include="Resources\45_kmh.png" />
+    <EmbeddedResource Include="Resources\45_mph.png" />
+    <EmbeddedResource Include="Resources\50_kmh.png" />
+    <EmbeddedResource Include="Resources\50_mph.png" />
+    <EmbeddedResource Include="Resources\55_kmh.png" />
+    <EmbeddedResource Include="Resources\55_mph.png" />
+    <EmbeddedResource Include="Resources\5_kmh.png" />
+    <EmbeddedResource Include="Resources\5_mph.png" />
+    <EmbeddedResource Include="Resources\60_kmh.png" />
+    <EmbeddedResource Include="Resources\60_mph.png" />
+    <EmbeddedResource Include="Resources\65_kmh.png" />
+    <EmbeddedResource Include="Resources\65_mph.png" />
+    <EmbeddedResource Include="Resources\70_kmh.png" />
+    <EmbeddedResource Include="Resources\70_mph.png" />
+    <EmbeddedResource Include="Resources\75_kmh.png" />
+    <EmbeddedResource Include="Resources\75_mph.png" />
+    <EmbeddedResource Include="Resources\80_kmh.png" />
+    <EmbeddedResource Include="Resources\80_mph.png" />
+    <EmbeddedResource Include="Resources\85_kmh.png" />
+    <EmbeddedResource Include="Resources\85_mph.png" />
+    <EmbeddedResource Include="Resources\90_kmh.png" />
+    <EmbeddedResource Include="Resources\90_mph.png" />
+    <EmbeddedResource Include="Resources\95_kmh.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
