@@ -47,7 +47,8 @@ namespace TrafficManager.UI
 		public static readonly Texture2D ClockPlayTexture2D;
 		public static readonly Texture2D ClockPauseTexture2D;
 		public static readonly Texture2D ClockTestTexture2D;
-		public static readonly IDictionary<int, Texture2D> SpeedLimitTextures;
+		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesKmph;
+		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesMph;
 		public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
 		public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 		public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
@@ -135,14 +136,19 @@ namespace TrafficManager.UI
 			ClockTestTexture2D = LoadDllResource("clock_test.png", 512, 512);
 
 			// TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-			SpeedLimitTextures = new TinyDictionary<int, Texture2D>();
+			SpeedLimitTexturesKmph = new TinyDictionary<int, Texture2D>();
+			SpeedLimitTexturesMph = new TinyDictionary<int, Texture2D>();
 
 			// Load shared speed limit signs for Kmph and Mph
-			// Assumes that signs from 0 to 140 with step 5 exist, 0.png denotes no limit sign
+			// Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
 			for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-				var resource = LoadDllResource(speedLimit + ".png", 200, 200);
-				SpeedLimitTextures.Add(speedLimit,
-				                       resource ?? SpeedLimitTextures[5]);
+				var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
+				SpeedLimitTexturesKmph.Add(speedLimit, resource ?? SpeedLimitTexturesKmph[5]);
+			}
+			// Signs from 0 to 90 for MPH
+			for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
+				var resource = LoadDllResource($"SpeedLimits.Mph.{speedLimit}.png", 200, 250);
+				SpeedLimitTexturesMph.Add(speedLimit, resource ?? SpeedLimitTexturesMph[5]);
 			}
 
 			VehicleRestrictionTextures = new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>>();
@@ -220,20 +226,20 @@ namespace TrafficManager.UI
 		/// <param name="speedLimit">Ingame speed</param>
 		/// <returns>The texture, hopefully it existed</returns>
 		public static Texture2D GetSpeedLimitTexture(float speedLimit) {
-			// Special value for max speed, give it 5% margin for safety 950km/h+
+			var mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+			var textures = mph ? SpeedLimitTexturesMph : SpeedLimitTexturesKmph;
 			if (speedLimit > SpeedLimitManager.MAX_SPEED * 0.95f) {
-				return SpeedLimitTextures[0];
+				return textures[0];
 			}
-			var index = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-				       ? SpeedLimit.ToMphRounded(speedLimit)
-				       : SpeedLimit.ToKmphRounded(speedLimit);
-			// Trim by kmph because UPPER_KMPH is the max road sign that we have
-			if (index > SpeedLimit.UPPER_KMPH) {
-				Log.Info($"Trimming speed={speedLimit} index={index} to 140");
+			var index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
+			// Trim the index since 140 KMH / 90 MPH is the max sign we have
+			var upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
+			if (index > upper) {
+				Log.Info($"Trimming speed={speedLimit} index={index} to {upper}");
 			}
-			var trimIndex = Math.Min(SpeedLimit.UPPER_KMPH, Math.Max((ushort)0, index));
-			// Log._Debug($"texture for {speedLimit} is {index} trim={trimIndex}");
-			return SpeedLimitTextures[trimIndex];
+			var trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
+			Log._Debug($"Texture for {speedLimit} is {index} trim={trimIndex}");
+			return textures[trimIndex];
 		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)

@@ -23,8 +23,8 @@ using static TrafficManager.Util.SegmentLaneTraverser;
 namespace TrafficManager.UI.SubTools {
 	public class SpeedLimitsTool : SubTool {
 		/// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
-		private const int GuiSpeedSignSize = 90;
-		private readonly float speedLimitSignSize = 80f;
+		private const int GuiSpeedSignSize = 80;
+		private readonly float speedLimitSignSize = 70f;
 
 		private bool _cursorInSecondaryPanel;
 
@@ -416,30 +416,33 @@ namespace TrafficManager.UI.SubTools {
 			DragWindow(ref windowRect);
 		}
 
-		/// <summary>Like addButton helper below, but adds unclickable space of the same size</summary>
-		private void _guiSpeedLimitsWindow_AddDummy() {
-			GUILayout.BeginVertical();
-			var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
-			GUILayout.Button( null as Texture, GUILayout.Width(signSize), GUILayout.Height(signSize));
-			GUILayout.EndVertical();
-		}
-
 		/// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>
 		/// <param name="showMph">Config value from GlobalConfig.I.M.ShowMPH</param>
 		/// <param name="speedLimit">The float speed to show</param>
 		private void _guiSpeedLimitsWindow_AddButton(bool showMph, float speedLimit) {
 			// The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
 			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
 			if (GUILayout.Button(
 				TextureResources.GetSpeedLimitTexture(speedLimit),
 				GUILayout.Width(signSize),
-				GUILayout.Height(signSize))) {
+				showMph ? GUILayout.Height(signSize * 1.25f) : GUILayout.Height(signSize))) {
 				currentPaletteSpeedLimit = speedLimit;
 			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 			// For MPH setting display KM/H below, for KM/H setting display MPH
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			GUILayout.Label(showMph ? SpeedLimit.ToKmphPreciseString(speedLimit)
 				                : SpeedLimit.ToMphPreciseString(speedLimit));
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 			GUILayout.EndVertical();
 		}
 
@@ -505,9 +508,10 @@ namespace TrafficManager.UI.SubTools {
 					}
 
 					var laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
-					var hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
+					var hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
 						TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
-						camPos, zero, f, xu, yu, x, 0, speedLimitSignSize,
+						camPos, zero, f, f, xu, yu, x, 0, speedLimitSignSize,
+						GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? speedLimitSignSize * 1.25f : speedLimitSignSize,
 						!viewOnly);
 
 					if (!viewOnly
@@ -569,7 +573,8 @@ namespace TrafficManager.UI.SubTools {
 					var guiColor = GUI.color;
 					var boundingBox = new Rect(screenPos.x - (size / 2),
 					                            screenPos.y - (size / 2),
-					                            size, size);
+					                            size,
+								    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? size * 1.25f : size);
 					var hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
 					guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);

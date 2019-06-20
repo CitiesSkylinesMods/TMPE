@@ -24,7 +24,7 @@ namespace TrafficManager.Traffic.Data {
 
 		private const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
 		private const ushort LOWER_MPH = 5;
-		private const ushort UPPER_MPH = 90;
+		public const ushort UPPER_MPH = 90;
 		private const ushort MPH_STEP = 5;
 		public const int BREAK_PALETTE_COLUMN_MPH = 10; // palette shows M in a row, then break and another row
 

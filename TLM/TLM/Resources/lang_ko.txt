@@ -232,3 +232,6 @@ Scan_for_known_incompatible_mods_on_startup 게임 실행시 비호환되는 모
 Ignore_disabled_mods 비활성화된 모드 무시하기
 Traffic_Manager_detected_incompatible_mods Traffic Manager와 비호환되는 모드 감지
 Notify_me_if_there_is_an_unexpected_mod_conflict 모드와 비 호환되는 모드 발견 시 에러 보여주기
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
