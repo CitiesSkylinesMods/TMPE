@@ -109,7 +109,7 @@ Rotate_left Links rotieren
 Rotate_right Rechts rotieren
 Name Name
 Apply Anwenden
-Select_a_timed_traffic_light_program Wähle ein zeitgesteuertes Ampelprogramm aus 
+Select_a_timed_traffic_light_program Wähle ein zeitgesteuertes Ampelprogramm aus
 The_chosen_traffic_light_program_is_incompatible_to_this_junction Das ausgewählte Ampelprogramm ist inkompatibel zu dieser Kreuzung
 Advanced_AI_cannot_be_activated Erweiterte Fahrzeug-KI kann nicht aktiviert werden
 The_Advanced_Vehicle_AI_cannot_be_activated Die erweiterte Fahrzeug-KI kann nicht aktiviert werden, weil du bereits einen anderen Mod verwendest, der das Verhalten von Fahrzeugen verändern (z.B. Improved AI oder Traffic++).
@@ -154,7 +154,7 @@ Individual_driving_styles Individuelle Fahrstile
 Evacuation_busses_may_ignore_traffic_rules Evakuierungsbusse dürfen Verkehrsregeln missachten
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Evakuierungsbusse dienen nur zum Erreichen einer Notunterkunft
 Vehicle_behavior Fahrzeugverhalten
-Policies_&_Restrictions Richtlinien & Einschränkungen
+Policies_&_Restrictions Richtlinien
 At_junctions An Kreuzungen
 In_case_of_emergency Im Notfall
 Show_lane-wise_speed_limits Zeige spurweise Geschwindigkeitsbeschränkungen
@@ -164,7 +164,7 @@ requires_game_restart erfordert einen Neustart des Spiels
 Customizations_come_into_effect_instantaneously Anpassungen treten sofort in Kraft
 Options Optionen
 Lock_main_menu_button_position Position der Hauptmenü-Schaltfläche sperren
-Lock_main_menu_position Position des Hauptmenüs sperren 
+Lock_main_menu_position Position des Hauptmenüs sperren
 Recalculating_lane_routing Berechne Routenführung neu
 Please_wait Bitte warten
 Parking_restrictions Parkverbote
@@ -189,11 +189,11 @@ TMPE_TUTORIAL_BODY_MainMenu Willkommen bei TM:PE!\n\nBenutzerhandbuch: http://ww
 TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Kreuzungsbeschränkungen
 TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Steuere, wie Fahrzeuge und Fußgänger sich an Kreuzungen zu verhalten haben.\n\n1. Klicke auf die Kreuzung, die du kontrollieren möchtest.\n2. Klicke auf das entsprechende Symbol, um die Beschränkungen ein- oder auszuschalten.\n\nVerfügbare Beschränkungen:\n- Erlaube/Verbiete Spurwechsel für Fahrzeuge, die geradeaus fahren.\n- Erlaube/Verbiete das Wenden.\n- Erlaube/Verbiete Fahrzeugen, in die blockierte Kreuzung einzufahren.\n- Erlaube/Verbiete Fußgängern, die Straße zu überqueren.
 TMPE_TUTORIAL_HEAD_LaneArrowTool Richtungspfeile
-TMPE_TUTORIAL_BODY_LaneArrowTool Limitiere die Richtungen, in die Fahrzeuge fahren dürfen.\n\n1. Klicke auf ein Straßensegment nahe einer Kreuzung.\n2. Wähle die erlaubten Richtungen aus.  
+TMPE_TUTORIAL_BODY_LaneArrowTool Limitiere die Richtungen, in die Fahrzeuge fahren dürfen.\n\n1. Klicke auf ein Straßensegment nahe einer Kreuzung.\n2. Wähle die erlaubten Richtungen aus.
 TMPE_TUTORIAL_HEAD_LaneConnectorTool Fahrspurverbinder
 TMPE_TUTORIAL_BODY_LaneConnectorTool Verbinde zwei oder mehr Fahrspuren miteinander, um Fahrzeugen nur bestimmte Fahrspurwechsel zu erlauben.\n\n1. Klicke auf einen Spurwechselpunkt (grauer Kreis).\n2. Klicke auf eine Quellspurmarkierung.\n3. Klicke auf eine Zielspurmarkierung, um die Zielspur mit der Quellspur zu verbinden.\n4. Klicke irgendwo mit der sekundären Maustaste, um zur Qullspurselektion zurückzukehren.\n\nVerfügbare Tastenkombinationen:\n\n-Entf. oder Rücktaste: Lösche alle Fahrspurverbindungen\n- Umschalt + S: Wechsle durch alle verfügbaren "Bleib auf der Spur"-Vorlagen.
 TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Manuelle Ampeln
-TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Probiere die Ampelschaltungen von TM:PE aus.\n\n1. Klicke auf eine Kreuzung.\n2. Verwende das Werkzeug, um die Ampel zu kontrollieren.  
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Probiere die Ampelschaltungen von TM:PE aus.\n\n1. Klicke auf eine Kreuzung.\n2. Verwende das Werkzeug, um die Ampel zu kontrollieren.
 TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parkverbote
 TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Steuere, wo das Parken erlaubt ist.\n\nKlicke auf die "P"-Symbole.\n\nVerfügbare Tastenkombinationen:\n\n- Umschalt: Halte die Taste beim Klicken, um Parkverbote auch auf benachbarte Straßensegmente anzuwenden.
 TMPE_TUTORIAL_HEAD_PrioritySignsTool Vorfahrtsschilder
@@ -202,17 +202,17 @@ TMPE_TUTORIAL_HEAD_SpeedLimitsTool Geschwindigkeitsbeschränkungen
 TMPE_TUTORIAL_BODY_SpeedLimitsTool Setze Geschwindigkeitsbeschränkungen.\n\n1. Wähle im Fenster eine Geschwindigkeitsbegrenzung aus.\n2. Klicke auf ein Straßensegment, um die ausgewählte Begrenzung anzuwenden.\n\nVerfügbare Tastenkombinationen:\n\n- Umschalt: Halte die Taste beim Klicken, um Geschwindigkeitsbegrenzungen auch auf benachbarte Straßensegmente anzuwenden.\n- Strg: Halte die Taste beim Klicken, um Geschwindigkeitsbegrenzungen für einzelne Fahrspuren zu setzen.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Zeitgesteuerte Ampelschaltungen
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Definiere zeitgesteuerte Ampeln.\n\n1. Klicke auf eine Kreuzung.\n2. Klicke im Fenster auf "Schritt hinzufügen".\n3. Klick auf die Overlayelemente, um den gewünschten Zustand der Ampeln festzulegen.\n4. Klicke auf "Hinzufügen".\n5. Wiederhole die obigen Schritte bei Bedarf.
-TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Ampeln setzen 
+TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Ampeln setzen
 TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Füge Ampeln hinzu oder lösche sie von Kreuzungen.\n\nKlicke auf eine Kreuzung, um ihre Ampel ein- oder auszuschalten.
 TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Fahrzeugbeschränkungen
 TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Erlaube oder verbiete Fahrzeugen, bestimmte Straßensegmente zu benutzen.\n\n1. Klicke auf ein Straßensegment.\n2. Klicke auf die Symbole, um die Beschränkungen ein- oder auszuschalten.\n\nUnterschiedene Fahrzeugtypen:\n\n- Straßenfahrzeuge: KFZ, Busse, Taxen, Lieferwagen/Laster, Dienstleistungen, Notfallfahrzeuge\n- Züge: Passagierzüge, Frachtzüge\n\nVerfügbare Tastenkombinationen:\n\n- Umschalt: Halte die Taste beim Klicken, um Fahrzeugbeschränkungen auch auf benachbarte Straßen-/Schienensegmente anzuwenden.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Standard-Geschwindigkeitsbegrenzungen
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Benutze die Pfeiltasten in der oberen Hälfte des Fensters, um zwischen allen verfügbaren Straßensegmenten umzuschalten.\n2. Wähle auf die gleiche Weise in der unteren Hälfte die gewünschte Geschwindigkeitsbegrenzung aus.\n3. Klicke auf "Speichern" um die Auswahl für in der Zukunft gebaute Straßensegmente des gewählten Typs anzuwenden. Klicke auf "Speichern & Anwenden", um die Auswahl auch für bereits gebaute Straßen des gewählten Typs anzuwenden.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Füge einen neuen Zeitschritt hinzu 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Klick auf eine Ampel innerhalb des Overlays, um ihren Zustand zu ändern. Verwende die "Change mode"-Schaltfläche im Overlay, um Ampeln für verschiedene Richtungen hinzuzufügen.\n2. Gebe eine Minimal- und Maximaldauer für den Zeitschritt ein. Sobald die Minimalzeit verstrichen ist, wird die Ampelschaltung die ankommendenen Fahrzeuge messen und die Zahlen für alle Richtungen miteinander vergleichen.\n3. (optional) Konfiguriere die adaptive Schrittumschaltung. Im Standard wird der Schritt gewechselt, wenn (grob) weniger Fahrzeuge die Kreuzung durchqueren als Fahrzeuge warten.\n4. (optional) Konfiguriere die Sensitivität der Ampelschaltung. Ziehe den Regler z.B. nach links, um die Ampel weniger sensibel für wartende Fahrzeuge zu machen. 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Füge einen neuen Zeitschritt hinzu
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Klick auf eine Ampel innerhalb des Overlays, um ihren Zustand zu ändern. Verwende die "Change mode"-Schaltfläche im Overlay, um Ampeln für verschiedene Richtungen hinzuzufügen.\n2. Gebe eine Minimal- und Maximaldauer für den Zeitschritt ein. Sobald die Minimalzeit verstrichen ist, wird die Ampelschaltung die ankommendenen Fahrzeuge messen und die Zahlen für alle Richtungen miteinander vergleichen.\n3. (optional) Konfiguriere die adaptive Schrittumschaltung. Im Standard wird der Schritt gewechselt, wenn (grob) weniger Fahrzeuge die Kreuzung durchqueren als Fahrzeuge warten.\n4. (optional) Konfiguriere die Sensitivität der Ampelschaltung. Ziehe den Regler z.B. nach links, um die Ampel weniger sensibel für wartende Fahrzeuge zu machen.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Kopiere eine zeitgesteuerte Ampel
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Klicke auf eine andere Kreuzung, um die Ampelschaltung dort einzufügen.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Füge der Ampelschaltung eine andere Kreuzung hinzu 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Füge der Ampelschaltung eine andere Kreuzung hinzu
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Klicke auf eine andere Kreuzung, um sie der Schaltung hinzuzufügen. Die Ampelschaltung wird danach beide Kreuzungen gleichzeitig steuern.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Entferne eine Kreuzung von der Ampelschaltung.
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Klicke auf eine der Kreuzungen, die momentan von der Ampelschaltungen kontrolliert werden. Die selektierte Ampel wird entfernt, so dass die Ampelschaltung die Kreuzung nicht mehr kontrolliert.\n\nKlicke irgendwo mit der sekundären Maustaste, um die Operation abzubrechen.

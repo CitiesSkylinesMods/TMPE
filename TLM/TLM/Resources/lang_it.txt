@@ -123,7 +123,7 @@ Default_speed_limit Limite velocità di default
 Unit_system Unità di misura
 Metric Metrico
 Imperial Imperiale
-Use_more_CPU_cores_for_route_calculation_if_available Utilizza più core della CPU per il calcolo del percorso (se disponile) 
+Use_more_CPU_cores_for_route_calculation_if_available Utilizza più core della CPU per il calcolo del percorso (se disponile)
 Activated_features Features attivate
 Junction_restrictions Restrizioni incrocio
 Prohibit_spawning_of_pocket_cars Vieta ai "cims" di spawnare "pocket cars"
@@ -154,7 +154,7 @@ Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules I bus di evacuazione possono ignorare le regole stradali
 Evacuation_busses_may_only_be_used_to_reach_a_shelter I bus di evacuazione possono essere usati solo per raggiungere un rifugio
 Vehicle_behavior Comportamente del veicolo
-Policies_&_Restrictions Policies & Restrizioni
+Policies_&_Restrictions Policies
 At_junctions Agli incroci
 In_case_of_emergency In caso di emergenza
 Show_lane-wise_speed_limits Mostra limite velocità per ogni corsia
@@ -176,11 +176,11 @@ flow_ratio Indice flusso
 wait_ratio Indice attesa
 After_min._time_has_elapsed_switch_to_next_step_if Dopo min. tempo trascorso, passare al passo successivo se
 Adaptive_step_switching Azionamento adattivo prossimo stato
-Dynamic_lane_section Selezione corsia dinamica 
+Dynamic_lane_section Selezione corsia dinamica
 Percentage_of_vehicles_performing_dynamic_lane_section Percentuale di veicoli che effettuano la selezione dinamica della corsia
 Vehicle_restrictions_aggression Rigorosità restrizioni veicoli
 Strict Rigoroso
-Show_path-find_stats Mostra statistiche path-find 
+Show_path-find_stats Mostra statistiche path-find
 Remove_this_vehicle Rimuovi questo veicolo
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights I veicoli seguono le regole di precedenza agli incroci con semafori a tempo
 Enable_tutorial_messages Enable tutorial messages
@@ -208,11 +208,11 @@ TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
 TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
