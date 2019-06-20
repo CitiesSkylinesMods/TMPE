@@ -232,6 +232,6 @@ Scan_for_known_incompatible_mods_on_startup Сканирование извес�
 Ignore_disabled_mods Игнорировать отключённые моды
 Traffic_Manager_detected_incompatible_mods Traffic Manager обнаружил несовместимые моды
 Notify_me_if_there_is_an_unexpected_mod_conflict Показывать сообщение об ошибке при несовместимости модов
-Display_speed_limits_mph Display speed limits as MPH instead of KM/H
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
 Miles_per_hour Miles per Hour
 Kilometers_per_hour Kilometers per Hour

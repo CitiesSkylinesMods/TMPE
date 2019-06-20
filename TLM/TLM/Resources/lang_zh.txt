@@ -232,6 +232,6 @@ Scan_for_known_incompatible_mods_on_startup 启动时检测是否存在已知不
 Ignore_disabled_mods 忽略未启用MOD
 Traffic_Manager_detected_incompatible_mods 检测到的不兼容MOD
 Notify_me_if_there_is_an_unexpected_mod_conflict 检测到不兼容MOD时提示
-Display_speed_limits_mph Display speed limits as MPH instead of KM/H
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
 Miles_per_hour Miles per Hour
 Kilometers_per_hour Kilometers per Hour
