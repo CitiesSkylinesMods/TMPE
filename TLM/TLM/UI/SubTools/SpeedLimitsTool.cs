@@ -416,20 +416,15 @@ namespace TrafficManager.UI.SubTools {
 			DragWindow(ref windowRect);
 		}
 
-		/// <summary>Like addButton helper below, but adds unclickable space of the same size</summary>
-		private void _guiSpeedLimitsWindow_AddDummy() {
-			GUILayout.BeginVertical();
-			var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
-			GUILayout.Button( null as Texture, GUILayout.Width(signSize), GUILayout.Height(signSize));
-			GUILayout.EndVertical();
-		}
-
 		/// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>
 		/// <param name="showMph">Config value from GlobalConfig.I.M.ShowMPH</param>
 		/// <param name="speedLimit">The float speed to show</param>
 		private void _guiSpeedLimitsWindow_AddButton(bool showMph, float speedLimit) {
 			// The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
 			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
 			if (GUILayout.Button(
 				TextureResources.GetSpeedLimitTexture(speedLimit),
@@ -437,9 +432,17 @@ namespace TrafficManager.UI.SubTools {
 				showMph ? GUILayout.Height(signSize * 1.25f) : GUILayout.Height(signSize))) {
 				currentPaletteSpeedLimit = speedLimit;
 			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 			// For MPH setting display KM/H below, for KM/H setting display MPH
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			GUILayout.Label(showMph ? SpeedLimit.ToKmphPreciseString(speedLimit)
 				                : SpeedLimit.ToMphPreciseString(speedLimit));
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
 			GUILayout.EndVertical();
 		}
 
