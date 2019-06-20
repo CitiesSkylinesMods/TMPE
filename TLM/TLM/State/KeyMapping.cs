@@ -14,6 +14,9 @@ namespace TrafficManager.State {
 	public class OptionsKeymappingMain : OptionsKeymapping {
 		private void Awake() {
 			TryCreateConfig();
+			AddReadOnlyKeymapping(Translation.GetString("Keybind_Exit_subtool"),
+			                      KeyToolCancel_ViewOnly);
+
 			AddKeymapping(Translation.GetString("Keybind_toggle_TMPE_main_menu"),
 			              KeyToggleTMPEMainMenu);
 
@@ -39,46 +42,55 @@ namespace TrafficManager.State {
 		protected static readonly string KeyBindingTemplate = "KeyBindingTemplate";
 		private const string KEYBOARD_SHORTCUTS_FILENAME = "TMPE_Keyboard";
 
+		/// <summary>
+		/// This input key can not be changed and is not checked, instead it is display only
+		/// </summary>
+		public static SavedInputKey KeyToolCancel_ViewOnly =
+			new SavedInputKey("keyExitSubtool",
+			                  KEYBOARD_SHORTCUTS_FILENAME,
+			                  SavedInputKey.Encode(KeyCode.Escape, false, false, false),
+			                  false);
+
 		public static SavedInputKey KeyToggleTMPEMainMenu =
 			new SavedInputKey("keyToggleTMPEMainMenu",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.T, true, false, true),
+			                  SavedInputKey.Encode(KeyCode.Semicolon, false, true, false),
 			                  true);
 
 		public static SavedInputKey KeyToggleTrafficLightTool =
 			new SavedInputKey("keyToggleTrafficLightTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.T, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeyLaneArrowTool =
 			new SavedInputKey("keyLaneArrowTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.A, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeyLaneConnectionsTool =
 			new SavedInputKey("keyLaneConnectionsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.C, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeyPrioritySignsTool =
 			new SavedInputKey("keyPrioritySignsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.P, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeyJunctionRestrictionsTool =
 			new SavedInputKey("keyJunctionRestrictionsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.J, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeySpeedLimitsTool =
 			new SavedInputKey("keySpeedLimitsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
-			                  SavedInputKey.Encode(KeyCode.S, true, true, false),
+			                  SavedInputKey.Empty,
 			                  true);
 
 		public static SavedInputKey KeyLaneConnectorStayInLane =
@@ -111,23 +123,50 @@ namespace TrafficManager.State {
 		/// <param name="label">Text to display</param>
 		/// <param name="savedInputKey">A SavedInputKey from GlobalConfig.KeyboardShortcuts</param>
 		protected void AddKeymapping(string label, SavedInputKey savedInputKey) {
-			var uiPanel =
-				component.AttachUIComponent(UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as
-					UIPanel;
-			if (count_++ % 2 == 1) uiPanel.backgroundSprite = null;
+			var uiPanel = component.AttachUIComponent(
+				              UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as UIPanel;
+			if (count_++ % 2 == 1) {
+				uiPanel.backgroundSprite = null;
+			}
 
 			// Create a label
-			var uILabel = uiPanel.Find<UILabel>("Name");
+			var uiLabel = uiPanel.Find<UILabel>("Name");
 
 			// Create a button which displays the shortcut and modifies it on click
-			var uIButton = uiPanel.Find<UIButton>("Binding");
-			uIButton.eventKeyDown += OnBindingKeyDown;
-			uIButton.eventMouseDown += OnBindingMouseDown;
+			var uiButton = uiPanel.Find<UIButton>("Binding");
+			uiButton.eventKeyDown += OnBindingKeyDown;
+			uiButton.eventMouseDown += OnBindingMouseDown;
 
 			// Set label text (as provided) and set button text from the SavedInputKey
-			uILabel.text = label;
-			uIButton.text = savedInputKey.ToLocalizedString("KEYNAME");
-			uIButton.objectUserData = savedInputKey;
+			uiLabel.text = label;
+			uiButton.text = savedInputKey.ToLocalizedString("KEYNAME");
+			uiButton.objectUserData = savedInputKey;
+		}
+
+		/// <summary>
+		/// Creates a line of key mapping but does not allow changing it. 
+		/// Used to improve awareness.
+		/// </summary>
+		/// <param name="label"></param>
+		/// <param name="inputKey"></param>
+		protected void AddReadOnlyKeymapping(string label, SavedInputKey inputKey) {
+			var uiPanel = component.AttachUIComponent(
+				              UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as UIPanel;
+			if (count_++ % 2 == 1) {
+				uiPanel.backgroundSprite = null;
+			}
+
+			// Create a label
+			var uiLabel = uiPanel.Find<UILabel>("Name");
+
+			// Create a button which displays the shortcut and modifies it on click
+			var uiReadOnlyKey = uiPanel.Find<UIButton>("Binding");
+			uiReadOnlyKey.Disable();
+
+			// Set label text (as provided) and set button text from the InputKey
+			uiLabel.text = label;
+			uiReadOnlyKey.text = inputKey.ToLocalizedString("KEYNAME");
+			uiReadOnlyKey.objectUserData = inputKey;
 		}
 
 		protected void OnEnable() {

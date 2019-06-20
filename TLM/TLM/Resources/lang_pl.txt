@@ -241,3 +241,4 @@ Keybind_use_junction_restrictions_tool Narzędzie 'Ograniczenia na skrzyżowaniu
 Keybind_use_speed_limits_tool Narzędzie 'Limity prędkości'
 Keybind_lane_connector_stay_in_lane Połącz pasy ruchu: Pozostań na pasie
 Keybinds Skróty klawiszowe
+Keybind_Exit_subtool Exit tool and close TM:PE Menu
