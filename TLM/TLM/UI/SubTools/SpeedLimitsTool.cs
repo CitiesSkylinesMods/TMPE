@@ -34,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 		/// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
 		private readonly int guiSpeedSignSize = 90;
 
-		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 225));
+		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 95, 225));
 		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
@@ -73,6 +73,7 @@ namespace TrafficManager.UI.SubTools {
 			var unitTitle = " (" + (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
 				                        ? Translation.GetString("Miles_per_hour")
 				                        : Translation.GetString("Kilometers_per_hour")) + ")";
+			windowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * 95 : 8 * 95;
 			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow,
 			                              Translation.GetString("Speed_limits") + unitTitle,
 			                              WindowStyle);
@@ -364,6 +365,7 @@ namespace TrafficManager.UI.SubTools {
 		/// <param name="num"></param>
 		private void _guiSpeedLimitsWindow(int num) {
 			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 
 			var oldColor = GUI.color;
 			var allSpeedLimits = SpeedLimit.EnumerateSpeedLimits(SpeedUnit.CurrentlyConfigured);
@@ -386,19 +388,17 @@ namespace TrafficManager.UI.SubTools {
 				// TODO: This can be calculated from SpeedLimit MPH or KMPH limit constants
 				column++;
 				if (column % breakColumn == 0) {
+					GUILayout.FlexibleSpace();
 					GUILayout.EndHorizontal();
 					GUILayout.BeginHorizontal();
+					GUILayout.FlexibleSpace();
 				} 
 			}
-
-			while (column % breakColumn != 0) {
-				// The last row is not finished, might want to add a spacer
-				_guiSpeedLimitsWindow_AddDummy();
-				column++;
-			}
+			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Default_speed_limits"),
 			                     GUILayout.Width(200))) {
 				TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
@@ -407,7 +407,11 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			showLimitsPerLane = GUILayout.Toggle(showLimitsPerLane, Translation.GetString("Show_lane-wise_speed_limits"));
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
 
 			DragWindow(ref windowRect);
 		}
