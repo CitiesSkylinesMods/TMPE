@@ -34,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 		private bool overlayHandleHovered;
 		private Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 
-		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 10 * (GuiSpeedSignSize + 5), 225));
+		private Rect paletteWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 10 * (GuiSpeedSignSize + 5), 150));
 		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
@@ -73,8 +73,8 @@ namespace TrafficManager.UI.SubTools {
 			var unitTitle = " (" + (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
 				                        ? Translation.GetString("Miles_per_hour")
 				                        : Translation.GetString("Kilometers_per_hour")) + ")";
-			windowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * (GuiSpeedSignSize + 5) : 8 * (GuiSpeedSignSize + 5);
-			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow,
+			paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * (GuiSpeedSignSize + 5) : 8 * (GuiSpeedSignSize + 5);
+			paletteWindowRect = GUILayout.Window(254, paletteWindowRect, _guiSpeedLimitsWindow,
 			                              Translation.GetString("Speed_limits") + unitTitle,
 			                              WindowStyle);
 			if (defaultsWindowVisible) {
@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools {
 					Translation.GetString("Default_speed_limits"),
 					WindowStyle);
 			}
-			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition)
+			_cursorInSecondaryPanel = paletteWindowRect.Contains(Event.current.mousePosition)
 			                          || (defaultsWindowVisible
 			                              && defaultsWindowRect.Contains(Event.current.mousePosition));
 
@@ -397,6 +397,9 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
+			//---------------------
+			// UI buttons row
+			//---------------------
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Default_speed_limits"),
@@ -407,13 +410,26 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
+			//---------------------
+			// Checkboxes row
+			//---------------------
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			showLimitsPerLane = GUILayout.Toggle(showLimitsPerLane, Translation.GetString("Show_lane-wise_speed_limits"));
 			GUILayout.FlexibleSpace();
+
+			// Display MPH checkbox, if ticked will save global config
+			var displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+			displayMph = GUILayout.Toggle(displayMph, Translation.GetString("Display_speed_limits_mph"));
+			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
+				GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = displayMph;
+				GlobalConfig.WriteConfig();
+			}
+
+			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
-			DragWindow(ref windowRect);
+			DragWindow(ref paletteWindowRect);
 		}
 
 		/// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>

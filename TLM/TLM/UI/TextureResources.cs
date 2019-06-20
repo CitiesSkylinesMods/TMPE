@@ -226,19 +226,30 @@ namespace TrafficManager.UI
 		/// <param name="speedLimit">Ingame speed</param>
 		/// <returns>The texture, hopefully it existed</returns>
 		public static Texture2D GetSpeedLimitTexture(float speedLimit) {
-			var mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+			var m = GlobalConfig.Instance.Main;
+			var unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
+			return GetSpeedLimitTexture(speedLimit, m.MphRoadSignStyle, unit);
+		}
+
+		public static Texture2D GetSpeedLimitTexture(float speedLimit, MphSignStyle mphStyle, SpeedUnit unit) {
+			// Select the source for the textures based on unit and the theme
+			var mph = unit == SpeedUnit.Mph;
 			var textures = mph ? SpeedLimitTexturesMph : SpeedLimitTexturesKmph;
+
+			// Trim the range
 			if (speedLimit > SpeedLimitManager.MAX_SPEED * 0.95f) {
 				return textures[0];
 			}
+
+			// Round to nearest 5 MPH or nearest 10 km/h
 			var index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
-			// Trim the index since 140 KMH / 90 MPH is the max sign we have
+
+			// Trim the index since 140 km/h / 90 MPH is the max sign we have
 			var upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
 			if (index > upper) {
 				Log.Info($"Trimming speed={speedLimit} index={index} to {upper}");
 			}
 			var trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
-			Log._Debug($"Texture for {speedLimit} is {index} trim={trimIndex}");
 			return textures[trimIndex];
 		}
 

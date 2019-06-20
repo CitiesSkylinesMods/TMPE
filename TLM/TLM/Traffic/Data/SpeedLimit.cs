@@ -11,6 +11,11 @@ namespace TrafficManager.Traffic.Data {
 		Mph
 	}
 
+	public enum MphSignStyle {
+		SquareUS = 0,
+		RoundUK = 1,
+	}
+
 	/// <summary>
 	/// Defines a speed limit value with default Kmph and display value of Mph
 	/// for when the option is set to display Mph. The engine still uses kmph.

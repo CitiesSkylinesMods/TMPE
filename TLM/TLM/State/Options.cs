@@ -14,6 +14,7 @@ using TrafficManager.Manager;
 using CSUtil.Commons;
 using System.Reflection;
 using TrafficManager.Manager.Impl;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.State {
 
@@ -32,6 +33,7 @@ namespace TrafficManager.State {
 		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
 		private static UICheckBox ignoreDisabledModsToggle = null;
 		private static UICheckBox displayMphToggle = null;
+		private static UIDropDown roadSignsMphThemeDropdown = null;
 		private static UICheckBox individualDrivingStyleToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -93,6 +95,7 @@ namespace TrafficManager.State {
 		private static UIButton reloadGlobalConfBtn = null;
 		private static UIButton resetGlobalConfBtn = null;
 
+		public static int roadSignMphStyleInt;
 		public static bool instantEffects = true;
 		public static int simAccuracy = 0;
 		//public static int laneChangingRandomization = 2;
@@ -236,11 +239,11 @@ namespace TrafficManager.State {
 			scanForKnownIncompatibleModsToggle = generalGroup.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, onScanForKnownIncompatibleModsChanged) as UICheckBox;
 			ignoreDisabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Ignore_disabled_mods"), GlobalConfig.Instance.Main.IgnoreDisabledMods, onIgnoreDisabledModsChanged) as UICheckBox;
 			Indent(ignoreDisabledModsToggle);
-			displayMphToggle = generalGroup.AddCheckbox(
-				                   Translation.GetString("Display_speed_limits_mph"),
-				                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
-				                   onDisplayMphChanged) as UICheckBox;
 
+			// General: Speed Limits
+			setupSpeedLimitsPanel(panelHelper, generalGroup);
+
+			// General: Simulation
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			simAccuracyDropdown = simGroup.AddDropdown(Translation.GetString("Simulation_accuracy") + ":", new string[] { Translation.GetString("Very_high"), Translation.GetString("High"), Translation.GetString("Medium"), Translation.GetString("Low"), Translation.GetString("Very_Low") }, simAccuracy, onSimAccuracyChanged) as UIDropDown;
 			instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
@@ -489,6 +492,25 @@ namespace TrafficManager.State {
 			tabStrip.selectedIndex = 0;
 		}
 
+		private static void setupSpeedLimitsPanel(UIHelper panelHelper, UIHelperBase generalGroup) {
+			displayMphToggle = generalGroup.AddCheckbox(
+				                   Translation.GetString("Display_speed_limits_mph"),
+				                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+				                   onDisplayMphChanged) as UICheckBox;
+
+			
+			var mphThemeOptions = new[] {
+				                             Translation.GetString("theme_Square_US"),
+				                             Translation.GetString("theme_Round_UK")
+			                             };
+			roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
+			roadSignsMphThemeDropdown = generalGroup.AddDropdown(
+				                        Translation.GetString("Road_signs_theme_mph") + ":",
+				                        mphThemeOptions, roadSignMphStyleInt,
+				                        onRoadSignsMphThemeChanged) as UIDropDown;
+			roadSignsMphThemeDropdown.width = 400;
+		}
+
 		private static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");
             if (label != null) {
@@ -707,6 +729,15 @@ namespace TrafficManager.State {
 	        Log._Debug($"Display MPH changed to {newValue}");
 	        GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
 	        GlobalConfig.WriteConfig();
+        }
+
+        private static void onRoadSignsMphThemeChanged(int newRoadSignStyle) {
+	        if (!checkGameLoaded()) {
+		        return;
+	        }
+	        var newStyle = newRoadSignStyle == 1 ? MphSignStyle.RoundUK : MphSignStyle.SquareUS;
+		Log._Debug($"Road Sign theme changed to {newStyle}");
+	        GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
         }
 
 		private static void onInstantEffectsChanged(bool newValue) {

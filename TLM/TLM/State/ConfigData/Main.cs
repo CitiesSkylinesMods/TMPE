@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic.Data;
 using TrafficManager.UI.MainMenu;
 
 namespace TrafficManager.State.ConfigData {
@@ -65,6 +66,11 @@ namespace TrafficManager.State.ConfigData {
 		/// but internally Kmph are still used).
 		/// </summary>
 		public bool DisplaySpeedLimitsMph = false;
+
+		/// <summary>
+		/// Selected theme for road signs when MPH is active.
+		/// </summary>
+		public MphSignStyle MphRoadSignStyle = MphSignStyle.SquareUS;
 
 		public void AddDisplayedTutorialMessage(string messageKey) {
 			HashSet<string> newMessages = DisplayedTutorialMessages != null
