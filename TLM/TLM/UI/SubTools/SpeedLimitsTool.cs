@@ -23,8 +23,8 @@ using static TrafficManager.Util.SegmentLaneTraverser;
 namespace TrafficManager.UI.SubTools {
 	public class SpeedLimitsTool : SubTool {
 		/// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
-		private const int GuiSpeedSignSize = 90;
-		private readonly float speedLimitSignSize = 80f;
+		private const int GuiSpeedSignSize = 80;
+		private readonly float speedLimitSignSize = 70f;
 
 		private bool _cursorInSecondaryPanel;
 
