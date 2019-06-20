@@ -63,7 +63,7 @@ Settings_are_defined_for_each_savegame_separately ustawienia są definiowane odd
 Simulation_accuracy Dokładność symulacji (większa dokładność zmiejsza wydajność gry)
 Enable_highway_specific_lane_merging/splitting_rules Aktywuj Zmienione zasady podziału/łączenia pasów dla autostrad
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Chęć kierowców do zmiany pasa (tylko gdy Zaawansowana SI jest włączona)
-Maintenance Konserwacja (dodatkowe informacje)
+Maintenance Konserwacja
 Very_often Bardzo często
 Often Często
 Sometimes Czasami
