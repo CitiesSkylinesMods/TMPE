@@ -34,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 		/// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
 		private readonly int guiSpeedSignSize = 90;
 
-		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 95, 225));
+		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 10 * 95, 225));
 		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
@@ -73,7 +73,7 @@ namespace TrafficManager.UI.SubTools {
 			var unitTitle = " (" + (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
 				                        ? Translation.GetString("Miles_per_hour")
 				                        : Translation.GetString("Kilometers_per_hour")) + ")";
-			windowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * 95 : 8 * 95;
+			windowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * (guiSpeedSignSize + 5) : 8 * (guiSpeedSignSize + 5);
 			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow,
 			                              Translation.GetString("Speed_limits") + unitTitle,
 			                              WindowStyle);
