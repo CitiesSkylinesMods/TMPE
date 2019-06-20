@@ -501,8 +501,9 @@ namespace TrafficManager.State {
 			
 			var mphThemeOptions = new[] {
 				                             Translation.GetString("theme_Square_US"),
-				                             Translation.GetString("theme_Round_UK")
-			                             };
+				                             Translation.GetString("theme_Round_UK"),
+				                             Translation.GetString("theme_Round_German"),
+						     };
 			roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
 			roadSignsMphThemeDropdown = generalGroup.AddDropdown(
 				                        Translation.GetString("Road_signs_theme_mph") + ":",
@@ -735,8 +736,19 @@ namespace TrafficManager.State {
 	        if (!checkGameLoaded()) {
 		        return;
 	        }
-	        var newStyle = newRoadSignStyle == 1 ? MphSignStyle.RoundUK : MphSignStyle.SquareUS;
-		Log._Debug($"Road Sign theme changed to {newStyle}");
+
+		// The UI order is: US, UK, German
+	        var newStyle = MphSignStyle.RoundGerman;
+	        switch (newRoadSignStyle) {
+		        case 1:
+			        newStyle = MphSignStyle.RoundUK;
+			        break;
+		        case 0:
+			        newStyle = MphSignStyle.SquareUS;
+			        break;
+	        }
+
+	        Log._Debug($"Road Sign theme changed to {newStyle}");
 	        GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
         }
 

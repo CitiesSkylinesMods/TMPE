@@ -48,7 +48,8 @@ namespace TrafficManager.UI
 		public static readonly Texture2D ClockPauseTexture2D;
 		public static readonly Texture2D ClockTestTexture2D;
 		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesKmph;
-		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesMph;
+		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesMphUS;
+		public static readonly IDictionary<int, Texture2D> SpeedLimitTexturesMphUK;
 		public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
 		public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
 		public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
@@ -137,7 +138,8 @@ namespace TrafficManager.UI
 
 			// TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
 			SpeedLimitTexturesKmph = new TinyDictionary<int, Texture2D>();
-			SpeedLimitTexturesMph = new TinyDictionary<int, Texture2D>();
+			SpeedLimitTexturesMphUS = new TinyDictionary<int, Texture2D>();
+			SpeedLimitTexturesMphUK = new TinyDictionary<int, Texture2D>();
 
 			// Load shared speed limit signs for Kmph and Mph
 			// Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
@@ -147,8 +149,12 @@ namespace TrafficManager.UI
 			}
 			// Signs from 0 to 90 for MPH
 			for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
-				var resource = LoadDllResource($"SpeedLimits.Mph.{speedLimit}.png", 200, 250);
-				SpeedLimitTexturesMph.Add(speedLimit, resource ?? SpeedLimitTexturesMph[5]);
+				// Load US textures, they are rectangular
+				var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
+				SpeedLimitTexturesMphUS.Add(speedLimit, resourceUs ?? SpeedLimitTexturesMphUS[5]);
+				// Load UK textures, they are square
+				var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
+				SpeedLimitTexturesMphUK.Add(speedLimit, resourceUk ?? SpeedLimitTexturesMphUK[5]);
 			}
 
 			VehicleRestrictionTextures = new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>>();
@@ -231,10 +237,30 @@ namespace TrafficManager.UI
 			return GetSpeedLimitTexture(speedLimit, m.MphRoadSignStyle, unit);
 		}
 
+		/// <summary>
+		/// Given the float speed, style and MPH option return a texture to render.
+		/// </summary>
+		/// <param name="speedLimit">float speed</param>
+		/// <param name="mphStyle">Signs theme</param>
+		/// <param name="unit">Mph or km/h</param>
+		/// <returns></returns>
 		public static Texture2D GetSpeedLimitTexture(float speedLimit, MphSignStyle mphStyle, SpeedUnit unit) {
 			// Select the source for the textures based on unit and the theme
 			var mph = unit == SpeedUnit.Mph;
-			var textures = mph ? SpeedLimitTexturesMph : SpeedLimitTexturesKmph;
+			var textures = SpeedLimitTexturesKmph;
+			if (mph) {
+				switch (mphStyle) {
+					case MphSignStyle.SquareUS:
+						textures = SpeedLimitTexturesMphUS;
+						break;
+					case MphSignStyle.RoundUK:
+						textures = SpeedLimitTexturesMphUK;
+						break;
+					case MphSignStyle.RoundGerman:
+						// Do nothing, this is the default above
+						break;
+				}
+			}
 
 			// Trim the range
 			if (speedLimit > SpeedLimitManager.MAX_SPEED * 0.95f) {

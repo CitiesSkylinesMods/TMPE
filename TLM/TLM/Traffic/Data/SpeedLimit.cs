@@ -14,6 +14,7 @@ namespace TrafficManager.Traffic.Data {
 	public enum MphSignStyle {
 		SquareUS = 0,
 		RoundUK = 1,
+		RoundGerman = 2,
 	}
 
 	/// <summary>
@@ -160,5 +161,16 @@ namespace TrafficManager.Traffic.Data {
 			}
 		}
 
+		/// <summary>
+		/// For US signs and MPH enabled, scale textures vertically by 1.25f.
+		/// Other signs are round.
+		/// </summary>
+		/// <returns>Multiplier for horizontal sign size</returns>
+		public static float GetVerticalTextureScale() {
+			return (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph &&
+			        GlobalConfig.Instance.Main.MphRoadSignStyle == MphSignStyle.SquareUS)
+				       ? 1.25f
+				       : 1.0f;
+		}
 	}
 }

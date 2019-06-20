@@ -445,7 +445,7 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button(
 				TextureResources.GetSpeedLimitTexture(speedLimit),
 				GUILayout.Width(signSize),
-				showMph ? GUILayout.Height(signSize * 1.25f) : GUILayout.Height(signSize))) {
+				GUILayout.Height(signSize * SpeedLimit.GetVerticalTextureScale()))) {
 				currentPaletteSpeedLimit = speedLimit;
 			}
 			GUILayout.FlexibleSpace();
@@ -477,6 +477,10 @@ namespace TrafficManager.UI.SubTools {
 			if (!viewOnly) {
 				showPerLane = showLimitsPerLane ^ (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
 			}
+
+			// US signs are rectangular, all other are round
+			var speedLimitSignVerticalScale = SpeedLimit.GetVerticalTextureScale();
+
 			if (showPerLane) {
 				// show individual speed limit handle per lane
 				int numDirections;
@@ -526,8 +530,8 @@ namespace TrafficManager.UI.SubTools {
 					var laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
 					var hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
 						TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
-						camPos, zero, f, f, xu, yu, x, 0, speedLimitSignSize,
-						GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? speedLimitSignSize * 1.25f : speedLimitSignSize,
+						camPos, zero, f, f, xu, yu, x, 0,
+						speedLimitSignSize, speedLimitSignSize * speedLimitSignVerticalScale,
 						!viewOnly);
 
 					if (!viewOnly
@@ -590,7 +594,7 @@ namespace TrafficManager.UI.SubTools {
 					var boundingBox = new Rect(screenPos.x - (size / 2),
 					                            screenPos.y - (size / 2),
 					                            size,
-								    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? size * 1.25f : size);
+					                            size * speedLimitSignVerticalScale);
 					var hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
 					guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
