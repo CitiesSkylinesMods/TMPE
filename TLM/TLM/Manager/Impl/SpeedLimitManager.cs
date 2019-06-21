@@ -230,7 +230,7 @@ namespace TrafficManager.Manager.Impl {
 			float speedLimit = 0;
 			float?[] fastArray = Flags.laneSpeedLimitArray[segmentId];
 			if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
-				speedLimit = ToGameSpeedLimit((ushort)fastArray[laneIndex]);
+				speedLimit = ToGameSpeedLimit((float)fastArray[laneIndex]);
 			} else {
 				speedLimit = laneInfo.m_speedLimit;
 			}
@@ -728,15 +728,17 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
 					           $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
 					           $"lanes={info?.m_lanes} is {customSpeedLimit}");
+
 					if (SpeedLimit.IsValidRange(customSpeedLimit)) {
 						// lane speed limit differs from default speed limit
 						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: " +
-						           $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
-						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+						           $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
+						var kmph = laneSpeedLimit.speedLimit / SpeedLimit.SPEED_TO_KMPH; // convert to game units
+						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
 					} else {
 						Log._Debug($"SpeedLimitManager.LoadData: " +
 						           $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
-						           $"({laneSpeedLimit.speedLimit})");
+						           $"({laneSpeedLimit.speedLimit} km/h)");
 					}
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -748,14 +750,15 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		List<Configuration.LaneSpeedLimit> ICustomDataManager<List<Configuration.LaneSpeedLimit>>.SaveData(ref bool success) {
-			List<Configuration.LaneSpeedLimit> ret = new List<Configuration.LaneSpeedLimit>();
+			var ret = new List<Configuration.LaneSpeedLimit>();
 			foreach (var e in Flags.getAllLaneSpeedLimits()) {
 				try {
-					Configuration.LaneSpeedLimit laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
-					Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: {laneSpeedLimit.speedLimit}");
+					var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
+					Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: " +
+					           $"{laneSpeedLimit.speedLimit*SpeedLimit.SPEED_TO_KMPH} km/h");
 					ret.Add(laneSpeedLimit);
 				} catch (Exception ex) {
-					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex.ToString()}");
+					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex}");
 					success = false;
 				}
 			}

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using TrafficManager.State;
+using TrafficManager.Traffic.Data;
 
 // TODO this class should be moved to TrafficManager.State, but the deserialization fails if we just do that now. Anyway, we should get rid of these crazy lists of arrays. So let's move the class when we decide rework the load/save system.
 namespace TrafficManager {
@@ -12,11 +13,11 @@ namespace TrafficManager {
 		[Serializable]
 		public class LaneSpeedLimit {
 			public uint laneId;
-			public float speedLimit;
+			public ushort speedLimit;
 
 			public LaneSpeedLimit(uint laneId, float speedLimit) {
 				this.laneId = laneId;
-				this.speedLimit = speedLimit;
+				this.speedLimit = (ushort)(speedLimit * SpeedLimit.SPEED_TO_KMPH);
 			}
 		}
 

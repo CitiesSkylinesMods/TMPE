@@ -22,7 +22,7 @@ namespace TrafficManager.Traffic.Data {
 	/// for when the option is set to display Mph. The engine still uses kmph.
 	/// </summary>
 	public struct SpeedLimit {
-		private const float SPEED_TO_KMPH = 50.0f; // 1.0f equals 50 km/h
+		public const float SPEED_TO_KMPH = 50.0f; // 1.0f equals 50 km/h
 		private const ushort LOWER_KMPH = 10;
 		public const ushort UPPER_KMPH = 140;
 		private const ushort KMPH_STEP = 10;
