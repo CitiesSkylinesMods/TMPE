@@ -950,7 +950,7 @@ namespace TrafficManager.UI {
 				ushort segmentId = vState.currentSegmentId;
 
 				// Some magical constant converting magnitudes into km/h
-				float vehSpeed = vehicle.GetLastFrameVelocity().magnitude * 5f;
+				float vehSpeed = SpeedLimit.ToKmphPrecise(vehicle.GetLastFrameVelocity().magnitude / 8f);
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
 					continue;
