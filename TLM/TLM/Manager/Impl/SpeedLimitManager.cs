@@ -528,7 +528,8 @@ namespace TrafficManager.Manager.Impl {
 					goto nextIter;
 				}
 #if DEBUG
-				Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} to {speedLimit}");
+				Log._Debug($"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
+				           $"to {speedLimit * SpeedLimit.SPEED_TO_KMPH}");
 #endif
 				Flags.setLaneSpeedLimit(curLaneId, speedLimit);
 
