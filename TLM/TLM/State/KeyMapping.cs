@@ -15,30 +15,47 @@ using TrafficManager.UI;
 using UnityEngine;
 
 namespace TrafficManager.State {
+	/// <summary>
+	/// This attribute is used on key bindings and tells us where this key is used,
+	/// to allow using the same key in multiple occasions we need to know the category.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field)]
+	public class TMPERebindableKey: Attribute {
+		public string Category;
+		public TMPERebindableKey(string cat) {
+			Category = cat;
+		}
+	}
+
 	public class OptionsKeymappingMain : OptionsKeymapping {
 		private void Awake() {
 			TryCreateConfig();
+
 			AddReadOnlyKeymapping(Translation.GetString("Keybind_Exit_subtool"),
 			                      KeyToolCancel_ViewOnly);
 
 			AddKeymapping(Translation.GetString("Keybind_toggle_TMPE_main_menu"),
-			              KeyToggleTMPEMainMenu);
+			              KeyToggleTMPEMainMenu, "Global");
 
 			AddKeymapping(Translation.GetString("Keybind_toggle_traffic_lights_tool"),
-			              KeyToggleTrafficLightTool);
+			              KeyToggleTrafficLightTool, "Global");
 			AddKeymapping(Translation.GetString("Keybind_use_lane_arrow_tool"),
-			              KeyLaneArrowTool);
+			              KeyLaneArrowTool, "Global");
 			AddKeymapping(Translation.GetString("Keybind_use_lane_connections_tool"),
-			              KeyLaneConnectionsTool);
+			              KeyLaneConnectionsTool, "Global");
 			AddKeymapping(Translation.GetString("Keybind_use_priority_signs_tool"),
-			              KeyPrioritySignsTool);
+			              KeyPrioritySignsTool, "Global");
 			AddKeymapping(Translation.GetString("Keybind_use_junction_restrictions_tool"),
-			              KeyJunctionRestrictionsTool);
+			              KeyJunctionRestrictionsTool, "Global");
 			AddKeymapping(Translation.GetString("Keybind_use_speed_limits_tool"),
-			              KeySpeedLimitsTool);
+			              KeySpeedLimitsTool, "Global");
 
+			// New section: Lane Connector Tool
 			AddKeymapping(Translation.GetString("Keybind_lane_connector_stay_in_lane"),
-			              KeyLaneConnectorStayInLane);
+			              KeyLaneConnectorStayInLane, "LaneConnector");
+
+			AddKeymapping(Translation.GetString("Keybind_lane_connector_delete"),
+			              KeyLaneConnectorDelete, "LaneConnector");
 		}
 	}
 
@@ -49,58 +66,74 @@ namespace TrafficManager.State {
 		/// <summary>
 		/// This input key can not be changed and is not checked, instead it is display only
 		/// </summary>
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyToolCancel_ViewOnly =
 			new SavedInputKey("keyExitSubtool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Encode(KeyCode.Escape, false, false, false),
 			                  false);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyToggleTMPEMainMenu =
 			new SavedInputKey("keyToggleTMPEMainMenu",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Encode(KeyCode.Semicolon, false, true, false),
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyToggleTrafficLightTool =
 			new SavedInputKey("keyToggleTrafficLightTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyLaneArrowTool =
 			new SavedInputKey("keyLaneArrowTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyLaneConnectionsTool =
 			new SavedInputKey("keyLaneConnectionsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyPrioritySignsTool =
 			new SavedInputKey("keyPrioritySignsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeyJunctionRestrictionsTool =
 			new SavedInputKey("keyJunctionRestrictionsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("Global")]
 		public static SavedInputKey KeySpeedLimitsTool =
 			new SavedInputKey("keySpeedLimitsTool",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Empty,
 			                  true);
 
+		[TMPERebindableKey("LaneConnector")]
 		public static SavedInputKey KeyLaneConnectorStayInLane =
 			new SavedInputKey("keyLaneConnectorStayInLane",
 			                  KEYBOARD_SHORTCUTS_FILENAME,
 			                  SavedInputKey.Encode(KeyCode.S, false, true, false),
+			                  true);
+
+		[TMPERebindableKey("LaneConnector")]
+		public static SavedInputKey KeyLaneConnectorDelete =
+			new SavedInputKey("keyLaneConnectorDelete",
+			                  KEYBOARD_SHORTCUTS_FILENAME,
+			                  SavedInputKey.Encode(KeyCode.Delete, false, false, false),
 			                  true);
 
 		private SavedInputKey editingBinding_;
@@ -126,7 +159,7 @@ namespace TrafficManager.State {
 		/// </summary>
 		/// <param name="label">Text to display</param>
 		/// <param name="savedInputKey">A SavedInputKey from GlobalConfig.KeyboardShortcuts</param>
-		protected void AddKeymapping(string label, SavedInputKey savedInputKey) {
+		protected void AddKeymapping(string label, SavedInputKey savedInputKey, string category) {
 			var uiPanel = component.AttachUIComponent(
 				              UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as UIPanel;
 			if (count_++ % 2 == 1) {
@@ -140,11 +173,12 @@ namespace TrafficManager.State {
 			var uiButton = uiPanel.Find<UIButton>("Binding");
 			uiButton.eventKeyDown += OnBindingKeyDown;
 			uiButton.eventMouseDown += OnBindingMouseDown;
+			uiButton.text = savedInputKey.ToLocalizedString("KEYNAME");
+			uiButton.objectUserData = savedInputKey;
+			uiButton.stringUserData = category;
 
 			// Set label text (as provided) and set button text from the SavedInputKey
 			uiLabel.text = label;
-			uiButton.text = savedInputKey.ToLocalizedString("KEYNAME");
-			uiButton.objectUserData = savedInputKey;
 		}
 
 		/// <summary>
@@ -249,14 +283,16 @@ namespace TrafficManager.State {
 				var inputKey = (p.keycode == KeyCode.Escape)
 					               ? editingBinding_.value
 					               : SavedInputKey.Encode(keycode, p.control, p.shift, p.alt);
+				var category = p.source.stringUserData;
+
 				if (p.keycode == KeyCode.Backspace) {
 					inputKey = SavedInputKey.Empty;
 				}
-				var maybeConflict = FindConflict(inputKey);
+				var maybeConflict = FindConflict(inputKey, category);
 				if (maybeConflict != string.Empty) {
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
 						"Key Conflict",
-						Translation.GetString("Keybind_conflict") + "\n" + maybeConflict,
+						Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
 						false);
 				} else {
 					editingBinding_.value = inputKey;
@@ -290,11 +326,12 @@ namespace TrafficManager.State {
 				var inputKey = SavedInputKey.Encode(ButtonToKeycode(p.buttons),
 				                                    IsControlDown(), IsShiftDown(),
 				                                    IsAltDown());
-				var maybeConflict = FindConflict(inputKey);
+				var category = p.source.stringUserData;
+				var maybeConflict = FindConflict(inputKey, category);
 				if (maybeConflict != string.Empty) {
 					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
 						"Key Conflict", 
-						Translation.GetString("Keybind_conflict") + "\n" + maybeConflict,
+						Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
 						false);
 				} else {
 					editingBinding_.value = inputKey;
@@ -341,7 +378,7 @@ namespace TrafficManager.State {
 		/// </summary>
 		/// <param name="k">Key to search for the conflicts</param>
 		/// <returns></returns>
-		private string FindConflict(InputKey sample) {
+		private string FindConflict(InputKey sample, string sampleCategory) {
 			if (sample == SavedInputKey.Empty 
 			    || sample == SavedInputKey.Encode(KeyCode.None, false, false, false)) {
 				// empty key never conflicts
@@ -355,13 +392,13 @@ namespace TrafficManager.State {
 
 			// Saves and null 'self.editingBinding_' to allow rebinding the key to itself.
 			var saveEditingBinding = editingBinding_;
-			editingBinding_ = null;
+			editingBinding_.value = SavedInputKey.Empty;
 
 			// Check in TMPE settings
 			var tmpeSettingsType = typeof(OptionsKeymapping);
 			var tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
 			
-			var inTmpe = FindConflictInTmpe(sample, tmpeFields);
+			var inTmpe = FindConflictInTmpe(sample, sampleCategory, tmpeFields);
 			editingBinding_ = saveEditingBinding;
 			return inTmpe;
 		}
@@ -405,14 +442,41 @@ namespace TrafficManager.State {
 			return 0;
 		}
 
-		private static string FindConflictInTmpe(InputKey sample, FieldInfo[] fields) { 
+		/// <summary>
+		/// For given key and category check TM:PE settings for the Global category
+		/// and the same category if it is not Global. This will allow reusing key in other tool
+		/// categories without conflicting.
+		/// </summary>
+		/// <param name="sample">The key to search for</param>
+		/// <param name="sampleCategory">The category Global or some tool name</param>
+		/// <param name="fields">Fields of the key settings class</param>
+		/// <returns>Empty string if no conflicts otherwise the key name to print an error</returns>
+		private static string FindConflictInTmpe(InputKey sample, string sampleCategory, FieldInfo[] fields) { 
 			foreach (var field in fields) {
 				// This will match inputkeys of TMPE key settings
-				if (field.FieldType == typeof(SavedInputKey)) {
-					var key = (SavedInputKey)field.GetValue(null);
-					if (key.value == sample) {
-						return "TM:PE -- " + CamelCaseSplit(field.Name);
-					}
+				if (field.FieldType != typeof(SavedInputKey)) {
+					continue;
+				}
+
+				var rebindableKeyAttrs = field.GetCustomAttributes(
+					                         typeof(TMPERebindableKey), 
+					                         false) as TMPERebindableKey[];
+				if (rebindableKeyAttrs == null || rebindableKeyAttrs.Length <= 0) {
+					continue;
+				}
+
+				// Check category, category=Global will check keys in all categories
+				// category=<other> will check Global and its own only
+				var rebindableKeyCategory = rebindableKeyAttrs[0].Category;
+				if (sampleCategory != "Global" && sampleCategory != rebindableKeyCategory) {
+					continue;
+				}
+
+				var key = (SavedInputKey) field.GetValue(null);
+				if (key.value == sample) {
+					return "TM:PE, " 
+					       + Translation.GetString("Keybind_category_" + rebindableKeyCategory)
+					       + " -- " + CamelCaseSplit(field.Name);
 				}
 			}
 

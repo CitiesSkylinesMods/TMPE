@@ -40,7 +40,7 @@ namespace TrafficManager.UI.SubTools {
                 /// Resets when the event is consumed or after a few frames.</summary>
                 private int frameStayInLanePressed = 0;
 
-                /// <summary>Clear lane lines is Delete or Backspace</summary>
+                /// <summary>Clear lane lines is Delete (configurable)</summary>
                 private int frameClearPressed = 0;
 
 		class NodeLaneMarker {
@@ -77,7 +77,7 @@ namespace TrafficManager.UI.SubTools {
 				// not too long ago (within 20 Unity frames or 0.33 sec)
 			}
 
-			if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) {
+			if (OptionsKeymapping.KeyLaneConnectorDelete.IsPressed(e)) {
 				frameClearPressed = Time.frameCount;
 				// this will be consumed in RenderOverlay() if the key was pressed
 				// not too long ago (within 20 Unity frames or 0.33 sec)

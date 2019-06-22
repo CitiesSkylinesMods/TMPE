@@ -233,13 +233,15 @@ Ignore_disabled_mods Игнорировать отключённые моды
 Traffic_Manager_detected_incompatible_mods Traffic Manager обнаружил несовместимые моды
 Notify_me_if_there_is_an_unexpected_mod_conflict Показывать сообщение об ошибке при несовместимости модов
 Keybind_toggle_TMPE_main_menu Показать или скрыть меню TM:PE
-Keybind_toggle_traffic_lights_tool Инструмент 'Установка светофора'
-Keybind_use_lane_arrow_tool Инструмент 'Стрелки движения'
-Keybind_use_lane_connections_tool Инструмент 'Линии движения'
-Keybind_use_priority_signs_tool Инструмент 'Знаки приоритета'
-Keybind_use_junction_restrictions_tool Инструмент 'Ограничения на перекрёстках'
-Keybind_use_speed_limits_tool Инструмент 'Ограничения скорости'
+Keybind_toggle_traffic_lights_tool Инструмент "Установка светофора"
+Keybind_use_lane_arrow_tool Инструмент "Стрелки движения"
+Keybind_use_lane_connections_tool Инструмент "Линии движения"
+Keybind_use_priority_signs_tool Инструмент "Знаки приоритета"
+Keybind_use_junction_restrictions_tool Инструмент "Ограничения на перекрёстках"
+Keybind_use_speed_limits_tool Инструмент "Ограничения скорости"
 Keybind_lane_connector_stay_in_lane Линии движения: Оставаться в своей полосе
 Keybinds Горячие клавиши
 Keybind_Exit_subtool Закрыть инструмент и меню TM:PE
 Keybind_conflict Выбранная комбинация клавиш уже используется в другом месте. Пожалуйста, выберите другую комбинацию.
+Keybind_category_Global Общие комбинации клавиш
+Keybind_category_LaneConnector Клавиши для инструмента "Линии Движения"
