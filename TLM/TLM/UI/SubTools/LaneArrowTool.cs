@@ -34,7 +34,7 @@ namespace TrafficManager.UI.SubTools {
 		/// Sum of widths of GUI elements for 1 lane.
 		/// NOTE this also adds spacing between lane columns.
 		/// </summary>
-		private const float LANE_GUI_WIDTH = BUTTON_GUI_SCALE * 1.33f + (2f * LANE_LABEL_OFFSET_X);
+		private const float LANE_GUI_WIDTH = BUTTON_GUI_SCALE * 1.33f + LANE_LABEL_OFFSET_X;
 		private const float GUI_HEIGHT = 24f + BUTTON_GUI_SCALE * 1.66f; // label size + buttons
 
 		/// <summary>The horizontal offset for "Lane #" text in each column</summary>
