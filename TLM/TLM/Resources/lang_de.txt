@@ -241,4 +241,4 @@ Keybind_use_junction_restrictions_tool Werkzeug 'Kreuzungsbeschränkungen' verwe
 Keybind_use_speed_limits_tool Werkzeug 'Geschwindigkeitsbeschränkungen' verwenden
 Keybind_lane_connector_stay_in_lane Fahrspurverbinder: Bleib auf der Fahrspur
 Keybinds Tastenkombinationen
-Keybind_Exit_subtool Exit tool and close TM:PE Menu
+Keybind_Exit_subtool Werkzeug und TM:PE Menü schließen
