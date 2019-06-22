@@ -34,11 +34,11 @@ namespace TrafficManager.UI.SubTools {
 		/// Sum of widths of GUI elements for 1 lane.
 		/// NOTE this also adds spacing between lane columns.
 		/// </summary>
-		private const float LANE_GUI_WIDTH = BUTTON_GUI_SCALE * 1.33f + LANE_LABEL_OFFSET_X;
-		private const float GUI_HEIGHT = 24f + BUTTON_GUI_SCALE * 1.66f; // label size + buttons
+		private const float LANE_GUI_WIDTH = BUTTON_GUI_SCALE * 1.33f + LANE_EXTRA_WIDTH;
+		private const float GUI_HEIGHT = BUTTON_GUI_SCALE * 1.66f; // label size + buttons
 
-		/// <summary>The horizontal offset for "Lane #" text in each column</summary>
-		private const float LANE_LABEL_OFFSET_X = 36f;
+		/// <summary>Some spacing between lane GUI elements</summary>
+		private const float LANE_EXTRA_WIDTH = 36f;
 
 		private bool _cursorInSecondaryPanel;
 
@@ -149,13 +149,7 @@ namespace TrafficManager.UI.SubTools {
 
 				var laneStyle = new GUIStyle { contentOffset = new Vector2(12f, 0f) };
 
-				var laneTitleStyle = new GUIStyle {
-					contentOffset = new Vector2(LANE_LABEL_OFFSET_X, 2f),
-					normal = { textColor = new Color(1f, 1f, 1f) }
-				};
-
 				GUILayout.BeginVertical(laneStyle);
-				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 
 				//----------------------
 				// Button group
