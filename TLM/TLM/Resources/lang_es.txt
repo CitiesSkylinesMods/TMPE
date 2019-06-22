@@ -242,3 +242,4 @@ Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
 Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
 Keybinds Keybinds
 Keybind_Exit_subtool Exit tool and close TM:PE Menu
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.

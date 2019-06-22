@@ -2,7 +2,11 @@
 // Thanks to https://github.com/Quboid/CS-MoveIt
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using ColossalFramework;
 using ColossalFramework.Globalization;
 using ColossalFramework.UI;
@@ -248,8 +252,16 @@ namespace TrafficManager.State {
 				if (p.keycode == KeyCode.Backspace) {
 					inputKey = SavedInputKey.Empty;
 				}
+				var maybeConflict = FindConflict(inputKey);
+				if (maybeConflict != string.Empty) {
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
+						"Key Conflict",
+						Translation.GetString("Keybind_conflict") + "\n" + maybeConflict,
+						false);
+				} else {
+					editingBinding_.value = inputKey;
+				}
 
-				editingBinding_.value = inputKey;
 				var uITextComponent = p.source as UITextComponent;
 				uITextComponent.text = editingBinding_.ToLocalizedString("KEYNAME");
 				editingBinding_ = null;
@@ -278,8 +290,16 @@ namespace TrafficManager.State {
 				var inputKey = SavedInputKey.Encode(ButtonToKeycode(p.buttons),
 				                                    IsControlDown(), IsShiftDown(),
 				                                    IsAltDown());
+				var maybeConflict = FindConflict(inputKey);
+				if (maybeConflict != string.Empty) {
+					UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
+						"Key Conflict", 
+						Translation.GetString("Keybind_conflict") + "\n" + maybeConflict,
+						false);
+				} else {
+					editingBinding_.value = inputKey;
+				}
 
-				editingBinding_.value = inputKey;
 				var uIButton2 = p.source as UIButton;
 				uIButton2.text = editingBinding_.ToLocalizedString("KEYNAME");
 				uIButton2.buttonsMask = UIMouseButton.Left;
@@ -304,22 +324,7 @@ namespace TrafficManager.State {
 				}
 			}
 		}
-
-		protected InputKey GetDefaultEntry(string entryName) {
-			var field =
-				typeof(DefaultSettings).GetField(entryName, BindingFlags.Static | BindingFlags.Public);
-			if (field == null) {
-				return 0;
-			}
-
-			var value = field.GetValue(null);
-			if (value is InputKey) {
-				return (InputKey) value;
-			}
-
-			return 0;
-		}
-
+		
 		protected void RefreshKeyMapping() {
 			foreach (var current in component.GetComponentsInChildren<UIComponent>()) {
 				var uITextComponent = current.Find<UITextComponent>("Binding");
@@ -328,6 +333,98 @@ namespace TrafficManager.State {
 					uITextComponent.text = savedInputKey.ToLocalizedString("KEYNAME");
 				}
 			}
+		}
+
+		/// <summary>
+		/// For an inputkey, try find where possibly it is already used.
+		/// This covers game Settings class, and self (OptionsKeymapping class).
+		/// </summary>
+		/// <param name="k">Key to search for the conflicts</param>
+		/// <returns></returns>
+		private string FindConflict(InputKey sample) {
+			if (sample == SavedInputKey.Empty 
+			    || sample == SavedInputKey.Encode(KeyCode.None, false, false, false)) {
+				// empty key never conflicts
+				return string.Empty;
+			}
+
+			var inGameSettings = FindConflictInGameSettings(sample);
+			if (!string.IsNullOrEmpty(inGameSettings)) {
+				return inGameSettings;
+			}
+
+			// Saves and null 'self.editingBinding_' to allow rebinding the key to itself.
+			var saveEditingBinding = editingBinding_;
+			editingBinding_ = null;
+
+			// Check in TMPE settings
+			var tmpeSettingsType = typeof(OptionsKeymapping);
+			var tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
+			
+			var inTmpe = FindConflictInTmpe(sample, tmpeFields);
+			editingBinding_ = saveEditingBinding;
+			return inTmpe;
+		}
+
+		private static string FindConflictInGameSettings(InputKey sample) {
+			var fieldList = typeof(Settings).GetFields(BindingFlags.Static | BindingFlags.Public);
+			foreach (var field in fieldList) {
+				var customAttributes = field.GetCustomAttributes(typeof(RebindableKeyAttribute), false) as RebindableKeyAttribute[];
+				if (customAttributes != null && customAttributes.Length > 0) {
+					var category = customAttributes[0].category;
+					if (category != string.Empty && category != "Game") {
+						// Ignore other categories: MapEditor, Decoration, ThemeEditor, ScenarioEditor
+						continue;
+					}
+
+					var str = field.GetValue(null) as string;
+
+					var savedInputKey = new SavedInputKey(str,
+					                                      Settings.gameSettingsFile,
+					                                      GetDefaultEntryInGameSettings(str),
+					                                      true);
+					if (savedInputKey.value == sample) {
+						return (category == string.Empty ? string.Empty : (category + " -- ")) 
+						       + CamelCaseSplit(field.Name);
+					}
+				}
+			}
+
+			return string.Empty;
+		}
+
+		private static InputKey GetDefaultEntryInGameSettings(string entryName) {
+			var field = typeof(DefaultSettings).GetField(entryName, BindingFlags.Static | BindingFlags.Public);
+			if (field == null) {
+				return 0;
+			}
+			var obj = field.GetValue(null);
+			if (obj is InputKey) {
+				return (InputKey)obj;
+			}
+			return 0;
+		}
+
+		private static string FindConflictInTmpe(InputKey sample, FieldInfo[] fields) { 
+			foreach (var field in fields) {
+				// This will match inputkeys of TMPE key settings
+				if (field.FieldType == typeof(SavedInputKey)) {
+					var key = (SavedInputKey)field.GetValue(null);
+					if (key.value == sample) {
+						return "TM:PE -- " + CamelCaseSplit(field.Name);
+					}
+				}
+			}
+
+			return string.Empty;
+		}
+
+		private static string CamelCaseSplit(string s) {
+			var words = Regex.Matches(s, @"([A-Z][a-z]+)")
+				     .Cast<Match>()
+				     .Select(m => m.Value);
+
+			return string.Join(" ", words.ToArray());
 		}
 	}
 }

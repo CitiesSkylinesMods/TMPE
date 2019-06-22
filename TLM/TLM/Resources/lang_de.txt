@@ -242,3 +242,4 @@ Keybind_use_speed_limits_tool Werkzeug 'Geschwindigkeitsbeschränkungen' verwend
 Keybind_lane_connector_stay_in_lane Fahrspurverbinder: Bleib auf der Fahrspur
 Keybinds Tastenkombinationen
 Keybind_Exit_subtool Werkzeug und TM:PE Menü schließen
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.

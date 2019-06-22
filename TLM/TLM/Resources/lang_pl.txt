@@ -242,3 +242,4 @@ Keybind_use_speed_limits_tool Narzędzie 'Limity prędkości'
 Keybind_lane_connector_stay_in_lane Połącz pasy ruchu: Pozostań na pasie
 Keybinds Skróty klawiszowe
 Keybind_Exit_subtool Wyłącz narzędzie i zamknij TM:PE menu
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
