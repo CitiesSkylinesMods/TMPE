@@ -189,6 +189,10 @@ namespace TrafficManager.Manager.Impl {
 				Options.setAllowFarTurnOnRed(data[40] == (byte)1);
 			}
 
+			if (data.Length >= 42) {
+				Options.setCreateAllJunctionsWithoutTrafficLights(data[41] == (byte)1);
+			}
+
 			return true;
 		}
 
@@ -234,7 +238,8 @@ namespace TrafficManager.Manager.Impl {
 						(byte)(Options.realisticPublicTransport ? 1 : 0),
 						(byte)(Options.turnOnRedEnabled ? 1 : 0),
 						(byte)(Options.allowNearTurnOnRed ? 1 : 0),
-						(byte)(Options.allowFarTurnOnRed ? 1 : 0)
+						(byte)(Options.allowFarTurnOnRed ? 1 : 0),
+						(byte)(Options.createAllJunctionsWithoutTrafficLights ? 1 : 0),
 				};
 		}
 	}

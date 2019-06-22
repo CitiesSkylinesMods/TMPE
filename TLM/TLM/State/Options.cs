@@ -1312,6 +1312,13 @@ namespace TrafficManager.State {
                 realisticPublicTransportToggle.isChecked = newValue;
         }
 
+		public static void setCreateAllJunctionsWithoutTrafficLights(bool newValue) {
+			bool valueChanged = newValue != createAllJunctionsWithoutTrafficLights;
+			createAllJunctionsWithoutTrafficLights = newValue;
+			if (createAllJunctionsWithoutTrafficLightsToggle != null)
+				createAllJunctionsWithoutTrafficLightsToggle.isChecked = newValue;
+		}
+
         public static void setIndividualDrivingStyle(bool newValue) {
             individualDrivingStyle = newValue;
 
