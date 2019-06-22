@@ -61,6 +61,7 @@ namespace TrafficManager.State {
         private static UICheckBox prohibitPocketCarsToggle = null;
         private static UICheckBox advancedAIToggle = null;
         private static UICheckBox realisticPublicTransportToggle = null;
+		private static UIButton removeAllExistingTrafficLightsBtn = null;
         private static UISlider altLaneSelectionRatioSlider = null;
         private static UICheckBox highwayRulesToggle = null;
         private static UICheckBox preferOuterLaneToggle = null;
@@ -386,6 +387,10 @@ namespace TrafficManager.State {
 
             var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
             realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
+
+			var jGroup = panelHelper.AddGroup(Translation.GetString(Translation.GetString("Junctions")));
+			removeAllExistingTrafficLightsBtn = (UIButton)jGroup.AddButton(Translation.GetString("Remove_all_existing_traffic_lights"), onClickRemoveAllExistingTrafficLights);
+			removeAllExistingTrafficLightsBtn.tooltip = Translation.GetString("Remove_all_existing_traffic_lights_tooltip");
         }
 
         private static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {
@@ -1013,6 +1018,16 @@ namespace TrafficManager.State {
             Log._Debug($"realisticPublicTransport changed to {newValue}");
             realisticPublicTransport = newValue;
         }
+
+		private static void onClickRemoveAllExistingTrafficLights() {
+			if (!checkGameLoaded())
+				return;
+
+			Log._Debug("Remove all existing Traffic Lights");
+			Constants.ServiceFactory.SimulationService.AddAction(() => {
+                TrafficLightManager.Instance.RemoveAllExistingTrafficLights();
+            });
+		}
 
         private static void onIndividualDrivingStyleChanged(bool value) {
             if (!checkGameLoaded())

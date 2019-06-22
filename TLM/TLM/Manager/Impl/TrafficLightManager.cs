@@ -170,6 +170,15 @@ namespace TrafficManager.Manager.Impl {
 			return LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights), (uint)(NetNode.Flags.Created | NetNode.Flags.TrafficLights));
 		}
 
+		public void RemoveAllExistingTrafficLights()
+    {
+      var nodes = NetManager.instance.m_nodes;
+      for(ushort i = 0; i < nodes.m_size; i++)
+      {
+        RemoveTrafficLight(i, ref nodes.m_buffer[i]);
+      }
+    }
+
 		[Obsolete]
 		public bool LoadData(string data) {
 			bool success = true;
