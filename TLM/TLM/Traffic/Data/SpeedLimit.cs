@@ -71,7 +71,7 @@ namespace TrafficManager.Traffic.Data {
 				return Translation.GetString("Speed_limit_unlimited");
 			}
 
-			return ToMphPrecise(speed) + " mph";
+			return ToMphPrecise(speed) + " MPH";
 		}
 
 		public static string ToKmphPreciseString(float speed) {

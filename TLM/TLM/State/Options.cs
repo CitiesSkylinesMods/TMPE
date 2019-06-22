@@ -497,8 +497,6 @@ namespace TrafficManager.State {
 				                   Translation.GetString("Display_speed_limits_mph"),
 				                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
 				                   onDisplayMphChanged) as UICheckBox;
-
-			
 			var mphThemeOptions = new[] {
 				                             Translation.GetString("theme_Square_US"),
 				                             Translation.GetString("theme_Round_UK"),
@@ -732,7 +730,13 @@ namespace TrafficManager.State {
 	        GlobalConfig.WriteConfig();
         }
 
-        private static void onRoadSignsMphThemeChanged(int newRoadSignStyle) {
+        public static void setDisplayInMPH(bool value) {
+	        if (displayMphToggle != null) {
+		        displayMphToggle.isChecked = value;
+	        }
+        }
+
+	private static void onRoadSignsMphThemeChanged(int newRoadSignStyle) {
 	        if (!checkGameLoaded()) {
 		        return;
 	        }

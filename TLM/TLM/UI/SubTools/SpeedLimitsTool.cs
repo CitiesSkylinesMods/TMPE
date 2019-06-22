@@ -73,7 +73,9 @@ namespace TrafficManager.UI.SubTools {
 			var unitTitle = " (" + (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
 				                        ? Translation.GetString("Miles_per_hour")
 				                        : Translation.GetString("Kilometers_per_hour")) + ")";
-			paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph ? 10 * (GuiSpeedSignSize + 5) : 8 * (GuiSpeedSignSize + 5);
+			paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				                          ? 10 * (GuiSpeedSignSize + 5)
+				                          : 8 * (GuiSpeedSignSize + 5);
 			paletteWindowRect = GUILayout.Window(254, paletteWindowRect, _guiSpeedLimitsWindow,
 			                              Translation.GetString("Speed_limits") + unitTitle,
 			                              WindowStyle);
@@ -422,8 +424,7 @@ namespace TrafficManager.UI.SubTools {
 			var displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
 			displayMph = GUILayout.Toggle(displayMph, Translation.GetString("Display_speed_limits_mph"));
 			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
-				GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = displayMph;
-				GlobalConfig.WriteConfig();
+				Options.setDisplayInMPH(displayMph);
 			}
 
 			GUILayout.FlexibleSpace();
