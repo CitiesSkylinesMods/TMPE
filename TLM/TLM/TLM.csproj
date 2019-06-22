@@ -458,6 +458,16 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonF.png" />
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonL.png" />
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonR.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonFGray.png" />
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonLGray.png" />
+    <EmbeddedResource Include="Resources\TurnSigns\ButtonRGray.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"

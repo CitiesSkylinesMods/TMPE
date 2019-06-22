@@ -8,6 +8,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic;
 using TrafficManager.UI;
+using TrafficManager.UI.SubTools;
 using TrafficManager.Util;
 using UnityEngine;
 using static TrafficManager.Traffic.Data.PrioritySegment;
@@ -42,6 +43,14 @@ namespace TrafficManager.UI
         public static readonly Texture2D PedestrianModeAutomaticTexture2D;
         public static readonly Texture2D PedestrianModeManualTexture2D;
 		public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+
+		public static readonly Texture2D TurnButtonLeft;
+		public static readonly Texture2D TurnButtonRight;
+		public static readonly Texture2D TurnButtonForward;
+		public static readonly Texture2D TurnButtonLeftGray;
+		public static readonly Texture2D TurnButtonRightGray;
+		public static readonly Texture2D TurnButtonForwardGray;
+
 		public static readonly Texture2D SignRemoveTexture2D;
 		public static readonly Texture2D ClockPlayTexture2D;
 		public static readonly Texture2D ClockPauseTexture2D;
@@ -123,7 +132,14 @@ namespace TrafficManager.UI
 			PrioritySignTextures[PriorityType.Main] = LoadDllResource("sign_priority.png", 200, 200);
 			PrioritySignTextures[PriorityType.Stop] = LoadDllResource("sign_stop.png", 200, 200);
 			PrioritySignTextures[PriorityType.Yield] = LoadDllResource("sign_yield.png", 200, 200);
-			
+
+			TurnButtonLeft = LoadDllResource("TurnSigns.ButtonL.png", 80, 127);
+			TurnButtonRight = LoadDllResource("TurnSigns.ButtonR.png", 80, 127);
+			TurnButtonForward = LoadDllResource("TurnSigns.ButtonF.png", 62, 62);
+			TurnButtonLeftGray = LoadDllResource("TurnSigns.ButtonLGray.png", 80, 127);
+			TurnButtonRightGray = LoadDllResource("TurnSigns.ButtonRGray.png", 80, 127);
+			TurnButtonForwardGray = LoadDllResource("TurnSigns.ButtonFGray.png", 62, 62);
+
 			// delete priority sign
 			SignRemoveTexture2D = LoadDllResource("remove_signs.png", 256, 256);
 
@@ -264,5 +280,5 @@ namespace TrafficManager.UI
                 stream.Position = originalPosition;
             }
         }
-	}
+    }
 }

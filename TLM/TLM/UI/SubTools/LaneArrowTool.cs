@@ -19,6 +19,27 @@ using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
+		/// <summary>
+		/// Arrow sign bits are combined together to find index in turn arrow textures
+		/// located in TextureResources.TurnSignTextures.
+		/// </summary>
+		public const int SIGN_BIT_LEFT = 1;
+		public const int SIGN_BIT_FORWARD = 2;
+		public const int SIGN_BIT_RIGHT = 4;
+
+		/// <summary>Size for white turn sign in the GUI</summary>
+		private const float BUTTON_GUI_SCALE = 50f;
+
+		/// <summary>
+		/// Sum of widths of GUI elements for 1 lane.
+		/// NOTE this also adds spacing between lane columns.
+		/// </summary>
+		private const float LANE_GUI_WIDTH = BUTTON_GUI_SCALE * 1.33f + (2f * LANE_LABEL_OFFSET_X);
+		private const float GUI_HEIGHT = 24f + BUTTON_GUI_SCALE * 1.66f; // label size + buttons
+
+		/// <summary>The horizontal offset for "Lane #" text in each column</summary>
+		private const float LANE_LABEL_OFFSET_X = 36f;
+
 		private bool _cursorInSecondaryPanel;
 
 		public LaneArrowTool(TrafficManagerTool mainTool) : base(mainTool) {
@@ -30,15 +51,20 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnPrimaryClickOverlay() {
-			if (HoveredNodeId == 0 || HoveredSegmentId == 0) return;
+			if (HoveredNodeId == 0 || HoveredSegmentId == 0) {
+				return;
+			}
 
 			var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
-
-			if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
-
-			if (Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_startNode != HoveredNodeId &&
-				Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_endNode != HoveredNodeId)
+			if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) {
 				return;
+			}
+
+			var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
+			if (hoveredSegment.m_startNode != HoveredNodeId &&
+				hoveredSegment.m_endNode != HoveredNodeId) {
+				return;
+			}
 
 			SelectedSegmentId = HoveredSegmentId;
 			SelectedNodeId = HoveredNodeId;
@@ -79,16 +105,19 @@ namespace TrafficManager.UI.SubTools {
 			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
-			int width = numLanes * 128;
-			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
-			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
-			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
+			int width = numLanes * (int)LANE_GUI_WIDTH;
+			var proposedWindowRect = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, GUI_HEIGHT);
+			var actualWindowRect = GUILayout.Window(250, proposedWindowRect, _guiLaneChangeWindow, "", BorderlessStyle);
+			_cursorInSecondaryPanel = actualWindowRect.Contains(Event.current.mousePosition);
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
-			if (!_cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
+			if (!_cursorInSecondaryPanel 
+			    && HoveredSegmentId != 0 
+			    && HoveredNodeId != 0 
+			    && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
 				var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
 				
 				if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId) && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
@@ -118,42 +147,67 @@ namespace TrafficManager.UI.SubTools {
 			for (var i = 0; i < laneList.Count; i++) {
 				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
 
-				var style1 = new GUIStyle("button");
-				var style2 = new GUIStyle("button") {
-					normal = { textColor = new Color32(255, 0, 0, 255) },
-					hover = { textColor = new Color32(255, 0, 0, 255) },
-					focused = { textColor = new Color32(255, 0, 0, 255) }
-				};
-
 				var laneStyle = new GUIStyle { contentOffset = new Vector2(12f, 0f) };
 
 				var laneTitleStyle = new GUIStyle {
-					contentOffset = new Vector2(36f, 2f),
+					contentOffset = new Vector2(LANE_LABEL_OFFSET_X, 2f),
 					normal = { textColor = new Color(1f, 1f, 1f) }
 				};
 
 				GUILayout.BeginVertical(laneStyle);
 				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
+
+				//----------------------
+				// Button group
+				//----------------------
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
 				if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
 					Flags.removeLaneArrowFlags(laneList[i].laneId);
 				}
 				Flags.LaneArrowChangeResult res = Flags.LaneArrowChangeResult.Invalid;
-				bool buttonClicked = false;
-				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Left, out res);
-				}
-				if (GUILayout.Button("↑", ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2), GUILayout.Width(25), GUILayout.Height(35))) {
-					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Forward, out res);
-				}
-				if (GUILayout.Button("→", ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
-					buttonClicked = true;
-					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, Flags.LaneArrows.Right, out res);
-				}
 
+				bool buttonClicked = false;
+				var isLeft = (flags & NetLane.Flags.Left) == NetLane.Flags.Left;
+				var isForward = (flags & NetLane.Flags.Forward) == NetLane.Flags.Forward;
+				var isRight = (flags & NetLane.Flags.Right) == NetLane.Flags.Right;
+
+				if (GUILayout.Button(isForward ? TextureResources.TurnButtonForward : TextureResources.TurnButtonForwardGray, 
+				                     GUILayout.Width(BUTTON_GUI_SCALE * 1.33f), 
+				                     GUILayout.Height(BUTTON_GUI_SCALE * 0.66f))) {
+					buttonClicked = true;
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode, 
+					                                           Flags.LaneArrows.Forward, out res);
+				}
+				GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+
+				//----------------------
+				// Arrow sign row
+				//----------------------
+				GUILayout.BeginHorizontal();
+				GUILayout.FlexibleSpace();
+				if (GUILayout.Button(isLeft ? TextureResources.TurnButtonLeft : TextureResources.TurnButtonLeftGray, 
+				                     GUILayout.Width(BUTTON_GUI_SCALE * 0.66f),
+				                     GUILayout.Height(BUTTON_GUI_SCALE))) {
+					buttonClicked = true;
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode,
+					                                           Flags.LaneArrows.Left, out res);
+				}
+				if (GUILayout.Button(isRight ? TextureResources.TurnButtonRight : TextureResources.TurnButtonRightGray, 
+						     GUILayout.Width(BUTTON_GUI_SCALE * 0.66f),
+						     GUILayout.Height(BUTTON_GUI_SCALE))) {
+					buttonClicked = true;
+					LaneArrowManager.Instance.ToggleLaneArrows(laneList[i].laneId, startNode,
+					                                           Flags.LaneArrows.Right, out res);
+				}
+				GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+
+				//----------------------
+				// Button click handling
+				//----------------------
 				if (buttonClicked) {
 					switch (res) {
 						case Flags.LaneArrowChangeResult.Invalid:
@@ -169,7 +223,6 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}
 
-				GUILayout.EndHorizontal();
 				GUILayout.EndVertical();
 				GUILayout.EndVertical();
 			}
