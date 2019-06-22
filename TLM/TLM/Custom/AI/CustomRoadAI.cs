@@ -710,6 +710,30 @@ namespace TrafficManager.Custom.AI {
 			}
 		}
 
+    public void CustomUpdateNode(ushort nodeId, ref NetNode data)
+    {
+      OriginalUpdateNode(nodeId, ref data);
+
+      if (!Options.createAllJunctionsWithoutTrafficLights)
+      {
+        return;
+      }
+
+			// test for not Flags.Junction is unnecessary because tested in IsTrafficLightToggleable
+			// but it's a simple and fast exit, while IsTrafficLightToggleable is quite complex
+      if(!data.m_flags.IsFlagSet(NetNode.Flags.Junction) || !TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, false, ref data, out var _))
+      {
+        return;
+      }
+
+			// UpdateNode is called for new nodes and changed nodes (-> existing AND new junctions)
+			// For new junctions this method is called BEFORE traffic lights are set (done in UpdateNodeFlags)
+			// Marking junction with CustomTrafficLights prevents the setting of traffic lights
+			// For existing junctions this has the additional benefit of not removing the lights when the junction changed
+
+      data.m_flags |= NetNode.Flags.CustomTrafficLights;
+    }
+
 #region stock code
 
 		public void OriginalSimulationStep(ushort nodeID, ref NetNode data) { // pure stock code
@@ -993,6 +1017,105 @@ namespace TrafficManager.Custom.AI {
 			}
 			data.m_problems = problem;
 		}
+
+		public void OriginalUpdateNode(ushort nodeID, ref NetNode data) {
+      Notification.Problem problem = Notification.RemoveProblems(data.m_problems, Notification.Problem.RoadNotConnected | Notification.Problem.TrackNotConnected);
+			int num = 0;
+			int num2 = 0;
+			data.CountLanes(nodeID, 0, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, true, ref num, ref num2);
+			if ((data.m_flags & NetNode.Flags.Outside) != NetNode.Flags.None && data.m_building != 0)
+			{
+				BuildingManager instance = Singleton<BuildingManager>.instance;
+				if (num != 0)
+				{
+					Building[] buffer = instance.m_buildings.m_buffer;
+					ushort building = data.m_building;
+					buffer[(int)building].m_flags = (buffer[(int)building].m_flags | Building.Flags.Outgoing);
+				}
+				else
+				{
+					Building[] buffer2 = instance.m_buildings.m_buffer;
+					ushort building2 = data.m_building;
+					buffer2[(int)building2].m_flags = (buffer2[(int)building2].m_flags & ~Building.Flags.Outgoing);
+				}
+				if (num2 != 0)
+				{
+					Building[] buffer3 = instance.m_buildings.m_buffer;
+					ushort building3 = data.m_building;
+					buffer3[(int)building3].m_flags = (buffer3[(int)building3].m_flags | Building.Flags.Incoming);
+				}
+				else
+				{
+					Building[] buffer4 = instance.m_buildings.m_buffer;
+					ushort building4 = data.m_building;
+					buffer4[(int)building4].m_flags = (buffer4[(int)building4].m_flags & ~Building.Flags.Incoming);
+				}
+			}
+			else if ((num != 0 && num2 == 0) || (num == 0 && num2 != 0))
+			{
+				problem = Notification.AddProblems(problem, Notification.Problem.RoadNotConnected);
+			}
+			if (num == 1)
+			{
+				data.m_flags |= NetNode.Flags.OneWayOut;
+			}
+			else
+			{
+				data.m_flags &= ~NetNode.Flags.OneWayOut;
+			}
+			if (num2 == 1)
+			{
+				data.m_flags |= NetNode.Flags.OneWayIn;
+			}
+			else
+			{
+				data.m_flags &= ~NetNode.Flags.OneWayIn;
+			}
+			if ((data.m_flags & NetNode.Flags.ForbidLaneConnection) == NetNode.Flags.None)
+			{
+				int num3 = 0;
+				num = 0;
+				num2 = 0;
+				NetManager instance2 = Singleton<NetManager>.instance;
+				for (int i = 0; i < 8; i++)
+				{
+					ushort segment = data.GetSegment(i);
+					if (segment != 0)
+					{
+						int num4 = 0;
+						int num5 = 0;
+						instance2.m_segments.m_buffer[(int)segment].CountLanes(segment, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Tram, ref num4, ref num5);
+						if (num4 != 0 || num5 != 0)
+						{
+							num3++;
+							if (num4 != 0)
+							{
+								num4 = 1;
+							}
+							if (num5 != 0)
+							{
+								num5 = 1;
+							}
+							if (instance2.m_segments.m_buffer[(int)segment].m_endNode == nodeID)
+							{
+								num += num5;
+								num2 += num4;
+							}
+							else
+							{
+								num += num4;
+								num2 += num5;
+							}
+						}
+					}
+				}
+				if ((num != 0 && num2 == 0) || (num == 0 && num2 != 0) || num3 == 1)
+				{
+					problem = Notification.AddProblems(problem, Notification.Problem.TrackNotConnected);
+				}
+			}
+			data.m_problems = problem;
+    }
 #endregion
 	}
 }

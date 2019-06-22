@@ -61,6 +61,7 @@ namespace TrafficManager.State {
         private static UICheckBox prohibitPocketCarsToggle = null;
         private static UICheckBox advancedAIToggle = null;
         private static UICheckBox realisticPublicTransportToggle = null;
+		private static UICheckBox createAllJunctionsWithoutTrafficLightsToggle = null;
 		private static UIButton removeAllExistingTrafficLightsBtn = null;
         private static UISlider altLaneSelectionRatioSlider = null;
         private static UICheckBox highwayRulesToggle = null;
@@ -136,6 +137,7 @@ namespace TrafficManager.State {
         public static bool banRegularTrafficOnBusLanes = false;
         public static bool advancedAI = false;
         public static bool realisticPublicTransport = false;
+		public static bool createAllJunctionsWithoutTrafficLights = false;
         public static byte altLaneSelectionRatio = 0;
         public static bool highwayRules = false;
 #if DEBUG
@@ -389,6 +391,7 @@ namespace TrafficManager.State {
             realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
 
 			var jGroup = panelHelper.AddGroup(Translation.GetString(Translation.GetString("Junctions")));
+			createAllJunctionsWithoutTrafficLightsToggle = (UICheckBox)jGroup.AddCheckbox(Translation.GetString("Create_all_junctions_without_traffic_lights"), createAllJunctionsWithoutTrafficLights, onCreateAllJunctionsWithoutTrafficLightsChanged);
 			removeAllExistingTrafficLightsBtn = (UIButton)jGroup.AddButton(Translation.GetString("Remove_all_existing_traffic_lights"), onClickRemoveAllExistingTrafficLights);
 			removeAllExistingTrafficLightsBtn.tooltip = Translation.GetString("Remove_all_existing_traffic_lights_tooltip");
         }
@@ -1018,6 +1021,14 @@ namespace TrafficManager.State {
             Log._Debug($"realisticPublicTransport changed to {newValue}");
             realisticPublicTransport = newValue;
         }
+
+		private static void onCreateAllJunctionsWithoutTrafficLightsChanged(bool newValue) {
+      if(!checkGameLoaded())
+        return;
+
+      Log._Debug($"{nameof(createAllJunctionsWithoutTrafficLights)} changed to {newValue}");
+      createAllJunctionsWithoutTrafficLights = newValue;
+    }
 
 		private static void onClickRemoveAllExistingTrafficLights() {
 			if (!checkGameLoaded())

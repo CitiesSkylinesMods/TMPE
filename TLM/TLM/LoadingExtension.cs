@@ -1424,6 +1424,15 @@ namespace TrafficManager {
 					Log.Error("Could not redirect RoadBaseAI::SimulationStep.");
 				}
 
+				Log.Info("Redirecting RoadBaseAI.UpdateNode for nodes");
+				try {
+					Detours.Add(new Detour(typeof(RoadBaseAI).GetMethod(nameof(RoadBaseAI.UpdateNode), new[] { typeof(ushort), typeof(NetNode).MakeByRefType() }),
+						typeof(CustomRoadAI).GetMethod(nameof(CustomRoadAI.CustomUpdateNode))));
+				} catch (Exception) {
+					Log.Error("Could not redirect RoadBaseAI::UpdateNode.");
+					detourFailed = true;
+				}
+
 				Log.Info("Redirection BuildingAI::GetColor calls");
 				try {
 					Detours.Add(new Detour(typeof(BuildingAI).GetMethod("GetColor",
