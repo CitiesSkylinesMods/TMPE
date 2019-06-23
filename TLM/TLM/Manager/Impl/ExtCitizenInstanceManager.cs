@@ -931,7 +931,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void UpdateReturnPathState(ref ExtCitizenInstance extInstance) {
 #if DEBUG
@@ -971,8 +971,8 @@ namespace TrafficManager.Manager.Impl {
 
 			PathUnit.Position parkPathPos;
 			PathUnit.Position targetPathPos = default(PathUnit.Position);
-			bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(parkPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out parkPathPos);
-			bool foundTargetPathPos = foundParkPathPos && CustomPathManager.FindCitizenPathPosition(targetPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, false, false, out targetPathPos);
+			bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(parkPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, out parkPathPos);
+			bool foundTargetPathPos = foundParkPathPos && CustomPathManager.FindCitizenPathPosition(targetPos, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, out targetPathPos);
 			if (foundParkPathPos && foundTargetPathPos) {
 
 				PathUnit.Position dummyPathPos = default(PathUnit.Position);

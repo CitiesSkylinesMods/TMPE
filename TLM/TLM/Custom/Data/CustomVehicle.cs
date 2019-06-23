@@ -29,7 +29,7 @@ namespace TrafficManager.Custom.Data {
 				while (trailingVehicle != 0) {
 					vehManager.m_vehicles.m_buffer[trailingVehicle].Spawn(trailingVehicle);
 					trailingVehicle = vehManager.m_vehicles.m_buffer[trailingVehicle].m_trailingVehicle;
-					if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 						break;
 					}

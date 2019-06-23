@@ -15,6 +15,7 @@ using CSUtil.Commons;
 using System.Reflection;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Enums;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.State {
 
@@ -32,6 +33,8 @@ namespace TrafficManager.State {
 		private static UICheckBox showCompatibilityCheckErrorToggle = null;
 		private static UICheckBox scanForKnownIncompatibleModsToggle = null;
 		private static UICheckBox ignoreDisabledModsToggle = null;
+		private static UICheckBox displayMphToggle = null;
+		private static UIDropDown roadSignsMphThemeDropdown = null;
 		private static UICheckBox individualDrivingStyleToggle = null;
 		private static UIDropDown recklessDriversDropdown = null;
 		private static UICheckBox relaxedBussesToggle = null;
@@ -93,6 +96,7 @@ namespace TrafficManager.State {
 		private static UIButton reloadGlobalConfBtn = null;
 		private static UIButton resetGlobalConfBtn = null;
 
+		public static int roadSignMphStyleInt;
 		public static bool instantEffects = true;
 		//public static int laneChangingRandomization = 2;
 		public static bool individualDrivingStyle = true;
@@ -234,8 +238,12 @@ namespace TrafficManager.State {
 			showCompatibilityCheckErrorToggle = generalGroup.AddCheckbox(Translation.GetString("Notify_me_if_there_is_an_unexpected_mod_conflict"), GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage, onShowCompatibilityCheckErrorChanged) as UICheckBox;
 			scanForKnownIncompatibleModsToggle = generalGroup.AddCheckbox(Translation.GetString("Scan_for_known_incompatible_mods_on_startup"), GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup, onScanForKnownIncompatibleModsChanged) as UICheckBox;
 			ignoreDisabledModsToggle = generalGroup.AddCheckbox(Translation.GetString("Ignore_disabled_mods"), GlobalConfig.Instance.Main.IgnoreDisabledMods, onIgnoreDisabledModsChanged) as UICheckBox;
-            Indent(ignoreDisabledModsToggle);
+			Indent(ignoreDisabledModsToggle);
 
+			// General: Speed Limits
+			setupSpeedLimitsPanel(panelHelper, generalGroup);
+
+			// General: Simulation
 			var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
 			instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
 
@@ -464,7 +472,7 @@ namespace TrafficManager.State {
 			currentPanel.autoLayoutPadding.right = 10;
 
 			panelHelper = new UIHelper(currentPanel);
-			
+
 			debugSwitchFields.Clear();
 			for (int i = 0; i < Debug.Switches.Length; ++i) {
 				int index = i;
@@ -481,6 +489,24 @@ namespace TrafficManager.State {
 #endif
 
 			tabStrip.selectedIndex = 0;
+		}
+
+		private static void setupSpeedLimitsPanel(UIHelper panelHelper, UIHelperBase generalGroup) {
+			displayMphToggle = generalGroup.AddCheckbox(
+				                   Translation.GetString("Display_speed_limits_mph"),
+				                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+				                   onDisplayMphChanged) as UICheckBox;
+			var mphThemeOptions = new[] {
+				                             Translation.GetString("theme_Square_US"),
+				                             Translation.GetString("theme_Round_UK"),
+				                             Translation.GetString("theme_Round_German"),
+						     };
+			roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
+			roadSignsMphThemeDropdown = generalGroup.AddDropdown(
+				                        Translation.GetString("Road_signs_theme_mph") + ":",
+				                        mphThemeOptions, roadSignMphStyleInt,
+				                        onRoadSignsMphThemeChanged) as UIDropDown;
+			roadSignsMphThemeDropdown.width = 400;
 		}
 
 		private static void Indent<T>(T component) where T : UIComponent {
@@ -703,8 +729,41 @@ namespace TrafficManager.State {
             GlobalConfig.WriteConfig();
         }
 
-        private static void onInstantEffectsChanged(bool newValue) {
-			if (!IsGameLoaded())
+
+        private static void onDisplayMphChanged(bool newValue) {
+	        Log._Debug($"Display MPH changed to {newValue}");
+	        GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
+	        GlobalConfig.WriteConfig();
+        }
+
+        public static void setDisplayInMPH(bool value) {
+	        if (displayMphToggle != null) {
+		        displayMphToggle.isChecked = value;
+	        }
+        }
+
+	private static void onRoadSignsMphThemeChanged(int newRoadSignStyle) {
+	        if (!IsGameLoaded()) {
+		        return;
+	        }
+
+		// The UI order is: US, UK, German
+	        var newStyle = MphSignStyle.RoundGerman;
+	        switch (newRoadSignStyle) {
+		        case 1:
+			        newStyle = MphSignStyle.RoundUK;
+			        break;
+		        case 0:
+			        newStyle = MphSignStyle.SquareUS;
+			        break;
+	        }
+
+	        Log._Debug($"Road Sign theme changed to {newStyle}");
+	        GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
+        }
+
+	private static void onInstantEffectsChanged(bool newValue) {
+		if (!IsGameLoaded())
 				return;
 
 			Log._Debug($"Instant effects changed to {newValue}");
@@ -954,7 +1013,7 @@ namespace TrafficManager.State {
 			}
 
 			Log._Debug($"allowLaneChangesWhileGoingStraight changed to {newValue}");
-			allowLaneChangesWhileGoingStraight = newValue;
+			setAllowLaneChangesWhileGoingStraight(newValue);
 		}
 
 		private static void onTrafficLightPriorityRulesChanged(bool newValue) {
@@ -1299,6 +1358,7 @@ namespace TrafficManager.State {
 			if (allowUTurnsToggle != null)
 				allowUTurnsToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowNearTurnOnRed(bool newValue) {
@@ -1306,6 +1366,7 @@ namespace TrafficManager.State {
 			if (allowNearTurnOnRedToggle != null)
 				allowNearTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowFarTurnOnRed(bool newValue) {
@@ -1313,6 +1374,7 @@ namespace TrafficManager.State {
 			if (allowFarTurnOnRedToggle != null)
 				allowFarTurnOnRedToggle.isChecked = newValue;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowLaneChangesWhileGoingStraight(bool value) {
@@ -1320,6 +1382,7 @@ namespace TrafficManager.State {
 			if (allowLaneChangesWhileGoingStraightToggle != null)
 				allowLaneChangesWhileGoingStraightToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setAllowEnterBlockedJunctions(bool value) {
@@ -1327,6 +1390,7 @@ namespace TrafficManager.State {
 			if (allowEnterBlockedJunctionsToggle != null)
 				allowEnterBlockedJunctionsToggle.isChecked = value;
 			Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
+			UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
 		}
 
 		public static void setTrafficLightPriorityRules(bool value) {
@@ -1492,7 +1556,7 @@ namespace TrafficManager.State {
 				showPathFindStatsToggle.isChecked = value;
 		}
 #endif
-        
+
         public static void setScanForKnownIncompatibleMods(bool value) {
             scanForKnownIncompatibleModsEnabled = value;
             if (scanForKnownIncompatibleModsToggle != null) {

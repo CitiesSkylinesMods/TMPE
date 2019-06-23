@@ -13,6 +13,7 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
+using TrafficManager.Traffic.Data;
 using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 using UnityEngine;
@@ -21,22 +22,28 @@ using static TrafficManager.Util.SegmentLaneTraverser;
 
 namespace TrafficManager.UI.SubTools {
 	public class SpeedLimitsTool : SubTool {
+		/// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
+		private const int GuiSpeedSignSize = 80;
+		private readonly float speedLimitSignSize = 70f;
+
 		private bool _cursorInSecondaryPanel;
-		private int curSpeedLimitIndex = 0;
+
+		/// <summary>Currently selected speed limit on the limits palette</summary>
+		private float currentPaletteSpeedLimit = -1f;
+
 		private bool overlayHandleHovered;
 		private Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
-		private readonly float speedLimitSignSize = 80f;
-		private readonly int guiSpeedSignSize = 100;
-		private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 7 * 105, 225));
-		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 280, 400, 400));
+
+		private Rect paletteWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 10 * (GuiSpeedSignSize + 5), 150));
+		private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
 		private HashSet<ushort> currentlyVisibleSegmentIds;
 		private bool defaultsWindowVisible = false;
 		private int currentInfoIndex = -1;
-		private int currentSpeedLimitIndex = -1;
+		private float currentSpeedLimit = -1f;
 		private Texture2D RoadTexture {
 			get {
 				if (roadTexture == null) {
-					roadTexture = new Texture2D(guiSpeedSignSize, guiSpeedSignSize);
+					roadTexture = new Texture2D(GuiSpeedSignSize, GuiSpeedSignSize);
 				}
 				return roadTexture;
 			}
@@ -63,11 +70,24 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnToolGUI(Event e) {
 			base.OnToolGUI(e);
 
-			windowRect = GUILayout.Window(254, windowRect, _guiSpeedLimitsWindow, Translation.GetString("Speed_limits"), WindowStyle);
+			var unitTitle = " (" + (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				                        ? Translation.GetString("Miles_per_hour")
+				                        : Translation.GetString("Kilometers_per_hour")) + ")";
+			paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				                          ? 10 * (GuiSpeedSignSize + 5)
+				                          : 8 * (GuiSpeedSignSize + 5);
+			paletteWindowRect = GUILayout.Window(254, paletteWindowRect, _guiSpeedLimitsWindow,
+			                              Translation.GetString("Speed_limits") + unitTitle,
+			                              WindowStyle);
 			if (defaultsWindowVisible) {
-				defaultsWindowRect = GUILayout.Window(258, defaultsWindowRect, _guiDefaultsWindow, Translation.GetString("Default_speed_limits"), WindowStyle);
+				defaultsWindowRect = GUILayout.Window(
+					258, defaultsWindowRect, _guiDefaultsWindow,
+					Translation.GetString("Default_speed_limits"),
+					WindowStyle);
 			}
-			_cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition) || (defaultsWindowVisible && defaultsWindowRect.Contains(Event.current.mousePosition));
+			_cursorInSecondaryPanel = paletteWindowRect.Contains(Event.current.mousePosition)
+			                          || (defaultsWindowVisible
+			                              && defaultsWindowRect.Contains(Event.current.mousePosition));
 
 			//overlayHandleHovered = false;
 			//ShowSigns(false);
@@ -91,7 +111,7 @@ namespace TrafficManager.UI.SubTools {
 			lastCamPos = null;
 			lastCamRot = null;
 			currentInfoIndex = -1;
-			currentSpeedLimitIndex = -1;
+			currentSpeedLimit = -1f;
 		}
 
 		private Quaternion? lastCamRot = null;
@@ -153,8 +173,12 @@ namespace TrafficManager.UI.SubTools {
 			overlayHandleHovered = handleHovered;
 		}
 
+		/// <summary>
+		/// The window for setting the defaullt speeds per road type
+		/// </summary>
+		/// <param name="num"></param>
 		private void _guiDefaultsWindow(int num) {
-			List<NetInfo> mainNetInfos = SpeedLimitManager.Instance.GetCustomizableNetInfos();
+			var mainNetInfos = SpeedLimitManager.Instance.GetCustomizableNetInfos();
 
 			if (mainNetInfos == null || mainNetInfos.Count <= 0) {
 				Log._Debug($"mainNetInfos={mainNetInfos?.Count}");
@@ -173,18 +197,11 @@ namespace TrafficManager.UI.SubTools {
 			if (updateRoadTex)
 				UpdateRoadTex(info);
 
-			if (currentSpeedLimitIndex < 0) {
-				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
-				Log._Debug($"set currentSpeedLimitIndex to {currentSpeedLimitIndex}");
+			if (currentSpeedLimit < 0f) {
+				currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+				Log._Debug($"set currentSpeedLimit to {currentSpeedLimit}");
 			}
 			//Log._Debug($"currentInfoIndex={currentInfoIndex} currentSpeedLimitIndex={currentSpeedLimitIndex}");
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			if (GUILayout.Button("X", GUILayout.Width(25))) {
-				defaultsWindowVisible = false;
-			}
-			GUILayout.EndHorizontal();
 
 			// Road type label
 			GUILayout.BeginVertical();
@@ -194,15 +211,17 @@ namespace TrafficManager.UI.SubTools {
 
 			// switch between NetInfos
 			GUILayout.BeginHorizontal();
-			
+
 			GUILayout.BeginVertical();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("←", GUILayout.Width(50))) {
-				currentInfoIndex = (currentInfoIndex + mainNetInfos.Count - 1) % mainNetInfos.Count;
+				currentInfoIndex =
+					(currentInfoIndex + mainNetInfos.Count - 1) % mainNetInfos.Count;
 				info = mainNetInfos[currentInfoIndex];
-				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
+				currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
 				UpdateRoadTex(info);
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
 
@@ -211,7 +230,7 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 
 			// NetInfo thumbnail
-			GUILayout.Box(RoadTexture, GUILayout.Height(guiSpeedSignSize));
+			GUILayout.Box(RoadTexture, GUILayout.Height(GuiSpeedSignSize));
 			GUILayout.FlexibleSpace();
 
 			GUILayout.EndVertical();
@@ -222,16 +241,16 @@ namespace TrafficManager.UI.SubTools {
 			if (GUILayout.Button("→", GUILayout.Width(50))) {
 				currentInfoIndex = (currentInfoIndex + 1) % mainNetInfos.Count;
 				info = mainNetInfos[currentInfoIndex];
-				currentSpeedLimitIndex = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimitIndex(info);
+				currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
 				UpdateRoadTex(info);
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
 
 			GUILayout.EndHorizontal();
 
-			GUIStyle centeredTextStyle = new GUIStyle("label");
-			centeredTextStyle.alignment = TextAnchor.MiddleCenter;
+			var centeredTextStyle = new GUIStyle("label") { alignment = TextAnchor.MiddleCenter };
 
 			// NetInfo name
 			GUILayout.Label(info.name, centeredTextStyle);
@@ -248,8 +267,10 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginVertical();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("←", GUILayout.Width(50))) {
-				currentSpeedLimitIndex = (currentSpeedLimitIndex + SpeedLimitManager.Instance.AvailableSpeedLimits.Count - 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
+				// currentSpeedLimit = (currentSpeedLimitIndex + SpeedLimitManager.Instance.AvailableSpeedLimits.Count - 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
+				currentSpeedLimit = SpeedLimit.GetPrevious(currentSpeedLimit);
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
 
@@ -259,7 +280,12 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.FlexibleSpace();
 
 			// speed limit sign
-			GUILayout.Box(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[currentSpeedLimitIndex]], GUILayout.Width(guiSpeedSignSize), GUILayout.Height(guiSpeedSignSize));
+			GUILayout.Box(TextureResources.GetSpeedLimitTexture(currentSpeedLimit),
+			              GUILayout.Width(GuiSpeedSignSize),
+			              GUILayout.Height(GuiSpeedSignSize));
+			GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+				                ? Translation.GetString("Miles_per_hour")
+				                : Translation.GetString("Kilometers_per_hour"));
 
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
@@ -269,8 +295,10 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.BeginVertical();
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("→", GUILayout.Width(50))) {
-				currentSpeedLimitIndex = (currentSpeedLimitIndex + 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
+				// currentSpeedLimitIndex = (currentSpeedLimitIndex + 1) % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
+				currentSpeedLimit = SpeedLimit.GetNext(currentSpeedLimit);
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.EndVertical();
 
@@ -281,16 +309,27 @@ namespace TrafficManager.UI.SubTools {
 			GUILayout.Space(10);
 
 			GUILayout.BeginHorizontal();
+
+			// Close button. TODO: Make more visible or obey 'Esc' pressed or something
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("X", GUILayout.Width(80))) {
+				defaultsWindowVisible = false;
+			}
+
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
 				SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
-				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
+				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit);
 			}
+
 			GUILayout.FlexibleSpace();
-			if (GUILayout.Button(Translation.GetString("Save") + " & " + Translation.GetString("Apply"), GUILayout.Width(160))) {
-				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimitIndex(info, currentSpeedLimitIndex);
+			if (GUILayout.Button(
+				Translation.GetString("Save") + " & " + Translation.GetString("Apply"),
+				GUILayout.Width(160))) {
+				SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit);
 				SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
@@ -322,73 +361,151 @@ namespace TrafficManager.UI.SubTools {
 			roadTexture = TextureResources.NoImageTexture2D;
 		}
 
+		/// <summary>
+		/// The window for selecting and applying a speed limit
+		/// </summary>
+		/// <param name="num"></param>
 		private void _guiSpeedLimitsWindow(int num) {
 			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 
-			Color oldColor = GUI.color;
-			for (int i = 0; i < SpeedLimitManager.Instance.AvailableSpeedLimits.Count; ++i) {
-				if (curSpeedLimitIndex != i)
+			var oldColor = GUI.color;
+			var allSpeedLimits = SpeedLimit.EnumerateSpeedLimits(SpeedUnit.CurrentlyConfigured);
+			allSpeedLimits.Add(0); // add last item: no limit
+
+			var showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+			var column = 0u; // break palette to a new line at breakColumn
+			var breakColumn = showMph ? SpeedLimit.BREAK_PALETTE_COLUMN_MPH
+				                  : SpeedLimit.BREAK_PALETTE_COLUMN_KMPH; 
+
+			foreach (var speedLimit in allSpeedLimits) {
+				// Highlight palette item if it is very close to its float speed
+				if (SpeedLimit.NearlyEqual(currentPaletteSpeedLimit, speedLimit)) {
 					GUI.color = Color.gray;
-				float signSize = TrafficManagerTool.AdaptWidth(guiSpeedSignSize);
-				if (GUILayout.Button(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.AvailableSpeedLimits[i]], GUILayout.Width(signSize), GUILayout.Height(signSize))) {
-					curSpeedLimitIndex = i;
 				}
+
+				_guiSpeedLimitsWindow_AddButton(showMph, speedLimit);
 				GUI.color = oldColor;
 
-				if (i == 6) {
+				// TODO: This can be calculated from SpeedLimit MPH or KMPH limit constants
+				column++;
+				if (column % breakColumn == 0) {
+					GUILayout.FlexibleSpace();
 					GUILayout.EndHorizontal();
 					GUILayout.BeginHorizontal();
-				}
+					GUILayout.FlexibleSpace();
+				} 
 			}
-
+			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
-			if (GUILayout.Button(Translation.GetString("Default_speed_limits"))) {
+			//---------------------
+			// UI buttons row
+			//---------------------
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button(Translation.GetString("Default_speed_limits"),
+			                     GUILayout.Width(200))) {
 				TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
 				defaultsWindowVisible = true;
 			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
 
+			//---------------------
+			// Checkboxes row
+			//---------------------
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
 			showLimitsPerLane = GUILayout.Toggle(showLimitsPerLane, Translation.GetString("Show_lane-wise_speed_limits"));
+			GUILayout.FlexibleSpace();
 
-			DragWindow(ref windowRect);
+			// Display MPH checkbox, if ticked will save global config
+			var displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+			displayMph = GUILayout.Toggle(displayMph, Translation.GetString("Display_speed_limits_mph"));
+			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
+				Options.setDisplayInMPH(displayMph);
+			}
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			DragWindow(ref paletteWindowRect);
+		}
+
+		/// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>
+		/// <param name="showMph">Config value from GlobalConfig.I.M.ShowMPH</param>
+		/// <param name="speedLimit">The float speed to show</param>
+		private void _guiSpeedLimitsWindow_AddButton(bool showMph, float speedLimit) {
+			// The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
+			GUILayout.BeginVertical();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
+			if (GUILayout.Button(
+				TextureResources.GetSpeedLimitTexture(speedLimit),
+				GUILayout.Width(signSize),
+				GUILayout.Height(signSize * SpeedLimit.GetVerticalTextureScale()))) {
+				currentPaletteSpeedLimit = speedLimit;
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			// For MPH setting display KM/H below, for KM/H setting display MPH
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(showMph ? SpeedLimit.ToKmphPreciseString(speedLimit)
+				                : SpeedLimit.ToMphPreciseString(speedLimit));
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
 		}
 
 		private bool drawSpeedLimitHandles(ushort segmentId, ref NetSegment segment, bool viewOnly, ref Vector3 camPos) {
-			if (viewOnly && !Options.speedLimitsOverlay)
+			if (viewOnly && !Options.speedLimitsOverlay) {
 				return false;
+			}
 
-			Vector3 center = segment.m_bounds.center;
-			NetManager netManager = Singleton<NetManager>.instance;
+			var center = segment.m_bounds.center;
+			var netManager = Singleton<NetManager>.instance;
 
-			bool hovered = false;
-			ushort speedLimitToSet = viewOnly ? (ushort)0 : SpeedLimitManager.Instance.AvailableSpeedLimits[curSpeedLimitIndex];
+			var hovered = false;
+			var speedLimitToSet = viewOnly ? -1f : currentPaletteSpeedLimit;
 
 			bool showPerLane = showLimitsPerLane;
 			if (!viewOnly) {
 				showPerLane = showLimitsPerLane ^ (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
 			}
+
+			// US signs are rectangular, all other are round
+			var speedLimitSignVerticalScale = SpeedLimit.GetVerticalTextureScale();
+
 			if (showPerLane) {
 				// show individual speed limit handle per lane
 				int numDirections;
-				int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, SpeedLimitManager.VEHICLE_TYPES);
+				var numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(segmentId, null, out numDirections, SpeedLimitManager.VEHICLE_TYPES);
 
-				NetInfo segmentInfo = segment.Info;
-				Vector3 yu = (segment.m_endDirection - segment.m_startDirection).normalized;
-				Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
+				var segmentInfo = segment.Info;
+				var yu = (segment.m_endDirection - segment.m_startDirection).normalized;
+				var xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
 				/*if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) {
 					xu = -xu;
 				}*/
-				float f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
-				Vector3 zero = center - 0.5f * (float)(numLanes - 1 + numDirections - 1) * f * xu;
+				var f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
+				var zero = center - 0.5f * (float)(numLanes - 1 + numDirections - 1) * f * xu;
 
 				uint x = 0;
 				var guiColor = GUI.color;
-				IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, SpeedLimitManager.LANE_TYPES, SpeedLimitManager.VEHICLE_TYPES);
-				bool onlyMonorailLanes = sortedLanes.Count > 0;
+				var sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+					segmentId, ref segment, null, SpeedLimitManager.LANE_TYPES,
+					SpeedLimitManager.VEHICLE_TYPES);
+				var onlyMonorailLanes = sortedLanes.Count > 0;
 				if (!viewOnly) {
 					foreach (LanePos laneData in sortedLanes) {
-						byte laneIndex = laneData.laneIndex;
-						NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+						var laneIndex = laneData.laneIndex;
+						var laneInfo = segmentInfo.m_lanes[laneIndex];
 
 						if ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) == VehicleInfo.VehicleType.None) {
 							onlyMonorailLanes = false;
@@ -397,8 +514,8 @@ namespace TrafficManager.UI.SubTools {
 					}
 				}
 
-				HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
-				int sortedLaneIndex = -1;
+				var directions = new HashSet<NetInfo.Direction>();
+				var sortedLaneIndex = -1;
 				foreach (LanePos laneData in sortedLanes) {
 					++sortedLaneIndex;
 					uint laneId = laneData.laneId;
@@ -411,12 +528,23 @@ namespace TrafficManager.UI.SubTools {
 						directions.Add(laneInfo.m_finalDirection);
 					}
 
-					bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId)], camPos, zero, f, xu, yu, x, 0, speedLimitSignSize, !viewOnly);
-					if (!viewOnly && !onlyMonorailLanes && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
-						MainTool.DrawStaticSquareOverlayGridTexture(TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain], camPos, zero, f, xu, yu, x, 1, speedLimitSignSize);
+					var laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
+					var hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
+						TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
+						camPos, zero, f, f, xu, yu, x, 0,
+						speedLimitSignSize, speedLimitSignSize * speedLimitSignVerticalScale,
+						!viewOnly);
+
+					if (!viewOnly
+					    && !onlyMonorailLanes
+					    && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
+						MainTool.DrawStaticSquareOverlayGridTexture(
+							TextureResources.VehicleInfoSignTextures[ExtVehicleType.PassengerTrain],
+							camPos, zero, f, xu, yu, x, 1, speedLimitSignSize);
 					}
-					if (hoveredHandle)
+					if (hoveredHandle) {
 						hovered = true;
+					}
 
 					if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
 						SpeedLimitManager.Instance.SetSpeedLimit(segmentId, laneIndex, laneInfo, laneId, speedLimitToSet);
@@ -455,16 +583,20 @@ namespace TrafficManager.UI.SubTools {
 
 				foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
 					Vector3 screenPos;
-					bool visible = MainTool.WorldToScreenPoint(e.Value, out screenPos);
+					var visible = MainTool.WorldToScreenPoint(e.Value, out screenPos);
 
-					if (!visible)
+					if (!visible) {
 						continue;
+					}
 
-					float zoom = 1.0f / (e.Value - camPos).magnitude * 100f * MainTool.GetBaseZoom();
-					float size = (viewOnly ? 0.8f : 1f) * speedLimitSignSize * zoom;
-					Color guiColor = GUI.color;
-					Rect boundingBox = new Rect(screenPos.x - size / 2, screenPos.y - size / 2, size, size);
-					bool hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
+					var zoom = 1.0f / (e.Value - camPos).magnitude * 100f * MainTool.GetBaseZoom();
+					var size = (viewOnly ? 0.8f : 1f) * speedLimitSignSize * zoom;
+					var guiColor = GUI.color;
+					var boundingBox = new Rect(screenPos.x - (size / 2),
+					                            screenPos.y - (size / 2),
+					                            size,
+					                            size * speedLimitSignVerticalScale);
+					var hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
 					guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
 					if (hoveredHandle) {
@@ -472,13 +604,16 @@ namespace TrafficManager.UI.SubTools {
 						hovered = true;
 					}
 
+					// Draw something right here, the road sign texture
 					GUI.color = guiColor;
-					GUI.DrawTexture(boundingBox, TextureResources.SpeedLimitTextures[SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key)]);
+					var displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
+					var tex = TextureResources.GetSpeedLimitTexture(displayLimit);
+					GUI.DrawTexture(boundingBox, tex);
 
 					if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
 						// change the speed limit to the selected one
 						//Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()} to {speedLimitToSet}");
-						SpeedLimitManager.Instance.SetSpeedLimit(segmentId, e.Key, speedLimitToSet);
+						SpeedLimitManager.Instance.SetSpeedLimit(segmentId, e.Key, currentPaletteSpeedLimit);
 
 						if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
 

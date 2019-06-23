@@ -275,7 +275,7 @@ namespace TrafficManager.Custom.PathFinding {
 			m_laneTypes = (NetInfo.LaneType)m_pathUnits.m_buffer[unit].m_laneTypes;
 			m_vehicleTypes = (VehicleInfo.VehicleType)m_pathUnits.m_buffer[unit].m_vehicleTypes;
 			m_maxLength = m_pathUnits.m_buffer[unit].m_length;
-			m_pathFindIndex = (m_pathFindIndex + 1 & 0x7FFF);
+			m_pathFindIndex = m_pathFindIndex + 1 & 0x7FFF;
 			m_pathRandomizer = new Randomizer(unit);
 			m_carBanMask = NetSegment.Flags.CarBan;
 
@@ -288,12 +288,12 @@ namespace TrafficManager.Custom.PathFinding {
 				m_carBanMask |= NetSegment.Flags.WaitingPath;
 			}
 
-			m_ignoreBlocked = ((m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_BLOCKED) != 0);
-			m_stablePath = ((m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_STABLE_PATH) != 0);
-			m_randomParking = ((m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_RANDOM_PARKING) != 0);
-			m_transportVehicle = ((m_laneTypes & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None);
-			m_ignoreCost = (m_stablePath || (m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_COST) != 0);
-			m_disableMask = (NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed);
+			m_ignoreBlocked = (m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_BLOCKED) != 0;
+			m_stablePath = (m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_STABLE_PATH) != 0;
+			m_randomParking = (m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_RANDOM_PARKING) != 0;
+			m_transportVehicle = (m_laneTypes & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None;
+			m_ignoreCost = m_stablePath || (m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_COST) != 0;
+			m_disableMask = NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed;
 
 			if ((m_pathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_FLOODED) == 0) {
 				m_disableMask |= NetSegment.Flags.Flooded;
@@ -2410,6 +2410,7 @@ namespace TrafficManager.Custom.PathFinding {
 			}
 
 			// NON-STOCK CODE START
+			bool mayCross = true;
 #if JUNCTIONRESTRICTIONS || CUSTOMTRAFFICLIGHTS
 			if (Options.junctionRestrictionsEnabled || Options.timedLightsEnabled) {
 				bool nextIsStartNode = nextNodeId == nextSegment.m_startNode;
@@ -2420,10 +2421,10 @@ namespace TrafficManager.Custom.PathFinding {
 						if (!m_junctionManager.IsPedestrianCrossingAllowed(nextSegmentId, nextIsStartNode)) {
 #if DEBUG
 							if (debug) {
-								Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemPedBicycle: Aborting: Pedestrian crossing prohibited");
+								Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemPedBicycle: Pedestrian crossing prohibited");
 							}
 #endif
-							return;
+							mayCross = false;
 						}
 					}
 #endif
@@ -2498,6 +2499,17 @@ namespace TrafficManager.Custom.PathFinding {
 				nextItem.m_position.m_segment = nextSegmentId;
 				nextItem.m_position.m_lane = (byte)nextLaneIndex;
 				nextItem.m_position.m_offset = offset;
+
+				// NON-STOCK CODE START
+				if (!mayCross && nextLaneInfo.m_laneType == NetInfo.LaneType.Pedestrian) {
+#if DEBUG
+					if (debug) {
+						Debug(unitId, item, nextSegmentId, nextLaneIndex, nextLaneId, $"ProcessItemPedBicycle: Aborting: Crossing prohibited");
+					}
+#endif
+					return;
+				}
+				// NON-STOCK CODE END
 
 				if ((nextLaneInfo.m_laneType & prevLaneType) == NetInfo.LaneType.None) {
 					nextItem.m_methodDistance = 0f;

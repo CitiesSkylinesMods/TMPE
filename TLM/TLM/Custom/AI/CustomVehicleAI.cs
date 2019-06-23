@@ -57,7 +57,7 @@ namespace TrafficManager.Custom.AI {
 					$"\ttargetPosIndex={targetPosIndex}\n" +
 					$"\tmaxTargetPosIndex={maxTargetPosIndex}\n" +
 					$"\tminSqrDistanceA={minSqrDistanceA}\n" +
-					$"\tminSqrDistanceB={minSqrDistanceB}\n" + 
+					$"\tminSqrDistanceB={minSqrDistanceB}\n" +
 					$"\tvehicleData.m_path={vehicleData.m_path}\n" +
 					$"\tvehicleData.m_pathPositionIndex={vehicleData.m_pathPositionIndex}\n" +
 					$"\tvehicleData.m_lastPathOffset={vehicleData.m_lastPathOffset}"
@@ -381,14 +381,18 @@ namespace TrafficManager.Custom.AI {
 						Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): Finding best lane for emergency vehicles. Before: bestLaneIndex={bestLaneIndex}");
 					}
 #endif
-					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPosition);
-
+#if ROUTING
+					bestLaneIndex = VehicleBehaviorManager.Instance.FindBestEmergencyLane(vehicleID, ref vehicleData, ref ExtVehicleManager.Instance.ExtVehicles[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPosition, nextSegmentInfo);
+#else
+					// stock procedure for emergency vehicles on duty
+					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPathPos);
+#endif
 #if DEBUG
 					if (debug) {
 						Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): Found best lane for emergency vehicles. After: bestLaneIndex={bestLaneIndex}");
 					}
 #endif
-				} else {
+				} else if (VehicleBehaviorManager.Instance.MayFindBestLane(vehicleID, ref vehicleData, ref ExtVehicleManager.Instance.ExtVehicles[vehicleID])) {
 					// NON-STOCK CODE START
 					if (firstIter &&
 						this.m_info.m_vehicleType == VehicleInfo.VehicleType.Car

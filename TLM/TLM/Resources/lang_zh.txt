@@ -1,4 +1,4 @@
-Switch_traffic_lights 红绿灯增删
+﻿Switch_traffic_lights 红绿灯增删
 Add_priority_signs 添加路口优先权
 Manual_traffic_lights 手动控制红绿灯
 Timed_traffic_lights 红绿灯定时设置
@@ -150,7 +150,7 @@ Reset_global_configuration 重置所有设定
 General 常规
 Gameplay 游戏
 Overlays 覆盖
-Individual_driving_styles Individual driving styles
+Individual_driving_styles 个人驾驶风格
 Evacuation_busses_may_ignore_traffic_rules 应急疏散巴士可忽略交通规则
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 应急疏散巴士仅可用于到达避难所
 Vehicle_behavior 车辆行为
@@ -232,3 +232,10 @@ Scan_for_known_incompatible_mods_on_startup 启动时检测是否存在已知不
 Ignore_disabled_mods 忽略未启用MOD
 Traffic_Manager_detected_incompatible_mods 检测到的不兼容MOD
 Notify_me_if_there_is_an_unexpected_mod_conflict 检测到不兼容MOD时提示
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
+Road_signs_theme_mph Theme for MPH road signs
+theme_Square_US US signs
+theme_Round_UK British signs
+theme_Round_German German signs

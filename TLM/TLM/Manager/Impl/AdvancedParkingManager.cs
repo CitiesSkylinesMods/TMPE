@@ -54,7 +54,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected override void OnEnableFeatureInternal() {
-			
+
 		}
 
 		public bool EnterParkedCar(ushort instanceID, ref CitizenInstance instanceData, ushort parkedVehicleId, out ushort vehicleId) {
@@ -608,7 +608,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 
-			
+
 			// check if path is complete
 			PathUnit.Position pos;
 			if (instanceData.m_pathPositionIndex != 255 && (instanceData.m_path == 0 || !CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path].GetPosition(instanceData.m_pathPositionIndex >> 1, out pos))) {
@@ -697,7 +697,7 @@ namespace TrafficManager.Manager.Impl {
 					 * when using public transport together with a car (assuming a "source -> walk -> drive -> walk -> use public transport -> walk -> target" path)
 					 * discard parking space information since the cim has to park near the public transport stop
 					 * (instead of parking in the vicinity of the target building).
-					 * 
+					 *
 					 * TODO we could check if the path looks like "source -> walk -> use public transport -> walk -> drive -> [walk ->] target" (in this case parking space information would still be valid)
 					*/
 #if DEBUG
@@ -1317,7 +1317,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 				} else if (knownParkingSpaceLocation == ExtParkingSpaceLocation.Building) {
 					// found a building with parking space
-					if (Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(parkPos, endPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.None, VehicleInfo.VehicleType.None, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out endPathPos)) {
+					if (Constants.ManagerFactory.ExtPathManager.FindPathPositionWithSpiralLoop(parkPos, endPos, ItemClass.Service.Road, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, VehicleInfo.VehicleType.Car, false, false, GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance, out endPathPos)) {
 						calculateEndPos = false;
 					}
 

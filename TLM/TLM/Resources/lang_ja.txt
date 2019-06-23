@@ -232,3 +232,10 @@ Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on 
 Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict modの非互換性が検出された場合にエラーメッセージを表示す
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
+Road_signs_theme_mph Theme for MPH road signs
+theme_Square_US US signs
+theme_Round_UK British signs
+theme_Round_German German signs

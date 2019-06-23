@@ -187,7 +187,7 @@ namespace TrafficManager.Manager.Impl {
 				UpdateDefaults(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)], ref SegmentFlags[segmentId].startNodeFlags, ref node);
 				return true;
 			});
-			
+
 			ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
 			Services.NetService.ProcessNode(endNodeId, delegate (ushort nId, ref NetNode node) {
 				UpdateDefaults(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)], ref SegmentFlags[segmentId].endNodeFlags, ref node);
@@ -334,7 +334,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 				return false;
 			}
-			
+
 			bool ret = near ? Options.allowNearTurnOnRed : Options.allowFarTurnOnRed;
 #if DEBUG
 			if (debug)
@@ -368,7 +368,7 @@ namespace TrafficManager.Manager.Impl {
 
 			IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
 			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-			
+
 			bool ret =
 				(node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Transition)) != NetNode.Flags.None &&
 				node.Info?.m_class?.m_service != ItemClass.Service.Beautification &&
@@ -499,7 +499,8 @@ namespace TrafficManager.Manager.Impl {
 				return true;
 			}
 
-			bool ret = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+			// crossing is allowed at junctions and at untouchable nodes (for example: spiral underground parking)
+			bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) != NetNode.Flags.None;
 #if DEBUG
 			if (debug)
 				Log._Debug($"JunctionRestrictionsManager.GetDefaultPedestrianCrossingAllowed({segmentId}, {startNode}): Setting is configurable. ret={ret}, flags={node.m_flags}");
@@ -709,7 +710,7 @@ namespace TrafficManager.Manager.Impl {
 									SetNearTurnOnRedAllowed(segNodeConf.segmentId, true, (bool)flags.turnOnRedAllowed);
 								}
 
-								if (flags.farTurnOnRedAllowed != null && IsNearTurnOnRedAllowedConfigurable(segNodeConf.segmentId, true, ref node)) {
+								if (flags.farTurnOnRedAllowed != null && IsFarTurnOnRedAllowedConfigurable(segNodeConf.segmentId, true, ref node)) {
 									SetFarTurnOnRedAllowed(segNodeConf.segmentId, true, (bool)flags.farTurnOnRedAllowed);
 								}
 
@@ -741,14 +742,6 @@ namespace TrafficManager.Manager.Impl {
 									SetUturnAllowed(segNodeConf.segmentId, false, (bool)flags.uturnAllowed);
 								}
 
-								if (flags.turnOnRedAllowed != null) {
-									SetNearTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.turnOnRedAllowed);
-								}
-
-								if (flags.farTurnOnRedAllowed != null) {
-									SetFarTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.farTurnOnRedAllowed);
-								}
-
 								if (flags.straightLaneChangingAllowed != null && IsLaneChangingAllowedWhenGoingStraightConfigurable(segNodeConf.segmentId, false, ref node)) {
 									SetLaneChangingAllowedWhenGoingStraight(segNodeConf.segmentId, false, (bool)flags.straightLaneChangingAllowed);
 								}
@@ -759,6 +752,14 @@ namespace TrafficManager.Manager.Impl {
 
 								if (flags.pedestrianCrossingAllowed != null && IsPedestrianCrossingAllowedConfigurable(segNodeConf.segmentId, false, ref node)) {
 									SetPedestrianCrossingAllowed(segNodeConf.segmentId, false, (bool)flags.pedestrianCrossingAllowed);
+								}
+
+								if (flags.turnOnRedAllowed != null && IsNearTurnOnRedAllowedConfigurable(segNodeConf.segmentId, false, ref node)) {
+									SetNearTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.turnOnRedAllowed);
+								}
+
+								if (flags.farTurnOnRedAllowed != null && IsFarTurnOnRedAllowedConfigurable(segNodeConf.segmentId, false, ref node)) {
+									SetFarTurnOnRedAllowed(segNodeConf.segmentId, false, (bool)flags.farTurnOnRedAllowed);
 								}
 								return true;
 							});

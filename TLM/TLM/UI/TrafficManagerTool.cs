@@ -61,7 +61,7 @@ namespace TrafficManager.UI {
 		private static IDisposable confDisposable;
 
 		static TrafficManagerTool() {
-			
+
 		}
 
 		internal ToolController GetToolController() {
@@ -176,14 +176,14 @@ namespace TrafficManager.UI {
 			}
 			return null;
 		}
-		
+
 		public ToolMode GetToolMode() {
 			return _toolMode;
 		}
 
 		public void SetToolMode(ToolMode mode) {
 			Log._Debug($"SetToolMode: {mode}");
-			
+
 			bool toolModeChanged = (mode != _toolMode);
 			var oldToolMode = _toolMode;
 			SubTool oldSubTool = null;
@@ -388,7 +388,7 @@ namespace TrafficManager.UI {
 			Bezier3 bezier;
 			bezier.a = pos;
 			bezier.d = pos;
-			
+
 			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d, segment.m_endDirection, false, false, out bezier.b, out bezier.c);
 
 			DrawOverlayBezier(cameraInfo, bezier, color, alpha);
@@ -668,7 +668,7 @@ namespace TrafficManager.UI {
 
 			return mouseRayValid;
 		}
-		
+
 		/// <summary>
 		/// Displays lane ids over lanes
 		/// </summary>
@@ -677,7 +677,7 @@ namespace TrafficManager.UI {
 			Vector3 centerPos = segment.m_bounds.center;
 			Vector3 screenPos;
 			bool visible = WorldToScreenPoint(centerPos, out screenPos);
-			
+
 			if (! visible) {
 				return;
 			}
@@ -751,7 +751,7 @@ namespace TrafficManager.UI {
 
 				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
 			}
-			
+
 			Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 			Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y, dim.x, dim.y);
 
@@ -858,7 +858,7 @@ namespace TrafficManager.UI {
 		private void _guiNodes() {
 			NetManager netManager = Singleton<NetManager>.instance;
 			GUIStyle _counterStyle = new GUIStyle();
-			
+
 			for (int i = 1; i < NetManager.MAX_NODE_COUNT; ++i) {
 				if ((netManager.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None) // node is unused
 					continue;
@@ -938,16 +938,26 @@ namespace TrafficManager.UI {
 				ExtCitizenInstance driverInst = ExtCitizenInstanceManager.Instance.ExtInstances[Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId((ushort)i, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i])];
 				bool startNode = vState.currentStartNode;
 				ushort segmentId = vState.currentSegmentId;
-				ushort vehSpeed = SpeedLimitManager.Instance.VehicleToCustomSpeed(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
 
+				// Some magical constant converting magnitudes into km/h
+				float vehSpeed = SpeedLimit.ToKmphPrecise(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude / 8f);
 #if DEBUG
 				if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None && driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
 					continue;
 				}
 #endif
-
-				String labelStr = "V #" + i + " is a " + (vState.recklessDriver ? "reckless " : "") + vState.flags + " " + vState.vehicleType + " @ ~" + vehSpeed + " km/h [^2=" + Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].GetLastFrameVelocity().sqrMagnitude + "] (len: " + vState.totalLength + ", " + vState.junctionTransitState + " @ " + vState.currentSegmentId + " (" + vState.currentStartNode + "), l. " + vState.currentLaneIndex + " -> " + vState.nextSegmentId + ", l. " + vState.nextLaneIndex + "), w: " + vState.waitTime + "\n" +
-					"di: " + driverInst.instanceId + " dc: " + ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId) + " m: " + driverInst.pathMode.ToString() + " f: " + driverInst.failedParkingAttempts + " l: " + driverInst.parkingSpaceLocation + " lid: " + driverInst.parkingSpaceLocationId + " ltsu: " + vState.lastTransitStateUpdate + " lpu: " + vState.lastPositionUpdate + " als: " + vState.lastAltLaneSelSegmentId + " srnd: " + Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand((ushort)i) + " trnd: " + Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand((ushort)i);
+				var labelStr =
+					$"V #{i} is a {(vState.recklessDriver ? "reckless " : string.Empty)}{vState.flags} " +
+					$"{vState.vehicleType} @ ~{vehSpeed:0.0} km/h (len: {vState.totalLength:0.0}, " +
+					$"{vState.junctionTransitState} @ {vState.currentSegmentId} " +
+					$"({vState.currentStartNode}), l. {vState.currentLaneIndex} -> {vState.nextSegmentId}, " +
+					$"l. {vState.nextLaneIndex}), w: {vState.waitTime}\n" +
+					$"di: {driverInst.instanceId} dc: {ExtCitizenInstanceManager.Instance.GetCitizenId(driverInst.instanceId)} m: {driverInst.pathMode} " +
+					$"f: {driverInst.failedParkingAttempts} l: {driverInst.parkingSpaceLocation} " +
+					$"lid: {driverInst.parkingSpaceLocationId} ltsu: {vState.lastTransitStateUpdate} " +
+					$"lpu: {vState.lastPositionUpdate} als: {vState.lastAltLaneSelSegmentId} " +
+					$"srnd: {Constants.ManagerFactory.ExtVehicleManager.GetStaticVehicleRand((ushort) i)} " +
+					$"trnd: {Constants.ManagerFactory.ExtVehicleManager.GetTimedVehicleRand((ushort) i)}";
 
 				Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
 				Rect labelRect = new Rect(screenPos.x - dim.x / 2f, screenPos.y - dim.y - 50f, dim.x, dim.y);
@@ -1092,7 +1102,7 @@ namespace TrafficManager.UI {
 
 			return numLanes;
 		}
-		
+
 		internal static void CalculateSegmentCenterByDir(ushort segmentId, Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir) {
 			segmentCenterByDir.Clear();
 			NetManager netManager = Singleton<NetManager>.instance;
