@@ -719,9 +719,10 @@ namespace TrafficManager.Custom.AI {
         return;
       }
 
-			// test for not Flags.Junction is unnecessary because tested in IsTrafficLightToggleable
-			// but it's a simple and fast exit, while IsTrafficLightToggleable is quite complex
-      if(!data.m_flags.IsFlagSet(NetNode.Flags.Junction) || !TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, false, ref data, out var _))
+      // test for not Flags.Junction is unnecessary because tested in IsTrafficLightToggleable
+      // but it's a simple and fast exit, while IsTrafficLightToggleable is quite complex
+      UnableReason unableReason;
+      if(!data.m_flags.IsFlagSet(NetNode.Flags.Junction) || !TrafficLightManager.Instance.IsTrafficLightToggleable(nodeId, false, ref data, out unableReason))
       {
         return;
       }
