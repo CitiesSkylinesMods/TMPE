@@ -222,6 +222,8 @@ Junctions Junctions
 Create_all_junctions_without_traffic_lights Create without traffic lights
 Remove_all_existing_traffic_lights Remove all existing traffic lights
 Remove_all_existing_traffic_lights_tooltip excluding timed traffic lights
+Remove_all_existing_traffic_lights_dialog_title Remove all traffic lights
+Remove_all_existing_traffic_lights_dialog_message Are you sure you want to remove all existing traffic lights?
 Compact_main_menu Compact main menu
 Window_transparency Window transparency
 Overlay_transparency Overlay transparency

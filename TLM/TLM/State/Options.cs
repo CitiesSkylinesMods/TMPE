@@ -1031,13 +1031,23 @@ namespace TrafficManager.State {
     }
 
 		private static void onClickRemoveAllExistingTrafficLights() {
-			if (!checkGameLoaded())
-				return;
+      if (!checkGameLoaded())
+        return;
 
-			Log._Debug("Remove all existing Traffic Lights");
-			Constants.ServiceFactory.SimulationService.AddAction(() => {
-                TrafficLightManager.Instance.RemoveAllExistingTrafficLights();
-            });
+      // invasive action -> ask first
+      ConfirmPanel.ShowModal(Translation.GetString("Remove_all_existing_traffic_lights_dialog_title"), Translation.GetString("Remove_all_existing_traffic_lights_dialog_message"), (_, result) =>
+      {
+        if(result != 1)
+        {
+          return;
+        }
+
+        Log._Debug("Remove all existing Traffic Lights");
+        Constants.ServiceFactory.SimulationService.AddAction(() =>
+        {
+          TrafficLightManager.Instance.RemoveAllExistingTrafficLights();
+        });
+      });
 		}
 
         private static void onIndividualDrivingStyleChanged(bool value) {
