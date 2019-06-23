@@ -229,6 +229,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\CanvasGUI\WorldSpaceUI.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
@@ -454,6 +455,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\WorldSpaceGUI\SeeThroughZ.shader" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />

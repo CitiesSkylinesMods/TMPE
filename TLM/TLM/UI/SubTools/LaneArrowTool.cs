@@ -14,15 +14,18 @@ using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.TrafficLight;
+using TrafficManager.UI.CanvasGUI;
 using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
+		private static WorldSpaceUI wsUi = null;
+		
 		private bool _cursorInSecondaryPanel;
 
-		public LaneArrowTool(TrafficManagerTool mainTool) : base(mainTool) {
-			
+		public LaneArrowTool(TrafficManagerTool mainTool)
+			: base(mainTool) {
 		}
 
 		public override bool IsCursorInPanel() {
@@ -40,14 +43,14 @@ namespace TrafficManager.UI.SubTools {
 				Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId].m_endNode != HoveredNodeId)
 				return;
 
+			Deselect();
 			SelectedSegmentId = HoveredSegmentId;
 			SelectedNodeId = HoveredNodeId;
 		}
 
 		public override void OnSecondaryClickOverlay() {
 			if (!IsCursorInPanel()) {
-				SelectedSegmentId = 0;
-				SelectedNodeId = 0;
+				Deselect();
 			}
 		}
 
@@ -60,8 +63,7 @@ namespace TrafficManager.UI.SubTools {
 			int numDirections;
 			int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(SelectedSegmentId, SelectedNodeId, out numDirections, LaneArrowManager.VEHICLE_TYPES);
 			if (numLanes <= 0) {
-				SelectedNodeId = 0;
-				SelectedSegmentId = 0;
+				Deselect();
 				return;
 			}
 
@@ -85,6 +87,15 @@ namespace TrafficManager.UI.SubTools {
 			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
 		}
 
+		private void Deselect() {
+			SelectedSegmentId = 0;
+			SelectedNodeId = 0;
+			if (wsUi != null) {
+				wsUi.DestroyCanvas();
+				wsUi = null;
+			}
+		}
+
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
 			NetManager netManager = Singleton<NetManager>.instance;
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
@@ -99,7 +110,28 @@ namespace TrafficManager.UI.SubTools {
 
 			if (SelectedSegmentId == 0) return;
 
-			NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], MainTool.GetToolColor(true, false), MainTool.GetToolColor(true, false));
+			var netSegment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId];
+			NetTool.RenderOverlay(cameraInfo, ref netSegment, MainTool.GetToolColor(true, false), MainTool.GetToolColor(true, false));
+
+			// Create UI on the ground
+			if (wsUi == null) {
+				var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+
+				// Make the canvas be aligned with the segment and looking UP
+				var otherNodeId = SelectedNodeId == netSegment.m_startNode
+					                  ? netSegment.m_endNode
+					                  : SelectedNodeId;
+				var forward = nodesBuffer[SelectedNodeId].m_position - nodesBuffer[otherNodeId].m_position;
+				forward.y = 0f; // make strictly flat
+				// var lookRotation = Quaternion.LookRotation(Vector3.down, forward.normalized);
+				var lookRotation = Quaternion.Euler(90f, 0f, 0f);
+				Log.Info(lookRotation.ToString());
+				wsUi = new WorldSpaceUI(nodesBuffer[SelectedNodeId].m_position, lookRotation);
+
+				// Create button on the ground 10m by 5m
+				wsUi.AddButton(Vector3.zero, new Vector2(10f, 5f), "Forward");
+				wsUi.AddText(new Vector3(0, -5f, 0f), new Vector2(40f, 10f), "Hello text");
+			}
 		}
 
 		private void _guiLaneChangeWindow(int num) {
