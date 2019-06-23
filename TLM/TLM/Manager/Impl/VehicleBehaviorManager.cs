@@ -1387,14 +1387,18 @@ namespace TrafficManager.Manager.Impl {
 				if (bestStaySpeedDiff < 0 && bestOptSpeedDiff > bestStaySpeedDiff) {
 					// found a lane change that improves vehicle speed
 					//float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
-					ushort optImprovementInKmH = SpeedLimitManager.Instance.LaneToCustomSpeedLimit(bestOptSpeedDiff - bestStaySpeedDiff, false);
-					float speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+					var speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+					var optImprovementSpeed = SpeedLimit.ToKmphRounded(bestOptSpeedDiff - bestStaySpeedDiff);
 #if DEBUG
 					if (debug) {
-						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. optImprovementInKmH={optImprovementInKmH} km/h speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
+						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): " +
+						           $"a lane change for speed improvement is possible. " +
+						           $"optImprovementInKmH={optImprovementSpeed} km/h speedDiff={speedDiff} " +
+						           $"(bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, " +
+						           $"foundSafeLaneChange={foundSafeLaneChange})");
 					}
 #endif
-					if (optImprovementInKmH >= vehicleState.minSafeSpeedImprovement &&
+					if (optImprovementSpeed >= vehicleState.minSafeSpeedImprovement &&
 						(foundSafeLaneChange || (speedDiff <= vehicleState.maxUnsafeSpeedDiff))
 						) {
 						// speed improvement is significant

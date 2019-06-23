@@ -1,0 +1,9 @@
+﻿root = true
+
+[*.{cs,vb}]
+indent_style = tab
+indent_size = 8
+trim_trailing_whitespace = true
+
+[*.cs]
+# csharp_new_line_before_open_brace = methods

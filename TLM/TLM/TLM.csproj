@@ -186,6 +186,7 @@
     <Compile Include="TrafficLight\LightMode.cs" />
     <Compile Include="TrafficLight\StepChangeMetric.cs" />
     <Compile Include="TrafficLight\TrafficLightSimulationType.cs" />
+    <Compile Include="Traffic\Data\SpeedLimit.cs" />
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
@@ -364,19 +365,6 @@
     <EmbeddedResource Include="Resources\lang_ja.txt" />
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
-    <EmbeddedResource Include="Resources\0.png" />
-    <EmbeddedResource Include="Resources\10.png" />
-    <EmbeddedResource Include="Resources\100.png" />
-    <EmbeddedResource Include="Resources\120.png" />
-    <EmbeddedResource Include="Resources\130.png" />
-    <EmbeddedResource Include="Resources\20.png" />
-    <EmbeddedResource Include="Resources\30.png" />
-    <EmbeddedResource Include="Resources\40.png" />
-    <EmbeddedResource Include="Resources\50.png" />
-    <EmbeddedResource Include="Resources\60.png" />
-    <EmbeddedResource Include="Resources\70.png" />
-    <EmbeddedResource Include="Resources\80.png" />
-    <EmbeddedResource Include="Resources\90.png" />
     <EmbeddedResource Include="Resources\clock_pause.png" />
     <EmbeddedResource Include="Resources\clock_test.png" />
     <EmbeddedResource Include="Resources\clock_play.png" />
@@ -392,9 +380,6 @@
     <EmbeddedResource Include="Resources\enterblocked_forbidden.png" />
     <EmbeddedResource Include="Resources\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\uturn_forbidden.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\110.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\MenuButton.png" />
@@ -457,6 +442,77 @@
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\100.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\105.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\110.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\115.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\120.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\125.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\130.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\135.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\140.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\90.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Kmh\95.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\90.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

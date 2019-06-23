@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TrafficManager.Traffic.Data;
 using TrafficManager.UI.MainMenu;
 
 namespace TrafficManager.State.ConfigData {
@@ -50,18 +51,31 @@ namespace TrafficManager.State.ConfigData {
 		/// </summary>
 		public bool ShowCompatibilityCheckErrorMessage = false;
 
-        /// <summary>
-        /// Shows warning dialog if any incompatible mods detected
-        /// </summary>
-        public bool ScanForKnownIncompatibleModsAtStartup = true;
+		/// <summary>
+		/// Shows warning dialog if any incompatible mods detected
+		/// </summary>
+		public bool ScanForKnownIncompatibleModsAtStartup = true;
 
-        /// <summary>
-        /// Skip disabled mods while running incompatible mod detector
-        /// </summary>
-        public bool IgnoreDisabledMods = true;
+		/// <summary>
+		/// Skip disabled mods while running incompatible mod detector
+		/// </summary>
+		public bool IgnoreDisabledMods = true;
+
+		/// <summary>
+		/// Prefer Miles per hour instead of Kmph (affects speed limits display
+		/// but internally Kmph are still used).
+		/// </summary>
+		public bool DisplaySpeedLimitsMph = false;
+
+		/// <summary>
+		/// Selected theme for road signs when MPH is active.
+		/// </summary>
+		public MphSignStyle MphRoadSignStyle = MphSignStyle.SquareUS;
 
 		public void AddDisplayedTutorialMessage(string messageKey) {
-			HashSet<string> newMessages = DisplayedTutorialMessages != null ? new HashSet<string>(DisplayedTutorialMessages) : new HashSet<string>();
+			HashSet<string> newMessages = DisplayedTutorialMessages != null
+				                              ? new HashSet<string>(DisplayedTutorialMessages)
+				                              : new HashSet<string>();
 			newMessages.Add(messageKey);
 			DisplayedTutorialMessages = newMessages.ToArray();
 		}
