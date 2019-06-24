@@ -6,50 +6,48 @@ using UnityEngine.UI;
 using Object = System.Object;
 
 namespace TrafficManager.UI.CanvasGUI {
-	public class WorldSpaceUI
-	{
+	/// <summary>
+	/// Creates canvas in the world space somewhere on map, and also creates
+	/// controls for it and assists with styling, etc.
+	/// </summary>
+	public class WorldSpaceGUI {
 		private GameObject canvasGameObj_;
 		private ulong counter_;
 		private Shader seeThroughShader_;
 
-		public WorldSpaceUI(Vector3 pos, Quaternion rot) {
+		public WorldSpaceGUI(Vector3 pos, Quaternion rot) {
 			// seeThroughShader_ = Resources.Load<Shader>("WorldSpaceGUI.SeeThroughZ");
 
 			canvasGameObj_ = new GameObject();
-			canvasGameObj_.name = "WorldSpaceUI Canvas " + (counter_++);
+			canvasGameObj_.name = "Canvas " + (counter_++);
 
 			var canvasComponent = canvasGameObj_.AddComponent<Canvas>();
 			canvasComponent.renderMode = RenderMode.WorldSpace;
 
+			var rtComponent = canvasGameObj_.GetComponent<RectTransform>();
+			rtComponent.localScale = new Vector3(1f, 1f, 1f);
+			rtComponent.localPosition = pos;
+			rtComponent.localRotation = rot;
+
 			var scalerComponent = canvasGameObj_.AddComponent<CanvasScaler>();
-			canvasGameObj_.AddComponent<GraphicRaycaster>();
-
-			// var rtComponent = canvasGameObj_.GetComponent<RectTransform>();
-			// rtComponent.rotation = rot;
-			// rtComponent.position = pos;
-			// rtComponent.localScale = new Vector3(1f, 1f, 1f);
-
-			scalerComponent.dynamicPixelsPerUnit = 2f;
+			scalerComponent.dynamicPixelsPerUnit = 8f;
 			scalerComponent.referencePixelsPerUnit = 1f;
 
+			canvasGameObj_.AddComponent<GraphicRaycaster>();
 			canvasComponent.worldCamera = Camera.main;
-			canvasGameObj_.transform.SetPositionAndRotation(pos, rot);
-			canvasGameObj_.transform.localScale = new Vector3(1f, 1f, 1f);
 		}
 
 		public void DestroyCanvas() {
-			// canvasGO_.transform.SetParent(null);
 			UnityEngine.Object.Destroy(canvasGameObj_);
 			canvasGameObj_ = null;
 		}
 
-		private RectTransform SetupRectTransform(Transform c, Vector3 pos, Vector2 size) {
-			var rectTransform = c.GetComponent<RectTransform>();
+		private RectTransform SetupRectTransform(GameObject gameObject, Vector3 pos, Vector2 size) {
+			var rectTransform = gameObject.GetComponent<RectTransform>();
 			rectTransform.localPosition = pos;
 			rectTransform.sizeDelta = size;
-
-			c.localScale = new Vector3(1f, 1f, 1f);
-			c.rotation = Quaternion.identity;
+			rectTransform.localScale = new Vector3(1f, 1f, 1f);
+			rectTransform.localRotation = Quaternion.identity;
 			return rectTransform;
 		}
 
@@ -61,14 +59,15 @@ namespace TrafficManager.UI.CanvasGUI {
 
 			var textComponent = textGameObj.AddComponent<Text>();
 			// C:S fonts: OpenSans-Regular, OpenSans-Semibold. NanumGothic and ArchitectsDaughter
-			textComponent.font = Resources.GetBuiltinResource<Font>("OpenSans-Regular");
+			// textComponent.font = Resources.GetBuiltinResource<Font>("OpenSans-Regular");
+			textComponent.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 			textComponent.text = str;
-			textComponent.fontSize = 10;
+			textComponent.fontSize = 5; // in metres
 			textComponent.color = Color.black;
 			SetupMaterial(textComponent.material);
 
 			// Text position
-			SetupRectTransform(textComponent.GetComponent<RectTransform>(), pos, size);
+			SetupRectTransform(textGameObj, pos, size);
 			return textGameObj;
 		}
 
@@ -80,26 +79,24 @@ namespace TrafficManager.UI.CanvasGUI {
 					    string str = "",
 					    GameObject parent = null) {
 			// Add the button object
-			var buttonGO = new GameObject();
-			buttonGO.transform.SetParent(parent == null ? canvasGameObj_.transform : parent.transform);
-			buttonGO.name = "Button " + (counter_++);
+			var buttonGameObj = new GameObject();
+			buttonGameObj.transform.SetParent(parent == null ? canvasGameObj_.transform : parent.transform);
+			buttonGameObj.name = "Button " + (counter_++);
 
 			//-----------------
 
-			buttonGO.AddComponent<RectTransform>();
+			buttonGameObj.AddComponent<RectTransform>();
 
-			// var imageComponent = buttonGO.AddComponent<Image>();
-
-			var imageComponent = buttonGO.AddComponent<Image>();
-			var buttonComponent = buttonGO.AddComponent<Button>();
-			// buttonGO.transform.position = pos;
-
-			SetupRectTransform(buttonGO.transform, pos, size);
+			buttonGameObj.AddComponent<Image>();
+			buttonGameObj.AddComponent<Button>();
+			SetupRectTransform(buttonGameObj, pos, size);
 
 			// Add text label
-			AddText(pos, size, str, buttonGO);
+			if (str != string.Empty) {
+				AddText(Vector3.zero, size, str, buttonGameObj);
+			}
 
-			return buttonGO;
+			return buttonGameObj;
 		}
 
 		public void SetButtonImage(GameObject button, Texture2D tex) {
@@ -107,7 +104,10 @@ namespace TrafficManager.UI.CanvasGUI {
 			if (imageComponent == null) {
 				imageComponent = button.AddComponent<Image>();
 			}
-			imageComponent.material.mainTexture = tex;
+			// imageComponent.material.mainTexture = tex;
+			imageComponent.sprite = Sprite.Create(tex,
+			                                      new Rect(0, 0, tex.width, tex.height),
+			                                      Vector2.zero);
 			SetupMaterial(imageComponent.material);
 		}
 

@@ -20,7 +20,7 @@ using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneArrowTool : SubTool {
-		private static WorldSpaceUI wsUi = null;
+		private static WorldSpaceGUI wsGui = null;
 		
 		private bool _cursorInSecondaryPanel;
 
@@ -81,18 +81,18 @@ namespace TrafficManager.UI.SubTools {
 			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
 
-			int width = numLanes * 128;
-			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
-			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
-			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
+//			int width = 32; // numLanes * 128;
+//			var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
+//			GUILayout.Window(250, windowRect3, _guiLaneChangeWindow, "", BorderlessStyle);
+//			_cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
 		}
 
 		private void Deselect() {
 			SelectedSegmentId = 0;
 			SelectedNodeId = 0;
-			if (wsUi != null) {
-				wsUi.DestroyCanvas();
-				wsUi = null;
+			if (wsGui != null) {
+				wsGui.DestroyCanvas();
+				wsGui = null;
 			}
 		}
 
@@ -114,24 +114,68 @@ namespace TrafficManager.UI.SubTools {
 			NetTool.RenderOverlay(cameraInfo, ref netSegment, MainTool.GetToolColor(true, false), MainTool.GetToolColor(true, false));
 
 			// Create UI on the ground
-			if (wsUi == null) {
-				var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-				// Make the canvas be aligned with the segment and looking UP
-				var otherNodeId = SelectedNodeId == netSegment.m_startNode
-					                  ? netSegment.m_endNode
-					                  : SelectedNodeId;
-				var forward = nodesBuffer[SelectedNodeId].m_position - nodesBuffer[otherNodeId].m_position;
-				forward.y = 0f; // make strictly flat
-				// var lookRotation = Quaternion.LookRotation(Vector3.down, forward.normalized);
-				var lookRotation = Quaternion.Euler(90f, 0f, 0f);
-				Log.Info(lookRotation.ToString());
-				wsUi = new WorldSpaceUI(nodesBuffer[SelectedNodeId].m_position, lookRotation);
-
-				// Create button on the ground 10m by 5m
-				wsUi.AddButton(Vector3.zero, new Vector2(10f, 5f), "Forward");
-				wsUi.AddText(new Vector3(0, -5f, 0f), new Vector2(40f, 10f), "Hello text");
+			if (wsGui == null) {
+				CreateWorldSpaceGUI(netSegment);
 			}
+		}
+
+		private void CreateWorldSpaceGUI(NetSegment netSegment) {
+			var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+
+			// Forward is the direction of the selected segment, even if it's a curve
+			var forward = GetSegmentTangent(SelectedNodeId, netSegment);
+			var rot = Quaternion.LookRotation(Vector3.down, forward.normalized);
+
+			// UI is floating 10m above the ground
+			wsGui = new WorldSpaceGUI(nodesBuffer[SelectedNodeId].m_position + Vector3.up * 10f, rot);
+
+			// Create button 11m by 5m, forward lane
+			var bForward = wsGui.AddButton(Vector3.zero, new Vector2(11f, 5f));
+			wsGui.SetButtonImage(bForward, TextureResources.LaneArrowButtonForward);
+
+			// Create left lane button under it
+			var bLeft = wsGui.AddButton(new Vector3(0f, -11f, 0f), new Vector2(5f, 10f));
+			wsGui.SetButtonImage(bLeft, TextureResources.LaneArrowButtonLeft);
+
+			// Create right lane button to the right of it
+			var bRight = wsGui.AddButton(new Vector3(6, -11f, 0f), new Vector2(5f, 10f));
+			wsGui.SetButtonImage(bRight, TextureResources.LaneArrowButtonRight);
+
+			// Add text slightly below?
+			// wsGui.AddText(new Vector3(0, -5f, 0f), new Vector2(40f, 10f), "Hello text");
+		}
+
+		/// <summary>
+		/// For given segment and one of its end nodes, get the direction vector.
+		/// </summary>
+		/// <returns>Direction of the given end of the segment.</returns>
+		private static Vector3 GetSegmentTangent(ushort nodeId, NetSegment segment) {
+			var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+			var otherNodeId = segment.GetOtherNode(nodeId);
+			var nodePos = nodesBuffer[nodeId].m_position;
+			var otherNodePos = nodesBuffer[otherNodeId].m_position;
+
+			if (segment.IsStraight()) {
+				return (nodePos - otherNodePos).normalized;
+			}
+
+			// Handle some curvature, take the last tangent
+			var bezier = default(Bezier3);
+			bezier.a = nodesBuffer[segment.m_startNode].m_position;
+			bezier.d = nodesBuffer[segment.m_endNode].m_position;
+			NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection,
+			                                 bezier.d, segment.m_endDirection,
+			                                 false, false,
+			                                 out bezier.b, out bezier.c);
+			var isStartNode = nodeId == segment.m_startNode;
+			var tangent = bezier.Tangent(isStartNode ? 0f : 1f);
+
+//			if (isStartNode) {
+//				// For start node flip the direction, so that the GUI looks right
+//				tangentScreen *= -1;
+//			}
+
+			return tangent;
 		}
 
 		private void _guiLaneChangeWindow(int num) {

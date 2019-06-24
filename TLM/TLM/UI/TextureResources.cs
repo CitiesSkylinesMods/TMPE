@@ -1,4 +1,4 @@
-using CSUtil.Commons;
+﻿using CSUtil.Commons;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,6 +71,16 @@ namespace TrafficManager.UI
 		public static readonly Texture2D RemoveButtonTexture2D;
 		public static readonly Texture2D WindowBackgroundTexture2D;
 
+<<<<<<< HEAD
+=======
+		public static readonly Texture2D LaneArrowButtonLeft; // white
+		public static readonly Texture2D LaneArrowButtonRight; // white
+		public static readonly Texture2D LaneArrowButtonForward; // white
+		public static readonly Texture2D LaneArrowButtonLeftOff; // black
+		public static readonly Texture2D LaneArrowButtonRightOff; // black
+		public static readonly Texture2D LaneArrowButtonForwardOff; // black
+
+>>>>>>> UI creation in world space
 		static TextureResources() {
 			// missing image
 			NoImageTexture2D = LoadDllResource("noimage.png", 64, 64);
@@ -224,8 +234,16 @@ namespace TrafficManager.UI
 			RemoveButtonTexture2D = LoadDllResource("remove-btn.png", 150, 30);
 
 			WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
+
+			LaneArrowButtonLeft = LoadDllResource("LaneArrows.ButtonL.png", 80, 127);
+			LaneArrowButtonRight = LoadDllResource("LaneArrows.ButtonR.png", 80, 127);
+			LaneArrowButtonForward = LoadDllResource("LaneArrows.ButtonF.png", 62, 62);
+			LaneArrowButtonLeftOff = LoadDllResource("LaneArrows.ButtonLOff.png", 80, 127);
+			LaneArrowButtonRightOff = LoadDllResource("LaneArrows.ButtonROff.png", 80, 127);
+			LaneArrowButtonForwardOff = LoadDllResource("LaneArrows.ButtonFOff.png", 62, 62);
 		}
 
+<<<<<<< HEAD
 		/// <summary>
 		/// Given speed limit, round it up to nearest Kmph or Mph and produce a texture
 		/// </summary>
@@ -280,6 +298,9 @@ namespace TrafficManager.UI
 		}
 
         private static Texture2D LoadDllResource(string resourceName, int width, int height)
+=======
+		private static Texture2D LoadDllResource(string resourceName, int width, int height)
+>>>>>>> UI creation in world space
         {
 #if DEBUG
             bool debug = State.GlobalConfig.Instance.Debug.Switches[11];

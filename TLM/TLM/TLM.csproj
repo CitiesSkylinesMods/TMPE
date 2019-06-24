@@ -229,7 +229,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
-    <Compile Include="UI\CanvasGUI\WorldSpaceUI.cs" />
+    <Compile Include="UI\CanvasGUI\WorldSpaceGUI.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
@@ -491,8 +491,6 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\90.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\95.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\0.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\10.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\15.png" />
@@ -531,6 +529,12 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonF.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonFOff.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonL.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonLOff.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonR.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonROff.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
