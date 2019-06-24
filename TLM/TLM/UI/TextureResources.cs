@@ -71,16 +71,18 @@ namespace TrafficManager.UI
 		public static readonly Texture2D RemoveButtonTexture2D;
 		public static readonly Texture2D WindowBackgroundTexture2D;
 
-<<<<<<< HEAD
-=======
 		public static readonly Texture2D LaneArrowButtonLeft; // white
-		public static readonly Texture2D LaneArrowButtonRight; // white
-		public static readonly Texture2D LaneArrowButtonForward; // white
 		public static readonly Texture2D LaneArrowButtonLeftOff; // black
-		public static readonly Texture2D LaneArrowButtonRightOff; // black
-		public static readonly Texture2D LaneArrowButtonForwardOff; // black
+		public static readonly Texture2D LaneArrowButtonLeftDisabled; // crossed
 
->>>>>>> UI creation in world space
+		public static readonly Texture2D LaneArrowButtonRight; // white
+		public static readonly Texture2D LaneArrowButtonRightOff; // black
+		public static readonly Texture2D LaneArrowButtonRightDisabled; // crossed
+
+		public static readonly Texture2D LaneArrowButtonForward; // white
+		public static readonly Texture2D LaneArrowButtonForwardOff; // black
+		public static readonly Texture2D LaneArrowButtonForwardDisabled; // crossed
+
 		static TextureResources() {
 			// missing image
 			NoImageTexture2D = LoadDllResource("noimage.png", 64, 64);
@@ -125,7 +127,7 @@ namespace TrafficManager.UI
 			// light mode
 			LightModeTexture2D =
 				LoadDllResource(Translation.GetTranslatedFileName("light_mode.png"), 103, 95);
-			LightCounterTexture2D =
+			LightCounterTexture2D = 
 				LoadDllResource(Translation.GetTranslatedFileName("light_counter.png"), 103, 95);
 			// pedestrian mode
 			PedestrianModeAutomaticTexture2D = LoadDllResource("pedestrian_mode_1.png", 73, 70);
@@ -173,8 +175,7 @@ namespace TrafficManager.UI
 			VehicleRestrictionTextures[ExtVehicleType.CargoTruck] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Emergency] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.PassengerCar] = new TinyDictionary<bool, Texture2D>();
-			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] =
-				new TinyDictionary<bool, Texture2D>();
+			VehicleRestrictionTextures[ExtVehicleType.PassengerTrain] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Service] = new TinyDictionary<bool, Texture2D>();
 			VehicleRestrictionTextures[ExtVehicleType.Taxi] = new TinyDictionary<bool, Texture2D>();
 
@@ -182,9 +183,9 @@ namespace TrafficManager.UI
 				VehicleRestrictionTextures) {
 				foreach (bool b in new bool[] {false, true}) {
 					string suffix = b ? "allowed" : "forbidden";
-					e.Value[b] =
-						LoadDllResource(e.Key.ToString().ToLower() + "_" + suffix + ".png", 200,
-						                200);
+					e.Value[b] = LoadDllResource(
+						$"{e.Key.ToString().ToLower()}_{suffix}.png",
+						200, 200);
 				}
 			}
 
@@ -236,14 +237,18 @@ namespace TrafficManager.UI
 			WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
 
 			LaneArrowButtonLeft = LoadDllResource("LaneArrows.ButtonL.png", 80, 127);
-			LaneArrowButtonRight = LoadDllResource("LaneArrows.ButtonR.png", 80, 127);
-			LaneArrowButtonForward = LoadDllResource("LaneArrows.ButtonF.png", 62, 62);
 			LaneArrowButtonLeftOff = LoadDllResource("LaneArrows.ButtonLOff.png", 80, 127);
+			LaneArrowButtonLeftDisabled = LoadDllResource("LaneArrows.ButtonLDisabled.png", 80, 127);
+
+			LaneArrowButtonRight = LoadDllResource("LaneArrows.ButtonR.png", 80, 127);
 			LaneArrowButtonRightOff = LoadDllResource("LaneArrows.ButtonROff.png", 80, 127);
-			LaneArrowButtonForwardOff = LoadDllResource("LaneArrows.ButtonFOff.png", 62, 62);
+			LaneArrowButtonRightDisabled = LoadDllResource("LaneArrows.ButtonRDisabled.png", 80, 127);
+
+			LaneArrowButtonForward = LoadDllResource("LaneArrows.ButtonF.png", 127, 65);
+			LaneArrowButtonForwardOff = LoadDllResource("LaneArrows.ButtonFOff.png", 127, 65);
+			LaneArrowButtonForwardDisabled = LoadDllResource("LaneArrows.ButtonFDisabled.png", 127, 65);
 		}
 
-<<<<<<< HEAD
 		/// <summary>
 		/// Given speed limit, round it up to nearest Kmph or Mph and produce a texture
 		/// </summary>
@@ -297,79 +302,73 @@ namespace TrafficManager.UI
 			return textures[trimIndex];
 		}
 
-        private static Texture2D LoadDllResource(string resourceName, int width, int height)
-=======
-		private static Texture2D LoadDllResource(string resourceName, int width, int height)
->>>>>>> UI creation in world space
-        {
+		private static Texture2D LoadDllResource(string resourceName, int width, int height) {
 #if DEBUG
-            bool debug = State.GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = State.GlobalConfig.Instance.Debug.Switches[11];
 #endif
-            try {
+			try {
 #if DEBUG
-                if (debug)
-                    Log._Debug($"Loading DllResource {resourceName}");
+				if (debug) Log._Debug($"Loading DllResource {resourceName}");
 #endif
-                var myAssembly = Assembly.GetExecutingAssembly();
-                var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
+				var myAssembly = Assembly.GetExecutingAssembly();
+				var myStream = myAssembly.GetManifestResourceStream(
+					$"TrafficManager.Resources.{resourceName}");
 
-                var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+				var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
 
-                texture.LoadImage(ReadToEnd(myStream));
+				texture.LoadImage(ReadToEnd(myStream));
 
-                return texture;
-            } catch (Exception e) {
-                Log.Error(e.StackTrace.ToString());
-                return null;
-            }
-        }
+				return texture;
+			}
+			catch (Exception e) {
+				Log.Error(e.StackTrace.ToString());
+				return null;
+			}
+		}
 
-        static byte[] ReadToEnd(Stream stream)
-        {
-            var originalPosition = stream.Position;
-            stream.Position = 0;
+		static byte[] ReadToEnd(Stream stream) {
+			var originalPosition = stream.Position;
+			stream.Position = 0;
 
-            try
-            {
-                var readBuffer = new byte[4096];
+			try {
+				var readBuffer = new byte[4096];
 
-                var totalBytesRead = 0;
-                int bytesRead;
+				var totalBytesRead = 0;
+				int bytesRead;
 
-                while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
-                {
-                    totalBytesRead += bytesRead;
+				while ((bytesRead = stream.Read(readBuffer, totalBytesRead,
+				                                readBuffer.Length - totalBytesRead)) > 0) {
+					totalBytesRead += bytesRead;
 
-                    if (totalBytesRead != readBuffer.Length)
-                        continue;
+					if (totalBytesRead != readBuffer.Length)
+						continue;
 
-                    var nextByte = stream.ReadByte();
-                    if (nextByte == -1)
-                        continue;
+					var nextByte = stream.ReadByte();
+					if (nextByte == -1)
+						continue;
 
-                    var temp = new byte[readBuffer.Length * 2];
-                    Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
-                    Buffer.SetByte(temp, totalBytesRead, (byte)nextByte);
-                    readBuffer = temp;
-                    totalBytesRead++;
-                }
+					var temp = new byte[readBuffer.Length * 2];
+					Buffer.BlockCopy(readBuffer, 0, temp, 0, readBuffer.Length);
+					Buffer.SetByte(temp, totalBytesRead, (byte) nextByte);
+					readBuffer = temp;
+					totalBytesRead++;
+				}
 
-                var buffer = readBuffer;
-                if (readBuffer.Length == totalBytesRead)
-                    return buffer;
+				var buffer = readBuffer;
+				if (readBuffer.Length == totalBytesRead)
+					return buffer;
 
-                buffer = new byte[totalBytesRead];
-                Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
-                return buffer;
-            }
-            catch (Exception e) {
-                Log.Error(e.StackTrace.ToString());
-                return null;
-            }
-            finally
-            {
-                stream.Position = originalPosition;
-            }
-        }
-	}
+				buffer = new byte[totalBytesRead];
+				Buffer.BlockCopy(readBuffer, 0, buffer, 0, totalBytesRead);
+				return buffer;
+			}
+			catch (Exception e) {
+				Log.Error(e.StackTrace.ToString());
+				return null;
+			}
+			finally {
+				stream.Position = originalPosition;
+			}
+		}
+	} // class
 }
