@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using CSUtil.Commons;
 using OptionsFramework.Extensions;
 using UnityEngine;
@@ -171,17 +172,7 @@ namespace TrafficManager.UI.CanvasGUI {
 
 			mouse1Held = true;
 
-			// Set up the new Pointer Event
-			var pointerEventData = new PointerEventData(eventSystem_);
-
-			// Set the Pointer Event Position to that of the mouse position
-			pointerEventData.position = Input.mousePosition;
-
-			// Create a list of Raycast Results
-			var results = new List<RaycastResult>();
-
-			// Raycast using the Graphics Raycaster and mouse click position
-			raycaster_.Raycast(pointerEventData, results);
+			var results = RaycastMouse();
 
 			// For every result returned, output the name of the GameObject on the Canvas hit by the Ray
 			if (results.Count > 0) {
@@ -193,6 +184,25 @@ namespace TrafficManager.UI.CanvasGUI {
 //			foreach (var result in results) {
 //				Log.Info("Hit " + result.gameObject.name);
 //			}
+		}
+
+		/// <summary>
+		/// Take mouse position and find whether we hit anything
+		/// </summary>
+		/// <returns></returns>
+		public List<RaycastResult> RaycastMouse() {
+			// Set up the new Pointer Event
+			var pointerEventData = new PointerEventData(eventSystem_);
+
+			// Set the Pointer Event Position to that of the mouse position
+			pointerEventData.position = Input.mousePosition;
+
+			// Create a list of Raycast Results
+			var results = new List<RaycastResult>();
+
+			// Raycast using the Graphics Raycaster and mouse click position
+			raycaster_.Raycast(pointerEventData, results);
+			return results;
 		}
 	}
 }
