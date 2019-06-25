@@ -1,5 +1,7 @@
 using ColossalFramework;
+#if !DEBUG
 using ColossalFramework.PlatformServices; // used in RELEASE builds
+#endif
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
