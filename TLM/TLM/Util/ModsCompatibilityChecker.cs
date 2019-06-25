@@ -111,14 +111,8 @@ namespace TrafficManager.Util
         /// <returns>The name of the specified plugin.</returns>
         public string GetModName(PluginInfo plugin)
         {
-            string name = plugin.name;
-            IUserMod[] instances = plugin.GetInstances<IUserMod>();
-            if (instances.Length > 0)
-            {
-                name = instances[0].Name;
-            }
-            return name;
-        }
+	    return ((IUserMod)plugin.userModInstance).Name;
+	}
 
         /// <summary>
         /// Works out if the game is effectively running in offline mode, in which no workshop mod subscriptions will be active.
