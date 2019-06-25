@@ -540,6 +540,14 @@
     <EmbeddedResource Include="Resources\LaneArrows\ButtonR.png" />
     <EmbeddedResource Include="Resources\LaneArrows\ButtonROff.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonFDisabled.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonLDisabled.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\ButtonRDisabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneArrows\Atlas_Lane_Arrows.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)"
