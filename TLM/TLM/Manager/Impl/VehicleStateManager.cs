@@ -21,10 +21,6 @@ namespace TrafficManager.Manager.Impl {
 		/// </summary>
 		public VehicleState[] VehicleStates { get; private set; } = null;
 
-		static VehicleStateManager() {
-			Instance = new VehicleStateManager();
-		}
-
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Vehicle states:");
@@ -37,8 +33,8 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		private VehicleStateManager() {
-			VehicleStates = new VehicleState[VehicleManager.MAX_VEHICLE_COUNT];
-			for (uint i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
+			VehicleStates = new VehicleState[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
+			for (uint i = 0; i < VehicleStates.Length; ++i) {
 				VehicleStates[i] = new VehicleState((ushort)i);
 			}
 		}
@@ -253,7 +249,7 @@ namespace TrafficManager.Manager.Impl {
 			Log._Debug("VehicleStateManager: InitAllVehicles()");
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-			for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+			for (uint vehicleId = 0; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
 					if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
 						return true;

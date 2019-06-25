@@ -1387,14 +1387,18 @@ namespace TrafficManager.Manager.Impl {
 				if (bestStaySpeedDiff < 0 && bestOptSpeedDiff > bestStaySpeedDiff) {
 					// found a lane change that improves vehicle speed
 					//float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
-					ushort optImprovementInKmH = SpeedLimitManager.Instance.LaneToCustomSpeedLimit(bestOptSpeedDiff - bestStaySpeedDiff, false);
-					float speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+					var speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+					var optImprovementSpeed = SpeedLimit.ToKmphRounded(bestOptSpeedDiff - bestStaySpeedDiff);
 #if DEBUG
 					if (debug) {
-						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for speed improvement is possible. optImprovementInKmH={optImprovementInKmH} km/h speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
+						Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): " +
+						           $"a lane change for speed improvement is possible. " +
+						           $"optImprovementInKmH={optImprovementSpeed} km/h speedDiff={speedDiff} " +
+						           $"(bestOptMeanSpeed={bestOptMeanSpeed}, vehicleCurVelocity={vehicleCurSpeed}, " +
+						           $"foundSafeLaneChange={foundSafeLaneChange})");
 					}
 #endif
-					if (optImprovementInKmH >= vehicleState.minSafeSpeedImprovement &&
+					if (optImprovementSpeed >= vehicleState.minSafeSpeedImprovement &&
 						(foundSafeLaneChange || (speedDiff <= vehicleState.maxUnsafeSpeedDiff))
 						) {
 						// speed improvement is significant
@@ -1451,6 +1455,132 @@ namespace TrafficManager.Manager.Impl {
 				Log.Error($"VehicleBehaviorManager.FindBestLane({vehicleId}): Exception occurred: {e}");
 			}
 			return next1PathPos.m_lane;
+		}
+
+		public int FindBestEmergencyLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position nextPathPos, NetInfo nextSegInfo) {
+			try {
+				GlobalConfig conf = GlobalConfig.Instance;
+#if DEBUG
+				bool debug = false;
+				if (conf.Debug.Switches[17]) {
+					ushort nodeId = Services.NetService.GetSegmentNodeId(currentPathPos.m_segment, currentPathPos.m_offset < 128);
+					debug = (conf.Debug.VehicleId == 0 || conf.Debug.VehicleId == vehicleId) && (conf.Debug.NodeId == 0 || conf.Debug.NodeId == nodeId);
+				}
+
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): currentLaneId={currentLaneId}, currentPathPos=[seg={currentPathPos.m_segment}, lane={currentPathPos.m_lane}, off={currentPathPos.m_offset}] nextPathPos=[seg={nextPathPos.m_segment}, lane={nextPathPos.m_lane}, off={nextPathPos.m_offset}]");
+				}
+#endif
+
+				// cur -> next
+				float curPosition = 0f;
+				if (currentPathPos.m_lane < currentSegInfo.m_lanes.Length) {
+					curPosition = currentSegInfo.m_lanes[currentPathPos.m_lane].m_position;
+				}
+				float vehicleLength = 1f + vehicleState.totalLength;
+				bool startNode = currentPathPos.m_offset < 128;
+				uint currentFwdRoutingIndex = RoutingManager.Instance.GetLaneEndRoutingIndex(currentLaneId, startNode);
+
+#if DEBUG
+				if (currentFwdRoutingIndex >= RoutingManager.Instance.laneEndForwardRoutings.Length) {
+					Log.Error($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Invalid array index: currentFwdRoutingIndex={currentFwdRoutingIndex}, RoutingManager.Instance.laneEndForwardRoutings.Length={RoutingManager.Instance.laneEndForwardRoutings.Length} (currentLaneId={currentLaneId}, startNode={startNode})");
+				}
+#endif
+
+				if (!RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].routed) {
+#if DEBUG
+					if (debug) {
+						Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): No forward routing for next path position available.");
+					}
+#endif
+					return nextPathPos.m_lane;
+				}
+
+				LaneTransitionData[] currentFwdTransitions = RoutingManager.Instance.laneEndForwardRoutings[currentFwdRoutingIndex].transitions;
+
+				if (currentFwdTransitions == null) {
+#if DEBUG
+					if (debug) {
+						Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): No forward transitions found for current lane {currentLaneId} at startNode {startNode}.");
+					}
+#endif
+					return nextPathPos.m_lane;
+				}
+
+#if DEBUG
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Starting lane-finding algorithm now. vehicleLength={vehicleLength}");
+				}
+#endif
+
+				float minCost = float.MaxValue;
+				byte bestNextLaneIndex = nextPathPos.m_lane;
+				for (int i = 0; i < currentFwdTransitions.Length; ++i) {
+					if (currentFwdTransitions[i].segmentId != nextPathPos.m_segment) {
+						continue;
+					}
+
+					if (!(
+						currentFwdTransitions[i].type == LaneEndTransitionType.Default ||
+						currentFwdTransitions[i].type == LaneEndTransitionType.LaneConnection ||
+						currentFwdTransitions[i].type == LaneEndTransitionType.Relaxed
+					)) {
+						continue;
+					}
+
+					if (!VehicleRestrictionsManager.Instance.MayUseLane(vehicleState.vehicleType, nextPathPos.m_segment, currentFwdTransitions[i].laneIndex, nextSegInfo)) {
+#if DEBUG
+						if (debug) {
+							Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Skipping current transition {currentFwdTransitions[i]} (vehicle restrictions)");
+						}
+#endif
+						continue;
+					}
+
+					NetInfo.Lane nextLaneInfo = nextSegInfo.m_lanes[currentFwdTransitions[i].laneIndex];
+
+					/*
+					 * Check reserved space on next lane
+					 */
+#if DEBUG
+					if (debug) {
+						Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Checking for traffic on next lane id={currentFwdTransitions[i].laneId}.");
+					}
+#endif
+
+					Services.NetService.ProcessLane(currentFwdTransitions[i].laneId, (uint nextLaneId, ref NetLane nextLane) => {
+						// similar to stock code in VehicleAI.FindBestLane
+						float cost = nextLane.GetReservedSpace();
+						if (currentFwdTransitions[i].laneIndex == nextPathPos.m_lane) {
+							cost -= vehicleLength;
+						}
+
+						cost += Mathf.Abs(curPosition - nextLaneInfo.m_position) * 0.1f;
+
+						if (cost < minCost) {
+							minCost = cost;
+							bestNextLaneIndex = currentFwdTransitions[i].laneIndex;
+
+#if DEBUG
+							if (debug) {
+								Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Found better lane: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
+							}
+#endif
+						}
+						return true;
+					});
+				} // for each forward transition
+
+#if DEBUG
+				if (debug) {
+					Log._Debug($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Best lane identified: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
+				}
+#endif
+				return bestNextLaneIndex;
+			} catch (Exception e) {
+				Log.Error($"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Exception occurred: {e}");
+			}
+			return nextPathPos.m_lane;
 		}
 
 		public bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState) {

@@ -233,3 +233,10 @@ Ignore_disabled_mods 비활성화된 모드 무시하기
 Traffic_Manager_detected_incompatible_mods 와 비호환되는 모드 감지
 Notify_me_if_there_is_an_unexpected_mod_conflict 모드와 비 호환되는 모드 발견 시 에러 보여주기
 Unsubscribe Unsubscribe
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
+Road_signs_theme_mph Theme for MPH road signs
+theme_Square_US US signs
+theme_Round_UK British signs
+theme_Round_German German signs

@@ -233,3 +233,10 @@ Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
 Unsubscribe Unsubscribe
+Display_speed_limits_mph Geschwindigkeitsbegrenzungen anzeigen als MPH statt km/h
+Miles_per_hour Meilen pro Stunde
+Kilometers_per_hour Kilometer pro Stunde
+Road_signs_theme_mph Thema für MPH Verkehrszeichen
+theme_Square_US US-Verkehrszeichen
+theme_Round_UK Britische Verkehrszeichen
+theme_Round_German Deutsche Verkehrszeichen
