@@ -87,12 +87,13 @@ namespace TrafficManager.Util
                     else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
-                        string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
+			string folder = Path.GetFileName(mod.modPath);
+                        //string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
                         results.Add(mod, $"{modName} in /{folder}");
                     }
 #endif
-                }
-            }
+								}
+						}
 
             Log.Info($"Scan complete: {results.Count} incompatible mod(s) found");
 
