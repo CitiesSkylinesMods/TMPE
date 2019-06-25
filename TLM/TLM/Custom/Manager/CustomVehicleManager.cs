@@ -31,7 +31,7 @@ namespace TrafficManager.Custom.Manager {
 #if BENCHMARK
 			using (var bm = new Benchmark(null, "keep-spare-vehicles")) {
 #endif
-				if (this.m_vehicleCount > VehicleManager.MAX_VEHICLE_COUNT - 5) {
+				if (this.m_vehicleCount > Constants.ServiceFactory.VehicleService.MaxVehicleCount - 5) {
 					// prioritize service vehicles and public transport when hitting the vehicle limit
 					ItemClass.Service service = info.GetService();
 					if (service == ItemClass.Service.Residential || service == ItemClass.Service.Industrial || service == ItemClass.Service.Commercial || service == ItemClass.Service.Office) {

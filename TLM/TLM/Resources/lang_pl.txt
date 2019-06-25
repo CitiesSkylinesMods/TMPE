@@ -245,3 +245,10 @@ Keybind_Exit_subtool Wyłącz narzędzie i zamknij TM:PE menu
 Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
 Keybind_category_Global Global keys
 Keybind_category_LaneConnector Lane Connector Tool keys
+Display_speed_limits_mph Wyświetlaj limity prędkości w mph zamiast km/h
+Miles_per_hour Mile na godzinę
+Kilometers_per_hour Kilometry na godzinę
+Road_signs_theme_mph Motyw dla znaków MPH 
+theme_Square_US Stany zjednoczone
+theme_Round_UK Wielka Brytania
+theme_Round_German Niemcy

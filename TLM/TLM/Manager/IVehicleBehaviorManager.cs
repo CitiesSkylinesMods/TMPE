@@ -47,6 +47,21 @@ namespace TrafficManager.Manager {
 		int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position next1PathPos, NetInfo next1SegInfo, PathUnit.Position next2PathPos, NetInfo next2SegInfo, PathUnit.Position next3PathPos, NetInfo next3SegInfo, PathUnit.Position next4PathPos);
 
 		/// <summary>
+		/// Identifies the best lane to take on the next segment (for emergency vehicles on duty).
+		/// Note that this method does not require Advanced AI and/or DLS to be active.
+		/// </summary>
+		/// <param name="vehicleId">queried vehicle id</param>
+		/// <param name="vehicleData">vehicle data</param>
+		/// <param name="vehicleState">vehicle state</param>
+		/// <param name="currentLaneId">current lane id</param>
+		/// <param name="currentPathPos">current path position</param>
+		/// <param name="currentSegInfo">current segment info</param>
+		/// <param name="nextPathPos">next path position</param>
+		/// <param name="nextSegInfo">next segment info</param>
+		/// <returns>target position lane index</returns>
+		int FindBestEmergencyLane(ushort vehicleId, ref Vehicle vehicleData, ref VehicleState vehicleState, uint currentLaneId, PathUnit.Position currentPathPos, NetInfo currentSegInfo, PathUnit.Position nextPathPos, NetInfo nextSegInfo);
+
+		/// <summary>
 		/// Determines if the given vehicle is allowed to find an alternative lane.
 		/// </summary>
 		/// <param name="vehicleId">queried vehicle</param>

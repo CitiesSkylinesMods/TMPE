@@ -11,6 +11,8 @@ namespace CitiesGameBridge.Service {
 
 		}
 
+        public int MaxVehicleCount => VehicleManager.instance.m_vehicles.m_buffer.Length; 
+
 		public bool CheckVehicleFlags(ushort vehicleId, Vehicle.Flags flagMask, Vehicle.Flags? expectedResult = default(Vehicle.Flags?)) {
 			bool ret = false;
 			ProcessVehicle(vehicleId, delegate (ushort vId, ref Vehicle vehicle) {

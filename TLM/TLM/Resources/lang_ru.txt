@@ -245,3 +245,10 @@ Keybind_Exit_subtool Закрыть инструмент и меню TM:PE
 Keybind_conflict Выбранная комбинация клавиш уже используется в другом месте. Пожалуйста, выберите другую комбинацию.
 Keybind_category_Global Общие комбинации клавиш
 Keybind_category_LaneConnector Клавиши для инструмента "Линии Движения"
+Display_speed_limits_mph Показывать скорости в милях в час вместо км/ч
+Miles_per_hour Мили в час
+Kilometers_per_hour Километры в час
+Road_signs_theme_mph Стиль знаков, когда показываются мили в час
+theme_Square_US Американские знаки
+theme_Round_UK Британские знаки
+theme_Round_German Немецкие знаки

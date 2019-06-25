@@ -245,3 +245,10 @@ Keybind_Exit_subtool Werkzeug und TM:PE Menü schließen
 Keybind_conflict Die ausgewählte Taste steht in Konflikt mit einer anderen Tastenkombination. Bitte wähle etwas anderes.
 Keybind_category_Global Allgemeine Tasten
 Keybind_category_LaneConnector Tasten für 'Fahrspurverbinder' Werkzeug
+Display_speed_limits_mph Geschwindigkeitsbegrenzungen anzeigen als MPH statt km/h
+Miles_per_hour Meilen pro Stunde
+Kilometers_per_hour Kilometer pro Stunde
+Road_signs_theme_mph Thema für MPH Verkehrszeichen
+theme_Square_US US-Verkehrszeichen
+theme_Round_UK Britische Verkehrszeichen
+theme_Round_German Deutsche Verkehrszeichen
