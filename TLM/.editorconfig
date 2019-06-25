@@ -1,8 +1,8 @@
 ﻿root = true
 
 [*.{cs,vb}]
-indent_style = tab
-indent_size = 8
+indent_style = space
+indent_size = 4
 trim_trailing_whitespace = true
 
 [*.cs]
