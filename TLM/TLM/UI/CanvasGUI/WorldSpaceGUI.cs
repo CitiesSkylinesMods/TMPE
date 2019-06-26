@@ -73,7 +73,7 @@ namespace TrafficManager.UI.CanvasGUI {
             var rectTransform = gameObject.GetComponent<RectTransform>();
 
             // adjust position from a more natural way to Unity3d Y facing down
-            pos.y = -(pos.y + size.y);
+            // pos.y = -(pos.y + size.y);
 
             rectTransform.localPosition = pos;
             rectTransform.localScale = new Vector3(1f, 1f, 1f);
@@ -198,13 +198,15 @@ namespace TrafficManager.UI.CanvasGUI {
         /// <returns></returns>
         public List<RaycastResult> RaycastMouse() {
             // Set up the new Pointer Event
+            var results = new List<RaycastResult>();
+            if (raycaster_ == null) {
+                return results;
+            }
+
             var pointerEventData = new PointerEventData(eventSystem_);
 
             // Set the Pointer Event Position to that of the mouse position
             pointerEventData.position = Input.mousePosition;
-
-            // Create a list of Raycast Results
-            var results = new List<RaycastResult>();
 
             // Raycast using the Graphics Raycaster and mouse click position
             raycaster_.Raycast(pointerEventData, results);
