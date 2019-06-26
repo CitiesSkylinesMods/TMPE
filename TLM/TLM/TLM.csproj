@@ -533,17 +533,6 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonF.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonFOff.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonL.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonLOff.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonR.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonROff.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonFDisabled.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonLDisabled.png" />
-    <EmbeddedResource Include="Resources\LaneArrows\ButtonRDisabled.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\LaneArrows\Atlas_Lane_Arrows.png" />
