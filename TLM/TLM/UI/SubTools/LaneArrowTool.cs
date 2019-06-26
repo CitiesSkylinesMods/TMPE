@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Policy;
 using ColossalFramework;
 using ColossalFramework.Math;
 using CSUtil.Commons;
@@ -125,11 +126,6 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-//        private const float LANE_GROUP_WIDTH = 11f;
-//        private const float LANE_BUTTON_GAP = 0.7f;
-//        private const float LANE_GROUP_GAP = LANE_BUTTON_GAP * 2f;
-//        private const float LANE_GROUP_HALFSIZE = (LANE_GROUP_WIDTH - LANE_BUTTON_GAP) / 2f;
-
         private const float LANE_BUTTON_SIZE = 4f; // control button size, 4x4m
 
         /// <summary>
@@ -142,29 +138,14 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="netSegment">The most recently clicked segment, will be used to position
         ///     and rotate the canvas.</param>
         private void CreateWorldSpaceGUI(NetSegment netSegment) {
-            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             var lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
             var laneList = GetLaneList(SelectedSegmentId, SelectedNodeId);
 
-            // Create the GUI form and center it according to the lane count
+            // Create the GUI form and center it according to the node position
+            Quaternion rotInverse;
+            Vector3 guiOriginWorldPos;
+            CreateWorldSpaceCanvas(netSegment, out guiOriginWorldPos, out rotInverse);
 
-            // Forward is the direction of the selected segment, even if it's a curve
-            var forwardVector = GetSegmentTangent(SelectedNodeId, netSegment);
-            var rot = Quaternion.LookRotation(Vector3.down, forwardVector.normalized);
-            var rotInverse = Quaternion.Inverse(rot); // for projecting stuff from world into the canvas
-
-            // UI is floating 5 metres above the ground
-            const float UI_FLOAT_HEIGHT = 5f;
-            var adjustFloat = Vector3.up * UI_FLOAT_HEIGHT;
-
-            // Adjust UI vertically
-            var guiOriginWorldPos = nodesBuffer[SelectedNodeId].m_position + adjustFloat;
-            wsGui = new WorldSpaceGUI(guiOriginWorldPos, rot);
-
-            // -------------------------------
-            // Now iterate over eligible lanes
-            // -------------------------------
             var geometry = SegmentGeometry.Get(SelectedSegmentId);
             if (geometry == null) {
                 Log.Error($"LaneArrowTool._guiLaneChangeWindow: No geometry information " +
@@ -173,10 +154,8 @@ namespace TrafficManager.UI.SubTools {
             }
 
             var isStartNode = geometry.StartNodeId() == SelectedNodeId;
-//            var expectedGuiWidth = (laneList.Count * LANE_GROUP_WIDTH) +
-//                                   ((laneList.Count - 1) * LANE_GROUP_GAP);
-//            var offset = -expectedGuiWidth / 2f;
 
+            // Now iterate over eligible lanes
             for (var i = 0; i < laneList.Count; i++) {
                 var laneId = laneList[i].laneId;
                 var lane = lanesBuffer[laneId];
@@ -204,39 +183,15 @@ namespace TrafficManager.UI.SubTools {
                         if (laneEditButton == btnCurrentControlButton) {
                             return;
                         }
-                        CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId, laneId, isStartNode);
+
+                        CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId,
+                                                laneId, isStartNode);
                     });
 
                 if (laneList.Count == 1) {
                     // For only one lane, immediately open the arrow buttons
                     CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId, laneId, isStartNode);
                 }
-
-                /*
-                        // TODO: Here apply LaneButtonState.Disabled if the lane cannot turn there
-                        var forward = (flags & NetLane.Flags.Forward) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-                        var bForward = GuiAddLaneControlForward(offset, forward);
-                        UnityAction clickForward = () => {
-                            OnClickForward(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, bForward);
-                        };
-                        bForward.GetComponent<Button>().onClick.AddListener(clickForward);
-        
-                        var left = (flags & NetLane.Flags.Left) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-                        var bLeft = GuiAddLaneControlLeft(offset, left);
-                        UnityAction clickLeft = () => {
-                            OnClickLeft(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, bLeft);
-                        };
-                        bLeft.GetComponent<Button>().onClick.AddListener(clickLeft);
-        
-                        var right = (flags & NetLane.Flags.Right) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-                        var bRight = GuiAddLaneControlRight(offset, right);
-                        UnityAction clickRight = () => {
-                            OnClickRight(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, bRight);
-                        };
-                        bRight.GetComponent<Button>().onClick.AddListener(clickRight);
-                
-                        offset += LANE_GROUP_WIDTH + LANE_GROUP_GAP;
-                */
 
                 //	if (buttonClicked) {
                 //		switch (res) {
@@ -253,6 +208,31 @@ namespace TrafficManager.UI.SubTools {
                 //		}
                 //	}
             }
+        }
+
+        /// <summary>
+        /// Given segment being edited, and globals (selected node id) create canvas centered at that node.
+        /// </summary>
+        /// <param name="netSegment">Segment being edited</param>
+        /// <param name="guiOriginWorldPos">Returns position in the world where the canvas is centered</param>
+        /// <param name="inverse">Returns inverse rotation quaternion for later use</param>
+        private void CreateWorldSpaceCanvas(NetSegment netSegment, out Vector3 guiOriginWorldPos,
+                                            out Quaternion inverse) {
+            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+
+            // Forward is the direction of the selected segment, even if it's a curve
+            var forwardVector = GetSegmentTangent(SelectedNodeId, netSegment);
+            var rot = Quaternion.LookRotation(Vector3.down, forwardVector.normalized);
+            inverse = Quaternion.Inverse(rot); // for projecting stuff from world into the canvas
+
+            // UI is floating 5 metres above the ground
+            const float UI_FLOAT_HEIGHT = 5f;
+            var adjustFloat = Vector3.up * UI_FLOAT_HEIGHT;
+
+            // Adjust UI vertically
+            guiOriginWorldPos = nodesBuffer[SelectedNodeId].m_position + adjustFloat;
+            wsGui?.DestroyCanvas();
+            wsGui = new WorldSpaceGUI("LaneArrowTool", guiOriginWorldPos, rot);
         }
 
         /// <summary>
@@ -278,35 +258,53 @@ namespace TrafficManager.UI.SubTools {
             DestroyLaneArrowButtons();
             btnCurrentControlButton = originButton; // save this to decolorize it later
 
+	    // Get eligible turn directions
+            var eligibleDirections = GetAllowedTurns(nodeId, segmentId);
+
             //-----------------
             // Button FORWARD
             //-----------------
             var forward = (flags & NetLane.Flags.Forward) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            GuiAddLaneArrowForward(originButton, forward);
-            UnityAction clickForward = () => {
-                OnClickForward(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowForward);
-            };
-            btnLaneArrowForward.GetComponent<Button>().onClick.AddListener(clickForward);
+            if (eligibleDirections.Contains(ArrowDirection.Forward)) {
+                GuiAddLaneArrowForward(originButton, forward);
+                UnityAction clickForward = () => {
+                    OnClickForward(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowForward);
+                };
+                btnLaneArrowForward.GetComponent<Button>().onClick.AddListener(clickForward);
+            } else {
+                GuiAddLaneArrowForward(originButton, LaneButtonState.Disabled);
+		// Note: no click handler added
+            }
 
             //-----------------
             // Button LEFT
             //-----------------
             var left = (flags & NetLane.Flags.Left) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            GuiAddLaneArrowLeft(originButton, left);
-            UnityAction clickLeft = () => {
-                OnClickLeft(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowLeft);
-            };
-            btnLaneArrowLeft.GetComponent<Button>().onClick.AddListener(clickLeft);
+            if (eligibleDirections.Contains(ArrowDirection.Left)) {
+                GuiAddLaneArrowLeft(originButton, left);
+                UnityAction clickLeft = () => {
+                    OnClickLeft(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowLeft);
+                };
+                btnLaneArrowLeft.GetComponent<Button>().onClick.AddListener(clickLeft);
+            } else {
+                GuiAddLaneArrowLeft(originButton, LaneButtonState.Disabled);
+                // Note: no click handler added
+            }
 
             //-----------------
             // Button RIGHT
             //-----------------
             var right = (flags & NetLane.Flags.Right) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            GuiAddLaneArrowRight(originButton, right);
-            UnityAction clickRight = () => {
-                OnClickRight(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowRight);
-            };
-            btnLaneArrowRight.GetComponent<Button>().onClick.AddListener(clickRight);
+            if (eligibleDirections.Contains(ArrowDirection.Right)) {
+                GuiAddLaneArrowRight(originButton, right);
+                UnityAction clickRight = () => {
+                    OnClickRight(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowRight);
+                };
+                btnLaneArrowRight.GetComponent<Button>().onClick.AddListener(clickRight);
+            } else {
+                GuiAddLaneArrowRight(originButton, LaneButtonState.Disabled);
+                // Note: no click handler added
+            }
         }
 
         private void UpdateButtonGraphics(ushort segmentId, ushort nodeId, uint laneId, NetLane.Flags direction,
@@ -402,19 +400,19 @@ namespace TrafficManager.UI.SubTools {
             switch (direction) {
                 case NetLane.Flags.Forward:
                     return GetButtonTextureFromState(state,
-                                            TextureResources.LaneArrows.ButtonForward,
-                                            TextureResources.LaneArrows.ButtonForwardOff,
-                                            TextureResources.LaneArrows.ButtonForwardDisabled);
+                                                     TextureResources.LaneArrows.ButtonForward,
+                                                     TextureResources.LaneArrows.ButtonForwardOff,
+                                                     TextureResources.LaneArrows.ButtonForwardDisabled);
                 case NetLane.Flags.Left:
                     return GetButtonTextureFromState(state,
-                                            TextureResources.LaneArrows.ButtonLeft,
-                                            TextureResources.LaneArrows.ButtonLeftOff,
-                                            TextureResources.LaneArrows.ButtonLeftDisabled);
+                                                     TextureResources.LaneArrows.ButtonLeft,
+                                                     TextureResources.LaneArrows.ButtonLeftOff,
+                                                     TextureResources.LaneArrows.ButtonLeftDisabled);
                 case NetLane.Flags.Right:
                     return GetButtonTextureFromState(state,
-                                            TextureResources.LaneArrows.ButtonRight,
-                                            TextureResources.LaneArrows.ButtonRightOff,
-                                            TextureResources.LaneArrows.ButtonRightDisabled);
+                                                     TextureResources.LaneArrows.ButtonRight,
+                                                     TextureResources.LaneArrows.ButtonRightOff,
+                                                     TextureResources.LaneArrows.ButtonRightDisabled);
                 default:
                     Log.Error($"Trying to find texture for lane state {direction.ToString()}");
                     return null;
@@ -430,9 +428,17 @@ namespace TrafficManager.UI.SubTools {
                 btnCurrentControlButton.GetComponentInParent<Image>().color = Color.white;
             }
 
-            if (btnLaneArrowLeft != null) { UnityEngine.Object.Destroy(btnLaneArrowLeft); }
-            if (btnLaneArrowForward != null) { UnityEngine.Object.Destroy(btnLaneArrowForward); }
-            if (btnLaneArrowRight != null) { UnityEngine.Object.Destroy(btnLaneArrowRight); }
+            if (btnLaneArrowLeft != null) {
+                UnityEngine.Object.Destroy(btnLaneArrowLeft);
+            }
+
+            if (btnLaneArrowForward != null) {
+                UnityEngine.Object.Destroy(btnLaneArrowForward);
+            }
+
+            if (btnLaneArrowRight != null) {
+                UnityEngine.Object.Destroy(btnLaneArrowRight);
+            }
 
             btnCurrentControlButton = btnLaneArrowLeft = btnLaneArrowForward = btnLaneArrowRight = null;
         }
@@ -441,10 +447,10 @@ namespace TrafficManager.UI.SubTools {
         /// Creates Turn Left lane control button slightly to the left of the originButton.
         /// </summary>
         private void GuiAddLaneArrowForward(GameObject originButton, LaneButtonState forward) {
-            btnLaneArrowForward = wsGui.AddButton(new Vector3(0f, LANE_BUTTON_SIZE * 1.3f, 0f),
-                                                    new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                    string.Empty,
-                                                    originButton);
+            btnLaneArrowForward = wsGui.AddButton(new Vector3(0f, LANE_BUTTON_SIZE * 1.3f, -1f),
+                                                  new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
+                                                  string.Empty,
+                                                  originButton);
 
             wsGui.SetButtonImage(btnLaneArrowForward,
                                  SelectControlButtonGraphics(NetLane.Flags.Forward, forward));
@@ -456,11 +462,11 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="originButton">The parent for the new button</param>
         /// <param name="left">The state of the button (on, off, disabled)</param>
         private void GuiAddLaneArrowLeft(GameObject originButton,
-                                           LaneButtonState left) {
-            btnLaneArrowLeft = wsGui.AddButton(new Vector3(-LANE_BUTTON_SIZE, LANE_BUTTON_SIZE, 0f),
-                                                    new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                    string.Empty,
-                                                    originButton);
+                                         LaneButtonState left) {
+            btnLaneArrowLeft = wsGui.AddButton(new Vector3(-LANE_BUTTON_SIZE, LANE_BUTTON_SIZE, -1f),
+                                               new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f),
+                                               string.Empty,
+                                               originButton);
 
             wsGui.SetButtonImage(btnLaneArrowLeft,
                                  SelectControlButtonGraphics(NetLane.Flags.Left, left));
@@ -472,11 +478,11 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="originButton">The parent for the new button</param>
         /// <param name="right">The state of the button (on, off, disabled)</param>
         private void GuiAddLaneArrowRight(GameObject originButton,
-                                            LaneButtonState right) {
-            btnLaneArrowRight = wsGui.AddButton(new Vector3(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE, 0f),
-                                                  new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                  string.Empty,
-                                                  originButton);
+                                          LaneButtonState right) {
+            btnLaneArrowRight = wsGui.AddButton(new Vector3(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE, -1f),
+                                                new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f),
+                                                string.Empty,
+                                                originButton);
 
             wsGui.SetButtonImage(btnLaneArrowRight,
                                  SelectControlButtonGraphics(NetLane.Flags.Right, right));
@@ -507,6 +513,43 @@ namespace TrafficManager.UI.SubTools {
             var isStartNode = nodeId == segment.m_startNode;
             var tangent = bezier.Tangent(isStartNode ? 0f : 1f);
             return tangent;
+        }
+
+	/// <summary>
+        /// For incoming segment into a node, get allowed directions to leave the segment.
+        /// This is used to disable some of the lane turn buttons.
+        /// </summary>
+        /// <param name="nodeId">The currently edited node</param>
+        /// <param name="incomingSegmentId">The currently edited segment</param>
+        /// <returns>Bit combination of allowed lane turns</returns>
+        private HashSet<ArrowDirection> GetAllowedTurns(ushort nodeId, ushort incomingSegmentId) {
+            var result = new HashSet<ArrowDirection>();
+
+	    var geometry = SegmentGeometry.Get(incomingSegmentId);
+            if (geometry == null) {
+                Log.Error(
+                    $"LaneArrowsTool: No geometry information available for segment {incomingSegmentId}");
+                return result;
+            }
+
+            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            var node = nodesBuffer[nodeId];
+            var incomingSegment = Singleton<NetManager>.instance.m_segments.m_buffer[incomingSegmentId];
+            var isStartNode = nodeId == incomingSegment.m_startNode;
+
+            for (var i = 0; i < 8; ++i) {
+                var outgoingSegId = node.GetSegment(i);
+                if (outgoingSegId == 0) {
+                    continue;
+                }
+                if (outgoingSegId == incomingSegmentId) {
+                    continue;
+                }
+
+                result.Add(geometry.GetDirection(outgoingSegId, isStartNode));
+            }
+
+            return result;
         }
     }
 }

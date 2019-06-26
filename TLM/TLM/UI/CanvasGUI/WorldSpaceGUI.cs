@@ -15,6 +15,7 @@ namespace TrafficManager.UI.CanvasGUI {
     /// controls for it and assists with styling, etc.
     /// </summary>
     public class WorldSpaceGUI {
+        public string name_;
         private GameObject canvasGameObj_;
         private ulong counter_;
         private Shader seeThroughShader_;
@@ -24,11 +25,18 @@ namespace TrafficManager.UI.CanvasGUI {
         private EventSystem eventSystem_;
         private bool mouse1Held = false;
 
-        public WorldSpaceGUI(Vector3 pos, Quaternion rot) {
+        /// <summary>Creates canvas $"{name} Canvas" in the scene</summary>
+        /// <param name="name"></param>
+        /// <param name="pos"></param>
+        /// <param name="rot"></param>
+        public WorldSpaceGUI(string name, Vector3 pos, Quaternion rot) {
             // seeThroughShader_ = Resources.Load<Shader>("WorldSpaceGUI.SeeThroughZ");
+            name_ = name; // for debugging/printing canvas name if ever
 
-            canvasGameObj_ = new GameObject();
-            canvasGameObj_.name = "Canvas " + (counter_++);
+            var canvasName = $"{name} Canvas";
+            DestroyAllWithName(canvasName);
+
+            canvasGameObj_ = new GameObject { name = canvasName };
 
             var canvasComponent = canvasGameObj_.AddComponent<Canvas>();
             canvasComponent.renderMode = RenderMode.WorldSpace;
@@ -47,12 +55,28 @@ namespace TrafficManager.UI.CanvasGUI {
             eventSystem_ = UnityEngine.Object.FindObjectOfType<EventSystem>();
 
             // Set the camera
-            //	var mainCam = GameObject.FindGameObjectWithTag("MainCamera");
-            //	Debug.Assert(mainCam != null);
-            //	canvasComponent.worldCamera = mainCam.GetComponent<Camera>();
+            // TODO: Although this sets the camera, it does not work correctly with the GUI
+            // var mainCam = GameObject.FindObjectOfType<Camera>();
+            // Debug.Assert(mainCam != null);
+            // canvasComponent.worldCamera = mainCam.GetComponent<Camera>();
 
             // canvasComponent.worldCamera = Camera.main;
             // Log.Info($"All cameras count {Camera.allCamerasCount}");
+        }
+
+        /// <summary>
+        /// For safety: delete all other canvases with this name
+        /// </summary>
+        /// <param name="canvasName"></param>
+        private static void DestroyAllWithName(string canvasName) {
+            do {
+                var destroy = GameObject.Find(canvasName);
+                if (destroy == null) {
+                    break;
+                }
+
+                UnityEngine.Object.Destroy(destroy);
+            } while (true);
         }
 
         public void DestroyCanvas() {
@@ -163,6 +187,9 @@ namespace TrafficManager.UI.CanvasGUI {
         //			}
         //		}
 
+        /// <summary>
+        /// Check whether mouse1 was pressed and where did it hit.
+        /// </summary>
         public void HandleInput() {
             if (!Input.GetKey(KeyCode.Mouse0)) {
                 // Mouse1 is released, clear the flag
@@ -195,7 +222,7 @@ namespace TrafficManager.UI.CanvasGUI {
         /// <summary>
         /// Take mouse position and find whether we hit anything
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of hit results containing gameobjects</returns>
         public List<RaycastResult> RaycastMouse() {
             // Set up the new Pointer Event
             var results = new List<RaycastResult>();
