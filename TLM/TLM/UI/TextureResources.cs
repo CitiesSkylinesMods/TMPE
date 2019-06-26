@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Resources;
 using TrafficManager.Geometry;
 using TrafficManager.Manager;
 using TrafficManager.Manager.Impl;
@@ -70,6 +71,14 @@ namespace TrafficManager.UI {
         public static readonly Texture2D RemoveButtonTexture2D;
         public static readonly Texture2D WindowBackgroundTexture2D;
 
+        public struct WorldSpaceGUI {
+            public static Shader SeeThroughZ;
+
+            static WorldSpaceGUI() {
+                SeeThroughZ = Resources.Load<Shader>("WorldSpaceGUI.SeeThroughZ.shader");
+            }
+        }
+
         /// <summary>
         /// Groups resources for Lane Arrows Tool, 32x32
         /// Row 0 (64px) contains: red X, green ↑, →, ↑→, ←, ←↑, ←→, ←↑→
@@ -77,10 +86,11 @@ namespace TrafficManager.UI {
         /// Row 2 (0px) contains: black ←, ↑, → 
         /// </summary>
         public struct LaneArrows {
-            public static readonly Texture2D Atlas;
             private const int ATLAS_H = 96;
             private const float SPRITE_H = 32f;
             private const float SPRITE_W = 32f;
+
+            public static readonly Texture2D Atlas;
 
             static LaneArrows() {
                 Atlas = LoadDllResource("LaneArrows.Atlas_Lane_Arrows.png", 256, ATLAS_H);

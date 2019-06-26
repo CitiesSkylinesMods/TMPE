@@ -18,8 +18,7 @@ namespace TrafficManager.UI.CanvasGUI {
         public string name_;
         private GameObject canvasGameObj_;
         private ulong counter_;
-        private Shader seeThroughShader_;
-
+        
         // Raycaster and eventsystem handle the input
         private GraphicRaycaster raycaster_;
         private EventSystem eventSystem_;
@@ -127,7 +126,7 @@ namespace TrafficManager.UI.CanvasGUI {
         }
 
         private void SetupMaterial(Material material) {
-            // material.shader = seeThroughShader_;
+            material.shader = TextureResources.WorldSpaceGUI.SeeThroughZ;
         }
 
         public GameObject AddButton(Vector3 pos, Vector2 size,
