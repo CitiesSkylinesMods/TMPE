@@ -207,6 +207,11 @@ namespace TrafficManager.UI.SubTools {
                         CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId, laneId, isStartNode);
                     });
 
+                if (laneList.Count == 1) {
+                    // For only one lane, immediately open the arrow buttons
+                    CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId, laneId, isStartNode);
+                }
+
                 /*
                         // TODO: Here apply LaneButtonState.Disabled if the lane cannot turn there
                         var forward = (flags & NetLane.Flags.Forward) != 0 ? LaneButtonState.On : LaneButtonState.Off;
