@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
 using ColossalFramework;
-using ColossalFramework.Globalization;
 using ColossalFramework.IO;
 using ColossalFramework.PlatformServices;
-using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
 
@@ -25,7 +23,7 @@ namespace TrafficManager.UI
         private UIComponent blurEffect;
 
         /// <summary>
-        /// List of incompatible mods from <see cref="TrafficManager.Util.ModsCompatibilityChecker"/>.
+        /// Gets or sets list of incompatible mods from <see cref="TrafficManager.Util.ModsCompatibilityChecker"/>.
         /// </summary>
         public Dictionary<PluginInfo, string> IncompatibleMods { get; set; }
 
@@ -144,7 +142,7 @@ namespace TrafficManager.UI
             if (blurEffect != null)
             {
                 blurEffect.isVisible = true;
-                ValueAnimator.Animate("ModalEffect", delegate(float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
             }
 
             // Make sure modal dialog is in front of all other UI
