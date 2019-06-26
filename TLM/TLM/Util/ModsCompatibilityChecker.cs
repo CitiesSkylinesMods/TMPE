@@ -9,9 +9,9 @@ using ICities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq; // used in RELEASE builds
 using System.Reflection;
 using TrafficManager.UI;
+using UnityEngine;
 using static ColossalFramework.Plugins.PluginManager;
 
 namespace TrafficManager.Util
@@ -38,15 +38,22 @@ namespace TrafficManager.Util
         /// </summary>
         public void PerformModCheck()
         {
-            Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
-
-            if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
+            try
             {
-                IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
-                panel.IncompatibleMods = detected;
-                panel.Initialize();
-                UIView.PushModal(panel);
-                UIView.SetFocus(panel);
+                Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
+
+                if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
+                {
+                    IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
+                    panel.IncompatibleMods = detected;
+                    panel.Initialize();
+                    UIView.PushModal(panel);
+                    UIView.SetFocus(panel);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
@@ -89,13 +96,13 @@ namespace TrafficManager.Util
                     else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
-			string folder = Path.GetFileName(mod.modPath);
+                        string folder = Path.GetFileName(mod.modPath);
                         //string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
                         results.Add(mod, $"{modName} in /{folder}");
                     }
 #endif
-								}
-						}
+                }
+            }
 
             Log.Info($"Scan complete: {results.Count} incompatible mod(s) found");
 
@@ -113,8 +120,8 @@ namespace TrafficManager.Util
         /// <returns>The name of the specified plugin.</returns>
         public string GetModName(PluginInfo plugin)
         {
-	    return ((IUserMod)plugin.userModInstance).Name;
-	}
+            return ((IUserMod)plugin.userModInstance).Name;
+        }
 
         /// <summary>
         /// Works out if the game is effectively running in offline mode, in which no workshop mod subscriptions will be active.
@@ -184,7 +191,7 @@ namespace TrafficManager.Util
 
             // Treat other workshop-published branches of TM:PE, as applicable, as conflicts
 #if LABS
-            results.Add(583429740u , "TM:PE STABLE");
+            results.Add(583429740u, "TM:PE STABLE");
 #elif DEBUG
             results.Add(1637663252u, "TM:PE LABS");
             results.Add(583429740u, "TM:PE STABLE");
