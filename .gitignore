@@ -186,6 +186,7 @@ FakesAssemblies/
 # MSVS 2017 artifacts
 /.vs/slnx.sqlite
 /TLM/.vs/TMPE/*
+/TLM/.vs/config/applicationhost.config
 
 # Dependecies game dlls
 /TLM/dependencies
