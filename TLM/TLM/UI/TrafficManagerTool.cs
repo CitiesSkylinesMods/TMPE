@@ -189,28 +189,45 @@ namespace TrafficManager.UI {
             }
             bool realToolChange = toolModeChanged;
 
-            if (oldSubTool != null) {
-                if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights) {
-                        oldSubTool.Cleanup();
-                    }
-                } else {
-                    oldSubTool.Cleanup();
-                }
-            }
+			if (oldSubTool != null) {
+				if (oldToolMode == ToolMode.TimedLightsSelectNode
+                    || oldToolMode == ToolMode.TimedLightsShowLights
+                    || oldToolMode == ToolMode.TimedLightsAddNode
+                    || oldToolMode == ToolMode.TimedLightsRemoveNode
+                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
+                    // TODO refactor to SubToolMode
+					if (mode != ToolMode.TimedLightsSelectNode
+                        && mode != ToolMode.TimedLightsShowLights
+                        && mode != ToolMode.TimedLightsAddNode
+                        && mode != ToolMode.TimedLightsRemoveNode
+                        && mode != ToolMode.TimedLightsCopyLights) {
+						oldSubTool.Cleanup();
+					}
+				} else {
+					oldSubTool.Cleanup();
+				}
+			}
 
-            if (toolModeChanged && activeSubTool != null) {
-                if ((oldToolMode == ToolMode.TimedLightsSelectNode || oldToolMode == ToolMode.TimedLightsShowLights || oldToolMode == ToolMode.TimedLightsAddNode || oldToolMode == ToolMode.TimedLightsRemoveNode || oldToolMode == ToolMode.TimedLightsCopyLights)) { // TODO refactor to SubToolMode
+			if (toolModeChanged && activeSubTool != null) {
+				if (oldToolMode == ToolMode.TimedLightsSelectNode
+                    || oldToolMode == ToolMode.TimedLightsShowLights
+                    || oldToolMode == ToolMode.TimedLightsAddNode
+                    || oldToolMode == ToolMode.TimedLightsRemoveNode
+                    || oldToolMode == ToolMode.TimedLightsCopyLights) { // TODO refactor to SubToolMode
 
-                    if (mode != ToolMode.TimedLightsSelectNode && mode != ToolMode.TimedLightsShowLights && mode != ToolMode.TimedLightsAddNode && mode != ToolMode.TimedLightsRemoveNode && mode != ToolMode.TimedLightsCopyLights) {
-                        activeSubTool.Cleanup();
-                    } else {
-                        realToolChange = false;
-                    }
-                } else {
-                    activeSubTool.Cleanup();
-                }
-            }
+					if (mode != ToolMode.TimedLightsSelectNode
+                        && mode != ToolMode.TimedLightsShowLights
+                        && mode != ToolMode.TimedLightsAddNode
+                        && mode != ToolMode.TimedLightsRemoveNode
+                        && mode != ToolMode.TimedLightsCopyLights) {
+						activeSubTool.Cleanup();
+					} else {
+						realToolChange = false;
+					}
+				} else {
+					activeSubTool.Cleanup();
+				}
+			}
 
             SelectedNodeId = 0;
             SelectedSegmentId = 0;

@@ -392,7 +392,7 @@ namespace TrafficManager.UI {
                 return texture;
             }
             catch (Exception e) {
-                Log.Error(e.StackTrace);
+                Log.Error(e.StackTrace.ToString());
                 return null;
             }
         }

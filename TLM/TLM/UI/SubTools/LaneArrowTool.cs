@@ -13,6 +13,9 @@ using UnityEngine.UI;
 
 namespace TrafficManager.UI.SubTools {
     public class LaneArrowTool : SubTool {
+        /// <summary>
+        /// Used for selecting textures for lane arrows in different states
+        /// </summary>
         private enum LaneButtonState {
             On,
             Off,
@@ -26,7 +29,7 @@ namespace TrafficManager.UI.SubTools {
         private GameObject btnLaneArrowLeft;
         private GameObject btnLaneArrowRight;
 
-	// Used to draw lane on screen which is being edited
+        // Used to draw lane on screen which is being edited
         private uint highlightLaneId;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
@@ -76,7 +79,7 @@ namespace TrafficManager.UI.SubTools {
 
             Vector3 screenPos;
             bool visible = MainTool.WorldToScreenPoint(nodePos, out screenPos);
-	    if (!visible) {
+            if (!visible) {
                 return;
             }
 
@@ -108,7 +111,7 @@ namespace TrafficManager.UI.SubTools {
             if (!cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 &&
                 (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
                 var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
-		var hoveredSegment = netManager.m_segments.m_buffer[HoveredSegmentId];
+                var hoveredSegment = netManager.m_segments.m_buffer[HoveredSegmentId];
 
                 if ((hoveredSegment.m_startNode == HoveredNodeId ||
                      hoveredSegment.m_endNode == HoveredNodeId) &&
@@ -457,7 +460,6 @@ namespace TrafficManager.UI.SubTools {
         /// <summary>
         /// When lane arrow button is destroyed we might want to decolorize the control button
         /// </summary>
-        /// <param name="b">The button we are destroying, its parent is to be restored</param>
         private void DestroyLaneArrowButtons() {
             if (btnCurrentControlButton != null) {
                 btnCurrentControlButton.GetComponentInParent<Image>().color = Color.white;
@@ -550,7 +552,7 @@ namespace TrafficManager.UI.SubTools {
             return tangent;
         }
 
-	/// <summary>
+        /// <summary>
         /// For incoming segment into a node, get allowed directions to leave the segment.
         /// This is used to disable some of the lane turn buttons.
         /// </summary>
@@ -560,7 +562,7 @@ namespace TrafficManager.UI.SubTools {
         private HashSet<ArrowDirection> GetAllowedTurns(ushort nodeId, ushort incomingSegmentId) {
             var result = new HashSet<ArrowDirection>();
 
-	    var geometry = SegmentGeometry.Get(incomingSegmentId);
+    	    var geometry = SegmentGeometry.Get(incomingSegmentId);
             if (geometry == null) {
                 Log.Error(
                     $"LaneArrowsTool: No geometry information available for segment {incomingSegmentId}");
@@ -586,5 +588,9 @@ namespace TrafficManager.UI.SubTools {
 
             return result;
         }
-    }
-}
+
+        public override void Cleanup() {
+            Deselect();
+        }
+    } // class
+} // namespace
