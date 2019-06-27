@@ -6,6 +6,7 @@
 - Added: Miles Per Hour option for speed limits (thanks kvakvs) (#384)
 - Added: Selectable style (US, UK, EU) of speed sign in speed limits UI (thanks kvakvs) (#384)
 - Added: Differentiate LABS, STABLE and DEBUG branches in UI (#326, #333)
+- Added: Basic support of offline mode for users playing on EA's Origin service (#333)
 - Improved: Avoid setting loss due to duplicate TM:PE subscriptions (#333, #306, #149, #190, #211)
 - Fixed: Vehicle limit count; compatibility with More Vehicles mod (thanks Dymanoid!) (#362)
 - Fixed: Mail trucks ignoring lane arrows (#307, #338)
@@ -32,6 +33,7 @@
 - Meta: Added GitHub issue templates for bugs, features, translations. (#272)
 - Meta: Added `.editorconfig` file for IDE code indenting standardisation (#392, #384)
 - Meta: Added entire `.vs/` folder to `.gitignore` (#395)
+* Meta: Updated install guide to include section for EA Origin users (#333)
 
 ### 10.20, 21/05/2019
 - Updated for game version 1.12.0-f5
