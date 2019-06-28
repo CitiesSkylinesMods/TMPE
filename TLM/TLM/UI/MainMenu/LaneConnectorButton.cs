@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using TrafficManager.State;
+using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
     public class LaneConnectorButton : MenuToolModeButton {
@@ -7,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.LaneConnector;
         public override string Tooltip => "Lane_connector";
         public override bool Visible => Options.laneConnectorEnabled;
-        public override SavedInputKey ShortcutKey => OptionsKeymapping.KeyLaneConnectionsTool;
+        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyLaneConnectionsTool;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using TrafficManager.State;
+using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
     public class JunctionRestrictionsButton : MenuToolModeButton {
@@ -7,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.JunctionRestrictions;
         public override string Tooltip => "Junction_restrictions";
         public override bool Visible => Options.junctionRestrictionsEnabled;
-        public override SavedInputKey ShortcutKey => OptionsKeymapping.KeyJunctionRestrictionsTool;
+        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyJunctionRestrictionsTool;
     }
 }

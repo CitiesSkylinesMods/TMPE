@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using TrafficManager.State;
+using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
     public class ToggleTrafficLightsButton : MenuToolModeButton {
@@ -7,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
         public override string Tooltip => "Switch_traffic_lights";
         public override bool Visible => true;
-        public override SavedInputKey ShortcutKey => OptionsKeymapping.KeyToggleTrafficLightTool;
+        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyToggleTrafficLightTool;
     }
 }

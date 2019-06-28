@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using TrafficManager.State;
+using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
     public class LaneArrowsButton : MenuToolModeButton {
@@ -7,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.LaneArrows;
         public override string Tooltip => "Change_lane_arrows";
         public override bool Visible => true;
-        public override SavedInputKey ShortcutKey => OptionsKeymapping.KeyLaneArrowTool;
+        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyLaneArrowTool;
     }
 }

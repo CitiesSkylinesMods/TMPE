@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrafficManager.State;
+using TrafficManager.State.Keybinds;
 using TrafficManager.Util;
 using UnityEngine;
 
@@ -127,7 +128,7 @@ namespace TrafficManager.UI {
 		public void OnGUI() {
 			if (!UIView.HasModalInput()
 			    && !UIView.HasInputFocus()
-			    && OptionsKeymapping.KeyToggleTMPEMainMenu.IsPressed(Event.current)) {
+			    && KeymappingSettings.KeyToggleTMPEMainMenu.IsPressed(Event.current)) {
 				LoadingExtension.BaseUI?.ToggleMainMenu();
 			}
 

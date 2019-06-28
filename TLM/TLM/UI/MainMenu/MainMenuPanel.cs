@@ -12,6 +12,7 @@ using TrafficManager.Custom.PathFinding;
 using System.Collections.Generic;
 using TrafficManager.Manager;
 using CSUtil.Commons;
+using TrafficManager.State.Keybinds;
 using TrafficManager.UI.SubTools;
 using TrafficManager.Util;
 
@@ -217,17 +218,17 @@ namespace TrafficManager.UI.MainMenu {
 
             // Some safety checks to not trigger while full screen/modals are open
             // Check the key and then click the corresponding button
-            if (OptionsKeymapping.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
+            if (KeymappingSettings.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(ToggleTrafficLightsButton));
-            } else if (OptionsKeymapping.KeyLaneArrowTool.IsPressed(Event.current)) {
+            } else if (KeymappingSettings.KeyLaneArrowTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(LaneArrowsButton));
-            } else if (OptionsKeymapping.KeyLaneConnectionsTool.IsPressed(Event.current)) {
+            } else if (KeymappingSettings.KeyLaneConnectionsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(LaneConnectorButton));
-            } else if (OptionsKeymapping.KeyPrioritySignsTool.IsPressed(Event.current)) {
+            } else if (KeymappingSettings.KeyPrioritySignsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(PrioritySignsButton));
-            } else if (OptionsKeymapping.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
+            } else if (KeymappingSettings.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(JunctionRestrictionsButton));
-            } else if (OptionsKeymapping.KeySpeedLimitsTool.IsPressed(Event.current)) {
+            } else if (KeymappingSettings.KeySpeedLimitsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(SpeedLimitsButton));
             }
         }

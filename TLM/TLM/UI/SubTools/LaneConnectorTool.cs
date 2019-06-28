@@ -13,6 +13,7 @@ using UnityEngine;
 using TrafficManager.Manager;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
+using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.SubTools {
 	public class LaneConnectorTool : SubTool {
@@ -71,13 +72,13 @@ namespace TrafficManager.UI.SubTools {
 //			           $"SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} " +
 //			           $"HoveredSegmentId={HoveredSegmentId} IsInsideUI={MainTool.GetToolController().IsInsideUI}");
 
-			if (OptionsKeymapping.KeyLaneConnectorStayInLane.IsPressed(e)) {
+			if (KeymappingSettings.KeyLaneConnectorStayInLane.IsPressed(e)) {
 				frameStayInLanePressed = Time.frameCount;
 				// this will be consumed in RenderOverlay() if the key was pressed
 				// not too long ago (within 20 Unity frames or 0.33 sec)
 			}
 
-			if (OptionsKeymapping.KeyLaneConnectorDelete.IsPressed(e)) {
+			if (KeymappingSettings.KeyLaneConnectorDelete.IsPressed(e)) {
 				frameClearPressed = Time.frameCount;
 				// this will be consumed in RenderOverlay() if the key was pressed
 				// not too long ago (within 20 Unity frames or 0.33 sec)
