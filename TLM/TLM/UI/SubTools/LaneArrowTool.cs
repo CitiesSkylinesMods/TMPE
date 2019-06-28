@@ -14,6 +14,102 @@ using UnityEngine.UI;
 namespace TrafficManager.UI.SubTools {
     public class LaneArrowTool : SubTool {
         /// <summary>
+        /// For all allowed ways (Left, Forward, Right, and possibly U-turn) to leave the node.
+        /// Stores the collection of segment ids grouped by directions.
+        /// </summary>
+        struct PossibleTurnsOut {
+            public ushort CurrentNodeId;
+            public ushort CurrentSegmentId;
+
+            /// <summary>
+            /// Outgoing segments, grouped by direction
+            /// </summary>
+            public Dictionary<ArrowDirection, HashSet<ushort>> AllTurns;
+
+            /// <summary>
+            /// Outgoing lanes for each outgoing segment
+            /// </summary>
+            private Dictionary<ushort, HashSet<uint>> Lanes;
+
+            public PossibleTurnsOut(ushort nodeId, ushort segmentId) {
+                CurrentNodeId = nodeId;
+                CurrentSegmentId = segmentId;
+                AllTurns = new Dictionary<ArrowDirection, HashSet<ushort>>();
+                Lanes = new Dictionary<ushort, HashSet<uint>>();
+            }
+
+            /// <summary>
+            /// Insert an outgoing segment, group by outgoing direction
+            /// </summary>
+            /// <param name="dir">Direction for leaving this node</param>
+            /// <param name="segmentId">Segment for leaving this node</param>
+            public void AddTurn(ArrowDirection dir, ushort segmentId) {
+                if (segmentId == CurrentSegmentId) {
+                    return;
+                }
+
+                if (!AllTurns.ContainsKey(dir)) {
+                    AllTurns.Add(dir, new HashSet<ushort>());
+                }
+
+                AllTurns[dir].Add(segmentId);
+
+                // Extract outgoing lane ids and store them as NetLane's
+                var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+                var segment = segmentBuffer[segmentId];
+                // The other end of the segment, for getting incoming lanes into it
+                var otherNodeId = segment.m_startNode == CurrentNodeId
+                                      ? segment.m_endNode
+                                      : segment.m_startNode;
+
+                if (!Lanes.ContainsKey(segmentId)) {
+                    Lanes.Add(segmentId, new HashSet<uint>());
+                }
+                foreach (var ln in GetIncomingLaneList(segmentId, otherNodeId)) {
+                    Lanes[segmentId].Add(ln.laneId);
+                }
+            }
+
+            public bool Contains(ArrowDirection dir) {
+                return AllTurns.ContainsKey(dir);
+            }
+
+            /// <summary>
+            /// For node flags, group together all outgoing lanes except the one that we remember.
+            /// </summary>
+            /// <param name="flags"></param>
+            /// <returns></returns>
+            public HashSet<uint> GetLanesFor(NetLane.Flags flags) {
+                var result = new HashSet<uint>();
+                if ((flags & NetLane.Flags.Left) != 0 && AllTurns.ContainsKey(ArrowDirection.Left)) {
+                    foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Left]) {
+                        if (!Lanes.ContainsKey(outgoingSegmentId)) {
+                            continue;
+                        }
+                        result.UnionWith(Lanes[outgoingSegmentId]);
+                    }
+                }
+                if ((flags & NetLane.Flags.Right) != 0 && AllTurns.ContainsKey(ArrowDirection.Right)) {
+                    foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Right]) {
+                        if (!Lanes.ContainsKey(outgoingSegmentId)) {
+                            continue;
+                        }
+                        result.UnionWith(Lanes[outgoingSegmentId]);
+                    }
+                }
+                if ((flags & NetLane.Flags.Forward) != 0 && AllTurns.ContainsKey(ArrowDirection.Forward)) {
+                    foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Forward]) {
+                        if (!Lanes.ContainsKey(outgoingSegmentId)) {
+                            continue;
+                        }
+                        result.UnionWith(Lanes[outgoingSegmentId]);
+                    }
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Used for selecting textures for lane arrows in different states
         /// </summary>
         private enum LaneButtonState {
@@ -22,15 +118,25 @@ namespace TrafficManager.UI.SubTools {
             Disabled
         }
 
-        private static WorldSpaceGUI wsGui;
+        /// <summary>
+        /// The smarter type of canvas, created in the ground plane
+        /// </summary>
+        private WorldSpaceGUI wsGui;
 
         private GameObject btnCurrentControlButton;
         private GameObject btnLaneArrowForward;
         private GameObject btnLaneArrowLeft;
         private GameObject btnLaneArrowRight;
 
-        // Used to draw lane on screen which is being edited
+        /// <summary>
+        /// Used to draw lane on screen which is being edited.
+        /// </summary>
         private uint highlightLaneId;
+
+        /// <summary>
+        /// Contains the leaving lanes for the current nodeid, grouped by direction
+        /// </summary>
+        private PossibleTurnsOut? possibleTurns_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) { }
@@ -94,6 +200,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void Deselect() {
+            possibleTurns_ = null; // no more overlay rendering
             highlightLaneId = 0;
             SelectedSegmentId = 0;
             SelectedNodeId = 0;
@@ -123,12 +230,25 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
+            //----------------------------------------------------
+            // Draw the lane we are editing and all outgoing lanes
+            //----------------------------------------------------
             var netSegment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId];
+            var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
             if (highlightLaneId != 0) {
-                var lane = Singleton<NetManager>.instance.m_lanes.m_buffer[highlightLaneId];
-                RenderLaneOverlay(cameraInfo, ref netSegment, lane, 
-                                  MainTool.GetToolColor(true, false),
+                var highlightLane = laneBuffer[highlightLaneId];
+                RenderLaneOverlay(cameraInfo, ref netSegment, highlightLane,
+                                  Mathf.Max(3f, netSegment.Info.m_lanes[0].m_width),
                                   MainTool.GetToolColor(true, false));
+                if (possibleTurns_ != null) {
+                    var turns = possibleTurns_.Value;
+                    foreach (var laneId in turns.GetLanesFor((NetLane.Flags)highlightLane.m_flags)) {
+                        var lane = laneBuffer[laneId];
+                        RenderLaneOverlay(cameraInfo, ref netSegment, lane,
+                                          1f,
+                                          Color.green);
+                    }
+                }
             }
 
             if (SelectedSegmentId == 0) {
@@ -149,8 +269,8 @@ namespace TrafficManager.UI.SubTools {
         public static void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo,
                                              ref NetSegment segment,
                                              NetLane lane,
-                                             Color importantColor,
-                                             Color nonImportantColor) {
+                                             float width,
+                                             Color color) {
             var info = segment.Info;
             if (info == null ||
                 ((segment.m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None
@@ -158,18 +278,10 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            Color color = (ItemClass.GetPrivateServiceIndex(info.m_class.m_service) == -1
-                          && !info.m_autoRemove)
-                          || (segment.m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None
-                              ? importantColor
-                              : nonImportantColor;
-
             ++Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls;
 
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo, color, lane.m_bezier,
-                Mathf.Max(3f, segment.Info.m_lanes[0].m_width),
-                -100000f, -100000f,
+                cameraInfo, color, lane.m_bezier, width, -100000f, -100000f,
                 -1f, 1280f, false, false);
         }
 
@@ -186,7 +298,7 @@ namespace TrafficManager.UI.SubTools {
         ///     and rotate the canvas.</param>
         private void CreateWorldSpaceGUI(NetSegment netSegment) {
             var lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            var laneList = GetLaneList(SelectedSegmentId, SelectedNodeId);
+            var laneList = GetIncomingLaneList(SelectedSegmentId, SelectedNodeId);
 
             // Create the GUI form and center it according to the node position
             Quaternion rotInverse;
@@ -308,14 +420,15 @@ namespace TrafficManager.UI.SubTools {
             DestroyLaneArrowButtons();
             btnCurrentControlButton = originButton; // save this to decolorize it later
 
-	    // Get eligible turn directions
-            var eligibleDirections = GetAllowedTurns(nodeId, segmentId);
+	        // Get all possible turn directions to leave the nodeId
+            possibleTurns_ = GetAllTurnsOut(nodeId, segmentId);
 
             //-----------------
             // Button FORWARD
             //-----------------
             var forward = (flags & NetLane.Flags.Forward) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (eligibleDirections.Contains(ArrowDirection.Forward)) {
+            if (possibleTurns_ != null
+                && possibleTurns_.Value.Contains(ArrowDirection.Forward)) {
                 GuiAddLaneArrowForward(originButton, forward);
                 UnityAction clickForward = () => {
                     OnClickForward(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowForward);
@@ -330,7 +443,8 @@ namespace TrafficManager.UI.SubTools {
             // Button LEFT
             //-----------------
             var left = (flags & NetLane.Flags.Left) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (eligibleDirections.Contains(ArrowDirection.Left)) {
+            if (possibleTurns_ != null
+                && possibleTurns_.Value.Contains(ArrowDirection.Left)) {
                 GuiAddLaneArrowLeft(originButton, left);
                 UnityAction clickLeft = () => {
                     OnClickLeft(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowLeft);
@@ -345,7 +459,8 @@ namespace TrafficManager.UI.SubTools {
             // Button RIGHT
             //-----------------
             var right = (flags & NetLane.Flags.Right) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (eligibleDirections.Contains(ArrowDirection.Right)) {
+            if (possibleTurns_ != null
+                && possibleTurns_.Value.Contains(ArrowDirection.Right)) {
                 GuiAddLaneArrowRight(originButton, right);
                 UnityAction clickRight = () => {
                     OnClickRight(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowRight);
@@ -365,7 +480,7 @@ namespace TrafficManager.UI.SubTools {
             wsGui.SetButtonSprite(button, SelectControlButtonSprite(direction, buttonState));
         }
 
-        private static IList<LanePos> GetLaneList(ushort segmentId, ushort nodeId) {
+        private static IList<LanePos> GetIncomingLaneList(ushort segmentId, ushort nodeId) {
             var segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             return Constants.ServiceFactory.NetService.GetSortedLanes(
                 segmentId,
@@ -558,9 +673,9 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         /// <param name="nodeId">The currently edited node</param>
         /// <param name="incomingSegmentId">The currently edited segment</param>
-        /// <returns>Bit combination of allowed lane turns</returns>
-        private HashSet<ArrowDirection> GetAllowedTurns(ushort nodeId, ushort incomingSegmentId) {
-            var result = new HashSet<ArrowDirection>();
+        /// <returns>Dict where keys are allowed lane turns, and values are sets of segment ids</returns>
+        private PossibleTurnsOut GetAllTurnsOut(ushort nodeId, ushort incomingSegmentId) {
+            var result = new PossibleTurnsOut(nodeId, incomingSegmentId);
 
     	    var geometry = SegmentGeometry.Get(incomingSegmentId);
             if (geometry == null) {
@@ -583,12 +698,15 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                result.Add(geometry.GetDirection(outgoingSegId, isStartNode));
+                result.AddTurn(geometry.GetDirection(outgoingSegId, isStartNode), outgoingSegId);
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Escape is pressed, or the tool was closed.
+        /// </summary>
         public override void Cleanup() {
             Deselect();
         }
