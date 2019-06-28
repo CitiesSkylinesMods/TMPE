@@ -49,32 +49,33 @@ namespace TrafficManager.UI.MainMenu {
             public int MENU_HEIGHT { get; set; }
         }
 
-        public static readonly SizeProfile[] SIZE_PROFILES = new SizeProfile[] {
-                                                                                   new SizeProfile() {
-                                                                                                         NUM_BUTTONS_PER_ROW = 6,
-                                                                                                         NUM_ROWS = 2,
+        public static readonly SizeProfile[] SIZE_PROFILES
+            = {
+                  new SizeProfile() {
+                                        NUM_BUTTONS_PER_ROW = 6,
+                                        NUM_ROWS = 2,
 
-                                                                                                         VSPACING = 5,
-                                                                                                         HSPACING = 5,
-                                                                                                         TOP_BORDER = 25,
-                                                                                                         BUTTON_SIZE = 30,
+                                        VSPACING = 5,
+                                        HSPACING = 5,
+                                        TOP_BORDER = 25,
+                                        BUTTON_SIZE = 30,
 
-                                                                                                         MENU_WIDTH = 215,
-                                                                                                         MENU_HEIGHT = 95
-                                                                                                     },
-                                                                                   new SizeProfile() {
-                                                                                                         NUM_BUTTONS_PER_ROW = 6,
-                                                                                                         NUM_ROWS = 2,
+                                        MENU_WIDTH = 215,
+                                        MENU_HEIGHT = 95
+                                    },
+                  new SizeProfile() {
+                                        NUM_BUTTONS_PER_ROW = 6,
+                                        NUM_ROWS = 2,
 
-                                                                                                         VSPACING = 5,
-                                                                                                         HSPACING = 5,
-                                                                                                         TOP_BORDER = 25,
-                                                                                                         BUTTON_SIZE = 50,
+                                        VSPACING = 5,
+                                        HSPACING = 5,
+                                        TOP_BORDER = 25,
+                                        BUTTON_SIZE = 50,
 
-                                                                                                         MENU_WIDTH = 335,
-                                                                                                         MENU_HEIGHT = 135
-                                                                                                     }
-                                                                               };
+                                        MENU_WIDTH = 335,
+                                        MENU_HEIGHT = 135
+                                    }
+              };
 
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
