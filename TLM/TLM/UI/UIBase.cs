@@ -56,24 +56,27 @@ namespace TrafficManager.UI {
         }
 
         public void ToggleMainMenu() {
-            if (IsVisible())
+            if (IsVisible()) {
                 Close();
-            else
+            } else {
                 Show();
+            }
         }
 
         internal void RebuildMenu() {
             Close();
             if (MainMenu != null) {
                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-                if(keyHandler != null)
+                if(keyHandler != null) {
                     UnityEngine.Object.Destroy(keyHandler);
+                }
 
                 UnityEngine.Object.Destroy(MainMenu);
 #if DEBUG
                 UnityEngine.Object.Destroy(DebugMenu);
 #endif
             }
+
             var uiView = UIView.GetAView();
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
             MainMenu.gameObject.AddComponent<CustomKeyHandler>();
@@ -86,7 +89,7 @@ namespace TrafficManager.UI {
             try {
                 ToolsModifierControl.mainToolbar.CloseEverything();
             } catch (Exception e) {
-                Log.Error("Error on Show(): " + e.ToString());
+                Log.Error("Error on Show(): " + e);
             }
 
             foreach (var button in GetMenu().Buttons) {
@@ -115,6 +118,7 @@ namespace TrafficManager.UI {
             if (tmTool != null) {
                 tmTool.SetToolMode(UI.ToolMode.None);
             }
+
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
             MainMenuButton.UpdateSprites();
@@ -172,8 +176,9 @@ namespace TrafficManager.UI {
                     UnityEngine.Object.Destroy(tool);
                     tool = null;
                 }
-            } else
+            } else {
                 Log.Warning("LoadingExtensions.DestroyTool: ToolsModifierControl.toolController is null!");
+            }
         }
     }
 }

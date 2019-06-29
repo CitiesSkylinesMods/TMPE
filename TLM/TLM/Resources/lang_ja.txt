@@ -85,9 +85,9 @@ Add_zoning 区間の追加
 Remove_zoning 区間の削除
 Lane_Arrow_Changer_Disabled_Highway 高速道路ルールシステムを適用しているため、この車線の矢印は変更できません
 Add_junction_to_timed_light この信号に交差点を追加
-Remove_junction_from_timed_light この信号から交差点を削除 
-Select_junction 交差点を選択してください 
-Cancel キャンセル 
+Remove_junction_from_timed_light この信号から交差点を削除
+Select_junction 交差点を選択してください
+Cancel キャンセル
 Speed_limits 速度制限
 Persistently_visible_overlays オーバーレイ表示し続ける情報
 Priority_signs 優先関係標識
@@ -209,10 +209,10 @@ TMPE_TUTORIAL_BODY_VehicleRestrictionsTool 特定の道路区間の車両を禁�
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults デフォルトの制限速度
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. 上半分の矢印を使用して、すべての道路タイプを順に切り替えます。\n2. 下半分で、制限速度を選択します。\n3. 「保存」をクリックして、選択した制限速度を選択したタイプの将来の道路区間のデフォルトとして設定します。 選択した種類の既存の道路をすべて更新するには、「保存して適用」をクリックします。
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep 時間設定を追加する
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. ゲーム内オーバーレイ内で、信号機をクリックして状態を変更します。 矢印信号を追加するには、「モードの変更」ボタンを使用します。\n2. ステップの最短時間と最長時間の両方を入力します。 最短時間が経過すると、信号機が接近してくる車両を数えて比較します。\n3. 必要に応じて、ステップ切り替えタイプを選択します。 デフォルトでは、待っているよりもおおよそ少ない車両が運転している場合、ステップは変わります。\n4. 必要に応じて、感度を調整してください。 たとえば、スライダーを左に動かすと、待機中の車両に対するタイムシグナルの感度が低くなります。 
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. ゲーム内オーバーレイ内で、信号機をクリックして状態を変更します。 矢印信号を追加するには、「モードの変更」ボタンを使用します。\n2. ステップの最短時間と最長時間の両方を入力します。 最短時間が経過すると、信号機が接近してくる車両を数えて比較します。\n3. 必要に応じて、ステップ切り替えタイプを選択します。 デフォルトでは、待っているよりもおおよそ少ない車両が運転している場合、ステップは変わります。\n4. 必要に応じて、感度を調整してください。 たとえば、スライダーを左に動かすと、待機中の車両に対するタイムシグナルの感度が低くなります。
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy 時間設定付き信号をコピーする
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy 別の交差点をクリックして時間設定付き信号を貼り付けます。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 時間設定付き信号機に交差点を追加する 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction 時間設定付き信号機に交差点を追加する
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction 追加するには、他の交差点をクリックします。 両方の信号は、時間設定プログラムが両方の交差点を一度に制御するように結合されます。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction 時間設定付き信号機から交差点を削除する
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction この時間設定プログラムによって制御されている交差点の1つをクリックします。 選択した信号機は削除され、時間設定プログラムによって管理されなくなります。\n\n操作をキャンセルするには、マウスの右ボタンで任意の場所をクリックします。
@@ -240,6 +240,7 @@ Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
 Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
 Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
 Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybind_lane_connector_delete Clear lane connections
 Keybinds Keybinds
 Keybind_Exit_subtool Exit tool and close TM:PE Menu
 Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.

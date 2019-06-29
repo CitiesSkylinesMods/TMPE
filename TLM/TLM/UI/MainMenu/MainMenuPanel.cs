@@ -51,7 +51,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public static readonly SizeProfile[] SIZE_PROFILES
             = {
-                  new SizeProfile() {
+                  new SizeProfile {
                                         NUM_BUTTONS_PER_ROW = 6,
                                         NUM_ROWS = 2,
 
@@ -63,7 +63,7 @@ namespace TrafficManager.UI.MainMenu {
                                         MENU_WIDTH = 215,
                                         MENU_HEIGHT = 95
                                     },
-                  new SizeProfile() {
+                  new SizeProfile {
                                         NUM_BUTTONS_PER_ROW = 6,
                                         NUM_ROWS = 2,
 

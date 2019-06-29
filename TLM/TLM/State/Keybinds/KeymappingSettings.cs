@@ -127,7 +127,7 @@ namespace TrafficManager.State.Keybinds {
             var uiButton = uiPanel.Find<UIButton>("Binding");
             uiButton.eventKeyDown += OnBindingKeyDown;
             uiButton.eventMouseDown += OnBindingMouseDown;
-            uiButton.text = savedInputKey.ToLocalizedString("KEYNAME");
+            uiButton.text = Keybind.Str(savedInputKey);
             uiButton.objectUserData = savedInputKey;
             uiButton.stringUserData = category;
 
@@ -157,7 +157,7 @@ namespace TrafficManager.State.Keybinds {
 
             // Set label text (as provided) and set button text from the InputKey
             uiLabel.text = label;
-            uiReadOnlyKey.text = inputKey.ToLocalizedString("KEYNAME");
+            uiReadOnlyKey.text = Keybind.Str(inputKey);
             uiReadOnlyKey.objectUserData = inputKey;
         }
 
@@ -227,7 +227,7 @@ namespace TrafficManager.State.Keybinds {
             return KeyCode.None;
         }
 
-        protected void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
+        private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
             // This will only work if the user clicked the modify button
             // otherwise no effect
             if (editingBinding_ != null && !IsModifierKey(p.keycode)) {
@@ -253,13 +253,13 @@ namespace TrafficManager.State.Keybinds {
                 }
 
                 var uITextComponent = p.source as UITextComponent;
-                uITextComponent.text = editingBinding_.ToLocalizedString("KEYNAME");
+                uITextComponent.text = Keybind.Str(editingBinding_);
                 editingBinding_ = null;
                 editingBindingCategory_ = string.Empty;
             }
         }
 
-        protected void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
+        private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
             // This will only work if the user is not in the process of changing the shortcut
             if (editingBinding_ == null) {
                 p.Use();
@@ -292,36 +292,26 @@ namespace TrafficManager.State.Keybinds {
                 }
 
                 var uIButton2 = p.source as UIButton;
-                uIButton2.text = editingBinding_.ToLocalizedString("KEYNAME");
+                uIButton2.text = Keybind.Str(editingBinding_);
                 uIButton2.buttonsMask = UIMouseButton.Left;
                 editingBinding_ = null;
                 editingBindingCategory_ = string.Empty;
             }
         }
 
-        protected void RefreshBindableInputs() {
+        private void RefreshBindableInputs() {
             foreach (var current in component.GetComponentsInChildren<UIComponent>()) {
                 var uITextComponent = current.Find<UITextComponent>("Binding");
                 if (uITextComponent != null) {
                     var savedInputKey = uITextComponent.objectUserData as SavedInputKey;
                     if (savedInputKey != null) {
-                        uITextComponent.text = savedInputKey.ToLocalizedString("KEYNAME");
+                        uITextComponent.text = Keybind.Str(savedInputKey);
                     }
                 }
 
                 var uILabel = current.Find<UILabel>("Name");
                 if (uILabel != null) {
                     uILabel.text = Locale.Get("KEYMAPPING", uILabel.stringUserData);
-                }
-            }
-        }
-
-        protected void RefreshKeyMapping() {
-            foreach (var current in component.GetComponentsInChildren<UIComponent>()) {
-                var uITextComponent = current.Find<UITextComponent>("Binding");
-                var savedInputKey = (SavedInputKey) uITextComponent.objectUserData;
-                if (editingBinding_ != savedInputKey) {
-                    uITextComponent.text = savedInputKey.ToLocalizedString("KEYNAME");
                 }
             }
         }
@@ -333,8 +323,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="k">Key to search for the conflicts</param>
         /// <returns></returns>
         private string FindConflict(InputKey sample, string sampleCategory) {
-            if (sample == SavedInputKey.Empty
-                || sample == SavedInputKey.Encode(KeyCode.None, false, false, false)) {
+            if (Keybind.IsEmpty(sample)) {
                 // empty key never conflicts
                 return string.Empty;
             }

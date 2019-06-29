@@ -176,6 +176,7 @@
     <Compile Include="State\ConfigData\TimedTrafficLights.cs" />
     <Compile Include="State\ConfigData\AdvancedVehicleAI.cs" />
     <Compile Include="State\GlobalConfig.cs" />
+    <Compile Include="State\Keybinds\Keybind.cs" />
     <Compile Include="State\Keybinds\KeymappingSettings.cs" />
     <Compile Include="State\Keybinds\KeymappingSettingsMain.cs" />
     <Compile Include="State\Keybinds\TmpeRebindableKey.cs" />
