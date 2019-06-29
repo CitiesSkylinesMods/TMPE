@@ -8,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.LaneArrows;
         public override string Tooltip => "Change_lane_arrows";
         public override bool Visible => true;
-        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyLaneArrowTool;
+        public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneArrowTool;
     }
 }

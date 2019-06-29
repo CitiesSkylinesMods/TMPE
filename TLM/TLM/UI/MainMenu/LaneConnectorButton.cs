@@ -8,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.LaneConnector;
         public override string Tooltip => "Lane_connector";
         public override bool Visible => Options.laneConnectorEnabled;
-        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyLaneConnectionsTool;
+        public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneConnectionsTool;
     }
 }

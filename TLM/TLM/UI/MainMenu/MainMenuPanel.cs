@@ -219,17 +219,17 @@ namespace TrafficManager.UI.MainMenu {
 
             // Some safety checks to not trigger while full screen/modals are open
             // Check the key and then click the corresponding button
-            if (KeymappingSettings.KeyToggleTrafficLightTool.IsPressed(Event.current)) {
+            if (KeybindSettingsBase.ToggleTrafficLightTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(ToggleTrafficLightsButton));
-            } else if (KeymappingSettings.KeyLaneArrowTool.IsPressed(Event.current)) {
+            } else if (KeybindSettingsBase.LaneArrowTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(LaneArrowsButton));
-            } else if (KeymappingSettings.KeyLaneConnectionsTool.IsPressed(Event.current)) {
+            } else if (KeybindSettingsBase.LaneConnectionsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(LaneConnectorButton));
-            } else if (KeymappingSettings.KeyPrioritySignsTool.IsPressed(Event.current)) {
+            } else if (KeybindSettingsBase.PrioritySignsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(PrioritySignsButton));
-            } else if (KeymappingSettings.KeyJunctionRestrictionsTool.IsPressed(Event.current)) {
+            } else if (KeybindSettingsBase.JunctionRestrictionsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(JunctionRestrictionsButton));
-            } else if (KeymappingSettings.KeySpeedLimitsTool.IsPressed(Event.current)) {
+            } else if (KeybindSettingsBase.SpeedLimitsTool.IsPressed(Event.current)) {
                 ClickToolButton(typeof(SpeedLimitsButton));
             }
         }

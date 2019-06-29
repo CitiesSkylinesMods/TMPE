@@ -233,7 +233,7 @@ namespace TrafficManager.State {
             panelHelper = new UIHelper(currentPanel);
 
             var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
-            ((UIPanel) ((UIHelper) keyboardGroup).self).gameObject.AddComponent<KeymappingSettingsMain>();
+            ((UIPanel) ((UIHelper) keyboardGroup).self).gameObject.AddComponent<KeybindSettingsPage>();
         }
 
         private static void MakeSettings_Maintenance(UITabstrip tabStrip, int tabIndex) {

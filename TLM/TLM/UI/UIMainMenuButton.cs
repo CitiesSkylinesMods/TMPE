@@ -67,6 +67,13 @@ namespace TrafficManager.UI {
                 m_TooltipBox = uiView.defaultTooltipBox;
             }
 
+            UpdateTooltip();
+        }
+
+        /// <summary>
+        /// Reset the tooltip (or set for the first time), or if keybinding has changed
+        /// </summary>
+        public void UpdateTooltip() {
             tooltip = Translation.GetString("Keybind_toggle_TMPE_main_menu")
                       + GetTooltip();
         }
@@ -139,7 +146,7 @@ namespace TrafficManager.UI {
         public void OnGUI() {
             if (!UIView.HasModalInput()
                 && !UIView.HasInputFocus()
-                && KeymappingSettings.KeyToggleTMPEMainMenu.IsPressed(Event.current)) {
+                && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
                 if (LoadingExtension.BaseUI != null) {
                     LoadingExtension.BaseUI.ToggleMainMenu();
                 }
@@ -147,11 +154,7 @@ namespace TrafficManager.UI {
         }
 
         private string GetTooltip() {
-            if (Keybind.IsEmpty(KeymappingSettings.KeyToggleTMPEMainMenu)) {
-                return string.Empty;
-            }
-
-            return "\n" + Keybind.Str(KeymappingSettings.KeyToggleTMPEMainMenu);
+            return KeybindSettingsBase.ToggleMainMenu.Str("\n");
         }
     }
 }

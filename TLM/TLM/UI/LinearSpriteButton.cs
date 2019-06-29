@@ -101,7 +101,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public abstract void HandleClick(UIMouseEventParameter p);
 
-        public virtual SavedInputKey ShortcutKey {
+        public virtual KeybindSetting ShortcutKey {
             get { return null; }
         }
 
@@ -147,10 +147,7 @@ namespace TrafficManager.UI.MainMenu {
         /// </summary>
         /// <returns>Tooltip to append to the main tooltip text, or an empty string</returns>
         private string GetShortcutTooltip() {
-            var isNotSet = ShortcutKey == null || Keybind.IsEmpty(ShortcutKey.value);
-            return isNotSet
-                       ? string.Empty
-                       : "\n" + Keybind.Str(ShortcutKey);
+            return ShortcutKey.Str("\n");
         }
     }
 }

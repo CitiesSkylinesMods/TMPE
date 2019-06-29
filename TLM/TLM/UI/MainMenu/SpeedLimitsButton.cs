@@ -8,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.SpeedLimits;
         public override string Tooltip => "Speed_limits";
         public override bool Visible => Options.customSpeedLimitsEnabled;
-        public override SavedInputKey ShortcutKey => KeymappingSettings.KeySpeedLimitsTool;
+        public override KeybindSetting ShortcutKey => KeybindSettingsBase.SpeedLimitsTool;
     }
 }

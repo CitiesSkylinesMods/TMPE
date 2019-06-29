@@ -8,6 +8,6 @@ namespace TrafficManager.UI.MainMenu {
         public override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
         public override string Tooltip => "Switch_traffic_lights";
         public override bool Visible => true;
-        public override SavedInputKey ShortcutKey => KeymappingSettings.KeyToggleTrafficLightTool;
+        public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleTrafficLightTool;
     }
 }
