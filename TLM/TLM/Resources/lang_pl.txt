@@ -1,4 +1,4 @@
-Switch_traffic_lights Włącznik sygnalizacji
+﻿Switch_traffic_lights Włącznik sygnalizacji
 Add_priority_signs Dodaj znaki pierwszeństwa
 Manual_traffic_lights Sygnalizacja Ręczna
 Timed_traffic_lights Sygnalizacja Czasowa
@@ -230,8 +230,9 @@ Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Also_apply_to_left/right_turns_between_one-way_streets Uwzględnia również skręt w lewo/prawo pomiędzy drogami jednokierunkowymi
 Scan_for_known_incompatible_mods_on_startup Uruchamiaj sprawdzanie przy starcie gry
 Ignore_disabled_mods Ignoruj wyłączone mody
-Traffic_Manager_detected_incompatible_mods Traffic Manager wykrył niekompatybilne mody
+Traffic_Manager_detected_incompatible_mods wykrył niekompatybilne mody
 Notify_me_if_there_is_an_unexpected_mod_conflict Powiadom mnie w razie nieoczekiwanej niezgodność modów
+Unsubscribe Odsubskrybuj
 Display_speed_limits_mph Wyświetlaj limity prędkości w mph zamiast km/h
 Miles_per_hour Mile na godzinę
 Kilometers_per_hour Kilometry na godzinę

@@ -230,8 +230,9 @@ Vehicles_may_turn_on_red 車両が赤信号で曲がることがある
 Also_apply_to_left/right_turns_between_one-way_streets 一方通行路の左右の曲がり角にも適用
 Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
 Ignore_disabled_mods Ignore disabled mods
-Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict modの非互換性が検出された場合にエラーメッセージを表示す
+Unsubscribe Unsubscribe
 Display_speed_limits_mph Display speed limits as MPH instead of km/h
 Miles_per_hour Miles per Hour
 Kilometers_per_hour Kilometers per Hour
