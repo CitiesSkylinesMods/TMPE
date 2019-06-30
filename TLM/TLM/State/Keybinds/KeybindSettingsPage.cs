@@ -11,6 +11,12 @@ namespace TrafficManager.State.Keybinds {
 
             AddKeybindRowUI(Translation.GetString("Keybind_toggle_TMPE_main_menu"),
                             ToggleMainMenu);
+            ToggleMainMenu.OnChanged(() => {
+                if (LoadingExtension.BaseUI != null &&
+                    LoadingExtension.BaseUI.MainMenuButton != null) {
+                    LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
+                }
+            });
 
             AddKeybindRowUI(Translation.GetString("Keybind_toggle_traffic_lights_tool"),
                             ToggleTrafficLightTool);

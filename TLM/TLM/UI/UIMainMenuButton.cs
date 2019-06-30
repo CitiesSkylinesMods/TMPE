@@ -89,9 +89,14 @@ namespace TrafficManager.UI {
         }
 
         protected override void OnClick(UIMouseEventParameter p) {
-            Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-            LoadingExtension.BaseUI.ToggleMainMenu();
-            UpdateSprites();
+            try {
+                Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
+                LoadingExtension.BaseUI.ToggleMainMenu();
+                UpdateSprites();
+            }
+            catch (Exception e) {
+                Log.Error($"Toggle mainmenu failed {e}");
+            }
         }
 
         protected override void OnPositionChanged() {

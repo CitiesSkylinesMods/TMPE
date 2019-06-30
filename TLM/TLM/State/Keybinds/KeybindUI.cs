@@ -107,7 +107,7 @@ namespace TrafficManager.State.Keybinds {
         private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
             // This will only work if the user clicked the modify button
             // otherwise no effect
-            if (currentlyEditedBinding_ == null || Keybind.IsModifierKey(p.keycode)) {
+            if (!currentlyEditedBinding_.HasValue || Keybind.IsModifierKey(p.keycode)) {
                 return;
             }
 
@@ -129,11 +129,12 @@ namespace TrafficManager.State.Keybinds {
                     false);
             } else {
                 currentlyEditedBinding_.Value.TargetKey.value = inputKey;
+                currentlyEditedBinding_.Value.Target.OnChanged();
             }
 
             // Update text on the button
-            var uITextComponent = p.source as UITextComponent;
-            uITextComponent.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
+            var button = p.source as UIButton;
+            button.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
             currentlyEditedBinding_ = null;
         }
 
@@ -170,11 +171,12 @@ namespace TrafficManager.State.Keybinds {
                         false);
                 } else {
                     currentlyEditedBinding_.Value.TargetKey.value = inputKey;
+                    currentlyEditedBinding_.Value.Target.OnChanged();
                 }
 
-                var uIButton2 = p.source as UIButton;
-                uIButton2.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-                uIButton2.buttonsMask = UIMouseButton.Left;
+                var button = p.source as UIButton;
+                button.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
+                button.buttonsMask = UIMouseButton.Left;
                 currentlyEditedBinding_ = null;
             }
         }

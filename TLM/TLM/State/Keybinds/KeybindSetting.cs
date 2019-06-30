@@ -29,6 +29,9 @@ namespace TrafficManager.State.Keybinds {
         [CanBeNull]
         public SavedInputKey AlternateKey;
 
+        public delegate void OnChangedHandler();
+        private OnChangedHandler onChanged_;
+
         public KeybindSetting(string cat,
                               string configFileKey,
                               InputKey? defaultKey1 = null) {
@@ -38,6 +41,14 @@ namespace TrafficManager.State.Keybinds {
                 KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
                 defaultKey1 ?? SavedInputKey.Empty,
                 true);
+        }
+
+        public void OnChanged(OnChangedHandler onChanged) {
+            onChanged_ = onChanged;
+        }
+
+        public void OnChanged() {
+            onChanged_();
         }
 
         public KeybindSetting(string cat,
