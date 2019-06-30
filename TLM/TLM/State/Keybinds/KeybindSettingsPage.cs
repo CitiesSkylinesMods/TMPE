@@ -5,13 +5,24 @@ namespace TrafficManager.State.Keybinds {
         private void Awake() {
             TryCreateConfig();
 
-            BeginForm();
-            ReadOnlyKeybindUI(Translation.GetString("Keybind_Exit_subtool"),
-                              ToolCancelViewOnly);
+            keybindUi_.BeginForm(component);
+            keybindUi_.AddGroup(Translation.GetString("Keybind_category_Global"),
+                                CreateUI_Global);
+            // New section: Lane Connector Tool
+            keybindUi_.AddGroup(Translation.GetString("Keybind_category_LaneConnector"),
+                                CreateUI_LaneConnector);
+        }
+
+        /// <summary>
+        /// Fill Global keybinds section
+        /// </summary>
+        private void CreateUI_Global() {
+            AddReadOnlyKeybind(Translation.GetString("Keybind_Exit_subtool"),
+                               ToolCancelViewOnly);
 
             AddKeybindRowUI(Translation.GetString("Keybind_toggle_TMPE_main_menu"),
                             ToggleMainMenu);
-            ToggleMainMenu.OnChanged(() => {
+            ToggleMainMenu.OnKeyChanged(() => {
                 if (LoadingExtension.BaseUI != null &&
                     LoadingExtension.BaseUI.MainMenuButton != null) {
                     LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
@@ -30,14 +41,17 @@ namespace TrafficManager.State.Keybinds {
                             JunctionRestrictionsTool);
             AddKeybindRowUI(Translation.GetString("Keybind_use_speed_limits_tool"),
                             SpeedLimitsTool);
+        }
 
-            // New section: Lane Connector Tool
+        /// <summary>
+        /// Fill Lane Connector keybinds section
+        /// </summary>
+        private void CreateUI_LaneConnector() {
             AddKeybindRowUI(Translation.GetString("Keybind_lane_connector_stay_in_lane"),
                             LaneConnectorStayInLane);
 
-            ReadOnlyKeybindUI(Translation.GetString("Keybind_lane_connector_delete"),
-                              LaneConnectorDelete);
-            AddAlternateUiControl(LaneConnectorDelete);
+            AddAlternateKeybindUI(Translation.GetString("Keybind_lane_connector_delete"),
+                                  LaneConnectorDelete);
         }
     }
 }

@@ -24,13 +24,17 @@ namespace TrafficManager.State.Keybinds {
         /// <summary>
         /// The key itself, bound to a config file value
         /// </summary>
-        public SavedInputKey Key;
+        public SavedInputKey Key { get; }
 
+        /// <summary>
+        /// A second key, which can possibly be used or kept null
+        /// </summary>
         [CanBeNull]
-        public SavedInputKey AlternateKey;
+        public SavedInputKey AlternateKey { get; }
 
-        public delegate void OnChangedHandler();
-        private OnChangedHandler onChanged_;
+        private OnKeyChangedHandler onKeyChanged_;
+
+        public delegate void OnKeyChangedHandler();
 
         public KeybindSetting(string cat,
                               string configFileKey,
@@ -43,12 +47,12 @@ namespace TrafficManager.State.Keybinds {
                 true);
         }
 
-        public void OnChanged(OnChangedHandler onChanged) {
-            onChanged_ = onChanged;
+        public void OnKeyChanged(OnKeyChangedHandler onChanged) {
+            onKeyChanged_ = onChanged;
         }
 
-        public void OnChanged() {
-            onChanged_();
+        public void NotifyKeyChanged() {
+            onKeyChanged_();
         }
 
         public KeybindSetting(string cat,

@@ -1,3 +1,5 @@
+using System;
+
 namespace TrafficManager.State.Keybinds {
     using System.Linq;
     using System.Reflection;
@@ -11,18 +13,20 @@ namespace TrafficManager.State.Keybinds {
     /// Helper for creating keyboard bindings Settings page.
     /// </summary>
     public class KeybindUI {
-        private KeybindSetting.Editable? currentlyEditedBinding_;
-        private const float ROW_WIDTH = 744f;
+        private const float ROW_WIDTH = 744f - 15f;
         private const float ROW_HEIGHT = 34f;
 
-        /// <summary>
-        /// Scrollable panel for keybinds, first created on Unity Awake call
-        /// </summary>
-        private UIComponent settingsPanel_;
+        private KeybindSetting.Editable? currentlyEditedBinding_;
 
-        public void BeginForm(UIComponent component) {
-            settingsPanel_ = CreateScrollablePanel(component);
-        }
+        /// <summary>
+        /// Scrollable panel, first created on Unity Awake call
+        /// </summary>
+        private UIComponent scrollPanel_;
+
+        /// <summary>
+        /// Group panel with text title for adding controls in it
+        /// </summary>
+        private UIComponent currentGroup_;
 
         /// <summary>
         /// Creates a row for keyboard bindings editor. The row will contain a text
@@ -33,40 +37,102 @@ namespace TrafficManager.State.Keybinds {
         public static UIComponent CreateScrollablePanel(UIComponent root) {
             var scrollablePanel = root.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.backgroundSprite = string.Empty;
-            scrollablePanel.size = new Vector2(ROW_WIDTH, 0);
+            scrollablePanel.size = root.size;
             scrollablePanel.relativePosition = Vector3.zero;
+
             scrollablePanel.clipChildren = true;
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.autoLayoutDirection = LayoutDirection.Vertical;
             scrollablePanel.autoLayout = true;
 
+            scrollablePanel.FitTo(root);
+            scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
+            scrollablePanel.builtinKeyNavigation = true;
+
+            UIScrollbar verticalScroll = root.AddUIComponent<UIScrollbar>();
+            verticalScroll.stepSize = 1;
+            verticalScroll.relativePosition = new Vector2(root.width - 15, 0);
+            verticalScroll.orientation = UIOrientation.Vertical;
+            verticalScroll.size = new Vector2(20, root.height);
+            verticalScroll.incrementAmount = 25;
+            verticalScroll.scrollEasingType = EasingType.BackEaseOut;
+
+            scrollablePanel.verticalScrollbar = verticalScroll;
+
+            UISlicedSprite track = verticalScroll.AddUIComponent<UISlicedSprite>();
+            track.spriteName = "ScrollbarTrack";
+            track.relativePosition = Vector3.zero;
+            track.size = new Vector2(16, 320);
+
+            verticalScroll.trackObject = track;
+
+            UISlicedSprite thumb = track.AddUIComponent<UISlicedSprite>();
+            thumb.spriteName = "ScrollbarThumb";
+            thumb.autoSize = true;
+            thumb.relativePosition = Vector3.zero;
+            verticalScroll.thumbObject = thumb;
+
             return scrollablePanel;
         }
 
-        public UIPanel CreateRowPanel() {
-            settingsPanel_.size += new Vector2(0f, ROW_HEIGHT);
-
-            var p = settingsPanel_.AddUIComponent<UIPanel>();
-            p.size = new Vector2(ROW_WIDTH, ROW_HEIGHT);
-            p.autoLayoutStart = LayoutStart.TopLeft;
-            p.autoLayoutDirection = LayoutDirection.Horizontal;
-            p.autoLayout = true;
-
-            return p;
+        public void BeginForm(UIComponent component) {
+            scrollPanel_ = CreateScrollablePanel(component);
         }
 
-        public void CreateLabel(UIPanel parent, string text) {
+        /// <summary>
+        /// Create an empty row of ROW_HEIGHT pixels, with left-to-right layout
+        /// </summary>
+        /// <returns>The row panel</returns>
+        public UIPanel CreateRowPanel() {
+            // scrollPanel_.size += new Vector2(0f, ROW_HEIGHT);
+            var rowPanel = currentGroup_.AddUIComponent<UIPanel>();
+            rowPanel.size = new Vector2(ROW_WIDTH, ROW_HEIGHT);
+            rowPanel.autoLayoutStart = LayoutStart.TopLeft;
+            rowPanel.autoLayoutDirection = LayoutDirection.Horizontal;
+            rowPanel.autoLayout = true;
+
+            return rowPanel;
+        }
+
+        /// <summary>
+        /// Create a box with title
+        /// </summary>
+        /// <param name="text">Title</param>
+        private void BeginGroup(string text) {
+            const string K_GROUP_TEMPLATE = "OptionsGroupTemplate";
+            var groupPanel = scrollPanel_.AttachUIComponent(
+                              UITemplateManager.GetAsGameObject(K_GROUP_TEMPLATE)) as UIPanel;
+            groupPanel.autoLayoutStart = LayoutStart.TopLeft;
+            groupPanel.autoLayoutDirection = LayoutDirection.Vertical;
+            groupPanel.autoLayout = true;
+
+            groupPanel.Find<UILabel>("Label").text = text;
+
+            currentGroup_ = groupPanel.Find("Content");
+        }
+
+        /// <summary>
+        /// Close the group and expand the scroll panel to include it
+        /// </summary>
+        private void EndGroup() {
+            // scrollPanel_.size += new Vector2(0f, currentGroup_.size.y);
+            currentGroup_ = null;
+        }
+
+        public UILabel CreateLabel(UIPanel parent, string text, float widthFraction) {
             var label = parent.AddUIComponent<UILabel>();
             label.autoSize = false;
-            label.size = new Vector2(ROW_WIDTH * 0.6f, ROW_HEIGHT);
+            label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             label.text = text;
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.textAlignment = UIHorizontalAlignment.Left;
+            return label;
         }
 
-        public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey) {
+        public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey,
+                                        float widthFraction) {
             var btn = parent.AddUIComponent<UIButton>();
-            btn.size = new Vector2(ROW_WIDTH * 0.3f, ROW_HEIGHT);
+            btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             btn.text = Keybind.Str(editKey);
             btn.hoveredTextColor = new Color32(128, 128, 255, 255); // darker blue
             btn.pressedTextColor = new Color32(192, 192, 255, 255); // lighter blue
@@ -75,17 +141,28 @@ namespace TrafficManager.State.Keybinds {
             btn.eventKeyDown += OnBindingKeyDown;
             btn.eventMouseDown += OnBindingMouseDown;
             btn.objectUserData
-                = new KeybindSetting.Editable { Target = setting, TargetKey = editKey };
+                = new KeybindSetting.Editable {Target = setting, TargetKey = editKey};
 
-            // Add X button
+            AddXButton(parent, editKey, btn);
+        }
+
+        /// <summary>
+        /// Add X button to the right of another button
+        /// </summary>
+        /// <param name="parent">The panel to host the new button</param>
+        /// <param name="editKey">The key to be cleared on click</param>
+        /// <param name="alignTo">Align X button to the right of this</param>
+        private static void AddXButton(UIPanel parent, SavedInputKey editKey, UIButton alignTo) {
             var btnX = parent.AddUIComponent<UIButton>();
             btnX.autoSize = false;
             btnX.size = new Vector2(ROW_HEIGHT, ROW_HEIGHT);
-            btnX.normalBgSprite = "ButtonMenu";
+            btnX.normalBgSprite = "buttonclose";
+            btnX.hoveredBgSprite = "buttonclosehover";
+            btnX.pressedBgSprite = "buttonclosepressed";
             btnX.text = "X";
             btnX.eventClicked += (component, eventParam) => {
                 editKey.value = SavedInputKey.Empty;
-                btn.text = Keybind.Str(editKey);
+                alignTo.text = Keybind.Str(editKey);
             };
         }
 
@@ -104,6 +181,17 @@ namespace TrafficManager.State.Keybinds {
             label.textColor = new Color32(128, 128, 128, 255); // grey
         }
 
+        /// <summary>
+        /// Performs group creation sequence: BeginGroup, add keybinds UI rows, EndGroup
+        /// </summary>
+        /// <param name="title">Translated title</param>
+        /// <param name="code">Function which adds keybind rows</param>
+        public void AddGroup(string title, Action code) {
+            BeginGroup(title);
+            code.Invoke();
+            EndGroup();
+        }
+
         private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
             // This will only work if the user clicked the modify button
             // otherwise no effect
@@ -118,7 +206,7 @@ namespace TrafficManager.State.Keybinds {
                                ? currentlyEditedBinding_.Value.TargetKey
                                : SavedInputKey.Encode(keycode, p.control, p.shift, p.alt);
 
-            var editable = (KeybindSetting.Editable)p.source.objectUserData;
+            var editable = (KeybindSetting.Editable) p.source.objectUserData;
             var category = editable.Target.Category;
 
             var maybeConflict = FindConflict(inputKey, category);
@@ -129,7 +217,7 @@ namespace TrafficManager.State.Keybinds {
                     false);
             } else {
                 currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                currentlyEditedBinding_.Value.Target.OnChanged();
+                currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
             }
 
             // Update text on the button
@@ -139,7 +227,7 @@ namespace TrafficManager.State.Keybinds {
         }
 
         private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
-            var editable = (KeybindSetting.Editable)p.source.objectUserData;
+            var editable = (KeybindSetting.Editable) p.source.objectUserData;
 
             // This will only work if the user is not in the process of changing the shortcut
             if (currentlyEditedBinding_ == null) {
@@ -171,7 +259,7 @@ namespace TrafficManager.State.Keybinds {
                         false);
                 } else {
                     currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                    currentlyEditedBinding_.Value.Target.OnChanged();
+                    currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
                 }
 
                 var button = p.source as UIButton;
@@ -181,7 +269,7 @@ namespace TrafficManager.State.Keybinds {
             }
         }
 
-                /// <summary>
+        /// <summary>
         /// For an inputkey, try find where possibly it is already used.
         /// This covers game Settings class, and self (OptionsKeymapping class).
         /// </summary>
@@ -215,7 +303,8 @@ namespace TrafficManager.State.Keybinds {
         private static string FindConflictInGameSettings(InputKey sample) {
             var fieldList = typeof(Settings).GetFields(BindingFlags.Static | BindingFlags.Public);
             foreach (var field in fieldList) {
-                var customAttributes = field.GetCustomAttributes(typeof(RebindableKeyAttribute), false) as RebindableKeyAttribute[];
+                var customAttributes =
+                    field.GetCustomAttributes(typeof(RebindableKeyAttribute), false) as RebindableKeyAttribute[];
                 if (customAttributes != null && customAttributes.Length > 0) {
                     var category = customAttributes[0].category;
                     if (category != string.Empty && category != "Game") {
@@ -247,7 +336,7 @@ namespace TrafficManager.State.Keybinds {
 
             var obj = field.GetValue(null);
             if (obj is InputKey) {
-                return (InputKey)obj;
+                return (InputKey) obj;
             }
 
             return 0;

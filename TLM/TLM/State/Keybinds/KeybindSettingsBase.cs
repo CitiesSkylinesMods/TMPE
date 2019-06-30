@@ -59,7 +59,7 @@ namespace TrafficManager.State.Keybinds {
             SavedInputKey.Encode(KeyCode.Delete, false, false, false),
             SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
 
-        private KeybindUI keybindUi_ = new KeybindUI();
+        protected KeybindUI keybindUi_ = new KeybindUI();
 
         /// <summary>
         /// Counter to produce alternating UI row colors (dark and light).
@@ -79,10 +79,6 @@ namespace TrafficManager.State.Keybinds {
             }
         }
 
-        protected void BeginForm() {
-            keybindUi_.BeginForm(component);
-        }
-
         /// <summary>
         /// Creates a row in the current panel with the label and the button
         /// which will prompt user to press a new key.
@@ -95,8 +91,8 @@ namespace TrafficManager.State.Keybinds {
                 settingsRow.backgroundSprite = null;
             }
 
-            keybindUi_.CreateLabel(settingsRow, label);
-            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key);
+            keybindUi_.CreateLabel(settingsRow, label, 0.6f);
+            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key, 0.3f);
         }
 
         /// <summary>
@@ -104,15 +100,16 @@ namespace TrafficManager.State.Keybinds {
         /// previous key editor.
         /// </summary>
         /// <param name="keybind"></param>
-        protected void AddAlternateUiControl(KeybindSetting keybind) {
+        protected void AddAlternateKeybindUI(string title, KeybindSetting keybind) {
             var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_ % 2 == 1) {
                 // color the panel but do not increment uiRowCount
                 settingsRow.backgroundSprite = null;
             }
 
-            keybindUi_.CreateLabel(settingsRow, string.Empty);
-            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.AlternateKey);
+            keybindUi_.CreateLabel(settingsRow, title, 0.45f);
+            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key, 0.2f);
+            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.AlternateKey, 0.2f);
         }
 
         /// <summary>
@@ -121,13 +118,13 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
-        protected void ReadOnlyKeybindUI(string label, KeybindSetting keybind) {
+        protected void AddReadOnlyKeybind(string label, KeybindSetting keybind) {
             var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
                 settingsRow.backgroundSprite = null;
             }
 
-            keybindUi_.CreateLabel(settingsRow, label);
+            keybindUi_.CreateLabel(settingsRow, label, 0.6f);
             keybindUi_.CreateKeybindText(settingsRow, keybind.Key);
         }
 
