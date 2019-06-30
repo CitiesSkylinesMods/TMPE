@@ -49,7 +49,7 @@ namespace TrafficManager.State.Keybinds {
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
             scrollablePanel.builtinKeyNavigation = true;
 
-            UIScrollbar verticalScroll = root.AddUIComponent<UIScrollbar>();
+            var verticalScroll = root.AddUIComponent<UIScrollbar>();
             verticalScroll.stepSize = 1;
             verticalScroll.relativePosition = new Vector2(root.width - 15, 0);
             verticalScroll.orientation = UIOrientation.Vertical;
@@ -59,14 +59,14 @@ namespace TrafficManager.State.Keybinds {
 
             scrollablePanel.verticalScrollbar = verticalScroll;
 
-            UISlicedSprite track = verticalScroll.AddUIComponent<UISlicedSprite>();
+            var track = verticalScroll.AddUIComponent<UISlicedSprite>();
             track.spriteName = "ScrollbarTrack";
             track.relativePosition = Vector3.zero;
             track.size = new Vector2(16, 320);
 
             verticalScroll.trackObject = track;
 
-            UISlicedSprite thumb = track.AddUIComponent<UISlicedSprite>();
+            var thumb = track.AddUIComponent<UISlicedSprite>();
             thumb.spriteName = "ScrollbarThumb";
             thumb.autoSize = true;
             thumb.relativePosition = Vector3.zero;
@@ -84,7 +84,6 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <returns>The row panel</returns>
         public UIPanel CreateRowPanel() {
-            // scrollPanel_.size += new Vector2(0f, ROW_HEIGHT);
             var rowPanel = currentGroup_.AddUIComponent<UIPanel>();
             rowPanel.size = new Vector2(ROW_WIDTH, ROW_HEIGHT);
             rowPanel.autoLayoutStart = LayoutStart.TopLeft;
@@ -115,7 +114,6 @@ namespace TrafficManager.State.Keybinds {
         /// Close the group and expand the scroll panel to include it
         /// </summary>
         private void EndGroup() {
-            // scrollPanel_.size += new Vector2(0f, currentGroup_.size.y);
             currentGroup_ = null;
         }
 
@@ -171,10 +169,10 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="parent">The panel to host it</param>
         /// <param name="showKey">The key to display</param>
-        public void CreateKeybindText(UIPanel parent, SavedInputKey showKey) {
+        public void CreateKeybindText(UIPanel parent, SavedInputKey showKey, float widthFraction) {
             var label = parent.AddUIComponent<UILabel>();
             label.autoSize = false;
-            label.size = new Vector2(ROW_WIDTH * 0.3f, ROW_HEIGHT);
+            label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             label.text = Keybind.Str(showKey);
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.textAlignment = UIHorizontalAlignment.Center;

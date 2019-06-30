@@ -50,8 +50,9 @@ namespace TrafficManager.State.Keybinds {
             AddKeybindRowUI(Translation.GetString("Keybind_lane_connector_stay_in_lane"),
                             LaneConnectorStayInLane);
 
+            // First key binding is readonly (editable1=false)
             AddAlternateKeybindUI(Translation.GetString("Keybind_lane_connector_delete"),
-                                  LaneConnectorDelete);
+                                  LaneConnectorDelete, false, true);
         }
     }
 }

@@ -100,7 +100,10 @@ namespace TrafficManager.State.Keybinds {
         /// previous key editor.
         /// </summary>
         /// <param name="keybind"></param>
-        protected void AddAlternateKeybindUI(string title, KeybindSetting keybind) {
+        /// <param name="editable1">Whether main key binding is editable or readonly</param>
+        /// <param name="editable2">Whether alt key binding is editable or readonly</param>
+        protected void AddAlternateKeybindUI(string title, KeybindSetting keybind,
+                                             bool editable1, bool editable2) {
             var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_ % 2 == 1) {
                 // color the panel but do not increment uiRowCount
@@ -108,8 +111,17 @@ namespace TrafficManager.State.Keybinds {
             }
 
             keybindUi_.CreateLabel(settingsRow, title, 0.45f);
-            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key, 0.2f);
-            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.AlternateKey, 0.2f);
+            if (editable1) {
+                keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key, 0.2f);
+            } else {
+                keybindUi_.CreateKeybindText(settingsRow, keybind.Key, 0.25f);
+            }
+
+            if (editable2) {
+                keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.AlternateKey, 0.2f);
+            } else {
+                keybindUi_.CreateKeybindText(settingsRow, keybind.AlternateKey, 0.25f);
+            }
         }
 
         /// <summary>
@@ -125,7 +137,7 @@ namespace TrafficManager.State.Keybinds {
             }
 
             keybindUi_.CreateLabel(settingsRow, label, 0.6f);
-            keybindUi_.CreateKeybindText(settingsRow, keybind.Key);
+            keybindUi_.CreateKeybindText(settingsRow, keybind.Key, 0.3f);
         }
 
         protected void OnEnable() {
