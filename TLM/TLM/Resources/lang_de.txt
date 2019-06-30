@@ -230,8 +230,9 @@ Vehicles_may_turn_on_red Fahrzeuge dürfen an roten Ampeln abbiegen
 Also_apply_to_left/right_turns_between_one-way_streets Gilt auch für Links- & Rechtskurven zwischen Einbahnstraßen
 Scan_for_known_incompatible_mods_on_startup Scan for known incompatible mods on startup
 Ignore_disabled_mods Ignore disabled mods
-Traffic_Manager_detected_incompatible_mods Traffic Manager detected incompatible mods
+Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Zeige Fehlermeldung, wenn eine Mod-Inkompatibilität erkannt wurde
+Unsubscribe Unsubscribe
 Keybind_toggle_TMPE_main_menu TM:PE-Hauptmenü umschalten
 Keybind_toggle_traffic_lights_tool Werkzeug 'Ampeln setzen' verwenden
 Keybind_use_lane_arrow_tool Werkzeug 'Richtungspfeile' verwenden

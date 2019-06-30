@@ -230,8 +230,9 @@ Vehicles_may_turn_on_red Разрешить поворот направо на �
 Also_apply_to_left/right_turns_between_one-way_streets Разрешить направо/налево между улицами с односторонним движением
 Scan_for_known_incompatible_mods_on_startup Сканирование известных несовместимых модов при запуске
 Ignore_disabled_mods Игнорировать отключённые моды
-Traffic_Manager_detected_incompatible_mods Traffic Manager обнаружил несовместимые моды
+Traffic_Manager_detected_incompatible_mods обнаружил несовместимые моды
 Notify_me_if_there_is_an_unexpected_mod_conflict Показывать сообщение об ошибке при несовместимости модов
+Unsubscribe Unsubscribe
 Keybind_toggle_TMPE_main_menu Показать или скрыть меню TM:PE
 Keybind_toggle_traffic_lights_tool Инструмент "Установка светофора"
 Keybind_use_lane_arrow_tool Инструмент "Стрелки движения"
