@@ -1,17 +1,11 @@
 ﻿// Based on keymapping module from CS-MoveIt mod
 // Thanks to https://github.com/Quboid/CS-MoveIt
-using TrafficManager.UI;
-
 namespace TrafficManager.State.Keybinds {
     using System;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
     using ColossalFramework;
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
     using UnityEngine;
 
     public class KeybindSettingsBase : UICustomControl {
@@ -21,51 +15,51 @@ namespace TrafficManager.State.Keybinds {
         }
 
         protected static readonly string KeyBindingTemplate = "KeyBindingTemplate";
-        public const string KEYBOARD_SHORTCUTS_FILENAME = "TMPE_Keyboard";
+        public const string KEYBOARD_SHORTCUTS_FILENAME = "TMPE_Keybinds";
 
         /// <value>
         /// This input key can not be changed and is not checked, instead it is display only
         /// </value>
         protected static KeybindSetting ToolCancelViewOnly { get; } = new KeybindSetting(
             "Global",
-            "keyExitSubtool",
+            "Key_ExitSubtool",
             SavedInputKey.Encode(KeyCode.Escape, false, false, false));
 
         public static KeybindSetting ToggleMainMenu { get; } = new KeybindSetting(
             "Global",
-            "keyToggleTMPEMainMenu",
+            "Key_ToggleTMPEMainMenu",
             SavedInputKey.Encode(KeyCode.Semicolon, false, true, false));
 
         public static KeybindSetting ToggleTrafficLightTool { get; } =
-            new KeybindSetting("Global", "keyToggleTrafficLightTool");
+            new KeybindSetting("Global", "Key_ToggleTrafficLightTool");
 
         public static KeybindSetting LaneArrowTool { get; } =
-            new KeybindSetting("Global", "keyLaneArrowTool");
+            new KeybindSetting("Global", "Key_LaneArrowTool");
 
         public static KeybindSetting LaneConnectionsTool { get; } =
-            new KeybindSetting("Global", "keyLaneConnectionsTool");
+            new KeybindSetting("Global", "Key_LaneConnectionsTool");
 
         public static KeybindSetting PrioritySignsTool { get; } =
-            new KeybindSetting("Global", "keyPrioritySignsTool");
+            new KeybindSetting("Global", "Key_PrioritySignsTool");
 
         public static KeybindSetting JunctionRestrictionsTool { get; } =
-            new KeybindSetting("Global", "keyJunctionRestrictionsTool");
+            new KeybindSetting("Global", "Key_JunctionRestrictionsTool");
 
         public static KeybindSetting SpeedLimitsTool { get; } =
-            new KeybindSetting("Global", "keySpeedLimitsTool");
+            new KeybindSetting("Global", "Key_SpeedLimitsTool");
 
         public static KeybindSetting LaneConnectorStayInLane { get; } = new KeybindSetting(
             "LaneConnector",
-            "keyLaneConnectorStayInLane",
+            "Key_LaneConnector_StayInLane",
             SavedInputKey.Encode(KeyCode.S, false, true, false));
 
         public static KeybindSetting LaneConnectorDelete { get; } = new KeybindSetting(
             "LaneConnector",
-            "keyLaneConnectorDelete",
+            "Key_LaneConnector_Delete",
             SavedInputKey.Encode(KeyCode.Delete, false, false, false),
             SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
 
-        private KeybindSetting.Editable? currentlyEditedBinding_;
+        private KeybindUI keybindUi_ = new KeybindUI();
 
         /// <summary>
         /// Counter to produce alternating UI row colors (dark and light).
@@ -85,37 +79,40 @@ namespace TrafficManager.State.Keybinds {
             }
         }
 
+        protected void BeginForm() {
+            keybindUi_.BeginForm(component);
+        }
+
         /// <summary>
         /// Creates a row in the current panel with the label and the button
         /// which will prompt user to press a new key.
         /// </summary>
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
-        protected void AddUiControl(string label, KeybindSetting keybind) {
-            var uiPanel = component.AttachUIComponent(
-                              UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as UIPanel;
+        protected void AddKeybindRowUI(string label, KeybindSetting keybind) {
+            var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
-                uiPanel.backgroundSprite = null;
+                settingsRow.backgroundSprite = null;
             }
 
-            // Create a label
-            var uiLabel = uiPanel.Find<UILabel>("Name");
+            keybindUi_.CreateLabel(settingsRow, label);
+            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.Key);
+        }
 
-            // Create a button which displays the shortcut and modifies it on click
-            var uiButton = uiPanel.Find<UIButton>("Binding");
-            uiButton.eventKeyDown += OnBindingKeyDown;
-            uiButton.eventMouseDown += OnBindingMouseDown;
-            uiButton.text = Keybind.Str(keybind.Key); // take the first key only
+        /// <summary>
+        /// Add a second key under the first key, using same row background as the
+        /// previous key editor.
+        /// </summary>
+        /// <param name="keybind"></param>
+        protected void AddAlternateUiControl(KeybindSetting keybind) {
+            var settingsRow = keybindUi_.CreateRowPanel();
+            if (uiRowCount_ % 2 == 1) {
+                // color the panel but do not increment uiRowCount
+                settingsRow.backgroundSprite = null;
+            }
 
-            // Tell the button handler that we're editing the main Key of this keybind
-            uiButton.objectUserData
-                = new KeybindSetting.Editable {
-                                                  Target = keybind,
-                                                  TargetKey = keybind.Key
-                                              };
-
-            // Set label text (as provided) and set button text from the SavedInputKey
-            uiLabel.text = label;
+            keybindUi_.CreateLabel(settingsRow, string.Empty);
+            keybindUi_.CreateKeybindButton(settingsRow, keybind, keybind.AlternateKey);
         }
 
         /// <summary>
@@ -124,23 +121,14 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
-        protected void AddReadOnlyUi(string label, KeybindSetting keybind) {
-            var uiPanel = component.AttachUIComponent(
-                              UITemplateManager.GetAsGameObject(KeyBindingTemplate)) as UIPanel;
+        protected void ReadOnlyKeybindUI(string label, KeybindSetting keybind) {
+            var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
-                uiPanel.backgroundSprite = null;
+                settingsRow.backgroundSprite = null;
             }
 
-            // Create a label
-            var uiLabel = uiPanel.Find<UILabel>("Name");
-
-            // Create a button which displays the shortcut and modifies it on click
-            var uiReadOnlyKey = uiPanel.Find<UIButton>("Binding");
-            uiReadOnlyKey.Disable();
-
-            // Set label text (as provided) and set button text from the InputKey
-            uiLabel.text = label;
-            uiReadOnlyKey.text = keybind.Str();
+            keybindUi_.CreateLabel(settingsRow, label);
+            keybindUi_.CreateKeybindText(settingsRow, keybind.Key);
         }
 
         protected void OnEnable() {
@@ -152,219 +140,27 @@ namespace TrafficManager.State.Keybinds {
         }
 
         private void OnLocaleChanged() {
-            RefreshBindableInputs();
+            // RefreshBindableInputs();
         }
 
-        private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
-            // This will only work if the user clicked the modify button
-            // otherwise no effect
-            if (currentlyEditedBinding_ == null || Keybind.IsModifierKey(p.keycode)) {
-                return;
-            }
-
-            p.Use(); // Consume the event
-            UIView.PopModal();
-            var keycode = p.keycode;
-            var inputKey = (p.keycode == KeyCode.Escape)
-                               ? currentlyEditedBinding_.Value.TargetKey
-                               : SavedInputKey.Encode(keycode, p.control, p.shift, p.alt);
-
-            var editable = (KeybindSetting.Editable)p.source.objectUserData;
-            var category = editable.Target.Category;
-
-            if (p.keycode == KeyCode.Backspace) {
-                // TODO: Show hint somewhere for Bksp and Esc special handling
-                inputKey = SavedInputKey.Empty;
-            }
-
-            var maybeConflict = FindConflict(inputKey, category);
-            if (maybeConflict != string.Empty) {
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                    "Key Conflict",
-                    Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
-                    false);
-            } else {
-                currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-            }
-
-            // Update text on the button
-            var uITextComponent = p.source as UITextComponent;
-            uITextComponent.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-            currentlyEditedBinding_ = null;
-        }
-
-        private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
-            var editable = (KeybindSetting.Editable)p.source.objectUserData;
-
-            // This will only work if the user is not in the process of changing the shortcut
-            if (currentlyEditedBinding_ == null) {
-                p.Use();
-                currentlyEditedBinding_ = editable;
-
-                var uIButton = p.source as UIButton;
-                uIButton.buttonsMask =
-                    UIMouseButton.Left | UIMouseButton.Right | UIMouseButton.Middle |
-                    UIMouseButton.Special0 | UIMouseButton.Special1 | UIMouseButton.Special2 |
-                    UIMouseButton.Special3;
-                uIButton.text = "Press any key";
-                p.source.Focus();
-                UIView.PushModal(p.source);
-            } else if (!Keybind.IsUnbindableMouseButton(p.buttons)) {
-                // This will work if the user clicks while the shortcut change is in progress
-                p.Use();
-                UIView.PopModal();
-                var inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(p.buttons),
-                                                    Keybind.IsControlDown(),
-                                                    Keybind.IsShiftDown(),
-                                                    Keybind.IsAltDown());
-                var category = editable.Target.Category;
-                var maybeConflict = FindConflict(inputKey, category);
-                if (maybeConflict != string.Empty) {
-                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                        "Key Conflict",
-                        Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
-                        false);
-                } else {
-                    currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                }
-
-                var uIButton2 = p.source as UIButton;
-                uIButton2.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-                uIButton2.buttonsMask = UIMouseButton.Left;
-                currentlyEditedBinding_ = null;
-            }
-        }
-
-        private void RefreshBindableInputs() {
-            foreach (var current in component.GetComponentsInChildren<UIComponent>()) {
-                var uITextComponent = current.Find<UITextComponent>("Binding");
-                if (uITextComponent != null) {
-                    var savedInputKey = uITextComponent.objectUserData as SavedInputKey;
-                    if (savedInputKey != null) {
-                        uITextComponent.text = Keybind.Str(savedInputKey);
-                    }
-                }
-
-                var uILabel = current.Find<UILabel>("Name");
-                if (uILabel != null) {
-                    uILabel.text = Locale.Get("KEYMAPPING", uILabel.stringUserData);
-                }
-            }
-        }
-
-        /// <summary>
-        /// For an inputkey, try find where possibly it is already used.
-        /// This covers game Settings class, and self (OptionsKeymapping class).
-        /// </summary>
-        /// <param name="k">Key to search for the conflicts</param>
-        /// <param name="sampleCategory">Check the same category keys if possible</param>
-        /// <returns>Empty string for no conflict, or the conflicting key name</returns>
-        private string FindConflict(InputKey sample, string sampleCategory) {
-            if (Keybind.IsEmpty(sample)) {
-                // empty key never conflicts
-                return string.Empty;
-            }
-
-            var inGameSettings = FindConflictInGameSettings(sample);
-            if (!string.IsNullOrEmpty(inGameSettings)) {
-                return inGameSettings;
-            }
-
-            // Saves and null 'self.editingBinding_' to allow rebinding the key to itself.
-            var saveEditingBinding = currentlyEditedBinding_.Value.TargetKey.value;
-            currentlyEditedBinding_.Value.TargetKey.value = SavedInputKey.Empty;
-
-            // Check in TMPE settings
-            var tmpeSettingsType = typeof(KeybindSettingsBase);
-            var tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
-
-            var inTmpe = FindConflictInTmpe(sample, sampleCategory, tmpeFields);
-            currentlyEditedBinding_.Value.TargetKey.value = saveEditingBinding;
-            return inTmpe;
-        }
-
-        private static string FindConflictInGameSettings(InputKey sample) {
-            var fieldList = typeof(Settings).GetFields(BindingFlags.Static | BindingFlags.Public);
-            foreach (var field in fieldList) {
-                var customAttributes = field.GetCustomAttributes(typeof(RebindableKeyAttribute), false) as RebindableKeyAttribute[];
-                if (customAttributes != null && customAttributes.Length > 0) {
-                    var category = customAttributes[0].category;
-                    if (category != string.Empty && category != "Game") {
-                        // Ignore other categories: MapEditor, Decoration, ThemeEditor, ScenarioEditor
-                        continue;
-                    }
-
-                    var str = field.GetValue(null) as string;
-
-                    var savedInputKey = new SavedInputKey(str,
-                                                          Settings.gameSettingsFile,
-                                                          GetDefaultEntryInGameSettings(str),
-                                                          true);
-                    if (savedInputKey.value == sample) {
-                        return (category == string.Empty ? string.Empty : (category + " -- "))
-                               + CamelCaseSplit(field.Name);
-                    }
-                }
-            }
-
-            return string.Empty;
-        }
-
-        private static InputKey GetDefaultEntryInGameSettings(string entryName) {
-            var field = typeof(DefaultSettings).GetField(entryName, BindingFlags.Static | BindingFlags.Public);
-            if (field == null) {
-                return 0;
-            }
-
-            var obj = field.GetValue(null);
-            if (obj is InputKey) {
-                return (InputKey)obj;
-            }
-
-            return 0;
-        }
-
-        /// <summary>
-        /// For given key and category check TM:PE settings for the Global category
-        /// and the same category if it is not Global. This will allow reusing key in other tool
-        /// categories without conflicting.
-        /// </summary>
-        /// <param name="sample">The key to search for</param>
-        /// <param name="sampleCategory">The category Global or some tool name</param>
-        /// <param name="fields">Fields of the key settings class</param>
-        /// <returns>Empty string if no conflicts otherwise the key name to print an error</returns>
-        private static string FindConflictInTmpe(InputKey sample, string sampleCategory, FieldInfo[] fields) {
-            foreach (var field in fields) {
-                // This will match inputkeys of TMPE key settings
-                if (field.FieldType != typeof(KeybindSetting)) {
-                    continue;
-                }
-
-                var tmpeSetting = field.GetValue(null) as KeybindSetting;
-
-                // Check category, category=Global will check keys in all categories
-                // category=<other> will check Global and its own only
-                if (sampleCategory != "Global"
-                    && sampleCategory != tmpeSetting.Category) {
-                    continue;
-                }
-
-                if (tmpeSetting.HasKey(sample)) {
-                    return "TM:PE, "
-                           + Translation.GetString("Keybind_category_" + tmpeSetting.Category)
-                           + " -- " + CamelCaseSplit(field.Name);
-                }
-            }
-
-            return string.Empty;
-        }
-
-        private static string CamelCaseSplit(string s) {
-            var words = Regex.Matches(s, @"([A-Z][a-z]+)")
-                             .Cast<Match>()
-                             .Select(m => m.Value);
-
-            return string.Join(" ", words.ToArray());
-        }
+//        /// <summary>
+//        /// Called on locale change, resets keys to the new language
+//        /// </summary>
+//        private void RefreshBindableInputs() {
+//            foreach (var current in component.GetComponentsInChildren<UIComponent>()) {
+//                var uITextComponent = current.Find<UITextComponent>("Binding");
+//                if (uITextComponent != null) {
+//                    var savedInputKey = uITextComponent.objectUserData as SavedInputKey;
+//                    if (savedInputKey != null) {
+//                        uITextComponent.text = Keybind.Str(savedInputKey);
+//                    }
+//                }
+//
+//                var uILabel = current.Find<UILabel>("Name");
+//                if (uILabel != null) {
+//                    uILabel.text = Locale.Get("KEYMAPPING", uILabel.stringUserData);
+//                }
+//            }
+//        }
     }
 }

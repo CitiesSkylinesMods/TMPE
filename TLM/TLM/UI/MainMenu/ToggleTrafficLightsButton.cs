@@ -1,6 +1,4 @@
-﻿using ColossalFramework;
-using TrafficManager.State;
-using TrafficManager.State.Keybinds;
+﻿using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
     public class ToggleTrafficLightsButton : MenuToolModeButton {

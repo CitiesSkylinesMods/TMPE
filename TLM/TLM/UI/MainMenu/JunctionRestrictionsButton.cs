@@ -1,5 +1,4 @@
-﻿using ColossalFramework;
-using TrafficManager.State;
+﻿using TrafficManager.State;
 using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.MainMenu {
