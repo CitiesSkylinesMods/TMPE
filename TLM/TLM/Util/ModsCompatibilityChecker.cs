@@ -100,7 +100,7 @@ namespace TrafficManager.Util
                     {
                         if (GetModVerId(mod) == selfModVerId)
                         {
-                            Log.Info($"Skipping local TM:PE with same GUID as self: {selfModVerId}");
+                            Log.Info($"Skipping local TM:PE with GUID '{selfModVerId}' in '{mod.modPath}'");
                         }
                         else
                         {
