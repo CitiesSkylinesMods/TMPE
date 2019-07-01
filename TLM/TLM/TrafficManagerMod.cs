@@ -17,8 +17,6 @@ namespace TrafficManager {
         public static readonly uint GameVersionC = 0u;
         public static readonly uint GameVersionBuild = 5u;
 
-        public static int Build => Assembly.GetExecutingAssembly().GetName().Version.Build;
-
         // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
         public static readonly string Version = "10.20";
 
@@ -57,7 +55,7 @@ namespace TrafficManager {
 		private static void CheckForIncompatibleMods() {
             if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
                 ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-                mcc.PerformModCheck(Build);
+                mcc.PerformModCheck();
             }
 		}
 	}
