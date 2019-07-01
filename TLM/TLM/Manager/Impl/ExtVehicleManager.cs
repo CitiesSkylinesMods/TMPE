@@ -43,8 +43,8 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		private ExtVehicleManager() {
-			ExtVehicles = new ExtVehicle[VehicleManager.MAX_VEHICLE_COUNT];
-			for (uint i = 0; i < VehicleManager.MAX_VEHICLE_COUNT; ++i) {
+			ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
+			for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
 				ExtVehicles[i] = new ExtVehicle((ushort)i);
 			}
 		}
@@ -737,7 +737,7 @@ namespace TrafficManager.Manager.Impl {
 			Log._Debug("ExtVehicleManager: InitAllVehicles()");
 			VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-			for (uint vehicleId = 0; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+			for (uint vehicleId = 0; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				Services.VehicleService.ProcessVehicle((ushort)vehicleId, delegate (ushort vId, ref Vehicle vehicle) {
 					if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
 						return true;
@@ -754,7 +754,7 @@ namespace TrafficManager.Manager.Impl {
 					}
 
 					OnSpawnVehicle(vId, ref vehicle);
-						
+
 					return true;
 				});
 			}

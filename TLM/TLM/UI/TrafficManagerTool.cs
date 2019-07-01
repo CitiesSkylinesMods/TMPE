@@ -905,7 +905,7 @@ namespace TrafficManager.UI {
 
 
 			int startVehicleId = 1;
-			int endVehicleId = (int)(VehicleManager.MAX_VEHICLE_COUNT - 1);
+			int endVehicleId = (int)(Constants.ServiceFactory.VehicleService.MaxVehicleCount - 1);
 #if DEBUG
 			if (GlobalConfig.Instance.Debug.VehicleId != 0) {
 				startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;

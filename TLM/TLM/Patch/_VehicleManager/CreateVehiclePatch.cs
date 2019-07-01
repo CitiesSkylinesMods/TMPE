@@ -15,7 +15,7 @@ namespace TrafficManager.Patch._VehicleManager {
 		/// </summary>
 		[HarmonyPrefix]
 		public static bool Prefix(VehicleManager __instance, ref ushort vehicle, VehicleInfo info) {
-			if (__instance.m_vehicleCount > VehicleManager.MAX_VEHICLE_COUNT - 5) {
+			if (__instance.m_vehicleCount > Constants.ServiceFactory.VehicleService.MaxVehicleCount - 5) {
 				// prioritize service vehicles and public transport when hitting the vehicle limit
 				ItemClass.Service service = info.GetService();
 				if (service == ItemClass.Service.Residential || service == ItemClass.Service.Industrial || service == ItemClass.Service.Commercial || service == ItemClass.Service.Office) {

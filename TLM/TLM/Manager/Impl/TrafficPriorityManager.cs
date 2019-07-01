@@ -355,7 +355,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 				return true;
 			}
-			
+
 			PriorityType curSign = GetPrioritySign(curPos.m_segment, startNode);
 			if (curSign == PriorityType.None) {
 #if DEBUG
@@ -451,7 +451,7 @@ namespace TrafficManager.Manager.Impl {
 					// check next incoming vehicle
 					incomingVehicleId = vehStateManager.ExtVehicles[incomingVehicleId].nextVehicleIdOnSegment;
 
-					if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+					if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 						break;
 					}
