@@ -96,7 +96,7 @@ namespace TrafficManager.Util
                     }
 #if !DEBUG
                     // Workshop TM:PE builds treat local builds as incompatible
-                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) && GetModBuild(mod) != selfModVerId)
+                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) && GetModVerId(mod) != selfModVerId)
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
                         string folder = Path.GetFileName(mod.modPath);
