@@ -1,12 +1,9 @@
 using CSUtil.Commons;
 using ICities;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using ColossalFramework;
 using ColossalFramework.UI;
 using TrafficManager.State;
 using TrafficManager.Util;
-using UnityEngine;
 
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
@@ -34,6 +31,7 @@ namespace TrafficManager {
 
         public void OnEnabled() {
 			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} {Branch} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
+            Log.Info($"Enabled TM:PE has GUID {Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId}");
 
             // check for incompatible mods
             if (UIView.GetAView() != null) { // when TM:PE is enabled in content manager
