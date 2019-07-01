@@ -17,6 +17,8 @@ namespace TrafficManager {
         public static readonly uint GameVersionC = 0u;
         public static readonly uint GameVersionBuild = 5u;
 
+        public static int Build => Assembly.GetExecutingAssembly().GetName().Version.Build;
+
         // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
         public static readonly string Version = "10.20";
 
@@ -32,7 +34,7 @@ namespace TrafficManager {
 
         public string Description => "Manage your city's traffic";
 
-		public void OnEnabled() {
+        public void OnEnabled() {
 			Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} {Branch} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
 
             // check for incompatible mods
@@ -55,7 +57,7 @@ namespace TrafficManager {
 		private static void CheckForIncompatibleMods() {
             if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
                 ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-                mcc.PerformModCheck();
+                mcc.PerformModCheck(Build);
             }
 		}
 	}

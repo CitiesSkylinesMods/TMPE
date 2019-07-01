@@ -36,11 +36,13 @@ namespace TrafficManager.Util
         /// <summary>
         /// Initiates scan for incompatible mods. If any found, and the user has enabled the mod checker, it creates and initialises the modal dialog panel.
         /// </summary>
-        public void PerformModCheck()
+        /// 
+        /// <param name="build">Used to filter out current mod when checking for offline TM:PE installs.</param>
+        public void PerformModCheck(int build)
         {
             try
             {
-                Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
+                Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods(build);
 
                 if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
                 {
@@ -53,6 +55,7 @@ namespace TrafficManager.Util
             }
             catch (Exception e)
             {
+                Log.Info("Something went wrong while checking incompatible mods - see main game log for details.");
                 Debug.LogException(e);
             }
         }
@@ -60,12 +63,14 @@ namespace TrafficManager.Util
         /// <summary>
         /// Iterates installed mods looking for known incompatibilities.
         /// </summary>
+        ///
+        /// <param name="build">Used to filter out current mod when checking for offline TM:PE installs.</param>
         /// 
         /// <returns>A list of detected incompatible mods.</returns>
         /// 
         /// <exception cref="ArgumentException">Invalid folder path (contains invalid characters, is empty, or contains only white spaces).</exception>
         /// <exception cref="PathTooLongException">Path is too long (longer than the system-defined maximum length).</exception>
-        public Dictionary<PluginInfo, string> ScanForIncompatibleMods()
+        public Dictionary<PluginInfo, string> ScanForIncompatibleMods(int build)
         {
             Log.Info("Scanning for incompatible mods");
 
@@ -93,11 +98,10 @@ namespace TrafficManager.Util
                     }
 #if !DEBUG
                     // Workshop TM:PE builds treat local builds as incompatible
-                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
+                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) && build != GetModBuild(mod))
                     {
                         Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
                         string folder = Path.GetFileName(mod.modPath);
-                        //string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
                         results.Add(mod, $"{modName} in /{folder}");
                     }
 #endif
@@ -121,6 +125,27 @@ namespace TrafficManager.Util
         public string GetModName(PluginInfo plugin)
         {
             return ((IUserMod)plugin.userModInstance).Name;
+        }
+
+        /// <summary>
+        /// Gets the build number of an offline TM:PE mod
+        /// 
+        /// It will return the <see cref="IUserMod.Build"/> if found, otherwise <c>0</c>.
+        /// </summary>
+        /// 
+        /// <param name="plugin">The <see cref="PluginInfo"/> associated with the mod.</param>
+        /// 
+        /// <returns>The name of the specified plugin.</returns>
+        public int GetModBuild(PluginInfo plugin)
+        {
+            try
+            {
+                return ((TrafficManagerMod)plugin.userModInstance).Build;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
 
         /// <summary>
