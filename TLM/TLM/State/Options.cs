@@ -261,6 +261,8 @@ namespace TrafficManager.State {
 #if DEBUG
             resetSpeedLimitsBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_custom_speed_limits"), onClickResetSpeedLimits) as UIButton;
 #endif
+			removeAllExistingTrafficLightsBtn = (UIButton)maintenanceGroup.AddButton(Translation.GetString("Remove_all_existing_traffic_lights"), onClickRemoveAllExistingTrafficLights);
+			removeAllExistingTrafficLightsBtn.tooltip = Translation.GetString("Remove_all_existing_traffic_lights_tooltip");
             reloadGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reload_global_configuration"), onClickReloadGlobalConf) as UIButton;
             resetGlobalConfBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_global_configuration"), onClickResetGlobalConf) as UIButton;
 
@@ -392,8 +394,6 @@ namespace TrafficManager.State {
 
 			var jGroup = panelHelper.AddGroup(Translation.GetString(Translation.GetString("Junctions")));
 			createAllJunctionsWithoutTrafficLightsToggle = (UICheckBox)jGroup.AddCheckbox(Translation.GetString("Create_all_junctions_without_traffic_lights"), createAllJunctionsWithoutTrafficLights, onCreateAllJunctionsWithoutTrafficLightsChanged);
-			removeAllExistingTrafficLightsBtn = (UIButton)jGroup.AddButton(Translation.GetString("Remove_all_existing_traffic_lights"), onClickRemoveAllExistingTrafficLights);
-			removeAllExistingTrafficLightsBtn.tooltip = Translation.GetString("Remove_all_existing_traffic_lights_tooltip");
         }
 
         private static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {
