@@ -157,7 +157,6 @@ namespace TrafficManager.State.Keybinds {
             btnX.normalBgSprite = "buttonclose";
             btnX.hoveredBgSprite = "buttonclosehover";
             btnX.pressedBgSprite = "buttonclosepressed";
-            btnX.text = "X";
             btnX.eventClicked += (component, eventParam) => {
                 editKey.value = SavedInputKey.Empty;
                 alignTo.text = Keybind.Str(editKey);
@@ -198,52 +197,58 @@ namespace TrafficManager.State.Keybinds {
             }
 
             p.Use(); // Consume the event
+
+            var editedBinding = currentlyEditedBinding_; // will be nulled by popmodal
             UIView.PopModal();
-            var keycode = p.keycode;
-            var inputKey = (p.keycode == KeyCode.Escape)
-                               ? currentlyEditedBinding_.Value.TargetKey
-                               : SavedInputKey.Encode(keycode, p.control, p.shift, p.alt);
+            currentlyEditedBinding_ = editedBinding;
 
-            var editable = (KeybindSetting.Editable) p.source.objectUserData;
-            var category = editable.Target.Category;
+            var keybindButton = p.source as UIButton;
 
-            var maybeConflict = FindConflict(inputKey, category);
-            if (maybeConflict != string.Empty) {
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                    "Key Conflict",
-                    Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
-                    false);
-            } else {
-                currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
+            if (p.keycode != KeyCode.Escape) {
+                var inputKey = SavedInputKey.Encode(p.keycode, p.control, p.shift, p.alt);
+                var editable = (KeybindSetting.Editable) p.source.objectUserData;
+                var category = editable.Target.Category;
+
+                var maybeConflict = FindConflict(inputKey, category);
+                if (maybeConflict != string.Empty) {
+                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
+                        "Key Conflict",
+                        Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
+                        false);
+                } else {
+                    currentlyEditedBinding_.Value.TargetKey.value = inputKey;
+                    currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
+                }
             }
 
             // Update text on the button
-            var button = p.source as UIButton;
-            button.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-            currentlyEditedBinding_ = null;
+            EndButtonEditMode(keybindButton);
         }
 
         private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
             var editable = (KeybindSetting.Editable) p.source.objectUserData;
+            var keybindButton = p.source as UIButton;
 
             // This will only work if the user is not in the process of changing the shortcut
             if (currentlyEditedBinding_ == null) {
                 p.Use();
                 currentlyEditedBinding_ = editable;
 
-                var uIButton = p.source as UIButton;
-                uIButton.buttonsMask =
+                keybindButton.buttonsMask =
                     UIMouseButton.Left | UIMouseButton.Right | UIMouseButton.Middle |
                     UIMouseButton.Special0 | UIMouseButton.Special1 | UIMouseButton.Special2 |
                     UIMouseButton.Special3;
-                uIButton.text = "Press any key";
-                p.source.Focus();
-                UIView.PushModal(p.source);
+                keybindButton.text = "Press any key";
+                keybindButton.Focus();
+                UIView.PushModal(keybindButton, OnKeybindModalPopped);
             } else if (!Keybind.IsUnbindableMouseButton(p.buttons)) {
                 // This will work if the user clicks while the shortcut change is in progress
                 p.Use();
+
+                var editedBinding = currentlyEditedBinding_; // it will be nulled on modal pop
                 UIView.PopModal();
+                currentlyEditedBinding_ = editedBinding;
+
                 var inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(p.buttons),
                                                     Keybind.IsControlDown(),
                                                     Keybind.IsShiftDown(),
@@ -260,11 +265,26 @@ namespace TrafficManager.State.Keybinds {
                     currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
                 }
 
-                var button = p.source as UIButton;
-                button.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-                button.buttonsMask = UIMouseButton.Left;
-                currentlyEditedBinding_ = null;
+                keybindButton.buttonsMask = UIMouseButton.Left;
+                EndButtonEditMode(keybindButton);
             }
+        }
+
+        /// <summary>
+        /// Called by the UIView when modal was popped without us knowing
+        /// </summary>
+        /// <param name="component">The button which temporarily was modal</param>
+        private void OnKeybindModalPopped(UIComponent component) {
+            if (!(component is UIButton) || currentlyEditedBinding_ == null) {
+                return;
+            }
+
+            EndButtonEditMode((UIButton) component);
+        }
+
+        private void EndButtonEditMode(UIButton b) {
+            b.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
+            currentlyEditedBinding_ = null;
         }
 
         /// <summary>

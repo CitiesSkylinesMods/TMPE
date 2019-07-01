@@ -6,9 +6,12 @@ namespace TrafficManager.State.Keybinds {
             TryCreateConfig();
 
             keybindUi_.BeginForm(component);
+
+            // Section: Global
             keybindUi_.AddGroup(Translation.GetString("Keybind_category_Global"),
                                 CreateUI_Global);
-            // New section: Lane Connector Tool
+
+            // Section: Lane Connector Tool
             keybindUi_.AddGroup(Translation.GetString("Keybind_category_LaneConnector"),
                                 CreateUI_LaneConnector);
         }
