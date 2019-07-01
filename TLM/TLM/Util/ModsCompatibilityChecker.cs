@@ -70,7 +70,7 @@ namespace TrafficManager.Util
         {
             Guid selfModVerId = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
 
-            Log.Info($"Scanning for incompatible mods; GUID = {selfModVerId}");
+            Log.Info($"Scanning for incompatible mods; Self GUID = {selfModVerId}");
 
             // list of installed incompatible mods
             Dictionary<PluginInfo, string> results = new Dictionary<PluginInfo, string>();
@@ -96,11 +96,18 @@ namespace TrafficManager.Util
                     }
 #if !DEBUG
                     // Workshop TM:PE builds treat local builds as incompatible
-                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) && GetModVerId(mod) != selfModVerId)
+                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
                     {
-                        Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
-                        string folder = Path.GetFileName(mod.modPath);
-                        results.Add(mod, $"{modName} in /{folder}");
+                        if (GetModVerId(mod) == selfModVerId)
+                        {
+                            Log.Info($"Skipping local TM:PE with same GUID as self: {selfModVerId}");
+                        }
+                        else
+                        {
+                            Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
+                            string folder = Path.GetFileName(mod.modPath);
+                            results.Add(mod, $"{modName} in /{folder}");
+                        }
                     }
 #endif
                 }
