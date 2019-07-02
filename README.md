@@ -7,7 +7,7 @@
 
 > Having problems with traffic despawning after updating roads or rails? Try [Broken Node Detector](https://steamcommunity.com/sharedfiles/filedetails/?id=1777173984) which helps detect a game bug. Collossal Order are aware of the issue.
 
-#### Version [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), ??/07/2019
+#### Version [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), 02/07/2019
 - Added: Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
 - Added: Miles Per Hour option for speed limits (thanks kvakvs) (#384)
 - Added: Selectable style (US, UK, EU) of speed sign in speed limits UI (thanks kvakvs) (#384)
