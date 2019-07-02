@@ -9,51 +9,50 @@ namespace TrafficManager.State.Keybinds {
     using UnityEngine;
 
     public class KeybindSettingsBase : UICustomControl {
-        private static void OnMainMenuShortcutChanged(SavedInputKey savedinputkey) {
-            LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
-            Log.Info("Main menu shortcut changed");
-        }
-
         protected static readonly string KeyBindingTemplate = "KeyBindingTemplate";
         public const string KEYBOARD_SHORTCUTS_FILENAME = "TMPE_Keybinds";
+
+        // NOTE: Do not change fields to properties, otherwise also fix the conflict
+        // detection code in KeybindUI.FindConflict(inTmpe) which expects these below
+        // to be fields of type KeybindSetting.
 
         /// <value>
         /// This input key can not be changed and is not checked, instead it is display only
         /// </value>
-        protected static KeybindSetting ToolCancelViewOnly { get; } = new KeybindSetting(
+        protected static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
             "Global",
             "Key_ExitSubtool",
             SavedInputKey.Encode(KeyCode.Escape, false, false, false));
 
-        public static KeybindSetting ToggleMainMenu { get; } = new KeybindSetting(
+        public static KeybindSetting ToggleMainMenu = new KeybindSetting(
             "Global",
             "Key_ToggleTMPEMainMenu",
             SavedInputKey.Encode(KeyCode.Semicolon, false, true, false));
 
-        public static KeybindSetting ToggleTrafficLightTool { get; } =
+        public static KeybindSetting ToggleTrafficLightTool =
             new KeybindSetting("Global", "Key_ToggleTrafficLightTool");
 
-        public static KeybindSetting LaneArrowTool { get; } =
+        public static KeybindSetting LaneArrowTool =
             new KeybindSetting("Global", "Key_LaneArrowTool");
 
-        public static KeybindSetting LaneConnectionsTool { get; } =
+        public static KeybindSetting LaneConnectionsTool =
             new KeybindSetting("Global", "Key_LaneConnectionsTool");
 
-        public static KeybindSetting PrioritySignsTool { get; } =
+        public static KeybindSetting PrioritySignsTool =
             new KeybindSetting("Global", "Key_PrioritySignsTool");
 
-        public static KeybindSetting JunctionRestrictionsTool { get; } =
+        public static KeybindSetting JunctionRestrictionsTool =
             new KeybindSetting("Global", "Key_JunctionRestrictionsTool");
 
-        public static KeybindSetting SpeedLimitsTool { get; } =
+        public static KeybindSetting SpeedLimitsTool =
             new KeybindSetting("Global", "Key_SpeedLimitsTool");
 
-        public static KeybindSetting LaneConnectorStayInLane { get; } = new KeybindSetting(
+        public static KeybindSetting LaneConnectorStayInLane = new KeybindSetting(
             "LaneConnector",
             "Key_LaneConnector_StayInLane",
             SavedInputKey.Encode(KeyCode.S, false, true, false));
 
-        public static KeybindSetting LaneConnectorDelete { get; } = new KeybindSetting(
+        public static KeybindSetting LaneConnectorDelete = new KeybindSetting(
             "LaneConnector",
             "Key_LaneConnector_Delete",
             SavedInputKey.Encode(KeyCode.Delete, false, false, false),

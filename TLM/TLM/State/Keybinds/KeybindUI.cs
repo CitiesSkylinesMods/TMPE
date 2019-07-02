@@ -1,4 +1,5 @@
 using System;
+using CSUtil.Commons;
 
 namespace TrafficManager.State.Keybinds {
     using System.Linq;
@@ -189,85 +190,96 @@ namespace TrafficManager.State.Keybinds {
             EndGroup();
         }
 
-        private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter p) {
-            // This will only work if the user clicked the modify button
-            // otherwise no effect
-            if (!currentlyEditedBinding_.HasValue || Keybind.IsModifierKey(p.keycode)) {
-                return;
-            }
+        private void OnBindingKeyDown(UIComponent comp, UIKeyEventParameter evParam) {
+            try {
+                // This will only work if the user clicked the modify button
+                // otherwise no effect
+                if (!currentlyEditedBinding_.HasValue || Keybind.IsModifierKey(evParam.keycode)) {
+                    return;
+                }
 
-            p.Use(); // Consume the event
+                evParam.Use(); // Consume the event
+                var editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
+                UIView.PopModal();
 
-            var editedBinding = currentlyEditedBinding_; // will be nulled by popmodal
-            UIView.PopModal();
-            currentlyEditedBinding_ = editedBinding;
-
-            var keybindButton = p.source as UIButton;
-
-            if (p.keycode != KeyCode.Escape) {
-                var inputKey = SavedInputKey.Encode(p.keycode, p.control, p.shift, p.alt);
-                var editable = (KeybindSetting.Editable) p.source.objectUserData;
+                var keybindButton = evParam.source as UIButton;
+                var inputKey = SavedInputKey.Encode(evParam.keycode, evParam.control, evParam.shift, evParam.alt);
+                var editable = (KeybindSetting.Editable) evParam.source.objectUserData;
                 var category = editable.Target.Category;
 
-                var maybeConflict = FindConflict(inputKey, category);
-                if (maybeConflict != string.Empty) {
-                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                        "Key Conflict",
-                        Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
-                        false);
-                } else {
-                    currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                    currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
+                if (evParam.keycode != KeyCode.Escape) {
+                    // Check the key conflict
+                    var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
+                    if (maybeConflict != string.Empty) {
+                        var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                        Log.Info($"Keybind conflict: {message}");
+                    UIView.library
+                          .ShowModal<ExceptionPanel>("ExceptionPanel")
+                          .SetMessage("Key Conflict", message, false);
+                    } else {
+                        editedBinding.Value.TargetKey.value = inputKey;
+                        editedBinding.Value.Target.NotifyKeyChanged();
+                    }
                 }
-            }
 
-            // Update text on the button
-            EndButtonEditMode(keybindButton);
+                keybindButton.text = Keybind.Str(editedBinding.Value.TargetKey);
+                currentlyEditedBinding_ = null;
+            } catch (Exception e) {Log.Error($"{e}");}
         }
 
-        private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter p) {
-            var editable = (KeybindSetting.Editable) p.source.objectUserData;
-            var keybindButton = p.source as UIButton;
+        private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter evParam) {
+            var editable = (KeybindSetting.Editable) evParam.source.objectUserData;
+            var keybindButton = evParam.source as UIButton;
 
             // This will only work if the user is not in the process of changing the shortcut
             if (currentlyEditedBinding_ == null) {
-                p.Use();
-                currentlyEditedBinding_ = editable;
-
-                keybindButton.buttonsMask =
-                    UIMouseButton.Left | UIMouseButton.Right | UIMouseButton.Middle |
-                    UIMouseButton.Special0 | UIMouseButton.Special1 | UIMouseButton.Special2 |
-                    UIMouseButton.Special3;
-                keybindButton.text = "Press any key";
-                keybindButton.Focus();
-                UIView.PushModal(keybindButton, OnKeybindModalPopped);
-            } else if (!Keybind.IsUnbindableMouseButton(p.buttons)) {
+                evParam.Use();
+                StartKeybindEditMode(editable, keybindButton);
+            } else if (!Keybind.IsUnbindableMouseButton(evParam.buttons)) {
                 // This will work if the user clicks while the shortcut change is in progress
-                p.Use();
-
-                var editedBinding = currentlyEditedBinding_; // it will be nulled on modal pop
+                evParam.Use();
+                var editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
                 UIView.PopModal();
-                currentlyEditedBinding_ = editedBinding;
 
-                var inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(p.buttons),
+                var inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(evParam.buttons),
                                                     Keybind.IsControlDown(),
                                                     Keybind.IsShiftDown(),
                                                     Keybind.IsAltDown());
                 var category = editable.Target.Category;
-                var maybeConflict = FindConflict(inputKey, category);
+                var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                 if (maybeConflict != string.Empty) {
-                    UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                        "Key Conflict",
-                        Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict,
-                        false);
+                    var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                    Log.Info($"Keybind conflict: {message}");
+                    UIView.library
+                          .ShowModal<ExceptionPanel>("ExceptionPanel")
+                          .SetMessage("Key Conflict", message, false);
                 } else {
-                    currentlyEditedBinding_.Value.TargetKey.value = inputKey;
-                    currentlyEditedBinding_.Value.Target.NotifyKeyChanged();
+                    editedBinding.Value.TargetKey.value = inputKey;
+                    editedBinding.Value.Target.NotifyKeyChanged();
                 }
 
                 keybindButton.buttonsMask = UIMouseButton.Left;
-                EndButtonEditMode(keybindButton);
+                keybindButton.text = Keybind.Str(editedBinding.Value.TargetKey);
+                currentlyEditedBinding_ = null;
             }
+        }
+
+        /// <summary>
+        /// Set the button text to welcoming message. Push the button as modal blocking
+        /// everything else on screen and capturing the input.
+        /// </summary>
+        /// <param name="editable">The keysetting and inputkey inside it, to edit</param>
+        /// <param name="keybindButton">The button to become modal</param>
+        private void StartKeybindEditMode(KeybindSetting.Editable editable, UIButton keybindButton) {
+            currentlyEditedBinding_ = editable;
+
+            keybindButton.buttonsMask =
+                UIMouseButton.Left | UIMouseButton.Right | UIMouseButton.Middle |
+                UIMouseButton.Special0 | UIMouseButton.Special1 | UIMouseButton.Special2 |
+                UIMouseButton.Special3;
+            keybindButton.text = "Press key (or Esc)";
+            keybindButton.Focus();
+            UIView.PushModal(keybindButton, OnKeybindModalPopped);
         }
 
         /// <summary>
@@ -275,16 +287,11 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="component">The button which temporarily was modal</param>
         private void OnKeybindModalPopped(UIComponent component) {
-            if (!(component is UIButton) || currentlyEditedBinding_ == null) {
-                return;
+            var keybindButton = component as UIButton;
+            if (keybindButton != null && currentlyEditedBinding_ != null) {
+                keybindButton.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
+                currentlyEditedBinding_ = null;
             }
-
-            EndButtonEditMode((UIButton) component);
-        }
-
-        private void EndButtonEditMode(UIButton b) {
-            b.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
-            currentlyEditedBinding_ = null;
         }
 
         /// <summary>
@@ -294,7 +301,9 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="k">Key to search for the conflicts</param>
         /// <param name="sampleCategory">Check the same category keys if possible</param>
         /// <returns>Empty string for no conflict, or the conflicting key name</returns>
-        private string FindConflict(InputKey sample, string sampleCategory) {
+        private string FindConflict(KeybindSetting.Editable editedKeybind,
+                                    InputKey sample,
+                                    string sampleCategory) {
             if (Keybind.IsEmpty(sample)) {
                 // empty key never conflicts
                 return string.Empty;
@@ -306,15 +315,15 @@ namespace TrafficManager.State.Keybinds {
             }
 
             // Saves and null 'self.editingBinding_' to allow rebinding the key to itself.
-            var saveEditingBinding = currentlyEditedBinding_.Value.TargetKey.value;
-            currentlyEditedBinding_.Value.TargetKey.value = SavedInputKey.Empty;
+            var saveEditingBinding = editedKeybind.TargetKey.value;
+            editedKeybind.TargetKey.value = SavedInputKey.Empty;
 
             // Check in TMPE settings
             var tmpeSettingsType = typeof(KeybindSettingsBase);
             var tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
 
             var inTmpe = FindConflictInTmpe(sample, sampleCategory, tmpeFields);
-            currentlyEditedBinding_.Value.TargetKey.value = saveEditingBinding;
+            editedKeybind.TargetKey.value = saveEditingBinding;
             return inTmpe;
         }
 
@@ -365,11 +374,13 @@ namespace TrafficManager.State.Keybinds {
         /// and the same category if it is not Global. This will allow reusing key in other tool
         /// categories without conflicting.
         /// </summary>
-        /// <param name="sample">The key to search for</param>
-        /// <param name="sampleCategory">The category Global or some tool name</param>
+        /// <param name="testSample">The key to search for</param>
+        /// <param name="testSampleCategory">The category Global or some tool name</param>
         /// <param name="fields">Fields of the key settings class</param>
         /// <returns>Empty string if no conflicts otherwise the key name to print an error</returns>
-        private static string FindConflictInTmpe(InputKey sample, string sampleCategory, FieldInfo[] fields) {
+        private static string FindConflictInTmpe(InputKey testSample,
+                                                 string testSampleCategory,
+                                                 FieldInfo[] fields) {
             foreach (var field in fields) {
                 // This will match inputkeys of TMPE key settings
                 if (field.FieldType != typeof(KeybindSetting)) {
@@ -378,17 +389,16 @@ namespace TrafficManager.State.Keybinds {
 
                 var tmpeSetting = field.GetValue(null) as KeybindSetting;
 
-                // Check category, category=Global will check keys in all categories
+                // Check category
+                // settingCategory=Global will check against any other test samples
                 // category=<other> will check Global and its own only
-                if (sampleCategory != "Global"
-                    && sampleCategory != tmpeSetting.Category) {
-                    continue;
-                }
-
-                if (tmpeSetting.HasKey(sample)) {
-                    return "TM:PE, "
-                           + Translation.GetString("Keybind_category_" + tmpeSetting.Category)
-                           + " -- " + CamelCaseSplit(field.Name);
+                if (tmpeSetting.Category == "Global"
+                    || testSampleCategory == tmpeSetting.Category) {
+                    if (tmpeSetting.HasKey(testSample)) {
+                        return "TM:PE, "
+                               + Translation.GetString("Keybind_category_" + tmpeSetting.Category)
+                               + " -- " + CamelCaseSplit(field.Name);
+                    }
                 }
             }
 

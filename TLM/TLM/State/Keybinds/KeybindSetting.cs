@@ -52,7 +52,7 @@ namespace TrafficManager.State.Keybinds {
         }
 
         public void NotifyKeyChanged() {
-            onKeyChanged_();
+            onKeyChanged_?.Invoke();
         }
 
         public KeybindSetting(string cat,
