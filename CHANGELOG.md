@@ -23,6 +23,7 @@
 - Fixed: Resetting stuck cims unpauses the simulation (#358, #351)
 - Fixed: Treat duplicate TM:PE subscriptions as mod conflicts (#333, #306, #149, #190, #400)
 - Fixed: TargetInvocationException in mod compatibility checker (#386, #333)
+- Updated: Game version 1.12.1-f1 compatible (#403)
 - Updated: Chinese translation (thanks Emphasia) (#375, #336)
 - Updated: German translation (thanks kvakvs) (#384)
 - Updated: Polish translation (thanks krzychu124) (#384, #333)
