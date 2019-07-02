@@ -32,7 +32,7 @@
 - Updated: Chinese translation (thanks Emphasia) (#375, #336)
 - Updated: German translation (thanks kvakvs) (#384)
 - Updated: Polish translation (thanks krzychu124) (#384, #333)
-- Updated: Russian translation (thanks vitalii201) (#327, #328)
+- Updated: Russian translation (thanks vitalii201 & kvakvs) (#327, #328)
 - Updated: Renamed 'Realistic driving speeds' to 'Individual driving styles' (#334)
 - Removed: Obsolete `TMPE.GlobalConfigGenerator` module (#367, #374)
 - Meta: Pathfinder debug logging tools (switch `26`) (#370)
