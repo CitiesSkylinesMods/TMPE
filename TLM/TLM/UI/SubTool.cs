@@ -1,11 +1,8 @@
-﻿using ColossalFramework.UI;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using TrafficManager.UI.Texture;
-using UnityEngine;
+﻿namespace TrafficManager.UI {
+    using ColossalFramework.UI;
+    using Texture;
+    using UnityEngine;
 
-namespace TrafficManager.UI {
     public abstract class SubTool {
         public TrafficManagerTool MainTool { get; set; }
 
@@ -73,15 +70,15 @@ namespace TrafficManager.UI {
             get {
                 if (borderlessStyle == null) {
                     borderlessStyle = new GUIStyle {
-                                                       normal = { background = BorderlessTexture },
-                                                       alignment = TextAnchor.MiddleCenter,
-                                                       border = {
-                                                                    bottom = 2,
-                                                                    top = 2,
-                                                                    right = 2,
-                                                                    left = 2
-                                                                }
-                                                   };
+                        normal = { background = BorderlessTexture },
+                        alignment = TextAnchor.MiddleCenter,
+                        border = {
+                            bottom = 2,
+                            top = 2,
+                            right = 2,
+                            left = 2
+                        }
+                    };
                 }
 
                 return borderlessStyle;

@@ -276,9 +276,9 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
-			if (debug)
-				Log._Debug($"TppLaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId}");
+            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            if (debug)
+                Log._Debug($"TppLaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId}");
 #endif
 
             if (IsCursorInPanel())
@@ -287,15 +287,15 @@ namespace TrafficManager.UI.SubTools {
             if (GetMarkerSelectionMode() == MarkerSelectionMode.None) {
                 if (HoveredNodeId != 0) {
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: HoveredNode != 0");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: HoveredNode != 0");
 #endif
 
                     if (NetManager.instance.m_nodes.m_buffer[HoveredNodeId].CountSegments() < 2) {
                         // this node cannot be configured (dead end)
 #if DEBUGCONN
-						if (debug)
-							Log._Debug($"TppLaneConnectorTool: Node is a dead end");
+                        if (debug)
+                            Log._Debug($"TppLaneConnectorTool: Node is a dead end");
 #endif
                         SelectedNodeId = 0;
                         selectedMarker = null;
@@ -305,8 +305,8 @@ namespace TrafficManager.UI.SubTools {
 
                     if (SelectedNodeId != HoveredNodeId) {
 #if DEBUGCONN
-						if (debug)
-							Log._Debug($"Node {HoveredNodeId} has been selected. Creating markers.");
+                        if (debug)
+                            Log._Debug($"Node {HoveredNodeId} has been selected. Creating markers.");
 #endif
 
                         // selected node has changed. create markers
@@ -322,8 +322,8 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } else {
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: Node {SelectedNodeId} has been deselected.");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: Node {SelectedNodeId} has been deselected.");
 #endif
 
                     // click on free spot. deselect node
@@ -338,8 +338,8 @@ namespace TrafficManager.UI.SubTools {
                 stayInLaneMode = StayInLaneMode.None;
 
 #if DEBUGCONN
-				if (debug)
-					Log._Debug($"TppLaneConnectorTool: hoveredMarker != null. selMode={GetMarkerSelectionMode()}");
+                if (debug)
+                    Log._Debug($"TppLaneConnectorTool: hoveredMarker != null. selMode={GetMarkerSelectionMode()}");
 #endif
 
                 // hovered marker has been clicked
@@ -347,8 +347,8 @@ namespace TrafficManager.UI.SubTools {
                     // select source marker
                     selectedMarker = hoveredMarker;
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: set selected marker");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: set selected marker");
 #endif
                 } else if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget) {
                     // select target marker
@@ -356,15 +356,15 @@ namespace TrafficManager.UI.SubTools {
                     if (LaneConnectionManager.Instance.RemoveLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to remove connection
                         selectedMarker.connectedMarkers.Remove(hoveredMarker);
 #if DEBUGCONN
-						if (debug)
-							Log._Debug($"TppLaneConnectorTool: removed lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
+                        if (debug)
+                            Log._Debug($"TppLaneConnectorTool: removed lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
 #endif
                         //success = true;
                     } else if (LaneConnectionManager.Instance.AddLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to add connection
                         selectedMarker.connectedMarkers.Add(hoveredMarker);
 #if DEBUGCONN
-						if (debug)
-							Log._Debug($"TppLaneConnectorTool: added lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
+                        if (debug)
+                            Log._Debug($"TppLaneConnectorTool: added lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
 #endif
                         //success = true;
                     }
@@ -381,7 +381,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = GlobalConfig.Instance.Debug.Switches[23];
 #endif
 
             if (IsCursorInPanel())
@@ -391,24 +391,24 @@ namespace TrafficManager.UI.SubTools {
                 case MarkerSelectionMode.None:
                 default:
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
 #endif
                     stayInLaneMode = StayInLaneMode.None;
                     break;
                 case MarkerSelectionMode.SelectSource:
                     // deselect node
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
 #endif
                     SelectedNodeId = 0;
                     break;
                 case MarkerSelectionMode.SelectTarget:
                     // deselect source marker
 #if DEBUGCONN
-					if (debug)
-						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
+                    if (debug)
+                        Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
 #endif
                     selectedMarker = null;
                     break;
@@ -417,9 +417,9 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnActivate() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
-			if (debug)
-				Log._Debug("TppLaneConnectorTool: OnActivate");
+            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            if (debug)
+                Log._Debug("TppLaneConnectorTool: OnActivate");
 #endif
             SelectedNodeId = 0;
             selectedMarker = null;
@@ -507,20 +507,20 @@ namespace TrafficManager.UI.SubTools {
                             Vector3 finalPos = new Vector3(((Vector3)pos).x, terrainY, ((Vector3)pos).z);
 
                             nodeMarkers.Add(new NodeLaneMarker() {
-                                                                     segmentId = segmentId,
-                                                                     laneId = laneId,
-                                                                     nodeId = nodeId,
-                                                                     startNode = !isEndNode,
-                                                                     position = finalPos,
-                                                                     secondaryPosition = (Vector3)pos,
-                                                                     color = colors[nodeMarkers.Count % colors.Length],
-                                                                     isSource = isSource,
-                                                                     isTarget = isTarget,
-                                                                     laneType = laneInfo.m_laneType,
-                                                                     vehicleType = laneInfo.m_vehicleType,
-                                                                     innerSimilarLaneIndex = ((byte)(laneInfo.m_direction & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
-                                                                     segmentIndex = i
-                                                                 });
+                                segmentId = segmentId,
+                                laneId = laneId,
+                                nodeId = nodeId,
+                                startNode = !isEndNode,
+                                position = finalPos,
+                                secondaryPosition = (Vector3)pos,
+                                color = colors[nodeMarkers.Count % colors.Length],
+                                isSource = isSource,
+                                isTarget = isTarget,
+                                laneType = laneInfo.m_laneType,
+                                vehicleType = laneInfo.m_vehicleType,
+                                innerSimilarLaneIndex = ((byte)(laneInfo.m_direction & NetInfo.Direction.Forward) != 0) ? laneInfo.m_similarLaneIndex : laneInfo.m_similarLaneCount - laneInfo.m_similarLaneIndex - 1,
+                                segmentIndex = i
+                            });
                         }
                     }
 
@@ -610,54 +610,54 @@ namespace TrafficManager.UI.SubTools {
 
         private static readonly Color32[] colors
             = {
-                  new Color32(161, 64, 206, 255),
-                  new Color32(79, 251, 8, 255),
-                  new Color32(243, 96, 44, 255),
-                  new Color32(45, 106, 105, 255),
-                  new Color32(253, 165, 187, 255),
-                  new Color32(90, 131, 14, 255),
-                  new Color32(58, 20, 70, 255),
-                  new Color32(248, 246, 183, 255),
-                  new Color32(255, 205, 29, 255),
-                  new Color32(91, 50, 18, 255),
-                  new Color32(76, 239, 155, 255),
-                  new Color32(241, 25, 130, 255),
-                  new Color32(125, 197, 240, 255),
-                  new Color32(57, 102, 187, 255),
-                  new Color32(160, 27, 61, 255),
-                  new Color32(167, 251, 107, 255),
-                  new Color32(165, 94, 3, 255),
-                  new Color32(204, 18, 161, 255),
-                  new Color32(208, 136, 237, 255),
-                  new Color32(232, 211, 202, 255),
-                  new Color32(45, 182, 15, 255),
-                  new Color32(8, 40, 47, 255),
-                  new Color32(249, 172, 142, 255),
-                  new Color32(248, 99, 101, 255),
-                  new Color32(180, 250, 208, 255),
-                  new Color32(126, 25, 77, 255),
-                  new Color32(243, 170, 55, 255),
-                  new Color32(47, 69, 126, 255),
-                  new Color32(50, 105, 70, 255),
-                  new Color32(156, 49, 1, 255),
-                  new Color32(233, 231, 255, 255),
-                  new Color32(107, 146, 253, 255),
-                  new Color32(127, 35, 26, 255),
-                  new Color32(240, 94, 222, 255),
-                  new Color32(58, 28, 24, 255),
-                  new Color32(165, 179, 240, 255),
-                  new Color32(239, 93, 145, 255),
-                  new Color32(47, 110, 138, 255),
-                  new Color32(57, 195, 101, 255),
-                  new Color32(124, 88, 213, 255),
-                  new Color32(252, 220, 144, 255),
-                  new Color32(48, 106, 224, 255),
-                  new Color32(90, 109, 28, 255),
-                  new Color32(56, 179, 208, 255),
-                  new Color32(239, 73, 177, 255),
-                  new Color32(84, 60, 2, 255),
-                  new Color32(169, 104, 238, 255),
-                  new Color32(97, 201, 238, 255),
-              };
+                new Color32(161, 64, 206, 255),
+                new Color32(79, 251, 8, 255),
+                new Color32(243, 96, 44, 255),
+                new Color32(45, 106, 105, 255),
+                new Color32(253, 165, 187, 255),
+                new Color32(90, 131, 14, 255),
+                new Color32(58, 20, 70, 255),
+                new Color32(248, 246, 183, 255),
+                new Color32(255, 205, 29, 255),
+                new Color32(91, 50, 18, 255),
+                new Color32(76, 239, 155, 255),
+                new Color32(241, 25, 130, 255),
+                new Color32(125, 197, 240, 255),
+                new Color32(57, 102, 187, 255),
+                new Color32(160, 27, 61, 255),
+                new Color32(167, 251, 107, 255),
+                new Color32(165, 94, 3, 255),
+                new Color32(204, 18, 161, 255),
+                new Color32(208, 136, 237, 255),
+                new Color32(232, 211, 202, 255),
+                new Color32(45, 182, 15, 255),
+                new Color32(8, 40, 47, 255),
+                new Color32(249, 172, 142, 255),
+                new Color32(248, 99, 101, 255),
+                new Color32(180, 250, 208, 255),
+                new Color32(126, 25, 77, 255),
+                new Color32(243, 170, 55, 255),
+                new Color32(47, 69, 126, 255),
+                new Color32(50, 105, 70, 255),
+                new Color32(156, 49, 1, 255),
+                new Color32(233, 231, 255, 255),
+                new Color32(107, 146, 253, 255),
+                new Color32(127, 35, 26, 255),
+                new Color32(240, 94, 222, 255),
+                new Color32(58, 28, 24, 255),
+                new Color32(165, 179, 240, 255),
+                new Color32(239, 93, 145, 255),
+                new Color32(47, 110, 138, 255),
+                new Color32(57, 195, 101, 255),
+                new Color32(124, 88, 213, 255),
+                new Color32(252, 220, 144, 255),
+                new Color32(48, 106, 224, 255),
+                new Color32(90, 109, 28, 255),
+                new Color32(56, 179, 208, 255),
+                new Color32(239, 73, 177, 255),
+                new Color32(84, 60, 2, 255),
+                new Color32(169, 104, 238, 255),
+                new Color32(97, 201, 238, 255),
+            };
     }
 }

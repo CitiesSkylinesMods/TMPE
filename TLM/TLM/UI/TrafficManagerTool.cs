@@ -1,37 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ColossalFramework;
-using ColossalFramework.Math;
-using ColossalFramework.UI;
-using JetBrains.Annotations;
-using TrafficManager.Custom.AI;
-using UnityEngine;
-using TrafficManager.State;
-using TrafficManager.UI.SubTools;
-using TrafficManager.Traffic;
-using TrafficManager.Manager;
-using TrafficManager.Util;
-using TrafficManager.UI.MainMenu;
-using CSUtil.Commons;
-using TrafficManager.Manager.Impl;
-using TrafficManager.Traffic.Data;
-using TrafficManager.UI.SubTools.LaneArrows;
-using static TrafficManager.Traffic.Data.ExtCitizenInstance;
+﻿namespace TrafficManager.UI {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using Custom.AI;
+    using JetBrains.Annotations;
+    using MainMenu;
+    using Manager;
+    using Manager.Impl;
+    using State;
+    using SubTools;
+    using SubTools.LaneArrows;
+    using Traffic;
+    using Traffic.Data;
+    using UnityEngine;
+    using Util;
+    using static Traffic.Data.ExtCitizenInstance;
 
-namespace TrafficManager.UI {
     [UsedImplicitly]
     public class TrafficManagerTool : DefaultTool, IObserver<GlobalConfig> {
-        public struct NodeVisitItem {
-            public ushort nodeId;
-            public bool startNode;
-
-            public NodeVisitItem(ushort nodeId, bool startNode) {
-                this.nodeId = nodeId;
-                this.startNode = startNode;
-            }
-        }
-
         private ToolMode _toolMode;
 
         internal static ushort HoveredNodeId;
@@ -190,45 +180,45 @@ namespace TrafficManager.UI {
             }
             bool realToolChange = toolModeChanged;
 
-			if (oldSubTool != null) {
-				if (oldToolMode == ToolMode.TimedLightsSelectNode
+            if (oldSubTool != null) {
+                if (oldToolMode == ToolMode.TimedLightsSelectNode
                     || oldToolMode == ToolMode.TimedLightsShowLights
                     || oldToolMode == ToolMode.TimedLightsAddNode
                     || oldToolMode == ToolMode.TimedLightsRemoveNode
                     || oldToolMode == ToolMode.TimedLightsCopyLights) {
                     // TODO refactor to SubToolMode
-					if (mode != ToolMode.TimedLightsSelectNode
+                    if (mode != ToolMode.TimedLightsSelectNode
                         && mode != ToolMode.TimedLightsShowLights
                         && mode != ToolMode.TimedLightsAddNode
                         && mode != ToolMode.TimedLightsRemoveNode
                         && mode != ToolMode.TimedLightsCopyLights) {
-						oldSubTool.Cleanup();
-					}
-				} else {
-					oldSubTool.Cleanup();
-				}
-			}
+                        oldSubTool.Cleanup();
+                    }
+                } else {
+                    oldSubTool.Cleanup();
+                }
+            }
 
-			if (toolModeChanged && activeSubTool != null) {
-				if (oldToolMode == ToolMode.TimedLightsSelectNode
+            if (toolModeChanged && activeSubTool != null) {
+                if (oldToolMode == ToolMode.TimedLightsSelectNode
                     || oldToolMode == ToolMode.TimedLightsShowLights
                     || oldToolMode == ToolMode.TimedLightsAddNode
                     || oldToolMode == ToolMode.TimedLightsRemoveNode
                     || oldToolMode == ToolMode.TimedLightsCopyLights) { // TODO refactor to SubToolMode
 
-					if (mode != ToolMode.TimedLightsSelectNode
+                    if (mode != ToolMode.TimedLightsSelectNode
                         && mode != ToolMode.TimedLightsShowLights
                         && mode != ToolMode.TimedLightsAddNode
                         && mode != ToolMode.TimedLightsRemoveNode
                         && mode != ToolMode.TimedLightsCopyLights) {
-						activeSubTool.Cleanup();
-					} else {
-						realToolChange = false;
-					}
-				} else {
-					activeSubTool.Cleanup();
-				}
-			}
+                        activeSubTool.Cleanup();
+                    } else {
+                        realToolChange = false;
+                    }
+                } else {
+                    activeSubTool.Cleanup();
+                }
+            }
 
             SelectedNodeId = 0;
             SelectedSegmentId = 0;

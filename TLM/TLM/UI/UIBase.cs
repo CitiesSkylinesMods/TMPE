@@ -1,9 +1,9 @@
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using TrafficManager.UI.MainMenu;
-
 namespace TrafficManager.UI {
+    using System;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using UI.MainMenu;
+
     public class UIBase : UICustomControl {
 
         public UIMainMenuButton MainMenuButton { get; private set; }
