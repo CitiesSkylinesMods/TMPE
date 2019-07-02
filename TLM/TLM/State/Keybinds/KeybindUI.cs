@@ -132,7 +132,7 @@ namespace TrafficManager.State.Keybinds {
                                         float widthFraction) {
             var btn = parent.AddUIComponent<UIButton>();
             btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
-            btn.text = Keybind.Str(editKey);
+            btn.text = Keybind.ToLocalizedString(editKey);
             btn.hoveredTextColor = new Color32(128, 128, 255, 255); // darker blue
             btn.pressedTextColor = new Color32(192, 192, 255, 255); // lighter blue
             btn.normalBgSprite = "ButtonMenu";
@@ -160,7 +160,7 @@ namespace TrafficManager.State.Keybinds {
             btnX.pressedBgSprite = "buttonclosepressed";
             btnX.eventClicked += (component, eventParam) => {
                 editKey.value = SavedInputKey.Empty;
-                alignTo.text = Keybind.Str(editKey);
+                alignTo.text = Keybind.ToLocalizedString(editKey);
             };
         }
 
@@ -173,7 +173,7 @@ namespace TrafficManager.State.Keybinds {
             var label = parent.AddUIComponent<UILabel>();
             label.autoSize = false;
             label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
-            label.text = Keybind.Str(showKey);
+            label.text = Keybind.ToLocalizedString(showKey);
             label.verticalAlignment = UIVerticalAlignment.Middle;
             label.textAlignment = UIHorizontalAlignment.Center;
             label.textColor = new Color32(128, 128, 128, 255); // grey
@@ -222,7 +222,7 @@ namespace TrafficManager.State.Keybinds {
                     }
                 }
 
-                keybindButton.text = Keybind.Str(editedBinding.Value.TargetKey);
+                keybindButton.text = Keybind.ToLocalizedString(editedBinding.Value.TargetKey);
                 currentlyEditedBinding_ = null;
             } catch (Exception e) {Log.Error($"{e}");}
         }
@@ -259,7 +259,7 @@ namespace TrafficManager.State.Keybinds {
                 }
 
                 keybindButton.buttonsMask = UIMouseButton.Left;
-                keybindButton.text = Keybind.Str(editedBinding.Value.TargetKey);
+                keybindButton.text = Keybind.ToLocalizedString(editedBinding.Value.TargetKey);
                 currentlyEditedBinding_ = null;
             }
         }
@@ -289,7 +289,7 @@ namespace TrafficManager.State.Keybinds {
         private void OnKeybindModalPopped(UIComponent component) {
             var keybindButton = component as UIButton;
             if (keybindButton != null && currentlyEditedBinding_ != null) {
-                keybindButton.text = Keybind.Str(currentlyEditedBinding_.Value.TargetKey);
+                keybindButton.text = Keybind.ToLocalizedString(currentlyEditedBinding_.Value.TargetKey);
                 currentlyEditedBinding_ = null;
             }
         }

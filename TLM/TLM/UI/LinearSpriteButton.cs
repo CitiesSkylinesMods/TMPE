@@ -147,7 +147,7 @@ namespace TrafficManager.UI.MainMenu {
         /// </summary>
         /// <returns>Tooltip to append to the main tooltip text, or an empty string</returns>
         private string GetShortcutTooltip() {
-            return ShortcutKey != null ? ShortcutKey.Str("\n") : string.Empty;
+            return ShortcutKey != null ? ShortcutKey.ToLocalizedString("\n") : string.Empty;
         }
     }
 }

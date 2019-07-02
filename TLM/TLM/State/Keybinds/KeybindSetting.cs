@@ -77,10 +77,10 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="prefix">Prefix will be added if any key is not empty</param>
         /// <returns>String tooltip with the key shortcut or two</returns>
-        public string Str(string prefix = "") {
+        public string ToLocalizedString(string prefix = "") {
             var result = default(string);
             if (!Keybind.IsEmpty(Key)) {
-                result += prefix + Keybind.Str(Key);
+                result += prefix + Keybind.ToLocalizedString(Key);
             }
 
             if (AlternateKey == null || Keybind.IsEmpty(AlternateKey)) {
@@ -93,7 +93,7 @@ namespace TrafficManager.State.Keybinds {
                 result += " | ";
             }
 
-            return result + Keybind.Str(AlternateKey);
+            return result + Keybind.ToLocalizedString(AlternateKey);
         }
 
         public bool IsPressed(Event e) {

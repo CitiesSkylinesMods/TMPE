@@ -9,8 +9,7 @@ namespace TrafficManager.State.Keybinds {
     public class Keybind {
         public static bool IsEmpty(InputKey sample) {
             var noKey = SavedInputKey.Encode(KeyCode.None, false, false, false);
-            return sample == SavedInputKey.Empty
-                   || sample == noKey;
+            return sample == SavedInputKey.Empty || sample == noKey;
         }
 
         /// <summary>
@@ -18,7 +17,7 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <param name="k">The key</param>
         /// <returns>The shortcut, example: "Ctrl + Alt + H"</returns>
-        public static string Str(SavedInputKey k) {
+        public static string ToLocalizedString(SavedInputKey k) {
             return k.ToLocalizedString("KEYNAME");
         }
 

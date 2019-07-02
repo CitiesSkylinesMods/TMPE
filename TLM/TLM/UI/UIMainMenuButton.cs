@@ -159,7 +159,7 @@ namespace TrafficManager.UI {
         }
 
         private string GetTooltip() {
-            return KeybindSettingsBase.ToggleMainMenu.Str("\n");
+            return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
     }
 }
