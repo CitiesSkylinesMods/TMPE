@@ -1,8 +1,7 @@
-using JetBrains.Annotations;
-using UnityEngine;
-
 namespace TrafficManager.State.Keybinds {
     using ColossalFramework;
+    using JetBrains.Annotations;
+    using UnityEngine;
 
     /// <summary>
     /// Contains one or two SavedInputKeys, and event handler when the key is changed.

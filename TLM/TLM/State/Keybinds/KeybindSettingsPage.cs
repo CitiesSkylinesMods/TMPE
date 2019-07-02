@@ -1,6 +1,6 @@
-using TrafficManager.UI;
-
 namespace TrafficManager.State.Keybinds {
+    using UI;
+
     public class KeybindSettingsPage : KeybindSettingsBase {
         private void Awake() {
             TryCreateConfig();

@@ -1,8 +1,8 @@
-using ColossalFramework;
-using ColossalFramework.UI;
-using UnityEngine;
-
 namespace TrafficManager.State.Keybinds {
+    using ColossalFramework;
+    using ColossalFramework.UI;
+    using UnityEngine;
+
     /// <summary>
     /// General input key handling functions, checking for empty, converting to string etc.
     /// </summary>
