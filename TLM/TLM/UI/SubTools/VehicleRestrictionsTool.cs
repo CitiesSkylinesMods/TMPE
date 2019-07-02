@@ -12,6 +12,7 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.TrafficLight;
+using TrafficManager.UI.Texture;
 using TrafficManager.Util;
 using UnityEngine;
 using static TrafficManager.UI.TrafficManagerTool;

@@ -252,14 +252,16 @@
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\PossibleTurnsOut.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\Texture\TextureResources.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
@@ -296,7 +298,6 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />

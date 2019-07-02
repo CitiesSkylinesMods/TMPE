@@ -14,6 +14,7 @@ using TrafficManager.Traffic;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
 using ColossalFramework.UI;
+using TrafficManager.UI.Texture;
 
 namespace TrafficManager.UI.SubTools {
 	public class ManualTrafficLightsTool : SubTool {

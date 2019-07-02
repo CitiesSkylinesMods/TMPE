@@ -18,6 +18,7 @@ using TrafficManager.Manager.Impl;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 using static TrafficManager.Util.SegmentTraverser;
 using ColossalFramework.UI;
+using TrafficManager.UI.Texture;
 
 namespace TrafficManager.UI.SubTools {
 	public class PrioritySignsTool : SubTool {

@@ -15,6 +15,7 @@ using TrafficManager.State;
 using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 using TrafficManager.TrafficLight;
+using TrafficManager.UI.Texture;
 using TrafficManager.Util;
 using UnityEngine;
 using static ColossalFramework.UI.UITextureAtlas;

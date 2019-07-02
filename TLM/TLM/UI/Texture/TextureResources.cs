@@ -1,21 +1,16 @@
-﻿using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Resources;
-using TrafficManager.Geometry;
-using TrafficManager.Manager;
-using TrafficManager.Manager.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.UI;
-using TrafficManager.Util;
-using UnityEngine;
-using static TrafficManager.Traffic.Data.PrioritySegment;
+﻿namespace TrafficManager.UI.Texture {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Reflection;
+    using CSUtil.Commons;
+    using Manager.Impl;
+    using State;
+    using Traffic;
+    using Traffic.Data;
+    using  UnityEngine;
+    using Util;
 
-namespace TrafficManager.UI {
     public class TextureResources {
         public static readonly Texture2D RedLightTexture2D;
         public static readonly Texture2D YellowRedLightTexture2D;
@@ -42,7 +37,7 @@ namespace TrafficManager.UI {
         public static readonly Texture2D LightCounterTexture2D;
         public static readonly Texture2D PedestrianModeAutomaticTexture2D;
         public static readonly Texture2D PedestrianModeManualTexture2D;
-        public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+        public static readonly IDictionary<PrioritySegment.PriorityType, Texture2D> PrioritySignTextures;
         public static readonly Texture2D SignRemoveTexture2D;
         public static readonly Texture2D ClockPlayTexture2D;
         public static readonly Texture2D ClockPauseTexture2D;
@@ -112,7 +107,7 @@ namespace TrafficManager.UI {
         /// Groups resources for Lane Arrows Tool, 32x32
         /// Row 0 (64px) contains: red X, green ↑, →, ↑→, ←, ←↑, ←→, ←↑→
         /// Row 1 (32px) contains: Blue ←, ↑, →, disabled ←, ↑, →
-        /// Row 2 (0px) contains: black ←, ↑, → 
+        /// Row 2 (0px) contains: black ←, ↑, →
         /// </summary>
         public struct LaneArrows {
             private const int ATLAS_H = 96;
@@ -179,9 +174,12 @@ namespace TrafficManager.UI {
                     // off sprites are on row 2 (64px)
                     y++;
                 }
+
                 if (disabled) {
-                    x += 3; y = 1; 
+                    x += 3;
+                    y = 1;
                 }
+
                 return GetSprite(x, y);
             }
         }
@@ -237,11 +235,11 @@ namespace TrafficManager.UI {
             PedestrianModeManualTexture2D = LoadDllResource("pedestrian_mode_2.png", 73, 73);
 
             // priority signs
-            PrioritySignTextures = new TinyDictionary<PriorityType, Texture2D>();
-            PrioritySignTextures[PriorityType.None] = LoadDllResource("sign_none.png", 200, 200);
-            PrioritySignTextures[PriorityType.Main] = LoadDllResource("sign_priority.png", 200, 200);
-            PrioritySignTextures[PriorityType.Stop] = LoadDllResource("sign_stop.png", 200, 200);
-            PrioritySignTextures[PriorityType.Yield] = LoadDllResource("sign_yield.png", 200, 200);
+            PrioritySignTextures = new TinyDictionary<PrioritySegment.PriorityType, Texture2D>();
+            PrioritySignTextures[PrioritySegment.PriorityType.None] = LoadDllResource("sign_none.png", 200, 200);
+            PrioritySignTextures[PrioritySegment.PriorityType.Main] = LoadDllResource("sign_priority.png", 200, 200);
+            PrioritySignTextures[PrioritySegment.PriorityType.Stop] = LoadDllResource("sign_stop.png", 200, 200);
+            PrioritySignTextures[PrioritySegment.PriorityType.Yield] = LoadDllResource("sign_yield.png", 200, 200);
 
             // delete priority sign
             SignRemoveTexture2D = LoadDllResource("remove_signs.png", 256, 256);

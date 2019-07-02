@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using CSUtil.Commons;
 using OptionsFramework.Extensions;
+using TrafficManager.UI.Texture;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;

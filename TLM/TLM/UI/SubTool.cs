@@ -2,160 +2,167 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TrafficManager.UI.Texture;
 using UnityEngine;
 
 namespace TrafficManager.UI {
-	public abstract class SubTool {
-		public TrafficManagerTool MainTool { get; set; }
+    public abstract class SubTool {
+        public TrafficManagerTool MainTool { get; set; }
 
-		protected Texture2D WindowTexture {
-			get {
-				if (windowTexture == null) {
-					windowTexture = TrafficManagerTool.AdjustAlpha(TextureResources.WindowBackgroundTexture2D, MainTool.GetWindowAlpha());
-				}
-				return windowTexture;
-			}
-		}
-		private Texture2D windowTexture = null;
+        protected Texture2D WindowTexture {
+            get {
+                if (windowTexture == null) {
+                    windowTexture = TrafficManagerTool.AdjustAlpha(TextureResources.WindowBackgroundTexture2D, MainTool.GetWindowAlpha());
+                }
+                return windowTexture;
+            }
+        }
 
-		protected GUIStyle WindowStyle {
-			get {
-				if (windowStyle == null) {
-					windowStyle = new GUIStyle {
-						normal = {
-							background = WindowTexture,
-							textColor = Color.white
-						},
-						alignment = TextAnchor.UpperCenter,
-						fontSize = 20,
-						border = {
-							left = 4,
-							top = 41,
-							right = 4,
-							bottom = 8
-						},
-						overflow = {
-							bottom = 0,
-							top = 0,
-							right = 12,
-							left = 12
-						},
-						contentOffset = new Vector2(0, -44),
-						padding = {
-							top = 55
-						}
-					};
-				}
+        private Texture2D windowTexture = null;
 
-				return windowStyle;
-			}
-		}
-		private GUIStyle windowStyle = null;
+        protected GUIStyle WindowStyle {
+            get {
+                if (windowStyle == null) {
+                    windowStyle = CreateGUIStyle();
+                }
 
-		protected Texture2D BorderlessTexture {
-			get {
-				if (borderlessTexture == null) {
-					borderlessTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, MainTool.GetWindowAlpha()));
-				}
-				return borderlessTexture;
-			}
-		}
-		private Texture2D borderlessTexture = null;
+                return windowStyle;
+            }
+        }
 
-		protected GUIStyle BorderlessStyle {
-			get {
-				if (borderlessStyle == null) {
-					borderlessStyle = new GUIStyle {
-						normal = { background = BorderlessTexture },
-						alignment = TextAnchor.MiddleCenter,
-						border = {
-							bottom = 2,
-							top = 2,
-							right = 2,
-							left = 2
-						}
-					};
-				}
+        private GUIStyle CreateGUIStyle() {
+            return new GUIStyle {
+                normal = {
+                    background = WindowTexture,
+                    textColor = Color.white
+                },
+                alignment = TextAnchor.UpperCenter,
+                fontSize = 20,
+                border = {
+                    left = 4,
+                    top = 41,
+                    right = 4,
+                    bottom = 8
+                },
+                overflow = {
+                    bottom = 0,
+                    top = 0,
+                    right = 12,
+                    left = 12
+                },
+                contentOffset = new Vector2(0, -44),
+                padding = {
+                    top = 55
+                }
+            };
+        }
 
-				return borderlessStyle;
-			}
-		}
-		private GUIStyle borderlessStyle = null;
+        private GUIStyle windowStyle = null;
 
-		protected ushort HoveredNodeId {
-			get { return TrafficManagerTool.HoveredNodeId; }
-			set { TrafficManagerTool.HoveredNodeId = value; }
-		}
+        protected Texture2D BorderlessTexture {
+            get {
+                if (borderlessTexture == null) {
+                    borderlessTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, MainTool.GetWindowAlpha()));
+                }
+                return borderlessTexture;
+            }
+        }
+        private Texture2D borderlessTexture = null;
 
-		protected ushort HoveredSegmentId {
-			get { return TrafficManagerTool.HoveredSegmentId; }
-			set { TrafficManagerTool.HoveredSegmentId = value; }
-		}
+        protected GUIStyle BorderlessStyle {
+            get {
+                if (borderlessStyle == null) {
+                    borderlessStyle = new GUIStyle {
+                                                       normal = { background = BorderlessTexture },
+                                                       alignment = TextAnchor.MiddleCenter,
+                                                       border = {
+                                                                    bottom = 2,
+                                                                    top = 2,
+                                                                    right = 2,
+                                                                    left = 2
+                                                                }
+                                                   };
+                }
 
-		protected ushort SelectedNodeId {
-			get { return TrafficManagerTool.SelectedNodeId; }
-			set { TrafficManagerTool.SelectedNodeId = value; }
-		}
+                return borderlessStyle;
+            }
+        }
+        private GUIStyle borderlessStyle = null;
 
-		protected ushort SelectedSegmentId {
-			get { return TrafficManagerTool.SelectedSegmentId; }
-			set { TrafficManagerTool.SelectedSegmentId = value; }
-		}
+        protected ushort HoveredNodeId {
+            get { return TrafficManagerTool.HoveredNodeId; }
+            set { TrafficManagerTool.HoveredNodeId = value; }
+        }
 
-		public SubTool(TrafficManagerTool mainTool) {
-			MainTool = mainTool;
-		}
+        protected ushort HoveredSegmentId {
+            get { return TrafficManagerTool.HoveredSegmentId; }
+            set { TrafficManagerTool.HoveredSegmentId = value; }
+        }
 
-		public void OnToolUpdate() {
-			//OnLeftClickOverlay();
-		}
+        protected ushort SelectedNodeId {
+            get { return TrafficManagerTool.SelectedNodeId; }
+            set { TrafficManagerTool.SelectedNodeId = value; }
+        }
 
-		float nativeWidth = 1920;
-		float nativeHeight = 1200;
+        protected ushort SelectedSegmentId {
+            get { return TrafficManagerTool.SelectedSegmentId; }
+            set { TrafficManagerTool.SelectedSegmentId = value; }
+        }
 
-		/// <summary>
-		/// Called whenever the 
-		/// </summary>
-		public abstract void OnPrimaryClickOverlay();
-		public virtual void OnSecondaryClickOverlay() { }
-		public virtual void OnToolGUI(Event e) {
-			//set up scaling
-			/*Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			float rx = resolution.x / nativeWidth;
-			float ry = resolution.y / nativeHeight;
-			GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));*/
-		}
-		public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
-		public virtual void Initialize() {
-			borderlessTexture = null;
-			borderlessStyle = null;
-			windowTexture = null;
-			windowStyle = null;
-		}
-		public virtual void Cleanup() { }
-		public virtual void OnActivate() { }
-		public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
-		public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
-		public virtual bool IsCursorInPanel() {
-			return LoadingExtension.BaseUI.GetMenu().containsMouse
+        public SubTool(TrafficManagerTool mainTool) {
+            MainTool = mainTool;
+        }
+
+        public void OnToolUpdate() {
+            //OnLeftClickOverlay();
+        }
+
+        float nativeWidth = 1920;
+        float nativeHeight = 1200;
+
+        /// <summary>
+        /// Called whenever the
+        /// </summary>
+        public abstract void OnPrimaryClickOverlay();
+        public virtual void OnSecondaryClickOverlay() { }
+        public virtual void OnToolGUI(Event e) {
+            //set up scaling
+            /*Vector2 resolution = UIView.GetAView().GetScreenResolution();
+            float rx = resolution.x / nativeWidth;
+            float ry = resolution.y / nativeHeight;
+            GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));*/
+        }
+        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
+        public virtual void Initialize() {
+            borderlessTexture = null;
+            borderlessStyle = null;
+            windowTexture = null;
+            windowStyle = null;
+        }
+        public virtual void Cleanup() { }
+        public virtual void OnActivate() { }
+        public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+        public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
+        public virtual bool IsCursorInPanel() {
+            return LoadingExtension.BaseUI.GetMenu().containsMouse
 #if DEBUG
-				|| LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+                   || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
 #endif
-				;
-		}
-		public virtual string GetTutorialKey() {
-			return this.GetType().Name;
-		}
+                ;
+        }
+        public virtual string GetTutorialKey() {
+            return this.GetType().Name;
+        }
 
-		protected void DragWindow(ref Rect window) {
-			Vector2 resolution = UIView.GetAView().GetScreenResolution();
-			window.x = Mathf.Clamp(window.x, 0, resolution.x - window.width);
-			window.y = Mathf.Clamp(window.y, 0, resolution.y - window.height);
+        protected void DragWindow(ref Rect window) {
+            Vector2 resolution = UIView.GetAView().GetScreenResolution();
+            window.x = Mathf.Clamp(window.x, 0, resolution.x - window.width);
+            window.y = Mathf.Clamp(window.y, 0, resolution.y - window.height);
 
-			bool primaryMouseDown = Input.GetMouseButton(0);
-			if (primaryMouseDown) {
-				GUI.DragWindow();
-			}
-		}
-	}
+            bool primaryMouseDown = Input.GetMouseButton(0);
+            if (primaryMouseDown) {
+                GUI.DragWindow();
+            }
+        }
+    }
 }

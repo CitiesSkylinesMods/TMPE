@@ -16,6 +16,7 @@ using TrafficManager.UI.MainMenu;
 using CSUtil.Commons;
 using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Data;
+using TrafficManager.UI.SubTools.LaneArrows;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.UI {
