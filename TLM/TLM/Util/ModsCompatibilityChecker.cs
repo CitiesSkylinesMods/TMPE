@@ -1,7 +1,4 @@
 using ColossalFramework;
-#if !DEBUG
-using ColossalFramework.PlatformServices; // used in RELEASE builds
-#endif
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using CSUtil.Commons;
@@ -18,7 +15,6 @@ namespace TrafficManager.Util
 {
     public class ModsCompatibilityChecker
     {
-
         public const ulong LOCAL_MOD = ulong.MaxValue;
 
         // Used for LoadIncompatibleModsList()
@@ -26,11 +22,11 @@ namespace TrafficManager.Util
         private const string INCOMPATIBLE_MODS_FILE = "incompatible_mods.txt";
 
         // parsed contents of incompatible_mods.txt
-        private readonly Dictionary<ulong, string> incompatibleMods;
+        private readonly Dictionary<ulong, string> knownIncompatibleMods;
 
         public ModsCompatibilityChecker()
         {
-            incompatibleMods = LoadListOfIncompatibleMods();
+            knownIncompatibleMods = LoadListOfIncompatibleMods();
         }
 
         /// <summary>
@@ -42,7 +38,7 @@ namespace TrafficManager.Util
             {
                 Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
 
-                if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
+                if (detected.Count > 0)
                 {
                     IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
                     panel.IncompatibleMods = detected;
@@ -53,6 +49,7 @@ namespace TrafficManager.Util
             }
             catch (Exception e)
             {
+                Log.Info("Something went wrong while checking incompatible mods - see main game log for details.");
                 Debug.LogException(e);
             }
         }
@@ -60,14 +57,16 @@ namespace TrafficManager.Util
         /// <summary>
         /// Iterates installed mods looking for known incompatibilities.
         /// </summary>
-        /// 
+        ///
         /// <returns>A list of detected incompatible mods.</returns>
         /// 
         /// <exception cref="ArgumentException">Invalid folder path (contains invalid characters, is empty, or contains only white spaces).</exception>
         /// <exception cref="PathTooLongException">Path is too long (longer than the system-defined maximum length).</exception>
         public Dictionary<PluginInfo, string> ScanForIncompatibleMods()
         {
-            Log.Info("Scanning for incompatible mods");
+            Guid selfGuid = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
+
+            Log.Info($"Scanning for incompatible mods; My GUID = {selfGuid}");
 
             // list of installed incompatible mods
             Dictionary<PluginInfo, string> results = new Dictionary<PluginInfo, string>();
@@ -75,32 +74,36 @@ namespace TrafficManager.Util
             // only check enabled mods?
             bool filterToEnabled = State.GlobalConfig.Instance.Main.IgnoreDisabledMods;
 
-#if !DEBUG
-            bool offline = IsOffline();
-#endif
-
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo())
             {
                 if (!mod.isBuiltin && !mod.isCameraScript && (!filterToEnabled || mod.isEnabled))
                 {
                     string modName = GetModName(mod);
+                    ulong workshopID = mod.publishedFileID.AsUInt64;
 
-                    if (incompatibleMods.ContainsKey(mod.publishedFileID.AsUInt64))
+                    if (knownIncompatibleMods.ContainsKey(workshopID))
                     {
-                        Log.Info($"Incompatible mod: {mod.publishedFileID.AsUInt64} - {modName}");
+                        // must be online workshop mod
+                        Log.Info($"Incompatible with: {workshopID} - {modName}");
                         results.Add(mod, modName);
                     }
-#if !DEBUG
-                    // Workshop TM:PE builds treat local builds as incompatible
-                    else if (!offline && mod.publishedFileID.AsUInt64 == LOCAL_MOD && (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")))
+                    else if (modName.Contains("TM:PE") || modName.Contains("Traffic Manager"))
                     {
-                        Log.Info($"Local TM:PE detected: '{modName}' in '{mod.modPath}'");
-                        string folder = Path.GetFileName(mod.modPath);
-                        //string folder = mod.modPath.Split(Path.DirectorySeparatorChar).Last();
-                        results.Add(mod, $"{modName} in /{folder}");
+                        // It's a TM:PE build - either local or workshop
+                        string workshopIDstr = workshopID == LOCAL_MOD ? "LOCAL" : workshopID.ToString();
+                        Guid currentGuid = GetModGuid(mod);
+
+                        if (currentGuid == selfGuid)
+                        {
+                            Log.Info($"Found myself: '{modName}' (Workshop ID: {workshopIDstr}, GUID: {currentGuid}) in '{mod.modPath}'");
+                        }
+                        else
+                        {
+                            Log.Info($"Detected conflicting '{modName}' (Workshop ID: {workshopIDstr}, GUID: {currentGuid}) in '{mod.modPath}'");
+                            results.Add(mod, $"{modName} in /{Path.GetFileName(mod.modPath)}");
+                        }
                     }
-#endif
                 }
             }
 
@@ -124,37 +127,16 @@ namespace TrafficManager.Util
         }
 
         /// <summary>
-        /// Works out if the game is effectively running in offline mode, in which no workshop mod subscriptions will be active.
-        /// 
-        /// Applicalbe "offline" states include:
-        /// 
-        /// * Origin plaform service (no support for Steam workshop)
-        /// * Steam (or other platform service) not active
-        /// * --noWorkshop launch option
-        /// 
-        /// This is allows LABS and STABLE builds to be used offline without trying to delete themselves.
+        /// Gets the <see cref="Guid"/> of a mod.
         /// </summary>
         /// 
-        /// <returns>Returns <c>true</c> if game is offline for any reason, otherwise <c>false</c>.</returns>
-#if !DEBUG
-        private bool IsOffline()
+        /// <param name="plugin">The <see cref="PluginInfo"/> associated with the mod.</param>
+        /// 
+        /// <returns>The <see cref="Guid"/> of the mod.</returns>
+        public Guid GetModGuid(PluginInfo plugin)
         {
-            // TODO: Work out if TGP and QQGame platform services allow workshop
-            if (PluginManager.noWorkshop)
-            {
-                return true;
-            }
-            else if (PlatformService.platformType == PlatformType.Origin)
-            {
-                return true;
-            }
-            else if (!PlatformService.active)
-            {
-                return true;
-            }
-            return false;
+            return plugin.userModInstance.GetType().Assembly.ManifestModule.ModuleVersionId;
         }
-#endif
 
         /// <summary>
         /// Loads and parses the <c>incompatible_mods.txt</c> resource, adds other workshop branches of TM:PE as applicable.
@@ -176,7 +158,7 @@ namespace TrafficManager.Util
                 }
             }
 
-            Log.Info($"{INCOMPATIBLE_MODS_FILE} contains {lines.Length} entries");
+            Log.Info($"{RESOURCES_PREFIX}{INCOMPATIBLE_MODS_FILE} contains {lines.Length} entries");
 
             // parse the file
             for (int i = 0; i < lines.Length; i++)
@@ -188,16 +170,6 @@ namespace TrafficManager.Util
                     results.Add(steamId, strings[1]);
                 }
             }
-
-            // Treat other workshop-published branches of TM:PE, as applicable, as conflicts
-#if LABS
-            results.Add(583429740u, "TM:PE STABLE");
-#elif DEBUG
-            results.Add(1637663252u, "TM:PE LABS");
-            results.Add(583429740u, "TM:PE STABLE");
-#else
-            results.Add(1637663252u, "TM:PE LABS");
-#endif
 
             return results;
         }
