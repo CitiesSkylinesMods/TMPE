@@ -29,7 +29,6 @@
 - Updated: Russian translation (thanks vitalii201 & kvakvs) (#327, #328)
 - Updated: Renamed 'Realistic driving speeds' to 'Individual driving styles' (#334)
 - Removed: Obsolete `TMPE.GlobalConfigGenerator` module (#367, #374)
-- Meta: Pathfinder debug logging tools (switch `26`) (#370)
 - Meta: Separate binaries for Stable and Labs on GitHub release pages (#360)
 - Meta: Initial documentation for release process in wiki (see `Contributing` page) (#360)
 - Meta: Added GitHub issue templates for bugs, features, translations. (#272)
