@@ -23,6 +23,7 @@
 - Fixed: Resetting stuck cims unpauses the simulation (#358, #351)
 - Fixed: Treat duplicate TM:PE subscriptions as mod conflicts (#333, #306, #149, #190, #400)
 - Fixed: TargetInvocationException in mod compatibility checker (#386, #333)
+- Fixed: Issue with Paradox login blurring compatibility checker dialog (#404)
 - Updated: Game version 1.12.1-f1 compatible (#403)
 - Updated: Chinese translation (thanks Emphasia) (#375, #336)
 - Updated: German translation (thanks kvakvs) (#384)
@@ -34,7 +35,7 @@
 - Meta: Initial documentation for release process in wiki (see `Contributing` page) (#360)
 - Meta: Added GitHub issue templates for bugs, features, translations. (#272)
 - Meta: Added `.editorconfig` file for IDE code indenting standardisation (#392, #384)
-- Meta: Added entire `.vs/` folder to `.gitignore` (#395)
+- Meta: Added entire `.vs/` and `.idea/` folders to `.gitignore` (#395, #382)
 - Meta: Updated install guide to include section for EA Origin users (#333)
 - Meta: Enable latest C# `LangVersion` in all projects (#398)
 
