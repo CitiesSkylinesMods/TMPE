@@ -183,8 +183,9 @@ UpgradeLog*.htm
 FakesAssemblies/
 /logo/
 
-# MSVS 2017 artifacts
+# MSVS 2017, IntelliJ IDEA/Rider artifacts
 .vs/
+.idea/
 
 # Dependecies game dlls
 /TLM/dependencies
