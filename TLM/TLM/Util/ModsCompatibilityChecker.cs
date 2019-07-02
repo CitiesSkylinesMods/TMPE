@@ -22,11 +22,11 @@ namespace TrafficManager.Util
         private const string INCOMPATIBLE_MODS_FILE = "incompatible_mods.txt";
 
         // parsed contents of incompatible_mods.txt
-        private readonly Dictionary<ulong, string> incompatibleMods;
+        private readonly Dictionary<ulong, string> knownIncompatibleMods;
 
         public ModsCompatibilityChecker()
         {
-            incompatibleMods = LoadListOfIncompatibleMods();
+            knownIncompatibleMods = LoadListOfIncompatibleMods();
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace TrafficManager.Util
             {
                 Dictionary<PluginInfo, string> detected = ScanForIncompatibleMods();
 
-                if (detected.Count > 0 && State.GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
+                if (detected.Count > 0)
                 {
                     IncompatibleModsPanel panel = UIView.GetAView().AddUIComponent(typeof(IncompatibleModsPanel)) as IncompatibleModsPanel;
                     panel.IncompatibleMods = detected;
@@ -82,7 +82,7 @@ namespace TrafficManager.Util
                     string modName = GetModName(mod);
                     ulong workshopID = mod.publishedFileID.AsUInt64;
 
-                    if (incompatibleMods.ContainsKey(workshopID))
+                    if (knownIncompatibleMods.ContainsKey(workshopID))
                     {
                         // must be online workshop mod
                         Log.Info($"Incompatible with: {workshopID} - {modName}");
