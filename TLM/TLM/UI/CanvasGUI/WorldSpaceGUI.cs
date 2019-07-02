@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using CSUtil.Commons;
-using OptionsFramework.Extensions;
-using TrafficManager.UI.Texture;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using Object = System.Object;
+﻿namespace TrafficManager.UI.CanvasGUI {
+    using System.Collections.Generic;
+    using Texture;
+    using UnityEngine;
+    using UnityEngine.EventSystems;
+    using UnityEngine.UI;
 
-namespace TrafficManager.UI.CanvasGUI {
     /// <summary>
     /// Creates canvas in the world space somewhere on map, and also creates
     /// controls for it and assists with styling, etc.
     /// </summary>
     public class WorldSpaceGUI {
-        public string name_;
         private GameObject canvasGameObj_;
         private ulong counter_;
-        
+
         // Raycaster and eventsystem handle the input
         private GraphicRaycaster raycaster_;
         private EventSystem eventSystem_;
@@ -31,8 +24,6 @@ namespace TrafficManager.UI.CanvasGUI {
         /// <param name="rot"></param>
         public WorldSpaceGUI(string name, Vector3 pos, Quaternion rot) {
             // seeThroughShader_ = Resources.Load<Shader>("WorldSpaceGUI.SeeThroughZ");
-            name_ = name; // for debugging/printing canvas name if ever
-
             var canvasName = $"{name} Canvas";
             DestroyAllWithName(canvasName);
 
@@ -170,22 +161,22 @@ namespace TrafficManager.UI.CanvasGUI {
             imageComponent.sprite = sprite;
         }
 
-        //		private static Shader LoadDllShader(string resourceName) {
-        //			try {
-        //				var myAssembly = Assembly.GetExecutingAssembly();
-        //				var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
+        // private static Shader LoadDllShader(string resourceName) {
+        //    try {
+        //        var myAssembly = Assembly.GetExecutingAssembly();
+        //        var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
         //
-        //				var sh = new Shader();
+        //        var sh = new Shader();
         //
-        //				sh.R(ReadToEnd(myStream));
+        //        sh.R(ReadToEnd(myStream));
         //
-        //				return sh;
-        //			}
-        //			catch (Exception e) {
-        //				Log.Error(e.StackTrace.ToString());
-        //				return null;
-        //			}
-        //		}
+        //        return sh;
+        //    }
+        //    catch (Exception e) {
+        //        Log.Error(e.StackTrace.ToString());
+        //        return null;
+        //    }
+        // }
 
         /// <summary>
         /// Check whether mouse1 was pressed and where did it hit.
@@ -213,10 +204,6 @@ namespace TrafficManager.UI.CanvasGUI {
                     button.onClick.Invoke();
                 }
             }
-
-//			foreach (var result in results) {
-//				Log.Info("Hit " + result.gameObject.name);
-//			}
         }
 
         /// <summary>

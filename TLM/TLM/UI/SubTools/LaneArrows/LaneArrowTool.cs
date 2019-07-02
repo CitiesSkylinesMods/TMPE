@@ -580,6 +580,25 @@
                                              out bezier.b, out bezier.c);
             var isStartNode = nodeId == segment.m_startNode;
             var tangent = bezier.Tangent(isStartNode ? 0f : 1f);
+
+            // Some segments appear inverted. Perform a safety check that the angle
+            // between vector Middle→B and the tangent is < 90°
+            //
+            // Correct situation:
+            // <A>———————<Middle>————————<B>
+            //                          ——→ tangent; GUI oriented with top towards B
+            //
+            // Inverted (bad) situation:
+            // <A>———————<Middle>————————<B>
+            //                          ←—— tangent; GUI upside down, bottom towards B
+            //                  —————————→
+            var middleToB = nodesBuffer[nodeId].m_position - segment.m_middlePosition;
+            var product = Vector3.Dot(middleToB, tangent);
+            if (product < 0f) {
+                // For vectors with angle > 90° between them, the dot product is negative
+                tangent *= -1f;
+            }
+
             return tangent;
         }
 
