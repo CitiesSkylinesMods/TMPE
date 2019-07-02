@@ -119,6 +119,7 @@ namespace TrafficManager.State.Keybinds {
 
         public UILabel CreateLabel(UIPanel parent, string text, float widthFraction) {
             var label = parent.AddUIComponent<UILabel>();
+            label.wordWrap = true;
             label.autoSize = false;
             label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             label.text = text;
