@@ -8,14 +8,14 @@ using TrafficManager.Util;
 namespace TrafficManager {
 	public class TrafficManagerMod : IUserMod {
 
-        public static readonly uint GameVersion = 184673552u;
+        public static readonly uint GameVersion = 184803856u;
         public static readonly uint GameVersionA = 1u;
         public static readonly uint GameVersionB = 12u;
-        public static readonly uint GameVersionC = 0u;
-        public static readonly uint GameVersionBuild = 5u;
+        public static readonly uint GameVersionC = 1u;
+        public static readonly uint GameVersionBuild = 2u;
 
         // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
-        public static readonly string Version = "10.20";
+        public static readonly string Version = "10.21";
 
 #if LABS
         public string Branch => "LABS";
