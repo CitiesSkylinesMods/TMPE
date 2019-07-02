@@ -29,7 +29,7 @@ namespace TrafficManager.UI
 
         /// <summary>
         /// Initialises the dialog, populates it with list of incompatible mods, and adds it to the modal stack.
-        /// 
+        ///
         /// If the modal stack was previously empty, a blur effect is added over the screen background.
         /// </summary>
         public void Initialize()
@@ -139,20 +139,29 @@ namespace TrafficManager.UI
             blurEffect.size = new Vector2(resolution.x, resolution.y);
             blurEffect.absolutePosition = new Vector3(0, 0);
             blurEffect.SendToBack();
-            if (blurEffect != null)
-            {
-                blurEffect.isVisible = true;
-                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
-            }
+            blurEffect.eventPositionChanged += OnBlurEffectPositionChange;
+            blurEffect.eventZOrderChanged += OnBlurEffectZOrderChange;
+            blurEffect.opacity = 0;
+            blurEffect.isVisible = true;
+            ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
 
             // Make sure modal dialog is in front of all other UI
             BringToFront();
         }
 
+        private void OnBlurEffectPositionChange(UIComponent component, Vector2 position) {
+            blurEffect.absolutePosition = Vector3.zero;
+        }
+
+        private void OnBlurEffectZOrderChange(UIComponent component, int value) {
+            blurEffect.zOrder = 0;
+            mainPanel.zOrder = 1000;
+        }
+
         /// <summary>
         /// Allows the user to press "Esc" to close the dialog.
         /// </summary>
-        /// 
+        ///
         /// <param name="p">Details about the key press.</param>
         protected override void OnKeyDown(UIKeyEventParameter p)
         {
@@ -170,7 +179,7 @@ namespace TrafficManager.UI
         /// <summary>
         /// Hnadles click of the "Run incompatible check on startup" checkbox and updates game options accordingly.
         /// </summary>
-        /// 
+        ///
         /// <param name="value">The new value of the checkbox; <c>true</c> if checked, otherwise <c>false</c>.</param>
         private void RunModsCheckerOnStartup_eventCheckChanged(bool value)
         {
@@ -181,7 +190,7 @@ namespace TrafficManager.UI
         /// <summary>
         /// Handles click of the "close dialog" button; pops the dialog off the modal stack.
         /// </summary>
-        /// 
+        ///
         /// <param name="component">Handle to the close button UI component (not used).</param>
         /// <param name="eventparam">Details about the click event.</param>
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam)
@@ -204,7 +213,7 @@ namespace TrafficManager.UI
         /// <summary>
         /// Creates a panel representing the mod and adds it to the <paramref name="parent"/> UI component.
         /// </summary>
-        /// 
+        ///
         /// <param name="parent">The parent UI component that the panel will be added to.</param>
         /// <param name="modName">The name of the mod, which is displayed to user.</param>
         /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
@@ -226,10 +235,10 @@ namespace TrafficManager.UI
 
         /// <summary>
         /// Handles click of "Unsubscribe" or "Delete" button; removes the associated mod and updates UI.
-        /// 
+        ///
         /// Once all incompatible mods are removed, the dialog will be closed automatically.
         /// </summary>
-        /// 
+        ///
         /// <param name="component">A handle to the UI button that was clicked.</param>
         /// <param name="eventparam">Details of the click event.</param>
         /// <param name="mod">The <see cref="PluginInfo"/> instance of the mod to remove.</param>
@@ -273,9 +282,9 @@ namespace TrafficManager.UI
         /// <summary>
         /// Deletes a locally installed TM:PE mod.
         /// </summary>
-        /// 
+        ///
         /// <param name="mod">The <see cref="PluginInfo"/> associated with the mod that needs deleting.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if successfully deleted, otherwise <c>false</c>.</returns>
         private bool DeleteLocalTMPE(PluginInfo mod)
         {
@@ -295,7 +304,7 @@ namespace TrafficManager.UI
         /// <summary>
         /// Creates an `Unsubscribe` or `Delete` button (as applicable to mod location) and attaches it to the <paramref name="parent"/> UI component.
         /// </summary>
-        /// 
+        ///
         /// <param name="parent">The parent UI component which the button will be attached to.</param>
         /// <param name="text">The translated text to display on the button.</param>
         /// <param name="x">The x position of the top-left corner of the button, relative to <paramref name="parent"/>.</param>
@@ -334,8 +343,9 @@ namespace TrafficManager.UI
                 }
             }
 
-            if (blurEffect != null && UIView.ModalInputCount() == 0)
-            {
+            if (blurEffect != null && UIView.ModalInputCount() == 0) {
+                blurEffect.eventPositionChanged -= OnBlurEffectPositionChange;
+                blurEffect.eventZOrderChanged -= OnBlurEffectZOrderChange;
                 ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate () { blurEffect.Hide(); });
             }
         }
