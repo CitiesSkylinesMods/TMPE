@@ -64,123 +64,11 @@
         public static readonly Texture2D RemoveButtonTexture2D;
         public static readonly Texture2D WindowBackgroundTexture2D;
 
-        public struct SpeedLimitTextures
-        {
-            public static readonly IDictionary<int, Texture2D> Kmph;
-            public static readonly IDictionary<int, Texture2D> MphUS;
-            public static readonly IDictionary<int, Texture2D> MphUK;
-
-            static SpeedLimitTextures() {
-                // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-                Kmph = new TinyDictionary<int, Texture2D>();
-                MphUS = new TinyDictionary<int, Texture2D>();
-                MphUK = new TinyDictionary<int, Texture2D>();
-
-                // Load shared speed limit signs for Kmph and Mph
-                // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
-                for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                    var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
-                    Kmph.Add(speedLimit, resource ?? Kmph[5]);
-                }
-
-                // Signs from 0 to 90 for MPH
-                for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
-                    // Load US textures, they are rectangular
-                    var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
-                    MphUS.Add(speedLimit, resourceUs ?? MphUS[5]);
-                    // Load UK textures, they are square
-                    var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
-                    MphUK.Add(speedLimit, resourceUk ?? MphUK[5]);
-                }
-            }
-        }
-
         public struct WorldSpaceGUI {
             public static Shader SeeThroughZ;
 
             static WorldSpaceGUI() {
                 SeeThroughZ = Resources.Load<Shader>("WorldSpaceGUI.SeeThroughZ.shader");
-            }
-        }
-
-        /// <summary>
-        /// Groups resources for Lane Arrows Tool, 32x32
-        /// Row 0 (64px) contains: red X, green ↑, →, ↑→, ←, ←↑, ←→, ←↑→
-        /// Row 1 (32px) contains: Blue ←, ↑, →, disabled ←, ↑, →
-        /// Row 2 (0px) contains: black ←, ↑, →
-        /// </summary>
-        public struct LaneArrows {
-            private const int ATLAS_H = 96;
-            private const float SPRITE_H = 32f;
-            private const float SPRITE_W = 32f;
-
-            public static readonly Texture2D Atlas;
-
-            static LaneArrows() {
-                Atlas = LoadDllResource("LaneArrows.Atlas_Lane_Arrows.png", 256, ATLAS_H);
-            }
-
-            /// <summary>
-            /// Returns sprite, where rect has Y inverted, because Unity has Y axis going up...
-            /// </summary>
-            /// <param name="x">Horizontal sprite number</param>
-            /// <param name="y">Vertical sprite number, 0 = top row</param>
-            /// <returns>Rect</returns>
-            static Sprite GetSprite(int x, int y) {
-                var rc = new Rect(x * 32f, ATLAS_H - 32f - (y * 32f),
-                                SPRITE_H, SPRITE_W);
-                return Sprite.Create(Atlas, rc, Vector2.zero);
-            }
-
-            /// <summary>
-            /// The first row of the atlas contains arrow signs, where Left, Forward and Right form bit-combinations
-            /// </summary>
-            /// <param name="flags">Actual lane flags to display</param>
-            /// <returns>A sprite</returns>
-            public static Sprite GetLaneControlSprite(NetLane.Flags flags) {
-                var forward = (flags & NetLane.Flags.Forward) != 0 ? 1 : 0;
-                var right = (flags & NetLane.Flags.Right) != 0 ? 2 : 0;
-                var left = (flags & NetLane.Flags.Left) != 0 ? 4 : 0;
-                var spriteIndex = forward | left | right;
-                return GetSprite(spriteIndex, 0);
-            }
-
-            /// <summary>
-            /// For lane direction and possibly disabled lane, return a sprite
-            /// </summary>
-            /// <param name="dir">Direction</param>
-            /// <param name="disabled">Whether the sprite should be gray and crossed out</param>
-            /// <returns>The sprite</returns>
-            public static Sprite GetLaneArrowSprite(ArrowDirection dir, bool on, bool disabled) {
-                var x = 0;
-                var y = 0; // 0,0 is red x default fallback sprite
-
-                switch (dir) {
-                    case ArrowDirection.Left:
-                        x = 1; y = 1;
-                        break;
-                    case ArrowDirection.Forward:
-                        x = 0; y = 1;
-                        break;
-                    case ArrowDirection.Right:
-                        x = 2; y = 1;
-                        break;
-                    case ArrowDirection.None:
-                    case ArrowDirection.Turn:
-                        break;
-                }
-
-                if (!on) {
-                    // off sprites are on row 2 (64px)
-                    y++;
-                }
-
-                if (disabled) {
-                    x += 3;
-                    y = 1;
-                }
-
-                return GetSprite(x, y);
             }
         }
 
@@ -371,7 +259,7 @@
             return textures[trimIndex];
         }
 
-        private static Texture2D LoadDllResource(string resourceName, int width, int height) {
+        internal static Texture2D LoadDllResource(string resourceName, int width, int height) {
 #if DEBUG
             bool debug = State.GlobalConfig.Instance.Debug.Switches[11];
 #endif

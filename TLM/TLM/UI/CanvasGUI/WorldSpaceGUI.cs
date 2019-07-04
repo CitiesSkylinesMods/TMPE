@@ -156,7 +156,7 @@
             imageComponent.material = imageComponentMat;
         }
 
-        public void SetButtonSprite(GameObject button, Sprite sprite) {
+        public static void SetButtonSprite(GameObject button, Sprite sprite) {
             var imageComponent = button.GetComponent<Image>();
             imageComponent.sprite = sprite;
         }
@@ -181,16 +181,16 @@
         /// <summary>
         /// Check whether mouse1 was pressed and where did it hit.
         /// </summary>
-        public void HandleInput() {
+        public bool HandleInput() {
             if (!Input.GetKey(KeyCode.Mouse0)) {
                 // Mouse1 is released, clear the flag
                 mouse1Held = false;
-                return;
+                return false;
             }
 
             if (mouse1Held) {
                 // Do not create more than 1 click event
-                return;
+                return false;
             }
 
             mouse1Held = true;
@@ -198,12 +198,15 @@
             var results = RaycastMouse();
 
             // For every result returned, output the name of the GameObject on the Canvas hit by the Ray
-            if (results.Count > 0) {
+            if (results != null && results.Count > 0) {
                 var button = results[0].gameObject.GetComponent<Button>();
                 if (button != null) {
                     button.onClick.Invoke();
+                    return true; // event consumed
                 }
             }
+
+            return false;
         }
 
         /// <summary>

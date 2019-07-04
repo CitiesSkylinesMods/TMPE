@@ -7,7 +7,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// For all allowed ways (Left, Forward, Right, and possibly U-turn) to leave the node.
     /// Stores the collection of segment ids grouped by directions.
     /// </summary>
-    internal struct PossibleTurnsOut {
+    public struct PossibleTurnsOut {
         private readonly ushort currentNodeId_;
         private readonly ushort currentSegmentId_;
 

@@ -252,9 +252,14 @@
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\Geometry.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowsEditor.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\LaneArrows\PossibleTurnsOut.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\SharedLaneArrowGuiState.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\Texture\LaneArrowsTextures.cs" />
+    <Compile Include="UI\Texture\SpeedLimitTextures.cs" />
     <Compile Include="UI\Texture\TextureResources.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />

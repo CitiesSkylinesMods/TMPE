@@ -1,11 +1,14 @@
 ﻿namespace TrafficManager.UI.SubTools.LaneArrows {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using CanvasGUI;
+// for simpler higher order functions
     using ColossalFramework;
-    using ColossalFramework.Math;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Geometry.Impl;
+    using global::TrafficManager.Geometry.Impl;
     using Manager.Impl;
     using State;
     using Texture;
@@ -15,29 +18,17 @@
 
     public class LaneArrowTool : SubTool {
         private const float LANE_BUTTON_SIZE = 4f; // control button size, 4x4m
+        private const int MAX_NODE_SEGMENTS = 8;
 
         /// <summary>
-        /// The smarter type of canvas, created in the ground plane
+        /// One lane arrow editor with canvas, per segment
         /// </summary>
-        private WorldSpaceGUI wsGui_;
-
-        private GameObject btnCurrentControlButton_;
-
-        private GameObject btnLaneArrowForward_;
-
-        private GameObject btnLaneArrowLeft_;
-
-        private GameObject btnLaneArrowRight_;
+        private Dictionary<ushort, LaneArrowsEditor> laneEditors_ = new Dictionary<ushort, LaneArrowsEditor>();
 
         /// <summary>
-        /// Used to draw lane on screen which is being edited.
+        /// State for the GUI is shared with all LaneArrowsEditors in laneEditors_
         /// </summary>
-        private uint highlightLaneId_;
-
-        /// <summary>
-        /// Contains the leaving lanes for the current nodeid, grouped by direction
-        /// </summary>
-        private PossibleTurnsOut? possibleTurns_;
+        private SharedLaneArrowsGuiState sharedState_ = new SharedLaneArrowsGuiState();
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool)
@@ -53,32 +44,50 @@
             Disabled
         }
 
+        /// <summary>
+        /// Return true if cursor is in TM:PE menu or over any world-space UI control
+        /// </summary>
+        /// <returns>Cursor is over some UI</returns>
         public override bool IsCursorInPanel() {
-            return base.IsCursorInPanel() || wsGui_?.RaycastMouse().Count > 0;
+            // True if cursor is inside TM:PE GUI or in any of the world space
+            // GUIs that we have
+            return base.IsCursorInPanel() || IsCursorInAnyLaneEditor();
         }
 
+        private bool IsCursorInAnyLaneEditor() {
+            return laneEditors_.Values.Any(
+                laneEditor => laneEditor.Gui.RaycastMouse().Count > 0);
+        }
+
+        /// <summary>
+        /// Left click on a node should enter the node edit mode
+        /// </summary>
         public override void OnPrimaryClickOverlay() {
             if (HoveredNodeId == 0 || HoveredSegmentId == 0) {
                 return;
             }
 
             var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
-
             if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) {
                 return;
             }
 
-            var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
-            if (hoveredSegment.m_startNode != HoveredNodeId &&
-                hoveredSegment.m_endNode != HoveredNodeId) {
-                return;
-            }
-
             Deselect();
-            SelectedSegmentId = HoveredSegmentId;
             SelectedNodeId = HoveredNodeId;
+            SelectedSegmentId = 0;
+
+//            var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
+//            if (hoveredSegment.m_startNode != HoveredNodeId &&
+//                hoveredSegment.m_endNode != HoveredNodeId) {
+//                return;
+//            }
+//
+//            SelectedSegmentId = HoveredSegmentId;
         }
 
+        /// <summary>
+        /// Right click on the world should remove the selection
+        /// </summary>
         public override void OnSecondaryClickOverlay() {
             if (!IsCursorInPanel()) {
                 Deselect();
@@ -86,16 +95,17 @@
         }
 
         public override void OnToolGUI(Event e) {
-            if (SelectedNodeId == 0 || SelectedSegmentId == 0) {
+            if (SelectedNodeId == 0) {
                 return;
             }
 
-            var numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
-                SelectedSegmentId, SelectedNodeId, out _, LaneArrowManager.VEHICLE_TYPES);
-            if (numLanes <= 0) {
-                Deselect();
-                return;
-            }
+            // Cancel selection immediately if there are no vehicle lanes
+//            var numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+//                SelectedSegmentId, SelectedNodeId, out _, LaneArrowManager.VEHICLE_TYPES);
+//            if (numLanes <= 0) {
+//                Deselect();
+//                return;
+//            }
 
             var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
             var visible = MainTool.WorldToScreenPoint(nodePos, out _);
@@ -105,77 +115,107 @@
 
             var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             var diff = nodePos - camPos;
-
             if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance) {
                 return; // do not draw if too distant
             }
 
             // Try click something on Canvas
-            wsGui_?.HandleInput();
-        }
-
-        private void Deselect() {
-            possibleTurns_ = null; // no more overlay rendering
-            highlightLaneId_ = 0;
-            SelectedSegmentId = 0;
-            SelectedNodeId = 0;
-            if (wsGui_ != null) {
-                wsGui_.DestroyCanvas();
-                wsGui_ = null;
-                btnLaneArrowLeft_ = btnLaneArrowRight_ = btnLaneArrowForward_ = null;
+            foreach (var laneEditor in laneEditors_.Values) {
+                if (laneEditor.Gui.HandleInput()) {
+                    break; // handle until first true is returned (consumed)
+                }
             }
         }
 
+        /// <summary>
+        /// User right-clicked or other reasons, the selection is cleared
+        /// </summary>
+        private void Deselect() {
+            SelectedSegmentId = 0;
+            SelectedNodeId = 0;
+
+            foreach (var laneEditor in laneEditors_.Values) {
+                laneEditor.Destroy();
+            }
+
+            laneEditors_.Clear();
+            sharedState_.Reset();
+        }
+
+        /// <summary>
+        /// Render selection and hovered nodes and segments
+        /// </summary>
+        /// <param name="cameraInfo">The camera</param>
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             var netManager = Singleton<NetManager>.instance;
-            var cursorInSecondaryPanel = wsGui_?.RaycastMouse().Count > 0;
-            if (!cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 &&
-                (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
-                var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
-                var hoveredSegment = netManager.m_segments.m_buffer[HoveredSegmentId];
+            var nodeBuffer = netManager.m_nodes.m_buffer;
+            var segmentBuffer = netManager.m_segments.m_buffer;
+            var laneBuffer = netManager.m_lanes.m_buffer;
 
-                if ((hoveredSegment.m_startNode == HoveredNodeId ||
-                     hoveredSegment.m_endNode == HoveredNodeId) &&
-                    (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-                    NetTool.RenderOverlay(
-                        cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
-                        MainTool.GetToolColor(false, false),
-                        MainTool.GetToolColor(false, false));
+            //---------------------------------------------------
+            // Highlight the other hovered node than the selected
+            //---------------------------------------------------
+            if (!IsCursorInAnyLaneEditor()
+                && HoveredNodeId != 0
+                && HoveredNodeId != SelectedNodeId) {
+                var hoveredNodeFlags = nodeBuffer[HoveredNodeId].m_flags;
+                if ((hoveredNodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
+                    RenderNodeOverlay(cameraInfo, ref nodeBuffer[HoveredNodeId], Color.white);
                 }
+            }
+
+            // Draw the selected node, if any
+            if (SelectedNodeId != 0) {
+                RenderNodeOverlay(cameraInfo, ref nodeBuffer[SelectedNodeId], new Color(0f, 0f, 1f, 0.3f));
             }
 
             //----------------------------------------------------
             // Draw the lane we are editing and all outgoing lanes
             //----------------------------------------------------
-            var netSegment = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId];
-            var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            if (highlightLaneId_ != 0) {
-                var highlightLane = laneBuffer[highlightLaneId_];
-                RenderLaneOverlay(cameraInfo, ref netSegment, highlightLane,
-                                  Mathf.Max(3f, netSegment.Info.m_lanes[0].m_width),
+            if (SelectedSegmentId != 0 && sharedState_.selectedLaneId_ != 0) {
+                var selectedSegment = segmentBuffer[SelectedSegmentId];
+                var selectedLane = laneBuffer[sharedState_.selectedLaneId_];
+                RenderLaneOverlay(cameraInfo, ref selectedSegment, selectedLane,
+                                  Mathf.Max(3f, selectedSegment.Info.m_lanes[0].m_width),
                                   MainTool.GetToolColor(true, false));
-                if (possibleTurns_ != null) {
-                    var turns = possibleTurns_.Value;
-                    foreach (var laneId in turns.GetLanesFor((NetLane.Flags)highlightLane.m_flags)) {
+
+                var editor = laneEditors_[SelectedSegmentId];
+                if (editor.PossibleTurns != null) {
+                    var turns = editor.PossibleTurns.Value;
+                    foreach (var laneId in turns.GetLanesFor((NetLane.Flags)selectedLane.m_flags)) {
                         var lane = laneBuffer[laneId];
-                        RenderLaneOverlay(cameraInfo, ref netSegment, lane, 1f, Color.green);
+                        RenderLaneOverlay(cameraInfo, ref selectedSegment, lane, 1f, Color.green);
                     }
                 }
             }
 
-            if (SelectedSegmentId == 0) {
-                return;
+            // If no editors are created for the lanes around the selected node,
+            // let's create the UI (slightly above the ground)
+            if (SelectedNodeId != 0 && laneEditors_.Count == 0) {
+                try {
+                    CreateEditorsForAllSegments();
+                }
+                catch (Exception e) {
+                    Log.Error($"Creating editors for node segments: {e}");
+                }
             }
+        }
 
-            if (highlightLaneId_ == 0) {
-                NetTool.RenderOverlay(cameraInfo, ref netSegment, MainTool.GetToolColor(true, false),
-                                      MainTool.GetToolColor(true, false));
-            }
+        /// <summary>
+        /// Draw a HOVER_RADIUS=10m circle on the node
+        /// </summary>
+        /// <param name="cameraInfo">The camera</param>
+        /// <param name="node">The node to take the position</param>
+        /// <param name="color">The color</param>
+        private static void RenderNodeOverlay(RenderManager.CameraInfo cameraInfo,
+                                              ref NetNode node,
+                                              Color color) {
+            ++Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls;
 
-            // Create UI in the ground plane, slightly above
-            if (wsGui_ == null) {
-                CreateWorldSpaceGUI(netSegment);
-            }
+            const float NODE_HOVER_RADIUS = 10f;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
+                cameraInfo, color, node.m_position, NODE_HOVER_RADIUS,
+                -1f, 1280f, false, false);
         }
 
         private static void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo,
@@ -198,37 +238,104 @@
         }
 
         /// <summary>
-        /// Fill canvas with buttons for the clicked segment.
-        /// The initial state is one lane control button per lane.
-        /// Clicking that lane button will produce 3 arrow buttons controlling that lane.
-        /// Clicking another lane button will destroy these 3 and create 3 new arrow buttons.
-        /// Clicking away, or clicking another segment will hide everything.
+        /// Create canvas one per incoming segment to the selected node.
+        /// Fill each canvas with lane buttons.
+        /// The initial GUI state is one lane control button per each incoming lane.
+        /// Clicking that lane button will produce 0..3 arrow buttons controlling that lane.
+        /// Clicking another lane button will destroy these and create another 0..3 buttons.
+        /// Right-clicking, or clicking another node will destroy the GUI.
         /// </summary>
-        /// <param name="netSegment">The most recently clicked segment, will be used to position
-        ///     and rotate the canvas.</param>
-        private void CreateWorldSpaceGUI(NetSegment netSegment) {
+        private void CreateEditorsForAllSegments() {
+            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            var selectedNode = nodeBuffer[SelectedNodeId];
+            var nodeId = SelectedNodeId;
+
+            // For all incoming segments
+            for (var i = 0; i < MAX_NODE_SEGMENTS; ++i) {
+                var incomingSegmentId = selectedNode.GetSegment(i);
+                if (incomingSegmentId == 0) {
+                    continue;
+                }
+
+                var incomingSegment = segmentBuffer[incomingSegmentId];
+
+                // Create the GUI form and center it according to the node position
+                Quaternion rotInverse;
+                Vector3 guiOriginWorldPos;
+                var editor = new LaneArrowsEditor();
+                editor.CreateWorldSpaceCanvas(
+                    incomingSegment, nodeId, incomingSegmentId, out guiOriginWorldPos, out rotInverse);
+                laneEditors_[incomingSegmentId] = editor;
+
+                if (LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
+                    // Do not allow editing lanes, because custom connections exist
+                    // Create a forbidden icon button which does not click
+                    CreateForbiddenButton_LaneConnections();
+                    return; // do not create any more buttons
+                }
+
+                var laneList = GetIncomingLaneList(incomingSegmentId, nodeId);
+                CreateLaneControlButtons(editor, nodeId, incomingSegmentId, laneList,
+                                         rotInverse, guiOriginWorldPos);
+            }
+        }
+
+        /// <summary>
+        /// As now we know that lane arrows cannot be edited, we do not create lane control GUI,
+        /// instead create a single button with a warning icon. Clicking this button
+        /// will pop up an explanation message.
+        /// </summary>
+        private void CreateForbiddenButton_LaneConnections() {
+            var gui = laneEditors_.First().Value.Gui; // exact 1 element in laneEditors
+            var button = gui.AddButton(
+                new Vector3(0f, 0f, 0f),
+                new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
+                string.Empty);
+            WorldSpaceGUI.SetButtonSprite(button, LaneArrowsTextures.GetSprite(3, 2));
+
+            UnityAction clickLaneConnections = () => {
+                const string MESSAGE = "Lane arrows disabled for this node, because you have custom " +
+                                       "lane connections set up.";
+                UIView.library
+                      .ShowModal<ExceptionPanel>("ExceptionPanel")
+                      .SetMessage("No Lane Arrows for this node", MESSAGE, false);
+            };
+            button.GetComponent<Button>().onClick.AddListener(clickLaneConnections);
+        }
+
+        /// <summary>
+        /// The lane editing is possible.
+        /// Create buttons one per lane.
+        /// </summary>
+        /// <param name="editor">The editor containing canvas for these buttons</param>
+        /// <param name="nodeId">Node being the center of the junction and all editors</param>
+        /// <param name="segmentId">Segment we are editing in this canvas</param>
+        /// <param name="laneList">List of lanes to create buttons for them</param>
+        /// <param name="rotInverse">The inverse rotation quaternion for projecting world stuff into the canvas</param>
+        /// <param name="guiOriginWorldPos">Where GUI 0,0 is located in the world</param>
+        private void CreateLaneControlButtons(LaneArrowsEditor editor,
+                                              ushort nodeId,
+                                              ushort segmentId,
+                                              IList<LanePos> laneList,
+                                              Quaternion rotInverse,
+                                              Vector3 guiOriginWorldPos) {
             var lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            var laneList = GetIncomingLaneList(SelectedSegmentId, SelectedNodeId);
 
-            // Create the GUI form and center it according to the node position
-            Quaternion rotInverse;
-            Vector3 guiOriginWorldPos;
-            CreateWorldSpaceCanvas(netSegment, out guiOriginWorldPos, out rotInverse);
-
-            var geometry = SegmentGeometry.Get(SelectedSegmentId);
+            var geometry = SegmentGeometry.Get(segmentId);
             if (geometry == null) {
                 Log.Error("LaneArrowTool._guiLaneChangeWindow: No geometry information " +
-                          $"available for segment {SelectedSegmentId}");
+                          $"available for segment {segmentId}");
                 return;
             }
 
-            var isStartNode = geometry.StartNodeId() == SelectedNodeId;
+            var isStartNode = geometry.StartNodeId() == nodeId;
 
             // Now iterate over eligible lanes
             for (var i = 0; i < laneList.Count; i++) {
                 var laneId = laneList[i].laneId;
                 var lane = lanesBuffer[laneId];
-                var flags = (NetLane.Flags)lane.m_flags;
+                var laneFlags = (NetLane.Flags)lane.m_flags;
 
                 if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
                     Flags.removeLaneArrowFlags(laneList[i].laneId);
@@ -244,72 +351,41 @@
                                                  buttonPositionRot.z - (LANE_BUTTON_SIZE * 3f),
                                                  0f);
 
-                var laneEditButton = wsGui_.AddButton(buttonPosition,
-                                                      new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE));
-                wsGui_.SetButtonSprite(laneEditButton,
-                                       TextureResources.LaneArrows.GetLaneControlSprite(flags));
+                var laneEditButton = editor.Gui.AddButton(
+                    buttonPosition, new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE));
+
+                WorldSpaceGUI.SetButtonSprite(
+                    laneEditButton, LaneArrowsTextures.GetLaneControlSprite(laneFlags));
+
                 laneEditButton.GetComponent<Button>().onClick.AddListener(
                     () => {
                         // Ignore second click on the same control button
-                        if (laneEditButton == btnCurrentControlButton_) {
+                        if (laneEditButton == sharedState_.btnCurrentControlButton_) {
                             return;
                         }
 
-                        highlightLaneId_ = laneId;
-                        CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId,
-                                                laneId, isStartNode);
+                        SelectedSegmentId = segmentId;
+                        sharedState_.selectedLaneId_ = laneId;
+                        try {
+                            CreateLaneArrowButtons(
+                                laneEditButton, segmentId, SelectedNodeId, laneId, isStartNode);
+                        }
+                        catch (Exception e) {
+                            Log.Error($"While creating lane arrows: {e}");
+                        }
                     });
 
-                if (laneList.Count == 1) {
-                    // For only one lane, immediately open the arrow buttons
-                    highlightLaneId_ = laneId;
-                    CreateLaneControlArrows(laneEditButton, SelectedSegmentId, SelectedNodeId, laneId, isStartNode);
-                }
-
-                // if (buttonClicked) {
-                //        switch (res) {
-                //            case Flags.LaneArrowChangeResult.Invalid:
-                //            case Flags.LaneArrowChangeResult.Success:
-                //            default:
-                //                break;
-                //            case Flags.LaneArrowChangeResult.HighwayArrows:
-                //                MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
-                //                break;
-                //            case Flags.LaneArrowChangeResult.LaneConnection:
-                //                MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
-                //                break;
-                //        }
-                //    }
+                // TODO: Fix this if only one incoming lane available in the whole junction? or delete this
+//                if (laneList.Count == 1) {
+//                    // For only one lane, immediately open the arrow buttons
+//                    sharedState_.selectedLaneId_ = laneId;
+//                    CreateLaneControlArrows(laneEditButton, segmentId, SelectedNodeId, laneId, isStartNode);
+//                }
             }
         }
 
         /// <summary>
-        /// Given segment being edited, and globals (selected node id) create canvas centered at that node.
-        /// </summary>
-        /// <param name="netSegment">Segment being edited</param>
-        /// <param name="guiOriginWorldPos">Returns position in the world where the canvas is centered</param>
-        /// <param name="inverse">Returns inverse rotation quaternion for later use</param>
-        private void CreateWorldSpaceCanvas(NetSegment netSegment,
-                                            out Vector3 guiOriginWorldPos,
-                                            out Quaternion inverse) {
-            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-            // Forward is the direction of the selected segment, even if it's a curve
-            var forwardVector = GetSegmentTangent(SelectedNodeId, netSegment);
-            var rot = Quaternion.LookRotation(Vector3.down, forwardVector.normalized);
-            inverse = Quaternion.Inverse(rot); // for projecting stuff from world into the canvas
-
-            // UI is floating 5 metres above the ground
-            const float UI_FLOAT_HEIGHT = 5f;
-            var adjustFloat = Vector3.up * UI_FLOAT_HEIGHT;
-
-            // Adjust UI vertically
-            guiOriginWorldPos = nodesBuffer[SelectedNodeId].m_position + adjustFloat;
-            wsGui_?.DestroyCanvas();
-            wsGui_ = new WorldSpaceGUI("LaneArrowTool", guiOriginWorldPos, rot);
-        }
-
-        /// <summary>
+        /// Create world space canvas in the ground plane.
         /// Recreate Lane Arrows at the location of the given button and slightly above it.
         /// </summary>
         /// <param name="originButton">The button user clicked to create these controls</param>
@@ -318,36 +394,39 @@
         /// <param name="laneId">Current lane being edited</param>
         /// <param name="isStartNode">Bool if selected node is start node of the geometry (used for
         ///     lane modifications later)</param>
-        private void CreateLaneControlArrows(GameObject originButton,
-                                             ushort segmentId,
-                                             ushort nodeId,
-                                             uint laneId,
-                                             bool isStartNode) {
+        private void CreateLaneArrowButtons(GameObject originButton,
+                                            ushort segmentId,
+                                            ushort nodeId,
+                                            uint laneId,
+                                            bool isStartNode) {
             // Set some nice color or effect to highlight
             originButton.GetComponent<Image>().color = Color.gray;
 
             var lane = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId];
             var flags = (NetLane.Flags)lane.m_flags;
 
-            DestroyLaneArrowButtons();
-            btnCurrentControlButton_ = originButton; // save this to decolorize it later
+            sharedState_.DestroyLaneArrowButtons();
+            sharedState_.btnCurrentControlButton_ = originButton; // save this to decolorize it later
 
-            // Get all possible turn directions to leave the nodeId
-            possibleTurns_ = GetAllTurnsOut(nodeId, segmentId);
+            // Get all possible turn directions to leave the nodeId via this segment
+            var editor = laneEditors_[segmentId];
+            editor.PossibleTurns = GetAllTurnsOut(nodeId, segmentId);
 
             //-----------------
             // Button FORWARD
             //-----------------
             var forward = (flags & NetLane.Flags.Forward) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (possibleTurns_ != null
-                && possibleTurns_.Value.Contains(ArrowDirection.Forward)) {
-                GuiAddLaneArrowForward(originButton, forward);
+            if (editor.PossibleTurns != null
+                && editor.PossibleTurns.Value.Contains(ArrowDirection.Forward)) {
+                GuiAddLaneArrowForward(editor, originButton, forward);
                 UnityAction clickForward = () => {
-                    OnClickForward(laneId, isStartNode, btnLaneArrowForward_);
+                    OnClickForward(laneId, isStartNode, sharedState_.btnLaneArrowForward_);
                 };
-                btnLaneArrowForward_.GetComponent<Button>().onClick.AddListener(clickForward);
-            } else {
-                GuiAddLaneArrowForward(originButton, LaneButtonState.Disabled);
+
+                var buttonComponent = sharedState_.btnLaneArrowForward_.GetComponent<Button>();
+                buttonComponent.onClick.AddListener(clickForward);
+//            } else {
+//                GuiAddLaneArrowForward(originButton, LaneButtonState.Disabled);
                 // Note: no click handler added
             }
 
@@ -355,15 +434,17 @@
             // Button LEFT
             //-----------------
             var left = (flags & NetLane.Flags.Left) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (possibleTurns_ != null
-                && possibleTurns_.Value.Contains(ArrowDirection.Left)) {
-                GuiAddLaneArrowLeft(originButton, left);
+            if (editor.PossibleTurns != null
+                && editor.PossibleTurns.Value.Contains(ArrowDirection.Left)) {
+                GuiAddLaneArrowLeft(editor, originButton, left);
                 UnityAction clickLeft = () => {
-                    OnClickLeft(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowLeft_);
+                    OnClickLeft(segmentId, SelectedNodeId, laneId,
+                                isStartNode, sharedState_.btnLaneArrowLeft_);
                 };
-                btnLaneArrowLeft_.GetComponent<Button>().onClick.AddListener(clickLeft);
-            } else {
-                GuiAddLaneArrowLeft(originButton, LaneButtonState.Disabled);
+                var buttonComponent = sharedState_.btnLaneArrowLeft_.GetComponent<Button>();
+                buttonComponent.onClick.AddListener(clickLeft);
+//            } else {
+//                GuiAddLaneArrowLeft(originButton, LaneButtonState.Disabled);
                 // Note: no click handler added
             }
 
@@ -371,15 +452,17 @@
             // Button RIGHT
             //-----------------
             var right = (flags & NetLane.Flags.Right) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            if (possibleTurns_ != null
-                && possibleTurns_.Value.Contains(ArrowDirection.Right)) {
-                GuiAddLaneArrowRight(originButton, right);
+            if (editor.PossibleTurns != null
+                && editor.PossibleTurns.Value.Contains(ArrowDirection.Right)) {
+                GuiAddLaneArrowRight(editor, originButton, right);
                 UnityAction clickRight = () => {
-                    OnClickRight(SelectedSegmentId, SelectedNodeId, laneId, isStartNode, btnLaneArrowRight_);
+                    OnClickRight(segmentId, SelectedNodeId, laneId,
+                                 isStartNode, sharedState_.btnLaneArrowRight_);
                 };
-                btnLaneArrowRight_.GetComponent<Button>().onClick.AddListener(clickRight);
-            } else {
-                GuiAddLaneArrowRight(originButton, LaneButtonState.Disabled);
+                var buttonComponent = sharedState_.btnLaneArrowRight_.GetComponent<Button>();
+                buttonComponent.onClick.AddListener(clickRight);
+//            } else {
+//                GuiAddLaneArrowRight(originButton, LaneButtonState.Disabled);
                 // Note: no click handler added
             }
         }
@@ -390,7 +473,7 @@
             var lane = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId];
             var flags = (NetLane.Flags)lane.m_flags;
             var buttonState = (flags & direction) != 0 ? LaneButtonState.On : LaneButtonState.Off;
-            wsGui_.SetButtonSprite(button, SelectControlButtonSprite(direction, buttonState));
+            WorldSpaceGUI.SetButtonSprite(button, SelectControlButtonSprite(direction, buttonState));
         }
 
         internal static IList<LanePos> GetIncomingLaneList(ushort segmentId, ushort nodeId) {
@@ -414,7 +497,7 @@
             if (res == Flags.LaneArrowChangeResult.Invalid ||
                 res == Flags.LaneArrowChangeResult.Success) {
                 UpdateButtonGraphics(laneId, NetLane.Flags.Forward, button);
-                UpdateLaneControlButton(btnLaneArrowForward_.transform.parent.gameObject, laneId);
+                UpdateLaneControlButton(sharedState_.btnLaneArrowForward_.transform.parent.gameObject, laneId);
             }
         }
 
@@ -428,7 +511,7 @@
             if (res == Flags.LaneArrowChangeResult.Invalid ||
                 res == Flags.LaneArrowChangeResult.Success) {
                 UpdateButtonGraphics(laneId, NetLane.Flags.Left, button);
-                UpdateLaneControlButton(btnLaneArrowLeft_.transform.parent.gameObject, laneId);
+                UpdateLaneControlButton(sharedState_.btnLaneArrowLeft_.transform.parent.gameObject, laneId);
             }
         }
 
@@ -442,24 +525,24 @@
             if (res == Flags.LaneArrowChangeResult.Invalid ||
                 res == Flags.LaneArrowChangeResult.Success) {
                 UpdateButtonGraphics(laneId, NetLane.Flags.Right, button);
-                UpdateLaneControlButton(btnLaneArrowRight_.transform.parent.gameObject, laneId);
+                UpdateLaneControlButton(sharedState_.btnLaneArrowRight_.transform.parent.gameObject, laneId);
             }
         }
 
         private void UpdateLaneControlButton(GameObject button, uint laneId) {
             var lane = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId];
             var flags = (NetLane.Flags)lane.m_flags;
-            wsGui_.SetButtonSprite(button, TextureResources.LaneArrows.GetLaneControlSprite(flags));
+            WorldSpaceGUI.SetButtonSprite(button, LaneArrowsTextures.GetLaneControlSprite(flags));
         }
 
         private Sprite GetLaneControlSprite(LaneButtonState state, ArrowDirection dir) {
             switch (state) {
                 case LaneButtonState.On:
-                    return TextureResources.LaneArrows.GetLaneArrowSprite(dir, true, false);
+                    return LaneArrowsTextures.GetLaneArrowSprite(dir, true, false);
                 case LaneButtonState.Off:
-                    return TextureResources.LaneArrows.GetLaneArrowSprite(dir, false, false);
+                    return LaneArrowsTextures.GetLaneArrowSprite(dir, false, false);
                 default:
-                    return TextureResources.LaneArrows.GetLaneArrowSprite(dir, false, true);
+                    return LaneArrowsTextures.GetLaneArrowSprite(dir, false, true);
             }
         }
 
@@ -485,41 +568,22 @@
         }
 
         /// <summary>
-        /// When lane arrow button is destroyed we might want to decolorize the control button
-        /// </summary>
-        private void DestroyLaneArrowButtons() {
-            if (btnCurrentControlButton_ != null) {
-                btnCurrentControlButton_.GetComponentInParent<Image>().color = Color.white;
-            }
-
-            if (btnLaneArrowLeft_ != null) {
-                Object.Destroy(btnLaneArrowLeft_);
-            }
-
-            if (btnLaneArrowForward_ != null) {
-                Object.Destroy(btnLaneArrowForward_);
-            }
-
-            if (btnLaneArrowRight_ != null) {
-                Object.Destroy(btnLaneArrowRight_);
-            }
-
-            btnCurrentControlButton_ = btnLaneArrowLeft_ = btnLaneArrowForward_ = btnLaneArrowRight_ = null;
-        }
-
-        /// <summary>
         /// Creates Turn Left lane control button slightly to the left of the originButton.
         /// </summary>
         /// <param name="originButton">The parent for the new button</param>
         /// <param name="forward">The state of the button (on, off, disabled)</param>
-        private void GuiAddLaneArrowForward(GameObject originButton, LaneButtonState forward) {
-            btnLaneArrowForward_ = wsGui_.AddButton(new Vector3(0f, LANE_BUTTON_SIZE * 1.3f, 0f),
-                                                    new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                    string.Empty,
-                                                    originButton);
+        private void GuiAddLaneArrowForward(LaneArrowsEditor editor,
+                                            GameObject originButton,
+                                            LaneButtonState forward) {
+            sharedState_.btnLaneArrowForward_ = editor.Gui.AddButton(
+                new Vector3(0f, LANE_BUTTON_SIZE * 1.3f, 0f),
+                new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
+                string.Empty,
+                originButton);
 
-            wsGui_.SetButtonSprite(btnLaneArrowForward_,
-                                   SelectControlButtonSprite(NetLane.Flags.Forward, forward));
+            WorldSpaceGUI.SetButtonSprite(
+                sharedState_.btnLaneArrowForward_,
+                SelectControlButtonSprite(NetLane.Flags.Forward, forward));
         }
 
         /// <summary>
@@ -527,15 +591,18 @@
         /// </summary>
         /// <param name="originButton">The parent for the new button</param>
         /// <param name="left">The state of the button (on, off, disabled)</param>
-        private void GuiAddLaneArrowLeft(GameObject originButton,
+        private void GuiAddLaneArrowLeft(LaneArrowsEditor editor,
+                                         GameObject originButton,
                                          LaneButtonState left) {
-            btnLaneArrowLeft_ = wsGui_.AddButton(new Vector3(-LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f, 0f),
-                                                 new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                 string.Empty,
-                                                 originButton);
+            sharedState_.btnLaneArrowLeft_ = editor.Gui.AddButton(
+                new Vector3(-LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f, 0f),
+                new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
+                string.Empty,
+                originButton);
 
-            wsGui_.SetButtonSprite(btnLaneArrowLeft_,
-                                   SelectControlButtonSprite(NetLane.Flags.Left, left));
+            WorldSpaceGUI.SetButtonSprite(
+                sharedState_.btnLaneArrowLeft_,
+                SelectControlButtonSprite(NetLane.Flags.Left, left));
         }
 
         /// <summary>
@@ -543,63 +610,18 @@
         /// </summary>
         /// <param name="originButton">The parent for the new button</param>
         /// <param name="right">The state of the button (on, off, disabled)</param>
-        private void GuiAddLaneArrowRight(GameObject originButton,
+        private void GuiAddLaneArrowRight(LaneArrowsEditor editor,
+                                          GameObject originButton,
                                           LaneButtonState right) {
-            btnLaneArrowRight_ = wsGui_.AddButton(new Vector3(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f, 0f),
-                                                  new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
-                                                  string.Empty,
-                                                  originButton);
+            sharedState_.btnLaneArrowRight_ = editor.Gui.AddButton(
+                new Vector3(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE * 1.3f, 0f),
+                new Vector2(LANE_BUTTON_SIZE, LANE_BUTTON_SIZE),
+                string.Empty,
+                originButton);
 
-            wsGui_.SetButtonSprite(btnLaneArrowRight_,
-                                   SelectControlButtonSprite(NetLane.Flags.Right, right));
-        }
-
-        /// <summary>
-        /// For given segment and one of its end nodes, get the direction vector.
-        /// </summary>
-        /// <param name="nodeId">The node, at which we need to know the tangent</param>
-        /// <param name="segment">The segment, possibly a curve</param>
-        /// <returns>Direction of the road at the given end of the segment.</returns>
-        private static Vector3 GetSegmentTangent(ushort nodeId, NetSegment segment) {
-            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            var otherNodeId = segment.GetOtherNode(nodeId);
-            var nodePos = nodesBuffer[nodeId].m_position;
-            var otherNodePos = nodesBuffer[otherNodeId].m_position;
-
-            if (segment.IsStraight()) {
-                return (nodePos - otherNodePos).normalized;
-            }
-
-            // Handle some curvature, take the last tangent
-            var bezier = default(Bezier3);
-            bezier.a = nodesBuffer[segment.m_startNode].m_position;
-            bezier.d = nodesBuffer[segment.m_endNode].m_position;
-            NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection,
-                                             bezier.d, segment.m_endDirection,
-                                             false, false,
-                                             out bezier.b, out bezier.c);
-            var isStartNode = nodeId == segment.m_startNode;
-            var tangent = bezier.Tangent(isStartNode ? 0f : 1f);
-
-            // Some segments appear inverted. Perform a safety check that the angle
-            // between vector Middle→B and the tangent is < 90°
-            //
-            // Correct situation:
-            // <A>———————<Middle>————————<B>
-            //                          ——→ tangent; GUI oriented with top towards B
-            //
-            // Inverted (bad) situation:
-            // <A>———————<Middle>————————<B>
-            //                          ←—— tangent; GUI upside down, bottom towards B
-            //                  —————————→
-            var middleToB = nodesBuffer[nodeId].m_position - segment.m_middlePosition;
-            var product = Vector3.Dot(middleToB, tangent);
-            if (product < 0f) {
-                // For vectors with angle > 90° between them, the dot product is negative
-                tangent *= -1f;
-            }
-
-            return tangent;
+            WorldSpaceGUI.SetButtonSprite(
+                sharedState_.btnLaneArrowRight_,
+                SelectControlButtonSprite(NetLane.Flags.Right, right));
         }
 
         /// <summary>
@@ -624,7 +646,7 @@
             var incomingSegment = Singleton<NetManager>.instance.m_segments.m_buffer[incomingSegmentId];
             var isStartNode = nodeId == incomingSegment.m_startNode;
 
-            for (var i = 0; i < 8; ++i) {
+            for (var i = 0; i < MAX_NODE_SEGMENTS; ++i) {
                 var outgoingSegId = node.GetSegment(i);
                 if (outgoingSegId == 0) {
                     continue;
