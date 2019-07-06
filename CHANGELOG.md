@@ -1,6 +1,12 @@
 ﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
+
+#### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
+
+- Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
+- Meta: Main changelog refactored (#412) 
+
 ### [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), 02/07/2019
 - Added: Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
 - Added: Miles Per Hour option for speed limits (thanks kvakvs) (#384)
