@@ -229,6 +229,7 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Geometry\Impl\SegmentGeometry.cs" />
     <Compile Include="LoadingExtension.cs" />
+    <Compile Include="UI\CanvasGUI\WorldSpaceGUI.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
@@ -251,14 +252,22 @@
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\Geometry.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowsEditor.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Click.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Render.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\OutgoingTurnsCollection.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\Texture\LaneArrowsTextures.cs" />
+    <Compile Include="UI\Texture\SpeedLimitTextures.cs" />
+    <Compile Include="UI\Texture\TextureResources.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
@@ -271,6 +280,7 @@
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Manager\ICustomManager.cs" />
@@ -295,7 +305,6 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
@@ -421,6 +430,10 @@
       <Project>{D3ADE06E-F493-4819-865A-3BB44FEEDF01}</Project>
       <Name>CSUtil.Commons</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OptionsFramework\OptionsFramework.csproj">
+      <Project>{F4BEABA8-E56B-4201-99C8-5E0115E87D1C}</Project>
+      <Name>OptionsFramework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
       <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
       <Name>TMPE.CitiesGameBridge</Name>
@@ -454,6 +467,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="Resources\WorldSpaceGUI\SeeThroughZ.shader">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
@@ -489,8 +505,6 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\90.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\95.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\0.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\10.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_UK\15.png" />
@@ -529,6 +543,9 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LaneArrows\Atlas_Lane_Arrows.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
