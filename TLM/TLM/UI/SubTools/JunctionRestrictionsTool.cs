@@ -38,7 +38,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) {
-			
+
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools {
 				Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
 				var diff = nodePos - camPos;
 
-				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
+				if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
 					continue; // do not draw if too distant
 
 				Vector3 screenPos;

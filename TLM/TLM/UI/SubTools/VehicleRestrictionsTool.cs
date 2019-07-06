@@ -134,7 +134,7 @@
                 if (!visible)
                     continue;
 
-                if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
+                if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
                     continue; // do not draw if too distant
 
                 // draw vehicle restrictions
@@ -286,7 +286,7 @@
             var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             var diff = center - camPos;
 
-            if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
+            if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
                 return false; // do not draw if too distant
 
             int numDirections;

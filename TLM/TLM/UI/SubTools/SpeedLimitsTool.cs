@@ -128,7 +128,7 @@
                     /*if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
                             continue;*/
 
-                    if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MaxOverlayDistance)
+                    if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
                         continue; // do not draw if too distant
 
                     Vector3 screenPos;

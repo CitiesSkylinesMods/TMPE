@@ -1,5 +1,6 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
+    using System.Security.Policy;
     using ColossalFramework;
     using CSUtil.Commons;
 
@@ -7,24 +8,24 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// For all allowed ways (Left, Forward, Right, and possibly U-turn) to leave the node.
     /// Stores the collection of segment ids grouped by directions.
     /// </summary>
-    public struct PossibleTurnsOut {
+    public struct OutgoingTurnsCollection {
         private readonly ushort currentNodeId_;
         private readonly ushort currentSegmentId_;
 
         /// <summary>
         /// Outgoing segments, grouped by direction
         /// </summary>
-        private readonly Dictionary<ArrowDirection, HashSet<ushort>> allTurns_;
+        public readonly Dictionary<ArrowDirection, HashSet<ushort>> AllTurns;
 
         /// <summary>
         /// Outgoing lanes for each outgoing segment
         /// </summary>
         private Dictionary<ushort, HashSet<uint>> lanes_;
 
-        public PossibleTurnsOut(ushort nodeId, ushort segmentId) {
+        public OutgoingTurnsCollection(ushort nodeId, ushort segmentId) {
             currentNodeId_ = nodeId;
             currentSegmentId_ = segmentId;
-            allTurns_ = new Dictionary<ArrowDirection, HashSet<ushort>>();
+            AllTurns = new Dictionary<ArrowDirection, HashSet<ushort>>();
             lanes_ = new Dictionary<ushort, HashSet<uint>>();
         }
 
@@ -38,11 +39,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            if (!allTurns_.ContainsKey(dir)) {
-                allTurns_.Add(dir, new HashSet<ushort>());
+            if (!AllTurns.ContainsKey(dir)) {
+                AllTurns.Add(dir, new HashSet<ushort>());
             }
 
-            allTurns_[dir].Add(segmentId);
+            AllTurns[dir].Add(segmentId);
 
             // Extract outgoing lane ids and store them as NetLane's
             var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
@@ -63,7 +64,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         public bool Contains(ArrowDirection dir) {
-            return allTurns_.ContainsKey(dir);
+            return AllTurns.ContainsKey(dir);
         }
 
         /// <summary>
@@ -71,38 +72,45 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="flags">Given combination of turn bits, extract lanes for those turns</param>
         /// <returns>Set of lane ids</returns>
-        public HashSet<uint> GetLanesFor(NetLane.Flags flags) {
-            var result = new HashSet<uint>();
-            if ((flags & NetLane.Flags.Left) != 0 && allTurns_.ContainsKey(ArrowDirection.Left)) {
-                foreach (var outgoingSegmentId in allTurns_[ArrowDirection.Left]) {
+        public Dictionary<ArrowDirection, HashSet<uint>> GetLanesFor(NetLane.Flags flags) {
+            var resultLeft = new HashSet<uint>();
+            var resultForward = new HashSet<uint>();
+            var resultRight = new HashSet<uint>();
+
+            if ((flags & NetLane.Flags.Left) != 0 && AllTurns.ContainsKey(ArrowDirection.Left)) {
+                foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Left]) {
                     if (!lanes_.ContainsKey(outgoingSegmentId)) {
                         continue;
                     }
 
-                    result.UnionWith(lanes_[outgoingSegmentId]);
+                    resultLeft.UnionWith(lanes_[outgoingSegmentId]);
                 }
             }
 
-            if ((flags & NetLane.Flags.Right) != 0 && allTurns_.ContainsKey(ArrowDirection.Right)) {
-                foreach (var outgoingSegmentId in allTurns_[ArrowDirection.Right]) {
+            if ((flags & NetLane.Flags.Right) != 0 && AllTurns.ContainsKey(ArrowDirection.Right)) {
+                foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Right]) {
                     if (!lanes_.ContainsKey(outgoingSegmentId)) {
                         continue;
                     }
 
-                    result.UnionWith(lanes_[outgoingSegmentId]);
+                    resultRight.UnionWith(lanes_[outgoingSegmentId]);
                 }
             }
 
-            if ((flags & NetLane.Flags.Forward) != 0 && allTurns_.ContainsKey(ArrowDirection.Forward)) {
-                foreach (var outgoingSegmentId in allTurns_[ArrowDirection.Forward]) {
+            if ((flags & NetLane.Flags.Forward) != 0 && AllTurns.ContainsKey(ArrowDirection.Forward)) {
+                foreach (var outgoingSegmentId in AllTurns[ArrowDirection.Forward]) {
                     if (!lanes_.ContainsKey(outgoingSegmentId)) {
                         continue;
                     }
 
-                    result.UnionWith(lanes_[outgoingSegmentId]);
+                    resultForward.UnionWith(lanes_[outgoingSegmentId]);
                 }
             }
 
+            var result = new Dictionary<ArrowDirection, HashSet<uint>>();
+            result.Add(ArrowDirection.Left, resultLeft);
+            result.Add(ArrowDirection.Forward, resultForward);
+            result.Add(ArrowDirection.Right, resultRight);
             return result;
         }
     }

@@ -255,8 +255,9 @@
     <Compile Include="UI\SubTools\LaneArrows\Geometry.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowsEditor.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
-    <Compile Include="UI\SubTools\LaneArrows\PossibleTurnsOut.cs" />
-    <Compile Include="UI\SubTools\LaneArrows\SharedLaneArrowGuiState.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Click.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Render.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\OutgoingTurnsCollection.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\Texture\LaneArrowsTextures.cs" />
     <Compile Include="UI\Texture\SpeedLimitTextures.cs" />
@@ -279,6 +280,7 @@
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Manager\ICustomManager.cs" />

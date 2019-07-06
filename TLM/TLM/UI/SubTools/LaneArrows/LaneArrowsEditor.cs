@@ -15,7 +15,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>
         /// Contains the leaving lanes for the current nodeid, grouped by direction
         /// </summary>
-        public PossibleTurnsOut? PossibleTurns;
+        public OutgoingTurnsCollection? PossibleTurns;
 
         /// <summary>
         /// End of life, the LaneArrowsEditor will be destroyed in a moment

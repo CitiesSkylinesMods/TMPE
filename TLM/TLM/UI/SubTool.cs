@@ -1,16 +1,19 @@
-﻿namespace TrafficManager.UI {
+﻿﻿namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using Texture;
     using UnityEngine;
 
     public abstract class SubTool {
-        public TrafficManagerTool MainTool { get; set; }
+        public TrafficManagerTool MainTool { get; }
 
         protected Texture2D WindowTexture {
             get {
                 if (windowTexture == null) {
-                    windowTexture = TrafficManagerTool.AdjustAlpha(TextureResources.WindowBackgroundTexture2D, MainTool.GetWindowAlpha());
+                    windowTexture =
+                        TrafficManagerTool.AdjustAlpha(TextureResources.WindowBackgroundTexture2D,
+                                                       MainTool.GetWindowAlpha());
                 }
+
                 return windowTexture;
             }
         }
@@ -59,13 +62,17 @@
         protected Texture2D BorderlessTexture {
             get {
                 if (borderlessTexture == null) {
-                    borderlessTexture = TrafficManagerTool.MakeTex(1, 1, new Color(0.5f, 0.5f, 0.5f, MainTool.GetWindowAlpha()));
+                    var color = new Color(0.5f, 0.5f, 0.5f, MainTool.GetWindowAlpha());
+                    borderlessTexture = TrafficManagerTool.MakeTex(1, 1, color);
                 }
+
                 return borderlessTexture;
             }
         }
-        private Texture2D borderlessTexture = null;
 
+        private Texture2D borderlessTexture;
+
+        // ReSharper disable once UnusedMember.Global
         protected GUIStyle BorderlessStyle {
             get {
                 if (borderlessStyle == null) {
@@ -84,26 +91,28 @@
                 return borderlessStyle;
             }
         }
-        private GUIStyle borderlessStyle = null;
 
-        protected ushort HoveredNodeId {
-            get { return TrafficManagerTool.HoveredNodeId; }
-            set { TrafficManagerTool.HoveredNodeId = value; }
-        }
+        private GUIStyle borderlessStyle;
 
-        protected ushort HoveredSegmentId {
-            get { return TrafficManagerTool.HoveredSegmentId; }
-            set { TrafficManagerTool.HoveredSegmentId = value; }
-        }
+        protected ushort HoveredNodeId => TrafficManagerTool.HoveredNodeId;
+
+        protected ushort HoveredSegmentId => TrafficManagerTool.HoveredSegmentId;
+
+        protected uint HoveredLaneId => TrafficManagerTool.HoveredLaneId;
 
         protected ushort SelectedNodeId {
-            get { return TrafficManagerTool.SelectedNodeId; }
-            set { TrafficManagerTool.SelectedNodeId = value; }
+            get => TrafficManagerTool.SelectedNodeId;
+            set => TrafficManagerTool.SelectedNodeId = value;
         }
 
         protected ushort SelectedSegmentId {
-            get { return TrafficManagerTool.SelectedSegmentId; }
-            set { TrafficManagerTool.SelectedSegmentId = value; }
+            get => TrafficManagerTool.SelectedSegmentId;
+            set => TrafficManagerTool.SelectedSegmentId = value;
+        }
+
+        protected uint SelectedLaneId {
+            get => TrafficManagerTool.SelectedLaneId;
+            set => TrafficManagerTool.SelectedLaneId = value;
         }
 
         public SubTool(TrafficManagerTool mainTool) {
@@ -114,32 +123,41 @@
             //OnLeftClickOverlay();
         }
 
-        float nativeWidth = 1920;
-        float nativeHeight = 1200;
+        const float NATIVE_WIDTH = 1920;
+        const float NATIVE_HEIGHT = 1200;
 
         /// <summary>
         /// Called whenever the
         /// </summary>
         public abstract void OnPrimaryClickOverlay();
+
         public virtual void OnSecondaryClickOverlay() { }
+
         public virtual void OnToolGUI(Event e) {
-            //set up scaling
+            // set up scaling
             /*Vector2 resolution = UIView.GetAView().GetScreenResolution();
             float rx = resolution.x / nativeWidth;
             float ry = resolution.y / nativeHeight;
             GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(rx, ry, 1));*/
         }
+
         public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
+
         public virtual void Initialize() {
             borderlessTexture = null;
             borderlessStyle = null;
             windowTexture = null;
             windowStyle = null;
         }
+
         public virtual void Cleanup() { }
+
         public virtual void OnActivate() { }
+
         public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
+
         public virtual bool IsCursorInPanel() {
             return LoadingExtension.BaseUI.GetMenu().containsMouse
 #if DEBUG
@@ -147,6 +165,7 @@
 #endif
                 ;
         }
+
         public virtual string GetTutorialKey() {
             return this.GetType().Name;
         }
