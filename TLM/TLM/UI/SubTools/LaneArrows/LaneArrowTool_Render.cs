@@ -25,7 +25,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>
         /// Green, for allowed turns.
         /// </summary>
-        private readonly Color PALETTE_TURN_ALLOWED = new Color(0f, 0.75f, 0f, 0.66f);
+        private readonly Color PALETTE_TURN_ALLOWED = new Color(0f, 0.6f, 0f, 0.66f);
 
         private void RenderHoveredNode(RenderManager.CameraInfo cameraInfo) {
             var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
@@ -122,28 +122,38 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             var orange = MainTool.GetToolColor(true, false);
             RenderLaneOverlay(cameraInfo, laneBuffer[SelectedLaneId], 2f, orange);
 
+            RenderOutgoingDirectionsAsLanes(cameraInfo);
+        }
+
+        private void RenderOutgoingDirectionsAsLanes(RenderManager.CameraInfo cameraInfo) {
+            var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
             // Draw outgoing directions for the last selected segment
             var selectedLane = laneBuffer[SelectedLaneId];
-            var selectedLaneFlags = (NetLane.Flags)selectedLane.m_flags;
+            var selectedLaneFlags = (NetLane.Flags) selectedLane.m_flags;
 
             // Turns out of this node converted to lanes (we want all turn bits here)
             var outgoingLaneTurns = outgoingTurns_.GetLanesFor(NetLane.Flags.LeftForwardRight);
+            var hoveredDirection = outgoingTurns_.FindDirection(HoveredSegmentId);
 
             foreach (var outDirections in outgoingTurns_.AllTurns) {
                 switch (outDirections.Key) {
                     case ArrowDirection.Left:
                         RenderOutgoingDirection(cameraInfo,
                                                 (selectedLaneFlags & NetLane.Flags.Left) != 0,
+                                                hoveredDirection == ArrowDirection.Left,
                                                 outgoingLaneTurns[outDirections.Key]);
                         break;
                     case ArrowDirection.Forward:
                         RenderOutgoingDirection(cameraInfo,
                                                 (selectedLaneFlags & NetLane.Flags.Forward) != 0,
+                                                hoveredDirection == ArrowDirection.Forward,
                                                 outgoingLaneTurns[outDirections.Key]);
                         break;
                     case ArrowDirection.Right:
                         RenderOutgoingDirection(cameraInfo,
                                                 (selectedLaneFlags & NetLane.Flags.Right) != 0,
+                                                hoveredDirection == ArrowDirection.Right,
                                                 outgoingLaneTurns[outDirections.Key]);
                         break;
                     case ArrowDirection.Turn:
@@ -153,15 +163,32 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        /// <summary>
+        /// Render outgoing directions as separate lanes
+        /// </summary>
+        /// <param name="cameraInfo">The camera</param>
+        /// <param name="turnEnabled">Render green if the turn is enabled</param>
+        /// <param name="turnHovered">Render green+white, or white if hovered</param>
+        /// <param name="laneTurns">Set of all lane ids to render</param>
         private void RenderOutgoingDirection(RenderManager.CameraInfo cameraInfo,
                                              bool turnEnabled,
+                                             bool turnHovered,
                                              HashSet<uint> laneTurns) {
-            var t = Time.time - (float) Math.Truncate(Time.time); // fraction
-            var pulsatingColor = Color.Lerp(PALETTE_SELECTED, Color.black, t);
+            var color = PALETTE_TURN_ALLOWED;
+            if (!turnEnabled) {
+                // Replace with pulsating blue
+                var t = Time.time - (float) Math.Truncate(Time.time); // fraction
+                color = Color.Lerp(PALETTE_SELECTED, Color.black, t);
+            }
+
+            if (turnHovered) {
+                // Mix with selected color 33% blue pulsating|green to 66% hovered
+                color = Color.Lerp(color, PALETTE_HOVERED, 0.66f);
+            }
+
             var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
             foreach (var laneId in laneTurns) {
-                var color = turnEnabled ? PALETTE_TURN_ALLOWED : pulsatingColor;
                 RenderLaneOverlay(cameraInfo, laneBuffer[laneId], 2f, color);
             }
         }

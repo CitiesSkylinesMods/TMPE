@@ -1,5 +1,10 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
+    using System;
+    using ColossalFramework;
     using CSUtil.Commons;
+    using Manager.Impl;
+    using State;
+    using UnityEngine;
 
     public partial class LaneArrowTool {
         /// <summary>
@@ -73,29 +78,50 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         private void OnPrimaryClickOverlay_OutgoingDirections() {
-            // Allow to click a node and start over
-            if (SelectedNodeId != HoveredNodeId && IsNodeEditable(HoveredNodeId)) {
-                // Try change state to IncomingSelect, or do nothing
-                SelectedNodeId = HoveredNodeId;
-                fsm_.SendTrigger(Trigger.NodeClick);
+            if (HoveredSegmentId != 0) {
+                var hoveredDirection = outgoingTurns_.FindDirection(HoveredSegmentId);
+                var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+                var hoveredSegment = segmentBuffer[HoveredSegmentId];
+                var startNode = hoveredSegment.m_startNode == SelectedNodeId;
 
-                // State did not change, just reenter with another nodeId
+                switch (hoveredDirection) {
+                    case ArrowDirection.Left:
+                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Left);
+                        break;
+                    case ArrowDirection.Forward:
+                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Forward);
+                        break;
+                    case ArrowDirection.Right:
+                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Right);
+                        break;
+                    case ArrowDirection.Turn:
+                    case ArrowDirection.None:
+                        break;
+                }
+
+                // End click here
                 return;
             }
 
-//            if (HoveredLaneId == 0 || HoveredSegmentId == 0) {
-//                return;
-//            }
+            // Allow to click a node and start over
+            if (SelectedNodeId != HoveredNodeId && IsNodeEditable(HoveredNodeId)) {
+                // Try changed back to IncomingSelect
+                SelectedNodeId = HoveredNodeId;
+                fsm_.SendTrigger(Trigger.NodeClick);
 
-
-            // var hoveredSegment = Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
-            // if (hoveredSegment.m_startNode != HoveredNodeId &&
-            //     hoveredSegment.m_endNode != HoveredNodeId) {
-            //     return;
-            // }
-            //
-            // SelectedSegmentId = HoveredSegmentId;
+                // State change, just reenter with another nodeId
+            }
         }
+
+        private void ForwardSegmentsClicked(uint laneId, bool startNode, Flags.LaneArrows toggle) {
+            LaneArrowManager.Instance.ToggleLaneArrows(laneId, startNode, toggle, out var res);
+
+            if (res == Flags.LaneArrowChangeResult.Invalid ||
+                res == Flags.LaneArrowChangeResult.Success) {
+                // success
+            }
+        }
+
 
         /// <summary>
         /// Right click on the world should remove the selection

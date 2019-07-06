@@ -113,5 +113,20 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             result.Add(ArrowDirection.Right, resultRight);
             return result;
         }
+
+        /// <summary>
+        /// Find the direction for a given segmentId, or 0
+        /// </summary>
+        /// <param name="segmentId">Find this</param>
+        /// <returns>The direction where segmentId was found</returns>
+        public ArrowDirection FindDirection(ushort segmentId) {
+            foreach (var dir in AllTurns) {
+                if (dir.Value.Contains(segmentId)) {
+                    return dir.Key;
+                }
+            }
+
+            return ArrowDirection.None;
+        }
     }
 }
