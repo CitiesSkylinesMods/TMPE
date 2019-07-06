@@ -1,4 +1,4 @@
-﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
+# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
 
@@ -8,6 +8,11 @@
 > * **TM:PE** = Traffic Manager: President Edition
 > * **TMPlus** = Traffic Manager Plus
 > * **TM** = Traffic Manager
+
+#### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
+
+- Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
+- Meta: Main changelog refactored (#412) 
 
 ### TM:PE [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), 02/07/2019
 
