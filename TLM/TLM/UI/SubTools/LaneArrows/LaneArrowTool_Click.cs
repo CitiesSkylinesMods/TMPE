@@ -82,25 +82,32 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 var hoveredDirection = outgoingTurns_.FindDirection(HoveredSegmentId);
                 var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
                 var hoveredSegment = segmentBuffer[HoveredSegmentId];
-                var startNode = hoveredSegment.m_startNode == SelectedNodeId;
 
-                switch (hoveredDirection) {
-                    case ArrowDirection.Left:
-                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Left);
-                        break;
-                    case ArrowDirection.Forward:
-                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Forward);
-                        break;
-                    case ArrowDirection.Right:
-                        ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Right);
-                        break;
-                    case ArrowDirection.Turn:
-                    case ArrowDirection.None:
-                        break;
+                // Only accept clicks on something that belongs to the selected node
+                if (hoveredSegment.m_startNode == SelectedNodeId
+                    || hoveredSegment.m_endNode == SelectedNodeId) {
+
+                    var startNode = hoveredSegment.m_startNode == SelectedNodeId;
+
+                    switch (hoveredDirection) {
+                        case ArrowDirection.Left:
+                            ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Left);
+                            // End click here
+                            return;
+                        case ArrowDirection.Forward:
+                            ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Forward);
+                            // End click here
+                            return;
+                        case ArrowDirection.Right:
+                            ForwardSegmentsClicked(SelectedLaneId, startNode, Flags.LaneArrows.Right);
+                            // End click here
+                            return;
+                        case ArrowDirection.Turn:
+                        case ArrowDirection.None:
+                            // Fall through to node click below
+                            break;
+                    }
                 }
-
-                // End click here
-                return;
             }
 
             // Allow to click a node and start over
