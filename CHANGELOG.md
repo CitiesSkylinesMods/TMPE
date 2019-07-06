@@ -9,7 +9,7 @@
 > * **TMPlus** = Traffic Manager Plus
 > * **TM** = Traffic Manager
 
-#### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
+### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
 
 - Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
 - Meta: Main changelog refactored (#412) 
