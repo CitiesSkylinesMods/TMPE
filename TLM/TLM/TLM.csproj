@@ -255,7 +255,7 @@
     <Compile Include="UI\SubTools\LaneArrows\Geometry.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowsEditor.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
-    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Click.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_UI.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Render.cs" />
     <Compile Include="UI\SubTools\LaneArrows\OutgoingTurnsCollection.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />

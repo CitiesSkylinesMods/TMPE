@@ -1,10 +1,13 @@
+//------------------------------------------------------------------------------
+// User interactions part of the Lane Arrow Tool
+// Handles mouse moving and clicking
+
 namespace TrafficManager.UI.SubTools.LaneArrows {
     using System;
     using ColossalFramework;
     using CSUtil.Commons;
     using Manager.Impl;
     using State;
-    using UnityEngine;
 
     public partial class LaneArrowTool {
         /// <summary>
@@ -79,7 +82,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         private void OnPrimaryClickOverlay_OutgoingDirections() {
             if (HoveredSegmentId != 0) {
-                var hoveredDirection = outgoingTurns_.FindDirection(HoveredSegmentId);
+                var hoveredDirection = outgoingTurns_?.FindDirection(HoveredSegmentId);
                 var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
                 var hoveredSegment = segmentBuffer[HoveredSegmentId];
 
@@ -142,5 +145,30 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 //                Deselect();
 //            }
         }
+
+        internal override void OnChangeHoveredSegment(ushort oldSegmentId, ushort newSegmentId) {
+            switch (fsm_.State) {
+                case State.IncomingSelect:
+                    OnChangeHoveredSegment_IncomingSelect(oldSegmentId, newSegmentId);
+                    break;
+
+                case State.NodeSelect:
+                case State.OutgoingDirections:
+                case State.OutgoingLanes:
+                case State.Off:
+                    break;
+            }
+        }
+
+        private void OnChangeHoveredSegment_IncomingSelect(ushort oldSegmentId, ushort newSegmentId) {
+            if (newSegmentId == 0) {
+                outgoingTurns_ = null;
+                return;
+            }
+
+            outgoingTurns_ = GetOutgoingTurns(SelectedNodeId, newSegmentId);
+        }
     }
 }
+
+//------------------------------------------------------------------------------

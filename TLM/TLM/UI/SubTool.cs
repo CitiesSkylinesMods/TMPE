@@ -4,7 +4,10 @@
     using UnityEngine;
 
     public abstract class SubTool {
-        public TrafficManagerTool MainTool { get; }
+        /// <summary>
+        /// Parent Main Tool, one for all subtools
+        /// </summary>
+        internal TrafficManagerTool MainTool { get; }
 
         protected Texture2D WindowTexture {
             get {
@@ -94,25 +97,25 @@
 
         private GUIStyle borderlessStyle;
 
-        protected ushort HoveredNodeId => TrafficManagerTool.HoveredNodeId;
+        protected ushort HoveredNodeId => MainTool.HoveredNodeId;
 
-        protected ushort HoveredSegmentId => TrafficManagerTool.HoveredSegmentId;
+        protected ushort HoveredSegmentId => MainTool.HoveredSegmentId;
 
-        protected uint HoveredLaneId => TrafficManagerTool.HoveredLaneId;
+        protected uint HoveredLaneId => MainTool.HoveredLaneId;
 
         protected ushort SelectedNodeId {
-            get => TrafficManagerTool.SelectedNodeId;
-            set => TrafficManagerTool.SelectedNodeId = value;
+            get => MainTool.SelectedNodeId;
+            set => MainTool.SelectedNodeId = value;
         }
 
         protected ushort SelectedSegmentId {
-            get => TrafficManagerTool.SelectedSegmentId;
-            set => TrafficManagerTool.SelectedSegmentId = value;
+            get => MainTool.SelectedSegmentId;
+            set => MainTool.SelectedSegmentId = value;
         }
 
         protected uint SelectedLaneId {
-            get => TrafficManagerTool.SelectedLaneId;
-            set => TrafficManagerTool.SelectedLaneId = value;
+            get => MainTool.SelectedLaneId;
+            set => MainTool.SelectedLaneId = value;
         }
 
         public SubTool(TrafficManagerTool mainTool) {
@@ -127,11 +130,32 @@
         const float NATIVE_HEIGHT = 1200;
 
         /// <summary>
-        /// Called whenever the
+        /// Called whenever left mouse is clicked on the screen, over the GUI or the world
         /// </summary>
         public abstract void OnPrimaryClickOverlay();
 
         public virtual void OnSecondaryClickOverlay() { }
+
+        /// <summary>
+        /// Hovered node is changed to a different value than before (also 0)
+        /// </summary>
+        /// <param name="oldNodeId">The previously hovered node</param>
+        /// <param name="newNodeId">New hovered node</param>
+        internal virtual void OnChangeHoveredNode(ushort oldNodeId, ushort newNodeId) { }
+
+        /// <summary>
+        /// Hovered segment is changed to a different value than before (also 0)
+        /// </summary>
+        /// <param name="oldSegmentId">The previously hovered segment</param>
+        /// <param name="newSegmentId">New hovered segment</param>
+        internal virtual void OnChangeHoveredSegment(ushort oldSegmentId, ushort newSegmentId) { }
+
+        /// <summary>
+        /// Hovered lane is changed a different value than before (also 0)
+        /// </summary>
+        /// <param name="oldLaneId">The previously hovered lane</param>
+        /// <param name="newLaneId">New hovered lane</param>
+        internal virtual void OnChangeHoveredLane(uint oldLaneId, uint newLaneId) { }
 
         public virtual void OnToolGUI(Event e) {
             // set up scaling

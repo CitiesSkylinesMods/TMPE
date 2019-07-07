@@ -8,7 +8,6 @@
     using CSUtil.Commons;
     using Custom.AI;
     using GenericGameBridge.Service;
-    using JetBrains.Annotations;
     using MainMenu;
     using Manager;
     using Manager.Impl;
@@ -21,17 +20,58 @@
     using Util;
     using static Traffic.Data.ExtCitizenInstance;
 
-    [UsedImplicitly]
     public class TrafficManagerTool : DefaultTool, IObserver<GlobalConfig> {
         private ToolMode toolMode_;
 
-        internal static ushort HoveredNodeId;
+        /// <summary>
+        /// The node id currently under the mouse pointer
+        /// </summary>
+        internal ushort HoveredNodeId {
+            get => hoveredNodeId_;
+            private set {
+                if (hoveredNodeId_ == value) {
+                    return;
+                }
 
-        internal static ushort HoveredSegmentId;
+                var oldValue = hoveredNodeId_;
+                hoveredNodeId_ = value;
+                activeSubTool?.OnChangeHoveredNode(oldValue, value);
+            }
+        }
 
-        internal static uint HoveredLaneId = 0;
+        /// <summary>
+        /// The segment id currently under the mouse pointer
+        /// </summary>
+        internal ushort HoveredSegmentId {
+            get => hoveredSegmentId_;
+            private set {
+                if (hoveredSegmentId_ == value) {
+                    return;
+                }
 
-        private static bool mouseClickProcessed;
+                var oldValue = hoveredSegmentId_;
+                hoveredSegmentId_ = value;
+                activeSubTool?.OnChangeHoveredSegment(oldValue, value);
+            }
+        }
+
+        /// <summary>
+        /// The lane id (inside the hoveredSegmentId) currently closest to the mouse pointer
+        /// </summary>
+        internal uint HoveredLaneId {
+            get => hoveredLaneId_;
+            private set {
+                if (hoveredLaneId_ == value) {
+                    return;
+                }
+
+                var oldValue = hoveredLaneId_;
+                hoveredLaneId_ = value;
+                activeSubTool?.OnChangeHoveredLane(oldValue, value);
+            }
+        }
+
+        private bool mouseClickProcessed;
 
         private const float DEBUG_CLOSE_LOD = 300f;
 
@@ -39,11 +79,11 @@
 
         private IDictionary<ToolMode, SubTool> subTools = new TinyDictionary<ToolMode, SubTool>();
 
-        public static ushort SelectedNodeId { get; internal set; }
+        public ushort SelectedNodeId { get; internal set; }
 
-        public static ushort SelectedSegmentId { get; internal set; }
+        public ushort SelectedSegmentId { get; internal set; }
 
-        public static uint SelectedLaneId { get; internal set; }
+        public uint SelectedLaneId { get; internal set; }
 
         public static TransportDemandViewMode CurrentTransportDemandViewMode {
             get; internal set;
@@ -55,9 +95,15 @@
             ExtVehicleType.Service, ExtVehicleType.RailVehicle
         };
 
-        private static SubTool activeSubTool;
+        private SubTool activeSubTool;
 
-        private static IDisposable confDisposable;
+        private IDisposable confDisposable;
+
+        private ushort hoveredNodeId_;
+
+        private ushort hoveredSegmentId_;
+
+        private uint hoveredLaneId_;
 
         static TrafficManagerTool() {
         }
@@ -754,8 +800,10 @@ nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain
             foreach (var ln in GetIncomingLaneList(HoveredSegmentId, HoveredNodeId)) {
                 var lane = laneBuffer[ln.laneId];
 
-                var sqrDist1 = (groundOutput.m_hitPos - lane.m_bezier.a).sqrMagnitude;
-                var sqrDist2 = (groundOutput.m_hitPos - lane.m_bezier.b).sqrMagnitude;
+                var aPosition = lane.CalculatePosition(0f);
+                var bPosition = lane.CalculatePosition(1f);
+                var sqrDist1 = (groundOutput.m_hitPos - aPosition).sqrMagnitude;
+                var sqrDist2 = (groundOutput.m_hitPos - bPosition).sqrMagnitude;
                 var sqrDist = Mathf.Min(sqrDist1, sqrDist2);
                 if (sqrDist < minSqrDist) {
                     minSqrDist = sqrDist;
