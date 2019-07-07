@@ -2539,6 +2539,8 @@ namespace TrafficManager {
 
 		public override void OnLevelUnloading() {
 			Log.Info("OnLevelUnloading");
+			World.TearDown();
+
 			base.OnLevelUnloading();
 			if (IsPathManagerReplaced) {
 				CustomPathManager._instance.WaitForAllPaths();
@@ -2698,7 +2700,7 @@ namespace TrafficManager {
 
 			// add "remove citizen instance" button
 			UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
-			
+
 			initDetours();
 
 			//Log.Info("Fixing non-created nodes with problems...");
@@ -2712,6 +2714,8 @@ namespace TrafficManager {
 
 			//InitTool();
 			//Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
+
+			World.Setup();
 
 			Log.Info("OnLevelLoaded complete.");
 		}

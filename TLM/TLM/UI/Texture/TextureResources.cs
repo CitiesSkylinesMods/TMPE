@@ -64,6 +64,11 @@
         public static readonly Texture2D RemoveButtonTexture2D;
         public static readonly Texture2D WindowBackgroundTexture2D;
 
+        /// <summary>
+        /// Signs and icons used in laneArrowTool
+        /// </summary>
+        public static readonly Texture2D LaneTool_DirectionBlocked;
+
         public struct WorldSpaceGUI {
             public static Shader SeeThroughZ;
 
@@ -73,6 +78,8 @@
         }
 
         static TextureResources() {
+            LaneTool_DirectionBlocked = LoadDllResource("LaneTool.DirectionBlocked.png", 64, 64);
+
             // missing image
             NoImageTexture2D = LoadDllResource("noimage.png", 64, 64);
 

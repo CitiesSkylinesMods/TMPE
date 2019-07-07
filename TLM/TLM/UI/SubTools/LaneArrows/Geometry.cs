@@ -65,5 +65,19 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             var bScreen = Camera.main.WorldToScreenPoint(b);
             return (Input.mousePosition - bScreen).magnitude;
         }
+
+        /// <summary>
+        /// For a lane and a point in 3d space, find closest lane end to that point
+        /// </summary>
+        /// <param name="lane"></param>
+        /// <param name="point"></param>
+        /// <returns>Closest lane end position</returns>
+        public static Vector3 GetClosestLaneEnd(NetLane lane, Vector3 point) {
+            var aPosition = lane.CalculatePosition(0f);
+            var bPosition = lane.CalculatePosition(1f);
+            var aDistSqr = (aPosition - point).sqrMagnitude;
+            var bDistSqr = (bPosition - point).sqrMagnitude;
+            return aDistSqr < bDistSqr ? aPosition : bPosition;
+        }
     }
 }

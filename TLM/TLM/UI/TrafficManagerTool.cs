@@ -807,11 +807,8 @@ nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain
             foreach (var ln in GetIncomingLaneList(HoveredSegmentId, HoveredNodeId)) {
                 var lane = laneBuffer[ln.laneId];
 
-                var aPosition = lane.CalculatePosition(0f);
-                var bPosition = lane.CalculatePosition(1f);
-                var aDistanceSqr = (groundOutput.m_hitPos - aPosition).sqrMagnitude;
-                var bDistanceSqr = (groundOutput.m_hitPos - bPosition).sqrMagnitude;
-                var distanceSqr = Mathf.Min(aDistanceSqr, bDistanceSqr);
+                lane.GetClosestPosition(groundOutput.m_hitPos, out var closestPos, out _);
+                var distanceSqr = (groundOutput.m_hitPos - closestPos).sqrMagnitude;
 
                 if (distanceSqr < minSqrDist) {
                     minSqrDist = distanceSqr;

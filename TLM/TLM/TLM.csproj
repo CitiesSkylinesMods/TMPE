@@ -288,6 +288,7 @@
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Manager\IManagerFactory.cs" />
     <Compile Include="Util\IVisitor.cs" />
+    <Compile Include="Util\World.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
@@ -467,6 +468,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\LaneTool\DirectionBlocked.png" />
     <Content Include="Resources\WorldSpaceGUI\SeeThroughZ.shader">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -543,9 +545,6 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\LaneArrows\Atlas_Lane_Arrows.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

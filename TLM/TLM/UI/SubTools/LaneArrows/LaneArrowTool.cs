@@ -139,20 +139,15 @@
 
         private static bool IsNodeEditable(ushort nodeId) {
             // TODO: Other node types? Basically check if the node has some incoming and some outgoing lanes
-            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            var netFlags = nodeBuffer[nodeId].m_flags;
+            var node = World.Node(nodeId);
+            var netFlags = node.m_flags;
 
             const NetNode.Flags MASK = NetNode.Flags.Junction;
-//                                       | NetNode.Flags.AsymBackward
-//                                       | NetNode.Flags.AsymForward
-//                                       | NetNode.Flags.Transition
-                                       // Also allow middle and bend, to control the road flow
-//                                       | NetNode.Flags.Bend | NetNode.Flags.Middle;
             if ((netFlags & MASK) == NetNode.Flags.None) {
                 return false;
             }
 
-            ItemClass connectionClass = nodeBuffer[nodeId].Info.GetConnectionClass();
+            ItemClass connectionClass = node.Info.GetConnectionClass();
             return connectionClass != null && connectionClass.m_service == ItemClass.Service.Road;
         }
 

@@ -6,8 +6,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using System;
     using System.Collections.Generic;
     using ColossalFramework;
+    using ColossalFramework.Math;
     using CSUtil.Commons;
+    using Texture;
     using UnityEngine;
+    using Util;
 
     public partial class LaneArrowTool {
         /// <summary>
@@ -41,14 +44,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private static readonly Color PALETTE_CURRENT_SEGMENT_GHOST = new Color(1f, 1f, 1f, 0.33f);
 
         /// <summary>
-        /// Translucent green, for allowed turns.
+        /// Translucent white, for allowed turns and lane links.
         /// </summary>
-        private static readonly Color PALETTE_TURN_ALLOWED1 = new Color(0f, 0.5f, 0f, 0.3f);
+        private static readonly Color PALETTE_TURN_ALLOWED = new Color(1f, 1f, 1f, 0.75f);
 
         /// <summary>
-        /// Solid green, for blinking green on allowed turn circles.
+        /// Translucent blue, for hovering segments for setting up turns.
         /// </summary>
-        private static readonly Color PALETTE_TURN_ALLOWED2 = new Color(0f, 1f, 0f, 0.66f);
+        private static readonly Color PALETTE_TURN_HOVERED = new Color(0f, 0f, 1f, 0.75f);
 
         /// <summary>
         /// Used for turn circles which are not allowed but should be visible
@@ -56,14 +59,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private static readonly Color PALETTE_TURN_INACTIVE = Color.black;
 
         private void RenderHoveredNode(RenderManager.CameraInfo cameraInfo) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            var nodeBuffer = netManager.m_nodes.m_buffer;
-
             // Render currently selected node
             if (HoveredNodeId != 0 && HoveredNodeId != SelectedNodeId
-                && IsNodeEditable(HoveredNodeId))
-            {
-                RenderNodeOverlay(cameraInfo, ref nodeBuffer[HoveredNodeId], PALETTE_HOVERED);
+                                   && IsNodeEditable(HoveredNodeId)) {
+                RenderNodeOverlay(cameraInfo, ref World.NodeRef(HoveredNodeId), PALETTE_HOVERED);
             }
 
             var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -71,20 +70,18 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // Terrible performance here (possibly)
             for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
                 if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)
-                    || nodeId == HoveredNodeId) {
+                    || nodeId == HoveredNodeId
+                    || nodeId == SelectedNodeId
+                    || !IsNodeEditable(nodeId)) {
                     continue;
                 }
 
-                if (!IsNodeEditable(nodeId)) {
-                    continue;
-                }
-
-                var diff = nodeBuffer[nodeId].m_position - camPos;
+                var diff = World.Node(nodeId).m_position - camPos;
                 if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                     continue; // do not draw if too distant
                 }
 
-                RenderNodeOverlay(cameraInfo, ref nodeBuffer[nodeId], PALETTE_AVAILABLE_NODE);
+                RenderNodeOverlay(cameraInfo, ref World.NodeRef(nodeId), PALETTE_AVAILABLE_NODE);
             }
         }
 
@@ -130,33 +127,42 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="cameraInfo">The camera</param>
         private void RenderOverlay_IncomingSelect(RenderManager.CameraInfo cameraInfo) {
-            var netManager = Singleton<NetManager>.instance;
-            var laneBuffer = netManager.m_lanes.m_buffer;
-            var nodeBuffer = netManager.m_nodes.m_buffer;
-
             RenderHoveredNode(cameraInfo);
 
             // Draw the selected node with blue
-            RenderNodeOverlay(cameraInfo, ref nodeBuffer[SelectedNodeId], PALETTE_SELECTED);
+            // RenderNodeOverlay(cameraInfo, ref nodeBuffer[SelectedNodeId], PALETTE_SELECTED);
 
             // Draw hovered lane with 2 metres white sausage
             if (HoveredLaneId != 0 && incomingLanes_.Contains(HoveredLaneId)) {
                 // TODO: Check if hovered lane has SelectedNodeId as one of its ends
-                RenderLaneOverlay(cameraInfo, laneBuffer[HoveredLaneId], 2f, PALETTE_HOVERED);
+                RenderLaneOverlay(cameraInfo, World.Lane(HoveredLaneId), 2f, PALETTE_HOVERED);
 
                 RenderOutgoingDirectionsAsLanes(cameraInfo, HoveredLaneId,
-                                                RenderOutgoingLaneStyle.Circles);
+                                                RenderOutgoingLaneStyle.LaneLinks);
             }
 
             // Draw the incoming lanes in black/blue pulsating color
-            var t = Time.time - (float) Math.Truncate(Time.time); // fraction
-            var pulsatingColor = Color.Lerp(PALETTE_POSSIBLE_CANDIDATES1,
-                                            PALETTE_POSSIBLE_CANDIDATES2, t);
+            var pulsatingColor = GetPulsatingColor(PALETTE_POSSIBLE_CANDIDATES1,
+                                                   PALETTE_POSSIBLE_CANDIDATES2,
+                                                   0.5f);
             foreach (var laneId in incomingLanes_) {
                 if (laneId != HoveredLaneId) {
-                    RenderLaneOverlay(cameraInfo, laneBuffer[laneId], 1f, pulsatingColor);
+                    RenderLaneOverlay(cameraInfo, World.Lane(laneId), 1f, pulsatingColor);
                 }
             }
+        }
+
+        /// <summary>
+        /// Produces pulsating color linearly between colors a and b, with given time period.
+        /// </summary>
+        /// <param name="a">Color from</param>
+        /// <param name="b">Color to</param>
+        /// <param name="periodSec">How soon the pulsation repeats</param>
+        /// <returns>The linearly interpolated color between A and B</returns>
+        private static Color GetPulsatingColor(Color a, Color b, float periodSec) {
+            var t = Time.time * periodSec * 2f * Mathf.PI;
+            var pulsatingColor = Color.Lerp(a, b, Mathf.Sin(t));
+            return pulsatingColor;
         }
 
         /// <summary>
@@ -164,26 +170,22 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="cameraInfo">The camera</param>
         private void RenderOverlay_OutgoingDirections(RenderManager.CameraInfo cameraInfo) {
-            var netManager = Singleton<NetManager>.instance;
-            var laneBuffer = netManager.m_lanes.m_buffer;
-            var nodeBuffer = netManager.m_nodes.m_buffer;
-
             RenderHoveredNode(cameraInfo);
 
             // Draw selected node with blue
-            RenderNodeOverlay(cameraInfo, ref nodeBuffer[SelectedNodeId], PALETTE_SELECTED);
+            // RenderNodeOverlay(cameraInfo, ref nodeBuffer[SelectedNodeId], PALETTE_SELECTED);
 
             // Draw selected lane with orange
             var orange = MainTool.GetToolColor(true, false);
-            RenderLaneOverlay(cameraInfo, laneBuffer[SelectedLaneId], 2f, orange);
+            RenderLaneOverlay(cameraInfo, World.Lane(SelectedLaneId), 2f, orange);
 
             RenderOutgoingDirectionsAsLanes(cameraInfo, SelectedLaneId,
-                                            RenderOutgoingLaneStyle.Sausages);
+                                            RenderOutgoingLaneStyle.SausagesAndLinks);
         }
 
         private enum RenderOutgoingLaneStyle {
-            Sausages,
-            Circles
+            SausagesAndLinks,
+            LaneLinks
         }
 
         /// <summary>
@@ -199,10 +201,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
             // Draw outgoing directions for the last selected segment
-            var selectedLane = laneBuffer[laneId];
+            var selectedLane = World.Lane(laneId);
             var selectedLaneFlags = (NetLane.Flags) selectedLane.m_flags;
 
             // Turns out of this node converted to lanes (we want all turn bits here)
@@ -213,24 +213,21 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 switch (outDirections.Key) {
                     case ArrowDirection.Left:
                         RenderOutgoingDirectionsAsLanes_One(
-                            cameraInfo,
-                            style,
+                            cameraInfo, style, laneId,
                             (selectedLaneFlags & NetLane.Flags.Left) != 0,
                             hoveredDirection == ArrowDirection.Left,
                             outgoingLaneTurns[outDirections.Key]);
                         break;
                     case ArrowDirection.Forward:
                         RenderOutgoingDirectionsAsLanes_One(
-                            cameraInfo,
-                            style,
+                            cameraInfo, style, laneId,
                             (selectedLaneFlags & NetLane.Flags.Forward) != 0,
                             hoveredDirection == ArrowDirection.Forward,
                             outgoingLaneTurns[outDirections.Key]);
                         break;
                     case ArrowDirection.Right:
                         RenderOutgoingDirectionsAsLanes_One(
-                            cameraInfo,
-                            style,
+                            cameraInfo, style, laneId,
                             (selectedLaneFlags & NetLane.Flags.Right) != 0,
                             hoveredDirection == ArrowDirection.Right,
                             outgoingLaneTurns[outDirections.Key]);
@@ -249,79 +246,67 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <param name="turnEnabled">Render green if the turn is enabled</param>
         /// <param name="turnHovered">Render green+white, or white if hovered</param>
         /// <param name="laneTurns">Set of all lane ids to render</param>
-        private void RenderOutgoingDirectionsAsLanes_One(
-            RenderManager.CameraInfo cameraInfo,
-            RenderOutgoingLaneStyle style,
-            bool turnEnabled,
-            bool turnHovered,
-            HashSet<uint> laneTurns) {
-            var color = PALETTE_TURN_ALLOWED1; // no blinking/translucent green
+        private void RenderOutgoingDirectionsAsLanes_One(RenderManager.CameraInfo cameraInfo,
+                                                         RenderOutgoingLaneStyle style,
+                                                         uint fromLaneId,
+                                                         bool turnEnabled,
+                                                         bool turnHovered,
+                                                         HashSet<uint> laneTurns) {
+            var color = PALETTE_TURN_ALLOWED; // no blinking/translucent green
             if (!turnEnabled) {
-                // Replace with pulsating blue
-                var t = Time.time - (float) Math.Truncate(Time.time); // fraction
-                color = Color.Lerp(PALETTE_POSSIBLE_CANDIDATES1,
-                                   PALETTE_POSSIBLE_CANDIDATES2, t);
+                color = GetPulsatingColor(PALETTE_POSSIBLE_CANDIDATES1,
+                                          PALETTE_POSSIBLE_CANDIDATES2,
+                                          0.5f);
             }
 
             if (turnHovered) {
-                // Mix with selected color 33% blue pulsating|green to 66% hovered
-                color = Color.Lerp(color, PALETTE_HOVERED, 0.66f);
+                // Mix with selected color 33% white | 66% hovered blue
+                color = Color.Lerp(color, PALETTE_TURN_HOVERED, 0.66f);
             }
 
-            var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            var selectedNode = nodeBuffer[SelectedNodeId];
+            var fromLane = World.Lane(fromLaneId);
 
             switch (style) {
-                case RenderOutgoingLaneStyle.Sausages:
+                case RenderOutgoingLaneStyle.SausagesAndLinks:
                     foreach (var laneId in laneTurns) {
-                        var lane = laneBuffer[laneId];
-                        RenderLaneOverlay(cameraInfo, lane, 2f, color);
+                        var toLane = World.Lane(laneId);
+                        RenderLaneOverlay(cameraInfo, toLane, 2f, color);
+
+                        if (turnEnabled) {
+                            RenderLaneLink(cameraInfo,
+                                           fromLane,
+                                           toLane,
+                                           0.1f,
+                                           PALETTE_TURN_ALLOWED);
+                        }
                     }
 
                     break;
-                case RenderOutgoingLaneStyle.Circles:
+
+                case RenderOutgoingLaneStyle.LaneLinks:
                     foreach (var laneId in laneTurns) {
-                        var lane = laneBuffer[laneId];
-                        RenderOutgoingLaneAsCircle(cameraInfo, turnEnabled, color, lane, selectedNode);
+                        var toLane = World.Lane(laneId);
+
+                        // RenderOutgoingLaneAsCircle(cameraInfo, turnEnabled, color, lane, selectedNode);
+                        if (turnEnabled) {
+                            RenderLaneLink(cameraInfo,
+                                           fromLane,
+                                           toLane,
+                                           0.1f,
+                                           PALETTE_TURN_ALLOWED);
+                        } else {
+                            // Draw a black square on the destination lane
+                            var worldPos = Geometry.GetClosestLaneEnd(toLane, World.Node(SelectedNodeId).m_position);
+
+                            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+                            RenderManager.instance.OverlayEffect.DrawCircle(
+                                cameraInfo, PALETTE_TURN_INACTIVE, worldPos,
+                                1f, -1f, 1280f, false, true);
+                        }
                     }
 
                     break;
             }
-        }
-
-        /// <summary>
-        /// A helper which displays outgoing lane as a circle (or maybe a sprite?)
-        /// </summary>
-        /// <param name="cameraInfo">The camera</param>
-        /// <param name="turnEnabled">Whether the exit is possible, or blocked</param>
-        /// <param name="color">Base render color (pulsating blue most likely)</param>
-        /// <param name="lane">The lane we are drawing</param>
-        /// <param name="selectedNode">The node which is being edited</param>
-        private static void RenderOutgoingLaneAsCircle(RenderManager.CameraInfo cameraInfo,
-                                                       bool turnEnabled,
-                                                       Color color,
-                                                       NetLane lane,
-                                                       NetNode selectedNode) {
-            if (turnEnabled) {
-                // blinking bright green/translucent green
-                var t = (long)Math.Truncate(Time.time * 2f); // integer part, 2x faster blink
-                color = t % 2 == 0 ? PALETTE_TURN_ALLOWED1 : PALETTE_TURN_ALLOWED2;
-            } else {
-                color = PALETTE_TURN_INACTIVE; // black
-            }
-
-            // Pick end of the lane, closest to the node being edited
-            var aPosition = lane.CalculatePosition(0f);
-            var bPosition = lane.CalculatePosition(1f);
-            var aDistSqr = (aPosition - selectedNode.m_position).sqrMagnitude;
-            var bDistSqr = (bPosition - selectedNode.m_position).sqrMagnitude;
-            var nearestPos = aDistSqr < bDistSqr ? aPosition : bPosition;
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls += 1;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
-                cameraInfo, color, nearestPos, 2f,
-                -1f, 1280f, false, false);
         }
 
         /// <summary>
@@ -345,11 +330,60 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                                               NetLane lane,
                                               float width,
                                               Color color) {
-            ++Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls;
-
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
                 cameraInfo, color, lane.m_bezier, width, -100000f, -100000f,
                 -1f, 1280f, false, false);
+        }
+
+        /// <summary>Links two lanes</summary>
+        /// <param name="cameraInfo">The camera</param>
+        /// <param name="fromLane">The lane A</param>
+        /// <param name="toLane">The lane B</param>
+        /// <param name="width">Render width</param>
+        /// <param name="color">Render color</param>
+        private void RenderLaneLink(RenderManager.CameraInfo cameraInfo,
+                                    NetLane fromLane,
+                                    NetLane toLane,
+                                    float width,
+                                    Color color) {
+            var selectedNode = World.Node(SelectedNodeId);
+            var fromLanePos = Geometry.GetClosestLaneEnd(fromLane, selectedNode.m_position);
+            var toLanePos = Geometry.GetClosestLaneEnd(toLane, selectedNode.m_position);
+
+            RenderLanesJoinCurve(
+                cameraInfo, fromLanePos, toLanePos, selectedNode.m_position,
+                color, width);
+        }
+
+
+        /// <summary>
+        /// Copied from LaneConnectorTool, connects two lanes
+        /// </summary>
+        /// <param name="cameraInfo">The camera</param>
+        /// <param name="start">Start</param>
+        /// <param name="end">End</param>
+        /// <param name="middlePoint">Curve center</param>
+        /// <param name="color">Color</param>
+        /// <param name="size">Width</param>
+        private void RenderLanesJoinCurve(RenderManager.CameraInfo cameraInfo,
+                                          Vector3 start,
+                                          Vector3 end,
+                                          Vector3 middlePoint,
+                                          Color color,
+                                          float size = 0.1f) {
+            Bezier3 bezier;
+            bezier.a = start;
+            bezier.d = end;
+            NetSegment.CalculateMiddlePoints(
+                bezier.a, (middlePoint - bezier.a).normalized, bezier.d,
+                (middlePoint - bezier.d).normalized, false, false,
+                out bezier.b, out bezier.c);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            RenderManager.instance.OverlayEffect.DrawBezier(
+                cameraInfo, color, bezier, size, 0, 0,
+                -1f, 1280f, false, true);
         }
     }
 }

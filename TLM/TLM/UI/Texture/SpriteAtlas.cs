@@ -1,13 +1,11 @@
 namespace TrafficManager.UI.Texture {
-    using JetBrains.Annotations;
     using UnityEngine;
 
     /// <summary>
     /// Loads a texture with sprites in a regular rectangular grid.
     /// Allows accessing sprites per row and column.
     /// </summary>
-    [UsedImplicitly]
-    internal class SpriteAtlas {
+    public class SpriteAtlas {
         private readonly int atlasH_;
         private readonly float spriteH_;
         private readonly float spriteW_;
