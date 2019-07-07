@@ -273,7 +273,7 @@
             GUILayout.FlexibleSpace();
 
             // speed limit sign
-            GUILayout.Box(TextureResources.GetSpeedLimitTexture(currentSpeedLimit),
+            GUILayout.Box(SpeedLimitTextures.GetSpeedLimitTexture(currentSpeedLimit),
                           GUILayout.Width(GuiSpeedSignSize),
                           GUILayout.Height(GuiSpeedSignSize));
             GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
@@ -437,7 +437,7 @@
             GUILayout.FlexibleSpace();
             var signSize = TrafficManagerTool.AdaptWidth(GuiSpeedSignSize);
             if (GUILayout.Button(
-                TextureResources.GetSpeedLimitTexture(speedLimit),
+                SpeedLimitTextures.GetSpeedLimitTexture(speedLimit),
                 GUILayout.Width(signSize),
                 GUILayout.Height(signSize * SpeedLimit.GetVerticalTextureScale()))) {
                 currentPaletteSpeedLimit = speedLimit;
@@ -523,7 +523,7 @@
 
                     var laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
                     var hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
-                        TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
+                        SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos, zero, f, f, xu, yu, x, 0,
                         speedLimitSignSize, speedLimitSignSize * speedLimitSignVerticalScale,
                         !viewOnly);
@@ -600,7 +600,7 @@
                     // Draw something right here, the road sign texture
                     GUI.color = guiColor;
                     var displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
-                    var tex = TextureResources.GetSpeedLimitTexture(displayLimit);
+                    var tex = SpeedLimitTextures.GetSpeedLimitTexture(displayLimit);
                     GUI.DrawTexture(boundingBox, tex);
 
                     if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {

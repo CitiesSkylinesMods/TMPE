@@ -259,7 +259,7 @@
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool_Render.cs" />
     <Compile Include="UI\SubTools\LaneArrows\OutgoingTurnsCollection.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
-    <Compile Include="UI\Texture\LaneArrowsTextures.cs" />
+    <Compile Include="UI\Texture\SpriteAtlas.cs" />
     <Compile Include="UI\Texture\SpeedLimitTextures.cs" />
     <Compile Include="UI\Texture\TextureResources.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
