@@ -7,10 +7,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
-    using State;
     using UnityEngine;
 
     public partial class LaneArrowTool {
+        /// <summary>
+        /// Translucent silver. Available nodes for clicking
+        /// </summary>
+        private static readonly Color PALETTE_AVAILABLE_NODE = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+
         /// <summary>
         /// White. New hovered node in node selection mode.
         /// </summary>
@@ -19,7 +23,17 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>
         /// Blue solid. Currently (active) selected node.
         /// </summary>
-        private static readonly Color PALETTE_SELECTED = new Color(0f, 0f, 1f, 1f);
+        private static readonly Color PALETTE_SELECTED = new Color(0.7f, 0.7f, 1f, 0.7f);
+
+        /// <summary>
+        /// Pulsating color for clicking candidates (first color)
+        /// </summary>
+        private static readonly Color PALETTE_POSSIBLE_CANDIDATES1 = new Color(0.3f, 0.3f, 0.5f, 1f);
+
+        /// <summary>
+        /// Pulsating color for clicking candidates (second color)
+        /// </summary>
+        private static readonly Color PALETTE_POSSIBLE_CANDIDATES2 = new Color(0.0f, 0.0f, 0.5f, 1f);
 
         /// <summary>
         /// White translucent. Outline for current segment, when we are operating lanes.
@@ -42,12 +56,35 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private static readonly Color PALETTE_TURN_INACTIVE = Color.black;
 
         private void RenderHoveredNode(RenderManager.CameraInfo cameraInfo) {
-            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            if (!IsCursorInAnyLaneEditor()
-                && HoveredNodeId != 0 && HoveredNodeId != SelectedNodeId
+            NetManager netManager = Singleton<NetManager>.instance;
+            var nodeBuffer = netManager.m_nodes.m_buffer;
+
+            // Render currently selected node
+            if (HoveredNodeId != 0 && HoveredNodeId != SelectedNodeId
                 && IsNodeEditable(HoveredNodeId))
             {
                 RenderNodeOverlay(cameraInfo, ref nodeBuffer[HoveredNodeId], PALETTE_HOVERED);
+            }
+
+            var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+
+            // Terrible performance here (possibly)
+            for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)
+                    || nodeId == HoveredNodeId) {
+                    continue;
+                }
+
+                if (!IsNodeEditable(nodeId)) {
+                    continue;
+                }
+
+                var diff = nodeBuffer[nodeId].m_position - camPos;
+                if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                    continue; // do not draw if too distant
+                }
+
+                RenderNodeOverlay(cameraInfo, ref nodeBuffer[nodeId], PALETTE_AVAILABLE_NODE);
             }
         }
 
@@ -113,7 +150,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // Draw the incoming lanes in black/blue pulsating color
             var t = Time.time - (float) Math.Truncate(Time.time); // fraction
-            var pulsatingColor = Color.Lerp(PALETTE_SELECTED, Color.black, t);
+            var pulsatingColor = Color.Lerp(PALETTE_POSSIBLE_CANDIDATES1,
+                                            PALETTE_POSSIBLE_CANDIDATES2, t);
             foreach (var laneId in incomingLanes_) {
                 if (laneId != HoveredLaneId) {
                     RenderLaneOverlay(cameraInfo, laneBuffer[laneId], 1f, pulsatingColor);
@@ -221,7 +259,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             if (!turnEnabled) {
                 // Replace with pulsating blue
                 var t = Time.time - (float) Math.Truncate(Time.time); // fraction
-                color = Color.Lerp(PALETTE_SELECTED, Color.black, t);
+                color = Color.Lerp(PALETTE_POSSIBLE_CANDIDATES1,
+                                   PALETTE_POSSIBLE_CANDIDATES2, t);
             }
 
             if (turnHovered) {

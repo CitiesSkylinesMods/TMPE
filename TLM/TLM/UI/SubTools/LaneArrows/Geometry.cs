@@ -54,5 +54,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             return tangent;
         }
+
+
+        /// <summary>
+        /// Distance from world position to the mouse pointer position, in screen pixels
+        /// </summary>
+        /// <param name="b">Point in the world</param>
+        /// <returns>Distance in pixels on screen</returns>
+        public static float ScreenDistanceToMouse(Vector3 b) {
+            var bScreen = Camera.main.WorldToScreenPoint(b);
+            return (Input.mousePosition - bScreen).magnitude;
+        }
     }
 }

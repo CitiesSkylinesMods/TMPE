@@ -52,6 +52,11 @@
                 var oldValue = hoveredSegmentId_;
                 hoveredSegmentId_ = value;
                 activeSubTool?.OnChangeHoveredSegment(oldValue, value);
+
+                if (value == 0) {
+                    // Also clear lane id
+                    HoveredLaneId = 0;
+                }
             }
         }
 
@@ -576,6 +581,7 @@
         /// <param name="screenPos"></param>
         /// <returns></returns>
         public bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
+            // TODO: Replace this in favour of a static utility function
             screenPos = Camera.main.WorldToScreenPoint(worldPos);
             screenPos.y = Screen.height - screenPos.y;
 
@@ -783,33 +789,37 @@ nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain
         /// Use just end points, no curve geometry.
         /// </summary>
         private void DetermineHoveredElements_Lane() {
-            HoveredLaneId = 0;
-
             // Try and hit the ground
             var nodeInput = new RaycastInput(m_mouseRay, m_mouseRayLength) {
                 m_ignoreTerrain = false
             };
 
             if (!RayCast(nodeInput, out var groundOutput)) {
+                HoveredLaneId = 0;
                 return;
             }
 
             // Find nearest lane by either end, no curve calculations
-            var minSqrDist = 1e11f; // very large
+            var minSqrDist = 50f * 50f; // 50m (squared) is max distance to register hover
             var laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+            var newLaneId = 0u;
+
             foreach (var ln in GetIncomingLaneList(HoveredSegmentId, HoveredNodeId)) {
                 var lane = laneBuffer[ln.laneId];
 
                 var aPosition = lane.CalculatePosition(0f);
                 var bPosition = lane.CalculatePosition(1f);
-                var sqrDist1 = (groundOutput.m_hitPos - aPosition).sqrMagnitude;
-                var sqrDist2 = (groundOutput.m_hitPos - bPosition).sqrMagnitude;
-                var sqrDist = Mathf.Min(sqrDist1, sqrDist2);
-                if (sqrDist < minSqrDist) {
-                    minSqrDist = sqrDist;
-                    HoveredLaneId = ln.laneId;
+                var aDistanceSqr = (groundOutput.m_hitPos - aPosition).sqrMagnitude;
+                var bDistanceSqr = (groundOutput.m_hitPos - bPosition).sqrMagnitude;
+                var distanceSqr = Mathf.Min(aDistanceSqr, bDistanceSqr);
+
+                if (distanceSqr < minSqrDist) {
+                    minSqrDist = distanceSqr;
+                    newLaneId = ln.laneId;
                 }
             }
+
+            HoveredLaneId = newLaneId;
         }
 
         private static IList<LanePos> GetIncomingLaneList(ushort segmentId, ushort nodeId) {
@@ -871,18 +881,34 @@ nodeInput.m_netService2.m_subService = ItemClass.SubService.PublicTransportTrain
 #if PFTRAFFICSTATS
                 uint pfTrafficBuf = TrafficMeasurementManager.Instance.segmentDirTrafficData[TrafficMeasurementManager.Instance.GetDirIndex(segmentId, laneInfo.m_finalDirection)].totalPathFindTrafficBuffer;
 #endif
-                //TrafficMeasurementManager.Instance.GetTrafficData(segmentId, laneInfo.m_finalDirection, out dirTrafficData);
+                // TrafficMeasurementManager.Instance.GetTrafficData(segmentId, laneInfo.m_finalDirection, out dirTrafficData);
 
-                //int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
+                // int dirIndex = laneInfo.m_finalDirection == NetInfo.Direction.Backward ? 1 : 0;
 
                 labelStr += "L idx " + i + ", id " + curLaneId;
 #if DEBUG
-                labelStr += ", in: " + RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i) + ", out: " + RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i) + ", f: " + ((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags).ToString() + ", l: " + SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId) + " km/h, rst: " + VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(segmentId, segmentInfo, (uint)i, laneInfo, VehicleRestrictionsMode.Configured) + ", dir: " + laneInfo.m_direction + ", fnl: " + laneInfo.m_finalDirection + ", pos: " + String.Format("{0:0.##}", laneInfo.m_position) + ", sim: " + laneInfo.m_similarLaneIndex + " for " + laneInfo.m_vehicleType + "/" + laneInfo.m_laneType;
+                var allowedVehicleTypes = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
+                    segmentId, segmentInfo, (uint) i, laneInfo, VehicleRestrictionsMode.Configured);
+                var mFlags = (NetLane.Flags) Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_flags;
+                labelStr += $", in: {RoutingManager.Instance.CalcInnerSimilarLaneIndex(segmentId, i)}, " +
+                            $"out: {RoutingManager.Instance.CalcOuterSimilarLaneIndex(segmentId, i)}, " +
+                            $"f: {mFlags}, " +
+                            $"l: {SpeedLimitManager.Instance.GetCustomSpeedLimit(curLaneId)} km/h, " +
+                            $"rst: {allowedVehicleTypes}, " +
+                            $"dir: {laneInfo.m_direction}, " +
+                            $"fnl: {laneInfo.m_finalDirection}, " +
+                            $"pos: {laneInfo.m_position:0.##}, " +
+                            $"sim: {laneInfo.m_similarLaneIndex} " +
+                            $"for {laneInfo.m_vehicleType}/{laneInfo.m_laneType}";
 #endif
                 if (laneTrafficDataLoaded) {
-                    labelStr += ", sp: " + (TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(segmentId, (byte)i, curLaneId, laneInfo) / 100) + "%";
+                    var calcLaneRelativeMeanSpeed = TrafficMeasurementManager.Instance.CalcLaneRelativeMeanSpeed(
+                        segmentId, (byte) i, curLaneId, laneInfo);
+                    labelStr += $", sp: {calcLaneRelativeMeanSpeed / 100}%";
 #if DEBUG
-                    labelStr += ", buf: " + laneTrafficData.trafficBuffer + ", max: " + laneTrafficData.maxTrafficBuffer + ", acc: " + laneTrafficData.accumulatedSpeeds;
+                    labelStr += $", buf: {laneTrafficData.trafficBuffer}, " +
+                                $"max: {laneTrafficData.maxTrafficBuffer}, " +
+                                $"acc: {laneTrafficData.accumulatedSpeeds}";
 #if PFTRAFFICSTATS
                     labelStr += ", pfBuf: " + laneTrafficData.pathFindTrafficBuffer + "/" + laneTrafficData.lastPathFindTrafficBuffer + ", (" + (pfTrafficBuf > 0 ? "" + ((laneTrafficData.lastPathFindTrafficBuffer * 100u) / pfTrafficBuf) : "n/a") + " %)";
 #endif

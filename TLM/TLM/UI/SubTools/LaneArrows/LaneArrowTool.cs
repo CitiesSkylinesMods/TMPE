@@ -139,14 +139,21 @@
 
         private static bool IsNodeEditable(ushort nodeId) {
             // TODO: Other node types? Basically check if the node has some incoming and some outgoing lanes
-            var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags;
+            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            var netFlags = nodeBuffer[nodeId].m_flags;
+
             const NetNode.Flags MASK = NetNode.Flags.Junction;
 //                                       | NetNode.Flags.AsymBackward
 //                                       | NetNode.Flags.AsymForward
 //                                       | NetNode.Flags.Transition
                                        // Also allow middle and bend, to control the road flow
 //                                       | NetNode.Flags.Bend | NetNode.Flags.Middle;
-            return (netFlags & MASK) != NetNode.Flags.None;
+            if ((netFlags & MASK) == NetNode.Flags.None) {
+                return false;
+            }
+
+            ItemClass connectionClass = nodeBuffer[nodeId].Info.GetConnectionClass();
+            return connectionClass != null && connectionClass.m_service == ItemClass.Service.Road;
         }
 
         public override void OnToolGUI(Event e) {
