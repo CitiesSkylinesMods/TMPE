@@ -50,6 +50,18 @@ namespace TrafficManager.Util {
             return segmentBuffer_[index];
         }
 
+        /// <summary>
+        /// Returns ref to world segment, use where `ref segments[index]` is needed.
+        /// </summary>
+        /// <param name="index">Segment index</param>
+        /// <returns>Reference to the segment</returns>
+        public static ref NetSegment SegmentRef(ushort index) {
+#if DEBUG
+            Debug.Assert(Constants.ServiceFactory.NetService.IsSegmentValid(index));
+#endif
+            return ref segmentBuffer_[index];
+        }
+
         public static NetNode Node(ushort index) {
 #if DEBUG
             Debug.Assert(Constants.ServiceFactory.NetService.IsNodeValid(index));

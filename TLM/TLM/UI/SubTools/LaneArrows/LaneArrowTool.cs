@@ -107,16 +107,6 @@
             if (!Flags.applyLaneArrowFlags(SelectedLaneId)) {
                 Flags.removeLaneArrowFlags(SelectedLaneId);
             }
-
-//            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-//            var segment = segmentBuffer[SelectedSegmentId];
-//            var otherNodeId = SelectedNodeId == segment.m_startNode
-//                                  ? segment.m_endNode : segment.m_startNode;
-//
-//            outgoingLanes_ = new HashSet<uint>();
-//            foreach (var ln in GetIncomingLaneList(SelectedSegmentId, otherNodeId)) {
-//                outgoingLanes_.Add(ln.laneId);
-//            }
         }
 
         /// <summary>
@@ -200,11 +190,10 @@
         }
 
         internal static IList<LanePos> GetIncomingLaneList(ushort segmentId, ushort nodeId) {
-            var segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             return Constants.ServiceFactory.NetService.GetSortedLanes(
                 segmentId,
-                ref segmentsBuffer[segmentId],
-                segmentsBuffer[segmentId].m_startNode == nodeId,
+                ref World.SegmentRef(segmentId),
+                World.Segment(segmentId).m_startNode == nodeId,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES,
                 true);
@@ -227,9 +216,8 @@
                 return result;
             }
 
-            var nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            var node = nodesBuffer[nodeId];
-            var incomingSegment = Singleton<NetManager>.instance.m_segments.m_buffer[ignoreSegmentId];
+            var node = World.Node(nodeId);
+            var incomingSegment = World.Segment(ignoreSegmentId);
             var isStartNode = nodeId == incomingSegment.m_startNode;
 
             for (var i = 0; i < MAX_NODE_SEGMENTS; ++i) {
@@ -256,8 +244,7 @@
         private HashSet<uint> GetAllIncomingLanes(ushort nodeId) {
             var result = new HashSet<uint>();
 
-            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            var node = nodeBuffer[nodeId];
+            var node = World.Node(nodeId);
 
             for (var i = 0; i < MAX_NODE_SEGMENTS; ++i) {
                 var connectedSegId = node.GetSegment(i);

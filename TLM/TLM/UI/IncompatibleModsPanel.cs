@@ -336,7 +336,11 @@ namespace TrafficManager.UI
 
             if (blurEffect != null && UIView.ModalInputCount() == 0)
             {
-                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate () { blurEffect.Hide(); });
+                ValueAnimator.Animate(
+                    "ModalEffect",
+                    val => blurEffect.opacity = val,
+                    new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut),
+                    () => blurEffect.Hide());
             }
         }
     }

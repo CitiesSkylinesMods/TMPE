@@ -114,30 +114,29 @@
             Quaternion camRot = Camera.main.transform.rotation;
             Vector3 camPos = Camera.main.transform.position;
 
-            NetManager netManager = Singleton<NetManager>.instance;
             SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
             if (lastCamPos == null || lastCamRot == null || !lastCamRot.Equals(camRot) || !lastCamPos.Equals(camPos)) {
                 // cache visible segments
                 currentlyVisibleSegmentIds.Clear();
 
-                for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                    if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
+                for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                    if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
                         continue;
                     }
                     /*if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
                             continue;*/
 
-                    if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
+                    if ((World.Segment((ushort)segmentId).m_bounds.center - camPos).magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE)
                         continue; // do not draw if too distant
 
                     Vector3 screenPos;
-                    bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+                    bool visible = MainTool.WorldToScreenPoint(World.Segment((ushort)segmentId).m_bounds.center, out screenPos);
 
                     if (! visible)
                         continue;
 
-                    if (!speedLimitManager.MayHaveCustomSpeedLimits((ushort)segmentId, ref netManager.m_segments.m_buffer[segmentId]))
+                    if (!speedLimitManager.MayHaveCustomSpeedLimits((ushort)segmentId, ref World.SegmentRef((ushort)segmentId)))
                         continue;
 
                     currentlyVisibleSegmentIds.Add((ushort)segmentId);
@@ -150,19 +149,21 @@
             bool handleHovered = false;
             foreach (ushort segmentId in currentlyVisibleSegmentIds) {
                 Vector3 screenPos;
-                bool visible = MainTool.WorldToScreenPoint(netManager.m_segments.m_buffer[segmentId].m_bounds.center, out screenPos);
+                bool visible = MainTool.WorldToScreenPoint(World.Segment(segmentId).m_bounds.center, out screenPos);
 
                 if (!visible)
                     continue;
 
-                NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+                NetInfo segmentInfo = World.Segment(segmentId).Info;
 
                 // draw speed limits
                 if (MainTool.GetToolMode() != ToolMode.VehicleRestrictions || segmentId != SelectedSegmentId) { // no speed limit overlay on selected segment when in vehicle restrictions mode
-                    if (drawSpeedLimitHandles((ushort)segmentId, ref netManager.m_segments.m_buffer[segmentId], viewOnly, ref camPos))
+                    if (drawSpeedLimitHandles(segmentId, ref World.SegmentRef(segmentId), viewOnly, ref camPos)) {
                         handleHovered = true;
+                    }
                 }
             }
+
             overlayHandleHovered = handleHovered;
         }
 
@@ -462,7 +463,6 @@
             }
 
             var center = segment.m_bounds.center;
-            var netManager = Singleton<NetManager>.instance;
 
             var hovered = false;
             var speedLimitToSet = viewOnly ? -1f : currentPaletteSpeedLimit;
@@ -611,7 +611,7 @@
                         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
 
                             NetInfo.Direction normDir = e.Key;
-                            if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
+                            if ((World.Segment(segmentId).m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                                 normDir = NetInfo.InvertDirection(normDir);
                             }
 
@@ -622,13 +622,13 @@
                                 bool reverse = data.segVisitData.viaStartNode == data.segVisitData.viaInitialStartNode;
 
                                 ushort otherSegmentId = data.segVisitData.curGeo.SegmentId;
-                                NetInfo otherSegmentInfo = netManager.m_segments.m_buffer[otherSegmentId].Info;
+                                NetInfo otherSegmentInfo = World.Segment(otherSegmentId).Info;
                                 uint laneId = data.curLanePos.laneId;
                                 byte laneIndex = data.curLanePos.laneIndex;
                                 NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                                 NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
-                                if ((netManager.m_segments.m_buffer[otherSegmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None ^
+                                if ((World.Segment(otherSegmentId).m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None ^
                                     reverse) {
                                     otherNormDir = NetInfo.InvertDirection(otherNormDir);
                                 }

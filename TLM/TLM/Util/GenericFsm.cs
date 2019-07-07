@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
-    using CSUtil.Commons;
 
     /// <summary>
     /// A finite state machine
@@ -18,7 +17,7 @@ namespace TrafficManager.Util {
             transitions_ = new Dictionary<TState, Dictionary<TTrigger, TState>>();
             enterStateEvents_ = new Dictionary<TState, Action>();
             State = state;
-            Log._Debug($"FSM: Created with state {state}");
+            // Log._Debug($"FSM: Created with state {state}");
         }
 
         /// <summary>
@@ -85,20 +84,19 @@ namespace TrafficManager.Util {
         /// <returns>Whether state change succeeded</returns>
         public bool SendTrigger(TTrigger trigger) {
             if (!transitions_.ContainsKey(State)) {
-                Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
-                           "no transitions defined for it");
+                // Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
+                //           "no transitions defined for it");
                 return false;
             }
 
             var outTransitions = transitions_[State];
             if (!outTransitions.ContainsKey(trigger)) {
-                Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
-                           "the trigger is not accepted in this state");
+                // Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
+                //           "the trigger is not accepted in this state");
                 return false;
             }
 
-            // TODO: Callback on leave state
-            Log._Debug($"FSM: State changed {State} -> ({trigger}) -> {outTransitions[trigger]}");
+            // Log._Debug($"FSM: State changed {State} -> ({trigger}) -> {outTransitions[trigger]}");
             State = outTransitions[trigger];
 
             // Callback on enter state

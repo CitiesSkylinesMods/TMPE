@@ -111,13 +111,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="cameraInfo">The camera</param>
         private void RenderOverlay_NodeSelect(RenderManager.CameraInfo cameraInfo) {
-            var nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             RenderHoveredNode(cameraInfo);
 
             // Draw the selected node
             if (SelectedNodeId != 0) {
                 RenderNodeOverlay(cameraInfo,
-                                  ref nodeBuffer[SelectedNodeId],
+                                  ref World.NodeRef(SelectedNodeId),
                                   PALETTE_SELECTED);
             }
         }
