@@ -7,6 +7,7 @@ namespace TrafficManager.State.Keybinds {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using UI;
+    using UI.MainMenu;
     using UnityEngine;
 
     /// <summary>
@@ -219,6 +220,9 @@ namespace TrafficManager.State.Keybinds {
                     } else {
                         editedBinding.Value.TargetKey.value = inputKey;
                         editedBinding.Value.Target.NotifyKeyChanged();
+
+                        // Refresh OSD keybinds
+                        LoadingExtension.BaseUI.MainMenu.OsdPanel.Update();
                     }
                 }
 
@@ -256,6 +260,9 @@ namespace TrafficManager.State.Keybinds {
                 } else {
                     editedBinding.Value.TargetKey.value = inputKey;
                     editedBinding.Value.Target.NotifyKeyChanged();
+
+                    // Refresh OSD keybinds
+                    LoadingExtension.BaseUI.MainMenu.OsdPanel.Update();
                 }
 
                 keybindButton.buttonsMask = UIMouseButton.Left;

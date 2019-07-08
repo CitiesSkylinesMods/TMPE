@@ -19,7 +19,7 @@ namespace TrafficManager.State.Keybinds {
         /// <value>
         /// This input key can not be changed and is not checked, instead it is display only
         /// </value>
-        protected static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
+        public static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
             "Global",
             "Key_ExitSubtool",
             SavedInputKey.Encode(KeyCode.Escape, false, false, false));

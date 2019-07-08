@@ -300,6 +300,10 @@ namespace TrafficManager.UI.SubTools {
                         SelectedNodeId = 0;
                         selectedMarker = null;
                         stayInLaneMode = StayInLaneMode.None;
+
+                        // Update OSD help text
+                        OsdSetup_SelectNode();
+
                         return;
                     }
 
@@ -315,6 +319,9 @@ namespace TrafficManager.UI.SubTools {
                             SelectedNodeId = HoveredNodeId;
                             selectedMarker = null;
                             stayInLaneMode = StayInLaneMode.None;
+
+                            // Update OSD help text
+                            OsdSetup_LinkLanes();
 
                             currentNodeMarkers[SelectedNodeId] = markers;
                         }
@@ -403,6 +410,9 @@ namespace TrafficManager.UI.SubTools {
 						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
 #endif
                     SelectedNodeId = 0;
+
+                    // Update OSD help text
+                    OsdSetup_SelectNode();
                     break;
                 case MarkerSelectionMode.SelectTarget:
                     // deselect source marker
@@ -426,6 +436,25 @@ namespace TrafficManager.UI.SubTools {
             hoveredMarker = null;
             stayInLaneMode = StayInLaneMode.None;
             RefreshCurrentNodeMarkers();
+
+            // Set up the OSD to show the first tip for the user
+            OsdSetup_SelectNode();
+        }
+
+        private static void OsdSetup_SelectNode() {
+            LoadingExtension.BaseUI.MainMenu.OsdPanel.Setup()
+                            .Title("Lane Connections: Select a node")
+                            .Shortcut("Exit tool", KeybindSettingsBase.ToolCancelViewOnly)
+                            .Show();
+        }
+
+        private static void OsdSetup_LinkLanes() {
+            LoadingExtension.BaseUI.MainMenu.OsdPanel.Setup()
+                            .Title("Link the lanes")
+                            .Shortcut("Clear", KeybindSettingsBase.LaneConnectorDelete)
+                            .Shortcut("Stay in lane", KeybindSettingsBase.LaneConnectorStayInLane)
+                            .Shortcut("Exit tool", KeybindSettingsBase.ToolCancelViewOnly)
+                            .Show();
         }
 
         private void RefreshCurrentNodeMarkers(ushort forceNodeId=0) {
@@ -460,7 +489,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void Cleanup() {
-
+            // Clear OSD keybinds
+            var osd = LoadingExtension.BaseUI.MainMenu.OsdPanel;
+            osd.Clear();
         }
 
         public override void Initialize() {

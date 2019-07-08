@@ -1,40 +1,33 @@
 #define QUEUEDSTATSx
 
-using System;
-using System.Linq;
-using ColossalFramework;
-using ColossalFramework.UI;
-using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
-using TrafficManager.State;
-using TrafficManager.Custom.PathFinding;
-using System.Collections.Generic;
-using TrafficManager.Manager;
-using CSUtil.Commons;
-using TrafficManager.State.Keybinds;
-using TrafficManager.UI.SubTools;
-using TrafficManager.Util;
-
 namespace TrafficManager.UI.MainMenu {
+    using System;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using OSD;
+    using State;
+    using State.Keybinds;
+    using UnityEngine;
+    using Util;
+
     public class MainMenuPanel : UIPanel, IObserver<GlobalConfig> {
         private static readonly Type[] MENU_BUTTON_TYPES
             = {
-                  // first row
-                  typeof(ToggleTrafficLightsButton),
-                  typeof(ManualTrafficLightsButton),
-                  typeof(LaneArrowsButton),
-                  typeof(LaneConnectorButton),
-                  typeof(DespawnButton),
-                  typeof(ClearTrafficButton),
-                  // second row
-                  typeof(PrioritySignsButton),
-                  typeof(TimedTrafficLightsButton),
-                  typeof(JunctionRestrictionsButton),
-                  typeof(SpeedLimitsButton),
-                  typeof(VehicleRestrictionsButton),
-                  typeof(ParkingRestrictionsButton),
-              };
+                // first row
+                typeof(ToggleTrafficLightsButton),
+                typeof(ManualTrafficLightsButton),
+                typeof(LaneArrowsButton),
+                typeof(LaneConnectorButton),
+                typeof(DespawnButton),
+                typeof(ClearTrafficButton),
+                // second row
+                typeof(PrioritySignsButton),
+                typeof(TimedTrafficLightsButton),
+                typeof(JunctionRestrictionsButton),
+                typeof(SpeedLimitsButton),
+                typeof(VehicleRestrictionsButton),
+                typeof(ParkingRestrictionsButton),
+            };
 
         public class SizeProfile {
             public int NUM_BUTTONS_PER_ROW { get; set; }
@@ -51,31 +44,31 @@ namespace TrafficManager.UI.MainMenu {
 
         public static readonly SizeProfile[] SIZE_PROFILES
             = {
-                  new SizeProfile {
-                                        NUM_BUTTONS_PER_ROW = 6,
-                                        NUM_ROWS = 2,
+                new SizeProfile {
+                    NUM_BUTTONS_PER_ROW = 6,
+                    NUM_ROWS = 2,
 
-                                        VSPACING = 5,
-                                        HSPACING = 5,
-                                        TOP_BORDER = 25,
-                                        BUTTON_SIZE = 30,
+                    VSPACING = 5,
+                    HSPACING = 5,
+                    TOP_BORDER = 25,
+                    BUTTON_SIZE = 30,
 
-                                        MENU_WIDTH = 215,
-                                        MENU_HEIGHT = 95
-                                    },
-                  new SizeProfile {
-                                        NUM_BUTTONS_PER_ROW = 6,
-                                        NUM_ROWS = 2,
+                    MENU_WIDTH = 215,
+                    MENU_HEIGHT = 95
+                },
+                new SizeProfile {
+                    NUM_BUTTONS_PER_ROW = 6,
+                    NUM_ROWS = 2,
 
-                                        VSPACING = 5,
-                                        HSPACING = 5,
-                                        TOP_BORDER = 25,
-                                        BUTTON_SIZE = 50,
+                    VSPACING = 5,
+                    HSPACING = 5,
+                    TOP_BORDER = 25,
+                    BUTTON_SIZE = 50,
 
-                                        MENU_WIDTH = 335,
-                                        MENU_HEIGHT = 135
-                                    }
-              };
+                    MENU_WIDTH = 335,
+                    MENU_HEIGHT = 135
+                }
+            };
 
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
@@ -91,7 +84,7 @@ namespace TrafficManager.UI.MainMenu {
         private SizeProfile activeProfile = null;
         private bool started = false;
 
-        //private UILabel optionsLabel;
+        public OnScreenDisplayPanel OsdPanel;
 
         public override void Start() {
             GlobalConfig conf = GlobalConfig.Instance;
@@ -120,14 +113,16 @@ namespace TrafficManager.UI.MainMenu {
             Drag = dragHandler.AddComponent<UIDragHandle>();
             Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
+            // Attach On-Screen Display panel (invisible)
+            OsdPanel = new OnScreenDisplayPanel(this);
+
             UpdateAllSizes();
             started = true;
         }
 
         public override void OnDestroy() {
-            if (confDisposable != null) {
-                confDisposable.Dispose();
-            }
+            OsdPanel = null; // break the reference loop
+            confDisposable?.Dispose();
         }
 
         internal void SetPosLock(bool lck) {
@@ -208,6 +203,9 @@ namespace TrafficManager.UI.MainMenu {
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
             absolutePosition = rect.position;
+
+            OsdPanel?.UpdatePosition();
+
             Invalidate();
         }
 
@@ -244,5 +242,6 @@ namespace TrafficManager.UI.MainMenu {
                 }
             }
         }
+
     }
 }
