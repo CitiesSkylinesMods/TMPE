@@ -139,14 +139,23 @@ namespace TrafficManager.UI
             blurEffect.size = new Vector2(resolution.x, resolution.y);
             blurEffect.absolutePosition = new Vector3(0, 0);
             blurEffect.SendToBack();
-            if (blurEffect != null)
-            {
-                blurEffect.isVisible = true;
-                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
-            }
+            blurEffect.eventPositionChanged += OnBlurEffectPositionChange;
+            blurEffect.eventZOrderChanged += OnBlurEffectZOrderChange;
+            blurEffect.opacity = 0;
+            blurEffect.isVisible = true;
+            ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
 
             // Make sure modal dialog is in front of all other UI
             BringToFront();
+        }
+
+        private void OnBlurEffectPositionChange(UIComponent component, Vector2 position) {
+            blurEffect.absolutePosition = Vector3.zero;
+        }
+
+        private void OnBlurEffectZOrderChange(UIComponent component, int value) {
+            blurEffect.zOrder = 0;
+            mainPanel.zOrder = 1000;
         }
 
         /// <summary>
@@ -334,8 +343,9 @@ namespace TrafficManager.UI
                 }
             }
 
-            if (blurEffect != null && UIView.ModalInputCount() == 0)
-            {
+            if (blurEffect != null && UIView.ModalInputCount() == 0) {
+                blurEffect.eventPositionChanged -= OnBlurEffectPositionChange;
+                blurEffect.eventZOrderChanged -= OnBlurEffectZOrderChange;
                 ValueAnimator.Animate(
                     "ModalEffect",
                     val => blurEffect.opacity = val,
