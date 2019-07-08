@@ -1,17 +1,20 @@
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using TrafficManager.UI.MainMenu;
-
 namespace TrafficManager.UI {
+    using System;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using UI.MainMenu;
+
     public class UIBase : UICustomControl {
 
         public UIMainMenuButton MainMenuButton { get; private set; }
+
         public MainMenuPanel MainMenu { get; private set; }
+
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
-        public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired=true) {
+
+        public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
             if (tool == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
                 tool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
@@ -21,7 +24,9 @@ namespace TrafficManager.UI {
 
             return tool;
         }
+
         private static TrafficManagerTool tool = null;
+
         public static TrafficManagerMode ToolMode { get; set; }
 
         private bool _uiShown = false;

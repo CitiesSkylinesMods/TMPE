@@ -1,15 +1,15 @@
-using ColossalFramework;
-using ColossalFramework.IO;
-using ColossalFramework.PlatformServices;
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using static ColossalFramework.Plugins.PluginManager;
-
 namespace TrafficManager.UI
 {
+    using System;
+    using System.Collections.Generic;
+    using ColossalFramework;
+    using ColossalFramework.IO;
+    using ColossalFramework.PlatformServices;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using UnityEngine;
+    using static ColossalFramework.Plugins.PluginManager;
+
     public class IncompatibleModsPanel : UIPanel
     {
         private const ulong LOCAL_MOD = ulong.MaxValue;
@@ -139,23 +139,14 @@ namespace TrafficManager.UI
             blurEffect.size = new Vector2(resolution.x, resolution.y);
             blurEffect.absolutePosition = new Vector3(0, 0);
             blurEffect.SendToBack();
-            blurEffect.eventPositionChanged += OnBlurEffectPositionChange;
-            blurEffect.eventZOrderChanged += OnBlurEffectZOrderChange;
-            blurEffect.opacity = 0;
-            blurEffect.isVisible = true;
-            ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+            if (blurEffect != null)
+            {
+                blurEffect.isVisible = true;
+                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+            }
 
             // Make sure modal dialog is in front of all other UI
             BringToFront();
-        }
-
-        private void OnBlurEffectPositionChange(UIComponent component, Vector2 position) {
-            blurEffect.absolutePosition = Vector3.zero;
-        }
-
-        private void OnBlurEffectZOrderChange(UIComponent component, int value) {
-            blurEffect.zOrder = 0;
-            mainPanel.zOrder = 1000;
         }
 
         /// <summary>
@@ -343,10 +334,13 @@ namespace TrafficManager.UI
                 }
             }
 
-            if (blurEffect != null && UIView.ModalInputCount() == 0) {
-                blurEffect.eventPositionChanged -= OnBlurEffectPositionChange;
-                blurEffect.eventZOrderChanged -= OnBlurEffectZOrderChange;
-                ValueAnimator.Animate("ModalEffect", delegate (float val) { blurEffect.opacity = val; }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate () { blurEffect.Hide(); });
+            if (blurEffect != null && UIView.ModalInputCount() == 0)
+            {
+                ValueAnimator.Animate(
+                    "ModalEffect",
+                    val => blurEffect.opacity = val,
+                    new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut),
+                    () => blurEffect.Hide());
             }
         }
     }

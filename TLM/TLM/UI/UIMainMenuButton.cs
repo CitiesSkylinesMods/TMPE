@@ -1,12 +1,12 @@
-﻿using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using TrafficManager.State;
-using TrafficManager.State.Keybinds;
-using TrafficManager.Util;
-using UnityEngine;
+﻿namespace TrafficManager.UI {
+    using System;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using State;
+    using State.Keybinds;
+    using UnityEngine;
+    using Util;
 
-namespace TrafficManager.UI {
     public class UIMainMenuButton : UIButton, IObserver<GlobalConfig> {
         private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
         private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
