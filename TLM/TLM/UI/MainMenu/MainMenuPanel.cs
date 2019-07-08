@@ -141,7 +141,10 @@ namespace TrafficManager.UI.MainMenu {
                 config.Main.MainMenuY = (int)absolutePosition.y;
 
                 GlobalConfig.WriteConfig();
+
+                OsdPanel?.UpdatePosition();
             }
+
             base.OnPositionChanged();
         }
 
@@ -203,8 +206,6 @@ namespace TrafficManager.UI.MainMenu {
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
             absolutePosition = rect.position;
-
-            OsdPanel?.UpdatePosition();
 
             Invalidate();
         }

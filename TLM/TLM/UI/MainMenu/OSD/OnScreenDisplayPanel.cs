@@ -124,11 +124,11 @@ namespace TrafficManager.UI.MainMenu.OSD {
         public void UpdatePosition() {
             var parent = (UIPanel) thisPanel_.parent;
             if (parent.relativePosition.y < Screen.height / 2f) {
-                // Lower part of the screen, place above the TM:PE panel, with 1px margin
-                thisPanel_.position = new Vector3(0f, -parent.height - 1f, 0f);
-            } else {
                 // Upper part of the screen, place below the TM:PE panel, with 1px margin
-                thisPanel_.position = new Vector3(0f, thisPanel_.height + 1f, 0f);
+                thisPanel_.relativePosition = new Vector3(0f, parent.height + 1f, 0f);
+            } else {
+                // Lower part of the screen, place above the TM:PE panel, with 1px margin
+                thisPanel_.relativePosition = new Vector3(0f, -thisPanel_.height - 1f, 0f);
             }
         }
     }
