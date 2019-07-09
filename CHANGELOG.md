@@ -1,4 +1,4 @@
-# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
+﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
 
 # Changelog
 
@@ -6,7 +6,10 @@
 >  
 > * **C:SL** = Cities: Skylines game updates
 > * **TM:PE** = Traffic Manager: President Edition
+> * **TPP2** = Traffic++ V2
 > * **TMPlus** = Traffic Manager Plus
+> * **TPP:AI** - Traffic++ Improved AI
+> * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
 ### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
@@ -624,6 +627,13 @@
 - Fixed: Mod crashed when loading a second savegame
 - Updated: translations: Polish, Chinese (simplified)
 
+### TPP2 2.0.12, 10/06/2016
+
+- Updated: Compatible with C:SL 1.6.0-f4
+- Meta: This was the final release of TPP2
+- Meta: TM:PE continued as the main traffic mod for the game
+- Meta: The TPP/TPP2 can still be found in the Network Extensions 2 project
+
 ### TM:PE 1.8.0, 29/11/2016
 
 - Added: Default speed limits
@@ -816,6 +826,10 @@
 
 - Fixed: Timed traffic lights UI not working as expected (thanks to Madgemade for pointing out this problem)
 
+### TPP2 2.0.11, 10/06/2016
+
+- Updated: Compatible with C:SL 1.5.0-f4
+
 ### TM:PE 1.6.18, 09/06/2016
 
 - Improved: Players can now select elevated rail segments/nodes
@@ -829,6 +843,14 @@
 - Added: Football stadium (causes heavy traffic in city on match day)
 - Fixed: Various bugs in game and DLCs
 
+### TPP2 2.0.10, 02/06/2016
+
+- Fixed: NullPointerException
+
+### TPP2 2.0.9, 31/05/2016
+
+- Update: Compatbile with Network Extensions 2.5
+
 ### TM:PE 1.6.17, 20/04/2016
 
 - Fixed: Hotfix for reported path-finding problems
@@ -841,6 +863,12 @@
 
 - Fixed: Busses could enter/exit bus stations at highways with sound barriers
 - Fixed: Various other bugs
+
+### TPP2 2.0.8, 22/03/2016
+
+- Updated: Cpde from TM:PE 1.6.10
+- Updated: Compatible with C:SL 1.4.0-f3
+- Removed: Old code from TPP
 
 ### TM:PE 1.6.15, 22/03/2016
 
@@ -898,11 +926,23 @@
 - Fixed: Short roads warning
 - Fixed: Cyclists despawn when changing from bike path to bike lane
 
+### TPP2 2.0.7, 01/03/2016
+
+- Improved: Performance
+- Updated: Vehicle AIs
+- Updated: Code from TM:PE 1.16 merged in to TPP2
+
 ### TM:PE 1.6.8, 01/03/2016
 
 - Added: Spanish translation
 - Improved: Major path-finding performance improvements
 - Updated: Japanese translation (thanks to Akira Ishizaki for translating!)
+
+### TPP2 2.0.6, 28/02/2016
+
+- Updated: Cargo trucks pathfinder
+- Updated: Stations and ports pathfinder
+- Updated: Code from TM:PE 1.6.6 & 1.6.7 merged in to TPP2
 
 ### TM:PE 1.6.7, 27/02/2016
 
@@ -924,10 +964,40 @@
 - Updated: Portuguese translation (thanks to igordeeoliveira for translating!)
 - Updated: Russian translation (thanks to FireGames for translating!)
 
+### TPP2 2.0.5, 26/02/2016
+
+- Improved: Service vehicle pathfinding
+- Fixed: Cars disappearing underground
+
+### TPP2 2.0.4, 24/02/2016
+
+- Improved: Vehicle restrictions
+- Updated: Removed typecasting from Car AI
+- Updated: Major pathfinder refactor
+- Updated: Code from TM:PE 1.6.0 to 1.6.5 merged in to TPP2
+
 ### TM:PE 1.6.5, 24/02/2016
 
 - Added: Despawning setting to options dialog
 - Improved: Detection of Traffic++ V2
+
+### TPP2 2.0.3, 23/02/2016
+
+- Added: Medium pedestrianised road
+- Fixed: Busses not using custom pathfinder
+- Fixed: Crash bug when Snowfall DLC subscribed
+- Fixed: Trams not working
+- Fixed: Transport lines not respecting restrictions
+- Fixed: Broken bus lanes on roads
+- Fixed: Path finder not respecting vehicle types
+- Fixed: Car AI broken when using Snowfall DLC
+- Fixed: Bug loading options
+- Updated: Improved how extended vehicle types are defined
+- Updated: Custom path manager refactored
+- Updated: Namespace and project refactor & clean-up
+- Updated: Separate extensions and AIs
+- Updated: Imrpoved options definition and storage
+- Removed: Ghost Mode
 
 ### TM:PE 1.6.4, 23/02/2016
 
@@ -945,9 +1015,16 @@
 
 ### TM:PE 1.6.3, 22/02/2016
 
-- Fixed: Using the "Old Town" policy led to vehicles not spawning.
+- Fixed: Using the "Old Town" policy led to vehicles not spawning
 - Fixed: Planes, cargo trains and ship were sometimes not arriving
 - Fixed: Trams are not doing u-turns anymore
+
+### TPP2 2.0.2, 21/02/2016
+
+- Fixed: Bus routing & bus stops
+- Fixed: European theme incompatible (thanks BloodyPenguin for help!)
+- Fixed: Traffic doesn't stop for flooded tunnels
+- Updated: Serialise for lane data
 
 ### TM:PE 1.6.2, 20/02/2016
 
@@ -961,6 +1038,22 @@
 - Improved: Performance
 - Improved: Modifying mod options through the main menu now gives an annoying warning message instead of a blank page.
 - Fixed: Various UI issues
+
+### TPP2 2.0.1, 19/02/2016
+
+- Fixed: Default vehicle restrictions always include bus
+- Updated: Compatible with C:SL 1.3.0-f4
+
+### TPP2 2.0.0, 18/02/2016
+
+- Added: Allow restrictions on pedestrianised roads
+- Fixed: Bus lines not working
+- Fixed: Traffic++ roads
+- Fixed: Options screen now saves options properly
+- Improved: Better compatibility with TPP
+- Improved: Detection of incompatible mods
+- Updated: Lots of code clean-up
+- Meta: First sable release of TPP2
 
 ### TM:PE 1.6.0, 18/02/2016
 
@@ -992,6 +1085,23 @@
 - Added: Road maintenance
 - Added: Road conditions affect vehicle speed
 - Added: Priority routes
+
+### TPP2 0.0.1, 17/02/2016
+
+- Added: Tool - Lane Connector (from TPP)
+- Added: Tool - Vehicle Restrictions (from TPP)
+- Added: Tool - Speed Restrictions (from TPP)
+- Added: No Despawn (from TPP)
+- Added: Improved AI (from TPP:AI)
+- Meta: Released as version 0.0a
+
+### TPP2 0.0, 17/02/2016
+
+- Meta: Development started 4th October 2015
+- Meta: Was planned to replace TM:PE, TPP, etc
+- Meta: Dev team: LinuxFan, Katalyst6, Lazarus*Man
+- Meta: GitHub Repository: [Katalyst6/CSL.TransitAddonMod](https://github.com/Katalyst6/CSL.TransitAddonMod)
+- Meta: Steam Workshop: [626024868 - Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TM:PE 1.5.2, 01/02/2016
 
@@ -1273,6 +1383,27 @@
 
 - Fixed: Minor bugfixes with game and asset editor
 
+### TPP 1.6.1, 25/09/2015
+
+- Removed: In-game log messages
+- Meta: This was the last release of Traffic++ mod
+- Meta: It was later continued in Traffic++ V2 (TPP2)
+- Meta: It's features have since been merged in to TM:PE (tools & AIs) and NExt2 (roads)
+
+### TPP 1.6.0, 25/09/2015
+
+- Fixed: Rendering of road customiser in underground view
+- Updated: Integrated latest Improved Vehicle AI
+- Updated: Lamps on pedestrian roads
+
+### TPP 1.5.6, 24/09/2015
+
+- Fixed: Disable custom roads option not working
+
+### TPP 1.5.5, 24/09/2015
+
+- Update: Compatible with C:SL 1.2.0 (thanks javitonino)
+
 ### C:SL 1.2 (After Dark), 24/09/2015
 
 - Added: Bicycles
@@ -1296,6 +1427,15 @@
 - Updated: New save system
 - Updated: New load system
 - Meta: Lots of code refactoring
+
+### TPP:AI 1.0.0, 02/08/2015
+
+- Added: Improved Vehicle AI
+- Meta: This was a preview mod by Jfarias, developer of TPP
+- Meta: It made vehicles use more lanes, and also change lanes (later becoming "DLS" in TM:PE)
+- Meta: Steam Workshop: [492391912 - Improved AI Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=492391912)
+- Meta: Source code no longer avialable
+- Meta: The feature was merged in to later version of TPP and, later, TM:PE (Advanced Vehicle AI and DLS)
 
 ### TM 1.0.5, 28/07/2015
 
@@ -1331,6 +1471,10 @@
 - Meta: Project fork by sieggy
 - Meta: First release in Steam Workshop under name "Traffic Manager Plus"
 
+### TPP 1.5.4, 06/07/2015
+
+- Updated: Compatible with C:SL 1.1.1
+
 ### C:SL 1.1.1, 01/07/2015
 
 - Added: Tunnels for pedestrian paths
@@ -1338,22 +1482,108 @@
 - Fixed: Lots of stuff
 - Improved: Asset editor
 
+### TPP 1.5.3, 02/06/2015
+
+- Fixed: Crash on Linux
+
+### TPP 1.5.2, 02/06/2015
+
+- Fixed: Trucks not allowed on new roads
+
+### TPP 1.5.1, 01/06/2015
+
+- Fixed: Bug preventing options loading if button not shown in content manager
+- Fixed: Duplicate prefab bug in Ghost Mode
+- Fixed: Duplicate roads in roads panel in Ghost Mode
+- Fixed: Vehicles have wrong AI when returning to main menu
+- Fixed: Vehicles using restricted lanes
+- Fixed: Bug preventing the Scrollable Toolbar mod from working in the entirety of the speed customizer panel
+- Updated: Added debug logs to the game's Debug Panel (F7) - thanks to Nefarion for implementing it
+
 ### TM 1.0.4, 29/05/2015
 
 - Fixed: Negative timers (thanks XaBBoK!)
 - Improved: Pathfinder cleanup (thanks dornathal!)
 
+### TPP 1.5.0 hotfix, 28/05/2015
+
+- Fixed: Vehicles stopping in road
+- Fixed: Realistic speeds not stopping without restarting the game
+- Fixed: Road costs (thanks Archomeda)
+
+### TPP 1.5.0, 27/05/2015
+
+- Added: More roads
+- Added: Option for Improved Vehicle AI
+- Fixed: Bug cauing crashes when loading map through pause menu
+- Fixed: Tunnels from new roads turning in to normal tunnels
+- Fixed: Custom vehicles ignoring lane restricitons
+
+### TPP 1.4.0 hotfix, 23/05/2015
+
+- Fixed: Few more bugs
+
+### TPP 1.4.0 hotfix, 23/05/2015
+
+- Fixed: Wrong lane usage in highways
+
+### TPP 1.4.0, 22/05/2015
+
+- Added: Tool - Speed Limits
+- Added: Underground view for customisation tools
+- Added: Mod Option - No Despawn (from TM:PE)
+- Added: Multi-track station enabler
+- Improved: New UI for road customisation tools
+- Fixed: Road customisation tools appearing in asset editor
+- Fixed: Objects under the map bug
+- Fixed: Options button on all resolutions
+- Fixed: Train tracks should not be selectable
+
+### TPP 1.3.2 hotfix, 20/05/2015
+
+- Improved: Compatibility with C:SL 1.1.0b
+
+### TPP 1.3.2 hotfix, 19/05/2015
+
+- Update: Compatible with C:SL 1.1.0b
+
 ### TM 1.0.4 hotfix, 19/05/2015
 
 - Fixed: Support for tunnels in AIs and pathfinder
-- Update: Compatible with C:SL 1.1
+- Update: Compatible with C:SL 1.1.0b
 - Update: Traffic++ Compatibility - No despawn or lane changer available in compatibility mode
 
-### C:SL 1.1, 19/05/2015
+### C:SL 1.1.0b, 19/05/2015
 
 - Added: European theme
 - Added: Tunnels for roads and rail
 - Improved: Metro tunnels can be built at different heights
+
+### TPP 1.3.2, 05/05/2015
+
+- Added: Ability to set restrictions lane by lane
+- Added: Ability to customise multiple lanes at same time
+- Fixed: But that prevented settings saving
+- Fixed: Bug that prevented short roads being selected
+- Fixed: Vehicle restrictions now show correctly on all resolutions
+- Updated: Road customiser tool button moved
+- Updated: Customisation overlays visible at all times when tool active
+
+### TPP 1.3.1, 29/04/2015
+
+- Improved: Perfomance issues reduced
+- Fixed: Strange vehicle behaviours
+- Fixed: Prevent road tool from selecting vehicles
+
+### TPP 1.3.0, 28/04/2015
+
+- Added: More roads
+- Added: Services overlay (vehicle restrictions) for pedestrian roads
+- Added: Tool - Vehicle Restrictions
+- Added: Tool - Lane Connections
+- Fixed: Left hand traffic issues
+- Fixed: Ghost mode caused crash if busway bridges on map
+- Fixed: Several crashes caused by mod incompatibilities
 
 ### TM 1.0.4 beta, 22/04/2015
 
@@ -1447,13 +1677,74 @@
 - Updated: Better traffic light UI
 - Meta: Using cities-skylines-detour by cope (sschoener on github)
 
+### TPP 1.2.0, 14/04/2015
+
+- Added: Realistic driving speeds
+- Added: More roads
+- Fixed: Bug in mod options screen
+- Updated: Compatible with C:SL 1.0.7c
+
 ### C:SL 1.0.7c, 07/04/2015
 
 - Fixed: Lots of stuff
 
+### TPP 1.2.1, 06/04/2015
+
+- Fixed: Bugs introduced by previous version
+
+### TPP 1.1.8, 05/04/2015
+
+- Added: Support for left-hand traffic maps
+- Improved: Compatibility with Fine Road Heights mod
+- Fixed: Various bugs
+- Updated: Compatible with C:SL 1.0.7
+
 ### C:SL 1.0.7, 27/03/2015
 
 - Fixed: Lots of stuff
+
+### TPP 1.1.7, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.6, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.5, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.4, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.3, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.2, 26/03/2015
+
+- Fixed: Various bugs
+
+### TPP 1.1.1, 25/03/2015
+
+- Added: Option to disable updates from previous version
+- Fixed: Bugs from previous version
+
+### TPP 1.1.0, 25/03/2015
+
+- Added: More roads & associated features
+- Added: Option to disable pedestrians in middle lane
+- Meta: Renamed to "Traffic++"
+
+### TPP 1.0.5, 24/03/2015
+
+- Fixed: Options panel bug
+
+### TPP 1.0.4, 23/03/2015
+
+- Fixed: Various bugs
 
 ### TM 0.5.0, 22/03/2015
 
@@ -1463,14 +1754,39 @@
 - Added: Log file
 - Updated: Compatible with C:SL 1.0.6
 
+### TPP 1.0.3, 20/03/2015
+
+- Added: Option to toggle which vehicles can use pedestrian roads
+- Added: Ghost mode to disable most of mod but still allow maps to load
+- Updated: Compatible with C:SL 1.0.6
+- Meta: First working implementation of vehicle restrictions
+
 ### C:SL 1.0.6, 19/03/2015
 
 - Fixed: Lots of stuff
 
+### TPP 1.0.2, 18/03/2015
+
+- Improved: Some interface improvements
+
+### TPP 1.0.1, 17/03/2015
+
+- Fixed: Mod could only be used once per gaming session
+- Fixed: Various bugs
+
+### TPP 1.0.0, 16/03/2015
+
+- Added: Pedestrian zoneable road
+- Meta: Traffic++ project starts, but under its original name "CSL-Traffic"
+- Meta: GitHub Repository: [joaofarias/csl-traffic](https://github.com/joaofarias/csl-traffic)
+- Meta: Steam Workshop
+
 ### TM 0.4.0, 14/03/2015
 
-- Meta: Traffic Manager project officially started (at v0.4 for some reason!?)
-- Meta: Github repository created by CBeTHaX (github user SvetlozarValchev)
+- Meta: Traffic Manager project starts
+- Meta: Developer CBeTHaX (github user SvetlozarValchev)
+- Meta: GitHub Repository: [SvetlozarValchev/Skylines-Traffic-Manager](https://github.com/SvetlozarValchev/Skylines-Traffic-Manager)
+- Meta: Steam Workshop: Traffic Manager
 
 ### C:SL 1.0, 10/03/2015
 
