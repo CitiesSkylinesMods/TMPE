@@ -1,6 +1,8 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using State;
     using State.Keybinds;
     using UnityEngine;
 
@@ -10,7 +12,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
             public Configurator(OnScreenDisplayPanel panel) {
                 panel_ = panel;
-                panel_.items_.Clear();
+                panel_.Clear();
             }
 
             public Configurator Title(string text) {
@@ -25,7 +27,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
             public void Show() {
                 panel_.Update();
-                panel_ = null;
+                panel_ = null; // end of work for the configurator object
             }
         }
 
@@ -45,7 +47,6 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// Sand yellow. Shortcut text.
         /// </summary>
         public static readonly Color PALETTE_SHORTCUT = new Color(.8f, .6f, .3f, 1f);
-        // public static readonly Color PALETTE_SHORTCUT = Color.black;
 
         /// <summary>
         /// Text line with 8px paddings above and below
@@ -62,25 +63,67 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// </summary>
         public const float PADDING = 8f;
 
-        private readonly UIPanel thisPanel_;
+        private readonly OsdUIPanel thisPanel_;
+
+        public UIDragHandle Drag { get; private set; }
 
         private readonly List<OsdItem> items_;
+
+        /// <summary>
+        /// Stores panel visibility, separate variable because even visible
+        /// panel is hidden when there's no active tool.
+        /// </summary>
+        private bool osdVisible_;
+
+        /// <summary>
+        /// The button used to control attachment
+        /// </summary>
+        private UIButton OsdButton_;
+
+        private MainMenuPanel mainMenuPanel_;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OnScreenDisplayPanel"/> class.
         /// Constructs the empty OSD panel and hides it.
         /// </summary>
-        /// <param name="mainPanel">The parent panel to attach to</param>
-        public OnScreenDisplayPanel(UIPanel mainPanel) {
+        /// <param name="parent">The parent panel to attach to</param>
+        public OnScreenDisplayPanel(UIView uiView, MainMenuPanel mainMenuPanel) {
             items_ = new List<OsdItem>();
+            mainMenuPanel_ = mainMenuPanel;
 
-            thisPanel_ = mainPanel.AddUIComponent<UIPanel>();
+            thisPanel_ = (OsdUIPanel)uiView.AddUIComponent(typeof(OsdUIPanel));
+            thisPanel_.name = "TMPE_OSD_Panel";
             thisPanel_.width = 10f;
             thisPanel_.height = PANEL_HEIGHT;
             thisPanel_.backgroundSprite = "GenericPanel";
             thisPanel_.color = new Color32(64, 64, 64, 240);
-            Update();
+
+            // Hide!
+            thisPanel_.isVisible = false;
+
+            // ResetPanelPosition();
+            var config = GlobalConfig.Instance.Main;
+            thisPanel_.absolutePosition = new Vector3(config.OSDPanelX, config.OSDPanelY);
+
+            // Setup drag
+            var dragHandler = new GameObject("TMPE_OSD_DragHandler");
+            dragHandler.transform.parent = thisPanel_.transform;
+            dragHandler.transform.localPosition = Vector3.zero;
+            Drag = dragHandler.AddComponent<UIDragHandle>();
+            Drag.enabled = true;
+
+            // Update();
         }
+
+//        private void ResetPanelPosition() {
+//            if (mainMenuPanel_.relativePosition.y < Screen.height / 2f) {
+//                // Upper part of the screen, place below the TM:PE panel, with 1px margin
+//                thisPanel_.relativePosition = new Vector3(0f, mainMenuPanel_.height + 1f, 0f);
+//            } else {
+//                // Lower part of the screen, place above the TM:PE panel, with 1px margin
+//                thisPanel_.relativePosition = new Vector3(0f, -thisPanel_.height - 1f, 0f);
+//            }
+//        }
 
         public Configurator Setup() {
             return new Configurator(this);
@@ -92,13 +135,22 @@ namespace TrafficManager.UI.MainMenu.OSD {
         }
 
         public void Update() {
-            UpdatePosition();
-            thisPanel_.isVisible = items_.Count > 0;
+            thisPanel_.isVisible = (items_.Count > 0) && osdVisible_;
+            if (osdVisible_) {
+                OsdButton_.textColor =  Color.green;
+                OsdButton_.text = "¿";
+                OsdButton_.tooltip = Translation.GetString("Toggle_OSD_panel_visible");
+            } else {
+                OsdButton_.textColor =  Color.gray;
+                OsdButton_.text = "?";
+                OsdButton_.tooltip = Translation.GetString("Toggle_OSD_panel_hidden");
+            }
+
             UpdatePanelItems();
         }
 
         private void UpdatePanelItems() {
-            ClearPanelItems();
+            ClearPanelGuiItems();
 
             var titleLabel = thisPanel_.AddUIComponent<UILabel>();
             titleLabel.textColor = PALETTE_TEXT;
@@ -112,24 +164,47 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 position = item.AddTo(thisPanel_, position);
             }
 
-            thisPanel_.width = Mathf.Max(position.x, titleLabel.width + 2 * PADDING);
+            thisPanel_.width = Mathf.Max(position.x, titleLabel.width + (2 * PADDING));
         }
 
-        private void ClearPanelItems() {
+        /// <summary>
+        /// Delete all UILabels in the panel (spare the DragHandler)
+        /// </summary>
+        private void ClearPanelGuiItems() {
             foreach (var c in thisPanel_.components) {
-                UnityEngine.Object.Destroy(c);
+                if (c is UILabel) {
+                    UnityEngine.Object.Destroy(c);
+                }
             }
         }
 
-        public void UpdatePosition() {
-            var parent = (UIPanel) thisPanel_.parent;
-            if (parent.relativePosition.y < Screen.height / 2f) {
-                // Upper part of the screen, place below the TM:PE panel, with 1px margin
-                thisPanel_.relativePosition = new Vector3(0f, parent.height + 1f, 0f);
-            } else {
-                // Lower part of the screen, place above the TM:PE panel, with 1px margin
-                thisPanel_.relativePosition = new Vector3(0f, -thisPanel_.height - 1f, 0f);
-            }
+        /// <summary>
+        /// Creates a tiny [?] button on the Main Menu panel to the right of TM:PE version
+        /// which will toggle visibility for the hints panel
+        /// </summary>
+        /// <param name="versionLabel">The version label in the mainmenu, we attach to its right</param>
+        /// <returns>The OSD button we've just created</returns>
+        public UIButton CreateOsdButton(UILabel versionLabel) {
+            OsdButton_ = mainMenuPanel_.AddUIComponent<UIButton>();
+            OsdButton_.buttonsMask = UIMouseButton.Left;
+            OsdButton_.normalBgSprite = "ButtonSmall";
+            OsdButton_.hoveredBgSprite = "ButtonSmallHovered";
+            OsdButton_.pressedBgSprite = "ButtonSmallPressed";
+            OsdButton_.canFocus = false; // no focusing just click
+            OsdButton_.width = 20f;
+            OsdButton_.position = new Vector3(mainMenuPanel_.width - OsdButton_.width - 4f, 4f, 0f);
+            OsdButton_.eventClicked += (component, param) => {
+                osdVisible_ = !osdVisible_;
+                Log._Debug($"OSD visibility button clicked, now vis={osdVisible_}");
+
+                // Update the main config
+                var config = GlobalConfig.Instance.Main;
+                config.OSDPanelVisible = osdVisible_;
+                GlobalConfig.WriteConfig();
+
+                Update(); // reset visibility and (unnecessary but cheap) reset items
+            };
+            return OsdButton_;
         }
     }
 }

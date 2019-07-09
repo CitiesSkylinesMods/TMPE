@@ -291,14 +291,16 @@ namespace TrafficManager.UI {
                 return;
 
             // check if mouse is inside panel
-            if (LoadingExtension.BaseUI.GetMenu().containsMouse
+            var mainMenuPanel = LoadingExtension.BaseUI.GetMenu();
+            var mainMenuContainsMouse = mainMenuPanel != null && mainMenuPanel.containsMouse;
 #if DEBUG
-                || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+            var debugMenuPanel = LoadingExtension.BaseUI.GetDebugMenu();
+            var debugMenuContainsMouse = debugMenuPanel != null && debugMenuPanel.containsMouse;
+#else
+            const bool debugMenuContainsMouse = false;
 #endif
-                ) {
-#if DEBUG
+            if (mainMenuContainsMouse || debugMenuContainsMouse) {
                 Log._Debug($"TrafficManagerTool: OnToolUpdate: Menu contains mouse. Ignoring click.");
-#endif
                 return;
             }
 

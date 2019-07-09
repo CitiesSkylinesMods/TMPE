@@ -21,6 +21,10 @@ namespace TrafficManager.State.ConfigData {
 		public int MainMenuY = MainMenuPanel.DEFAULT_MENU_Y;
 		public bool MainMenuPosLocked = false;
 
+		public int OSDPanelX = MainMenuPanel.DEFAULT_MENU_X;
+		public int OSDPanelY = MainMenuPanel.DEFAULT_MENU_Y - 32;
+		public bool OSDPanelVisible = true;
+
 		/// <summary>
 		/// Already displayed tutorial messages
 		/// </summary>

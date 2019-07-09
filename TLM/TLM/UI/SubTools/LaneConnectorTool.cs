@@ -443,17 +443,21 @@ namespace TrafficManager.UI.SubTools {
 
         private static void OsdSetup_SelectNode() {
             LoadingExtension.BaseUI.MainMenu.OsdPanel.Setup()
-                            .Title("Lane Connections: Select a node")
-                            .Shortcut("Exit tool", KeybindSettingsBase.ToolCancelViewOnly)
+                            .Title(Translation.GetString("OSD_Lane_Connection__Select"))
+                            .Shortcut(Translation.GetString("OSD_Exit_tool"),
+                                      KeybindSettingsBase.ToolCancelViewOnly)
                             .Show();
         }
 
         private static void OsdSetup_LinkLanes() {
             LoadingExtension.BaseUI.MainMenu.OsdPanel.Setup()
-                            .Title("Link the lanes")
-                            .Shortcut("Clear", KeybindSettingsBase.LaneConnectorDelete)
-                            .Shortcut("Stay in lane", KeybindSettingsBase.LaneConnectorStayInLane)
-                            .Shortcut("Exit tool", KeybindSettingsBase.ToolCancelViewOnly)
+                            .Title(Translation.GetString("OSD_Lane_Connection__Link"))
+                            .Shortcut(Translation.GetString("OSD_Lane_Connection_Clear"),
+                                      KeybindSettingsBase.LaneConnectorDelete)
+                            .Shortcut(Translation.GetString("OSD_Lane_Connection_Stay_in_lane"),
+                                      KeybindSettingsBase.LaneConnectorStayInLane)
+                            .Shortcut(Translation.GetString("OSD_Exit_tool"),
+                                      KeybindSettingsBase.ToolCancelViewOnly)
                             .Show();
         }
 
@@ -490,8 +494,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void Cleanup() {
             // Clear OSD keybinds
-            var osd = LoadingExtension.BaseUI.MainMenu.OsdPanel;
-            osd.Clear();
+            LoadingExtension.BaseUI.MainMenu.OsdPanel.Clear();
         }
 
         public override void Initialize() {

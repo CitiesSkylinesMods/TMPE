@@ -255,3 +255,10 @@ Road_signs_theme_mph Theme for MPH road signs
 theme_Square_US US signs
 theme_Round_UK British signs
 theme_Round_German German signs
+Toggle_OSD_panel_visible Hide OSD panel, now visible
+Toggle_OSD_panel_hidden Show OSD panel, now hidden
+OSD_Lane_Connection__Select Lane Connection: Select a node
+OSD_Exit_tool Exit tool
+OSD_Lane_Connection__Link Now link incoming lanes to outgoing
+OSD_Lane_Connection_Stay_in_lane Stay in lane (both, forward or back)
+OSD_Lane_Connection_Clear Clear

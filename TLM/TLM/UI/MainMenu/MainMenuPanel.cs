@@ -84,7 +84,15 @@ namespace TrafficManager.UI.MainMenu {
         private SizeProfile activeProfile = null;
         private bool started = false;
 
-        public OnScreenDisplayPanel OsdPanel;
+        /// <summary>
+        /// OSD Panel with help and keybind tips
+        /// </summary>
+        public OnScreenDisplayPanel OsdPanel { get; private set; }
+
+        /// <summary>
+        /// Toggle button for OSD panel visibility
+        /// </summary>
+        public UIButton OsdButton { get; private set; }
 
         public override void Start() {
             GlobalConfig conf = GlobalConfig.Instance;
@@ -113,15 +121,22 @@ namespace TrafficManager.UI.MainMenu {
             Drag = dragHandler.AddComponent<UIDragHandle>();
             Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
-            // Attach On-Screen Display panel (invisible)
-            OsdPanel = new OnScreenDisplayPanel(this);
-
             UpdateAllSizes();
+
+            // Attach On-Screen Display panel (invisible)
+            // This reads main menu panel size, so goes after Update(All)Sizes
+            try {
+                OsdPanel = new OnScreenDisplayPanel(UIView.GetAView(), this);
+                OsdButton = OsdPanel.CreateOsdButton(VersionLabel);
+            }
+            catch (Exception e) {
+                Log.Error($"Error creating OSD panel: {e}");
+            }
+
             started = true;
         }
 
         public override void OnDestroy() {
-            OsdPanel = null; // break the reference loop
             confDisposable?.Dispose();
         }
 
@@ -141,8 +156,6 @@ namespace TrafficManager.UI.MainMenu {
                 config.Main.MainMenuY = (int)absolutePosition.y;
 
                 GlobalConfig.WriteConfig();
-
-                OsdPanel?.UpdatePosition();
             }
 
             base.OnPositionChanged();

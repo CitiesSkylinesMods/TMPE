@@ -8,9 +8,11 @@ namespace TrafficManager.UI {
 
         public UIMainMenuButton MainMenuButton { get; private set; }
         public MainMenuPanel MainMenu { get; private set; }
+
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
+
         public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired=true) {
             if (tool == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
@@ -21,7 +23,9 @@ namespace TrafficManager.UI {
 
             return tool;
         }
+
         private static TrafficManagerTool tool = null;
+
         public static TrafficManagerMode ToolMode { get; set; }
 
         private bool _uiShown = false;
@@ -39,6 +43,7 @@ namespace TrafficManager.UI {
             // add the menu
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
             MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+
 #if DEBUG
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
