@@ -1,13 +1,13 @@
 Switch_traffic_lights Interruptor de Semáforos
-Add_priority_signs Placas de preferência 
+Add_priority_signs Placas de preferência
 Manual_traffic_lights Semáforo manual
-Timed_traffic_lights Semáforos cronometrados 
+Timed_traffic_lights Semáforos cronometrados
 Change_lane_arrows Alterar setas de pista
 Clear_Traffic Limpar tráfego
 Disable_despawning Desativar despawning
 Enable_despawning Ativar despawning
 NODE_IS_LIGHT O cruzamento tem um semáforo.\nExclua o semáforo, escolhendo "Interruptor de Semáforos" e clicando em seu cruzamento.
-NODE_IS_TIMED_LIGHT Esta junção é parte de um script cronometrado.\nPrimeiro selecione "Semáforos cronometrados", selecione este cruzamento e clique em remover. 
+NODE_IS_TIMED_LIGHT Esta junção é parte de um script cronometrado.\nPrimeiro selecione "Semáforos cronometrados", selecione este cruzamento e clique em remover.
 Select_nodes_windowTitle Selecione um cruzamento
 Select_nodes Selecione cruzamento(s)
 Node Cruzamento
@@ -50,10 +50,10 @@ avg._wait Espera média
 min/max min/max
 Lane Pista
 Set_Speed Setar velocidade {0}
-Max_speed Velocidade Máxima 
+Max_speed Velocidade Máxima
 Segment Segmento
 incoming entrando
-Enable_Advanced_Vehicle_AI Ativar IA avançada de veículo 
+Enable_Advanced_Vehicle_AI Ativar IA avançada de veículo
 Vehicles_may_enter_blocked_junctions Veículos podem entrar em cruzamentos bloqueados
 All_vehicles_may_ignore_lane_arrows Todos os veículos podem ignorar setas da pista
 Busses_may_ignore_lane_arrows ônibus podem ignorar setas da pista
@@ -74,9 +74,9 @@ Nodes_and_segments Cruzamentos e segmentos
 Lanes Faixas
 Path_Of_Evil_(10_%) Caminho do mal (10 %)
 Rush_Hour_(5_%) Hora do Rush (5 %)
-Minor_Complaints_(2_%) Reclamações de menor importância (2 %) 
+Minor_Complaints_(2_%) Reclamações de menor importância (2 %)
 Holy_City_(0_%) Cidade Santa (0 %)
-Forget_toggled_traffic_lights Esquecer os semáforos alternados 
+Forget_toggled_traffic_lights Esquecer os semáforos alternados
 Road_is_already_in_a_group! Pista já esta em um grupo!
 All_selected_roads_must_be_of_the_same_type! Todas as pistas selecionadas devem ser do mesmo tipo!
 Create_group Criar grupo
@@ -90,7 +90,7 @@ Select_junction Selecionar cruzamento
 Cancel Cancelar
 Speed_limits Limite de Velocidade
 Persistently_visible_overlays Sobreposições persistentemente visíveis
-Priority_signs Placas de preferência 
+Priority_signs Placas de preferência
 Vehicles_may_do_u-turns_at_junctions Veículos podem fazer retorno nos cruzamentos
 Vehicles_going_straight_may_change_lanes_at_junctions Veículos seguindo reto pode mudar de faixa nos cruzamentos
 Allow_u-turns Permitir retornos
@@ -154,7 +154,7 @@ Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules Os ônibus de evacuação podem ignorar as regras de trânsito
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Os ônibus de evacuação só podem ser usados para alcançar um abrigo
 Vehicle_behavior Comportamento do veículo
-Policies_&_Restrictions Políticas e Restrições
+Policies_&_Restrictions Políticas
 At_junctions Nas junções
 In_case_of_emergency Em caso de emergência
 Show_lane-wise_speed_limits Mostrar limites de velocidade por faixa.
@@ -208,11 +208,11 @@ TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Vehicle restrictions
 TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Ban vehicles from certain road segments.\n\n1. Click on a road segment.\n2. Click on the icons to toggle restrictions.\n\nDistinguished vehicle types:\n\n- Road vehicles: Passenger cars, busses, taxis, cargo trucks, service vehicles, emergency vehicles\n- Rail vehicles: Passenger trains, cargo trains\n\nAvailable hotkeys:\n\n- Shift: Hold Shift while clicking to apply restrictions to multiple road segments at once.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Default speed limits
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Use the arrows in the upper half to cycle through all road types.\n2. In the lower half, select a speed limit.\n3. Click on "Save" to set the selected speed limit as default for future road segments of the selected type. Click on "Save & Apply" to also update all existing roads of the selected type.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles. 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Add a timed step
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Within the in-game overlay, click on the traffic lights to change their state. Use the "Change mode" button to add directional traffic lights.\n2. Enter both a minimum and maximum duration for the step. After the min. time has elapsed the traffic light will count and compare approaching vehicles.\n3. Optionally, select a step switching type. Per default, the step changes if roughly less vehicles are driving than waiting.\n4. Optionally, adjust the light's sensitivity. For example, move the slider to the left to make the timed traffic light less sensitive for waiting vehicles.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copy a timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Click on another junction to paste the timed traffic light.\n\nClick anywhere with your secondary mouse button to cancel the operation.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Add a junction to the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Click on another junction to add it. Both lights will be joined such that the timed program will then control both junctions at once.\n\nClick anywhere with your secondary mouse button to cancel the operation.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Remove a junction from the timed traffic light
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Click on one of the junctions that are controlled by this timed program. The selected traffic light will be removed such that the timed programm will no longer manage it.\n\nClick anywhere with your secondary mouse button to cancel the operation.
@@ -233,6 +233,20 @@ Ignore_disabled_mods Ignore disabled mods
 Traffic_Manager_detected_incompatible_mods detected incompatible mods
 Notify_me_if_there_is_an_unexpected_mod_conflict Notify me if there is an unexpected mod conflict
 Unsubscribe Unsubscribe
+Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
+Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
+Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
+Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
+Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
+Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
+Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
+Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybind_lane_connector_delete Clear lane connections
+Keybinds Keybinds
+Keybind_Exit_subtool Exit tool and close TM:PE Menu
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
+Keybind_category_Global Global keys
+Keybind_category_LaneConnector Lane Connector Tool keys
 Display_speed_limits_mph Display speed limits as MPH instead of km/h
 Miles_per_hour Miles per Hour
 Kilometers_per_hour Kilometers per Hour

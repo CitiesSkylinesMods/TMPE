@@ -273,9 +273,11 @@ namespace TrafficManager.UI
 
 			// Trim the index since 140 km/h / 90 MPH is the max sign we have
 			var upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
-			if (index > upper) {
+#if DEBUG
+            if (index > upper) {
 				Log.Info($"Trimming speed={speedLimit} index={index} to {upper}");
 			}
+#endif
 			var trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
 			return textures[trimIndex];
 		}
