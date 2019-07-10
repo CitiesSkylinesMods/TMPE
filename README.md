@@ -5,28 +5,11 @@
 
 ## Current release
 
-[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740) • [Discord Guild](https://discord.gg/faKUnST) • [Installation](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) • [User Guide](http://www.viathinksoft.de/tmpe/wiki) • [Issue Tracker](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/issues) • [Report a Bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
+> Having problems with traffic despawning after updating roads or rails? Try [Broken Node Detector](https://steamcommunity.com/sharedfiles/filedetails/?id=1777173984) which helps detect a game bug. Collossal Order are aware of the issue.
 
-# Features
+#### Version [11.0-alpha](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), XX/XX/2019
 
-* Timed traffic lights
-* Change lane arrows
-* Edit lane connections
-* Add priority signs
-* Junction restrictions
-    * Toggle u-turns
-    * Allow "turn on red"
-    * Enter blocked junctions
-    * Toggle pedestrian crossings
-* Vehicle restrictions
-    * For roads and trains!
-* Customise speed limits
-* Toggle despawn
-* Clear traffic, stuck cims, etc.
-
-# Changelog
-### [11.x](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.x...11.x), xx/xx/2019
-- UNDER DEVELOPMENT
+- Under construction
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases.
 
@@ -38,7 +21,7 @@ We welcome contributions from the community! See: [Contributing Guide](https://g
 
 [MIT License](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/LICENSE) (open source)
 
-# Notice
+## Support Policy
 
 The TM:PE team is happy to support you if you have any issues with the mod under the following conditions:
 - You are using the latest version of the STABLE and/or LABS mod.
