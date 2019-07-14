@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.State.ConfigData {
+	using API.Traffic.Enums;
+
 	public class TimedTrafficLights {
 		/// <summary>
 		/// TTL wait/flow calculation mode

@@ -35,4 +35,4 @@ using TrafficManager.Traffic;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.*")]
 
-[assembly:TypeForwardedTo(typeof(ExtVehicleType))]
+// [assembly:TypeForwardedTo(typeof(ExtVehicleType))]

@@ -2,6 +2,9 @@ using CSUtil.Commons;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight.Data {
+	using API.Traffic.Enums;
+	using API.TrafficLight;
+
 	public struct TrafficLightSimulation {
 		/// <summary>
 		/// Timed traffic light by node id

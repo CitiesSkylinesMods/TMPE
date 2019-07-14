@@ -7,6 +7,8 @@ using TrafficManager.Traffic.Enums;
 using UnityEngine;
 
 namespace TrafficManager.Manager {
+	using API.Traffic.Data;
+
 	public interface IVehicleBehaviorManager {
 		// TODO define me!
 		// TODO documentation

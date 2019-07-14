@@ -7,6 +7,8 @@ using TrafficManager.Traffic.Enums;
 using static TrafficManager.Traffic.Data.PrioritySegment;
 
 namespace TrafficManager.Manager {
+	using API.Traffic.Enums;
+
 	public interface ITrafficPriorityManager {
 		// TODO define me!
 

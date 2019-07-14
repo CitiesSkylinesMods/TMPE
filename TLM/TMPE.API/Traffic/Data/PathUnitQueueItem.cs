@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Traffic.Enums;
+﻿namespace TrafficManager.Traffic.Data {
+	using API.Traffic.Enums;
 
-namespace TrafficManager.Traffic.Data {
 	public struct PathUnitQueueItem {
 		public uint nextPathUnitId; // access requires acquisition of CustomPathFind.QueueLock
 		public ExtVehicleType vehicleType; // access requires acquisition of m_bufferLock

@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager {
+	using API.Traffic.Enums;
+
 	public interface ITrafficLightManager {
 		// TODO documentation
 		bool AddTrafficLight(ushort nodeId, ref NetNode node);

@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Manager;
 
 namespace TrafficManager.Manager {
+	using API.Manager;
+
 	public interface IManagerFactory {
 		IAdvancedParkingManager AdvancedParkingManager { get; }
 		ICustomSegmentLightsManager CustomSegmentLightsManager { get; }

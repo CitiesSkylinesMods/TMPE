@@ -8,6 +8,8 @@ using TrafficManager.Traffic.Enums;
 using UnityEngine;
 
 namespace TrafficManager.Traffic.Data {
+	using API.Traffic.Enums;
+
 	public struct ExtCitizenInstance {
 		public ushort instanceId;
 

@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Geometry {
+	using API.Traffic.Enums;
+
 	public interface ISegmentGeometry {
 		/// <summary>
 		/// Holds the id of the managed segment.

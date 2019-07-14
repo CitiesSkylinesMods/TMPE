@@ -22,6 +22,8 @@ using TrafficManager.RedirectionFramework.Attributes;
 // ReSharper disable InconsistentNaming
 
 namespace TrafficManager.Custom.PathFinding {
+	using API.Traffic.Data;
+
 	[TargetType(typeof(PathManager))]
 	public class CustomPathManager : PathManager {
 		/// <summary>
