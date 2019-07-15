@@ -1,25 +1,40 @@
 using ColossalFramework;
 using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
 using TrafficManager.State;
-using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Impl;
-using TrafficManager.Util;
-using static TrafficManager.Geometry.Impl.NodeGeometry;
 
 namespace TrafficManager.Manager.Impl {
 	public class TurnOnRedManager : AbstractGeometryObservingManager, ITurnOnRedManager {
-		public static TurnOnRedManager Instance { get; private set; } = new TurnOnRedManager();
-
-		public TurnOnRedSegments[] TurnOnRedSegments { get; private set; }
-
 		private TurnOnRedManager() {
 			TurnOnRedSegments = new TurnOnRedSegments[2 * NetManager.MAX_SEGMENT_COUNT];
+		}
+
+		public static TurnOnRedManager Instance { get; } = new TurnOnRedManager();
+
+		public TurnOnRedSegments[] TurnOnRedSegments { get; }
+
+		public override void OnBeforeLoadData() {
+			base.OnBeforeLoadData();
+
+			// JunctionRestrictionsManager requires our data during loading of custom data
+			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+				if (!Services.NetService.IsSegmentValid((ushort)i)) {
+					continue;
+				}
+
+				HandleValidSegment(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[i]);
+			}
+		}
+
+		public override void OnLevelUnloading() {
+			base.OnLevelUnloading();
+			for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
+				TurnOnRedSegments[i].Reset();
+			}
+		}
+
+		public int GetIndex(ushort segmentId, bool startNode) {
+			return (int)segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
 		}
 
 		protected override void InternalPrintDebugInfo() {
@@ -30,69 +45,85 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
-			UpdateSegment(geometry);
+		protected override void HandleValidSegment(ref ExtSegment seg) {
+			UpdateSegment(ref seg);
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
-			ResetSegment(geometry.SegmentId);
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			ResetSegment(seg.segmentId);
 		}
 
-		protected void UpdateSegment(SegmentGeometry geometry) {
+		protected void UpdateSegment(ref ExtSegment seg) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[25];
 			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegment({geometry.SegmentId}) called.");
+				Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
 			}
 #endif
 
-			ResetSegment(geometry.SegmentId);
-			SegmentEndGeometry startEndGeo = geometry.GetEnd(true);
-			if (startEndGeo != null) {
-				UpdateSegmentEnd(startEndGeo);
+			ResetSegment(seg.segmentId);
+
+			IExtSegmentEndManager extSegmentEndManager = Constants.ManagerFactory.ExtSegmentEndManager;
+			ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
+			if (startNodeId != 0) {
+				UpdateSegmentEnd(ref seg, ref extSegmentEndManager.ExtSegmentEnds[extSegmentEndManager.GetIndex(seg.segmentId, true)]);
 			}
 
-			SegmentEndGeometry endEndGeo = geometry.GetEnd(false);
-			if (endEndGeo != null) {
-				UpdateSegmentEnd(endEndGeo);
+			ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
+			if (endNodeId != 0) {
+				UpdateSegmentEnd(ref seg, ref extSegmentEndManager.ExtSegmentEnds[extSegmentEndManager.GetIndex(seg.segmentId, false)]);
 			}
 		}
 
-		protected void UpdateSegmentEnd(SegmentEndGeometry endGeo) {
+		protected void UpdateSegmentEnd(ref ExtSegment seg, ref ExtSegmentEnd end) {
 #if DEBUG
 			bool debug = GlobalConfig.Instance.Debug.Switches[25];
 			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}) called.");
+				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}) called.");
 			}
 #endif
+			IExtSegmentManager segmentManager = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager segmentEndManager = Constants.ManagerFactory.ExtSegmentEndManager;
 
-			// check if traffic can flow to the node and that there is at least one outgoing segment
-			if (endGeo.OutgoingOneWay || endGeo.NumOutgoingSegments <= 0) {
+			ushort segmentId = seg.segmentId;
+			ushort nodeId = end.nodeId;
+
+			bool hasOutgoingSegment = false;
+			Services.NetService.IterateNodeSegments(end.nodeId, (ushort otherSegId, ref NetSegment otherSeg) => {
+				if (otherSegId != segmentId && segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(otherSegId, otherSeg.m_startNode == nodeId)].outgoing) {
+					hasOutgoingSegment = true;
+					return false;
+				} else {
+					return true;
+				}
+			});
+
+			// check if traffic can flow to the node and that there is at least one left segment
+			if (!end.incoming || !hasOutgoingSegment) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): outgoing one-way or insufficient number of outgoing segments.");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): outgoing one-way or insufficient number of outgoing segments.");
 				}
 #endif
 				return;
 			}
 
 			bool lhd = Services.SimulationService.LeftHandDrive;
-			ushort nodeId = endGeo.NodeId();
 
 			// check node
 			// note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
 			bool nodeValid = false;
-			Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
+			Services.NetService.ProcessNode(nodeId, (ushort _, ref NetNode node) => {
 				nodeValid =
 					(node.m_flags & NetNode.Flags.LevelCrossing) == NetNode.Flags.None &&
 					node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
 				return true;
 			});
 
-			if (! nodeValid) {
+			if (!nodeValid) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): node invalid");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): node invalid");
 				}
 #endif
 				return;
@@ -101,74 +132,69 @@ namespace TrafficManager.Manager.Impl {
 			// get left/right segments
 			ushort leftSegmentId = 0;
 			ushort rightSegmentId = 0;
-			Services.NetService.ProcessSegment(endGeo.SegmentId, delegate (ushort segId, ref NetSegment seg) {
-				seg.GetLeftAndRightSegments(nodeId, out leftSegmentId, out rightSegmentId);
+			Services.NetService.ProcessSegment(end.segmentId, (ushort _, ref NetSegment segment) => {
+				segment.GetLeftAndRightSegments(nodeId, out leftSegmentId, out rightSegmentId);
 				return true;
 			});
 
 #if DEBUG
 			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): got left/right segments: {leftSegmentId}/{rightSegmentId}");
+				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): got left/right segments: {leftSegmentId}/{rightSegmentId}");
 			}
 #endif
 
 			// validate left/right segments according to geometric properties
-			if (leftSegmentId != 0 && !endGeo.IsLeftSegment(leftSegmentId)) {
+			if (leftSegmentId != 0 && segmentEndManager.GetDirection(ref end, leftSegmentId) != ArrowDirection.Left) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): left segment is not geometrically left");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): left segment is not geometrically left");
 				}
 #endif
 				leftSegmentId = 0;
 			}
 
-			if (rightSegmentId != 0 && !endGeo.IsRightSegment(rightSegmentId)) {
+			if (rightSegmentId != 0 && segmentEndManager.GetDirection(ref end, rightSegmentId) != ArrowDirection.Right) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): right segment is not geometrically right");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): right segment is not geometrically right");
 				}
 #endif
 				rightSegmentId = 0;
 			}
 
 			// check for incoming one-ways
-			if (leftSegmentId != 0 && SegmentGeometry.Get(leftSegmentId).GetEnd(nodeId).IncomingOneWay) {
+			if (leftSegmentId != 0 && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(leftSegmentId, nodeId)].outgoing) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): left segment is incoming one-way");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): left segment is incoming one-way");
 				}
 #endif
 				leftSegmentId = 0;
 			}
 
-			if (rightSegmentId != 0 && SegmentGeometry.Get(rightSegmentId).GetEnd(nodeId).IncomingOneWay) {
+			if (rightSegmentId != 0 && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(rightSegmentId, nodeId)].outgoing) {
 #if DEBUG
 				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): right segment is incoming one-way");
+					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): right segment is incoming one-way");
 				}
 #endif
 				rightSegmentId = 0;
 			}
 
-			if (endGeo.IncomingOneWay) {
-				if (lhd && rightSegmentId != 0 || !lhd && leftSegmentId != 0) {
+			if (seg.oneWay) {
+				if ((lhd && rightSegmentId != 0) || (!lhd && leftSegmentId != 0)) {
 					// special case: one-way to one-way in non-preferred direction
 #if DEBUG
 					if (debug) {
-						Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): source is incoming one-way. checking for one-way in non-preferred direction");
+						Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): source is incoming one-way. checking for one-way in non-preferred direction");
 					}
 #endif
 					ushort targetSegmentId = lhd ? rightSegmentId : leftSegmentId;
-					SegmentEndGeometry targetEndGeo = SegmentGeometry.Get(targetSegmentId)?.GetEnd(nodeId);
-					if (targetEndGeo == null || !targetEndGeo.OutgoingOneWay) {
-						if (targetEndGeo == null) {
-							Log.Error($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): One-way to one-way: Target segment end geometry not found for segment id {targetSegmentId} @ {nodeId}");
-						}
-
+					if (!segmentManager.ExtSegments[targetSegmentId].oneWay) {
 						// disallow turn in non-preferred direction
 #if DEBUG
 						if (debug) {
-							Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): turn in non-preferred direction {(lhd ? "right" : "left")} disallowed");
+							Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): turn in non-preferred direction {(lhd ? "right" : "left")} disallowed");
 						}
 #endif
 						if (lhd) {
@@ -186,13 +212,13 @@ namespace TrafficManager.Manager.Impl {
 				leftSegmentId = 0;
 			}
 
-			int index = GetIndex(endGeo.SegmentId, endGeo.StartNode);
+			int index = GetIndex(end.segmentId, end.startNode);
 			TurnOnRedSegments[index].leftSegmentId = leftSegmentId;
 			TurnOnRedSegments[index].rightSegmentId = rightSegmentId;
 
 #if DEBUG
 			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({endGeo.SegmentId}, {endGeo.StartNode}): Finished calculation. leftSegmentId={leftSegmentId}, rightSegmentId={rightSegmentId}");
+				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): Finished calculation. leftSegmentId={leftSegmentId}, rightSegmentId={rightSegmentId}");
 			}
 #endif
 		}
@@ -200,29 +226,6 @@ namespace TrafficManager.Manager.Impl {
 		protected void ResetSegment(ushort segmentId) {
 			TurnOnRedSegments[GetIndex(segmentId, true)].Reset();
 			TurnOnRedSegments[GetIndex(segmentId, false)].Reset();
-		}
-
-		public override void OnBeforeLoadData() {
-			base.OnBeforeLoadData();
-
-			// JunctionRestrictionsManager requires our data during loading of custom data
-			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				SegmentGeometry geo = SegmentGeometry.Get((ushort)i);
-				if (geo != null && geo.IsValid()) {
-					HandleValidSegment(geo);
-				}
-			}
-		}
-
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
-				TurnOnRedSegments[i].Reset();
-			}
-		}
-
-		public int GetIndex(ushort segmentId, bool startNode) {
-			return (int)segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
 		}
 	}
 }

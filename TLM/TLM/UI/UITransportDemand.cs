@@ -76,7 +76,7 @@ namespace TrafficManager.UI {
 
         private void ParentVisibilityChanged(UIComponent component, bool value) {
             Log._Debug($"Public transport info view panel changed visibility: {value}");
-            if (value && Options.prohibitPocketCars) {
+            if (value && Options.parkingAI) {
 				TrafficManagerTool.CurrentTransportDemandViewMode = TransportDemandViewMode.Outgoing;
 				if (viewModeLabel != null)
 					viewModeLabel.text = Translation.GetString("Outgoing_demand");

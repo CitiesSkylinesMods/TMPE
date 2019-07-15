@@ -17,6 +17,8 @@ using ColossalFramework.UI;
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Linq.Expressions;
+using TrafficManager.RedirectionFramework;
+using TrafficManager.RedirectionFramework;
 
 namespace TrafficManager {
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -52,7 +54,17 @@ namespace TrafficManager {
 				List<string> missingDetours = new List<string>();
 				foreach (Detour detour in LoadingExtension.Detours) {
 					if (! RedirectionHelper.IsRedirected(detour.OriginalMethod, detour.CustomMethod)) {
-						missingDetours.Add($"{detour.OriginalMethod.DeclaringType.Name}.{detour.OriginalMethod.Name} with {detour.OriginalMethod.GetParameters().Length} parameters ({detour.OriginalMethod.DeclaringType.AssemblyQualifiedName})");
+						missingDetours.Add($"<Manual> {detour.OriginalMethod.DeclaringType.Name}.{detour.OriginalMethod.Name} with {detour.OriginalMethod.GetParameters().Length} parameters ({detour.OriginalMethod.DeclaringType.AssemblyQualifiedName})");
+					}
+				}
+
+				foreach (KeyValuePair<MethodBase, RedirectCallsState> entry in LoadingExtension.HarmonyMethodStates) {
+					MethodBase method = entry.Key;
+					RedirectCallsState oldState = entry.Value;
+					RedirectCallsState newState = RedirectionHelper.GetState(method.MethodHandle.GetFunctionPointer());
+
+					if (!oldState.Equals(newState)) {
+						missingDetours.Add($"<Harmony> {method.DeclaringType.Name}.{method.Name} with {method.GetParameters().Length} parameters ({method.DeclaringType.AssemblyQualifiedName})");
 					}
 				}
 

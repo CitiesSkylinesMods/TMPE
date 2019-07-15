@@ -9,8 +9,13 @@ using TrafficManager.Custom.AI;
 using CSUtil.Commons;
 using TrafficManager.State;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Enums;
+using TrafficManager.Manager;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.TrafficLight.Impl {
+	using API.Traffic.Enums;
+
 	/// <summary>
 	/// Represents the traffic light (left, forward, right) at a specific segment end
 	/// </summary>
@@ -31,12 +36,6 @@ namespace TrafficManager.TrafficLight.Impl {
 		public bool StartNode {
 			get {
 				return lights.StartNode;
-			}
-		}
-
-		public short ClockwiseIndex {
-			get {
-				return lights.ClockwiseIndex;
 			}
 		}
 
@@ -147,20 +146,30 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ToggleMode() {
-			SegmentGeometry geometry = SegmentGeometry.Get(SegmentId);
-
-			if (geometry == null) {
-				Log.Error($"CustomSegmentLight.ToggleMode: No geometry information available for segment {SegmentId}");
+			if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+				Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
 				return;
 			}
 
-			bool startNode = lights.StartNode;
-			var hasLeftSegment = geometry.HasOutgoingLeftSegment(startNode);
-			var hasForwardSegment = geometry.HasOutgoingStraightSegment(startNode);
-			var hasRightSegment = geometry.HasOutgoingRightSegment(startNode);
+			IExtSegmentEndManager extSegMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			Constants.ServiceFactory.NetService.ProcessNode(NodeId, delegate (ushort nId, ref NetNode node) {
+				ToggleMode(ref extSegMan.ExtSegmentEnds[extSegMan.GetIndex(SegmentId, StartNode)], ref node);
+				return true;
+			});
+		}
 
+		private void ToggleMode(ref ExtSegmentEnd segEnd, ref NetNode node) {
+			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			bool startNode = lights.StartNode;
+
+			bool hasLeftSegment;
+			bool hasForwardSegment;
+			bool hasRightSegment;
+			extSegEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out hasLeftSegment, out hasForwardSegment, out hasRightSegment);
+				
 #if DEBUG
-			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasOutgoingLeft={hasLeftSegment}, hasOutgoingStraight={hasForwardSegment}, hasOutgoingRight={hasRightSegment}");
+			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasLeftSegment={hasLeftSegment}, hasForwardSegment={hasForwardSegment}, hasRightSegment={hasRightSegment}");
 #endif
 
 			LightMode newMode = LightMode.Simple;
@@ -228,6 +237,12 @@ namespace TrafficManager.TrafficLight.Impl {
 			SetStates(null, null, invertedLight);
 
 			UpdateVisuals();
+		}
+
+		public RoadBaseAI.TrafficLightState GetLightState(ushort toSegmentId) {
+			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+			ArrowDirection dir = segEndMan.GetDirection(ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(SegmentId, StartNode)], toSegmentId);
+			return GetLightState(dir);
 		}
 
 		public RoadBaseAI.TrafficLightState GetLightState(ArrowDirection dir) {
@@ -301,7 +316,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 			ushort nodeId = lights.NodeId;
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			uint num = (uint)(((int)nodeId << 8) / 32768);
+			uint simGroup = (uint)nodeId >> 7;
 
 			RoadBaseAI.TrafficLightState vehicleLightState;
 			RoadBaseAI.TrafficLightState pedestrianLightState;
@@ -333,9 +348,9 @@ namespace TrafficManager.TrafficLight.Impl {
 			Log._Debug($"Setting visual traffic light state of node {NodeId}, seg. {SegmentId} to vehicleState={vehicleLightState} pedState={pedestrianLightState}");
 #endif
 
-			uint now = ((currentFrameIndex - num) >> 8) & 1;
-			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
-			CustomRoadAI.OriginalSetTrafficLightState(true, nodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
+			uint now = ((currentFrameIndex - simGroup) >> 8) & 1;
+			Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(nodeId, ref instance.m_segments.m_buffer[SegmentId], now << 8, vehicleLightState, pedestrianLightState, false, false);
+			Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(nodeId, ref instance.m_segments.m_buffer[SegmentId], (1u - now) << 8, vehicleLightState, pedestrianLightState, false, false);
 		}
 
 		public RoadBaseAI.TrafficLightState GetVisualLightState() {

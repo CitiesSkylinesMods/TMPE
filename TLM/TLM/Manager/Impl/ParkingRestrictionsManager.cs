@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TrafficManager.Geometry;
 using TrafficManager.Geometry.Impl;
+using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
 	public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
@@ -58,15 +59,15 @@ namespace TrafficManager.Manager.Impl {
 			return true;
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
-			parkingAllowed[geometry.SegmentId][0] = true;
-			parkingAllowed[geometry.SegmentId][1] = true;
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			parkingAllowed[seg.segmentId][0] = true;
+			parkingAllowed[seg.segmentId][1] = true;
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
-			if (! MayHaveParkingRestriction(geometry.SegmentId)) {
-				parkingAllowed[geometry.SegmentId][0] = true;
-				parkingAllowed[geometry.SegmentId][1] = true;
+		protected override void HandleValidSegment(ref ExtSegment seg) {
+			if (! MayHaveParkingRestriction(seg.segmentId)) {
+				parkingAllowed[seg.segmentId][0] = true;
+				parkingAllowed[seg.segmentId][1] = true;
 			}
 		}
 
@@ -91,6 +92,7 @@ namespace TrafficManager.Manager.Impl {
 			Log.Info($"Loading parking restrictions data. {data.Count} elements");
 			foreach (Configuration.ParkingRestriction restr in data) {
 				try {
+					Log._Trace($"Setting forwardParkingAllowed={restr.forwardParkingAllowed}, backwardParkingAllowed={restr.backwardParkingAllowed} at segment {restr.segmentId}");
 					SetParkingAllowed(restr.segmentId, NetInfo.Direction.Forward, restr.forwardParkingAllowed);
 					SetParkingAllowed(restr.segmentId, NetInfo.Direction.Backward, restr.backwardParkingAllowed);
 				} catch (Exception e) {
@@ -113,6 +115,7 @@ namespace TrafficManager.Manager.Impl {
 					Configuration.ParkingRestriction restr = new Configuration.ParkingRestriction((ushort)segmentId);
 					restr.forwardParkingAllowed = parkingAllowed[segmentId][0];
 					restr.backwardParkingAllowed = parkingAllowed[segmentId][1];
+					Log._Trace($"Saving forwardParkingAllowed={restr.forwardParkingAllowed}, backwardParkingAllowed={restr.backwardParkingAllowed} at segment {restr.segmentId}");
 					ret.Add(restr);
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving parking restrictions @ {segmentId}: {ex.ToString()}");

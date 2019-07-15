@@ -64,20 +64,6 @@ namespace TrafficManager.Manager.Impl {
 				Log.Error($"Error occurred while printing debug info for flags: {e}");
 			}
 
-			Log._Debug("=== SegmentGeometry.PrintDebugInfo() ===");
-			try {
-				SegmentGeometry.PrintDebugInfo();
-			} catch (Exception e) {
-				Log.Error($"Error occurred while printing debug info for segment geometries: {e}");
-			}
-
-			Log._Debug("=== NodeGeometry.PrintDebugInfo() ===");
-			try {
-				NodeGeometry.PrintDebugInfo();
-			} catch (Exception e) {
-				Log.Error($"Error occurred while printing debug info for node geometries: {e}");
-			}
-
 			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
 				try {
 					manager.PrintDebugInfo();
@@ -144,7 +130,7 @@ namespace TrafficManager.Manager.Impl {
 			for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0) {
-					ushort driverInstanceId = CustomPassengerCarAI.GetDriverInstanceId((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
+					ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
 					uint citizenId = Singleton<CitizenManager>.instance.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
 					if (citizenId != 0u && Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0) {
 

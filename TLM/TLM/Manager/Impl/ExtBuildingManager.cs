@@ -22,7 +22,7 @@ namespace TrafficManager.Manager.Impl {
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>
-		public ExtBuilding[] ExtBuildings = null;
+		public ExtBuilding[] ExtBuildings { get; private set; } = null;
 
 		private ExtBuildingManager() {
 			ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
@@ -31,11 +31,86 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
+		public void OnBeforeSimulationStep(ushort buildingId, ref Building data) {
+			// slowly decrease parking space demand / public transport demand if Parking AI is active
+			if (! Options.parkingAI) {
+				return;
+			}
+
+			uint frameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex >> 8;
+			if ((frameIndex & 1u) == 0u) {
+				RemoveDemand(ref ExtBuildings[buildingId]);
+			}
+		}
+
+		protected void RemoveDemand(ref ExtBuilding extBuilding) {
+			RemoveParkingSpaceDemand(ref extBuilding, GlobalConfig.Instance.ParkingAI.ParkingSpaceDemandDecrement);
+			RemovePublicTransportDemand(ref extBuilding, GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, true);
+			RemovePublicTransportDemand(ref extBuilding, GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement, false);
+		}
+
+		public bool IsValid(ushort buildingId) {
+			return Constants.ServiceFactory.BuildingService.IsBuildingValid(buildingId);
+		}
+
+		public void Reset(ref ExtBuilding extBuilding) {
+			extBuilding.parkingSpaceDemand = 0;
+			extBuilding.incomingPublicTransportDemand = 0;
+			extBuilding.outgoingPublicTransportDemand = 0;
+		}
+
+		public void AddParkingSpaceDemand(ref ExtBuilding extBuilding, uint delta) {
+			extBuilding.parkingSpaceDemand = (byte)Math.Min(100, (int)extBuilding.parkingSpaceDemand + delta);
+			RequestColorUpdate(extBuilding.buildingId);
+		}
+
+		public void RemoveParkingSpaceDemand(ref ExtBuilding extBuilding, uint delta) {
+			extBuilding.parkingSpaceDemand = (byte)Math.Max(0, (int)extBuilding.parkingSpaceDemand - delta);
+			RequestColorUpdate(extBuilding.buildingId);
+		}
+
+		public void ModifyParkingSpaceDemand(ref ExtBuilding extBuilding, Vector3 parkPos, int minDelta = -10, int maxDelta = 10) {
+			Vector3 buildingPos = Singleton<BuildingManager>.instance.m_buildings.m_buffer[extBuilding.buildingId].m_position;
+			float distance = Mathf.Clamp((parkPos - buildingPos).magnitude, 0f, GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding);
+
+			float delta = (float)(maxDelta - minDelta) * (distance / GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding) + (float)minDelta;
+			extBuilding.parkingSpaceDemand = (byte)Mathf.Clamp((int)extBuilding.parkingSpaceDemand + (int)Mathf.Round(delta), 0, 100);
+			RequestColorUpdate(extBuilding.buildingId);
+		}
+
+		public void AddPublicTransportDemand(ref ExtBuilding extBuilding, uint delta, bool outgoing) {
+			byte oldDemand = outgoing ? extBuilding.outgoingPublicTransportDemand : extBuilding.incomingPublicTransportDemand;
+			byte newDemand = (byte)Math.Min(100, (int)oldDemand + delta);
+			if (outgoing) {
+				extBuilding.outgoingPublicTransportDemand = newDemand;
+			} else {
+				extBuilding.incomingPublicTransportDemand = newDemand;
+			}
+
+			RequestColorUpdate(extBuilding.buildingId);
+		}
+
+		public void RemovePublicTransportDemand(ref ExtBuilding extBuilding, uint delta, bool outgoing) {
+			byte oldDemand = outgoing ? extBuilding.outgoingPublicTransportDemand : extBuilding.incomingPublicTransportDemand;
+			byte newDemand = (byte)Math.Max(0, (int)oldDemand - delta);
+			if (outgoing) {
+				extBuilding.outgoingPublicTransportDemand = newDemand;
+			} else {
+				extBuilding.incomingPublicTransportDemand = newDemand;
+			}
+
+			RequestColorUpdate(extBuilding.buildingId);
+		}
+
+		protected void RequestColorUpdate(ushort buildingId) {
+			Singleton<BuildingManager>.instance.UpdateBuildingColors(buildingId);
+		}
+
 		protected override void InternalPrintDebugInfo() {
 			base.InternalPrintDebugInfo();
 			Log._Debug($"Extended building data:");
 			for (int i = 0; i < ExtBuildings.Length; ++i) {
-				if (! ExtBuildings[i].IsValid()) {
+				if (! IsValid((ushort)i)) {
 					continue;
 				}
 				Log._Debug($"Building {i}: {ExtBuildings[i]}");
@@ -44,8 +119,9 @@ namespace TrafficManager.Manager.Impl {
 		
 		public override void OnLevelUnloading() {
 			base.OnLevelUnloading();
-			for (int i = 0; i < ExtBuildings.Length; ++i)
-				ExtBuildings[i].Reset();
+			for (int i = 0; i < ExtBuildings.Length; ++i) {
+				Reset(ref ExtBuildings[i]);
+			}
 		}
 	}
 }

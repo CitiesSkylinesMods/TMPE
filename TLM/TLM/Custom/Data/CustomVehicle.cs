@@ -2,6 +2,7 @@
 using ColossalFramework.Math;
 using CSUtil.Commons;
 using CSUtil.Commons.Benchmark;
+using TrafficManager.RedirectionFramework.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,10 @@ using TrafficManager.Manager.Impl;
 using UnityEngine;
 
 namespace TrafficManager.Custom.Data {
+	[TargetType(typeof(Vehicle))]
 	public static class CustomVehicle {
-		public static void Spawn(ref Vehicle vehicleData, ushort vehicleId) {
-			//Log._Debug($"CustomVehicle.Spawn({vehicleId}) called.");
-
+		[RedirectMethod]
+		public static void CustomSpawn(ref Vehicle vehicleData, ushort vehicleId) {
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;
 			VehicleInfo vehicleInfo = vehicleData.Info;
 			if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == (Vehicle.Flags)0) {
@@ -67,7 +68,7 @@ namespace TrafficManager.Custom.Data {
 							vehManager.m_vehicles.m_buffer[(int)trailerVehicleId].m_frame2.m_rotation = lastFrameData.m_rotation;
 							vehManager.m_vehicles.m_buffer[(int)trailerVehicleId].m_frame3.m_rotation = lastFrameData.m_rotation;
 							trailerInfo.m_vehicleAI.FrameDataUpdated(trailerVehicleId, ref vehManager.m_vehicles.m_buffer[(int)trailerVehicleId], ref vehManager.m_vehicles.m_buffer[(int)trailerVehicleId].m_frame0);
-							CustomVehicle.Spawn(ref vehManager.m_vehicles.m_buffer[(int)trailerVehicleId], trailerVehicleId); // NON-STOCK CODE
+							CustomVehicle.CustomSpawn(ref vehManager.m_vehicles.m_buffer[(int)trailerVehicleId], trailerVehicleId); // NON-STOCK CODE
 							curVehicleId = trailerVehicleId;
 						}
 						length += ((!hasTrailers) ? (trailerInfo.m_generatedInfo.m_size.z * 0.5f) : 0f);
@@ -80,27 +81,16 @@ namespace TrafficManager.Custom.Data {
 			}
 
 			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnSpawnVehicle")) {
-#endif
-				VehicleStateManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
-#if BENCHMARK
-			}
-#endif
+			ExtVehicleManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 		}
 
-		public static void Unspawn(ref Vehicle vehicleData, ushort vehicleId) {
+		[RedirectMethod]
+		public static void CustomUnspawn(ref Vehicle vehicleData, ushort vehicleId) {
 			//Log._Debug($"CustomVehicle.Unspawn({vehicleId}) called.");
 
 			// NON-STOCK CODE START
-#if BENCHMARK
-			using (var bm = new Benchmark(null, "OnDespawnVehicle")) {
-#endif
-				VehicleStateManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
-#if BENCHMARK
-			}
-#endif
+			ExtVehicleManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
 			// NON-STOCK CODE END
 
 			VehicleManager vehManager = Singleton<VehicleManager>.instance;

@@ -191,7 +191,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!MayHaveCustomSpeedLimits(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
 				return 0;
 			}
-			
+
 			var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 
 			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
@@ -415,7 +415,9 @@ namespace TrafficManager.Manager.Impl {
 			float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
 
 			// save speed limit in all NetInfos
+#if DEBUGLOAD
 			Log._Debug($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
+#endif
 			UpdateNetInfoGameSpeedLimit(info, gameSpeedLimit);
 
 			List<string> childNetInfoNames;
@@ -423,7 +425,9 @@ namespace TrafficManager.Manager.Impl {
 				foreach (var childNetInfoName in childNetInfoNames) {
 					NetInfo childNetInfo;
 					if (NetInfoByName.TryGetValue(childNetInfoName, out childNetInfo)) {
+#if DEBUGLOAD
 						Log._Debug($"Updating child NetInfo {childNetInfoName}: Setting speed limit to {gameSpeedLimit}");
+#endif
 						CustomLaneSpeedLimitByNetInfoName[childNetInfoName] = customSpeedLimit;
 						UpdateNetInfoGameSpeedLimit(childNetInfo, gameSpeedLimit);
 					}
@@ -453,7 +457,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			Log._Debug($"Updating speed limit of NetInfo {info.name} to {gameSpeedLimit}");
+			Log._Trace($"Updating speed limit of NetInfo {info.name} to {gameSpeedLimit}");
 
 			foreach (NetInfo.Lane lane in info.m_lanes) {
 				// TODO refactor check
@@ -583,7 +587,7 @@ namespace TrafficManager.Manager.Impl {
 						continue;
 					}
 
-					Log.Info($"Loaded road NetInfo: {infoName}");
+					Log._Trace($"Loaded road NetInfo: {infoName}");
 					NetInfoByName[infoName] = info;
 					mainNetInfos.Add(info);
 
@@ -671,7 +675,7 @@ namespace TrafficManager.Manager.Impl {
 					NetInfo parentInfo = mainNetInfos[y];
 
 					if (info.m_placementStyle == ItemClass.Placement.Procedural && !infoName.Equals(parentInfo.name) && infoName.StartsWith(parentInfo.name)) {
-						Log.Info($"Identified child NetInfo {infoName} of parent {parentInfo.name}");
+						Log._Trace($"Identified child NetInfo {infoName} of parent {parentInfo.name}");
 						List<string> childNetInfoNames;
 						if (!childNetInfoNamesByCustomizableNetInfoName.TryGetValue(parentInfo.name, out childNetInfoNames)) {
 							childNetInfoNamesByCustomizableNetInfoName[parentInfo.name] = childNetInfoNames = new List<string>();
@@ -693,9 +697,9 @@ namespace TrafficManager.Manager.Impl {
 			customizableNetInfos = mainNetInfos;
 		}
 
-		protected override void HandleInvalidSegment(SegmentGeometry geometry) {
-			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].Info;
-			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[geometry.SegmentId].m_lanes;
+		protected override void HandleInvalidSegment(ref ExtSegment seg) {
+			NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[seg.segmentId].Info;
+			uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[seg.segmentId].m_lanes;
 			int laneIndex = 0;
 			while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
 				// NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
@@ -708,7 +712,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 		}
 
-		protected override void HandleValidSegment(SegmentGeometry geometry) {
+		protected override void HandleValidSegment(ref ExtSegment seg) {
 
 		}
 
@@ -718,28 +722,37 @@ namespace TrafficManager.Manager.Impl {
 			foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
 				try {
 					if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
-						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: " +
-						           $"Lane is invalid");
+#if DEBUGLOAD
+						Log._Debug($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
+#endif
 						continue;
 					}
 
 					ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneSpeedLimit.laneId].m_segment;
 					NetInfo info = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
 					var customSpeedLimit = GetCustomNetInfoSpeedLimit(info);
+#if DEBUGLOAD
 					Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
 					           $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
 					           $"lanes={info?.m_lanes} is {customSpeedLimit}");
+#endif
 
 					if (SpeedLimit.IsValidRange(customSpeedLimit)) {
 						// lane speed limit differs from default speed limit
+#if DEBUGLOAD
+						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
+#endif
+						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
 						Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: " +
 						           $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
 						var kmph = laneSpeedLimit.speedLimit / SpeedLimit.SPEED_TO_KMPH; // convert to game units
 						Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
 					} else {
+#if DEBUGLOAD
 						Log._Debug($"SpeedLimitManager.LoadData: " +
 						           $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
 						           $"({laneSpeedLimit.speedLimit} km/h)");
+#endif
 					}
 				} catch (Exception e) {
 					// ignore, as it's probably corrupt save data. it'll be culled on next save
@@ -755,8 +768,10 @@ namespace TrafficManager.Manager.Impl {
 			foreach (var e in Flags.getAllLaneSpeedLimits()) {
 				try {
 					var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
+#if DEBUGSAVE
 					Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: " +
 					           $"{laneSpeedLimit.speedLimit*SpeedLimit.SPEED_TO_KMPH} km/h");
+#endif
 					ret.Add(laneSpeedLimit);
 				} catch (Exception ex) {
 					Log.Error($"Exception occurred while saving lane speed limit @ {e.Key}: {ex}");

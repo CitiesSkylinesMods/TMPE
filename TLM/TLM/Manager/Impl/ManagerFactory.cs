@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Manager;
 
 namespace TrafficManager.Manager.Impl {
+	using API.Manager;
+
 	public class ManagerFactory : IManagerFactory {
 		public static IManagerFactory Instance = new ManagerFactory();
 
@@ -19,7 +21,7 @@ namespace TrafficManager.Manager.Impl {
 				return Impl.CustomSegmentLightsManager.Instance;
 			}
 		}
-
+		
 		public IExtBuildingManager ExtBuildingManager {
 			get {
 				return Impl.ExtBuildingManager.Instance;
@@ -35,6 +37,36 @@ namespace TrafficManager.Manager.Impl {
 		public IExtCitizenManager ExtCitizenManager {
 			get {
 				return Impl.ExtCitizenManager.Instance;
+			}
+		}
+
+		public IExtNodeManager ExtNodeManager {
+			get {
+				return Impl.ExtNodeManager.Instance;
+			}
+		}
+
+		public IExtPathManager ExtPathManager {
+			get {
+				return Impl.ExtPathManager.Instance;
+			}
+		}
+
+		public IExtSegmentManager ExtSegmentManager {
+			get {
+				return Impl.ExtSegmentManager.Instance;
+			}
+		}
+
+		public IExtSegmentEndManager ExtSegmentEndManager {
+			get {
+				return Impl.ExtSegmentEndManager.Instance;
+			}
+		}
+
+		public IExtVehicleManager ExtVehicleManager {
+			get {
+				return Impl.ExtVehicleManager.Instance;
 			}
 		}
 
@@ -137,12 +169,6 @@ namespace TrafficManager.Manager.Impl {
 		public IVehicleRestrictionsManager VehicleRestrictionsManager {
 			get {
 				return Impl.VehicleRestrictionsManager.Instance;
-			}
-		}
-
-		public IVehicleStateManager VehicleStateManager {
-			get {
-				return Impl.VehicleStateManager.Instance;
 			}
 		}
 	}
