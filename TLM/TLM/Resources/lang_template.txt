@@ -232,6 +232,7 @@ Scan_for_known_incompatible_mods_on_startup
 Ignore_disabled_mods
 Traffic_Manager_detected_incompatible_mods
 Notify_me_if_there_is_an_unexpected_mod_conflict
+Unsubscribe
 Keybind_toggle_TMPE_main_menu
 Keybind_toggle_traffic_lights_tool
 Keybind_use_lane_arrow_tool
@@ -246,6 +247,7 @@ Keybind_Exit_subtool
 Keybind_conflict
 Keybind_category_Global
 Keybind_category_LaneConnector
+Speed_limit_unlimited
 Display_speed_limits_mph
 Miles_per_hour
 Kilometers_per_hour
