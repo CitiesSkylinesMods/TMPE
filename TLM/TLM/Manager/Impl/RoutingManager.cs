@@ -18,6 +18,8 @@ using TrafficManager.Util;
 using static TrafficManager.State.Flags;
 
 namespace TrafficManager.Manager.Impl {
+	using API.Traffic.Enums;
+
 	public class RoutingManager : AbstractGeometryObservingManager, IRoutingManager {
 		public static readonly RoutingManager Instance = new RoutingManager();
 

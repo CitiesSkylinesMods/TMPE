@@ -7,7 +7,7 @@
     <ProjectGuid>{C911D31C-C85D-42A8-A839-7B209A715495}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TrafficManager</RootNamespace>
+    <RootNamespace>TrafficManager.API</RootNamespace>
     <AssemblyName>TMPE.API</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

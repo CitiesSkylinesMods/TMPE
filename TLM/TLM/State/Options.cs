@@ -13,6 +13,7 @@ using TrafficManager.State.Keybinds;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.State {
+    using API.Traffic.Enums;
 
     public class Options : MonoBehaviour {
         private static UIDropDown languageDropdown = null;

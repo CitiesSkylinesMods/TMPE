@@ -14,6 +14,8 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.TrafficLight.Impl {
+	using API.Traffic.Enums;
+
 	/// <summary>
 	/// Represents the traffic light (left, forward, right) at a specific segment end
 	/// </summary>

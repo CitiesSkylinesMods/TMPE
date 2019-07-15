@@ -1,7 +1,13 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+﻿namespace TrafficManager.Traffic {
     using System;
 
+    /// <summary>
+    /// This Enum is kept for save compatibility.
+    /// DO NOT USE.
+    /// Please use TMPE.API.Traffic.Enums.ExtVehicleType
+    /// </summary>
     [Flags]
+    [Obsolete]
     public enum ExtVehicleType {
         None = 0,
         PassengerCar = 1,
@@ -33,5 +39,15 @@
         NonTransportRoadVehicle = RoadVehicle & ~PublicTransport,
         Ferry = PassengerFerry,
         Blimp = PassengerBlimp
+    }
+
+    public static class LegacyExtVehicleType {
+        public static API.Traffic.Enums.ExtVehicleType ToNew(ExtVehicleType old) {
+            return (API.Traffic.Enums.ExtVehicleType)(int)old;
+        }
+
+        public static ExtVehicleType ToOld(API.Traffic.Enums.ExtVehicleType new_) {
+            return (ExtVehicleType)(int)new_;
+        }
     }
 }

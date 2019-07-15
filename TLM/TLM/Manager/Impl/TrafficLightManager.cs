@@ -11,6 +11,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
+	using API.Traffic.Enums;
+
 	/// <summary>
 	/// Manages traffic light toggling
 	/// </summary>

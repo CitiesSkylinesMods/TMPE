@@ -6,6 +6,8 @@ using System.Text;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Traffic.Data {
+	using API.Traffic.Enums;
+
 	public struct ExtCitizen {
 		public uint citizenId;
 

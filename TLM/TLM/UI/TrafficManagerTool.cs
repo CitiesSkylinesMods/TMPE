@@ -1,23 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ColossalFramework;
-using ColossalFramework.Math;
-using ColossalFramework.UI;
-using JetBrains.Annotations;
-using UnityEngine;
-using TrafficManager.State;
-using TrafficManager.UI.SubTools;
-using TrafficManager.Traffic;
-using TrafficManager.Manager;
-using TrafficManager.Util;
-using TrafficManager.UI.MainMenu;
-using CSUtil.Commons;
-using TrafficManager.Manager.Impl;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Enums;
+﻿namespace TrafficManager.UI {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using API.Traffic.Data;
+    using API.Traffic.Enums;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
+    using Manager;
+    using Manager.Impl;
+    using State;
+    using Traffic.Data;
+    using Traffic.Enums;
+    using UI.MainMenu;
+    using UI.SubTools;
+    using Util;
+    using UnityEngine;
 
-namespace TrafficManager.UI {
     [UsedImplicitly]
     public class TrafficManagerTool : DefaultTool, IObserver<GlobalConfig> {
         public struct NodeVisitItem {

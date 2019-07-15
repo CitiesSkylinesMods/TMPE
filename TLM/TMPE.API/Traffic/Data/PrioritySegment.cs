@@ -2,6 +2,8 @@ using System;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Traffic.Data {
+	using API.Traffic.Enums;
+
 	/// <summary>
 	/// A priority segment specifies the priority signs that are present at each end of a certain segment.
 	/// </summary>

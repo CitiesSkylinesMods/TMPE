@@ -5,6 +5,8 @@ using System.Text;
 using TrafficManager.Manager;
 
 namespace TrafficManager.Manager.Impl {
+	using API.Manager;
+
 	public class ManagerFactory : IManagerFactory {
 		public static IManagerFactory Instance = new ManagerFactory();
 

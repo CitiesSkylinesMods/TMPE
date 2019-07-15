@@ -9,6 +9,8 @@ using UnityEngine;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager {
+	using API.Traffic.Enums;
+
 	public interface IAdvancedParkingManager : IFeatureManager {
 		/// <summary>
 		/// Determines the color the given building should be colorized with given the current info view mode.

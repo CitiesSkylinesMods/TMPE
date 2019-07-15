@@ -13,6 +13,8 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.UI.SubTools {
+	using API.Traffic.Enums;
+
 	public class ToggleTrafficLightsTool : SubTool {
 		public ToggleTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
 			

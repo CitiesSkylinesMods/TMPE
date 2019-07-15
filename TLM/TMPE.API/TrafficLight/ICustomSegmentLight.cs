@@ -6,6 +6,8 @@ using System.Text;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.TrafficLight {
+	using API.Traffic.Enums;
+
 	public interface ICustomSegmentLight : ICloneable {
 		// TODO documentation
 		ushort NodeId { get; }
