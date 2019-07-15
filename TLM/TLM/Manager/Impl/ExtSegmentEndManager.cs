@@ -20,7 +20,7 @@ namespace TrafficManager.Manager.Impl {
 		static ExtSegmentEndManager() {
 			Instance = new ExtSegmentEndManager();
 		}
-		
+
 		/// <summary>
 		/// All additional data for segment ends
 		/// </summary>
@@ -44,7 +44,7 @@ namespace TrafficManager.Manager.Impl {
 				ret += $" -> {vehicleId} (seg: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentSegmentId}@{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentStartNode} , adj: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].previousVehicleIdOnSegment}..{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment})";
 				vehicleId = Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -64,7 +64,7 @@ namespace TrafficManager.Manager.Impl {
 			while (extSegmentEnd.firstVehicleId != 0) {
 				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
 
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -111,7 +111,7 @@ namespace TrafficManager.Manager.Impl {
 				++ret;
 				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -150,7 +150,7 @@ namespace TrafficManager.Manager.Impl {
 		protected ArrowDirection CalculateArrowDirection(Vector3 sourceDir, Vector3 targetDir) {
 			sourceDir.y = 0;
 			sourceDir.Normalize();
-			
+
 			targetDir.y = 0;
 			targetDir.Normalize();
 			float c = Vector3.Cross(sourceDir, targetDir).y;

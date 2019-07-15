@@ -20,6 +20,9 @@ using TrafficManager.Traffic.Enums;
 using TrafficManager.RedirectionFramework.Attributes;
 
 namespace TrafficManager.Custom.AI {
+	using API.Traffic.Enums;
+	using API.TrafficLight;
+
 	[TargetType(typeof(HumanAI))]
 	public class CustomHumanAI : CitizenAI {
 		[RedirectMethod]

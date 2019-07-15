@@ -123,7 +123,7 @@ Default_speed_limit 默认道路限速
 Unit_system 单元制度
 Metric 公制
 Imperial 英制
-Use_more_CPU_cores_for_route_calculation_if_available 使用更多的CPU内核来计算路线(如果可用)
+Use_more_CPU_cores_for_route_calculation_if_available 使用更多的CPU核心来计算路线
 Activated_features 启用功能
 Junction_restrictions 路口管制
 Prohibit_spawning_of_pocket_cars 禁止袖珍车产生
@@ -150,7 +150,7 @@ Reset_global_configuration 重置所有设定
 General 常规
 Gameplay 游戏
 Overlays 覆盖
-Individual_driving_styles Individual driving styles
+Individual_driving_styles 个人驾驶风格
 Evacuation_busses_may_ignore_traffic_rules 应急疏散巴士可忽略交通规则
 Evacuation_busses_may_only_be_used_to_reach_a_shelter 应急疏散巴士仅可用于到达避难所
 Vehicle_behavior 车辆行为
@@ -191,7 +191,7 @@ TMPE_TUTORIAL_BODY_JunctionRestrictionsTool 控制车辆和行人在路口的行
 TMPE_TUTORIAL_HEAD_LaneArrowTool 变更车道方向
 TMPE_TUTORIAL_BODY_LaneArrowTool 限制车辆的可选方向。\n\n1. 单击路口前的路段\n2. 选择允许的方向
 TMPE_TUTORIAL_HEAD_LaneConnectorTool 车道连接工具
-TMPE_TUTORIAL_BODY_LaneConnectorTool 连接2+条车道来告知车辆可用的车道。\n\n1. 单击一个车道变更点(灰色圆圈)\n2. 单击一个来源车道\n3. 单击目标车道来建立连接\n4. 任意位置单击右键返回来源车道选择\n\n可用热键：\n\n- Delete or Backspace：移除所有车道连接\n- Shift + S：(循环)查看所有"stay on lane"模式
+TMPE_TUTORIAL_BODY_LaneConnectorTool 连接2+条车道来告知车辆可用的车道。\n\n1. 单击一个车道变更点(灰色圆圈)\n2. 单击一个来源车道\n3. 单击目标车道来建立连接\n4. 任意位置单击右键返回来源车道选择\n\n可用热键：\n\n- Delete 或 Backspace：移除所有车道连接\n- Shift + S：(循环)查看所有"stay on lane"模式
 TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool 手动控制红绿灯
 TMPE_TUTORIAL_BODY_ManualTrafficLightsTool 尝试自定时的红绿灯。\n\n1. 单击一个路口\n2. 使用此工具来控制红绿灯
 TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool 路边停车限制
@@ -232,3 +232,25 @@ Scan_for_known_incompatible_mods_on_startup 启动时检测是否存在已知不
 Ignore_disabled_mods 忽略未启用MOD
 Traffic_Manager_detected_incompatible_mods 检测到的不兼容MOD
 Notify_me_if_there_is_an_unexpected_mod_conflict 检测到不兼容MOD时提示
+Unsubscribe 取消订阅
+Keybind_toggle_TMPE_main_menu TM:PE主菜单
+Keybind_toggle_traffic_lights_tool 「红绿灯增删」工具
+Keybind_use_lane_arrow_tool 「变更车道方向」工具
+Keybind_use_lane_connections_tool 「车道连接」工具
+Keybind_use_priority_signs_tool 「优先通行权设置」工具
+Keybind_use_junction_restrictions_tool 「路口管制」工具
+Keybind_use_speed_limits_tool 「道路限速设置」工具
+Keybind_lane_connector_stay_in_lane 车道连接：stay in lane
+Keybind_lane_connector_delete 清除车道连接设置
+Keybinds 热键
+Keybind_Exit_subtool 关闭工具与TM:PE主菜单
+Keybind_conflict 所选快捷键有冲突，请重新选择。
+Keybind_category_Global 全局热键
+Keybind_category_LaneConnector 车道连接工具热键
+Display_speed_limits_mph 速度以MPH而不是km/h显示
+Miles_per_hour 英里／小时
+Kilometers_per_hour 千米／小时
+Road_signs_theme_mph MPH路标风格
+theme_Square_US 美国风格
+theme_Round_UK 英国风格
+theme_Round_German 德国风格

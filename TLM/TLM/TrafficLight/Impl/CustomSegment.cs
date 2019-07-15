@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using TrafficManager.Geometry;
 
 namespace TrafficManager.TrafficLight.Impl {
-    class CustomSegment {
+	using API.TrafficLight;
+
+	class CustomSegment {
         public ICustomSegmentLights StartNodeLights;
         public ICustomSegmentLights EndNodeLights;
 

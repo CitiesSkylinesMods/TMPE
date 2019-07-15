@@ -7,6 +7,8 @@ using TrafficManager.Traffic;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Geometry {
+	using API.Traffic.Enums;
+
 	public interface ISegmentEndGeometry : ISegmentEndId {
 		/// <summary>
 		/// Holds the connected node id

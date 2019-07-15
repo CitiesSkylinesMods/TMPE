@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace TrafficManager.Traffic.Enums {
+﻿namespace TrafficManager.API.Traffic.Enums {
 	public enum EmergencyBehavior {
 		/// <summary>
 		/// No custom behavior

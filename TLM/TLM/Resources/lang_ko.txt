@@ -230,5 +230,27 @@ Vehicles_may_turn_on_red 빨간 신호등에서 차량이 진입 할 수 있습�
 Also_apply_to_left/right_turns_between_one-way_streets 빨간 신호등에서 우회전을 허용
 Scan_for_known_incompatible_mods_on_startup 게임 실행시 비호환되는 모드 스캔
 Ignore_disabled_mods 비활성화된 모드 무시하기
-Traffic_Manager_detected_incompatible_mods Traffic Manager와 비호환되는 모드 감지
+Traffic_Manager_detected_incompatible_mods 와 비호환되는 모드 감지
 Notify_me_if_there_is_an_unexpected_mod_conflict 모드와 비 호환되는 모드 발견 시 에러 보여주기
+Unsubscribe Unsubscribe
+Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
+Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
+Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
+Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
+Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
+Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
+Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
+Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybind_lane_connector_delete Clear lane connections
+Keybinds Keybinds
+Keybind_Exit_subtool Exit tool and close TM:PE Menu
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
+Keybind_category_Global Global keys
+Keybind_category_LaneConnector Lane Connector Tool keys
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
+Road_signs_theme_mph Theme for MPH road signs
+theme_Square_US US signs
+theme_Round_UK British signs
+theme_Round_German German signs

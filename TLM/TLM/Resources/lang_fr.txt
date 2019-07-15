@@ -23,8 +23,8 @@ Delete Suppr.
 Timed_traffic_lights_manager Gestionnaire de feux tricolores chronométrés
 Add_step Ajouter un état
 Remove_timed_traffic_light Retirer le chronométrage
-Min._Time: Temps Min : 
-Max._Time: Temps Max : 
+Min._Time: Temps Min :
+Max._Time: Temps Max :
 Save Sauvegarder
 Add Ajouter
 Sensitivity Sensibilité
@@ -62,7 +62,7 @@ TMPE_Title Gestionnaire de trafic : Édition Président
 Settings_are_defined_for_each_savegame_separately Paramètres définis pour chaque sauvegarde séparément
 Simulation_accuracy Précision de la simulation (une plus haute précision réduit les performances)
 Enable_highway_specific_lane_merging/splitting_rules Activer les règles spécifiques de divergence/convergence sur les autoroutes
-Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Les conducteurs veulent changer de voies (seulement si l'IA avancée est activée) : 
+Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Les conducteurs veulent changer de voies (seulement si l'IA avancée est activée) :
 Maintenance Maintenance
 Very_often Très souvent
 Often Souvent
@@ -154,7 +154,7 @@ Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules Les bus d'évacuation peuvent ignorer les règles de trafic
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Les bus d'évacuation ne peuvent être utilisés que pour atteindre un abri
 Vehicle_behavior Comportement des véhicules
-Policies_&_Restrictions Restrictions et politiques
+Policies_&_Restrictions Politiques
 At_junctions Aux intersections
 In_case_of_emergency En cas d'urgence
 Show_lane-wise_speed_limits Afficher les limites de vitesse par voie
@@ -212,7 +212,7 @@ TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Ajouter une étape chronométr
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. Pendant le jeu, cliquez sur les feux de circulation pour changer leur état. Utilisez le bouton "Changer de mode" pour ajouter des feux de circulation directionnels.\n2. Entrez à la fois une durée minimale et maximale pour l'étape. Après le temps minimum écoulé, le feu de circulation comptera et comparera les véhicules qui approchent.\n3. En option, sélectionnez un type de changement d'étape. Par défaut, l'étape change si à peu près moins de véhicules sont en train de rouler qu'en attente.\n4. En option, ajustez la sensibilité du feu. Par exemple, déplacez le curseur vers la gauche pour le rendre moins sensible aux véhicules en attente.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Copier un feu de circulation chronométré
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Cliquez sur un autre carrefour pour coller le feu de circulation chronométré.\n\nCliquez n'importe où avec le bouton secondaire de la souris pour annuler l'opération.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Ajouter une intersection à un feu de circulation chronométré 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Ajouter une intersection à un feu de circulation chronométré
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Cliquez sur une autre intersection pour l'ajouter. Les deux feux seront associés de sorte que le programme chronométré contrôlera ensuite les deux intersections à la fois.\n\nCliquez n'importe où avec le bouton secondaire de la souris pour annuler l'opération.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Retirer une intersection d'un feu de circulation chronométré
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Cliquez sur l'une des intersections contrôlées par ce programme chronométré. Le feu sélectionné sera supprimé de telle sorte que le programme chronométré ne le gérera plus.\n\nCliquez n'importe où avec le bouton secondaire de la souris pour annuler l'opération.
@@ -230,5 +230,27 @@ Vehicles_may_turn_on_red Les véhicules peuvent tourner aux feux rouges
 Also_apply_to_left/right_turns_between_one-way_streets Appliquer de même aux virages gauche/droite entre des rues à sens unique
 Scan_for_known_incompatible_mods_on_startup Rechercher les mods incompatibles au lancement
 Ignore_disabled_mods Ignorer les mods désactivés
-Traffic_Manager_detected_incompatible_mods Le gestionnaire de trafic a détecté des mods incompatibles
+Traffic_Manager_detected_incompatible_mods a détecté des mods incompatibles
 Notify_me_if_there_is_an_unexpected_mod_conflict Afficher un message d'erreur si un mod incompatible est détecté
+Unsubscribe Unsubscribe
+Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
+Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
+Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
+Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
+Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
+Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
+Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
+Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
+Keybind_lane_connector_delete Clear lane connections
+Keybinds Keybinds
+Keybind_Exit_subtool Exit tool and close TM:PE Menu
+Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
+Keybind_category_Global Global keys
+Keybind_category_LaneConnector Lane Connector Tool keys
+Display_speed_limits_mph Display speed limits as MPH instead of km/h
+Miles_per_hour Miles per Hour
+Kilometers_per_hour Kilometers per Hour
+Road_signs_theme_mph Theme for MPH road signs
+theme_Square_US US signs
+theme_Round_UK British signs
+theme_Round_German German signs

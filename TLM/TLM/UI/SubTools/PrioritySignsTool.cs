@@ -22,6 +22,8 @@ using TrafficManager.Traffic.Enums;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.UI.SubTools {
+	using API.Traffic.Enums;
+
 	public class PrioritySignsTool : SubTool {
 		public enum PrioritySignsMassEditMode {
 			MainYield = 0,

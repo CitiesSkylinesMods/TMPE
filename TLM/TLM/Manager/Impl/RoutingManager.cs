@@ -18,6 +18,8 @@ using TrafficManager.Util;
 using static TrafficManager.State.Flags;
 
 namespace TrafficManager.Manager.Impl {
+	using API.Traffic.Enums;
+
 	public class RoutingManager : AbstractGeometryObservingManager, IRoutingManager {
 		public static readonly RoutingManager Instance = new RoutingManager();
 
@@ -303,8 +305,6 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-			bool prevIsMergeLane = Constants.ServiceFactory.NetService.CheckLaneFlags(laneId, NetLane.Flags.Merge);
-
 			NetInfo prevSegmentInfo = null;
 			bool prevSegIsInverted = false;
 			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort prevSegId, ref NetSegment segment) {
@@ -342,14 +342,24 @@ namespace TrafficManager.Manager.Impl {
 			bool nextHasTrafficLights = false;
 			bool nextHasPrioritySigns = Constants.ManagerFactory.TrafficPriorityManager.HasNodePrioritySign(nextNodeId);
 			bool nextIsRealJunction = false;
+			ushort buildingId = 0;
 			Constants.ServiceFactory.NetService.ProcessNode(nextNodeId, delegate (ushort nodeId, ref NetNode node) {
 				nextIsJunction = (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 				nextIsTransition = (node.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
 				nextHasTrafficLights = (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
 				nextIsEndOrOneWayOut = (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
 				nextIsRealJunction = node.CountSegments() >= 3;
+				buildingId = NetNode.FindOwnerBuilding(nextNodeId, 32f);
 				return true;
 			});
+
+			bool isTollBooth = false;
+			if (buildingId != 0) {
+				Constants.ServiceFactory.BuildingService.ProcessBuilding(buildingId, (ushort bId, ref Building building) => {
+					isTollBooth = building.Info.m_buildingAI is TollBoothAI;
+					return true;
+				});
+			}
 
 			bool nextIsSimpleJunction = false;
 			bool nextIsSplitJunction = false;
@@ -384,6 +394,7 @@ namespace TrafficManager.Manager.Impl {
 				nextIsSimpleJunction = numOutgoing == 1 || numIncoming == 1;
 				nextIsSplitJunction = numOutgoing > 1;
 			}
+//			bool isNextRealJunction = prevSegGeo.CountOtherSegments(startNode) > 1;
 			bool nextAreOnlyOneWayHighways = Constants.ManagerFactory.ExtSegmentEndManager.CalculateOnlyHighways(prevEnd.segmentId, prevEnd.startNode);
 
 			// determine if highway rules should be applied
@@ -399,6 +410,7 @@ namespace TrafficManager.Manager.Impl {
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSegIsInverted={prevSegIsInverted} leftHandDrive={leftHandDrive}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): prevSimilarLaneCount={prevSimilarLaneCount} prevInnerSimilarLaneIndex={prevInnerSimilarLaneIndex} prevOuterSimilarLaneIndex={prevOuterSimilarLaneIndex} prevHasBusLane={prevHasBusLane}");
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextIsJunction={nextIsJunction} nextIsEndOrOneWayOut={nextIsEndOrOneWayOut} nextHasTrafficLights={nextHasTrafficLights} nextIsSimpleJunction={nextIsSimpleJunction} nextIsSplitJunction={nextIsSplitJunction} isNextRealJunction={nextIsRealJunction}");
+				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextNodeId={nextNodeId} buildingId={buildingId} isTollBooth={isTollBooth}");
 			}
 #endif
 
@@ -565,15 +577,15 @@ namespace TrafficManager.Manager.Impl {
 									}
 								}
 
-								if (prevIsMergeLane && Constants.ServiceFactory.NetService.CheckLaneFlags(nextLaneId, NetLane.Flags.Merge)) {
+								if (isTollBooth) {
 #if DEBUGROUTING
 									if (debugFine)
-										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a merge lane, as the previous lane. adding as Default.");
+										Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextNodeId={nextNodeId}, buildingId={buildingId} is a toll booth. Preventing lane changes.");
 #endif
 									if (nextOuterSimilarLaneIndex == prevOuterSimilarLaneIndex) {
 #if DEBUGROUTING
 										if (debugFine)
-											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is a continuous merge lane. adding as Default.");
+											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): nextLaneId={nextLaneId}, idx={nextLaneIndex} is associated with a toll booth (buildingId={buildingId}). adding as Default.");
 #endif
 										isCompatibleLane = true;
 										transitionType = LaneEndTransitionType.Default;
@@ -601,7 +613,7 @@ namespace TrafficManager.Manager.Impl {
 											(nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
 											(nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
 											(nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-											(nextIncomingDir == ArrowDirection.Turn && (nextIsEndOrOneWayOut || ((leftHandDrive && hasRightArrow) || (!leftHandDrive && hasLeftArrow))))) { // valid turning lane
+											(nextIncomingDir == ArrowDirection.Turn && (!nextIsRealJunction || nextIsEndOrOneWayOut || ((leftHandDrive && hasRightArrow) || (!leftHandDrive && hasLeftArrow))))) { // valid turning lane
 #if DEBUGROUTING
 										if (debugFine)
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): lane arrow check passed for nextLaneId={nextLaneId}, idx={nextLaneIndex}. adding as default lane.");
@@ -1054,7 +1066,7 @@ namespace TrafficManager.Manager.Impl {
 										}
 									}
 								} else {
-									// at lane splits: distribute traffic evenly (1-to-n, n-to-n)										
+									// at lane splits: distribute traffic evenly (1-to-n, n-to-n)
 									// prevOuterSimilarIndex is always > nextCompatibleLaneCount
 #if DEBUGROUTING
 									if (debugFine)
@@ -1069,7 +1081,7 @@ namespace TrafficManager.Manager.Impl {
 											Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}): split outer lanes: minNextCompatibleOuterSimilarIndex={minNextCompatibleOuterSimilarIndex}, maxNextCompatibleOuterSimilarIndex={maxNextCompatibleOuterSimilarIndex}");
 #endif
 									} else {
-										// split outer lanes, criss-cross inner lanes 
+										// split outer lanes, criss-cross inner lanes
 										int a = (prevSimilarLaneCount - nextCompatibleLaneCount - 1) >> 1; // prevSimilarLaneCount - nextCompatibleLaneCount - 1 is always >= 0
 
 										minNextCompatibleOuterSimilarIndex = (a - 1 >= prevOuterSimilarLaneIndex) ? 0 : prevOuterSimilarLaneIndex - a - 1;

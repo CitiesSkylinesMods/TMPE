@@ -26,6 +26,9 @@ using TrafficManager.Traffic.Enums;
 /// (having custom traffic lights or priority signs).
 /// </summary>
 namespace TrafficManager.Traffic.Impl {
+	using API.Traffic.Data;
+	using API.Traffic.Enums;
+
 	[Obsolete("should be removed when implementing issue #240")]
 	public class SegmentEnd : SegmentEndId, ISegmentEnd {
 		// TODO convert to struct
@@ -71,7 +74,7 @@ namespace TrafficManager.Traffic.Impl {
 		public SegmentEnd(ushort segmentId, bool startNode) : base(segmentId, startNode) {
 			Update();
 		}
-		
+
 		~SegmentEnd() {
 			//Destroy();
 		}
@@ -119,7 +122,7 @@ namespace TrafficManager.Traffic.Impl {
 				});
 				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -180,7 +183,7 @@ namespace TrafficManager.Traffic.Impl {
 				return;
 			}
 
-			
+
 			uint normLength = 10u;
 			if (avgSegmentLength > 0) {
 				normLength = Math.Min(100u, (uint)(Math.Max(1u, state.totalLength) * 100u) / avgSegmentLength) + 1; // TODO +1 because the vehicle length calculation for trains/monorail in the method VehicleState.OnVehicleSpawned returns 0 (or a very small number maybe?)
@@ -219,7 +222,7 @@ namespace TrafficManager.Traffic.Impl {
 			int numIter = 0;
 			while (segEndMan.ExtSegmentEnds[endIndex].firstVehicleId != 0) {
 				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[segEndMan.ExtSegmentEnds[endIndex].firstVehicleId]);
-				if (++numIter > VehicleManager.MAX_VEHICLE_COUNT) {
+				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
 					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
 					break;
 				}
@@ -269,7 +272,7 @@ namespace TrafficManager.Traffic.Impl {
 				if (!segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, NodeId))].outgoing) {
 					continue;
 				}
-				
+
 				foreach (TinyDictionary<ushort, uint> numVehiclesMovingToSegId in numVehiclesMovingToSegmentId) {
 					numVehiclesMovingToSegId[segId] = 0;
 				}

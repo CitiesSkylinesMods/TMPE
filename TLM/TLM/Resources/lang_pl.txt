@@ -1,4 +1,4 @@
-Switch_traffic_lights Włącznik sygnalizacji
+﻿Switch_traffic_lights Włącznik sygnalizacji
 Add_priority_signs Dodaj znaki pierwszeństwa
 Manual_traffic_lights Sygnalizacja Ręczna
 Timed_traffic_lights Sygnalizacja Czasowa
@@ -63,7 +63,7 @@ Settings_are_defined_for_each_savegame_separately ustawienia są definiowane odd
 Simulation_accuracy Dokładność symulacji (większa dokładność zmiejsza wydajność gry)
 Enable_highway_specific_lane_merging/splitting_rules Aktywuj Zmienione zasady podziału/łączenia pasów dla autostrad
 Drivers_want_to_change_lanes_(only_applied_if_Advanced_AI_is_enabled): Chęć kierowców do zmiany pasa (tylko gdy Zaawansowana SI jest włączona)
-Maintenance Konserwacja (dodatkowe informacje)
+Maintenance Konserwacja
 Very_often Bardzo często
 Often Często
 Sometimes Czasami
@@ -154,7 +154,7 @@ Individual_driving_styles Individual driving styles
 Evacuation_busses_may_ignore_traffic_rules Autobusy ewakuacyjne mogą ignorować przepisy
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Autobusy ewakuacyjne mogą przewozić tylko do schroniena
 Vehicle_behavior Zachowanie pojazdu
-Policies_&_Restrictions Zasady i Ograniczenia
+Policies_&_Restrictions Zasady
 At_junctions Na strzyżowaniach
 In_case_of_emergency W sytuacjach nadzwyczajnych
 Show_lane-wise_speed_limits Pokaż limity prędkości dla pasów
@@ -208,11 +208,11 @@ TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Ograniczenia ruchu pojazdów
 TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Zabroń wjazdu pojazdom na konkretnych odcinkach drogi.\n\n1. Kliknij na odcinku drogi.\n2. Kliknij na wybranej ikonie, aby wł/wył ograniczenie.\n\nDostępne typy pojazdów:\n\n- Pojazdy drogowe: samochody, autobust, taxi, ciężarówki, pojazdy usługowe, pojazdy uprzywilejowane\n- Pojazdy szynowe: pociągi pasażerskie, towarowe\n\nSkróty klawiszowe:\n\n- Shift: Przytrzymaj Shift podczas klikania, aby zastosować ograniczenia do kilku odcinków drogi jednocześnie.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Domyślne limity prędkości
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Użyj strzałek u góry, aby przęłączać pomiędzy dostępnymi typami dróg.\n2. Poniżej, wybierz limit prędkości.\n3. Naciśnij "Zapisz", aby ustawić wybrany limit prędkości jako domyślny dla nowo wybudowanych dróg wybranego typu. Naciścij "Zapisz i zastosuj", aby zaktualizować wszystkie już istniejące drogi wybranego typu.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Dodaj krok 
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. W ramach nakładki, kliknij na sygnalizatorze, aby zmienić jego stan. Użyj przycisku "Zmiana trybu", aby dodać kierunkowe sygnalizatory.\n2. Ustaw minimalny oraz maksymalny czas aktualnego kroku. Po upłynięciu minimalnego czasu sygnalizacja zacznie zliczać i porównywać ilość nadjeżdżających pojazdów.\n3. Opcjonalnie, wybierz tryb zmiany kroku. Domyślnie, krok zostaje zmieniony jeśli liczba poruszających się pojazdów jest dużo mniejsza niż oczekujących.\n4. Opcjonalnie, możesz dostosować czułość. Na przykład, przesuń suwak w lewo by zmniejszyć czułość na oczekujące pojazdy. 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Dodaj krok
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. W ramach nakładki, kliknij na sygnalizatorze, aby zmienić jego stan. Użyj przycisku "Zmiana trybu", aby dodać kierunkowe sygnalizatory.\n2. Ustaw minimalny oraz maksymalny czas aktualnego kroku. Po upłynięciu minimalnego czasu sygnalizacja zacznie zliczać i porównywać ilość nadjeżdżających pojazdów.\n3. Opcjonalnie, wybierz tryb zmiany kroku. Domyślnie, krok zostaje zmieniony jeśli liczba poruszających się pojazdów jest dużo mniejsza niż oczekujących.\n4. Opcjonalnie, możesz dostosować czułość. Na przykład, przesuń suwak w lewo by zmniejszyć czułość na oczekujące pojazdy.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Kopiuj czasową sygnalizację
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Kliknij na innym skrzyżowaniu, aby wkleić skopiowane ustawienie.\n\nKliknij gdziekolwiek prawym przyciskiem myszy, aby anulować operację.
-TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Dodaj skrzyżowanie do czasowej sygnalizacji 
+TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Dodaj skrzyżowanie do czasowej sygnalizacji
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Kliknij na innym skrzyżowaniu, aby je dodać. Obydwa skrzyżowania zostaną połączone, ustawienia czasowej sygnalizacji będą działać na nich jednocześnie.\n\nKliknij gdziekolwiek prawym klawiszem myszy, aby anulować operację.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Usuń skrzyżowanie spod kontroli czasowej sygnalizacji
 TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Kliknij na jednym ze skrzyżować kontrolowanych przez czasową sygnalizację. Wybrane skrzyżowanie zostanie usunięte spod kontroli programu czasowej sygnalizacji.\n\nKliknij gdziekolwiek prawym klawiszem myszy, aby anulować operację.
@@ -230,5 +230,27 @@ Vehicles_may_turn_on_red Pojazdy mogą skręcić w prawo na czerwonym świetle
 Also_apply_to_left/right_turns_between_one-way_streets Uwzględnia również skręt w lewo/prawo pomiędzy drogami jednokierunkowymi
 Scan_for_known_incompatible_mods_on_startup Uruchamiaj sprawdzanie przy starcie gry
 Ignore_disabled_mods Ignoruj wyłączone mody
-Traffic_Manager_detected_incompatible_mods Traffic Manager wykrył niekompatybilne mody
+Traffic_Manager_detected_incompatible_mods wykrył niekompatybilne mody
 Notify_me_if_there_is_an_unexpected_mod_conflict Powiadom mnie w razie nieoczekiwanej niezgodność modów
+Unsubscribe Odsubskrybuj
+Keybind_toggle_TMPE_main_menu Menu TM:PE
+Keybind_toggle_traffic_lights_tool Narzędzie 'Przełącznik Sygnalizacji świetlnej'
+Keybind_use_lane_arrow_tool Narzędzie 'Strzałki pasów ruchu'
+Keybind_use_lane_connections_tool Narzędzie 'Połącz pasy ruchu'
+Keybind_use_priority_signs_tool Narzędzie 'Znaki pierwszeństwa'
+Keybind_use_junction_restrictions_tool Narzędzie 'Ograniczenia na skrzyżowaniu'
+Keybind_use_speed_limits_tool Narzędzie 'Limity prędkości'
+Keybind_lane_connector_stay_in_lane Połącz pasy ruchu: Pozostań na pasie
+Keybind_lane_connector_delete Usuń połączenia pasów ruchu
+Keybinds Skróty klawiszowe
+Keybind_Exit_subtool Wyłącz narzędzie i zamknij TM:PE menu
+Keybind_conflict Wybrany skrót klawiszowy jest już używany. Wybierz inną kombinację.
+Keybind_category_Global Główne
+Keybind_category_LaneConnector Narzędzie: Połącz pasy ruchu
+Display_speed_limits_mph Wyświetlaj limity prędkości w mph zamiast km/h
+Miles_per_hour Mile na godzinę
+Kilometers_per_hour Kilometry na godzinę
+Road_signs_theme_mph Motyw dla znaków MPH
+theme_Square_US Stany zjednoczone
+theme_Round_UK Wielka Brytania
+theme_Round_German Niemcy

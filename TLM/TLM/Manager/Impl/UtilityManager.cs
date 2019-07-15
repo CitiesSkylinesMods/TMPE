@@ -79,8 +79,12 @@ namespace TrafficManager.Manager.Impl {
 		public void ResetStuckEntities() {
 			Log.Info($"UtilityManager.RemoveStuckEntities() called.");
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			bool wasPaused = Singleton<SimulationManager>.instance.ForcedSimulationPaused;
+
+			if (!wasPaused) {
+				Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+			}
 
 			Log.Info($"UtilityManager.RemoveStuckEntities(): Waiting for all paths.");
 			Singleton<PathManager>.instance.WaitForAllPaths();
@@ -109,7 +113,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			Log.Info($"UtilityManager.RemoveStuckEntities(): Resetting vehicles that are waiting for a path.");
-			for (uint vehicleId = 1; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+			for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
 					if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
@@ -123,7 +127,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 			Log.Info($"UtilityManager.RemoveStuckEntities(): Resetting vehicles that are parking and where no parked vehicle is assigned to the driver.");
-			for (uint vehicleId = 1; vehicleId < VehicleManager.MAX_VEHICLE_COUNT; ++vehicleId) {
+			for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
 				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
 				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0) {
 					ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
@@ -136,8 +140,10 @@ namespace TrafficManager.Manager.Impl {
 				}
 			}
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			if (!wasPaused) {
+				Log.Info($"UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
+				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+			}
 		}
 	}
 }

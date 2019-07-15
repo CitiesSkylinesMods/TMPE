@@ -19,6 +19,8 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI.SubTools {
+	using API.Traffic.Enums;
+
 	public class LaneArrowTool : SubTool {
 		private bool _cursorInSecondaryPanel;
 

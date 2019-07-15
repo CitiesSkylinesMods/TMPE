@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace TrafficManager.Traffic.Enums {
-	public enum GeometryCalculationMode {
-		Init,
-		Propagate,
-		NoPropagate
-	}
+﻿namespace TrafficManager.API.Traffic.Enums {
+    public enum GeometryCalculationMode {
+        Init,
+        Propagate,
+        NoPropagate
+    }
 }
