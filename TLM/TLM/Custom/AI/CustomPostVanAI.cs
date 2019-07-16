@@ -19,7 +19,7 @@
                                         bool endBothWays,
                                         bool undergroundTarget) {
             if (vehicleData.m_transferType == (byte)TransferManager.TransferReason.Mail) {
-                return StartPathFind(
+                return base.StartPathFind(
                     vehicleId,
                     ref vehicleData,
                     startPos,
@@ -30,7 +30,7 @@
             }
 
             if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource | Vehicle.Flags.GoingBack)) != 0) {
-                return StartPathFind(
+                return base.StartPathFind(
                     vehicleId,
                     ref vehicleData,
                     startPos,

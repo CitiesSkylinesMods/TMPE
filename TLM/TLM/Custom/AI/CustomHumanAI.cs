@@ -218,7 +218,7 @@ namespace TrafficManager.Custom.AI {
 #endif
 
             // NON-STOCK CODE END
-            SimulationStep(instanceId, ref instanceData, physicsLodRefPos);
+            base.SimulationStep(instanceId, ref instanceData, physicsLodRefPos);
 
             var vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;

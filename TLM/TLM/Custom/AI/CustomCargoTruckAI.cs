@@ -33,7 +33,7 @@ namespace TrafficManager.Custom.AI {
                 }
             }
 
-            SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
+            base.SimulationStep(vehicleId, ref vehicleData, physicsLodRefPos);
         }
 
         [RedirectMethod]
@@ -55,7 +55,7 @@ namespace TrafficManager.Custom.AI {
 
             if ((vehicleData.m_flags & (Vehicle.Flags.TransferToSource
                                         | Vehicle.Flags.GoingBack)) != 0) {
-                return StartPathFind(
+                return base.StartPathFind(
                     vehicleId,
                     ref vehicleData,
                     startPos,

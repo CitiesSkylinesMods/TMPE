@@ -25,7 +25,7 @@
             var ctzInstance = instance.m_instances.m_buffer[passengerInstanceId];
             if (passengerInstanceId == 0
                 || (ctzInstance.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
-                return StartPathFind(
+                return base.StartPathFind(
                     vehicleId,
                     ref vehicleData,
                     startPos,
