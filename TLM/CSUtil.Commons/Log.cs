@@ -45,6 +45,11 @@
             LogToFile(s, LogLevel.Info);
         }
 
+        [Conditional("DEBUG")]
+        public static void _DebugOnlyWarning(string s) {
+            LogToFile(s, LogLevel.Warning);
+        }
+
         public static void Warning(string s) {
             LogToFile(s, LogLevel.Warning);
         }

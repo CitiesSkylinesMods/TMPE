@@ -9,6 +9,7 @@ namespace TrafficManager.Custom.AI {
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using JetBrains.Annotations;
     using Manager.Impl;
     using PathFinding;

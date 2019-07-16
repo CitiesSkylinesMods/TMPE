@@ -388,7 +388,7 @@ namespace TrafficManager.Custom.AI {
 					bestLaneIndex = VehicleBehaviorManager.Instance.FindBestEmergencyLane(vehicleID, ref vehicleData, ref ExtVehicleManager.Instance.ExtVehicles[vehicleID], curLaneId, currentPosition, curSegmentInfo, nextPosition, nextSegmentInfo);
 #else
 					// stock procedure for emergency vehicles on duty
-					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPathPos);
+					bestLaneIndex = FindBestLane(vehicleID, ref vehicleData, nextPosition);
 #endif
 #if DEBUG
 					if (debug) {
