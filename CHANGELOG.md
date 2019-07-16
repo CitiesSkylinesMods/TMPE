@@ -88,7 +88,7 @@
 
 ### TM:PE 10.17, 23/03/2019
 
-- Added: Turn-on-red can now be toggled for unpreferred turns between one-ways
+- Added: Turn-on-red can now be toggled for unpreferred turns between one-ways (#121)
 - Improved: Train behavior at shunts: Trains now prefer to stay on their track (#230)
 - Improved: Parking AI - Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
 - Fixed: Lane selection for u-turns and at dead ends (also optimised) (#101)
